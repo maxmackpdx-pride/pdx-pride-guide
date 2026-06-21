@@ -165,7 +165,7 @@ function seedData() {
 
   // Force re-seed if old fake events, no lat/lng, no poster images, or event count too low (new events added)
   if (existing.length > 0) {
-    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 21;
+    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 22;
     if (needsReseed) {
       sqlite.exec(`DELETE FROM events`);
       sqlite.exec(`DELETE FROM attendances`);
@@ -408,14 +408,31 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Bearracuda Double Pride",
-      description: "Two-night Pride dance party at Nova PDX. One of the longest-running bear & friends club nights in the country.",
+      title: "Bearracuda Double Pride — Night 1",
+      description: "Two-night Pride dance party at Nova PDX. One of the longest-running bear & friends club nights in the country. Night 1 of 2.",
       venueName: "Nova PDX",
       address: "18 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
       lat: 45.5249, lng: -122.6742,
       dateStart: "2026-07-17T21:00:00", dateEnd: "2026-07-18T02:00:00",
       dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "BEAR"]),
+      admission: "TICKETED",
+      ticketUrl: "https://novapdxevents.com",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Bearracuda Double Pride — Night 2",
+      description: "Two-night Pride dance party at Nova PDX. One of the longest-running bear & friends club nights in the country. Night 2 of 2.",
+      venueName: "Nova PDX",
+      address: "18 NW 3rd Ave, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5249, lng: -122.6742,
+      dateStart: "2026-07-18T21:00:00", dateEnd: "2026-07-19T02:00:00",
+      dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "DANCE", "BEAR"]),
       admission: "TICKETED",
@@ -559,7 +576,7 @@ function seedData() {
     "Hey, let's be awkward together",
   ];
   const handles = ["queercat", "neonbabe", "velvethaze", "crushpunk", "stardust", "wildthing", "radtrans", "badfemme"];
-  for (let eventId = 1; eventId <= 21; eventId++) {
+  for (let eventId = 1; eventId <= 22; eventId++) {
     const count = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       db.insert(attendances).values({
