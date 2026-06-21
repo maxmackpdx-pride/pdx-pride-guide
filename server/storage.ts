@@ -1039,7 +1039,243 @@ function seedData() {
   } as any).run();
 }
 
+function applyVerifiedEventOverrides() {
+  const now = new Date().toISOString();
+  const updateByTitle = sqlite.prepare(`
+    UPDATE events SET
+      title = COALESCE(@newTitle, title),
+      description = COALESCE(@description, description),
+      venue_name = COALESCE(@venueName, venue_name),
+      address = COALESCE(@address, address),
+      neighborhood = COALESCE(@neighborhood, neighborhood),
+      lat = COALESCE(@lat, lat),
+      lng = COALESCE(@lng, lng),
+      date_start = COALESCE(@dateStart, date_start),
+      date_end = COALESCE(@dateEnd, date_end),
+      day_of_week = COALESCE(@dayOfWeek, day_of_week),
+      age_requirement = COALESCE(@ageRequirement, age_requirement),
+      event_types = COALESCE(@eventTypes, event_types),
+      admission = COALESCE(@admission, admission),
+      ticket_url = COALESCE(@ticketUrl, ticket_url),
+      status = COALESCE(@status, status),
+      admin_notes = COALESCE(@adminNotes, admin_notes)
+    WHERE title = @title
+  `);
+  const updateByVenue = sqlite.prepare(`
+    UPDATE events SET
+      title = COALESCE(@newTitle, title),
+      description = COALESCE(@description, description),
+      admission = COALESCE(@admission, admission),
+      event_types = COALESCE(@eventTypes, event_types),
+      admin_notes = COALESCE(@adminNotes, admin_notes)
+    WHERE venue_name = @venueName
+  `);
+  const runTitle = (title: string, patch: Record<string, any>) => updateByTitle.run({
+    title,
+    newTitle: null,
+    description: null,
+    venueName: null,
+    address: null,
+    neighborhood: null,
+    lat: null,
+    lng: null,
+    dateStart: null,
+    dateEnd: null,
+    dayOfWeek: null,
+    ageRequirement: null,
+    eventTypes: null,
+    admission: null,
+    ticketUrl: null,
+    status: null,
+    adminNotes: null,
+    ...patch,
+  });
+
+  runTitle("Portland Pride Waterfront Festival", {
+    description: "Official PrideNW festival at Tom McCall Waterfront Park. 2026 theme: \"Made with Pride\" — celebrating creativity, entrepreneurship, and Pride's protest roots. Saturday noon-8pm and Sunday 11:30am-6pm. $10 suggested donation; no one turned away. Headliners announced so far: Lushious Massacr, DeJa Skye, Tenderoni. Features main stage and north stage, ASL interpreters, ADA viewing areas, accessible flooring, and VIP pass options.",
+    dateStart: "2026-07-18T12:00:00",
+    dateEnd: "2026-07-19T18:00:00",
+    admission: "FREE",
+    eventTypes: JSON.stringify(["FESTIVAL", "OFFICIAL", "FAMILY", "ACCESSIBLE"]),
+    adminNotes: "Per updated PrideNW details: performers include Lushious Massacr, DeJa Skye, Tenderoni; accessibility includes ASL, ADA viewing areas, accessible flooring.",
+  });
+  runTitle("Portland Pride Parade", {
+    description: "Official PrideNW parade. Oregon's largest parade, drawing tens of thousands. Route starts at the North Park Blocks, winds through downtown, and ends at the festival at Tom McCall Waterfront Park.",
+    dateStart: "2026-07-19T11:00:00",
+    dateEnd: "2026-07-19T13:30:00",
+    eventTypes: JSON.stringify(["PARADE", "FREE", "OFFICIAL", "MARCH", "FAMILY"]),
+  });
+  runTitle("Ankeny Alley Pride Block Party", {
+    newTitle: "Old Town Block Party",
+    description: "Official PrideNW Old Town activation. Unstoppable joy, radical love, and Pride weekend community energy in and around Ankeny Alley.",
+    eventTypes: JSON.stringify(["BLOCK-PARTY", "OFFICIAL", "FREE", "OUTDOOR"]),
+  });
+  runTitle("Ankeny Alley Pride Block Party — Sunday", {
+    newTitle: "Old Town Block Party — Sunday",
+    description: "Official PrideNW Old Town activation. Unstoppable joy, radical love, and Pride weekend community energy in and around Ankeny Alley.",
+    eventTypes: JSON.stringify(["BLOCK-PARTY", "OFFICIAL", "FREE", "OUTDOOR"]),
+  });
+  runTitle("Midtown Beer Garden Pride", {
+    address: "431 SW Harvey Milk St, Portland, OR 97204",
+    lat: 45.520416,
+    lng: -122.678127,
+    dateStart: "2026-07-16T17:00:00",
+    dateEnd: "2026-07-19T20:00:00",
+    dayOfWeek: "THU",
+    description: "Official PrideNW outdoor beer garden open across Pride weekend at 431 SW Harvey Milk St. Community drinks and Pride energy just outside the main festival footprint.",
+  });
+  runTitle("Markets Made With Pride", {
+    newTitle: "LGBTQIA2S+ Maker's Market",
+    description: "Official PrideNW maker's market within the Waterfront Festival at Tom McCall Waterfront Park, featuring photography, painting, jewelry, handmade crafts, and local queer makers.",
+    venueName: "Maker's Market at Waterfront Festival",
+    address: "98 SW Naito Pkwy, Portland, OR 97204",
+    neighborhood: "Downtown",
+    lat: 45.5201241,
+    lng: -122.6727,
+    eventTypes: JSON.stringify(["MARKET", "OFFICIAL", "FREE", "MAKERS"]),
+  });
+  runTitle("Portland Trans Pride March", {
+    description: "Official PrideNW programming. Free, all ages, masks encouraged. Organized by and for the trans community.",
+    status: "LIVE",
+    eventTypes: JSON.stringify(["MARCH", "COMMUNITY", "FREE", "TRANS", "OFFICIAL"]),
+  });
+
+  runTitle("Portland Pickles Pride Night", {
+    description: "Pride baseball game vs. the Gresham Greywolves at Walker Stadium. On-field activities, vendors, and family-friendly Pride Night energy. From $12.",
+  });
+  runTitle("A Spellman Spectacle: 30th Anniversary", {
+    description: "Sabrina the Teenage Witch 30th anniversary celebration featuring Gordie and Harvey, with drag performances and nostalgia. Doors 7:30pm.",
+  });
+  runTitle("Darcelle XV Sunday Funday Drag Brunch", {
+    description: "Pride weekend drag brunch hosted by Poison Waters, Alexis Campbell Starr, and Cassie Nova. Plated brunch included. Doors 11:30am, show 12:30pm. $32 cover. 21+.",
+    ageRequirement: "21_PLUS",
+  });
+  runTitle("Treasure Trail Portland Pride", {
+    venueName: "Sanctuary Club",
+    description: "Bearracuda's Pride Friday kick-off at Sanctuary Club. DJ TIGERBEATZ from Seattle, hosted by JP Hardy. Wristband color system at the door: red=top, blue=vers, green=bottom, white=side. Venmo tickets available with no surcharge.",
+  });
+  runTitle("Bearracuda Pride Friday — Vaseline Alley", {
+    description: "Bearracuda Pride Friday at 722 E Burnside. Theme: VASELINE ALLEY. Harnesses and fetish gear encouraged.",
+  });
+  sqlite.prepare(`
+    UPDATE events SET
+      status = 'HIDDEN',
+      admin_notes = 'Duplicate/old Friday listing. Confirmed 2026 Pride in Demand listing is Saturday July 18 at Star Theater.'
+    WHERE title = 'Pride in Demand — Portland Queer Takeover'
+      AND date_start = '2026-07-17T21:00:00'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      title = 'Pride in Demand — Portland Queer Takeover',
+      description = 'DotGay''s Pride in Demand Portland Queer Takeover at Star Theater. Confirmed Saturday July 18, 2026 at 9pm. Ticket range reported at $31-$134.',
+      ticket_url = 'https://www.startheaterportland.com/tm-event/pride-in-demand-portland-queer-takeover/',
+      event_types = '["PARTY","TAKEOVER","MULTI-DAY"]',
+      status = 'LIVE'
+    WHERE (title = 'Pride in Demand — Portland Queer Takeover — Night 2'
+      OR title = 'Pride in Demand — Portland Queer Takeover')
+      AND date_start = '2026-07-18T21:00:00'
+  `).run();
+  runTitle("Stank Yes Coach — PDX PRIDE", {
+    description: "Yes Coach / Stank Pride party at Sanctuary Club. DJs: JUMPR, Bro Hoe, Lake Everett, Spencer Adam, and Tucker Max.",
+  });
+  runTitle("Gay Witch Appreciation Day + Pride at Seagrape", {
+    description: "All-ages witch-themed Pride market and apothecary event at Seagrape, 11am-5pm. All are welcome.",
+  });
+  runTitle("Portland Pride Drag Brunch at Stag PDX", {
+    description: "Portland Pride Drag Brunch at Stag PDX. Confirmed Saturday July 18, 2026 at 11am. Ticket range reported at $45-$150.",
+    ageRequirement: "21_PLUS",
+  });
+  runTitle("Portland Pride Drag Brunch at Stag PDX — Sunday", {
+    description: "Portland Pride Drag Brunch at Stag PDX. Confirmed Sunday July 19, 2026 at 11am. Ticket range reported at $40-$150.",
+    ageRequirement: "21_PLUS",
+  });
+  runTitle("Rose City Roller Derby: Blood, Sweat & Queers Pride 2026", {
+    description: "Rose City Roller Derby home team championship Pride Night at The Hangar at Oaks Amusement Park. Local food carts, Plow Stop Bar, and parking available for $3-$5.",
+  });
+  runTitle("Portland Pride Ride", {
+    description: "Community Pride ride from Trek Bicycle Portland Slabtown. Helmets required. Ends at 503 Distilling, 2671 NW Vaughn St, with a parking lot party.",
+  });
+  runTitle("Certified Freak Block Party", {
+    description: "Certified Freak Block Party at Happylucky / Now Serving. Benefits Basic Rights Oregon. Suggested $20 donation, VIP $50.",
+  });
+  runTitle("INFERNO PRIDE PORTLAND 2026", {
+    description: "INFERNO PRIDE PORTLAND 2026 at Formerly Opaline. DJs Lauren 6-8pm and Wild Fire 8-10pm. $20 presale, $25 door.",
+  });
+  runTitle("BOYeurism: Pride Spectacular", {
+    description: "BOYeurism Pride Spectacular at Alberta Rose Theatre. Created by IZOHNNY — Isaiah Esquire and Johnny Nuriel.",
+  });
+  runTitle("RADIANCE by Gaylabration", {
+    description: "RADIANCE by Gaylabration at Crystal Ballroom. Headliner Matt Suave, with Poundstar, Mircat Dragonfae, and Bro Hoe Sappho. Sponsored by Q Care+.",
+  });
+  runTitle("DIVAPALOOZA 5th Anniversary", {
+    description: "DIVAPALOOZA 5th Anniversary Pride party. Confirmed Saturday July 18, 2026, 10pm-4am. $10-$25 sliding scale.",
+  });
+  runTitle("Jewish Pride Greater PDX March", {
+    description: "Jewish Pride Greater PDX March in the Portland Pride Parade. 9th year marching. All welcome.",
+  });
+  runTitle("The Sports Bra Pride Block Party", {
+    description: "5th Annual Sports Bra Pride Block Party. Live DJ sets, weightlifting competition, dance performances, games, food carts, cocktails, shave ice, and kid-friendly activities. Ticket range reported at $0-$39.",
+  });
+  runTitle("Lumbertwink Plaid Patio Pride", {
+    description: "Lumbertwink Plaid Patio Pride at Jackie's. DJs Not That Jennifer and Orographic, sexy lumber go-gos, photo booth by Matty Hoffman. $18.69 plaid / $29.45 non-plaid.",
+  });
+  runTitle("NE Portland Pride & LGBTQ+ Resource Fair", {
+    description: "Free NE Portland Pride & LGBTQ+ Resource Fair hosted by Take Two and Javier Puga-Phillips on NE 30th Ave between Killingsworth and Emerson.",
+  });
+  runTitle("BAZ MOTO PRIDE BEYOND THE PARK", {
+    address: "431 SW Harvey Milk St, Portland, OR 97204",
+    lat: 45.520416,
+    lng: -122.678127,
+    description: "BAZ MOTO PRIDE BEYOND THE PARK at Midtown Beer Garden, 7-10pm.",
+  });
+  runTitle("Chai & Roses Pride Party", {
+    description: "Sunday tea dance for QTBIPOC and allies at Holocene. DJs Suavecito and DJ Anjali. Performances by Blossom Drearie, Chiffon Cherie, and Hibiscus Lust. MC Armaan Singh.",
+  });
+  runTitle("Yes Sir Gay Dance Party", {
+    description: "Secret warehouse gay underwear night at REALM PDX featuring DJ Ottogyro. Location details revealed to ticket holders only.",
+  });
+  runTitle("Twirl! PDX Queer Disco — Pride Edition (HOLD)", {
+    newTitle: "Twirl! PDX Queer Disco — Pride Edition (2025 Hold)",
+    description: "Hold listing only: this was a July 20, 2025 event. No 2026 date has been announced.",
+    dateStart: "2025-07-20T15:00:00",
+    dateEnd: "2025-07-20T22:30:00",
+    dayOfWeek: "SUN",
+    status: "HIDDEN",
+    adminNotes: "Remove from 2026 public listings unless a 2026 date is announced.",
+  });
+  updateByVenue.run({
+    venueName: "Hawks PDX",
+    newTitle: "Hawks PDX Pride Weekend Placeholder",
+    description: "TBD placeholder listing: Hawks PDX is expected to host Pride weekend programming because they typically do something every year, but their 2026 Pride calendar is still empty. Check Hawks PDX directly for the final schedule before attending.",
+    admission: "TBD",
+    eventTypes: JSON.stringify(["TBD", "VENUE", "COMMUNITY"]),
+    adminNotes: "Updated source says Hawks PDX has no 2026 Pride updates yet; keep TBD.",
+  });
+
+  const dykeMarchExists = sqlite.prepare("SELECT id FROM events WHERE title = ?").get("Dyke March Portland Pride");
+  if (!dykeMarchExists) {
+    db.insert(events).values({
+      title: "Dyke March Portland Pride",
+      description: "Official PrideNW event. Downtown route details are expected closer to Pride; past timing suggests early evening. Check portlandpride.org for exact start and route before attending.",
+      venueName: "Downtown Portland",
+      address: "Downtown Portland, Portland, OR 97205",
+      neighborhood: "Downtown",
+      lat: 45.5202471, lng: -122.674194,
+      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-17T20:00:00",
+      dayOfWeek: "FRI",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["MARCH", "COMMUNITY", "FREE", "OFFICIAL"]),
+      admission: "FREE",
+      ticketUrl: "https://portlandpride.org",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: "Added from updated official PrideNW event info; route/start should be checked closer to date.", createdAt: now,
+    }).run();
+  }
+}
+
 seedData();
+applyVerifiedEventOverrides();
 
 function archiveExpiredMissedConnections() {
   const archiveAt = new Date("2026-07-21T00:00:00-07:00").getTime();
