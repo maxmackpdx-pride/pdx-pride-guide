@@ -200,23 +200,33 @@ export default function About() {
         {/* Portland Pride info */}
         {/* Tucker Credit */}
         <section>
-          <div style={{ border: "2px solid #1a1a1a", padding: "32px 36px", background: "#050505", position: "relative", overflow: "hidden" }}>
+          <div style={{
+            position: "relative", overflow: "hidden",
+            backgroundImage: "url('/tucker-yes-coach.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            border: "2px solid #1a1a1a",
+            minHeight: 340,
+          }}>
+            {/* Dark overlay — heavier on left so text is readable */}
             <div style={{
-              position: "absolute", top: -10, right: -10, fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "6rem", color: "rgba(204,255,0,0.025)", userSelect: "none", pointerEvents: "none",
-            }}>YES COACH</div>
-            <div style={{ position: "relative", zIndex: 1 }}>
+              position: "absolute", inset: 0,
+              background: "linear-gradient(100deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 50%, rgba(0,0,0,0.35) 100%)",
+              zIndex: 1,
+            }} />
+            {/* Content */}
+            <div style={{ position: "relative", zIndex: 2, padding: "40px 40px 36px" }}>
               <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.14em", color: "#CCFF00", marginBottom: 12 }}>ABOUT THE CREATOR</div>
-              <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", marginBottom: 16, lineHeight: 1.1 }}>
+              <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", marginBottom: 16, lineHeight: 1.05, textShadow: "0 2px 12px #000" }}>
                 MADE BY <span style={{ color: "#CCFF00" }}>TUCKER CASEY</span>
               </h2>
-              <p style={{ color: "#777", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 560, marginBottom: 16 }}>
+              <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
                 Tucker Casey is the host and creator of <em>Yes Coach</em>. He built this guide alone — no team, no budget, no sponsors — because he thinks Portland's queer community deserves something that isn't run by a corporation or driven by ad revenue.
               </p>
-              <p style={{ color: "#555", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 560, marginBottom: 20 }}>
+              <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
                 Meta sucks. We deserve better. This guide is free, community-moderated, and not going anywhere.
               </p>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#444", letterSpacing: "0.08em" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#CCFF00", letterSpacing: "0.1em", opacity: 0.7 }}>
                 NO SPONSORS · NO CORPORATE BACKING · BUILT WITH LOVE FOR PDX
               </div>
             </div>
