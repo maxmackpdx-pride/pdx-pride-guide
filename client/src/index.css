@@ -972,5 +972,4 @@ body::before {
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--neon-yellow); }
 
-/* Leaflet overrides */
-.leaflet-tile-pane { filter: grayscale(1) invert(1) brightness(0.3) contrast(1.2); }
+/* Leaflet overrides — CartoDB Dark Matter tiles are already dark, NO filter */

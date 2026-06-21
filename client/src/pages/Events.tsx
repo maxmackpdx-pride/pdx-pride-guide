@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "../components/EventModal";
 import { List, Grid, MapPin } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { divIcon } from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // THU–SUN only — no WED, no MULTI
 const DAY_COLORS: Record<string, string> = {
@@ -19,225 +22,185 @@ const TYPE_FILTERS = ["FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PA
 const PDX_CENTER: [number, number] = [45.5231, -122.6765];
 const PDX_ZOOM = 12;
 
+// CartoDB Dark Matter — already dark, white streets, no filter needed
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const DARK_TILE_ATTR =
-  '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://openstreetmap.org">OpenStreetMap</a>';
 
-/** Build a pie-slice SVG divIcon for a multi-day venue.
- *  days = array of day strings (e.g. ["THU","SAT"])
- *  Each day gets an equal arc, colored by DAY_COLORS.
- */
-function buildSegmentedIcon(L: any, days: string[]) {
-  const size = 18;
-  const r = size / 2;
-  const n = days.length;
+// ── Pin icon builder ────────────────────────────────────────────────────────
+function buildPinIcon(days: string[]) {
+  const SIZE = 22;
+  const R = SIZE / 2;
 
-  if (n === 1) {
+  if (days.length === 1) {
     const color = DAY_COLORS[days[0]] || "#CCFF00";
-    const html = `<div style="
-      width:${size}px;height:${size}px;
-      background:${color};
-      border:2px solid #000;
-      border-radius:50%;
-      box-shadow:0 0 8px ${color}99,0 0 2px #000;
-    "></div>`;
-    return L.divIcon({ html, iconSize: [size, size], iconAnchor: [r, r], className: "" });
+    return divIcon({
+      html: `<div style="
+        width:${SIZE}px;height:${SIZE}px;
+        background:${color};
+        border:2.5px solid #000;
+        border-radius:50%;
+        box-shadow:0 0 10px ${color}bb,0 2px 6px rgba(0,0,0,0.8);
+      "></div>`,
+      iconSize: [SIZE, SIZE],
+      iconAnchor: [R, R],
+      popupAnchor: [0, -R - 4],
+      className: "",
+    });
   }
 
-  // Build SVG pie slices
+  // Multi-day: pie slices
+  const n = days.length;
   const sliceAngle = (2 * Math.PI) / n;
-  let svgPaths = "";
-
+  let paths = "";
   days.forEach((day, i) => {
     const color = DAY_COLORS[day] || "#CCFF00";
-    const startAngle = i * sliceAngle - Math.PI / 2;
-    const endAngle = startAngle + sliceAngle;
-
-    const x1 = r + r * Math.cos(startAngle);
-    const y1 = r + r * Math.sin(startAngle);
-    const x2 = r + r * Math.cos(endAngle);
-    const y2 = r + r * Math.sin(endAngle);
-    const largeArc = sliceAngle > Math.PI ? 1 : 0;
-
-    svgPaths += `<path d="M${r},${r} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${largeArc},1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${color}" />`;
+    const a0 = i * sliceAngle - Math.PI / 2;
+    const a1 = a0 + sliceAngle;
+    const x1 = +(R + R * Math.cos(a0)).toFixed(2);
+    const y1 = +(R + R * Math.sin(a0)).toFixed(2);
+    const x2 = +(R + R * Math.cos(a1)).toFixed(2);
+    const y2 = +(R + R * Math.sin(a1)).toFixed(2);
+    const large = sliceAngle > Math.PI ? 1 : 0;
+    paths += `<path d="M${R},${R} L${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} Z" fill="${color}"/>`;
   });
 
-  const glowColors = days.map(d => DAY_COLORS[d] || "#fff").join(",");
-  const html = `
-    <div style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 5px ${DAY_COLORS[days[0]] || "#fff"});position:relative;">
-      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="overflow:visible;">
-        ${svgPaths}
-        <circle cx="${r}" cy="${r}" r="${r}" fill="none" stroke="#000" stroke-width="1.5"/>
+  return divIcon({
+    html: `<div style="width:${SIZE}px;height:${SIZE}px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8));">
+      <svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
+        ${paths}
+        <circle cx="${R}" cy="${R}" r="${R - 1}" fill="none" stroke="#000" stroke-width="2"/>
       </svg>
-    </div>`;
-
-  return L.divIcon({ html, iconSize: [size, size], iconAnchor: [r, r], className: "" });
+    </div>`,
+    iconSize: [SIZE, SIZE],
+    iconAnchor: [R, R],
+    popupAnchor: [0, -R - 4],
+    className: "",
+  });
 }
 
-function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
-  const initializedRef = useRef(false);
+// ── Markers layer — child of MapContainer so it has map context ─────────────
+function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Event) => void }) {
+  useMap(); // ensures we're inside MapContainer context
 
-  // Init map only when first made visible — avoids Leaflet sizing on display:none
-  useEffect(() => {
-    if (!visible) return;
-    if (initializedRef.current) {
-      // Already initialized — just re-measure
-      if (mapRef.current) {
-        setTimeout(() => mapRef.current?.invalidateSize(), 50);
-        setTimeout(() => mapRef.current?.invalidateSize(), 300);
-      }
-      return;
-    }
-
-    let cancelled = false;
-    let retryTimer: ReturnType<typeof setTimeout>;
-
-    function initMap() {
-      const L = (window as any).L;
-      if (!L) {
-        if (!cancelled) retryTimer = setTimeout(initMap, 200);
-        return;
-      }
-      if (cancelled || !containerRef.current) return;
-      if (mapRef.current) return;
-
-      const map = L.map(containerRef.current, {
-        zoomControl: true,
-        attributionControl: true,
-      }).setView(PDX_CENTER, PDX_ZOOM);
-
-      L.tileLayer(DARK_TILE, {
-        maxZoom: 19,
-        subdomains: "abcd",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      }).addTo(map);
-
-      mapRef.current = map;
-      initializedRef.current = true;
-
-      // Multiple invalidates to ensure tiles paint after layout
-      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 50);
-      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 300);
-      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 700);
-    }
-
-    initMap();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(retryTimer);
-    };
-  }, [visible]);
-
-  // Update markers whenever events change (retry until map is ready)
-  useEffect(() => {
-    let t: ReturnType<typeof setTimeout>;
-    function updateMarkers() {
-      const L = (window as any).L;
-      if (!L || !mapRef.current) {
-        t = setTimeout(updateMarkers, 200);
-        return;
-      }
-
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
-
-    const map = mapRef.current;
-
-    const byVenue: Record<string, Event[]> = {};
+  const byVenue = useMemo(() => {
+    const groups: Record<string, Event[]> = {};
     events.forEach(e => {
       if (!e.lat || !e.lng) return;
       const key = `${e.lat},${e.lng}`;
-      if (!byVenue[key]) byVenue[key] = [];
-      byVenue[key].push(e);
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(e);
     });
-
-    Object.entries(byVenue).forEach(([key, evts]) => {
-      const [lat, lng] = key.split(",").map(Number);
-      const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
-
-      const icon = buildSegmentedIcon(L, days);
-
-      const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
-      const popup = L.popup({
-        className: "pdx-popup",
-        maxWidth: 240,
-      }).setContent(`
-        <div style="background:#0d0d0d;color:#fff;padding:10px 12px;border:none;font-family:sans-serif;">
-          <div style="color:${primaryColor};font-weight:700;font-size:13px;margin-bottom:4px;">${evts[0].venueName}</div>
-          ${evts[0].address ? `<div style="font-size:11px;color:#666;margin-bottom:6px;">${evts[0].address}</div>` : ""}
-          ${evts.map(e => {
-            const dc = DAY_COLORS[(e.dayOfWeek || "")] || "#fff";
-            return `<div style="font-size:11px;color:#aaa;padding:3px 0;border-top:1px solid #1a1a1a;">
-              <span style="color:${dc};font-weight:700;margin-right:4px;">${e.dayOfWeek}</span>
-              ${e.title}
-            </div>`;
-          }).join("")}
-        </div>
-      `);
-
-      const marker = L.marker([lat, lng], { icon }).addTo(map).bindPopup(popup);
-      markersRef.current.push(marker);
-    });
-    } // end updateMarkers
-    updateMarkers();
-    return () => clearTimeout(t);
-  }, [events]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      markersRef.current.forEach(m => m.remove());
-      markersRef.current = [];
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, []);
+    return groups;
+  }, [events]);
 
   return (
-    <div style={{ position: "relative", background: "#0a0a0a", display: visible ? "block" : "none" }}>
+    <>
+      {Object.entries(byVenue).map(([key, evts]) => {
+        const [lat, lng] = key.split(",").map(Number);
+        const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
+        const icon = buildPinIcon(days);
+        const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
+
+        return (
+          <Marker key={key} position={[lat, lng]} icon={icon}>
+            <Popup className="pdx-popup" maxWidth={240}>
+              <div style={{ background: "#0d0d0d", color: "#fff", padding: "10px 12px", fontFamily: "sans-serif", minWidth: 180 }}>
+                <div style={{ color: primaryColor, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
+                  {evts[0].venueName}
+                </div>
+                {evts[0].address && (
+                  <div style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>{evts[0].address}</div>
+                )}
+                {evts.map(e => {
+                  const dc = DAY_COLORS[e.dayOfWeek || ""] || "#fff";
+                  return (
+                    <div
+                      key={e.id}
+                      onClick={() => onSelect(e)}
+                      style={{
+                        fontSize: 11, color: "#aaa", padding: "5px 0",
+                        borderTop: "1px solid #1a1a1a", cursor: "pointer",
+                      }}
+                    >
+                      <span style={{ color: dc, fontWeight: 700, marginRight: 4 }}>{e.dayOfWeek}</span>
+                      {e.title}
+                    </div>
+                  );
+                })}
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
+    </>
+  );
+}
+
+// ── Map view — only mounted once visible to avoid Leaflet display:none bug ──
+function MapView({ events, visible, onSelect }: { events: Event[]; visible: boolean; onSelect: (e: Event) => void }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (visible && !mounted) setMounted(true);
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div style={{ display: visible ? "block" : "none", position: "relative" }}>
       <style>{`
         .pdx-popup .leaflet-popup-content-wrapper {
           background: #0d0d0d !important;
-          border: 1px solid #222 !important;
+          border: 1.5px solid #333 !important;
           border-radius: 0 !important;
-          box-shadow: 0 4px 24px #000c !important;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.9) !important;
           padding: 0 !important;
         }
-        .pdx-popup .leaflet-popup-content { margin: 0 !important; }
-        .pdx-popup .leaflet-popup-tip { background: #0d0d0d !important; }
-        .leaflet-popup-close-button { color: #555 !important; font-size: 16px !important; top: 6px !important; right: 8px !important; }
-        .leaflet-control-attribution { background: rgba(0,0,0,0.7) !important; color: #444 !important; font-size: 9px !important; }
+        .pdx-popup .leaflet-popup-content { margin: 0 !important; width: auto !important; }
+        .pdx-popup .leaflet-popup-tip-container { display: none; }
+        .leaflet-popup-close-button { color: #666 !important; top: 6px !important; right: 8px !important; }
+        .leaflet-control-attribution { background: rgba(0,0,0,0.65) !important; color: #444 !important; font-size: 9px !important; }
         .leaflet-control-attribution a { color: #555 !important; }
+        .leaflet-control-zoom a { background: #111 !important; color: #CCFF00 !important; border-color: #333 !important; }
+        .leaflet-control-zoom a:hover { background: #222 !important; }
       `}</style>
-      <div ref={containerRef} className="map-container" data-testid="events-map" />
-      {/* Day legend — THU/FRI/SAT/SUN only */}
+      {mounted && (
+        <MapContainer
+          center={PDX_CENTER}
+          zoom={PDX_ZOOM}
+          style={{ height: "calc(100vh - 120px)", width: "100%", background: "#0a0a0a" }}
+          zoomControl={true}
+          attributionControl={true}
+        >
+          <TileLayer
+            url={DARK_TILE}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            maxZoom={19}
+            subdomains="abcd"
+          />
+          <MarkersLayer events={events} onSelect={onSelect} />
+        </MapContainer>
+      )}
+
+      {/* Legend */}
       <div style={{
-        position: "absolute", bottom: 12, right: 12,
-        background: "rgba(0,0,0,0.88)", padding: "8px 12px",
-        border: "1px solid #222", zIndex: 999,
+        position: "absolute", bottom: 28, right: 12, zIndex: 1000,
+        background: "rgba(0,0,0,0.92)", padding: "10px 14px",
+        border: "1.5px solid #CCFF00",
+        pointerEvents: "none",
       }}>
         {Object.entries(DAY_COLORS).map(([day, color]) => (
-          <div key={day} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-            <div style={{ width: 8, height: 8, background: color, borderRadius: "50%", boxShadow: `0 0 4px ${color}` }} />
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#888", letterSpacing: "0.08em" }}>{day}</span>
+          <div key={day} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+            <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", boxShadow: `0 0 6px ${color}` }} />
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>{day}</span>
           </div>
         ))}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
-          {/* Multi-day indicator: small segmented circle preview */}
-          <svg width="8" height="8" viewBox="0 0 8 8">
-            <path d="M4,4 L4,0 A4,4 0 0,1 8,4 Z" fill="#00FFFF"/>
-            <path d="M4,4 L8,4 A4,4 0 0,1 4,8 Z" fill="#FF6600"/>
-            <path d="M4,4 L4,8 A4,4 0 0,1 0,4 Z" fill="#FF00CC"/>
-            <path d="M4,4 L0,4 A4,4 0 0,1 4,0 Z" fill="#FF2400"/>
-            <circle cx="4" cy="4" r="4" fill="none" stroke="#000" strokeWidth="0.5"/>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, paddingTop: 5, borderTop: "1px solid #222" }}>
+          <svg width="10" height="10" viewBox="0 0 10 10">
+            <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF"/>
+            <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600"/>
+            <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC"/>
+            <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill="#FF2400"/>
+            <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1"/>
           </svg>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#888", letterSpacing: "0.08em" }}>MULTI-DAY</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>MULTI-DAY</span>
         </div>
       </div>
     </div>
@@ -447,7 +410,7 @@ export default function Events() {
   return (
     <div className="zine-page events-page">
       {/* Map — always mounted, shown/hidden via CSS to avoid Leaflet reinit */}
-      <MapView events={filtered} visible={viewMode === "map"} />
+      <MapView events={filtered} visible={viewMode === "map"} onSelect={setSelectedEvent} />
 
       {/* Filters + View Toggle */}
       <div className="zine-filter-bar" style={{
