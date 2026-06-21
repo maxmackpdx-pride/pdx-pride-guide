@@ -130,15 +130,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── PROMOTER BAR ─────────────────────────────────────────── */}
-      <section style={{ background: "#000", borderTop: "1px solid #111" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", textAlign: "center" }}>
-          <Link href="/submit" style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#777", letterSpacing: "0.08em", textDecoration: "none" }}>
-            PROMOTER OR ORGANIZER? SUBMIT OR CLAIM AN EVENT →
-          </Link>
-        </div>
-      </section>
-
       {/* ── LGBTQ+IA BANNER — homepage only ─────────────────────── */}
       <section
         aria-hidden="true"
