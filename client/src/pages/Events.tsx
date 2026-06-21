@@ -375,6 +375,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
 export default function Events() {
   const [activeDay, setActiveDay] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -393,6 +394,11 @@ export default function Events() {
     if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
     if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
     if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const haystack = `${e.title} ${e.venueName} ${e.neighborhood} ${e.description}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     return true;
   }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
 
@@ -439,6 +445,40 @@ export default function Events() {
           ))}
           {/* Spacer */}
           <div style={{ flex: 1 }} />
+          {/* Search bar */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              data-testid="event-search"
+              style={{
+                background: "#111",
+                border: "1px solid #2a2a2a",
+                color: "#fff",
+                padding: "5px 28px 5px 10px",
+                fontSize: "0.75rem",
+                fontFamily: "var(--font-body)",
+                outline: "none",
+                width: 180,
+                transition: "border-color 0.15s",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#CCFF00")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#2a2a2a")}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                style={{
+                  position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", color: "#555", cursor: "pointer",
+                  fontSize: "0.75rem", lineHeight: 1, padding: 0,
+                }}
+                title="Clear search"
+              >×</button>
+            )}
+          </div>
           {/* View toggle */}
           <div style={{ display: "flex", gap: 2, border: "1px solid #222", padding: 2 }}>
             <button

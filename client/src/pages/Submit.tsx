@@ -116,10 +116,11 @@ export default function Submit() {
               <div>
                 <label style={labelStyle}>Day of Week</label>
                 <select value={form.dayOfWeek} onChange={e => setForm(f => ({ ...f, dayOfWeek: e.target.value }))} style={inputStyle}>
-                  <option value="THU">Thursday July 17</option>
-                  <option value="FRI">Friday July 18</option>
-                  <option value="SAT">Saturday July 19</option>
-                  <option value="SUN">Sunday July 20</option>
+                  <option value="THU">Thursday July 16</option>
+                  <option value="FRI">Friday July 17</option>
+                  <option value="SAT">Saturday July 18</option>
+                  <option value="SUN">Sunday July 19</option>
+                  <option value="MON">Monday July 20</option>
                 </select>
               </div>
               <div>
@@ -147,12 +148,11 @@ export default function Submit() {
                 </select>
               </div>
             </div>
-            {(form.admission === "TICKETED" || form.admission === "SUGGESTED_DONATION") && (
-              <div>
-                <label style={labelStyle}>Ticket / RSVP Link</label>
-                <input value={form.ticketUrl} onChange={e => setForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." style={inputStyle} />
-              </div>
-            )}
+            <div>
+              <label style={labelStyle}>Ticket / RSVP Link *</label>
+              <input value={form.ticketUrl} onChange={e => setForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/... (required)" required style={inputStyle} />
+              <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 4 }}>Link to buy tickets, RSVP, or find more info. All events must have a link.</div>
+            </div>
             <div>
               <label style={labelStyle}>Event Flyer / Poster Image URL (optional)</label>
               <input value={form.posterImageUrl} onChange={e => setForm(f => ({ ...f, posterImageUrl: e.target.value }))} type="url" placeholder="https://... (direct image link)" style={inputStyle} />
