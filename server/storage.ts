@@ -295,7 +295,7 @@ function seedData() {
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "SPORTS", "LEATHER"]),
       admission: "TICKETED",
-      ticketUrl: "https://members.pdxsanctuary.com/events/93071/orders/new",
+      ticketUrl: "https://members.pdxsanctuary.com/events/93071",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: true, nudityOk: true,
       posterImageUrl: "/posters/stank-yes-coach.jpg",
       status: "LIVE", source: "admin_seeded", isClaimable: true,

@@ -75,21 +75,25 @@ function buildSegmentedIcon(L: any, days: string[]) {
 }
 
 function MapView({ events }: { events: Event[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
 
+  // Init map once on mount
   useEffect(() => {
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout>;
+
     function initMap() {
       const L = (window as any).L;
       if (!L) {
-        if (!cancelled) setTimeout(initMap, 150);
+        if (!cancelled) retryTimer = setTimeout(initMap, 200);
         return;
       }
-      if (cancelled) return;
+      if (cancelled || !containerRef.current) return;
+      if (mapRef.current) return; // already initialized
 
-    if (!mapRef.current) {
-      const map = L.map("pdx-map", {
+      const map = L.map(containerRef.current, {
         zoomControl: true,
         attributionControl: true,
       }).setView(PDX_CENTER, PDX_ZOOM);
@@ -101,12 +105,30 @@ function MapView({ events }: { events: Event[] }) {
       }).addTo(map);
 
       mapRef.current = map;
-      // Force Leaflet to recalculate size after DOM is ready
-      setTimeout(() => map.invalidateSize(), 100);
-    } else {
-      mapRef.current.setView(PDX_CENTER, PDX_ZOOM);
-      setTimeout(() => mapRef.current.invalidateSize(), 100);
+
+      // Invalidate after layout settles — multiple times to be sure
+      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 50);
+      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 300);
+      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 800);
     }
+
+    initMap();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+    };
+  }, []);
+
+  // Update markers whenever events change (retry until map is ready)
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    function updateMarkers() {
+      const L = (window as any).L;
+      if (!L || !mapRef.current) {
+        t = setTimeout(updateMarkers, 200);
+        return;
+      }
 
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
@@ -148,18 +170,16 @@ function MapView({ events }: { events: Event[] }) {
       const marker = L.marker([lat, lng], { icon }).addTo(map).bindPopup(popup);
       markersRef.current.push(marker);
     });
+    } // end updateMarkers
+    updateMarkers();
+    return () => clearTimeout(t);
+  }, [events]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    } // end initMap
-    initMap();
-    return () => {
-      cancelled = true;
-      markersRef.current.forEach(m => m.remove());
-      markersRef.current = [];
-    };
-  }, [events]);
-
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -183,7 +203,7 @@ function MapView({ events }: { events: Event[] }) {
         .leaflet-control-attribution { background: rgba(0,0,0,0.7) !important; color: #444 !important; font-size: 9px !important; }
         .leaflet-control-attribution a { color: #555 !important; }
       `}</style>
-      <div id="pdx-map" className="map-container" data-testid="events-map" />
+      <div ref={containerRef} className="map-container" data-testid="events-map" />
       {/* Day legend — THU/FRI/SAT/SUN only */}
       <div style={{
         position: "absolute", bottom: 12, right: 12,
@@ -377,7 +397,7 @@ export default function Events() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
 
   const { data: events = [], isLoading } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -407,7 +427,8 @@ export default function Events() {
 
   return (
     <div>
-      <MapView events={filtered} />
+      {/* Map — only mounted when map view is active */}
+      {viewMode === "map" && <MapView events={filtered} />}
 
       {/* Filters + View Toggle */}
       <div style={{
@@ -505,12 +526,24 @@ export default function Events() {
             >
               <List size={13} />
             </button>
+            <button
+              data-testid="toggle-map-view"
+              onClick={() => setViewMode("map")}
+              style={{
+                padding: "4px 8px", background: viewMode === "map" ? "#CCFF00" : "transparent",
+                border: "none", cursor: "pointer", color: viewMode === "map" ? "#000" : "#555",
+                display: "flex", alignItems: "center",
+              }}
+              title="Map view"
+            >
+              <MapPin size={13} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Events listing */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
+      {/* Events listing — hidden in map view */}
+      {viewMode !== "map" && <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 24 }}>
           <h2 className="display" style={{ fontSize: "1.4rem", margin: 0 }}>{filtered.length} EVENTS</h2>
           {activeFilters.length > 0 && (
@@ -568,7 +601,7 @@ export default function Events() {
           </div>
           <a href="#/submit" className="btn-neon solid">Get Started →</a>
         </div>
-      </div>
+      </div>}
 
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
     </div>
