@@ -60,6 +60,7 @@ type AdminTab = "queue" | "moderation" | "events";
 export default function Admin() {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +75,7 @@ export default function Admin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("POST", "/api/admin/login", { password });
+      await apiRequest("POST", "/api/admin/login", { username, password });
       setAuthenticated(true);
       setPasswordError(false);
     } catch {
@@ -183,6 +184,17 @@ export default function Admin() {
             <p className="text-white/40 text-sm mt-1">PDX Pride Guide</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="display text-xs text-white/40 block mb-2">USERNAME</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="w-full px-4 py-3 bg-black border border-white/20 text-white focus:outline-none focus:border-yellow-400"
+                  placeholder="Username"
+                  autoComplete="username"
+                />
+              </div>
             <div>
               <label className="display text-xs block mb-2" style={{ color: "#CCFF00" }}>ADMIN NAME</label>
               <input
@@ -530,6 +542,16 @@ export default function Admin() {
                               <input type="number" step="any" value={editForm.lng ?? ""} onChange={e => setEditForm(f => ({ ...f, lng: Number(e.target.value) }))}
                                 placeholder="-122.67..." className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
                             </div>
+                          </div>
+                          <div className="flex gap-6 items-center">
+                            <label className="display text-xs text-white/40 flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={!!editForm.isSexPositive} onChange={e => setEditForm(f => ({ ...f, isSexPositive: e.target.checked }))} />
+                              SEX POSITIVE
+                            </label>
+                            <label className="display text-xs text-white/40 flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={!!editForm.nudityOk} onChange={e => setEditForm(f => ({ ...f, nudityOk: e.target.checked }))} />
+                              NUDITY OK
+                            </label>
                           </div>
                           <div className="md:col-span-2">
                             <label className="display text-xs text-white/40 block mb-1">DESCRIPTION</label>

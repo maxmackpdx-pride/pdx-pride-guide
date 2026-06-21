@@ -13,7 +13,7 @@ const DAY_COLORS: Record<string, string> = {
   SUN: "#FF2400",
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
-const TYPE_FILTERS = ["FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PARTY"];
+const TYPE_FILTERS = ["FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PARTY", "SEX POSITIVE", "NUDITY OK"];
 
 // Portland, OR center
 const PDX_CENTER: [number, number] = [45.5231, -122.6765];
@@ -391,6 +391,8 @@ export default function Events() {
     if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
     if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
     if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
+    if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
+    if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
     return true;
   }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
 

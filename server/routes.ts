@@ -14,7 +14,8 @@ declare module "express-session" {
   }
 }
 
-const ADMIN_PASSWORD = "pdxpride2026";
+const ADMIN_USERNAME = "Tcasey90";
+const ADMIN_PASSWORD = "dinoLeo!1";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.session?.userId) {
@@ -278,9 +279,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── ADMIN AUTH ───────────────────────────────────────────────────────────
   app.post("/api/admin/login", (req, res) => {
-    const { password } = req.body;
+    const { username, password } = req.body;
     if (!password) return res.status(400).json({ error: "password required" });
-    if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: "Invalid password" });
+    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) return res.status(401).json({ error: "Invalid credentials" });
     req.session.isAdmin = true;
     res.json({ isAdmin: true });
   });
