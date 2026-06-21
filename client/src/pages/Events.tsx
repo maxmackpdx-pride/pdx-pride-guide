@@ -79,8 +79,14 @@ function MapView({ events }: { events: Event[] }) {
   const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
-    const L = (window as any).L;
-    if (!L) return;
+    let cancelled = false;
+    function initMap() {
+      const L = (window as any).L;
+      if (!L) {
+        if (!cancelled) setTimeout(initMap, 150);
+        return;
+      }
+      if (cancelled) return;
 
     if (!mapRef.current) {
       const map = L.map("pdx-map", {
@@ -143,7 +149,10 @@ function MapView({ events }: { events: Event[] }) {
       markersRef.current.push(marker);
     });
 
+    } // end initMap
+    initMap();
     return () => {
+      cancelled = true;
       markersRef.current.forEach(m => m.remove());
       markersRef.current = [];
     };
