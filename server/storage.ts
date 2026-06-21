@@ -163,9 +163,10 @@ const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extr
 function seedData() {
   const existing = db.select().from(events).all();
 
-  // Force re-seed if first event is one of the old fake ones
+  // Force re-seed if old fake events, no lat/lng, or no poster images yet
   if (existing.length > 0) {
-    if (OLD_SEED_TITLES.includes(existing[0].title)) {
+    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null;
+    if (needsReseed) {
       sqlite.exec(`DELETE FROM events`);
       sqlite.exec(`DELETE FROM attendances`);
       sqlite.exec(`DELETE FROM gig_posts`);
@@ -183,7 +184,7 @@ function seedData() {
       venueName: "Tom McCall Waterfront Park",
       address: "98 SW Naito Pkwy, Portland, OR 97204",
       neighborhood: "Downtown",
-      lat: null, lng: null,
+      lat: 45.5122, lng: -122.6715,
       dateStart: "2026-07-18T12:00:00", dateEnd: "2026-07-19T23:59:00",
       dayOfWeek: "SAT",
       ageRequirement: "ALL_AGES",
@@ -191,7 +192,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://pridenw.org",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/portland-pride-waterfront.png",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -200,7 +202,7 @@ function seedData() {
       venueName: "North Park Blocks to Naito Pkwy",
       address: "NW Park Ave & W Burnside St, Portland, OR 97209",
       neighborhood: "Downtown",
-      lat: null, lng: null,
+      lat: 45.5231, lng: -122.6838,
       dateStart: "2026-07-19T11:00:00", dateEnd: "2026-07-19T23:59:00",
       dayOfWeek: "SUN",
       ageRequirement: "ALL_AGES",
@@ -217,7 +219,7 @@ function seedData() {
       venueName: "Formerly Opaline",
       address: "105 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
-      lat: null, lng: null,
+      lat: 45.5247, lng: -122.6731,
       dateStart: "2026-07-18T18:00:00", dateEnd: "2026-07-18T23:59:00",
       dayOfWeek: "SAT",
       ageRequirement: "21_PLUS",
@@ -234,7 +236,7 @@ function seedData() {
       venueName: "Trek Bicycle Portland Slabtown",
       address: "Trek Bicycle Portland Slabtown, Northwest District, Portland, OR",
       neighborhood: "Northwest District",
-      lat: null, lng: null,
+      lat: 45.5311, lng: -122.698,
       dateStart: "2026-07-18T17:30:00", dateEnd: "2026-07-18T23:59:00",
       dayOfWeek: "SAT",
       ageRequirement: "ALL_AGES",
@@ -251,7 +253,7 @@ function seedData() {
       venueName: "Bullard Tavern",
       address: "813 SW Alder St, Portland, OR 97205",
       neighborhood: "Downtown",
-      lat: null, lng: null,
+      lat: 45.5194, lng: -122.6768,
       dateStart: "2026-07-18T12:00:00", dateEnd: "2026-07-18T23:59:00",
       dayOfWeek: "SAT",
       ageRequirement: "21_PLUS",
@@ -259,7 +261,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/lez-out-pride-brunch.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -268,7 +271,7 @@ function seedData() {
       venueName: "McMenamins Crystal Ballroom",
       address: "1332 W Burnside St, Portland, OR 97209",
       neighborhood: "Pearl District",
-      lat: null, lng: null,
+      lat: 45.5228, lng: -122.6851,
       dateStart: "2026-07-18T21:00:00", dateEnd: "2026-07-19T03:00:00",
       dayOfWeek: "SAT",
       ageRequirement: "21_PLUS",
@@ -276,7 +279,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/radiance-gaylabration.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -285,7 +289,7 @@ function seedData() {
       venueName: "Sanctuary Club",
       address: "33 NW 9th Ave, Portland, OR 97209",
       neighborhood: "Pearl District",
-      lat: null, lng: null,
+      lat: 45.5246, lng: -122.6787,
       dateStart: "2026-07-18T21:00:00", dateEnd: "2026-07-19T02:00:00",
       dayOfWeek: "SAT",
       ageRequirement: "21_PLUS",
@@ -293,7 +297,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/stank-yes-coach.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -302,7 +307,7 @@ function seedData() {
       venueName: "Happylucky",
       address: "1930 NE Sandy Blvd, Portland, OR 97232",
       neighborhood: "Portland",
-      lat: null, lng: null,
+      lat: 45.5326, lng: -122.6444,
       dateStart: "2026-07-18T18:00:00", dateEnd: "2026-07-19T00:00:00",
       dayOfWeek: "SAT",
       ageRequirement: "21_PLUS",
@@ -310,7 +315,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/certified-freak-block-party.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -319,7 +325,7 @@ function seedData() {
       venueName: "Crystal Ballroom",
       address: "1332 W Burnside St, Portland, OR 97209",
       neighborhood: "Pearl District",
-      lat: null, lng: null,
+      lat: 45.5228, lng: -122.6851,
       dateStart: "2026-07-17T20:00:00", dateEnd: "2026-07-18T02:00:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
@@ -327,7 +333,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/horse-meat-disco-tuff.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -336,7 +343,7 @@ function seedData() {
       venueName: "Star Theater and Starlight Lounge",
       address: "13 NW 6th Ave, Portland, OR 97209",
       neighborhood: "Old Town",
-      lat: null, lng: null,
+      lat: 45.5249, lng: -122.6742,
       dateStart: "2026-07-17T20:00:00", dateEnd: "2026-07-18T23:59:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
@@ -353,7 +360,7 @@ function seedData() {
       venueName: "TBA",
       address: "Portland, OR",
       neighborhood: "Portland",
-      lat: null, lng: null,
+      lat: 45.5231, lng: -122.6765,
       dateStart: "2026-07-19T20:00:00", dateEnd: "2026-07-19T23:59:00",
       dayOfWeek: "SUN",
       ageRequirement: "21_PLUS",
@@ -361,7 +368,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/lumbertwink-bearracuda.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -370,7 +378,7 @@ function seedData() {
       venueName: "Seagrape Apothecary",
       address: "2823 NE Sandy Blvd, Portland, OR 97232",
       neighborhood: "NE Portland",
-      lat: null, lng: null,
+      lat: 45.533, lng: -122.6327,
       dateStart: "2026-07-18T11:00:00", dateEnd: "2026-07-18T23:59:00",
       dayOfWeek: "SAT",
       ageRequirement: "ALL_AGES",
@@ -387,7 +395,7 @@ function seedData() {
       venueName: "TBA",
       address: "Portland, OR",
       neighborhood: "Portland",
-      lat: null, lng: null,
+      lat: 45.5231, lng: -122.6765,
       dateStart: "2026-07-16T20:00:00", dateEnd: "2026-07-16T23:59:00",
       dayOfWeek: "THU",
       ageRequirement: "21_PLUS",
@@ -395,7 +403,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://flipphoneevents.com/Portland",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/sasha-colby-pride-kickoff.jpg",
+      status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
   ];

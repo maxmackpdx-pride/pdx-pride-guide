@@ -94,8 +94,11 @@ function MapView({ events }: { events: Event[] }) {
       }).addTo(map);
 
       mapRef.current = map;
+      // Force Leaflet to recalculate size after DOM is ready
+      setTimeout(() => map.invalidateSize(), 100);
     } else {
       mapRef.current.setView(PDX_CENTER, PDX_ZOOM);
+      setTimeout(() => mapRef.current.invalidateSize(), 100);
     }
 
     markersRef.current.forEach(m => m.remove());

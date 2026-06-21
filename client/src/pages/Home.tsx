@@ -246,7 +246,7 @@ export default function Home() {
       {/* ── NEON DIVIDER ─────────────────────────────────────────── */}
       <div style={{ height: 2, background: "linear-gradient(90deg, #FF6600, #CCFF00, #00FFFF)", boxShadow: "0 0 8px rgba(204,255,0,0.3)" }} />
 
-      {/* ── PRIDE WORK / GIG BOARD PREVIEW ───────────────────────── */}
+      {/* ── PRIDE WORK / GIG BOARD PREVIEW ──────────────────────────
       <section style={{ background: "#030303", borderTop: "none" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
@@ -324,37 +324,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SUBMIT CTA ───────────────────────────────────────────── */}
+      {/* ── SUBMIT QUIET LINK ─────────────────────────────────────── */}
       <section style={{ background: "#000", borderTop: "1px solid #111" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "28px 24px" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.68rem", color: "#00FFFF", letterSpacing: "0.12em", marginBottom: 10 }}>PROMOTERS & ORGANIZERS</div>
-              <h3 className="display" style={{ fontSize: "1.4rem", marginBottom: 10 }}>SUBMIT AN EVENT</h3>
-              <p style={{ color: "#555", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: 20 }}>
-                Add your event to the guide. Reviewed by two admins before going live.
-              </p>
-              <Link href="/submit">
-                <button className="btn-neon" style={{ borderColor: "#00FFFF", color: "#00FFFF", fontSize: "0.8rem" }}>Submit Now →</button>
-              </Link>
-            </div>
-            <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "28px 24px" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.68rem", color: "#FF00CC", letterSpacing: "0.12em", marginBottom: 10 }}>YOUR EVENT LISTED?</div>
-              <h3 className="display" style={{ fontSize: "1.4rem", marginBottom: 10 }}>CLAIM IT</h3>
-              <p style={{ color: "#555", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: 20 }}>
-                See your event listed but didn't add it? Claim ownership and keep it updated.
-              </p>
-              <Link href="/submit">
-                <button className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC", fontSize: "0.8rem" }}>Claim an Event →</button>
-              </Link>
-            </div>
-          </div>
-          <div style={{ marginTop: 12, padding: "10px 16px", background: "#050505", border: "1px solid #111", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 6, height: 6, background: "#CCFF00", borderRadius: "50%", flexShrink: 0 }} />
-            <span style={{ fontSize: "0.72rem", color: "#444", fontFamily: "var(--font-display)", letterSpacing: "0.04em" }}>
-              ALL SUBMISSIONS REQUIRE TWO-ADMIN APPROVAL BEFORE GOING LIVE.
-            </span>
-          </div>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", textAlign: "center" }}>
+          <Link href="/submit" style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#444", letterSpacing: "0.08em", textDecoration: "none" }}>
+            PROMOTER OR ORGANIZER? SUBMIT OR CLAIM AN EVENT →
+          </Link>
         </div>
       </section>
 
