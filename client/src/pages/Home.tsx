@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import skylineImg from "@assets/pdx-skyline-neon.png";
-import communityStampImg from "@assets/community-first-stamp.png";
 
 // Countdown to July 17, 2026 (Portland Pride Weekend starts)
 function useCountdown() {
@@ -101,73 +100,6 @@ export default function Home() {
           </div>
         </div>
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
-      </section>
-
-      {/* ── NEON DIVIDER ─────────────────────────────────────────── */}
-      <div style={{ height: 3, background: "linear-gradient(90deg, #00FFFF, #FF00CC, #FF6600, #FF2400)", boxShadow: "0 0 12px rgba(255,0,204,0.4)" }} />
-
-      {/* ── WHAT IS THIS ─────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 40px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}>
-          {[
-            { label: "EVENTS", color: "#CCFF00", desc: "Every queer event this Pride weekend — parties, parades, brunches, shows.", href: "/events" },
-            { label: "PRIDE WORK", color: "#FF6600", desc: "DJs, photographers, bartenders, performers. Find gigs or post you're available.", href: "/pride-work" },
-            { label: "SUBMIT", color: "#00FFFF", desc: "Organizing something? Submit your event. Community-moderated, always free.", href: "/submit" },
-            { label: "ABOUT", color: "#FF00CC", desc: "Made by one person. No sponsors. No corporate backing. Just Portland.", href: "/about" },
-          ].map(({ label, color, desc, href }) => (
-            <Link key={label} href={href} style={{ textDecoration: "none" }}>
-              <div style={{
-                background: "#080808", border: `1px solid #1a1a1a`,
-                borderTop: `3px solid ${color}`,
-                padding: "24px 20px", cursor: "pointer",
-                transition: "background 0.1s",
-              }}
-                onMouseEnter={e => (e.currentTarget.style.background = "#0f0f0f")}
-                onMouseLeave={e => (e.currentTarget.style.background = "#080808")}
-              >
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "1.4rem", color, marginBottom: 10 }}>{label}</div>
-                <p style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.6 }}>{desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── NEON DIVIDER ─────────────────────────────────────────── */}
-      <div style={{ height: 2, background: "linear-gradient(90deg, #8800FF, #FF00CC, #00FFFF)", boxShadow: "0 0 8px rgba(136,0,255,0.3)" }} />
-
-      {/* ── TUCKER CREDIT — COMMUNITY FIRST ──────────────────────── */}
-      <section style={{ background: "#050505" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 24px" }}>
-          <div style={{ border: "2px solid #1a1a1a", padding: "36px 40px", position: "relative", overflow: "hidden" }}>
-            <div style={{
-              position: "absolute", top: -20, right: -10,
-              fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "7rem",
-              color: "rgba(204,255,0,0.025)", letterSpacing: "-0.02em", userSelect: "none", pointerEvents: "none",
-            }}>COMMUNITY<br />FIRST</div>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <img src={communityStampImg} alt="Community First" style={{
-                width: 140, height: 140, objectFit: "contain",
-                marginBottom: 20, transform: "rotate(-4deg)",
-                transformOrigin: "left center", display: "block",
-                filter: "drop-shadow(0 0 12px rgba(204,255,0,0.4))",
-              }} />
-              <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", marginBottom: 16, lineHeight: 1.1 }}>
-                MADE BY ONE PERSON.<br />
-                <span style={{ color: "#CCFF00" }}>NO SPONSORS. NO CORPORATE BACKING.</span>
-              </h2>
-              <p style={{ color: "#777", fontSize: "1rem", lineHeight: 1.7, maxWidth: 600, marginBottom: 16 }}>
-                Built by Tucker Casey — host and creator of <em>Yes Coach</em> — alone, because Portland's queer community deserves something we actually own. Not a Meta product. Not a sponsored listing. Not a corporate rainbow campaign.
-              </p>
-              <p style={{ color: "#555", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 600, marginBottom: 28 }}>
-                Meta sucks. We deserve better. This is free, community-moderated, and built to stay that way.
-              </p>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.75rem", color: "#333", letterSpacing: "0.06em" }}>
-                COMMUNITY POWERED · QUEER OWNED · ADMIN APPROVED · FREE FOREVER
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* ── QUIET FOOTER LINK ────────────────────────────────────── */}
