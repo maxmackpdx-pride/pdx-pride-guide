@@ -614,8 +614,8 @@ export default function Events() {
           marginTop: 60, textAlign: "center", padding: "36px 20px",
           background: "#050505", border: "1px solid #1a1a1a",
         }}>
-          <div className="motif motif-protest events-callout-protest" aria-hidden="true" />
-          <div className="motif motif-go-piss events-callout-badge" aria-hidden="true" />
+          <div className="motif events-callout-protest" style={{ backgroundImage: 'url("/motifs/pride-protest.jpg")' }} aria-hidden="true" />
+          <div className="motif events-callout-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
           <div className="display" style={{ fontSize: "1.3rem", marginBottom: 6 }}>NOT SEEING YOUR EVENT?</div>
           <div style={{ color: "#555", marginBottom: 20, fontSize: "0.85rem" }}>
             Submit it or claim an existing listing.

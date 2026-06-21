@@ -10,8 +10,8 @@ export default function About() {
         className="relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center overflow-hidden"
         style={{ background: "#0a0a0a" }}
       >
-        <div className="motif motif-keep about-motif-keep" aria-hidden="true" />
-        <div className="motif motif-protest about-motif-protest" aria-hidden="true" />
+        <div className="motif about-motif-keep" style={{ backgroundImage: 'url("/motifs/keep-portland-queer.jpg")' }} aria-hidden="true" />
+        <div className="motif about-motif-protest" style={{ backgroundImage: 'url("/motifs/pride-protest.jpg")' }} aria-hidden="true" />
         {/* Halftone BG decoration */}
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
@@ -135,7 +135,7 @@ export default function About() {
             className="p-6 md:p-8 border-2 relative overflow-hidden"
             style={{ background: "#111", borderColor: "#8800FF" }}
           >
-            <div className="motif motif-go-piss values-motif-badge" aria-hidden="true" />
+            <div className="motif values-motif-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
             <ul className="space-y-4">
               {[
                 "Free to browse, free forever. No paywalls, no ads.",

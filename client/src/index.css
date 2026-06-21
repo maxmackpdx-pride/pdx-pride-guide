@@ -331,13 +331,6 @@ body::before {
   pointer-events: none;
 }
 
-.motif-hired { background-image: url("/motifs/get-hired.jpg"); }
-.motif-keep { background-image: url("/motifs/keep-portland-queer.jpg"); }
-.motif-protest { background-image: url("/motifs/pride-protest.jpg"); }
-.motif-go-piss { background-image: url("/motifs/go-piss-girl.jpg"); }
-.motif-progress { background-image: url("/motifs/progress-flag.jpg"); }
-.motif-portland { background-image: url("/motifs/portland-sign.jpg"); }
-
 .home-motif-keep {
   right: 7%;
   top: 42px;
@@ -855,12 +848,6 @@ body::before {
 .footer-motif-strip {
   height: 72px;
   border-bottom: 1px solid #222;
-  background-image:
-    linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.12), rgba(0,0,0,0.55)),
-    url("/motifs/keep-portland-queer.jpg"),
-    url("/motifs/progress-flag.jpg"),
-    url("/motifs/get-hired.jpg"),
-    url("/motifs/portland-sign.jpg");
   background-size: auto 130%, auto 160%, auto 155%, auto 135%, auto 145%;
   background-position: left center, 4% 48%, 34% 58%, 70% 45%, 98% 55%;
   background-repeat: no-repeat;

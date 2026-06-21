@@ -50,9 +50,9 @@ export default function Home() {
           color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
           userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
         }}>LOVE<br />LOUDER</div>
-        <div className="motif motif-keep home-motif-keep" aria-hidden="true" />
-        <div className="motif motif-progress home-motif-progress" aria-hidden="true" />
-        <div className="motif motif-portland home-motif-portland" aria-hidden="true" />
+        <div className="motif home-motif-keep" style={{ backgroundImage: 'url("/motifs/keep-portland-queer.jpg")' }} aria-hidden="true" />
+        <div className="motif home-motif-progress" style={{ backgroundImage: 'url("/motifs/progress-flag.jpg")' }} aria-hidden="true" />
+        <div className="motif home-motif-portland" style={{ backgroundImage: 'url("/motifs/portland-sign.jpg")' }} aria-hidden="true" />
 
         <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "80px 24px", width: "100%", zIndex: 1 }}>
           <div style={{ maxWidth: 700 }}>
