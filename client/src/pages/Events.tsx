@@ -74,7 +74,7 @@ function buildSegmentedIcon(L: any, days: string[]) {
   return L.divIcon({ html, iconSize: [size, size], iconAnchor: [r, r], className: "" });
 }
 
-function MapView({ events }: { events: Event[] }) {
+function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -119,6 +119,14 @@ function MapView({ events }: { events: Event[] }) {
       clearTimeout(retryTimer);
     };
   }, []);
+
+  // When map becomes visible, force invalidateSize so tiles render
+  useEffect(() => {
+    if (!visible || !mapRef.current) return;
+    const map = mapRef.current;
+    setTimeout(() => map.invalidateSize(), 50);
+    setTimeout(() => map.invalidateSize(), 250);
+  }, [visible]);
 
   // Update markers whenever events change (retry until map is ready)
   useEffect(() => {
@@ -188,7 +196,7 @@ function MapView({ events }: { events: Event[] }) {
   }, []);
 
   return (
-    <div style={{ position: "relative", background: "#0a0a0a" }}>
+    <div style={{ position: "relative", background: "#0a0a0a", display: visible ? "block" : "none" }}>
       <style>{`
         .pdx-popup .leaflet-popup-content-wrapper {
           background: #0d0d0d !important;
@@ -427,8 +435,8 @@ export default function Events() {
 
   return (
     <div>
-      {/* Map — only mounted when map view is active */}
-      {viewMode === "map" && <MapView events={filtered} />}
+      {/* Map — always mounted, shown/hidden via CSS to avoid Leaflet reinit */}
+      <MapView events={filtered} visible={viewMode === "map"} />
 
       {/* Filters + View Toggle */}
       <div style={{

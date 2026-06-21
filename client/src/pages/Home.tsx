@@ -59,7 +59,7 @@ export default function Home() {
               GUIDE
             </h1>
 
-            <p style={{ fontSize: "1rem", color: "#888", lineHeight: 1.6, marginBottom: 24, maxWidth: 480 }}>
+            <p style={{ fontSize: "1rem", color: "#ccc", lineHeight: 1.6, marginBottom: 24, maxWidth: 480 }}>
               Find events. Support queer spaces. Build community.
             </p>
 
@@ -70,16 +70,16 @@ export default function Home() {
                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "2.8rem", color: "#CCFF00", lineHeight: 1 }}>
                     {countdown.days}
                   </div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#555", letterSpacing: "0.12em", marginTop: 2 }}>DAYS</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#999", letterSpacing: "0.12em", marginTop: 2 }}>DAYS</div>
                 </div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "2rem", color: "#333" }}>:</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "2rem", color: "#888" }}>:</div>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "2.8rem", color: "#CCFF00", lineHeight: 1 }}>
                     {String(countdown.hours).padStart(2, "0")}
                   </div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#555", letterSpacing: "0.12em", marginTop: 2 }}>HRS</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#999", letterSpacing: "0.12em", marginTop: 2 }}>HRS</div>
                 </div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.65rem", color: "#444", letterSpacing: "0.1em", marginLeft: 4 }}>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.65rem", color: "#aaa", letterSpacing: "0.1em", marginLeft: 4 }}>
                   UNTIL PRIDE<br />WEEKEND
                 </div>
               </div>
@@ -105,7 +105,7 @@ export default function Home() {
       {/* ── QUIET FOOTER LINK ────────────────────────────────────── */}
       <section style={{ background: "#000", borderTop: "1px solid #111" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", textAlign: "center" }}>
-          <Link href="/submit" style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#444", letterSpacing: "0.08em", textDecoration: "none" }}>
+          <Link href="/submit" style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#777", letterSpacing: "0.08em", textDecoration: "none" }}>
             PROMOTER OR ORGANIZER? SUBMIT OR CLAIM AN EVENT →
           </Link>
         </div>

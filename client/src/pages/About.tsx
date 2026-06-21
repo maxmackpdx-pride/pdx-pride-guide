@@ -221,7 +221,7 @@ export default function About() {
                 MADE BY <span style={{ color: "#CCFF00" }}>TUCKER CASEY</span>
               </h2>
               <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
-                Tucker Casey is the host and creator of <em>Yes Coach</em>. He built this guide alone — no team, no budget, no sponsors — because he thinks Portland's queer community deserves something that isn't run by a corporation or driven by ad revenue.
+                Tucker Max is the host and creator of <em>Yes Coach</em>. He built this guide alone — no team, no budget, no sponsors — because he thinks Portland's queer community deserves something that isn't run by a corporation or driven by ad revenue.
               </p>
               <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
                 Meta sucks. We deserve better. This guide is free, community-moderated, and not going anywhere.
