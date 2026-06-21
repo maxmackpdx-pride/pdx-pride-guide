@@ -1,14 +1,48 @@
 import type { Express } from "express";
 import type { Server } from "http";
-import { storage } from "./storage";
+import { storage, hashPassword } from "./storage";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertAttendanceSchema } from "@shared/schema";
 import crypto from "crypto";
+import session from "express-session";
 
-function hashPassword(pw: string) {
-  return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
+// Extend express-session to include our custom fields
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+    promoterId?: number;
+    isAdmin?: boolean;
+  }
+}
+
+const ADMIN_PASSWORD = "pdxpride2026";
+
+function requireAuth(req: any, res: any, next: any) {
+  if (!req.session?.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  next();
+}
+
+function requireAdmin(req: any, res: any, next: any) {
+  if (!req.session?.isAdmin) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  next();
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
+  // Session middleware
+  app.use(session({
+    secret: "pdxpride_secret_2026",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // set true behind HTTPS proxy
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    },
+  }));
+
   // ─── EVENTS ─────────────────────────────────────────────────────────────
   app.get("/api/events", (req, res) => {
     const { day, status } = req.query as { day?: string; status?: string };
@@ -76,11 +110,145 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/gigs", (req, res) => {
     try {
       const data = insertGigPostSchema.parse(req.body);
-      const gig = storage.createGigPost(data);
+      const userId = req.session?.userId;
+      const gig = storage.createGigPost({ ...data, userId: userId || null } as any);
       res.json(gig);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
+  });
+
+  // User's own gig posts
+  app.get("/api/gigs/mine", requireAuth, (req, res) => {
+    const gigs = storage.getGigPostsByUser(req.session.userId!);
+    res.json(gigs);
+  });
+
+  app.put("/api/gigs/:id", requireAuth, (req, res) => {
+    const id = Number(req.params.id);
+    const userId = req.session.userId!;
+    try {
+      storage.updateGigPost(id, userId, req.body);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/gigs/:id", requireAuth, (req, res) => {
+    const id = Number(req.params.id);
+    const userId = req.session.userId!;
+    storage.deleteGigPost(id, userId);
+    res.json({ ok: true });
+  });
+
+  // ─── USER AUTH ────────────────────────────────────────────────────────────
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { username, email, password, displayName } = req.body;
+      if (!username || !email || !password) {
+        return res.status(400).json({ error: "username, email, and password are required" });
+      }
+      if (username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
+      if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+
+      const existingEmail = storage.getUserByEmail(email);
+      if (existingEmail) return res.status(409).json({ error: "Email already registered" });
+
+      const existingUsername = storage.getUserByUsername(username);
+      if (existingUsername) return res.status(409).json({ error: "Username already taken" });
+
+      const user = storage.createUser({ username, email, passwordHash: password, displayName });
+      req.session.userId = user.id;
+      res.json({
+        id: user.id, username: user.username, email: user.email,
+        displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
+      });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/auth/login", (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "email and password required" });
+    const user = storage.getUserByEmail(email);
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    const hashed = hashPassword(password);
+    if (user.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
+    req.session.userId = user.id;
+    res.json({
+      id: user.id, username: user.username, email: user.email,
+      displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
+    });
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.userId = undefined;
+    res.json({ ok: true });
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    if (!req.session?.userId) return res.status(401).json({ error: "Not authenticated" });
+    const user = storage.getUserById(req.session.userId);
+    if (!user) return res.status(401).json({ error: "Not authenticated" });
+    res.json({
+      id: user.id, username: user.username, email: user.email,
+      displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
+    });
+  });
+
+  // Look up user by username (for inbox compose)
+  app.get("/api/users/by-username/:username", (req, res) => {
+    const user = storage.getUserByUsername(req.params.username);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ id: user.id, username: user.username, displayName: user.displayName, avatarChoice: user.avatarChoice });
+  });
+
+  // Public user profile
+  app.get("/api/users/:id", (req, res) => {
+    const user = storage.getUserById(Number(req.params.id));
+    if (!user) return res.status(404).json({ error: "Not found" });
+    res.json({ id: user.id, username: user.username, displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio });
+  });
+
+  // Update own profile
+  app.put("/api/users/me", requireAuth, (req, res) => {
+    const { displayName, avatarChoice, bio } = req.body;
+    storage.updateUser(req.session.userId!, { displayName, avatarChoice, bio });
+    const updated = storage.getUserById(req.session.userId!);
+    res.json({
+      id: updated!.id, username: updated!.username, email: updated!.email,
+      displayName: updated!.displayName, avatarChoice: updated!.avatarChoice, bio: updated!.bio,
+    });
+  });
+
+  // ─── MESSAGES ────────────────────────────────────────────────────────────
+  app.get("/api/messages/inbox", requireAuth, (req, res) => {
+    const inbox = storage.getInbox(req.session.userId!);
+    res.json(inbox);
+  });
+
+  app.get("/api/messages/sent", requireAuth, (req, res) => {
+    const sent = storage.getSentMessages(req.session.userId!);
+    res.json(sent);
+  });
+
+  app.post("/api/messages", requireAuth, (req, res) => {
+    const { toUserId, subject, body } = req.body;
+    if (!toUserId || !body) return res.status(400).json({ error: "toUserId and body required" });
+    const msg = storage.sendMessage(req.session.userId!, Number(toUserId), subject || "", body);
+    res.json(msg);
+  });
+
+  app.put("/api/messages/:id/read", requireAuth, (req, res) => {
+    storage.markRead(Number(req.params.id));
+    res.json({ ok: true });
+  });
+
+  app.get("/api/messages/thread/:threadId", requireAuth, (req, res) => {
+    const thread = storage.getThread(req.params.threadId);
+    res.json(thread);
   });
 
   // ─── PROMOTER AUTH ────────────────────────────────────────────────────────
@@ -104,7 +272,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!promoter) return res.status(401).json({ error: "Invalid credentials" });
     const hashed = hashPassword(password);
     if (promoter.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
+    req.session.promoterId = promoter.id;
     res.json({ id: promoter.id, name: promoter.name, email: promoter.email, org: promoter.org });
+  });
+
+  // ─── ADMIN AUTH ───────────────────────────────────────────────────────────
+  app.post("/api/admin/login", (req, res) => {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: "password required" });
+    if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: "Invalid password" });
+    req.session.isAdmin = true;
+    res.json({ isAdmin: true });
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.isAdmin = undefined;
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/me", (req, res) => {
+    if (!req.session?.isAdmin) return res.status(401).json({ error: "Not authenticated" });
+    res.json({ isAdmin: true });
   });
 
   // ─── ADMIN ────────────────────────────────────────────────────────────────

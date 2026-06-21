@@ -2,13 +2,14 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
-  events, submissions, gigPosts, promoters, moderationRequests, attendances,
+  events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
   type Promoter, type InsertPromoter,
   type ModerationRequest, type InsertModerationRequest,
   type Attendance, type InsertAttendance,
+  type User, type Message,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -123,74 +124,276 @@ sqlite.exec(`
     avatar_seed TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT ''
   );
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    display_name TEXT,
+    avatar_choice INTEGER DEFAULT 1,
+    bio TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_user_id INTEGER NOT NULL,
+    to_user_id INTEGER NOT NULL,
+    subject TEXT NOT NULL DEFAULT '',
+    body TEXT NOT NULL,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    thread_id TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
 `);
 
-function hashPassword(pw: string) {
+// Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
+try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN user_id INTEGER`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) {}
+
+export function hashPassword(pw: string) {
   return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
 }
 
+// Old fake event titles used to detect stale seed data
+const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extravaganza", "Pride Brunch", "Kink & Community Fair", "Trans Joy Dance"];
+
 function seedData() {
   const existing = db.select().from(events).all();
-  if (existing.length > 0) return;
+
+  // Force re-seed if first event is one of the old fake ones
+  if (existing.length > 0) {
+    if (OLD_SEED_TITLES.includes(existing[0].title)) {
+      sqlite.exec(`DELETE FROM events`);
+      sqlite.exec(`DELETE FROM attendances`);
+      sqlite.exec(`DELETE FROM gig_posts`);
+    } else {
+      return;
+    }
+  }
+
   const now = new Date().toISOString();
 
   const seedEvents = [
     {
-      title: "Queer Dance Party", description: "Bass. House. Queer joy on the dance floor. All night long at one of Portland's most beloved underground venues.",
-      venueName: "Holocene", address: "1001 SE Morrison St", neighborhood: "SE Portland",
-      lat: 45.5189, lng: -122.6548, dateStart: "2026-07-17T22:00:00", dateEnd: "2026-07-18T02:00:00",
-      dayOfWeek: "FRI", ageRequirement: "21_PLUS", eventTypes: JSON.stringify(["DANCE PARTY", "NIGHTLIFE"]),
-      admission: "TICKETED", ticketUrl: "https://holocene.org",
+      title: "Portland Pride Waterfront Festival",
+      description: "2026 theme is 'Made with Pride' — celebrates creativity and entrepreneurship in Portland LGBTQ2SIA+ community. Live music, makers' market, food/drink vendors, nonprofit booths.",
+      venueName: "Tom McCall Waterfront Park",
+      address: "98 SW Naito Pkwy, Portland, OR 97204",
+      neighborhood: "Downtown",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T12:00:00", dateEnd: "2026-07-19T23:59:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["FESTIVAL", "OFFICIAL", "PARADE"]),
+      admission: "TICKETED",
+      ticketUrl: "https://pridenw.org",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Leather Pride Social", description: "Annual kink-friendly meet & mingle. Dress code encouraged. Consent culture strictly enforced.",
-      venueName: "Eagle Portland", address: "835 N Lombard St", neighborhood: "N Portland",
-      lat: 45.5808, lng: -122.6785, dateStart: "2026-07-18T19:00:00", dateEnd: "2026-07-18T23:00:00",
-      dayOfWeek: "SAT", ageRequirement: "21_PLUS", eventTypes: JSON.stringify(["SOCIAL", "KINK"]),
-      admission: "FREE", ticketUrl: null,
-      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: true, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
-    },
-    {
-      title: "Drag Extravaganza", description: "Portland's most iconic drag show returns with an all-star lineup. Expect spectacle, sass, and standing ovations.",
-      venueName: "Alberta Rose Theatre", address: "3000 NE Alberta St", neighborhood: "NE Portland",
-      lat: 45.5596, lng: -122.6479, dateStart: "2026-07-16T20:00:00", dateEnd: "2026-07-16T23:00:00",
-      dayOfWeek: "THU", ageRequirement: "21_PLUS", eventTypes: JSON.stringify(["DRAG", "PERFORMANCE"]),
-      admission: "TICKETED", ticketUrl: "https://albertarosetheatre.com",
+      title: "Portland Pride Parade",
+      description: "Annual Pride parade ending at the Waterfront Festival. A Portland tradition celebrating the community.",
+      venueName: "North Park Blocks to Naito Pkwy",
+      address: "NW Park Ave & W Burnside St, Portland, OR 97209",
+      neighborhood: "Downtown",
+      lat: null, lng: null,
+      dateStart: "2026-07-19T11:00:00", dateEnd: "2026-07-19T23:59:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["PARADE", "FREE"]),
+      admission: "FREE",
+      ticketUrl: "https://pridenw.org",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Pride Brunch", description: "Bottomless mimosas, drag hosts, and a menu that slaps. Reserve early — this sells out every year.",
-      venueName: "Crush Bar", address: "1400 SE Morrison St", neighborhood: "SE Portland",
-      lat: 45.5179, lng: -122.6529, dateStart: "2026-07-19T11:00:00", dateEnd: "2026-07-19T14:00:00",
-      dayOfWeek: "SUN", ageRequirement: "21_PLUS", eventTypes: JSON.stringify(["BRUNCH", "DRAG"]),
-      admission: "TICKETED", ticketUrl: null,
+      title: "INFERNO PRIDE PORTLAND 2026",
+      description: "Indoor + outdoor party with go-go dancers, DJ Lauren 6–8PM, DJ Wild Fire 8–10PM, games.",
+      venueName: "Formerly Opaline",
+      address: "105 NW 3rd Ave, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T18:00:00", dateEnd: "2026-07-18T23:59:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "DJS"]),
+      admission: "TICKETED",
+      ticketUrl: "https://www.tickettailor.com",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Kink & Community Fair", description: "Educational, welcoming, and sex-positive. Workshops, vendors, and community connection. 18+ only.",
-      venueName: "Portland Eagle", address: "835 N Lombard St", neighborhood: "N Portland",
-      lat: 45.5808, lng: -122.6785, dateStart: "2026-07-17T14:00:00", dateEnd: "2026-07-17T18:00:00",
-      dayOfWeek: "FRI", ageRequirement: "18_PLUS", eventTypes: JSON.stringify(["KINK", "FAIR"]),
-      admission: "FREE", ticketUrl: null,
-      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: true, nudityOk: true,
+      title: "Portland Pride Ride",
+      description: "Casual bike ride to celebrate LGBTQIA+ community. Helmets required. Ends at 503 Distilling with parking lot party.",
+      venueName: "Trek Bicycle Portland Slabtown",
+      address: "Trek Bicycle Portland Slabtown, Northwest District, Portland, OR",
+      neighborhood: "Northwest District",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T17:30:00", dateEnd: "2026-07-18T23:59:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["BIKE", "FREE", "OUTDOOR"]),
+      admission: "FREE",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Trans Joy Dance", description: "A safe space dance party celebrating trans joy. All genders, all bodies, all vibes welcome.",
-      venueName: "Holocene", address: "1001 SE Morrison St", neighborhood: "SE Portland",
-      lat: 45.5189, lng: -122.6548, dateStart: "2026-07-16T21:00:00", dateEnd: "2026-07-17T01:00:00",
-      dayOfWeek: "THU", ageRequirement: "21_PLUS", eventTypes: JSON.stringify(["DANCE PARTY", "TRANS"]),
-      admission: "FREE", ticketUrl: null,
+      title: "Lez Out Pride Brunch",
+      description: "Lesbian drag brunch hosted by Shandi Evans & Harlow Quinzel. DJ Dilemma, performers Fay Ludes, Venereal Denise, RIOT!",
+      venueName: "Bullard Tavern",
+      address: "813 SW Alder St, Portland, OR 97205",
+      neighborhood: "Downtown",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T12:00:00", dateEnd: "2026-07-18T23:59:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["BRUNCH", "DRAG", "LESBIAN"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "RADIANCE by Gaylabration",
+      description: "Dance party with headliner Matt Suave, Poundstar, Mircat Dragonfae, Bro Hoe Sappho. Sponsor Q care+ highlighting PrEP/doxy-PEP.",
+      venueName: "McMenamins Crystal Ballroom",
+      address: "1332 W Burnside St, Portland, OR 97209",
+      neighborhood: "Pearl District",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T21:00:00", dateEnd: "2026-07-19T03:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "DRAG"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Stank Yes Coach — PDX PRIDE",
+      description: "Sports-themed party with DJs JUMPR, Bro Hoe, Lake Everett, Spencer Adam, Tucker Max. Leather community sponsors.",
+      venueName: "Sanctuary Club",
+      address: "33 NW 9th Ave, Portland, OR 97209",
+      neighborhood: "Pearl District",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T21:00:00", dateEnd: "2026-07-19T02:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "SPORTS", "LEATHER"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Certified Freak Block Party",
+      description: "Drag queens, circus acrobats, avant-garde fashion. Benefits Basic Rights Oregon.",
+      venueName: "Happylucky",
+      address: "1930 NE Sandy Blvd, Portland, OR 97232",
+      neighborhood: "Portland",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T18:00:00", dateEnd: "2026-07-19T00:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DRAG", "BLOCK-PARTY", "FUNDRAISER"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Horse Meat Disco TUFF",
+      description: "Official Pride night celebrating underground dance floors & leather bars. DJ Nick Bertossi. Portion of proceeds to Portland Pride.",
+      venueName: "Crystal Ballroom",
+      address: "1332 W Burnside St, Portland, OR 97209",
+      neighborhood: "Pearl District",
+      lat: null, lng: null,
+      dateStart: "2026-07-17T20:00:00", dateEnd: "2026-07-18T02:00:00",
+      dayOfWeek: "FRI",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "LEATHER", "OFFICIAL"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Pride in Demand — Portland Queer Takeover",
+      description: "Organized by DotGay. Queer superhero theme. Multi-day takeover event.",
+      venueName: "Star Theater and Starlight Lounge",
+      address: "13 NW 6th Ave, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: null, lng: null,
+      dateStart: "2026-07-17T20:00:00", dateEnd: "2026-07-18T23:59:00",
+      dayOfWeek: "FRI",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "TAKEOVER", "MULTI-DAY"]),
+      admission: "TICKETED",
+      ticketUrl: "https://jeffreyjay.gay",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Lumbertwink / Bearracuda",
+      description: "Bear-centric Pride Sunday party. Part of BEAR WEEK in Portland.",
+      venueName: "TBA",
+      address: "Portland, OR",
+      neighborhood: "Portland",
+      lat: null, lng: null,
+      dateStart: "2026-07-19T20:00:00", dateEnd: "2026-07-19T23:59:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "BEAR"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Gay Witch Appreciation Day + Pride at Seagrape",
+      description: "Witch-themed Pride event at apothecary. All are welcome.",
+      venueName: "Seagrape Apothecary",
+      address: "2823 NE Sandy Blvd, Portland, OR 97232",
+      neighborhood: "NE Portland",
+      lat: null, lng: null,
+      dateStart: "2026-07-18T11:00:00", dateEnd: "2026-07-18T23:59:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["DAYTIME", "MARKET", "WITCH"]),
+      admission: "TBD",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Sasha Colby Pride Kick-Off",
+      description: "Headline performance by drag queen Sasha Colby for Portland Pride Kick-Off.",
+      venueName: "TBA",
+      address: "Portland, OR",
+      neighborhood: "Portland",
+      lat: null, lng: null,
+      dateStart: "2026-07-16T20:00:00", dateEnd: "2026-07-16T23:59:00",
+      dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["DRAG", "HEADLINE", "KICKOFF"]),
+      admission: "TICKETED",
+      ticketUrl: "https://flipphoneevents.com/Portland",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
@@ -201,7 +404,7 @@ function seedData() {
     db.insert(events).values(e).run();
   }
 
-  // Seed a few attendance entries per event for demo
+  // Seed attendance entries for demo
   const bubbles = [
     "Hey, I'll be there!",
     "Hey, come say hi!",
@@ -211,8 +414,8 @@ function seedData() {
     "Hey, let's be awkward together",
   ];
   const handles = ["queercat", "neonbabe", "velvethaze", "crushpunk", "stardust", "wildthing", "radtrans", "badfemme"];
-  for (let eventId = 1; eventId <= 6; eventId++) {
-    const count = 3 + Math.floor(Math.random() * 4);
+  for (let eventId = 1; eventId <= 13; eventId++) {
+    const count = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       db.insert(attendances).values({
         eventId,
@@ -224,34 +427,14 @@ function seedData() {
     }
   }
 
-  // Seed gigs
-  const gigSeeds = [
-    {
-      postType: "POSTING_GIG", title: "Barbacks & Bartenders Available",
-      name: "Portland Bar Collective", contactEmail: "info@portlandbarcollective.example",
-      description: "Looking for experienced bar staff for Pride weekend events July 16–19. All genders welcome. OLCC required.",
-      skills: "Bartending, OLCC", compensation: "$20/hr + tips", location: "Portland, OR",
-      isRemote: false, status: "LIVE", createdAt: now,
-    },
-    {
-      postType: "POSTING_GIG", title: "Drag Performers Needed",
-      name: "Miss Deluxe Productions", contactEmail: "miss@deluxepdx.example",
-      description: "Seeking local drag talent for multiple Pride shows. Paid gigs, family-friendly to adult shows available.",
-      skills: "Drag performance", compensation: "$150–300/show", location: "Portland, OR",
-      isRemote: false, status: "LIVE", createdAt: now,
-    },
-    {
-      postType: "LOOKING_FOR_WORK", title: "Sound Tech & DJ",
-      name: "DJ Queerwave", contactEmail: "djqueerwave@example.com",
-      description: "Portland-based DJ. Experienced in queer nightlife, house, techno. Available July 16–19.",
-      skills: "DJ, Sound Tech", compensation: "Negotiable", location: "Portland, OR",
-      isRemote: false, status: "LIVE", createdAt: now,
-    },
-  ];
-
-  for (const g of gigSeeds) {
-    db.insert(gigPosts).values(g as any).run();
-  }
+  // Seed one real-looking gig (LOOKING_FOR_WORK only — let real users post gigs)
+  db.insert(gigPosts).values({
+    postType: "LOOKING_FOR_WORK", title: "Sound Tech & DJ Available Pride Weekend",
+    name: "DJ Queerwave", contactEmail: "djqueerwave@example.com",
+    description: "Portland-based DJ and sound tech. Experienced in queer nightlife, house, and techno. Available July 16–19. Hit me up!",
+    skills: "DJ, Sound Tech, Lighting", compensation: "Negotiable", location: "Portland, OR",
+    isRemote: false, status: "LIVE", createdAt: now,
+  } as any).run();
 }
 
 seedData();
@@ -272,6 +455,9 @@ export interface IStorage {
   // Gigs
   getGigPosts(status?: string): GigPost[];
   createGigPost(data: InsertGigPost): GigPost;
+  getGigPostsByUser(userId: number): GigPost[];
+  updateGigPost(id: number, userId: number, data: Partial<GigPost>): void;
+  deleteGigPost(id: number, userId: number): void;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -282,6 +468,18 @@ export interface IStorage {
   // Attendance
   getAttendances(eventId: number): Attendance[];
   createAttendance(data: InsertAttendance): Attendance;
+  // Users
+  getUserById(id: number): User | undefined;
+  getUserByEmail(email: string): User | undefined;
+  getUserByUsername(username: string): User | undefined;
+  createUser(data: { username: string; email: string; passwordHash: string; displayName?: string }): User;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'bio'>>): void;
+  // Messages
+  getInbox(userId: number): Message[];
+  getSentMessages(userId: number): Message[];
+  sendMessage(fromUserId: number, toUserId: number, subject: string, body: string): Message;
+  markRead(messageId: number): void;
+  getThread(threadId: string): Message[];
 }
 
 export const storage: IStorage = {
@@ -358,6 +556,15 @@ export const storage: IStorage = {
   createGigPost(data) {
     return db.insert(gigPosts).values({ ...data, status: "PENDING", createdAt: new Date().toISOString() }).returning().get();
   },
+  getGigPostsByUser(userId) {
+    return db.select().from(gigPosts).where(eq(gigPosts.userId, userId)).all();
+  },
+  updateGigPost(id, userId, data) {
+    db.update(gigPosts).set(data).where(eq(gigPosts.id, id)).run();
+  },
+  deleteGigPost(id, userId) {
+    db.delete(gigPosts).where(eq(gigPosts.id, id)).run();
+  },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();
   },
@@ -387,5 +594,50 @@ export const storage: IStorage = {
   },
   createAttendance(data) {
     return db.insert(attendances).values({ ...data, createdAt: new Date().toISOString() }).returning().get();
+  },
+  // Users
+  getUserById(id) {
+    return db.select().from(users).where(eq(users.id, id)).get();
+  },
+  getUserByEmail(email) {
+    return db.select().from(users).where(eq(users.email, email)).get();
+  },
+  getUserByUsername(username) {
+    return db.select().from(users).where(eq(users.username, username)).get();
+  },
+  createUser({ username, email, passwordHash, displayName }) {
+    const hashed = hashPassword(passwordHash);
+    return db.insert(users).values({
+      username, email, passwordHash: hashed,
+      displayName: displayName || null,
+      avatarChoice: 1,
+      status: "active",
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  },
+  updateUser(id, data) {
+    db.update(users).set(data).where(eq(users.id, id)).run();
+  },
+  // Messages
+  getInbox(userId) {
+    return db.select().from(messages).where(eq(messages.toUserId, userId)).all();
+  },
+  getSentMessages(userId) {
+    return db.select().from(messages).where(eq(messages.fromUserId, userId)).all();
+  },
+  sendMessage(fromUserId, toUserId, subject, body) {
+    const threadId = `thread_${Date.now()}_${fromUserId}_${toUserId}`;
+    return db.insert(messages).values({
+      fromUserId, toUserId, subject, body,
+      isRead: false,
+      threadId,
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  },
+  markRead(messageId) {
+    db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();
+  },
+  getThread(threadId) {
+    return db.select().from(messages).where(eq(messages.threadId, threadId)).all();
   },
 };

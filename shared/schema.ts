@@ -91,6 +91,10 @@ export const gigPosts = sqliteTable("gig_posts", {
   isRemote: integer("is_remote", { mode: "boolean" }).default(false),
   status: text("status").notNull().default("PENDING"),
   createdAt: text("created_at").notNull().default(""),
+  userId: integer("user_id"),
+  imageUrl: text("image_url"),
+  gigDate: text("gig_date"),
+  gigTime: text("gig_time"),
 });
 
 export const insertGigPostSchema = createInsertSchema(gigPosts).omit({ id: true, createdAt: true, status: true });
@@ -143,3 +147,33 @@ export const attendances = sqliteTable("attendances", {
 export const insertAttendanceSchema = createInsertSchema(attendances).omit({ id: true, createdAt: true });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 export type Attendance = typeof attendances.$inferSelect;
+
+// Users
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  displayName: text("display_name"),
+  avatarChoice: integer("avatar_choice").default(1), // 1-6
+  bio: text("bio"),
+  status: text("status").notNull().default("active"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, status: true });
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+// Messages
+export const messages = sqliteTable("messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  fromUserId: integer("from_user_id").notNull(),
+  toUserId: integer("to_user_id").notNull(),
+  subject: text("subject").notNull().default(""),
+  body: text("body").notNull(),
+  isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
+  threadId: text("thread_id").notNull(), // group replies
+  createdAt: text("created_at").notNull().default(""),
+});
+export type Message = typeof messages.$inferSelect;

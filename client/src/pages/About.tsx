@@ -198,6 +198,31 @@ export default function About() {
         </section>
 
         {/* Portland Pride info */}
+        {/* Tucker Credit */}
+        <section>
+          <div style={{ border: "2px solid #1a1a1a", padding: "32px 36px", background: "#050505", position: "relative", overflow: "hidden" }}>
+            <div style={{
+              position: "absolute", top: -10, right: -10, fontFamily: "var(--font-display)", fontWeight: 900,
+              fontSize: "6rem", color: "rgba(204,255,0,0.025)", userSelect: "none", pointerEvents: "none",
+            }}>YES COACH</div>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.14em", color: "#CCFF00", marginBottom: 12 }}>ABOUT THE CREATOR</div>
+              <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", marginBottom: 16, lineHeight: 1.1 }}>
+                MADE BY <span style={{ color: "#CCFF00" }}>TUCKER CASEY</span>
+              </h2>
+              <p style={{ color: "#777", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 560, marginBottom: 16 }}>
+                Tucker Casey is the host and creator of <em>Yes Coach</em>. He built this guide alone — no team, no budget, no sponsors — because he thinks Portland's queer community deserves something that isn't run by a corporation or driven by ad revenue.
+              </p>
+              <p style={{ color: "#555", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 560, marginBottom: 20 }}>
+                Meta sucks. We deserve better. This guide is free, community-moderated, and not going anywhere.
+              </p>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#444", letterSpacing: "0.08em" }}>
+                NO SPONSORS · NO CORPORATE BACKING · BUILT WITH LOVE FOR PDX
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="pb-8">
           <h2 className="display text-4xl md:text-5xl text-white mb-8">
             PORTLAND PRIDE <span style={{ color: "#FF6600" }}>2026</span>

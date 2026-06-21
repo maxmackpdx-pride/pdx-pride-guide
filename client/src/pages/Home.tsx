@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import skylineImg from "@assets/pdx-skyline-neon.png";
 import communityStampImg from "@assets/community-first-stamp.png";
+import { getGoogleCalLink, downloadICS } from "@/utils/calendarLinks";
 
 const DAY_COLORS: Record<string, string> = {
   THU: "#00FFFF",
@@ -17,240 +19,341 @@ const DAY_LABELS: Record<string, string> = {
   SUN: "SUN · JUL 20",
 };
 
+function CalButtons({ event }: { event: any }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <button onClick={() => setOpen(!open)} style={{
+        fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.65rem",
+        letterSpacing: "0.08em", textTransform: "uppercase",
+        background: "none", border: "1px solid #333", color: "#666",
+        padding: "4px 10px", cursor: "pointer", whiteSpace: "nowrap",
+      }}>+ ADD TO CAL</button>
+      {open && (
+        <div style={{
+          position: "absolute", bottom: "calc(100% + 6px)", left: 0, zIndex: 50,
+          background: "#111", border: "1px solid #333",
+          minWidth: 160,
+        }} onMouseLeave={() => setOpen(false)}>
+          <a href={getGoogleCalLink(event)} target="_blank" rel="noopener noreferrer"
+            style={{ display: "block", padding: "10px 14px", color: "#fff", textDecoration: "none", fontSize: "0.78rem", fontFamily: "var(--font-display)", borderBottom: "1px solid #222" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#1a1a1a"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+          >Google Calendar</a>
+          <button onClick={() => { downloadICS(event); setOpen(false); }}
+            style={{ display: "block", width: "100%", padding: "10px 14px", color: "#fff", background: "none", border: "none", fontSize: "0.78rem", fontFamily: "var(--font-display)", textAlign: "left", cursor: "pointer" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#1a1a1a"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+          >Apple Calendar (.ics)</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EventCard({ ev }: { ev: any }) {
+  const color = DAY_COLORS[ev.dayOfWeek] || "#CCFF00";
+  const types: string[] = (() => { try { return JSON.parse(ev.eventTypes); } catch { return []; } })();
+  const time = ev.dateStart ? new Date(ev.dateStart).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+  const dateLabel = DAY_LABELS[ev.dayOfWeek] || ev.dayOfWeek;
+  return (
+    <div style={{
+      background: "#080808", border: "1px solid #1a1a1a",
+      borderTop: `3px solid ${color}`,
+      padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8,
+    }}>
+      {/* Day + time */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.68rem", letterSpacing: "0.1em", color, padding: "2px 8px", border: `1px solid ${color}33` }}>
+          {dateLabel}
+        </span>
+        {time && <span style={{ fontSize: "0.72rem", color: "#555" }}>{time}</span>}
+        {ev.ageRequirement !== "ALL_AGES" && (
+          <span style={{ fontSize: "0.65rem", color: "#666", fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>
+            {ev.ageRequirement === "21_PLUS" ? "21+" : "18+"}
+          </span>
+        )}
+        {ev.admission === "FREE" && (
+          <span style={{ fontSize: "0.65rem", color: "#CCFF00", fontFamily: "var(--font-display)", letterSpacing: "0.08em", border: "1px solid #CCFF0066", padding: "1px 6px" }}>FREE</span>
+        )}
+      </div>
+
+      {/* Title */}
+      <div className="display" style={{ fontSize: "1rem", color: "#fff", lineHeight: 1.1 }}>{ev.title}</div>
+
+      {/* Venue */}
+      <div style={{ fontSize: "0.78rem", color: "#555" }}>{ev.venueName}{ev.address ? ` · ${ev.address}` : ""}</div>
+
+      {/* Tags */}
+      {types.length > 0 && (
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {types.slice(0, 3).map((t: string) => (
+            <span key={t} style={{ fontSize: "0.6rem", fontFamily: "var(--font-display)", letterSpacing: "0.08em", color: "#444", border: "1px solid #222", padding: "2px 6px" }}>{t}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 4, flexWrap: "wrap" }}>
+        {ev.ticketUrl && (
+          <a href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" style={{
+            fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.65rem",
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            background: color, color: "#000", border: "none",
+            padding: "5px 12px", textDecoration: "none", display: "inline-block",
+          }}>TICKETS →</a>
+        )}
+        <CalButtons event={ev} />
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
+  const [activeDay, setActiveDay] = useState<string | null>(null);
+
   const { data: events = [] } = useQuery<any[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
   });
 
-  const byDay = ["THU", "FRI", "SAT", "SUN"].map(day => ({
-    day,
-    count: events.filter((e: any) => e.dayOfWeek === day).length,
-    sample: events.filter((e: any) => e.dayOfWeek === day).slice(0, 2),
-  }));
+  const { data: gigs = [] } = useQuery<any[]>({
+    queryKey: ["/api/gigs"],
+    queryFn: () => fetch("/api/gigs").then(r => r.json()),
+  });
+
+  const filteredEvents = activeDay ? events.filter((e: any) => e.dayOfWeek === activeDay) : events;
+  const days = ["THU", "FRI", "SAT", "SUN"];
 
   return (
     <div style={{ background: "#000", minHeight: "100vh" }}>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section style={{ position: "relative", overflow: "hidden", minHeight: 520, display: "flex", alignItems: "center" }}>
-        {/* Portland neon skyline backdrop */}
+      <section style={{ position: "relative", overflow: "hidden", minHeight: 480, display: "flex", alignItems: "center" }}>
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: `url(${skylineImg})`,
           backgroundSize: "cover", backgroundPosition: "center 60%",
-          backgroundRepeat: "no-repeat",
-          opacity: 0.35,
+          backgroundRepeat: "no-repeat", opacity: 0.55,
         }} />
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.85) 100%)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%)",
         }} />
-        {/* Halftone dot texture overlay */}
         <div style={{
           position: "absolute", inset: 0, opacity: 0.06,
           backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
           backgroundSize: "18px 18px",
         }} />
-        {/* Atmospheric background text — low opacity, NOT the focus */}
         <div style={{
           position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
           fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(5rem, 14vw, 11rem)",
           color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
           userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
-        }}>
-          LOVE<br />LOUDER
-        </div>
+        }}>LOVE<br />LOUDER</div>
+
         <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "80px 24px", width: "100%", zIndex: 1 }}>
-          <div style={{ maxWidth: 680 }}>
-            {/* Badge */}
+          <div style={{ maxWidth: 700 }}>
             <div style={{
               display: "inline-block", fontFamily: "var(--font-display)", fontWeight: 900,
               fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase",
-              color: "#000", background: "var(--neon-yellow)", padding: "5px 12px",
-              marginBottom: 24, boxShadow: "3px 3px 0 rgba(204,255,0,0.3)",
-            }}>
-              Portland Pride Weekend · July 17–20, 2026
-            </div>
+              color: "#000", background: "#CCFF00", padding: "5px 12px", marginBottom: 24,
+            }}>Portland Pride Weekend · July 17–20, 2026</div>
+
             <h1 className="display" style={{
-              fontSize: "clamp(3rem, 8vw, 6rem)", lineHeight: 0.92, marginBottom: 24,
-              textShadow: "0 0 40px rgba(204,255,0,0.15)",
+              fontSize: "clamp(3rem, 8vw, 6rem)", lineHeight: 0.92, marginBottom: 20,
+              textShadow: "0 0 60px rgba(204,255,0,0.25), 0 0 120px rgba(204,255,0,0.1)",
             }}>
               PORTLAND<br />
-              <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span><br />
+              <span style={{ color: "#CCFF00" }}>PRIDE</span><br />
               GUIDE
             </h1>
-            <p style={{ fontSize: "1.1rem", color: "#888", lineHeight: 1.6, marginBottom: 36, maxWidth: 480 }}>
+            <p style={{ fontSize: "1rem", color: "#888", lineHeight: 1.6, marginBottom: 32, maxWidth: 480 }}>
               Find events. Support queer spaces. Build community.
             </p>
+
+            {/* Day pill filters */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
+              <button onClick={() => setActiveDay(null)} style={{
+                fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.72rem",
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                background: !activeDay ? "#fff" : "transparent",
+                color: !activeDay ? "#000" : "#555",
+                border: `1px solid ${!activeDay ? "#fff" : "#333"}`,
+                padding: "6px 14px", cursor: "pointer",
+              }}>ALL</button>
+              {days.map(d => (
+                <button key={d} onClick={() => setActiveDay(activeDay === d ? null : d)} style={{
+                  fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.72rem",
+                  letterSpacing: "0.1em", textTransform: "uppercase",
+                  background: activeDay === d ? DAY_COLORS[d] : "transparent",
+                  color: activeDay === d ? "#000" : DAY_COLORS[d],
+                  border: `1px solid ${DAY_COLORS[d]}`,
+                  padding: "6px 14px", cursor: "pointer",
+                }}>{DAY_LABELS[d]}</button>
+              ))}
+            </div>
+
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <Link href="/events">
-                <button className="btn-neon solid" style={{ fontSize: "0.9rem", padding: "12px 28px" }}>
-                  View All Events →
-                </button>
-              </Link>
               <Link href="/submit">
-                <button className="btn-neon" style={{ fontSize: "0.9rem", padding: "12px 28px" }}>
+                <button className="btn-neon" style={{ fontSize: "0.85rem", padding: "10px 24px" }}>
                   Submit an Event
                 </button>
               </Link>
-              <Link href="/submit">
-                <button className="btn-neon" style={{ fontSize: "0.9rem", padding: "12px 28px", borderColor: "var(--neon-cyan)", color: "var(--neon-cyan)" }}>
-                  Claim an Event
+              <Link href="/pride-work">
+                <button className="btn-neon" style={{ fontSize: "0.85rem", padding: "10px 24px", borderColor: "#FF6600", color: "#FF6600" }}>
+                  Gig Board →
                 </button>
               </Link>
             </div>
           </div>
         </div>
-        {/* Bottom torn-paper divider */}
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 
-      {/* ── PRIDE WEEKEND DAYS ────────────────────────────────────── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 24px" }}>
+      {/* ── NEON DIVIDER ─────────────────────────────────────────── */}
+      <div style={{ height: 3, background: "linear-gradient(90deg, #00FFFF, #FF00CC, #FF6600, #FF2400)", boxShadow: "0 0 12px rgba(255,0,204,0.4)" }} />
+
+      {/* ── ALL EVENTS ───────────────────────────────────────────── */}
+      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-          <h2 className="display" style={{ fontSize: "1.8rem" }}>THIS WEEKEND</h2>
+          <h2 className="display" style={{ fontSize: "1.8rem" }}>
+            {activeDay ? `${DAY_LABELS[activeDay]} EVENTS` : "ALL EVENTS"}
+          </h2>
           <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-          <Link href="/events">
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#555", letterSpacing: "0.06em", cursor: "pointer" }}>VIEW ALL →</span>
-          </Link>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#444", letterSpacing: "0.06em" }}>
+            {filteredEvents.length} EVENT{filteredEvents.length !== 1 ? "S" : ""}
+          </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}>
-          {byDay.map(({ day, count, sample }) => (
-            <Link key={day} href={`/events?day=${day}`} style={{ textDecoration: "none" }}>
-              <div style={{
-                border: `2px solid ${DAY_COLORS[day]}22`,
-                borderTop: `3px solid ${DAY_COLORS[day]}`,
-                background: "#080808", padding: "20px 18px",
-                cursor: "pointer", transition: "background 0.15s",
-              }}
-                onMouseEnter={e => (e.currentTarget.style.background = "#111")}
-                onMouseLeave={e => (e.currentTarget.style.background = "#080808")}
-              >
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "1.1rem", color: DAY_COLORS[day], letterSpacing: "0.06em", marginBottom: 6 }}>
-                  {DAY_LABELS[day]}
-                </div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", fontWeight: 900, color: "#fff", marginBottom: 12 }}>
-                  {count} <span style={{ fontSize: "0.9rem", color: "#555" }}>events</span>
-                </div>
-                {sample.map((ev: any) => (
-                  <div key={ev.id} style={{ fontSize: "0.75rem", color: "#666", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    · {ev.title}
-                  </div>
-                ))}
-                <div style={{ marginTop: 14, fontFamily: "var(--font-display)", fontSize: "0.72rem", color: DAY_COLORS[day], letterSpacing: "0.08em" }}>
-                  VIEW DAY →
-                </div>
-              </div>
-            </Link>
-          ))}
+
+        {filteredEvents.length === 0 ? (
+          <div style={{ color: "#444", padding: "40px 0", textAlign: "center" }}>No events for this day yet.</div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 2 }}>
+            {filteredEvents.map((ev: any) => <EventCard key={ev.id} ev={ev} />)}
+          </div>
+        )}
+
+        <div style={{ marginTop: 24, textAlign: "center" }}>
+          <Link href="/events">
+            <button className="btn-neon" style={{ fontSize: "0.85rem", padding: "10px 28px" }}>
+              Full Events Page + Map →
+            </button>
+          </Link>
         </div>
       </section>
 
+      {/* ── NEON DIVIDER ─────────────────────────────────────────── */}
+      <div style={{ height: 2, background: "linear-gradient(90deg, #FF6600, #CCFF00, #00FFFF)", boxShadow: "0 0 8px rgba(204,255,0,0.3)" }} />
+
+      {/* ── PRIDE WORK / GIG BOARD PREVIEW ───────────────────────── */}
+      <section style={{ background: "#030303", borderTop: "none" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+            <h2 className="display" style={{ fontSize: "1.8rem", color: "#FF6600" }}>PRIDE WORK</h2>
+            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
+            <Link href="/pride-work">
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#FF6600", letterSpacing: "0.06em", cursor: "pointer" }}>VIEW ALL →</span>
+            </Link>
+          </div>
+
+          <p style={{ color: "#555", fontSize: "0.88rem", marginBottom: 24, maxWidth: 560 }}>
+            DJs, photographers, bartenders, performers — find gigs or post that you're available. Community-run. Two-admin approved.
+          </p>
+
+          {gigs.length > 0 ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 2, marginBottom: 24 }}>
+              {gigs.slice(0, 3).map((g: any) => (
+                <div key={g.id} style={{ background: "#080808", border: "1px solid #1a1a1a", borderTop: "3px solid #FF6600", padding: "16px 18px" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#FF6600", letterSpacing: "0.1em", marginBottom: 6 }}>
+                    {g.postType === "LOOKING_FOR_WORK" ? "AVAILABLE FOR WORK" : "GIG POSTING"}
+                    {g.gigDate && ` · ${g.gigDate}`}
+                  </div>
+                  <div className="display" style={{ fontSize: "0.95rem", color: "#fff", marginBottom: 6 }}>{g.title}</div>
+                  <div style={{ fontSize: "0.78rem", color: "#555", marginBottom: 8 }}>{g.name}{g.compensation ? ` · ${g.compensation}` : ""}</div>
+                  <div style={{ fontSize: "0.78rem", color: "#666", lineHeight: 1.5 }}>{g.description.substring(0, 100)}{g.description.length > 100 ? "..." : ""}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ color: "#333", fontSize: "0.88rem", marginBottom: 24 }}>No gigs posted yet — be the first.</div>
+          )}
+
+          <Link href="/pride-work">
+            <button className="btn-neon" style={{ borderColor: "#FF6600", color: "#FF6600", fontSize: "0.85rem", padding: "10px 24px" }}>
+              View Gig Board + Post a Gig →
+            </button>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── NEON DIVIDER ─────────────────────────────────────────── */}
+      <div style={{ height: 2, background: "linear-gradient(90deg, #8800FF, #FF00CC, #00FFFF)", boxShadow: "0 0 8px rgba(136,0,255,0.3)" }} />
+
       {/* ── TUCKER CREDIT — COMMUNITY FIRST ──────────────────────── */}
-      <section style={{ borderTop: "1px solid #111", borderBottom: "1px solid #111", background: "#050505" }}>
+      <section style={{ background: "#050505" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 24px" }}>
-          <div style={{
-            border: "2px solid #1a1a1a", padding: "36px 40px",
-            position: "relative", overflow: "hidden",
-          }}>
-            {/* Background accent */}
+          <div style={{ border: "2px solid #1a1a1a", padding: "36px 40px", position: "relative", overflow: "hidden" }}>
             <div style={{
               position: "absolute", top: -20, right: -10,
               fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "7rem",
-              color: "rgba(204,255,0,0.03)", letterSpacing: "-0.02em", userSelect: "none",
-              pointerEvents: "none",
+              color: "rgba(204,255,0,0.025)", letterSpacing: "-0.02em", userSelect: "none", pointerEvents: "none",
             }}>COMMUNITY<br />FIRST</div>
             <div style={{ position: "relative", zIndex: 1 }}>
-              {/* COMMUNITY FIRST stamp */}
-              <img
-                src={communityStampImg}
-                alt="Community First"
-                style={{
-                  width: 100, height: 100, objectFit: "contain",
-                  marginBottom: 20, transform: "rotate(-4deg)",
-                  transformOrigin: "left center", display: "block",
-                  filter: "drop-shadow(0 0 12px rgba(204,255,0,0.4))",
-                }}
-              />
+              <img src={communityStampImg} alt="Community First" style={{
+                width: 140, height: 140, objectFit: "contain",
+                marginBottom: 20, transform: "rotate(-4deg)",
+                transformOrigin: "left center", display: "block",
+                filter: "drop-shadow(0 0 12px rgba(204,255,0,0.4))",
+              }} />
               <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", marginBottom: 16, lineHeight: 1.1 }}>
                 MADE BY ONE PERSON.<br />
-                <span style={{ color: "var(--neon-yellow)" }}>NO SPONSORS. NO CORPORATE BACKING.</span>
+                <span style={{ color: "#CCFF00" }}>NO SPONSORS. NO CORPORATE BACKING.</span>
               </h2>
-              <p style={{ color: "#777", fontSize: "1rem", lineHeight: 1.7, maxWidth: 600, marginBottom: 24 }}>
-                This guide was built by Tucker — alone — because Portland's queer community deserves something we actually own. Not a Meta product. Not a sponsored listing. Not a corporate rainbow campaign that disappears after June.
+              <p style={{ color: "#777", fontSize: "1rem", lineHeight: 1.7, maxWidth: 600, marginBottom: 16 }}>
+                Built by Tucker Casey — host and creator of <em>Yes Coach</em> — alone, because Portland's queer community deserves something we actually own. Not a Meta product. Not a sponsored listing. Not a corporate rainbow campaign.
               </p>
               <p style={{ color: "#555", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 600, marginBottom: 28 }}>
                 Meta sucks. We deserve better. This is free, community-moderated, and built to stay that way.
               </p>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#444", letterSpacing: "0.06em" }}>
-                  COMMUNITY POWERED · QUEER OWNED · TWO-ADMIN APPROVED · FREE FOREVER
-                </div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.75rem", color: "#333", letterSpacing: "0.06em" }}>
+                COMMUNITY POWERED · QUEER OWNED · TWO-ADMIN APPROVED · FREE FOREVER
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── PROMOTERS CTA ─────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-          {/* Left: Submit */}
-          <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "32px 28px" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "var(--neon-cyan)", letterSpacing: "0.12em", marginBottom: 12 }}>PROMOTERS & ORGANIZERS</div>
-            <h3 className="display" style={{ fontSize: "1.6rem", marginBottom: 12 }}>SUBMIT AN EVENT</h3>
-            <p style={{ color: "#666", fontSize: "0.85rem", lineHeight: 1.6, marginBottom: 24 }}>
-              Add your event to the guide. Reviewed by two admins before going live. Free forever.
-            </p>
-            <Link href="/submit">
-              <button className="btn-neon" style={{ borderColor: "var(--neon-cyan)", color: "var(--neon-cyan)" }}>
-                Submit Now →
-              </button>
-            </Link>
+      {/* ── SUBMIT CTA ───────────────────────────────────────────── */}
+      <section style={{ background: "#000", borderTop: "1px solid #111" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "28px 24px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.68rem", color: "#00FFFF", letterSpacing: "0.12em", marginBottom: 10 }}>PROMOTERS & ORGANIZERS</div>
+              <h3 className="display" style={{ fontSize: "1.4rem", marginBottom: 10 }}>SUBMIT AN EVENT</h3>
+              <p style={{ color: "#555", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: 20 }}>
+                Add your event to the guide. Reviewed by two admins before going live.
+              </p>
+              <Link href="/submit">
+                <button className="btn-neon" style={{ borderColor: "#00FFFF", color: "#00FFFF", fontSize: "0.8rem" }}>Submit Now →</button>
+              </Link>
+            </div>
+            <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "28px 24px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.68rem", color: "#FF00CC", letterSpacing: "0.12em", marginBottom: 10 }}>YOUR EVENT LISTED?</div>
+              <h3 className="display" style={{ fontSize: "1.4rem", marginBottom: 10 }}>CLAIM IT</h3>
+              <p style={{ color: "#555", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: 20 }}>
+                See your event listed but didn't add it? Claim ownership and keep it updated.
+              </p>
+              <Link href="/submit">
+                <button className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC", fontSize: "0.8rem" }}>Claim an Event →</button>
+              </Link>
+            </div>
           </div>
-          {/* Right: Claim */}
-          <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "32px 28px" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "var(--neon-magenta)", letterSpacing: "0.12em", marginBottom: 12 }}>YOUR EVENT IS LISTED?</div>
-            <h3 className="display" style={{ fontSize: "1.6rem", marginBottom: 12 }}>CLAIM IT</h3>
-            <p style={{ color: "#666", fontSize: "0.85rem", lineHeight: 1.6, marginBottom: 24 }}>
-              See your event listed but you didn't add it? Claim ownership, then keep it updated.
-            </p>
-            <Link href="/submit">
-              <button className="btn-neon" style={{ borderColor: "var(--neon-magenta)", color: "var(--neon-magenta)" }}>
-                Claim an Event →
-              </button>
-            </Link>
-          </div>
-        </div>
-        {/* Two-admin badge */}
-        <div style={{ marginTop: 16, padding: "12px 20px", background: "#050505", border: "1px solid #111", display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 8, height: 8, background: "var(--neon-yellow)", borderRadius: "50%", flexShrink: 0 }} />
-          <span style={{ fontSize: "0.78rem", color: "#555", fontFamily: "var(--font-display)", letterSpacing: "0.04em" }}>
-            ALL SUBMISSIONS REQUIRE TWO-ADMIN APPROVAL BEFORE GOING LIVE. NO EXCEPTIONS.
-          </span>
-        </div>
-      </section>
-
-      {/* ── PRIDE WORK CALLOUT ────────────────────────────────────── */}
-      <section style={{ borderTop: "1px solid #111", background: "#050505" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 24px", display: "flex", gap: 40, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 280 }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "var(--neon-orange)", letterSpacing: "0.12em", marginBottom: 12 }}>PRIDE WORK BOARD</div>
-            <h2 className="display" style={{ fontSize: "2rem", marginBottom: 12 }}>
-              PAID. RESPECTED.<br />
-              <span style={{ color: "var(--neon-orange)" }}>VALUED.</span>
-            </h2>
-            <p style={{ color: "#666", fontSize: "0.88rem", lineHeight: 1.6 }}>
-              DJs, photographers, bartenders, security, performers — find gigs or post them. Community-run. Two-admin approved.
-            </p>
-          </div>
-          <div>
-            <Link href="/pride-work">
-              <button className="btn-neon" style={{ borderColor: "var(--neon-orange)", color: "var(--neon-orange)", fontSize: "0.9rem", padding: "12px 28px" }}>
-                View the Gig Board →
-              </button>
-            </Link>
+          <div style={{ marginTop: 12, padding: "10px 16px", background: "#050505", border: "1px solid #111", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 6, height: 6, background: "#CCFF00", borderRadius: "50%", flexShrink: 0 }} />
+            <span style={{ fontSize: "0.72rem", color: "#444", fontFamily: "var(--font-display)", letterSpacing: "0.04em" }}>
+              ALL SUBMISSIONS REQUIRE TWO-ADMIN APPROVAL BEFORE GOING LIVE.
+            </span>
           </div>
         </div>
       </section>
