@@ -7,11 +7,8 @@ export default function About() {
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
       {/* Hero */}
       <div
-        className="relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center overflow-hidden"
-        style={{ background: "#0a0a0a" }}
+        className="about-hero relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center overflow-hidden"
       >
-        <div className="motif about-motif-keep" style={{ backgroundImage: 'url("/motifs/keep-portland-queer.jpg")' }} aria-hidden="true" />
-        <div className="motif about-motif-protest" style={{ backgroundImage: 'url("/motifs/pride-protest.jpg")' }} aria-hidden="true" />
         {/* Halftone BG decoration */}
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"

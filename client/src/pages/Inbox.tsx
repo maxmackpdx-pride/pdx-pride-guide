@@ -94,19 +94,22 @@ export default function Inbox() {
 
   return (
     <div style={{ background: "#000", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "48px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <h1 className="display" style={{ fontSize: "2.2rem", color: "#CCFF00" }}>INBOX</h1>
-            <p style={{ color: "#555", fontSize: "0.85rem", marginTop: 6 }}>
-              Private threads from missed connections, Pride Work posts, event hosts, and check-ins.
-            </p>
+      <div className="inbox-hero">
+        <div style={{ maxWidth: 980, margin: "0 auto", padding: "42px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, position: "relative", zIndex: 1 }}>
+            <div>
+              <h1 className="display" style={{ fontSize: "2.4rem", color: "#CCFF00" }}>INBOX</h1>
+              <p style={{ color: "#bbb", fontSize: "0.9rem", marginTop: 6, maxWidth: 560 }}>
+                Private threads from missed connections, Pride Work posts, event hosts, and check-ins.
+              </p>
+            </div>
+            {unreadCount > 0 && (
+              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", background: "rgba(0,0,0,0.65)" }}>{unreadCount} UNREAD</span>
+            )}
           </div>
-          {unreadCount > 0 && (
-            <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{unreadCount} UNREAD</span>
-          )}
         </div>
-
+      </div>
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "28px 24px 48px" }}>
         <div style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
           {(["inbox", "sent"] as const).map(t => (
             <button key={t} onClick={() => { setTab(t); setActiveThread(null); }} style={{

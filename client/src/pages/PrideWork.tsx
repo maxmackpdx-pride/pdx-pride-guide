@@ -106,11 +106,9 @@ export default function PrideWork() {
   return (
     <div className="min-h-screen zine-page pride-work-page" style={{ background: "#0a0a0a" }}>
       {/* Header */}
-      <div className="zine-section-head border-b-2 border-white/10 px-4 py-8 md:px-8">
-        <div className="motif pride-work-motif-hired" style={{ backgroundImage: 'url("/motifs/get-hired.jpg")' }} aria-hidden="true" />
-        <div className="motif pride-work-motif-progress" style={{ backgroundImage: 'url("/motifs/progress-flag.jpg")' }} aria-hidden="true" />
+      <div className="zine-section-head pride-work-hero border-b-2 border-white/10 px-4 py-8 md:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-start justify-between flex-wrap gap-4">
+          <div className="flex items-start flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <Briefcase size={20} style={{ color: "#CCFF00" }} />
@@ -126,20 +124,20 @@ export default function PrideWork() {
                 Community-powered job board for Pride weekend and beyond. 
                 Queer workers, queer employers, queer gigs.
               </p>
+              <button
+                data-testid="button-post-gig"
+                onClick={handlePostClick}
+                className="display text-lg px-6 py-3 border-2 transition-all mt-6"
+                style={{
+                  background: showForm ? "#CCFF00" : "transparent",
+                  borderColor: "#CCFF00",
+                  color: showForm ? "#000" : "#CCFF00",
+                }}
+              >
+                {showForm ? <X size={16} className="inline mr-2" /> : <Plus size={16} className="inline mr-2" />}
+                {showForm ? "CANCEL" : "POST HERE"}
+              </button>
             </div>
-            <button
-              data-testid="button-post-gig"
-              onClick={handlePostClick}
-              className="display text-lg px-6 py-3 border-2 transition-all"
-              style={{
-                background: showForm ? "#CCFF00" : "transparent",
-                borderColor: "#CCFF00",
-                color: showForm ? "#000" : "#CCFF00",
-              }}
-            >
-              {showForm ? <X size={16} className="inline mr-2" /> : <Plus size={16} className="inline mr-2" />}
-              {showForm ? "CANCEL" : "POST HERE"}
-            </button>
           </div>
 
           {/* Filter tabs */}

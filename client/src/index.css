@@ -303,7 +303,9 @@ body::before {
     #050505;
 }
 
-.zine-section-head > :not(.motif) {
+.zine-section-head > :not(.motif),
+.about-hero > :not(.motif),
+.inbox-hero > * {
   position: relative;
   z-index: 1;
 }
@@ -329,6 +331,21 @@ body::before {
     repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 9px);
   mix-blend-mode: screen;
   pointer-events: none;
+}
+
+.sticker-motif {
+  overflow: hidden;
+  border: 7px solid rgba(244,239,225,0.9);
+  background-color: transparent;
+  clip-path: polygon(2% 7%, 14% 3%, 31% 5%, 48% 2%, 65% 6%, 84% 3%, 98% 8%, 95% 27%, 99% 45%, 96% 65%, 98% 88%, 83% 96%, 64% 93%, 47% 98%, 30% 94%, 11% 98%, 3% 88%, 6% 68%, 2% 49%, 5% 28%);
+  filter: drop-shadow(0 18px 22px rgba(0,0,0,0.72)) drop-shadow(0 0 10px rgba(255,0,204,0.28));
+  box-shadow: none;
+}
+
+.sticker-motif::after {
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.12), transparent 34%, rgba(0,0,0,0.16)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 10px);
 }
 
 .home-motif-keep {
@@ -358,22 +375,27 @@ body::before {
   transform: rotate(7deg);
 }
 
-.pride-work-motif-hired {
-  right: -18px;
-  top: 18px;
-  width: min(35vw, 430px);
-  aspect-ratio: 1.51;
-  opacity: 0.82;
-  transform: rotate(2deg);
+.pride-work-hero {
+  min-height: 430px;
+  display: flex;
+  align-items: center;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 29%, rgba(0,0,0,0.46) 56%, rgba(0,0,0,0.06) 100%),
+    url("/motifs/hero-pride-work.png") right top / cover no-repeat,
+    #050505;
 }
 
-.pride-work-motif-progress {
-  right: 20%;
-  bottom: -42px;
-  width: min(25vw, 300px);
-  aspect-ratio: 1.82;
-  opacity: 0.5;
-  transform: rotate(-5deg);
+.pride-work-hero::after,
+.about-hero::after,
+.inbox-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.34) 42%, rgba(0,0,0,0) 100%),
+    radial-gradient(circle at 25% 50%, rgba(204,255,0,0.08), transparent 25rem);
+  z-index: 0;
 }
 
 .paste-label {
@@ -817,22 +839,11 @@ body::before {
   transform: rotate(9deg);
 }
 
-.about-motif-keep {
-  left: max(-50px, 4vw);
-  top: 34px;
-  width: min(27vw, 310px);
-  aspect-ratio: 1.65;
-  opacity: 0.42;
-  transform: rotate(-7deg);
-}
-
-.about-motif-protest {
-  right: max(-40px, 5vw);
-  bottom: 26px;
-  width: min(24vw, 280px);
-  aspect-ratio: 1.47;
-  opacity: 0.38;
-  transform: rotate(6deg);
+.about-hero {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.88) 32%, rgba(0,0,0,0.38) 62%, rgba(0,0,0,0.06) 100%),
+    url("/motifs/hero-about.png") 56% 50% / cover no-repeat,
+    #0a0a0a;
 }
 
 .values-motif-badge {
@@ -846,13 +857,36 @@ body::before {
 }
 
 .footer-motif-strip {
-  height: 72px;
+  height: clamp(120px, 16vw, 190px);
   border-bottom: 1px solid #222;
-  background-size: auto 130%, auto 160%, auto 155%, auto 135%, auto 145%;
-  background-position: left center, 4% 48%, 34% 58%, 70% 45%, 98% 55%;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.76) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0) 100%),
+    url("/motifs/footer-banner-lgbtqia.png") center / cover no-repeat;
   background-repeat: no-repeat;
-  opacity: 0.75;
+  opacity: 0.9;
   filter: saturate(1.15) contrast(1.05);
+}
+
+.inbox-hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.88) 34%, rgba(0,0,0,0.36) 68%, rgba(0,0,0,0.05) 100%),
+    url("/motifs/hero-inbox.png") 52% 42% / cover no-repeat,
+    #050505;
+}
+
+.inbox-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 14px),
+    radial-gradient(circle at 72% 26%, rgba(0,255,255,0.12), transparent 18rem);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .gig-card {
@@ -872,21 +906,22 @@ body::before {
   .home-motif-keep,
   .home-motif-progress,
   .home-motif-portland,
-  .pride-work-motif-hired,
-  .pride-work-motif-progress,
   .events-callout-protest,
   .events-callout-badge,
-  .about-motif-keep,
-  .about-motif-protest,
   .values-motif-badge {
     display: none;
   }
 
+  .pride-work-hero,
+  .about-hero,
+  .inbox-hero {
+    background-position: 64% top, center;
+  }
+
   .footer-motif-strip {
-    height: 56px;
-    background-size: auto 145%, auto 170%, auto 165%, auto 145%, auto 150%;
-    background-position: left center, -4% 50%, 31% 56%, 72% 48%, 108% 56%;
-    opacity: 0.62;
+    height: 92px;
+    background-position: center;
+    opacity: 0.78;
   }
 }
 
