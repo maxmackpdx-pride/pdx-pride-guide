@@ -73,8 +73,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
 
         {tab === "login" ? (
           <form onSubmit={handleLogin}>
-            <label style={labelStyle}>Email</label>
-            <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
+            <label style={labelStyle}>Username or Email</label>
+            <input style={inputStyle} type="text" value={email} onChange={e => setEmail(e.target.value)} required placeholder="username or you@example.com" autoComplete="username" />
             <label style={labelStyle}>Password</label>
             <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
             {error && <div style={errorStyle}>{error}</div>}

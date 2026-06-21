@@ -335,8 +335,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/auth/login", (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "email and password required" });
-    const user = storage.getUserByEmail(email);
+    if (!email || !password) return res.status(400).json({ error: "username/email and password required" });
+    // Accept username or email
+    const user = storage.getUserByEmail(email) || storage.getUserByUsername(email);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
     const hashed = hashPassword(password);
     if (user.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
