@@ -58,6 +58,156 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Responsive site header */
+.site-header {
+  background: #000;
+  border-bottom: 2px solid #1a1a1a;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.site-header-inner {
+  max-width: 1200px;
+  min-height: 60px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
+.site-brand-logo {
+  width: auto;
+  height: clamp(34px, 7vw, 44px);
+  flex: 0 0 auto;
+}
+
+.site-brand-wordmark {
+  color: #fff;
+  font-size: clamp(0.95rem, 1.7vw, 1.1rem);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.site-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 9px 10px;
+  color: #aaa;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.1s;
+}
+
+.site-nav-link.active {
+  color: var(--neon-yellow);
+}
+
+.site-nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 2px;
+  height: 2px;
+  background: var(--neon-yellow);
+}
+
+.site-auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1px solid #222;
+  flex: 0 0 auto;
+}
+
+.site-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--neon-yellow);
+  color: #000;
+  font-size: 0.55rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.site-dashboard-link,
+.site-login-button,
+.site-logout-button {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-dashboard-link {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 6px 10px;
+  border: 1px solid var(--neon-yellow);
+  color: var(--neon-yellow);
+  font-size: 0.72rem;
+  text-decoration: none;
+}
+
+.site-login-button {
+  margin-left: 8px;
+  padding: 8px 14px;
+  border: 2px solid var(--neon-yellow);
+  background: var(--neon-yellow);
+  color: #000;
+  cursor: pointer;
+  font-size: 0.78rem;
+  box-shadow: 2px 2px 0 rgba(204,255,0,0.3);
+}
+
+.site-logout-button {
+  padding: 6px;
+  border: 0;
+  background: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 0.68rem;
+}
+
 /* Display headline style */
 .display {
   font-family: var(--font-display);
@@ -233,7 +383,89 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  .site-header-inner {
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .site-brand-wordmark {
+    display: none;
+  }
+
+  .site-nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
+  .site-header-inner {
+    min-height: auto;
+    padding: 8px 12px 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+  }
+
+  .site-brand-logo {
+    height: 38px;
+  }
+
+  .site-brand-wordmark {
+    display: none;
+  }
+
+  .site-nav {
+    order: 3;
+    width: calc(100% + 24px);
+    margin: 0 -12px;
+    padding: 2px 12px 8px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-nav-link {
+    padding: 10px 9px;
+    font-size: 0.78rem;
+  }
+
+  .site-nav-link.active::after {
+    left: 9px;
+    right: 9px;
+    bottom: 3px;
+  }
+
+  .site-auth {
+    gap: 4px;
+    margin-left: 0;
+    padding-left: 8px;
+  }
+
+  .site-dashboard-link {
+    max-width: 86px;
+    padding: 6px 8px;
+  }
+
+  .site-login-button {
+    margin-left: auto;
+    padding: 7px 10px;
+    font-size: 0.72rem;
+  }
+
   .event-ticker-band {
     gap: 10px;
     min-height: 42px;
