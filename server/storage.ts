@@ -746,8 +746,8 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Hawks All-Gender Friday Pride Mixxxer",
-      description: "Hawks PDX All-Gender Pride Friday — all afternoon and all night. Inclusive, friendly, body-positive queer community space. Sauna, soak, connection. All LGBTQIA2S+ community members welcome. Come pre-game before heading out to other events.",
+      title: "Hawks PDX Pride Weekend Placeholder",
+      description: "Placeholder listing: Hawks PDX is expected to host Pride weekend programming because they typically do something every year, but specific 2026 event details have not been confirmed yet. Check Hawks PDX directly for the final schedule before attending.",
       venueName: "Hawks PDX",
       address: "335 SE 99th Ave, Portland, OR 97216",
       neighborhood: "SE Portland",
@@ -763,8 +763,8 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "TranSocial at Hawks PDX",
-      description: "Transcendent Pride Saturday at Hawks PDX celebrating Trans identity. All gender expressions welcome. Open to close (10am-6am). A welcoming, affirming space for the trans community and allies.",
+      title: "Hawks PDX Pride Weekend Placeholder",
+      description: "Placeholder listing: Hawks PDX is expected to host Pride weekend programming because they typically do something every year, but specific 2026 event details have not been confirmed yet. Check Hawks PDX directly for the final schedule before attending.",
       venueName: "Hawks PDX",
       address: "335 SE 99th Ave, Portland, OR 97216",
       neighborhood: "SE Portland",
@@ -780,8 +780,8 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Hawks All-Gender Pride Spa Day",
-      description: "Queer/allied community wellness day at Hawks PDX. Body-positive, all gender expressions welcome. Nude yoga at 4pm (optional). Sauna, soak, and Pride Sunday relaxation. 1pm to 2am.",
+      title: "Hawks PDX Pride Weekend Placeholder",
+      description: "Placeholder listing: Hawks PDX is expected to host Pride weekend programming because they typically do something every year, but specific 2026 event details have not been confirmed yet. Check Hawks PDX directly for the final schedule before attending.",
       venueName: "Hawks PDX",
       address: "335 SE 99th Ave, Portland, OR 97216",
       neighborhood: "SE Portland",

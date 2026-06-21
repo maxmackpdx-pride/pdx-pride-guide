@@ -86,7 +86,7 @@ export default function Home() {
             </h1>
 
             <p className="home-hero-subtitle">
-              Find events. Support queer spaces. Build community.
+              This is your welcoming spot to discover what's happening, connect with the right people, keep our venues and creators thriving, grow your connections, and take care of each other when it matters most.
             </p>
 
             {countdown && (
