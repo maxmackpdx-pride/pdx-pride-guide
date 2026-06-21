@@ -472,7 +472,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.picklestickets.com/event/pickles-all-stars-vs-gresham-greywolves-presente-cflvs4",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/portland-pickles-pride-night.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -489,7 +489,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/ankeny-alley-pride.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -523,7 +523,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://www.eventbrite.com/e/portland-pride-ne-2026-tickets-1990118485964",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/ne-portland-pride-resource-fair.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -540,7 +540,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/the-sports-bra-pride-block-party-tickets-1990528264623",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/sports-bra-pride-block-party.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -557,7 +557,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://shotgun.live/en/events/yes-sir-portland-pride-2026",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: true, nudityOk: true,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/yes-sir-gay-dance-party.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -591,7 +591,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://albertarosetheatre.com/event/boyeurism-9/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/boyeurism-pride-spectacular.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -625,7 +625,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.holocene.org/event/chai-roses-pride-party-a-sunday-tea-dance-for-qtbipoc-allies-21-2/holocene/portland/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/chai-and-roses-pride-party.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -642,7 +642,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.darcellexv.com",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/darcelle-xv-friday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -659,7 +659,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.darcellexv.com",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/darcelle-xv-saturday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -676,7 +676,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.travelportland.com/event/6839b05cf06e831a6c746688/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/darcelle-xv-sunday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -710,7 +710,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://rosecityrollers.com/schedule/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/rose-city-roller-derby.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -727,7 +727,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://hawkspdx.com/calendar-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/transocial-hawks.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -744,7 +744,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://hawkspdx.com/calendar-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/transocial-hawks.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -761,7 +761,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://hawkspdx.com/calendar-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/transocial-hawks.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -795,7 +795,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://ma.to/event/euphoria-spellman-spectacle-16-jul-2026",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/spellman-spectacle.webp", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -812,7 +812,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/lets-get-wild-a-pride-drag-show-tickets-1991640876475",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/lets-get-wild-pride-drag-show.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -846,7 +846,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://www.mobilize.us/aflcio/event/952383/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/oregon-labor-pride.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -897,7 +897,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://jewishportland.org/pdxjewishpride",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/jewish-pride-pdx-march.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -914,7 +914,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/markets-made-with-pride.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -948,7 +948,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/ankeny-alley-pride.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -965,7 +965,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/portland-pride-drag-brunch-sunday-tickets-1989269916871",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/sports-bra-pride-block-party.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
   ];
