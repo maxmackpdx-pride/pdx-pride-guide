@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "../components/EventModal";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { Circle, MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -57,18 +57,50 @@ function buildPinIcon(days: string[]) {
 }
 
 // ── Markers layer ───────────────────────────────────────────────────────────
+function groupEventsByVenue(events: Event[]) {
+  const groups: Record<string, Event[]> = {};
+  events.forEach(e => {
+    if (!e.lat || !e.lng) return;
+    const key = `${e.lat},${e.lng}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(e);
+  });
+  return groups;
+}
+
+function VenueGlowLayer({ events }: { events: Event[] }) {
+  const byVenue = useMemo(() => groupEventsByVenue(events), [events]);
+
+  return (
+    <>
+      {Object.entries(byVenue).map(([key, evts]) => {
+        const [lat, lng] = key.split(",").map(Number);
+        const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
+        const color = days.length > 1 ? "#CCFF00" : (DAY_COLORS[days[0]] || "#CCFF00");
+        return (
+          <Circle
+            key={`glow-${key}`}
+            center={[lat, lng]}
+            radius={250}
+            pathOptions={{
+              color,
+              weight: 1,
+              opacity: 0.46,
+              fillColor: color,
+              fillOpacity: 0.035,
+              className: "venue-street-glow",
+            }}
+            interactive={false}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Event) => void }) {
   useMap();
-  const byVenue = useMemo(() => {
-    const groups: Record<string, Event[]> = {};
-    events.forEach(e => {
-      if (!e.lat || !e.lng) return;
-      const key = `${e.lat},${e.lng}`;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(e);
-    });
-    return groups;
-  }, [events]);
+  const byVenue = useMemo(() => groupEventsByVenue(events), [events]);
 
   return (
     <>
@@ -80,6 +112,9 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
         const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
         return (
           <Marker key={key} position={[lat, lng]} icon={icon}>
+            <Tooltip direction="top" offset={[0, -16]} opacity={1} className="venue-hover-tooltip">
+              {evts[0].venueName}
+            </Tooltip>
             <Popup className="pdx-popup" maxWidth={240}>
               <div style={{ background: "#0d0d0d", color: "#fff", padding: "10px 12px", fontFamily: "sans-serif", minWidth: 180 }}>
                 <div style={{ color: primaryColor, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{evts[0].venueName}</div>
@@ -114,11 +149,12 @@ function MapResizer({ expanded }: { expanded: boolean }) {
 }
 
 // ── Map panel — half-height by default, expands to fullscreen ──────────────
-function MapView({ events, expanded, onToggleExpand, onSelect }: {
+export function MapView({ events, expanded, onToggleExpand, onSelect, variant = "events" }: {
   events: Event[];
   expanded: boolean;
   onToggleExpand: () => void;
   onSelect: (e: Event) => void;
+  variant?: "events" | "home";
 }) {
   const [mounted, setMounted] = useState(false);
   // Lazy-mount: only initialize Leaflet after first paint to avoid divIcon/window timing crash
@@ -143,7 +179,7 @@ function MapView({ events, expanded, onToggleExpand, onSelect }: {
         right: expanded ? 0 : undefined,
         bottom: expanded ? 0 : undefined,
         zIndex: expanded ? 999 : 1,
-        height: expanded ? "100vh" : "42vh",
+        height: expanded ? "100vh" : (variant === "home" ? "clamp(150px, 21vh, 210px)" : "42vh"),
         width: "100%",
         borderBottom: expanded ? "none" : "2px solid #1a1a1a",
       }}>
@@ -156,6 +192,9 @@ function MapView({ events, expanded, onToggleExpand, onSelect }: {
           .leaflet-control-attribution a { color:#555 !important; }
           .leaflet-control-zoom a { background:#111 !important; color:#CCFF00 !important; border-color:#333 !important; }
           .leaflet-control-zoom a:hover { background:#222 !important; }
+          .venue-hover-tooltip { background:#050505 !important; border:1px solid #CCFF00 !important; border-radius:0 !important; box-shadow:0 0 14px rgba(204,255,0,0.42) !important; color:#fff !important; font-family:var(--font-display); font-size:0.7rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; padding:4px 8px !important; }
+          .venue-hover-tooltip::before { border-top-color:#CCFF00 !important; }
+          .venue-street-glow { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor); mix-blend-mode: screen; }
         `}</style>
 
         {expanded && (
@@ -185,6 +224,7 @@ function MapView({ events, expanded, onToggleExpand, onSelect }: {
               maxZoom={19}
               subdomains="abcd"
             />
+            <VenueGlowLayer events={events} />
             <MarkersLayer events={events} onSelect={onSelect} />
             <MapResizer expanded={expanded} />
           </MapContainer>

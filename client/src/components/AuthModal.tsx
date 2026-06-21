@@ -10,6 +10,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const [tab, setTab] = useState<"login" | "register">(defaultTab);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +30,12 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); setLoading(true);
+    setError("");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
     try {
       await register(username, email, password, displayName || undefined);
       onClose();
@@ -60,7 +66,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         {/* Tabs */}
         <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "2px solid #000" }}>
           {(["login", "register"] as const).map(t => (
-            <button key={t} onClick={() => { setTab(t); setError(""); }} style={{
+            <button key={t} onClick={() => { setTab(t); setError(""); setConfirmPassword(""); }} style={{
               flex: 1, fontFamily: "var(--font-display)", fontWeight: 900,
               fontSize: "1rem", letterSpacing: "0.1em", textTransform: "uppercase",
               padding: "10px 0", border: "none", cursor: "pointer",
@@ -106,6 +112,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
             <label style={labelStyle}>Password</label>
             <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min 6 characters" minLength={6} />
+            <label style={labelStyle}>Enter Password Again</label>
+            <input style={inputStyle} type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="Repeat password" minLength={6} />
             {error && <div style={errorStyle}>{error}</div>}
             <button type="submit" disabled={loading} style={submitStyle}>
               {loading ? "JOINING..." : "JOIN THE GUIDE →"}
