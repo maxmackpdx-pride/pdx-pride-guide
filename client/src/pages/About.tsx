@@ -196,11 +196,11 @@ export default function About() {
         <section>
           <div style={{
             position: "relative", overflow: "hidden",
-            backgroundImage: "url('/tucker-yes-coach.jpg')",
+            backgroundImage: "url('/tucker-yes-coach-2.jpg')",
             backgroundSize: "cover",
-            backgroundPosition: "center top",
+            backgroundPosition: "center center",
             border: "2px solid #1a1a1a",
-            minHeight: 340,
+            minHeight: 380,
           }}>
             {/* Dark overlay — heavier on left so text is readable */}
             <div style={{
@@ -223,9 +223,30 @@ export default function About() {
               <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
                 Meta sucks. We deserve better. This guide is free, community-moderated, and built to last.
               </p>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#CCFF00", letterSpacing: "0.1em", opacity: 0.7 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#CCFF00", letterSpacing: "0.1em", opacity: 0.7, marginBottom: 16 }}>
                 NO SPONSORS · NO CORPORATE BACKING · BUILT WITH LOVE FOR PDX
               </div>
+              <a
+                href="https://www.instagram.com/yes.coach.pdx"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  color: "#fff", textDecoration: "none", opacity: 0.75,
+                  fontFamily: "var(--font-body)", fontSize: "0.82rem",
+                  transition: "opacity 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0.75")}
+              >
+                {/* Instagram SVG icon */}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                </svg>
+                @yes.coach.pdx
+              </a>
             </div>
           </div>
         </section>

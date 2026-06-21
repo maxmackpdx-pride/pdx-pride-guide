@@ -132,7 +132,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── QUIET FOOTER LINK ────────────────────────────────────── */}
+      {/* ── PROMOTER BAR ─────────────────────────────────────────── */}
       <section style={{ background: "#000", borderTop: "1px solid #111" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", textAlign: "center" }}>
           <Link href="/submit" style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", color: "#777", letterSpacing: "0.08em", textDecoration: "none" }}>
@@ -140,6 +140,22 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* ── LGBTQ+IA BANNER — homepage only ─────────────────────── */}
+      <section
+        aria-hidden="true"
+        style={{
+          width: "100%",
+          height: "clamp(220px, 28vw, 380px)",
+          background: `
+            linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 45%, rgba(0,0,0,0) 100%),
+            url("/motifs/footer-banner-lgbtqia.png") center / cover no-repeat
+          `,
+          filter: "saturate(1.2) contrast(1.08)",
+          borderTop: "2px solid #111",
+          display: "block",
+        }}
+      />
 
     </div>
   );

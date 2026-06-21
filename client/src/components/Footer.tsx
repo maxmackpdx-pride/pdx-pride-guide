@@ -2,8 +2,7 @@ import { Link } from "wouter";
 
 export default function Footer() {
   return (
-    <footer style={{ background: "#000", borderTop: "2px solid #1a1a1a", marginTop: 80 }}>
-      <div className="footer-motif-strip" aria-hidden="true" />
+    <footer style={{ background: "#000", borderTop: "2px solid #1a1a1a" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between", marginBottom: 32 }}>
           <div>
