@@ -1,4 +1,7 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { Event } from "@shared/schema";
 import skylineImg from "@assets/pdx-skyline-neon.png";
 
 // Countdown to July 17, 2026 (Portland Pride Weekend starts)
@@ -14,6 +17,12 @@ function useCountdown() {
 
 export default function Home() {
   const countdown = useCountdown();
+  const { data: events = [] } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+  });
+  const eventNames = events.map(event => event.title).filter(Boolean);
+  const tickerItems = eventNames.length ? [...eventNames, ...eventNames] : [];
 
   return (
     <div style={{ background: "#000", minHeight: "100vh" }}>
@@ -101,6 +110,24 @@ export default function Home() {
         </div>
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
+
+      {/* ── LIVE EVENT TICKER ───────────────────────────────────── */}
+      {tickerItems.length > 0 && (
+        <section className="event-ticker-band" aria-label="Live event ticker">
+          <Link href="/events" className="event-ticker-label">
+            LIVE EVENTS
+          </Link>
+          <div className="event-ticker-window">
+            <div className="event-ticker-track">
+              {tickerItems.map((name, i) => (
+                <span className="event-ticker-item" key={`${name}-${i}`}>
+                  {name}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── QUIET FOOTER LINK ────────────────────────────────────── */}
       <section style={{ background: "#000", borderTop: "1px solid #111" }}>

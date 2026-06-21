@@ -107,7 +107,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
         if (now - lastRandomizeRef.current > 3000 + Math.random() * 2000) {
           lastRandomizeRef.current = now;
           const count = 1 + Math.floor(Math.random() * 3);
-          const indices = [...Array(prev.length).keys()].sort(() => Math.random() - 0.5).slice(0, count);
+          const indices = Array.from({ length: prev.length }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, count);
           newBubbles = prev.map((b, i) =>
             indices.includes(i) ? { ...b, visible: !b.visible } : b
           );
@@ -260,7 +260,6 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       padding: "6px 10px",
                       borderRadius: 0,
                       border: "2px solid #000",
-                      whiteSpace: "nowrap",
                       maxWidth: 220,
                       whiteSpace: "normal",
                       textAlign: "center",

@@ -157,7 +157,7 @@ function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
 
     Object.entries(byVenue).forEach(([key, evts]) => {
       const [lat, lng] = key.split(",").map(Number);
-      const days = [...new Set(evts.map(e => e.dayOfWeek).filter(Boolean))] as string[];
+      const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
 
       const icon = buildSegmentedIcon(L, days);
 

@@ -134,6 +134,126 @@ body {
   background: var(--neon-yellow);
   color: #000;
 }
+
+/* Homepage live event ticker */
+.event-ticker-band {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 46px;
+  overflow: hidden;
+  border-top: 1px solid #171717;
+  border-bottom: 1px solid #171717;
+  background: #101010;
+}
+
+.event-ticker-label {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 18px 0 24px;
+  border-right: 1px solid #242424;
+  background: #101010;
+  color: var(--neon-yellow);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.event-ticker-window {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.event-ticker-window::before,
+.event-ticker-window::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 48px;
+  pointer-events: none;
+}
+
+.event-ticker-window::before {
+  left: 0;
+  background: linear-gradient(to right, #101010, transparent);
+}
+
+.event-ticker-window::after {
+  right: 0;
+  background: linear-gradient(to left, #101010, transparent);
+}
+
+.event-ticker-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  white-space: nowrap;
+  animation: event-ticker-scroll 95s linear infinite;
+}
+
+.event-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  color: #d7d7d7;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.event-ticker-item::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--neon-yellow);
+  box-shadow: 0 0 8px var(--neon-yellow);
+}
+
+@keyframes event-ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-ticker-track {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .event-ticker-band {
+    gap: 10px;
+    min-height: 42px;
+  }
+
+  .event-ticker-label {
+    padding: 0 12px;
+    font-size: 0.68rem;
+  }
+
+  .event-ticker-track {
+    gap: 18px;
+    animation-duration: 120s;
+  }
+
+  .event-ticker-item {
+    gap: 18px;
+    font-size: 0.74rem;
+  }
+}
 .btn-neon.cyan {
   border-color: var(--neon-cyan);
   color: var(--neon-cyan);

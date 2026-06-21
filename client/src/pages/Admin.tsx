@@ -39,6 +39,8 @@ interface AdminEvent {
   isClaimable: boolean;
   isHouseParty: boolean;
   isPrivate: boolean;
+  isSexPositive: boolean;
+  nudityOk: boolean;
   status: string;
 }
 

@@ -39,6 +39,11 @@ declare module "express-session" {
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Tcasey90";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "dinoLeo!1";
 
+function publicEvent(evt: any) {
+  const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
+  return safe;
+}
+
 function requireAuth(req: any, res: any, next: any) {
   if (!req.session?.userId) {
     return res.status(401).json({ error: "Not authenticated" });
@@ -88,17 +93,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
-    app.get("/api/events", (req, res) => {
+  app.get("/api/events", (req, res) => {
     const { status, day } = req.query;
     const evts = storage.getEvents({ status: "LIVE", day: day as string });
-    const safe = evts.map(({ adminNotes, submittedBy, claimedBy, ...e }) => e);
-    res.json(safe);
+    res.json(evts.map(publicEvent));
   });
 
   app.get("/api/events/:id", (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    res.json(evt);
+    res.json(publicEvent(evt));
   });
 
   // ─── SUBMISSIONS ─────────────────────────────────────────────────────────
