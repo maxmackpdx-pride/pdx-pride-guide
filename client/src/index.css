@@ -375,6 +375,43 @@ body::before {
   transform: rotate(7deg);
 }
 
+/* New hero motifs */
+.home-motif-gay-all-day {
+  right: 33%;
+  top: 18px;
+  width: min(14vw, 170px);
+  aspect-ratio: 0.69;
+  opacity: 0.78;
+  transform: rotate(-6deg);
+}
+
+.home-motif-portland-hell {
+  right: 3%;
+  top: 22px;
+  width: min(18vw, 210px);
+  aspect-ratio: 1.14;
+  opacity: 0.72;
+  transform: rotate(3deg);
+}
+
+.home-motif-they-them {
+  right: 36%;
+  bottom: 28px;
+  width: min(20vw, 230px);
+  aspect-ratio: 1.41;
+  opacity: 0.65;
+  transform: rotate(4deg);
+}
+
+.home-motif-protest {
+  right: 20%;
+  top: 50%;
+  transform: translateY(-50%) rotate(-3deg);
+  width: min(16vw, 190px);
+  aspect-ratio: 1.47;
+  opacity: 0.6;
+}
+
 .pride-work-hero {
   min-height: 430px;
   display: flex;
@@ -906,6 +943,10 @@ body::before {
   .home-motif-keep,
   .home-motif-progress,
   .home-motif-portland,
+  .home-motif-gay-all-day,
+  .home-motif-portland-hell,
+  .home-motif-they-them,
+  .home-motif-protest,
   .events-callout-protest,
   .events-callout-badge,
   .values-motif-badge {

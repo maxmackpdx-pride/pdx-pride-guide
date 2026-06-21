@@ -53,6 +53,10 @@ export default function Home() {
         <div className="motif sticker-motif home-motif-keep" style={{ backgroundImage: 'url("/motifs/keep-portland-queer.jpg")' }} aria-hidden="true" />
         <div className="motif sticker-motif home-motif-progress" style={{ backgroundImage: 'url("/motifs/progress-flag.jpg")' }} aria-hidden="true" />
         <div className="motif sticker-motif home-motif-portland" style={{ backgroundImage: 'url("/motifs/portland-sign.jpg")' }} aria-hidden="true" />
+        <div className="motif sticker-motif home-motif-gay-all-day" style={{ backgroundImage: 'url("/motifs/gay-all-day.jpg")' }} aria-hidden="true" />
+        <div className="motif sticker-motif home-motif-portland-hell" style={{ backgroundImage: 'url("/motifs/portland-as-hell.jpg")' }} aria-hidden="true" />
+        <div className="motif sticker-motif home-motif-they-them" style={{ backgroundImage: 'url("/motifs/they-them.jpg")' }} aria-hidden="true" />
+        <div className="motif sticker-motif home-motif-protest" style={{ backgroundImage: 'url("/motifs/pride-protest.jpg")' }} aria-hidden="true" />
 
         <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "80px 24px", width: "100%", zIndex: 1 }}>
           <div style={{ maxWidth: 700 }}>
