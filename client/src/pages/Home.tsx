@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
-import skylineImg from "@assets/pdx-skyline-neon.png";
+const skylineImg = "/pdx-skyline-neon.jpg";
 
 // Countdown to July 17, 2026 (Portland Pride Weekend starts)
 function useCountdown() {
@@ -32,7 +32,7 @@ export default function Home() {
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: `url(${skylineImg})`,
-          backgroundSize: "cover", backgroundPosition: "center 60%",
+          backgroundSize: "cover", backgroundPosition: "center center",
           backgroundRepeat: "no-repeat", opacity: 0.82,
         }} />
         <div style={{
