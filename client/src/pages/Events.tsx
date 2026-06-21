@@ -392,7 +392,7 @@ export default function Events() {
     if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
     if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
     return true;
-  });
+  }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
 
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
