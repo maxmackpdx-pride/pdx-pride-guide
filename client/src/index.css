@@ -199,7 +199,7 @@ body {
   align-items: center;
   gap: 22px;
   white-space: nowrap;
-  animation: event-ticker-scroll 95s linear infinite;
+  animation: event-ticker-scroll 190s linear infinite;
 }
 
 .event-ticker-item {
@@ -246,7 +246,7 @@ body {
 
   .event-ticker-track {
     gap: 18px;
-    animation-duration: 120s;
+    animation-duration: 240s;
   }
 
   .event-ticker-item {
