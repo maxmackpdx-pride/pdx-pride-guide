@@ -320,6 +320,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(evts);
   });
 
+  // PUT full event edit (admin only)
+  app.put("/api/admin/events/:id", (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Forbidden" });
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const updated = storage.updateEvent(Number(req.params.id), req.body);
+    res.json(updated);
+  });
+
   app.patch("/api/admin/events/:id/claimable", (req, res) => {
     const { isClaimable } = req.body;
     const evt = storage.getEvent(Number(req.params.id));

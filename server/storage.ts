@@ -454,6 +454,7 @@ export interface IStorage {
   getEvent(id: number): Event | undefined;
   createEvent(data: InsertEvent): Event;
   updateEventStatus(id: number, status: string): void;
+  updateEvent(id: number, data: Partial<InsertEvent>): Event | undefined;
   toggleClaimable(id: number, isClaimable: boolean): void;
   // Submissions
   getSubmissions(status?: string): Submission[];
@@ -508,6 +509,10 @@ export const storage: IStorage = {
   },
   updateEventStatus(id, status) {
     db.update(events).set({ status }).where(eq(events.id, id)).run();
+  },
+  updateEvent(id, data) {
+    db.update(events).set(data as any).where(eq(events.id, id)).run();
+    return db.select().from(events).where(eq(events.id, id)).get();
   },
   toggleClaimable(id, isClaimable) {
     db.update(events).set({ isClaimable }).where(eq(events.id, id)).run();

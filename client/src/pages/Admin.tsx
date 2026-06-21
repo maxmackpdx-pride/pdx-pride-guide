@@ -4,7 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle,
+  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X,
 } from "lucide-react";
 
 const ADMIN_PASSWORD = "pdxpride2026";
@@ -23,10 +23,22 @@ interface Submission {
 interface AdminEvent {
   id: number;
   title: string;
+  description: string;
   venueName: string;
+  address: string | null;
+  neighborhood: string | null;
+  lat: number | null;
+  lng: number | null;
   dayOfWeek: string;
   dateStart: string;
+  dateEnd: string;
+  ageRequirement: string;
+  admission: string;
+  ticketUrl: string | null;
+  posterImageUrl: string | null;
   isClaimable: boolean;
+  isHouseParty: boolean;
+  isPrivate: boolean;
   status: string;
 }
 
@@ -56,13 +68,16 @@ export default function Admin() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    try {
+      await apiRequest("POST", "/api/admin/login", { password });
       setAuthenticated(true);
       setPasswordError(false);
-    } else {
+    } catch {
       setPasswordError(true);
     }
   };
@@ -118,6 +133,21 @@ export default function Admin() {
     },
   });
 
+  const editEventMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<AdminEvent> }) =>
+      apiRequest("PUT", `/api/admin/events/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setEditingId(null);
+      setEditForm({});
+      toast({ title: "Event updated", description: "Changes are live." });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Could not save changes.", variant: "destructive" });
+    },
+  });
+
   const resolveModerationMutation = useMutation({
     mutationFn: ({ id, action, note }: { id: number; action: "approve" | "reject"; note?: string }) =>
       apiRequest("POST", `/api/admin/moderation/${id}/resolve`, { action, adminNote: note, adminName }),
@@ -130,6 +160,17 @@ export default function Admin() {
       toast({ title: "Error", description: "Could not resolve request.", variant: "destructive" });
     },
   });
+
+  const startEdit = (ev: AdminEvent) => {
+    setEditingId(ev.id);
+    setEditForm({ ...ev });
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingId) return;
+    editEventMutation.mutate({ id: editingId, data: editForm });
+  };
 
   // Login screen
   if (!authenticated) {
@@ -145,7 +186,6 @@ export default function Admin() {
             <div>
               <label className="display text-xs block mb-2" style={{ color: "#CCFF00" }}>ADMIN NAME</label>
               <input
-                data-testid="input-admin-name"
                 type="text"
                 value={adminName}
                 onChange={e => setAdminName(e.target.value)}
@@ -157,7 +197,6 @@ export default function Admin() {
               <label className="display text-xs block mb-2" style={{ color: "#CCFF00" }}>PASSWORD</label>
               <div className="relative">
                 <input
-                  data-testid="input-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={e => { setPassword(e.target.value); setPasswordError(false); }}
@@ -178,7 +217,6 @@ export default function Admin() {
             </div>
             <button
               type="submit"
-              data-testid="button-login"
               className="display text-lg w-full py-3 border-2 transition-all"
               style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
             >
@@ -218,8 +256,7 @@ export default function Admin() {
               </span>
             )}
             <button
-              data-testid="button-logout"
-              onClick={() => setAuthenticated(false)}
+              onClick={() => { apiRequest("POST", "/api/admin/logout", {}); setAuthenticated(false); }}
               className="sticker transition-all hover:bg-white/10"
               style={{ color: "#fff", borderColor: "#333" }}
             >
@@ -239,7 +276,6 @@ export default function Admin() {
           ]).map(tab => (
             <button
               key={tab.key}
-              data-testid={`tab-${tab.key}`}
               onClick={() => setActiveTab(tab.key)}
               className="display text-sm px-5 py-3 border-b-2 -mb-px transition-all flex items-center gap-2"
               style={{
@@ -278,9 +314,7 @@ export default function Admin() {
                     expanded={expandedId === sub.id}
                     onToggle={() => setExpandedId(expandedId === sub.id ? null : sub.id)}
                     rejectReason={rejectReasons[sub.id] || ""}
-                    onRejectReasonChange={val =>
-                      setRejectReasons(prev => ({ ...prev, [sub.id]: val }))
-                    }
+                    onRejectReasonChange={val => setRejectReasons(prev => ({ ...prev, [sub.id]: val }))}
                     onApprove={() => approveMutation.mutate({ id: sub.id })}
                     onReject={() => rejectMutation.mutate({ id: sub.id, reason: rejectReasons[sub.id] || "" })}
                     approving={approveMutation.isPending}
@@ -289,30 +323,17 @@ export default function Admin() {
                 ))}
               </div>
             )}
-
             {resolvedSubs.length > 0 && (
               <div>
                 <h3 className="display text-xl text-white/30 mb-4">RESOLVED ({resolvedSubs.length})</h3>
                 <div className="space-y-2">
                   {resolvedSubs.map(sub => (
-                    <div
-                      key={sub.id}
-                      className="p-4 border border-white/10 flex items-center justify-between gap-4"
-                      style={{ background: "#0d0d0d" }}
-                    >
+                    <div key={sub.id} className="p-4 border border-white/10 flex items-center justify-between gap-4" style={{ background: "#0d0d0d" }}>
                       <div>
                         <span className="display text-sm text-white/50">{sub.type}</span>
-                        <p className="text-white/30 text-xs mt-0.5">
-                          {new Date(sub.createdAt).toLocaleDateString()}
-                        </p>
+                        <p className="text-white/30 text-xs mt-0.5">{new Date(sub.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <span
-                        className="sticker text-xs"
-                        style={{
-                          color: sub.status === "approved" ? "#CCFF00" : "#FF2400",
-                          borderColor: sub.status === "approved" ? "#CCFF00" : "#FF2400",
-                        }}
-                      >
+                      <span className="sticker text-xs" style={{ color: sub.status === "approved" ? "#CCFF00" : "#FF2400", borderColor: sub.status === "approved" ? "#CCFF00" : "#FF2400" }}>
                         {sub.status.toUpperCase()}
                       </span>
                     </div>
@@ -323,27 +344,19 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── MODERATION INBOX (CLAIM / REMOVE) ── */}
+        {/* ── MODERATION ── */}
         {activeTab === "moderation" && (
           <div>
-            <p className="text-white/40 text-sm mb-6">
-              Claim requests — promoters asking to take ownership of an event. Remove requests — requests to take down a listing.
-            </p>
+            <p className="text-white/40 text-sm mb-6">Claim and remove requests from the public.</p>
             {modLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />
-                ))}
-              </div>
+              <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : modRequests.length === 0 ? (
               <div className="text-center py-16">
                 <Inbox size={36} className="mx-auto mb-4 text-white/20" />
                 <p className="display text-xl text-white/30">INBOX EMPTY</p>
-                <p className="text-white/20 text-sm mt-2">No claim or remove requests.</p>
               </div>
             ) : (
               <div>
-                {/* Pending */}
                 {pendingMod.length > 0 && (
                   <div className="mb-8">
                     <h3 className="display text-base text-white/40 mb-3">PENDING ({pendingMod.length})</h3>
@@ -364,41 +377,17 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
-                {/* Resolved */}
                 {modRequests.filter(r => r.status !== "pending").length > 0 && (
                   <div>
                     <h3 className="display text-base text-white/30 mb-3">RESOLVED</h3>
                     <div className="space-y-2">
                       {modRequests.filter(r => r.status !== "pending").map(req => (
-                        <div
-                          key={req.id}
-                          className="p-4 border border-white/10 flex items-center justify-between gap-4"
-                          style={{ background: "#0d0d0d" }}
-                        >
+                        <div key={req.id} className="p-4 border border-white/10 flex items-center justify-between gap-4" style={{ background: "#0d0d0d" }}>
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span
-                              className="sticker text-xs flex-shrink-0"
-                              style={{
-                                color: req.type === "CLAIM" ? "#00FFFF" : "#FF6600",
-                                borderColor: req.type === "CLAIM" ? "#00FFFF" : "#FF6600",
-                              }}
-                            >
-                              {req.type}
-                            </span>
-                            <div className="min-w-0">
-                              <p className="display text-sm text-white/50 truncate">
-                                Event #{req.eventId}{req.eventTitle ? ` — ${req.eventTitle}` : ""}
-                              </p>
-                              <p className="text-white/30 text-xs">{req.contactName} · {new Date(req.createdAt).toLocaleDateString()}</p>
-                            </div>
+                            <span className="sticker text-xs flex-shrink-0" style={{ color: req.type === "CLAIM" ? "#00FFFF" : "#FF6600", borderColor: req.type === "CLAIM" ? "#00FFFF" : "#FF6600" }}>{req.type}</span>
+                            <p className="display text-sm text-white/50 truncate">Event #{req.eventId}{req.eventTitle ? ` — ${req.eventTitle}` : ""}</p>
                           </div>
-                          <span
-                            className="sticker text-xs flex-shrink-0"
-                            style={{
-                              color: req.status === "approved" ? "#CCFF00" : "#FF2400",
-                              borderColor: req.status === "approved" ? "#CCFF00" : "#FF2400",
-                            }}
-                          >
+                          <span className="sticker text-xs flex-shrink-0" style={{ color: req.status === "approved" ? "#CCFF00" : "#FF2400", borderColor: req.status === "approved" ? "#CCFF00" : "#FF2400" }}>
                             {req.status.toUpperCase()}
                           </span>
                         </div>
@@ -415,51 +404,153 @@ export default function Admin() {
         {activeTab === "events" && (
           <div>
             <p className="text-white/40 text-sm mb-6">
-              Toggle "claimable" to let organizers submit a claim for ownership of an event.
+              Edit any field on any event. Changes go live immediately.
             </p>
             {eventsLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />
-                ))}
-              </div>
+              <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : events.length === 0 ? (
               <p className="text-white/30 text-center py-12">No events found.</p>
             ) : (
               <div className="space-y-2">
                 {events.map(ev => (
-                  <div
-                    key={ev.id}
-                    data-testid={`row-event-${ev.id}`}
-                    className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap"
-                    style={{ background: "#111" }}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="display text-base text-white truncate">{ev.title}</p>
-                      <p className="text-white/40 text-xs mt-0.5">
-                        {ev.venueName} · {ev.dayOfWeek} {new Date(ev.dateStart).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                      </p>
+                  <div key={ev.id} className="border border-white/10" style={{ background: "#111" }}>
+                    {/* Row */}
+                    <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <p className="display text-base text-white truncate">{ev.title}</p>
+                        <p className="text-white/40 text-xs mt-0.5">
+                          {ev.venueName} · {ev.dayOfWeek} · {new Date(ev.dateStart).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="sticker text-xs" style={{ color: ev.status === "LIVE" ? "#CCFF00" : "#666", borderColor: ev.status === "LIVE" ? "#CCFF00" : "#333" }}>
+                          {ev.status}
+                        </span>
+                        <button
+                          onClick={() => claimableMutation.mutate({ id: ev.id, isClaimable: !ev.isClaimable })}
+                          className="flex items-center gap-1 text-sm transition-all"
+                          style={{ color: ev.isClaimable ? "#CCFF00" : "#444" }}
+                        >
+                          {ev.isClaimable ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                          <span className="display text-xs">{ev.isClaimable ? "CLAIMABLE" : "CLAIM OFF"}</span>
+                        </button>
+                        <button
+                          onClick={() => editingId === ev.id ? setEditingId(null) : startEdit(ev)}
+                          className="flex items-center gap-1 display text-xs px-3 py-1 border transition-all"
+                          style={{
+                            borderColor: editingId === ev.id ? "#FF00CC" : "#333",
+                            color: editingId === ev.id ? "#FF00CC" : "#666",
+                            background: "transparent",
+                          }}
+                        >
+                          {editingId === ev.id ? <><X size={11} /> CANCEL</> : <><Pencil size={11} /> EDIT</>}
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="sticker text-xs"
-                        style={{
-                          color: ev.status === "live" ? "#CCFF00" : "#666",
-                          borderColor: ev.status === "live" ? "#CCFF00" : "#333",
-                        }}
-                      >
-                        {ev.status.toUpperCase()}
-                      </span>
-                      <button
-                        data-testid={`toggle-claimable-${ev.id}`}
-                        onClick={() => claimableMutation.mutate({ id: ev.id, isClaimable: !ev.isClaimable })}
-                        className="flex items-center gap-2 text-sm transition-all"
-                        style={{ color: ev.isClaimable ? "#CCFF00" : "#444" }}
-                      >
-                        {ev.isClaimable ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
-                        <span className="display text-xs">{ev.isClaimable ? "CLAIMABLE" : "CLAIM OFF"}</span>
-                      </button>
-                    </div>
+
+                    {/* Inline edit form */}
+                    {editingId === ev.id && (
+                      <form onSubmit={handleEditSave} className="border-t border-white/10 p-5 space-y-4" style={{ background: "#0d0d0d" }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">TITLE</label>
+                            <input value={editForm.title || ""} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">VENUE NAME</label>
+                            <input value={editForm.venueName || ""} onChange={e => setEditForm(f => ({ ...f, venueName: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">ADDRESS</label>
+                            <input value={editForm.address || ""} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">NEIGHBORHOOD</label>
+                            <input value={editForm.neighborhood || ""} onChange={e => setEditForm(f => ({ ...f, neighborhood: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">DAY</label>
+                            <select value={editForm.dayOfWeek || ""} onChange={e => setEditForm(f => ({ ...f, dayOfWeek: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
+                              {["THU","FRI","SAT","SUN"].map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">START TIME</label>
+                            <input type="datetime-local" value={editForm.dateStart?.slice(0,16) || ""}
+                              onChange={e => setEditForm(f => ({ ...f, dateStart: e.target.value + ":00" }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">END TIME</label>
+                            <input type="datetime-local" value={editForm.dateEnd?.slice(0,16) || ""}
+                              onChange={e => setEditForm(f => ({ ...f, dateEnd: e.target.value + ":00" }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">ADMISSION</label>
+                            <select value={editForm.admission || "FREE"} onChange={e => setEditForm(f => ({ ...f, admission: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
+                              {["FREE","TICKETED","DONATION","TBD"].map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">AGE REQUIREMENT</label>
+                            <select value={editForm.ageRequirement || "ALL_AGES"} onChange={e => setEditForm(f => ({ ...f, ageRequirement: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
+                              {["ALL_AGES","18_PLUS","21_PLUS"].map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">TICKET URL</label>
+                            <input value={editForm.ticketUrl || ""} onChange={e => setEditForm(f => ({ ...f, ticketUrl: e.target.value || null }))}
+                              placeholder="https://..." className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">POSTER IMAGE PATH</label>
+                            <input value={editForm.posterImageUrl || ""} onChange={e => setEditForm(f => ({ ...f, posterImageUrl: e.target.value || null }))}
+                              placeholder="/posters/filename.jpg" className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">STATUS</label>
+                            <select value={editForm.status || "LIVE"} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
+                              {["LIVE","HIDDEN","CANCELLED"].map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">LAT / LNG</label>
+                            <div className="flex gap-2">
+                              <input type="number" step="any" value={editForm.lat ?? ""} onChange={e => setEditForm(f => ({ ...f, lat: Number(e.target.value) }))}
+                                placeholder="45.52..." className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                              <input type="number" step="any" value={editForm.lng ?? ""} onChange={e => setEditForm(f => ({ ...f, lng: Number(e.target.value) }))}
+                                placeholder="-122.67..." className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                            </div>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">DESCRIPTION</label>
+                            <textarea rows={3} value={editForm.description || ""} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400 resize-y" />
+                          </div>
+                        </div>
+                        <div className="flex gap-3 flex-wrap pt-2">
+                          <button type="submit" disabled={editEventMutation.isPending}
+                            className="display text-sm px-6 py-2 border-2 disabled:opacity-50"
+                            style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
+                            {editEventMutation.isPending ? "SAVING..." : "SAVE CHANGES"}
+                          </button>
+                          <button type="button" onClick={() => setEditingId(null)}
+                            className="display text-sm px-6 py-2 border"
+                            style={{ borderColor: "#333", color: "#666", background: "transparent" }}>
+                            CANCEL
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 ))}
               </div>
@@ -472,104 +563,60 @@ export default function Admin() {
 }
 
 // ── Submission Card ──────────────────────────────────────────────────────────
-function SubmissionCard({
-  sub, expanded, onToggle, rejectReason, onRejectReasonChange, onApprove, onReject, approving, rejecting,
-}: {
-  sub: Submission;
-  expanded: boolean;
-  onToggle: () => void;
-  rejectReason: string;
-  onRejectReasonChange: (v: string) => void;
-  onApprove: () => void;
-  onReject: () => void;
-  approving: boolean;
-  rejecting: boolean;
+function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonChange, onApprove, onReject, approving, rejecting }: {
+  sub: Submission; expanded: boolean; onToggle: () => void;
+  rejectReason: string; onRejectReasonChange: (v: string) => void;
+  onApprove: () => void; onReject: () => void; approving: boolean; rejecting: boolean;
 }) {
   let parsedData: Record<string, any> = {};
   try { parsedData = JSON.parse(sub.submittedData); } catch {}
-
   const approvalCount = sub.approvedBy ? sub.approvedBy.split(",").filter(Boolean).length : 0;
 
   return (
-    <div
-      data-testid={`card-submission-${sub.id}`}
-      className="border-2 transition-all"
-      style={{ background: "#111", borderColor: expanded ? "#FF00CC" : "#222" }}
-    >
+    <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? "#FF00CC" : "#222" }}>
       <button className="w-full text-left p-5 flex items-start justify-between gap-4" onClick={onToggle}>
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{sub.type}</span>
-            {approvalCount > 0 && (
-              <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>
-                {approvalCount}/2 APPROVED
-              </span>
-            )}
+            {approvalCount > 0 && <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{approvalCount}/2 APPROVED</span>}
           </div>
-          <p className="display text-xl text-white">
-            {parsedData.name || parsedData.title || `Submission #${sub.id}`}
-          </p>
+          <p className="display text-xl text-white">{parsedData.name || parsedData.title || `Submission #${sub.id}`}</p>
           <p className="text-white/30 text-xs mt-1 flex items-center gap-1">
             <Clock size={10} />
             {new Date(sub.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
           </p>
         </div>
-        <ChevronDown
-          size={18}
-          className="text-white/30 flex-shrink-0 mt-1 transition-transform"
-          style={{ transform: expanded ? "rotate(180deg)" : "none" }}
-        />
+        <ChevronDown size={18} className="text-white/30 flex-shrink-0 mt-1 transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
       </button>
-
       {expanded && (
         <div className="px-5 pb-5 border-t border-white/10 pt-4">
           <div className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-3">
-            {Object.entries(parsedData)
-              .filter(([k]) => !["id", "status", "createdAt"].includes(k))
-              .map(([key, val]) => (
-                <div key={key} className="bg-black/30 p-2 border border-white/10">
-                  <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{key}</p>
-                  <p className="text-white text-sm truncate">{String(val)}</p>
-                </div>
-              ))}
+            {Object.entries(parsedData).filter(([k]) => !["id","status","createdAt"].includes(k)).map(([key, val]) => (
+              <div key={key} className="bg-black/30 p-2 border border-white/10">
+                <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{key}</p>
+                <p className="text-white text-sm truncate">{String(val)}</p>
+              </div>
+            ))}
           </div>
           <div className="space-y-3">
             <div>
               <label className="display text-xs text-white/30 block mb-1">REJECT REASON (optional)</label>
-              <input
-                data-testid={`input-reject-reason-${sub.id}`}
-                type="text"
-                value={rejectReason}
-                onChange={e => onRejectReasonChange(e.target.value)}
-                placeholder="Reason for rejection..."
-                className="w-full px-3 py-2 text-white text-sm border border-white/10 bg-black/40 focus:outline-none focus:border-red-500"
-              />
+              <input type="text" value={rejectReason} onChange={e => onRejectReasonChange(e.target.value)}
+                placeholder="Reason for rejection..." className="w-full px-3 py-2 text-white text-sm border border-white/10 bg-black/40 focus:outline-none focus:border-red-500" />
             </div>
             <div className="flex gap-3 flex-wrap">
-              <button
-                data-testid={`button-approve-${sub.id}`}
-                onClick={onApprove}
-                disabled={approving}
+              <button onClick={onApprove} disabled={approving}
                 className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
-              >
-                <CheckCircle size={14} />
-                {approving ? "APPROVING..." : "APPROVE"}
+                style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
+                <CheckCircle size={14} />{approving ? "APPROVING..." : "APPROVE"}
               </button>
-              <button
-                data-testid={`button-reject-${sub.id}`}
-                onClick={onReject}
-                disabled={rejecting}
+              <button onClick={onReject} disabled={rejecting}
                 className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ borderColor: "#FF2400", color: "#FF2400" }}
-              >
-                <XCircle size={14} />
-                {rejecting ? "REJECTING..." : "REJECT"}
+                style={{ borderColor: "#FF2400", color: "#FF2400" }}>
+                <XCircle size={14} />{rejecting ? "REJECTING..." : "REJECT"}
               </button>
             </div>
-            {approvalCount === 1 && (
-              <p className="text-white/30 text-xs">1 of 2 admins approved — needs one more approval to go live.</p>
-            )}
+            {approvalCount === 1 && <p className="text-white/30 text-xs">1 of 2 admins approved — needs one more approval to go live.</p>}
           </div>
         </div>
       )}
@@ -577,100 +624,52 @@ function SubmissionCard({
   );
 }
 
-// ── Moderation Request Card ──────────────────────────────────────────────────
-function ModerationCard({
-  req, expanded, onToggle, note, onNoteChange, onApprove, onReject, resolving,
-}: {
-  req: ModerationRequest;
-  expanded: boolean;
-  onToggle: () => void;
-  note: string;
-  onNoteChange: (v: string) => void;
-  onApprove: () => void;
-  onReject: () => void;
-  resolving: boolean;
+// ── Moderation Card ──────────────────────────────────────────────────────────
+function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove, onReject, resolving }: {
+  req: ModerationRequest; expanded: boolean; onToggle: () => void;
+  note: string; onNoteChange: (v: string) => void;
+  onApprove: () => void; onReject: () => void; resolving: boolean;
 }) {
   const isClaim = req.type === "CLAIM";
   const accentColor = isClaim ? "#00FFFF" : "#FF6600";
 
   return (
-    <div
-      data-testid={`card-moderation-${req.id}`}
-      className="border-2 transition-all"
-      style={{ background: "#111", borderColor: expanded ? accentColor : "#222" }}
-    >
+    <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? accentColor : "#222" }}>
       <button className="w-full text-left p-5 flex items-start justify-between gap-4" onClick={onToggle}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="sticker text-xs" style={{ color: accentColor, borderColor: accentColor }}>
-              {req.type}
-            </span>
-            {!isClaim && (
-              <span className="sticker text-xs flex items-center gap-1" style={{ color: "#FF6600", borderColor: "#FF6600" }}>
-                <AlertTriangle size={9} /> REMOVE
-              </span>
-            )}
+            <span className="sticker text-xs" style={{ color: accentColor, borderColor: accentColor }}>{req.type}</span>
+            {!isClaim && <span className="sticker text-xs flex items-center gap-1" style={{ color: "#FF6600", borderColor: "#FF6600" }}><AlertTriangle size={9} /> REMOVE</span>}
           </div>
-          <p className="display text-lg text-white">
-            {req.eventTitle || `Event #${req.eventId}`}
-          </p>
-          <p className="text-white/40 text-xs mt-1">
-            {req.contactName} · {req.contactEmail}
-          </p>
-          <p className="text-white/20 text-xs flex items-center gap-1 mt-0.5">
-            <Clock size={9} />
-            {new Date(req.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-          </p>
+          <p className="display text-lg text-white">{req.eventTitle || `Event #${req.eventId}`}</p>
+          <p className="text-white/40 text-xs mt-1">{req.contactName} · {req.contactEmail}</p>
         </div>
-        <ChevronDown
-          size={18}
-          className="text-white/30 flex-shrink-0 mt-1 transition-transform"
-          style={{ transform: expanded ? "rotate(180deg)" : "none" }}
-        />
+        <ChevronDown size={18} className="text-white/30 flex-shrink-0 mt-1 transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
       </button>
-
       {expanded && (
         <div className="px-5 pb-5 border-t border-white/10 pt-4">
           {req.proof && (
             <div className="mb-4 bg-black/30 p-3 border border-white/10">
-              <p className="text-white/30 text-xs uppercase tracking-wide mb-1">
-                {isClaim ? "PROOF OF OWNERSHIP" : "REASON FOR REMOVAL"}
-              </p>
+              <p className="text-white/30 text-xs uppercase tracking-wide mb-1">{isClaim ? "PROOF OF OWNERSHIP" : "REASON FOR REMOVAL"}</p>
               <p className="text-white/80 text-sm">{req.proof}</p>
             </div>
           )}
           <div className="space-y-3">
             <div>
               <label className="display text-xs text-white/30 block mb-1">ADMIN NOTE (optional)</label>
-              <input
-                data-testid={`input-mod-note-${req.id}`}
-                type="text"
-                value={note}
-                onChange={e => onNoteChange(e.target.value)}
-                placeholder="Internal note..."
-                className="w-full px-3 py-2 text-white text-sm border border-white/10 bg-black/40 focus:outline-none focus:border-yellow-400"
-              />
+              <input type="text" value={note} onChange={e => onNoteChange(e.target.value)}
+                placeholder="Internal note..." className="w-full px-3 py-2 text-white text-sm border border-white/10 bg-black/40 focus:outline-none focus:border-yellow-400" />
             </div>
             <div className="flex gap-3 flex-wrap">
-              <button
-                data-testid={`button-mod-approve-${req.id}`}
-                onClick={onApprove}
-                disabled={resolving}
+              <button onClick={onApprove} disabled={resolving}
                 className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
-              >
-                <CheckCircle size={14} />
-                {resolving ? "PROCESSING..." : isClaim ? "GRANT CLAIM" : "APPROVE REMOVAL"}
+                style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
+                <CheckCircle size={14} />{resolving ? "PROCESSING..." : isClaim ? "GRANT CLAIM" : "APPROVE REMOVAL"}
               </button>
-              <button
-                data-testid={`button-mod-reject-${req.id}`}
-                onClick={onReject}
-                disabled={resolving}
+              <button onClick={onReject} disabled={resolving}
                 className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ borderColor: "#FF2400", color: "#FF2400" }}
-              >
-                <XCircle size={14} />
-                {resolving ? "PROCESSING..." : "DENY"}
+                style={{ borderColor: "#FF2400", color: "#FF2400" }}>
+                <XCircle size={14} />{resolving ? "PROCESSING..." : "DENY"}
               </button>
             </div>
           </div>

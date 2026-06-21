@@ -19,7 +19,7 @@ const TYPE_FILTERS = ["FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PA
 const PDX_CENTER: [number, number] = [45.5231, -122.6765];
 const PDX_ZOOM = 12;
 
-const DARK_TILE = "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png";
+const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const DARK_TILE_ATTR =
   '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://openstreetmap.org">OpenStreetMap</a>';
 
@@ -89,8 +89,9 @@ function MapView({ events }: { events: Event[] }) {
       }).setView(PDX_CENTER, PDX_ZOOM);
 
       L.tileLayer(DARK_TILE, {
-        maxZoom: 18,
-        attribution: DARK_TILE_ATTR,
+        maxZoom: 19,
+        subdomains: "abcd",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
       }).addTo(map);
 
       mapRef.current = map;
