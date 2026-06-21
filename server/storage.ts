@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
-  events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages,
+  events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -10,6 +10,7 @@ import {
   type ModerationRequest, type InsertModerationRequest,
   type Attendance, type InsertAttendance,
   type User, type Message,
+  type MissedConnection, type InsertMissedConnection,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -119,9 +120,12 @@ sqlite.exec(`
   CREATE TABLE IF NOT EXISTS attendances (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     event_id INTEGER NOT NULL,
+    user_id INTEGER,
     handle TEXT NOT NULL,
     message TEXT NOT NULL,
     avatar_seed TEXT NOT NULL,
+    photo_url TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT ''
   );
   CREATE TABLE IF NOT EXISTS users (
@@ -144,6 +148,21 @@ sqlite.exec(`
     body TEXT NOT NULL,
     is_read INTEGER NOT NULL DEFAULT 0,
     thread_id TEXT NOT NULL,
+    context_type TEXT NOT NULL DEFAULT 'THREAD',
+    context_id INTEGER,
+    context_label TEXT,
+    deleted_by_from INTEGER NOT NULL DEFAULT 0,
+    deleted_by_to INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS missed_connections (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    day_of_week TEXT,
+    venue_hint TEXT,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
@@ -154,6 +173,14 @@ try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e)
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN user_id INTEGER`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN photo_url TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_type TEXT NOT NULL DEFAULT 'THREAD'`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_id INTEGER`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_label TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_from INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_to INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 
 export function hashPassword(pw: string) {
   return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
@@ -1011,6 +1038,12 @@ function seedData() {
 
 seedData();
 
+function archiveExpiredMissedConnections() {
+  const archiveAt = new Date("2026-07-21T00:00:00-07:00").getTime();
+  if (Date.now() < archiveAt) return;
+  sqlite.prepare(`UPDATE missed_connections SET status = 'ARCHIVED' WHERE status = 'ACTIVE'`).run();
+}
+
 export interface IStorage {
   // Events
   getEvents(filters?: { status?: string; day?: string }): Event[];
@@ -1039,8 +1072,10 @@ export interface IStorage {
   createModerationRequest(data: InsertModerationRequest): ModerationRequest;
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   // Attendance
-  getAttendances(eventId: number): Attendance[];
-  createAttendance(data: InsertAttendance): Attendance;
+  getAttendances(eventId: number): any[];
+  getAttendancesByUser(userId: number): any[];
+  upsertAttendance(eventId: number, user: User, message: string): Attendance;
+  removeAttendance(eventId: number, userId: number): void;
   // Users
   getUserById(id: number): User | undefined;
   getUserByEmail(email: string): User | undefined;
@@ -1050,9 +1085,18 @@ export interface IStorage {
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
-  sendMessage(fromUserId: number, toUserId: number, subject: string, body: string): Message;
+  getUnreadCount(userId: number): number;
+  sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
   markRead(messageId: number): void;
   getThread(threadId: string): Message[];
+  softDeleteThread(threadId: string, userId: number): void;
+  // Missed connections
+  getMissedConnections(status?: string): any[];
+  getMissedConnectionsByUser(userId: number): MissedConnection[];
+  createMissedConnection(data: InsertMissedConnection): MissedConnection;
+  updateMissedConnection(id: number, userId: number, data: Partial<MissedConnection>): MissedConnection | undefined;
+  deleteMissedConnection(id: number, userId: number): void;
+  archiveExpiredMissedConnections(): void;
 }
 
 export const storage: IStorage = {
@@ -1137,10 +1181,33 @@ export const storage: IStorage = {
     return db.select().from(gigPosts).where(eq(gigPosts.userId, userId)).all();
   },
   updateGigPost(id, userId, data) {
-    db.update(gigPosts).set(data).where(eq(gigPosts.id, id)).run();
+    const params = {
+      id,
+      userId,
+      title: data.title ?? null,
+      description: data.description ?? null,
+      skills: data.skills ?? null,
+      compensation: data.compensation ?? null,
+      location: data.location ?? null,
+      gigDate: data.gigDate ?? null,
+      gigTime: data.gigTime ?? null,
+      imageUrl: data.imageUrl ?? null,
+    };
+    sqlite.prepare(`
+      UPDATE gig_posts
+      SET title = COALESCE(@title, title),
+          description = COALESCE(@description, description),
+          skills = COALESCE(@skills, skills),
+          compensation = COALESCE(@compensation, compensation),
+          location = COALESCE(@location, location),
+          gig_date = COALESCE(@gigDate, gig_date),
+          gig_time = COALESCE(@gigTime, gig_time),
+          image_url = COALESCE(@imageUrl, image_url)
+      WHERE id = @id AND user_id = @userId
+    `).run(params);
   },
   deleteGigPost(id, userId) {
-    db.delete(gigPosts).where(eq(gigPosts.id, id)).run();
+    sqlite.prepare(`DELETE FROM gig_posts WHERE id = ? AND user_id = ?`).run(id, userId);
   },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();
@@ -1167,10 +1234,44 @@ export const storage: IStorage = {
     }
   },
   getAttendances(eventId) {
-    return db.select().from(attendances).where(eq(attendances.eventId, eventId)).all();
+    return sqlite.prepare(`
+      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice
+      FROM attendances a
+      LEFT JOIN users u ON u.id = a.user_id
+      WHERE a.event_id = ? AND a.is_active = 1
+      ORDER BY a.created_at DESC
+    `).all(eventId) as any[];
   },
-  createAttendance(data) {
-    return db.insert(attendances).values({ ...data, createdAt: new Date().toISOString() }).returning().get();
+  getAttendancesByUser(userId) {
+    return sqlite.prepare(`
+      SELECT a.*, e.title AS eventTitle, e.venue_name AS venueName, e.date_start AS dateStart
+      FROM attendances a
+      LEFT JOIN events e ON e.id = a.event_id
+      WHERE a.user_id = ? AND a.is_active = 1
+      ORDER BY e.date_start ASC
+    `).all(userId) as any[];
+  },
+  upsertAttendance(eventId, user, message) {
+    const handle = user.displayName || user.username;
+    const existing = sqlite.prepare(`SELECT * FROM attendances WHERE event_id = ? AND user_id = ?`).get(eventId, user.id) as Attendance | undefined;
+    const values = {
+      eventId,
+      userId: user.id,
+      handle,
+      message,
+      avatarSeed: user.username,
+      photoUrl: user.photoUrl || null,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    if (existing) {
+      db.update(attendances).set(values as any).where(eq(attendances.id, existing.id)).run();
+      return db.select().from(attendances).where(eq(attendances.id, existing.id)).get()!;
+    }
+    return db.insert(attendances).values(values as any).returning().get();
+  },
+  removeAttendance(eventId, userId) {
+    sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE event_id = ? AND user_id = ?`).run(eventId, userId);
   },
   // Users
   getUserById(id) {
@@ -1197,24 +1298,74 @@ export const storage: IStorage = {
   },
   // Messages
   getInbox(userId) {
-    return db.select().from(messages).where(eq(messages.toUserId, userId)).all();
+    return sqlite.prepare(`
+      SELECT * FROM messages
+      WHERE to_user_id = ? AND deleted_by_to = 0
+      ORDER BY created_at DESC
+    `).all(userId) as Message[];
   },
   getSentMessages(userId) {
-    return db.select().from(messages).where(eq(messages.fromUserId, userId)).all();
+    return sqlite.prepare(`
+      SELECT * FROM messages
+      WHERE from_user_id = ? AND deleted_by_from = 0
+      ORDER BY created_at DESC
+    `).all(userId) as Message[];
   },
-  sendMessage(fromUserId, toUserId, subject, body) {
-    const threadId = `thread_${Date.now()}_${fromUserId}_${toUserId}`;
+  getUnreadCount(userId) {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM messages WHERE to_user_id = ? AND is_read = 0 AND deleted_by_to = 0`).get(userId) as any;
+    return row?.count || 0;
+  },
+  sendMessage(fromUserId, toUserId, subject, body, opts) {
+    const threadId = opts?.threadId || `thread_${Date.now()}_${fromUserId}_${toUserId}`;
     return db.insert(messages).values({
       fromUserId, toUserId, subject, body,
       isRead: false,
       threadId,
+      contextType: opts?.contextType || "THREAD",
+      contextId: opts?.contextId ?? null,
+      contextLabel: opts?.contextLabel || null,
+      deletedByFrom: false,
+      deletedByTo: false,
       createdAt: new Date().toISOString(),
-    }).returning().get();
+    } as any).returning().get();
   },
   markRead(messageId) {
     db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();
   },
   getThread(threadId) {
-    return db.select().from(messages).where(eq(messages.threadId, threadId)).all();
+    return sqlite.prepare(`SELECT * FROM messages WHERE thread_id = ? ORDER BY created_at ASC`).all(threadId) as Message[];
+  },
+  softDeleteThread(threadId, userId) {
+    sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE thread_id = ? AND from_user_id = ?`).run(threadId, userId);
+    sqlite.prepare(`UPDATE messages SET deleted_by_to = 1 WHERE thread_id = ? AND to_user_id = ?`).run(threadId, userId);
+  },
+  archiveExpiredMissedConnections() {
+    archiveExpiredMissedConnections();
+  },
+  getMissedConnections(status = "ACTIVE") {
+    archiveExpiredMissedConnections();
+    return sqlite.prepare(`
+      SELECT m.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice
+      FROM missed_connections m
+      JOIN users u ON u.id = m.user_id
+      WHERE m.status = ?
+      ORDER BY m.created_at DESC
+    `).all(status) as any[];
+  },
+  getMissedConnectionsByUser(userId) {
+    archiveExpiredMissedConnections();
+    return db.select().from(missedConnections).where(eq(missedConnections.userId, userId)).all();
+  },
+  createMissedConnection(data) {
+    return db.insert(missedConnections).values({ ...data, status: "ACTIVE", createdAt: new Date().toISOString() }).returning().get();
+  },
+  updateMissedConnection(id, userId, data) {
+    const before = db.select().from(missedConnections).where(eq(missedConnections.id, id)).get();
+    if (!before || before.userId !== userId) return undefined;
+    db.update(missedConnections).set(data as any).where(eq(missedConnections.id, id)).run();
+    return db.select().from(missedConnections).where(eq(missedConnections.id, id)).get();
+  },
+  deleteMissedConnection(id, userId) {
+    sqlite.prepare(`UPDATE missed_connections SET status = 'DELETED' WHERE id = ? AND user_id = ?`).run(id, userId);
   },
 };

@@ -10,6 +10,7 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/submit", label: "Promoters" },
   { href: "/pride-work", label: "Pride Work" },
+  { href: "/missed-connections", label: "Missed" },
   { href: "/about", label: "About" },
 ];
 
@@ -18,13 +19,13 @@ export default function Nav() {
   const { user, logout } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
 
-  const { data: inbox = [] } = useQuery<any[]>({
-    queryKey: ["/api/inbox"],
-    queryFn: () => fetch("/api/inbox").then(r => r.json()),
+  const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ["/api/messages/unread-count"],
+    queryFn: () => fetch("/api/messages/unread-count").then(r => r.ok ? r.json() : { count: 0 }),
     enabled: !!user,
-    refetchInterval: 30000,
+    refetchInterval: 90000,
   });
-  const unreadCount = inbox.filter((m: any) => !m.readAt && m.toUserId === user?.id).length;
+  const unreadCount = unread.count || 0;
 
   return (
     <>

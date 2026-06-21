@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [saveMsg, setSaveMsg] = useState("");
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [eventForm, setEventForm] = useState<any>(null);
+  const [editingGig, setEditingGig] = useState<any>(null);
+  const [gigForm, setGigForm] = useState({ title: "", description: "", skills: "", compensation: "", location: "" });
 
   const { data: myGigs = [] } = useQuery<any[]>({
     queryKey: ["/api/gigs/mine"],
@@ -40,6 +42,31 @@ export default function Dashboard() {
     queryKey: ["/api/events/mine/claimed"],
     queryFn: () => fetch("/api/events/mine/claimed").then(r => r.ok ? r.json() : []),
     enabled: !!user,
+  });
+
+  const { data: submittedEvents = [] } = useQuery<any[]>({
+    queryKey: ["/api/events/mine/submitted"],
+    queryFn: () => fetch("/api/events/mine/submitted").then(r => r.ok ? r.json() : []),
+    enabled: !!user,
+  });
+
+  const { data: myMissed = [] } = useQuery<any[]>({
+    queryKey: ["/api/missed-connections/mine"],
+    queryFn: () => fetch("/api/missed-connections/mine").then(r => r.ok ? r.json() : []),
+    enabled: !!user,
+  });
+
+  const { data: myCheckIns = [] } = useQuery<any[]>({
+    queryKey: ["/api/events/mine/check-ins"],
+    queryFn: () => fetch("/api/events/mine/check-ins").then(r => r.ok ? r.json() : []),
+    enabled: !!user,
+  });
+
+  const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ["/api/messages/unread-count"],
+    queryFn: () => fetch("/api/messages/unread-count").then(r => r.ok ? r.json() : { count: 0 }),
+    enabled: !!user,
+    refetchInterval: 90000,
   });
 
   const eventEditMutation = useMutation({
@@ -61,6 +88,24 @@ export default function Dashboard() {
     onError: () => toast({ title: "Error", description: "Could not save event.", variant: "destructive" }),
   });
 
+  const gigEditMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const res = await fetch(`/api/gigs/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Save failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
+      setEditingGig(null);
+      toast({ title: "Gig post updated" });
+    },
+    onError: () => toast({ title: "Error", description: "Could not update gig post.", variant: "destructive" }),
+  });
+
   if (!user) {
     return (
       <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
@@ -72,6 +117,7 @@ export default function Dashboard() {
   }
 
   const avatar = AVATARS.find(a => a.id === (user.avatarChoice || 1)) || AVATARS[0];
+  const initial = (user.displayName || user.username || "?").trim().slice(0, 1).toUpperCase();
 
   const handleSave = async () => {
     setSaving(true);
@@ -93,6 +139,23 @@ export default function Dashboard() {
     if (!confirm("Delete this gig post?")) return;
     await fetch(`/api/gigs/${id}`, { method: "DELETE" });
     queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
+  };
+
+  const startGigEdit = (gig: any) => {
+    setEditingGig(gig);
+    setGigForm({
+      title: gig.title || "",
+      description: gig.description || "",
+      skills: gig.skills || "",
+      compensation: gig.compensation || "",
+      location: gig.location || "",
+    });
+  };
+
+  const handleDeleteMissed = async (id: number) => {
+    if (!confirm("Delete this missed connection?")) return;
+    await fetch(`/api/missed-connections/${id}`, { method: "DELETE" });
+    queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
   };
 
   const startEventEdit = (evt: any) => {
@@ -142,7 +205,7 @@ export default function Dashboard() {
           }}>
             {user.photoUrl
               ? <img src={user.photoUrl} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
-              : avatar.emoji
+              : <span className="display" style={{ color: "#CCFF00", background: "#000", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>{initial}</span>
             }
           </div>
           <div>
@@ -150,6 +213,7 @@ export default function Dashboard() {
               {user.displayName || user.username}
             </h1>
             <div style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>@{user.username} · {user.email}</div>
+            {user.bio && <p style={{ color: "#aaa", maxWidth: 520, marginTop: 8, lineHeight: 1.5 }}>{user.bio}</p>}
           </div>
           <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
             <button onClick={() => setEditMode(!editMode)} style={{
@@ -214,9 +278,8 @@ export default function Dashboard() {
           </section>
         )}
 
-        {/* My Claimed Events */}
-        {myEvents.length > 0 && (
-          <section style={{ marginBottom: 48 }}>
+        {/* My Events */}
+        <section style={{ marginBottom: 48 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
               <h2 className="display" style={{ fontSize: "1.5rem", color: "#00FFFF" }}>MY EVENTS</h2>
               <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
@@ -341,6 +404,20 @@ export default function Dashboard() {
 
             {/* Event list */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {submittedEvents.map((evt: any) => (
+                <div key={`submitted-${evt.id}`} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  <div style={{ flex: 1 }}>
+                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{evt.title}</div>
+                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>
+                      {evt.dayOfWeek} · {evt.venueName}
+                    </div>
+                  </div>
+                  <span style={{
+                    fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em",
+                    padding: "3px 8px", border: "1px solid #FF00CC", color: "#FF00CC",
+                  }}>SUBMITTED · {evt.status}</span>
+                </div>
+              ))}
               {myEvents.map((evt: any) => (
                 <div key={evt.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   <div style={{ flex: 1 }}>
@@ -361,9 +438,11 @@ export default function Dashboard() {
                   }}>EDIT</button>
                 </div>
               ))}
+              {submittedEvents.length === 0 && myEvents.length === 0 && (
+                <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No submitted or claimed events yet.</div>
+              )}
             </div>
           </section>
-        )}
 
         {/* My Gig Posts */}
         <section style={{ marginBottom: 48 }}>
@@ -378,6 +457,22 @@ export default function Dashboard() {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {editingGig && (
+                <div style={{ background: "#0a0a0a", border: "2px solid #FF6600", padding: "20px", marginBottom: 8 }}>
+                  <h3 className="display" style={{ color: "#FF6600", fontSize: "1rem", marginBottom: 12 }}>EDIT GIG POST</h3>
+                  <input style={inputStyle} value={gigForm.title} onChange={e => setGigForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" />
+                  <textarea style={{ ...inputStyle, marginTop: 10, minHeight: 90, resize: "vertical" }} value={gigForm.description} onChange={e => setGigForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                    <input style={inputStyle} value={gigForm.skills} onChange={e => setGigForm(f => ({ ...f, skills: e.target.value }))} placeholder="Skills" />
+                    <input style={inputStyle} value={gigForm.compensation} onChange={e => setGigForm(f => ({ ...f, compensation: e.target.value }))} placeholder="Compensation" />
+                    <input style={inputStyle} value={gigForm.location} onChange={e => setGigForm(f => ({ ...f, location: e.target.value }))} placeholder="Location" />
+                  </div>
+                  <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                    <button onClick={() => gigEditMutation.mutate({ id: editingGig.id, data: gigForm })} style={{ background: "#FF6600", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer" }}>SAVE</button>
+                    <button onClick={() => setEditingGig(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>Cancel</button>
+                  </div>
+                </div>
+              )}
               {myGigs.map((gig: any) => (
                 <div key={gig.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   <div style={{ flex: 1 }}>
@@ -393,6 +488,12 @@ export default function Dashboard() {
                     padding: "3px 8px", border: `1px solid ${gig.status === "LIVE" ? "#CCFF00" : "#555"}`,
                     color: gig.status === "LIVE" ? "#CCFF00" : "#555",
                   }}>{gig.status}</span>
+                  <button onClick={() => startGigEdit(gig)} style={{
+                    fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem",
+                    letterSpacing: "0.08em", textTransform: "uppercase",
+                    background: "none", border: "1px solid #FF6600", color: "#FF6600",
+                    padding: "4px 10px", cursor: "pointer",
+                  }}>EDIT</button>
                   <button onClick={() => handleDeleteGig(gig.id)} style={{
                     fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem",
                     letterSpacing: "0.08em", textTransform: "uppercase",
@@ -403,6 +504,64 @@ export default function Dashboard() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* My Missed Connections */}
+        <section style={{ marginBottom: 48 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <h2 className="display" style={{ fontSize: "1.5rem", color: "#FF00CC" }}>MY MISSED CONNECTIONS</h2>
+            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
+          </div>
+          {myMissed.length === 0 ? (
+            <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No missed connections yet.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {myMissed.map((post: any) => (
+                <div key={post.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  <div style={{ flex: 1 }}>
+                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{post.title}</div>
+                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{post.dayOfWeek || "Any day"}{post.venueHint ? ` · ${post.venueHint}` : ""}</div>
+                  </div>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em", padding: "3px 8px", border: "1px solid #FF00CC", color: "#FF00CC" }}>{post.status}</span>
+                  <a href="#/missed-connections" style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", color: "#FF00CC", textDecoration: "none", border: "1px solid #FF00CC", padding: "4px 10px" }}>EDIT</a>
+                  <button onClick={() => handleDeleteMissed(post.id)} style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "1px solid #FF2400", color: "#FF2400", padding: "4px 10px", cursor: "pointer" }}>DELETE</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* My Check-Ins */}
+        <section style={{ marginBottom: 48 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <h2 className="display" style={{ fontSize: "1.5rem", color: "#CCFF00" }}>MY CHECK-INS</h2>
+            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
+          </div>
+          {myCheckIns.length === 0 ? (
+            <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No active check-ins yet.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {myCheckIns.map((check: any) => (
+                <div key={check.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px" }}>
+                  <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{check.eventTitle}</div>
+                  <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{check.venueName} · {new Date(check.dateStart).toLocaleString()}</div>
+                  <div style={{ color: "#CCFF00", marginTop: 8, fontSize: "0.85rem" }}>{check.message}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Inbox Preview */}
+        <section style={{ marginBottom: 48 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <h2 className="display" style={{ fontSize: "1.5rem", color: "#00FFFF" }}>INBOX PREVIEW</h2>
+            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
+          </div>
+          <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ color: "#aaa" }}>{unread.count} unread message{unread.count === 1 ? "" : "s"}</div>
+            <a href="#/inbox" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#00FFFF", border: "2px solid #00FFFF", padding: "10px 20px", textDecoration: "none", display: "inline-block" }}>OPEN INBOX →</a>
+          </div>
         </section>
 
         {/* Quick links */}

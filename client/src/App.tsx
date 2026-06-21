@@ -14,6 +14,7 @@ import About from "./pages/About";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
 import Inbox from "./pages/Inbox";
+import MissedConnections from "./pages/MissedConnections";
 import NotFound from "./pages/not-found";
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
                 <Route path="/admin" component={Admin} />
                 <Route path="/dashboard" component={Dashboard} />
                 <Route path="/inbox" component={Inbox} />
+                <Route path="/missed-connections" component={MissedConnections} />
                 <Route component={NotFound} />
               </Switch>
             </main>

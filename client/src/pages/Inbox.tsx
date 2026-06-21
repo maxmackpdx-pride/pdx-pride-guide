@@ -4,45 +4,68 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 
+type Message = {
+  id: number;
+  fromUserId: number;
+  toUserId: number;
+  subject: string;
+  body: string;
+  isRead: boolean;
+  threadId: string;
+  contextType?: string;
+  contextLabel?: string | null;
+  createdAt: string;
+};
+
 export default function Inbox() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"inbox" | "sent">("inbox");
-  const [activeThread, setActiveThread] = useState<any | null>(null);
+  const [activeThread, setActiveThread] = useState<Message | null>(null);
   const [replyBody, setReplyBody] = useState("");
-  const [showCompose, setShowCompose] = useState(false);
-  const [composeTo, setComposeTo] = useState("");
-  const [composeSubject, setComposeSubject] = useState("");
-  const [composeBody, setComposeBody] = useState("");
-  const [sendError, setSendError] = useState("");
 
-  const { data: inbox = [] } = useQuery<any[]>({
+  const { data: inbox = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages/inbox"],
     queryFn: () => fetch("/api/messages/inbox").then(r => r.ok ? r.json() : []),
     enabled: !!user,
   });
 
-  const { data: sent = [] } = useQuery<any[]>({
+  const { data: sent = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages/sent"],
     queryFn: () => fetch("/api/messages/sent").then(r => r.ok ? r.json() : []),
     enabled: !!user,
   });
 
-  const { data: thread = [] } = useQuery<any[]>({
+  const { data: thread = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages/thread", activeThread?.threadId],
-    queryFn: () => fetch(`/api/messages/thread/${activeThread.threadId}`).then(r => r.json()),
+    queryFn: () => fetch(`/api/messages/thread/${activeThread!.threadId}`).then(r => r.ok ? r.json() : []),
     enabled: !!activeThread,
   });
 
-  const sendMsg = useMutation({
-    mutationFn: (body: any) => fetch("/api/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }).then(r => r.json()),
+  const replyMutation = useMutation({
+    mutationFn: (body: string) => fetch(`/api/messages/thread/${activeThread!.threadId}/reply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body }),
+    }).then(r => {
+      if (!r.ok) throw new Error("Reply failed");
+      return r.json();
+    }),
     onSuccess: () => {
+      setReplyBody("");
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
-      setReplyBody(""); setShowCompose(false);
-      setComposeTo(""); setComposeSubject(""); setComposeBody("");
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread?.threadId] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (threadId: string) => fetch(`/api/messages/thread/${threadId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      setActiveThread(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
     },
   });
 
@@ -57,81 +80,33 @@ export default function Inbox() {
   }
 
   const msgs = tab === "inbox" ? inbox : sent;
-  const unreadCount = inbox.filter((m: any) => !m.isRead).length;
+  const unreadCount = inbox.filter(m => !m.isRead).length;
 
-  const openThread = (msg: any) => {
+  const openThread = (msg: Message) => {
     setActiveThread(msg);
     if (!msg.isRead && tab === "inbox") {
-      fetch(`/api/messages/${msg.id}/read`, { method: "PUT" });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      fetch(`/api/messages/${msg.id}/read`, { method: "PUT" }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+      });
     }
-  };
-
-  const handleReply = async () => {
-    if (!replyBody.trim() || !activeThread) return;
-    const toId = tab === "inbox" ? activeThread.fromUserId : activeThread.toUserId;
-    await sendMsg.mutateAsync({
-      toUserId: toId,
-      subject: `Re: ${activeThread.subject}`,
-      body: replyBody,
-      threadId: activeThread.threadId,
-    });
-    queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread.threadId] });
-  };
-
-  const handleCompose = async () => {
-    setSendError("");
-    if (!composeTo || !composeBody) { setSendError("Recipient and message required."); return; }
-    // Look up user by username
-    const userRes = await fetch(`/api/users/by-username/${composeTo}`);
-    if (!userRes.ok) { setSendError("User not found."); return; }
-    const toUser = await userRes.json();
-    await sendMsg.mutateAsync({ toUserId: toUser.id, subject: composeSubject, body: composeBody });
   };
 
   return (
     <div style={{ background: "#000", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px" }}>
-
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "48px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+          <div>
             <h1 className="display" style={{ fontSize: "2.2rem", color: "#CCFF00" }}>INBOX</h1>
-            {unreadCount > 0 && (
-              <span style={{
-                background: "#FF00CC", color: "#fff", borderRadius: "50%",
-                width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.75rem",
-              }}>{unreadCount}</span>
-            )}
+            <p style={{ color: "#555", fontSize: "0.85rem", marginTop: 6 }}>
+              Private threads from missed connections, Pride Work posts, event hosts, and check-ins.
+            </p>
           </div>
-          <button onClick={() => setShowCompose(true)} style={{
-            fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem",
-            letterSpacing: "0.1em", textTransform: "uppercase",
-            background: "#CCFF00", color: "#000", border: "2px solid #000",
-            padding: "10px 20px", cursor: "pointer", boxShadow: "3px 3px 0 #000",
-          }}>+ NEW MESSAGE</button>
+          {unreadCount > 0 && (
+            <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{unreadCount} UNREAD</span>
+          )}
         </div>
 
-        {/* Compose modal */}
-        {showCompose && (
-          <div style={{ marginBottom: 28, background: "#0a0a0a", border: "2px solid #CCFF00", padding: "24px 28px" }}>
-            <h3 className="display" style={{ color: "#CCFF00", fontSize: "1rem", marginBottom: 16 }}>NEW MESSAGE</h3>
-            <label style={labelStyle}>TO (USERNAME)</label>
-            <input style={inputStyle} value={composeTo} onChange={e => setComposeTo(e.target.value)} placeholder="their_username" />
-            <label style={labelStyle}>SUBJECT</label>
-            <input style={inputStyle} value={composeSubject} onChange={e => setComposeSubject(e.target.value)} placeholder="What's up?" />
-            <label style={labelStyle}>MESSAGE</label>
-            <textarea style={{ ...inputStyle, minHeight: 100, resize: "vertical" }} value={composeBody} onChange={e => setComposeBody(e.target.value)} placeholder="Write your message..." />
-            {sendError && <div style={{ color: "#FF2400", fontSize: "0.82rem", marginTop: 8 }}>{sendError}</div>}
-            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              <button onClick={handleCompose} style={btnStyle}>SEND →</button>
-              <button onClick={() => setShowCompose(false)} style={{ ...btnStyle, background: "transparent", color: "#555", border: "2px solid #333" }}>CANCEL</button>
-            </div>
-          </div>
-        )}
-
-        {/* Tabs */}
         <div style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
           {(["inbox", "sent"] as const).map(t => (
             <button key={t} onClick={() => { setTab(t); setActiveThread(null); }} style={{
@@ -145,49 +120,48 @@ export default function Inbox() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: activeThread ? "1fr 1fr" : "1fr", gap: 16 }}>
-          {/* Message list */}
+        <div style={{ display: "grid", gridTemplateColumns: activeThread ? "minmax(0, 1fr) minmax(0, 1fr)" : "1fr", gap: 16 }}>
           <div>
             {msgs.length === 0 ? (
-              <div style={{ color: "#444", padding: "24px 0" }}>No messages yet.</div>
-            ) : (
-              msgs.map((msg: any) => (
-                <div key={msg.id} onClick={() => openThread(msg)} style={{
-                  padding: "14px 18px", borderBottom: "1px solid #111",
-                  cursor: "pointer", background: activeThread?.id === msg.id ? "#0d0d0d" : "transparent",
-                  display: "flex", gap: 12, alignItems: "flex-start",
-                  transition: "background 0.1s",
-                }}
-                  onMouseEnter={e => { if (activeThread?.id !== msg.id) e.currentTarget.style.background = "#080808"; }}
-                  onMouseLeave={e => { if (activeThread?.id !== msg.id) e.currentTarget.style.background = "transparent"; }}
-                >
-                  {!msg.isRead && tab === "inbox" && (
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF00CC", marginTop: 6, flexShrink: 0 }} />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.88rem", color: "#fff", marginBottom: 2 }}>
-                      {msg.subject || "(no subject)"}
-                    </div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {tab === "inbox" ? `from user #${msg.fromUserId}` : `to user #${msg.toUserId}`} · {msg.body.substring(0, 60)}{msg.body.length > 60 ? "..." : ""}
-                    </div>
-                    <div style={{ fontSize: "0.7rem", color: "#333", marginTop: 4 }}>
-                      {new Date(msg.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+              <div style={{ color: "#444", padding: "24px 0" }}>No scoped messages yet.</div>
+            ) : msgs.map(msg => (
+              <button key={msg.id} onClick={() => openThread(msg)} style={{
+                width: "100%", textAlign: "left", padding: "14px 18px", border: "none", borderBottom: "1px solid #111",
+                cursor: "pointer", background: activeThread?.id === msg.id ? "#0d0d0d" : "transparent",
+                display: "flex", gap: 12, alignItems: "flex-start",
+              }}>
+                {!msg.isRead && tab === "inbox" && <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF00CC", marginTop: 6, flexShrink: 0 }} />}
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="display" style={{ display: "block", fontSize: "0.88rem", color: "#fff", marginBottom: 3 }}>
+                    {msg.subject || "(no subject)"}
+                  </span>
+                  {msg.contextLabel && <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>{msg.contextLabel}</span>}
+                  <span style={{ display: "block", fontSize: "0.78rem", color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {tab === "inbox" ? `from user #${msg.fromUserId}` : `to user #${msg.toUserId}`} · {msg.body.substring(0, 70)}{msg.body.length > 70 ? "..." : ""}
+                  </span>
+                  <span style={{ display: "block", fontSize: "0.7rem", color: "#333", marginTop: 4 }}>
+                    {new Date(msg.createdAt).toLocaleString()}
+                  </span>
+                </span>
+              </button>
+            ))}
           </div>
 
-          {/* Thread view */}
           {activeThread && (
-            <div style={{ background: "#060606", border: "1px solid #1a1a1a", padding: "20px" }}>
-              <div className="display" style={{ fontSize: "1rem", color: "#fff", marginBottom: 16 }}>
-                {activeThread.subject || "(no subject)"}
+            <div style={{ background: "#060606", border: "1px solid #1a1a1a", padding: 20 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+                <div>
+                  <div className="display" style={{ fontSize: "1rem", color: "#fff" }}>{activeThread.subject || "(no subject)"}</div>
+                  {activeThread.contextType && (
+                    <div style={{ color: "#555", fontSize: "0.75rem", marginTop: 4 }}>{activeThread.contextType.replaceAll("_", " ")}</div>
+                  )}
+                </div>
+                <button onClick={() => deleteMutation.mutate(activeThread.threadId)} style={{ background: "transparent", border: "1px solid #333", color: "#666", padding: "5px 10px", cursor: "pointer" }}>
+                  Delete
+                </button>
               </div>
-              <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 16 }}>
-                {thread.map((m: any) => (
+              <div style={{ maxHeight: 330, overflowY: "auto", marginBottom: 16 }}>
+                {thread.map(m => (
                   <div key={m.id} style={{
                     marginBottom: 12, padding: "10px 14px",
                     background: m.fromUserId === user.id ? "#0a0a0a" : "#111",
@@ -201,31 +175,28 @@ export default function Inbox() {
                 ))}
               </div>
               <textarea
-                style={{ ...inputStyle, minHeight: 80, resize: "vertical" }}
-                placeholder="Write a reply..."
+                style={inputStyle}
+                placeholder="Write a private reply..."
                 value={replyBody}
                 onChange={e => setReplyBody(e.target.value)}
               />
-              <button onClick={handleReply} style={{ ...btnStyle, marginTop: 10 }}>REPLY →</button>
+              <button onClick={() => replyMutation.mutate(replyBody)} disabled={!replyBody.trim() || replyMutation.isPending} style={{ ...btnStyle, marginTop: 10, opacity: !replyBody.trim() || replyMutation.isPending ? 0.5 : 1 }}>
+                {replyMutation.isPending ? "SENDING..." : "REPLY →"}
+              </button>
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
 }
 
-const labelStyle: React.CSSProperties = {
-  display: "block", fontFamily: "var(--font-display)", fontWeight: 900,
-  fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase",
-  color: "#666", marginBottom: 6, marginTop: 14,
-};
 const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "10px 12px", border: "1px solid #333",
+  width: "100%", minHeight: 80, padding: "10px 12px", border: "1px solid #333",
   fontSize: "0.9rem", background: "#0d0d0d", color: "#fff",
-  fontFamily: "var(--font-body)", boxSizing: "border-box",
+  fontFamily: "var(--font-body)", boxSizing: "border-box", resize: "vertical",
 };
+
 const btnStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem",
   letterSpacing: "0.1em", textTransform: "uppercase",

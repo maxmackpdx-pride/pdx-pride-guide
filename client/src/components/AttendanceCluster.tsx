@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "./AuthModal";
 
 const SPEECH_OPTIONS = [
-  "Hey, I'll be there!",
+  "Hey, I'm working here!",
   "Hey, come say hi!",
   "Hey, I just have RBF but really come say hi!",
   "Hey, come say hi — I don't bite (unless asked)",
@@ -32,9 +34,12 @@ function initials(handle: string): string {
 
 interface Attendee {
   id: number;
+  userId?: number;
   handle: string;
   message: string;
   avatarSeed: string;
+  userPhotoUrl?: string | null;
+  photoUrl?: string | null;
 }
 
 interface BubbleState {
@@ -48,11 +53,14 @@ interface BubbleState {
 }
 
 export default function AttendanceCluster({ eventId }: { eventId: number }) {
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
-  const [handle, setHandle] = useState("");
   const [selectedMessage, setSelectedMessage] = useState(SPEECH_OPTIONS[0]);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [bubbles, setBubbles] = useState<BubbleState[]>([]);
+  const [showAuth, setShowAuth] = useState(false);
+  const [messageTarget, setMessageTarget] = useState<Attendee | null>(null);
+  const [messageBody, setMessageBody] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastRandomizeRef = useRef<number>(Date.now());
@@ -63,12 +71,25 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: { handle: string; message: string }) =>
+    mutationFn: (data: { message: string }) =>
       apiRequest("POST", `/api/events/${eventId}/attendance`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       setShowForm(false);
-      setHandle("");
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/events/${eventId}/attendance`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] }),
+  });
+
+  const messageMutation = useMutation({
+    mutationFn: ({ attendanceId, body }: { attendanceId: number; body: string }) =>
+      apiRequest("POST", `/api/events/${eventId}/attendance/${attendanceId}/message`, { body }),
+    onSuccess: () => {
+      setMessageTarget(null);
+      setMessageBody("");
     },
   });
 
@@ -143,9 +164,10 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!handle.trim()) return;
-    mutation.mutate({ handle: handle.trim(), message: selectedMessage });
+    mutation.mutate({ message: selectedMessage });
   };
+
+  const myAttendance = attendees.find(a => a.userId === user?.id);
 
   return (
     <div
@@ -160,16 +182,16 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
         <div>
           <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00", fontSize: "0.6rem" }}>
-            {attendees.length} GOING
+            {attendees.length} PEOPLE HERE
           </span>
           <h3 className="display" style={{ fontSize: "1.4rem", color: "#fff", margin: "6px 0 0" }}>
-            HEY, I'LL BE THERE
+            I'M HERE
           </h3>
         </div>
         {!showForm && (
           <button
             data-testid="button-ill-be-there"
-            onClick={() => setShowForm(true)}
+            onClick={() => user ? setShowForm(true) : setShowAuth(true)}
             className="display"
             style={{
               background: "transparent",
@@ -191,7 +213,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
               (e.target as HTMLButtonElement).style.color = "#CCFF00";
             }}
           >
-            + I'LL BE THERE
+            {myAttendance ? "CHANGE MY VIBE" : "I'M HERE"}
           </button>
         )}
       </div>
@@ -243,6 +265,13 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                 }}
               >
                 {initials(b.attendee.handle)}
+                {(b.attendee.userPhotoUrl || b.attendee.photoUrl) && (
+                  <img
+                    src={(b.attendee.userPhotoUrl || b.attendee.photoUrl)!}
+                    alt=""
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                  />
+                )}
 
                 {/* Speech bubble on hover */}
                 {isHovered && (
@@ -265,7 +294,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       textAlign: "center",
                       lineHeight: 1.3,
                       zIndex: 30,
-                      pointerEvents: "none",
+                      pointerEvents: "auto",
                       boxShadow: "3px 3px 0 #000",
                     }}
                   >
@@ -273,6 +302,25 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       {b.attendee.handle}
                     </span>
                     {b.attendee.message}
+                    {user && b.attendee.userId && b.attendee.userId !== user.id && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
+                        style={{
+                          display: "block",
+                          margin: "6px auto 0",
+                          border: "1px solid #000",
+                          background: "#CCFF00",
+                          color: "#000",
+                          fontFamily: "var(--font-display)",
+                          fontWeight: 900,
+                          fontSize: "0.62rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        MESSAGE
+                      </button>
+                    )}
                     {/* Tail */}
                     <div style={{
                       position: "absolute",
@@ -295,7 +343,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
       {attendees.length === 0 && !showForm && (
         <div style={{ textAlign: "center", padding: "20px 0", color: "#444" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO SAY YOU'RE GOING</p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO CHECK IN</p>
         </div>
       )}
 
@@ -338,30 +386,10 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
             ))}
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <input
-              type="text"
-              data-testid="input-handle"
-              placeholder="Your handle or name"
-              value={handle}
-              onChange={e => setHandle(e.target.value)}
-              maxLength={30}
-              style={{
-                flex: "1 1 160px",
-                padding: "8px 12px",
-                background: "#000",
-                border: "1px solid #333",
-                color: "#fff",
-                fontSize: "0.85rem",
-                fontFamily: "var(--font-body)",
-                outline: "none",
-              }}
-              onFocus={e => (e.target.style.borderColor = "#CCFF00")}
-              onBlur={e => (e.target.style.borderColor = "#333")}
-            />
             <button
               type="submit"
               data-testid="button-submit-attendance"
-              disabled={mutation.isPending || !handle.trim()}
+              disabled={mutation.isPending}
               className="display"
               style={{
                 padding: "9px 20px",
@@ -370,13 +398,29 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                 color: "#000",
                 fontSize: "0.85rem",
                 cursor: "pointer",
-                opacity: mutation.isPending || !handle.trim() ? 0.5 : 1,
+                opacity: mutation.isPending ? 0.5 : 1,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
               }}
             >
-              {mutation.isPending ? "ADDING..." : "I'M IN"}
+              {mutation.isPending ? "SAVING..." : myAttendance ? "UPDATE VIBE" : "I'M HERE"}
             </button>
+            {myAttendance && (
+              <button
+                type="button"
+                onClick={() => removeMutation.mutate()}
+                style={{
+                  padding: "9px 14px",
+                  background: "transparent",
+                  border: "1px solid #FF2400",
+                  color: "#FF2400",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                }}
+              >
+                REMOVE ME
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowForm(false)}
@@ -394,6 +438,33 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
           </div>
         </form>
       )}
+      {messageTarget && (
+        <div style={{ marginTop: 14, border: "1px solid #333", background: "#090909", padding: 14 }}>
+          <p className="display" style={{ color: "#CCFF00", fontSize: "0.9rem", marginBottom: 8 }}>
+            MESSAGE {messageTarget.handle}
+          </p>
+          <textarea
+            value={messageBody}
+            onChange={e => setMessageBody(e.target.value)}
+            placeholder={`Reply to: ${messageTarget.message}`}
+            style={{ width: "100%", minHeight: 72, background: "#000", color: "#fff", border: "1px solid #333", padding: 10, boxSizing: "border-box" }}
+          />
+          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <button
+              onClick={() => messageTarget && messageMutation.mutate({ attendanceId: messageTarget.id, body: messageBody })}
+              disabled={!messageBody.trim() || messageMutation.isPending}
+              className="display"
+              style={{ background: "#CCFF00", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer" }}
+            >
+              SEND
+            </button>
+            <button onClick={() => setMessageTarget(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px" }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

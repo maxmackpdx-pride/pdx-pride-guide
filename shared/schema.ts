@@ -138,9 +138,12 @@ export type ModerationRequest = typeof moderationRequests.$inferSelect;
 export const attendances = sqliteTable("attendances", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   eventId: integer("event_id").notNull(),
+  userId: integer("user_id"),
   handle: text("handle").notNull(), // display name / handle
   message: text("message").notNull(), // chosen speech bubble
   avatarSeed: text("avatar_seed").notNull(), // seed for deterministic avatar color/initials
+  photoUrl: text("photo_url"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(""),
 });
 
@@ -175,6 +178,27 @@ export const messages = sqliteTable("messages", {
   body: text("body").notNull(),
   isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
   threadId: text("thread_id").notNull(), // group replies
+  contextType: text("context_type").notNull().default("THREAD"), // MISSED_CONNECTION | GIG | EVENT_HOST | CHECK_IN | THREAD
+  contextId: integer("context_id"),
+  contextLabel: text("context_label"),
+  deletedByFrom: integer("deleted_by_from", { mode: "boolean" }).notNull().default(false),
+  deletedByTo: integer("deleted_by_to", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull().default(""),
 });
 export type Message = typeof messages.$inferSelect;
+
+// Missed Connections
+export const missedConnections = sqliteTable("missed_connections", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  dayOfWeek: text("day_of_week"),
+  venueHint: text("venue_hint"),
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE | ARCHIVED | DELETED
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertMissedConnectionSchema = createInsertSchema(missedConnections).omit({ id: true, createdAt: true, status: true });
+export type InsertMissedConnection = z.infer<typeof insertMissedConnectionSchema>;
+export type MissedConnection = typeof missedConnections.$inferSelect;

@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,6 +39,7 @@ interface GigPost {
   isRemote: boolean | null;
   status: string;
   createdAt: string;
+  userId?: number | null;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -51,7 +54,9 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function PrideWork() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [filterType, setFilterType] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">("ALL");
 
   const { data: gigs = [], isLoading } = useQuery<GigPost[]>({
@@ -86,6 +91,14 @@ export default function PrideWork() {
     },
   });
 
+  const handlePostClick = () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    setShowForm(!showForm);
+  };
+
   const filteredGigs = gigs.filter(g =>
     filterType === "ALL" ? true : g.postType === filterType
   );
@@ -114,7 +127,7 @@ export default function PrideWork() {
             </div>
             <button
               data-testid="button-post-gig"
-              onClick={() => setShowForm(!showForm)}
+              onClick={handlePostClick}
               className="display text-lg px-6 py-3 border-2 transition-all"
               style={{
                 background: showForm ? "#CCFF00" : "transparent",
@@ -383,14 +396,35 @@ export default function PrideWork() {
           </div>
         )}
       </div>
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }
 
 function GigCard({ gig }: { gig: GigPost }) {
   const [expanded, setExpanded] = useState(false);
+  const { user } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
+  const [messageBody, setMessageBody] = useState("");
   const color = TYPE_COLORS[gig.postType] || "#fff";
   const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+  const messageMutation = useMutation({
+    mutationFn: () => fetch(`/api/gigs/${gig.id}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body: messageBody }),
+    }).then(r => {
+      if (!r.ok) throw new Error("Could not send message");
+      return r.json();
+    }),
+    onSuccess: () => {
+      setMessageBody("");
+      setShowMessage(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+    },
+  });
 
   return (
     <div
@@ -460,9 +494,41 @@ function GigCard({ gig }: { gig: GigPost }) {
             <p className="text-white/30 text-xs">
               Posted {new Date(gig.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </p>
+            {gig.userId !== user?.id && (
+              <button
+                type="button"
+                onClick={() => user ? setShowMessage(!showMessage) : setShowAuth(true)}
+                className="mt-4 display text-sm px-4 py-2 border-2"
+                style={{ color, borderColor: color }}
+              >
+                Reply to Post
+              </button>
+            )}
+            {showMessage && (
+              <div className="mt-4 p-4 border border-white/10 bg-black/40">
+                <textarea
+                  value={messageBody}
+                  onChange={e => setMessageBody(e.target.value)}
+                  placeholder={`Write a private reply about "${gig.title}"...`}
+                  className="w-full min-h-24 p-3 bg-black border border-white/20 text-white resize-y"
+                />
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => messageMutation.mutate()}
+                    disabled={!messageBody.trim() || messageMutation.isPending}
+                    className="display text-sm px-4 py-2"
+                    style={{ background: color, color: "#000", opacity: !messageBody.trim() || messageMutation.isPending ? 0.55 : 1 }}
+                  >
+                    {messageMutation.isPending ? "SENDING..." : "SEND"}
+                  </button>
+                  <button onClick={() => setShowMessage(false)} className="text-white/40 text-sm px-3 py-2 border border-white/10">Cancel</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

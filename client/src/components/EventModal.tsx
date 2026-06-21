@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
 import AttendanceCluster from "./AttendanceCluster";
+import AuthModal from "./AuthModal";
 
 const DAY_COLORS: Record<string, string> = {
   WED: "#CCFF00", THU: "#00FFFF", FRI: "#FF00CC", SAT: "#FF6600", SUN: "#FF2400"
@@ -13,8 +15,12 @@ type ModerationMode = null | "claim" | "remove";
 
 export default function EventModal({ event, onClose }: { event: Event; onClose: () => void }) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [modMode, setModMode] = useState<ModerationMode>(null);
   const [modForm, setModForm] = useState({ name: "", email: "", proof: "" });
+  const [showAuth, setShowAuth] = useState(false);
+  const [hostDrawer, setHostDrawer] = useState<"closed" | "compose" | "noHost">("closed");
+  const [hostMessage, setHostMessage] = useState("");
 
   const types = JSON.parse(event.eventTypes || "[]") as string[];
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
@@ -39,6 +45,35 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     },
     onError: () => {
       toast({ title: "Error", description: "Could not submit request.", variant: "destructive" });
+    },
+  });
+
+  const hostMutation = useMutation({
+    mutationFn: async (body: string) => {
+      const res = await fetch(`/api/events/${event.id}/message-host`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err = new Error(payload.error || "Could not send message") as Error & { code?: string };
+        err.code = payload.error;
+        throw err;
+      }
+      return payload;
+    },
+    onSuccess: () => {
+      toast({ title: "Message sent", description: "The host can reply in your inbox." });
+      setHostMessage("");
+      setHostDrawer("closed");
+    },
+    onError: (err: Error & { code?: string }) => {
+      if (err.code === "NO_HOST") {
+        setHostDrawer("noHost");
+        return;
+      }
+      toast({ title: "Error", description: err.message || "Could not send message.", variant: "destructive" });
     },
   });
 
@@ -176,7 +211,63 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               className="btn-neon" style={{ fontSize: "0.8rem", padding: "8px 16px" }}>
               Add to Calendar
             </a>
+            <button
+              type="button"
+              onClick={() => user ? setHostDrawer("compose") : setShowAuth(true)}
+              className="btn-neon"
+              style={{ fontSize: "0.8rem", padding: "8px 16px" }}
+            >
+              Message the Host
+            </button>
           </div>
+
+          {hostDrawer === "compose" && (
+            <div style={{ background: "#080808", border: "2px solid #00FFFF", padding: 16, marginTop: 16 }}>
+              <p className="display" style={{ color: "#00FFFF", fontSize: "0.95rem", marginBottom: 8 }}>
+                MESSAGE THE HOST
+              </p>
+              <textarea
+                value={hostMessage}
+                onChange={e => setHostMessage(e.target.value)}
+                rows={4}
+                placeholder={`Ask about ${event.title}...`}
+                style={{ width: "100%", boxSizing: "border-box", background: "#000", color: "#fff", border: "1px solid #333", padding: 10, fontFamily: "var(--font-body)", resize: "vertical" }}
+              />
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => hostMutation.mutate(hostMessage)}
+                  disabled={!hostMessage.trim() || hostMutation.isPending}
+                  className="display"
+                  style={{ background: "#00FFFF", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer", opacity: !hostMessage.trim() || hostMutation.isPending ? 0.55 : 1 }}
+                >
+                  {hostMutation.isPending ? "SENDING..." : "SEND"}
+                </button>
+                <button type="button" onClick={() => setHostDrawer("closed")} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {hostDrawer === "noHost" && (
+            <div style={{ background: "#080808", border: "2px solid #FF2400", padding: 16, marginTop: 16 }}>
+              <p className="display" style={{ color: "#FF2400", fontSize: "1rem", marginBottom: 8 }}>
+                NO HOST IS ATTACHED TO THIS EVENT YET
+              </p>
+              <p style={{ color: "#888", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 12 }}>
+                This event hasn't been claimed by an organizer. You may find contact info at the link below.
+              </p>
+              {event.ticketUrl && (
+                <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid" style={{ fontSize: "0.78rem", padding: "8px 14px" }}>
+                  Visit Event Link →
+                </a>
+              )}
+              <button type="button" onClick={() => setHostDrawer("closed")} style={{ marginLeft: 8, background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
+                Close
+              </button>
+            </div>
+          )}
 
           {/* Attendance cluster */}
           <AttendanceCluster eventId={event.id} />
@@ -279,6 +370,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
           )}
         </div>
       </div>
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

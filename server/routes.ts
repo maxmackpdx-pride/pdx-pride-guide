@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage, hashPassword } from "./storage";
-import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertAttendanceSchema } from "@shared/schema";
+import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema } from "@shared/schema";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -41,6 +41,12 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "dinoLeo!1";
 
 function publicEvent(evt: any) {
   const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
+  return safe;
+}
+
+function publicUser(user: any) {
+  if (!user) return null;
+  const { passwordHash, email, status, ...safe } = user;
   return safe;
 }
 
@@ -129,6 +135,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(mine);
   });
 
+  app.get("/api/events/mine/submitted", requireAuth, (req, res) => {
+    const user = storage.getUserById(req.session.userId!);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const mine = storage.getSubmissions().filter(s => s.submitterEmail === user.email);
+    res.json(mine);
+  });
+
+  app.get("/api/events/mine/check-ins", requireAuth, (req, res) => {
+    res.json(storage.getAttendancesByUser(req.session.userId!));
+  });
+
   // Owner edits a claimed event (all fields, goes back to pending review)
   app.put("/api/events/:id/edit", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
@@ -167,18 +184,38 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(list);
   });
 
-  app.post("/api/events/:id/attendance", (req, res) => {
+  app.post("/api/events/:id/attendance", requireAuth, (req, res) => {
     try {
-      const data = insertAttendanceSchema.parse({
-        ...req.body,
-        eventId: Number(req.params.id),
-        avatarSeed: req.body.handle + "_" + Date.now(),
-      });
-      const att = storage.createAttendance(data);
+      const user = storage.getUserById(req.session.userId!);
+      if (!user) return res.status(401).json({ error: "Not authenticated" });
+      const message = String(req.body.message || "").trim();
+      if (!message) return res.status(400).json({ error: "message required" });
+      const att = storage.upsertAttendance(Number(req.params.id), user, message);
       res.json(att);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
+  });
+
+  app.delete("/api/events/:id/attendance", requireAuth, (req, res) => {
+    storage.removeAttendance(Number(req.params.id), req.session.userId!);
+    res.json({ ok: true });
+  });
+
+  app.post("/api/events/:eventId/attendance/:attendanceId/message", requireAuth, (req, res) => {
+    const list = storage.getAttendances(Number(req.params.eventId));
+    const att = list.find((a: any) => a.id === Number(req.params.attendanceId));
+    if (!att?.userId) return res.status(404).json({ error: "Check-in not found" });
+    if (att.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+    const body = String(req.body.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    const evt = storage.getEvent(Number(req.params.eventId));
+    const msg = storage.sendMessage(req.session.userId!, Number(att.userId), `Check-in: ${evt?.title || "Event"}`, body, {
+      contextType: "CHECK_IN",
+      contextId: Number(req.params.eventId),
+      contextLabel: evt?.title || null,
+    });
+    res.json(msg);
   });
 
   // ─── GIGS ─────────────────────────────────────────────────────────────────
@@ -187,15 +224,29 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(gigs);
   });
 
-  app.post("/api/gigs", (req, res) => {
+  app.post("/api/gigs", requireAuth, (req, res) => {
     try {
       const data = insertGigPostSchema.parse(req.body);
-      const userId = req.session?.userId;
-      const gig = storage.createGigPost({ ...data, userId: userId || null } as any);
+      const userId = req.session.userId!;
+      const gig = storage.createGigPost({ ...data, userId } as any);
       res.json(gig);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
+  });
+
+  app.post("/api/gigs/:id/message", requireAuth, (req, res) => {
+    const gig = storage.getGigPosts().find(g => g.id === Number(req.params.id));
+    if (!gig?.userId) return res.status(404).json({ error: "Host not available" });
+    if (gig.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+    const body = String(req.body.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    const msg = storage.sendMessage(req.session.userId!, gig.userId, `Gig Board: ${gig.title}`, body, {
+      contextType: "GIG",
+      contextId: gig.id,
+      contextLabel: gig.title,
+    });
+    res.json(msg);
   });
 
   // User's own gig posts
@@ -280,20 +331,6 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
-  // Look up user by username (for inbox compose)
-  app.get("/api/users/by-username/:username", (req, res) => {
-    const user = storage.getUserByUsername(req.params.username);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ id: user.id, username: user.username, displayName: user.displayName, avatarChoice: user.avatarChoice });
-  });
-
-  // Public user profile
-  app.get("/api/users/:id", (req, res) => {
-    const user = storage.getUserById(Number(req.params.id));
-    if (!user) return res.status(404).json({ error: "Not found" });
-    res.json({ id: user.id, username: user.username, displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio });
-  });
-
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
     const { displayName, avatarChoice, bio } = req.body;
@@ -306,7 +343,60 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
+  // ─── MISSED CONNECTIONS ──────────────────────────────────────────────────
+  app.get("/api/missed-connections", requireAuth, (req, res) => {
+    res.json(storage.getMissedConnections("ACTIVE"));
+  });
+
+  app.get("/api/missed-connections/mine", requireAuth, (req, res) => {
+    res.json(storage.getMissedConnectionsByUser(req.session.userId!));
+  });
+
+  app.post("/api/missed-connections", requireAuth, (req, res) => {
+    try {
+      const data = insertMissedConnectionSchema.parse({ ...req.body, userId: req.session.userId! });
+      if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
+      res.json(storage.createMissedConnection(data));
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.put("/api/missed-connections/:id", requireAuth, (req, res) => {
+    const patch: any = {};
+    ["title", "body", "dayOfWeek", "venueHint", "status"].forEach(k => {
+      if (req.body[k] !== undefined) patch[k] = req.body[k];
+    });
+    if (patch.body && patch.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
+    const updated = storage.updateMissedConnection(Number(req.params.id), req.session.userId!, patch);
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
+  });
+
+  app.delete("/api/missed-connections/:id", requireAuth, (req, res) => {
+    storage.deleteMissedConnection(Number(req.params.id), req.session.userId!);
+    res.json({ ok: true });
+  });
+
+  app.post("/api/missed-connections/:id/reply", requireAuth, (req, res) => {
+    const post = storage.getMissedConnections("ACTIVE").find((m: any) => m.id === Number(req.params.id));
+    if (!post) return res.status(404).json({ error: "Not found" });
+    if (post.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+    const body = String(req.body.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    const msg = storage.sendMessage(req.session.userId!, post.userId, `Missed Connection: ${post.title}`, body, {
+      contextType: "MISSED_CONNECTION",
+      contextId: post.id,
+      contextLabel: post.title,
+    });
+    res.json(msg);
+  });
+
   // ─── MESSAGES ────────────────────────────────────────────────────────────
+  app.get("/api/messages/unread-count", requireAuth, (req, res) => {
+    res.json({ count: storage.getUnreadCount(req.session.userId!) });
+  });
+
   app.get("/api/messages/inbox", requireAuth, (req, res) => {
     const inbox = storage.getInbox(req.session.userId!);
     res.json(inbox);
@@ -317,10 +407,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(sent);
   });
 
-  app.post("/api/messages", requireAuth, (req, res) => {
-    const { toUserId, subject, body } = req.body;
-    if (!toUserId || !body) return res.status(400).json({ error: "toUserId and body required" });
-    const msg = storage.sendMessage(req.session.userId!, Number(toUserId), subject || "", body);
+  app.post("/api/messages/thread/:threadId/reply", requireAuth, (req, res) => {
+    const thread = storage.getThread(req.params.threadId);
+    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
+    if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
+    const first = thread[0] as any;
+    const last = thread[thread.length - 1] as any;
+    const toUserId = last.fromUserId === req.session.userId ? last.toUserId : last.fromUserId;
+    const body = String(req.body.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    const msg = storage.sendMessage(req.session.userId!, toUserId, first.subject || "Reply", body, {
+      threadId: req.params.threadId,
+      contextType: first.contextType || "THREAD",
+      contextId: first.contextId || null,
+      contextLabel: first.contextLabel || null,
+    });
     res.json(msg);
   });
 
@@ -331,7 +432,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/messages/thread/:threadId", requireAuth, (req, res) => {
     const thread = storage.getThread(req.params.threadId);
+    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
+    if (!visible) return res.status(404).json({ error: "Thread not found" });
     res.json(thread);
+  });
+
+  app.delete("/api/messages/thread/:threadId", requireAuth, (req, res) => {
+    storage.softDeleteThread(req.params.threadId, req.session.userId!);
+    res.json({ ok: true });
+  });
+
+  app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    if (!evt.claimedBy) return res.status(400).json({ error: "NO_HOST", ticketUrl: evt.ticketUrl });
+    const host = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
+    if (!host) return res.status(400).json({ error: "NO_HOST", ticketUrl: evt.ticketUrl });
+    if (host.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+    const body = String(req.body.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    const msg = storage.sendMessage(req.session.userId!, host.id, `Event: ${evt.title}`, body, {
+      contextType: "EVENT_HOST",
+      contextId: evt.id,
+      contextLabel: evt.title,
+    });
+    res.json(msg);
   });
 
   // ─── PROMOTER AUTH ────────────────────────────────────────────────────────
