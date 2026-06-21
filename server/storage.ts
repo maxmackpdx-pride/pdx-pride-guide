@@ -165,7 +165,7 @@ function seedData() {
 
   // Force re-seed if old fake events, no lat/lng, no poster images, or event count too low (new events added)
   if (existing.length > 0) {
-    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 22;
+    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 23;
     if (needsReseed) {
       sqlite.exec(`DELETE FROM events`);
       sqlite.exec(`DELETE FROM attendances`);
@@ -408,8 +408,25 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Bearracuda Double Pride — Night 1",
-      description: "Two-night Pride dance party at Nova PDX. One of the longest-running bear & friends club nights in the country. Night 1 of 2.",
+      title: "Treasure Trail Portland Pride",
+      description: "Bearracuda's Pride Thursday kick-off at Sanctuary. DJ TIGERBEATZ (Seattle), hosted by JP Hardy. Wristband color system at the door (red=top, blue=vers, green=bottom, white=side). Venmo tickets available with no surcharge.",
+      venueName: "Sanctuary",
+      address: "33 NW 9th Ave, Portland, OR 97209",
+      neighborhood: "Pearl District",
+      lat: 45.5246, lng: -122.6787,
+      dateStart: "2026-07-17T20:00:00", dateEnd: "2026-07-18T02:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "BEAR"]),
+      admission: "TICKETED",
+      ticketUrl: "https://bearracuda.com/events/treasurepdx/",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: "/posters/treasure-trail-portland-pride.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Bearracuda Portland Pride Friday",
+      description: "Bearracuda's Pride Friday night at Nova PDX. One of the longest-running bear & friends club nights in the country — all admirers and respectful partygoers welcome.",
       venueName: "Nova PDX",
       address: "18 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
@@ -419,14 +436,14 @@ function seedData() {
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "DANCE", "BEAR"]),
       admission: "TICKETED",
-      ticketUrl: "https://novapdxevents.com",
+      ticketUrl: "https://bearracuda.com/events/portland-pridefriday/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/bearracuda-pride-friday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Bearracuda Double Pride — Night 2",
-      description: "Two-night Pride dance party at Nova PDX. One of the longest-running bear & friends club nights in the country. Night 2 of 2.",
+      title: "Bearracuda Portland Pride Saturday",
+      description: "Bearracuda's Pride Saturday night at Nova PDX. Final tier tickets. All admirers and respectful partygoers welcome.",
       venueName: "Nova PDX",
       address: "18 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
@@ -436,9 +453,9 @@ function seedData() {
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "DANCE", "BEAR"]),
       admission: "TICKETED",
-      ticketUrl: "https://novapdxevents.com",
+      ticketUrl: "https://bearracuda.com/events/portland-pride-saturday/",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/bearracuda-pride-saturday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -576,7 +593,7 @@ function seedData() {
     "Hey, let's be awkward together",
   ];
   const handles = ["queercat", "neonbabe", "velvethaze", "crushpunk", "stardust", "wildthing", "radtrans", "badfemme"];
-  for (let eventId = 1; eventId <= 22; eventId++) {
+  for (let eventId = 1; eventId <= 23; eventId++) {
     const count = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       db.insert(attendances).values({
