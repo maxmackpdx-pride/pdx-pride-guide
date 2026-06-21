@@ -3,12 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "../components/EventModal";
-import { List, Grid, MapPin } from "lucide-react";
+import { List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// THU–SUN only — no WED, no MULTI
 const DAY_COLORS: Record<string, string> = {
   THU: "#00FFFF",
   FRI: "#FF00CC",
@@ -18,11 +17,8 @@ const DAY_COLORS: Record<string, string> = {
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
 const TYPE_FILTERS = ["FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PARTY", "SEX POSITIVE", "NUDITY OK"];
 
-// Portland, OR center
 const PDX_CENTER: [number, number] = [45.5231, -122.6765];
 const PDX_ZOOM = 12;
-
-// CartoDB Dark Matter — already dark, white streets, no filter needed
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
 // ── Pin icon builder ────────────────────────────────────────────────────────
@@ -33,21 +29,11 @@ function buildPinIcon(days: string[]) {
   if (days.length === 1) {
     const color = DAY_COLORS[days[0]] || "#CCFF00";
     return divIcon({
-      html: `<div style="
-        width:${SIZE}px;height:${SIZE}px;
-        background:${color};
-        border:2.5px solid #000;
-        border-radius:50%;
-        box-shadow:0 0 10px ${color}bb,0 2px 6px rgba(0,0,0,0.8);
-      "></div>`,
-      iconSize: [SIZE, SIZE],
-      iconAnchor: [R, R],
-      popupAnchor: [0, -R - 4],
-      className: "",
+      html: `<div style="width:${SIZE}px;height:${SIZE}px;background:${color};border:2.5px solid #000;border-radius:50%;box-shadow:0 0 10px ${color}bb,0 2px 6px rgba(0,0,0,0.8);"></div>`,
+      iconSize: [SIZE, SIZE], iconAnchor: [R, R], popupAnchor: [0, -R - 4], className: "",
     });
   }
 
-  // Multi-day: pie slices
   const n = days.length;
   const sliceAngle = (2 * Math.PI) / n;
   let paths = "";
@@ -64,23 +50,14 @@ function buildPinIcon(days: string[]) {
   });
 
   return divIcon({
-    html: `<div style="width:${SIZE}px;height:${SIZE}px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8));">
-      <svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-        ${paths}
-        <circle cx="${R}" cy="${R}" r="${R - 1}" fill="none" stroke="#000" stroke-width="2"/>
-      </svg>
-    </div>`,
-    iconSize: [SIZE, SIZE],
-    iconAnchor: [R, R],
-    popupAnchor: [0, -R - 4],
-    className: "",
+    html: `<div style="width:${SIZE}px;height:${SIZE}px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8));"><svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${paths}<circle cx="${R}" cy="${R}" r="${R - 1}" fill="none" stroke="#000" stroke-width="2"/></svg></div>`,
+    iconSize: [SIZE, SIZE], iconAnchor: [R, R], popupAnchor: [0, -R - 4], className: "",
   });
 }
 
-// ── Markers layer — child of MapContainer so it has map context ─────────────
+// ── Markers layer ───────────────────────────────────────────────────────────
 function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Event) => void }) {
-  useMap(); // ensures we're inside MapContainer context
-
+  useMap();
   const byVenue = useMemo(() => {
     const groups: Record<string, Event[]> = {};
     events.forEach(e => {
@@ -99,28 +76,16 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
         const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
         const icon = buildPinIcon(days);
         const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
-
         return (
           <Marker key={key} position={[lat, lng]} icon={icon}>
             <Popup className="pdx-popup" maxWidth={240}>
               <div style={{ background: "#0d0d0d", color: "#fff", padding: "10px 12px", fontFamily: "sans-serif", minWidth: 180 }}>
-                <div style={{ color: primaryColor, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
-                  {evts[0].venueName}
-                </div>
-                {evts[0].address && (
-                  <div style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>{evts[0].address}</div>
-                )}
+                <div style={{ color: primaryColor, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{evts[0].venueName}</div>
+                {evts[0].address && <div style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>{evts[0].address}</div>}
                 {evts.map(e => {
                   const dc = DAY_COLORS[e.dayOfWeek || ""] || "#fff";
                   return (
-                    <div
-                      key={e.id}
-                      onClick={() => onSelect(e)}
-                      style={{
-                        fontSize: 11, color: "#aaa", padding: "5px 0",
-                        borderTop: "1px solid #1a1a1a", cursor: "pointer",
-                      }}
-                    >
+                    <div key={e.id} onClick={() => onSelect(e)} style={{ fontSize: 11, color: "#aaa", padding: "5px 0", borderTop: "1px solid #1a1a1a", cursor: "pointer" }}>
                       <span style={{ color: dc, fontWeight: 700, marginRight: 4 }}>{e.dayOfWeek}</span>
                       {e.title}
                     </div>
@@ -135,75 +100,117 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
   );
 }
 
-// ── Map view — only mounted once visible to avoid Leaflet display:none bug ──
-function MapView({ events, visible, onSelect }: { events: Event[]; visible: boolean; onSelect: (e: Event) => void }) {
-  const [mounted, setMounted] = useState(false);
-
+// Fires invalidateSize after expand/collapse transition
+function MapResizer({ expanded }: { expanded: boolean }) {
+  const map = useMap();
   useEffect(() => {
-    if (visible && !mounted) setMounted(true);
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+    const t1 = setTimeout(() => map.invalidateSize(), 50);
+    const t2 = setTimeout(() => map.invalidateSize(), 350);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [expanded]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
+// ── Map panel — half-height by default, expands to fullscreen ──────────────
+function MapView({ events, expanded, onToggleExpand, onSelect }: {
+  events: Event[];
+  expanded: boolean;
+  onToggleExpand: () => void;
+  onSelect: (e: Event) => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   return (
-    <div style={{ display: visible ? "block" : "none", position: "relative" }}>
-      <style>{`
-        .pdx-popup .leaflet-popup-content-wrapper {
-          background: #0d0d0d !important;
-          border: 1.5px solid #333 !important;
-          border-radius: 0 !important;
-          box-shadow: 0 4px 24px rgba(0,0,0,0.9) !important;
-          padding: 0 !important;
-        }
-        .pdx-popup .leaflet-popup-content { margin: 0 !important; width: auto !important; }
-        .pdx-popup .leaflet-popup-tip-container { display: none; }
-        .leaflet-popup-close-button { color: #666 !important; top: 6px !important; right: 8px !important; }
-        .leaflet-control-attribution { background: rgba(0,0,0,0.65) !important; color: #444 !important; font-size: 9px !important; }
-        .leaflet-control-attribution a { color: #555 !important; }
-        .leaflet-control-zoom a { background: #111 !important; color: #CCFF00 !important; border-color: #333 !important; }
-        .leaflet-control-zoom a:hover { background: #222 !important; }
-      `}</style>
-      {mounted && (
-        <MapContainer
-          center={PDX_CENTER}
-          zoom={PDX_ZOOM}
-          style={{ height: "calc(100vh - 120px)", width: "100%", background: "#0a0a0a" }}
-          zoomControl={true}
-          attributionControl={true}
-        >
-          <TileLayer
-            url={DARK_TILE}
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            maxZoom={19}
-            subdomains="abcd"
-          />
-          <MarkersLayer events={events} onSelect={onSelect} />
-        </MapContainer>
+    <>
+      {/* Full-screen overlay backdrop when expanded */}
+      {expanded && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 998, background: "#000" }}
+          onClick={onToggleExpand}
+        />
       )}
-
-      {/* Legend */}
       <div style={{
-        position: "absolute", bottom: 28, right: 12, zIndex: 1000,
-        background: "rgba(0,0,0,0.92)", padding: "10px 14px",
-        border: "1.5px solid #CCFF00",
-        pointerEvents: "none",
+        position: expanded ? "fixed" : "relative",
+        top: expanded ? 0 : undefined,
+        left: expanded ? 0 : undefined,
+        right: expanded ? 0 : undefined,
+        bottom: expanded ? 0 : undefined,
+        zIndex: expanded ? 999 : 1,
+        height: expanded ? "100vh" : "42vh",
+        width: "100%",
+        borderBottom: expanded ? "none" : "2px solid #1a1a1a",
       }}>
-        {Object.entries(DAY_COLORS).map(([day, color]) => (
-          <div key={day} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-            <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", boxShadow: `0 0 6px ${color}` }} />
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>{day}</span>
+        <style>{`
+          .pdx-popup .leaflet-popup-content-wrapper { background:#0d0d0d !important; border:1.5px solid #333 !important; border-radius:0 !important; box-shadow:0 4px 24px rgba(0,0,0,0.9) !important; padding:0 !important; }
+          .pdx-popup .leaflet-popup-content { margin:0 !important; width:auto !important; }
+          .pdx-popup .leaflet-popup-tip-container { display:none; }
+          .leaflet-popup-close-button { color:#666 !important; top:6px !important; right:8px !important; }
+          .leaflet-control-attribution { background:rgba(0,0,0,0.65) !important; color:#444 !important; font-size:9px !important; }
+          .leaflet-control-attribution a { color:#555 !important; }
+          .leaflet-control-zoom a { background:#111 !important; color:#CCFF00 !important; border-color:#333 !important; }
+          .leaflet-control-zoom a:hover { background:#222 !important; }
+        `}</style>
+
+        {mounted && (
+          <MapContainer
+            center={PDX_CENTER}
+            zoom={PDX_ZOOM}
+            style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+            zoomControl={true}
+            attributionControl={true}
+          >
+            <TileLayer
+              url={DARK_TILE}
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              maxZoom={19}
+              subdomains="abcd"
+            />
+            <MarkersLayer events={events} onSelect={onSelect} />
+            <MapResizer expanded={expanded} />
+          </MapContainer>
+        )}
+
+        {/* Expand / collapse button */}
+        <button
+          onClick={onToggleExpand}
+          title={expanded ? "Collapse map" : "Expand map"}
+          style={{
+            position: "absolute", top: 10, right: expanded ? 60 : 10, zIndex: 1001,
+            background: "#000", border: "1.5px solid #CCFF00", color: "#CCFF00",
+            padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
+            fontFamily: "var(--font-display)", fontSize: "0.6rem", letterSpacing: "0.08em",
+          }}
+        >
+          {expanded ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+          {expanded ? "COLLAPSE" : "EXPAND"}
+        </button>
+
+        {/* Legend */}
+        <div style={{
+          position: "absolute", bottom: 28, right: 12, zIndex: 1000,
+          background: "rgba(0,0,0,0.92)", padding: "10px 14px",
+          border: "1.5px solid #CCFF00", pointerEvents: "none",
+        }}>
+          {Object.entries(DAY_COLORS).map(([day, color]) => (
+            <div key={day} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+              <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", boxShadow: `0 0 6px ${color}` }} />
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>{day}</span>
+            </div>
+          ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, paddingTop: 5, borderTop: "1px solid #222" }}>
+            <svg width="10" height="10" viewBox="0 0 10 10">
+              <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF"/>
+              <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600"/>
+              <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC"/>
+              <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill="#FF2400"/>
+              <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1"/>
+            </svg>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>MULTI-DAY</span>
           </div>
-        ))}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, paddingTop: 5, borderTop: "1px solid #222" }}>
-          <svg width="10" height="10" viewBox="0 0 10 10">
-            <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF"/>
-            <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600"/>
-            <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC"/>
-            <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill="#FF2400"/>
-            <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1"/>
-          </svg>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>MULTI-DAY</span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -379,7 +386,8 @@ export default function Events() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   const { data: events = [], isLoading } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -409,8 +417,13 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page">
-      {/* Map — always mounted, shown/hidden via CSS to avoid Leaflet reinit */}
-      <MapView events={filtered} visible={viewMode === "map"} onSelect={setSelectedEvent} />
+      {/* Map — always visible at top, half-height by default */}
+      <MapView
+        events={filtered}
+        expanded={mapExpanded}
+        onToggleExpand={() => setMapExpanded(p => !p)}
+        onSelect={setSelectedEvent}
+      />
 
       {/* Filters + View Toggle */}
       <div className="zine-filter-bar" style={{
@@ -446,7 +459,7 @@ export default function Events() {
               {f}
             </button>
           ))}
-          {/* Search bar — sits right after type filters */}
+          {/* Search bar */}
           <div style={{ position: "relative", display: "flex", alignItems: "center", marginLeft: 4 }}>
             <input
               type="text"
@@ -482,7 +495,7 @@ export default function Events() {
           </div>
           {/* Spacer */}
           <div style={{ flex: 1 }} />
-          {/* View toggle */}
+          {/* View toggle — grid / list only (map is always shown above) */}
           <div style={{ display: "flex", gap: 2, border: "1px solid #222", padding: 2 }}>
             <button
               data-testid="toggle-grid-view"
@@ -508,15 +521,16 @@ export default function Events() {
             >
               <List size={13} />
             </button>
+            {/* Map expand button in filter bar too */}
             <button
-              data-testid="toggle-map-view"
-              onClick={() => setViewMode("map")}
+              data-testid="toggle-map-expand"
+              onClick={() => setMapExpanded(p => !p)}
               style={{
-                padding: "4px 8px", background: viewMode === "map" ? "#CCFF00" : "transparent",
-                border: "none", cursor: "pointer", color: viewMode === "map" ? "#000" : "#555",
+                padding: "4px 8px", background: mapExpanded ? "#CCFF00" : "transparent",
+                border: "none", cursor: "pointer", color: mapExpanded ? "#000" : "#555",
                 display: "flex", alignItems: "center",
               }}
-              title="Map view"
+              title={mapExpanded ? "Collapse map" : "Expand map"}
             >
               <MapPin size={13} />
             </button>
@@ -524,8 +538,8 @@ export default function Events() {
         </div>
       </div>
 
-      {/* Events listing — hidden in map view */}
-      {viewMode !== "map" && <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
+      {/* Events listing */}
+      <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 24 }}>
           <h2 className="display" style={{ fontSize: "1.4rem", margin: 0 }}>{filtered.length} EVENTS</h2>
           {activeFilters.length > 0 && (
@@ -585,7 +599,7 @@ export default function Events() {
           </div>
           <a href="#/submit" className="btn-neon solid">Get Started →</a>
         </div>
-      </div>}
+      </div>
 
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
     </div>
