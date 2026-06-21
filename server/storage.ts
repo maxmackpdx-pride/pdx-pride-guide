@@ -1048,6 +1048,7 @@ export interface IStorage {
   // Events
   getEvents(filters?: { status?: string; day?: string }): Event[];
   getEvent(id: number): Event | undefined;
+  getPendingClaimEventIds(): number[];
   createEvent(data: InsertEvent): Event;
   updateEventStatus(id: number, status: string): void;
   updateEvent(id: number, data: Partial<InsertEvent>): Event | undefined;
@@ -1111,6 +1112,13 @@ export const storage: IStorage = {
   getEvent(id) {
     return db.select().from(events).where(eq(events.id, id)).get();
   },
+  getPendingClaimEventIds() {
+    return sqlite.prepare(`
+      SELECT DISTINCT event_id AS eventId
+      FROM submissions
+      WHERE type = 'CLAIM' AND status = 'PENDING' AND event_id IS NOT NULL
+    `).all().map((row: any) => Number(row.eventId));
+  },
   createEvent(data) {
     return db.insert(events).values({ ...data, createdAt: new Date().toISOString() }).returning().get();
   },
@@ -1148,21 +1156,30 @@ export const storage: IStorage = {
     const newStatus = approvalList.length >= 2 ? "APPROVED" : "PENDING";
     db.update(submissions).set({ approvals: JSON.stringify(approvalList), status: newStatus }).where(eq(submissions.id, id)).run();
     if (newStatus === "APPROVED") {
-      db.insert(events).values({
-        title: sub.title, description: sub.description,
-        venueName: sub.venueName, address: sub.address,
-        neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
-        dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
-        ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
-        admission: sub.admission, ticketUrl: sub.ticketUrl,
-        isPublic: sub.isPublic, isPrivate: sub.isPrivate,
-        isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
-        nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
-        status: "LIVE", source: "user_submitted",
-        isClaimable: false, claimedBy: sub.submitterEmail,
-        submittedBy: sub.submitterEmail, adminNotes: null,
-        createdAt: new Date().toISOString(),
-      }).run();
+      if (sub.type === "CLAIM" && sub.eventId) {
+        const user = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+        db.update(events).set({
+          isClaimable: false,
+          claimedBy: user?.username || sub.submitterEmail,
+          adminNotes: null,
+        }).where(eq(events.id, sub.eventId)).run();
+      } else {
+        db.insert(events).values({
+          title: sub.title, description: sub.description,
+          venueName: sub.venueName, address: sub.address,
+          neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+          dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+          ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+          admission: sub.admission, ticketUrl: sub.ticketUrl,
+          isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+          isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+          nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+          status: "LIVE", source: "user_submitted",
+          isClaimable: false, claimedBy: null,
+          submittedBy: sub.submitterEmail, adminNotes: null,
+          createdAt: new Date().toISOString(),
+        }).run();
+      }
     }
     return db.select().from(submissions).where(eq(submissions.id, id)).get();
   },

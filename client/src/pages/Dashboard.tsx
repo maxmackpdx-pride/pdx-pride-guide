@@ -324,7 +324,6 @@ export default function Dashboard() {
                         <option value="FRI">Friday July 17</option>
                         <option value="SAT">Saturday July 18</option>
                         <option value="SUN">Sunday July 19</option>
-                        <option value="MON">Monday July 20</option>
                       </select>
                     </div>
                     <div>

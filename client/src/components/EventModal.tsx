@@ -24,6 +24,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
 
   const types = JSON.parse(event.eventTypes || "[]") as string[];
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
+  const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const startTime = new Date(event.dateStart).toLocaleString([], {
     weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
   });
@@ -142,9 +143,13 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             {event.isSexPositive && <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>SEX+</span>}
             {event.nudityOk && <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>NUDITY OK</span>}
             {event.isHouseParty && <span className="sticker" style={{ color: "#FF6600", borderColor: "#FF6600" }}>HOUSE PARTY</span>}
-            {event.isClaimable && (
+            {hasPendingClaim ? (
+              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>
+                CLAIM PENDING
+              </span>
+            ) : event.isClaimable && (
               <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", cursor: "pointer" }}
-                onClick={() => setModMode("claim")}>
+                onClick={() => user ? (window.location.hash = `/submit?mode=claim&eventId=${event.id}`) : setShowAuth(true)}>
                 CLAIM THIS EVENT →
               </span>
             )}
@@ -180,6 +185,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#555", letterSpacing: "0.08em", whiteSpace: "nowrap", paddingTop: 2 }}>[WARNING]</span>
               <span style={{ fontSize: "0.75rem", color: "#555", lineHeight: 1.5 }}>
                 This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
+                {hasPendingClaim ? " A claim is pending admin review." : ""}
               </span>
             </div>
           )}
@@ -277,10 +283,15 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             display: "flex", gap: 16, padding: "16px 0 24px",
             borderTop: "1px solid #111", marginTop: 16,
           }}>
-            {event.isClaimable && modMode !== "claim" && (
+            {hasPendingClaim && (
+              <span style={{ color: "#FF00CC", fontSize: "0.75rem", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                Claim pending admin review
+              </span>
+            )}
+            {!hasPendingClaim && event.isClaimable && (
               <button
                 data-testid="button-claim-event"
-                onClick={() => setModMode("claim")}
+                onClick={() => user ? (window.location.hash = `/submit?mode=claim&eventId=${event.id}`) : setShowAuth(true)}
                 style={{ background: "none", border: "none", color: "#00FFFF", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
               >
                 ↗ Request to Claim This Event

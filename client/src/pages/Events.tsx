@@ -247,6 +247,7 @@ function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
 function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => void; viewMode: "grid" | "list" }) {
   const types = JSON.parse(event.eventTypes || "[]") as string[];
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
+  const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const time = event.dateStart
     ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "";
@@ -288,7 +289,9 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
         <div style={{ flex: 1, padding: "10px 14px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
             <span className="sticker" style={{ color: dayColor, borderColor: dayColor, fontSize: "0.55rem" }}>{event.dayOfWeek}</span>
-            {event.isClaimable && (
+            {hasPendingClaim ? (
+              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", fontSize: "0.55rem" }}>CLAIM PENDING</span>
+            ) : event.isClaimable && (
               <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", fontSize: "0.55rem" }}>CLAIM ME</span>
             )}
           </div>
@@ -342,7 +345,9 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 12 }}>
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 }}>
               <span className="sticker" style={{ color: dayColor, borderColor: dayColor, fontSize: "0.55rem" }}>{event.dayOfWeek}</span>
-              {event.isClaimable && (
+              {hasPendingClaim ? (
+                <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", fontSize: "0.55rem" }}>CLAIM PENDING</span>
+              ) : event.isClaimable && (
                 <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", fontSize: "0.55rem" }}>CLAIM ME</span>
               )}
             </div>
@@ -377,7 +382,9 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
                   {event.ageRequirement?.replace("_PLUS", "+").replace("ALL_AGES", "") || ""}
                 </span>
               )}
-              {event.isClaimable && (
+              {hasPendingClaim ? (
+                <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", fontSize: "0.58rem" }}>CLAIM PENDING</span>
+              ) : event.isClaimable && (
                 <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", fontSize: "0.58rem" }}>CLAIM ME</span>
               )}
             </div>

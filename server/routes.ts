@@ -39,9 +39,9 @@ declare module "express-session" {
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Tcasey90";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "dinoLeo!1";
 
-function publicEvent(evt: any) {
+function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
   const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
-  return safe;
+  return { ...safe, hasPendingClaim: pendingClaimIds.has(evt.id) };
 }
 
 function publicUser(user: any) {
@@ -102,21 +102,54 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/events", (req, res) => {
     const { status, day } = req.query;
     const evts = storage.getEvents({ status: "LIVE", day: day as string });
-    res.json(evts.map(publicEvent));
+    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
+    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds)));
+  });
+
+  app.get("/api/events/unclaimed", (req, res) => {
+    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
+    const evts = storage.getEvents({ status: "LIVE" }).filter(evt =>
+      evt.isClaimable && !evt.claimedBy && !pendingClaimIds.has(evt.id)
+    );
+    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds)));
   });
 
   app.get("/api/events/:id", (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    res.json(publicEvent(evt));
+    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
+    res.json(publicEvent(evt, pendingClaimIds));
   });
 
   // ─── SUBMISSIONS ─────────────────────────────────────────────────────────
-  app.post("/api/submit", (req, res) => {
+  app.post("/api/submit", requireAuth, (req, res) => {
     try {
+      const user = storage.getUserById(req.session.userId!);
+      if (!user) return res.status(401).json({ error: "Not authenticated" });
+      const type = req.body.type === "CLAIM" ? "CLAIM" : "NEW_EVENT";
+      const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
+      const claimEventId = eventId ?? 0;
+      const claimEvent = type === "CLAIM" && Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
+      if (type === "CLAIM") {
+        if (!claimEvent || claimEvent.status !== "LIVE" || !claimEvent.isClaimable || claimEvent.claimedBy) {
+          return res.status(400).json({ error: "This event is not available to claim." });
+        }
+        if (storage.getPendingClaimEventIds().includes(claimEventId)) {
+          return res.status(409).json({ error: "This event already has a pending claim." });
+        }
+      }
+      const source = type === "CLAIM" && claimEvent ? claimEvent : req.body;
       const data = insertSubmissionSchema.parse({
-        ...req.body,
-        eventTypes: JSON.stringify(req.body.eventTypes || []),
+        ...source,
+        type,
+        eventId: type === "CLAIM" ? claimEventId : null,
+        submitterName: user.displayName || user.username,
+        submitterEmail: user.email,
+        submitterOrg: req.body.submitterOrg || null,
+        claimReason: type === "CLAIM" ? req.body.claimReason : null,
+        eventTypes: type === "CLAIM"
+          ? source.eventTypes
+          : JSON.stringify(req.body.eventTypes || []),
       });
       const sub = storage.createSubmission(data);
       res.json(sub);

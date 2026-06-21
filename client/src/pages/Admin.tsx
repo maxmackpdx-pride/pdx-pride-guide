@@ -12,11 +12,22 @@ const ADMIN_PASSWORD = "pdxpride2026";
 interface Submission {
   id: number;
   type: string;
-  submittedData: string;
+  eventId: number | null;
+  title: string;
+  description: string;
+  venueName: string;
+  address: string | null;
+  neighborhood: string | null;
+  dayOfWeek: string | null;
+  dateStart: string;
+  dateEnd: string;
+  submitterName: string;
+  submitterEmail: string;
+  submitterOrg: string | null;
+  claimReason: string | null;
   status: string;
-  approvedBy: string | null;
-  rejectedBy: string | null;
-  rejectReason: string | null;
+  approvals: string;
+  adminNotes: string | null;
   createdAt: string;
 }
 
@@ -50,11 +61,11 @@ interface ModerationRequest {
   eventId: number;
   eventTitle?: string;
   proof: string;
-  contactEmail: string;
-  contactName: string;
-  status: "pending" | "approved" | "rejected";
+  requesterEmail: string;
+  requesterName: string;
+  status: string;
   createdAt: string;
-  adminNote?: string;
+  adminNotes?: string;
 }
 
 type AdminTab = "queue" | "moderation" | "events";
@@ -106,6 +117,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/unclaimed"] });
       toast({ title: "Approved", description: "Submission approved successfully." });
     },
     onError: (err: any) => {
@@ -153,7 +165,11 @@ export default function Admin() {
 
   const resolveModerationMutation = useMutation({
     mutationFn: ({ id, action, note }: { id: number; action: "approve" | "reject"; note?: string }) =>
-      apiRequest("POST", `/api/admin/moderation/${id}/resolve`, { action, adminNote: note, adminName }),
+      apiRequest("POST", `/api/admin/moderation/${id}/resolve`, {
+        status: action === "approve" ? "APPROVED" : "REJECTED",
+        adminNotes: note,
+        adminName,
+      }),
     onSuccess: (_, { action }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -242,9 +258,9 @@ export default function Admin() {
     );
   }
 
-  const pendingSubs = submissions.filter(s => s.status === "pending");
-  const resolvedSubs = submissions.filter(s => s.status !== "pending");
-  const pendingMod = modRequests.filter(r => r.status === "pending");
+  const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
+  const resolvedSubs = submissions.filter(s => s.status.toUpperCase() !== "PENDING");
+  const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -347,7 +363,7 @@ export default function Admin() {
                         <span className="display text-sm text-white/50">{sub.type}</span>
                         <p className="text-white/30 text-xs mt-0.5">{new Date(sub.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <span className="sticker text-xs" style={{ color: sub.status === "approved" ? "#CCFF00" : "#FF2400", borderColor: sub.status === "approved" ? "#CCFF00" : "#FF2400" }}>
+                      <span className="sticker text-xs" style={{ color: sub.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400", borderColor: sub.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400" }}>
                         {sub.status.toUpperCase()}
                       </span>
                     </div>
@@ -391,17 +407,17 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
-                {modRequests.filter(r => r.status !== "pending").length > 0 && (
+                {modRequests.filter(r => r.status.toUpperCase() !== "PENDING").length > 0 && (
                   <div>
                     <h3 className="display text-base text-white/30 mb-3">RESOLVED</h3>
                     <div className="space-y-2">
-                      {modRequests.filter(r => r.status !== "pending").map(req => (
+                      {modRequests.filter(r => r.status.toUpperCase() !== "PENDING").map(req => (
                         <div key={req.id} className="p-4 border border-white/10 flex items-center justify-between gap-4" style={{ background: "#0d0d0d" }}>
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <span className="sticker text-xs flex-shrink-0" style={{ color: req.type === "CLAIM" ? "#00FFFF" : "#FF6600", borderColor: req.type === "CLAIM" ? "#00FFFF" : "#FF6600" }}>{req.type}</span>
                             <p className="display text-sm text-white/50 truncate">Event #{req.eventId}{req.eventTitle ? ` — ${req.eventTitle}` : ""}</p>
                           </div>
-                          <span className="sticker text-xs flex-shrink-0" style={{ color: req.status === "approved" ? "#CCFF00" : "#FF2400", borderColor: req.status === "approved" ? "#CCFF00" : "#FF2400" }}>
+                          <span className="sticker text-xs flex-shrink-0" style={{ color: req.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400", borderColor: req.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400" }}>
                             {req.status.toUpperCase()}
                           </span>
                         </div>
@@ -592,9 +608,22 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
   rejectReason: string; onRejectReasonChange: (v: string) => void;
   onApprove: () => void; onReject: () => void; approving: boolean; rejecting: boolean;
 }) {
-  let parsedData: Record<string, any> = {};
-  try { parsedData = JSON.parse(sub.submittedData); } catch {}
-  const approvalCount = sub.approvedBy ? sub.approvedBy.split(",").filter(Boolean).length : 0;
+  let approvals: string[] = [];
+  try { approvals = JSON.parse(sub.approvals || "[]"); } catch {}
+  const approvalCount = approvals.length;
+  const details: Record<string, any> = {
+    eventId: sub.eventId,
+    title: sub.title,
+    venue: sub.venueName,
+    day: sub.dayOfWeek,
+    start: sub.dateStart,
+    end: sub.dateEnd,
+    submitter: sub.submitterName,
+    email: sub.submitterEmail,
+    organization: sub.submitterOrg,
+    claimReason: sub.claimReason,
+    description: sub.description,
+  };
 
   return (
     <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? "#FF00CC" : "#222" }}>
@@ -604,7 +633,8 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
             <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{sub.type}</span>
             {approvalCount > 0 && <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{approvalCount}/2 APPROVED</span>}
           </div>
-          <p className="display text-xl text-white">{parsedData.name || parsedData.title || `Submission #${sub.id}`}</p>
+          <p className="display text-xl text-white">{sub.title || `Submission #${sub.id}`}</p>
+          <p className="text-white/40 text-xs mt-1">{sub.submitterName} · {sub.submitterEmail}</p>
           <p className="text-white/30 text-xs mt-1 flex items-center gap-1">
             <Clock size={10} />
             {new Date(sub.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
@@ -615,7 +645,7 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
       {expanded && (
         <div className="px-5 pb-5 border-t border-white/10 pt-4">
           <div className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-3">
-            {Object.entries(parsedData).filter(([k]) => !["id","status","createdAt"].includes(k)).map(([key, val]) => (
+            {Object.entries(details).filter(([, val]) => val !== null && val !== undefined && val !== "").map(([key, val]) => (
               <div key={key} className="bg-black/30 p-2 border border-white/10">
                 <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{key}</p>
                 <p className="text-white text-sm truncate">{String(val)}</p>
@@ -666,7 +696,7 @@ function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove
             {!isClaim && <span className="sticker text-xs flex items-center gap-1" style={{ color: "#FF6600", borderColor: "#FF6600" }}><AlertTriangle size={9} /> REMOVE</span>}
           </div>
           <p className="display text-lg text-white">{req.eventTitle || `Event #${req.eventId}`}</p>
-          <p className="text-white/40 text-xs mt-1">{req.contactName} · {req.contactEmail}</p>
+          <p className="text-white/40 text-xs mt-1">{req.requesterName} · {req.requesterEmail}</p>
         </div>
         <ChevronDown size={18} className="text-white/30 flex-shrink-0 mt-1 transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
       </button>

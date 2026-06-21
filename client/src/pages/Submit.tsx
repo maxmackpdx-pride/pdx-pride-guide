@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageUploader from "@/components/ImageUploader";
-import { useMutation } from "@tanstack/react-query";
+import AuthModal from "@/components/AuthModal";
+import { useAuth } from "@/context/AuthContext";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type { Event } from "@shared/schema";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 
@@ -15,7 +18,12 @@ const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", margin
 
 export default function Submit() {
   const { toast } = useToast();
-  const [mode, setMode] = useState<"submit" | "claim">("submit");
+  const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const initialMode = params.get("mode") === "claim" ? "claim" : "submit";
+  const initialEventId = params.get("eventId") || "";
+  const [mode, setMode] = useState<"submit" | "claim">(initialMode);
   const [form, setForm] = useState({
     title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
     dateStart: "", dateEnd: "", dayOfWeek: "FRI",
@@ -25,8 +33,27 @@ export default function Submit() {
     isSexPositive: false, nudityOk: false,
     selectedTypes: [] as string[],
     submitterName: "", submitterEmail: "", submitterOrg: "",
-    claimReason: "", type: "NEW_EVENT",
+    claimReason: "", eventId: initialEventId, type: "NEW_EVENT",
   });
+
+  const { data: unclaimedEvents = [] } = useQuery<Event[]>({
+    queryKey: ["/api/events/unclaimed"],
+    queryFn: () => apiRequest("GET", "/api/events/unclaimed").then(r => r.json()),
+    enabled: mode === "claim",
+  });
+
+  useEffect(() => {
+    if (!loading && !user) setShowAuth(true);
+  }, [loading, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    setForm(f => ({
+      ...f,
+      submitterName: user.displayName || user.username,
+      submitterEmail: user.email,
+    }));
+  }, [user]);
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
@@ -39,7 +66,7 @@ export default function Submit() {
     },
     onSuccess: () => {
       toast({ title: "Submitted!", description: "Your submission is pending review." });
-      setForm(f => ({ ...f, title: "", description: "" }));
+      setForm(f => ({ ...f, title: "", description: "", claimReason: "", eventId: "" }));
     },
     onError: () => toast({ title: "Error", description: "Something went wrong. Try again.", variant: "destructive" }),
   });
@@ -51,12 +78,13 @@ export default function Submit() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "60px 20px" }}>
+      {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <div className="sticker" style={{ color: "var(--neon-cyan)", borderColor: "var(--neon-cyan)", marginBottom: 16 }}>Promoters &amp; Organizers</div>
       <h1 className="display" style={{ fontSize: "2.5rem", marginBottom: 8 }}>
         {mode === "submit" ? "SUBMIT AN EVENT" : "CLAIM AN EVENT"}
       </h1>
       <p style={{ color: "#666", marginBottom: 32, lineHeight: 1.6 }}>
-        All submissions are reviewed before going live. You'll be notified by email.
+        Log in or create an account first. Submissions and claims stay tied to your dashboard while admins review them.
       </p>
 
       {/* Mode toggle */}
@@ -65,7 +93,17 @@ export default function Submit() {
         <button onClick={() => setMode("claim")} className={mode === "claim" ? "btn-neon solid" : "btn-neon"} style={{ flex: 1, justifyContent: "center", border: "none", borderLeft: "1px solid #222" }} data-testid="mode-claim">Claim Existing Event</button>
       </div>
 
-      <form onSubmit={e => { e.preventDefault(); mutation.mutate(form); }} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {!user && (
+        <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(204,255,0,0.08)", padding: 18, marginBottom: 24 }}>
+          <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1rem", marginBottom: 6 }}>ACCOUNT REQUIRED</div>
+          <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5, marginBottom: 14 }}>
+            Create an account or log in, then this form will attach the event or claim to your dashboard for review.
+          </p>
+          <button type="button" className="btn-neon solid" onClick={() => setShowAuth(true)}>Log In / Join →</button>
+        </div>
+      )}
+
+      <form onSubmit={e => { e.preventDefault(); if (!user) { setShowAuth(true); return; } mutation.mutate(form); }} style={{ display: "flex", flexDirection: "column", gap: 20, opacity: user ? 1 : 0.6 }}>
         {/* Contact */}
         <section>
           <div className="display" style={sectionHeadStyle}>YOUR INFO</div>
@@ -74,22 +112,42 @@ export default function Submit() {
               <div key={k} style={{ gridColumn: k === "submitterOrg" ? "1/-1" : "auto" }}>
                 <label style={labelStyle}>{label}</label>
                 <input value={(form as any)[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))}
-                  required={k !== "submitterOrg"} style={inputStyle} />
+                  required={k !== "submitterOrg"} disabled={k !== "submitterOrg"} style={{ ...inputStyle, opacity: k !== "submitterOrg" ? 0.7 : 1 }} />
               </div>
             ))}
           </div>
         </section>
 
         {mode === "claim" && (
-          <div>
-            <label style={labelStyle}>How are you connected to this event? *</label>
-            <textarea value={form.claimReason} onChange={e => setForm(f => ({ ...f, claimReason: e.target.value }))} rows={3} required
-              style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
+          <section>
+            <div className="display" style={sectionHeadStyle}>CLAIM DETAILS</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <label style={labelStyle}>Event to Claim *</label>
+                <select value={form.eventId} onChange={e => setForm(f => ({ ...f, eventId: e.target.value }))} required style={inputStyle} data-testid="select-claim-event">
+                  <option value="">Select an unclaimed event...</option>
+                  {unclaimedEvents.map(event => (
+                    <option key={event.id} value={event.id}>
+                      {event.title} · {event.venueName} · {event.dayOfWeek || "TBD"}
+                    </option>
+                  ))}
+                </select>
+                {unclaimedEvents.length === 0 && (
+                  <div style={{ fontSize: "0.76rem", color: "#555", marginTop: 6 }}>No unclaimed events are available right now.</div>
+                )}
+              </div>
+              <div>
+                <label style={labelStyle}>How are you connected to this event? *</label>
+                <textarea value={form.claimReason} onChange={e => setForm(f => ({ ...f, claimReason: e.target.value }))} rows={4} required
+                  placeholder="Tell us your organizer role and include a website, ticketing dashboard, social link, or other proof."
+                  style={{ ...inputStyle, resize: "vertical" }} />
+              </div>
+            </div>
+          </section>
         )}
 
         {/* Event details */}
-        <section>
+        {mode === "submit" && <section>
           <div className="display" style={sectionHeadStyle}>EVENT DETAILS</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
@@ -129,7 +187,6 @@ export default function Submit() {
                   <option value="FRI">Friday July 17</option>
                   <option value="SAT">Saturday July 18</option>
                   <option value="SUN">Sunday July 19</option>
-                  <option value="MON">Monday July 20</option>
                 </select>
               </div>
               <div>
@@ -174,10 +231,10 @@ export default function Submit() {
               <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 6 }}>jpg/png/gif/webp · max 8MB · appears on the event card and detail view</div>
             </div>
           </div>
-        </section>
+        </section>}
 
         {/* Event Types / Tags */}
-        <section>
+        {mode === "submit" && <section>
           <div className="display" style={sectionHeadStyle}>EVENT TYPES</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {EVENT_TYPES.map(t => (
@@ -185,10 +242,10 @@ export default function Submit() {
                 className={`filter-tag ${form.selectedTypes.includes(t) ? "active" : ""}`}>{t}</button>
             ))}
           </div>
-        </section>
+        </section>}
 
         {/* Event Flags */}
-        <section>
+        {mode === "submit" && <section>
           <div className="display" style={sectionHeadStyle}>EVENT FLAGS</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {[
@@ -219,7 +276,7 @@ export default function Submit() {
               </div>
             </div>
           )}
-        </section>
+        </section>}
 
         <button type="submit" disabled={mutation.isPending} className="btn-neon solid" style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center" }} data-testid="submit-button">
           {mutation.isPending ? "Submitting..." : mode === "claim" ? "Submit Claim Request →" : "Submit for Review →"}
