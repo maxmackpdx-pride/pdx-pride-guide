@@ -1,5 +1,7 @@
 import "dotenv/config";
 import express, { Response, NextFunction } from 'express';
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import type { Request } from 'express';
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -7,6 +9,15 @@ import { createServer } from "node:http";
 
 const app = express();
 const httpServer = createServer(app);
+
+// Security headers
+app.use(helmet({ contentSecurityPolicy: false }));
+
+// Rate limiting
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
+const strictLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
+app.use("/api/admin", strictLimiter);
+app.use("/api", limiter);
 
 declare module "http" {
   interface IncomingMessage {

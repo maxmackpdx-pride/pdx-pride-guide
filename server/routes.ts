@@ -14,8 +14,8 @@ declare module "express-session" {
   }
 }
 
-const ADMIN_USERNAME = "Tcasey90";
-const ADMIN_PASSWORD = "dinoLeo!1";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Tcasey90";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "dinoLeo!1";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.session?.userId) {
@@ -34,7 +34,7 @@ function requireAdmin(req: any, res: any, next: any) {
 export function registerRoutes(httpServer: Server, app: Express) {
   // Session middleware
   app.use(session({
-    secret: "pdxpride_secret_2026",
+    secret: process.env.SESSION_SECRET || "pdxpride_secret_2026",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -45,10 +45,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   }));
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
-  app.get("/api/events", (req, res) => {
-    const { day, status } = req.query as { day?: string; status?: string };
-    const evts = storage.getEvents({ status: status || "LIVE", day });
-    res.json(evts);
+    app.get("/api/events", (req, res) => {
+    const { status, day } = req.query;
+    const evts = storage.getEvents({ status: "LIVE", day: day as string });
+    const safe = evts.map(({ adminNotes, submittedBy, claimedBy, ...e }) => e);
+    res.json(safe);
   });
 
   app.get("/api/events/:id", (req, res) => {
