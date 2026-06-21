@@ -227,7 +227,7 @@ export default function About() {
                 NO SPONSORS · NO CORPORATE BACKING · BUILT WITH LOVE FOR PDX
               </div>
               <a
-                href="https://www.instagram.com/yes.coach.pdx"
+                href="https://www.instagram.com/tucker_pdmax"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -245,7 +245,7 @@ export default function About() {
                   <circle cx="12" cy="12" r="4"/>
                   <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
                 </svg>
-                @yes.coach.pdx
+                @tucker_pdmax
               </a>
             </div>
           </div>
