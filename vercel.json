@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "installCommand": "npm install --ignore-scripts && node node_modules/better-sqlite3/scripts/download-prebuilt.js 2>/dev/null || npm rebuild better-sqlite3",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/public",
+  "framework": null,
+  "builds": [
+    {
+      "src": "dist/index.cjs",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["dist/**", "node_modules/better-sqlite3/build/**", "data.db"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/dist/index.cjs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/public/$1"
+    }
+  ]
+}

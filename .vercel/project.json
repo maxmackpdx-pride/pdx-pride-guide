@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_AiP7IttO3o5D8QYq3iHbS6uJGXPl",
+  "orgId": "team_F4UxCOqetRWEZvDEf07ZYtUS",
+  "projectName": "pdx-pride-guide",
+  "settings": {
+    "createdAt": 1782004828468,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

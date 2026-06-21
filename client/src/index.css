@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 4%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 74 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 186 100% 50%;
+  --accent-foreground: 0 0% 0%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --input: 0 0% 14%;
+  --ring: 74 100% 50%;
+  --radius: 0.25rem;
+
+  /* PDX Pride Design Tokens */
+  --neon-yellow: #CCFF00;
+  --neon-cyan: #00FFFF;
+  --neon-magenta: #FF00CC;
+  --neon-orange: #FF6600;
+  --neon-violet: #8800FF;
+  --neon-red: #FF2400;
+  --neon-green: #00EE44;
+  --neon-blue: #0044FF;
+
+  /* Day colors */
+  --day-wed: #CCFF00;
+  --day-thu: #00FFFF;
+  --day-fri: #FF00CC;
+  --day-sat: #FF6600;
+  --day-sun: #FF2400;
+  --day-multi: linear-gradient(90deg, #FF2400, #FF6600, #FFEE00, #00EE44, #0044FF, #8800FF);
+
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: #0a0a0a;
+  color: #fff;
+  font-family: var(--font-body);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Display headline style */
+.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+
+/* Neon text effects */
+.neon-yellow { color: var(--neon-yellow); }
+.neon-cyan { color: var(--neon-cyan); }
+.neon-magenta { color: var(--neon-magenta); }
+.neon-orange { color: var(--neon-orange); }
+
+/* Sticker badge */
+.sticker {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border: 1.5px solid currentColor;
+  line-height: 1.4;
+}
+
+/* Poster card */
+.poster-card {
+  background: #111;
+  border: 2px solid #222;
+  transition: border-color 0.15s, transform 0.15s;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+.poster-card:hover {
+  border-color: var(--neon-yellow);
+  transform: translateY(-2px);
+}
+
+/* Day badge colors */
+.day-WED, .day-wed { color: var(--day-wed); border-color: var(--day-wed); }
+.day-THU, .day-thu { color: var(--day-thu); border-color: var(--day-thu); }
+.day-FRI, .day-fri { color: var(--day-fri); border-color: var(--day-fri); }
+.day-SAT, .day-sat { color: var(--day-sat); border-color: var(--day-sat); }
+.day-SUN, .day-sun { color: var(--day-sun); border-color: var(--day-sun); }
+
+/* Halftone texture overlay */
+.halftone {
+  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+/* Neon button */
+.btn-neon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 10px 20px;
+  border: 2px solid var(--neon-yellow);
+  color: var(--neon-yellow);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-neon:hover {
+  background: var(--neon-yellow);
+  color: #000;
+}
+.btn-neon.cyan {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+.btn-neon.cyan:hover {
+  background: var(--neon-cyan);
+  color: #000;
+}
+.btn-neon.magenta {
+  border-color: var(--neon-magenta);
+  color: var(--neon-magenta);
+}
+.btn-neon.magenta:hover {
+  background: var(--neon-magenta);
+  color: #000;
+}
+.btn-neon.solid {
+  background: var(--neon-yellow);
+  color: #000;
+}
+.btn-neon.solid:hover {
+  background: #fff;
+}
+
+/* Section divider — torn paper effect */
+.torn-divider {
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--neon-yellow) 0px,
+    var(--neon-yellow) 8px,
+    transparent 8px,
+    transparent 14px
+  );
+  opacity: 0.4;
+  margin: 0;
+}
+
+/* Filter tag */
+.filter-tag {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border: 1.5px solid #333;
+  color: #888;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.filter-tag:hover { border-color: #666; color: #ccc; }
+.filter-tag.active {
+  border-color: var(--neon-yellow);
+  color: var(--neon-yellow);
+  background: rgba(204,255,0,0.08);
+}
+
+/* Map container */
+.map-container { height: 400px; width: 100%; background: #111; }
+.map-container .leaflet-container { height: 100%; width: 100%; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-yellow); }
+
+/* Leaflet overrides */
+.leaflet-tile-pane { filter: grayscale(1) invert(1) brightness(0.3) contrast(1.2); }
