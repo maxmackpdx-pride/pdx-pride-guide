@@ -464,10 +464,8 @@ export default function Events() {
               {f}
             </button>
           ))}
-          {/* Spacer */}
-          <div style={{ flex: 1 }} />
-          {/* Search bar */}
-          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          {/* Search bar — sits right after type filters */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", marginLeft: 4 }}>
             <input
               type="text"
               placeholder="Search events..."
@@ -482,7 +480,7 @@ export default function Events() {
                 fontSize: "0.75rem",
                 fontFamily: "var(--font-body)",
                 outline: "none",
-                width: 180,
+                width: 160,
                 transition: "border-color 0.15s",
               }}
               onFocus={e => (e.currentTarget.style.borderColor = "#CCFF00")}
@@ -500,6 +498,8 @@ export default function Events() {
               >×</button>
             )}
           </div>
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
           {/* View toggle */}
           <div style={{ display: "flex", gap: 2, border: "1px solid #222", padding: 2 }}>
             <button
