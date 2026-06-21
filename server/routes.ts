@@ -33,6 +33,7 @@ declare module "express-session" {
     userId?: number;
     promoterId?: number;
     isAdmin?: boolean;
+    googleOAuthState?: string;
   }
 }
 
@@ -48,6 +49,30 @@ function publicUser(user: any) {
   if (!user) return null;
   const { passwordHash, email, status, ...safe } = user;
   return safe;
+}
+
+function getBaseUrl(req: any) {
+  const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+  return `${proto}://${req.get("host")}`;
+}
+
+function googleRedirectUri(req: any) {
+  return process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl(req)}/api/auth/google/callback`;
+}
+
+function makeUsername(email: string) {
+  const base = email
+    .split("@")[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 22) || "google_user";
+  let username = base.length >= 3 ? base : `${base}_user`;
+  let suffix = 1;
+  while (storage.getUserByUsername(username)) {
+    username = `${base.slice(0, 18)}_${suffix++}`;
+  }
+  return username;
 }
 
 function requireAuth(req: any, res: any, next: any) {
@@ -347,6 +372,88 @@ export function registerRoutes(httpServer: Server, app: Express) {
       displayName: user.displayName, avatarChoice: user.avatarChoice,
       bio: user.bio, photoUrl: user.photoUrl,
     });
+  });
+
+  app.get("/api/auth/google", (req, res) => {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) return res.status(500).send("Google sign-in is not configured.");
+    const state = crypto.randomBytes(24).toString("hex");
+    req.session.googleOAuthState = state;
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: googleRedirectUri(req),
+      response_type: "code",
+      scope: "openid email profile",
+      state,
+      prompt: "select_account",
+    });
+    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+  });
+
+  app.get("/api/auth/google/callback", async (req, res) => {
+    try {
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+      const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+      const code = String(req.query.code || "");
+      const state = String(req.query.state || "");
+      if (!clientId || !clientSecret) return res.status(500).send("Google sign-in is not configured.");
+      if (!code || !state || state !== req.session.googleOAuthState) {
+        return res.status(400).send("Invalid Google sign-in state.");
+      }
+      req.session.googleOAuthState = undefined;
+
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          grant_type: "authorization_code",
+          redirect_uri: googleRedirectUri(req),
+        }),
+      });
+      if (!tokenRes.ok) {
+        const text = await tokenRes.text();
+        console.error("Google token exchange failed:", text);
+        return res.status(401).send("Google sign-in failed.");
+      }
+      const token = await tokenRes.json() as { access_token?: string };
+      if (!token.access_token) return res.status(401).send("Google sign-in failed.");
+
+      const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${token.access_token}` },
+      });
+      if (!profileRes.ok) return res.status(401).send("Google profile lookup failed.");
+      const profile = await profileRes.json() as {
+        email?: string;
+        email_verified?: boolean;
+        name?: string;
+        picture?: string;
+      };
+      if (!profile.email || profile.email_verified === false) {
+        return res.status(401).send("Google email must be verified.");
+      }
+
+      let user = storage.getUserByEmail(profile.email);
+      if (!user) {
+        user = storage.createUser({
+          username: makeUsername(profile.email),
+          email: profile.email,
+          passwordHash: crypto.randomBytes(32).toString("hex"),
+          displayName: profile.name || profile.email.split("@")[0],
+        });
+        if (profile.picture) storage.updateUser(user.id, { photoUrl: profile.picture });
+      } else if (!user.photoUrl && profile.picture) {
+        storage.updateUser(user.id, { photoUrl: profile.picture });
+      }
+
+      req.session.userId = user.id;
+      res.redirect("/#/dashboard");
+    } catch (e) {
+      console.error("Google sign-in error:", e);
+      res.status(500).send("Google sign-in failed.");
+    }
   });
 
   app.post("/api/auth/logout", (req, res) => {

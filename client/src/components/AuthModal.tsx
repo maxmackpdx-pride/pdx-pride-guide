@@ -73,6 +73,10 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
 
         {tab === "login" ? (
           <form onSubmit={handleLogin}>
+            <a href="/api/auth/google" style={googleButtonStyle}>
+              CONTINUE WITH GOOGLE
+            </a>
+            <div style={dividerStyle}><span>OR</span></div>
             <label style={labelStyle}>Username or Email</label>
             <input style={inputStyle} type="text" value={email} onChange={e => setEmail(e.target.value)} required placeholder="username or you@example.com" autoComplete="username" />
             <label style={labelStyle}>Password</label>
@@ -90,6 +94,10 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           </form>
         ) : (
           <form onSubmit={handleRegister}>
+            <a href="/api/auth/google" style={googleButtonStyle}>
+              JOIN WITH GOOGLE
+            </a>
+            <div style={dividerStyle}><span>OR</span></div>
             <label style={labelStyle}>Username</label>
             <input style={inputStyle} type="text" value={username} onChange={e => setUsername(e.target.value)} required placeholder="queerbabe99" minLength={3} />
             <label style={labelStyle}>Display Name <span style={{ color: "#aaa", fontWeight: 400 }}>(optional)</span></label>
@@ -124,6 +132,18 @@ const inputStyle: React.CSSProperties = {
   width: "100%", padding: "10px 12px", border: "2px solid #000",
   fontSize: "0.95rem", fontFamily: "var(--font-body)", background: "#fff",
   color: "#000", outline: "none", boxSizing: "border-box",
+};
+const googleButtonStyle: React.CSSProperties = {
+  display: "block", width: "100%", padding: "13px", boxSizing: "border-box",
+  background: "#fff", color: "#000", border: "2px solid #000",
+  fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.95rem",
+  letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer",
+  textAlign: "center", textDecoration: "none", boxShadow: "3px 3px 0 #00FFFF",
+};
+const dividerStyle: React.CSSProperties = {
+  display: "flex", alignItems: "center", justifyContent: "center",
+  margin: "18px 0 4px", color: "#777", fontFamily: "var(--font-display)",
+  fontSize: "0.68rem", letterSpacing: "0.12em",
 };
 const submitStyle: React.CSSProperties = {
   width: "100%", marginTop: 20, padding: "14px",
