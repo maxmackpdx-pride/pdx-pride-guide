@@ -110,8 +110,8 @@ export default function About() {
               {
                 num: "04",
                 color: "#FF6600",
-                title: "AI may help fill gaps — humans review it all",
-                text: "Admins may use AI to help fill in missing event details from public sources. But AI-suggested content is always reviewed before it goes live. AI never invents ticket prices, age requirements, or private info.",
+                title: "All submissions are reviewed",
+                text: "Every event, claim, and edit goes through two-admin approval before it goes live. No single point of failure, no favoritism.",
               },
             ].map((step, i) => (
               <div

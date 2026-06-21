@@ -135,6 +135,20 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             )}
           </div>
 
+          {/* Unclaimed warning */}
+          {event.isClaimable && (
+            <div style={{
+              display: "flex", alignItems: "flex-start", gap: 8,
+              background: "#0d0d0d", border: "1px solid #2a2a2a",
+              padding: "8px 12px", marginBottom: 16,
+            }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#555", letterSpacing: "0.08em", whiteSpace: "nowrap", paddingTop: 2 }}>[WARNING]</span>
+              <span style={{ fontSize: "0.75rem", color: "#555", lineHeight: 1.5 }}>
+                This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
+              </span>
+            </div>
+          )}
+
           <p style={{ color: "#aaa", lineHeight: 1.7, fontSize: "0.88rem", marginBottom: 20 }}>
             {event.description}
           </p>
