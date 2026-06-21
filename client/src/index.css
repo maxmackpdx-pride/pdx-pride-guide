@@ -303,6 +303,86 @@ body::before {
     #050505;
 }
 
+.zine-section-head > :not(.motif) {
+  position: relative;
+  z-index: 1;
+}
+
+.motif {
+  position: absolute;
+  display: block;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.55), 0 0 20px rgba(255,0,204,0.1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.motif::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.08), transparent 36%, rgba(0,0,0,0.16)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 9px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.motif-hired { background-image: url("/motifs/get-hired.jpg"); }
+.motif-keep { background-image: url("/motifs/keep-portland-queer.jpg"); }
+.motif-protest { background-image: url("/motifs/pride-protest.jpg"); }
+.motif-go-piss { background-image: url("/motifs/go-piss-girl.jpg"); }
+.motif-progress { background-image: url("/motifs/progress-flag.jpg"); }
+.motif-portland { background-image: url("/motifs/portland-sign.jpg"); }
+
+.home-motif-keep {
+  right: 7%;
+  top: 42px;
+  width: min(28vw, 330px);
+  aspect-ratio: 1.65;
+  opacity: 0.82;
+  transform: rotate(5deg);
+}
+
+.home-motif-progress {
+  right: 16%;
+  bottom: 34px;
+  width: min(30vw, 360px);
+  aspect-ratio: 1.82;
+  opacity: 0.68;
+  transform: rotate(-4deg);
+}
+
+.home-motif-portland {
+  right: -34px;
+  bottom: 116px;
+  width: min(22vw, 260px);
+  aspect-ratio: 1.52;
+  opacity: 0.54;
+  transform: rotate(7deg);
+}
+
+.pride-work-motif-hired {
+  right: -18px;
+  top: 18px;
+  width: min(35vw, 430px);
+  aspect-ratio: 1.51;
+  opacity: 0.82;
+  transform: rotate(2deg);
+}
+
+.pride-work-motif-progress {
+  right: 20%;
+  bottom: -42px;
+  width: min(25vw, 300px);
+  aspect-ratio: 1.82;
+  opacity: 0.5;
+  transform: rotate(-5deg);
+}
+
 .paste-label {
   position: relative;
   transform: rotate(-0.7deg);
@@ -709,6 +789,11 @@ body::before {
   box-shadow: 0 0 0 1px #000, 0 18px 40px rgba(0,0,0,0.45);
 }
 
+.zine-callout > :not(.motif) {
+  position: relative;
+  z-index: 1;
+}
+
 .zine-callout::before {
   content: "";
   position: absolute;
@@ -718,6 +803,69 @@ body::before {
     linear-gradient(90deg, rgba(255,0,204,0.22), transparent 24%, transparent 72%, rgba(204,255,0,0.16)),
     radial-gradient(circle at 8% 50%, rgba(0,255,255,0.18), transparent 9rem);
   opacity: 0.5;
+}
+
+.events-callout-protest {
+  left: -34px;
+  top: 50%;
+  width: min(25vw, 260px);
+  aspect-ratio: 1.47;
+  opacity: 0.4;
+  transform: translateY(-50%) rotate(-6deg);
+}
+
+.events-callout-badge {
+  right: -22px;
+  bottom: -24px;
+  width: min(23vw, 230px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  opacity: 0.46;
+  transform: rotate(9deg);
+}
+
+.about-motif-keep {
+  left: max(-50px, 4vw);
+  top: 34px;
+  width: min(27vw, 310px);
+  aspect-ratio: 1.65;
+  opacity: 0.42;
+  transform: rotate(-7deg);
+}
+
+.about-motif-protest {
+  right: max(-40px, 5vw);
+  bottom: 26px;
+  width: min(24vw, 280px);
+  aspect-ratio: 1.47;
+  opacity: 0.38;
+  transform: rotate(6deg);
+}
+
+.values-motif-badge {
+  right: -54px;
+  bottom: -42px;
+  width: min(24vw, 230px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  opacity: 0.18;
+  transform: rotate(8deg);
+}
+
+.footer-motif-strip {
+  height: 72px;
+  border-bottom: 1px solid #222;
+  background-image:
+    linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.12), rgba(0,0,0,0.55)),
+    url("/motifs/keep-portland-queer.jpg"),
+    url("/motifs/progress-flag.jpg"),
+    url("/motifs/get-hired.jpg"),
+    url("/motifs/portland-sign.jpg");
+  background-size: auto 130%, auto 160%, auto 155%, auto 135%, auto 145%;
+  background-position: left center, 4% 48%, 34% 58%, 70% 45%, 98% 55%;
+  background-repeat: no-repeat;
+  opacity: 0.75;
+  filter: saturate(1.15) contrast(1.05);
 }
 
 .gig-card {
@@ -731,6 +879,28 @@ body::before {
 .gig-card:hover,
 .gig-card:nth-child(even):hover {
   transform: translateY(-2px) rotate(0deg);
+}
+
+@media (max-width: 900px) {
+  .home-motif-keep,
+  .home-motif-progress,
+  .home-motif-portland,
+  .pride-work-motif-hired,
+  .pride-work-motif-progress,
+  .events-callout-protest,
+  .events-callout-badge,
+  .about-motif-keep,
+  .about-motif-protest,
+  .values-motif-badge {
+    display: none;
+  }
+
+  .footer-motif-strip {
+    height: 56px;
+    background-size: auto 145%, auto 170%, auto 165%, auto 145%, auto 150%;
+    background-position: left center, -4% 50%, 31% 56%, 72% 48%, 108% 56%;
+    opacity: 0.62;
+  }
 }
 
 /* Scrollbar */

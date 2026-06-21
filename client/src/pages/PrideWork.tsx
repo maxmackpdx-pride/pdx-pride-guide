@@ -107,6 +107,8 @@ export default function PrideWork() {
     <div className="min-h-screen zine-page pride-work-page" style={{ background: "#0a0a0a" }}>
       {/* Header */}
       <div className="zine-section-head border-b-2 border-white/10 px-4 py-8 md:px-8">
+        <div className="motif motif-hired pride-work-motif-hired" aria-hidden="true" />
+        <div className="motif motif-progress pride-work-motif-progress" aria-hidden="true" />
         <div className="max-w-5xl mx-auto">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>

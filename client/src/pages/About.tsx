@@ -10,6 +10,8 @@ export default function About() {
         className="relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center overflow-hidden"
         style={{ background: "#0a0a0a" }}
       >
+        <div className="motif motif-keep about-motif-keep" aria-hidden="true" />
+        <div className="motif motif-protest about-motif-protest" aria-hidden="true" />
         {/* Halftone BG decoration */}
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
@@ -130,9 +132,10 @@ export default function About() {
             TRANSPARENCY <span style={{ color: "#8800FF" }}>&</span> VALUES
           </h2>
           <div
-            className="p-6 md:p-8 border-2"
+            className="p-6 md:p-8 border-2 relative overflow-hidden"
             style={{ background: "#111", borderColor: "#8800FF" }}
           >
+            <div className="motif motif-go-piss values-motif-badge" aria-hidden="true" />
             <ul className="space-y-4">
               {[
                 "Free to browse, free forever. No paywalls, no ads.",
