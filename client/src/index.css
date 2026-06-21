@@ -553,14 +553,15 @@ body::before {
 .event-ticker-band {
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 46px;
+  gap: 22px;
+  min-height: 62px;
   overflow: hidden;
   border-top: 1px solid #292929;
   border-bottom: 1px solid #292929;
   background:
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 18px),
-    #101010;
+    linear-gradient(90deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.38) 48%, rgba(0,0,0,0.72) 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 18px),
+    url("/pdx-skyline-neon.jpg") center 72% / cover no-repeat;
 }
 
 .event-ticker-label {
@@ -570,13 +571,13 @@ body::before {
   align-self: stretch;
   display: flex;
   align-items: center;
-  padding: 0 18px 0 24px;
+  padding: 0 24px 0 28px;
   border-right: 1px solid #242424;
-  background: var(--neon-yellow);
+  background: rgba(204,255,0,0.9);
   color: #000;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.78rem;
+  font-size: 1.05rem;
   letter-spacing: 0.14em;
   text-decoration: none;
   text-transform: uppercase;
@@ -602,18 +603,18 @@ body::before {
 
 .event-ticker-window::before {
   left: 0;
-  background: linear-gradient(to right, #101010, transparent);
+  background: linear-gradient(to right, rgba(0,0,0,0.86), transparent);
 }
 
 .event-ticker-window::after {
   right: 0;
-  background: linear-gradient(to left, #101010, transparent);
+  background: linear-gradient(to left, rgba(0,0,0,0.86), transparent);
 }
 
 .event-ticker-track {
   display: inline-flex;
   align-items: center;
-  gap: 22px;
+  gap: 30px;
   white-space: nowrap;
   animation: event-ticker-scroll 190s linear infinite;
 }
@@ -621,11 +622,11 @@ body::before {
 .event-ticker-item {
   display: inline-flex;
   align-items: center;
-  gap: 22px;
+  gap: 30px;
   color: #f0f0f0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.82rem;
+  font-size: 1.1rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -637,6 +638,86 @@ body::before {
   background: var(--neon-yellow);
   box-shadow: 0 0 8px var(--neon-yellow);
 }
+
+.home-map-preview {
+  position: relative;
+  display: block;
+  height: clamp(110px, 14vw, 190px);
+  overflow: hidden;
+  border-top: 1px solid #161616;
+  border-bottom: 1px solid #202020;
+  text-decoration: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.58) 36%, rgba(0,0,0,0.2) 100%),
+    linear-gradient(27deg, transparent 0 47%, rgba(0,255,255,0.18) 48% 50%, transparent 51%),
+    linear-gradient(151deg, transparent 0 47%, rgba(255,0,204,0.13) 48% 50%, transparent 51%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 34px),
+    #070808;
+}
+
+.home-map-preview::before {
+  content: "";
+  position: absolute;
+  inset: -35% -10%;
+  background:
+    radial-gradient(circle at 68% 42%, rgba(0,255,255,0.18), transparent 12rem),
+    radial-gradient(circle at 78% 72%, rgba(204,255,0,0.12), transparent 10rem);
+  transform: rotate(-4deg);
+}
+
+.home-map-preview-label,
+.home-map-preview-title {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.home-map-preview-label {
+  display: inline-flex;
+  margin: 24px 0 0 28px;
+  padding: 5px 12px;
+  color: #000;
+  background: var(--neon-cyan);
+  box-shadow: 4px 4px 0 rgba(255,0,204,0.9);
+  font-size: 0.72rem;
+}
+
+.home-map-preview-title {
+  display: block;
+  margin: 12px 0 0 28px;
+  color: #fff;
+  font-size: clamp(1.35rem, 4vw, 2.7rem);
+  line-height: 0.95;
+  text-shadow: 0 0 22px rgba(0,255,255,0.35);
+}
+
+.home-map-pin {
+  position: absolute;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px 999px 999px 0;
+  transform: rotate(-45deg);
+  border: 2px solid #050505;
+  box-shadow: 0 0 18px currentColor;
+}
+
+.home-map-pin::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: #050505;
+}
+
+.home-map-pin-a { right: 18%; top: 28%; color: var(--neon-pink); background: var(--neon-pink); }
+.home-map-pin-b { right: 31%; top: 56%; color: var(--neon-cyan); background: var(--neon-cyan); }
+.home-map-pin-c { right: 9%; top: 58%; color: var(--neon-yellow); background: var(--neon-yellow); }
+.home-map-pin-d { right: 42%; top: 24%; color: var(--neon-orange); background: var(--neon-orange); }
 
 @keyframes event-ticker-scroll {
   from { transform: translateX(0); }

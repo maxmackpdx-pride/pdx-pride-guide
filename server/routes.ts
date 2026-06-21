@@ -34,6 +34,7 @@ declare module "express-session" {
     promoterId?: number;
     isAdmin?: boolean;
     googleOAuthState?: string;
+    googleOAuthLinkUserId?: number;
   }
 }
 
@@ -47,7 +48,7 @@ function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
 
 function publicUser(user: any) {
   if (!user) return null;
-  const { passwordHash, email, status, ...safe } = user;
+  const { passwordHash, email, status, googleId, ...safe } = user;
   return safe;
 }
 
@@ -352,6 +353,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       res.json({
         id: user.id, username: user.username, email: user.email,
         displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
+        photoUrl: user.photoUrl, googleLinked: !!user.googleId,
       });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -370,7 +372,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       id: user.id, username: user.username, email: user.email,
       displayName: user.displayName, avatarChoice: user.avatarChoice,
-      bio: user.bio, photoUrl: user.photoUrl,
+      bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
     });
   });
 
@@ -379,6 +381,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!clientId) return res.status(500).send("Google sign-in is not configured.");
     const state = crypto.randomBytes(24).toString("hex");
     req.session.googleOAuthState = state;
+    req.session.googleOAuthLinkUserId = req.query.link === "1" && req.session.userId ? req.session.userId : undefined;
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: googleRedirectUri(req),
@@ -428,24 +431,46 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const profile = await profileRes.json() as {
         email?: string;
         email_verified?: boolean;
+        sub?: string;
         name?: string;
         picture?: string;
       };
       if (!profile.email || profile.email_verified === false) {
         return res.status(401).send("Google email must be verified.");
       }
+      if (!profile.sub) return res.status(401).send("Google profile lookup failed.");
 
-      let user = storage.getUserByEmail(profile.email);
+      const linkUserId = req.session.googleOAuthLinkUserId;
+      req.session.googleOAuthLinkUserId = undefined;
+
+      if (linkUserId) {
+        if (req.session.userId !== linkUserId) return res.status(401).send("Google link session expired.");
+        const existingGoogleUser = storage.getUserByGoogleId(profile.sub);
+        if (existingGoogleUser && existingGoogleUser.id !== linkUserId) {
+          return res.status(409).send("That Google account is already linked to another PDX Pride Guide profile.");
+        }
+        const linkedUser = storage.getUserById(linkUserId);
+        if (!linkedUser) return res.status(401).send("Google link session expired.");
+        storage.linkGoogleToUser(linkUserId, profile.sub);
+        if (!linkedUser.photoUrl && profile.picture) storage.updateUser(linkUserId, { photoUrl: profile.picture });
+        return res.redirect("/#/dashboard?google=linked");
+      }
+
+      let user = storage.getUserByGoogleId(profile.sub) || storage.getUserByEmail(profile.email);
       if (!user) {
         user = storage.createUser({
           username: makeUsername(profile.email),
           email: profile.email,
           passwordHash: crypto.randomBytes(32).toString("hex"),
           displayName: profile.name || profile.email.split("@")[0],
+          googleId: profile.sub,
         });
         if (profile.picture) storage.updateUser(user.id, { photoUrl: profile.picture });
-      } else if (!user.photoUrl && profile.picture) {
-        storage.updateUser(user.id, { photoUrl: profile.picture });
+      } else {
+        if (!user.googleId) storage.linkGoogleToUser(user.id, profile.sub);
+        if (!user.photoUrl && profile.picture) {
+          storage.updateUser(user.id, { photoUrl: profile.picture });
+        }
       }
 
       req.session.userId = user.id;
@@ -468,7 +493,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       id: user.id, username: user.username, email: user.email,
       displayName: user.displayName, avatarChoice: user.avatarChoice,
-      bio: user.bio, photoUrl: user.photoUrl,
+      bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
     });
   });
 
@@ -480,7 +505,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       id: updated!.id, username: updated!.username, email: updated!.email,
       displayName: updated!.displayName, avatarChoice: updated!.avatarChoice,
-      bio: updated!.bio, photoUrl: updated!.photoUrl,
+      bio: updated!.bio, photoUrl: updated!.photoUrl, googleLinked: !!updated!.googleId,
     });
   });
 

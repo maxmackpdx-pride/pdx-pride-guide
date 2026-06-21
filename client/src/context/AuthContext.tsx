@@ -8,6 +8,7 @@ export interface AuthUser {
   avatarChoice: number;
   bio: string | null;
   photoUrl: string | null;
+  googleLinked: boolean;
 }
 
 interface AuthContextType {

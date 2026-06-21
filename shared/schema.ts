@@ -161,6 +161,7 @@ export const users = sqliteTable("users", {
   avatarChoice: integer("avatar_choice").default(1), // 1-6
   bio: text("bio"),
   photoUrl: text("photo_url"),
+  googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
   createdAt: text("created_at").notNull().default(""),
 });

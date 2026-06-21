@@ -130,21 +130,15 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── LGBTQ+IA BANNER — homepage only ─────────────────────── */}
-      <section
-        aria-hidden="true"
-        style={{
-          width: "100%",
-          height: "clamp(220px, 28vw, 380px)",
-          background: `
-            linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 45%, rgba(0,0,0,0) 100%),
-            url("/motifs/footer-banner-lgbtqia.png") center / cover no-repeat
-          `,
-          filter: "saturate(1.2) contrast(1.08)",
-          borderTop: "2px solid #111",
-          display: "block",
-        }}
-      />
+      {/* ── MAP PREVIEW — homepage only ─────────────────────────── */}
+      <Link href="/events" className="home-map-preview" aria-label="Open the events map">
+        <span className="home-map-preview-label">MAP VIEW</span>
+        <span className="home-map-preview-title">SEE THE CITY BY EVENT</span>
+        <span className="home-map-pin home-map-pin-a" />
+        <span className="home-map-pin home-map-pin-b" />
+        <span className="home-map-pin home-map-pin-c" />
+        <span className="home-map-pin home-map-pin-d" />
+      </Link>
 
     </div>
   );

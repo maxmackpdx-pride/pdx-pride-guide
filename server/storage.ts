@@ -137,6 +137,7 @@ sqlite.exec(`
     avatar_choice INTEGER DEFAULT 1,
     bio TEXT,
     photo_url TEXT,
+    google_id TEXT UNIQUE,
     status TEXT NOT NULL DEFAULT 'active',
     created_at TEXT NOT NULL DEFAULT ''
   );
@@ -173,6 +174,8 @@ try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e)
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN google_id TEXT`); } catch(e) {}
+try { sqlite.exec(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_unique ON users(google_id)`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`); } catch(e) {}
@@ -1081,7 +1084,9 @@ export interface IStorage {
   getUserById(id: number): User | undefined;
   getUserByEmail(email: string): User | undefined;
   getUserByUsername(username: string): User | undefined;
-  createUser(data: { username: string; email: string; passwordHash: string; displayName?: string }): User;
+  getUserByGoogleId(googleId: string): User | undefined;
+  createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
+  linkGoogleToUser(id: number, googleId: string): void;
   updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'bio' | 'photoUrl'>>): void;
   // Messages
   getInbox(userId: number): Message[];
@@ -1300,15 +1305,22 @@ export const storage: IStorage = {
   getUserByUsername(username) {
     return db.select().from(users).where(eq(users.username, username)).get();
   },
-  createUser({ username, email, passwordHash, displayName }) {
+  getUserByGoogleId(googleId) {
+    return db.select().from(users).where(eq(users.googleId, googleId)).get();
+  },
+  createUser({ username, email, passwordHash, displayName, googleId }) {
     const hashed = hashPassword(passwordHash);
     return db.insert(users).values({
       username, email, passwordHash: hashed,
       displayName: displayName || null,
+      googleId: googleId || null,
       avatarChoice: 1,
       status: "active",
       createdAt: new Date().toISOString(),
     }).returning().get();
+  },
+  linkGoogleToUser(id, googleId) {
+    db.update(users).set({ googleId }).where(eq(users.id, id)).run();
   },
   updateUser(id, data) {
     db.update(users).set(data).where(eq(users.id, id)).run();

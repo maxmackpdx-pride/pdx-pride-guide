@@ -278,6 +278,23 @@ export default function Dashboard() {
           </section>
         )}
 
+        {/* Account Connections */}
+        <section style={{ marginBottom: 48, background: "#080808", border: "1px solid #1a1a1a", padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <h2 className="display" style={{ fontSize: "1.1rem", color: "#fff", marginBottom: 4 }}>ACCOUNT CONNECTIONS</h2>
+            <div style={{ color: user.googleLinked ? "#CCFF00" : "#777", fontSize: "0.86rem" }}>
+              Google is {user.googleLinked ? "linked to this profile." : "not linked yet."}
+            </div>
+          </div>
+          {user.googleLinked ? (
+            <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>GOOGLE LINKED</span>
+          ) : (
+            <a href="/api/auth/google?link=1" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#fff", border: "2px solid #fff", padding: "10px 18px", textDecoration: "none", display: "inline-block", boxShadow: "3px 3px 0 #00FFFF" }}>
+              LINK GOOGLE →
+            </a>
+          )}
+        </section>
+
         {/* My Events */}
         <section style={{ marginBottom: 48 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
