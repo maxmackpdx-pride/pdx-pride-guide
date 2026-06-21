@@ -98,20 +98,14 @@ export default function About() {
               {
                 num: "02",
                 color: "#00FFFF",
-                title: "Two admins must approve",
-                text: "All submissions — events, claims, edits, and gig posts — require approval from two separate admins before going live. No single point of failure, no favoritism.",
+                title: "Admins review every submission",
+                text: "All submissions — events, claims, edits, and gig posts — go through admin review before going live. No spam, no favoritism.",
               },
               {
                 num: "03",
                 color: "#FF00CC",
                 title: "Claimable events can be owned",
                 text: "Some events are seeded by admins and marked as claimable. If you're the organizer, submit a claim and take ownership of your listing.",
-              },
-              {
-                num: "04",
-                color: "#FF6600",
-                title: "All submissions are reviewed",
-                text: "Every event, claim, and edit goes through two-admin approval before it goes live. No single point of failure, no favoritism.",
               },
             ].map((step, i) => (
               <div
@@ -218,13 +212,16 @@ export default function About() {
             <div style={{ position: "relative", zIndex: 2, padding: "40px 40px 36px" }}>
               <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.14em", color: "#CCFF00", marginBottom: 12 }}>ABOUT THE CREATOR</div>
               <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", marginBottom: 16, lineHeight: 1.05, textShadow: "0 2px 12px #000" }}>
-                MADE BY <span style={{ color: "#CCFF00" }}>TUCKER CASEY</span>
+                MADE BY <span style={{ color: "#CCFF00" }}>TUCKER MAX</span>
               </h2>
               <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
-                Tucker Max is the host and creator of <em>Yes Coach</em>. He built this guide alone — no team, no budget, no sponsors — because he thinks Portland's queer community deserves something that isn't run by a corporation or driven by ad revenue.
+                I'm Tucker Max, host and creator of <em>Yes Coach</em>. I built this guide myself, because I believe Portland's queer community deserves something that isn't controlled by a corporation, buried by algorithms, or driven by ad revenue.
+              </p>
+              <p style={{ color: "#ccc", fontSize: "0.92rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
+                I also want to say thank you to everyone who helped and donated when I fell on extremely hard times this year. I'm still working through it, but your support helped make sure I could do this for the third year in a row. And for the first time ever, I was able to build a completely customized website made just for us.
               </p>
               <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
-                Meta sucks. We deserve better. This guide is free, community-moderated, and not going anywhere.
+                Meta sucks. We deserve better. This guide is free, community-moderated, and built to last.
               </p>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#CCFF00", letterSpacing: "0.1em", opacity: 0.7 }}>
                 NO SPONSORS · NO CORPORATE BACKING · BUILT WITH LOVE FOR PDX

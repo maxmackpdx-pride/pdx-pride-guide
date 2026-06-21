@@ -72,6 +72,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  // ─── CLAIMED EVENT EDIT (owner only) ──────────────────────────────────────
+  // Returns events claimed by the logged-in user
+  app.get("/api/events/mine/claimed", requireAuth, (req, res) => {
+    const username = storage.getUserById(req.session.userId!)?.username;
+    if (!username) return res.status(404).json({ error: "User not found" });
+    const all = storage.getEvents({});
+    const mine = all.filter(e => e.claimedBy === username);
+    res.json(mine);
+  });
+
+  // Owner edits a claimed event (all fields, goes back to pending review)
+  app.put("/api/events/:id/edit", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const user = storage.getUserById(req.session.userId!);
+    if (!user || evt.claimedBy !== user.username) return res.status(403).json({ error: "Not your event" });
+    const allowed = [
+      "title", "description", "venueName", "address", "neighborhood",
+      "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
+      "ticketUrl", "posterImageUrl", "eventTypes",
+      "isPublic", "isHouseParty", "isSexPositive", "nudityOk",
+    ];
+    const patch: any = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
+    if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
+      patch.eventTypes = JSON.stringify(patch.eventTypes);
+    }
+    const updated = storage.updateEvent(Number(req.params.id), patch);
+    res.json(updated);
+  });
+
   // ─── MODERATION REQUESTS (claim/remove) ──────────────────────────────────
   app.post("/api/moderation-request", (req, res) => {
     try {

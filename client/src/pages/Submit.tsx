@@ -4,7 +4,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
-const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Other"];
+
+// Must match TYPE_FILTERS tags on Events page (minus FREE/TICKETED/21+/ALL AGES/PUBLIC which are derived from other fields)
+const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 
 const inputStyle = { width: "100%", background: "#111", border: "1px solid #222", color: "#fff", padding: "10px 12px", fontSize: "0.88rem", fontFamily: "var(--font-body)", boxSizing: "border-box" as const };
 const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "#555", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
@@ -18,7 +20,7 @@ export default function Submit() {
     dateStart: "", dateEnd: "", dayOfWeek: "FRI",
     ageRequirement: "ALL_AGES", admission: "FREE", ticketUrl: "",
     posterImageUrl: "",
-    isPublic: true, isPrivate: false, isHouseParty: false,
+    isPublic: true, isHouseParty: false,
     isSexPositive: false, nudityOk: false,
     selectedTypes: [] as string[],
     submitterName: "", submitterEmail: "", submitterOrg: "",
@@ -35,7 +37,7 @@ export default function Submit() {
       return r.json();
     },
     onSuccess: () => {
-      toast({ title: "Submitted!", description: "Your submission is pending two-admin review." });
+      toast({ title: "Submitted!", description: "Your submission is pending review." });
       setForm(f => ({ ...f, title: "", description: "" }));
     },
     onError: () => toast({ title: "Error", description: "Something went wrong. Try again.", variant: "destructive" }),
@@ -53,7 +55,7 @@ export default function Submit() {
         {mode === "submit" ? "SUBMIT AN EVENT" : "CLAIM AN EVENT"}
       </h1>
       <p style={{ color: "#666", marginBottom: 32, lineHeight: 1.6 }}>
-        All submissions require two-admin approval before going live. You'll be notified by email.
+        All submissions are reviewed before going live. You'll be notified by email.
       </p>
 
       {/* Mode toggle */}
@@ -109,9 +111,15 @@ export default function Submit() {
                   {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
-              <div>
-                <label style={labelStyle}>Venue Address</label>
-                <input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Leave blank for private/house party" style={inputStyle} />
+              <div style={{ gridColumn: "1/-1" }}>
+                <label style={labelStyle}>Venue Address *</label>
+                <input
+                  value={form.address}
+                  onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+                  required={!form.isHouseParty}
+                  placeholder={form.isHouseParty ? "Optional for house parties" : "Street address (required)"}
+                  style={inputStyle}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Day of Week</label>
@@ -124,20 +132,20 @@ export default function Submit() {
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Start *</label>
-                <input type="datetime-local" value={form.dateStart} onChange={e => setForm(f => ({ ...f, dateStart: e.target.value }))} required style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>End *</label>
-                <input type="datetime-local" value={form.dateEnd} onChange={e => setForm(f => ({ ...f, dateEnd: e.target.value }))} required style={inputStyle} />
-              </div>
-              <div>
                 <label style={labelStyle}>Age Requirement</label>
                 <select value={form.ageRequirement} onChange={e => setForm(f => ({ ...f, ageRequirement: e.target.value }))} style={inputStyle}>
                   <option value="ALL_AGES">All Ages</option>
                   <option value="18_PLUS">18+</option>
                   <option value="21_PLUS">21+</option>
                 </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Start *</label>
+                <input type="datetime-local" value={form.dateStart} onChange={e => setForm(f => ({ ...f, dateStart: e.target.value }))} required style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>End *</label>
+                <input type="datetime-local" value={form.dateEnd} onChange={e => setForm(f => ({ ...f, dateEnd: e.target.value }))} required style={inputStyle} />
               </div>
               <div>
                 <label style={labelStyle}>Admission</label>
@@ -161,7 +169,7 @@ export default function Submit() {
           </div>
         </section>
 
-        {/* Tags */}
+        {/* Event Types / Tags */}
         <section>
           <div className="display" style={sectionHeadStyle}>EVENT TYPES</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -172,16 +180,12 @@ export default function Submit() {
           </div>
         </section>
 
-        {/* Privacy & Content */}
+        {/* Event Flags */}
         <section>
-          <div className="display" style={sectionHeadStyle}>PRIVACY &amp; CONTENT</div>
+          <div className="display" style={sectionHeadStyle}>EVENT FLAGS</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {[
-              ["isPublic", "Public Event"],
-              ["isPrivate", "Private (location withheld)"],
               ["isHouseParty", "House Party"],
-              ["isSexPositive", "Sex Positive"],
-              ["nudityOk", "Nudity OK"],
             ].map(([key, label]) => (
               <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "8px 12px", border: "1px solid #222", background: (form as any)[key] ? "#1a1a0a" : "transparent" }}>
                 <input type="checkbox" checked={(form as any)[key]} onChange={() => toggle(key as keyof typeof form)} style={{ accentColor: "var(--neon-yellow)" }} />
@@ -213,7 +217,7 @@ export default function Submit() {
         <button type="submit" disabled={mutation.isPending} className="btn-neon solid" style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center" }} data-testid="submit-button">
           {mutation.isPending ? "Submitting..." : mode === "claim" ? "Submit Claim Request →" : "Submit for Review →"}
         </button>
-        <p style={{ color: "#444", fontSize: "0.75rem", textAlign: "center" }}>Requires approval from two admins before going live.</p>
+        <p style={{ color: "#444", fontSize: "0.75rem", textAlign: "center" }}>All submissions are reviewed before going live.</p>
       </form>
     </div>
   );

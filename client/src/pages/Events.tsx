@@ -78,9 +78,20 @@ function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const initializedRef = useRef(false);
 
-  // Init map once on mount
+  // Init map only when first made visible — avoids Leaflet sizing on display:none
   useEffect(() => {
+    if (!visible) return;
+    if (initializedRef.current) {
+      // Already initialized — just re-measure
+      if (mapRef.current) {
+        setTimeout(() => mapRef.current?.invalidateSize(), 50);
+        setTimeout(() => mapRef.current?.invalidateSize(), 300);
+      }
+      return;
+    }
+
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout>;
 
@@ -91,7 +102,7 @@ function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
         return;
       }
       if (cancelled || !containerRef.current) return;
-      if (mapRef.current) return; // already initialized
+      if (mapRef.current) return;
 
       const map = L.map(containerRef.current, {
         zoomControl: true,
@@ -105,11 +116,12 @@ function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
       }).addTo(map);
 
       mapRef.current = map;
+      initializedRef.current = true;
 
-      // Invalidate after layout settles — multiple times to be sure
+      // Multiple invalidates to ensure tiles paint after layout
       setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 50);
       setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 300);
-      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 800);
+      setTimeout(() => { if (!cancelled) map.invalidateSize(); }, 700);
     }
 
     initMap();
@@ -118,14 +130,6 @@ function MapView({ events, visible }: { events: Event[]; visible: boolean }) {
       cancelled = true;
       clearTimeout(retryTimer);
     };
-  }, []);
-
-  // When map becomes visible, force invalidateSize so tiles render
-  useEffect(() => {
-    if (!visible || !mapRef.current) return;
-    const map = mapRef.current;
-    setTimeout(() => map.invalidateSize(), 50);
-    setTimeout(() => map.invalidateSize(), 250);
   }, [visible]);
 
   // Update markers whenever events change (retry until map is ready)
