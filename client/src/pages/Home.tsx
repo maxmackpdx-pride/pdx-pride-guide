@@ -25,10 +25,10 @@ export default function Home() {
   const tickerItems = eventNames.length ? [...eventNames, ...eventNames] : [];
 
   return (
-    <div style={{ background: "#000", minHeight: "100vh" }}>
+    <div className="zine-page home-page" style={{ background: "#000", minHeight: "100vh" }}>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section style={{ position: "relative", overflow: "hidden", minHeight: 520, display: "flex", alignItems: "center" }}>
+      <section className="zine-hero" style={{ position: "relative", overflow: "hidden", minHeight: 520, display: "flex", alignItems: "center" }}>
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: `url(${skylineImg})`,
@@ -53,7 +53,7 @@ export default function Home() {
 
         <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "80px 24px", width: "100%", zIndex: 1 }}>
           <div style={{ maxWidth: 700 }}>
-            <div style={{
+            <div className="paste-label" style={{
               display: "inline-block", fontFamily: "var(--font-display)", fontWeight: 900,
               fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase",
               color: "#000", background: "#CCFF00", padding: "5px 12px", marginBottom: 24,

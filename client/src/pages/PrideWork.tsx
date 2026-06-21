@@ -104,9 +104,9 @@ export default function PrideWork() {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
+    <div className="min-h-screen zine-page pride-work-page" style={{ background: "#0a0a0a" }}>
       {/* Header */}
-      <div className="border-b-2 border-white/10 px-4 py-8 md:px-8">
+      <div className="zine-section-head border-b-2 border-white/10 px-4 py-8 md:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
@@ -429,7 +429,7 @@ function GigCard({ gig }: { gig: GigPost }) {
   return (
     <div
       data-testid={`card-gig-${gig.id}`}
-      className="border-2 transition-all"
+      className="poster-card gig-card border-2 transition-all"
       style={{ background: "#111", borderColor: expanded ? color : "#222" }}
     >
       <button

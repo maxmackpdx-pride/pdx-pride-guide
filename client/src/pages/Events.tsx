@@ -438,12 +438,12 @@ export default function Events() {
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
   return (
-    <div>
+    <div className="zine-page events-page">
       {/* Map — always mounted, shown/hidden via CSS to avoid Leaflet reinit */}
       <MapView events={filtered} visible={viewMode === "map"} />
 
       {/* Filters + View Toggle */}
-      <div style={{
+      <div className="zine-filter-bar" style={{
         background: "#000", borderBottom: "1px solid #1a1a1a",
         position: "sticky", top: 60, zIndex: 50,
       }}>
@@ -555,7 +555,7 @@ export default function Events() {
       </div>
 
       {/* Events listing — hidden in map view */}
-      {viewMode !== "map" && <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
+      {viewMode !== "map" && <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 24 }}>
           <h2 className="display" style={{ fontSize: "1.4rem", margin: 0 }}>{filtered.length} EVENTS</h2>
           {activeFilters.length > 0 && (
@@ -603,7 +603,7 @@ export default function Events() {
           </div>
         )}
 
-        <div style={{
+        <div className="zine-callout" style={{
           marginTop: 60, textAlign: "center", padding: "36px 20px",
           background: "#050505", border: "1px solid #1a1a1a",
         }}>
