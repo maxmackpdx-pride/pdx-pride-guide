@@ -41,7 +41,7 @@ export default function Home() {
       .map(event => parsePacificEventTime(event.dateStart))
       .filter((time): time is number => typeof time === "number" && Number.isFinite(time))
       .sort((a, b) => a - b);
-    return starts[0] || new Date("2026-07-17T00:00:00-07:00").getTime();
+    return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
   const eventNames = events.map(event => event.title).filter(Boolean);
@@ -77,7 +77,7 @@ export default function Home() {
 
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
-            <div className="home-hero-kicker">Portland Pride Weekend · July 17–20, 2026</div>
+            <div className="home-hero-kicker">Portland Pride Weekend · July 16–19, 2026</div>
 
             <h1 className="display home-hero-title">
               PORTLAND<br />
