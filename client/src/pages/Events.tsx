@@ -23,6 +23,7 @@ const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
 
 // ── Pin icon builder ────────────────────────────────────────────────────────
 function buildPinIcon(days: string[]) {
+  if (typeof divIcon !== 'function') return null;
   const SIZE = 22;
   const R = SIZE / 2;
 
@@ -75,6 +76,7 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
         const [lat, lng] = key.split(",").map(Number);
         const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
         const icon = buildPinIcon(days);
+        if (!icon) return null;
         const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
         return (
           <Marker key={key} position={[lat, lng]} icon={icon}>
@@ -119,7 +121,11 @@ function MapView({ events, expanded, onToggleExpand, onSelect }: {
   onSelect: (e: Event) => void;
 }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  // Lazy-mount: only initialize Leaflet after first paint to avoid divIcon/window timing crash
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <>
