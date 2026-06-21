@@ -157,6 +157,7 @@ export const users = sqliteTable("users", {
   displayName: text("display_name"),
   avatarChoice: integer("avatar_choice").default(1), // 1-6
   bio: text("bio"),
+  photoUrl: text("photo_url"),
   status: text("status").notNull().default("active"),
   createdAt: text("created_at").notNull().default(""),
 });

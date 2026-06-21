@@ -4,6 +4,28 @@ import { storage, hashPassword } from "./storage";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertAttendanceSchema } from "@shared/schema";
 import crypto from "crypto";
 import session from "express-session";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// ─── File upload setup ────────────────────────────────────────────────────────
+const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
+      cb(null, `poster-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
+  fileFilter: (_req, file, cb) => {
+    const ok = /^image\/(jpeg|jpg|png|gif|webp)$/.test(file.mimetype);
+    cb(null, ok);
+  },
+});
 
 // Extend express-session to include our custom fields
 declare module "express-session" {
@@ -43,6 +65,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   }));
+
+  // ─── FILE UPLOADS ───────────────────────────────────────────────────────
+  // Poster image upload (event submit / claim edit)
+  app.post("/api/upload/poster", requireAuth, upload.single("poster"), (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
+    res.json({ url: `/uploads/${req.file.filename}` });
+  });
+
+  // Profile photo upload
+  app.post("/api/upload/avatar", requireAuth, upload.single("avatar"), async (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "No file or invalid type" });
+    const url = `/uploads/${req.file.filename}`;
+    storage.updateUser(req.session.userId!, { photoUrl: url });
+    res.json({ url });
+  });
+
+  // Serve uploaded files statically
+  app.use("/uploads", (req: any, res: any, next: any) => {
+    const express = require("express");
+    express.static(UPLOADS_DIR)(req, res, next);
+  });
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
     app.get("/api/events", (req, res) => {
@@ -212,7 +255,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     req.session.userId = user.id;
     res.json({
       id: user.id, username: user.username, email: user.email,
-      displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
+      displayName: user.displayName, avatarChoice: user.avatarChoice,
+      bio: user.bio, photoUrl: user.photoUrl,
     });
   });
 
@@ -227,7 +271,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user) return res.status(401).json({ error: "Not authenticated" });
     res.json({
       id: user.id, username: user.username, email: user.email,
-      displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
+      displayName: user.displayName, avatarChoice: user.avatarChoice,
+      bio: user.bio, photoUrl: user.photoUrl,
     });
   });
 
@@ -252,7 +297,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const updated = storage.getUserById(req.session.userId!);
     res.json({
       id: updated!.id, username: updated!.username, email: updated!.email,
-      displayName: updated!.displayName, avatarChoice: updated!.avatarChoice, bio: updated!.bio,
+      displayName: updated!.displayName, avatarChoice: updated!.avatarChoice,
+      bio: updated!.bio, photoUrl: updated!.photoUrl,
     });
   });
 

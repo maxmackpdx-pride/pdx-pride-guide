@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ImageUploader from "@/components/ImageUploader";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -162,9 +163,15 @@ export default function Submit() {
               <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 4 }}>Link to buy tickets, RSVP, or find more info. All events must have a link.</div>
             </div>
             <div>
-              <label style={labelStyle}>Event Flyer / Poster Image URL (optional)</label>
-              <input value={form.posterImageUrl} onChange={e => setForm(f => ({ ...f, posterImageUrl: e.target.value }))} type="url" placeholder="https://... (direct image link)" style={inputStyle} />
-              <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 4 }}>Paste a direct URL to your event flyer image. It will appear on the event card and detail view.</div>
+              <label style={labelStyle}>Event Flyer / Poster (optional)</label>
+              <ImageUploader
+                endpoint="/api/upload/poster"
+                fieldName="poster"
+                currentUrl={form.posterImageUrl}
+                onUploaded={url => setForm(f => ({ ...f, posterImageUrl: url }))}
+                label="UPLOAD FLYER"
+              />
+              <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 6 }}>jpg/png/gif/webp · max 8MB · appears on the event card and detail view</div>
             </div>
           </div>
         </section>

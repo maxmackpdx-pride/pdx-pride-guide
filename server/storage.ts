@@ -132,6 +132,7 @@ sqlite.exec(`
     display_name TEXT,
     avatar_choice INTEGER DEFAULT 1,
     bio TEXT,
+    photo_url TEXT,
     status TEXT NOT NULL DEFAULT 'active',
     created_at TEXT NOT NULL DEFAULT ''
   );
@@ -152,6 +153,7 @@ try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN user_id INTEGER`); } catch(e
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
 
 export function hashPassword(pw: string) {
   return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
@@ -1044,7 +1046,7 @@ export interface IStorage {
   getUserByEmail(email: string): User | undefined;
   getUserByUsername(username: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string }): User;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'bio'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'bio' | 'photoUrl'>>): void;
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];

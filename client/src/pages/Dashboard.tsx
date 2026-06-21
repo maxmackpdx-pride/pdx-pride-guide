@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import ImageUploader from "@/components/ImageUploader";
 
 const AVATARS = [
   { id: 1, emoji: "🐱", bg: "#00FFFF", label: "Cyan Cat" },
@@ -137,8 +138,13 @@ export default function Dashboard() {
             background: avatar.bg, border: "3px solid #000",
             boxShadow: `0 0 16px ${avatar.bg}66`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "2rem",
-          }}>{avatar.emoji}</div>
+            fontSize: "2rem", overflow: "hidden", position: "relative",
+          }}>
+            {user.photoUrl
+              ? <img src={user.photoUrl} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
+              : avatar.emoji
+            }
+          </div>
           <div>
             <h1 className="display" style={{ fontSize: "2.4rem", color: "#CCFF00", lineHeight: 1 }}>
               {user.displayName || user.username}
@@ -182,6 +188,14 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+            <label style={labelStyle}>PROFILE PHOTO (optional)</label>
+            <ImageUploader
+              endpoint="/api/upload/avatar"
+              fieldName="avatar"
+              currentUrl={user.photoUrl || ""}
+              onUploaded={() => {}}
+              label="UPLOAD PHOTO"
+            />
             <label style={labelStyle}>DISPLAY NAME</label>
             <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="How you appear to others" maxLength={40} />
             <label style={labelStyle}>BIO <span style={{ color: "#555", fontWeight: 400 }}>({bio.length}/160)</span></label>
@@ -279,11 +293,14 @@ export default function Dashboard() {
                       <input type="url" style={inputStyle} value={eventForm.ticketUrl} onChange={e => setEventForm((f: any) => ({ ...f, ticketUrl: e.target.value }))} placeholder="https://..." />
                     </div>
                     <div style={{ gridColumn: "1/-1" }}>
-                      <label style={labelStyle}>Poster Image URL</label>
-                      <input type="url" style={inputStyle} value={eventForm.posterImageUrl} onChange={e => setEventForm((f: any) => ({ ...f, posterImageUrl: e.target.value }))} placeholder="https://... direct image link" />
-                      {eventForm.posterImageUrl && (
-                        <img src={eventForm.posterImageUrl} alt="poster preview" style={{ marginTop: 10, maxHeight: 120, border: "1px solid #222" }} onError={e => (e.currentTarget.style.display = "none")} />
-                      )}
+                      <label style={labelStyle}>Event Flyer / Poster</label>
+                      <ImageUploader
+                        endpoint="/api/upload/poster"
+                        fieldName="poster"
+                        currentUrl={eventForm.posterImageUrl}
+                        onUploaded={url => setEventForm((f: any) => ({ ...f, posterImageUrl: url }))}
+                        label="UPLOAD FLYER"
+                      />
                     </div>
                   </div>
 
