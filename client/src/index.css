@@ -827,6 +827,32 @@ body::before {
 }
 .map-container .leaflet-container { height: 100%; width: 100%; }
 
+.map-exit-button {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 9px 13px;
+  border: 2px solid var(--neon-yellow);
+  background: rgba(0,0,0,0.88);
+  color: var(--neon-yellow);
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 0 18px rgba(204,255,0,0.18), 0 12px 28px rgba(0,0,0,0.55);
+}
+
+.map-exit-button:hover {
+  background: var(--neon-yellow);
+  color: #000;
+}
+
 .zine-filter-bar {
   box-shadow: 0 10px 26px rgba(0,0,0,0.58);
 }

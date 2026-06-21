@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "../components/EventModal";
-import { List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -157,6 +157,19 @@ function MapView({ events, expanded, onToggleExpand, onSelect }: {
           .leaflet-control-zoom a { background:#111 !important; color:#CCFF00 !important; border-color:#333 !important; }
           .leaflet-control-zoom a:hover { background:#222 !important; }
         `}</style>
+
+        {expanded && (
+          <button
+            type="button"
+            className="map-exit-button"
+            onClick={onToggleExpand}
+            data-testid="button-exit-map"
+            aria-label="Back to events"
+          >
+            <ArrowLeft size={15} />
+            <span>BACK TO EVENTS</span>
+          </button>
+        )}
 
         {mounted && (
           <MapContainer
