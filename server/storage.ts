@@ -163,9 +163,9 @@ const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extr
 function seedData() {
   const existing = db.select().from(events).all();
 
-  // Force re-seed if old fake events, no lat/lng, or no poster images yet
+  // Force re-seed if old fake events, no lat/lng, no poster images, or event count too low (new events added)
   if (existing.length > 0) {
-    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null;
+    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 21;
     if (needsReseed) {
       sqlite.exec(`DELETE FROM events`);
       sqlite.exec(`DELETE FROM attendances`);
@@ -210,7 +210,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://pridenw.org",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/portland-pride-parade.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -227,7 +227,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.tickettailor.com",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/inferno-pride-portland.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -244,7 +244,7 @@ function seedData() {
       admission: "FREE",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/portland-pride-ride.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -351,7 +351,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://jeffreyjay.gay",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/pride-in-demand.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -386,7 +386,7 @@ function seedData() {
       admission: "TBD",
       ticketUrl: null,
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/gay-witch-appreciation-day.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -407,6 +407,142 @@ function seedData() {
       status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
+    {
+      title: "Bearracuda Double Pride",
+      description: "Two-night Pride dance party at Nova PDX. One of the longest-running bear & friends club nights in the country.",
+      venueName: "Nova PDX",
+      address: "18 NW 3rd Ave, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5249, lng: -122.6742,
+      dateStart: "2026-07-17T21:00:00", dateEnd: "2026-07-18T02:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "BEAR"]),
+      admission: "TICKETED",
+      ticketUrl: "https://novapdxevents.com",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Portland Pickles Pride Night",
+      description: "Portland Pickles baseball meets Pride! All ages welcome at Walker Stadium. A rare Pride event the whole family can enjoy together.",
+      venueName: "Walker Stadium",
+      address: "4727 SE 92nd Ave, Portland, OR 97266",
+      neighborhood: "SE Portland",
+      lat: 45.4895, lng: -122.5680,
+      dateStart: "2026-07-17T19:05:00", dateEnd: "2026-07-17T22:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["SPORTS", "FAMILY", "OUTDOOR"]),
+      admission: "TICKETED",
+      ticketUrl: "https://portlandpickles.com",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Ankeny Alley Pride Block Party",
+      description: "Official PrideNW block party in Old Town's Ankeny Alley. Two days of outdoor celebration, local vendors, and community gathering. Free and all ages.",
+      venueName: "Ankeny Alley",
+      address: "SW Ankeny St, Portland, OR 97204",
+      neighborhood: "Old Town",
+      lat: 45.5228, lng: -122.6716,
+      dateStart: "2026-07-18T12:00:00", dateEnd: "2026-07-19T22:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["BLOCK-PARTY", "OFFICIAL", "FREE", "OUTDOOR"]),
+      admission: "FREE",
+      ticketUrl: "https://pridenw.org",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Midtown Beer Garden Pride",
+      description: "Official PrideNW outdoor beer garden open Thursday through Sunday. Community drinks and Pride energy just outside the main festival footprint.",
+      venueName: "Midtown Beer Garden",
+      address: "SW 3rd Ave & SW Morrison St, Portland, OR 97204",
+      neighborhood: "Downtown",
+      lat: 45.5200, lng: -122.6750,
+      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-20T20:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["BAR", "OFFICIAL", "OUTDOOR", "MULTI-DAY"]),
+      admission: "FREE",
+      ticketUrl: "https://pridenw.org",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "NE Portland Pride & LGBTQ+ Resource Fair",
+      description: "Community-organized Pride block on NE 30th Ave. Local vendors, LGBTQ+ resources, food, live entertainment. Free and family-friendly. Hosted by Take Two & Javier Puga-Phillips.",
+      venueName: "NE 30th Ave",
+      address: "NE 30th Ave between Killingsworth & Emerson, Portland, OR 97211",
+      neighborhood: "NE Portland",
+      lat: 45.5630, lng: -122.6457,
+      dateStart: "2026-07-19T15:00:00", dateEnd: "2026-07-19T21:00:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["BLOCK-PARTY", "COMMUNITY", "FREE", "OUTDOOR"]),
+      admission: "FREE",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "The Sports Bra Pride Block Party",
+      description: "Portland's legendary women's sports bar throws its annual Pride block party. Queer athletes, fans, and community taking over the block all afternoon.",
+      venueName: "The Sports Bra",
+      address: "3455 NE Belmont St, Portland, OR 97232",
+      neighborhood: "NE Portland",
+      lat: 45.5302, lng: -122.6502,
+      dateStart: "2026-07-19T13:00:00", dateEnd: "2026-07-19T22:00:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["BLOCK-PARTY", "SPORTS", "COMMUNITY"]),
+      admission: "TICKETED",
+      ticketUrl: "https://thesportsbrapub.com",
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Yes Sir Gay Dance Party",
+      description: "Secret warehouse dance party. Gay underwear night featuring DJ Ottogyro. Location revealed to ticket holders only. 21+ only.",
+      venueName: "Secret Warehouse",
+      address: "Portland, OR (location revealed with ticket)",
+      neighborhood: "Portland",
+      lat: 45.5231, lng: -122.6765,
+      dateStart: "2026-07-20T21:00:00", dateEnd: "2026-07-21T02:00:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "21_PLUS",
+      eventTypes: JSON.stringify(["PARTY", "DANCE", "WAREHOUSE"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
+    {
+      title: "Portland Pride Drag Brunch at Stag PDX",
+      description: "All-ages drag brunch at Stag PDX in the Pearl District. Two-day run of performances, mimosas, and weekend Pride energy.",
+      venueName: "Stag PDX",
+      address: "317 NW Broadway, Portland, OR 97209",
+      neighborhood: "Pearl District",
+      lat: 45.5270, lng: -122.6788,
+      dateStart: "2026-07-19T11:00:00", dateEnd: "2026-07-20T15:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: JSON.stringify(["BRUNCH", "DRAG", "MULTI-DAY"]),
+      admission: "TICKETED",
+      ticketUrl: null,
+      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
+      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+    },
   ];
 
   for (const e of seedEvents) {
@@ -423,7 +559,7 @@ function seedData() {
     "Hey, let's be awkward together",
   ];
   const handles = ["queercat", "neonbabe", "velvethaze", "crushpunk", "stardust", "wildthing", "radtrans", "badfemme"];
-  for (let eventId = 1; eventId <= 13; eventId++) {
+  for (let eventId = 1; eventId <= 21; eventId++) {
     const count = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       db.insert(attendances).values({

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
@@ -16,6 +17,14 @@ export default function Nav() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+
+  const { data: inbox = [] } = useQuery<any[]>({
+    queryKey: ["/api/inbox"],
+    queryFn: () => fetch("/api/inbox").then(r => r.json()),
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
+  const unreadCount = inbox.filter((m: any) => !m.readAt && m.toUserId === user?.id).length;
 
   return (
     <>
@@ -45,12 +54,19 @@ export default function Nav() {
             {/* Auth area */}
             {user ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8, paddingLeft: 12, borderLeft: "1px solid #222" }}>
-                <Link href="/inbox" style={{ textDecoration: "none" }}>
+                <Link href="/inbox" style={{ textDecoration: "none", position: "relative", display: "inline-flex", alignItems: "center" }}>
                   <span style={{
                     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.72rem",
-                    color: "#aaa", letterSpacing: "0.07em", textTransform: "uppercase",
+                    color: unreadCount > 0 ? "#CCFF00" : "#aaa", letterSpacing: "0.07em", textTransform: "uppercase",
                     padding: "4px 8px",
-                  }}>INBOX</span>
+                  }}>INBOX{unreadCount > 0 && (
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      background: "#CCFF00", color: "#000", borderRadius: "50%",
+                      width: 16, height: 16, fontSize: "0.55rem", fontWeight: 900,
+                      marginLeft: 4, lineHeight: 1,
+                    }}>{unreadCount}</span>
+                  )}</span>
                 </Link>
                 <Link href="/dashboard" style={{ textDecoration: "none" }}>
                   <span style={{

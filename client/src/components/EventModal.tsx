@@ -74,13 +74,13 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
         {/* Color bar */}
         <div style={{ height: 5, background: dayColor }} />
 
-        {/* Poster image — full width at top of modal */}
+        {/* Poster image — full natural size, centered, no crop */}
         {event.posterImageUrl && (
-          <div style={{ width: "100%", maxHeight: 340, overflow: "hidden", background: "#000" }}>
+          <div style={{ width: "100%", background: "#000", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "0" }}>
             <img
               src={event.posterImageUrl}
               alt={event.title}
-              style={{ width: "100%", height: 340, objectFit: "cover", display: "block", opacity: 0.95 }}
+              style={{ display: "block", maxWidth: "100%", width: "auto", height: "auto", maxHeight: "70vh", objectFit: "contain" }}
             />
           </div>
         )}
