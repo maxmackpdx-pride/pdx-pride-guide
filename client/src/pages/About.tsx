@@ -93,7 +93,7 @@ export default function About() {
                 num: "01",
                 color: "#CCFF00",
                 title: "Events are submitted by the community",
-                text: "Anyone can submit an event through the Submit page. Fill out the form and it enters the admin review queue.",
+                text: "Create a free account, fill out the Submit form, and it enters the review queue. Account required to keep listings accountable — no anonymous spam.",
               },
               {
                 num: "02",
@@ -141,12 +141,12 @@ export default function About() {
           >
             <ul className="space-y-4">
               {[
-                "Free to list, free to use, free forever.",
-                "No user accounts required to browse or submit.",
-                "No personal data sold or shared with third parties.",
-                "All event data is publicly visible — nothing behind a paywall.",
-                "Admins are community members, not staff of any organization.",
-                "This site is queer-owned and community-maintained.",
+                "Free to browse, free forever. No paywalls, no ads.",
+                "Submitting an event or posting a gig requires a free account — so I can keep out spam and keep listings accountable.",
+                "No personal data sold or shared. Ever.",
+                "Pride is a protest. Our bodies have always been political. Sex-positive and nude events are listed here — because they belong in our community and always have. I only tag them accurately, not judgmentally.",
+                "Admins are community members — right now that's just me, Tucker. Two-admin approval means nothing goes live on my say alone.",
+                "This site was built by one person. It's queer-owned because I own it.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: "#8800FF" }} />
