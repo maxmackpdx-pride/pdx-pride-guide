@@ -59,7 +59,7 @@ export default function PrideWork() {
   const [showAuth, setShowAuth] = useState(false);
   const [filterType, setFilterType] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">("ALL");
 
-  const { data: gigs = [], isLoading } = useQuery<GigPost[]>({
+  const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
     queryKey: ["/api/gigs"],
   });
 
@@ -374,6 +374,21 @@ export default function PrideWork() {
             {[1, 2, 3].map(i => (
               <div key={i} className="h-32 border border-white/10 bg-white/5 animate-pulse" />
             ))}
+          </div>
+        ) : isError ? (
+          <div className="text-center py-20 border-2" style={{ borderColor: "#FF6600" }}>
+            <Briefcase size={40} className="mx-auto mb-4" style={{ color: "#FF6600" }} />
+            <p className="display text-2xl text-white">COULD NOT LOAD POSTS</p>
+            <p className="text-white/50 text-sm mt-2 max-w-md mx-auto">
+              {error instanceof Error ? error.message : "The gig board API is unavailable right now."}
+            </p>
+            <button
+              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}
+              className="mt-6 display text-base px-6 py-2 border-2 transition-all"
+              style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+            >
+              TRY AGAIN
+            </button>
           </div>
         ) : filteredGigs.length === 0 ? (
           <div className="text-center py-20">
