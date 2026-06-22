@@ -40,11 +40,17 @@ Legacy aliases (redirect here):
 - **Avatar ring/crop on live:** Code + bundle deployed (`index-Dg_-8lVn.js`). API returns `avatarRing`/`avatarCrop`. **Round-trip not browser-verified** — needs Tucker Google login UAT.
 - **`dist/` on deploy:** Railway **rebuilds from source** (`railway.json`: `npm install && npm run build`). Server-only pushes don’t need a `dist/` commit. Frontend changes still need `npm run build` + commit `dist/` if you want GitHub tree to match what Nixpacks builds.
 
-### Grok next action (pending Tucker yes)
-1. Railway → Add volume `/data` on `pdx-pride-guide` service
-2. Variables: `DATABASE_PATH=/data/data.db`
-3. Redeploy
-4. (Follow-up) Claude adds `UPLOADS_DIR` env support → mount uploads under `/data/uploads`
+### Railway volume — DONE 2026-06-22 ~19:35Z
+
+Grok applied via Railway GraphQL API (project token):
+1. Volume `pdx-pride-guide-volume` (`d824af22-9a4b-4e1f-8f76-8be45f93886b`) mounted at `/data`
+2. `DATABASE_PATH=/data/data.db` set on service
+3. Redeploy `16d8d756` → **SUCCESS**
+4. Verified: `GET /api/events` → 200, 44 events auto-seeded on fresh volume
+
+**Tucker action:** Log in once with Google — profile should persist across future deploys.
+
+**Follow-up (Claude):** Add `UPLOADS_DIR` env support in `server/routes.ts` → set `UPLOADS_DIR=/data/uploads` on Railway so avatars/posters survive deploys too.
 
 ### Naming note (Tucker)
 - **Tucker Max** = stage name / public site credit
@@ -67,7 +73,8 @@ Legacy aliases (redirect here):
 | Apex `prideguidepdx.com` | **FIXED** 2026-06-22 — ALIAS `9piptmie.up.railway.app` + `TXT _railway-verify` |
 | UAT P1 items | **NOT STARTED** (ticket links, mobile overflow, admin cleanup) |
 | Claim route / popup / feedback | Deployed — needs browser re-UAT |
-| **DB/uploads persistence** | **BLOCKING** — no Railway volume yet; every deploy wipes `data.db` |
+| **DB persistence** | **FIXED** 2026-06-22 — volume `/data`, `DATABASE_PATH=/data/data.db` |
+| **Uploads persistence** | **OPEN** — needs `UPLOADS_DIR` code + env (`/data/uploads`) |
 
 ## Project paths
 
@@ -145,7 +152,7 @@ curl -sS "https://www.prideguidepdx.com/" | grep -oE 'index-[^"]+\.(css|js)' | h
 ## Still open
 
 1. UAT P1 items above
-2. `data.db` / `uploads/` Railway volume
+2. `UPLOADS_DIR` env support + Railway var (`/data/uploads`)
 3. Railway MCP OAuth (Tucker deferred)
 
 ## Apex DNS (Squarespace) — do not regress

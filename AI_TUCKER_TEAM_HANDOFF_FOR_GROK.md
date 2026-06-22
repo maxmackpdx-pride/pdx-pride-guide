@@ -4,24 +4,16 @@
 
 ## Claude — 2026-06-22 (update 2, latest)
 
-### PRIORITY 1: Railway persistent volume (BLOCKING)
+### PRIORITY 1: Railway persistent volume — DONE (Grok 2026-06-22)
 
-Every deploy wipes `data.db` — user profiles, claims, submissions, everything resets. This is the #1 blocker. Tucker confirmed it's happening on live.
+Grok completed via Railway API:
+- Volume `pdx-pride-guide-volume` at `/data`
+- `DATABASE_PATH=/data/data.db`
+- Deploy `16d8d756` SUCCESS; 44 events auto-seeded
 
-**Grok action items (Railway dashboard):**
+**Tucker:** Log in once — this is the last profile reset. Future deploys keep DB.
 
-1. **Add a persistent volume** to the service:
-   - Service → Settings → Volumes → Add Volume
-   - Mount path: `/data`
-2. **Add env var** `DATABASE_PATH` = `/data/data.db`
-   - Service → Variables
-3. **Also add volume for uploads** (user avatars, poster images):
-   - Either mount a second volume at `/app/uploads` or symlink
-   - Without this, uploaded images also vanish on deploy
-4. **Redeploy** after volume + env var are set
-5. **After first deploy with volume**: Tucker needs to log in again (fresh DB) — this will be the LAST time profiles reset
-
-Code is already deployed on master (`158f8ce`) — `server/storage.ts` reads `process.env.DATABASE_PATH` and falls back to `data.db` for local dev.
+**Still open:** `uploads/` — Claude to add `UPLOADS_DIR` env → set `/data/uploads` on Railway.
 
 ### What Claude shipped (commits on master)
 
@@ -48,8 +40,8 @@ Code is already deployed on master (`158f8ce`) — `server/storage.ts` reads `pr
 
 ### Still open (for reference)
 
-- [ ] **Railway persistent volume** ← BLOCKING, Grok
-- [ ] `uploads/` directory persistence (avatars, posters) ← Grok, same deploy
+- [x] **Railway persistent volume** — DONE (Grok 2026-06-22)
+- [ ] `uploads/` directory persistence (avatars, posters) ← Claude: `UPLOADS_DIR` code + env
 - [ ] UAT P1: ticket links for events 41 and 53
 - [ ] UAT P1: mobile overflow ~390px
 - [ ] UAT P1: admin moderation cleanup IDs 1–2 (will reset anyway until volume is live)
@@ -61,8 +53,10 @@ Code is already deployed on master (`158f8ce`) — `server/storage.ts` reads `pr
 3. After volume is live, should we seed the DB with the 44 events automatically, or does the current startup seed handle that?
 
 ### Blockers — needs Grok
-- Railway persistent volume + `DATABASE_PATH` env var (steps above)
-- `uploads/` persistence decision
+- None on DB volume — done
+
+### Blockers — needs Claude
+- `UPLOADS_DIR` env support in `server/routes.ts` + Railway var `/data/uploads`
 
 ### Blockers — needs Tucker
 - Browser UAT after volume is set up (this time profiles will stick)
