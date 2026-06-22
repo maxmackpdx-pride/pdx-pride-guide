@@ -1529,7 +1529,7 @@ export const storage: IStorage = {
     if (!sub) return undefined;
     const approvalList = JSON.parse(sub.approvals || "[]");
     if (!approvalList.includes(adminName)) approvalList.push(adminName);
-    const newStatus = approvalList.length >= 2 ? "APPROVED" : "PENDING";
+    const newStatus = approvalList.length >= 1 ? "APPROVED" : "PENDING";
     db.update(submissions).set({ approvals: JSON.stringify(approvalList), status: newStatus }).where(eq(submissions.id, id)).run();
     if (newStatus === "APPROVED") {
       if (sub.type === "CLAIM" && sub.eventId) {

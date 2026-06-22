@@ -845,7 +845,7 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
                 <XCircle size={14} />{rejecting ? "REJECTING..." : "REJECT"}
               </button>
             </div>
-            {approvalCount === 1 && <p className="text-white/30 text-xs">1 of 2 admins approved — needs one more approval to go live.</p>}
+            {approvalCount === 1 && <p className="text-white/30 text-xs">Approved by 1 admin — live.</p>}
           </div>
         </div>
       )}

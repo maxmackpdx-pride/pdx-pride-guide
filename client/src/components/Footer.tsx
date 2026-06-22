@@ -1,7 +1,9 @@
 import { Link } from "wouter";
+import { useAuth } from "@/context/AuthContext";
 import FeedbackForm from "./FeedbackForm";
 
 export default function Footer() {
+  const { user } = useAuth();
   return (
     <footer style={{ background: "#000", borderTop: "2px solid #1a1a1a" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
@@ -23,6 +25,7 @@ export default function Footer() {
                 ["/pride-work", "Pride Work"],
                 ["/gifting", "Gifting"],
                 ["/about", "About"],
+                ...(user?.isAdmin ? [["/admin", "Admin Panel"]] : []),
               ].map(([href, label]) => (
                 <div key={href} style={{ marginBottom: 8 }}>
                   <Link href={href} style={{ color: "#888", fontSize: "0.82rem", textDecoration: "none" }}>{label}</Link>

@@ -11,6 +11,7 @@ export interface AuthUser {
   bio: string | null;
   photoUrl: string | null;
   googleLinked: boolean;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
