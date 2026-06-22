@@ -1217,7 +1217,7 @@ body::before {
 }
 
 .home-gifting-panel {
-  --promo-bg: url("/motifs/hero-inbox.png");
+  --promo-bg: url("/motifs/hero-gifting.png");
 }
 
 .home-gigs-panel {
@@ -1285,7 +1285,7 @@ body::before {
   inset: 0;
   background:
     linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.84) 38%, rgba(0,0,0,0.38) 68%, rgba(0,0,0,0.05) 100%),
-    url("/motifs/hero-pride-work.png") 58% 40% / cover no-repeat;
+    url("/motifs/hero-gifting.png") 58% 46% / cover no-repeat;
   filter: saturate(1.2) contrast(1.08);
 }
 
