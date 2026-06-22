@@ -2,28 +2,76 @@
 
 ---
 
-## Claude — 2026-06-22
+## Claude — 2026-06-22 (update 2, latest)
 
-### Work completed
-- Full codebase audit: read every file in `server/`, `client/`, `shared/`, config, and build scripts
-- Added `tucker_pdmax` to `ADMIN_USERNAMES` default list (line 47 `server/routes.ts`)
-- Confirmed email `hello.tuckercasey@gmail.com` already matches `ADMIN_USER_EMAILS` — admin works on login via email match; username match now also works
+### PRIORITY 1: Railway persistent volume (BLOCKING)
+
+Every deploy wipes `data.db` — user profiles, claims, submissions, everything resets. This is the #1 blocker. Tucker confirmed it's happening on live.
+
+**Grok action items (Railway dashboard):**
+
+1. **Add a persistent volume** to the service:
+   - Service → Settings → Volumes → Add Volume
+   - Mount path: `/data`
+2. **Add env var** `DATABASE_PATH` = `/data/data.db`
+   - Service → Variables
+3. **Also add volume for uploads** (user avatars, poster images):
+   - Either mount a second volume at `/app/uploads` or symlink
+   - Without this, uploaded images also vanish on deploy
+4. **Redeploy** after volume + env var are set
+5. **After first deploy with volume**: Tucker needs to log in again (fresh DB) — this will be the LAST time profiles reset
+
+Code is already deployed on master (`158f8ce`) — `server/storage.ts` reads `process.env.DATABASE_PATH` and falls back to `data.db` for local dev.
+
+### What Claude shipped (commits on master)
+
+| Commit | What |
+|--------|------|
+| `2f87fe6` | Added `tucker_pdmax` to `ADMIN_USERNAMES` default list |
+| `a38c7cd` | Admin link in footer (only visible to admins), single-admin approval for claims, `isAdmin` added to auth context |
+| `158f8ce` | `DATABASE_PATH` env var for persistent SQLite location |
+
+### Changes explained
+
+1. **Admin footer link**: Footer NAVIGATE column shows "Admin Panel" link only when `user.isAdmin === true`. Goes to `#/admin`.
+2. **Single-admin approval**: Claims previously required 2 separate admin approvals to go through. Changed to 1. Tucker is the only admin — claims were stuck in limbo.
+3. **Persistent DB path**: `storage.ts` now uses `DATABASE_PATH` env var instead of hardcoded `data.db`.
+
+### Claim flow (confirmed working in code)
+
+1. User clicks claim on event → `POST /api/submit` with `type: "CLAIM"` → creates PENDING submission
+2. Admin goes to `#/admin` → Submissions tab → sees pending claim → clicks APPROVE
+3. One approval now marks it APPROVED → sets `claimedBy` on the event → claimer owns it
+4. Claimer can edit the event from their dashboard (`#/dashboard`)
+
+**This flow cannot be tested until the persistent volume is set up** — each deploy wipes the DB.
+
+### Still open (for reference)
+
+- [ ] **Railway persistent volume** ← BLOCKING, Grok
+- [ ] `uploads/` directory persistence (avatars, posters) ← Grok, same deploy
+- [ ] UAT P1: ticket links for events 41 and 53
+- [ ] UAT P1: mobile overflow ~390px
+- [ ] UAT P1: admin moderation cleanup IDs 1–2 (will reset anyway until volume is live)
+- [ ] Browser UAT by Tucker after volume is live
 
 ### Questions for Grok (numbered)
-1. `authUserResponse` on remote master returns `avatarRing` and `avatarCrop` — the UAT report doesn't mention testing these fields round-trip. Has avatar ring persistence been verified on live?
-2. `dist/public/` is tracked — this push only changes server source + docs. Does Railway rebuild from source on deploy, or does it need a `dist/` commit too?
-
-### Blockers — needs Tucker
-- Browser UAT with Google login (same as before — still pending)
-- Verify admin panel access after this deploy
+1. Can you set up the Railway volume + env var? Claude's network policy blocks Railway API access.
+2. Should `uploads/` get its own volume mount or share `/data/uploads/`? If shared, we'd update the `UPLOADS_DIR` in `server/routes.ts` to read from an env var too — let us know which path.
+3. After volume is live, should we seed the DB with the 44 events automatically, or does the current startup seed handle that?
 
 ### Blockers — needs Grok
-- Confirm avatar fields are deployed and tested on live
+- Railway persistent volume + `DATABASE_PATH` env var (steps above)
+- `uploads/` persistence decision
+
+### Blockers — needs Tucker
+- Browser UAT after volume is set up (this time profiles will stick)
 
 ### Recommended next step
-1. Railway auto-deploys this commit (admin username fix is live)
-2. Tucker does browser UAT: Google login → dashboard → avatar crop + ring → admin panel
-3. Claude tackles UAT P1 items (ticket links for events 41/53, mobile overflow, admin moderation cleanup) once Tucker approves
+1. **Grok**: Set up Railway volume + env var (15 min)
+2. **Tucker**: Log in once after volume deploy — profile persists from then on
+3. **Tucker**: Test claim flow (claim event → check `#/admin` → approve)
+4. **Claude**: UAT P1 fixes once Tucker confirms everything works
 
 ---
 
