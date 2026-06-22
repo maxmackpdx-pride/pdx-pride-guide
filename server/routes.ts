@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage, hashPassword } from "./storage";
-import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema } from "@shared/schema";
+import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -296,6 +296,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const data = insertModerationRequestSchema.parse(req.body);
       const req2 = storage.createModerationRequest(data);
       res.json(req2);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/feedback", (req, res) => {
+    try {
+      const payload = {
+        ...req.body,
+        pageUrl: String(req.body.pageUrl || req.get("referer") || "/").slice(0, 500),
+        category: String(req.body.category || "BUG").slice(0, 40),
+        severity: String(req.body.severity || "MEDIUM").slice(0, 40),
+        message: String(req.body.message || "").trim().slice(0, 2000),
+        steps: req.body.steps ? String(req.body.steps).trim().slice(0, 2000) : null,
+        email: req.body.email ? String(req.body.email).trim().slice(0, 180) : null,
+        userAgent: String(req.body.userAgent || req.get("user-agent") || "").slice(0, 500),
+      };
+      if (!payload.message) return res.status(400).json({ error: "message required" });
+      const feedback = storage.createFeedbackReport(insertFeedbackReportSchema.parse(payload));
+      res.json({ ok: true, id: feedback.id });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -916,6 +936,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/events", (req, res) => {
     const evts = storage.getEvents({});
     res.json(evts);
+  });
+
+  app.get("/api/admin/feedback", (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Forbidden" });
+    res.json(storage.getFeedbackReports("OPEN"));
+  });
+
+  app.post("/api/admin/feedback/:id/resolve", (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Forbidden" });
+    storage.resolveFeedbackReport(Number(req.params.id));
+    res.json({ ok: true });
   });
 
   // PUT full event edit (admin only)

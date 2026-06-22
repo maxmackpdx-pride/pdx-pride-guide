@@ -4,10 +4,8 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift,
+  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare,
 } from "lucide-react";
-
-const ADMIN_PASSWORD = "pdxpride2026";
 
 interface Submission {
   id: number;
@@ -68,7 +66,7 @@ interface ModerationRequest {
   adminNotes?: string;
 }
 
-type AdminTab = "queue" | "moderation" | "events" | "gifting";
+type AdminTab = "queue" | "moderation" | "events" | "gifting" | "feedback";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -114,6 +112,11 @@ export default function Admin() {
   const { data: giftingAdmin = { posts: [], reports: [] }, isLoading: giftingLoading } = useQuery<any>({
     queryKey: ["/api/admin/gifting"],
     enabled: authenticated && activeTab === "gifting",
+  });
+
+  const { data: feedback = [], isLoading: feedbackLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/feedback"],
+    enabled: authenticated && activeTab === "feedback",
   });
 
   const approveMutation = useMutation({
@@ -204,6 +207,14 @@ export default function Admin() {
     },
   });
 
+  const resolveFeedbackMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/feedback/${id}/resolve`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+      toast({ title: "Feedback resolved" });
+    },
+  });
+
   const startEdit = (ev: AdminEvent) => {
     setEditingId(ev.id);
     setEditForm({ ...ev });
@@ -287,6 +298,7 @@ export default function Admin() {
   const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
   const pendingGifting = (giftingAdmin.posts || []).filter((p: any) => p.status === "PENDING");
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
+  const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -330,6 +342,7 @@ export default function Admin() {
             { key: "moderation" as AdminTab, label: `CLAIM / REMOVE${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "events" as AdminTab, label: "MANAGE EVENTS", icon: <Shield size={12} /> },
             { key: "gifting" as AdminTab, label: `GIFTING${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
+            { key: "feedback" as AdminTab, label: `FEEDBACK${openFeedback.length > 0 ? ` (${openFeedback.length})` : ""}`, icon: <MessageSquare size={12} /> },
           ]).map(tab => (
             <button
               key={tab.key}
@@ -697,6 +710,48 @@ export default function Admin() {
                   </div>
                 </section>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* ── FEEDBACK ── */}
+        {activeTab === "feedback" && (
+          <div className="space-y-4">
+            <p className="text-white/40 text-sm">
+              Soft launch tech feedback from the footer form. Use this for bugs, mobile layout issues, wrong event data, login issues, and confusing flows.
+            </p>
+            {feedbackLoading ? (
+              <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : feedback.length === 0 ? (
+              <div className="border border-white/10 p-6 text-white/35">No open feedback right now.</div>
+            ) : (
+              feedback.map((item: any) => (
+                <div key={item.id} className="border border-white/10 bg-black/40 p-5">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{item.category}</span>
+                    <span
+                      className="sticker text-xs"
+                      style={{
+                        color: item.severity === "BLOCKER" || item.severity === "HIGH" ? "#FF2400" : "#CCFF00",
+                        borderColor: item.severity === "BLOCKER" || item.severity === "HIGH" ? "#FF2400" : "#CCFF00",
+                      }}
+                    >
+                      {item.severity}
+                    </span>
+                    <span className="text-white/30 text-xs">{new Date(item.createdAt || item.created_at).toLocaleString()}</span>
+                  </div>
+                  <p className="text-white/90 text-sm whitespace-pre-wrap mb-3">{item.message}</p>
+                  {item.steps && <p className="text-white/55 text-xs whitespace-pre-wrap mb-3">Steps / notes: {item.steps}</p>}
+                  <div className="text-white/35 text-xs space-y-1 mb-4">
+                    <div>Page: {item.pageUrl || item.page_url}</div>
+                    {item.email && <div>Email: {item.email}</div>}
+                    {(item.userAgent || item.user_agent) && <div>User agent: {item.userAgent || item.user_agent}</div>}
+                  </div>
+                  <button className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => resolveFeedbackMutation.mutate(item.id)}>
+                    MARK RESOLVED
+                  </button>
+                </div>
+              ))
             )}
           </div>
         )}

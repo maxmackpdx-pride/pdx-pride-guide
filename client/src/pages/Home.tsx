@@ -33,6 +33,10 @@ function useCountdown(target: number | null) {
 export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
+  });
   const { data: events = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
@@ -47,9 +51,59 @@ export default function Home() {
   const countdown = useCountdown(firstEventTarget);
   const eventNames = events.map(event => event.title).filter(Boolean);
   const tickerItems = eventNames.length ? [...eventNames, ...eventNames] : [];
+  const dismissSoftLaunch = () => {
+    window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
+    setShowSoftLaunch(false);
+  };
 
   return (
     <div className="zine-page home-page" style={{ background: "#000", minHeight: "100vh" }}>
+      {showSoftLaunch && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="soft-launch-title"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            background: "rgba(0,0,0,0.72)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 18,
+          }}
+        >
+          <div style={{
+            width: "min(560px, 100%)",
+            border: "3px solid var(--neon-yellow)",
+            background: "#050505",
+            boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(255,0,204,0.16)",
+            padding: 24,
+            position: "relative",
+          }}>
+            <button
+              type="button"
+              aria-label="Close welcome"
+              onClick={dismissSoftLaunch}
+              style={{ position: "absolute", top: 10, right: 10, background: "transparent", border: "1px solid #333", color: "#999", width: 30, height: 30, cursor: "pointer" }}
+            >
+              X
+            </button>
+            <div className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", marginBottom: 14 }}>SOFTIE LAUNCH</div>
+            <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}>
+              WELCOME
+            </h2>
+            <p style={{ color: "#bbb", fontSize: "1rem", lineHeight: 1.6, marginBottom: 18 }}>
+              Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around, and please submit feedback at the bottom of the website if you run into any issue.
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button type="button" onClick={dismissSoftLaunch} className="btn-neon solid">START EXPLORING</button>
+              <a href="#feedback" onClick={dismissSoftLaunch} className="btn-neon" style={{ color: "#00FFFF", borderColor: "#00FFFF", textDecoration: "none" }}>SEND FEEDBACK</a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="zine-hero home-hero" style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}>

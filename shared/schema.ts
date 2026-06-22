@@ -259,3 +259,25 @@ export type InsertGiftingInterest = z.infer<typeof insertGiftingInterestSchema>;
 export type GiftingInterest = typeof giftingInterests.$inferSelect;
 export type InsertGiftingReport = z.infer<typeof insertGiftingReportSchema>;
 export type GiftingReport = typeof giftingReports.$inferSelect;
+
+// Soft launch tester feedback
+export const feedbackReports = sqliteTable("feedback_reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  pageUrl: text("page_url").notNull(),
+  category: text("category").notNull().default("BUG"),
+  severity: text("severity").notNull().default("MEDIUM"),
+  message: text("message").notNull(),
+  steps: text("steps"),
+  email: text("email"),
+  userAgent: text("user_agent"),
+  status: text("status").notNull().default("OPEN"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertFeedbackReportSchema = createInsertSchema(feedbackReports).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+});
+export type InsertFeedbackReport = z.infer<typeof insertFeedbackReportSchema>;
+export type FeedbackReport = typeof feedbackReports.$inferSelect;

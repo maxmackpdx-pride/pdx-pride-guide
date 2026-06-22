@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports,
+  giftingPosts, giftingInterests, giftingReports, feedbackReports,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -13,6 +13,7 @@ import {
   type User, type Message,
   type MissedConnection, type InsertMissedConnection,
   type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
+  type FeedbackReport, type InsertFeedbackReport,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -200,6 +201,18 @@ sqlite.exec(`
     reason TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'PENDING',
     admin_notes TEXT,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS feedback_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_url TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'BUG',
+    severity TEXT NOT NULL DEFAULT 'MEDIUM',
+    message TEXT NOT NULL,
+    steps TEXT,
+    email TEXT,
+    user_agent TEXT,
+    status TEXT NOT NULL DEFAULT 'OPEN',
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
@@ -1428,6 +1441,10 @@ export interface IStorage {
   updateGiftingPostStatus(id: number, status: string, adminNotes?: string): void;
   resolveGiftingReport(id: number, adminNotes?: string): void;
   expireGiftingPosts(): void;
+  // Soft launch feedback
+  createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
+  getFeedbackReports(status?: string): FeedbackReport[];
+  resolveFeedbackReport(id: number): void;
 }
 
 export const storage: IStorage = {
@@ -1874,5 +1891,19 @@ export const storage: IStorage = {
   },
   expireGiftingPosts() {
     expireGiftingPosts();
+  },
+  createFeedbackReport(data) {
+    return db.insert(feedbackReports).values({
+      ...data,
+      createdAt: new Date().toISOString(),
+    } as any).returning().get();
+  },
+  getFeedbackReports(status) {
+    const rows = db.select().from(feedbackReports).all();
+    if (status) return rows.filter(report => report.status === status);
+    return rows;
+  },
+  resolveFeedbackReport(id) {
+    db.update(feedbackReports).set({ status: "RESOLVED" } as any).where(eq(feedbackReports.id, id)).run();
   },
 };
