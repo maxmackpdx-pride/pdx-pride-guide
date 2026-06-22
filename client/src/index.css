@@ -433,7 +433,7 @@ body::before {
   align-items: center;
   background:
     linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 29%, rgba(0,0,0,0.46) 56%, rgba(0,0,0,0.06) 100%),
-    url("/motifs/hero-pride-work.png") right top / cover no-repeat,
+    url("/motifs/hero-gigs.png") center / cover no-repeat,
     #050505;
 }
 
@@ -1221,7 +1221,7 @@ body::before {
 }
 
 .home-gigs-panel {
-  --promo-bg: url("/motifs/hero-pride-work.png");
+  --promo-bg: url("/motifs/hero-gigs.png");
 }
 
 .home-promo-inner {
