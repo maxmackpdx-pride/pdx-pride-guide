@@ -566,7 +566,21 @@ body::before {
 
 /* Homepage live event ticker */
 .home-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 720px;
   padding-bottom: 70px;
+}
+
+.home-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.9;
 }
 
 .home-hero-content {
@@ -691,7 +705,12 @@ body::before {
 
 @media (max-width: 640px) {
   .home-hero {
+    align-items: flex-start;
     padding-bottom: 60px;
+  }
+
+  .home-hero-bg {
+    background-position: center top;
   }
 
   .home-hero-content {

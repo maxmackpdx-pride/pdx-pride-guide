@@ -106,13 +106,8 @@ export default function Home() {
       )}
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="zine-hero home-hero" style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}>
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `url(${skylineImg})`,
-          backgroundSize: "cover", backgroundPosition: "center top",
-          backgroundRepeat: "no-repeat", opacity: 0.9,
-        }} />
+      <section className="zine-hero home-hero">
+        <div className="home-hero-bg" style={{ backgroundImage: `url(${skylineImg})` }} />
         <div style={{
           position: "absolute", inset: 0,
           background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",
