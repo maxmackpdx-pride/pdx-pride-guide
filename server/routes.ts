@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage, hashPassword } from "./storage";
-import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema } from "@shared/schema";
+import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema } from "@shared/schema";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -50,6 +50,64 @@ function publicUser(user: any) {
   if (!user) return null;
   const { passwordHash, email, status, googleId, ...safe } = user;
   return safe;
+}
+
+function publicGiftingPost(post: any, viewerUserId?: number) {
+  const userId = Number(post.userId ?? post.user_id);
+  const selectedInterestId = Number(post.selectedInterestId ?? post.selected_interest_id ?? 0) || null;
+  const safeInterests = Array.isArray(post.interests) ? post.interests.map((interest: any) => ({
+    id: interest.id,
+    userId: interest.userId ?? interest.user_id,
+    note: interest.note,
+    status: interest.status,
+    username: interest.username,
+    displayName: interest.displayName,
+    photoUrl: interest.photoUrl,
+    avatarChoice: interest.avatarChoice,
+    isMine: viewerUserId ? Number(interest.userId ?? interest.user_id) === viewerUserId : false,
+  })) : [];
+  return {
+    id: post.id,
+    userId,
+    postType: post.postType ?? post.post_type,
+    title: post.title,
+    description: post.description,
+    category: post.category,
+    neighborhood: post.neighborhood,
+    pickupPreference: post.pickupPreference ?? post.pickup_preference,
+    photoUrls: post.photoUrls || [],
+    status: post.status,
+    selectedInterestId,
+    renewCount: post.renewCount ?? post.renew_count ?? 0,
+    expiresAt: post.expiresAt ?? post.expires_at,
+    reportCount: post.reportCount ?? post.report_count ?? 0,
+    createdAt: post.createdAt ?? post.created_at,
+    username: post.username,
+    displayName: post.displayName,
+    posterPhotoUrl: post.posterPhotoUrl,
+    avatarChoice: post.avatarChoice,
+    interestCount: Number(post.interestCount || 0),
+    interests: safeInterests,
+    isMine: viewerUserId ? userId === viewerUserId : false,
+    selectedUserId: safeInterests.find((interest: any) => interest.id === selectedInterestId)?.userId || null,
+  };
+}
+
+const GIFTING_RUN_END = new Date("2026-07-27T00:00:00-07:00").getTime();
+const RESTRICTED_GIFTING_TERMS = [
+  "weapon", "gun", "ammo", "drugs", "cocaine", "meth", "fentanyl", "prescription",
+  "alcohol", "needle", "needles", "poppers", "lube", "lubricant", "insertable",
+  "underwear", "stolen", "counterfeit", "hazardous",
+];
+
+function assertGiftingAllowed(body: any) {
+  if (Date.now() >= GIFTING_RUN_END && process.env.GIFTING_KEEP_OPEN !== "true") {
+    throw new Error("Public gifting posts are paused after July 26, 2026.");
+  }
+  if (!body.acceptRules) throw new Error("You must agree to the community rules.");
+  const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
+  const found = RESTRICTED_GIFTING_TERMS.find(term => haystack.includes(term));
+  if (found) throw new Error("This post appears to include a restricted item. Please revise or contact an admin.");
 }
 
 function getBaseUrl(req: any) {
@@ -116,6 +174,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const url = `/uploads/${req.file.filename}`;
     storage.updateUser(req.session.userId!, { photoUrl: url });
     res.json({ url });
+  });
+
+  app.post("/api/upload/gifting", requireAuth, upload.array("photos", 2), (req: any, res: any) => {
+    const files = Array.isArray(req.files) ? req.files : [];
+    if (!files.length) return res.status(400).json({ error: "Upload 1 or 2 image files (jpg/png/gif/webp, max 8MB each)" });
+    res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
   });
 
   // Serve uploaded files statically
@@ -330,6 +394,166 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = req.session.userId!;
     storage.deleteGigPost(id, userId);
     res.json({ ok: true });
+  });
+
+  // ─── OUT OF MY CLOSET: GIFTING ───────────────────────────────────────────
+  app.get("/api/gifting", (req: any, res) => {
+    const posts = storage.getGiftingPosts();
+    res.json(posts.map(post => publicGiftingPost(post, req.session?.userId)));
+  });
+
+  app.get("/api/gifting/mine", requireAuth, (req, res) => {
+    const posts = storage.getGiftingPostsByUser(req.session.userId!);
+    res.json(posts.map(post => publicGiftingPost(post, req.session.userId!)));
+  });
+
+  app.get("/api/gifting/:id", (req: any, res) => {
+    const post = storage.getGiftingPost(Number(req.params.id));
+    if (!post) return res.status(404).json({ error: "Not found" });
+    res.json(publicGiftingPost(post, req.session?.userId));
+  });
+
+  app.post("/api/gifting", requireAuth, (req, res) => {
+    try {
+      assertGiftingAllowed(req.body);
+      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 2) : [];
+      const postType = req.body.postType === "ISO" ? "ISO" : "GIFT";
+      const data = insertGiftingPostSchema.parse({
+        userId: req.session.userId!,
+        postType,
+        title: String(req.body.title || "").trim(),
+        description: String(req.body.description || "").trim(),
+        category: String(req.body.category || "").trim(),
+        neighborhood: String(req.body.neighborhood || "").trim(),
+        pickupPreference: String(req.body.pickupPreference || "").trim(),
+        photoUrls: JSON.stringify(photoUrls),
+      });
+      const priorPosts = storage.getGiftingPostsByUser(req.session.userId!);
+      const firstPostHeld = priorPosts.length === 0;
+      const post = storage.createGiftingPost(data, firstPostHeld ? "PENDING" : undefined);
+      res.json({
+        ...post,
+        firstPostHeld,
+        message: firstPostHeld ? "Your first gifting post is held for admin review." : "Your gifting post is live.",
+      });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/interest", requireAuth, (req, res) => {
+    try {
+      const post = storage.getGiftingPost(Number(req.params.id));
+      if (!post) return res.status(404).json({ error: "Not found" });
+      if ((post.post_type || post.postType) !== "GIFT") return res.status(400).json({ error: "Use the ISO offer flow for ISO posts." });
+      const note = String(req.body.note || "").trim();
+      if (!note) return res.status(400).json({ error: "A short note is required." });
+      const interest = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
+        postId: post.id,
+        userId: req.session.userId!,
+        note,
+      }));
+      const interestedUser = storage.getUserById(req.session.userId!);
+      storage.sendMessage(Number(post.user_id), Number(post.user_id), `Gifting interest: ${post.title}`, `${interestedUser?.displayName || interestedUser?.username || "Someone"} raised their hand: ${note}`, {
+        contextType: "GIFTING",
+        contextId: post.id,
+        contextLabel: post.title,
+      });
+      res.json(interest);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/offer", requireAuth, (req, res) => {
+    try {
+      const post = storage.getGiftingPost(Number(req.params.id));
+      if (!post) return res.status(404).json({ error: "Not found" });
+      if ((post.post_type || post.postType) !== "ISO") return res.status(400).json({ error: "Use the interest flow for Gift posts." });
+      const note = String(req.body.note || "").trim();
+      if (!note) return res.status(400).json({ error: "A short note is required." });
+      const offer = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
+        postId: post.id,
+        userId: req.session.userId!,
+        note,
+      }));
+      const msg = storage.sendMessage(req.session.userId!, Number(post.user_id), `ISO offer: ${post.title}`, note, {
+        contextType: "GIFTING",
+        contextId: post.id,
+        contextLabel: post.title,
+      });
+      res.json({ offer, message: msg });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/interests/:interestId/choose", requireAuth, (req, res) => {
+    try {
+      const selected = storage.chooseGiftingInterest(Number(req.params.id), Number(req.params.interestId), req.session.userId!);
+      if (!selected) return res.status(404).json({ error: "Interest not found" });
+      const post = storage.getGiftingPost(Number(req.params.id));
+      const body = String(req.body.body || `You were picked for "${post?.title}". Coordinate pickup here.`).trim();
+      storage.sendMessage(req.session.userId!, Number((selected as any).userId), `Gifting pickup: ${post?.title || "Gift"}`, body, {
+        contextType: "GIFTING",
+        contextId: Number(req.params.id),
+        contextLabel: post?.title || null,
+      });
+      res.json(selected);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/mark-gifted", requireAuth, (req, res) => {
+    try {
+      storage.markGiftingResolved(Number(req.params.id), req.session.userId!, "GIFTED");
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/mark-found", requireAuth, (req, res) => {
+    try {
+      storage.markGiftingResolved(Number(req.params.id), req.session.userId!, "FOUND");
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/reopen", requireAuth, (req, res) => {
+    try {
+      storage.reopenGiftingPost(Number(req.params.id), req.session.userId!);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/renew", requireAuth, (req, res) => {
+    try {
+      storage.renewGiftingPost(Number(req.params.id), req.session.userId!);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/gifting/:id/report", requireAuth, (req, res) => {
+    try {
+      const reason = String(req.body.reason || "").trim();
+      if (!reason) return res.status(400).json({ error: "reason required" });
+      storage.reportGiftingPost(insertGiftingReportSchema.parse({
+        postId: Number(req.params.id),
+        reporterUserId: req.session.userId!,
+        reason,
+      }));
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   // ─── USER AUTH ────────────────────────────────────────────────────────────
@@ -722,6 +946,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { status, adminNotes } = req.body;
     if (!["APPROVED", "REJECTED"].includes(status)) return res.status(400).json({ error: "status must be APPROVED or REJECTED" });
     storage.resolveModerationRequest(Number(req.params.id), status, adminNotes);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/gifting", requireAdmin, (req, res) => {
+    res.json({
+      posts: storage.getGiftingPosts({ includeInactive: true }).map(post => publicGiftingPost(post)),
+      reports: storage.getGiftingReports(),
+    });
+  });
+
+  app.post("/api/admin/gifting/:id/status", requireAdmin, (req, res) => {
+    const status = String(req.body.status || "").trim().toUpperCase();
+    if (!status) return res.status(400).json({ error: "status required" });
+    storage.updateGiftingPostStatus(Number(req.params.id), status);
+    res.json({ ok: true });
+  });
+
+  app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
+    storage.resolveGiftingReport(Number(req.params.id), String(req.body.adminNotes || ""));
     res.json({ ok: true });
   });
 

@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
+  giftingPosts, giftingInterests, giftingReports,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -11,6 +12,7 @@ import {
   type Attendance, type InsertAttendance,
   type User, type Message,
   type MissedConnection, type InsertMissedConnection,
+  type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -164,6 +166,40 @@ sqlite.exec(`
     day_of_week TEXT,
     venue_hint TEXT,
     status TEXT NOT NULL DEFAULT 'ACTIVE',
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS gifting_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    post_type TEXT NOT NULL DEFAULT 'GIFT',
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL,
+    neighborhood TEXT NOT NULL,
+    pickup_preference TEXT NOT NULL,
+    photo_urls TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'OPEN',
+    selected_interest_id INTEGER,
+    renew_count INTEGER NOT NULL DEFAULT 0,
+    expires_at TEXT NOT NULL,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS gifting_interests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    note TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'INTERESTED',
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS gifting_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    reporter_user_id INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    admin_notes TEXT,
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
@@ -1276,11 +1312,94 @@ function applyVerifiedEventOverrides() {
 
 seedData();
 applyVerifiedEventOverrides();
+seedGiftingPosts();
 
 function archiveExpiredMissedConnections() {
   const archiveAt = new Date("2026-07-21T00:00:00-07:00").getTime();
   if (Date.now() < archiveAt) return;
   sqlite.prepare(`UPDATE missed_connections SET status = 'ARCHIVED' WHERE status = 'ACTIVE'`).run();
+}
+
+function giftingExpiry(postType: string, from = new Date()) {
+  const d = new Date(from);
+  d.setDate(d.getDate() + (postType === "ISO" ? 14 : 7));
+  return d.toISOString();
+}
+
+function safeJson(value: string) {
+  try {
+    return JSON.parse(value || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function expireGiftingPosts() {
+  sqlite.prepare(`
+    UPDATE gifting_posts
+    SET status = 'EXPIRED'
+    WHERE status IN ('OPEN','THREE_INTERESTED','POSTER_CHOOSING','LOOKING','OFFER_PENDING','REOPENED')
+      AND datetime(expires_at) <= datetime('now')
+  `).run();
+}
+
+function seedGiftingPosts() {
+  const existing = sqlite.prepare(`SELECT COUNT(*) AS count FROM gifting_posts`).get() as any;
+  if (existing?.count > 0) return;
+  let user = sqlite.prepare(`SELECT id FROM users ORDER BY id ASC LIMIT 1`).get() as any;
+  if (!user?.id) {
+    sqlite.prepare(`
+      INSERT OR IGNORE INTO users (username, email, password_hash, display_name, avatar_choice, status, created_at)
+      VALUES ('community_closet', 'community-closet@prideguidepdx.local', ?, 'Community Closet', 1, 'active', ?)
+    `).run(hashPassword(crypto.randomBytes(16).toString("hex")), new Date().toISOString());
+    user = sqlite.prepare(`SELECT id FROM users WHERE username = 'community_closet'`).get() as any;
+  }
+  if (!user?.id) return;
+  const now = new Date();
+  const rows = [
+    {
+      postType: "GIFT",
+      title: "Extra rainbow string lights",
+      description: "Clean, working string lights from last year's porch setup. Free to a queer home or event crew that can use them.",
+      category: "Decorations",
+      neighborhood: "Inner SE",
+      pickupPreference: "Porch pickup or event handoff",
+      photoUrls: JSON.stringify(["/motifs/progress-flag.jpg"]),
+      status: "OPEN",
+    },
+    {
+      postType: "GIFT",
+      title: "Black mesh party top",
+      description: "Lightly worn, washed, ready for Pride chaos. Approx medium with stretch.",
+      category: "Circuit Party Wear",
+      neighborhood: "Kerns",
+      pickupPreference: "Public meetup",
+      photoUrls: JSON.stringify(["/motifs/get-hired.jpg"]),
+      status: "OPEN",
+    },
+    {
+      postType: "ISO",
+      title: "ISO folding chair for parade day",
+      description: "Looking for one foldable chair to borrow or keep for Sunday. Happy to pick up near transit.",
+      category: "Pride Weekend Stuff",
+      neighborhood: "Downtown / close-in",
+      pickupPreference: "Flexible pickup",
+      photoUrls: JSON.stringify(["/motifs/keep-portland-queer.jpg"]),
+      status: "LOOKING",
+    },
+  ];
+  const stmt = sqlite.prepare(`
+    INSERT INTO gifting_posts
+      (user_id, post_type, title, description, category, neighborhood, pickup_preference, photo_urls, status, expires_at, created_at)
+    VALUES
+      (@userId, @postType, @title, @description, @category, @neighborhood, @pickupPreference, @photoUrls, @status, @expiresAt, @createdAt)
+  `);
+  rows.forEach((row, idx) => stmt.run({
+    ...row,
+    userId: user.id,
+    expiresAt: giftingExpiry(row.postType, now),
+    createdAt: new Date(now.getTime() - idx * 3600000).toISOString(),
+  }));
 }
 
 export interface IStorage {
@@ -1339,6 +1458,21 @@ export interface IStorage {
   updateMissedConnection(id: number, userId: number, data: Partial<MissedConnection>): MissedConnection | undefined;
   deleteMissedConnection(id: number, userId: number): void;
   archiveExpiredMissedConnections(): void;
+  // Gifting
+  getGiftingPosts(opts?: { includeInactive?: boolean; status?: string; userId?: number }): any[];
+  getGiftingPost(id: number): any | undefined;
+  getGiftingPostsByUser(userId: number): any[];
+  createGiftingPost(data: InsertGiftingPost, status?: string): GiftingPost;
+  addGiftingInterest(data: InsertGiftingInterest): GiftingInterest;
+  chooseGiftingInterest(postId: number, interestId: number, ownerUserId: number): GiftingInterest | undefined;
+  markGiftingResolved(postId: number, userId: number, status: "GIFTED" | "FOUND"): void;
+  reopenGiftingPost(postId: number, userId: number): void;
+  renewGiftingPost(postId: number, userId: number): void;
+  reportGiftingPost(data: InsertGiftingReport): void;
+  getGiftingReports(status?: string): any[];
+  updateGiftingPostStatus(id: number, status: string, adminNotes?: string): void;
+  resolveGiftingReport(id: number, adminNotes?: string): void;
+  expireGiftingPosts(): void;
 }
 
 export const storage: IStorage = {
@@ -1632,5 +1766,158 @@ export const storage: IStorage = {
   },
   deleteMissedConnection(id, userId) {
     sqlite.prepare(`UPDATE missed_connections SET status = 'DELETED' WHERE id = ? AND user_id = ?`).run(id, userId);
+  },
+  // Gifting
+  getGiftingPosts(opts = {}) {
+    expireGiftingPosts();
+    const where: string[] = [];
+    const params: any[] = [];
+    if (!opts.includeInactive) {
+      where.push(`p.status IN ('OPEN','THREE_INTERESTED','POSTER_CHOOSING','PICKUP_PENDING','REOPENED','LOOKING','OFFER_PENDING')`);
+    }
+    if (opts.status) {
+      where.push(`p.status = ?`);
+      params.push(opts.status);
+    }
+    if (opts.userId) {
+      where.push(`p.user_id = ?`);
+      params.push(opts.userId);
+    }
+    return sqlite.prepare(`
+      SELECT p.*,
+             u.username,
+             u.display_name AS displayName,
+             u.photo_url AS posterPhotoUrl,
+             u.avatar_choice AS avatarChoice,
+             (SELECT COUNT(*) FROM gifting_interests gi WHERE gi.post_id = p.id AND gi.status IN ('INTERESTED','SELECTED')) AS interestCount
+      FROM gifting_posts p
+      JOIN users u ON u.id = p.user_id
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY p.created_at DESC
+    `).all(...params).map((post: any) => ({
+      ...post,
+      photoUrls: safeJson(post.photo_urls || post.photoUrls || "[]"),
+      interests: this.getGiftingPost(post.id)?.interests || [],
+    }));
+  },
+  getGiftingPost(id) {
+    expireGiftingPosts();
+    const post = sqlite.prepare(`
+      SELECT p.*,
+             u.username,
+             u.display_name AS displayName,
+             u.photo_url AS posterPhotoUrl,
+             u.avatar_choice AS avatarChoice,
+             (SELECT COUNT(*) FROM gifting_interests gi WHERE gi.post_id = p.id AND gi.status IN ('INTERESTED','SELECTED')) AS interestCount
+      FROM gifting_posts p
+      JOIN users u ON u.id = p.user_id
+      WHERE p.id = ?
+    `).get(id) as any;
+    if (!post) return undefined;
+    const interests = sqlite.prepare(`
+      SELECT gi.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice
+      FROM gifting_interests gi
+      JOIN users u ON u.id = gi.user_id
+      WHERE gi.post_id = ? AND gi.status != 'WITHDRAWN'
+      ORDER BY gi.created_at ASC
+    `).all(id);
+    return { ...post, photoUrls: safeJson(post.photo_urls || "[]"), interests };
+  },
+  getGiftingPostsByUser(userId) {
+    return this.getGiftingPosts({ includeInactive: true, userId });
+  },
+  createGiftingPost(data, status) {
+    const postType = data.postType === "ISO" ? "ISO" : "GIFT";
+    return db.insert(giftingPosts).values({
+      ...data,
+      postType,
+      status: status || (postType === "ISO" ? "LOOKING" : "OPEN"),
+      photoUrls: data.photoUrls || "[]",
+      expiresAt: giftingExpiry(postType),
+      createdAt: new Date().toISOString(),
+    } as any).returning().get();
+  },
+  addGiftingInterest(data) {
+    const post = this.getGiftingPost(data.postId);
+    if (!post) throw new Error("Post not found");
+    if (post.user_id === data.userId || post.userId === data.userId) throw new Error("Cannot respond to your own post");
+    const existing = sqlite.prepare(`SELECT * FROM gifting_interests WHERE post_id = ? AND user_id = ? AND status != 'WITHDRAWN'`).get(data.postId, data.userId);
+    if (existing) throw new Error("You already responded to this post");
+    if (post.post_type === "GIFT" || post.postType === "GIFT") {
+      const count = Number(post.interestCount || 0);
+      if (count >= 3) throw new Error("This gift already has 3 people interested.");
+    }
+    const interest = db.insert(giftingInterests).values({
+      ...data,
+      note: data.note.slice(0, 240),
+      status: "INTERESTED",
+      createdAt: new Date().toISOString(),
+    } as any).returning().get();
+    const nextCount = Number(post.interestCount || 0) + 1;
+    if ((post.post_type === "GIFT" || post.postType === "GIFT") && nextCount >= 3) {
+      db.update(giftingPosts).set({ status: "POSTER_CHOOSING" }).where(eq(giftingPosts.id, data.postId)).run();
+    } else if (post.post_type === "ISO" || post.postType === "ISO") {
+      db.update(giftingPosts).set({ status: "OFFER_PENDING" }).where(eq(giftingPosts.id, data.postId)).run();
+    }
+    return interest;
+  },
+  chooseGiftingInterest(postId, interestId, ownerUserId) {
+    const post = this.getGiftingPost(postId);
+    if (!post || Number(post.user_id) !== ownerUserId) return undefined;
+    const interest = sqlite.prepare(`SELECT * FROM gifting_interests WHERE id = ? AND post_id = ?`).get(interestId, postId) as any;
+    if (!interest) return undefined;
+    sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE post_id = ? AND id != ?`).run(postId, interestId);
+    sqlite.prepare(`UPDATE gifting_interests SET status = 'SELECTED' WHERE id = ?`).run(interestId);
+    db.update(giftingPosts).set({ status: "PICKUP_PENDING", selectedInterestId: interestId } as any).where(eq(giftingPosts.id, postId)).run();
+    return db.select().from(giftingInterests).where(eq(giftingInterests.id, interestId)).get();
+  },
+  markGiftingResolved(postId, userId, status) {
+    const post = this.getGiftingPost(postId);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
+    db.update(giftingPosts).set({ status } as any).where(eq(giftingPosts.id, postId)).run();
+  },
+  reopenGiftingPost(postId, userId) {
+    const post = this.getGiftingPost(postId);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
+    sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE post_id = ? AND status = 'SELECTED'`).run(postId);
+    db.update(giftingPosts).set({
+      status: post.post_type === "ISO" ? "LOOKING" : "REOPENED",
+      selectedInterestId: null,
+    } as any).where(eq(giftingPosts.id, postId)).run();
+  },
+  renewGiftingPost(postId, userId) {
+    const post = this.getGiftingPost(postId);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
+    if (Number(post.renew_count || 0) >= 1) throw new Error("Posts can only be renewed once.");
+    db.update(giftingPosts).set({
+      status: post.post_type === "ISO" ? "LOOKING" : "OPEN",
+      renewCount: Number(post.renew_count || 0) + 1,
+      expiresAt: giftingExpiry(post.post_type),
+    } as any).where(eq(giftingPosts.id, postId)).run();
+  },
+  reportGiftingPost(data) {
+    db.insert(giftingReports).values({ ...data, status: "PENDING", createdAt: new Date().toISOString() } as any).run();
+    sqlite.prepare(`UPDATE gifting_posts SET report_count = report_count + 1 WHERE id = ?`).run(data.postId);
+  },
+  getGiftingReports(status) {
+    const where = status ? `WHERE gr.status = ?` : "";
+    const params = status ? [status] : [];
+    return sqlite.prepare(`
+      SELECT gr.*, p.title AS postTitle, p.post_type AS postType, u.username AS reporterUsername
+      FROM gifting_reports gr
+      JOIN gifting_posts p ON p.id = gr.post_id
+      JOIN users u ON u.id = gr.reporter_user_id
+      ${where}
+      ORDER BY gr.created_at DESC
+    `).all(...params);
+  },
+  updateGiftingPostStatus(id, status) {
+    db.update(giftingPosts).set({ status } as any).where(eq(giftingPosts.id, id)).run();
+  },
+  resolveGiftingReport(id, adminNotes) {
+    db.update(giftingReports).set({ status: "RESOLVED", adminNotes: adminNotes || null } as any).where(eq(giftingReports.id, id)).run();
+  },
+  expireGiftingPosts() {
+    expireGiftingPosts();
   },
 };

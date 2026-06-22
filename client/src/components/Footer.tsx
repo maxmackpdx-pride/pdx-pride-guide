@@ -20,6 +20,7 @@ export default function Footer() {
                 ["/events", "Events"],
                 ["/submit", "Promoters"],
                 ["/pride-work", "Pride Work"],
+                ["/gifting", "Gifting"],
                 ["/about", "About"],
               ].map(([href, label]) => (
                 <div key={href} style={{ marginBottom: 8 }}>
@@ -33,6 +34,7 @@ export default function Footer() {
                 ["/submit", "Submit an Event"],
                 ["/submit", "Claim an Event"],
                 ["/pride-work", "Post a Gig"],
+                ["/gifting", "Post a Gift / ISO"],
                 ["/about", "Contact"],
               ].map(([href, label]) => (
                 <div key={label} style={{ marginBottom: 8 }}>

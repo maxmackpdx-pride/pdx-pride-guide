@@ -56,6 +56,12 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
+  const { data: myGifting = [] } = useQuery<any[]>({
+    queryKey: ["/api/gifting/mine"],
+    queryFn: () => fetch("/api/gifting/mine").then(r => r.ok ? r.json() : []),
+    enabled: !!user,
+  });
+
   const { data: myCheckIns = [] } = useQuery<any[]>({
     queryKey: ["/api/events/mine/check-ins"],
     queryFn: () => fetch("/api/events/mine/check-ins").then(r => r.ok ? r.json() : []),
@@ -541,6 +547,31 @@ export default function Dashboard() {
                   <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em", padding: "3px 8px", border: "1px solid #FF00CC", color: "#FF00CC" }}>{post.status}</span>
                   <a href="#/missed-connections" style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", color: "#FF00CC", textDecoration: "none", border: "1px solid #FF00CC", padding: "4px 10px" }}>EDIT</a>
                   <button onClick={() => handleDeleteMissed(post.id)} style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "1px solid #FF2400", color: "#FF2400", padding: "4px 10px", cursor: "pointer" }}>DELETE</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* My Gifting */}
+        <section style={{ marginBottom: 48 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <h2 className="display" style={{ fontSize: "1.5rem", color: "#00FFFF" }}>MY GIFTING</h2>
+            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
+            <a href="#/gifting" style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", color: "#00FFFF", textDecoration: "none", border: "1px solid #00FFFF", padding: "4px 10px" }}>OPEN BOARD</a>
+          </div>
+          {myGifting.length === 0 ? (
+            <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No gifting posts yet.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {myGifting.map((post: any) => (
+                <div key={post.id} style={{ background: "#080808", border: `1px solid ${post.postType === "GIFT" ? "#CCFF00" : "#B451FF"}`, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  <div style={{ flex: 1 }}>
+                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{post.title}</div>
+                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{post.postType} · {post.category} · {post.neighborhood}</div>
+                  </div>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em", padding: "3px 8px", border: "1px solid #00FFFF", color: "#00FFFF" }}>{post.status}</span>
+                  <span style={{ color: "#666", fontSize: "0.78rem" }}>{post.interestCount || 0} response{post.interestCount === 1 ? "" : "s"}</span>
                 </div>
               ))}
             </div>

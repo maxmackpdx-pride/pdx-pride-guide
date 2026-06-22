@@ -4,7 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X,
+  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift,
 } from "lucide-react";
 
 const ADMIN_PASSWORD = "pdxpride2026";
@@ -68,7 +68,7 @@ interface ModerationRequest {
   adminNotes?: string;
 }
 
-type AdminTab = "queue" | "moderation" | "events";
+type AdminTab = "queue" | "moderation" | "events" | "gifting";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -109,6 +109,11 @@ export default function Admin() {
   const { data: modRequests = [], isLoading: modLoading } = useQuery<ModerationRequest[]>({
     queryKey: ["/api/admin/moderation"],
     enabled: authenticated && activeTab === "moderation",
+  });
+
+  const { data: giftingAdmin = { posts: [], reports: [] }, isLoading: giftingLoading } = useQuery<any>({
+    queryKey: ["/api/admin/gifting"],
+    enabled: authenticated && activeTab === "gifting",
   });
 
   const approveMutation = useMutation({
@@ -177,6 +182,25 @@ export default function Admin() {
     },
     onError: () => {
       toast({ title: "Error", description: "Could not resolve request.", variant: "destructive" });
+    },
+  });
+
+  const updateGiftingStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      apiRequest("POST", `/api/admin/gifting/${id}/status`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+      toast({ title: "Gifting post updated" });
+    },
+  });
+
+  const resolveGiftingReportMutation = useMutation({
+    mutationFn: ({ id, adminNotes }: { id: number; adminNotes?: string }) =>
+      apiRequest("POST", `/api/admin/gifting/reports/${id}/resolve`, { adminNotes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+      toast({ title: "Report resolved" });
     },
   });
 
@@ -261,6 +285,8 @@ export default function Admin() {
   const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
   const resolvedSubs = submissions.filter(s => s.status.toUpperCase() !== "PENDING");
   const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
+  const pendingGifting = (giftingAdmin.posts || []).filter((p: any) => p.status === "PENDING");
+  const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -303,6 +329,7 @@ export default function Admin() {
             { key: "queue" as AdminTab, label: `REVIEW QUEUE (${pendingSubs.length})`, icon: <Inbox size={12} /> },
             { key: "moderation" as AdminTab, label: `CLAIM / REMOVE${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "events" as AdminTab, label: "MANAGE EVENTS", icon: <Shield size={12} /> },
+            { key: "gifting" as AdminTab, label: `GIFTING${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
           ]).map(tab => (
             <button
               key={tab.key}
@@ -593,6 +620,82 @@ export default function Admin() {
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── GIFTING ── */}
+        {activeTab === "gifting" && (
+          <div>
+            <p className="text-white/40 text-sm mb-6">
+              Review first-time gifting posts, handle reports, and change listing statuses.
+            </p>
+            {giftingLoading ? (
+              <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : (
+              <div className="space-y-8">
+                <section>
+                  <h3 className="display text-xl text-white mb-3">PENDING / REPORTED</h3>
+                  {[...pendingGifting, ...(giftingAdmin.posts || []).filter((p: any) => p.reportCount > 0 && p.status !== "PENDING")].length === 0 ? (
+                    <p className="text-white/30">No gifting items need review.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {[...pendingGifting, ...(giftingAdmin.posts || []).filter((p: any) => p.reportCount > 0 && p.status !== "PENDING")].map((post: any) => (
+                        <div key={post.id} className="p-4 border border-white/10" style={{ background: "#111" }}>
+                          <div className="flex justify-between gap-3 flex-wrap">
+                            <div>
+                              <span className="sticker text-xs" style={{ color: post.postType === "GIFT" ? "#CCFF00" : "#B451FF", borderColor: post.postType === "GIFT" ? "#CCFF00" : "#B451FF" }}>{post.postType}</span>
+                              <p className="display text-lg text-white mt-2">{post.title}</p>
+                              <p className="text-white/45 text-sm">{post.category} · {post.neighborhood} · {post.status} · {post.reportCount || 0} report(s)</p>
+                              <p className="text-white/65 text-sm mt-2">{post.description}</p>
+                            </div>
+                            <div className="flex gap-2 flex-wrap content-start">
+                              <button className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => updateGiftingStatusMutation.mutate({ id: post.id, status: post.postType === "ISO" ? "LOOKING" : "OPEN" })}>APPROVE</button>
+                              <button className="sticker" style={{ color: "#FF6600", borderColor: "#FF6600" }} onClick={() => updateGiftingStatusMutation.mutate({ id: post.id, status: "HIDDEN" })}>HIDE</button>
+                              <button className="sticker" style={{ color: "#FF2400", borderColor: "#FF2400" }} onClick={() => updateGiftingStatusMutation.mutate({ id: post.id, status: "REMOVED" })}>REMOVE</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                <section>
+                  <h3 className="display text-xl text-white mb-3">REPORTS</h3>
+                  {pendingGiftingReports.length === 0 ? <p className="text-white/30">No open gifting reports.</p> : (
+                    <div className="space-y-2">
+                      {pendingGiftingReports.map((report: any) => (
+                        <div key={report.id} className="p-4 border border-white/10 flex justify-between gap-3 flex-wrap" style={{ background: "#0d0d0d" }}>
+                          <div>
+                            <p className="display text-white">{report.postTitle}</p>
+                            <p className="text-white/60 text-sm">{report.reason}</p>
+                          </div>
+                          <button className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => resolveGiftingReportMutation.mutate({ id: report.id })}>RESOLVE</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                <section>
+                  <h3 className="display text-xl text-white mb-3">ALL GIFTING POSTS</h3>
+                  <div className="space-y-2">
+                    {(giftingAdmin.posts || []).map((post: any) => (
+                      <div key={post.id} className="p-3 border border-white/10 flex justify-between gap-3 flex-wrap" style={{ background: "#0b0b0b" }}>
+                        <div>
+                          <p className="display text-white/80">{post.title}</p>
+                          <p className="text-white/35 text-xs">{post.postType} · {post.status} · {post.displayName || post.username}</p>
+                        </div>
+                        <select value={post.status} onChange={e => updateGiftingStatusMutation.mutate({ id: post.id, status: e.target.value })}
+                          className="px-3 py-2 bg-black text-white border border-white/20">
+                          {["OPEN","LOOKING","PENDING","POSTER_CHOOSING","PICKUP_PENDING","OFFER_PENDING","GIFTED","FOUND","EXPIRED","HIDDEN","REMOVED"].map(s => <option key={s}>{s}</option>)}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
             )}
           </div>

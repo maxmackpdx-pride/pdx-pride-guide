@@ -203,3 +203,59 @@ export const missedConnections = sqliteTable("missed_connections", {
 export const insertMissedConnectionSchema = createInsertSchema(missedConnections).omit({ id: true, createdAt: true, status: true });
 export type InsertMissedConnection = z.infer<typeof insertMissedConnectionSchema>;
 export type MissedConnection = typeof missedConnections.$inferSelect;
+
+// Out Of My Closet: Gifting
+export const giftingPosts = sqliteTable("gifting_posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  postType: text("post_type").notNull().default("GIFT"), // GIFT | ISO
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  neighborhood: text("neighborhood").notNull(),
+  pickupPreference: text("pickup_preference").notNull(),
+  photoUrls: text("photo_urls").notNull().default("[]"),
+  status: text("status").notNull().default("OPEN"),
+  selectedInterestId: integer("selected_interest_id"),
+  renewCount: integer("renew_count").notNull().default(0),
+  expiresAt: text("expires_at").notNull(),
+  reportCount: integer("report_count").notNull().default(0),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const giftingInterests = sqliteTable("gifting_interests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: integer("post_id").notNull(),
+  userId: integer("user_id").notNull(),
+  note: text("note").notNull(),
+  status: text("status").notNull().default("INTERESTED"), // INTERESTED | SELECTED | DECLINED | WITHDRAWN
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const giftingReports = sqliteTable("gifting_reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: integer("post_id").notNull(),
+  reporterUserId: integer("reporter_user_id").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status").notNull().default("PENDING"),
+  adminNotes: text("admin_notes"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertGiftingPostSchema = createInsertSchema(giftingPosts).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  selectedInterestId: true,
+  renewCount: true,
+  expiresAt: true,
+  reportCount: true,
+});
+export const insertGiftingInterestSchema = createInsertSchema(giftingInterests).omit({ id: true, createdAt: true, status: true });
+export const insertGiftingReportSchema = createInsertSchema(giftingReports).omit({ id: true, createdAt: true, status: true, adminNotes: true });
+export type InsertGiftingPost = z.infer<typeof insertGiftingPostSchema>;
+export type GiftingPost = typeof giftingPosts.$inferSelect;
+export type InsertGiftingInterest = z.infer<typeof insertGiftingInterestSchema>;
+export type GiftingInterest = typeof giftingInterests.$inferSelect;
+export type InsertGiftingReport = z.infer<typeof insertGiftingReportSchema>;
+export type GiftingReport = typeof giftingReports.$inferSelect;

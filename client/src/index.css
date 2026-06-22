@@ -1146,6 +1146,593 @@ body::before {
   transform: translateY(-2px) rotate(0deg);
 }
 
+.gifting-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(255,0,204,0.15), transparent 24rem),
+    radial-gradient(circle at 88% 18%, rgba(0,255,255,0.12), transparent 25rem),
+    #050505;
+  color: #f5f1e8;
+}
+
+.home-gifting-teaser {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(46px, 7vw, 82px) 20px;
+  color: #fff;
+}
+
+.home-gifting-teaser::before {
+  content: "";
+  position: absolute;
+  inset: 18px 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.72) 54%, rgba(0,0,0,0.32) 100%),
+    url("/motifs/hero-inbox.png") center / cover no-repeat;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  opacity: 0.92;
+}
+
+.home-gifting-copy,
+.home-gifting-tiles {
+  position: relative;
+  z-index: 1;
+}
+
+.home-gifting-copy h2 {
+  margin: 18px 0 10px;
+  font-size: clamp(4rem, 9vw, 8rem);
+  line-height: 0.82;
+  color: #ccff00;
+  text-shadow: 0 0 22px rgba(204,255,0,0.36);
+}
+
+.home-gifting-copy p {
+  max-width: 560px;
+  color: rgba(255,255,255,0.75);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.home-gifting-tag {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #f3ecdd;
+  color: #000 !important;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: 5px 5px 0 #00ffff;
+}
+
+.home-gifting-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-content: center;
+}
+
+.home-gifting-tile {
+  position: relative;
+  min-height: 180px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 15px;
+  border: 3px solid #ccff00;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.88)),
+    #111;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 6px 6px 0 rgba(255,0,204,0.5);
+}
+
+.home-gifting-tile.iso {
+  border-color: #b451ff;
+}
+
+.home-gifting-tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.56;
+}
+
+.home-gifting-tile span,
+.home-gifting-tile b,
+.home-gifting-tile small {
+  position: relative;
+  z-index: 1;
+}
+
+.home-gifting-tile span {
+  width: max-content;
+  padding: 4px 8px;
+  background: #ccff00;
+  color: #000;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+}
+
+.home-gifting-tile.iso span {
+  background: #b451ff;
+  color: #fff;
+}
+
+.home-gifting-tile b {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 0.95;
+}
+
+.home-gifting-tile small {
+  margin-top: 6px;
+  color: rgba(255,255,255,0.72);
+}
+
+.gifting-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 560px;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+}
+
+.gifting-hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.84) 38%, rgba(0,0,0,0.38) 68%, rgba(0,0,0,0.05) 100%),
+    url("/motifs/hero-pride-work.png") 58% 40% / cover no-repeat;
+  filter: saturate(1.2) contrast(1.08);
+}
+
+.gifting-hero::after,
+.gifting-how::before,
+.gifting-feed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 13px),
+    radial-gradient(circle at 14% 80%, rgba(204,255,0,0.1), transparent 15rem);
+  mix-blend-mode: screen;
+  opacity: 0.45;
+}
+
+.gifting-hero-inner,
+.gifting-how,
+.gifting-feed,
+.gifting-form-panel {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(44px, 7vw, 86px) 20px;
+}
+
+.gifting-title {
+  margin: 28px 0 16px;
+  font-size: clamp(4rem, 10vw, 8.8rem);
+  line-height: 0.82;
+  color: #f7f5ee;
+  text-shadow: 0 0 24px rgba(0,0,0,0.72);
+}
+
+.gifting-title span {
+  color: #00ffff;
+  text-shadow: 0 0 22px rgba(0,255,255,0.5), 5px 5px 0 rgba(255,0,204,0.45);
+}
+
+.gifting-lede {
+  max-width: 760px;
+  font-size: clamp(1rem, 2vw, 1.36rem);
+  line-height: 1.55;
+  color: rgba(255,255,255,0.82);
+}
+
+.gifting-tagline {
+  display: inline-block;
+  margin: 22px 0;
+  padding: 9px 14px;
+  background: #f2eadb;
+  color: #090909;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 6px 6px 0 #ff00cc;
+}
+
+.gifting-actions,
+.gifting-card-meta,
+.gifting-poster,
+.gifting-owner,
+.gifting-filterbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gifting-actions .btn-neon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gifting-actions .cyan {
+  border-color: #00ffff;
+  color: #00ffff;
+}
+
+.gifting-how-link {
+  color: #f2eadb;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gifting-how {
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background:
+    linear-gradient(90deg, rgba(255,0,204,0.13), rgba(0,255,255,0.09)),
+    #080808;
+}
+
+.gifting-how h2,
+.gifting-feed h2,
+.gifting-form-panel h2 {
+  margin: 16px 0 8px;
+  font-size: clamp(2rem, 5vw, 4.8rem);
+  line-height: 0.9;
+}
+
+.gifting-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.gifting-step {
+  position: relative;
+  min-height: 170px;
+  padding: 20px;
+  background: #f2eadb;
+  color: #060606;
+  border: 3px solid #000;
+  box-shadow: 7px 7px 0 rgba(0,255,255,0.72);
+  transform: rotate(-0.7deg);
+}
+
+.gifting-step:nth-child(even) {
+  box-shadow: 7px 7px 0 rgba(255,0,204,0.72);
+  transform: rotate(0.7deg);
+}
+
+.gifting-step b {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: rgba(0,0,0,0.18);
+}
+
+.gifting-step h3 {
+  margin: 0 0 8px;
+  font-size: 1.7rem;
+}
+
+.gifting-footer-line {
+  margin-top: 28px;
+  font-family: var(--font-display);
+  color: #ccff00;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gifting-form-panel {
+  margin-top: 28px;
+  margin-bottom: 28px;
+  background: rgba(8,8,8,0.96);
+  border: 3px solid #ccff00;
+  box-shadow: 9px 9px 0 rgba(255,0,204,0.8);
+}
+
+.gifting-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  color: #fff;
+  border: 1px solid #444;
+  background: #000;
+  padding: 7px;
+}
+
+.gifting-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 22px 0;
+}
+
+.gifting-form-grid label,
+.gifting-rules {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ccff00;
+}
+
+.gifting-form-grid .span {
+  grid-column: 1 / -1;
+}
+
+.gifting-form-grid input,
+.gifting-form-grid textarea,
+.gifting-form-grid select,
+.gifting-filterbar input,
+.gifting-filterbar select,
+.gifting-response textarea,
+.gifting-report input {
+  width: 100%;
+  margin-top: 7px;
+  padding: 11px 12px;
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff;
+  font-family: var(--font-body);
+  box-sizing: border-box;
+}
+
+.gifting-rules {
+  color: #f2eadb;
+  margin-bottom: 18px;
+}
+
+.gifting-rules input {
+  margin-right: 8px;
+}
+
+.gifting-feed {
+  overflow: hidden;
+}
+
+.gifting-feed-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.gifting-filterbar button {
+  padding: 9px 12px;
+  background: #070707;
+  border: 1px solid #333;
+  color: #aaa;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gifting-filterbar button.active {
+  color: #000;
+  background: #ccff00;
+  border-color: #ccff00;
+}
+
+.gifting-filterbar input,
+.gifting-filterbar select {
+  width: auto;
+  min-width: 160px;
+}
+
+.gifting-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.gifting-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(0,255,255,0.08), rgba(255,0,204,0.09)),
+    #0c0c0c;
+  border: 3px solid #ccff00;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.85);
+}
+
+.gifting-card.iso {
+  border-color: #b451ff;
+}
+
+.gifting-photo {
+  position: relative;
+  height: 245px;
+  background: #111;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.gifting-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.gifting-photo span {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 5px 9px;
+  background: #000;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+}
+
+.gifting-photo-empty {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  color: #ccff00;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+}
+
+.gifting-card-body {
+  padding: 18px;
+}
+
+.gifting-card-meta {
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+.gifting-type {
+  color: #000;
+  background: #ccff00;
+  padding: 4px 8px;
+}
+
+.gifting-card.iso .gifting-type {
+  color: #fff;
+  background: #7b2cff;
+}
+
+.gifting-card h3 {
+  margin: 13px 0 8px;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 0.95;
+}
+
+.gifting-card p {
+  color: rgba(255,255,255,0.75);
+  line-height: 1.5;
+}
+
+.gifting-details {
+  margin: 14px 0;
+  color: #00ffff;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.gifting-poster img,
+.gifting-poster span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.gifting-poster img {
+  object-fit: cover;
+}
+
+.gifting-poster span {
+  display: grid;
+  place-items: center;
+  color: #000;
+  background: #ccff00;
+  font-family: var(--font-display);
+}
+
+.gifting-response textarea {
+  min-height: 80px;
+}
+
+.gifting-response button,
+.gifting-owner button,
+.gifting-report button {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #ccff00;
+  background: transparent;
+  color: #ccff00;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.gifting-owner {
+  align-items: stretch;
+  margin-top: 14px;
+}
+
+.gifting-owner button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gifting-interest-list {
+  flex-basis: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.gifting-interest-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.76);
+}
+
+.gifting-report {
+  margin-top: 14px;
+  color: #888;
+  font-size: 0.82rem;
+}
+
+.gifting-report summary {
+  display: inline-flex;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.gifting-stamp {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  transform: translate(-50%, -50%) rotate(-16deg);
+  z-index: 2;
+  padding: 8px 18px;
+  border: 4px solid #ff2400;
+  color: #ff2400;
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  text-shadow: 2px 2px 0 #000;
+  opacity: 0.92;
+}
+
 @media (max-width: 900px) {
   .home-motif-keep,
   .home-motif-progress,
@@ -1170,6 +1757,27 @@ body::before {
     height: 92px;
     background-position: center;
     opacity: 0.78;
+  }
+
+  .gifting-steps,
+  .gifting-form-grid,
+  .gifting-grid,
+  .home-gifting-teaser,
+  .home-gifting-tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .gifting-feed-head {
+    display: block;
+  }
+
+  .gifting-filterbar input,
+  .gifting-filterbar select {
+    width: 100%;
+  }
+
+  .gifting-photo {
+    height: 210px;
   }
 }
 

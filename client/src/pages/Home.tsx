@@ -5,7 +5,18 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import { MapView } from "./Events";
+import { Gift, Search } from "lucide-react";
 const skylineImg = "/pdx-skyline-neon.jpg";
+
+type GiftingTeaserPost = {
+  id: number;
+  postType: "GIFT" | "ISO";
+  title: string;
+  category: string;
+  neighborhood: string;
+  photoUrls: string[];
+  status: string;
+};
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
@@ -35,6 +46,10 @@ export default function Home() {
   const { data: events = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+  });
+  const { data: giftingPosts = [] } = useQuery<GiftingTeaserPost[]>({
+    queryKey: ["/api/gifting"],
+    queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()),
   });
   const firstEventTarget = useMemo(() => {
     const starts = events
@@ -150,6 +165,29 @@ export default function Home() {
           onSelect={setSelectedEvent}
           variant="home"
         />
+      </section>
+
+      <section className="home-gifting-teaser">
+        <div className="home-gifting-copy">
+          <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>OUT OF MY CLOSET</span>
+          <h2 className="display">GIFTING</h2>
+          <p className="home-gifting-tag">Free stuff. Queer homes. No capitalism in the hallway.</p>
+          <p>A Pride-season gifting board for giving away what you do not need and asking for what you do.</p>
+          <div className="gifting-actions">
+            <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
+            <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an ISO</button></Link>
+          </div>
+        </div>
+        <div className="home-gifting-tiles">
+          {giftingPosts.slice(0, 4).map(post => (
+            <Link href="/gifting" className={`home-gifting-tile ${post.postType.toLowerCase()}`} key={post.id}>
+              {post.photoUrls?.[0] && <img src={post.photoUrls[0]} alt="" />}
+              <span>{post.postType}</span>
+              <b>{post.title}</b>
+              <small>{post.category} · {post.neighborhood}</small>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}

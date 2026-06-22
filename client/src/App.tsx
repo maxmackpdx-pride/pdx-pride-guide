@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Events from "./pages/Events";
 import Submit from "./pages/Submit";
 import PrideWork from "./pages/PrideWork";
+import Gifting from "./pages/Gifting";
 import About from "./pages/About";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
@@ -30,6 +31,7 @@ export default function App() {
                 <Route path="/events" component={Events} />
                 <Route path="/submit" component={Submit} />
                 <Route path="/pride-work" component={PrideWork} />
+                <Route path="/gifting" component={Gifting} />
                 <Route path="/about" component={About} />
                 <Route path="/admin" component={Admin} />
                 <Route path="/dashboard" component={Dashboard} />

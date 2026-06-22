@@ -10,6 +10,7 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/submit", label: "Promoters" },
   { href: "/pride-work", label: "Pride Work" },
+  { href: "/gifting", label: "Gifting" },
   { href: "/missed-connections", label: "Missed" },
   { href: "/about", label: "About" },
 ];
