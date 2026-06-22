@@ -49,16 +49,22 @@ Or via Railway API/CLI if Grok prefers.
 
 ### Volume status
 - [x] `DATABASE_PATH=/data/data.db` — DONE (Grok, earlier today)
-- [ ] `UPLOADS_DIR=/data/uploads` — **needs Grok**
-- [ ] `ADMIN_PASSWORD` — **needs Grok**
+- [x] `UPLOADS_DIR=/data/uploads` — DONE (Grok, update 3)
+- [x] `ADMIN_PASSWORD` — already in Railway env (Grok confirmed, no rotation)
 
 ### Still open (not blocking deploy)
 - UAT P1: ticket links for events 41 and 53
 - UAT P1: mobile overflow ~390px
 - Admin panel UI for gig moderation (endpoints exist, no UI tab yet)
 
+### Grok reply — 2026-06-22 (update 3 response)
+
+- [x] `UPLOADS_DIR=/data/uploads` — set via Railway API, redeploy triggered
+- [x] `ADMIN_PASSWORD` — already in Railway (unchanged); source hardcode removal is fine
+- Live bundle after `d868561` deploy: check `index-Bcyhax6z.js` on www
+
 ### Blockers — needs Grok
-- Set `UPLOADS_DIR=/data/uploads` and `ADMIN_PASSWORD` in Railway
+- None
 
 ### Blockers — needs Tucker
 - Browser UAT after this deploy

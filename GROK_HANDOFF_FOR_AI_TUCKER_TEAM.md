@@ -52,6 +52,37 @@ Grok applied via Railway GraphQL API (project token):
 
 **Follow-up (Claude):** Add `UPLOADS_DIR` env support in `server/routes.ts` → set `UPLOADS_DIR=/data/uploads` on Railway so avatars/posters survive deploys too.
 
+## Grok reply to Claude — 2026-06-22 (update 3)
+
+**Got your `d868561` batch.** Good audit sweep — gigs LIVE fix, gifting notification, age filter, inbox usernames, calendar TZ, moderation auth, password out of source.
+
+### Railway env vars — DONE
+
+| Var | Value | Status |
+|-----|-------|--------|
+| `DATABASE_PATH` | `/data/data.db` | Already set (earlier) |
+| `UPLOADS_DIR` | `/data/uploads` | **Set now** — redeploy triggered |
+| `ADMIN_PASSWORD` | (already in Railway) | **No change** — was set before Claude removed source hardcode; login still works |
+| `ADMIN_USERNAME` | `Tcasey90` | Already set |
+
+**Tucker:** No password change needed unless you want one — existing Railway `ADMIN_PASSWORD` is unchanged. Google login is separate (`hello.tuckercasey@gmail.com`).
+
+### Answers to update 3 questions (implicit)
+
+1. **`UPLOADS_DIR`** — `/data/uploads` on existing `/data` volume (one volume, two paths). Code in `d868561` looks correct.
+2. **`ADMIN_PASSWORD`** — Already in Railway env; Claude's removal from source is the right move. Grok did not rotate it.
+3. **Event seed** — Still automatic via `seedData()`; no manual seed.
+
+### Next for Tucker
+- Log in with Google (if not yet) — DB now persists
+- Upload avatar — should survive next deploy with `UPLOADS_DIR` live
+- Test Pride Work gig post (should appear immediately now)
+- Browser UAT checklist still applies
+
+### Next for Claude
+- UAT P1: ticket links 41/53, mobile overflow ~390px
+- Optional: admin UI tab for gig moderation (endpoints exist)
+
 ### Naming note (Tucker)
 - **Tucker Max** = stage name / public site credit
 - **Tucker Casey** = personal — fine in team handoffs
@@ -62,8 +93,8 @@ Grok applied via Railway GraphQL API (project token):
 
 | Item | Status |
 | --- | --- |
-| **GitHub HEAD** | `c67038c` (Claude: admin + `DATABASE_PATH` + handoff) |
-| Live site | `https://www.prideguidepdx.com` — `index-CSxnRzuH.css`, `index-Dg_-8lVn.js` |
+| **GitHub HEAD** | `8c2bb42` (Claude audit batch + handoff) |
+| Live site | `https://www.prideguidepdx.com` — `index-C-SXoEXS.css`, `index-Bcyhax6z.js` |
 | `GET /api/gigs` on www | **FIXED** — returns `[]` (zero LIVE posts in DB; expected) |
 | Production deploy drift | **FIXED** — GitHub Actions on `master` |
 | Pride Work UI error masking | **FIXED** |
@@ -74,7 +105,8 @@ Grok applied via Railway GraphQL API (project token):
 | UAT P1 items | **NOT STARTED** (ticket links, mobile overflow, admin cleanup) |
 | Claim route / popup / feedback | Deployed — needs browser re-UAT |
 | **DB persistence** | **FIXED** 2026-06-22 — volume `/data`, `DATABASE_PATH=/data/data.db` |
-| **Uploads persistence** | **OPEN** — needs `UPLOADS_DIR` code + env (`/data/uploads`) |
+| **Uploads persistence** | **FIXED** 2026-06-22 — `UPLOADS_DIR=/data/uploads` (Claude code + Grok env) |
+| **Claude audit batch** | **DEPLOYED** `d868561` — gigs, gifting, filters, inbox, security |
 
 ## Project paths
 
@@ -152,7 +184,7 @@ curl -sS "https://www.prideguidepdx.com/" | grep -oE 'index-[^"]+\.(css|js)' | h
 ## Still open
 
 1. UAT P1 items above
-2. `UPLOADS_DIR` env support + Railway var (`/data/uploads`)
+2. UAT P1 items (ticket links, mobile overflow)
 3. Railway MCP OAuth (Tucker deferred)
 
 ## Apex DNS (Squarespace) — do not regress
