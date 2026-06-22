@@ -32,7 +32,7 @@ Legacy aliases (redirect here):
 | Avatar system (Section 17) | **DEPLOYED** — circle crop + optional pride rings |
 | Mobile hero + nav | **DEPLOYED** |
 | Gift With Pride art | **DEPLOYED** |
-| Apex `prideguidepdx.com` | **STILL BROKEN** — Railway 404 |
+| Apex `prideguidepdx.com` | **FIXED** 2026-06-22 — ALIAS `9piptmie.up.railway.app` + `TXT _railway-verify` |
 | UAT P1 items | **NOT STARTED** (ticket links, mobile overflow, admin cleanup) |
 | Claim route / popup / feedback | Deployed — needs browser re-UAT |
 
@@ -92,6 +92,7 @@ GitHub Actions: `.github/workflows/railway-deploy.yml` on push to `master`.
 ## Verification
 
 ```bash
+curl -sS "https://prideguidepdx.com/api/events?limit=1"
 curl -sS "https://www.prideguidepdx.com/api/events?limit=1"
 curl -sS "https://www.prideguidepdx.com/api/gigs"
 curl -sS "https://www.prideguidepdx.com/" | grep -oE 'index-[^"]+\.(css|js)' | head -2
@@ -110,10 +111,20 @@ curl -sS "https://www.prideguidepdx.com/" | grep -oE 'index-[^"]+\.(css|js)' | h
 
 ## Still open
 
-1. Apex domain `prideguidepdx.com`
-2. UAT P1 items above
-3. `data.db` / `uploads/` Railway volume
-4. Railway MCP OAuth (Tucker deferred)
+1. UAT P1 items above
+2. `data.db` / `uploads/` Railway volume
+3. Railway MCP OAuth (Tucker deferred)
+
+## Apex DNS (Squarespace) — do not regress
+
+| Type | Name | Data |
+|------|------|------|
+| ALIAS | `@` | `9piptmie.up.railway.app` |
+| TXT | `_railway-verify` | `railway-verify=ae9d6a5461b84a1c95485ba8a6cd3f1ffb3a42a86a6384135baf4af1bf449845` |
+| CNAME | `www` | `he6e3ojn.up.railway.app` |
+| TXT | `_railway-verify.www` | `railway-verify=127c18adb3caf6283464c59fb57636c905fcee2d229a7a5d57b8e72bc1c1b423` |
+
+If apex 404s again: check Railway custom-domain target vs Squarespace ALIAS; never recreate Railway apex without updating ALIAS immediately.
 
 ## Railway reference
 
