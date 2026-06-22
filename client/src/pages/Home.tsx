@@ -6,7 +6,6 @@ import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
-const skylineImg = "/home-hero-bridge-stickers.png";
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
@@ -107,7 +106,7 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="zine-hero home-hero">
-        <div className="home-hero-bg" style={{ backgroundImage: `url(${skylineImg})` }} />
+        <div className="home-hero-bg" />
         <div style={{
           position: "absolute", inset: 0,
           background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",

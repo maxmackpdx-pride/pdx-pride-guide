@@ -577,6 +577,7 @@ body::before {
 .home-hero-bg {
   position: absolute;
   inset: 0;
+  background-image: url("/home-hero-bridge-stickers.png");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -611,7 +612,7 @@ body::before {
 .home-hero-title {
   margin-bottom: 30px;
   color: #f4f4f6;
-  font-size: 10.4rem;
+  font-size: 13.52rem;
   line-height: 0.78;
   letter-spacing: 0;
   text-shadow: 0 0 48px rgba(255,255,255,0.08);
@@ -710,7 +711,8 @@ body::before {
   }
 
   .home-hero-bg {
-    background-position: left top;
+    background-image: url("/home-hero-mobile.jpg");
+    background-position: center top;
   }
 
   .home-hero-content {
