@@ -205,6 +205,7 @@ sqlite.exec(`
 `);
 
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
+try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN post_type TEXT NOT NULL DEFAULT 'POSTING_GIG'`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) {}
