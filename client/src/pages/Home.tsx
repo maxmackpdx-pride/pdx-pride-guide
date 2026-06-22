@@ -8,16 +8,6 @@ import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/pdx-skyline-neon.jpg";
 
-type GiftingTeaserPost = {
-  id: number;
-  postType: "GIFT" | "ISO";
-  title: string;
-  category: string;
-  neighborhood: string;
-  photoUrls: string[];
-  status: string;
-};
-
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
   if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).getTime();
@@ -46,10 +36,6 @@ export default function Home() {
   const { data: events = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
-  });
-  const { data: giftingPosts = [] } = useQuery<GiftingTeaserPost[]>({
-    queryKey: ["/api/gifting"],
-    queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()),
   });
   const firstEventTarget = useMemo(() => {
     const starts = events
@@ -167,27 +153,38 @@ export default function Home() {
         />
       </section>
 
-      <section className="home-gifting-teaser">
-        <div className="home-gifting-copy">
-          <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>OUT OF MY CLOSET</span>
-          <h2 className="display">GIFTING</h2>
-          <p className="home-gifting-tag">Free stuff. Queer homes. No capitalism in the hallway.</p>
-          <p>A Pride-season gifting board for giving away what you do not need and asking for what you do.</p>
-          <div className="gifting-actions">
-            <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
-            <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an ISO</button></Link>
+      <section className="home-promo-stack">
+        <div className="torn-divider full-bleed" />
+        <article className="home-promo-panel home-gifting-panel">
+          <div className="home-promo-inner">
+            <div className="home-promo-copy">
+              <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>OUT OF MY CLOSET</span>
+              <h2 className="display">GIFTING</h2>
+              <p className="home-promo-tag">Free stuff. Queer homes. Keep it moving.</p>
+              <p>A Pride-season board for giving away what you do not need and asking for what you do.</p>
+              <div className="gifting-actions">
+                <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
+                <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an In Search Of</button></Link>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="home-gifting-tiles">
-          {giftingPosts.slice(0, 4).map(post => (
-            <Link href="/gifting" className={`home-gifting-tile ${post.postType.toLowerCase()}`} key={post.id}>
-              {post.photoUrls?.[0] && <img src={post.photoUrls[0]} alt="" />}
-              <span>{post.postType}</span>
-              <b>{post.title}</b>
-              <small>{post.category} · {post.neighborhood}</small>
-            </Link>
-          ))}
-        </div>
+        </article>
+        <div className="torn-divider full-bleed" />
+        <article className="home-promo-panel home-gigs-panel">
+          <div className="home-promo-inner">
+            <div className="home-promo-copy">
+              <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>PRIDE WORK</span>
+              <h2 className="display">GIG BOARD</h2>
+              <p className="home-promo-tag magenta">Paid, respected, valued.</p>
+              <p>Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
+              <div className="gifting-actions">
+                <Link href="/pride-work"><button className="btn-neon"><Search size={16} /> Find Work</button></Link>
+                <Link href="/pride-work"><button className="btn-neon cyan"><Gift size={16} /> Post a Gig</button></Link>
+              </div>
+            </div>
+          </div>
+        </article>
+        <div className="torn-divider full-bleed" />
       </section>
 
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}

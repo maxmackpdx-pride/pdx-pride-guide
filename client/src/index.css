@@ -950,6 +950,7 @@ body::before {
 /* Section divider — torn paper effect */
 .torn-divider {
   height: 8px;
+  width: 100%;
   background:
     linear-gradient(90deg, var(--neon-magenta), var(--neon-yellow), var(--neon-cyan), var(--neon-orange)),
     repeating-linear-gradient(90deg, #fff 0 8px, transparent 8px 14px);
@@ -962,6 +963,12 @@ body::before {
     0 0 22px rgba(0,255,255,0.34),
     0 0 34px rgba(255,0,204,0.28);
   animation: rainbow-divider-flow 42s linear infinite;
+}
+
+.torn-divider.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 @keyframes rainbow-divider-flow {
@@ -1155,52 +1162,88 @@ body::before {
   color: #f5f1e8;
 }
 
-.home-gifting-teaser {
+.home-promo-stack {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 24px;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: clamp(46px, 7vw, 82px) 20px;
+  overflow: hidden;
+  background: #000;
   color: #fff;
 }
 
-.home-gifting-teaser::before {
+.home-promo-panel {
+  position: relative;
+  min-height: clamp(360px, 42vw, 520px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.home-promo-panel::before,
+.home-promo-panel::after {
   content: "";
   position: absolute;
-  inset: 18px 0;
-  z-index: 0;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.72) 54%, rgba(0,0,0,0.32) 100%),
-    url("/motifs/hero-inbox.png") center / cover no-repeat;
-  border-top: 1px solid rgba(255,255,255,0.12);
-  border-bottom: 1px solid rgba(255,255,255,0.12);
-  opacity: 0.92;
+  inset: 0;
+  pointer-events: none;
 }
 
-.home-gifting-copy,
-.home-gifting-tiles {
+.home-promo-panel::before {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.8) 39%, rgba(0,0,0,0.36) 67%, rgba(0,0,0,0.08) 100%),
+    var(--promo-bg) center / cover no-repeat;
+  filter: saturate(1.08) contrast(1.05);
+}
+
+.home-promo-panel::after {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.038) 0 1px, transparent 1px 14px),
+    radial-gradient(circle at 12% 80%, rgba(204,255,0,0.1), transparent 18rem);
+  mix-blend-mode: screen;
+  opacity: 0.48;
+}
+
+.home-gifting-panel {
+  --promo-bg: url("/motifs/hero-inbox.png");
+}
+
+.home-gigs-panel {
+  --promo-bg: url("/motifs/hero-pride-work.png");
+}
+
+.home-promo-inner {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(52px, 7vw, 92px) 20px;
 }
 
-.home-gifting-copy h2 {
+.home-promo-copy {
+  position: relative;
+  max-width: 620px;
+}
+
+.home-promo-copy h2 {
   margin: 18px 0 10px;
-  font-size: clamp(4rem, 9vw, 8rem);
+  font-size: clamp(5.2rem, 11vw, 10rem);
   line-height: 0.82;
   color: #ccff00;
   text-shadow: 0 0 22px rgba(204,255,0,0.36);
 }
 
-.home-gifting-copy p {
+.home-gigs-panel .home-promo-copy h2 {
+  color: #f7f5ee;
+  text-shadow: 0 0 22px rgba(255,0,204,0.32);
+}
+
+.home-promo-copy p {
   max-width: 560px;
   color: rgba(255,255,255,0.75);
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   line-height: 1.55;
 }
 
-.home-gifting-tag {
+.home-promo-tag {
   display: inline-block;
   padding: 8px 12px;
   background: #f3ecdd;
@@ -1211,80 +1254,14 @@ body::before {
   box-shadow: 5px 5px 0 #00ffff;
 }
 
-.home-gifting-tiles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  align-content: center;
-}
-
-.home-gifting-tile {
-  position: relative;
-  min-height: 180px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 15px;
-  border: 3px solid #ccff00;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.88)),
-    #111;
-  color: #fff;
-  text-decoration: none;
-  box-shadow: 6px 6px 0 rgba(255,0,204,0.5);
-}
-
-.home-gifting-tile.iso {
-  border-color: #b451ff;
-}
-
-.home-gifting-tile img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.56;
-}
-
-.home-gifting-tile span,
-.home-gifting-tile b,
-.home-gifting-tile small {
-  position: relative;
-  z-index: 1;
-}
-
-.home-gifting-tile span {
-  width: max-content;
-  padding: 4px 8px;
-  background: #ccff00;
-  color: #000;
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-}
-
-.home-gifting-tile.iso span {
-  background: #b451ff;
-  color: #fff;
-}
-
-.home-gifting-tile b {
-  margin-top: 8px;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  line-height: 0.95;
-}
-
-.home-gifting-tile small {
-  margin-top: 6px;
-  color: rgba(255,255,255,0.72);
+.home-promo-tag.magenta {
+  box-shadow: 5px 5px 0 #ff00cc;
 }
 
 .gifting-hero {
   position: relative;
   overflow: hidden;
-  min-height: 560px;
+  min-height: clamp(680px, 72vw, 860px);
   border-bottom: 2px solid rgba(255,255,255,0.08);
 }
 
@@ -1312,8 +1289,6 @@ body::before {
 }
 
 .gifting-hero-inner,
-.gifting-how,
-.gifting-feed,
 .gifting-form-panel {
   position: relative;
   z-index: 1;
@@ -1322,9 +1297,25 @@ body::before {
   padding: clamp(44px, 7vw, 86px) 20px;
 }
 
+.gifting-how,
+.gifting-feed {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  margin: 0;
+  padding: clamp(44px, 7vw, 86px) 20px;
+}
+
+.gifting-how > *,
+.gifting-feed > * {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .gifting-title {
   margin: 28px 0 16px;
-  font-size: clamp(4rem, 10vw, 8.8rem);
+  font-size: clamp(5.8rem, 14vw, 13rem);
   line-height: 0.82;
   color: #f7f5ee;
   text-shadow: 0 0 24px rgba(0,0,0,0.72);
@@ -1761,10 +1752,16 @@ body::before {
 
   .gifting-steps,
   .gifting-form-grid,
-  .gifting-grid,
-  .home-gifting-teaser,
-  .home-gifting-tiles {
+  .gifting-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-promo-panel {
+    min-height: 430px;
+  }
+
+  .home-promo-copy h2 {
+    font-size: clamp(4rem, 20vw, 6rem);
   }
 
   .gifting-feed-head {

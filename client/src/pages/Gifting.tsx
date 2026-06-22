@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Gift, HeartHandshake, Megaphone, RefreshCw, Search, ShieldAlert, Sparkles, X } from "lucide-react";
+import { Gift, HeartHandshake, RefreshCw, Search, ShieldAlert, Sparkles, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +45,13 @@ const blankForm = {
   neighborhood: "",
   pickupPreference: "Message to coordinate",
   acceptRules: false,
+};
+
+const postTypeLabel = (type: string) => type === "ISO" ? "IN SEARCH OF" : "GIFT";
+const filterLabel = (type: string) => {
+  if (type === "OPEN") return "Open only";
+  if (type === "ISO") return "In Search Of";
+  return type;
 };
 
 export default function Gifting() {
@@ -131,10 +138,10 @@ export default function Gifting() {
           <div className="home-hero-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
           <h1 className="display gifting-title">OUT OF MY CLOSET:<br /><span>GIFTING</span></h1>
           <p className="gifting-lede">A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home.</p>
-          <p className="gifting-tagline">Free stuff. Queer homes. No capitalism in the hallway.</p>
+          <p className="gifting-tagline">Free stuff. Queer homes. Keep it moving.</p>
           <div className="gifting-actions">
             <button className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a Gift</button>
-            <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an ISO</button>
+            <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an In Search Of</button>
             <a href="#how-it-works" className="gifting-how-link">How It Works ↓</a>
           </div>
         </div>
@@ -148,7 +155,7 @@ export default function Gifting() {
         </div>
         <div className="gifting-steps">
           {[
-            ["POST IT", "Gift it or ISO it."],
+            ["POST IT", "Gift it or search for it."],
             ["ADD PHOTOS", "Upload up to 2. The site makes them fit."],
             ["3 QUEERS MAX", "Only 3 people can raise their hand on a Gift post."],
             ["PICK ONE", "Poster chooses and messages."],
@@ -168,10 +175,10 @@ export default function Gifting() {
       {formOpen && (
         <section id="gifting-form" className="gifting-form-panel">
           <button className="gifting-close" onClick={() => setFormOpen(false)}><X size={18} /></button>
-          <h2 className="display">POST A {form.postType}</h2>
+          <h2 className="display">POST A {postTypeLabel(form.postType)}</h2>
           <p>No selling, trading, bartering, exact addresses, unsafe items, or hookup behavior. First-time posts are held for admin review.</p>
           <div className="gifting-form-grid">
-            <label>Post Type<select value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}><option value="GIFT">Gift</option><option value="ISO">ISO</option></select></label>
+            <label>Post Type<select value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}><option value="GIFT">Gift</option><option value="ISO">In Search Of</option></select></label>
             <label>Category<select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></label>
             <label className="span">Title<input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} maxLength={90} /></label>
             <label className="span">Description<textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={5} /></label>
@@ -190,10 +197,10 @@ export default function Gifting() {
         <div className="gifting-feed-head">
           <div>
             <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>ACTIVE BOARD</span>
-            <h2 className="display">GIFTS & ISOs</h2>
+            <h2 className="display">GIFTS & IN SEARCH OF</h2>
           </div>
           <div className="gifting-filterbar">
-            {["ALL", "GIFT", "ISO", "OPEN"].map(f => <button key={f} className={filter === f ? "active" : ""} onClick={() => setFilter(f)}>{f === "OPEN" ? "Open only" : f}</button>)}
+            {["ALL", "GIFT", "ISO", "OPEN"].map(f => <button key={f} className={filter === f ? "active" : ""} onClick={() => setFilter(f)}>{filterLabel(f)}</button>)}
             <select value={category} onChange={e => setCategory(e.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select>
             <input placeholder="Neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} />
             <select value={sort} onChange={e => setSort(e.target.value)}><option value="RECENT">Recently posted</option><option value="EXPIRING">Expiring soon</option></select>
@@ -211,7 +218,7 @@ export default function Gifting() {
                 {["GIFTED", "FOUND"].includes(post.status) && <div className="gifting-stamp">{post.status}</div>}
                 <div className="gifting-card-body">
                   <div className="gifting-card-meta">
-                    <span className="gifting-type">{post.postType}</span>
+                    <span className="gifting-type">{postTypeLabel(post.postType)}</span>
                     <span>{post.status.replaceAll("_", " ")}</span>
                   </div>
                   <h3 className="display">{post.title}</h3>

@@ -34,7 +34,7 @@ export default function Footer() {
                 ["/submit", "Submit an Event"],
                 ["/submit", "Claim an Event"],
                 ["/pride-work", "Post a Gig"],
-                ["/gifting", "Post a Gift / ISO"],
+                ["/gifting", "Post a Gift / In Search Of"],
                 ["/about", "Contact"],
               ].map(([href, label]) => (
                 <div key={label} style={{ marginBottom: 8 }}>
@@ -44,7 +44,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="torn-divider" style={{ marginBottom: 20 }} />
+        <div className="torn-divider full-bleed" style={{ marginBottom: 20 }} />
         {/* Subtle donation line — footer only */}
         <div style={{ textAlign: "center", marginBottom: 20, padding: "12px 0", borderTop: "1px solid #111", borderBottom: "1px solid #111" }}>
           <span style={{ color: "#555", fontSize: "0.8rem", fontFamily: "var(--font-body)" }}>

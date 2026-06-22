@@ -1312,7 +1312,7 @@ function applyVerifiedEventOverrides() {
 
 seedData();
 applyVerifiedEventOverrides();
-seedGiftingPosts();
+removeGiftingSeedPosts();
 
 function archiveExpiredMissedConnections() {
   const archiveAt = new Date("2026-07-21T00:00:00-07:00").getTime();
@@ -1343,63 +1343,17 @@ function expireGiftingPosts() {
   `).run();
 }
 
-function seedGiftingPosts() {
-  const existing = sqlite.prepare(`SELECT COUNT(*) AS count FROM gifting_posts`).get() as any;
-  if (existing?.count > 0) return;
-  let user = sqlite.prepare(`SELECT id FROM users ORDER BY id ASC LIMIT 1`).get() as any;
-  if (!user?.id) {
-    sqlite.prepare(`
-      INSERT OR IGNORE INTO users (username, email, password_hash, display_name, avatar_choice, status, created_at)
-      VALUES ('community_closet', 'community-closet@prideguidepdx.local', ?, 'Community Closet', 1, 'active', ?)
-    `).run(hashPassword(crypto.randomBytes(16).toString("hex")), new Date().toISOString());
-    user = sqlite.prepare(`SELECT id FROM users WHERE username = 'community_closet'`).get() as any;
-  }
-  if (!user?.id) return;
-  const now = new Date();
-  const rows = [
-    {
-      postType: "GIFT",
-      title: "Extra rainbow string lights",
-      description: "Clean, working string lights from last year's porch setup. Free to a queer home or event crew that can use them.",
-      category: "Decorations",
-      neighborhood: "Inner SE",
-      pickupPreference: "Porch pickup or event handoff",
-      photoUrls: JSON.stringify(["/motifs/progress-flag.jpg"]),
-      status: "OPEN",
-    },
-    {
-      postType: "GIFT",
-      title: "Black mesh party top",
-      description: "Lightly worn, washed, ready for Pride chaos. Approx medium with stretch.",
-      category: "Circuit Party Wear",
-      neighborhood: "Kerns",
-      pickupPreference: "Public meetup",
-      photoUrls: JSON.stringify(["/motifs/get-hired.jpg"]),
-      status: "OPEN",
-    },
-    {
-      postType: "ISO",
-      title: "ISO folding chair for parade day",
-      description: "Looking for one foldable chair to borrow or keep for Sunday. Happy to pick up near transit.",
-      category: "Pride Weekend Stuff",
-      neighborhood: "Downtown / close-in",
-      pickupPreference: "Flexible pickup",
-      photoUrls: JSON.stringify(["/motifs/keep-portland-queer.jpg"]),
-      status: "LOOKING",
-    },
-  ];
-  const stmt = sqlite.prepare(`
-    INSERT INTO gifting_posts
-      (user_id, post_type, title, description, category, neighborhood, pickup_preference, photo_urls, status, expires_at, created_at)
-    VALUES
-      (@userId, @postType, @title, @description, @category, @neighborhood, @pickupPreference, @photoUrls, @status, @expiresAt, @createdAt)
-  `);
-  rows.forEach((row, idx) => stmt.run({
-    ...row,
-    userId: user.id,
-    expiresAt: giftingExpiry(row.postType, now),
-    createdAt: new Date(now.getTime() - idx * 3600000).toISOString(),
-  }));
+function removeGiftingSeedPosts() {
+  sqlite.prepare(`
+    DELETE FROM gifting_posts
+    WHERE title IN ('Extra rainbow string lights', 'Black mesh party top', 'ISO folding chair for parade day')
+       OR user_id IN (SELECT id FROM users WHERE username = 'community_closet')
+  `).run();
+  sqlite.prepare(`
+    DELETE FROM users
+    WHERE username = 'community_closet'
+      AND NOT EXISTS (SELECT 1 FROM gifting_posts WHERE user_id = users.id)
+  `).run();
 }
 
 export interface IStorage {

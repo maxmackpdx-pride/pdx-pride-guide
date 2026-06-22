@@ -645,7 +645,7 @@ export default function Admin() {
                         <div key={post.id} className="p-4 border border-white/10" style={{ background: "#111" }}>
                           <div className="flex justify-between gap-3 flex-wrap">
                             <div>
-                              <span className="sticker text-xs" style={{ color: post.postType === "GIFT" ? "#CCFF00" : "#B451FF", borderColor: post.postType === "GIFT" ? "#CCFF00" : "#B451FF" }}>{post.postType}</span>
+                              <span className="sticker text-xs" style={{ color: post.postType === "GIFT" ? "#CCFF00" : "#B451FF", borderColor: post.postType === "GIFT" ? "#CCFF00" : "#B451FF" }}>{post.postType === "ISO" ? "IN SEARCH OF" : post.postType}</span>
                               <p className="display text-lg text-white mt-2">{post.title}</p>
                               <p className="text-white/45 text-sm">{post.category} · {post.neighborhood} · {post.status} · {post.reportCount || 0} report(s)</p>
                               <p className="text-white/65 text-sm mt-2">{post.description}</p>
@@ -686,7 +686,7 @@ export default function Admin() {
                       <div key={post.id} className="p-3 border border-white/10 flex justify-between gap-3 flex-wrap" style={{ background: "#0b0b0b" }}>
                         <div>
                           <p className="display text-white/80">{post.title}</p>
-                          <p className="text-white/35 text-xs">{post.postType} · {post.status} · {post.displayName || post.username}</p>
+                          <p className="text-white/35 text-xs">{post.postType === "ISO" ? "IN SEARCH OF" : post.postType} · {post.status} · {post.displayName || post.username}</p>
                         </div>
                         <select value={post.status} onChange={e => updateGiftingStatusMutation.mutate({ id: post.id, status: e.target.value })}
                           className="px-3 py-2 bg-black text-white border border-white/20">

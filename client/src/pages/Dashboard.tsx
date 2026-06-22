@@ -568,7 +568,7 @@ export default function Dashboard() {
                 <div key={post.id} style={{ background: "#080808", border: `1px solid ${post.postType === "GIFT" ? "#CCFF00" : "#B451FF"}`, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   <div style={{ flex: 1 }}>
                     <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{post.title}</div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{post.postType} · {post.category} · {post.neighborhood}</div>
+                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{post.postType === "ISO" ? "IN SEARCH OF" : post.postType} · {post.category} · {post.neighborhood}</div>
                   </div>
                   <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em", padding: "3px 8px", border: "1px solid #00FFFF", color: "#00FFFF" }}>{post.status}</span>
                   <span style={{ color: "#666", fontSize: "0.78rem" }}>{post.interestCount || 0} response{post.interestCount === 1 ? "" : "s"}</span>

@@ -445,7 +445,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const post = storage.getGiftingPost(Number(req.params.id));
       if (!post) return res.status(404).json({ error: "Not found" });
-      if ((post.post_type || post.postType) !== "GIFT") return res.status(400).json({ error: "Use the ISO offer flow for ISO posts." });
+      if ((post.post_type || post.postType) !== "GIFT") return res.status(400).json({ error: "Use the In Search Of offer flow for In Search Of posts." });
       const note = String(req.body.note || "").trim();
       if (!note) return res.status(400).json({ error: "A short note is required." });
       const interest = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
@@ -477,7 +477,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         userId: req.session.userId!,
         note,
       }));
-      const msg = storage.sendMessage(req.session.userId!, Number(post.user_id), `ISO offer: ${post.title}`, note, {
+      const msg = storage.sendMessage(req.session.userId!, Number(post.user_id), `In Search Of offer: ${post.title}`, note, {
         contextType: "GIFTING",
         contextId: post.id,
         contextLabel: post.title,
