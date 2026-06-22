@@ -136,9 +136,9 @@ export default function Gifting() {
         <div className="gifting-hero-bg" />
         <div className="gifting-hero-inner">
           <div className="home-hero-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
-          <h1 className="display page-hero-title gifting-title">OUT OF MY CLOSET:<br /><span>GIFTING</span></h1>
+          <h1 className="display page-hero-title gifting-title">GIFT WITH<br /><span>PRIDE</span></h1>
           <p className="gifting-lede">A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home.</p>
-          <p className="gifting-tagline">Free stuff. Queer homes. Keep it moving.</p>
+          <p className="gifting-tagline">Give gay gifts. Queer homes. Keep it moving.</p>
           <div className="gifting-actions">
             <button className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a Gift</button>
             <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an In Search Of</button>
@@ -150,7 +150,7 @@ export default function Gifting() {
       <section id="how-it-works" className="gifting-how">
         <div>
           <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>HOW IT WORKS</span>
-          <h2 className="display section-heading">HOW OUT OF MY CLOSET: GIFTING WORKS</h2>
+          <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
           <p>Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
         </div>
         <div className="gifting-steps">

@@ -1272,7 +1272,13 @@ body::before {
 }
 
 .home-gifting-panel {
-  --promo-bg: url("/motifs/hero-gifting.png");
+  --promo-bg: url("/gift-with-pride-hero.jpg");
+}
+
+.home-gifting-panel::before {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.72) 34%, rgba(0,0,0,0.2) 58%, rgba(0,0,0,0.02) 100%),
+    var(--promo-bg) center / cover no-repeat;
 }
 
 .home-gigs-panel {
@@ -1339,9 +1345,9 @@ body::before {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.84) 38%, rgba(0,0,0,0.38) 68%, rgba(0,0,0,0.05) 100%),
-    url("/motifs/hero-gifting.png") 58% 46% / cover no-repeat;
-  filter: saturate(1.2) contrast(1.08);
+    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.78) 36%, rgba(0,0,0,0.28) 62%, rgba(0,0,0,0.04) 100%),
+    url("/gift-with-pride-hero.jpg") center / cover no-repeat;
+  filter: saturate(1.15) contrast(1.06);
 }
 
 .gifting-hero::after,
@@ -1390,8 +1396,12 @@ body::before {
 }
 
 .gifting-title span {
-  color: #00ffff;
-  text-shadow: 0 0 22px rgba(0,255,255,0.5), 5px 5px 0 rgba(255,0,204,0.45);
+  background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px rgba(255,255,255,0.18));
 }
 
 .gifting-lede {

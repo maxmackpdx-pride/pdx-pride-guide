@@ -223,9 +223,9 @@ export default function Home() {
         <article className="home-promo-panel home-gifting-panel">
           <div className="home-promo-inner">
             <div className="home-promo-copy">
-              <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>OUT OF MY CLOSET</span>
+              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>GIFT WITH PRIDE</span>
               <h2 className="display">GIFTING</h2>
-              <p className="home-promo-tag">Free stuff. Queer homes. Keep it moving.</p>
+              <p className="home-promo-tag">Give gay gifts. Queer homes. Keep it moving.</p>
               <p>A Pride-season board for giving away what you do not need and asking for what you do.</p>
               <div className="gifting-actions">
                 <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
