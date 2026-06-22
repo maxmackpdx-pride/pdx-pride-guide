@@ -29,6 +29,7 @@ export default function App() {
               <Switch>
                 <Route path="/" component={Home} />
                 <Route path="/events" component={Events} />
+                <Route path="/submit/claim/:eventId" component={Submit} />
                 <Route path="/submit" component={Submit} />
                 <Route path="/pride-work" component={PrideWork} />
                 <Route path="/gifting" component={Gifting} />

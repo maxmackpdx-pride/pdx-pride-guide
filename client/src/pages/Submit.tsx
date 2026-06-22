@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -20,9 +21,11 @@ export default function Submit() {
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+  const [location] = useLocation();
   const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
-  const initialMode = params.get("mode") === "claim" ? "claim" : "submit";
-  const initialEventId = params.get("eventId") || "";
+  const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
+  const initialMode = (claimPathEventId || params.get("mode") === "claim") ? "claim" : "submit";
+  const initialEventId = claimPathEventId || params.get("eventId") || "";
   const [mode, setMode] = useState<"submit" | "claim">(initialMode);
   const [form, setForm] = useState({
     title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
@@ -45,6 +48,13 @@ export default function Submit() {
   useEffect(() => {
     if (!loading && !user) setShowAuth(true);
   }, [loading, user]);
+
+  useEffect(() => {
+    const eventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1];
+    if (!eventId) return;
+    setMode("claim");
+    setForm(f => ({ ...f, eventId }));
+  }, [location]);
 
   useEffect(() => {
     if (!user) return;

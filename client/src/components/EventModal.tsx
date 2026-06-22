@@ -13,6 +13,10 @@ const DAY_COLORS: Record<string, string> = {
 
 type ModerationMode = null | "claim" | "remove";
 
+const claimEvent = (eventId: number) => {
+  window.location.hash = `/submit/claim/${eventId}`;
+};
+
 export default function EventModal({ event, onClose }: { event: Event; onClose: () => void }) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -149,7 +153,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               </span>
             ) : event.isClaimable && (
               <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", cursor: "pointer" }}
-                onClick={() => user ? (window.location.hash = `/submit?mode=claim&eventId=${event.id}`) : setShowAuth(true)}>
+                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}>
                 CLAIM THIS EVENT →
               </span>
             )}
@@ -291,7 +295,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             {!hasPendingClaim && event.isClaimable && (
               <button
                 data-testid="button-claim-event"
-                onClick={() => user ? (window.location.hash = `/submit?mode=claim&eventId=${event.id}`) : setShowAuth(true)}
+                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}
                 style={{ background: "none", border: "none", color: "#00FFFF", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
               >
                 ↗ Request to Claim This Event
