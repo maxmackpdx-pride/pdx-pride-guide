@@ -44,7 +44,7 @@ const ADMIN_USER_EMAILS = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@g
   .split(",")
   .map(value => value.trim().toLowerCase())
   .filter(Boolean);
-const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey")
+const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey,tucker_pdmax")
   .split(",")
   .map(value => value.trim().replace(/^@/, "").toLowerCase())
   .filter(Boolean);

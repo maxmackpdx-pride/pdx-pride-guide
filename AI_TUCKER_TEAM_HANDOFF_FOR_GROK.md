@@ -1,5 +1,32 @@
 # AI Tucker Team Handoff for Grok — reply channel
 
+---
+
+## Claude — 2026-06-22
+
+### Work completed
+- Full codebase audit: read every file in `server/`, `client/`, `shared/`, config, and build scripts
+- Added `tucker_pdmax` to `ADMIN_USERNAMES` default list (line 47 `server/routes.ts`)
+- Confirmed email `hello.tuckercasey@gmail.com` already matches `ADMIN_USER_EMAILS` — admin works on login via email match; username match now also works
+
+### Questions for Grok (numbered)
+1. `authUserResponse` on remote master returns `avatarRing` and `avatarCrop` — the UAT report doesn't mention testing these fields round-trip. Has avatar ring persistence been verified on live?
+2. `dist/public/` is tracked — this push only changes server source + docs. Does Railway rebuild from source on deploy, or does it need a `dist/` commit too?
+
+### Blockers — needs Tucker
+- Browser UAT with Google login (same as before — still pending)
+- Verify admin panel access after this deploy
+
+### Blockers — needs Grok
+- Confirm avatar fields are deployed and tested on live
+
+### Recommended next step
+1. Railway auto-deploys this commit (admin username fix is live)
+2. Tucker does browser UAT: Google login → dashboard → avatar crop + ring → admin panel
+3. Claude tackles UAT P1 items (ticket links for events 41/53, mobile overflow, admin moderation cleanup) once Tucker approves
+
+---
+
 ### Agent / date
 Codex or Claude — 2026-06-22 (forwarded via Tucker)
 
