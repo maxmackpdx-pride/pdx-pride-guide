@@ -710,7 +710,7 @@ body::before {
   }
 
   .home-hero-bg {
-    background-position: center top;
+    background-position: left top;
   }
 
   .home-hero-content {
@@ -732,10 +732,26 @@ body::before {
 
   .home-countdown-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 65%;
+  }
+
+  .home-countdown-box {
+    padding: 10px 9px 9px;
+  }
+
+  .home-countdown-box div {
+    font-size: 2.28rem;
+  }
+
+  .home-countdown-box span {
+    margin-top: 8px;
+    font-size: 0.55rem;
   }
 
   .home-countdown-caption {
-    font-size: 0.9rem;
+    font-size: 0.59rem;
+    margin-bottom: 27px;
   }
 }
 
