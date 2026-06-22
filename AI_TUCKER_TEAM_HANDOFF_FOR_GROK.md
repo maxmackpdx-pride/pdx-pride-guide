@@ -2,22 +2,67 @@
 
 ---
 
-## Claude — 2026-06-22 (update 2, latest)
+## Claude — 2026-06-22 (update 3, latest)
 
-### PRIORITY 1: Railway persistent volume — DONE (Grok 2026-06-22)
+### ACTION REQUIRED: 2 Railway env vars (5 minutes)
 
-Grok completed via Railway API:
-- Volume `pdx-pride-guide-volume` at `/data`
-- `DATABASE_PATH=/data/data.db`
-- Deploy `16d8d756` SUCCESS; 44 events auto-seeded
+Claude pushed a major bug-fix batch to master (`d868561`). Railway will auto-deploy the code, but **Grok needs to set 2 environment variables** in Railway for everything to work:
 
-**Tucker:** Log in once — this is the last profile reset. Future deploys keep DB.
+#### 1. `UPLOADS_DIR` = `/data/uploads`
+- Code now reads `process.env.UPLOADS_DIR` (falls back to `./uploads` for local dev)
+- Without this, uploaded avatars and poster images vanish on every deploy (same problem the DB had before the volume fix)
+- The `/data` volume is already mounted — this just puts uploads inside it
 
-**Still open:** `uploads/` — Claude to add `UPLOADS_DIR` env → set `/data/uploads` on Railway.
+#### 2. `ADMIN_PASSWORD` = (pick something secure, tell Tucker)
+- Claude removed the hardcoded password (`dinoLeo!1`) from source code — it was visible on GitHub
+- The fallback is now a generic placeholder; Grok needs to set the real one as an env var
+- `ADMIN_USERNAME` can stay as `Tcasey90` (already the default) or be set explicitly
 
-### What Claude shipped (commits on master)
+#### How
+Railway dashboard → Service → Variables → Add both → Redeploy.
+Or via Railway API/CLI if Grok prefers.
+
+### What Claude shipped since last handoff
 
 | Commit | What |
+|--------|------|
+| `0069280` | Scroll to top on route change |
+| `d868561` | Full audit bug-fix batch (details below) |
+
+### Bug fixes in `d868561`
+
+| Fix | Was | Now |
+|-----|-----|-----|
+| **Gig posts invisible** | `createGigPost()` set status `PENDING`, no admin approval endpoint existed | Posts go `LIVE` immediately; admin can moderate via `POST /api/admin/gigs/:id/status` |
+| **Gifting interest notification to self** | `sendMessage(post.user_id, post.user_id, ...)` | `sendMessage(req.session.userId, post.user_id, ...)` — owner gets notified |
+| **Events age filter inverted** | Selecting "21+" or "ALL AGES" excluded those events | Fixed filter logic |
+| **Inbox shows "user #X"** | Messages displayed raw userId | JOIN on users table — shows displayName/username |
+| **Calendar link broken** | `.replace(/[-:]/g, "")` corrupted dates, no timezone | Proper formatting + `ctz=America/Los_Angeles` |
+| **Moderation requests no auth** | `POST /api/moderation-request` was public | Now requires `requireAuth` |
+| **Hardcoded admin password** | `dinoLeo!1` in source code on GitHub | Removed — needs env var (see above) |
+| **UPLOADS_DIR hardcoded** | `path.resolve(process.cwd(), "uploads")` | Reads `process.env.UPLOADS_DIR` |
+| **Footer link hover** | No hover state on footer links | Cyan highlight on hover |
+
+### New admin endpoints
+- `GET /api/admin/gigs` — list all gig posts (any status)
+- `POST /api/admin/gigs/:id/status` — set gig status (`LIVE`, `PENDING`, `REMOVED`)
+
+### Volume status
+- [x] `DATABASE_PATH=/data/data.db` — DONE (Grok, earlier today)
+- [ ] `UPLOADS_DIR=/data/uploads` — **needs Grok**
+- [ ] `ADMIN_PASSWORD` — **needs Grok**
+
+### Still open (not blocking deploy)
+- UAT P1: ticket links for events 41 and 53
+- UAT P1: mobile overflow ~390px
+- Admin panel UI for gig moderation (endpoints exist, no UI tab yet)
+
+### Blockers — needs Grok
+- Set `UPLOADS_DIR=/data/uploads` and `ADMIN_PASSWORD` in Railway
+
+### Blockers — needs Tucker
+- Browser UAT after this deploy
+- Tell Tucker the new admin password once Grok sets it
 |--------|------|
 | `2f87fe6` | Added `tucker_pdmax` to `ADMIN_USERNAMES` default list |
 | `a38c7cd` | Admin link in footer (only visible to admins), single-admin approval for claims, `isAdmin` added to auth context |
