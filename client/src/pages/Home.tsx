@@ -6,6 +6,7 @@ import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
+const skylineImg = "/home-hero-bridge-stickers.png";
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
@@ -105,8 +106,23 @@ export default function Home() {
       )}
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="zine-hero home-hero">
-        <div className="home-hero-bg" />
+      <section
+        className="zine-hero home-hero"
+        style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}
+      >
+        <div
+          className="home-hero-bg-desktop"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url(${skylineImg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            backgroundRepeat: "no-repeat",
+            opacity: 0.9,
+          }}
+        />
+        <div className="home-hero-bg-mobile" aria-hidden="true" />
         <div style={{
           position: "absolute", inset: 0,
           background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",

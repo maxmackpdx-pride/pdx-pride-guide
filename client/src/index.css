@@ -158,6 +158,23 @@ body::before {
   white-space: nowrap;
 }
 
+.site-nav-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid var(--neon-yellow);
+  background: transparent;
+  color: var(--neon-yellow);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 rgba(255,0,204,0.45);
+}
+
 .site-nav {
   display: flex;
   align-items: center;
@@ -566,18 +583,14 @@ body::before {
 
 /* Homepage live event ticker */
 .home-hero {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  min-height: 720px;
   padding-bottom: 70px;
 }
 
-.home-hero-bg {
+.home-hero-bg-mobile {
+  display: none;
   position: absolute;
   inset: 0;
-  background-image: url("/home-hero-bridge-stickers.png");
+  background-image: url("/home-hero-mobile.jpg");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -585,6 +598,7 @@ body::before {
 }
 
 .home-hero-content {
+  --hero-title-size: 10.4rem;
   position: relative;
   z-index: 2;
   width: 100%;
@@ -612,10 +626,16 @@ body::before {
 .home-hero-title {
   margin-bottom: 30px;
   color: #f4f4f6;
-  font-size: 13.52rem;
+  font-size: var(--hero-title-size);
   line-height: 0.78;
   letter-spacing: 0;
   text-shadow: 0 0 48px rgba(255,255,255,0.08);
+}
+
+@media (min-width: 901px) {
+  .home-hero-content {
+    --hero-title-size: 13.52rem;
+  }
 }
 
 .home-hero-title span {
@@ -635,15 +655,15 @@ body::before {
 
 .home-countdown-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(72px, 138px));
-  gap: 18px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(4, minmax(calc(var(--hero-title-size) * 0.692), calc(var(--hero-title-size) * 1.327)));
+  gap: calc(var(--hero-title-size) * 0.173);
+  margin-bottom: calc(var(--hero-title-size) * 0.154);
 }
 
 .home-countdown-box {
   border: 1px solid rgba(255,255,255,0.22);
   background: rgba(0,0,0,0.32);
-  padding: 16px 14px 14px;
+  padding: calc(var(--hero-title-size) * 0.154) calc(var(--hero-title-size) * 0.135) calc(var(--hero-title-size) * 0.135);
   text-align: center;
   box-shadow: inset 0 0 24px rgba(204,255,0,0.08);
 }
@@ -652,7 +672,7 @@ body::before {
   color: var(--neon-yellow);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 4.7rem;
+  font-size: calc(var(--hero-title-size) * 0.452);
   line-height: 0.82;
   text-shadow:
     0 0 16px rgba(204,255,0,0.85),
@@ -669,13 +689,13 @@ body::before {
 
 .home-countdown-box span {
   display: block;
-  margin-top: 12px;
-  font-size: 0.85rem;
+  margin-top: calc(var(--hero-title-size) * 0.115);
+  font-size: calc(var(--hero-title-size) * 0.082);
 }
 
 .home-countdown-caption {
-  margin-bottom: 42px;
-  font-size: 1.25rem;
+  margin-bottom: calc(var(--hero-title-size) * 0.404);
+  font-size: calc(var(--hero-title-size) * 0.12);
 }
 
 .home-hero-actions {
@@ -691,12 +711,8 @@ body::before {
 }
 
 @media (max-width: 900px) {
-  .home-hero-title {
-    font-size: 7rem;
-  }
-
-  .home-countdown-box div {
-    font-size: 3.5rem;
+  .home-hero-content {
+    --hero-title-size: 7rem;
   }
 
   .home-hero-button {
@@ -706,13 +722,16 @@ body::before {
 
 @media (max-width: 640px) {
   .home-hero {
-    align-items: flex-start;
+    align-items: flex-start !important;
     padding-bottom: 60px;
   }
 
-  .home-hero-bg {
-    background-image: url("/home-hero-mobile.jpg");
-    background-position: center top;
+  .home-hero-bg-desktop {
+    display: none !important;
+  }
+
+  .home-hero-bg-mobile {
+    display: block;
   }
 
   .home-hero-content {
@@ -724,8 +743,8 @@ body::before {
     line-height: 1.25;
   }
 
-  .home-hero-title {
-    font-size: 4.45rem;
+  .home-hero-content {
+    --hero-title-size: 4.45rem;
   }
 
   .home-hero-subtitle {
@@ -734,26 +753,6 @@ body::before {
 
   .home-countdown-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    max-width: 65%;
-  }
-
-  .home-countdown-box {
-    padding: 10px 9px 9px;
-  }
-
-  .home-countdown-box div {
-    font-size: 2.28rem;
-  }
-
-  .home-countdown-box span {
-    margin-top: 8px;
-    font-size: 0.55rem;
-  }
-
-  .home-countdown-caption {
-    font-size: 0.59rem;
-    margin-bottom: 27px;
   }
 }
 
@@ -895,11 +894,12 @@ body::before {
 
 @media (max-width: 640px) {
   .site-header-inner {
+    position: relative;
     min-height: auto;
-    padding: 8px 12px 0;
+    padding: 10px 12px;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 10px;
+    gap: 10px;
   }
 
   .site-brand-logo {
@@ -910,47 +910,65 @@ body::before {
     display: none;
   }
 
-  .site-nav {
-    order: 3;
-    width: calc(100% + 24px);
-    margin: 0 -12px;
-    padding: 2px 12px 8px;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+  .site-nav-toggle {
+    display: inline-flex;
+    margin-left: auto;
   }
 
-  .site-nav::-webkit-scrollbar {
+  .site-nav {
     display: none;
+    order: 3;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin: 0;
+    padding: 10px 0 4px;
+    gap: 2px;
+    border-top: 1px solid #222;
+  }
+
+  .site-nav.open {
+    display: flex;
   }
 
   .site-nav-link {
-    padding: 10px 9px;
-    font-size: 0.78rem;
+    padding: 12px 4px;
+    font-size: 0.88rem;
   }
 
   .site-nav-link.active::after {
-    left: 9px;
-    right: 9px;
-    bottom: 3px;
+    left: 4px;
+    right: auto;
+    bottom: 8px;
+    width: 28px;
   }
 
   .site-auth {
-    gap: 4px;
-    margin-left: 0;
-    padding-left: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin: 8px 0 0;
+    padding: 12px 0 0;
+    border-left: 0;
+    border-top: 1px solid #222;
   }
 
   .site-dashboard-link {
-    max-width: 86px;
-    padding: 6px 8px;
+    max-width: none;
+    padding: 10px 12px;
+    text-align: center;
   }
 
   .site-login-button {
-    margin-left: auto;
-    padding: 7px 10px;
+    margin: 8px 0 0;
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+  }
+
+  .site-logout-button {
+    align-self: flex-end;
+    padding: 8px 4px;
     font-size: 0.72rem;
   }
 

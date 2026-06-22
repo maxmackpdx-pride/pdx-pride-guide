@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { Menu, X } from "lucide-react";
 import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
@@ -19,6 +20,11 @@ export default function Nav() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
 
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
@@ -39,26 +45,54 @@ export default function Nav() {
             </span>
           </Link>
 
-          <nav className="site-nav" aria-label="Primary navigation">
+          <button
+            type="button"
+            className="site-nav-toggle"
+            aria-expanded={menuOpen}
+            aria-controls="site-nav-menu"
+            onClick={() => setMenuOpen(open => !open)}
+          >
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            <span>{menuOpen ? "CLOSE" : "MENU"}</span>
+          </button>
+
+          <nav
+            id="site-nav-menu"
+            className={`site-nav${menuOpen ? " open" : ""}`}
+            aria-label="Primary navigation"
+          >
             {links.map(l => (
-              <Link key={l.href} href={l.href}
+              <Link
+                key={l.href}
+                href={l.href}
                 className={`site-nav-link${location === l.href ? " active" : ""}`}
-              >{l.label}</Link>
+                onClick={() => setMenuOpen(false)}
+              >
+                {l.label}
+              </Link>
             ))}
 
-            {/* Auth area */}
             {user ? (
               <div className="site-auth">
-                <Link href="/inbox" className={`site-nav-link inbox-link${location === "/inbox" ? " active" : ""}`}>
+                <Link
+                  href="/inbox"
+                  className={`site-nav-link inbox-link${location === "/inbox" ? " active" : ""}`}
+                  onClick={() => setMenuOpen(false)}
+                >
                   INBOX{unreadCount > 0 && <span className="site-unread-badge">{unreadCount}</span>}
                 </Link>
-                <Link href="/dashboard" className="site-dashboard-link">
+                <Link href="/dashboard" className="site-dashboard-link" onClick={() => setMenuOpen(false)}>
                   {user.displayName || user.username}
                 </Link>
-                <button onClick={() => logout()} className="site-logout-button">OUT</button>
+                <button onClick={() => { logout(); setMenuOpen(false); }} className="site-logout-button">OUT</button>
               </div>
             ) : (
-              <button onClick={() => setShowAuth(true)} className="site-login-button">LOG IN / JOIN</button>
+              <button
+                onClick={() => { setShowAuth(true); setMenuOpen(false); }}
+                className="site-login-button"
+              >
+                LOG IN / JOIN
+              </button>
             )}
           </nav>
         </div>
