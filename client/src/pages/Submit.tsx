@@ -80,7 +80,7 @@ export default function Submit() {
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "60px 20px" }}>
       {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <div className="sticker" style={{ color: "var(--neon-cyan)", borderColor: "var(--neon-cyan)", marginBottom: 16 }}>Promoters &amp; Organizers</div>
-      <h1 className="display" style={{ fontSize: "2.5rem", marginBottom: 8 }}>
+      <h1 className="display page-hero-title" style={{ marginBottom: 8 }}>
         {mode === "submit" ? "SUBMIT AN EVENT" : "CLAIM AN EVENT"}
       </h1>
       <p style={{ color: "#666", marginBottom: 32, lineHeight: 1.6 }}>

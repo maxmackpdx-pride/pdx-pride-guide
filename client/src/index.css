@@ -277,6 +277,21 @@ body::before {
   text-shadow: 0 1px 0 #000, 0 0 18px rgba(255,255,255,0.05);
 }
 
+.page-hero-title {
+  font-size: clamp(3rem, 7vw, 4.5rem);
+  line-height: 0.92;
+}
+
+.section-heading {
+  font-size: clamp(2.25rem, 5vw, 3rem);
+  line-height: 0.95;
+}
+
+.panel-heading {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  line-height: 1;
+}
+
 .zine-hero {
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
@@ -1261,7 +1276,7 @@ body::before {
 .gifting-hero {
   position: relative;
   overflow: hidden;
-  min-height: clamp(680px, 72vw, 860px);
+  min-height: clamp(920px, 92vw, 1120px);
   border-bottom: 2px solid rgba(255,255,255,0.08);
 }
 
@@ -1294,7 +1309,7 @@ body::before {
   z-index: 1;
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(44px, 7vw, 86px) 20px;
+  padding: clamp(84px, 12vw, 150px) 20px;
 }
 
 .gifting-how,
@@ -1315,8 +1330,6 @@ body::before {
 
 .gifting-title {
   margin: 28px 0 16px;
-  font-size: clamp(5.8rem, 14vw, 13rem);
-  line-height: 0.82;
   color: #f7f5ee;
   text-shadow: 0 0 24px rgba(0,0,0,0.72);
 }
@@ -1387,8 +1400,6 @@ body::before {
 .gifting-feed h2,
 .gifting-form-panel h2 {
   margin: 16px 0 8px;
-  font-size: clamp(2rem, 5vw, 4.8rem);
-  line-height: 0.9;
 }
 
 .gifting-steps {
@@ -1425,7 +1436,6 @@ body::before {
 
 .gifting-step h3 {
   margin: 0 0 8px;
-  font-size: 1.7rem;
 }
 
 .gifting-footer-line {
@@ -1618,8 +1628,6 @@ body::before {
 
 .gifting-card h3 {
   margin: 13px 0 8px;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  line-height: 0.95;
 }
 
 .gifting-card p {

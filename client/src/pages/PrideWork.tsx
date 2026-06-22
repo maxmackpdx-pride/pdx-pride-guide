@@ -116,7 +116,7 @@ export default function PrideWork() {
                   Pride Work
                 </span>
               </div>
-              <h1 className="display text-5xl md:text-7xl text-white">
+              <h1 className="display page-hero-title text-white">
                 QUEER<br />
                 <span style={{ color: "#CCFF00" }}>GIG BOARD</span>
               </h1>
@@ -172,7 +172,7 @@ export default function PrideWork() {
             className="mb-10 p-6 md:p-8 border-2"
             style={{ background: "#111", borderColor: "#CCFF00" }}
           >
-            <h2 className="display text-3xl text-white mb-6">
+            <h2 className="display section-heading text-white mb-6">
               POST TO THE GIG BOARD
             </h2>
             <p className="text-white/50 text-sm mb-8">
@@ -451,7 +451,7 @@ function GigCard({ gig }: { gig: GigPost }) {
                 </span>
               )}
             </div>
-            <h3 className="display text-xl md:text-2xl text-white">{gig.title}</h3>
+            <h3 className="display panel-heading text-white">{gig.title}</h3>
             <p className="text-white/50 text-sm mt-1">{gig.name}</p>
             <div className="flex items-center gap-4 mt-3 flex-wrap">
               {gig.compensation && (

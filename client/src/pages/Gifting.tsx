@@ -136,7 +136,7 @@ export default function Gifting() {
         <div className="gifting-hero-bg" />
         <div className="gifting-hero-inner">
           <div className="home-hero-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
-          <h1 className="display gifting-title">OUT OF MY CLOSET:<br /><span>GIFTING</span></h1>
+          <h1 className="display page-hero-title gifting-title">OUT OF MY CLOSET:<br /><span>GIFTING</span></h1>
           <p className="gifting-lede">A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home.</p>
           <p className="gifting-tagline">Free stuff. Queer homes. Keep it moving.</p>
           <div className="gifting-actions">
@@ -150,7 +150,7 @@ export default function Gifting() {
       <section id="how-it-works" className="gifting-how">
         <div>
           <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>HOW IT WORKS</span>
-          <h2 className="display">HOW OUT OF MY CLOSET: GIFTING WORKS</h2>
+          <h2 className="display section-heading">HOW OUT OF MY CLOSET: GIFTING WORKS</h2>
           <p>Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
         </div>
         <div className="gifting-steps">
@@ -164,7 +164,7 @@ export default function Gifting() {
           ].map(([title, text], i) => (
             <article className="gifting-step" key={title}>
               <b>{i + 1}</b>
-              <h3 className="display">{title}</h3>
+              <h3 className="display panel-heading">{title}</h3>
               <p>{text}</p>
             </article>
           ))}
@@ -175,7 +175,7 @@ export default function Gifting() {
       {formOpen && (
         <section id="gifting-form" className="gifting-form-panel">
           <button className="gifting-close" onClick={() => setFormOpen(false)}><X size={18} /></button>
-          <h2 className="display">POST A {postTypeLabel(form.postType)}</h2>
+          <h2 className="display section-heading">POST A {postTypeLabel(form.postType)}</h2>
           <p>No selling, trading, bartering, exact addresses, unsafe items, or hookup behavior. First-time posts are held for admin review.</p>
           <div className="gifting-form-grid">
             <label>Post Type<select value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}><option value="GIFT">Gift</option><option value="ISO">In Search Of</option></select></label>
@@ -197,7 +197,7 @@ export default function Gifting() {
         <div className="gifting-feed-head">
           <div>
             <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>ACTIVE BOARD</span>
-            <h2 className="display">GIFTS & IN SEARCH OF</h2>
+            <h2 className="display section-heading">GIFTS & IN SEARCH OF</h2>
           </div>
           <div className="gifting-filterbar">
             {["ALL", "GIFT", "ISO", "OPEN"].map(f => <button key={f} className={filter === f ? "active" : ""} onClick={() => setFilter(f)}>{filterLabel(f)}</button>)}
@@ -221,7 +221,7 @@ export default function Gifting() {
                     <span className="gifting-type">{postTypeLabel(post.postType)}</span>
                     <span>{post.status.replaceAll("_", " ")}</span>
                   </div>
-                  <h3 className="display">{post.title}</h3>
+                  <h3 className="display panel-heading">{post.title}</h3>
                   <p>{post.description}</p>
                   <div className="gifting-details">{post.category} · {post.neighborhood} · {post.pickupPreference}</div>
                   <div className="gifting-poster">

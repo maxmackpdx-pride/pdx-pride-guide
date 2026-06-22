@@ -98,7 +98,7 @@ export default function Inbox() {
         <div style={{ maxWidth: 980, margin: "0 auto", padding: "42px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, position: "relative", zIndex: 1 }}>
             <div>
-              <h1 className="display" style={{ fontSize: "2.4rem", color: "#CCFF00" }}>INBOX</h1>
+              <h1 className="display page-hero-title" style={{ color: "#CCFF00" }}>INBOX</h1>
               <p style={{ color: "#bbb", fontSize: "0.9rem", marginTop: 6, maxWidth: 560 }}>
                 Private threads from missed connections, Pride Work posts, event hosts, and check-ins.
               </p>

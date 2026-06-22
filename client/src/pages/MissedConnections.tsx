@@ -103,7 +103,7 @@ export default function MissedConnections() {
     return (
       <div style={{ minHeight: "70vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div style={{ maxWidth: 560, textAlign: "center" }}>
-          <h1 className="display" style={{ color: "#FF00CC", fontSize: "2.4rem", marginBottom: 12 }}>MISSED CONNECTIONS</h1>
+          <h1 className="display page-hero-title" style={{ color: "#FF00CC", marginBottom: 12 }}>MISSED CONNECTIONS</h1>
           <p style={{ color: "#888", lineHeight: 1.6, marginBottom: 20 }}>
             Log in to read or post. Replies are private and go straight to inbox threads.
           </p>
@@ -119,7 +119,7 @@ export default function MissedConnections() {
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "48px 24px" }}>
         <header style={{ marginBottom: 28 }}>
           <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>PRIVATE REPLIES ONLY</span>
-          <h1 className="display" style={{ color: "#fff", fontSize: "clamp(2.2rem, 7vw, 4rem)", lineHeight: 0.95, marginTop: 12 }}>
+          <h1 className="display page-hero-title" style={{ color: "#fff", marginTop: 12 }}>
             MISSED<br /><span style={{ color: "#FF00CC" }}>CONNECTIONS</span>
           </h1>
           <p style={{ color: "#777", maxWidth: 640, lineHeight: 1.6, marginTop: 12 }}>
@@ -128,7 +128,7 @@ export default function MissedConnections() {
         </header>
 
         <section style={{ background: "#0a0a0a", border: "2px solid #FF00CC", padding: 20, marginBottom: 28 }}>
-          <h2 className="display" style={{ color: "#FF00CC", fontSize: "1.1rem", marginBottom: 12 }}>WRITE A NOTE</h2>
+          <h2 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 12 }}>WRITE A NOTE</h2>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" maxLength={80} />
           <textarea
             style={{ ...inputStyle, minHeight: 120, resize: "vertical", marginTop: 10 }}
@@ -166,7 +166,7 @@ export default function MissedConnections() {
                   {post.dayOfWeek && <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{post.dayOfWeek}</span>}
                   {post.venueHint && <span className="sticker" style={{ color: "#777", borderColor: "#333" }}>{post.venueHint}</span>}
                 </div>
-                <h3 className="display" style={{ color: "#fff", fontSize: "1.25rem", marginBottom: 8 }}>{post.title}</h3>
+                <h3 className="display panel-heading" style={{ color: "#fff", marginBottom: 8 }}>{post.title}</h3>
                 <p style={{ color: "#bbb", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.body}</p>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
                   <span style={{ color: "#444", fontSize: "0.76rem" }}>
@@ -196,7 +196,7 @@ export default function MissedConnections() {
       {replyingTo && (
         <div onClick={() => setReplyingTo(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 22 }}>
-            <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>PRIVATE REPLY</h3>
+            <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE REPLY</h3>
             <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12 }}>{replyingTo.title}</p>
             <textarea style={{ ...inputStyle, minHeight: 120, resize: "vertical" }} value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="Write your reply..." />
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
@@ -212,7 +212,7 @@ export default function MissedConnections() {
       {editingPost && (
         <div onClick={() => setEditingPost(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 560, padding: 22 }}>
-            <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 12 }}>EDIT MISSED CONNECTION</h3>
+            <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 12 }}>EDIT MISSED CONNECTION</h3>
             <input style={inputStyle} value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" maxLength={80} />
             <textarea
               style={{ ...inputStyle, minHeight: 120, resize: "vertical", marginTop: 10 }}

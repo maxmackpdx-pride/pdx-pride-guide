@@ -21,7 +21,7 @@ export default function About() {
           <span className="sticker mb-4 inline-block" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>
             About This Guide
           </span>
-          <h1 className="display text-5xl md:text-7xl text-white mt-4 mb-6">
+          <h1 className="display page-hero-title text-white mt-4 mb-6">
             BUILT FOR<br />
             <span style={{ color: "#CCFF00" }}>THE COMMUNITY.</span>
           </h1>
@@ -36,7 +36,7 @@ export default function About() {
 
         {/* Mission */}
         <section>
-          <h2 className="display text-4xl md:text-5xl text-white mb-8">
+          <h2 className="display section-heading text-white mb-8">
             THE <span style={{ color: "#FF00CC" }}>MISSION</span>
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
@@ -83,7 +83,7 @@ export default function About() {
 
         {/* How It Works */}
         <section>
-          <h2 className="display text-4xl md:text-5xl text-white mb-8">
+          <h2 className="display section-heading text-white mb-8">
             HOW IT <span style={{ color: "#00FFFF" }}>WORKS</span>
           </h2>
           <div className="space-y-0">
@@ -115,7 +115,7 @@ export default function About() {
                   {step.num}
                 </div>
                 <div>
-                  <h3 className="display text-xl text-white mb-2">{step.title}</h3>
+                  <h3 className="display panel-heading text-white mb-2">{step.title}</h3>
                   <p className="text-white/50 text-sm leading-relaxed">{step.text}</p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export default function About() {
 
         {/* Transparency */}
         <section>
-          <h2 className="display text-4xl md:text-5xl text-white mb-8">
+          <h2 className="display section-heading text-white mb-8">
             TRANSPARENCY <span style={{ color: "#8800FF" }}>&</span> VALUES
           </h2>
           <div
@@ -165,7 +165,7 @@ export default function About() {
               }}
             />
             <Heart size={28} className="mx-auto mb-4" style={{ color: "#FF00CC" }} />
-            <h2 className="display text-4xl md:text-5xl text-white mb-4">
+            <h2 className="display section-heading text-white mb-4">
               KEEP THIS GUIDE <span style={{ color: "#CCFF00" }}>ALIVE</span>
             </h2>
             <p className="text-white/60 max-w-md mx-auto mb-8 text-sm leading-relaxed">
@@ -252,7 +252,7 @@ export default function About() {
         </section>
 
         <section className="pb-8">
-          <h2 className="display text-4xl md:text-5xl text-white mb-8">
+          <h2 className="display section-heading text-white mb-8">
             PORTLAND PRIDE <span style={{ color: "#FF6600" }}>2026</span>
           </h2>
           <div className="grid md:grid-cols-4 gap-4">
