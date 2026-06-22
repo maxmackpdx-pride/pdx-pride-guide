@@ -1,0 +1,76 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: railway-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Trigger Railway deployment
+        env:
+          RAILWAY_PROJECT_TOKEN: ${{ secrets.RAILWAY_PROJECT_TOKEN }}
+          RAILWAY_SERVICE_ID: c87eff12-aee2-4af2-8fd9-7f42b67c3ba3
+          RAILWAY_ENVIRONMENT_ID: 8ab787f3-f5ee-4713-9845-bd17dd30ad08
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RAILWAY_PROJECT_TOKEN:-}" ]; then
+            echo "Missing secret RAILWAY_PROJECT_TOKEN"
+            exit 1
+          fi
+
+          payload=$(jq -n \
+            --arg query 'mutation Deploy($serviceId: String!, $environmentId: String!, $commitSha: String!) { serviceInstanceDeployV2(serviceId: $serviceId, environmentId: $environmentId, commitSha: $commitSha) }' \
+            --arg serviceId "$RAILWAY_SERVICE_ID" \
+            --arg environmentId "$RAILWAY_ENVIRONMENT_ID" \
+            --arg commitSha "$COMMIT_SHA" \
+            '{query: $query, variables: {serviceId: $serviceId, environmentId: $environmentId, commitSha: $commitSha}}')
+
+          response=$(curl -sS -X POST https://backboard.railway.com/graphql/v2 \
+            -H "Content-Type: application/json" \
+            -H "Project-Access-Token: $RAILWAY_PROJECT_TOKEN" \
+            -d "$payload")
+
+          echo "$response" | jq .
+
+          if echo "$response" | jq -e '.errors' >/dev/null; then
+            echo "Railway deploy mutation failed"
+            exit 1
+          fi
+
+          DEPLOY_ID=$(echo "$response" | jq -r '.data.serviceInstanceDeployV2')
+          if [ -z "$DEPLOY_ID" ] || [ "$DEPLOY_ID" = "null" ]; then
+            echo "No deployment id returned"
+            exit 1
+          fi
+
+          echo "Deployment ID: $DEPLOY_ID"
+
+          for i in $(seq 1 60); do
+            status_payload=$(jq -n --arg query 'query($id: String!) { deployment(id: $id) { status } }' --arg id "$DEPLOY_ID" '{query: $query, variables: {id: $id}}')
+            status_response=$(curl -sS -X POST https://backboard.railway.com/graphql/v2 \
+              -H "Content-Type: application/json" \
+              -H "Project-Access-Token: $RAILWAY_PROJECT_TOKEN" \
+              -d "$status_payload")
+            STATUS=$(echo "$status_response" | jq -r '.data.deployment.status')
+            echo "Poll $i: $STATUS"
+
+            case "$STATUS" in
+              SUCCESS) echo "Railway deployment succeeded"; exit 0 ;;
+              FAILED|CRASHED|REMOVED) echo "Railway deployment failed: $STATUS"; echo "$status_response" | jq .; exit 1 ;;
+            esac
+
+            sleep 15
+          done
+
+          echo "Timed out waiting for Railway deployment"
+          exit 1
