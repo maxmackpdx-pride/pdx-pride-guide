@@ -11,7 +11,7 @@ export default function Footer() {
               PDX <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span> GUIDE
             </div>
             <div style={{ color: "#666", fontSize: "0.82rem", maxWidth: 260, lineHeight: 1.6 }}>
-              Community-run event directory for Portland Pride & year-round queer events.
+              Independently built event directory for Portland Pride & year-round queer events.
             </div>
           </div>
           <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
@@ -79,10 +79,10 @@ export default function Footer() {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
           <div style={{ color: "#444", fontSize: "0.75rem" }}>
-            Portland, Oregon · Community Powered · Queer Owned · Two-Admin Approved
+            Portland, Oregon · Made by Tucker · Queer Owned · Queer-Run Support Welcome
           </div>
           <div style={{ color: "#444", fontSize: "0.75rem" }}>
-            © 2026 PDX Pride Guide · Free Forever · Made by Tucker
+            © 2026 PDX Pride Guide · Free to Browse · Independently Run
           </div>
         </div>
       </div>

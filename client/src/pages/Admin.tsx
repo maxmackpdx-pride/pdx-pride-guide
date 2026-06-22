@@ -376,7 +376,7 @@ export default function Admin() {
               </div>
             ) : (
               <div className="space-y-4 mb-12">
-                <p className="text-white/40 text-sm">{pendingSubs.length} pending — two-admin approval required</p>
+                <p className="text-white/40 text-sm">{pendingSubs.length} pending — admin review required</p>
                 {pendingSubs.map(sub => (
                   <SubmissionCard
                     key={sub.id}

@@ -26,8 +26,8 @@ export default function About() {
             <span style={{ color: "#CCFF00" }}>THE COMMUNITY.</span>
           </h1>
           <p className="text-white/60 text-lg max-w-xl mx-auto leading-relaxed">
-            PDX Pride Guide is a free, community-powered event directory for Portland Pride Weekend 2026. 
-            No ads, no corporate backing, no gatekeeping.
+            PDX Pride Guide is a free, independently built event directory for Portland Pride Weekend 2026.
+            Made by Tucker, shaped by submissions, and open to support from queer-run local businesses.
           </p>
         </div>
       </div>
@@ -56,14 +56,14 @@ export default function About() {
               {
                 icon: <Heart size={20} />,
                 color: "#FF00CC",
-                title: "BUILD COMMUNITY",
-                text: "The gig board, the submit form, the claimable events — all of it is designed to connect people, not extract data.",
+                title: "CONNECT PEOPLE",
+                text: "The gig board, the submit form, the claimable events — all of it is designed to help people find each other, not extract data.",
               },
               {
                 icon: <Shield size={20} />,
                 color: "#FF6600",
                 title: "STAY INDEPENDENT",
-                text: "No VC money. No algorithms. Two-admin review on every listing. This site is a handshake, not a platform.",
+                text: "No VC money. No algorithmic feed. Queer-run business support is welcome; control of the guide is not for sale.",
               },
             ].map((item) => (
               <div
@@ -91,7 +91,7 @@ export default function About() {
               {
                 num: "01",
                 color: "#CCFF00",
-                title: "Events are submitted by the community",
+                title: "Events can be submitted by organizers",
                 text: "Create a free account, fill out the Submit form, and it enters the review queue. Account required to keep listings accountable — no anonymous spam.",
               },
               {
@@ -135,12 +135,13 @@ export default function About() {
             <div className="motif values-motif-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
             <ul className="space-y-4">
               {[
-                "Free to browse, free forever. No paywalls, no ads.",
+                "Free to browse. No paywalls, no junk ads, no selling user data.",
+                "I am open to sponsors and support from queer-run local businesses that align with the guide and the community it serves.",
                 "Submitting an event or posting a gig requires a free account — so I can keep out spam and keep listings accountable.",
                 "No personal data sold or shared. Ever.",
                 "Pride is a protest. Our bodies have always been political. Sex-positive and nude events are listed here — because they belong in our community and always have. I only tag them accurately, not judgmentally.",
-                "Admins are community members — right now that's just me, Tucker. Two-admin approval means nothing goes live on my say alone.",
-                "This site was built by one person. It's queer-owned because I own it.",
+                "Right now this is built and maintained by me, Tucker. I am using review tools and outside eyes where I can, but this is not a committee-built project.",
+                "This site is queer-owned because I own it.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: "#8800FF" }} />
@@ -214,17 +215,17 @@ export default function About() {
               <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", marginBottom: 16, lineHeight: 1.05, textShadow: "0 2px 12px #000" }}>
                 MADE BY <span style={{ color: "#CCFF00" }}>TUCKER MAX</span>
               </h2>
-              <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
-                I'm Tucker Max, host and creator of <em>Yes Coach</em>. I built this guide myself, because I believe Portland's queer community deserves something that isn't controlled by a corporation, buried by algorithms, or driven by ad revenue.
-              </p>
+            <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
+                I'm Tucker Max, host and creator of <em>Yes Coach</em>. I built this guide myself, because I believe Portland's queer community deserves something that isn't controlled by a corporation, buried by algorithms, or shaped by whoever pays the most.
+            </p>
               <p style={{ color: "#ccc", fontSize: "0.92rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
                 I also want to say thank you to everyone who helped and donated when I fell on extremely hard times this year. I'm still working through it, but your support helped make sure I could do this for the third year in a row. And for the first time ever, I was able to build a completely customized website made just for us.
               </p>
-              <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
-                Meta sucks. We deserve better. This guide is free, community-moderated, and built to last.
+            <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
+                Meta sucks. We deserve better. This guide is free to use, independently run, and built to last.
               </p>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#CCFF00", letterSpacing: "0.1em", opacity: 0.7, marginBottom: 16 }}>
-                NO SPONSORS · NO CORPORATE BACKING · BUILT WITH LOVE FOR PDX
+                QUEER-RUN SUPPORT WELCOME · INDEPENDENTLY RUN · BUILT WITH LOVE FOR PDX
               </div>
               <a
                 href="https://www.instagram.com/tucker_pdmax"
