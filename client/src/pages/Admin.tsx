@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -83,11 +83,28 @@ export default function Admin() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/me", { credentials: "include" })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (cancelled || !data?.isAdmin) return;
+        setAuthenticated(true);
+        if (data.username) setAdminName(data.username);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("POST", "/api/admin/login", { username, password });
+      const res = await apiRequest("POST", "/api/admin/login", { username, password });
+      const data = await res.json();
       setAuthenticated(true);
+      if (data?.username) setAdminName(data.username);
       setPasswordError(false);
     } catch {
       setPasswordError(true);

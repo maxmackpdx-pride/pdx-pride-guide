@@ -40,6 +40,14 @@ declare module "express-session" {
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Tcasey90";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "dinoLeo!1";
+const ADMIN_USER_EMAILS = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@gmail.com")
+  .split(",")
+  .map(value => value.trim().toLowerCase())
+  .filter(Boolean);
+const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey")
+  .split(",")
+  .map(value => value.trim().replace(/^@/, "").toLowerCase())
+  .filter(Boolean);
 
 function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
   const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
@@ -50,6 +58,31 @@ function publicUser(user: any) {
   if (!user) return null;
   const { passwordHash, email, status, googleId, ...safe } = user;
   return safe;
+}
+
+function isMainAdminUser(user: any) {
+  if (!user) return false;
+  const email = String(user.email || "").trim().toLowerCase();
+  const username = String(user.username || "").trim().replace(/^@/, "").toLowerCase();
+  return ADMIN_USER_EMAILS.includes(email) || ADMIN_USERNAMES.includes(username);
+}
+
+function markAdminSessionForUser(req: any, user: any) {
+  if (isMainAdminUser(user)) {
+    req.session.isAdmin = true;
+    return true;
+  }
+  return false;
+}
+
+function authUserResponse(req: any, user: any) {
+  const isAdmin = markAdminSessionForUser(req, user);
+  return {
+    id: user.id, username: user.username, email: user.email,
+    displayName: user.displayName, avatarChoice: user.avatarChoice,
+    bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
+    isAdmin,
+  };
 }
 
 function publicGiftingPost(post: any, viewerUserId?: number) {
@@ -142,10 +175,22 @@ function requireAuth(req: any, res: any, next: any) {
 }
 
 function requireAdmin(req: any, res: any, next: any) {
-  if (!req.session?.isAdmin) {
-    return res.status(401).json({ error: "Not authenticated" });
+  if (req.session?.isAdmin) {
+    return next();
   }
-  next();
+  const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+  if (markAdminSessionForUser(req, user)) {
+    return next();
+  }
+  return res.status(401).json({ error: "Not authenticated" });
+}
+
+function getSessionAdminUser(req: any) {
+  if (!req.session?.userId) return null;
+  const user = storage.getUserById(req.session.userId);
+  if (!isMainAdminUser(user)) return null;
+  req.session.isAdmin = true;
+  return user;
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
@@ -594,11 +639,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
       const user = storage.createUser({ username, email, passwordHash: password, displayName });
       req.session.userId = user.id;
-      res.json({
-        id: user.id, username: user.username, email: user.email,
-        displayName: user.displayName, avatarChoice: user.avatarChoice, bio: user.bio,
-        photoUrl: user.photoUrl, googleLinked: !!user.googleId,
-      });
+      res.json(authUserResponse(req, user));
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -613,11 +654,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const hashed = hashPassword(password);
     if (user.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
     req.session.userId = user.id;
-    res.json({
-      id: user.id, username: user.username, email: user.email,
-      displayName: user.displayName, avatarChoice: user.avatarChoice,
-      bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
-    });
+    res.json(authUserResponse(req, user));
   });
 
   app.get("/api/auth/google", (req, res) => {
@@ -697,6 +734,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         if (!linkedUser) return res.status(401).send("Google link session expired.");
         storage.linkGoogleToUser(linkUserId, profile.sub);
         if (!linkedUser.photoUrl && profile.picture) storage.updateUser(linkUserId, { photoUrl: profile.picture });
+        markAdminSessionForUser(req, linkedUser);
         return res.redirect("/#/dashboard?google=linked");
       }
 
@@ -718,6 +756,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
 
       req.session.userId = user.id;
+      markAdminSessionForUser(req, user);
       res.redirect("/#/dashboard");
     } catch (e) {
       console.error("Google sign-in error:", e);
@@ -727,6 +766,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/auth/logout", (req, res) => {
     req.session.userId = undefined;
+    req.session.isAdmin = undefined;
     res.json({ ok: true });
   });
 
@@ -734,11 +774,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!req.session?.userId) return res.status(401).json({ error: "Not authenticated" });
     const user = storage.getUserById(req.session.userId);
     if (!user) return res.status(401).json({ error: "Not authenticated" });
-    res.json({
-      id: user.id, username: user.username, email: user.email,
-      displayName: user.displayName, avatarChoice: user.avatarChoice,
-      bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
-    });
+    res.json(authUserResponse(req, user));
   });
 
   // Update own profile
@@ -746,11 +782,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { displayName, avatarChoice, bio } = req.body;
     storage.updateUser(req.session.userId!, { displayName, avatarChoice, bio });
     const updated = storage.getUserById(req.session.userId!);
-    res.json({
-      id: updated!.id, username: updated!.username, email: updated!.email,
-      displayName: updated!.displayName, avatarChoice: updated!.avatarChoice,
-      bio: updated!.bio, photoUrl: updated!.photoUrl, googleLinked: !!updated!.googleId,
-    });
+    res.json(authUserResponse(req, updated));
   });
 
   // ─── MISSED CONNECTIONS ──────────────────────────────────────────────────
@@ -900,7 +932,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!password) return res.status(400).json({ error: "password required" });
     if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) return res.status(401).json({ error: "Invalid credentials" });
     req.session.isAdmin = true;
-    res.json({ isAdmin: true });
+    res.json({ isAdmin: true, username: ADMIN_USERNAME });
   });
 
   app.post("/api/admin/logout", (req, res) => {
@@ -908,18 +940,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
-  app.get("/api/admin/me", (req, res) => {
-    if (!req.session?.isAdmin) return res.status(401).json({ error: "Not authenticated" });
-    res.json({ isAdmin: true });
+  app.get("/api/admin/me", requireAdmin, (req, res) => {
+    const user = getSessionAdminUser(req);
+    res.json({
+      isAdmin: true,
+      username: user?.username || ADMIN_USERNAME,
+      email: user?.email || null,
+    });
   });
 
   // ─── ADMIN ────────────────────────────────────────────────────────────────
-  app.get("/api/admin/submissions", (req, res) => {
+  app.get("/api/admin/submissions", requireAdmin, (req, res) => {
     const subs = storage.getSubmissions("PENDING");
     res.json(subs);
   });
 
-  app.post("/api/admin/submissions/:id/approve", (req, res) => {
+  app.post("/api/admin/submissions/:id/approve", requireAdmin, (req, res) => {
     const { adminName } = req.body;
     if (!adminName) return res.status(400).json({ error: "adminName required" });
     const sub = storage.approveSubmission(Number(req.params.id), adminName);
@@ -927,38 +963,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(sub);
   });
 
-  app.post("/api/admin/submissions/:id/reject", (req, res) => {
+  app.post("/api/admin/submissions/:id/reject", requireAdmin, (req, res) => {
     const { reason } = req.body;
     storage.rejectSubmission(Number(req.params.id), reason || "");
     res.json({ ok: true });
   });
 
-  app.get("/api/admin/events", (req, res) => {
+  app.get("/api/admin/events", requireAdmin, (req, res) => {
     const evts = storage.getEvents({});
     res.json(evts);
   });
 
-  app.get("/api/admin/feedback", (req, res) => {
-    if (!req.session.isAdmin) return res.status(403).json({ error: "Forbidden" });
+  app.get("/api/admin/feedback", requireAdmin, (req, res) => {
     res.json(storage.getFeedbackReports("OPEN"));
   });
 
-  app.post("/api/admin/feedback/:id/resolve", (req, res) => {
-    if (!req.session.isAdmin) return res.status(403).json({ error: "Forbidden" });
+  app.post("/api/admin/feedback/:id/resolve", requireAdmin, (req, res) => {
     storage.resolveFeedbackReport(Number(req.params.id));
     res.json({ ok: true });
   });
 
   // PUT full event edit (admin only)
-  app.put("/api/admin/events/:id", (req, res) => {
-    if (!req.session.isAdmin) return res.status(403).json({ error: "Forbidden" });
+  app.put("/api/admin/events/:id", requireAdmin, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const updated = storage.updateEvent(Number(req.params.id), req.body);
     res.json(updated);
   });
 
-  app.patch("/api/admin/events/:id/claimable", (req, res) => {
+  app.patch("/api/admin/events/:id/claimable", requireAdmin, (req, res) => {
     const { isClaimable } = req.body;
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
@@ -967,13 +1000,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // GET admin moderation requests
-  app.get("/api/admin/moderation", (req, res) => {
+  app.get("/api/admin/moderation", requireAdmin, (req, res) => {
     const reqs = storage.getModerationRequests("PENDING");
     res.json(reqs);
   });
 
   // POST resolve moderation request
-  app.post("/api/admin/moderation/:id/resolve", (req, res) => {
+  app.post("/api/admin/moderation/:id/resolve", requireAdmin, (req, res) => {
     const { status, adminNotes } = req.body;
     if (!["APPROVED", "REJECTED"].includes(status)) return res.status(400).json({ error: "status must be APPROVED or REJECTED" });
     storage.resolveModerationRequest(Number(req.params.id), status, adminNotes);
@@ -1000,7 +1033,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // GET admin inbox summary (notification counts)
-  app.get("/api/admin/inbox", (req, res) => {
+  app.get("/api/admin/inbox", requireAdmin, (req, res) => {
     const pendingSubs = storage.getSubmissions("PENDING").length;
     const pendingMod = storage.getModerationRequests("PENDING").length;
     res.json({ pendingSubmissions: pendingSubs, pendingModeration: pendingMod, total: pendingSubs + pendingMod });
