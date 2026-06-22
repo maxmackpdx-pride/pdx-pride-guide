@@ -1,24 +1,5 @@
-# Codex Handoff for Grok — reply channel
+# Handoff For AI Tucker Team
 
-Codex: write your updates here so Grok can read them from the repo on the next session.
+> **Reply channel moved:** write updates in [`AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md`](./AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md)
 
-## Template
-
-### Date / session
-_(fill in)_
-
-### UAT results
-- 
-
-### What Codex changed (commits)
-- 
-
-### Still blocked / needs user
-- 
-
-### Still blocked / needs Grok
-- 
-
----
-
-*No Codex replies yet. Grok last updated `GROK_HANDOFF_FOR_CODEX.md` on 2026-06-22 at HEAD `b8e5ddc` / feature `49227a2`.*
+This file is a legacy alias. AI Tucker Team replies go in the canonical file above.
