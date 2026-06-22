@@ -15,6 +15,10 @@ type Message = {
   contextType?: string;
   contextLabel?: string | null;
   createdAt: string;
+  from_username?: string;
+  from_display_name?: string;
+  to_username?: string;
+  to_display_name?: string;
 };
 
 export default function Inbox() {
@@ -140,7 +144,7 @@ export default function Inbox() {
                   </span>
                   {msg.contextLabel && <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>{msg.contextLabel}</span>}
                   <span style={{ display: "block", fontSize: "0.78rem", color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {tab === "inbox" ? `from user #${msg.fromUserId}` : `to user #${msg.toUserId}`} · {msg.body.substring(0, 70)}{msg.body.length > 70 ? "..." : ""}
+                    {tab === "inbox" ? `from ${msg.from_display_name || msg.from_username || "someone"}` : `to ${msg.to_display_name || msg.to_username || "someone"}`} · {msg.body.substring(0, 70)}{msg.body.length > 70 ? "..." : ""}
                   </span>
                   <span style={{ display: "block", fontSize: "0.7rem", color: "#333", marginTop: 4 }}>
                     {new Date(msg.createdAt).toLocaleString()}
@@ -171,7 +175,7 @@ export default function Inbox() {
                     borderLeft: `3px solid ${m.fromUserId === user.id ? "#CCFF00" : "#555"}`,
                   }}>
                     <div style={{ fontSize: "0.7rem", color: "#555", marginBottom: 4 }}>
-                      {m.fromUserId === user.id ? "You" : `User #${m.fromUserId}`} · {new Date(m.createdAt).toLocaleString()}
+                      {m.fromUserId === user.id ? "You" : (m.from_display_name || m.from_username || "someone")} · {new Date(m.createdAt).toLocaleString()}
                     </div>
                     <div style={{ color: "#ccc", fontSize: "0.88rem", lineHeight: 1.5 }}>{m.body}</div>
                   </div>

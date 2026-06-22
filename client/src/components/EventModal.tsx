@@ -35,9 +35,12 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   const endTime = new Date(event.dateEnd).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const calUrl = () => {
-    const s = event.dateStart.replace(/[-:]/g, "").slice(0, 15) + "00Z";
-    const e = event.dateEnd.replace(/[-:]/g, "").slice(0, 15) + "00Z";
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${s}/${e}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.address || event.venueName)}`;
+    const fmt = (iso: string) => {
+      const d = new Date(iso);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    };
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${fmt(event.dateStart)}/${fmt(event.dateEnd)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.address || event.venueName)}&ctz=America/Los_Angeles`;
   };
 
   const modMutation = useMutation({

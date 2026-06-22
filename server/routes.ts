@@ -9,7 +9,7 @@ import path from "path";
 import fs from "fs";
 
 // ─── File upload setup ────────────────────────────────────────────────────────
-const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+const UPLOADS_DIR = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"));
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 const upload = multer({
@@ -39,7 +39,7 @@ declare module "express-session" {
 }
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Tcasey90";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "dinoLeo!1";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "pdx_pride_admin_2026";
 const ADMIN_USER_EMAILS = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@gmail.com")
   .split(",")
   .map(value => value.trim().toLowerCase())
@@ -346,7 +346,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── MODERATION REQUESTS (claim/remove) ──────────────────────────────────
-  app.post("/api/moderation-request", (req, res) => {
+  app.post("/api/moderation-request", requireAuth, (req, res) => {
     try {
       const data = insertModerationRequestSchema.parse(req.body);
       const req2 = storage.createModerationRequest(data);
@@ -529,7 +529,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         note,
       }));
       const interestedUser = storage.getUserById(req.session.userId!);
-      storage.sendMessage(Number(post.user_id), Number(post.user_id), `Gifting interest: ${post.title}`, `${interestedUser?.displayName || interestedUser?.username || "Someone"} raised their hand: ${note}`, {
+      storage.sendMessage(req.session.userId!, Number(post.user_id), `Gifting interest: ${post.title}`, `${interestedUser?.displayName || interestedUser?.username || "Someone"} raised their hand: ${note}`, {
         contextType: "GIFTING",
         contextId: post.id,
         contextLabel: post.title,
@@ -1047,6 +1047,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
     storage.resolveGiftingReport(Number(req.params.id), String(req.body.adminNotes || ""));
+    res.json({ ok: true });
+  });
+
+  // ─── ADMIN: GIGS ────────────────────────────────────────────────────────
+  app.get("/api/admin/gigs", requireAdmin, (req, res) => {
+    res.json(storage.getGigPosts());
+  });
+
+  app.post("/api/admin/gigs/:id/status", requireAdmin, (req, res) => {
+    const status = String(req.body.status || "").trim().toUpperCase();
+    if (!["LIVE", "PENDING", "REMOVED"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+    storage.adminUpdateGigStatus(Number(req.params.id), status);
     res.json({ ok: true });
   });
 

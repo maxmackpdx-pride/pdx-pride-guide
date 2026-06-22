@@ -1421,6 +1421,7 @@ export interface IStorage {
   getGigPostsByUser(userId: number): GigPost[];
   updateGigPost(id: number, userId: number, data: Partial<GigPost>): void;
   deleteGigPost(id: number, userId: number): void;
+  adminUpdateGigStatus(id: number, status: string): void;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -1570,7 +1571,7 @@ export const storage: IStorage = {
     return rows;
   },
   createGigPost(data) {
-    return db.insert(gigPosts).values({ ...data, status: "PENDING", createdAt: new Date().toISOString() }).returning().get();
+    return db.insert(gigPosts).values({ ...data, status: "LIVE", createdAt: new Date().toISOString() }).returning().get();
   },
   getGigPostsByUser(userId) {
     return db.select().from(gigPosts).where(eq(gigPosts.userId, userId)).all();
@@ -1603,6 +1604,9 @@ export const storage: IStorage = {
   },
   deleteGigPost(id, userId) {
     sqlite.prepare(`DELETE FROM gig_posts WHERE id = ? AND user_id = ?`).run(id, userId);
+  },
+  adminUpdateGigStatus(id: number, status: string) {
+    sqlite.prepare(`UPDATE gig_posts SET status = ? WHERE id = ?`).run(status, id);
   },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();
@@ -1701,16 +1705,20 @@ export const storage: IStorage = {
   // Messages
   getInbox(userId) {
     return sqlite.prepare(`
-      SELECT * FROM messages
-      WHERE to_user_id = ? AND deleted_by_to = 0
-      ORDER BY created_at DESC
+      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
+      FROM messages m
+      LEFT JOIN users u ON u.id = m.from_user_id
+      WHERE m.to_user_id = ? AND m.deleted_by_to = 0
+      ORDER BY m.created_at DESC
     `).all(userId) as Message[];
   },
   getSentMessages(userId) {
     return sqlite.prepare(`
-      SELECT * FROM messages
-      WHERE from_user_id = ? AND deleted_by_from = 0
-      ORDER BY created_at DESC
+      SELECT m.*, u.username AS to_username, u.display_name AS to_display_name
+      FROM messages m
+      LEFT JOIN users u ON u.id = m.to_user_id
+      WHERE m.from_user_id = ? AND m.deleted_by_from = 0
+      ORDER BY m.created_at DESC
     `).all(userId) as Message[];
   },
   getUnreadCount(userId) {
@@ -1735,7 +1743,12 @@ export const storage: IStorage = {
     db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();
   },
   getThread(threadId) {
-    return sqlite.prepare(`SELECT * FROM messages WHERE thread_id = ? ORDER BY created_at ASC`).all(threadId) as Message[];
+    return sqlite.prepare(`
+      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
+      FROM messages m
+      LEFT JOIN users u ON u.id = m.from_user_id
+      WHERE m.thread_id = ? ORDER BY m.created_at ASC
+    `).all(threadId) as Message[];
   },
   softDeleteThread(threadId, userId) {
     sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE thread_id = ? AND from_user_id = ?`).run(threadId, userId);

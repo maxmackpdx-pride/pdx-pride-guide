@@ -463,14 +463,16 @@ export default function Events() {
 
   const filtered = events.filter(e => {
     if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
-    if (activeFilters.includes("FREE") && e.admission !== "FREE") return false;
-    if (activeFilters.includes("TICKETED") && e.admission !== "TICKETED") return false;
-    if (activeFilters.includes("21+") && e.ageRequirement !== "21_PLUS") return false;
-    if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
-    if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
-    if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
-    if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
-    if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
+    if (activeFilters.length > 0) {
+      const admissionFilters = activeFilters.filter(f => f === "FREE" || f === "TICKETED");
+      if (admissionFilters.length > 0 && !admissionFilters.some(f => f === e.admission)) return false;
+      if (activeFilters.includes("21+") && e.ageRequirement !== "21_PLUS") return false;
+      if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
+      if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
+      if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
+      if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
+      if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const haystack = `${e.title} ${e.venueName} ${e.neighborhood} ${e.description}`.toLowerCase();

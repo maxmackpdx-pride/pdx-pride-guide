@@ -2105,4 +2105,8 @@ body::before {
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--neon-yellow); }
 
+/* Footer link hover */
+footer a { transition: color 0.15s ease; }
+footer a:hover { color: #00FFFF !important; }
+
 /* Leaflet overrides — CartoDB Dark Matter tiles are already dark, NO filter */
