@@ -240,6 +240,9 @@ function ensureGigPostsSchema() {
   if (!colNames.has("compensation")) addColumn(`ALTER TABLE gig_posts ADD COLUMN compensation TEXT`);
   if (!colNames.has("location")) addColumn(`ALTER TABLE gig_posts ADD COLUMN location TEXT`);
   if (!colNames.has("is_remote")) addColumn(`ALTER TABLE gig_posts ADD COLUMN is_remote INTEGER DEFAULT 0`);
+
+  const finalColumns = sqlite.prepare(`PRAGMA table_info(gig_posts)`).all() as Array<{ name: string }>;
+  console.log("[gig_posts] schema columns:", finalColumns.map((c) => c.name).join(", "));
 }
 ensureGigPostsSchema();
 
@@ -1558,6 +1561,7 @@ export const storage: IStorage = {
     db.update(submissions).set({ status: "REJECTED", adminNotes: reason }).where(eq(submissions.id, id)).run();
   },
   getGigPosts(status) {
+    ensureGigPostsSchema();
     const rows = db.select().from(gigPosts).all();
     if (status) return rows.filter(g => g.status === status);
     return rows;

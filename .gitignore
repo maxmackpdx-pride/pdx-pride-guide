@@ -3,3 +3,5 @@ node_modules/
 .env.local
 .vercel/.env*
 *.log
+# Runtime DB should not be re-committed after initial seed; Railway uses deployed copy + startup migrations.
+# data.db is intentionally tracked until prod uses a persistent volume.
