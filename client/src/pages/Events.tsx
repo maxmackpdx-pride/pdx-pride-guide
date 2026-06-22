@@ -149,10 +149,11 @@ function MapResizer({ expanded }: { expanded: boolean }) {
 }
 
 // ── Map panel — half-height by default, expands to fullscreen ──────────────
-export function MapView({ events, expanded, onToggleExpand, onSelect, variant = "events" }: {
+export function MapView({ events, expanded, onExpand, onCollapse, onSelect, variant = "events" }: {
   events: Event[];
   expanded: boolean;
-  onToggleExpand: () => void;
+  onExpand: () => void;
+  onCollapse: () => void;
   onSelect: (e: Event) => void;
   variant?: "events" | "home";
 }) {
@@ -169,7 +170,7 @@ export function MapView({ events, expanded, onToggleExpand, onSelect, variant = 
       {expanded && (
         <div
           style={{ position: "fixed", inset: 0, zIndex: 998, background: "#000" }}
-          onClick={onToggleExpand}
+          onClick={onCollapse}
         />
       )}
       <div style={{
@@ -201,7 +202,10 @@ export function MapView({ events, expanded, onToggleExpand, onSelect, variant = 
           <button
             type="button"
             className="map-exit-button"
-            onClick={onToggleExpand}
+            onClick={(event) => {
+              event.stopPropagation();
+              onCollapse();
+            }}
             data-testid="button-exit-map"
             aria-label="Back to events"
           >
@@ -232,7 +236,11 @@ export function MapView({ events, expanded, onToggleExpand, onSelect, variant = 
 
         {/* Expand / collapse button */}
         <button
-          onClick={onToggleExpand}
+          onClick={(event) => {
+            event.stopPropagation();
+            expanded ? onCollapse() : onExpand();
+          }}
+          data-testid={expanded ? "button-collapse-map" : "button-expand-map"}
           title={expanded ? "Collapse map" : "Expand map"}
           style={{
             position: "absolute", top: 10, right: expanded ? 60 : 10, zIndex: 1001,
@@ -480,7 +488,8 @@ export default function Events() {
       <MapView
         events={filtered}
         expanded={mapExpanded}
-        onToggleExpand={() => setMapExpanded(p => !p)}
+        onExpand={() => setMapExpanded(true)}
+        onCollapse={() => setMapExpanded(false)}
         onSelect={setSelectedEvent}
       />
 
@@ -589,7 +598,7 @@ export default function Events() {
                 border: "none", cursor: "pointer", color: mapExpanded ? "#000" : "#555",
                 display: "flex", alignItems: "center",
               }}
-              title={mapExpanded ? "Collapse map" : "Expand map"}
+              title="Toggle map size"
             >
               <MapPin size={13} />
             </button>

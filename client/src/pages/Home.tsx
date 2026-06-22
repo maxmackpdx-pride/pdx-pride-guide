@@ -201,7 +201,8 @@ export default function Home() {
         <MapView
           events={events}
           expanded={mapExpanded}
-          onToggleExpand={() => setMapExpanded(p => !p)}
+          onExpand={() => setMapExpanded(true)}
+          onCollapse={() => setMapExpanded(false)}
           onSelect={setSelectedEvent}
           variant="home"
         />
