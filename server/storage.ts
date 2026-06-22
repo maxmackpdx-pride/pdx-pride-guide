@@ -17,7 +17,8 @@ import {
 } from "@shared/schema";
 import crypto from "crypto";
 
-const sqlite = new Database("data.db");
+const DB_PATH = process.env.DATABASE_PATH || "data.db";
+const sqlite = new Database(DB_PATH);
 const db = drizzle(sqlite);
 
 // Initialize tables
