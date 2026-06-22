@@ -6,6 +6,8 @@ export interface AuthUser {
   email: string;
   displayName: string | null;
   avatarChoice: number;
+  avatarRing?: string | null;
+  avatarCrop?: string | null;
   bio: string | null;
   photoUrl: string | null;
   googleLinked: boolean;

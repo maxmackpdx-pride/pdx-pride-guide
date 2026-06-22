@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
+import UserAvatar from "@/components/UserAvatar";
 
 const SPEECH_OPTIONS = [
   "Hey, I'm working here!",
@@ -40,6 +41,8 @@ interface Attendee {
   avatarSeed: string;
   userPhotoUrl?: string | null;
   photoUrl?: string | null;
+  avatarChoice?: number;
+  avatarRing?: string | null;
 }
 
 interface BubbleState {
@@ -232,6 +235,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
           {bubbles.map((b, i) => {
             const color = seedColor(b.attendee.avatarSeed);
             const isHovered = hoveredId === b.attendee.id;
+            const avatarSize = Math.max(36, b.size - 4);
             return (
               <div
                 key={b.attendee.id}
@@ -246,32 +250,27 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                   width: b.size,
                   height: b.size,
                   borderRadius: "50%",
-                  background: color,
-                  border: `2.5px solid ${isHovered ? "#fff" : "#000"}`,
+                  background: "transparent",
+                  border: "none",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 900,
-                  fontSize: Math.max(10, b.size * 0.33),
-                  color: "#000",
                   cursor: "pointer",
                   userSelect: "none",
                   opacity: b.visible ? 1 : 0,
-                  transition: "opacity 0.6s, border-color 0.15s, transform 0.15s",
-                  transform: `scale(${b.visible ? (isHovered ? 1.15 : 1) : 0.6})`,
+                  transition: "opacity 0.6s, transform 0.15s",
+                  transform: `scale(${b.visible ? (isHovered ? 1.12 : 1) : 0.6})`,
                   zIndex: isHovered ? 20 : 10,
-                  boxShadow: isHovered ? `0 0 12px ${color}88` : `0 0 4px ${color}44`,
+                  filter: isHovered ? `drop-shadow(0 0 10px ${color})` : `drop-shadow(0 0 4px ${color}66)`,
                 }}
               >
-                {initials(b.attendee.handle)}
-                {(b.attendee.userPhotoUrl || b.attendee.photoUrl) && (
-                  <img
-                    src={(b.attendee.userPhotoUrl || b.attendee.photoUrl)!}
-                    alt=""
-                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
-                  />
-                )}
+                <UserAvatar
+                  photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
+                  avatarChoice={b.attendee.avatarChoice}
+                  avatarRing={b.attendee.avatarRing}
+                  displayName={b.attendee.handle}
+                  size={avatarSize}
+                />
 
                 {/* Speech bubble on hover */}
                 {isHovered && (

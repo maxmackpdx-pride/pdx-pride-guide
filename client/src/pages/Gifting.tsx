@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import UserAvatar from "@/components/UserAvatar";
 
 const CATEGORIES = [
   "Clothing", "Queer Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -32,9 +33,11 @@ type GiftingPost = {
   username: string;
   displayName?: string | null;
   posterPhotoUrl?: string | null;
+  posterAvatarRing?: string | null;
+  avatarChoice?: number;
   interestCount: number;
   isMine?: boolean;
-  interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null }>;
+  interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
 };
 
 const blankForm = {
@@ -225,7 +228,14 @@ export default function Gifting() {
                   <p>{post.description}</p>
                   <div className="gifting-details">{post.category} · {post.neighborhood} · {post.pickupPreference}</div>
                   <div className="gifting-poster">
-                    {post.posterPhotoUrl ? <img src={post.posterPhotoUrl} alt="" /> : <span>{(post.displayName || post.username || "P").slice(0, 1)}</span>}
+                    <UserAvatar
+                      photoUrl={post.posterPhotoUrl}
+                      avatarChoice={post.avatarChoice}
+                      avatarRing={post.posterAvatarRing}
+                      displayName={post.displayName}
+                      username={post.username}
+                      size={34}
+                    />
                     <b>{post.displayName || post.username}</b>
                   </div>
                   {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
@@ -239,7 +249,11 @@ export default function Gifting() {
                   {post.isMine && (
                     <div className="gifting-owner">
                       {post.interests?.length ? <div className="gifting-interest-list">{post.interests.map(i => (
-                        <div key={i.id}><span>{i.displayName || i.username}: {i.note}</span>{i.status === "INTERESTED" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/interests/${i.id}/choose` })}>Pick</button>}</div>
+                        <div key={i.id} className="gifting-interest-row">
+                          <UserAvatar photoUrl={i.photoUrl} avatarChoice={i.avatarChoice} avatarRing={i.avatarRing} displayName={i.displayName} username={i.username} size={28} />
+                          <span>{i.displayName || i.username}: {i.note}</span>
+                          {i.status === "INTERESTED" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/interests/${i.id}/choose` })}>Pick</button>}
+                        </div>
                       ))}</div> : <p>No responses yet.</p>}
                       {post.postType === "GIFT" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-gifted` })}><HeartHandshake size={14} /> Mark Gifted</button>}
                       {post.postType === "ISO" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-found` })}><HeartHandshake size={14} /> Mark Found</button>}

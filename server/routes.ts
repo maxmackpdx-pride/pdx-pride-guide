@@ -88,6 +88,7 @@ function authUserResponse(req: any, user: any) {
   return {
     id: user.id, username: user.username, email: user.email,
     displayName: user.displayName, avatarChoice: user.avatarChoice,
+    avatarRing: user.avatarRing || "none", avatarCrop: user.avatarCrop || null,
     bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
     isAdmin,
   };
@@ -105,6 +106,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     displayName: interest.displayName,
     photoUrl: interest.photoUrl,
     avatarChoice: interest.avatarChoice,
+    avatarRing: interest.avatarRing || "none",
     isMine: viewerUserId ? Number(interest.userId ?? interest.user_id) === viewerUserId : false,
   })) : [];
   return {
@@ -127,6 +129,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     displayName: post.displayName,
     posterPhotoUrl: post.posterPhotoUrl,
     avatarChoice: post.avatarChoice,
+    posterAvatarRing: post.posterAvatarRing || post.avatarRing || "none",
     interestCount: Number(post.interestCount || 0),
     interests: safeInterests,
     isMine: viewerUserId ? userId === viewerUserId : false,
@@ -221,11 +224,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ url: `/uploads/${req.file.filename}` });
   });
 
-  // Profile photo upload
+  // Profile photo upload (client sends pre-cropped circle JPEG from AvatarEditor)
   app.post("/api/upload/avatar", requireAuth, upload.single("avatar"), async (req: any, res: any) => {
     if (!req.file) return res.status(400).json({ error: "No file or invalid type" });
     const url = `/uploads/${req.file.filename}`;
-    storage.updateUser(req.session.userId!, { photoUrl: url });
     res.json({ url });
   });
 
@@ -787,8 +789,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
-    const { displayName, avatarChoice, bio } = req.body;
-    storage.updateUser(req.session.userId!, { displayName, avatarChoice, bio });
+    const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl } = req.body;
+    const patch: Record<string, unknown> = {};
+    if (displayName !== undefined) patch.displayName = displayName;
+    if (avatarChoice !== undefined) patch.avatarChoice = avatarChoice;
+    if (avatarRing !== undefined) patch.avatarRing = avatarRing || "none";
+    if (avatarCrop !== undefined) patch.avatarCrop = avatarCrop || null;
+    if (bio !== undefined) patch.bio = bio;
+    if (photoUrl !== undefined) patch.photoUrl = photoUrl || null;
+    storage.updateUser(req.session.userId!, patch as any);
     const updated = storage.getUserById(req.session.userId!);
     res.json(authUserResponse(req, updated));
   });

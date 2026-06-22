@@ -252,6 +252,8 @@ try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) 
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN google_id TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_ring TEXT DEFAULT 'none'`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_crop TEXT`); } catch(e) {}
 try { sqlite.exec(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_unique ON users(google_id)`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN photo_url TEXT`); } catch(e) {}
@@ -1437,7 +1439,7 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'bio' | 'photoUrl'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl'>>): void;
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
@@ -1627,7 +1629,7 @@ export const storage: IStorage = {
   },
   getAttendances(eventId) {
     return sqlite.prepare(`
-      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice
+      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.event_id = ? AND a.is_active = 1
@@ -1744,7 +1746,7 @@ export const storage: IStorage = {
   getMissedConnections(status = "ACTIVE") {
     archiveExpiredMissedConnections();
     return sqlite.prepare(`
-      SELECT m.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice
+      SELECT m.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM missed_connections m
       JOIN users u ON u.id = m.user_id
       WHERE m.status = ?
@@ -1789,6 +1791,7 @@ export const storage: IStorage = {
              u.display_name AS displayName,
              u.photo_url AS posterPhotoUrl,
              u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS posterAvatarRing,
              (SELECT COUNT(*) FROM gifting_interests gi WHERE gi.post_id = p.id AND gi.status IN ('INTERESTED','SELECTED')) AS interestCount
       FROM gifting_posts p
       JOIN users u ON u.id = p.user_id
@@ -1808,6 +1811,7 @@ export const storage: IStorage = {
              u.display_name AS displayName,
              u.photo_url AS posterPhotoUrl,
              u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS posterAvatarRing,
              (SELECT COUNT(*) FROM gifting_interests gi WHERE gi.post_id = p.id AND gi.status IN ('INTERESTED','SELECTED')) AS interestCount
       FROM gifting_posts p
       JOIN users u ON u.id = p.user_id
@@ -1815,7 +1819,7 @@ export const storage: IStorage = {
     `).get(id) as any;
     if (!post) return undefined;
     const interests = sqlite.prepare(`
-      SELECT gi.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice
+      SELECT gi.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM gifting_interests gi
       JOIN users u ON u.id = gi.user_id
       WHERE gi.post_id = ? AND gi.status != 'WITHDRAWN'

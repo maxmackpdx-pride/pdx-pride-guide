@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
+import UserAvatar from "@/components/UserAvatar";
 
 const links = [
   { href: "/", label: "Home" },
@@ -81,8 +82,16 @@ export default function Nav() {
                 >
                   INBOX{unreadCount > 0 && <span className="site-unread-badge">{unreadCount}</span>}
                 </Link>
-                <Link href="/dashboard" className="site-dashboard-link" onClick={() => setMenuOpen(false)}>
-                  {user.displayName || user.username}
+                <Link href="/dashboard" className="site-dashboard-link site-dashboard-link--avatar" onClick={() => setMenuOpen(false)}>
+                  <UserAvatar
+                    photoUrl={user.photoUrl}
+                    avatarChoice={user.avatarChoice}
+                    avatarRing={user.avatarRing}
+                    displayName={user.displayName}
+                    username={user.username}
+                    size={28}
+                  />
+                  <span>{user.displayName || user.username}</span>
                 </Link>
                 <button onClick={() => { logout(); setMenuOpen(false); }} className="site-logout-button">OUT</button>
               </div>

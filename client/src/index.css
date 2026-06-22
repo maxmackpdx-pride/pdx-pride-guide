@@ -1875,6 +1875,230 @@ body::before {
   }
 }
 
+/* ── User avatars (circle crop + optional pride rings) ── */
+.user-avatar {
+  --avatar-size: 48px;
+  --ring-width: 3px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  flex-shrink: 0;
+}
+
+.user-avatar::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--ring-width) * -1);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.user-avatar[data-ring]:not([data-ring="none"])::before {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(204, 255, 0, 0.22), 0 0 18px rgba(0, 255, 255, 0.12);
+}
+
+.user-avatar__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #0a0a0a;
+  background: #111;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.user-avatar__photo,
+.user-avatar__fallback {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.user-avatar__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--avatar-size) * 0.38);
+  font-weight: 900;
+}
+
+.user-avatar__padlock {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-size: calc(var(--avatar-size) * 0.18);
+  line-height: 1;
+  filter: drop-shadow(0 0 4px rgba(180, 190, 210, 0.8));
+}
+
+.user-avatar[data-ring="rainbow"]::before { background: conic-gradient(#E40303, #FF8C00, #FFED00, #008026, #24408E, #732982, #E40303); }
+.user-avatar[data-ring="progress"]::before { background: conic-gradient(#E40303, #FF8C00, #FFED00, #008026, #24408E, #FFFFFF, #F6A9B8, #55CDFC, #000000, #784F17, #E40303); }
+.user-avatar[data-ring="lesbian"]::before { background: conic-gradient(#D52D00, #FF9A56, #FFFFFF, #D362A4, #A30262, #D52D00); }
+.user-avatar[data-ring="gay-men"]::before { background: conic-gradient(#078D70, #26CEAA, #FFFFFF, #98E8C1, #5BCEFA, #078D70); }
+.user-avatar[data-ring="bisexual"]::before { background: conic-gradient(#D60270, #D60270, #9B4F96, #0038A8, #0038A8, #D60270); }
+.user-avatar[data-ring="transgender"]::before { background: conic-gradient(#5BCEFA, #F5A9B8, #FFFFFF, #F5A9B8, #5BCEFA, #5BCEFA); }
+.user-avatar[data-ring="nonbinary"]::before { background: conic-gradient(#FCF434, #FFFFFF, #9C59D1, #000000, #FCF434); }
+.user-avatar[data-ring="pansexual"]::before { background: conic-gradient(#FF218C, #FFD800, #21B1FF, #FF218C); }
+.user-avatar[data-ring="genderfluid"]::before { background: conic-gradient(#FF76A4, #FFFFFF, #C011D7, #000000, #2F3CBE, #FF76A4); }
+.user-avatar[data-ring="genderqueer"]::before { background: conic-gradient(#B57EDC, #FFFFFF, #4A8123, #B57EDC); }
+.user-avatar[data-ring="intersex"]::before { background: conic-gradient(#FFD800, #FFD800, #79007F, #FFD800); }
+.user-avatar[data-ring="asexual"]::before { background: conic-gradient(#000000, #A3A3A3, #FFFFFF, #810081, #000000); }
+.user-avatar[data-ring="aromantic"]::before { background: conic-gradient(#3DA542, #FFFFFF, #ABABAB, #000000, #3DA542); }
+.user-avatar[data-ring="agender"]::before { background: conic-gradient(#000000, #BABABA, #FFFFFF, #B4F8C8, #FFFFFF, #BABABA, #000000); }
+.user-avatar[data-ring="leather"]::before { background: conic-gradient(#000000, #000000, #FFFFFF, #000000, #0000FF, #000000); }
+.user-avatar[data-ring="bear"]::before { background: conic-gradient(#623818, #623818, #FEEF9C, #623818, #000000, #623818); }
+.user-avatar[data-ring="chain"]::before {
+  background:
+    repeating-conic-gradient(from 0deg, #8a919c 0deg 8deg, #c8d0dc 8deg 16deg, #5f6670 16deg 24deg, #dfe5ee 24deg 32deg);
+  box-shadow: 0 0 8px rgba(200, 210, 225, 0.35), inset 0 0 6px rgba(255, 255, 255, 0.15);
+}
+
+.site-dashboard-link--avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gifting-interest-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.avatar-editor {
+  margin-top: 8px;
+  padding: 18px;
+  border: 1px solid #222;
+  background: #080808;
+}
+
+.avatar-editor__preview-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.avatar-editor__label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #666;
+  margin: 14px 0 8px;
+}
+
+.avatar-editor__btn {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--neon-yellow);
+  border: 2px solid var(--neon-yellow);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.avatar-editor__btn--ghost {
+  color: #888;
+  border-color: #444;
+}
+
+.avatar-editor__crop-panel {
+  margin-bottom: 12px;
+}
+
+.avatar-editor__crop-canvas {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  border: 1px solid #222;
+  background: #050505;
+  cursor: grab;
+  touch-action: none;
+}
+
+.avatar-editor__crop-canvas.dragging { cursor: grabbing; }
+
+.avatar-editor__zoom {
+  width: 100%;
+  margin-top: 10px;
+  accent-color: var(--neon-yellow);
+}
+
+.avatar-editor__ring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.avatar-editor__ring-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: 1px solid #2a2a2a;
+  background: #0d0d0d;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.avatar-editor__ring-btn.active {
+  border-color: var(--neon-yellow);
+  color: var(--neon-yellow);
+  box-shadow: 0 0 10px rgba(204, 255, 0, 0.15);
+}
+
+.avatar-editor__ring-btn span {
+  text-align: center;
+  line-height: 1.2;
+}
+
+.avatar-editor__save {
+  margin-top: 16px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--neon-yellow);
+  color: #000;
+  border: 2px solid #000;
+  padding: 10px 20px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.avatar-editor__save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #111; }

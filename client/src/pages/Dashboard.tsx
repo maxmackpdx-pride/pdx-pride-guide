@@ -5,15 +5,9 @@ import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import ImageUploader from "@/components/ImageUploader";
-
-const AVATARS = [
-  { id: 1, emoji: "🐱", bg: "#00FFFF", label: "Cyan Cat" },
-  { id: 2, emoji: "🦋", bg: "#FF00CC", label: "Magenta Butterfly" },
-  { id: 3, emoji: "🐍", bg: "#CCFF00", label: "Neon Snake" },
-  { id: 4, emoji: "🌙", bg: "#8800FF", label: "Violet Moon" },
-  { id: 5, emoji: "🔥", bg: "#FF6600", label: "Orange Flame" },
-  { id: 6, emoji: "⚡", bg: "#fff", label: "White Lightning" },
-];
+import AvatarEditor from "@/components/AvatarEditor";
+import UserAvatar from "@/components/UserAvatar";
+import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -122,8 +116,7 @@ export default function Dashboard() {
     );
   }
 
-  const avatar = AVATARS.find(a => a.id === (user.avatarChoice || 1)) || AVATARS[0];
-  const initial = (user.displayName || user.username || "?").trim().slice(0, 1).toUpperCase();
+  const avatar = AVATAR_EMOJI_OPTIONS.find(a => a.id === (user.avatarChoice || 1)) || AVATAR_EMOJI_OPTIONS[0];
 
   const handleSave = async () => {
     setSaving(true);
@@ -202,18 +195,14 @@ export default function Dashboard() {
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 48, flexWrap: "wrap" }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: "50%",
-            background: avatar.bg, border: "3px solid #000",
-            boxShadow: `0 0 16px ${avatar.bg}66`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "2rem", overflow: "hidden", position: "relative",
-          }}>
-            {user.photoUrl
-              ? <img src={user.photoUrl} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
-              : <span className="display" style={{ color: "#CCFF00", background: "#000", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>{initial}</span>
-            }
-          </div>
+          <UserAvatar
+            photoUrl={user.photoUrl}
+            avatarChoice={user.avatarChoice}
+            avatarRing={user.avatarRing}
+            displayName={user.displayName}
+            username={user.username}
+            size={72}
+          />
           <div>
             <h1 className="display" style={{ fontSize: "2.4rem", color: "#CCFF00", lineHeight: 1 }}>
               {user.displayName || user.username}
@@ -247,7 +236,7 @@ export default function Dashboard() {
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>YOUR AVATAR</label>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
-                {AVATARS.map(a => (
+                {AVATAR_EMOJI_OPTIONS.map(a => (
                   <button key={a.id} onClick={() => setAvatarChoice(a.id)} title={a.label} style={{
                     width: 52, height: 52, borderRadius: "50%",
                     background: a.bg, border: avatarChoice === a.id ? "3px solid #CCFF00" : "3px solid #333",
@@ -258,13 +247,15 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <label style={labelStyle}>PROFILE PHOTO (optional)</label>
-            <ImageUploader
-              endpoint="/api/upload/avatar"
-              fieldName="avatar"
-              currentUrl={user.photoUrl || ""}
-              onUploaded={() => {}}
-              label="UPLOAD PHOTO"
+            <label style={labelStyle}>PROFILE PHOTO & RING</label>
+            <AvatarEditor
+              photoUrl={user.photoUrl}
+              avatarRing={user.avatarRing}
+              avatarCrop={user.avatarCrop}
+              avatarChoice={avatarChoice}
+              displayName={displayName}
+              username={user.username}
+              onSaved={() => void refreshUser()}
             />
             <label style={labelStyle}>DISPLAY NAME</label>
             <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="How you appear to others" maxLength={40} />
@@ -383,7 +374,7 @@ export default function Dashboard() {
                         endpoint="/api/upload/poster"
                         fieldName="poster"
                         currentUrl={eventForm.posterImageUrl}
-                        onUploaded={url => setEventForm((f: any) => ({ ...f, posterImageUrl: url }))}
+                        onUploaded={(url: string) => setEventForm((f: any) => ({ ...f, posterImageUrl: url }))}
                         label="UPLOAD FLYER"
                       />
                     </div>
