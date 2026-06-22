@@ -48,6 +48,7 @@ const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey")
   .split(",")
   .map(value => value.trim().replace(/^@/, "").toLowerCase())
   .filter(Boolean);
+const OWNER_DISPLAY_NAME = process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX";
 
 function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
   const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
@@ -75,7 +76,14 @@ function markAdminSessionForUser(req: any, user: any) {
   return false;
 }
 
+function syncOwnerDisplayName(user: any) {
+  if (!isMainAdminUser(user) || user.displayName === OWNER_DISPLAY_NAME) return user;
+  storage.updateUser(user.id, { displayName: OWNER_DISPLAY_NAME });
+  return { ...user, displayName: OWNER_DISPLAY_NAME };
+}
+
 function authUserResponse(req: any, user: any) {
+  user = syncOwnerDisplayName(user);
   const isAdmin = markAdminSessionForUser(req, user);
   return {
     id: user.id, username: user.username, email: user.email,
@@ -942,10 +950,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/admin/me", requireAdmin, (req, res) => {
     const user = getSessionAdminUser(req);
+    const syncedUser = user ? syncOwnerDisplayName(user) : null;
     res.json({
       isAdmin: true,
-      username: user?.username || ADMIN_USERNAME,
-      email: user?.email || null,
+      username: syncedUser?.displayName || syncedUser?.username || ADMIN_USERNAME,
+      email: syncedUser?.email || null,
     });
   });
 
