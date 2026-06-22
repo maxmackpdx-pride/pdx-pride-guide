@@ -1,163 +1,160 @@
-# Grok Session Handoff for Codex — 2026-06-22 ~07:15 UTC
+# Grok Session Handoff for Codex — 2026-06-22 (updated)
 
-User paused ~1 hour. This document is the full handoff from the Grok agent session that reviewed `SOFT_LAUNCH_UAT_REPORT_CODEX.md`, investigated `/api/gigs`, fixed what could be fixed without user input, and continued DNS/deploy work.
+Read this file first. GitHub is the communication bus — same pattern as `GROK_HANDOFF_FOR_CLAUDE.md`.
+
+## How this bridge works
+
+| Direction | File | Writer | Reader |
+|-----------|------|--------|--------|
+| Grok → Codex | `GROK_HANDOFF_FOR_CODEX.md` | Grok | Codex |
+| Codex → Grok | `CODEX_HANDOFF_FOR_GROK.md` | Codex | Grok |
+| Grok → Claude | `GROK_HANDOFF_FOR_CLAUDE.md` | Grok | Claude |
+
+**Codex start prompt:**
+> Read `GROK_HANDOFF_FOR_CODEX.md` and `SOFT_LAUNCH_UAT_REPORT_CODEX.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Reply in `CODEX_HANDOFF_FOR_GROK.md` or via commits.
 
 ## Executive summary
 
 | Item | Status |
 | --- | --- |
-| `GET /api/gigs` on www | **FIXED** — returns `[]` (valid JSON) as of deploy `9be1878f` / commit `c7b71db` |
-| Production deploy drift | **FIXED** — live is now `c7b71db` (was stuck at `11884e0`) |
-| Pride Work UI error masking | **FIXED in repo** — `b5b0f74` surfaces API errors instead of "0 posts" |
-| Apex `prideguidepdx.com` on Railway | **STILL BROKEN** — returns Railway `404 Application not found` |
-| GitHub → Railway auto-deploy | **STILL BROKEN** — `repoTriggers` empty; manual deploy required |
-| Claim route / soft-launch popup / feedback | **IN REPO, DEPLOYED** — needs browser UAT on live site |
+| **GitHub HEAD** | `b8e5ddc` (docs refresh); feature HEAD `49227a2` |
+| Live site | `https://www.prideguidepdx.com` — serving `index-CSxnRzuH.css`, `index-D7i_j5zy.js` |
+| `GET /api/gigs` on www | **FIXED** — valid JSON |
+| Production deploy drift | **FIXED** — GitHub Actions auto-deploy on `master` |
+| Pride Work UI error masking | **FIXED** |
+| Avatar system (Section 17) | **DEPLOYED** — circle crop + optional pride rings |
+| Mobile hero + nav | **DEPLOYED** |
+| Gift With Pride art | **DEPLOYED** |
+| Apex `prideguidepdx.com` | **STILL BROKEN** — Railway 404 |
 | Codex UAT P1 items | **NOT STARTED** (ticket links, mobile overflow, admin cleanup) |
+| Claim route / popup / feedback | Deployed — needs browser re-UAT |
 
-## Root cause: `/api/gigs` 500
+## Project paths
 
-Two compounding issues:
+| Item | Value |
+|------|-------|
+| Canonical repo | `/Users/tuckercasey/Documents/Codex/2026-06-20/c/work/pdx-pride-guide` |
+| GitHub | `maxmackpdx-pride/pdx-pride-guide` (branch `master`) |
+| Plan PDF | `/Users/tuckercasey/Downloads/pdx-pride-guide-plan-v8.pdf` |
+| UAT report | `SOFT_LAUNCH_UAT_REPORT_CODEX.md` |
 
-1. **Deploy drift** — Railway production was stuck on commit `11884e0` while GitHub `master` had `ce8ad4d` (startup migration) and later fixes. GitHub webhooks were disconnected (`repoTriggers: []`). `serviceInstanceDeploy` / `serviceInstanceRedeploy` only rebuilt the *currently pinned* commit, not latest GitHub.
+## Admin & identity
 
-2. **Legacy `data.db` in git** — `data.db` is tracked in the repo (not gitignored) and ships with every Railway build. Its `gig_posts` table used the **old schema** (`type`, `role`, `pay`, …) without `post_type`. Drizzle queries `post_type`, causing:
-   ```
-   no such column: "post_type"
-   ```
-   Startup migrations in `server/storage.ts` should have fixed this at runtime, but the persisted runtime DB + shipped git `data.db` both lacked the column. **Direct migration of tracked `data.db` + redeploy resolved it.**
+- **Owner/admin Google login:** `hello.tuckercasey@gmail.com`
+- **Display username:** `tucker_pdmax`
+- **Creator credit everywhere:** Tucker Max — NOT Tucker Casey (hard rule)
+- Admin via `ADMIN_USER_EMAILS` in `server/routes.ts`
 
-## What Grok changed (commits pushed to `master`)
+## What changed since last Codex handoff (`c7b71db`)
 
 | Commit | Description |
-| --- | --- |
-| `b5b0f74` | `client/src/pages/PrideWork.tsx` — show error state when `/api/gigs` fails (UAT P0 UI masking) |
-| `f862267` | `server/storage.ts` — PRAGMA-based `ensureGigPostsSchema()` for legacy `gig_posts` (+ maps old `type` column) |
-| `c7b71db` | Migrated tracked `data.db` `gig_posts` schema; added startup column logging; call `ensureGigPostsSchema()` in `getGigPosts()` |
+|--------|-------------|
+| `49227a2` | Avatar system: `UserAvatar`, `AvatarEditor`, pride rings, schema `avatar_ring`/`avatar_crop` |
+| `6537bee` | Mobile hero title restored; countdown row shrunk |
+| `bdc0898` | Gift With Pride hero art on home + `/gifting` |
+| `fedf025` | Dist refresh for production CSS |
+| `3872755` | Mobile nav MENU dropdown (≤640px) |
+| `75d54d7` | Mobile hero image; desktop title sizing |
+| `b8e5ddc` | Claude + Codex bridge docs refresh |
 
-**GitHub HEAD:** `c7b71dbfc47bcb6ba57d94d36ae95898764cab0a`
+### Avatar system (for UAT)
 
-**Live Railway deployment:** `9be1878f-0ad5-4b52-8ae1-60d832e31f78` (SUCCESS, commit `c7b71db`)
+- **Path:** Dashboard → Edit Profile → choose photo → drag/zoom crop → optional ring → save
+- **Files:** `UserAvatar.tsx`, `AvatarEditor.tsx`, `shared/avatarRings.ts`, `client/src/lib/avatarCrop.ts`
+- **Sitewide:** Nav, Dashboard, event check-ins, Gifting poster/interests
+- **Test:** `https://www.prideguidepdx.com/#/dashboard` logged in as admin
 
-## How to deploy Railway (until auto-deploy is restored)
+## Deploy (auto-deploy restored)
 
-`serviceInstanceDeploy` / `serviceInstanceRedeploy` **do not** pull latest GitHub. Use:
+GitHub Actions: `.github/workflows/railway-deploy.yml` — push to `master` triggers Railway deploy via GraphQL.
 
+**Manual fallback** (if Actions fails):
 ```bash
-# Get latest SHA
 cd /Users/tuckercasey/Documents/Codex/2026-06-20/c/work/pdx-pride-guide
 SHA=$(git rev-parse HEAD)
-
-# Deploy that SHA
 curl -sS -X POST https://backboard.railway.com/graphql/v2 \
   -H "Content-Type: application/json" \
   -H "Project-Access-Token: e1875005-7e94-455a-98e4-ed6821da7495" \
   -d "{\"query\":\"mutation { serviceInstanceDeployV2(serviceId: \\\"c87eff12-aee2-4af2-8fd9-7f42b67c3ba3\\\", environmentId: \\\"8ab787f3-f5ee-4713-9845-bd17dd30ad08\\\", commitSha: \\\"$SHA\\\") }\"}"
-
-# Poll status (replace DEPLOY_ID from response)
-curl -sS -X POST https://backboard.railway.com/graphql/v2 \
-  -H "Content-Type: application/json" \
-  -H "Project-Access-Token: e1875005-7e94-455a-98e4-ed6821da7495" \
-  -d '{"query":"query { project(id: \"13064cbe-e2d7-41cd-a028-fa957d0c9167\") { services { edges { node { deployments(first:1) { edges { node { id status meta } } } } } } } }"}'
 ```
 
-**Restore auto-deploy (needs Railway dashboard / account owner):**
-- Service → Settings → Connect GitHub repo `maxmackpdx-pride/pdx-pride-guide`, branch `master`
-- GraphQL `deploymentTriggerCreate` returned `Bad Access` with project token — likely needs user OAuth in dashboard
+**Important:** `dist/public/` is tracked in git. Frontend CSS changes require `npm run build` + commit `dist/` before deploy.
 
-## Verification commands (run after any deploy)
+## Verification commands
 
 ```bash
-# APIs
-curl -sS "https://www.prideguidepdx.com/api/events?limit=1"   # expect JSON array
-curl -sS "https://www.prideguidepdx.com/api/gigs"              # expect JSON array (may be empty)
-curl -sS "https://www.prideguidepdx.com/api/gifting" | head -c 200
-
-# Apex (still broken as of handoff)
-curl -sS -o /dev/null -w "%{http_code}\n" "https://prideguidepdx.com/api/events?limit=1"  # expect 404 today
-
-# DNS authoritative
-dig @ns-cloud-e1.googledomains.com prideguidepdx.com A +short      # 69.46.46.118
-dig @ns-cloud-e1.googledomains.com www.prideguidepdx.com CNAME +short  # he6e3ojn.up.railway.app
+curl -sS "https://www.prideguidepdx.com/api/events?limit=1"
+curl -sS "https://www.prideguidepdx.com/api/gigs"
+curl -sS -o /dev/null -w "%{http_code}\n" "https://prideguidepdx.com/api/events?limit=1"  # expect 404
+curl -sS "https://www.prideguidepdx.com/" | grep -oE 'index-[^"]+\.(css|js)' | head -2
 ```
 
-## Browser UAT checklist (post-deploy)
+## Browser UAT checklist (re-test on live)
 
-From `SOFT_LAUNCH_UAT_REPORT_CODEX.md`, re-test on live:
+From `SOFT_LAUNCH_UAT_REPORT_CODEX.md`:
 
-- [ ] `#/submit/claim/20` and `#/submit?mode=claim&eventId=20` open claim form (not React 404)
+- [ ] `#/submit/claim/20` and `#/submit?mode=claim&eventId=20` open claim form
 - [ ] Soft-launch welcome popup appears once
-- [ ] Footer tech feedback form submits successfully
-- [ ] Pride Work page shows error UI if API fails; shows posts when LIVE gigs exist
-- [ ] Treasure Trail / Bearracuda claim flow end-to-end
+- [ ] Footer tech feedback form submits
+- [ ] Pride Work shows error UI if API fails; shows posts when LIVE gigs exist
+- [ ] **Avatar:** circle crop + ring save on Dashboard; appears in nav + gifting
 - [ ] Mobile home at 390px — horizontal overflow
 - [ ] Admin: clear moderation test requests IDs 1–2
+- [ ] Ticket links for events 41 and 53
 
 ## P0 still open: apex domain
 
-**Symptom:** `https://prideguidepdx.com/*` → Railway `{"status":"error","code":404,"message":"Application not found"}` even when DNS A record points to Railway (`69.46.46.118`).
+**Symptom:** `https://prideguidepdx.com/*` → Railway `404 Application not found`
 
-**www works:** `he6e3ojn.up.railway.app` → `69.46.46.18`
+**www works:** `he6e3ojn.up.railway.app`
 
-**apex Railway target:** `9bkv0osk.up.railway.app` → `69.46.46.118`
-
-**Squarespace DNS (already applied):**
+**Squarespace DNS:**
 - ALIAS `@` → `9bkv0osk.up.railway.app`
-- TXT `@` → `railway-verify=ae9d6a5461b84a1c95485ba8a6cd3f1ffb3a42a86a6384135baf4af1bf449845`
 - CNAME `www` → `he6e3ojn.up.railway.app`
 
-**Railway custom domains (both registered):**
-- `www.prideguidepdx.com` — CERT VALID, DNS PROPAGATED
-- `prideguidepdx.com` — CERT VALID, DNS `REQUIRES_UPDATE` (`currentValue` empty; Squarespace ALIAS quirk)
+**Likely fix:** Railway dashboard → apex domain → re-verify DNS / re-issue cert. ALIAS at Squarespace may not satisfy Railway checker.
 
-**Likely fix for Codex:** In Railway dashboard, open apex domain `prideguidepdx.com` → verify DNS / re-issue cert / confirm routing. ALIAS at Squarespace may not satisfy Railway's DNS checker even when A record IP is correct. Options:
-1. Re-save apex domain in Railway after confirming ALIAS target `9bkv0osk.up.railway.app`
-2. Move DNS to Cloudflare (CNAME flattening at apex)
-3. Temporary: Squarespace path-preserving redirect apex → www (worked during cache transition but not ideal long-term)
-
-**DNS rollback snapshots:** `/Users/tuckercasey/pdx-pride-guide/DNS_SNAPSHOT_BEFORE.txt`, `DNS_SNAPSHOT_AFTER.txt`, `DNS_MIGRATION_VERIFICATION.txt`
-
-## Railway project reference
+## Railway reference
 
 | Key | Value |
 | --- | --- |
 | Project ID | `13064cbe-e2d7-41cd-a028-fa957d0c9167` |
 | Environment ID | `8ab787f3-f5ee-4713-9845-bd17dd30ad08` |
 | Service ID | `c87eff12-aee2-4af2-8fd9-7f42b67c3ba3` |
-| Project token | `e1875005-7e94-455a-98e4-ed6821da7495` (GraphQL header: `Project-Access-Token`) |
-| Canonical repo | `/Users/tuckercasey/Documents/Codex/2026-06-20/c/work/pdx-pride-guide` |
-| GitHub | `maxmackpdx-pride/pdx-pride-guide` |
+| Project token | `e1875005-7e94-455a-98e4-ed6821da7495` |
 
-## data.db warning for Codex
+## data.db warning
 
-- `data.db` is **tracked in git** and deployed with the app.
-- Long-term: attach a Railway volume, set explicit `DATABASE_PATH`, gitignore `data.db`, and stop committing runtime state.
-- Short-term: startup migrations in `ensureGigPostsSchema()` should keep legacy schemas compatible.
+- `data.db` is **tracked in git** and deployed with the app
+- `users.avatar_ring` and `users.avatar_crop` columns added in `49227a2`
+- Long-term: Railway volume + gitignore `data.db`
 
-## Failed deploy history (for context)
+## UAT report status
 
-Between `11884e0` (last auto success) and this session, several GitHub-triggered deploys **FAILED** (`294d1ff`, `5dc480b`, etc.). Builds pass locally now (`npm run build` OK). If auto-deploy is reconnected, watch first build logs in Railway dashboard.
+Original: `SOFT_LAUNCH_UAT_REPORT_CODEX.md` — **NO-SHIP**
 
-## Codex UAT report status update
-
-Original report: `SOFT_LAUNCH_UAT_REPORT_CODEX.md` — **NO-SHIP**
-
-**Would change after this session:**
+**Would change after Grok sessions:**
 - ~~Pride Work API 500~~ → fixed
-- ~~Production deploy drift~~ → fixed (manual deploy)
-- ~~Pride Work UI masking~~ → fixed in `b5b0f74`
-- ~~Apex API returns HTML~~ → DNS moved; apex now 404 on Railway (different blocker)
-- Claim route / feedback / popup → deployed, needs re-UAT
+- ~~Production deploy drift~~ → fixed (GitHub Actions)
+- ~~Pride Work UI masking~~ → fixed
+- Avatar system → implemented + deployed
+- Mobile hero/nav/gifting → deployed
 
-**Still NO-SHIP for wide promotion until:** apex domain works, browser UAT passes, P1 items addressed.
+**Still NO-SHIP until:** apex works, browser UAT passes, P1 items addressed.
 
-## What Grok could not fix without user
+## What Codex should pick up
 
-1. Railway dashboard: reconnect GitHub auto-deploy (`deploymentTriggerCreate` → Bad Access)
-2. Apex domain routing / DNS verification in Railway UI
-3. Admin cleanup of moderation requests IDs 1–2 (needs admin login)
-4. Event-specific ticket URLs for events 41 and 53
-5. Mobile overflow CSS polish
+1. **UAT P1** — ticket links (events 41, 53), mobile overflow ~390px, admin moderation cleanup
+2. **Browser re-UAT** — claim routes, popup, feedback, avatars on live
+3. **Apex domain** — Railway dashboard DNS verification
+4. Reply in `CODEX_HANDOFF_FOR_GROK.md` with findings
+
+## User workflow preferences
+
+- Confirm before code edits unless user explicitly says implement/deploy
+- Deploy when user says **yes**
+- Creator credit: Tucker Max — NOT Tucker Casey
 
 ---
 
-*Generated by Grok agent during paused session. User expected back in ~1 hour.*
+*Updated by Grok — 2026-06-22. Live HEAD feature commit `49227a2`, docs `b8e5ddc`.*
