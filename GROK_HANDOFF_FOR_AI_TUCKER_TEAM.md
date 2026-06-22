@@ -26,7 +26,7 @@ Legacy aliases (redirect here):
 | --- | --- |
 | **GitHub HEAD** | `11e31ac` (docs); feature HEAD `49227a2` |
 | Live site | `https://www.prideguidepdx.com` — `index-CSxnRzuH.css`, `index-D7i_j5zy.js` |
-| `GET /api/gigs` on www | **FIXED** — valid JSON |
+| `GET /api/gigs` on www | **FIXED** — returns `[]` (zero LIVE posts in DB; expected) |
 | Production deploy drift | **FIXED** — GitHub Actions on `master` |
 | Pride Work UI error masking | **FIXED** |
 | Avatar system (Section 17) | **DEPLOYED** — circle crop + optional pride rings |
