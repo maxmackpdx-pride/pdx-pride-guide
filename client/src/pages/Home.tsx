@@ -6,7 +6,7 @@ import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
-const skylineImg = "/home-hero-bridge-stickers.png";
+const skylineImg = "/home-hero-desktop.jpg";
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
