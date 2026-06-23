@@ -4,24 +4,47 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "../components/EventModal";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
-import { Circle, MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
+import { Circle, MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, Polyline } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const DAY_COLORS: Record<string, string> = {
   THU: "#00FFFF",
   FRI: "#FF00CC",
-  SAT: "#FF6600",
-  SUN: "#FF2400",
+  SAT: "#39FF14",
+  SUN: "#FF6600",
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
-const TYPE_FILTERS = ["FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PARTY", "SEX POSITIVE", "NUDITY OK"];
+const TYPE_FILTERS = ["SEX POSITIVE", "NUDITY OK", "FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PARTY"];
 
-const PDX_CENTER: [number, number] = [45.5231, -122.6765];
-const PDX_ZOOM = 12;
+const PDX_CENTER: [number, number] = [45.5152, -122.6784];
+const PDX_ZOOM = 13;
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
-// ── Pin icon builder ────────────────────────────────────────────────────────
+// ── Willamette River glow ────────────────────────────────────────────────────
+const WILLAMETTE_PATH: [number, number][] = [
+    [45.4720, -122.6595],
+    [45.4855, -122.6651],
+    [45.4990, -122.6680],
+    [45.5066, -122.6700],
+    [45.5152, -122.6705],
+    [45.5283, -122.6746],
+    [45.5499, -122.6822],
+    [45.5825, -122.7080],
+    [45.6100, -122.7250],
+  ];
+
+function WillametteGlow() {
+  return (
+    <>
+    <Polyline positions={WILLAMETTE_PATH} pathOptions={{ color: "#00FFFF", weight: 16, opacity: 0.1 }} interactive={false} className="willamette-glow-outer" />
+    <Polyline positions={WILLAMETTE_PATH} pathOptions={{ color: "#00FFFF", weight: 8, opacity: 0.25 }} interactive={false} className="willamette-glow-mid" />
+    <Polyline positions={WILLAMETTE_PATH} pathOptions={{ color: "#00FFFF", weight: 3, opacity: 0.9 }} interactive={false} className="willamette-glow-core" />
+    </>
+    );
+}
+
+  // ── Pin icon builder ──────────────────────────────────────────────────────
 function buildPinIcon(days: string[]) {
   if (typeof divIcon !== 'function') return null;
   const SIZE = 22;
@@ -30,7 +53,7 @@ function buildPinIcon(days: string[]) {
   if (days.length === 1) {
     const color = DAY_COLORS[days[0]] || "#CCFF00";
     return divIcon({
-      html: `<div style="width:${SIZE}px;height:${SIZE}px;background:${color};border:2.5px solid #000;border-radius:50%;box-shadow:0 0 10px ${color}bb,0 2px 6px rgba(0,0,0,0.8);"></div>`,
+      html: `<div style="width:${SIZE}px;height:${SIZE}px;background:transparent;border:3px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color},0 0 16px ${color}99,0 2px 6px rgba(0,0,0,0.8);"></div>`,
       iconSize: [SIZE, SIZE], iconAnchor: [R, R], popupAnchor: [0, -R - 4], className: "",
     });
   }
@@ -87,7 +110,7 @@ function VenueGlowLayer({ events }: { events: Event[] }) {
               weight: 1,
               opacity: 0.46,
               fillColor: color,
-              fillOpacity: 0.035,
+              fillOpacity: 0,
               className: "venue-street-glow",
             }}
             interactive={false}
@@ -228,7 +251,8 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
               maxZoom={19}
               subdomains="abcd"
             />
-            <VenueGlowLayer events={events} />
+            <WillametteGlow />
+                      <VenueGlowLayer events={events} />
             <MarkersLayer events={events} onSelect={onSelect} />
             <MapResizer expanded={expanded} />
           </MapContainer>
@@ -261,7 +285,7 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
         }}>
           {Object.entries(DAY_COLORS).map(([day, color]) => (
             <div key={day} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-              <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", boxShadow: `0 0 6px ${color}` }} />
+              <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", background: DAY_COLORS[d], boxShadow: `0 0 14px ${DAY_COLORS[d]}aa, 2px 2px 0 rgba(0,0,0,0.7)`, fontWeight: 900,: `0 0 6px ${color}` }} />
               <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>{day}</span>
             </div>
           ))}
@@ -511,8 +535,8 @@ export default function Events() {
               onClick={() => setActiveDay(d)}
               data-testid={`filter-day-${d}`}
               style={activeDay === d && d !== "ALL" ? {
-                color: DAY_COLORS[d], borderColor: DAY_COLORS[d],
-                background: DAY_COLORS[d] + "18",
+                color: "#000", borderColor: DAY_COLORS[d],
+                background: DAY_COLORS[d], boxShadow: `0 0 14px ${DAY_COLORS[d]}aa, 2px 2px 0 rgba(0,0,0,0.7)`, fontWeight: 900,
               } : {}}
             >
               {d}
