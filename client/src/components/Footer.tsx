@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import FeedbackForm from "./FeedbackForm";
+import { FeedbackButton } from "./FeedbackForm";
 
 export default function Footer() {
   const { user } = useAuth();
@@ -49,23 +49,9 @@ export default function Footer() {
           </div>
         </div>
         <div className="torn-divider full-bleed" style={{ marginBottom: 20 }} />
-        <section
-          id="feedback"
-          style={{
-            border: "2px solid #222",
-            background: "linear-gradient(135deg, rgba(0,255,255,0.08), rgba(255,0,204,0.05) 48%, rgba(204,255,0,0.06))",
-            padding: 18,
-            marginBottom: 20,
-          }}
-        >
-          <div className="display" style={{ color: "#00FFFF", fontSize: "1rem", marginBottom: 6 }}>
-            SOFT LAUNCH TECH FEEDBACK
-          </div>
-          <p style={{ color: "#888", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 14, maxWidth: 760 }}>
-            Hit a broken button, weird mobile layout, wrong event detail, login issue, or confusing flow? Send the tech notes here.
-          </p>
-          <FeedbackForm compact />
-        </section>
+        <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
+          <FeedbackButton />
+        </div>
         {/* Subtle donation line — footer only */}
         <div style={{ textAlign: "center", marginBottom: 20, padding: "12px 0", borderTop: "1px solid #111", borderBottom: "1px solid #111" }}>
           <span style={{ color: "#555", fontSize: "0.8rem", fontFamily: "var(--font-body)" }}>
