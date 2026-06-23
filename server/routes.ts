@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { storage, hashPassword } from "./storage";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -52,7 +53,11 @@ const OWNER_DISPLAY_NAME = process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX";
 
 function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
   const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
-  return { ...safe, hasPendingClaim: pendingClaimIds.has(evt.id) };
+  return {
+    ...safe,
+    posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
+    hasPendingClaim: pendingClaimIds.has(evt.id),
+  };
 }
 
 function publicUser(user: any) {
@@ -90,6 +95,7 @@ function authUserResponse(req: any, user: any) {
     displayName: user.displayName, avatarChoice: user.avatarChoice,
     avatarRing: user.avatarRing || "none", avatarCrop: user.avatarCrop || null,
     bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
+    promoterStatus: user.promoterStatus || "none",
     isAdmin,
   };
 }
@@ -272,6 +278,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const user = storage.getUserById(req.session.userId!);
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const type = req.body.type === "CLAIM" ? "CLAIM" : "NEW_EVENT";
+      const promoterStatus = user.promoterStatus || "none";
+      const isAdminUser = isMainAdminUser(user);
+
+      if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
+        return res.status(403).json({
+          error: "PROMOTER_NOT_APPROVED",
+          message: promoterStatus === "pending"
+            ? "Your promoter verification is pending admin review. You can claim an existing event to request verification."
+            : "Submit a claim request first to become a verified promoter, or wait for admin approval.",
+        });
+      }
+
       const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
       const claimEventId = eventId ?? 0;
       const claimEvent = type === "CLAIM" && Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
@@ -297,6 +315,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
           : JSON.stringify(req.body.eventTypes || []),
       });
       const sub = storage.createSubmission(data);
+      if (type === "CLAIM" && promoterStatus !== "approved" && !isAdminUser) {
+        storage.setPromoterStatus(user.id, "pending");
+      }
       res.json(sub);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -309,7 +330,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const username = storage.getUserById(req.session.userId!)?.username;
     if (!username) return res.status(404).json({ error: "User not found" });
     const all = storage.getEvents({});
-    const mine = all.filter(e => e.claimedBy === username);
+    const mine = all.filter(e => e.claimedBy === username).map(evt => ({
+      ...evt,
+      posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
+    }));
     res.json(mine);
   });
 
@@ -901,6 +925,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  app.get("/api/events/:id/host-messages", (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    res.json(storage.getHostMessages(Number(req.params.id), 2));
+  });
+
+  app.post("/api/events/:id/host-messages", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const user = storage.getUserById(req.session.userId!);
+    if (!user || evt.claimedBy !== user.username) {
+      return res.status(403).json({ error: "Only the event host can post updates" });
+    }
+    const body = String(req.body.body || "").trim().slice(0, 1000);
+    if (!body) return res.status(400).json({ error: "body required" });
+    const msg = storage.createHostMessage({ eventId: evt.id, userId: user.id, body });
+    res.json(msg);
+  });
+
   app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
@@ -985,6 +1028,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { reason } = req.body;
     storage.rejectSubmission(Number(req.params.id), reason || "");
     res.json({ ok: true });
+  });
+
+  app.get("/api/admin/promoter-requests", requireAdmin, (req, res) => {
+    res.json(storage.getPendingPromoterRequests());
+  });
+
+  app.post("/api/admin/promoter-requests/:userId/approve", requireAdmin, (req, res) => {
+    const userId = Number(req.params.userId);
+    const user = storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    storage.setPromoterStatus(userId, "approved");
+    res.json({ ok: true, promoterStatus: "approved" });
+  });
+
+  app.post("/api/admin/promoter-requests/:userId/deny", requireAdmin, (req, res) => {
+    const userId = Number(req.params.userId);
+    const user = storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    storage.setPromoterStatus(userId, "rejected");
+    res.json({ ok: true, promoterStatus: "rejected" });
   });
 
   app.get("/api/admin/events", requireAdmin, (req, res) => {
