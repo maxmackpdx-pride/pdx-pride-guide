@@ -285,7 +285,7 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
         }}>
           {Object.entries(DAY_COLORS).map(([day, color]) => (
             <div key={day} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-              <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", background: DAY_COLORS[d], boxShadow: `0 0 14px ${DAY_COLORS[d]}aa, 2px 2px 0 rgba(0,0,0,0.7)`, fontWeight: 900,: `0 0 6px ${color}` }} />
+              <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", boxShadow: `0 0 8px ${color}, 2px 2px 0 rgba(0,0,0,0.7)` }} />
               <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>{day}</span>
             </div>
           ))}
