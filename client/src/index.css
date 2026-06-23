@@ -40,8 +40,8 @@
   --day-wed: #CCFF00;
   --day-thu: #00FFFF;
   --day-fri: #FF00CC;
-  --day-sat: #FF6600;
-  --day-sun: #FF2400;
+  --day-sat: #39FF14;
+  --day-sun: #FF6600;
   --day-multi: linear-gradient(90deg, #FF2400, #FF6600, #FFEE00, #00EE44, #0044FF, #8800FF);
 
   --font-display: 'Barlow Condensed', sans-serif;
@@ -1093,9 +1093,10 @@ body::before {
 }
 .filter-tag.active {
   border-color: var(--neon-yellow);
-  color: var(--neon-yellow);
-  background: rgba(204,255,0,0.08);
-  box-shadow: 0 0 12px rgba(204,255,0,0.16), inset 0 0 0 1px rgba(204,255,0,0.16);
+    color: #000;
+    background: var(--neon-yellow);
+    box-shadow: 0 0 16px rgba(204,255,0,0.6), 2px 2px 0 rgba(0,0,0,0.7);
+    font-weight: 900;
 }
 
 /* Map container */
@@ -2110,3 +2111,18 @@ footer a { transition: color 0.15s ease; }
 footer a:hover { color: #00FFFF !important; }
 
 /* Leaflet overrides — CartoDB Dark Matter tiles are already dark, NO filter */
+
+
+/* Willamette River glow */
+.willamette-glow-outer {
+    filter: drop-shadow(0 0 18px #00FFFF) drop-shadow(0 0 36px #00FFFFaa);
+    mix-blend-mode: screen;
+}
+.willamette-glow-mid {
+    filter: drop-shadow(0 0 8px #00FFFF);
+    mix-blend-mode: screen;
+}
+.willamette-glow-core {
+    filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 6px #00FFFF);
+    mix-blend-mode: screen;
+}
