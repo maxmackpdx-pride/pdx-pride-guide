@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports, feedbackReports,
+  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -14,6 +14,7 @@ import {
   type MissedConnection, type InsertMissedConnection,
   type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
   type FeedbackReport, type InsertFeedbackReport,
+  type HostMessage, type InsertHostMessage,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -264,6 +265,16 @@ try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_id INTEGER`); } catch
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_label TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_from INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_to INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN promoter_status TEXT NOT NULL DEFAULT 'none'`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS host_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT ''
+  )
+`); } catch(e) {}
 
 export function hashPassword(pw: string) {
   return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
@@ -1441,7 +1452,12 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus'>>): void;
+  setPromoterStatus(userId: number, status: string): void;
+  getPendingPromoterRequests(): any[];
+  // Host messages
+  getHostMessages(eventId: number, limit?: number): any[];
+  createHostMessage(data: InsertHostMessage): HostMessage;
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
@@ -1541,6 +1557,9 @@ export const storage: IStorage = {
           claimedBy: user?.username || sub.submitterEmail,
           adminNotes: null,
         }).where(eq(events.id, sub.eventId)).run();
+        if (user) {
+          db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, user.id)).run();
+        }
       } else {
         db.insert(events).values({
           title: sub.title, description: sub.description,
@@ -1701,6 +1720,49 @@ export const storage: IStorage = {
   },
   updateUser(id, data) {
     db.update(users).set(data).where(eq(users.id, id)).run();
+  },
+  setPromoterStatus(userId, status) {
+    db.update(users).set({ promoterStatus: status }).where(eq(users.id, userId)).run();
+  },
+  getPendingPromoterRequests() {
+    const pendingUsers = db.select().from(users).all().filter(u => u.promoterStatus === "pending");
+    return pendingUsers.map(u => {
+      const claimSub = db.select().from(submissions).all()
+        .filter(s => s.submitterEmail === u.email && s.type === "CLAIM" && s.status === "PENDING")
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+      const evt = claimSub?.eventId
+        ? db.select().from(events).where(eq(events.id, claimSub.eventId)).get()
+        : undefined;
+      return {
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        displayName: u.displayName,
+        promoterStatus: u.promoterStatus,
+        submissionId: claimSub?.id ?? null,
+        eventId: claimSub?.eventId ?? null,
+        claimReason: claimSub?.claimReason ?? null,
+        submitterOrg: claimSub?.submitterOrg ?? null,
+        requestedAt: claimSub?.createdAt ?? u.createdAt,
+        eventTitle: evt?.title ?? null,
+      };
+    }).sort((a, b) => String(b.requestedAt).localeCompare(String(a.requestedAt)));
+  },
+  getHostMessages(eventId, limit = 2) {
+    return sqlite.prepare(`
+      SELECT hm.*, u.display_name AS displayName, u.username
+      FROM host_messages hm
+      LEFT JOIN users u ON u.id = hm.user_id
+      WHERE hm.event_id = ?
+      ORDER BY hm.created_at DESC
+      LIMIT ?
+    `).all(eventId, limit) as any[];
+  },
+  createHostMessage(data) {
+    return db.insert(hostMessages).values({
+      ...data,
+      createdAt: new Date().toISOString(),
+    }).returning().get();
   },
   // Messages
   getInbox(userId) {

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -26,8 +27,20 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   const [hostDrawer, setHostDrawer] = useState<"closed" | "compose" | "noHost">("closed");
   const [hostMessage, setHostMessage] = useState("");
 
+  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const types = JSON.parse(event.eventTypes || "[]") as string[];
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
+
+  const { data: hostMessages = [] } = useQuery<Array<{
+    id: number;
+    body: string;
+    createdAt: string;
+    displayName?: string;
+    username?: string;
+  }>>({
+    queryKey: ["/api/events", event.id, "host-messages"],
+    queryFn: () => fetch(`/api/events/${event.id}/host-messages`).then(r => r.ok ? r.json() : []),
+  });
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const startTime = new Date(event.dateStart).toLocaleString([], {
     weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
@@ -118,15 +131,13 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
         <div style={{ height: 5, background: dayColor }} />
 
         {/* Poster image — full natural size, centered, no crop */}
-        {event.posterImageUrl && (
-          <div style={{ width: "100%", background: "#000", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "0" }}>
-            <img
-              src={event.posterImageUrl}
-              alt={event.title}
-              style={{ display: "block", maxWidth: "100%", width: "auto", height: "auto", maxHeight: "70vh", objectFit: "contain" }}
-            />
-          </div>
-        )}
+        <div style={{ width: "100%", background: "#000", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "0" }}>
+          <img
+            src={posterUrl}
+            alt={event.title}
+            style={{ display: "block", maxWidth: "100%", width: "auto", height: "auto", maxHeight: "70vh", objectFit: "contain" }}
+          />
+        </div>
 
         <div style={{ padding: "24px 24px 0" }}>
           {/* Close */}
@@ -179,6 +190,34 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             )}
             {event.isPrivate && (
               <div style={{ fontSize: "0.8rem", color: "#555", marginTop: 4 }}>📍 Location provided upon RSVP</div>
+            )}
+          </div>
+
+          {/* Latest from host */}
+          <div style={{
+            marginBottom: 20,
+            border: `2px solid ${hostMessages.length > 0 ? dayColor : "#222"}`,
+            background: "#080808",
+            padding: "14px 16px",
+          }}>
+            <div className="display" style={{ fontSize: "0.78rem", color: hostMessages.length > 0 ? dayColor : "#555", letterSpacing: "0.08em", marginBottom: 10 }}>
+              LATEST FROM HOST
+            </div>
+            {hostMessages.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {hostMessages.map(msg => (
+                  <div key={msg.id} style={{ borderLeft: `3px solid ${dayColor}`, paddingLeft: 12 }}>
+                    <div style={{ fontSize: "0.88rem", color: "#ddd", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.body}</div>
+                    <div style={{ fontSize: "0.7rem", color: "#555", marginTop: 6 }}>
+                      {msg.displayName || msg.username || "Host"} · {new Date(msg.createdAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.5 }}>
+                No host updates yet. Check back closer to the event — organizers post timing changes, door info, and last-minute notes here.
+              </div>
             )}
           </div>
 

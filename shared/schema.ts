@@ -165,6 +165,7 @@ export const users = sqliteTable("users", {
   photoUrl: text("photo_url"),
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
+  promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
   createdAt: text("created_at").notNull().default(""),
 });
 
@@ -283,3 +284,16 @@ export const insertFeedbackReportSchema = createInsertSchema(feedbackReports).om
 });
 export type InsertFeedbackReport = z.infer<typeof insertFeedbackReportSchema>;
 export type FeedbackReport = typeof feedbackReports.$inferSelect;
+
+// Host broadcast messages (pinned on event detail)
+export const hostMessages = sqliteTable("host_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertHostMessageSchema = createInsertSchema(hostMessages).omit({ id: true, createdAt: true });
+export type InsertHostMessage = z.infer<typeof insertHostMessageSchema>;
+export type HostMessage = typeof hostMessages.$inferSelect;

@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [saveMsg, setSaveMsg] = useState("");
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [eventForm, setEventForm] = useState<any>(null);
+  const [hostUpdate, setHostUpdate] = useState("");
   const [editingGig, setEditingGig] = useState<any>(null);
   const [gigForm, setGigForm] = useState({ title: "", description: "", skills: "", compensation: "", location: "" });
 
@@ -67,6 +68,23 @@ export default function Dashboard() {
     queryFn: () => fetch("/api/messages/unread-count").then(r => r.ok ? r.json() : { count: 0 }),
     enabled: !!user,
     refetchInterval: 90000,
+  });
+
+  const hostUpdateMutation = useMutation({
+    mutationFn: async ({ eventId, body }: { eventId: number; body: string }) => {
+      const res = await fetch(`/api/events/${eventId}/host-messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Could not post update");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Host update posted", description: "Visible on the event detail page." });
+      setHostUpdate("");
+    },
+    onError: () => toast({ title: "Error", description: "Could not post host update.", variant: "destructive" }),
   });
 
   const eventEditMutation = useMutation({
@@ -159,6 +177,7 @@ export default function Dashboard() {
 
   const startEventEdit = (evt: any) => {
     setEditingEvent(evt);
+    setHostUpdate("");
     setEventForm({
       title: evt.title || "",
       description: evt.description || "",
@@ -402,6 +421,33 @@ export default function Dashboard() {
                         </label>
                       ))}
                     </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+                    <label style={labelStyle}>Post Host Update</label>
+                    <p style={{ fontSize: "0.76rem", color: "#555", marginBottom: 8, lineHeight: 1.4 }}>
+                      Pinned on your event detail page (max 2 visible, newest first).
+                    </p>
+                    <textarea
+                      style={{ ...inputStyle, minHeight: 80, resize: "vertical" }}
+                      value={hostUpdate}
+                      onChange={e => setHostUpdate(e.target.value)}
+                      placeholder="Door time change, weather note, last-minute info..."
+                      maxLength={1000}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
+                      disabled={!hostUpdate.trim() || hostUpdateMutation.isPending}
+                      style={{
+                        marginTop: 10, fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.78rem",
+                        letterSpacing: "0.08em", textTransform: "uppercase",
+                        background: "transparent", color: "#CCFF00", border: "1px solid #CCFF00",
+                        padding: "8px 14px", cursor: "pointer", opacity: !hostUpdate.trim() || hostUpdateMutation.isPending ? 0.5 : 1,
+                      }}
+                    >
+                      {hostUpdateMutation.isPending ? "POSTING..." : "POST UPDATE →"}
+                    </button>
                   </div>
 
                   <button onClick={saveEventEdit} disabled={eventEditMutation.isPending} style={{
