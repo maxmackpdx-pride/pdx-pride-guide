@@ -299,6 +299,13 @@ body::before {
   line-height: 0.92;
 }
 
+h1,
+h1.display {
+  -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 #000;
+}
+
 .section-heading {
   font-size: clamp(2.25rem, 5vw, 3rem);
   line-height: 0.95;
@@ -628,7 +635,7 @@ body::before {
   font-size: 10.4rem;
   line-height: 0.78;
   letter-spacing: 0;
-  text-shadow: 0 0 48px rgba(255,255,255,0.08);
+  text-shadow: 5px 5px 0 #000, 0 0 48px rgba(255,255,255,0.08);
 }
 
 @media (min-width: 901px) {
@@ -639,7 +646,9 @@ body::before {
 
 .home-hero-title span {
   color: var(--neon-yellow);
+  -webkit-text-stroke: 1px #000;
   text-shadow:
+    5px 5px 0 #000,
     0 0 20px rgba(204,255,0,0.72),
     0 0 52px rgba(204,255,0,0.32);
 }
@@ -1417,7 +1426,7 @@ body::before {
 .gifting-title {
   margin: 28px 0 16px;
   color: #f7f5ee;
-  text-shadow: 0 0 24px rgba(0,0,0,0.72);
+  text-shadow: 5px 5px 0 #000, 0 0 24px rgba(0,0,0,0.72);
 }
 
 .gifting-title span {
@@ -1425,8 +1434,9 @@ body::before {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-stroke: 1px #000;
   text-shadow: none;
-  filter: drop-shadow(0 0 18px rgba(255,255,255,0.18));
+  filter: drop-shadow(5px 5px 0 #000) drop-shadow(0 0 18px rgba(255,255,255,0.18));
 }
 
 .gifting-lede {
