@@ -66,7 +66,19 @@ interface ModerationRequest {
   adminNotes?: string;
 }
 
-type AdminTab = "queue" | "moderation" | "events" | "gifting" | "feedback";
+interface PromoterRequest {
+  id: number;
+  username: string;
+  email: string;
+  displayName: string | null;
+  eventId: number | null;
+  eventTitle: string | null;
+  claimReason: string | null;
+  submitterOrg: string | null;
+  requestedAt: string;
+}
+
+type AdminTab = "queue" | "promoters" | "moderation" | "events" | "gifting" | "feedback";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -134,6 +146,12 @@ export default function Admin() {
   const { data: feedback = [], isLoading: feedbackLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/feedback"],
     enabled: authenticated && activeTab === "feedback",
+  });
+
+  const { data: promoterRequests = [], isLoading: promotersLoading } = useQuery<PromoterRequest[]>({
+    queryKey: ["/api/admin/promoter-requests"],
+    queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then(r => r.json()),
+    enabled: authenticated && activeTab === "promoters",
   });
 
   const approveMutation = useMutation({
@@ -232,6 +250,24 @@ export default function Admin() {
     },
   });
 
+  const approvePromoterMutation = useMutation({
+    mutationFn: (userId: number) => apiRequest("POST", `/api/admin/promoter-requests/${userId}/approve`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+      toast({ title: "Promoter approved", description: "User can now submit new events." });
+    },
+    onError: () => toast({ title: "Error", description: "Could not approve promoter.", variant: "destructive" }),
+  });
+
+  const denyPromoterMutation = useMutation({
+    mutationFn: (userId: number) => apiRequest("POST", `/api/admin/promoter-requests/${userId}/deny`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+      toast({ title: "Promoter denied" });
+    },
+    onError: () => toast({ title: "Error", description: "Could not deny promoter.", variant: "destructive" }),
+  });
+
   const startEdit = (ev: AdminEvent) => {
     setEditingId(ev.id);
     setEditForm({ ...ev });
@@ -316,6 +352,7 @@ export default function Admin() {
   const pendingGifting = (giftingAdmin.posts || []).filter((p: any) => p.status === "PENDING");
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
   const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
+  const pendingPromoters = promoterRequests;
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -356,6 +393,7 @@ export default function Admin() {
         <div className="flex gap-0 mb-8 border-b-2 border-white/10">
           {([
             { key: "queue" as AdminTab, label: `REVIEW QUEUE (${pendingSubs.length})`, icon: <Inbox size={12} /> },
+            { key: "promoters" as AdminTab, label: `PROMOTERS${pendingPromoters.length > 0 ? ` (${pendingPromoters.length})` : ""}`, icon: <Shield size={12} /> },
             { key: "moderation" as AdminTab, label: `CLAIM / REMOVE${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "events" as AdminTab, label: "MANAGE EVENTS", icon: <Shield size={12} /> },
             { key: "gifting" as AdminTab, label: `GIFTING${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
@@ -426,6 +464,63 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PROMOTER REQUESTS ── */}
+        {activeTab === "promoters" && (
+          <div>
+            <p className="text-white/40 text-sm mb-6">Users who claimed an event and requested verified promoter status.</p>
+            {promotersLoading ? (
+              <div className="space-y-4">{[1, 2].map(i => <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : pendingPromoters.length === 0 ? (
+              <div className="text-center py-16">
+                <CheckCircle size={40} className="mx-auto mb-4" style={{ color: "#CCFF00" }} />
+                <p className="display text-2xl text-white/30">NO PENDING PROMOTERS</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingPromoters.map(req => (
+                  <div key={req.id} className="p-5 border border-white/10" style={{ background: "#0d0d0d" }}>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <p className="display text-lg text-white">{req.displayName || req.username}</p>
+                        <p className="text-white/40 text-sm">{req.email}{req.submitterOrg ? ` · ${req.submitterOrg}` : ""}</p>
+                        {req.eventTitle && (
+                          <p className="text-white/60 text-sm mt-2">
+                            Claiming: <span style={{ color: "#00FFFF" }}>{req.eventTitle}</span>
+                          </p>
+                        )}
+                        {req.claimReason && (
+                          <p className="text-white/70 text-sm mt-3 whitespace-pre-wrap border-l-2 pl-3" style={{ borderColor: "#00FFFF" }}>
+                            {req.claimReason}
+                          </p>
+                        )}
+                        <p className="text-white/30 text-xs mt-2">{new Date(req.requestedAt).toLocaleString()}</p>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => approvePromoterMutation.mutate(req.id)}
+                          disabled={approvePromoterMutation.isPending}
+                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
+                          style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                        >
+                          <CheckCircle size={14} /> APPROVE
+                        </button>
+                        <button
+                          onClick={() => denyPromoterMutation.mutate(req.id)}
+                          disabled={denyPromoterMutation.isPending}
+                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
+                          style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                        >
+                          <XCircle size={14} /> DENY
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
