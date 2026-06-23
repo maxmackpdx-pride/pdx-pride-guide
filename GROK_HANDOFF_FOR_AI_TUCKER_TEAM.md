@@ -35,7 +35,19 @@ Legacy aliases (redirect here):
 - `CLAUDE_HANDOFF_FOR_GROK.md`
 
 **Team start prompt:**
-> Read `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` and `SOFT_LAUNCH_UAT_REPORT_CODEX.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` or via commits.
+> Read `SESSION_HANDOFF_2026-06-23.md` (latest session), then `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` and `SOFT_LAUNCH_UAT_REPORT_CODEX.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` or via commits.
+
+---
+
+## Latest session — 2026-06-23 (Grok)
+
+**Full memory refresh:** `SESSION_HANDOFF_2026-06-23.md`
+
+**HEAD:** `b6d198a` — includes 4-item feature batch + h1 outline/shadow. Live CSS: `index-Dk4jzjl3.css`.
+
+**Done:** Placeholder SVGs, submit form polish, host messages, promoter approval queue, h1 typography.
+
+**Open:** Claude Design motifs (prompt pack in session handoff, not generated). Do NOT touch `Events.tsx` or filter/day-pill CSS.
 
 ---
 
