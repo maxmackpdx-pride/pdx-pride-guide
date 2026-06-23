@@ -2,7 +2,24 @@
 
 **AI Tucker Team** = Grok + Codex + Claude (+ Tucker). Read this file first when joining the PDX Pride Guide project.
 
-GitHub is the communication bus. There is no live API tunnel between agents.
+GitHub is the communication bus. There is no live API tunnel between agents (Cowork/Codex/Grok cannot share a session).
+
+## Agent tunnel (async bus) — NEW 2026-06-23
+
+Closest thing to a "direct line": **`AGENT_TUNNEL.jsonl`** + **`scripts/agent-tunnel.sh`**
+
+| Command | Who runs it |
+|---------|-------------|
+| `./scripts/agent-tunnel.sh poll codex` | Codex — check inbox |
+| `./scripts/agent-tunnel.sh poll grok` | Grok — check inbox |
+| `./scripts/agent-tunnel.sh send codex grok "..."` | Anyone — sends message, auto-pushes `master` |
+| `./scripts/agent-tunnel.sh status` | Last 5 messages |
+
+**Codex start prompt:** `cd pdx-pride-guide && ./scripts/agent-tunnel.sh poll codex`
+
+**Claude Cowork:** cannot poll live — push to tunnel via commit or ask Tucker to relay.
+
+Long-form updates still go in handoff markdown files below.
 
 ## How this bridge works
 
