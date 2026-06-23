@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "../components/EventModal";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
-import { Circle, MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -20,29 +20,6 @@ const TYPE_FILTERS = ["SEX POSITIVE", "NUDITY OK", "FREE", "TICKETED", "21+", "A
 const PDX_CENTER: [number, number] = [45.5152, -122.6784];
 const PDX_ZOOM = 13;
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-
-// ── Willamette River glow ────────────────────────────────────────────────────
-const WILLAMETTE_PATH: [number, number][] = [
-    [45.4720, -122.6595],
-    [45.4855, -122.6651],
-    [45.4990, -122.6680],
-    [45.5066, -122.6700],
-    [45.5152, -122.6705],
-    [45.5283, -122.6746],
-    [45.5499, -122.6822],
-    [45.5825, -122.7080],
-    [45.6100, -122.7250],
-  ];
-
-function WillametteGlow() {
-  return (
-    <>
-    <Polyline positions={WILLAMETTE_PATH} pathOptions={{ color: "#00FFFF", weight: 16, opacity: 0.1 }} interactive={false} className="willamette-glow-outer" />
-    <Polyline positions={WILLAMETTE_PATH} pathOptions={{ color: "#00FFFF", weight: 8, opacity: 0.25 }} interactive={false} className="willamette-glow-mid" />
-    <Polyline positions={WILLAMETTE_PATH} pathOptions={{ color: "#00FFFF", weight: 3, opacity: 0.9 }} interactive={false} className="willamette-glow-core" />
-    </>
-    );
-}
 
   // ── Pin icon builder ──────────────────────────────────────────────────────
 function buildPinIcon(days: string[]) {
@@ -91,35 +68,6 @@ function groupEventsByVenue(events: Event[]) {
   return groups;
 }
 
-function VenueGlowLayer({ events }: { events: Event[] }) {
-  const byVenue = useMemo(() => groupEventsByVenue(events), [events]);
-
-  return (
-    <>
-      {Object.entries(byVenue).map(([key, evts]) => {
-        const [lat, lng] = key.split(",").map(Number);
-        const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
-        const color = days.length > 1 ? "#CCFF00" : (DAY_COLORS[days[0]] || "#CCFF00");
-        return (
-          <Circle
-            key={`glow-${key}`}
-            center={[lat, lng]}
-            radius={250}
-            pathOptions={{
-              color,
-              weight: 1,
-              opacity: 0.46,
-              fillColor: color,
-              fillOpacity: 0,
-              className: "venue-street-glow",
-            }}
-            interactive={false}
-          />
-        );
-      })}
-    </>
-  );
-}
 
 function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Event) => void }) {
   useMap();
@@ -251,8 +199,6 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
               maxZoom={19}
               subdomains="abcd"
             />
-            <WillametteGlow />
-                      <VenueGlowLayer events={events} />
             <MarkersLayer events={events} onSelect={onSelect} />
             <MapResizer expanded={expanded} />
           </MapContainer>
