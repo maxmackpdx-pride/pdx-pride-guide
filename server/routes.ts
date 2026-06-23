@@ -83,7 +83,7 @@ function syncOwnerDisplayName(user: any) {
 }
 
 function authUserResponse(req: any, user: any) {
-  user = syncOwnerDisplayName(user);
+  
   const isAdmin = markAdminSessionForUser(req, user);
   return {
     id: user.id, username: user.username, email: user.email,
