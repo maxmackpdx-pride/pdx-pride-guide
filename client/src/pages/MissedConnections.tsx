@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
+import MissedConnectionsHero from "@/components/MissedConnectionsHero";
 
 type MissedConnection = {
   id: number;
@@ -101,14 +102,16 @@ export default function MissedConnections() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: "70vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-        <div style={{ maxWidth: 560, textAlign: "center" }}>
-          <h1 className="display page-hero-title" style={{ color: "#FF00CC", marginBottom: 12 }}>MISSED CONNECTIONS</h1>
-          <p style={{ color: "#888", lineHeight: 1.6, marginBottom: 20 }}>
-            Log in to read or post. Replies are private and go straight to inbox threads.
-          </p>
-          <button className="btn-neon solid" onClick={() => setShowAuth(true)}>Log in / Join</button>
-          {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      <div style={{ minHeight: "100vh", background: "#000" }}>
+        <MissedConnectionsHero />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px 64px" }}>
+          <div style={{ maxWidth: 560, textAlign: "center" }}>
+            <p style={{ color: "#aaa", lineHeight: 1.6, marginBottom: 20 }}>
+              Log in to read or post. Replies are private and go straight to inbox threads.
+            </p>
+            <button className="btn-neon solid" onClick={() => setShowAuth(true)}>Log in / Join</button>
+            {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+          </div>
         </div>
       </div>
     );
@@ -116,16 +119,8 @@ export default function MissedConnections() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#000" }}>
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "48px 24px" }}>
-        <header style={{ marginBottom: 28 }}>
-          <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>PRIVATE REPLIES ONLY</span>
-          <h1 className="display page-hero-title" style={{ color: "#fff", marginTop: 12 }}>
-            MISSED<br /><span style={{ color: "#FF00CC" }}>CONNECTIONS</span>
-          </h1>
-          <p style={{ color: "#777", maxWidth: 640, lineHeight: 1.6, marginTop: 12 }}>
-            Post a short note from Pride weekend. Replies never appear on the board; they open a private two-way inbox thread.
-          </p>
-        </header>
+      <MissedConnectionsHero />
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "32px 24px 48px" }}>
 
         <section style={{ background: "#0a0a0a", border: "2px solid #FF00CC", padding: 20, marginBottom: 28 }}>
           <h2 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 12 }}>WRITE A NOTE</h2>

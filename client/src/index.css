@@ -457,8 +457,41 @@ h1.display {
   align-items: center;
   background:
     linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 29%, rgba(0,0,0,0.46) 56%, rgba(0,0,0,0.06) 100%),
-    url("/motifs/hero-gigs.png") center / cover no-repeat,
+    url("/motifs/hero-gigs.jpg") center / cover no-repeat,
     #050505;
+}
+
+.missed-connections-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(360px, 42vw, 520px);
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.9) 32%, rgba(0,0,0,0.42) 58%, rgba(0,0,0,0.06) 100%),
+    url("/motifs/hero-missed-connections.jpg") center / cover no-repeat,
+    #050505;
+}
+
+.missed-connections-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.34) 42%, rgba(0,0,0,0) 100%),
+    radial-gradient(circle at 25% 50%, rgba(255,0,204,0.1), transparent 25rem);
+  z-index: 0;
+}
+
+.missed-connections-hero-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vw, 84px) 24px;
 }
 
 .pride-work-hero::after,
@@ -1348,7 +1381,7 @@ h1.display {
 }
 
 .home-gigs-panel {
-  --promo-bg: url("/motifs/hero-gigs.png");
+  --promo-bg: url("/motifs/hero-gigs.jpg");
 }
 
 .home-promo-inner {
