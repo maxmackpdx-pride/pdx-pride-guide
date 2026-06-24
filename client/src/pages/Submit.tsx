@@ -7,6 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
+import EventTypeTag from "@/components/EventTypeTag";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 
@@ -321,14 +322,27 @@ export default function Submit() {
         {mode === "submit" && <section>
           <div className="display" style={sectionHeadStyle}>EVENT FLAGS</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            <button
-              type="button"
+            <EventTypeTag
+              label="HOUSE PARTY"
+              interactive
+              active={form.isHouseParty}
               onClick={() => setForm(f => ({ ...f, isHouseParty: !f.isHouseParty }))}
-              className={`filter-tag ${form.isHouseParty ? "active" : ""}`}
-              data-testid="toggle-house-party"
-            >
-              House Party
-            </button>
+              testId="toggle-house-party"
+            />
+            <EventTypeTag
+              label="SEX POSITIVE"
+              interactive
+              active={form.isSexPositive}
+              onClick={() => setForm(f => ({ ...f, isSexPositive: !f.isSexPositive }))}
+              testId="toggle-sex-positive"
+            />
+            <EventTypeTag
+              label="NUDITY OK"
+              interactive
+              active={form.nudityOk}
+              onClick={() => setForm(f => ({ ...f, nudityOk: !f.nudityOk }))}
+              testId="toggle-nudity-ok"
+            />
           </div>
 
           {form.isHouseParty && (

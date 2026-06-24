@@ -5,6 +5,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
+import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
+import { EventTypeTagList } from "./EventTypeTag";
 import AttendanceCluster from "./AttendanceCluster";
 import AuthModal from "./AuthModal";
 
@@ -29,6 +31,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
 
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const types = JSON.parse(event.eventTypes || "[]") as string[];
+  const typeTags = getEventTypeTagsForEvent(event);
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
 
   const { data: hostMessages = [] } = useQuery<Array<{
@@ -154,13 +157,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
           {/* Tags */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
             <span className="sticker" style={{ color: dayColor, borderColor: dayColor }}>{event.dayOfWeek}</span>
-            <span className="sticker" style={{ color: "#888", borderColor: "#333" }}>
-              {event.ageRequirement.replace("_PLUS", "+").replace("ALL_AGES", "All Ages")}
-            </span>
-            <span className="sticker" style={{ color: "#888", borderColor: "#333" }}>{event.admission}</span>
-            {event.isSexPositive && <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>SEX+</span>}
-            {event.nudityOk && <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>NUDITY OK</span>}
-            {event.isHouseParty && <span className="sticker" style={{ color: "#FF6600", borderColor: "#FF6600" }}>HOUSE PARTY</span>}
+            <EventTypeTagList labels={typeTags} size="md" />
             {hasPendingClaim ? (
               <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>
                 CLAIM PENDING

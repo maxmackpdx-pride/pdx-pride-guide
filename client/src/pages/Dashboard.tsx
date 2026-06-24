@@ -8,6 +8,7 @@ import ImageUploader from "@/components/ImageUploader";
 import AvatarEditor from "@/components/AvatarEditor";
 import UserAvatar from "@/components/UserAvatar";
 import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
+import EventTypeTag from "@/components/EventTypeTag";
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -413,13 +414,25 @@ export default function Dashboard() {
                   {/* Flags */}
                   <div>
                     <label style={labelStyle}>Flags</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 6 }}>
-                      {[["isHouseParty", "House Party"], ["isSexPositive", "Sex Positive"], ["nudityOk", "Nudity OK"]].map(([k, lbl]) => (
-                        <label key={k} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "7px 12px", border: "1px solid #222", background: eventForm[k] ? "#1a1a0a" : "transparent" }}>
-                          <input type="checkbox" checked={!!eventForm[k]} onChange={() => setEventForm((f: any) => ({ ...f, [k]: !f[k] }))} style={{ accentColor: "var(--neon-yellow)" }} />
-                          <span style={{ fontSize: "0.78rem", fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: eventForm[k] ? "var(--neon-yellow)" : "#666" }}>{lbl}</span>
-                        </label>
-                      ))}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                      <EventTypeTag
+                        label="HOUSE PARTY"
+                        interactive
+                        active={!!eventForm.isHouseParty}
+                        onClick={() => setEventForm((f: any) => ({ ...f, isHouseParty: !f.isHouseParty }))}
+                      />
+                      <EventTypeTag
+                        label="SEX POSITIVE"
+                        interactive
+                        active={!!eventForm.isSexPositive}
+                        onClick={() => setEventForm((f: any) => ({ ...f, isSexPositive: !f.isSexPositive }))}
+                      />
+                      <EventTypeTag
+                        label="NUDITY OK"
+                        interactive
+                        active={!!eventForm.nudityOk}
+                        onClick={() => setEventForm((f: any) => ({ ...f, nudityOk: !f.nudityOk }))}
+                      />
                     </div>
                   </div>
 

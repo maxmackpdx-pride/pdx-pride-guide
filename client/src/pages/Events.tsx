@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
+import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
+import EventTypeTag, { EventTypeTagList } from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
@@ -15,7 +17,6 @@ const DAY_COLORS: Record<string, string> = {
   SUN: "#FF6600",
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
-const TYPE_FILTERS = ["SEX POSITIVE", "NUDITY OK", "FREE", "TICKETED", "21+", "ALL AGES", "PUBLIC", "HOUSE PARTY"];
 
 const PDX_CENTER: [number, number] = [45.5152, -122.6784];
 const PDX_ZOOM = 13;
@@ -92,10 +93,18 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
                 {evts[0].address && <div style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>{evts[0].address}</div>}
                 {evts.map(e => {
                   const dc = DAY_COLORS[e.dayOfWeek || ""] || "#fff";
+                  const typeTags = getEventTypeTagsForEvent(e);
                   return (
                     <div key={e.id} onClick={() => onSelect(e)} style={{ fontSize: 11, color: "#aaa", padding: "5px 0", borderTop: "1px solid #1a1a1a", cursor: "pointer" }}>
-                      <span style={{ color: dc, fontWeight: 700, marginRight: 4 }}>{e.dayOfWeek}</span>
-                      {e.title}
+                      <div>
+                        <span style={{ color: dc, fontWeight: 700, marginRight: 4 }}>{e.dayOfWeek}</span>
+                        {e.title}
+                      </div>
+                      {typeTags.length > 0 && (
+                        <div style={{ marginTop: 4 }}>
+                          <EventTypeTagList labels={typeTags} size="sm" max={3} />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -252,7 +261,7 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
 }
 
 function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => void; viewMode: "grid" | "list" }) {
-  const types = JSON.parse(event.eventTypes || "[]") as string[];
+  const typeTags = getEventTypeTagsForEvent(event);
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const time = event.dateStart
@@ -311,15 +320,9 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
           <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
           <div style={{ fontSize: "0.65rem", color: "#555", marginTop: 2 }}>{time} · {event.neighborhood}</div>
         </div>
-        {/* Types */}
+        {/* Type tags */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "10px 12px", justifyContent: "center", flexShrink: 0 }}>
-          {types.slice(0, 2).map(t => (
-            <span key={t} style={{
-              display: "inline-block",
-              fontSize: "0.55rem", color: "#444",
-              fontFamily: "var(--font-display)", letterSpacing: "0.05em", textTransform: "uppercase",
-            }}>{t}</span>
-          ))}
+          <EventTypeTagList labels={typeTags} size="sm" max={3} />
         </div>
       </div>
     );
@@ -365,6 +368,11 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
             }}>{event.title}</div>
             <div style={{ fontSize: "0.68rem", color: "#aaa" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.62rem", color: "#666", marginTop: 2 }}>{time}</div>
+            {typeTags.length > 0 && (
+              <div style={{ marginTop: 6 }}>
+                <EventTypeTagList labels={typeTags} size="sm" max={3} />
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -404,13 +412,11 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
             </div>
             <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.68rem", color: "#555", marginTop: 2 }}>{time} · {event.neighborhood}</div>
-            {types.slice(0, 2).map(t => (
-              <span key={t} style={{
-                display: "inline-block", marginTop: 5,
-                fontSize: "0.58rem", color: "#444",
-                fontFamily: "var(--font-display)", letterSpacing: "0.05em", textTransform: "uppercase",
-              }}>{t}</span>
-            ))}
+            {typeTags.length > 0 && (
+              <div style={{ marginTop: 6 }}>
+                <EventTypeTagList labels={typeTags} size="sm" max={3} />
+              </div>
+            )}
           </div>
         </>
       )}
@@ -489,15 +495,15 @@ export default function Events() {
             </button>
           ))}
           <div style={{ width: 1, height: 18, background: "#222", margin: "0 2px" }} />
-          {TYPE_FILTERS.map(f => (
-            <button
+          {EVENT_TYPE_FILTERS.map(f => (
+            <EventTypeTag
               key={f}
-              className={`filter-tag ${activeFilters.includes(f) ? "active" : ""}`}
+              label={f}
+              interactive
+              active={activeFilters.includes(f)}
               onClick={() => toggleFilter(f)}
-              data-testid={`filter-type-${f.replace(/[+ ]/g, "-")}`}
-            >
-              {f}
-            </button>
+              testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
+            />
           ))}
           {/* Search bar */}
           <div style={{ position: "relative", display: "flex", alignItems: "center", marginLeft: 4 }}>
