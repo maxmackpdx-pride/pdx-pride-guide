@@ -18,8 +18,8 @@ import {
 } from "@shared/schema";
 import crypto from "crypto";
 
-const DB_PATH = process.env.DATABASE_PATH || "data.db";
-const sqlite = new Database(DB_PATH);
+export const DB_PATH = process.env.DATABASE_PATH || "data.db";
+export const sqlite = new Database(DB_PATH);
 const db = drizzle(sqlite);
 
 // Initialize tables
@@ -290,9 +290,18 @@ function seedData() {
   if (existing.length > 0) {
     const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 46 || existing.some((e: any) => e.title === "Bearracuda Portland Pride Saturday" && e.address === "18 NW 3rd Ave, Portland, OR 97209");
     if (needsReseed) {
-      sqlite.exec(`DELETE FROM events`);
-      sqlite.exec(`DELETE FROM attendances`);
-      sqlite.exec(`DELETE FROM gig_posts`);
+      // Only replace admin seed events — never wipe user gigs, claims, or submissions.
+      sqlite.exec(`
+        DELETE FROM attendances
+        WHERE event_id IN (
+          SELECT id FROM events
+          WHERE source = 'admin_seeded' AND claimed_by IS NULL AND submitted_by IS NULL
+        )
+      `);
+      sqlite.exec(`
+        DELETE FROM events
+        WHERE source = 'admin_seeded' AND claimed_by IS NULL AND submitted_by IS NULL
+      `);
     } else {
       return;
     }
@@ -2015,3 +2024,32 @@ export const storage: IStorage = {
     db.update(feedbackReports).set({ status: "RESOLVED" } as any).where(eq(feedbackReports.id, id)).run();
   },
 };
+
+const PERSISTENCE_TABLES = [
+  "users",
+  "messages",
+  "submissions",
+  "events",
+  "gig_posts",
+  "gifting_posts",
+  "gifting_interests",
+  "attendances",
+  "missed_connections",
+  "host_messages",
+  "moderation_requests",
+  "feedback_reports",
+  "express_sessions",
+] as const;
+
+export function getTableCounts(): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const table of PERSISTENCE_TABLES) {
+    try {
+      const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get() as { count: number };
+      counts[table] = row.count;
+    } catch {
+      counts[table] = 0;
+    }
+  }
+  return counts;
+}

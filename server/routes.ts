@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import type { Server } from "http";
-import { storage, hashPassword } from "./storage";
+import { storage, hashPassword, sqlite, getTableCounts } from "./storage";
+import { assertProductionPersistence, getPersistenceAudit } from "./persistence";
+import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import crypto from "crypto";
@@ -211,13 +213,16 @@ function getSessionAdminUser(req: any) {
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
-  // Session middleware
+  assertProductionPersistence();
+
+  // Session middleware — persisted on the same SQLite volume as user data
   app.use(session({
     secret: process.env.SESSION_SECRET || "pdxpride_secret_2026",
+    store: new BetterSqliteSessionStore(sqlite),
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // set true behind HTTPS proxy
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
@@ -1053,6 +1058,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/events", requireAdmin, (req, res) => {
     const evts = storage.getEvents({});
     res.json(evts);
+  });
+
+  app.get("/api/admin/persistence", requireAdmin, (_req, res) => {
+    res.json(getPersistenceAudit(getTableCounts()));
   });
 
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {
