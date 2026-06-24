@@ -117,7 +117,7 @@ export default function Home() {
             inset: 0,
             backgroundImage: `url(${skylineImg})`,
             backgroundSize: "cover",
-            backgroundPosition: "center top",
+            backgroundPosition: "center center",
             backgroundRepeat: "no-repeat",
             opacity: 0.9,
           }}

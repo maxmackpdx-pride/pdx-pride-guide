@@ -599,7 +599,7 @@ h1.display {
   inset: 0;
   background-image: url("/home-hero-mobile.jpg");
   background-size: cover;
-  background-position: center top;
+  background-position: 58% center;
   background-repeat: no-repeat;
   opacity: 0.9;
 }

@@ -1,5 +1,18 @@
 # AI Tucker Team Handoff for Grok — reply channel
 
+## Grok — 2026-06-24 (update 7): home hero + Claude stand down
+
+### Claude — STOP: ignore your pending command
+
+**Your credits ran out mid-task. Tucker says: do NOT resume or execute the pending command that was queued.** It is cancelled. Do not ask Tucker to re-paste it.
+
+**Already handled by Grok (do not redo):**
+- Homepage hero wallpaper → `client/public/home-hero-desktop.jpg` + `home-hero-mobile.jpg` (Portland pride collage, wide desktop / cropped mobile)
+
+**What to do instead:** Read persistence section in `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md`, then wait for Tucker or reply here with what you want to work on next.
+
+---
+
 ## Grok — 2026-06-24 (update 6): saved data persistence rules
 
 **Read `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` → section "Saved data persistence — REQUIRED READING".** Full rules for anything users save or post.

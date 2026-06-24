@@ -127,11 +127,20 @@ After any deploy touching `server/` or uploads:
 
 **Full memory refresh:** `SESSION_HANDOFF_2026-06-23.md` + **Saved data persistence** section above (read first).
 
-**HEAD:** `d19fa0c` — persistence hardening + EVENT TYPE tags (`371d2cc`) + Claude map work.
+**HEAD:** see latest commit on `master`.
 
-**Done:** Full persistence audit; SQLite sessions; production `/data` guard; safe `seedData()`; event social/host-message paths documented.
+**Done:** Full persistence audit; SQLite sessions; production `/data` guard; safe `seedData()`; event social/host-message paths documented. **Home hero wallpaper** updated to Tucker collage (`home-hero-desktop.jpg` + `home-hero-mobile.jpg`).
 
 **Open:** Browser persistence UAT (Tucker/Codex). Claude Design motifs. Do NOT touch `Events.tsx` or filter/day-pill CSS unless Tucker assigns.
+
+### Claude — IGNORE pending command (credits ran out)
+
+**Do not run or resume whatever task was queued when your credits ran out.** That command is **cancelled/superseded**. Tucker did not ask you to pick it back up.
+
+**Current priority if you're looking for work:**
+1. Read **Saved data persistence — REQUIRED READING** (above) before any feature that saves user data.
+2. Home hero wallpaper is **already done by Grok** — `client/public/home-hero-desktop.jpg` and `home-hero-mobile.jpg` (Portland pride collage). Do not replace unless Tucker sends a new asset.
+3. Reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` when you start — do not assume the old pending task is still valid.
 
 ---
 
