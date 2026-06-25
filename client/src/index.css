@@ -2365,3 +2365,112 @@ footer a:hover { color: #00FFFF !important; }
     animation: none;
   }
 }
+
+/* ── Alive-on-hover — buttons/cards react a little more on hover ── */
+/* Only adds to existing transform/box-shadow rules above; does not */
+/* redeclare background/color, so the current hover behavior holds. */
+.btn-neon:hover {
+  transform: translate(-2px, -3px) scale(1.015);
+  box-shadow: 6px 8px 0 rgba(255,0,204,0.55), 0 0 22px rgba(204,255,0,0.32);
+}
+
+.gifting-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.gifting-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.85), 0 0 22px rgba(204,255,0,0.25);
+}
+
+.gig-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.gig-card:hover,
+.gig-card:nth-child(even):hover {
+  box-shadow: 0 10px 26px rgba(0,0,0,0.5), 0 0 18px rgba(0,255,255,0.22);
+}
+
+/* ── Spectrum loaders — opt-in utility classes for async waits ── */
+/* Not wired into any component yet; ready to use in place of plain */
+/* spinners for form submits / attendance fetch / image upload, etc. */
+.spectrum-spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: conic-gradient(var(--neon-magenta), var(--neon-yellow), var(--neon-cyan), var(--neon-orange), var(--neon-magenta));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
+  animation: spectrum-spin 0.9s linear infinite;
+}
+
+.spectrum-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.spectrum-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-yellow);
+  animation: spectrum-bob 0.9s ease-in-out infinite;
+}
+.spectrum-dots span:nth-child(2) { background: var(--neon-cyan); animation-delay: 0.15s; }
+.spectrum-dots span:nth-child(3) { background: var(--neon-magenta); animation-delay: 0.3s; }
+
+.spectrum-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  background: #111;
+}
+.spectrum-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 40%;
+  background: linear-gradient(90deg, var(--neon-magenta), var(--neon-yellow), var(--neon-cyan));
+  animation: spectrum-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes spectrum-spin { to { transform: rotate(360deg); } }
+@keyframes spectrum-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-6px); opacity: 1; }
+}
+@keyframes spectrum-shimmer {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+/* ── Staggered reveals — opt-in container; not wired into any page yet ── */
+/* Add class "reveal-stagger" to a list/grid container; its direct children */
+/* fade+rise in once an IntersectionObserver adds "is-visible" to each one. */
+/* CSS readiness only — JS wiring pending Tucker's pick of which lists. */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal-stagger > *.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spectrum-spinner,
+  .spectrum-dots span,
+  .spectrum-bar::after {
+    animation: none;
+  }
+
+  .reveal-stagger > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
