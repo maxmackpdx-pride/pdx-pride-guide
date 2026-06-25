@@ -47,6 +47,15 @@
   text-transform: uppercase;
 }
 
+@keyframes dash-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.dash-live-badge {
+  animation: dash-blink 1.8s ease-in-out infinite;
+}
+
 .dash-profile-header {
   display: flex;
   align-items: center;

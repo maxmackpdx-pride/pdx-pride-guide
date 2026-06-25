@@ -34,8 +34,23 @@ export default function DashboardWidgets() {
       <section className="dash-weather">
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
-            <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
-              Portland, OR
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
+                Portland, OR
+              </div>
+              <span
+                className="dash-mono"
+                style={{
+                  fontSize: 9,
+                  color: "#0a0a0a",
+                  background: "rgba(255,255,255,0.55)",
+                  padding: "3px 7px",
+                  borderRadius: 999,
+                  letterSpacing: "0.12em",
+                }}
+              >
+                Demo forecast
+              </span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
               <span className="dash-weather-temp">72°</span>
@@ -75,7 +90,7 @@ export default function DashboardWidgets() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Week</div>
           <span
-            className="dash-mono"
+            className={`dash-mono${live ? " dash-live-badge" : ""}`}
             style={{
               fontSize: 10,
               color: "#0a0a0a",

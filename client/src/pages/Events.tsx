@@ -432,7 +432,7 @@ export default function Events() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mapExpanded, setMapExpanded] = useState(false);
 
-  const { data: events = [], isLoading } = useQuery<Event[]>({
+  const { data: events = [], isLoading, isError, error, refetch } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
   });
@@ -609,8 +609,22 @@ export default function Events() {
               <div key={i} style={{ height: viewMode === "grid" ? undefined : 72, aspectRatio: viewMode === "grid" ? "2/3" : undefined, background: "#111" }} />
             ))}
           </div>
+        ) : isError ? (
+          <div style={{ textAlign: "center", padding: "60px 20px", border: "2px dashed #FF6600", background: "rgba(8,8,8,0.72)" }}>
+            <p className="display" style={{ fontSize: "1.4rem", color: "#fff" }}>COULD NOT LOAD EVENTS</p>
+            <p style={{ color: "#9d9a92", fontSize: "0.9rem", marginTop: 10, maxWidth: 420, marginInline: "auto" }}>
+              {error instanceof Error ? error.message : "The events API is unavailable right now."}
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="btn-neon"
+              style={{ marginTop: 20 }}
+            >
+              TRY AGAIN
+            </button>
+          </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", color: "#444" }}>
+          <div style={{ textAlign: "center", padding: "60px 20px", color: "#9d9a92" }}>
             <p className="display" style={{ fontSize: "1.4rem" }}>NO EVENTS MATCH</p>
             <button
               onClick={() => { setActiveDay("ALL"); setActiveFilters([]); }}

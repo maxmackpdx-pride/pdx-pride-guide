@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsHero from "@/components/MissedConnectionsHero";
 
@@ -22,6 +23,7 @@ const DAYS = ["", "THU", "FRI", "SAT", "SUN", "MON"];
 
 export default function MissedConnections() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", dayOfWeek: "", venueHint: "" });
   const [replyingTo, setReplyingTo] = useState<MissedConnection | null>(null);
@@ -29,9 +31,13 @@ export default function MissedConnections() {
   const [editingPost, setEditingPost] = useState<MissedConnection | null>(null);
   const [editForm, setEditForm] = useState({ title: "", body: "", dayOfWeek: "", venueHint: "" });
 
-  const { data: posts = [], isLoading } = useQuery<MissedConnection[]>({
+  const { data: posts = [], isLoading, isError, refetch } = useQuery<MissedConnection[]>({
     queryKey: ["/api/missed-connections"],
-    queryFn: () => fetch("/api/missed-connections").then(r => r.ok ? r.json() : []),
+    queryFn: async () => {
+      const r = await fetch("/api/missed-connections");
+      if (!r.ok) throw new Error("Could not load missed connections");
+      return r.json();
+    },
     enabled: !!user,
   });
 
@@ -47,7 +53,9 @@ export default function MissedConnections() {
     onSuccess: () => {
       setForm({ title: "", body: "", dayOfWeek: "", venueHint: "" });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
+      toast({ title: "Posted", description: "Your note is live on the board." });
     },
+    onError: () => toast({ title: "Could not post", description: "Try again in a moment.", variant: "destructive" }),
   });
 
   const replyMutation = useMutation({
@@ -63,7 +71,9 @@ export default function MissedConnections() {
       setReplyingTo(null);
       setReplyBody("");
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+      toast({ title: "Reply sent", description: "Check your inbox for the private thread." });
     },
+    onError: () => toast({ title: "Could not send reply", variant: "destructive" }),
   });
 
   const editMutation = useMutation({
@@ -79,15 +89,22 @@ export default function MissedConnections() {
       setEditingPost(null);
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
+      toast({ title: "Updated" });
     },
+    onError: () => toast({ title: "Could not update", variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => fetch(`/api/missed-connections/${id}`, { method: "DELETE" }),
+    mutationFn: async (id: number) => {
+      const r = await fetch(`/api/missed-connections/${id}`, { method: "DELETE" });
+      if (!r.ok) throw new Error("Delete failed");
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
+      toast({ title: "Deleted" });
     },
+    onError: () => toast({ title: "Could not delete", variant: "destructive" }),
   });
 
   const startEdit = (post: MissedConnection) => {
@@ -150,9 +167,16 @@ export default function MissedConnections() {
         </section>
 
         {isLoading ? (
-          <div style={{ color: "#555" }}>Loading...</div>
+          <div style={{ color: "#9d9a92" }}>Loading...</div>
+        ) : isError ? (
+          <div style={{ textAlign: "center", padding: "32px 0", border: "2px dashed #FF00CC" }}>
+            <p style={{ color: "#fff", marginBottom: 12 }}>Could not load missed connections.</p>
+            <button className="btn-neon" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>
+              TRY AGAIN
+            </button>
+          </div>
         ) : posts.length === 0 ? (
-          <div style={{ color: "#444", padding: "32px 0" }}>No active missed connections yet.</div>
+          <div style={{ color: "#9d9a92", padding: "32px 0" }}>No active missed connections yet.</div>
         ) : (
           <div style={{ display: "grid", gap: 14 }}>
             {posts.map(post => (

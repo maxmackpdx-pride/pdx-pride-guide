@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 
 type Message = {
@@ -23,25 +24,38 @@ type Message = {
 
 export default function Inbox() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [tab, setTab] = useState<"inbox" | "sent">("inbox");
   const [activeThread, setActiveThread] = useState<Message | null>(null);
   const [replyBody, setReplyBody] = useState("");
 
-  const { data: inbox = [] } = useQuery<Message[]>({
+  const { data: inbox = [], isLoading: inboxLoading, isError: inboxError, refetch: refetchInbox } = useQuery<Message[]>({
     queryKey: ["/api/messages/inbox"],
-    queryFn: () => fetch("/api/messages/inbox").then(r => r.ok ? r.json() : []),
+    queryFn: async () => {
+      const r = await fetch("/api/messages/inbox");
+      if (!r.ok) throw new Error("Could not load inbox");
+      return r.json();
+    },
     enabled: !!user,
   });
 
-  const { data: sent = [] } = useQuery<Message[]>({
+  const { data: sent = [], isLoading: sentLoading, isError: sentError, refetch: refetchSent } = useQuery<Message[]>({
     queryKey: ["/api/messages/sent"],
-    queryFn: () => fetch("/api/messages/sent").then(r => r.ok ? r.json() : []),
+    queryFn: async () => {
+      const r = await fetch("/api/messages/sent");
+      if (!r.ok) throw new Error("Could not load sent messages");
+      return r.json();
+    },
     enabled: !!user,
   });
 
-  const { data: thread = [] } = useQuery<Message[]>({
+  const { data: thread = [], isError: threadError } = useQuery<Message[]>({
     queryKey: ["/api/messages/thread", activeThread?.threadId],
-    queryFn: () => fetch(`/api/messages/thread/${activeThread!.threadId}`).then(r => r.ok ? r.json() : []),
+    queryFn: async () => {
+      const r = await fetch(`/api/messages/thread/${activeThread!.threadId}`);
+      if (!r.ok) throw new Error("Could not load thread");
+      return r.json();
+    },
     enabled: !!activeThread,
   });
 
@@ -61,16 +75,21 @@ export default function Inbox() {
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread?.threadId] });
     },
+    onError: () => toast({ title: "Reply failed", description: "Could not send your message.", variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (threadId: string) => fetch(`/api/messages/thread/${threadId}`, { method: "DELETE" }),
+    mutationFn: async (threadId: string) => {
+      const r = await fetch(`/api/messages/thread/${threadId}`, { method: "DELETE" });
+      if (!r.ok) throw new Error("Delete failed");
+    },
     onSuccess: () => {
       setActiveThread(null);
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
     },
+    onError: () => toast({ title: "Delete failed", description: "Could not remove this thread.", variant: "destructive" }),
   });
 
   if (!user) {
@@ -84,6 +103,9 @@ export default function Inbox() {
   }
 
   const msgs = tab === "inbox" ? inbox : sent;
+  const msgsLoading = tab === "inbox" ? inboxLoading : sentLoading;
+  const msgsError = tab === "inbox" ? inboxError : sentError;
+  const refetchMsgs = tab === "inbox" ? refetchInbox : refetchSent;
   const unreadCount = inbox.filter(m => !m.isRead).length;
 
   const openThread = (msg: Message) => {
@@ -127,10 +149,19 @@ export default function Inbox() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: activeThread ? "minmax(0, 1fr) minmax(0, 1fr)" : "1fr", gap: 16 }}>
-          <div>
-            {msgs.length === 0 ? (
-              <div style={{ color: "#444", padding: "24px 0" }}>No scoped messages yet.</div>
+        <div className={`inbox-layout${activeThread ? " inbox-layout--split" : ""}`}>
+          <div className="inbox-list-pane">
+            {msgsLoading ? (
+              <div style={{ color: "#9d9a92", padding: "24px 0" }}>Loading messages...</div>
+            ) : msgsError ? (
+              <div style={{ padding: "24px 0", textAlign: "center" }}>
+                <p style={{ color: "#fff", marginBottom: 8 }}>Could not load messages.</p>
+                <button className="btn-neon" style={{ fontSize: "0.75rem", padding: "8px 14px" }} onClick={() => refetchMsgs()}>
+                  TRY AGAIN
+                </button>
+              </div>
+            ) : msgs.length === 0 ? (
+              <div style={{ color: "#9d9a92", padding: "24px 0" }}>No scoped messages yet.</div>
             ) : msgs.map(msg => (
               <button key={msg.id} onClick={() => openThread(msg)} style={{
                 width: "100%", textAlign: "left", padding: "14px 18px", border: "none", borderBottom: "1px solid #111",
@@ -143,10 +174,10 @@ export default function Inbox() {
                     {msg.subject || "(no subject)"}
                   </span>
                   {msg.contextLabel && <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>{msg.contextLabel}</span>}
-                  <span style={{ display: "block", fontSize: "0.78rem", color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ display: "block", fontSize: "0.78rem", color: "#8c8980", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {tab === "inbox" ? `from ${msg.from_display_name || msg.from_username || "someone"}` : `to ${msg.to_display_name || msg.to_username || "someone"}`} · {msg.body.substring(0, 70)}{msg.body.length > 70 ? "..." : ""}
                   </span>
-                  <span style={{ display: "block", fontSize: "0.7rem", color: "#333", marginTop: 4 }}>
+                  <span style={{ display: "block", fontSize: "0.7rem", color: "#6f736c", marginTop: 4 }}>
                     {new Date(msg.createdAt).toLocaleString()}
                   </span>
                 </span>
@@ -155,20 +186,32 @@ export default function Inbox() {
           </div>
 
           {activeThread && (
-            <div style={{ background: "#060606", border: "1px solid #1a1a1a", padding: 20 }}>
+            <div className="inbox-thread-pane" style={{ background: "#060606", border: "1px solid #1a1a1a", padding: 20 }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
                 <div>
                   <div className="display" style={{ fontSize: "1rem", color: "#fff" }}>{activeThread.subject || "(no subject)"}</div>
                   {activeThread.contextType && (
-                    <div style={{ color: "#555", fontSize: "0.75rem", marginTop: 4 }}>{activeThread.contextType.replaceAll("_", " ")}</div>
+                    <div style={{ color: "#8c8980", fontSize: "0.75rem", marginTop: 4 }}>{activeThread.contextType.replaceAll("_", " ")}</div>
                   )}
                 </div>
-                <button onClick={() => deleteMutation.mutate(activeThread.threadId)} style={{ background: "transparent", border: "1px solid #333", color: "#666", padding: "5px 10px", cursor: "pointer" }}>
-                  Delete
-                </button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    type="button"
+                    className="inbox-back-btn"
+                    onClick={() => setActiveThread(null)}
+                    style={{ background: "transparent", border: "1px solid #333", color: "#bdbab2", padding: "5px 10px", cursor: "pointer" }}
+                  >
+                    Back
+                  </button>
+                  <button onClick={() => deleteMutation.mutate(activeThread.threadId)} style={{ background: "transparent", border: "1px solid #333", color: "#8c8980", padding: "5px 10px", cursor: "pointer" }}>
+                    Delete
+                  </button>
+                </div>
               </div>
               <div style={{ maxHeight: 330, overflowY: "auto", marginBottom: 16 }}>
-                {thread.map(m => (
+                {threadError ? (
+                  <p style={{ color: "#FF6600", fontSize: "0.85rem" }}>Could not load this thread.</p>
+                ) : thread.map(m => (
                   <div key={m.id} style={{
                     marginBottom: 12, padding: "10px 14px",
                     background: m.fromUserId === user.id ? "#0a0a0a" : "#111",

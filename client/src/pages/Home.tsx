@@ -37,7 +37,7 @@ export default function Home() {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
   });
-  const { data: events = [] } = useQuery<Event[]>({
+  const { data: events = [], isError: eventsError, refetch: refetchEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
   });
@@ -192,6 +192,31 @@ export default function Home() {
         )}
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
+
+      {eventsError && (
+        <div
+          role="alert"
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            padding: "16px 20px",
+            borderBottom: "2px solid #FF6600",
+            background: "rgba(255,102,0,0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
+          <p style={{ margin: 0, color: "#e8e8ec", fontSize: "0.9rem" }}>
+            Events could not load right now. The map and ticker may be empty.
+          </p>
+          <button className="btn-neon" style={{ fontSize: "0.75rem", padding: "8px 14px" }} onClick={() => refetchEvents()}>
+            RETRY
+          </button>
+        </div>
+      )}
 
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView

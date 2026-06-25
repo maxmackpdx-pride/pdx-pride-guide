@@ -315,11 +315,23 @@ export default function PrideWork() {
         ) : filteredGigs.length === 0 ? (
           <div className="board-empty">
             <Briefcase size={40} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto" }} />
-            <p className="display section-heading">NO POSTS YET</p>
-            <p className="board-copy-sm">Be the first to post a gig or offer your skills.</p>
-            <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("POSTING_GIG")}>
-              POST HERE
-            </button>
+            <p className="display section-heading">
+              {gigs.length === 0 ? "NO POSTS YET" : "NO MATCHES"}
+            </p>
+            <p className="board-copy-sm">
+              {gigs.length === 0
+                ? "Be the first to post a gig or offer your skills."
+                : "Nothing matches this filter. Try showing all posts."}
+            </p>
+            {gigs.length === 0 ? (
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("POSTING_GIG")}>
+                POST HERE
+              </button>
+            ) : (
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => setFilterType("ALL")}>
+                SHOW ALL
+              </button>
+            )}
           </div>
         ) : (
           <div className="gigs-grid">

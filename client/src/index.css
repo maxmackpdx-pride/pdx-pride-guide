@@ -63,6 +63,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+::selection {
+  background: #C8FA3C;
+  color: #000;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -1383,6 +1388,34 @@ h1.display {
     #050505;
 }
 
+.inbox-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.inbox-layout--split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.inbox-back-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .inbox-layout--split {
+    grid-template-columns: 1fr;
+  }
+
+  .inbox-layout--split .inbox-list-pane {
+    display: none;
+  }
+
+  .inbox-back-btn {
+    display: inline-block;
+  }
+}
+
 .inbox-hero::before {
   content: "";
   position: absolute;
@@ -1519,9 +1552,30 @@ h1.display {
   box-shadow: 5px 5px 0 #ff00cc;
 }
 
+@keyframes board-flickr {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  92% { opacity: 1; }
+  93% { opacity: 0.5; transform: translateX(-2px); }
+  94% { opacity: 1; transform: translateX(2px); }
+  95% { opacity: 0.7; }
+  96% { opacity: 1; transform: translateX(0); }
+}
+
 /* Board pages (Gifting + Gigs) — aligned to Claude Design reference */
 .board-page {
   color: var(--board-text);
+  position: relative;
+}
+
+.board-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grainB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grainB)'/%3E%3C/svg%3E");
 }
 
 .board-page .display {
@@ -1966,6 +2020,7 @@ h1.display {
 }
 
 .gifting-title span {
+  display: block;
   background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1973,6 +2028,7 @@ h1.display {
   -webkit-text-stroke: 1px #000;
   text-shadow: none;
   filter: drop-shadow(5px 5px 0 #000) drop-shadow(0 0 18px rgba(255,255,255,0.18));
+  animation: board-flickr 6s linear infinite;
 }
 
 .gifting-tagline {
@@ -2477,12 +2533,14 @@ h1.display {
 }
 
 .gigs-title span {
+  display: block;
   color: #ccff00;
   -webkit-text-stroke: 1px #000;
   text-shadow:
     5px 5px 0 #000,
     0 0 20px rgba(204, 255, 0, 0.72),
     0 0 52px rgba(204, 255, 0, 0.32);
+  animation: board-flickr 6s linear infinite;
 }
 
 .gigs-tagline {

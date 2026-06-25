@@ -71,7 +71,7 @@ export default function Gifting() {
   const [activeNote, setActiveNote] = useState<Record<number, string>>({});
   const [report, setReport] = useState<Record<number, string>>({});
 
-  const { data: posts = [], isLoading } = useQuery<GiftingPost[]>({ queryKey: ["/api/gifting"] });
+  const { data: posts = [], isLoading, isError, error } = useQuery<GiftingPost[]>({ queryKey: ["/api/gifting"] });
 
   const filtered = useMemo(() => {
     let rows = posts.slice();
@@ -124,6 +124,29 @@ export default function Gifting() {
     },
     onError: (err: any) => toast({ title: "Could not update", description: err.message, variant: "destructive" }),
   });
+
+  const submitPost = () => {
+    if (!form.acceptRules) {
+      toast({ title: "Accept the community rules first", variant: "destructive" });
+      return;
+    }
+    if (!form.title.trim()) {
+      toast({ title: "Add a title", variant: "destructive" });
+      return;
+    }
+    if (!form.description.trim()) {
+      toast({ title: "Add a description", variant: "destructive" });
+      return;
+    }
+    createMutation.mutate();
+  };
+
+  const clearFilters = () => {
+    setFilter("ALL");
+    setCategory("ALL");
+    setNeighborhood("");
+    setSort("RECENT");
+  };
 
   const submitResponse = (post: GiftingPost, endpoint: "interest" | "offer") => {
     if (!user) return setShowAuth(true);
@@ -190,7 +213,7 @@ export default function Gifting() {
             <label className="span">Photos, up to 2<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label>
           </div>
           <label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} /> I agree: Keep it free. Keep it kind. Keep it moving.</label>
-          <button className="btn-neon" disabled={createMutation.isPending} onClick={() => createMutation.mutate()}>
+          <button className="btn-neon" disabled={createMutation.isPending || !form.acceptRules} onClick={submitPost}>
             {createMutation.isPending ? "POSTING..." : "SUBMIT"}
           </button>
         </section>
@@ -210,7 +233,45 @@ export default function Gifting() {
           </div>
         </div>
 
-        {isLoading ? <p className="board-copy-sm">Loading gifting posts...</p> : (
+        {isLoading ? (
+          <p className="board-copy-sm">Loading gifting posts...</p>
+        ) : isError ? (
+          <div className="board-empty" style={{ borderColor: "#FF00CC" }}>
+            <Gift size={40} style={{ color: "#FF00CC", margin: "0 auto" }} />
+            <p className="display section-heading" style={{ color: "#fff" }}>COULD NOT LOAD POSTS</p>
+            <p className="board-copy-sm">
+              {error instanceof Error ? error.message : "The gifting board API is unavailable right now."}
+            </p>
+            <button
+              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}
+              className="btn-neon"
+              style={{ marginTop: 20 }}
+            >
+              TRY AGAIN
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="board-empty">
+            <Sparkles size={40} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto" }} />
+            <p className="display section-heading">
+              {posts.length === 0 ? "NO POSTS YET" : "NO MATCHES"}
+            </p>
+            <p className="board-copy-sm">
+              {posts.length === 0
+                ? "Be the first to gift something or post an In Search Of."
+                : "Nothing matches your filters. Try widening the search."}
+            </p>
+            {posts.length === 0 ? (
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("GIFT")}>
+                POST A GIFT
+              </button>
+            ) : (
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={clearFilters}>
+                CLEAR FILTERS
+              </button>
+            )}
+          </div>
+        ) : (
           <div className="gifting-grid">
             {filtered.map(post => (
               <article className={`gifting-card ${post.postType.toLowerCase()}`} key={post.id}>
