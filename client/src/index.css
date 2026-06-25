@@ -626,15 +626,96 @@ h1.display {
   padding-bottom: 70px;
 }
 
-.home-hero-bg-mobile {
-  display: none;
+/* Layer stack: wallpaper (0) → glitch overlay (1) → content (2) */
+.home-hero-bg-desktop,
+.home-hero-bg-mobile,
+.home-hero-shade,
+.home-hero-halftone {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home-hero-bg-desktop {
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.home-hero-bg-mobile {
+  display: none;
   background-image: url("/home-hero-mobile.jpg");
   background-size: cover;
   background-position: 58% center;
   background-repeat: no-repeat;
   opacity: 0.9;
+}
+
+.home-hero-shade {
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%);
+}
+
+.home-hero-halftone {
+  opacity: 0.06;
+  background-image: radial-gradient(circle, #CCFF00 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.home-hero-watermark {
+  position: absolute;
+  z-index: 0;
+  right: -2%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(5rem, 14vw, 11rem);
+  color: rgba(204,255,0,0.04);
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Zine scanline panel — was hidden under hero bg layers after mobile/desktop split */
+.home-hero.zine-hero::before {
+  z-index: 1;
+  animation: home-hero-glitch 8s steps(1, end) infinite;
+}
+
+@keyframes home-hero-glitch {
+  0%, 88%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.45;
+    filter: none;
+  }
+  89% {
+    transform: translate(-4px, 2px) skewX(-0.4deg);
+    opacity: 0.72;
+    filter: hue-rotate(12deg) saturate(1.2);
+  }
+  90% {
+    transform: translate(5px, -2px) skewX(0.3deg);
+    opacity: 0.28;
+    filter: hue-rotate(-10deg);
+  }
+  91% {
+    transform: translate(-2px, 1px);
+    opacity: 0.58;
+  }
+  92% {
+    transform: translate(0, 0);
+    opacity: 0.45;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero.zine-hero::before {
+    animation: none;
+  }
 }
 
 .home-hero-content {

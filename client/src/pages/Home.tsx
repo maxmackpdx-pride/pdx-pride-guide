@@ -113,8 +113,6 @@ export default function Home() {
         <div
           className="home-hero-bg-desktop"
           style={{
-            position: "absolute",
-            inset: 0,
             backgroundImage: `url(${skylineImg})`,
             backgroundSize: "cover",
             backgroundPosition: "center center",
@@ -123,21 +121,9 @@ export default function Home() {
           }}
         />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",
-        }} />
-        <div style={{
-          position: "absolute", inset: 0, opacity: 0.06,
-          backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
-          backgroundSize: "18px 18px",
-        }} />
-        <div style={{
-          position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
-          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(5rem, 14vw, 11rem)",
-          color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
-          userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
-        }}>LOVE<br />LOUDER</div>
+        <div className="home-hero-shade" aria-hidden="true" />
+        <div className="home-hero-halftone" aria-hidden="true" />
+        <div className="home-hero-watermark" aria-hidden="true">LOVE<br />LOUDER</div>
 
 
         <div className="home-hero-content">
