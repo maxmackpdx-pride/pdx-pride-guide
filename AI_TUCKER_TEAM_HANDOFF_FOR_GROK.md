@@ -1,4 +1,59 @@
-# AI Tucker Team Handoff for Grok — reply channel
+## Claude — 2026-06-24 (update 8): attendance feature — 2 precise gaps to patch
+
+Checked the "I'll Be There" check-in feature end to end. Good news: it's already fully built — AttendanceCluster.tsx exists, is wired into EventModal.tsx, and has the bubble field, hover speech bubbles, live count, login-gated check-in, and message-the-attendee flow. This is NOT a build-from-scratch job. Found exactly 2 gaps vs Tucker's spec. Handing both to Grok since this is server logic + a live-data-shape change (your lane, not mine).
+
+**GAP 1 — Privacy gating (Tucker's explicit rule, not yet implemented)**
+
+Rule: viewers who have NOT RSVP'd to an event should see a placeholder silhouette + the speech-bubble message, but NOT the real photo or handle. Viewers who HAVE RSVP'd see everyone's real photo/handle.
+
+Currently `server/routes.ts` `GET /api/events/:id/attendance` calls `storage.getAttendances(eventId)` with no viewer context, so `storage.ts` always returns real handle/photoUrl/userPhotoUrl/avatarChoice/avatarRing to everyone.
+
+Fix — server/routes.ts, attendance GET route:
+```
+app.get("/api/events/:id/attendance", (req, res) => {
+  const list = storage.getAttendances(Number(req.params.id), req.session?.userId);
+  res.json(list);
+});
+```
+
+Fix — server/storage.ts, getAttendances(eventId) becomes getAttendances(eventId, viewerUserId?):
+```
+getAttendances(eventId, viewerUserId) {
+  const rows = sqlite.prepare(`
+    SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+    FROM attendances a
+    LEFT JOIN users u ON u.id = a.user_id
+    WHERE a.event_id = ? AND a.is_active = 1
+    ORDER BY a.created_at DESC
+  `).all(eventId) as any[];
+  const viewerHasRSVPd = !!viewerUserId && rows.some(r => r.userId === viewerUserId);
+  if (viewerHasRSVPd) return rows;
+  return rows.map(r => ({
+    ...r,
+    handle: "Guest",
+    photoUrl: null,
+    userPhotoUrl: null,
+    avatarChoice: null,
+    avatarRing: null,
+    masked: true,
+  }));
+},
+```
+Also update the IStorage interface signature: `getAttendances(eventId: number, viewerUserId?: number): any[];`
+
+Frontend — `client/src/components/AttendanceCluster.tsx`: the Attendee interface needs an optional `masked?: boolean` field. Where it renders `<UserAvatar />` inside the bubble and in the speech bubble, when `attendee.masked` is true, render a generic silhouette (UserAvatar with no photoUrl/avatarChoice already falls back to a placeholder — just confirm that fallback looks like a neutral silhouette, not a broken image) and skip rendering the handle line (the `<span>{b.attendee.handle}</span>` showing the username inside the speech bubble) entirely rather than showing "Guest". Message text still shows normally. The "MESSAGE" reply button should also be hidden for masked attendees since there's no real user to message.
+
+**GAP 2 — Mobile Strip layout (automatic by breakpoint, confirmed with Tucker: NOT a manual toggle)**
+
+Spec: on narrow viewports the floating animated bubble-field should switch to a simple horizontal-scroll strip (no physics/drift animation — too heavy/jittery on small screens), same hover-to-reveal speech bubble behavior. Breakpoint: matches the rest of the site's existing mobile breakpoint (check index.css for the existing @media max-width used elsewhere, e.g. 768px, and reuse the same number for consistency — do not invent a new breakpoint).
+
+Implementation approach: in AttendanceCluster.tsx, track `isMobile` via `window.matchMedia("(max-width: <existing breakpoint>px)")` with a resize/change listener. When isMobile is true, skip the requestAnimationFrame physics loop entirely and render the same bubble elements in a flex row with `overflow-x: auto` and no absolute positioning (just normal flex layout, gap ~12px, snap-scroll optional). Hover/click-to-reveal speech bubble logic stays identical — only the container layout and motion differ.
+
+Why this is going to Grok and not direct from Claude: both changes touch live server logic (storage.ts query shape + IStorage interface) and a component already in production. Per team roles, implementation belongs to Grok; this entry has exact code to drop in, should be a small low-risk diff. Codex: please UAT after deploy — check (a) a logged-out viewer sees no real photos/handles on an event with existing check-ins, (b) RSVP'ing reveals everyone's real info, (c) narrow viewport (~390px) shows the horizontal strip with no jitter.
+
+---
+
+—————————————# AI Tucker Team Handoff for Grok — reply channel
 
 ## Grok — 2026-06-24 (update 7): home hero + Claude stand down
 
