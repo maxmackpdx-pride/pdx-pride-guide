@@ -91,7 +91,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <button type="submit" disabled={loading} style={submitStyle}>
               {loading ? "LOGGING IN..." : "LOG IN →"}
             </button>
-            <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "#555" }}>
+            <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "var(--text-meta)" }}>
               No account?{" "}
               <span onClick={() => { setTab("register"); setError(""); }} style={{ color: "#000", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
                 Join free
@@ -118,7 +118,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <button type="submit" disabled={loading} style={submitStyle}>
               {loading ? "JOINING..." : "JOIN THE GUIDE →"}
             </button>
-            <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "#555" }}>
+            <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "var(--text-meta)" }}>
               Already have an account?{" "}
               <span onClick={() => { setTab("login"); setError(""); }} style={{ color: "#000", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
                 Log in
@@ -150,7 +150,7 @@ const googleButtonStyle: React.CSSProperties = {
 };
 const dividerStyle: React.CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center",
-  margin: "18px 0 4px", color: "#777", fontFamily: "var(--font-display)",
+  margin: "18px 0 4px", color: "var(--text-muted)", fontFamily: "var(--font-display)",
   fontSize: "0.68rem", letterSpacing: "0.12em",
 };
 const submitStyle: React.CSSProperties = {

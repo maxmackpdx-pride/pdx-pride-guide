@@ -4,7 +4,7 @@ import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
 const labelStyle: React.CSSProperties = {
   display: "block", fontFamily: "var(--font-display)", fontWeight: 900,
   fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase",
-  color: "#666", marginBottom: 6, marginTop: 16,
+  color: "var(--text-meta)", marginBottom: 6, marginTop: 16,
 };
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "10px 12px", border: "1px solid #333",
@@ -62,7 +62,7 @@ export default function DashboardProfileEditor({
       />
       <label style={labelStyle}>Display name</label>
       <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={40} />
-      <label style={labelStyle}>Bio <span style={{ color: "#555", fontWeight: 400 }}>({bio.length}/160)</span></label>
+      <label style={labelStyle}>Bio <span style={{ color: "var(--text-meta)", fontWeight: 400 }}>({bio.length}/160)</span></label>
       <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
         value={bio} onChange={e => setBio(e.target.value)} maxLength={160} />
       <div style={{ display: "flex", gap: 12, marginTop: 20, alignItems: "center" }}>

@@ -37,7 +37,7 @@ export function DashboardEventEditForm({
     <div className="dash-edit-panel" style={{ borderColor: "#19E3FF" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h3 className="dash-anton" style={{ fontSize: "1.1rem", color: "#19E3FF" }}>Editing: {editingEvent.title}</h3>
-        <button type="button" onClick={onCancel} className="dash-mini-btn" style={{ color: "#666" }}>Cancel</button>
+        <button type="button" onClick={onCancel} className="dash-mini-btn" style={{ color: "var(--text-meta)" }}>Cancel</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -133,7 +133,7 @@ export function DashboardEventEditForm({
         </div>
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
           <label style={labelStyle}>Post host update</label>
-          <p style={{ fontSize: "0.76rem", color: "#555", marginBottom: 8, lineHeight: 1.4 }}>
+          <p style={{ fontSize: "0.76rem", color: "var(--text-meta)", marginBottom: 8, lineHeight: 1.4 }}>
             Pinned on your event detail page (max 2 visible, newest first).
           </p>
           <textarea

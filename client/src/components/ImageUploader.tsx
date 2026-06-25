@@ -59,7 +59,7 @@ export default function ImageUploader({
             fontFamily: "var(--font-display)", fontWeight: 900,
             fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase",
             background: uploading ? "#1a1a1a" : "transparent",
-            color: uploading ? "#555" : "var(--neon-yellow)",
+            color: uploading ? "var(--text-meta)" : "var(--neon-yellow)",
             border: "2px solid var(--neon-yellow)",
             padding: "8px 16px", cursor: uploading ? "not-allowed" : "pointer",
           }}
@@ -78,7 +78,7 @@ export default function ImageUploader({
           <button
             type="button"
             onClick={() => { setPreview(""); onUploaded(""); }}
-            style={{ background: "none", border: "none", color: "#555", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
+            style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
           >
             REMOVE
           </button>

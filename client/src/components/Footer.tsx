@@ -12,13 +12,13 @@ export default function Footer() {
             <div className="display" style={{ fontSize: "1.4rem", marginBottom: 8 }}>
               PDX <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span> GUIDE
             </div>
-            <div style={{ color: "#666", fontSize: "0.82rem", maxWidth: 260, lineHeight: 1.6 }}>
+            <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 260, lineHeight: 1.6 }}>
               Independently built event directory for Portland Pride & queer events.
             </div>
           </div>
           <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
             <div>
-              <div className="display" style={{ fontSize: "0.75rem", color: "#555", marginBottom: 12, letterSpacing: "0.1em" }}>NAVIGATE</div>
+              <div className="display" style={{ fontSize: "0.75rem", color: "var(--text-meta)", marginBottom: 12, letterSpacing: "0.1em" }}>NAVIGATE</div>
               {[
                 ["/events", "Events"],
                 ["/submit", "Promoters"],
@@ -33,7 +33,7 @@ export default function Footer() {
               ))}
             </div>
             <div>
-              <div className="display" style={{ fontSize: "0.75rem", color: "#555", marginBottom: 12, letterSpacing: "0.1em" }}>PARTICIPATE</div>
+              <div className="display" style={{ fontSize: "0.75rem", color: "var(--text-meta)", marginBottom: 12, letterSpacing: "0.1em" }}>PARTICIPATE</div>
               {[
                 ["/submit", "Submit an Event"],
                 ["/submit", "Claim an Event"],
@@ -54,7 +54,7 @@ export default function Footer() {
         </div>
         {/* Subtle donation line — footer only */}
         <div style={{ textAlign: "center", marginBottom: 20, padding: "12px 0", borderTop: "1px solid #111", borderBottom: "1px solid #111" }}>
-          <span style={{ color: "#555", fontSize: "0.8rem", fontFamily: "var(--font-body)" }}>
+          <span style={{ color: "var(--text-meta)", fontSize: "0.8rem", fontFamily: "var(--font-body)" }}>
             This guide is free. Keep it that way.{" "}
             <a
               href="https://venmo.com/tucker_pdmax"
@@ -67,10 +67,10 @@ export default function Footer() {
           </span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-          <div style={{ color: "#444", fontSize: "0.75rem" }}>
+          <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>
             Portland, Oregon · Made by Tucker · Queer Owned · Queer-Run Support Welcome
           </div>
-          <div style={{ color: "#444", fontSize: "0.75rem" }}>
+          <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>
             © 2026 PDX Pride Guide · Free to Browse · Independently Run
           </div>
         </div>

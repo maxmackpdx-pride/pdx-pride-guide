@@ -29,41 +29,67 @@ export default function Dashboard() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ events: true });
   const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
-  const { data: myGigs = [] } = useQuery<any[]>({
+  const fetchMine = async (url: string) => {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`Could not load ${url}`);
+    return r.json();
+  };
+
+  const myGigsQuery = useQuery<any[]>({
     queryKey: ["/api/gigs/mine"],
-    queryFn: () => fetch("/api/gigs/mine").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetchMine("/api/gigs/mine"),
     enabled: !!user,
   });
-
-  const { data: myEvents = [] } = useQuery<any[]>({
+  const myEventsQuery = useQuery<any[]>({
     queryKey: ["/api/events/mine/claimed"],
-    queryFn: () => fetch("/api/events/mine/claimed").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetchMine("/api/events/mine/claimed"),
     enabled: !!user,
   });
-
-  const { data: submittedEvents = [] } = useQuery<any[]>({
+  const submittedEventsQuery = useQuery<any[]>({
     queryKey: ["/api/events/mine/submitted"],
-    queryFn: () => fetch("/api/events/mine/submitted").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetchMine("/api/events/mine/submitted"),
     enabled: !!user,
   });
-
-  const { data: myMissed = [] } = useQuery<any[]>({
+  const myMissedQuery = useQuery<any[]>({
     queryKey: ["/api/missed-connections/mine"],
-    queryFn: () => fetch("/api/missed-connections/mine").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetchMine("/api/missed-connections/mine"),
     enabled: !!user,
   });
-
-  const { data: myGifting = [] } = useQuery<any[]>({
+  const myGiftingQuery = useQuery<any[]>({
     queryKey: ["/api/gifting/mine"],
-    queryFn: () => fetch("/api/gifting/mine").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetchMine("/api/gifting/mine"),
+    enabled: !!user,
+  });
+  const myCheckInsQuery = useQuery<any[]>({
+    queryKey: ["/api/events/mine/check-ins"],
+    queryFn: () => fetchMine("/api/events/mine/check-ins"),
     enabled: !!user,
   });
 
-  const { data: myCheckIns = [] } = useQuery<any[]>({
-    queryKey: ["/api/events/mine/check-ins"],
-    queryFn: () => fetch("/api/events/mine/check-ins").then(r => r.ok ? r.json() : []),
-    enabled: !!user,
-  });
+  const myGigs = myGigsQuery.data ?? [];
+  const myEvents = myEventsQuery.data ?? [];
+  const submittedEvents = submittedEventsQuery.data ?? [];
+  const myMissed = myMissedQuery.data ?? [];
+  const myGifting = myGiftingQuery.data ?? [];
+  const myCheckIns = myCheckInsQuery.data ?? [];
+
+  const dashboardQueryErrors = [
+    myGigsQuery.isError && "gigs",
+    myEventsQuery.isError && "claimed events",
+    submittedEventsQuery.isError && "submitted events",
+    myMissedQuery.isError && "missed connections",
+    myGiftingQuery.isError && "gifting posts",
+    myCheckInsQuery.isError && "check-ins",
+  ].filter(Boolean) as string[];
+
+  const retryDashboard = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/events/mine/submitted"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+  };
 
   const hostUpdateMutation = useMutation({
     mutationFn: async ({ eventId, body }: { eventId: number; body: string }) => {
@@ -236,6 +262,30 @@ export default function Dashboard() {
             </button>
           </div>
         </header>
+
+        {dashboardQueryErrors.length > 0 && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 20,
+              padding: "14px 16px",
+              border: "1px solid var(--dash-orange)",
+              background: "rgba(255,140,0,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <p className="dash-mono" style={{ margin: 0, fontSize: 10.5, color: "#fff", textTransform: "none", letterSpacing: "0.04em" }}>
+              Some dashboard sections could not load ({dashboardQueryErrors.join(", ")}).
+            </p>
+            <button type="button" className="dash-btn dash-btn-lime" onClick={retryDashboard}>
+              Retry
+            </button>
+          </div>
+        )}
 
         {editMode && (
           <DashboardProfileEditor

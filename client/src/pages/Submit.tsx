@@ -13,7 +13,7 @@ const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland"
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 
-const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "#555", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
+const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
 const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", marginBottom: 12, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
 
 type FormStep = 1 | 2 | 3;
@@ -131,7 +131,7 @@ export default function Submit() {
       <h1 className="display page-hero-title" style={{ marginBottom: 8 }}>
         {mode === "submit" ? "SUBMIT AN EVENT" : "CLAIM AN EVENT"}
       </h1>
-      <p style={{ color: "#666", marginBottom: 24, lineHeight: 1.6 }}>
+      <p style={{ color: "var(--text-meta)", marginBottom: 24, lineHeight: 1.6 }}>
         Log in or create an account first. Submissions and claims stay tied to your dashboard while admins review them.
       </p>
 
@@ -195,7 +195,7 @@ export default function Submit() {
           {mode === "claim" && (
             <>
               <div className="display" style={sectionHeadStyle}>CLAIM DETAILS</div>
-              <p style={{ color: "#666", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 14, marginTop: -4 }}>
+              <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 14, marginTop: -4 }}>
                 Selecting an event and submitting also requests verified promoter status so you can post new listings after approval.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -210,7 +210,7 @@ export default function Submit() {
                     ))}
                   </select>
                   {unclaimedEvents.length === 0 && (
-                    <div style={{ fontSize: "0.76rem", color: "#555", marginTop: 6 }}>No unclaimed events are available right now.</div>
+                    <div style={{ fontSize: "0.76rem", color: "var(--text-meta)", marginTop: 6 }}>No unclaimed events are available right now.</div>
                   )}
                 </div>
                 <div className="submit-form__field submit-form__field--cyan">
@@ -292,7 +292,7 @@ export default function Submit() {
               <div className="submit-form__field submit-form__field--cyan">
                 <label style={labelStyle}>Ticket / RSVP Link *</label>
                 <input value={form.ticketUrl} onChange={e => setForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/... (required)" required />
-                <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 4 }}>Link to buy tickets, RSVP, or find more info. All events must have a link.</div>
+                <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>Link to buy tickets, RSVP, or find more info. All events must have a link.</div>
               </div>
               <div>
                 <label style={labelStyle}>Event Flyer / Poster (optional)</label>
@@ -303,7 +303,7 @@ export default function Submit() {
                   onUploaded={url => setForm(f => ({ ...f, posterImageUrl: url }))}
                   label="UPLOAD FLYER"
                 />
-                <div style={{ fontSize: "0.72rem", color: "#444", marginTop: 6 }}>jpg/png/gif/webp · max 8MB · appears on the event card and detail view</div>
+                <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 6 }}>jpg/png/gif/webp · max 8MB · appears on the event card and detail view</div>
               </div>
             </div>
           </>}
@@ -380,7 +380,7 @@ export default function Submit() {
           >
             {mutation.isPending ? "Submitting..." : mode === "claim" ? "Submit Claim + Promoter Request →" : "Submit for Review →"}
           </button>
-          <p style={{ color: "#444", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>All submissions are reviewed before going live.</p>
+          <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>All submissions are reviewed before going live.</p>
         </section>
       </form>
     </div>

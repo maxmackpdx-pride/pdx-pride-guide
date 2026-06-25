@@ -148,7 +148,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             onClick={onClose}
             style={{
               position: "absolute", top: 16, right: 16,
-              background: "none", border: "1px solid #333", color: "#555",
+              background: "none", border: "1px solid #333", color: "var(--text-meta)",
               width: 28, height: 28, cursor: "pointer", fontSize: "0.85rem",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}
@@ -183,10 +183,10 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               {startTime} – {endTime}
             </div>
             {event.address && !event.isPrivate && (
-              <div style={{ fontSize: "0.8rem", color: "#666", marginTop: 4 }}>{event.address}</div>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-meta)", marginTop: 4 }}>{event.address}</div>
             )}
             {event.isPrivate && (
-              <div style={{ fontSize: "0.8rem", color: "#555", marginTop: 4 }}>📍 Location provided upon RSVP</div>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-meta)", marginTop: 4 }}>📍 Location provided upon RSVP</div>
             )}
           </div>
 
@@ -205,14 +205,14 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                 {hostMessages.map(msg => (
                   <div key={msg.id} style={{ borderLeft: `3px solid ${dayColor}`, paddingLeft: 12 }}>
                     <div style={{ fontSize: "0.88rem", color: "#ddd", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.body}</div>
-                    <div style={{ fontSize: "0.7rem", color: "#555", marginTop: 6 }}>
+                    <div style={{ fontSize: "0.7rem", color: "var(--text-meta)", marginTop: 6 }}>
                       {msg.displayName || msg.username || "Host"} · {new Date(msg.createdAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ fontSize: "0.82rem", color: "#555", lineHeight: 1.5 }}>
+              <div style={{ fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5 }}>
                 No host updates yet. Check back closer to the event — organizers post timing changes, door info, and last-minute notes here.
               </div>
             )}
@@ -225,8 +225,8 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               background: "#0d0d0d", border: "1px solid #2a2a2a",
               padding: "8px 12px", marginBottom: 16,
             }}>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "#555", letterSpacing: "0.08em", whiteSpace: "nowrap", paddingTop: 2 }}>[WARNING]</span>
-              <span style={{ fontSize: "0.75rem", color: "#555", lineHeight: 1.5 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "var(--text-meta)", letterSpacing: "0.08em", whiteSpace: "nowrap", paddingTop: 2 }}>[WARNING]</span>
+              <span style={{ fontSize: "0.75rem", color: "var(--text-meta)", lineHeight: 1.5 }}>
                 This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
                 {hasPendingClaim ? " A claim is pending admin review." : ""}
               </span>
@@ -240,7 +240,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
           {types.length > 0 && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
               {types.map(t => (
-                <span key={t} className="sticker" style={{ color: "#555", borderColor: "#222" }}>{t}</span>
+                <span key={t} className="sticker" style={{ color: "var(--text-meta)", borderColor: "#222" }}>{t}</span>
               ))}
             </div>
           )}
@@ -292,7 +292,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                 >
                   {hostMutation.isPending ? "SENDING..." : "SEND"}
                 </button>
-                <button type="button" onClick={() => setHostDrawer("closed")} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
+                <button type="button" onClick={() => setHostDrawer("closed")} style={{ background: "transparent", color: "var(--text-meta)", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
                   Cancel
                 </button>
               </div>
@@ -312,7 +312,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                   Visit Event Link →
                 </a>
               )}
-              <button type="button" onClick={() => setHostDrawer("closed")} style={{ marginLeft: 8, background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
+              <button type="button" onClick={() => setHostDrawer("closed")} style={{ marginLeft: 8, background: "transparent", color: "var(--text-meta)", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
                 Close
               </button>
             </div>
@@ -360,7 +360,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               <p className="display" style={{ fontSize: "1rem", color: modMode === "claim" ? "#00FFFF" : "#fff", marginBottom: 4 }}>
                 {modMode === "claim" ? "REQUEST TO CLAIM THIS EVENT" : "REQUEST REMOVAL"}
               </p>
-              <p style={{ fontSize: "0.78rem", color: "#555", marginBottom: 16, lineHeight: 1.5 }}>
+              <p style={{ fontSize: "0.78rem", color: "var(--text-meta)", marginBottom: 16, lineHeight: 1.5 }}>
                 {modMode === "claim"
                   ? "Tell us why you're the organizer. Include a link to your website, social, or any proof. An admin will verify and transfer ownership."
                   : "Tell us why this event should be removed. If you're the organizer or have a specific reason, explain below. An admin will review."}

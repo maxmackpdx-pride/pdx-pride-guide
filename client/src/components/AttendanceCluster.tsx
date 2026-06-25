@@ -269,7 +269,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
         style={{
           background: "transparent",
           border: "none",
-          color: "#666",
+          color: "var(--text-meta)",
           fontSize: "0.72rem",
           cursor: "pointer",
           textDecoration: "underline",
@@ -427,7 +427,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                     }}
                   >
                     {!b.attendee.masked && (
-                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "#555" }}>
+                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "var(--text-meta)" }}>
                         {b.attendee.handle}
                       </span>
                     )}
@@ -552,7 +552,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                     }}
                   >
                     {!b.attendee.masked && (
-                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "#555" }}>
+                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "var(--text-meta)" }}>
                         {b.attendee.handle}
                       </span>
                     )}
@@ -596,7 +596,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
       )}
 
       {attendees.length === 0 && !showForm && (
-        <div style={{ textAlign: "center", padding: "20px 0", color: "#444" }}>
+        <div style={{ textAlign: "center", padding: "20px 0", color: "var(--text-faint)" }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO SAY YOU'LL BE THERE</p>
         </div>
       )}
@@ -680,7 +680,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                 padding: "9px 14px",
                 background: "transparent",
                 border: "1px solid #333",
-                color: "#666",
+                color: "var(--text-meta)",
                 fontSize: "0.8rem",
                 cursor: "pointer",
               }}
@@ -732,13 +732,13 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
               <button
                 onClick={() => setMessageTarget(null)}
                 aria-label="Close"
-                style={{ background: "none", border: "none", color: "#666", fontSize: "1.5rem", cursor: "pointer", lineHeight: 1 }}
+                style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "1.5rem", cursor: "pointer", lineHeight: 1 }}
               >
                 ×
               </button>
             </div>
             <div style={{ flex: 1, padding: 18, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 10, overflowY: "auto" }}>
-              <div style={{ alignSelf: "center", fontFamily: "var(--font-body)", fontSize: "0.65rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "#444" }}>
+              <div style={{ alignSelf: "center", fontFamily: "var(--font-body)", fontSize: "0.65rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-faint)" }}>
                 New thread
               </div>
               <div

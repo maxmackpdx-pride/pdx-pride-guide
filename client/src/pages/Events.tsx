@@ -90,7 +90,7 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
             <Popup className="pdx-popup" maxWidth={240}>
               <div style={{ background: "#0d0d0d", color: "#fff", padding: "10px 12px", fontFamily: "sans-serif", minWidth: 180 }}>
                 <div style={{ color: primaryColor, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{evts[0].venueName}</div>
-                {evts[0].address && <div style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>{evts[0].address}</div>}
+                {evts[0].address && <div style={{ fontSize: 11, color: "var(--text-meta)", marginBottom: 6 }}>{evts[0].address}</div>}
                 {evts.map(e => {
                   const dc = DAY_COLORS[e.dayOfWeek || ""] || "#fff";
                   const typeTags = getEventTypeTagsForEvent(e);
@@ -169,8 +169,8 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
           .pdx-popup .leaflet-popup-content { margin:0 !important; width:auto !important; }
           .pdx-popup .leaflet-popup-tip-container { display:none; }
           .leaflet-popup-close-button { color:#666 !important; top:6px !important; right:8px !important; }
-          .leaflet-control-attribution { background:rgba(0,0,0,0.65) !important; color:#444 !important; font-size:9px !important; }
-          .leaflet-control-attribution a { color:#555 !important; }
+          .leaflet-control-attribution { background:rgba(0,0,0,0.65) !important; color:var(--text-faint) !important; font-size:9px !important; }
+          .leaflet-control-attribution a { color:var(--text-meta) !important; }
           .leaflet-control-zoom a { background:#111 !important; color:#CCFF00 !important; border-color:#333 !important; }
           .leaflet-control-zoom a:hover { background:#222 !important; }
           .venue-hover-tooltip { background:#050505 !important; border:1px solid #CCFF00 !important; border-radius:0 !important; box-shadow:0 0 14px rgba(204,255,0,0.42) !important; color:#fff !important; font-family:var(--font-display); font-size:0.7rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; padding:4px 8px !important; }
@@ -318,7 +318,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>{event.title}</div>
           <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
-          <div style={{ fontSize: "0.65rem", color: "#555", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+          <div style={{ fontSize: "0.65rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
         </div>
         {/* Type tags */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "10px 12px", justifyContent: "center", flexShrink: 0 }}>
@@ -367,7 +367,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
               color: "#fff", lineHeight: 1.05, marginBottom: 4,
             }}>{event.title}</div>
             <div style={{ fontSize: "0.68rem", color: "#aaa" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.62rem", color: "#666", marginTop: 2 }}>{time}</div>
+            <div style={{ fontSize: "0.62rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
             {typeTags.length > 0 && (
               <div style={{ marginTop: 6 }}>
                 <EventTypeTagList labels={typeTags} size="sm" max={3} />
@@ -411,7 +411,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
               {event.title}
             </div>
             <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.68rem", color: "#555", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+            <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
             {typeTags.length > 0 && (
               <div style={{ marginTop: 6 }}>
                 <EventTypeTagList labels={typeTags} size="sm" max={3} />
@@ -532,7 +532,7 @@ export default function Events() {
                 onClick={() => setSearchQuery("")}
                 style={{
                   position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", color: "#555", cursor: "pointer",
+                  background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer",
                   fontSize: "0.75rem", lineHeight: 1, padding: 0,
                 }}
                 title="Clear search"
@@ -591,7 +591,7 @@ export default function Events() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => setActiveFilters([])}
-              style={{ background: "none", border: "none", color: "#555", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
+              style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
             >
               CLEAR FILTERS ×
             </button>
@@ -654,7 +654,7 @@ export default function Events() {
           <div className="motif events-callout-protest" style={{ backgroundImage: 'url("/motifs/pride-protest.jpg")' }} aria-hidden="true" />
           <div className="motif events-callout-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
           <div className="display" style={{ fontSize: "1.3rem", marginBottom: 6 }}>NOT SEEING YOUR EVENT?</div>
-          <div style={{ color: "#555", marginBottom: 20, fontSize: "0.85rem" }}>
+          <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
             Submit it or claim an existing listing.
           </div>
           <a href="#/submit" className="btn-neon solid">Get Started →</a>

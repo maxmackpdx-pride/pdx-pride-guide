@@ -183,7 +183,7 @@ export default function AvatarEditor({
         />
         <div className="avatar-editor__hint">
           <div className="display" style={{ color: "#CCFF00", fontSize: "0.9rem" }}>LIVE PREVIEW</div>
-          <p style={{ color: "#666", fontSize: "0.82rem", margin: "6px 0 0", lineHeight: 1.4 }}>
+          <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", margin: "6px 0 0", lineHeight: 1.4 }}>
             Drag to reposition. Zoom to fit your face in the circle. Rings are optional.
           </p>
         </div>
