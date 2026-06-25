@@ -407,7 +407,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── ATTENDANCE ───────────────────────────────────────────────────────────
   app.get("/api/events/:id/attendance", (req, res) => {
-    const list = storage.getAttendances(Number(req.params.id));
+    const list = storage.getAttendances(Number(req.params.id), req.session?.userId);
     res.json(list);
   });
 
