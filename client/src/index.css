@@ -2498,3 +2498,24 @@ footer a:hover { color: #00FFFF !important; }
     animation: none;
   }
 }
+
+/* ── Events "I'll be there": badge pulse + message-panel slide-in ── */
+.attendance-badge-pulse {
+  animation: attendance-badge-pulse 2.4s ease-out infinite;
+}
+
+@keyframes attendance-badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(204, 255, 0, 0); }
+}
+
+@keyframes attendance-panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-badge-pulse {
+    animation: none;
+  }
+}
