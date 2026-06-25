@@ -7,11 +7,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Search, Plus, X, ChevronDown } from "lucide-react";
+import { Briefcase, Search, X, ChevronDown } from "lucide-react";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -42,15 +38,25 @@ interface GigPost {
   userId?: number | null;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  LOOKING_FOR_WORK: "#00FFFF",
-  POSTING_GIG: "#CCFF00",
-};
-
 const TYPE_LABELS: Record<string, string> = {
   LOOKING_FOR_WORK: "LOOKING FOR WORK",
   POSTING_GIG: "POSTING A GIG",
 };
+
+const FILTER_LABELS: Record<string, string> = {
+  ALL: "All posts",
+  POSTING_GIG: "Posting a gig",
+  LOOKING_FOR_WORK: "Looking for work",
+};
+
+const HOW_IT_WORKS = [
+  ["POST IT", "Share a gig or say what work you're looking for."],
+  ["ADD DETAILS", "Skills, pay, location, and what makes it queer Pride work."],
+  ["GET REVIEWED", "Admins approve posts to keep the board community-safe."],
+  ["CONNECT", "Reply privately through the site inbox."],
+  ["DO THE WORK", "Show up, get paid, build queer community labor."],
+  ["STAMP IT DONE", "Mark filled or found when the gig wraps."],
+];
 
 export default function PrideWork() {
   const { toast } = useToast();
@@ -91,327 +97,240 @@ export default function PrideWork() {
     },
   });
 
-  const handlePostClick = () => {
+  const openForm = (postType: "POSTING_GIG" | "LOOKING_FOR_WORK") => {
     if (!user) {
       setShowAuth(true);
       return;
     }
-    setShowForm(!showForm);
+    form.setValue("postType", postType);
+    setShowForm(true);
+    window.setTimeout(() => document.getElementById("gigs-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
   };
 
   const filteredGigs = gigs.filter(g =>
     filterType === "ALL" ? true : g.postType === filterType
   );
 
-  return (
-    <div className="min-h-screen zine-page pride-work-page" style={{ background: "#0a0a0a" }}>
-      {/* Header */}
-      <div className="zine-section-head pride-work-hero border-b-2 border-white/10 px-4 py-8 md:px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-start flex-wrap gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Briefcase size={20} style={{ color: "#CCFF00" }} />
-                <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>
-                  Pride Work
-                </span>
-              </div>
-              <h1 className="display page-hero-title text-white">
-                QUEER<br />
-                <span style={{ color: "#CCFF00" }}>GIG BOARD</span>
-              </h1>
-              <p className="mt-3 text-white/60 max-w-lg">
-                Community-powered job board for Pride weekend and beyond. 
-                Queer workers, queer employers, queer gigs.
-              </p>
-              <button
-                data-testid="button-post-gig"
-                onClick={handlePostClick}
-                className="display text-lg px-6 py-3 border-2 transition-all mt-6"
-                style={{
-                  background: showForm ? "#CCFF00" : "transparent",
-                  borderColor: "#CCFF00",
-                  color: showForm ? "#000" : "#CCFF00",
-                }}
-              >
-                {showForm ? <X size={16} className="inline mr-2" /> : <Plus size={16} className="inline mr-2" />}
-                {showForm ? "CANCEL" : "POST HERE"}
-              </button>
-            </div>
-          </div>
+  const postType = form.watch("postType");
 
-          {/* Filter tabs */}
-          <div className="flex gap-2 mt-6 flex-wrap">
+  return (
+    <div className="zine-page gigs-page board-page">
+      <section className="gigs-hero">
+        <div className="gigs-hero-bg" />
+        <div className="gigs-hero-inner">
+          <div className="board-kicker">PRIDE SEASON · QUEER WORK</div>
+          <h1 className="display page-hero-title gigs-title">
+            PRIDE<br /><span>GIG BOARD</span>
+          </h1>
+          <p className="gigs-lede">
+            Community-powered job board for Pride weekend and beyond. Queer workers, queer employers, queer gigs.
+          </p>
+          <p className="gigs-tagline">Paid, respected, valued.</p>
+          <div className="gifting-actions">
+            <button className="btn-neon cyan" onClick={() => setFilterType("LOOKING_FOR_WORK")}>
+              <Search size={16} /> Find Work
+            </button>
+            <button className="btn-neon" data-testid="button-post-gig" onClick={() => openForm("POSTING_GIG")}>
+              <Briefcase size={16} /> Post a Gig
+            </button>
+            <button className="btn-neon magenta" onClick={() => openForm("LOOKING_FOR_WORK")}>
+              <Search size={16} /> Post Availability
+            </button>
+            <a href="#how-it-works" className="gifting-how-link">How It Works ↓</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" className="gigs-how">
+        <div>
+          <span className="board-sticker" style={{ color: "#CCFF00" }}>HOW IT WORKS</span>
+          <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
+          <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
+        </div>
+        <div className="gigs-steps">
+          {HOW_IT_WORKS.map(([title, text], i) => (
+            <article className="gigs-step" key={title}>
+              <b>{i + 1}</b>
+              <h3 className="display panel-heading">{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+        <div className="gigs-footer-line">Paid, respected, valued. · Pride season and beyond</div>
+      </section>
+
+      {showForm && (
+        <section id="gigs-form" className="gigs-form-panel" data-testid="form-pride-work">
+          <button className="gigs-close" onClick={() => setShowForm(false)} aria-label="Close form">
+            <X size={18} />
+          </button>
+          <h2 className="display section-heading">POST TO THE GIG BOARD</h2>
+          <p className="board-copy-sm">All posts require admin approval before going live. Posts must be related to Pride events, queer spaces, or the community.</p>
+          <form onSubmit={form.handleSubmit(d => mutation.mutate(d))} className="gigs-form-grid">
+            <label className="span">
+              Post type
+              <div className="gigs-type-toggle">
+                {(["POSTING_GIG", "LOOKING_FOR_WORK"] as const).map(type => (
+                  <button
+                    key={type}
+                    type="button"
+                    data-testid={`select-posttype-${type}`}
+                    className={`${postType === type ? "active" : ""} ${type === "POSTING_GIG" ? "posting" : "looking"}`}
+                    onClick={() => form.setValue("postType", type)}
+                  >
+                    {TYPE_LABELS[type]}
+                  </button>
+                ))}
+              </div>
+            </label>
+
+            <label>
+              Your name *
+              <input
+                className="gigs-field"
+                data-testid="input-name"
+                placeholder="Name or handle"
+                {...form.register("name")}
+              />
+              {form.formState.errors.name && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.name.message}</span>}
+            </label>
+
+            <label>
+              Contact email *
+              <input
+                className="gigs-field"
+                data-testid="input-email"
+                type="email"
+                placeholder="your@email.com"
+                {...form.register("contactEmail")}
+              />
+              {form.formState.errors.contactEmail && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.contactEmail.message}</span>}
+            </label>
+
+            <label className="span">
+              {postType === "POSTING_GIG" ? "Gig title *" : "Role / what you do *"}
+              <input
+                className="gigs-field"
+                data-testid="input-title"
+                placeholder={postType === "POSTING_GIG" ? "e.g. Stage Manager for Pride Stage" : "e.g. Event Photographer"}
+                {...form.register("title")}
+              />
+              {form.formState.errors.title && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.title.message}</span>}
+            </label>
+
+            <label className="span">
+              Description *
+              <textarea
+                className="gigs-field"
+                data-testid="input-description"
+                rows={5}
+                placeholder={postType === "POSTING_GIG"
+                  ? "Describe the gig, responsibilities, dates, what you need..."
+                  : "Tell the community what you offer, your experience, availability..."}
+                {...form.register("description")}
+              />
+              {form.formState.errors.description && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.description.message}</span>}
+            </label>
+
+            <label>
+              Skills / tags
+              <input
+                className="gigs-field"
+                data-testid="input-skills"
+                placeholder="e.g. Sound, Lighting, Photography"
+                {...form.register("skills")}
+              />
+            </label>
+
+            <label>
+              Compensation
+              <input
+                className="gigs-field"
+                data-testid="input-compensation"
+                placeholder="e.g. $25/hr, Volunteer, Negotiable"
+                {...form.register("compensation")}
+              />
+            </label>
+
+            <label className="span">
+              Location
+              <input
+                className="gigs-field"
+                data-testid="input-location"
+                placeholder="e.g. Portland, OR / Remote / Washington Park"
+                {...form.register("location")}
+              />
+            </label>
+
+            <div className="span gigs-form-actions">
+              <button type="submit" className="btn-neon solid" data-testid="button-submit-gig" disabled={mutation.isPending}>
+                {mutation.isPending ? "SUBMITTING..." : "SUBMIT FOR REVIEW"}
+              </button>
+              <p className="board-copy-sm">Reviewed by admins before going live</p>
+            </div>
+          </form>
+        </section>
+      )}
+
+      <section className="gigs-feed">
+        <div className="gigs-feed-head">
+          <div>
+            <span className="board-sticker" style={{ color: "#00FFFF" }}>ACTIVE BOARD</span>
+            <h2 className="display section-heading">GIGS & AVAILABILITY</h2>
+          </div>
+          <div className="gigs-filterbar">
             {(["ALL", "POSTING_GIG", "LOOKING_FOR_WORK"] as const).map(type => (
               <button
                 key={type}
                 data-testid={`filter-${type}`}
+                className={`${filterType === type ? "active" : ""} ${type === "LOOKING_FOR_WORK" ? "looking" : ""}`}
                 onClick={() => setFilterType(type)}
-                className="sticker transition-all"
-                style={{
-                  color: filterType === type ? "#000" : (type === "ALL" ? "#fff" : TYPE_COLORS[type]),
-                  borderColor: type === "ALL" ? "#fff" : TYPE_COLORS[type],
-                  background: filterType === type ? (type === "ALL" ? "#fff" : TYPE_COLORS[type]) : "transparent",
-                }}
               >
-                {type === "ALL" ? "ALL POSTS" : TYPE_LABELS[type]}
+                {FILTER_LABELS[type]}
               </button>
             ))}
-            <span className="sticker ml-2" style={{ borderColor: "transparent", color: "#666" }}>
+            <span className="count">
               {filteredGigs.length} post{filteredGigs.length !== 1 ? "s" : ""}
             </span>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8 md:px-8">
-        {/* Post Form */}
-        {showForm && (
-          <div
-            data-testid="form-pride-work"
-            className="mb-10 p-6 md:p-8 border-2"
-            style={{ background: "#111", borderColor: "#CCFF00" }}
-          >
-            <h2 className="display section-heading text-white mb-6">
-              POST TO THE GIG BOARD
-            </h2>
-            <p className="text-white/50 text-sm mb-8">
-              All posts require admin approval before going live. Posts must be related to Pride events, queer spaces, or the community.
-            </p>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(d => mutation.mutate(d))} className="space-y-5">
-                {/* Post type */}
-                <FormField
-                  control={form.control}
-                  name="postType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>POST TYPE *</FormLabel>
-                      <div className="grid grid-cols-2 gap-3">
-                        {(["POSTING_GIG", "LOOKING_FOR_WORK"] as const).map(type => (
-                          <button
-                            key={type}
-                            type="button"
-                            data-testid={`select-posttype-${type}`}
-                            onClick={() => field.onChange(type)}
-                            className="py-3 px-4 border-2 display text-sm transition-all text-left"
-                            style={{
-                              borderColor: TYPE_COLORS[type],
-                              background: field.value === type ? TYPE_COLORS[type] : "transparent",
-                              color: field.value === type ? "#000" : TYPE_COLORS[type],
-                            }}
-                          >
-                            {TYPE_LABELS[type]}
-                          </button>
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid md:grid-cols-2 gap-5">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>YOUR NAME *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            data-testid="input-name"
-                            placeholder="Name or handle"
-                            className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="contactEmail"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>CONTACT EMAIL *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            data-testid="input-email"
-                            type="email"
-                            placeholder="your@email.com"
-                            className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>
-                        {form.watch("postType") === "POSTING_GIG" ? "GIG TITLE *" : "ROLE / WHAT YOU DO *"}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          data-testid="input-title"
-                          placeholder={form.watch("postType") === "POSTING_GIG" ? "e.g. Stage Manager for Pride Stage" : "e.g. Event Photographer"}
-                          className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>DESCRIPTION *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          data-testid="input-description"
-                          rows={4}
-                          placeholder={form.watch("postType") === "POSTING_GIG"
-                            ? "Describe the gig, responsibilities, dates, what you need..."
-                            : "Tell the community what you offer, your experience, availability..."}
-                          className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400 resize-none"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid md:grid-cols-2 gap-5">
-                  <FormField
-                    control={form.control}
-                    name="skills"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>SKILLS / TAGS</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            data-testid="input-skills"
-                            placeholder="e.g. Sound, Lighting, Photography"
-                            className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="compensation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>COMPENSATION</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            data-testid="input-compensation"
-                            placeholder="e.g. $25/hr, Volunteer, Negotiable"
-                            className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="display text-sm" style={{ color: "#CCFF00" }}>LOCATION</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          data-testid="input-location"
-                          placeholder="e.g. Portland, OR / Remote / Washington Park"
-                          className="border-white/20 bg-black/40 text-white placeholder:text-white/30 focus:border-yellow-400"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="pt-2 flex items-center gap-4">
-                  <button
-                    type="submit"
-                    data-testid="button-submit-gig"
-                    disabled={mutation.isPending}
-                    className="display text-lg px-8 py-3 border-2 transition-all disabled:opacity-50"
-                    style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
-                  >
-                    {mutation.isPending ? "SUBMITTING..." : "SUBMIT FOR REVIEW"}
-                  </button>
-                  <p className="text-white/30 text-xs">Reviewed by admins before going live</p>
-                </div>
-              </form>
-            </Form>
-          </div>
-        )}
-
-        {/* Gig listings */}
         {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-32 border border-white/10 bg-white/5 animate-pulse" />
-            ))}
-          </div>
+          <p className="board-copy-sm">Loading gig posts...</p>
         ) : isError ? (
-          <div className="text-center py-20 border-2" style={{ borderColor: "#FF6600" }}>
-            <Briefcase size={40} className="mx-auto mb-4" style={{ color: "#FF6600" }} />
-            <p className="display text-2xl text-white">COULD NOT LOAD POSTS</p>
-            <p className="text-white/50 text-sm mt-2 max-w-md mx-auto">
+          <div className="board-empty" style={{ borderColor: "#FF6600" }}>
+            <Briefcase size={40} style={{ color: "#FF6600", margin: "0 auto" }} />
+            <p className="display section-heading" style={{ color: "#fff" }}>COULD NOT LOAD POSTS</p>
+            <p className="board-copy-sm">
               {error instanceof Error ? error.message : "The gig board API is unavailable right now."}
             </p>
             <button
               onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}
-              className="mt-6 display text-base px-6 py-2 border-2 transition-all"
-              style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+              className="btn-neon"
+              style={{ marginTop: 20 }}
             >
               TRY AGAIN
             </button>
           </div>
         ) : filteredGigs.length === 0 ? (
-          <div className="text-center py-20">
-            <Briefcase size={40} className="mx-auto mb-4 text-white/20" />
-            <p className="display text-2xl text-white/30">NO POSTS YET</p>
-            <p className="text-white/30 text-sm mt-2">Be the first to post a gig or offer your skills.</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-6 display text-base px-6 py-2 border-2 transition-all"
-              style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
-            >
+          <div className="board-empty">
+            <Briefcase size={40} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto" }} />
+            <p className="display section-heading">NO POSTS YET</p>
+            <p className="board-copy-sm">Be the first to post a gig or offer your skills.</p>
+            <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("POSTING_GIG")}>
               POST HERE
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredGigs.map((gig) => (
+          <div className="gigs-grid">
+            {filteredGigs.map(gig => (
               <GigCard key={gig.id} gig={gig} />
             ))}
           </div>
         )}
-      </div>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      </section>
+
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
   );
 }
@@ -422,8 +341,8 @@ function GigCard({ gig }: { gig: GigPost }) {
   const [showAuth, setShowAuth] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [messageBody, setMessageBody] = useState("");
-  const color = TYPE_COLORS[gig.postType] || "#fff";
   const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const isLooking = gig.postType === "LOOKING_FOR_WORK";
 
   const messageMutation = useMutation({
     mutationFn: () => fetch(`/api/gigs/${gig.id}/message`, {
@@ -441,109 +360,77 @@ function GigCard({ gig }: { gig: GigPost }) {
     },
   });
 
-  return (
-    <div
-      data-testid={`card-gig-${gig.id}`}
-      className="poster-card gig-card border-2 transition-all"
-      style={{ background: "#111", borderColor: expanded ? color : "#222" }}
-    >
-      <button
-        className="w-full text-left p-5 md:p-6"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span
-                className="sticker text-xs"
-                style={{ color, borderColor: color }}
-              >
-                {TYPE_LABELS[gig.postType]}
-              </span>
-              {gig.isRemote && (
-                <span className="sticker text-xs" style={{ color: "#8800FF", borderColor: "#8800FF" }}>
-                  REMOTE
-                </span>
-              )}
-            </div>
-            <h3 className="display panel-heading text-white">{gig.title}</h3>
-            <p className="text-white/50 text-sm mt-1">{gig.name}</p>
-            <div className="flex items-center gap-4 mt-3 flex-wrap">
-              {gig.compensation && (
-                <span className="text-sm" style={{ color }}>
-                  {gig.compensation}
-                </span>
-              )}
-              {gig.location && (
-                <span className="text-white/40 text-sm">{gig.location}</span>
-              )}
-            </div>
-          </div>
-          <ChevronDown
-            size={20}
-            className="text-white/40 flex-shrink-0 mt-1 transition-transform"
-            style={{ transform: expanded ? "rotate(180deg)" : "none" }}
-          />
-        </div>
-      </button>
+  const detailParts = [gig.compensation, gig.location].filter(Boolean);
 
-      {expanded && (
-        <div className="px-5 md:px-6 pb-5 md:pb-6 border-t border-white/10 pt-4">
-          <p className="text-white/70 text-sm leading-relaxed whitespace-pre-line mb-4">
-            {gig.description}
-          </p>
-          {skills.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {skills.map(skill => (
-                <span
-                  key={skill}
-                  className="sticker text-xs"
-                  style={{ color: "#fff", borderColor: "#333" }}
-                >
-                  {skill}
-                </span>
-              ))}
+  return (
+    <article
+      data-testid={`card-gig-${gig.id}`}
+      className={`gigs-card ${isLooking ? "looking" : "posting"}`}
+    >
+      <div className="gigs-card-accent" aria-hidden="true" />
+      <div className="gigs-card-body">
+        <button className="gigs-card-toggle" onClick={() => setExpanded(!expanded)} type="button">
+          <div className="gigs-card-head">
+            <div className="gigs-card-summary">
+              <div className="gigs-card-meta">
+                <span className="gigs-type">{TYPE_LABELS[gig.postType]}</span>
+                {gig.isRemote && <span className="gigs-remote">REMOTE</span>}
+                <span>{gig.location || "Portland"}</span>
+              </div>
+              <h3 className="display panel-heading">{gig.title}</h3>
+              <p className="gigs-poster-name">{gig.name}</p>
+              {detailParts.length > 0 && (
+                <div className="gigs-details">{detailParts.join(" · ")}</div>
+              )}
             </div>
-          )}
-          <div className="pt-3 border-t border-white/10">
-            <p className="text-white/30 text-xs">
-              Posted {new Date(gig.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            </p>
-            {gig.userId !== user?.id && (
-              <button
-                type="button"
-                onClick={() => user ? setShowMessage(!showMessage) : setShowAuth(true)}
-                className="mt-4 display text-sm px-4 py-2 border-2"
-                style={{ color, borderColor: color }}
-              >
-                Reply to Post
-              </button>
-            )}
-            {showMessage && (
-              <div className="mt-4 p-4 border border-white/10 bg-black/40">
-                <textarea
-                  value={messageBody}
-                  onChange={e => setMessageBody(e.target.value)}
-                  placeholder={`Write a private reply about "${gig.title}"...`}
-                  className="w-full min-h-24 p-3 bg-black border border-white/20 text-white resize-y"
-                />
-                <div className="flex gap-2 mt-3">
-                  <button
-                    onClick={() => messageMutation.mutate()}
-                    disabled={!messageBody.trim() || messageMutation.isPending}
-                    className="display text-sm px-4 py-2"
-                    style={{ background: color, color: "#000", opacity: !messageBody.trim() || messageMutation.isPending ? 0.55 : 1 }}
-                  >
-                    {messageMutation.isPending ? "SENDING..." : "SEND"}
-                  </button>
-                  <button onClick={() => setShowMessage(false)} className="text-white/40 text-sm px-3 py-2 border border-white/10">Cancel</button>
-                </div>
+            <ChevronDown size={20} className={`gigs-chevron ${expanded ? "open" : ""}`} />
+          </div>
+        </button>
+
+        {expanded && (
+          <div className="gigs-card-expand">
+            <p className="board-copy" style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
+            {skills.length > 0 && (
+              <div className="gigs-skills">
+                {skills.map(skill => <span key={skill}>{skill}</span>)}
               </div>
             )}
+            {gig.userId !== user?.id && (
+              <>
+                <button
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => user ? setShowMessage(!showMessage) : setShowAuth(true)}
+                >
+                  Reply to Post
+                </button>
+                {showMessage && (
+                  <div className="gigs-response">
+                    <textarea
+                      value={messageBody}
+                      onChange={e => setMessageBody(e.target.value)}
+                      placeholder={`Write a private reply about "${gig.title}"...`}
+                    />
+                    <div className="gifting-actions">
+                      <button
+                        type="button"
+                        className="btn-neon solid"
+                        onClick={() => messageMutation.mutate()}
+                        disabled={!messageBody.trim() || messageMutation.isPending}
+                        style={{ opacity: !messageBody.trim() || messageMutation.isPending ? 0.55 : 1 }}
+                      >
+                        {messageMutation.isPending ? "SENDING..." : "SEND"}
+                      </button>
+                      <button type="button" className="btn-neon" onClick={() => setShowMessage(false)}>Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    </div>
+    </article>
   );
 }

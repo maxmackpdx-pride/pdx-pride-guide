@@ -134,11 +134,11 @@ export default function Gifting() {
   };
 
   return (
-    <div className="zine-page gifting-page">
+    <div className="zine-page gifting-page board-page">
       <section className="gifting-hero">
         <div className="gifting-hero-bg" />
         <div className="gifting-hero-inner">
-          <div className="home-hero-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
+          <div className="board-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
           <h1 className="display page-hero-title gifting-title">GIFT WITH<br /><span>PRIDE</span></h1>
           <p className="gifting-lede">A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home.</p>
           <p className="gifting-tagline">Give gay gifts. Queer homes. Keep it moving.</p>
@@ -152,9 +152,9 @@ export default function Gifting() {
 
       <section id="how-it-works" className="gifting-how">
         <div>
-          <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>HOW IT WORKS</span>
+          <span className="board-sticker" style={{ color: "#00FFFF" }}>HOW IT WORKS</span>
           <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
-          <p>Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
+          <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
         </div>
         <div className="gifting-steps">
           {[
@@ -199,7 +199,7 @@ export default function Gifting() {
       <section className="gifting-feed">
         <div className="gifting-feed-head">
           <div>
-            <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>ACTIVE BOARD</span>
+            <span className="board-sticker" style={{ color: "#CCFF00" }}>ACTIVE BOARD</span>
             <h2 className="display section-heading">GIFTS & IN SEARCH OF</h2>
           </div>
           <div className="gifting-filterbar">
@@ -210,7 +210,7 @@ export default function Gifting() {
           </div>
         </div>
 
-        {isLoading ? <p className="text-white/50">Loading gifting posts...</p> : (
+        {isLoading ? <p className="board-copy-sm">Loading gifting posts...</p> : (
           <div className="gifting-grid">
             {filtered.map(post => (
               <article className={`gifting-card ${post.postType.toLowerCase()}`} key={post.id}>
