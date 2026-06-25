@@ -43,6 +43,7 @@ interface Attendee {
   photoUrl?: string | null;
   avatarChoice?: number;
   avatarRing?: string | null;
+  masked?: boolean;
 }
 
 interface BubbleState {
@@ -67,6 +68,14 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastRandomizeRef = useRef<number>(Date.now());
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const handler = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],
@@ -119,6 +128,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
   // Animate bubbles: slow drift + random show/hide
   useEffect(() => {
     if (bubbles.length === 0) return;
+    if (isMobile) return;
 
     const animate = () => {
       const W = containerRef.current?.offsetWidth || 600;
@@ -163,7 +173,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
     animFrameRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [bubbles.length]);
+  }, [bubbles.length, isMobile]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,8 +231,8 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
         )}
       </div>
 
-      {/* Animated bubble cluster */}
-      {bubbles.length > 0 && (
+      {/* Animated bubble cluster (desktop) */}
+      {bubbles.length > 0 && !isMobile && (
         <div
           ref={containerRef}
           style={{
@@ -297,11 +307,13 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       boxShadow: "3px 3px 0 #000",
                     }}
                   >
-                    <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "#555" }}>
-                      {b.attendee.handle}
-                    </span>
+                    {!b.attendee.masked && (
+                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "#555" }}>
+                        {b.attendee.handle}
+                      </span>
+                    )}
                     {b.attendee.message}
-                    {user && b.attendee.userId && b.attendee.userId !== user.id && (
+                    {user && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
@@ -321,6 +333,111 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       </button>
                     )}
                     {/* Tail */}
+                    <div style={{
+                      position: "absolute",
+                      bottom: -8,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: 0,
+                      height: 0,
+                      borderLeft: "7px solid transparent",
+                      borderRight: "7px solid transparent",
+                      borderTop: "8px solid #fff",
+                    }} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Mobile horizontal strip (auto-switches by breakpoint, no physics) */}
+      {bubbles.length > 0 && isMobile && (
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            overflowX: "auto",
+            overflowY: "visible",
+            paddingBottom: 8,
+            marginBottom: 16,
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {bubbles.map((b, i) => {
+            const isHovered = hoveredId === b.attendee.id;
+            const avatarSize = 48;
+            return (
+              <div
+                key={b.attendee.id}
+                data-testid={`bubble-strip-attendee-${b.attendee.id}`}
+                onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
+                style={{
+                  position: "relative",
+                  flex: "0 0 auto",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
+                <UserAvatar
+                  photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
+                  avatarChoice={b.attendee.avatarChoice}
+                  avatarRing={b.attendee.avatarRing}
+                  displayName={b.attendee.handle}
+                  size={avatarSize}
+                />
+                {isHovered && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "calc(100% + 8px)",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "#fff",
+                      color: "#000",
+                      fontSize: "0.7rem",
+                      fontFamily: "var(--font-body)",
+                      fontWeight: 500,
+                      padding: "6px 10px",
+                      border: "2px solid #000",
+                      maxWidth: 220,
+                      whiteSpace: "normal",
+                      textAlign: "center",
+                      lineHeight: 1.3,
+                      zIndex: 30,
+                      pointerEvents: "auto",
+                      boxShadow: "3px 3px 0 #000",
+                    }}
+                  >
+                    {!b.attendee.masked && (
+                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "#555" }}>
+                        {b.attendee.handle}
+                      </span>
+                    )}
+                    {b.attendee.message}
+                    {user && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
+                        style={{
+                          display: "block",
+                          margin: "6px auto 0",
+                          border: "1px solid #000",
+                          background: "#CCFF00",
+                          color: "#000",
+                          fontFamily: "var(--font-display)",
+                          fontWeight: 900,
+                          fontSize: "0.62rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        MESSAGE
+                      </button>
+                    )}
                     <div style={{
                       position: "absolute",
                       bottom: -8,
