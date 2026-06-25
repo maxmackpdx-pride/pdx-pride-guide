@@ -1420,6 +1420,20 @@ function removeGiftingSeedPosts() {
   `).run();
 }
 
+function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
+    const viewerRsvped = viewerUserId != null && rows.some((r: any) => r.user_id === viewerUserId);
+    if (viewerRsvped) return rows;
+    return rows.map((r: any) => ({
+          ...r,
+          username: null,
+          displayName: null,
+          userPhotoUrl: null,
+          avatarChoice: null,
+          avatarRing: null,
+          masked: true,
+    }));
+}
+
 export interface IStorage {
   // Events
   getEvents(filters?: { status?: string; day?: string }): Event[];
@@ -1450,7 +1464,7 @@ export interface IStorage {
   createModerationRequest(data: InsertModerationRequest): ModerationRequest;
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   // Attendance
-  getAttendances(eventId: number): any[];
+  getAttendances(eventId: number, viewerUserId?: number): any[];
   getAttendancesByUser(userId: number): any[];
   upsertAttendance(eventId: number, user: User, message: string): Attendance;
   removeAttendance(eventId: number, userId: number): void;
@@ -1660,15 +1674,12 @@ export const storage: IStorage = {
       }
     }
   },
-  getAttendances(eventId) {
-    return sqlite.prepare(`
-      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+    getAttendances(eventId, viewerUserId) {      return maskAttendances(viewerUserId, sqlite.prepare(`      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.event_id = ? AND a.is_active = 1
       ORDER BY a.created_at DESC
-    `).all(eventId) as any[];
-  },
+      `).all(eventId) as any[]);  },
   getAttendancesByUser(userId) {
     return sqlite.prepare(`
       SELECT a.*, e.title AS eventTitle, e.venue_name AS venueName, e.date_start AS dateStart
