@@ -20,6 +20,11 @@ const SPEECH_OPTIONS = [
   "Hey, I'm floating around — tap me if you want company",
 ];
 
+// First 5 are the default pill row; the rest are tucked behind "More vibes"
+// so nothing from the original 12 gets dropped, per Tucker's "preserve everything" rule.
+const PRIMARY_OPTIONS = SPEECH_OPTIONS.slice(0, 5);
+const MORE_OPTIONS = SPEECH_OPTIONS.slice(5);
+
 // Generate a deterministic neon color from a seed string
 function seedColor(seed: string): string {
   let h = 0;
@@ -31,6 +36,10 @@ function seedColor(seed: string): string {
 // Generate initials from handle
 function initials(handle: string): string {
   return handle.slice(0, 2).toUpperCase();
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 interface Attendee {
@@ -59,15 +68,18 @@ interface BubbleState {
 export default function AttendanceCluster({ eventId }: { eventId: number }) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [showMoreVibes, setShowMoreVibes] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(SPEECH_OPTIONS[0]);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [bubbles, setBubbles] = useState<BubbleState[]>([]);
   const [showAuth, setShowAuth] = useState(false);
   const [messageTarget, setMessageTarget] = useState<Attendee | null>(null);
   const [messageBody, setMessageBody] = useState("");
+  const [newAttendeeIds, setNewAttendeeIds] = useState<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastRandomizeRef = useRef<number>(Date.now());
+  const seenIdsRef = useRef<Set<number> | null>(null);
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
 
   useEffect(() => {
@@ -80,7 +92,29 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],
     queryFn: () => apiRequest("GET", `/api/events/${eventId}/attendance`).then(r => r.json()),
+    refetchInterval: 15000,
   });
+
+  // Track which attendees are newly arrived (vs. already seen) so their bubble
+  // can pop in instead of just appearing. First load seeds the "seen" set with
+  // no animation; every load after that, anyone not previously seen gets the pop.
+  useEffect(() => {
+    const currentIds = new Set(attendees.map(a => a.id));
+    if (seenIdsRef.current === null) {
+      seenIdsRef.current = currentIds;
+      return;
+    }
+    const freshIds = new Set<number>();
+    currentIds.forEach(id => {
+      if (!seenIdsRef.current!.has(id)) freshIds.add(id);
+    });
+    seenIdsRef.current = currentIds;
+    if (freshIds.size > 0) {
+      setNewAttendeeIds(freshIds);
+      const t = setTimeout(() => setNewAttendeeIds(new Set()), 900);
+      return () => clearTimeout(t);
+    }
+  }, [attendees]);
 
   const mutation = useMutation({
     mutationFn: (data: { message: string }) =>
@@ -182,6 +216,72 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
   const myAttendance = attendees.find(a => a.userId === user?.id);
 
+  const pillStyle = (active: boolean): React.CSSProperties => ({
+    textAlign: "center",
+    padding: "8px 14px",
+    borderRadius: 999,
+    background: active ? "#CCFF00" : "transparent",
+    border: `1px solid ${active ? "#CCFF00" : "#333"}`,
+    color: active ? "#000" : "#aaa",
+    fontSize: "0.78rem",
+    fontFamily: "var(--font-body)",
+    cursor: "pointer",
+    transition: "all 0.15s",
+    whiteSpace: "nowrap",
+  });
+
+  const phrasePicker = (
+    <>
+      <p className="display" style={{ fontSize: "0.85rem", color: "#CCFF00", marginBottom: 12 }}>
+        PICK YOUR VIBE
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+        {PRIMARY_OPTIONS.map(opt => (
+          <button
+            key={opt}
+            type="button"
+            data-testid={`option-${opt.slice(0, 20)}`}
+            onClick={() => setSelectedMessage(opt)}
+            style={pillStyle(selectedMessage === opt)}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+      {showMoreVibes && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+          {MORE_OPTIONS.map(opt => (
+            <button
+              key={opt}
+              type="button"
+              data-testid={`option-${opt.slice(0, 20)}`}
+              onClick={() => setSelectedMessage(opt)}
+              style={pillStyle(selectedMessage === opt)}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setShowMoreVibes(s => !s)}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: "#666",
+          fontSize: "0.72rem",
+          cursor: "pointer",
+          textDecoration: "underline",
+          padding: 0,
+          marginBottom: 16,
+        }}
+      >
+        {showMoreVibes ? "Fewer vibes" : "More vibes"}
+      </button>
+    </>
+  );
+
   return (
     <div
       style={{
@@ -246,10 +346,12 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
             const color = seedColor(b.attendee.avatarSeed);
             const isHovered = hoveredId === b.attendee.id;
             const avatarSize = Math.max(36, b.size - 4);
+            const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
             return (
               <div
                 key={b.attendee.id}
                 data-testid={`bubble-attendee-${b.attendee.id}`}
+                className={isNew ? "attendance-pop-in" : undefined}
                 onMouseEnter={() => setHoveredId(b.attendee.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
@@ -313,7 +415,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       </span>
                     )}
                     {b.attendee.message}
-                    {user && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
+                    {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
@@ -368,10 +470,12 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
           {bubbles.map((b, i) => {
             const isHovered = hoveredId === b.attendee.id;
             const avatarSize = 48;
+            const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
             return (
               <div
                 key={b.attendee.id}
                 data-testid={`bubble-strip-attendee-${b.attendee.id}`}
+                className={isNew ? "attendance-pop-in" : undefined}
                 onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
                 style={{
                   position: "relative",
@@ -419,7 +523,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                       </span>
                     )}
                     {b.attendee.message}
-                    {user && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
+                    {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
@@ -463,44 +567,42 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
         </div>
       )}
 
-      {/* Sign-up form */}
+      {/* Sign-up form: inline panel on desktop, bottom-sheet on mobile */}
+      {showForm && isMobile && (
+        <div
+          onClick={() => setShowForm(false)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 55 }}
+        />
+      )}
       {showForm && (
         <form
           onSubmit={handleSubmit}
           data-testid="form-attendance"
-          style={{
-            background: "#111",
-            border: "1px solid #222",
-            padding: "16px",
-            marginTop: 12,
-          }}
+          style={
+            isMobile
+              ? {
+                  position: "fixed",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 60,
+                  background: "#111",
+                  borderTop: "2px solid #CCFF00",
+                  padding: "16px",
+                  maxHeight: "75vh",
+                  overflowY: "auto",
+                  boxShadow: "0 -8px 24px rgba(0,0,0,0.6)",
+                  animation: prefersReducedMotion() ? undefined : "attendance-sheet-up 0.25s ease-out",
+                }
+              : {
+                  background: "#111",
+                  border: "1px solid #222",
+                  padding: "16px",
+                  marginTop: 12,
+                }
+          }
         >
-          <p className="display" style={{ fontSize: "0.85rem", color: "#CCFF00", marginBottom: 12 }}>
-            PICK YOUR VIBE
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16, maxHeight: 200, overflowY: "auto" }}>
-            {SPEECH_OPTIONS.map(opt => (
-              <button
-                key={opt}
-                type="button"
-                data-testid={`option-${opt.slice(0, 20)}`}
-                onClick={() => setSelectedMessage(opt)}
-                style={{
-                  textAlign: "left",
-                  padding: "7px 12px",
-                  background: selectedMessage === opt ? "#CCFF00" : "transparent",
-                  border: `1px solid ${selectedMessage === opt ? "#CCFF00" : "#333"}`,
-                  color: selectedMessage === opt ? "#000" : "#aaa",
-                  fontSize: "0.8rem",
-                  fontFamily: "var(--font-body)",
-                  cursor: "pointer",
-                  transition: "all 0.1s",
-                }}
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
+          {phrasePicker}
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <button
               type="submit"
