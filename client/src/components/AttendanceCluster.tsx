@@ -294,7 +294,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
         <div>
-          <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00", fontSize: "0.6rem" }}>
+          <span className={`sticker${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`} style={{ color: "#CCFF00", borderColor: "#CCFF00", fontSize: "0.6rem" }}>
             {attendees.length} GOING
           </span>
           <h3 className="display" style={{ fontSize: "1.4rem", color: "#fff", margin: "6px 0 0" }}>
@@ -347,6 +347,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
             const isHovered = hoveredId === b.attendee.id;
             const avatarSize = Math.max(36, b.size - 4);
             const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
+            const isSelf = !!user && b.attendee.userId === user.id;
             return (
               <div
                 key={b.attendee.id}
@@ -383,6 +384,22 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                   displayName={b.attendee.handle}
                   size={avatarSize}
                 />
+                {isSelf && (
+                  <span
+                    data-testid="self-marker"
+                    style={{
+                      position: "absolute",
+                      bottom: -2,
+                      right: -2,
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: "#CCFF00",
+                      border: "2px solid #0d0d0d",
+                      zIndex: 25,
+                    }}
+                  />
+                )}
 
                 {/* Speech bubble on hover */}
                 {isHovered && (
@@ -471,6 +488,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
             const isHovered = hoveredId === b.attendee.id;
             const avatarSize = 48;
             const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
+            const isSelf = !!user && b.attendee.userId === user.id;
             return (
               <div
                 key={b.attendee.id}
@@ -494,6 +512,22 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                   displayName={b.attendee.handle}
                   size={avatarSize}
                 />
+                {isSelf && (
+                  <span
+                    data-testid="self-marker-strip"
+                    style={{
+                      position: "absolute",
+                      bottom: -2,
+                      right: -2,
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: "#CCFF00",
+                      border: "2px solid #0d0d0d",
+                      zIndex: 5,
+                    }}
+                  />
+                )}
                 {isHovered && (
                   <div
                     style={{
@@ -657,28 +691,87 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
         </form>
       )}
       {messageTarget && (
-        <div style={{ marginTop: 14, border: "1px solid #333", background: "#090909", padding: 14 }}>
-          <p className="display" style={{ color: "#CCFF00", fontSize: "0.9rem", marginBottom: 8 }}>
-            MESSAGE {messageTarget.handle}
-          </p>
-          <textarea
-            value={messageBody}
-            onChange={e => setMessageBody(e.target.value)}
-            placeholder={`Reply to: ${messageTarget.message}`}
-            style={{ width: "100%", minHeight: 72, background: "#000", color: "#fff", border: "1px solid #333", padding: 10, boxSizing: "border-box" }}
-          />
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button
-              onClick={() => messageTarget && messageMutation.mutate({ attendanceId: messageTarget.id, body: messageBody })}
-              disabled={!messageBody.trim() || messageMutation.isPending}
-              className="display"
-              style={{ background: "#CCFF00", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer" }}
-            >
-              SEND
-            </button>
-            <button onClick={() => setMessageTarget(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px" }}>
-              Cancel
-            </button>
+        <div
+          data-testid="message-panel-backdrop"
+          onClick={() => setMessageTarget(null)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 70 }}
+        >
+          <div
+            data-testid="message-panel"
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: "min(100%, 380px)",
+              background: "#0a0a0a",
+              borderLeft: "2px solid #CCFF00",
+              display: "flex",
+              flexDirection: "column",
+              zIndex: 71,
+              animation: prefersReducedMotion() ? undefined : "attendance-panel-in 0.25s cubic-bezier(0.2,0.8,0.2,1)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", borderBottom: "1px solid #222" }}>
+              <UserAvatar
+                photoUrl={messageTarget.userPhotoUrl || messageTarget.photoUrl}
+                avatarChoice={messageTarget.avatarChoice}
+                avatarRing={messageTarget.avatarRing}
+                displayName={messageTarget.handle}
+                size={42}
+              />
+              <div style={{ flex: 1 }}>
+                <div className="display" style={{ fontSize: "1rem", color: "#fff" }}>
+                  {messageTarget.handle}
+                </div>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", letterSpacing: "0.04em", textTransform: "uppercase", color: "#00FFFF", marginTop: 2 }}>
+                  ✓ Both going
+                </div>
+              </div>
+              <button
+                onClick={() => setMessageTarget(null)}
+                aria-label="Close"
+                style={{ background: "none", border: "none", color: "#666", fontSize: "1.5rem", cursor: "pointer", lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ flex: 1, padding: 18, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 10, overflowY: "auto" }}>
+              <div style={{ alignSelf: "center", fontFamily: "var(--font-body)", fontSize: "0.65rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "#444" }}>
+                New thread
+              </div>
+              <div
+                style={{
+                  alignSelf: "flex-start",
+                  maxWidth: "82%",
+                  background: "#15151a",
+                  border: "1px solid #222",
+                  borderRadius: "4px",
+                  padding: "10px 13px",
+                  fontSize: "0.85rem",
+                  color: "#e6e3da",
+                }}
+              >
+                "{messageTarget.message}" — see you there?
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, padding: "14px 16px", borderTop: "1px solid #222" }}>
+              <input
+                value={messageBody}
+                onChange={e => setMessageBody(e.target.value)}
+                placeholder="Say hi…"
+                style={{ flex: 1, background: "#000", color: "#fff", border: "1px solid #333", borderRadius: 999, padding: "10px 14px", fontFamily: "var(--font-body)", fontSize: "0.85rem", boxSizing: "border-box" }}
+              />
+              <button
+                onClick={() => messageTarget && messageMutation.mutate({ attendanceId: messageTarget.id, body: messageBody })}
+                disabled={!messageBody.trim() || messageMutation.isPending}
+                className="display"
+                style={{ background: "#CCFF00", color: "#000", border: "none", borderRadius: 999, padding: "0 20px", cursor: "pointer", opacity: !messageBody.trim() || messageMutation.isPending ? 0.5 : 1 }}
+              >
+                SEND
+              </button>
+            </div>
           </div>
         </div>
       )}
