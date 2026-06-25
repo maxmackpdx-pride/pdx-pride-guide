@@ -10,6 +10,9 @@ import { createServer } from "node:http";
 const app = express();
 const httpServer = createServer(app);
 
+// Railway terminates TLS at the edge; required for secure session cookies.
+app.set("trust proxy", 1);
+
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 

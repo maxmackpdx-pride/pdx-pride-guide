@@ -167,8 +167,9 @@ function getBaseUrl(req: any) {
   return `${proto}://${req.get("host")}`;
 }
 
-function googleRedirectUri(req: any) {
-  return process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl(req)}/api/auth/google/callback`;
+function googleRedirectUri(_req: any) {
+  // Always use www so OAuth state cookie + Google redirect URI stay on one host.
+  return process.env.GOOGLE_REDIRECT_URI || "https://www.prideguidepdx.com/api/auth/google/callback";
 }
 
 function makeUsername(email: string) {
@@ -219,11 +220,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.use(session({
     secret: process.env.SESSION_SECRET || "pdxpride_secret_2026",
     store: new BetterSqliteSessionStore(sqlite),
+    proxy: true,
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   }));
@@ -710,7 +713,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       state,
       prompt: "select_account",
     });
-    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    req.session.save((err) => {
+      if (err) {
+        console.error("Google OAuth session save failed:", err);
+        return res.status(500).send("Could not start Google Sign-In.");
+      }
+      res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    });
   });
 
   app.get("/api/auth/google/callback", async (req, res) => {
@@ -774,7 +783,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
         storage.linkGoogleToUser(linkUserId, profile.sub);
         if (!linkedUser.photoUrl && profile.picture) storage.updateUser(linkUserId, { photoUrl: profile.picture });
         markAdminSessionForUser(req, linkedUser);
-        return res.redirect("/#/dashboard?google=linked");
+        return req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Google link session save failed:", saveErr);
+            return res.status(500).send("Google sign-in failed.");
+          }
+          res.redirect("/#/dashboard?google=linked");
+        });
       }
 
       let user = storage.getUserByGoogleId(profile.sub) || storage.getUserByEmail(profile.email);
@@ -796,7 +811,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
       req.session.userId = user.id;
       markAdminSessionForUser(req, user);
-      res.redirect("/#/dashboard");
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("Google sign-in session save failed:", saveErr);
+          return res.status(500).send("Google sign-in failed.");
+        }
+        res.redirect("/#/dashboard");
+      });
     } catch (e) {
       console.error("Google sign-in error:", e);
       res.status(500).send("Google sign-in failed.");
