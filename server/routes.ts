@@ -1085,6 +1085,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(getPersistenceAudit(getTableCounts()));
   });
 
+  app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
+    const counts = getTableCounts();
+    const pendingSubmissions = storage.getSubmissions("PENDING").length;
+    const liveEvents = storage.getEvents({ status: "LIVE" }).length;
+    const openFeedback = storage.getFeedbackReports("OPEN").length;
+    res.json({
+      users: counts.users ?? 0,
+      activeSessions: counts.express_sessions ?? 0,
+      liveEvents,
+      messages: counts.messages ?? 0,
+      attendances: counts.attendances ?? 0,
+      pendingSubmissions,
+      gigPosts: counts.gig_posts ?? 0,
+      giftingPosts: counts.gifting_posts ?? 0,
+      missedConnections: counts.missed_connections ?? 0,
+      openFeedback,
+    });
+  });
+
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {
     res.json(storage.getFeedbackReports("OPEN"));
   });

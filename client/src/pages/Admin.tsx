@@ -6,6 +6,8 @@ import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
   ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare,
 } from "lucide-react";
+import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
+import "@/components/dashboard/dashboard.css";
 
 interface Submission {
   id: number;
@@ -282,63 +284,61 @@ export default function Admin() {
   // Login screen
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0a0a0a" }}>
-        <div className="w-full max-w-sm border-2 p-8" style={{ background: "#111", borderColor: "#CCFF00" }}>
-          <div className="text-center mb-8">
-            <Lock size={28} className="mx-auto mb-4" style={{ color: "#CCFF00" }} />
-            <h1 className="display text-4xl text-white">ADMIN</h1>
-            <p className="text-white/40 text-sm mt-1">PDX Pride Guide</p>
+      <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
+        <div className="w-full max-w-sm" style={{ background: "#0d0d0d", border: "2px solid #C8FA3C", borderRadius: 16, padding: 32 }}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <Lock size={28} style={{ color: "#C8FA3C", margin: "0 auto 16px" }} />
+            <h1 className="dash-anton dash-admin-title" style={{ fontSize: 36 }}>Admin</h1>
+            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginTop: 6 }}>PDX Pride Guide</p>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="display text-xs text-white/40 block mb-2">USERNAME</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 bg-black border border-white/20 text-white focus:outline-none focus:border-yellow-400"
-                  placeholder="Username"
-                  autoComplete="username"
-                />
-              </div>
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
-              <label className="display text-xs block mb-2" style={{ color: "#CCFF00" }}>ADMIN NAME</label>
+              <label className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", display: "block", marginBottom: 8 }}>Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                style={{ width: "100%", padding: "12px 14px", background: "#000", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 14 }}
+                placeholder="Username"
+                autoComplete="username"
+              />
+            </div>
+            <div>
+              <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Admin name</label>
               <input
                 type="text"
                 value={adminName}
                 onChange={e => setAdminName(e.target.value)}
-                className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black/40 focus:outline-none focus:border-yellow-400"
+                style={{ width: "100%", padding: "10px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 14 }}
                 placeholder="Admin1"
               />
             </div>
             <div>
-              <label className="display text-xs block mb-2" style={{ color: "#CCFF00" }}>PASSWORD</label>
-              <div className="relative">
+              <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Password</label>
+              <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={e => { setPassword(e.target.value); setPasswordError(false); }}
-                  className={`w-full px-3 py-2 pr-10 text-white text-sm border bg-black/40 focus:outline-none ${
-                    passwordError ? "border-red-500" : "border-white/20 focus:border-yellow-400"
-                  }`}
+                  style={{
+                    width: "100%", padding: "10px 36px 10px 12px", background: "rgba(0,0,0,0.4)",
+                    border: passwordError ? "1px solid #FF2400" : "1px solid rgba(255,255,255,0.2)",
+                    color: "#fff", fontSize: 14,
+                  }}
                   placeholder="Password"
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40"
+                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {passwordError && <p className="text-red-400 text-xs mt-1">Incorrect password</p>}
+              {passwordError && <p style={{ color: "#FF2400", fontSize: 12, marginTop: 4 }}>Incorrect password</p>}
             </div>
-            <button
-              type="submit"
-              className="display text-lg w-full py-3 border-2 transition-all"
-              style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
-            >
-              ENTER
+            <button type="submit" className="dash-btn dash-btn-lime active" style={{ width: "100%", marginTop: 8 }}>
+              Enter
             </button>
           </form>
         </div>
@@ -355,58 +355,49 @@ export default function Admin() {
   const pendingPromoters = promoterRequests;
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      {/* Admin header */}
-      <div className="border-b-2 border-white/10 px-4 py-6 md:px-8">
-        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <Shield size={20} style={{ color: "#CCFF00" }} />
-            <h1 className="display text-3xl text-white">ADMIN DASHBOARD</h1>
-            <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>
-              {adminName}
-            </span>
+    <div className="dash-page">
+      <div className="dash-inner" style={{ maxWidth: 1100 }}>
+        <header className="dash-admin-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Shield size={22} style={{ color: "#C8FA3C" }} />
+            <div>
+              <h1 className="dash-admin-title dash-anton">Admin dashboard</h1>
+              <p className="dash-subtitle">Signed in as {adminName}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="dash-actions">
             {pendingSubs.length > 0 && (
-              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>
-                {pendingSubs.length} PENDING
-              </span>
+              <span className="dash-chip" style={{ color: "#FF1FA0" }}>{pendingSubs.length} pending</span>
             )}
             {pendingMod.length > 0 && (
-              <span className="sticker" style={{ color: "#FF6600", borderColor: "#FF6600" }}>
-                {pendingMod.length} REQUESTS
-              </span>
+              <span className="dash-chip" style={{ color: "#FF8C00" }}>{pendingMod.length} requests</span>
             )}
             <button
+              type="button"
+              className="dash-btn dash-btn-ghost"
               onClick={() => { apiRequest("POST", "/api/admin/logout", {}); setAuthenticated(false); }}
-              className="sticker transition-all hover:bg-white/10"
-              style={{ color: "#fff", borderColor: "#333" }}
             >
-              LOG OUT
+              Log out
             </button>
           </div>
-        </div>
-      </div>
+        </header>
 
-      <div className="max-w-5xl mx-auto px-4 py-6 md:px-8">
-        {/* Tabs */}
-        <div className="flex gap-0 mb-8 border-b-2 border-white/10">
+        <AdminMetricsPanel enabled={authenticated} />
+
+        <div className="dash-admin-tabs">
           {([
-            { key: "queue" as AdminTab, label: `REVIEW QUEUE (${pendingSubs.length})`, icon: <Inbox size={12} /> },
-            { key: "promoters" as AdminTab, label: `PROMOTERS${pendingPromoters.length > 0 ? ` (${pendingPromoters.length})` : ""}`, icon: <Shield size={12} /> },
-            { key: "moderation" as AdminTab, label: `CLAIM / REMOVE${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
-            { key: "events" as AdminTab, label: "MANAGE EVENTS", icon: <Shield size={12} /> },
-            { key: "gifting" as AdminTab, label: `GIFTING${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
-            { key: "feedback" as AdminTab, label: `FEEDBACK${openFeedback.length > 0 ? ` (${openFeedback.length})` : ""}`, icon: <MessageSquare size={12} /> },
+            { key: "queue" as AdminTab, label: `Review queue (${pendingSubs.length})`, icon: <Inbox size={12} /> },
+            { key: "promoters" as AdminTab, label: `Promoters${pendingPromoters.length > 0 ? ` (${pendingPromoters.length})` : ""}`, icon: <Shield size={12} /> },
+            { key: "moderation" as AdminTab, label: `Claim / remove${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
+            { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
+            { key: "gifting" as AdminTab, label: `Gifting${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
+            { key: "feedback" as AdminTab, label: `Feedback${openFeedback.length > 0 ? ` (${openFeedback.length})` : ""}`, icon: <MessageSquare size={12} /> },
           ]).map(tab => (
             <button
               key={tab.key}
+              type="button"
               onClick={() => setActiveTab(tab.key)}
-              className="display text-sm px-5 py-3 border-b-2 -mb-px transition-all flex items-center gap-2"
-              style={{
-                borderColor: activeTab === tab.key ? "#CCFF00" : "transparent",
-                color: activeTab === tab.key ? "#CCFF00" : "#666",
-              }}
+              className={`dash-admin-tab ${activeTab === tab.key ? "active" : ""}`}
             >
               {tab.icon}
               {tab.label}

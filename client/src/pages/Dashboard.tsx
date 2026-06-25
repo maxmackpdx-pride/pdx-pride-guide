@@ -4,14 +4,13 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
-import ImageUploader from "@/components/ImageUploader";
-import AvatarEditor from "@/components/AvatarEditor";
 import UserAvatar from "@/components/UserAvatar";
-import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
-import EventTypeTag from "@/components/EventTypeTag";
-
-const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
-const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
+import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/DashboardDrawer";
+import DashboardInboxPreview from "@/components/dashboard/DashboardInboxPreview";
+import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
+import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
+import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
+import "@/components/dashboard/dashboard.css";
 
 export default function Dashboard() {
   const { user, logout, refreshUser } = useAuth();
@@ -27,6 +26,8 @@ export default function Dashboard() {
   const [hostUpdate, setHostUpdate] = useState("");
   const [editingGig, setEditingGig] = useState<any>(null);
   const [gigForm, setGigForm] = useState({ title: "", description: "", skills: "", compensation: "", location: "" });
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ events: true });
+  const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
   const { data: myGigs = [] } = useQuery<any[]>({
     queryKey: ["/api/gigs/mine"],
@@ -62,13 +63,6 @@ export default function Dashboard() {
     queryKey: ["/api/events/mine/check-ins"],
     queryFn: () => fetch("/api/events/mine/check-ins").then(r => r.ok ? r.json() : []),
     enabled: !!user,
-  });
-
-  const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/messages/unread-count"],
-    queryFn: () => fetch("/api/messages/unread-count").then(r => r.ok ? r.json() : { count: 0 }),
-    enabled: !!user,
-    refetchInterval: 90000,
   });
 
   const hostUpdateMutation = useMutation({
@@ -127,15 +121,13 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
-        <div className="display" style={{ fontSize: "2rem", color: "#fff" }}>MY DASHBOARD</div>
-        <p style={{ color: "#666" }}>You need to be logged in to view your dashboard.</p>
+      <div className="dash-page" style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
+        <div className="dash-anton" style={{ fontSize: "2rem", color: "#fff" }}>Profile</div>
+        <p style={{ color: "#8c8980" }}>You need to be logged in to view your dashboard.</p>
         <AuthModal onClose={() => {}} />
       </div>
     );
   }
-
-  const avatar = AVATAR_EMOJI_OPTIONS.find(a => a.id === (user.avatarChoice || 1)) || AVATAR_EMOJI_OPTIONS[0];
 
   const handleSave = async () => {
     setSaving(true);
@@ -204,484 +196,248 @@ export default function Dashboard() {
     eventEditMutation.mutate({ id: editingEvent.id, data: eventForm });
   };
 
-  const toggleType = (t: string) => setEventForm((f: any) => ({
-    ...f,
-    eventTypes: f.eventTypes.includes(t) ? f.eventTypes.filter((x: string) => x !== t) : [...f.eventTypes, t],
-  }));
+  const eventCount = submittedEvents.length + myEvents.length;
+  const CYAN = "#19E3FF";
+  const LIME = "#C8FA3C";
+  const MAGENTA = "#FF1FA0";
+  const ORANGE = "#FF8C00";
 
   return (
-    <div style={{ background: "#000", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px" }}>
-
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 48, flexWrap: "wrap" }}>
-          <UserAvatar
-            photoUrl={user.photoUrl}
-            avatarChoice={user.avatarChoice}
-            avatarRing={user.avatarRing}
-            displayName={user.displayName}
-            username={user.username}
-            size={72}
-          />
-          <div>
-            <h1 className="display" style={{ fontSize: "2.4rem", color: "#CCFF00", lineHeight: 1 }}>
-              {user.displayName || user.username}
-            </h1>
-            <div style={{ color: "#555", fontSize: "0.85rem", marginTop: 4 }}>@{user.username} · {user.email}</div>
-            {user.bio && <p style={{ color: "#aaa", maxWidth: 520, marginTop: 8, lineHeight: 1.5 }}>{user.bio}</p>}
+    <div className="dash-page">
+      <div className="dash-inner">
+        <header className="dash-profile-header">
+          <div className="dash-profile-identity">
+            <div className="dash-avatar-ring">
+              <UserAvatar
+                photoUrl={user.photoUrl}
+                avatarChoice={user.avatarChoice}
+                avatarRing={user.avatarRing}
+                displayName={user.displayName}
+                username={user.username}
+                size={80}
+              />
+            </div>
+            <div>
+              <h1 className="dash-title dash-anton">{user.displayName || user.username}</h1>
+              <p className="dash-subtitle">@{user.username} · {user.email}</p>
+              {user.bio && <p style={{ color: "#cbc8c0", maxWidth: 520, marginTop: 8, lineHeight: 1.5, fontSize: 14 }}>{user.bio}</p>}
+            </div>
           </div>
-          <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
-            <button onClick={() => setEditMode(!editMode)} style={{
-              fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.78rem",
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              background: editMode ? "#CCFF00" : "transparent",
-              color: editMode ? "#000" : "#CCFF00",
-              border: "2px solid #CCFF00", padding: "8px 18px", cursor: "pointer",
-            }}>
-              {editMode ? "CANCEL" : "EDIT PROFILE"}
+          <div className="dash-actions">
+            <button
+              type="button"
+              className={`dash-btn dash-btn-lime ${editMode ? "active" : ""}`}
+              onClick={() => setEditMode(!editMode)}
+            >
+              {editMode ? "Cancel" : "Edit profile"}
             </button>
-            <button onClick={() => logout()} style={{
-              fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.78rem",
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              background: "transparent", color: "#555",
-              border: "2px solid #333", padding: "8px 18px", cursor: "pointer",
-            }}>SIGN OUT</button>
+            <button type="button" className="dash-btn dash-btn-ghost" onClick={() => logout()}>
+              Sign out
+            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Edit Profile */}
         {editMode && (
-          <section style={{ marginBottom: 48, background: "#0a0a0a", border: "2px solid #CCFF00", padding: "28px 32px" }}>
-            <h2 className="display" style={{ fontSize: "1.3rem", color: "#CCFF00", marginBottom: 24 }}>EDIT PROFILE</h2>
-            <div style={{ marginBottom: 20 }}>
-              <label style={labelStyle}>YOUR AVATAR</label>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
-                {AVATAR_EMOJI_OPTIONS.map(a => (
-                  <button key={a.id} onClick={() => setAvatarChoice(a.id)} title={a.label} style={{
-                    width: 52, height: 52, borderRadius: "50%",
-                    background: a.bg, border: avatarChoice === a.id ? "3px solid #CCFF00" : "3px solid #333",
-                    boxShadow: avatarChoice === a.id ? `0 0 12px #CCFF00` : "none",
-                    fontSize: "1.5rem", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>{a.emoji}</button>
-                ))}
-              </div>
-            </div>
-            <label style={labelStyle}>PROFILE PHOTO & RING</label>
-            <AvatarEditor
-              photoUrl={user.photoUrl}
-              avatarRing={user.avatarRing}
-              avatarCrop={user.avatarCrop}
-              avatarChoice={avatarChoice}
-              displayName={displayName}
-              username={user.username}
-              onSaved={() => void refreshUser()}
-            />
-            <label style={labelStyle}>DISPLAY NAME</label>
-            <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="How you appear to others" maxLength={40} />
-            <label style={labelStyle}>BIO <span style={{ color: "#555", fontWeight: 400 }}>({bio.length}/160)</span></label>
-            <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
-              value={bio} onChange={e => setBio(e.target.value)} placeholder="A little about yourself..." maxLength={160} />
-            <div style={{ display: "flex", gap: 12, marginTop: 20, alignItems: "center" }}>
-              <button onClick={handleSave} disabled={saving} style={{
-                fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.9rem",
-                letterSpacing: "0.1em", textTransform: "uppercase",
-                background: "#CCFF00", color: "#000",
-                border: "2px solid #000", padding: "10px 24px", cursor: "pointer",
-                boxShadow: "3px 3px 0 #000",
-              }}>{saving ? "SAVING..." : "SAVE PROFILE"}</button>
-              {saveMsg && <span style={{ color: "#CCFF00", fontFamily: "var(--font-display)", fontSize: "0.85rem" }}>{saveMsg}</span>}
-            </div>
-          </section>
+          <DashboardProfileEditor
+            user={user}
+            displayName={displayName}
+            setDisplayName={setDisplayName}
+            bio={bio}
+            setBio={setBio}
+            avatarChoice={avatarChoice}
+            setAvatarChoice={setAvatarChoice}
+            saving={saving}
+            saveMsg={saveMsg}
+            onSave={handleSave}
+            onRefresh={refreshUser}
+          />
         )}
 
-        {/* Account Connections */}
-        <section style={{ marginBottom: 48, background: "#080808", border: "1px solid #1a1a1a", padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div className="dash-top-grid">
+          <DashboardInboxPreview enabled={!!user} />
+          <DashboardWidgets />
+        </div>
+
+        <section className="dash-connections">
           <div>
-            <h2 className="display" style={{ fontSize: "1.1rem", color: "#fff", marginBottom: 4 }}>ACCOUNT CONNECTIONS</h2>
-            <div style={{ color: user.googleLinked ? "#CCFF00" : "#777", fontSize: "0.86rem" }}>
+            <h2 className="dash-anton" style={{ fontSize: 18, color: "#fff", marginBottom: 4 }}>Account connections</h2>
+            <p style={{ fontSize: 13, color: user.googleLinked ? LIME : "var(--dash-muted)" }}>
               Google is {user.googleLinked ? "linked to this profile." : "not linked yet."}
-            </div>
+            </p>
           </div>
           {user.googleLinked ? (
-            <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>GOOGLE LINKED</span>
+            <span className="dash-chip" style={{ color: LIME }}>Google linked</span>
           ) : (
-            <a href="/api/auth/google?link=1" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#fff", border: "2px solid #fff", padding: "10px 18px", textDecoration: "none", display: "inline-block", boxShadow: "3px 3px 0 #00FFFF" }}>
-              LINK GOOGLE →
+            <a href="/api/auth/google?link=1" className="dash-pill-btn" style={{ color: "#fff", borderColor: "#fff" }}>
+              Link Google →
             </a>
           )}
         </section>
 
-        {/* My Events */}
-        <section style={{ marginBottom: 48 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              <h2 className="display" style={{ fontSize: "1.5rem", color: "#00FFFF" }}>MY EVENTS</h2>
-              <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-            </div>
-
-            {/* Event Edit Form */}
+        <div className="dash-drawers">
+          <DashboardDrawer
+            title="My events"
+            color={CYAN}
+            countLabel={`${eventCount} total`}
+            open={!!openSections.events}
+            onToggle={() => toggleSection("events")}
+            isEmpty={eventCount === 0}
+            emptyText="No submitted or claimed events yet."
+          >
             {editingEvent && eventForm && (
-              <div style={{ background: "#0a0a0a", border: "2px solid #00FFFF", padding: "28px 32px", marginBottom: 24 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                  <h3 className="display" style={{ fontSize: "1.1rem", color: "#00FFFF" }}>EDITING: {editingEvent.title}</h3>
-                  <button onClick={() => { setEditingEvent(null); setEventForm(null); }} style={{ background: "none", border: "1px solid #333", color: "#666", padding: "4px 12px", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.72rem", letterSpacing: "0.08em" }}>CANCEL</button>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div style={{ gridColumn: "1/-1" }}>
-                      <label style={labelStyle}>Event Title *</label>
-                      <input style={inputStyle} value={eventForm.title} onChange={e => setEventForm((f: any) => ({ ...f, title: e.target.value }))} required />
-                    </div>
-                    <div style={{ gridColumn: "1/-1" }}>
-                      <label style={labelStyle}>Description *</label>
-                      <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} value={eventForm.description} onChange={e => setEventForm((f: any) => ({ ...f, description: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Venue Name *</label>
-                      <input style={inputStyle} value={eventForm.venueName} onChange={e => setEventForm((f: any) => ({ ...f, venueName: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Neighborhood</label>
-                      <select style={inputStyle} value={eventForm.neighborhood} onChange={e => setEventForm((f: any) => ({ ...f, neighborhood: e.target.value }))}>
-                        {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
-                      </select>
-                    </div>
-                    <div style={{ gridColumn: "1/-1" }}>
-                      <label style={labelStyle}>Address *</label>
-                      <input style={inputStyle} value={eventForm.address} onChange={e => setEventForm((f: any) => ({ ...f, address: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Day</label>
-                      <select style={inputStyle} value={eventForm.dayOfWeek} onChange={e => setEventForm((f: any) => ({ ...f, dayOfWeek: e.target.value }))}>
-                        <option value="THU">Thursday July 16</option>
-                        <option value="FRI">Friday July 17</option>
-                        <option value="SAT">Saturday July 18</option>
-                        <option value="SUN">Sunday July 19</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Age Requirement</label>
-                      <select style={inputStyle} value={eventForm.ageRequirement} onChange={e => setEventForm((f: any) => ({ ...f, ageRequirement: e.target.value }))}>
-                        <option value="ALL_AGES">All Ages</option>
-                        <option value="18_PLUS">18+</option>
-                        <option value="21_PLUS">21+</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Start</label>
-                      <input type="datetime-local" style={inputStyle} value={eventForm.dateStart} onChange={e => setEventForm((f: any) => ({ ...f, dateStart: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>End</label>
-                      <input type="datetime-local" style={inputStyle} value={eventForm.dateEnd} onChange={e => setEventForm((f: any) => ({ ...f, dateEnd: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Admission</label>
-                      <select style={inputStyle} value={eventForm.admission} onChange={e => setEventForm((f: any) => ({ ...f, admission: e.target.value }))}>
-                        <option value="FREE">Free</option>
-                        <option value="TICKETED">Ticketed</option>
-                        <option value="SUGGESTED_DONATION">Suggested Donation</option>
-                      </select>
-                    </div>
-                    <div style={{ gridColumn: "1/-1" }}>
-                      <label style={labelStyle}>Ticket / RSVP Link *</label>
-                      <input type="url" style={inputStyle} value={eventForm.ticketUrl} onChange={e => setEventForm((f: any) => ({ ...f, ticketUrl: e.target.value }))} placeholder="https://..." />
-                    </div>
-                    <div style={{ gridColumn: "1/-1" }}>
-                      <label style={labelStyle}>Event Flyer / Poster</label>
-                      <ImageUploader
-                        endpoint="/api/upload/poster"
-                        fieldName="poster"
-                        currentUrl={eventForm.posterImageUrl}
-                        onUploaded={(url: string) => setEventForm((f: any) => ({ ...f, posterImageUrl: url }))}
-                        label="UPLOAD FLYER"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Event Types */}
-                  <div>
-                    <label style={labelStyle}>Event Types</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
-                      {EVENT_TYPES.map(t => (
-                        <button key={t} type="button" onClick={() => toggleType(t)}
-                          className={`filter-tag ${eventForm.eventTypes.includes(t) ? "active" : ""}`}>{t}</button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Flags */}
-                  <div>
-                    <label style={labelStyle}>Flags</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
-                      <EventTypeTag
-                        label="HOUSE PARTY"
-                        interactive
-                        active={!!eventForm.isHouseParty}
-                        onClick={() => setEventForm((f: any) => ({ ...f, isHouseParty: !f.isHouseParty }))}
-                      />
-                      <EventTypeTag
-                        label="SEX POSITIVE"
-                        interactive
-                        active={!!eventForm.isSexPositive}
-                        onClick={() => setEventForm((f: any) => ({ ...f, isSexPositive: !f.isSexPositive }))}
-                      />
-                      <EventTypeTag
-                        label="NUDITY OK"
-                        interactive
-                        active={!!eventForm.nudityOk}
-                        onClick={() => setEventForm((f: any) => ({ ...f, nudityOk: !f.nudityOk }))}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
-                    <label style={labelStyle}>Post Host Update</label>
-                    <p style={{ fontSize: "0.76rem", color: "#555", marginBottom: 8, lineHeight: 1.4 }}>
-                      Pinned on your event detail page (max 2 visible, newest first).
-                    </p>
-                    <textarea
-                      style={{ ...inputStyle, minHeight: 80, resize: "vertical" }}
-                      value={hostUpdate}
-                      onChange={e => setHostUpdate(e.target.value)}
-                      placeholder="Door time change, weather note, last-minute info..."
-                      maxLength={1000}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
-                      disabled={!hostUpdate.trim() || hostUpdateMutation.isPending}
-                      style={{
-                        marginTop: 10, fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.78rem",
-                        letterSpacing: "0.08em", textTransform: "uppercase",
-                        background: "transparent", color: "#CCFF00", border: "1px solid #CCFF00",
-                        padding: "8px 14px", cursor: "pointer", opacity: !hostUpdate.trim() || hostUpdateMutation.isPending ? 0.5 : 1,
-                      }}
-                    >
-                      {hostUpdateMutation.isPending ? "POSTING..." : "POST UPDATE →"}
-                    </button>
-                  </div>
-
-                  <button onClick={saveEventEdit} disabled={eventEditMutation.isPending} style={{
-                    fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.9rem",
-                    letterSpacing: "0.1em", textTransform: "uppercase",
-                    background: "#00FFFF", color: "#000",
-                    border: "none", padding: "12px 28px", cursor: "pointer",
-                    boxShadow: "3px 3px 0 #000", alignSelf: "flex-start",
-                  }}>{eventEditMutation.isPending ? "SAVING..." : "SAVE EVENT →"}</button>
-                </div>
-              </div>
+              <DashboardEventEditForm
+                editingEvent={editingEvent}
+                eventForm={eventForm}
+                setEventForm={setEventForm}
+                hostUpdate={hostUpdate}
+                setHostUpdate={setHostUpdate}
+                onCancel={() => { setEditingEvent(null); setEventForm(null); }}
+                onSave={saveEventEdit}
+                onPostUpdate={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
+                saving={eventEditMutation.isPending}
+                posting={hostUpdateMutation.isPending}
+              />
             )}
+            {submittedEvents.map((evt: any) => (
+              <DashboardItemRow
+                key={`submitted-${evt.id}`}
+                color={MAGENTA}
+                title={evt.title}
+                meta={`${evt.dayOfWeek} · ${evt.venueName}`}
+                chip={`Submitted · ${evt.status}`}
+                chipColor={MAGENTA}
+              />
+            ))}
+            {myEvents.map((evt: any) => (
+              <DashboardItemRow
+                key={evt.id}
+                color={CYAN}
+                title={evt.title}
+                meta={`${evt.dayOfWeek} · ${evt.venueName}`}
+                chip="Claimed"
+                chipColor={CYAN}
+                actions={
+                  <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => startEventEdit(evt)}>
+                    Edit
+                  </button>
+                }
+              />
+            ))}
+          </DashboardDrawer>
 
-            {/* Event list */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {submittedEvents.map((evt: any) => (
-                <div key={`submitted-${evt.id}`} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                  <div style={{ flex: 1 }}>
-                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{evt.title}</div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>
-                      {evt.dayOfWeek} · {evt.venueName}
-                    </div>
-                  </div>
-                  <span style={{
-                    fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em",
-                    padding: "3px 8px", border: "1px solid #FF00CC", color: "#FF00CC",
-                  }}>SUBMITTED · {evt.status}</span>
-                </div>
-              ))}
-              {myEvents.map((evt: any) => (
-                <div key={evt.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                  <div style={{ flex: 1 }}>
-                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{evt.title}</div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>
-                      {evt.dayOfWeek} · {evt.venueName}
-                    </div>
-                  </div>
-                  <span style={{
-                    fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em",
-                    padding: "3px 8px", border: `1px solid #00FFFF`, color: "#00FFFF",
-                  }}>CLAIMED</span>
-                  <button onClick={() => startEventEdit(evt)} style={{
-                    fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem",
-                    letterSpacing: "0.08em", textTransform: "uppercase",
-                    background: "none", border: "1px solid #00FFFF", color: "#00FFFF",
-                    padding: "4px 10px", cursor: "pointer",
-                  }}>EDIT</button>
-                </div>
-              ))}
-              {submittedEvents.length === 0 && myEvents.length === 0 && (
-                <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No submitted or claimed events yet.</div>
-              )}
-            </div>
-          </section>
+          <DashboardDrawer
+            title="Gig posts"
+            color={ORANGE}
+            countLabel={`${myGigs.length} posts`}
+            open={!!openSections.gigs}
+            onToggle={() => toggleSection("gigs")}
+            isEmpty={myGigs.length === 0}
+            emptyText="No gig posts yet."
+            cta={{ label: "Post on Pride Work board →", href: "#/pride-work" }}
+          >
+            {editingGig && (
+              <DashboardGigEditForm
+                gigForm={gigForm}
+                setGigForm={setGigForm}
+                onSave={() => gigEditMutation.mutate({ id: editingGig.id, data: gigForm })}
+                onCancel={() => setEditingGig(null)}
+              />
+            )}
+            {myGigs.map((gig: any) => (
+              <DashboardItemRow
+                key={gig.id}
+                color={ORANGE}
+                title={gig.title}
+                meta={`${gig.postType === "LOOKING_FOR_WORK" ? "Looking for work" : "Posting a gig"}${gig.gigDate ? ` · ${gig.gigDate}` : ""}${gig.gigTime ? ` · ${gig.gigTime}` : ""}`}
+                chip={gig.status}
+                chipColor={gig.status === "LIVE" ? LIME : "#6f736c"}
+                actions={
+                  <>
+                    <button type="button" className="dash-mini-btn" style={{ color: ORANGE }} onClick={() => startGigEdit(gig)}>Edit</button>
+                    <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteGig(gig.id)}>Delete</button>
+                  </>
+                }
+              />
+            ))}
+          </DashboardDrawer>
 
-        {/* My Gig Posts */}
-        <section style={{ marginBottom: 48 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-            <h2 className="display" style={{ fontSize: "1.5rem", color: "#FF6600" }}>MY GIG POSTS</h2>
-            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-          </div>
-          {myGigs.length === 0 ? (
-            <div style={{ color: "#444", fontSize: "0.9rem", padding: "20px 0" }}>
-              No gig posts yet.{" "}
-              <a href="#/pride-work" style={{ color: "#FF6600" }}>Post one on the Pride Work board →</a>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {editingGig && (
-                <div style={{ background: "#0a0a0a", border: "2px solid #FF6600", padding: "20px", marginBottom: 8 }}>
-                  <h3 className="display" style={{ color: "#FF6600", fontSize: "1rem", marginBottom: 12 }}>EDIT GIG POST</h3>
-                  <input style={inputStyle} value={gigForm.title} onChange={e => setGigForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" />
-                  <textarea style={{ ...inputStyle, marginTop: 10, minHeight: 90, resize: "vertical" }} value={gigForm.description} onChange={e => setGigForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" />
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-                    <input style={inputStyle} value={gigForm.skills} onChange={e => setGigForm(f => ({ ...f, skills: e.target.value }))} placeholder="Skills" />
-                    <input style={inputStyle} value={gigForm.compensation} onChange={e => setGigForm(f => ({ ...f, compensation: e.target.value }))} placeholder="Compensation" />
-                    <input style={inputStyle} value={gigForm.location} onChange={e => setGigForm(f => ({ ...f, location: e.target.value }))} placeholder="Location" />
-                  </div>
-                  <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                    <button onClick={() => gigEditMutation.mutate({ id: editingGig.id, data: gigForm })} style={{ background: "#FF6600", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer" }}>SAVE</button>
-                    <button onClick={() => setEditingGig(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>Cancel</button>
-                  </div>
-                </div>
-              )}
-              {myGigs.map((gig: any) => (
-                <div key={gig.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                  <div style={{ flex: 1 }}>
-                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{gig.title}</div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>
-                      {gig.postType === "LOOKING_FOR_WORK" ? "Looking for Work" : "Posting a Gig"}
-                      {gig.gigDate && ` · ${gig.gigDate}`}
-                      {gig.gigTime && ` · ${gig.gigTime}`}
-                    </div>
-                  </div>
-                  <span style={{
-                    fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em",
-                    padding: "3px 8px", border: `1px solid ${gig.status === "LIVE" ? "#CCFF00" : "#555"}`,
-                    color: gig.status === "LIVE" ? "#CCFF00" : "#555",
-                  }}>{gig.status}</span>
-                  <button onClick={() => startGigEdit(gig)} style={{
-                    fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem",
-                    letterSpacing: "0.08em", textTransform: "uppercase",
-                    background: "none", border: "1px solid #FF6600", color: "#FF6600",
-                    padding: "4px 10px", cursor: "pointer",
-                  }}>EDIT</button>
-                  <button onClick={() => handleDeleteGig(gig.id)} style={{
-                    fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem",
-                    letterSpacing: "0.08em", textTransform: "uppercase",
-                    background: "none", border: "1px solid #FF2400", color: "#FF2400",
-                    padding: "4px 10px", cursor: "pointer",
-                  }}>DELETE</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+          <DashboardDrawer
+            title="Missed connections"
+            color={MAGENTA}
+            countLabel={`${myMissed.length} posts`}
+            open={!!openSections.missed}
+            onToggle={() => toggleSection("missed")}
+            isEmpty={myMissed.length === 0}
+            emptyText="No missed connections yet."
+          >
+            {myMissed.map((post: any) => (
+              <DashboardItemRow
+                key={post.id}
+                color={MAGENTA}
+                title={post.title}
+                meta={`${post.dayOfWeek || "Any day"}${post.venueHint ? ` · ${post.venueHint}` : ""}`}
+                chip={post.status}
+                chipColor={MAGENTA}
+                actions={
+                  <>
+                    <a href="#/missed-connections" className="dash-mini-btn" style={{ color: MAGENTA, textDecoration: "none" }}>Edit</a>
+                    <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteMissed(post.id)}>Delete</button>
+                  </>
+                }
+              />
+            ))}
+          </DashboardDrawer>
 
-        {/* My Missed Connections */}
-        <section style={{ marginBottom: 48 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-            <h2 className="display" style={{ fontSize: "1.5rem", color: "#FF00CC" }}>MY MISSED CONNECTIONS</h2>
-            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-          </div>
-          {myMissed.length === 0 ? (
-            <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No missed connections yet.</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {myMissed.map((post: any) => (
-                <div key={post.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                  <div style={{ flex: 1 }}>
-                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{post.title}</div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{post.dayOfWeek || "Any day"}{post.venueHint ? ` · ${post.venueHint}` : ""}</div>
-                  </div>
-                  <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em", padding: "3px 8px", border: "1px solid #FF00CC", color: "#FF00CC" }}>{post.status}</span>
-                  <a href="#/missed-connections" style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", color: "#FF00CC", textDecoration: "none", border: "1px solid #FF00CC", padding: "4px 10px" }}>EDIT</a>
-                  <button onClick={() => handleDeleteMissed(post.id)} style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "1px solid #FF2400", color: "#FF2400", padding: "4px 10px", cursor: "pointer" }}>DELETE</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+          <DashboardDrawer
+            title="Gifting"
+            color={CYAN}
+            countLabel={`${myGifting.length} posts`}
+            open={!!openSections.gifting}
+            onToggle={() => toggleSection("gifting")}
+            isEmpty={myGifting.length === 0}
+            emptyText="No gifting posts yet."
+            cta={{ label: "Open gifting board →", href: "#/gifting" }}
+          >
+            {myGifting.map((post: any) => (
+              <DashboardItemRow
+                key={post.id}
+                color={post.postType === "GIFT" ? LIME : "#B451FF"}
+                title={post.title}
+                meta={`${post.postType === "ISO" ? "In search of" : post.postType} · ${post.category} · ${post.neighborhood}`}
+                chip={post.status}
+                chipColor={CYAN}
+                actions={
+                  <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
+                    {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
+                  </span>
+                }
+              />
+            ))}
+          </DashboardDrawer>
 
-        {/* My Gifting */}
-        <section style={{ marginBottom: 48 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-            <h2 className="display" style={{ fontSize: "1.5rem", color: "#00FFFF" }}>MY GIFTING</h2>
-            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-            <a href="#/gifting" style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", color: "#00FFFF", textDecoration: "none", border: "1px solid #00FFFF", padding: "4px 10px" }}>OPEN BOARD</a>
-          </div>
-          {myGifting.length === 0 ? (
-            <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No gifting posts yet.</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {myGifting.map((post: any) => (
-                <div key={post.id} style={{ background: "#080808", border: `1px solid ${post.postType === "GIFT" ? "#CCFF00" : "#B451FF"}`, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                  <div style={{ flex: 1 }}>
-                    <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{post.title}</div>
-                    <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{post.postType === "ISO" ? "IN SEARCH OF" : post.postType} · {post.category} · {post.neighborhood}</div>
-                  </div>
-                  <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", letterSpacing: "0.1em", padding: "3px 8px", border: "1px solid #00FFFF", color: "#00FFFF" }}>{post.status}</span>
-                  <span style={{ color: "#666", fontSize: "0.78rem" }}>{post.interestCount || 0} response{post.interestCount === 1 ? "" : "s"}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* My Check-Ins */}
-        <section style={{ marginBottom: 48 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-            <h2 className="display" style={{ fontSize: "1.5rem", color: "#CCFF00" }}>MY CHECK-INS</h2>
-            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-          </div>
-          {myCheckIns.length === 0 ? (
-            <div style={{ color: "#444", fontSize: "0.9rem", padding: "10px 0" }}>No active check-ins yet.</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {myCheckIns.map((check: any) => (
-                <div key={check.id} style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px" }}>
-                  <div className="display" style={{ fontSize: "0.95rem", color: "#fff" }}>{check.eventTitle}</div>
-                  <div style={{ fontSize: "0.78rem", color: "#555", marginTop: 2 }}>{check.venueName} · {new Date(check.dateStart).toLocaleString()}</div>
-                  <div style={{ color: "#CCFF00", marginTop: 8, fontSize: "0.85rem" }}>{check.message}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Inbox Preview */}
-        <section style={{ marginBottom: 48 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-            <h2 className="display" style={{ fontSize: "1.5rem", color: "#00FFFF" }}>INBOX PREVIEW</h2>
-            <div style={{ flex: 1, height: 1, background: "#1a1a1a" }} />
-          </div>
-          <div style={{ background: "#080808", border: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ color: "#aaa" }}>{unread.count} unread message{unread.count === 1 ? "" : "s"}</div>
-            <a href="#/inbox" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#00FFFF", border: "2px solid #00FFFF", padding: "10px 20px", textDecoration: "none", display: "inline-block" }}>OPEN INBOX →</a>
-          </div>
-        </section>
-
-        {/* Quick links */}
-        <section>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <a href="#/inbox" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#00FFFF", border: "2px solid #00FFFF", padding: "10px 20px", textDecoration: "none", display: "inline-block" }}>INBOX →</a>
-            <a href="#/events" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#FF00CC", border: "2px solid #FF00CC", padding: "10px 20px", textDecoration: "none", display: "inline-block" }}>VIEW EVENTS →</a>
-            <a href="#/pride-work" style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", color: "#FF6600", border: "2px solid #FF6600", padding: "10px 20px", textDecoration: "none", display: "inline-block" }}>GIG BOARD →</a>
-          </div>
-        </section>
-
+          <DashboardDrawer
+            title="Check-ins"
+            color={LIME}
+            countLabel={`${myCheckIns.length} active`}
+            open={!!openSections.checkins}
+            onToggle={() => toggleSection("checkins")}
+            isEmpty={myCheckIns.length === 0}
+            emptyText="No active check-ins yet."
+          >
+            {myCheckIns.map((check: any) => (
+              <DashboardItemRow
+                key={check.id}
+                color={LIME}
+                title={check.eventTitle}
+                meta={`${check.venueName} · ${new Date(check.dateStart).toLocaleString()}`}
+                actions={
+                  <span style={{ fontSize: 13, color: LIME, maxWidth: 200 }}>{check.message}</span>
+                }
+              />
+            ))}
+          </DashboardDrawer>
+        </div>
       </div>
     </div>
   );
 }
-
-const labelStyle: React.CSSProperties = {
-  display: "block", fontFamily: "var(--font-display)", fontWeight: 900,
-  fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase",
-  color: "#666", marginBottom: 6, marginTop: 16,
-};
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "10px 12px", border: "1px solid #333",
-  fontSize: "0.9rem", background: "#0d0d0d", color: "#fff",
-  fontFamily: "var(--font-body)", boxSizing: "border-box",
-};
