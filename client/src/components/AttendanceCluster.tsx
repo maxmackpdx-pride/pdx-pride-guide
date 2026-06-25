@@ -6,18 +6,18 @@ import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 
 const SPEECH_OPTIONS = [
-  "Hey, I'm working here!",
-  "Hey, come say hi!",
-  "Hey, I just have RBF but really come say hi!",
-  "Hey, come say hi — I don't bite (unless asked)",
-  "Hey, I'm friendly but bad at starting conversations",
-  "Hey, my social battery is low but I'm trying",
-  "Hey, I'm cute and slightly feral",
-  "Hey, let's be awkward together",
-  "Hey, eye contact first, then we talk 👀",
-  "Hey, here for the queers and the chaos",
-  "Hey, consent is hot — let's start there",
-  "Hey, I'm floating around — tap me if you want company",
+  "Hey, I'll be working this one!",
+  "Hey, I'll be there — come say hi!",
+  "Hey, I'll have RBF but please come say hi!",
+  "Hey, I'll be there — come say hi, I don't bite (unless asked)",
+  "Hey, I'll be there — friendly but bad at starting conversations",
+  "Hey, I'll be there — social battery's low but I'm trying",
+  "Hey, I'll be there — cute and slightly feral",
+  "Hey, I'll be there — let's be awkward together",
+  "Hey, I'll be there — eye contact first, then we talk 👀",
+  "Hey, I'll be there for the queers and the chaos",
+  "Hey, I'll be there — consent is hot, let's start there",
+  "Hey, I'll be floating around — tap me if you want company",
 ];
 
 // First 5 are the default pill row; the rest are tucked behind "More vibes"
@@ -295,10 +295,10 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
         <div>
           <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00", fontSize: "0.6rem" }}>
-            {attendees.length} PEOPLE HERE
+            {attendees.length} GOING
           </span>
           <h3 className="display" style={{ fontSize: "1.4rem", color: "#fff", margin: "6px 0 0" }}>
-            I'M HERE
+            I'LL BE THERE
           </h3>
         </div>
         {!showForm && (
@@ -326,7 +326,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
               (e.target as HTMLButtonElement).style.color = "#CCFF00";
             }}
           >
-            {myAttendance ? "CHANGE MY VIBE" : "I'M HERE"}
+            {myAttendance ? "CHANGE MY VIBE" : "I'LL BE THERE"}
           </button>
         )}
       </div>
@@ -563,7 +563,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
       {attendees.length === 0 && !showForm && (
         <div style={{ textAlign: "center", padding: "20px 0", color: "#444" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO CHECK IN</p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO SAY YOU'LL BE THERE</p>
         </div>
       )}
 
@@ -621,7 +621,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
                 textTransform: "uppercase",
               }}
             >
-              {mutation.isPending ? "SAVING..." : myAttendance ? "UPDATE VIBE" : "I'M HERE"}
+              {mutation.isPending ? "SAVING..." : myAttendance ? "UPDATE VIBE" : "I'LL BE THERE"}
             </button>
             {myAttendance && (
               <button
