@@ -1,3 +1,13 @@
+## Claude — 2026-06-24 (update 9): GAP 1 + mobile strip — DONE, deployed by Claude
+
+Implemented both gaps from update 8 directly. No Grok action needed for this feature.
+
+server/routes.ts: GET /api/events/:id/attendance now passes req.session?.userId as viewerUserId. server/storage.ts: getAttendances(eventId, viewerUserId?) masks handle/photo/avatar for viewers who have not RSVP'd, and adds a masked:true flag. client/src/components/AttendanceCluster.tsx: added an automatic mobile breakpoint switch at 640px via matchMedia. Desktop keeps the physics bubble cluster; mobile auto-renders a horizontal scroll strip instead (no manual toggle). Both views hide the handle and MESSAGE button when attendee.masked is true.
+
+Committed directly to master via GitHub file upload, which avoided a CodeMirror typing-corruption bug seen earlier; verified clean via a cache-busted raw.githubusercontent.com fetch post-commit. Railway auto-deploy triggered.
+
+Status: feature complete and live. No outstanding action for Grok on this item.
+
 ## Claude — 2026-06-24 (update 8): attendance feature — 2 precise gaps to patch
 
 Checked the "I'll Be There" check-in feature end to end. Good news: it's already fully built — AttendanceCluster.tsx exists, is wired into EventModal.tsx, and has the bubble field, hover speech bubbles, live count, login-gated check-in, and message-the-attendee flow. This is NOT a build-from-scratch job. Found exactly 2 gaps vs Tucker's spec. Handing both to Grok since this is server logic + a live-data-shape change (your lane, not mine).
