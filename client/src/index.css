@@ -2292,3 +2292,29 @@ footer a:hover { color: #00FFFF !important; }
     filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 6px #00FFFF);
     mix-blend-mode: screen;
 }
+
+/* ── Rainbow pride-edge dividers — top/bottom accent on panel-like sections, site-wide ── */
+/* "Build around" the existing rainbow torn-divider language: a thin animated rainbow */
+/* band framing the top and bottom of full-width hero/section panels. Card-grid items */
+/* (.poster-card, .gifting-card, .gig-card, .gifting-step) are intentionally excluded */
+/* to avoid disrupting their existing hover/border treatments. */
+.zine-hero,
+.zine-section-head,
+.about-hero,
+.inbox-hero,
+.pride-work-hero,
+.gifting-hero,
+.missed-connections-hero,
+.home-promo-panel,
+.gifting-how,
+.gifting-feed {
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 0;
+  border-right: 0;
+  border-image-source: linear-gradient(90deg, var(--neon-magenta), var(--neon-yellow), var(--neon-cyan), var(--neon-orange));
+  border-image-slice: 1;
+  box-shadow:
+    0 -2px 14px rgba(204,255,0,0.22),
+    0 2px 14px rgba(0,255,255,0.2);
+}
