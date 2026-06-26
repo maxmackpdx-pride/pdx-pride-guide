@@ -6331,3 +6331,17 @@ footer a:hover { color: #00FFFF !important; }
     width: 200px;
   }
 }
+
+
+/* Gifting hero: calm the busy collage photo to match the quieter, grain-poster reference look */
+.gifting-page .page-hero__bg {
+  filter: saturate(0.9) contrast(0.97) brightness(0.92);
+}
+.gifting-page .page-hero__scrim {
+  background:
+    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
+    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+}
+.gifting-page .page-hero__grain {
+  opacity: 0.12;
+}
