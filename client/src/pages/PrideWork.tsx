@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,10 @@ import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
-import { Briefcase, Search, X, ChevronDown } from "lucide-react";
+import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardActiveSection, { BoardFilterChip } from "@/components/BoardActiveSection";
+import { timeAgo } from "@/lib/boardFeed";
+import { Briefcase, Search, X } from "lucide-react";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -42,14 +45,8 @@ interface GigPost {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  LOOKING_FOR_WORK: "LOOKING FOR WORK",
-  POSTING_GIG: "POSTING A GIG",
-};
-
-const FILTER_LABELS: Record<string, string> = {
-  ALL: "All posts",
-  POSTING_GIG: "Posting a gig",
   LOOKING_FOR_WORK: "Looking for work",
+  POSTING_GIG: "Posting a gig",
 };
 
 const HOW_IT_WORKS = [
@@ -61,16 +58,28 @@ const HOW_IT_WORKS = [
   ["STAMP IT DONE", "Mark filled or found when the gig wraps."],
 ];
 
+const ACCENT = {
+  POSTING_GIG: "#C8FA3C",
+  LOOKING_FOR_WORK: "#19E3FF",
+};
+
 export default function PrideWork() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [filterType, setFilterType] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">("ALL");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
     queryKey: ["/api/gigs"],
   });
+
+  const stats = useMemo(() => [
+    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "Gigs posted", color: "#C8FA3C" },
+    { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Workers available", color: "#19E3FF" },
+    { num: gigs.filter(g => g.isRemote).length, label: "Remote-friendly", color: "#FF1FA0" },
+  ], [gigs]);
 
   const form = useForm<GigFormData>({
     resolver: zodResolver(gigSchema),
@@ -119,6 +128,7 @@ export default function PrideWork() {
   return (
     <div className="zine-page gigs-page board-page">
       <PageHero
+        kicker="Pride season & beyond"
         titleLine1="PRIDE"
         titleLine2="GIG BOARD"
         accent="lime"
@@ -128,7 +138,7 @@ export default function PrideWork() {
         bgImage="/motifs/hero-gigs.jpg"
         actions={
           <>
-            <button className="btn-neon cyan" onClick={() => setFilterType("LOOKING_FOR_WORK")}>
+            <button className="btn-neon cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>
               <Search size={16} /> Find Work
             </button>
             <button className="btn-neon" data-testid="button-post-gig" onClick={() => openForm("POSTING_GIG")}>
@@ -137,14 +147,17 @@ export default function PrideWork() {
             <button className="btn-neon magenta" onClick={() => openForm("LOOKING_FOR_WORK")}>
               <Search size={16} /> Post Availability
             </button>
-            <a href="#how-it-works" className="gifting-how-link">How It Works ↓</a>
+            <a href="#how-it-works" className="gifting-how-link">How it works ↓</a>
           </>
         }
       />
 
+      <BoardStatsBar stats={stats} liveLabel="Queer work board · live" />
+
       <ScrollReveal>
-        <section id="how-it-works" className="gigs-how">
+        <section id="how-it-works" className="gigs-how board-how board-how--inline">
           <div>
+            <span className="board-sticker board-sticker--cyan">How it works</span>
             <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
             <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
           </div>
@@ -181,7 +194,7 @@ export default function PrideWork() {
                     className={`${postType === type ? "active" : ""} ${type === "POSTING_GIG" ? "posting" : "looking"}`}
                     onClick={() => form.setValue("postType", type)}
                   >
-                    {TYPE_LABELS[type]}
+                    {TYPE_LABELS[type].toUpperCase()}
                   </button>
                 ))}
               </div>
@@ -189,80 +202,41 @@ export default function PrideWork() {
 
             <label>
               Your name *
-              <input
-                className="gigs-field"
-                data-testid="input-name"
-                placeholder="Name or handle"
-                {...form.register("name")}
-              />
+              <input className="gigs-field" data-testid="input-name" placeholder="Name or handle" {...form.register("name")} />
               {form.formState.errors.name && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.name.message}</span>}
             </label>
 
             <label>
               Contact email *
-              <input
-                className="gigs-field"
-                data-testid="input-email"
-                type="email"
-                placeholder="your@email.com"
-                {...form.register("contactEmail")}
-              />
+              <input className="gigs-field" data-testid="input-email" type="email" placeholder="your@email.com" {...form.register("contactEmail")} />
               {form.formState.errors.contactEmail && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.contactEmail.message}</span>}
             </label>
 
             <label className="span">
               {postType === "POSTING_GIG" ? "Gig title *" : "Role / what you do *"}
-              <input
-                className="gigs-field"
-                data-testid="input-title"
-                placeholder={postType === "POSTING_GIG" ? "e.g. Stage Manager for Pride Stage" : "e.g. Event Photographer"}
-                {...form.register("title")}
-              />
+              <input className="gigs-field" data-testid="input-title" placeholder={postType === "POSTING_GIG" ? "e.g. Stage Manager for Pride Stage" : "e.g. Event Photographer"} {...form.register("title")} />
               {form.formState.errors.title && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.title.message}</span>}
             </label>
 
             <label className="span">
               Description *
-              <textarea
-                className="gigs-field"
-                data-testid="input-description"
-                rows={5}
-                placeholder={postType === "POSTING_GIG"
-                  ? "Describe the gig, responsibilities, dates, what you need..."
-                  : "Tell the community what you offer, your experience, availability..."}
-                {...form.register("description")}
-              />
+              <textarea className="gigs-field" data-testid="input-description" rows={5} placeholder={postType === "POSTING_GIG" ? "Describe the gig, responsibilities, dates, what you need..." : "Tell the community what you offer, your experience, availability..."} {...form.register("description")} />
               {form.formState.errors.description && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.description.message}</span>}
             </label>
 
             <label>
               Skills / tags
-              <input
-                className="gigs-field"
-                data-testid="input-skills"
-                placeholder="e.g. Sound, Lighting, Photography"
-                {...form.register("skills")}
-              />
+              <input className="gigs-field" data-testid="input-skills" placeholder="e.g. Sound, Lighting, Photography" {...form.register("skills")} />
             </label>
 
             <label>
               Compensation
-              <input
-                className="gigs-field"
-                data-testid="input-compensation"
-                placeholder="e.g. $25/hr, Volunteer, Negotiable"
-                {...form.register("compensation")}
-              />
+              <input className="gigs-field" data-testid="input-compensation" placeholder="e.g. $25/hr, Volunteer, Negotiable" {...form.register("compensation")} />
             </label>
 
             <label className="span">
               Location
-              <input
-                className="gigs-field"
-                data-testid="input-location"
-                placeholder="e.g. Portland, OR / Remote / Washington Park"
-                {...form.register("location")}
-              />
+              <input className="gigs-field" data-testid="input-location" placeholder="e.g. Portland, OR / Remote / Washington Park" {...form.register("location")} />
             </label>
 
             <div className="span gigs-form-actions">
@@ -276,92 +250,73 @@ export default function PrideWork() {
         </ScrollReveal>
       )}
 
-      <ScrollReveal delay={60}>
-      <section className="gigs-feed">
-        <div className="gigs-feed-head">
-          <div>
-            <h2 className="display section-heading">GIGS & AVAILABILITY</h2>
-          </div>
-          <div className="gigs-filterbar">
-            {(["ALL", "POSTING_GIG", "LOOKING_FOR_WORK"] as const).map(type => (
-              <button
-                key={type}
-                data-testid={`filter-${type}`}
-                className={`${filterType === type ? "active" : ""} ${type === "LOOKING_FOR_WORK" ? "looking" : ""}`}
-                onClick={() => setFilterType(type)}
-              >
-                {FILTER_LABELS[type]}
-              </button>
+      <BoardActiveSection
+        sticker="Active board"
+        stickerTone="lime"
+        title="Gigs & Availability"
+        filters={
+          <>
+            {([
+              { key: "ALL", label: "All" },
+              { key: "POSTING_GIG", label: "Posting a gig" },
+              { key: "LOOKING_FOR_WORK", label: "Looking for work" },
+            ] as const).map(f => (
+              <BoardFilterChip key={f.key} active={filterType === f.key} onClick={() => setFilterType(f.key)}>
+                {f.label}
+              </BoardFilterChip>
             ))}
-            <span className="count">
-              {filteredGigs.length} post{filteredGigs.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-        </div>
-
+          </>
+        }
+      >
         {isLoading ? (
           <BoardLoadingState label="Loading gig posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#FF6600" }}>
             <Briefcase size={40} style={{ color: "#FF6600", margin: "0 auto" }} />
             <p className="display section-heading" style={{ color: "#fff" }}>COULD NOT LOAD POSTS</p>
-            <p className="board-copy-sm">
-              {error instanceof Error ? error.message : "The gig board API is unavailable right now."}
-            </p>
-            <button
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}
-              className="btn-neon"
-              style={{ marginTop: 20 }}
-            >
-              TRY AGAIN
-            </button>
+            <p className="board-copy-sm">{error instanceof Error ? error.message : "The gig board API is unavailable right now."}</p>
+            <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })} className="btn-neon" style={{ marginTop: 20 }}>TRY AGAIN</button>
           </div>
         ) : filteredGigs.length === 0 ? (
-          <div className="board-empty">
-            <Briefcase size={40} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto" }} />
-            <p className="display section-heading">
-              {gigs.length === 0 ? "NO POSTS YET" : "NO MATCHES"}
-            </p>
+          <div className="board-empty board-empty--prototype">
+            <p className="display section-heading">Nothing here yet</p>
             <p className="board-copy-sm">
-              {gigs.length === 0
-                ? "Be the first to post a gig or offer your skills."
-                : "Nothing matches this filter. Try showing all posts."}
+              {gigs.length === 0 ? "No posts match this filter right now. Be the first — post a gig or your availability." : "No posts match this filter right now. Try showing all posts."}
             </p>
             {gigs.length === 0 ? (
-              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("POSTING_GIG")}>
-                POST HERE
-              </button>
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("POSTING_GIG")}>Post a gig</button>
             ) : (
-              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => setFilterType("ALL")}>
-                SHOW ALL
-              </button>
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => setFilterType("ALL")}>Show all</button>
             )}
           </div>
         ) : (
-          <div className="gigs-grid">
+          <div className="board-listing-grid">
             {filteredGigs.map((gig, index) => (
               <ScrollReveal key={gig.id} delay={Math.min(index * 80, 400)}>
-                <GigCard gig={gig} />
+                <GigListingCard
+                  gig={gig}
+                  expanded={expandedId === gig.id}
+                  onToggle={() => setExpandedId(expandedId === gig.id ? null : gig.id)}
+                />
               </ScrollReveal>
             ))}
           </div>
         )}
-      </section>
-      </ScrollReveal>
+      </BoardActiveSection>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
   );
 }
 
-function GigCard({ gig }: { gig: GigPost }) {
-  const [expanded, setExpanded] = useState(false);
+function GigListingCard({ gig, expanded, onToggle }: { gig: GigPost; expanded: boolean; onToggle: () => void }) {
   const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [messageBody, setMessageBody] = useState("");
   const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
   const isLooking = gig.postType === "LOOKING_FOR_WORK";
+  const accent = isLooking ? ACCENT.LOOKING_FOR_WORK : ACCENT.POSTING_GIG;
 
   const messageMutation = useMutation({
     mutationFn: () => fetch(`/api/gigs/${gig.id}/message`, {
@@ -384,71 +339,59 @@ function GigCard({ gig }: { gig: GigPost }) {
   return (
     <article
       data-testid={`card-gig-${gig.id}`}
-      className={`gigs-card ${isLooking ? "looking" : "posting"}`}
+      className={`board-listing-card${expanded ? " is-expanded" : ""}`}
+      style={{ "--listing-accent": accent } as React.CSSProperties}
+      onClick={onToggle}
     >
-      <div className="gigs-card-accent" aria-hidden="true" />
-      <div className="gigs-card-body">
-        <button className="gigs-card-toggle" onClick={() => setExpanded(!expanded)} type="button">
-          <div className="gigs-card-head">
-            <div className="gigs-card-summary">
-              <div className="gigs-card-meta">
-                <span className="gigs-type">{TYPE_LABELS[gig.postType]}</span>
-                {gig.isRemote && <span className="gigs-remote">REMOTE</span>}
-                <span>{gig.location || "Portland"}</span>
-              </div>
-              <h3 className="display panel-heading">{gig.title}</h3>
-              <p className="gigs-poster-name">{gig.name}</p>
-              {detailParts.length > 0 && (
-                <div className="gigs-details">{detailParts.join(" · ")}</div>
-              )}
-            </div>
-            <ChevronDown size={20} className={`gigs-chevron ${expanded ? "open" : ""}`} />
+      <div className="board-listing-card__row">
+        <div className="board-listing-card__thumb" style={{ background: isLooking ? "linear-gradient(135deg,#19E3FF,#A24BFF)" : "linear-gradient(135deg,#C8FA3C,#19E3FF)" }}>
+          <div className="gifting-photo-empty" style={{ height: "100%", fontSize: "0.55rem" }}><Briefcase size={22} /></div>
+        </div>
+        <div className="board-listing-card__main">
+          <div className="board-listing-card__tags">
+            <span className="board-listing-card__kind">{TYPE_LABELS[gig.postType]}</span>
+            {gig.isRemote && <span className="board-listing-card__grab">Remote</span>}
+            <span className="board-listing-card__time">{timeAgo(gig.createdAt)}</span>
           </div>
-        </button>
-
-        {expanded && (
-          <div className="gigs-card-expand">
-            <p className="board-copy" style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
-            {skills.length > 0 && (
-              <div className="gigs-skills">
-                {skills.map(skill => <span key={skill}>{skill}</span>)}
-              </div>
-            )}
-            {gig.userId !== user?.id && (
-              <>
-                <button
-                  type="button"
-                  className="btn-outline"
-                  onClick={() => user ? setShowMessage(!showMessage) : setShowAuth(true)}
-                >
-                  Reply to Post
-                </button>
-                {showMessage && (
-                  <div className="gigs-response">
-                    <textarea
-                      value={messageBody}
-                      onChange={e => setMessageBody(e.target.value)}
-                      placeholder={`Write a private reply about "${gig.title}"...`}
-                    />
-                    <div className="gifting-actions">
-                      <button
-                        type="button"
-                        className="btn-neon solid"
-                        onClick={() => messageMutation.mutate()}
-                        disabled={!messageBody.trim() || messageMutation.isPending}
-                        style={{ opacity: !messageBody.trim() || messageMutation.isPending ? 0.55 : 1 }}
-                      >
-                        {messageMutation.isPending ? "SENDING..." : "SEND"}
-                      </button>
-                      <button type="button" className="btn-neon" onClick={() => setShowMessage(false)}>Cancel</button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+          <h4 className="board-listing-card__title">{gig.title}</h4>
+          <div className="board-listing-card__poster">
+            <span>{gig.name} · {gig.location || "Portland"}</span>
           </div>
-        )}
+        </div>
       </div>
+      <div className="board-listing-card__footer">
+        <span className="board-listing-card__status">{detailParts.join(" · ") || "Open — reply privately"}</span>
+        <span className="board-listing-card__cta">Reply →</span>
+      </div>
+
+      {expanded && (
+        <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+          <p style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
+          {skills.length > 0 && (
+            <div className="gigs-skills">
+              {skills.map(skill => <span key={skill}>{skill}</span>)}
+            </div>
+          )}
+          {gig.userId !== user?.id && (
+            <>
+              <button type="button" className="btn-outline" onClick={() => user ? setShowMessage(!showMessage) : setShowAuth(true)}>
+                Reply to Post
+              </button>
+              {showMessage && (
+                <div className="gigs-response">
+                  <textarea value={messageBody} onChange={e => setMessageBody(e.target.value)} placeholder={`Write a private reply about "${gig.title}"...`} />
+                  <div className="gifting-actions">
+                    <button type="button" className="btn-neon solid" onClick={() => messageMutation.mutate()} disabled={!messageBody.trim() || messageMutation.isPending}>
+                      {messageMutation.isPending ? "SENDING..." : "SEND"}
+                    </button>
+                    <button type="button" className="btn-neon" onClick={() => setShowMessage(false)}>Cancel</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </article>
   );

@@ -9,6 +9,9 @@ import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
+import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
+import { isOpenGrabPost, timeAgo } from "@/lib/boardFeed";
 
 const CATEGORIES = [
   "Clothing", "Queer Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -18,7 +21,7 @@ const CATEGORIES = [
   "Beauty / Grooming", "Other",
 ];
 
-const PICKUP = ["Porch pickup", "Public meetup", "Event handoff", "Flexible pickup", "Message to coordinate"];
+const PICKUP = ["Open Grab", "Porch pickup", "Public meetup", "Event handoff", "Flexible pickup", "Message to coordinate"];
 
 type GiftingPost = {
   id: number;
@@ -53,11 +56,12 @@ const blankForm = {
   acceptRules: false,
 };
 
-const postTypeLabel = (type: string) => type === "ISO" ? "IN SEARCH OF" : "GIFT";
-const filterLabel = (type: string) => {
-  if (type === "OPEN") return "Open only";
-  if (type === "ISO") return "In Search Of";
-  return type;
+const postTypeLabel = (type: string) => type === "ISO" ? "In search of" : "Gift";
+
+const ACCENT: Record<string, string> = {
+  GIFT: "#C8FA3C",
+  ISO: "#19E3FF",
+  GRAB: "#FF8C00",
 };
 
 export default function Gifting() {
@@ -73,13 +77,24 @@ export default function Gifting() {
   const [sort, setSort] = useState("RECENT");
   const [activeNote, setActiveNote] = useState<Record<number, string>>({});
   const [report, setReport] = useState<Record<number, string>>({});
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const { data: posts = [], isLoading, isError, error } = useQuery<GiftingPost[]>({ queryKey: ["/api/gifting"] });
 
+  const stats = useMemo(() => {
+    const active = (p: GiftingPost) => !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(p.status);
+    return [
+      { num: posts.filter(p => p.postType === "GIFT" && active(p)).length, label: "Gifts up now", color: "#C8FA3C" },
+      { num: posts.filter(p => p.status === "GIFTED").length, label: "Homes found this season", color: "#FF1FA0" },
+      { num: posts.filter(p => p.postType === "ISO" && active(p)).length, label: "In search of, open", color: "#19E3FF" },
+    ];
+  }, [posts]);
+
   const filtered = useMemo(() => {
     let rows = posts.slice();
-    if (filter === "GIFT" || filter === "ISO") rows = rows.filter(p => p.postType === filter);
-    if (filter === "OPEN") rows = rows.filter(p => ["OPEN", "LOOKING", "REOPENED"].includes(p.status));
+    if (filter === "GIFT") rows = rows.filter(p => p.postType === "GIFT" && !isOpenGrabPost(p));
+    if (filter === "ISO") rows = rows.filter(p => p.postType === "ISO");
+    if (filter === "GRAB") rows = rows.filter(p => isOpenGrabPost(p));
     if (category !== "ALL") rows = rows.filter(p => p.category === category);
     if (neighborhood.trim()) rows = rows.filter(p => p.neighborhood.toLowerCase().includes(neighborhood.trim().toLowerCase()));
     if (sort === "EXPIRING") rows.sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
@@ -159,9 +174,29 @@ export default function Gifting() {
     setActiveNote(prev => ({ ...prev, [post.id]: "" }));
   };
 
+  const cardAccent = (post: GiftingPost) => {
+    if (isOpenGrabPost(post)) return ACCENT.GRAB;
+    return post.postType === "ISO" ? ACCENT.ISO : ACCENT.GIFT;
+  };
+
+  const cardStatus = (post: GiftingPost) => {
+    if (post.postType === "ISO") return "Open — make an offer";
+    if (isOpenGrabPost(post)) return "First come — grab it";
+    if (post.interestCount >= 3) return "3 of 3 hands up";
+    return `${post.interestCount} of 3 hands up`;
+  };
+
+  const cardCta = (post: GiftingPost) => {
+    if (post.postType === "ISO") return "Offer it";
+    if (isOpenGrabPost(post)) return "Grab it";
+    if (post.interestCount >= 3) return "Full";
+    return "Raise hand";
+  };
+
   return (
     <div className="zine-page gifting-page board-page">
       <PageHero
+        kicker="Pride season only · Now through July 26"
         titleLine1="GIFT WITH"
         titleLine2="PRIDE"
         accent="rainbow"
@@ -173,13 +208,17 @@ export default function Gifting() {
           <>
             <button className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a Gift</button>
             <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an In Search Of</button>
+            <a href="#how-it-works" className="gifting-how-link">How it works ↓</a>
           </>
         }
       />
 
+      <BoardStatsBar stats={stats} />
+
       <ScrollReveal>
-        <section id="how-it-works" className="gifting-how">
+        <section id="how-it-works" className="gifting-how board-how board-how--inline">
           <div>
+            <span className="board-sticker board-sticker--cyan">How it works</span>
             <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
             <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
           </div>
@@ -206,7 +245,7 @@ export default function Gifting() {
       {formOpen && (
         <section id="gifting-form" className="gifting-form-panel">
           <button className="gifting-close" onClick={() => setFormOpen(false)}><X size={18} /></button>
-          <h2 className="display section-heading">POST A {postTypeLabel(form.postType)}</h2>
+          <h2 className="display section-heading">POST A {form.postType === "ISO" ? "IN SEARCH OF" : "GIFT"}</h2>
           <p>No selling, trading, bartering, exact addresses, unsafe items, or hookup behavior. First-time posts are held for admin review.</p>
           <div className="gifting-form-grid">
             <label>Post Type<select value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}><option value="GIFT">Gift</option><option value="ISO">In Search Of</option></select></label>
@@ -224,19 +263,38 @@ export default function Gifting() {
         </section>
       )}
 
-      <section className="gifting-feed">
-        <div className="gifting-feed-head">
-          <div>
-            <h2 className="display section-heading">GIFTS & IN SEARCH OF</h2>
-          </div>
-          <div className="gifting-filterbar">
-            {["ALL", "GIFT", "ISO", "OPEN"].map(f => <button key={f} className={filter === f ? "active" : ""} onClick={() => setFilter(f)}>{filterLabel(f)}</button>)}
-            <select value={category} onChange={e => setCategory(e.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select>
-            <input placeholder="Neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} />
-            <select value={sort} onChange={e => setSort(e.target.value)}><option value="RECENT">Recently posted</option><option value="EXPIRING">Expiring soon</option></select>
-          </div>
-        </div>
-
+      <BoardActiveSection
+        sticker="Active board"
+        stickerTone="lime"
+        title="Gifts & In Search Of"
+        filters={
+          <>
+            {[
+              { key: "ALL", label: "All" },
+              { key: "GIFT", label: "Gift" },
+              { key: "ISO", label: "In search of" },
+              { key: "GRAB", label: "Open Grab" },
+            ].map(f => (
+              <BoardFilterChip key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)}>
+                {f.label}
+              </BoardFilterChip>
+            ))}
+            <BoardSelectField value={category} onChange={setCategory}>
+              <option value="ALL">All categories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </BoardSelectField>
+          </>
+        }
+        filterRow2={
+          <>
+            <BoardTextField value={neighborhood} onChange={setNeighborhood} placeholder="Neighborhood" />
+            <BoardSelectField value={sort} onChange={setSort}>
+              <option value="RECENT">Recently posted</option>
+              <option value="EXPIRING">Expiring soon</option>
+            </BoardSelectField>
+          </>
+        }
+      >
         {isLoading ? (
           <BoardLoadingState label="Loading gifting posts" />
         ) : isError ? (
@@ -246,99 +304,135 @@ export default function Gifting() {
             <p className="board-copy-sm">
               {error instanceof Error ? error.message : "The gifting board API is unavailable right now."}
             </p>
-            <button
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}
-              className="btn-neon"
-              style={{ marginTop: 20 }}
-            >
+            <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })} className="btn-neon" style={{ marginTop: 20 }}>
               TRY AGAIN
             </button>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="board-empty">
-            <Sparkles size={40} style={{ color: "rgba(255,255,255,0.2)", margin: "0 auto" }} />
-            <p className="display section-heading">
-              {posts.length === 0 ? "NO POSTS YET" : "NO MATCHES"}
-            </p>
+          <div className="board-empty board-empty--prototype">
+            <p className="display section-heading">{posts.length === 0 ? "Nothing here yet" : "Nothing here yet"}</p>
             <p className="board-copy-sm">
               {posts.length === 0
-                ? "Be the first to gift something or post an In Search Of."
-                : "Nothing matches your filters. Try widening the search."}
+                ? "No posts match this filter right now. Be the first — post a gift or an in search of."
+                : "No posts match this filter right now. Try widening the search."}
             </p>
             {posts.length === 0 ? (
-              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("GIFT")}>
-                POST A GIFT
-              </button>
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("GIFT")}>Post a gift</button>
             ) : (
-              <button className="btn-neon" style={{ marginTop: 20 }} onClick={clearFilters}>
-                CLEAR FILTERS
-              </button>
+              <button className="btn-neon" style={{ marginTop: 20 }} onClick={clearFilters}>Clear filters</button>
             )}
           </div>
         ) : (
-          <div className="gifting-grid">
-            {filtered.map((post, index) => (
-              <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
-              <article className={`gifting-card ${post.postType.toLowerCase()}`}>
-                <div className="gifting-photo">
-                  {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" /> : <div className="gifting-photo-empty"><Sparkles /> FREE BOARD</div>}
-                  {post.photoUrls?.[1] && <span>+1 photo</span>}
-                </div>
-                {["GIFTED", "FOUND"].includes(post.status) && <div className="gifting-stamp">{post.status}</div>}
-                <div className="gifting-card-body">
-                  <div className="gifting-card-meta">
-                    <span className="gifting-type">{postTypeLabel(post.postType)}</span>
-                    <span>{post.status.replaceAll("_", " ")}</span>
-                  </div>
-                  <h3 className="display panel-heading">{post.title}</h3>
-                  <p>{post.description}</p>
-                  <div className="gifting-details">{post.category} · {post.neighborhood} · {post.pickupPreference}</div>
-                  <div className="gifting-poster">
-                    <UserAvatar
-                      photoUrl={post.posterPhotoUrl}
-                      avatarChoice={post.avatarChoice}
-                      avatarRing={post.posterAvatarRing}
-                      displayName={post.displayName}
-                      username={post.username}
-                      size={34}
-                    />
-                    <b>{post.displayName || post.username}</b>
-                  </div>
-                  {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
-                    <div className="gifting-response">
-                      <textarea placeholder={post.postType === "GIFT" ? "Short note: why you'd use this" : "Tell them what you have"} value={activeNote[post.id] || ""} onChange={e => setActiveNote(prev => ({ ...prev, [post.id]: e.target.value }))} maxLength={240} />
-                      <button onClick={() => submitResponse(post, post.postType === "GIFT" ? "interest" : "offer")} disabled={post.postType === "GIFT" && post.interestCount >= 3}>
-                        {post.postType === "GIFT" && post.interestCount >= 3 ? "3 people interested. Poster choosing now." : post.postType === "GIFT" ? "I'm Interested" : "I have this"}
-                      </button>
-                    </div>
-                  )}
-                  {post.isMine && (
-                    <div className="gifting-owner">
-                      {post.interests?.length ? <div className="gifting-interest-list">{post.interests.map(i => (
-                        <div key={i.id} className="gifting-interest-row">
-                          <UserAvatar photoUrl={i.photoUrl} avatarChoice={i.avatarChoice} avatarRing={i.avatarRing} displayName={i.displayName} username={i.username} size={28} />
-                          <span>{i.displayName || i.username}: {i.note}</span>
-                          {i.status === "INTERESTED" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/interests/${i.id}/choose` })}>Pick</button>}
+          <div className="board-listing-grid">
+            {filtered.map((post, index) => {
+              const accent = cardAccent(post);
+              const expanded = expandedId === post.id;
+              const showDots = post.postType === "GIFT" && !isOpenGrabPost(post);
+              return (
+                <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
+                  <article
+                    className={`board-listing-card${expanded ? " is-expanded" : ""}`}
+                    style={{ "--listing-accent": accent } as React.CSSProperties}
+                    onClick={() => setExpandedId(expanded ? null : post.id)}
+                  >
+                    <div className="board-listing-card__row">
+                      <div className="board-listing-card__thumb">
+                        {post.photoUrls?.[0] ? (
+                          <img src={post.photoUrls[0]} alt="" />
+                        ) : (
+                          <div className="gifting-photo-empty" style={{ height: "100%", fontSize: "0.55rem" }}><Sparkles /></div>
+                        )}
+                        {(post.photoUrls?.length || 0) > 0 && (
+                          <span className="board-listing-card__thumb-badge">▦ {post.photoUrls.length}</span>
+                        )}
+                      </div>
+                      <div className="board-listing-card__main">
+                        <div className="board-listing-card__tags">
+                          <span className="board-listing-card__kind">{postTypeLabel(post.postType)}</span>
+                          {isOpenGrabPost(post) && <span className="board-listing-card__grab">⊙ Open Grab</span>}
+                          <span className="board-listing-card__time">{timeAgo(post.createdAt)}</span>
                         </div>
-                      ))}</div> : <p>No responses yet.</p>}
-                      {post.postType === "GIFT" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-gifted` })}><HeartHandshake size={14} /> Mark Gifted</button>}
-                      {post.postType === "ISO" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-found` })}><HeartHandshake size={14} /> Mark Found</button>}
-                      <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/reopen` })}><RefreshCw size={14} /> Reopen one spot</button>
-                      <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/renew` })}><RefreshCw size={14} /> Renew once</button>
+                        <h4 className="board-listing-card__title">{post.title}</h4>
+                        <div className="board-listing-card__poster">
+                          <UserAvatar
+                            photoUrl={post.posterPhotoUrl}
+                            avatarChoice={post.avatarChoice}
+                            avatarRing={post.posterAvatarRing}
+                            displayName={post.displayName}
+                            username={post.username}
+                            size={18}
+                          />
+                          <span>@{post.username} · {post.neighborhood || "Portland"}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <details className="gifting-report">
-                    <summary><ShieldAlert size={13} /> Report</summary>
-                    <input placeholder="What's wrong?" value={report[post.id] || ""} onChange={e => setReport(prev => ({ ...prev, [post.id]: e.target.value }))} />
-                    <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/report`, data: { reason: report[post.id] } })}>Send report</button>
-                  </details>
-                </div>
-              </article>
-              </ScrollReveal>
-            ))}
+                    <div className="board-listing-card__footer">
+                      <div className="board-listing-card__status-wrap">
+                        {showDots && (
+                          <div className="board-listing-card__dots">
+                            {[0, 1, 2].map(i => (
+                              <span key={i} className={`board-listing-card__dot${i < post.interestCount ? " is-filled" : ""}`} />
+                            ))}
+                          </div>
+                        )}
+                        <span className="board-listing-card__status">{cardStatus(post)}</span>
+                      </div>
+                      <span className="board-listing-card__cta">{cardCta(post)} →</span>
+                    </div>
+
+                    {expanded && (
+                      <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+                        <p>{post.description}</p>
+                        <div className="gifting-details">{post.category} · {post.pickupPreference}</div>
+                        {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
+                          <div className="gifting-response">
+                            <textarea
+                              placeholder={post.postType === "GIFT" ? "Short note: why you'd use this" : "Tell them what you have"}
+                              value={activeNote[post.id] || ""}
+                              onChange={e => setActiveNote(prev => ({ ...prev, [post.id]: e.target.value }))}
+                              maxLength={240}
+                            />
+                            <button
+                              onClick={() => submitResponse(post, post.postType === "GIFT" ? "interest" : "offer")}
+                              disabled={!isOpenGrabPost(post) && post.postType === "GIFT" && post.interestCount >= 3}
+                            >
+                              {isOpenGrabPost(post) ? "On my way — grab it" : post.postType === "GIFT" && post.interestCount >= 3 ? "3 people interested. Poster choosing now." : post.postType === "GIFT" ? "I'm Interested" : "I have this"}
+                            </button>
+                          </div>
+                        )}
+                        {post.isMine && (
+                          <div className="gifting-owner">
+                            {post.interests?.length ? (
+                              <div className="gifting-interest-list">
+                                {post.interests.map(i => (
+                                  <div key={i.id} className="gifting-interest-row">
+                                    <UserAvatar photoUrl={i.photoUrl} avatarChoice={i.avatarChoice} avatarRing={i.avatarRing} displayName={i.displayName} username={i.username} size={28} />
+                                    <span>{i.displayName || i.username}: {i.note}</span>
+                                    {i.status === "INTERESTED" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/interests/${i.id}/choose` })}>Pick</button>}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : <p>No responses yet.</p>}
+                            {post.postType === "GIFT" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-gifted` })}><HeartHandshake size={14} /> Mark Gifted</button>}
+                            {post.postType === "ISO" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-found` })}><HeartHandshake size={14} /> Mark Found</button>}
+                            <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/reopen` })}><RefreshCw size={14} /> Reopen one spot</button>
+                            <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/renew` })}><RefreshCw size={14} /> Renew once</button>
+                          </div>
+                        )}
+                        <details className="gifting-report">
+                          <summary><ShieldAlert size={13} /> Report</summary>
+                          <input placeholder="What's wrong?" value={report[post.id] || ""} onChange={e => setReport(prev => ({ ...prev, [post.id]: e.target.value }))} />
+                          <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/report`, data: { reason: report[post.id] } })}>Send report</button>
+                        </details>
+                      </div>
+                    )}
+                  </article>
+                </ScrollReveal>
+              );
+            })}
           </div>
         )}
-      </section>
+      </BoardActiveSection>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>

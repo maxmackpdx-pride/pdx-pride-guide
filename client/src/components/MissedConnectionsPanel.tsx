@@ -5,7 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "./AuthModal";
 import BoardLoadingState from "./BoardLoadingState";
+import BoardActiveSection, { BoardSelectField, BoardTextField } from "./BoardActiveSection";
 import ScrollReveal from "./ScrollReveal";
+import { timeAgo } from "@/lib/boardFeed";
 import type { Event } from "@shared/schema";
 
 export type MissedConnectionPost = {
@@ -36,10 +38,12 @@ export default function MissedConnectionsPanel({
   mode,
   eventId,
   compact = false,
+  boardLayout = false,
 }: {
   mode: "board" | "event";
   eventId?: number;
   compact?: boolean;
+  boardLayout?: boolean;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -47,6 +51,7 @@ export default function MissedConnectionsPanel({
   const [form, setForm] = useState({ title: "", body: "", eventId: eventId ? String(eventId) : "" });
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
   const [replyBody, setReplyBody] = useState("");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const postsQueryKey = mode === "event" && eventId
     ? ["/api/events", eventId, "missed-connections"]
@@ -148,53 +153,196 @@ export default function MissedConnectionsPanel({
     );
   }
 
+  const composeForm = mode === "board" && (
+    <section className={boardLayout ? "board-compose-panel" : ""} style={boardLayout ? undefined : { background: "#0a0a0a", border: "2px solid #FF00CC", padding: 20, marginBottom: 28 }}>
+      <h2 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>WRITE A NOTE</h2>
+      <p className="board-copy-sm" style={{ marginBottom: 14 }}>
+        Pick an event happening today. Posts open 20 minutes after start and close 7 days later. You stay anonymous on the board.
+      </p>
+      {postableEvents.length === 0 ? (
+        <p className="board-copy-sm">No events are open for missed-connection posts right now.</p>
+      ) : (
+        <>
+          {boardLayout ? (
+            <BoardSelectField value={form.eventId} onChange={v => setForm(f => ({ ...f, eventId: v }))} className="board-compose-field">
+              <option value="">Select today's event…</option>
+              {postableEvents.map(evt => (
+                <option key={evt.id} value={String(evt.id)}>
+                  {evt.dayOfWeek} · {evt.title} @ {evt.venueName}
+                </option>
+              ))}
+            </BoardSelectField>
+          ) : (
+            <select style={{ ...inputStyle, marginBottom: 10 }} value={form.eventId} onChange={e => setForm(f => ({ ...f, eventId: e.target.value }))}>
+              <option value="">Select today's event…</option>
+              {postableEvents.map(evt => (
+                <option key={evt.id} value={evt.id}>{evt.dayOfWeek} · {evt.title} @ {evt.venueName}</option>
+              ))}
+            </select>
+          )}
+          {boardLayout ? (
+            <BoardTextField value={form.title} onChange={v => setForm(f => ({ ...f, title: v }))} placeholder="Title" />
+          ) : (
+            <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" maxLength={80} />
+          )}
+          <textarea
+            className={boardLayout ? "board-text-field" : undefined}
+            style={boardLayout ? { width: "100%", boxSizing: "border-box", minHeight: 120, resize: "vertical", marginTop: 10 } : { ...inputStyle, minHeight: 120, resize: "vertical", marginTop: 10 }}
+            value={form.body}
+            onChange={e => setForm(f => ({ ...f, body: e.target.value.slice(0, 500) }))}
+            placeholder="What happened? Keep it kind, specific, and under 500 characters."
+            maxLength={500}
+          />
+          <div style={{ color: form.body.length >= 500 ? "#FF2400" : "#555", fontSize: "0.75rem", marginTop: 4 }}>{form.body.length}/500</div>
+          <button
+            onClick={() => createMutation.mutate()}
+            disabled={!form.title.trim() || !form.body.trim() || !form.eventId || createMutation.isPending}
+            className="btn-neon solid"
+            style={{ marginTop: 14, opacity: !form.title.trim() || !form.body.trim() || !form.eventId || createMutation.isPending ? 0.55 : 1 }}
+          >
+            {createMutation.isPending ? "POSTING..." : "POST ANONYMOUSLY"}
+          </button>
+        </>
+      )}
+    </section>
+  );
+
+  const listings = isLoading ? (
+    <BoardLoadingState label="Loading missed connections" />
+  ) : isError ? (
+    boardLayout ? (
+      <div className="board-empty board-empty--prototype">
+        <p className="display section-heading">Could not load</p>
+        <button className="btn-neon" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</button>
+      </div>
+    ) : (
+      <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF00CC" }}>
+        <p style={{ color: "#fff", marginBottom: 12 }}>Could not load missed connections.</p>
+        <button className="btn-neon" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>TRY AGAIN</button>
+      </div>
+    )
+  ) : posts.length === 0 ? (
+    boardLayout && mode === "board" ? (
+      <div className="board-empty board-empty--prototype">
+        <p className="display section-heading">Nothing here yet</p>
+        <p className="board-copy-sm">No active missed connections yet. Be the first to post a note from today's events.</p>
+      </div>
+    ) : (
+      <div style={{ color: "#9d9a92", padding: compact ? "12px 0" : "32px 0" }}>
+        {mode === "event" ? "No missed connections for this event yet." : "No active missed connections yet."}
+      </div>
+    )
+  ) : boardLayout && mode === "board" ? (
+    <div className="board-listing-grid">
+      {posts.map((post, index) => {
+        const expanded = expandedId === post.id;
+        return (
+          <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
+            <article
+              className={`board-listing-card${expanded ? " is-expanded" : ""}`}
+              style={{ "--listing-accent": "#FF1FA0" } as React.CSSProperties}
+              onClick={() => setExpandedId(expanded ? null : post.id)}
+            >
+              <div className="board-listing-card__row">
+                <div className="board-listing-card__thumb" style={{ background: "linear-gradient(135deg,#FF1FA0,#A24BFF)" }} />
+                <div className="board-listing-card__main">
+                  <div className="board-listing-card__tags">
+                    <span className="board-listing-card__kind">Spotted</span>
+                    {(post.eventDay || post.dayOfWeek) && <span className="board-listing-card__grab">{post.eventDay || post.dayOfWeek}</span>}
+                    <span className="board-listing-card__time">{timeAgo(post.createdAt)}</span>
+                  </div>
+                  <h4 className="board-listing-card__title">{post.title}</h4>
+                  <div className="board-listing-card__poster">
+                    <span>{post.eventTitle || post.venueHint || "Pride event"} · anonymous</span>
+                  </div>
+                </div>
+              </div>
+              <div className="board-listing-card__footer">
+                <span className="board-listing-card__status">{post.isMine ? "Your post" : "Posted anonymously"}</span>
+                <span className="board-listing-card__cta">{post.isMine ? "Yours" : "Reply"} →</span>
+              </div>
+              {expanded && (
+                <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+                  <p>{post.body}</p>
+                  {!post.isMine && (
+                    <button onClick={() => setReplyingTo(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
+                      Reply Privately
+                    </button>
+                  )}
+                </div>
+              )}
+            </article>
+          </ScrollReveal>
+        );
+      })}
+    </div>
+  ) : (
+    <div style={{ display: "grid", gap: 14 }}>
+      {posts.map((post, index) => (
+        <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
+        <article style={{ background: "#0b0b0b", border: "1px solid #1f1f1f", padding: compact ? 14 : 18 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+            {(post.eventDay || post.dayOfWeek) && (
+              <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{post.eventDay || post.dayOfWeek}</span>
+            )}
+            {(post.eventVenue || post.venueHint) && (
+              <span className="sticker" style={{ color: "#777", borderColor: "#333" }}>{post.eventVenue || post.venueHint}</span>
+            )}
+            {post.eventTitle && (
+              <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{post.eventTitle}</span>
+            )}
+          </div>
+          <h3 className="display panel-heading" style={{ color: "#fff", marginBottom: 8, fontSize: compact ? "1rem" : undefined }}>{post.title}</h3>
+          <p style={{ color: "#bbb", lineHeight: 1.6, whiteSpace: "pre-wrap", fontSize: compact ? "0.88rem" : undefined }}>{post.body}</p>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
+            <span style={{ color: "#444", fontSize: "0.76rem" }}>
+              {post.isMine ? "Your post (anonymous to others)" : "Posted anonymously"} · {new Date(post.createdAt).toLocaleDateString()}
+            </span>
+            {!post.isMine && (
+              <button onClick={() => setReplyingTo(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
+                Reply Privately
+              </button>
+            )}
+          </div>
+        </article>
+        </ScrollReveal>
+      ))}
+    </div>
+  );
+
+  const replyModal = replyingTo && (
+    <div onClick={() => setReplyingTo(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 22 }}>
+        <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE REPLY</h3>
+        <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
+          {replyingTo.title} — your reply stays anonymous in inbox until you both choose to reveal.
+        </p>
+        <textarea style={{ ...inputStyle, minHeight: 120, resize: "vertical" }} value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="Write your reply..." />
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <button onClick={() => replyMutation.mutate()} disabled={!replyBody.trim() || replyMutation.isPending} style={{ background: "#FF00CC", color: "#000", border: "none", padding: "9px 16px", cursor: "pointer", opacity: !replyBody.trim() || replyMutation.isPending ? 0.55 : 1 }}>
+            {replyMutation.isPending ? "SENDING..." : "SEND"}
+          </button>
+          <button onClick={() => setReplyingTo(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "9px 12px", cursor: "pointer" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (boardLayout && mode === "board") {
+    return (
+      <div>
+        <BoardActiveSection sticker="Active board" stickerTone="magenta" title="Spotted & Seeking">
+          {composeForm}
+          {listings}
+        </BoardActiveSection>
+        {replyModal}
+      </div>
+    );
+  }
+
   return (
     <div>
-      {mode === "board" && (
-        <section style={{ background: "#0a0a0a", border: "2px solid #FF00CC", padding: 20, marginBottom: 28 }}>
-          <h2 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>WRITE A NOTE</h2>
-          <p style={{ color: "#888", fontSize: "0.82rem", marginBottom: 14, lineHeight: 1.5 }}>
-            Pick an event happening today. Posts open 20 minutes after start and close 7 days later. You stay anonymous on the board.
-          </p>
-          {postableEvents.length === 0 ? (
-            <p style={{ color: "#9d9a92", fontSize: "0.85rem", marginBottom: 0 }}>
-              No events are open for missed-connection posts right now.
-            </p>
-          ) : (
-            <>
-              <select
-                style={{ ...inputStyle, marginBottom: 10 }}
-                value={form.eventId}
-                onChange={e => setForm(f => ({ ...f, eventId: e.target.value }))}
-              >
-                <option value="">Select today's event…</option>
-                {postableEvents.map(evt => (
-                  <option key={evt.id} value={evt.id}>
-                    {evt.dayOfWeek} · {evt.title} @ {evt.venueName}
-                  </option>
-                ))}
-              </select>
-              <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" maxLength={80} />
-              <textarea
-                style={{ ...inputStyle, minHeight: 120, resize: "vertical", marginTop: 10 }}
-                value={form.body}
-                onChange={e => setForm(f => ({ ...f, body: e.target.value.slice(0, 500) }))}
-                placeholder="What happened? Keep it kind, specific, and under 500 characters."
-                maxLength={500}
-              />
-              <div style={{ color: form.body.length >= 500 ? "#FF2400" : "#555", fontSize: "0.75rem", marginTop: 4 }}>{form.body.length}/500</div>
-              <button
-                onClick={() => createMutation.mutate()}
-                disabled={!form.title.trim() || !form.body.trim() || !form.eventId || createMutation.isPending}
-                className="display"
-                style={{ marginTop: 14, background: "#FF00CC", color: "#000", border: "none", padding: "10px 18px", cursor: "pointer", opacity: !form.title.trim() || !form.body.trim() || !form.eventId || createMutation.isPending ? 0.55 : 1 }}
-              >
-                {createMutation.isPending ? "POSTING..." : "POST ANONYMOUSLY"}
-              </button>
-            </>
-          )}
-        </section>
-      )}
+      {composeForm}
 
       {mode === "event" && canPostToEvent && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
@@ -225,68 +373,8 @@ export default function MissedConnectionsPanel({
         </p>
       )}
 
-      {isLoading ? (
-        <BoardLoadingState label="Loading missed connections" />
-      ) : isError ? (
-        <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF00CC" }}>
-          <p style={{ color: "#fff", marginBottom: 12 }}>Could not load missed connections.</p>
-          <button className="btn-neon" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>TRY AGAIN</button>
-        </div>
-      ) : posts.length === 0 ? (
-        <div style={{ color: "#9d9a92", padding: compact ? "12px 0" : "32px 0" }}>
-          {mode === "event" ? "No missed connections for this event yet." : "No active missed connections yet."}
-        </div>
-      ) : (
-        <div style={{ display: "grid", gap: 14 }}>
-          {posts.map((post, index) => (
-            <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
-            <article style={{ background: "#0b0b0b", border: "1px solid #1f1f1f", padding: compact ? 14 : 18 }}>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-                {(post.eventDay || post.dayOfWeek) && (
-                  <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{post.eventDay || post.dayOfWeek}</span>
-                )}
-                {(post.eventVenue || post.venueHint) && (
-                  <span className="sticker" style={{ color: "#777", borderColor: "#333" }}>{post.eventVenue || post.venueHint}</span>
-                )}
-                {post.eventTitle && (
-                  <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{post.eventTitle}</span>
-                )}
-              </div>
-              <h3 className="display panel-heading" style={{ color: "#fff", marginBottom: 8, fontSize: compact ? "1rem" : undefined }}>{post.title}</h3>
-              <p style={{ color: "#bbb", lineHeight: 1.6, whiteSpace: "pre-wrap", fontSize: compact ? "0.88rem" : undefined }}>{post.body}</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
-                <span style={{ color: "#444", fontSize: "0.76rem" }}>
-                  {post.isMine ? "Your post (anonymous to others)" : "Posted anonymously"} · {new Date(post.createdAt).toLocaleDateString()}
-                </span>
-                {!post.isMine && (
-                  <button onClick={() => setReplyingTo(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
-                    Reply Privately
-                  </button>
-                )}
-              </div>
-            </article>
-            </ScrollReveal>
-          ))}
-        </div>
-      )}
-
-      {replyingTo && (
-        <div onClick={() => setReplyingTo(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 22 }}>
-            <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE REPLY</h3>
-            <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
-              {replyingTo.title} — your reply stays anonymous in inbox until you both choose to reveal.
-            </p>
-            <textarea style={{ ...inputStyle, minHeight: 120, resize: "vertical" }} value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="Write your reply..." />
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              <button onClick={() => replyMutation.mutate()} disabled={!replyBody.trim() || replyMutation.isPending} style={{ background: "#FF00CC", color: "#000", border: "none", padding: "9px 16px", cursor: "pointer", opacity: !replyBody.trim() || replyMutation.isPending ? 0.55 : 1 }}>
-                {replyMutation.isPending ? "SENDING..." : "SEND"}
-              </button>
-              <button onClick={() => setReplyingTo(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "9px 12px", cursor: "pointer" }}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {listings}
+      {replyModal}
     </div>
   );
 }
