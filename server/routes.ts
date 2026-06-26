@@ -6,6 +6,7 @@ import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { isMissedConnectionPostable, missedConnectionClosesAt } from "@shared/missedConnections";
+import { isEventTalentRole } from "@shared/eventTalent";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -212,6 +213,30 @@ function getSessionAdminUser(req: any) {
   if (!isMainAdminUser(user)) return null;
   req.session.isAdmin = true;
   return user;
+}
+
+function sessionIsAdmin(req: any): boolean {
+  if (req.session?.isAdmin) return true;
+  const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+  if (user && isMainAdminUser(user)) {
+    req.session.isAdmin = true;
+    return true;
+  }
+  return false;
+}
+
+function getAdminActorUserId(req: any): number | null {
+  const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+  if (sessionUser && isMainAdminUser(sessionUser)) return sessionUser.id;
+  for (const email of ADMIN_USER_EMAILS) {
+    const u = storage.getUserByEmail(email);
+    if (u) return u.id;
+  }
+  for (const uname of ADMIN_USERNAMES) {
+    const u = storage.getUserByUsername(uname);
+    if (u) return u.id;
+  }
+  return null;
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
@@ -1040,6 +1065,82 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(result.host);
   });
 
+  app.get("/api/events/:id/talent", (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    const userId = req.session?.userId;
+    const isAdmin = sessionIsAdmin(req);
+    const canManage = isAdmin || (userId && storage.isUserEventHost(evt.id, userId));
+    const talent = storage.getEventTalent(evt.id, { includePending: Boolean(canManage) });
+    res.json(talent);
+  });
+
+  app.post("/api/events/:id/talent", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    const role = String(req.body.role || "").trim().toUpperCase();
+    if (!isEventTalentRole(role)) return res.status(400).json({ error: "Invalid role" });
+    const username = String(req.body.username || "").trim();
+    if (!username) return res.status(400).json({ error: "username required" });
+    const result = storage.addEventTalentByHost(evt.id, req.session.userId!, username, role, { isAdmin: sessionIsAdmin(req) });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result.talent);
+  });
+
+  app.post("/api/events/:id/talent/self", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    const role = String(req.body.role || "").trim().toUpperCase();
+    if (!isEventTalentRole(role)) return res.status(400).json({ error: "Invalid role" });
+    const result = storage.requestEventTalentSelf(evt.id, req.session.userId!, role);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.post("/api/events/:id/talent/:talentId/approve", requireAuth, (req, res) => {
+    const talentId = Number(req.params.talentId);
+    const result = storage.approveEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result.talent);
+  });
+
+  app.post("/api/events/:id/talent/:talentId/reject", requireAuth, (req, res) => {
+    const talentId = Number(req.params.talentId);
+    const result = storage.rejectEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.get("/api/talent-request/:talentId", requireAuth, (req, res) => {
+    const row = storage.getEventTalentById(Number(req.params.talentId));
+    if (!row) return res.status(404).json({ error: "Not found" });
+    if (!storage.canApproveEventTalent(row.id, req.session.userId!, sessionIsAdmin(req))) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    res.json(row);
+  });
+
+  app.post("/api/talent-request/:talentId/approve", requireAuth, (req, res) => {
+    const talentId = Number(req.params.talentId);
+    const result = storage.approveEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result.talent);
+  });
+
+  app.post("/api/talent-request/:talentId/reject", requireAuth, (req, res) => {
+    const talentId = Number(req.params.talentId);
+    const result = storage.rejectEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.delete("/api/events/:id/talent/:talentId", requireAuth, (req, res) => {
+    const talentId = Number(req.params.talentId);
+    const result = storage.removeEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
   app.get("/api/events/:id/host-messages", (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
@@ -1169,6 +1270,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { reason } = req.body;
     storage.rejectSubmission(Number(req.params.id), reason || "");
     res.json({ ok: true });
+  });
+
+  app.get("/api/admin/talent-requests", requireAdmin, (req, res) => {
+    res.json(storage.getPendingTalentForUnclaimedEvents());
+  });
+
+  app.post("/api/admin/talent-requests/:talentId/approve", requireAdmin, (req, res) => {
+    const approverId = getAdminActorUserId(req);
+    if (!approverId) return res.status(401).json({ error: "No admin user account configured" });
+    const result = storage.approveEventTalent(Number(req.params.talentId), approverId, { isAdmin: true });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result.talent);
+  });
+
+  app.post("/api/admin/talent-requests/:talentId/reject", requireAdmin, (req, res) => {
+    const approverId = getAdminActorUserId(req);
+    if (!approverId) return res.status(401).json({ error: "No admin user account configured" });
+    const result = storage.rejectEventTalent(Number(req.params.talentId), approverId, { isAdmin: true });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
   });
 
   app.get("/api/admin/promoter-requests", requireAdmin, (req, res) => {

@@ -4,9 +4,10 @@ import { eq } from "drizzle-orm";
 import {
   isMissedConnectionPostable, missedConnectionClosesAt,
 } from "@shared/missedConnections";
+import { isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts,
+  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -300,6 +301,28 @@ function ensureEventHostsSchema() {
   }
 }
 ensureEventHostsSchema();
+
+function ensureEventTalentSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS event_talent (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'LIVE',
+        added_by_user_id INTEGER,
+        created_at TEXT NOT NULL DEFAULT '',
+        UNIQUE(event_id, user_id, role)
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS event_talent_event_idx ON event_talent(event_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS event_talent_status_idx ON event_talent(status)`);
+  } catch (e) {
+    console.error("[event_talent] schema migration failed:", e);
+  }
+}
+ensureEventTalentSchema();
 
 function ensureMissedConnectionsSchema() {
   try {
@@ -1546,6 +1569,18 @@ export interface IStorage {
   setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
   addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
   replaceEventPrimaryHost(eventId: number, newUserId: number): void;
+  // Event talent
+  getEventTalent(eventId: number, opts?: { includePending?: boolean }): any[];
+  getEventTalentById(talentId: number): any | undefined;
+  addEventTalentByHost(eventId: number, hostUserId: number, username: string, role: EventTalentRole, opts?: { isAdmin?: boolean }): { talent?: any; error?: string };
+  requestEventTalentSelf(eventId: number, userId: number, role: EventTalentRole): { talent?: any; error?: string };
+  approveEventTalent(talentId: number, approverUserId: number, opts?: { isAdmin?: boolean }): { talent?: any; error?: string };
+  rejectEventTalent(talentId: number, approverUserId: number, opts?: { isAdmin?: boolean }): { ok?: boolean; error?: string };
+  removeEventTalent(talentId: number, userId: number, opts?: { isAdmin?: boolean }): { ok?: boolean; error?: string };
+  getPendingTalentForUnclaimedEvents(): any[];
+  eventNeedsAdminTalentApproval(eventId: number): boolean;
+  getEventTalentApproverUserIds(eventId: number): number[];
+  canApproveEventTalent(talentId: number, userId: number, isAdmin?: boolean): boolean;
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
@@ -1991,6 +2026,211 @@ export const storage: IStorage = {
     const host = storage.getEventHosts(eventId).find((h: any) => h.userId === target.id);
     return { host };
   },
+  getEventTalent(eventId, opts) {
+    ensureEventTalentSchema();
+    const statusFilter = opts?.includePending ? "" : `AND et.status = 'LIVE'`;
+    return sqlite.prepare(`
+      SELECT
+        et.id,
+        et.event_id AS eventId,
+        et.user_id AS userId,
+        et.role,
+        et.status,
+        et.added_by_user_id AS addedByUserId,
+        et.created_at AS createdAt,
+        u.username,
+        u.display_name AS displayName,
+        u.photo_url AS photoUrl,
+        u.avatar_choice AS avatarChoice,
+        u.avatar_ring AS avatarRing
+      FROM event_talent et
+      LEFT JOIN users u ON u.id = et.user_id
+      WHERE et.event_id = ? ${statusFilter}
+      ORDER BY et.role ASC, et.created_at ASC
+    `).all(eventId) as any[];
+  },
+  getEventTalentById(talentId) {
+    ensureEventTalentSchema();
+    return sqlite.prepare(`
+      SELECT
+        et.id,
+        et.event_id AS eventId,
+        et.user_id AS userId,
+        et.role,
+        et.status,
+        et.added_by_user_id AS addedByUserId,
+        et.created_at AS createdAt,
+        e.title AS eventTitle,
+        e.is_claimable AS isClaimable,
+        u.username,
+        u.display_name AS displayName
+      FROM event_talent et
+      LEFT JOIN events e ON e.id = et.event_id
+      LEFT JOIN users u ON u.id = et.user_id
+      WHERE et.id = ?
+    `).get(talentId) as any | undefined;
+  },
+  getEventTalentApproverUserIds(eventId) {
+    const hosts = storage.getEventHosts(eventId);
+    if (hosts.length > 0) return hosts.map((h: any) => h.userId);
+    const evt = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (evt?.claimedBy) {
+      const owner = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
+      if (owner) return [owner.id];
+    }
+    return [];
+  },
+  eventNeedsAdminTalentApproval(eventId) {
+    const evt = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (!evt) return false;
+    if (!evt.isClaimable) return false;
+    return storage.getEventTalentApproverUserIds(eventId).length === 0;
+  },
+  canApproveEventTalent(talentId, userId, isAdmin = false) {
+    const row = storage.getEventTalentById(talentId);
+    if (!row || row.status !== "PENDING") return false;
+    if (isAdmin && storage.eventNeedsAdminTalentApproval(row.eventId)) return true;
+    if (storage.isUserEventHost(row.eventId, userId)) return true;
+    return false;
+  },
+  addEventTalentByHost(eventId, hostUserId, username, role, opts) {
+    ensureEventTalentSchema();
+    if (!isEventTalentRole(role)) return { error: "Invalid talent role" };
+    if (!opts?.isAdmin && !storage.isUserEventHost(eventId, hostUserId)) {
+      return { error: "Only event hosts can add talent" };
+    }
+    const evt = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (!evt || evt.status !== "LIVE") return { error: "Event not found" };
+    const uname = username.trim().replace(/^@/, "");
+    if (!uname) return { error: "Username required" };
+    const target = storage.getUserByUsername(uname);
+    if (!target) return { error: "No account found with that username" };
+    const existing = sqlite.prepare(`
+      SELECT id FROM event_talent WHERE event_id = ? AND user_id = ? AND role = ? AND status IN ('LIVE', 'PENDING')
+    `).get(eventId, target.id, role);
+    if (existing) return { error: "That person is already listed for this role" };
+    const created = db.insert(eventTalent).values({
+      eventId,
+      userId: target.id,
+      role,
+      status: "LIVE",
+      addedByUserId: hostUserId,
+      createdAt: new Date().toISOString(),
+    } as any).returning().get();
+    const talent = storage.getEventTalent(eventId, { includePending: true }).find((t: any) => t.id === created.id);
+    storage.sendMessage(
+      hostUserId,
+      target.id,
+      `You're on the lineup`,
+      `You were tagged as ${role} for "${evt.title}".`,
+      { contextType: "EVENT_TALENT", contextId: eventId, contextLabel: evt.title },
+    );
+    return { talent };
+  },
+  requestEventTalentSelf(eventId, userId, role) {
+    ensureEventTalentSchema();
+    if (!isEventTalentRole(role)) return { error: "Invalid talent role" };
+    const evt = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (!evt || evt.status !== "LIVE") return { error: "Event not found" };
+    const user = storage.getUserById(userId);
+    if (!user) return { error: "Not authenticated" };
+    const existing = sqlite.prepare(`
+      SELECT id, status FROM event_talent WHERE event_id = ? AND user_id = ? AND role = ?
+    `).get(eventId, userId, role) as { id: number; status: string } | undefined;
+    if (existing?.status === "LIVE") return { error: "You're already on the lineup for this role" };
+    if (existing?.status === "PENDING") return { error: "Your request is already pending approval" };
+    const created = db.insert(eventTalent).values({
+      eventId,
+      userId,
+      role,
+      status: "PENDING",
+      addedByUserId: userId,
+      createdAt: new Date().toISOString(),
+    } as any).returning().get();
+    const roleLabel = role.charAt(0) + role.slice(1).toLowerCase();
+    const body = `${user.displayName || user.username} (@${user.username}) requested to be listed as ${roleLabel} for "${evt.title}". Approve to add them to the public lineup.`;
+    const approverIds = storage.getEventTalentApproverUserIds(eventId);
+    if (approverIds.length > 0) {
+      for (const approverId of approverIds) {
+        storage.sendMessage(
+          userId,
+          approverId,
+          `Talent request: ${roleLabel}`,
+          body,
+          { contextType: "EVENT_TALENT_REQUEST", contextId: created.id, contextLabel: evt.title },
+        );
+      }
+    }
+    const talent = storage.getEventTalent(eventId, { includePending: true }).find((t: any) => t.id === created.id);
+    return { talent, needsAdmin: storage.eventNeedsAdminTalentApproval(eventId) };
+  },
+  approveEventTalent(talentId, approverUserId, opts) {
+    ensureEventTalentSchema();
+    const row = storage.getEventTalentById(talentId);
+    if (!row || row.status !== "PENDING") return { error: "Request not found or already resolved" };
+    if (!storage.canApproveEventTalent(talentId, approverUserId, opts?.isAdmin)) {
+      return { error: "Not authorized to approve this request" };
+    }
+    sqlite.prepare(`UPDATE event_talent SET status = 'LIVE', added_by_user_id = ? WHERE id = ?`).run(approverUserId, talentId);
+    const evt = db.select().from(events).where(eq(events.id, row.eventId)).get();
+    storage.sendMessage(
+      approverUserId,
+      row.userId,
+      `Lineup approved: ${row.role}`,
+      `You're now listed as ${row.role} on "${evt?.title || "the event"}".`,
+      { contextType: "EVENT_TALENT", contextId: row.eventId, contextLabel: evt?.title || null },
+    );
+    const talent = storage.getEventTalentById(talentId);
+    return { talent };
+  },
+  rejectEventTalent(talentId, approverUserId, opts) {
+    ensureEventTalentSchema();
+    const row = storage.getEventTalentById(talentId);
+    if (!row || row.status !== "PENDING") return { error: "Request not found or already resolved" };
+    if (!storage.canApproveEventTalent(talentId, approverUserId, opts?.isAdmin)) {
+      return { error: "Not authorized to deny this request" };
+    }
+    sqlite.prepare(`DELETE FROM event_talent WHERE id = ?`).run(talentId);
+    const evt = db.select().from(events).where(eq(events.id, row.eventId)).get();
+    storage.sendMessage(
+      approverUserId,
+      row.userId,
+      `Lineup request declined`,
+      `Your ${row.role} listing request for "${evt?.title || "the event"}" was not approved.`,
+      { contextType: "EVENT_TALENT", contextId: row.eventId, contextLabel: evt?.title || null },
+    );
+    return { ok: true };
+  },
+  removeEventTalent(talentId, userId, opts) {
+    ensureEventTalentSchema();
+    const row = storage.getEventTalentById(talentId);
+    if (!row) return { error: "Not found" };
+    const canManage = opts?.isAdmin || storage.isUserEventHost(row.eventId, userId);
+    if (!canManage) return { error: "Not authorized" };
+    sqlite.prepare(`DELETE FROM event_talent WHERE id = ?`).run(talentId);
+    return { ok: true };
+  },
+  getPendingTalentForUnclaimedEvents() {
+    ensureEventTalentSchema();
+    return sqlite.prepare(`
+      SELECT
+        et.id,
+        et.event_id AS eventId,
+        et.user_id AS userId,
+        et.role,
+        et.status,
+        et.created_at AS createdAt,
+        e.title AS eventTitle,
+        e.is_claimable AS isClaimable,
+        u.username,
+        u.display_name AS displayName
+      FROM event_talent et
+      JOIN events e ON e.id = et.event_id
+      JOIN users u ON u.id = et.user_id
+      WHERE et.status = 'PENDING' AND e.status = 'LIVE' AND e.is_claimable = 1
+      ORDER BY et.created_at DESC
+    `).all() as any[];
+  },
   // Messages
   getInbox(userId) {
     return sqlite.prepare(`
@@ -2380,6 +2620,7 @@ const PERSISTENCE_TABLES = [
   "missed_connections",
   "host_messages",
   "event_hosts",
+  "event_talent",
   "moderation_requests",
   "feedback_reports",
   "express_sessions",

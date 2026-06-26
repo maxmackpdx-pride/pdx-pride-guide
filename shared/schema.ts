@@ -323,3 +323,18 @@ export const eventHosts = sqliteTable("event_hosts", {
 export const insertEventHostSchema = createInsertSchema(eventHosts).omit({ id: true, createdAt: true });
 export type InsertEventHost = z.infer<typeof insertEventHostSchema>;
 export type EventHost = typeof eventHosts.$inferSelect;
+
+// Event talent / lineup (registered users tagged by role)
+export const eventTalent = sqliteTable("event_talent", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").notNull(),
+  status: text("status").notNull().default("LIVE"), // LIVE | PENDING
+  addedByUserId: integer("added_by_user_id"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertEventTalentSchema = createInsertSchema(eventTalent).omit({ id: true, createdAt: true });
+export type InsertEventTalent = z.infer<typeof insertEventTalentSchema>;
+export type EventTalent = typeof eventTalent.$inferSelect;

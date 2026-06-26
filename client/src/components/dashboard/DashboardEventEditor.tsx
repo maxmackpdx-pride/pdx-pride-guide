@@ -5,6 +5,7 @@ import EventTypeTag from "@/components/EventTypeTag";
 import UserAvatar from "@/components/UserAvatar";
 import { useToast } from "@/hooks/use-toast";
 import { labelStyle, inputStyle } from "./DashboardProfileEditor";
+import EventTalentPanel from "@/components/EventTalentPanel";
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -213,6 +214,15 @@ export function DashboardEventEditForm({
               {addCoHostMutation.isPending ? "Adding..." : "Add co-host →"}
             </button>
           )}
+        </div>
+        <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+          <EventTalentPanel
+            eventId={editingEvent.id}
+            eventTitle={editingEvent.title}
+            dayColor="#19E3FF"
+            mode="manage"
+            isClaimable={editingEvent.isClaimable}
+          />
         </div>
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
           <label style={labelStyle}>Post host update</label>

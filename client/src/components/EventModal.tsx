@@ -11,6 +11,7 @@ import AttendanceCluster from "./AttendanceCluster";
 import MissedConnectionsPanel from "./MissedConnectionsPanel";
 import AuthModal from "./AuthModal";
 import UserAvatar from "./UserAvatar";
+import EventTalentPanel from "./EventTalentPanel";
 
 type EventHostProfile = {
   userId: number;
@@ -345,6 +346,14 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               )}
             </div>
           )}
+
+          <EventTalentPanel
+            eventId={event.id}
+            eventTitle={event.title}
+            dayColor={dayColor}
+            mode="view"
+            isClaimable={event.isClaimable}
+          />
 
           {/* Time block */}
           <div style={{ background: "#111", padding: "14px 16px", marginBottom: 20, borderLeft: `3px solid ${dayColor}` }}>

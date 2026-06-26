@@ -4,6 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTalent";
 
 type Message = {
   id: number;
@@ -14,6 +15,7 @@ type Message = {
   isRead: boolean;
   threadId: string;
   contextType?: string;
+  contextId?: number | null;
   contextLabel?: string | null;
   createdAt: string;
   from_username?: string;
@@ -74,6 +76,46 @@ export default function Inbox() {
   });
   const thread = threadPayload?.messages ?? [];
   const threadReveal = threadPayload?.reveal ?? null;
+
+  const talentRequestId = activeThread?.contextType === "EVENT_TALENT_REQUEST" ? activeThread.contextId : null;
+
+  const { data: talentRequest } = useQuery({
+    queryKey: ["/api/talent-request", talentRequestId],
+    queryFn: () => fetch(`/api/talent-request/${talentRequestId}`, { credentials: "include" }).then(r => r.ok ? r.json() : null),
+    enabled: !!talentRequestId && !!user,
+  });
+
+  const approveTalentMutation = useMutation({
+    mutationFn: async () => {
+      if (!talentRequestId) throw new Error("Missing request");
+      const res = await fetch(`/api/talent-request/${talentRequestId}/approve`, { method: "POST", credentials: "include" });
+      const p = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(p.error || "Approve failed");
+      return p;
+    },
+    onSuccess: () => {
+      toast({ title: "Lineup approved" });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      setActiveThread(null);
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const denyTalentMutation = useMutation({
+    mutationFn: async () => {
+      if (!talentRequestId) throw new Error("Missing request");
+      const res = await fetch(`/api/talent-request/${talentRequestId}/reject`, { method: "POST", credentials: "include" });
+      const p = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(p.error || "Deny failed");
+      return p;
+    },
+    onSuccess: () => {
+      toast({ title: "Lineup declined" });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      setActiveThread(null);
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
 
   const replyMutation = useMutation({
     mutationFn: (body: string) => fetch(`/api/messages/thread/${activeThread!.threadId}/reply`, {
@@ -241,6 +283,26 @@ export default function Inbox() {
                   </button>
                 </div>
               </div>
+              {activeThread.contextType === "EVENT_TALENT_REQUEST" && talentRequest?.status === "PENDING" && (
+                <div style={{ marginBottom: 14, padding: "12px 14px", background: "#0d0d0d", border: "2px solid var(--neon-magenta)" }}>
+                  <div className="display" style={{ fontSize: "0.78rem", color: "var(--neon-magenta)", marginBottom: 8 }}>LINEUP REQUEST</div>
+                  <p style={{ fontSize: "0.82rem", color: "#ccc", lineHeight: 1.5, marginBottom: 12 }}>
+                    {talentRequest.displayName || talentRequest.username} wants{" "}
+                    <strong>{EVENT_TALENT_ROLE_LABELS[talentRequest.role as EventTalentRole] || talentRequest.role}</strong> on{" "}
+                    <span style={{ color: "#00FFFF" }}>{talentRequest.eventTitle}</span>.
+                  </p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button type="button" onClick={() => approveTalentMutation.mutate()} disabled={approveTalentMutation.isPending}
+                      style={{ ...btnStyle, marginTop: 0, opacity: approveTalentMutation.isPending ? 0.5 : 1 }}>
+                      {approveTalentMutation.isPending ? "APPROVING..." : "APPROVE LINEUP →"}
+                    </button>
+                    <button type="button" onClick={() => denyTalentMutation.mutate()} disabled={denyTalentMutation.isPending}
+                      style={{ ...btnStyle, marginTop: 0, background: "transparent", color: "#FF2400", borderColor: "#FF2400", opacity: denyTalentMutation.isPending ? 0.5 : 1 }}>
+                      {denyTalentMutation.isPending ? "DECLINING..." : "DECLINE"}
+                    </button>
+                  </div>
+                </div>
+              )}
               {activeThread.contextType === "MISSED_CONNECTION" && threadReveal && (
                 <div style={{ marginBottom: 14, padding: "10px 12px", background: "#0d0d0d", border: "1px solid #2a2a2a", fontSize: "0.78rem", color: "#9d9a92", lineHeight: 1.5 }}>
                   {threadReveal.bothRevealed ? (

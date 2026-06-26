@@ -81,7 +81,17 @@ interface PromoterRequest {
   requestedAt: string;
 }
 
-type AdminTab = "queue" | "promoters" | "moderation" | "events" | "gifting" | "feedback";
+interface TalentRequest {
+  id: number;
+  eventId: number;
+  eventTitle: string;
+  role: string;
+  username: string;
+  displayName: string | null;
+  createdAt: string;
+}
+
+type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gifting" | "feedback";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -155,6 +165,12 @@ export default function Admin() {
     queryKey: ["/api/admin/promoter-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then(r => r.json()),
     enabled: authenticated && activeTab === "promoters",
+  });
+
+  const { data: talentRequests = [], isLoading: talentLoading, isError: talentError, refetch: refetchTalent } = useQuery<TalentRequest[]>({
+    queryKey: ["/api/admin/talent-requests"],
+    queryFn: () => apiRequest("GET", "/api/admin/talent-requests").then(r => r.json()),
+    enabled: authenticated && activeTab === "talent",
   });
 
   const approveMutation = useMutation({
@@ -271,6 +287,24 @@ export default function Admin() {
     onError: () => toast({ title: "Error", description: "Could not deny promoter.", variant: "destructive" }),
   });
 
+  const approveTalentMutation = useMutation({
+    mutationFn: (talentId: number) => apiRequest("POST", `/api/admin/talent-requests/${talentId}/approve`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
+      toast({ title: "Talent approved", description: "Lineup tag is now live." });
+    },
+    onError: () => toast({ title: "Error", description: "Could not approve talent.", variant: "destructive" }),
+  });
+
+  const denyTalentMutation = useMutation({
+    mutationFn: (talentId: number) => apiRequest("POST", `/api/admin/talent-requests/${talentId}/reject`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
+      toast({ title: "Talent request denied" });
+    },
+    onError: () => toast({ title: "Error", description: "Could not deny talent.", variant: "destructive" }),
+  });
+
   const startEdit = (ev: AdminEvent) => {
     setEditingId(ev.id);
     setEditForm({ ...ev });
@@ -354,6 +388,7 @@ export default function Admin() {
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
   const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
   const pendingPromoters = promoterRequests;
+  const pendingTalent = talentRequests;
 
   return (
     <div className="dash-page">
@@ -389,6 +424,7 @@ export default function Admin() {
           {([
             { key: "queue" as AdminTab, label: `Review queue (${pendingSubs.length})`, icon: <Inbox size={12} /> },
             { key: "promoters" as AdminTab, label: `Promoters${pendingPromoters.length > 0 ? ` (${pendingPromoters.length})` : ""}`, icon: <Shield size={12} /> },
+            { key: "talent" as AdminTab, label: `Talent${pendingTalent.length > 0 ? ` (${pendingTalent.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "moderation" as AdminTab, label: `Claim / remove${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
             { key: "gifting" as AdminTab, label: `Gifting${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
@@ -508,6 +544,60 @@ export default function Admin() {
                         <button
                           onClick={() => denyPromoterMutation.mutate(req.id)}
                           disabled={denyPromoterMutation.isPending}
+                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
+                          style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                        >
+                          <XCircle size={14} /> DENY
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TALENT (unclaimed events) ── */}
+        {activeTab === "talent" && (
+          <div>
+            <p className="text-white/40 text-sm mb-6">
+              Self-tag lineup requests on unclaimed events. Claimed events go to the host&apos;s inbox.
+            </p>
+            {talentError ? (
+              <AdminLoadError label="talent requests" onRetry={() => refetchTalent()} />
+            ) : talentLoading ? (
+              <div className="space-y-4">{[1, 2].map(i => <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : pendingTalent.length === 0 ? (
+              <div className="text-center py-16">
+                <CheckCircle size={40} className="mx-auto mb-4" style={{ color: "#CCFF00" }} />
+                <p className="display text-2xl text-white/30">NO PENDING TALENT</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingTalent.map(req => (
+                  <div key={req.id} className="p-5 border border-white/10" style={{ background: "#0d0d0d" }}>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <p className="display text-lg text-white">{req.displayName || req.username}</p>
+                        <p className="text-white/40 text-sm">@{req.username} · {req.role}</p>
+                        <p className="text-white/60 text-sm mt-2">
+                          Event: <span style={{ color: "#00FFFF" }}>{req.eventTitle}</span>
+                        </p>
+                        <p className="text-white/30 text-xs mt-2">{new Date(req.createdAt).toLocaleString()}</p>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => approveTalentMutation.mutate(req.id)}
+                          disabled={approveTalentMutation.isPending}
+                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
+                          style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                        >
+                          <CheckCircle size={14} /> APPROVE
+                        </button>
+                        <button
+                          onClick={() => denyTalentMutation.mutate(req.id)}
+                          disabled={denyTalentMutation.isPending}
                           className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
                           style={{ borderColor: "#FF2400", color: "#FF2400" }}
                         >
