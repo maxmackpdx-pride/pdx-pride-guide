@@ -137,6 +137,13 @@ body::before {
 }
 
 .site-header-inner {
+  --site-logo-h: clamp(102px, 21vw, 132px);
+  --site-nav-size: clamp(1.1rem, calc(var(--site-logo-h) * 0.118), 1.72rem);
+  --site-nav-pad-x: clamp(10px, calc(var(--site-logo-h) * 0.11), 20px);
+  --site-nav-pad-y: clamp(12px, calc(var(--site-logo-h) * 0.1), 16px);
+  --site-nav-gap: clamp(4px, calc(var(--site-logo-h) * 0.05), 10px);
+  --site-brand-gap: clamp(14px, calc(var(--site-logo-h) * 0.12), 22px);
+  --site-wordmark-size: clamp(1.9rem, calc(var(--site-logo-h) * 0.175), 2.35rem);
   width: 100%;
   max-width: 1440px;
   min-height: var(--site-header-height);
@@ -151,15 +158,14 @@ body::before {
 .site-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
+  gap: var(--site-brand-gap);
   flex: 0 0 auto;
   text-decoration: none;
 }
 
 .site-brand-logo {
   width: auto;
-  height: clamp(102px, 21vw, 132px);
+  height: var(--site-logo-h);
   flex: 0 0 auto;
   mix-blend-mode: screen;
   filter:
@@ -170,7 +176,7 @@ body::before {
 
 .site-brand-wordmark {
   color: #fff;
-  font-size: clamp(1.9rem, 3.4vw, 2.2rem);
+  font-size: var(--site-wordmark-size);
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
@@ -196,7 +202,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--site-nav-gap);
   flex: 1 1 auto;
   min-width: 0;
   overflow: visible;
@@ -208,12 +214,12 @@ body::before {
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
-  padding: 16px 18px;
+  padding: var(--site-nav-pad-y) var(--site-nav-pad-x);
   color: #aaa;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.64rem;
-  letter-spacing: 0.07em;
+  font-size: var(--site-nav-size);
+  letter-spacing: 0.06em;
   line-height: 1;
   text-decoration: none;
   text-transform: uppercase;
@@ -228,8 +234,8 @@ body::before {
 .site-nav-link.active::after {
   content: "";
   position: absolute;
-  left: 18px;
-  right: 18px;
+  left: var(--site-nav-pad-x);
+  right: var(--site-nav-pad-x);
   bottom: 4px;
   height: 3px;
   background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow));
@@ -239,9 +245,9 @@ body::before {
 .site-auth {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-left: 12px;
-  padding-left: 16px;
+  gap: var(--site-nav-gap);
+  margin-left: clamp(6px, 0.8vw, 12px);
+  padding-left: clamp(8px, 1vw, 14px);
   border-left: 1px solid #222;
   flex: 0 0 auto;
 }
@@ -293,48 +299,41 @@ body::before {
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 10px 14px;
+  padding: calc(var(--site-nav-pad-y) * 0.7) calc(var(--site-nav-pad-x) * 0.9);
   border: 1px solid var(--neon-yellow);
   color: var(--neon-yellow);
-  font-size: 1.44rem;
+  font-size: calc(var(--site-nav-size) * 0.92);
   text-decoration: none;
   flex-shrink: 0;
 }
 
-@media (min-width: 1024px) {
-  .site-brand-wordmark {
-    font-size: clamp(2rem, 2.4vw, 2.35rem);
-  }
-
-  .site-nav-link {
-    padding: 16px 20px;
-    font-size: 1.72rem;
-  }
-
-  .site-login-button {
-    padding: 16px 26px;
-    font-size: 1.64rem;
+@media (min-width: 1024px) and (max-width: 1320px) {
+  .site-header-inner {
+    --site-nav-size: clamp(1rem, 1.15vw, 1.38rem);
+    --site-nav-pad-x: clamp(8px, 0.95vw, 14px);
+    --site-nav-gap: 4px;
+    --site-brand-gap: 16px;
   }
 }
 
 .site-login-button {
-  margin-left: 8px;
-  padding: 14px 22px;
+  margin-left: clamp(4px, 0.5vw, 8px);
+  padding: var(--site-nav-pad-y) calc(var(--site-nav-pad-x) * 1.4);
   border: 2px solid var(--neon-yellow);
   background: var(--neon-yellow);
   color: #000;
   cursor: pointer;
-  font-size: 1.56rem;
+  font-size: calc(var(--site-nav-size) * 0.95);
   box-shadow: 4px 4px 0 rgba(255,0,204,0.55);
 }
 
 .site-logout-button {
-  padding: 10px;
+  padding: calc(var(--site-nav-pad-y) * 0.65);
   border: 0;
   background: none;
   color: #555;
   cursor: pointer;
-  font-size: 1.36rem;
+  font-size: calc(var(--site-nav-size) * 0.82);
 }
 
 /* Display headline style — editorial condensed */
@@ -1285,8 +1284,8 @@ h2.display,
 }
 
 @media (max-width: 640px) {
-  .site-brand-logo {
-    height: 114px;
+  .site-header-inner {
+    --site-logo-h: 114px;
   }
 }
 .btn-neon.cyan {
