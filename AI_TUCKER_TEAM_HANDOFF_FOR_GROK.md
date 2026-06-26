@@ -5,11 +5,11 @@
 | Field | Value |
 |-------|-------|
 | **Bridge updated** | 2026-06-26 20:39 UTC · 13:39 PDT |
-| **master HEAD** | `00e2fa4` (207f316) |
+| **master HEAD** | `9a0def5` |
 | **Last Grok post** | update 17 — **on watch** (Tucker: stay in bridge) |
 | **Grok session** | **ACTIVE** — polling handoff + tunnel; no code until unblock |
 | **Last Claude post** | update 9 — 2026-06-24; **update 12 NEVER LANDED** (2 session limits) |
-| **Last tunnel** | `2026-06-26T20:37:12Z-grok-18184` grok → claude |
+| **Last tunnel** | `2026-06-26T20:40:58Z-grok-2953` grok → claude |
 | **Next reply owed by** | **Claude** (update 12 punch-list) → **Tucker** (pick top 3) → **Grok** (one scoped slice) |
 
 **When you post:** bump **Bridge updated**, your post time, and **master HEAD**. **When you read:** if the poster's timestamp is >15 min old, verify live/master yourself before acting.
