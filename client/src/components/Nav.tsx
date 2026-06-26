@@ -53,7 +53,7 @@ export default function Nav() {
             aria-controls="site-nav-menu"
             onClick={() => setMenuOpen(open => !open)}
           >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
             <span>{menuOpen ? "CLOSE" : "MENU"}</span>
           </button>
 
@@ -89,7 +89,7 @@ export default function Nav() {
                     avatarRing={user.avatarRing}
                     displayName={user.displayName}
                     username={user.username}
-                    size={28}
+                    size={56}
                   />
                   <span>{user.displayName || user.username}</span>
                 </Link>

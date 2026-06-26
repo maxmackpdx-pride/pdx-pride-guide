@@ -535,7 +535,7 @@ export default function Events() {
       {/* Filters + View Toggle */}
       <div className="zine-filter-bar" style={{
         background: "#000", borderBottom: "1px solid #1a1a1a",
-        position: "sticky", top: 60, zIndex: 50,
+        position: "sticky", top: "var(--site-header-height)", zIndex: 50,
       }}>
         <div style={{
           maxWidth: 1200, margin: "0 auto", padding: "10px 20px",
