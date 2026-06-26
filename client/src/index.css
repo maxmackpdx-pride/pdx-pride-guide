@@ -3947,29 +3947,151 @@ footer a:hover { color: #00FFFF !important; }
   min-height: 34px;
 }
 
-/* Events poster grid — max 2 mobile, max 5 desktop */
-.events-poster-grid {
+/* Events board — full I'll Be There cluster on each card */
+.events-board-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.events-board-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  grid-template-columns: 1fr;
 }
 
-@media (min-width: 640px) {
-  .events-poster-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (min-width: 900px) {
+  .events-board-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 960px) {
-  .events-poster-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+.event-board-card {
+  border: 2px solid #1a1a1a;
+  background: #050505;
+  overflow: hidden;
 }
 
-@media (min-width: 1200px) {
-  .events-poster-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
+.event-board-card__head {
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.event-board-card__open {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.event-board-card__open:hover .event-board-card__details-link {
+  color: var(--neon-yellow);
+}
+
+.event-board-card__poster {
+  position: relative;
+  width: 92px;
+  min-width: 92px;
+  flex-shrink: 0;
+  background: #111;
+  overflow: hidden;
+}
+
+.event-board-card--grid .event-board-card__poster {
+  width: 84px;
+  min-width: 84px;
+}
+
+.event-board-card__poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-height: 108px;
+}
+
+.event-board-card__poster--empty {
+  min-height: 108px;
+  background: #0d0d0d;
+  border-right: 1px solid #1a1a1a;
+}
+
+.event-board-card__day {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.event-board-card__meta {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.event-board-card__title {
+  margin: 0;
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  line-height: 1.05;
+  color: #fff;
+}
+
+.event-board-card__venue {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #aaa;
+}
+
+.event-board-card__when {
+  margin: 0;
+  font-family: var(--font-board-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-meta);
+}
+
+.event-board-card__details-link {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+}
+
+.event-board-card__attendance {
+  padding: 0;
+}
+
+.event-board-card__attendance .attendance-cluster-panel--card {
+  border: none;
+  margin: 0;
+  padding: 16px 16px 18px;
+}
+
+.attendance-cluster-panel--card .attendance-cluster-headline {
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+}
+
+.attendance-cluster-panel--card .attendance-cluster-cta__btn {
+  font-size: 0.95rem;
+  padding: 11px 26px;
+}
+
+.attendance-cluster-panel--card .attendance-bubble-stage {
+  min-height: 200px;
+  border-radius: 12px;
 }
 
 /* Submit form polish */

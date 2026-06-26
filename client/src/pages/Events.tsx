@@ -6,15 +6,13 @@ import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "../components/EventTypeTag";
-import EventTagsRow from "../components/EventTagsRow";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
-import EventAttendancePreview from "@/components/EventAttendancePreview";
+import EventBoardCard from "@/components/EventBoardCard";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
-import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -361,141 +359,6 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   );
 }
 
-function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary }: {
-  event: Event;
-  onClick: () => void;
-  viewMode: "grid" | "list";
-  revealDelay?: number;
-  attendanceSummary?: AttendanceSummary | null;
-}) {
-  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
-  const time = event.dateStart
-    ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "";
-
-  if (viewMode === "list") {
-    return (
-      <ScrollReveal delay={revealDelay}>
-      <div
-        className="poster-card"
-        onClick={onClick}
-        data-testid={`event-card-${event.id}`}
-        style={{
-          display: "flex", gap: 0, alignItems: "stretch",
-          borderLeft: `4px solid ${dayColor}`,
-          cursor: "pointer",
-        }}
-      >
-        {/* Flyer thumbnail */}
-        {event.posterImageUrl ? (
-          <div style={{
-            width: 72, minWidth: 72, flexShrink: 0,
-            background: "#111", overflow: "hidden",
-          }}>
-            <img
-              src={event.posterImageUrl}
-              alt={event.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-          </div>
-        ) : (
-          <div style={{
-            width: 72, minWidth: 72, flexShrink: 0,
-            background: "#111",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: dayColor + "22", border: `1px solid ${dayColor}44` }} />
-          </div>
-        )}
-        {/* Info */}
-        <div style={{ flex: 1, padding: "10px 14px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
-          <EventTagsRow event={event} size="sm" className="event-card-tags--list" />
-          <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 900,
-            fontSize: "clamp(0.9rem, 2vw, 1.05rem)",
-            color: "#fff", lineHeight: 1.1, marginBottom: 3,
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>{event.title}</div>
-          <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
-          <div style={{ fontSize: "0.65rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
-          <EventAttendancePreview summary={attendanceSummary} compact />
-        </div>
-      </div>
-      </ScrollReveal>
-    );
-  }
-
-  // Grid view
-  return (
-    <ScrollReveal delay={revealDelay}>
-    <div
-      className="poster-card"
-      onClick={onClick}
-      data-testid={`event-card-${event.id}`}
-      style={{ aspectRatio: "2/3", display: "flex", flexDirection: "column" }}
-    >
-      {/* Flyer image if available, else halftone bg */}
-      {event.posterImageUrl ? (
-        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-          <img
-            src={event.posterImageUrl}
-            alt={event.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-          {/* Overlay gradient for readability */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(to top, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.1) 100%)",
-          }} />
-          {/* Day stripe */}
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
-          <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--overlay" />
-          {/* Info overlay */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 14 }}>
-            <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1rem, 1.4vw, 1.22rem)",
-              color: "#fff", lineHeight: 1.05, marginBottom: 4,
-            }}>{event.title}</div>
-            <div style={{ fontSize: "0.74rem", color: "#aaa" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
-            <EventAttendancePreview summary={attendanceSummary} compact />
-          </div>
-        </div>
-      ) : (
-        <>
-          <div style={{ height: 5, background: dayColor }} />
-          <div
-            className="halftone"
-            style={{
-              flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end",
-              padding: 14, background: "#0d0d0d", minHeight: 140, position: "relative",
-            }}
-          >
-            <div style={{
-              position: "absolute", top: 0, right: 0, width: 60, height: 60,
-              background: `radial-gradient(circle at top right, ${dayColor}22, transparent 70%)`,
-              pointerEvents: "none",
-            }} />
-            <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--inline" />
-            <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1.02rem, 1.4vw, 1.28rem)",
-              color: "#fff", lineHeight: 1.05, marginBottom: 6,
-            }}>
-              {event.title}
-            </div>
-            <div style={{ fontSize: "0.78rem", color: "#888" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
-            <EventAttendancePreview summary={attendanceSummary} compact />
-          </div>
-        </>
-      )}
-    </div>
-    </ScrollReveal>
-  );
-}
-
 export default function Events() {
   const [activeDay, setActiveDay] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -512,12 +375,6 @@ export default function Events() {
   });
 
   useAttendanceSummariesLive();
-
-  const { data: attendanceSummaries = {} } = useQuery<Record<string, AttendanceSummary>>({
-    queryKey: ["/api/events/attendance-summaries"],
-    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
-    refetchInterval: 120_000,
-  });
 
   const filtered = events.filter(e => {
     if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
@@ -549,7 +406,7 @@ export default function Events() {
         titleLine1="EVENTS"
         titleLine2="GUIDE"
         accent="cyan"
-        lede="Every party, brunch, protest, and after-hours happening Thu–Sun. Filter by day, search by vibe, and show up."
+        lede="Every party, brunch, protest, and after-hours happening Thu–Sun. Tap I'll be there on any card to drop into the room — filter by day, search by vibe, and show up."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 42%"
       />
@@ -700,29 +557,15 @@ export default function Events() {
               Clear Filters
             </button>
           </div>
-        ) : viewMode === "grid" ? (
-          <div className="events-poster-grid">
-            {filtered.map((e, i) => (
-              <EventCard
-                key={e.id}
-                event={e}
-                onClick={() => openEvent(e)}
-                viewMode="grid"
-                revealDelay={(i % 6) * 70}
-                attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
-              />
-            ))}
-          </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className={viewMode === "grid" ? "events-board-grid" : "events-board-stack"}>
             {filtered.map((e, i) => (
-              <EventCard
+              <EventBoardCard
                 key={e.id}
                 event={e}
-                onClick={() => openEvent(e)}
-                viewMode="list"
-                revealDelay={(i % 8) * 55}
-                attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
+                onOpenDetails={() => openEvent(e)}
+                layout={viewMode === "grid" ? "grid" : "stack"}
+                revealDelay={(i % 6) * 70}
               />
             ))}
           </div>

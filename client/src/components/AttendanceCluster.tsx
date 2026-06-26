@@ -60,7 +60,20 @@ interface BubbleState {
   size: number;
 }
 
-export default function AttendanceCluster({ eventId, embedded = false }: { eventId: number; embedded?: boolean }) {
+type AttendanceClusterProps = {
+  eventId: number;
+  embedded?: boolean;
+  /** Per-event socket; disable on /events cards — page uses subscribe-summaries instead */
+  liveSocket?: boolean;
+  variant?: "default" | "card";
+};
+
+export default function AttendanceCluster({
+  eventId,
+  embedded = false,
+  liveSocket = true,
+  variant = "default",
+}: AttendanceClusterProps) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showMoreVibes, setShowMoreVibes] = useState(false);
@@ -92,7 +105,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  useAttendanceLive(eventId);
+  useAttendanceLive(eventId, liveSocket);
 
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],
@@ -144,7 +157,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     },
   });
 
-  const BUBBLE_STAGE_H = 220;
+  const BUBBLE_STAGE_H = variant === "card" ? 200 : 220;
   const BUBBLE_TOP_MARGIN = 56;
 
   // Initialize bubbles when attendees load
@@ -296,7 +309,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
   const showBubbleStrip = viewTab === "strip" && bubbles.length > 0;
 
   return (
-    <div className={`attendance-cluster-panel${embedded ? " attendance-cluster--embedded" : ""}`}>
+    <div className={`attendance-cluster-panel${embedded ? " attendance-cluster--embedded" : ""}${variant === "card" ? " attendance-cluster-panel--card" : ""}`}>
       <div className="attendance-cluster-head">
         <div className="attendance-cluster-head__title">
           <h3 className="display attendance-cluster-headline">

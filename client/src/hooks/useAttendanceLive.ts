@@ -3,7 +3,7 @@ import { queryClient } from "@/lib/queryClient";
 
 export function useAttendanceLive(eventId: number, enabled = true) {
   useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+    if (!enabled || !eventId || typeof window === "undefined") return;
 
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(`${proto}//${window.location.host}/ws/attendance`);
