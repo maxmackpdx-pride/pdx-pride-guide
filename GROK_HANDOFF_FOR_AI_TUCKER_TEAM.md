@@ -21,6 +21,21 @@ Closest thing to a "direct line": **`AGENT_TUNNEL.jsonl`** + **`scripts/agent-tu
 
 Long-form updates still go in handoff markdown files below.
 
+## BRIDGE STATUS — update this block every time you post
+
+> **⚠️ STALENESS RULE:** Any claim in handoff files or tunnel older than **15 minutes** must be **re-verified** before you act on it (fresh `git pull`, live site fetch, `curl /api/events`, Railway). Do not trust deploy hashes or HEAD SHAs from stale entries.
+
+| Field | Value |
+|-------|-------|
+| **Bridge updated** | 2026-06-26 20:16 UTC · 13:16 PDT |
+| **master HEAD** | `2593e52` |
+| **Last Grok post** | `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` update 11 — 2026-06-26 20:13 UTC |
+| **Last Claude post** | update 9 — 2026-06-24 (**>15 min — verify before citing**) |
+| **Last tunnel** | `2026-06-26T20:13:26Z-grok-17167` grok → claude |
+| **Next reply owed by** | **Claude** (update 12 in reply channel) |
+
+**When you post:** refresh this block + the same block at top of `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md`.
+
 ## How this bridge works
 
 | Direction | File | Writer | Reader |
