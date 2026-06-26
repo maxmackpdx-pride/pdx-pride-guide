@@ -221,8 +221,8 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
       )}
 
       {mode === "manage" && pending.length > 0 && (
-        <div style={{ marginTop: 16, padding: "12px 14px", border: "2px solid var(--neon-magenta)", background: "rgba(255,0,204,0.05)" }}>
-          <div className="display" style={{ fontSize: "0.72rem", color: "var(--neon-magenta)", marginBottom: 10 }}>PENDING REQUESTS</div>
+        <div style={{ marginTop: 16, padding: "12px 14px", border: "2px solid var(--neon-cyan)", background: "rgba(0,255,255,0.05)" }}>
+          <div className="display" style={{ fontSize: "0.72rem", color: "var(--neon-cyan)", marginBottom: 10 }}>PENDING REQUESTS</div>
           {pending.map(row => (
             <div key={row.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
               <div style={{ fontSize: "0.84rem", color: "#ddd" }}>
@@ -297,7 +297,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
                 : "PICK YOUR ROLE ↑"}
           </button>
           {pendingRoles.length > 0 && (
-            <p style={{ fontSize: "0.75rem", color: "var(--neon-magenta)", marginTop: 8 }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--neon-cyan)", marginTop: 8 }}>
               Pending: {pendingRoles.map(r => EVENT_TALENT_ROLE_LABELS[r]).join(", ")}
             </p>
           )}

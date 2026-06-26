@@ -155,8 +155,8 @@ export default function Submit() {
       </div>
 
       {mode === "submit" && user && !canSubmitNew && (
-        <div style={{ border: "2px solid var(--neon-magenta)", background: "rgba(255,0,204,0.06)", padding: 18, marginBottom: 24 }}>
-          <div className="display" style={{ color: "var(--neon-magenta)", fontSize: "0.95rem", marginBottom: 6 }}>
+        <div style={{ border: "2px solid var(--neon-cyan)", background: "rgba(0,255,255,0.06)", padding: 18, marginBottom: 24 }}>
+          <div className="display" style={{ color: "var(--neon-cyan)", fontSize: "0.95rem", marginBottom: 6 }}>
             {promoterStatus === "pending" ? "PROMOTER VERIFICATION PENDING" : "VERIFIED PROMOTER REQUIRED"}
           </div>
           <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5 }}>

@@ -10,6 +10,7 @@ import HeroAurora from "@/components/HeroAurora";
 import HeroGlitchOverlay from "@/components/HeroGlitchOverlay";
 import HeroImageGlitch from "@/components/HeroImageGlitch";
 import ScrollReveal from "@/components/ScrollReveal";
+import SpectrumDivider from "@/components/SpectrumDivider";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/home-hero-desktop.jpg";
@@ -147,7 +148,7 @@ export default function Home() {
             width: "min(560px, 100%)",
             border: "3px solid var(--neon-yellow)",
             background: "#050505",
-            boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(255,0,204,0.16)",
+            boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(0,255,255,0.18)",
             padding: 24,
             position: "relative",
           }}>
@@ -159,7 +160,7 @@ export default function Home() {
             >
               X
             </button>
-            <div className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", marginBottom: 14 }}>SOFTIE LAUNCH</div>
+            <span className="board-sticker" style={{ color: "#00FFFF", marginBottom: 14, display: "inline-block" }}>SOFTIE LAUNCH</span>
             <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}>
               WELCOME
             </h2>
@@ -201,6 +202,7 @@ export default function Home() {
             willChange: "transform",
           }}
         />
+        <div className="home-hero-bg-collage" aria-hidden="true" />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
         <HeroAurora />
         <div className="home-hero-shade" aria-hidden="true" />
@@ -274,6 +276,8 @@ export default function Home() {
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 
+      <SpectrumDivider />
+
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
           events={events}
@@ -284,6 +288,8 @@ export default function Home() {
           variant="home"
         />
       </section>
+
+      <SpectrumDivider reverse />
 
       <section className="home-promo-stack">
         <ScrollReveal>

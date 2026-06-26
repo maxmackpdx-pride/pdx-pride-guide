@@ -713,8 +713,8 @@ export default function Admin() {
                           onClick={() => editingId === ev.id ? setEditingId(null) : startEdit(ev)}
                           className="flex items-center gap-1 display text-xs px-3 py-1 border transition-all"
                           style={{
-                            borderColor: editingId === ev.id ? "#FF00CC" : "#333",
-                            color: editingId === ev.id ? "#FF00CC" : "#666",
+                            borderColor: editingId === ev.id ? "#00FFFF" : "#333",
+                            color: editingId === ev.id ? "#00FFFF" : "#666",
                             background: "transparent",
                           }}
                         >
@@ -993,11 +993,11 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
   };
 
   return (
-    <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? "#FF00CC" : "#222" }}>
+    <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? "#00FFFF" : "#222" }}>
       <button className="w-full text-left p-5 flex items-start justify-between gap-4" onClick={onToggle}>
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{sub.type}</span>
+            <span className="board-sticker text-xs" style={{ color: "#00FFFF" }}>{sub.type}</span>
             {approvalCount > 0 && <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{approvalCount}/2 APPROVED</span>}
           </div>
           <p className="display text-xl text-white">{sub.title || `Submission #${sub.id}`}</p>

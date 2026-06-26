@@ -213,7 +213,7 @@ export default function Inbox() {
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
         actions={unreadCount > 0 ? (
-          <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{unreadCount} UNREAD</span>
+          <span className="board-sticker" style={{ color: "#00FFFF" }}>{unreadCount} UNREAD</span>
         ) : undefined}
       />
       <ScrollReveal>
@@ -309,8 +309,8 @@ export default function Inbox() {
                 </div>
               </div>
               {activeThread.contextType === "EVENT_TALENT_REQUEST" && talentRequest?.status === "PENDING" && (
-                <div style={{ marginBottom: 14, padding: "12px 14px", background: "#0d0d0d", border: "2px solid var(--neon-magenta)" }}>
-                  <div className="display" style={{ fontSize: "0.78rem", color: "var(--neon-magenta)", marginBottom: 8 }}>LINEUP REQUEST</div>
+                <div style={{ marginBottom: 14, padding: "12px 14px", background: "#0d0d0d", border: "2px solid var(--neon-cyan)" }}>
+                  <div className="display" style={{ fontSize: "0.78rem", color: "var(--neon-cyan)", marginBottom: 8 }}>LINEUP REQUEST</div>
                   <p style={{ fontSize: "0.82rem", color: "#ccc", lineHeight: 1.5, marginBottom: 12 }}>
                     {talentRequest.displayName || talentRequest.username} wants{" "}
                     <strong>{EVENT_TALENT_ROLE_LABELS[talentRequest.role as EventTalentRole] || talentRequest.role}</strong> on{" "}

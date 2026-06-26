@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
+import AttendanceVibeModal from "./AttendanceVibeModal";
 import UserAvatar from "@/components/UserAvatar";
 
 const SPEECH_OPTIONS = [
@@ -70,6 +71,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
   const [showForm, setShowForm] = useState(false);
   const [showMoreVibes, setShowMoreVibes] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(SPEECH_OPTIONS[0]);
+  const [customMessage, setCustomMessage] = useState("");
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [bubbles, setBubbles] = useState<BubbleState[]>([]);
   const [showAuth, setShowAuth] = useState(false);
@@ -215,54 +217,48 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     return () => cancelAnimationFrame(animFrameRef.current);
   }, [bubbles.length, isMobile]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    mutation.mutate({ message: selectedMessage });
+  const submitVibe = () => {
+    const message = customMessage.trim() || selectedMessage;
+    mutation.mutate({ message });
   };
 
   const myAttendance = attendees.find(a => a.userId === user?.id);
 
-  const pillStyle = (active: boolean): React.CSSProperties => ({
-    textAlign: "center",
-    padding: "8px 14px",
-    borderRadius: 999,
-    background: active ? "#CCFF00" : "transparent",
-    border: `1px solid ${active ? "#CCFF00" : "#333"}`,
-    color: active ? "#000" : "#aaa",
-    fontSize: "0.78rem",
-    fontFamily: "var(--font-body)",
-    cursor: "pointer",
-    transition: "all 0.15s",
-    whiteSpace: "nowrap",
-  });
+  useEffect(() => {
+    if (!showForm || !myAttendance) return;
+    if (SPEECH_OPTIONS.includes(myAttendance.message)) {
+      setSelectedMessage(myAttendance.message);
+      setCustomMessage("");
+    } else {
+      setCustomMessage(myAttendance.message);
+    }
+  }, [showForm, myAttendance]);
 
   const phrasePicker = (
     <>
-      <p className="display" style={{ fontSize: "0.85rem", color: "#CCFF00", marginBottom: 12 }}>
-        PICK YOUR VIBE
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+      <p className="display attendance-vibe-label">PICK YOUR VIBE</p>
+      <div className="attendance-vibe-pills">
         {PRIMARY_OPTIONS.map(opt => (
           <button
             key={opt}
             type="button"
             data-testid={`option-${opt.slice(0, 20)}`}
             onClick={() => setSelectedMessage(opt)}
-            style={pillStyle(selectedMessage === opt)}
+            className={`attendance-vibe-pill${selectedMessage === opt && !customMessage.trim() ? " attendance-vibe-pill--active" : ""}`}
           >
             {opt}
           </button>
         ))}
       </div>
       {showMoreVibes && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+        <div className="attendance-vibe-pills">
           {MORE_OPTIONS.map(opt => (
             <button
               key={opt}
               type="button"
               data-testid={`option-${opt.slice(0, 20)}`}
               onClick={() => setSelectedMessage(opt)}
-              style={pillStyle(selectedMessage === opt)}
+              className={`attendance-vibe-pill${selectedMessage === opt && !customMessage.trim() ? " attendance-vibe-pill--active" : ""}`}
             >
               {opt}
             </button>
@@ -271,20 +267,22 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
       )}
       <button
         type="button"
+        className="attendance-vibe-more"
         onClick={() => setShowMoreVibes(s => !s)}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: "var(--text-meta)",
-          fontSize: "0.72rem",
-          cursor: "pointer",
-          textDecoration: "underline",
-          padding: 0,
-          marginBottom: 16,
-        }}
       >
         {showMoreVibes ? "Fewer vibes" : "More vibes"}
       </button>
+      <label className="attendance-vibe-custom-label">
+        Say something (optional)
+        <textarea
+          value={customMessage}
+          onChange={(e) => setCustomMessage(e.target.value)}
+          placeholder="Your own line — shows on your bubble instead of a preset"
+          rows={3}
+          className="attendance-vibe-custom"
+          data-testid="input-custom-vibe"
+        />
+      </label>
     </>
   );
 
@@ -301,7 +299,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
         <div>
-          <span className={`sticker${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`} style={{ color: "#CCFF00", borderColor: "#CCFF00", fontSize: "0.6rem" }}>
+          <span className={`board-sticker attendance-going-badge${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`}>
             {attendees.length} GOING
           </span>
           <h3 className="display" style={{ fontSize: "1.4rem", color: "#fff", margin: "6px 0 0" }}>
@@ -478,19 +476,11 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
         </div>
       )}
 
-      {/* Mobile horizontal strip (auto-switches by breakpoint, no physics) */}
+      {/* Mobile horizontal strip with scroll-snap */}
       {bubbles.length > 0 && isMobile && (
-        <div
-          style={{
-            display: "flex",
-            gap: 14,
-            overflowX: "auto",
-            overflowY: "visible",
-            paddingBottom: 8,
-            marginBottom: 16,
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
+        <>
+        <p className="attendance-mobile-hint">Swipe · tap a face</p>
+        <div className="attendance-mobile-strip">
           {bubbles.map((b, i) => {
             const isHovered = hoveredId === b.attendee.id;
             const avatarSize = 48;
@@ -500,17 +490,8 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
               <div
                 key={b.attendee.id}
                 data-testid={`bubble-strip-attendee-${b.attendee.id}`}
-                className={isNew ? "attendance-pop-in" : undefined}
+                className={`attendance-mobile-strip__item${isNew ? " attendance-pop-in" : ""}`}
                 onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
-                style={{
-                  position: "relative",
-                  flex: "0 0 auto",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  userSelect: "none",
-                }}
               >
                 <UserAvatar
                   photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
@@ -600,6 +581,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
             );
           })}
         </div>
+        </>
       )}
 
       {attendees.length === 0 && !showForm && (
@@ -608,95 +590,18 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
         </div>
       )}
 
-      {/* Sign-up form: inline panel on desktop, bottom-sheet on mobile */}
-      {showForm && isMobile && (
-        <div
-          onClick={() => setShowForm(false)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 55 }}
-        />
-      )}
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          data-testid="form-attendance"
-          style={
-            isMobile
-              ? {
-                  position: "fixed",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  zIndex: 60,
-                  background: "#111",
-                  borderTop: "2px solid #CCFF00",
-                  padding: "16px",
-                  maxHeight: "75vh",
-                  overflowY: "auto",
-                  boxShadow: "0 -8px 24px rgba(0,0,0,0.6)",
-                  animation: prefersReducedMotion() ? undefined : "attendance-sheet-up 0.25s ease-out",
-                }
-              : {
-                  background: "#111",
-                  border: "1px solid #222",
-                  padding: "16px",
-                  marginTop: 12,
-                }
-          }
-        >
-          {phrasePicker}
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <button
-              type="submit"
-              data-testid="button-submit-attendance"
-              disabled={mutation.isPending}
-              className="display"
-              style={{
-                padding: "9px 20px",
-                background: "#CCFF00",
-                border: "none",
-                color: "#000",
-                fontSize: "0.85rem",
-                cursor: "pointer",
-                opacity: mutation.isPending ? 0.5 : 1,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-              }}
-            >
-              {mutation.isPending ? "SAVING..." : myAttendance ? "UPDATE VIBE" : "I'LL BE THERE"}
-            </button>
-            {myAttendance && (
-              <button
-                type="button"
-                onClick={() => removeMutation.mutate()}
-                style={{
-                  padding: "9px 14px",
-                  background: "transparent",
-                  border: "1px solid #FF2400",
-                  color: "#FF2400",
-                  fontSize: "0.8rem",
-                  cursor: "pointer",
-                }}
-              >
-                REMOVE ME
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              style={{
-                padding: "9px 14px",
-                background: "transparent",
-                border: "1px solid #333",
-                color: "var(--text-meta)",
-                fontSize: "0.8rem",
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
+      <AttendanceVibeModal
+        open={showForm}
+        isMobile={isMobile}
+        isPending={mutation.isPending}
+        hasAttendance={!!myAttendance}
+        title={myAttendance ? "CHANGE YOUR VIBE" : "I'LL BE THERE"}
+        onClose={() => setShowForm(false)}
+        onSubmit={submitVibe}
+        onRemove={() => removeMutation.mutate()}
+      >
+        {phrasePicker}
+      </AttendanceVibeModal>
       {messageTarget && (
         <div
           data-testid="message-panel-backdrop"
