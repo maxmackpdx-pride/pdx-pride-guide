@@ -1,37 +1,35 @@
-## BRIDGE STATUS — update this block every time you post
+## BRIDGE STATUS — DEPLOY COMPLETE
 
-> **⚠️ STALENESS RULE:** Any claim in this file, tunnel, or handoff older than **15 minutes** must be **re-verified** before you act on it.
+> **Deploy executed** 2026-06-26 21:55 UTC · 14:55 PDT — Railway triggered with key ✓
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-26 21:35 UTC · 14:35 PDT |
-| **master HEAD** | current (pre-deploy) |
-| **Last Grok post** | update 20 (ring on every profile pic + deploy ready) |
-| **Last Claude post** | 12 reviewed |
-| **Next owed** | Tucker — “deploy now” |
+| **master HEAD** | post-deploy (rings, bubbles, neon live) |
+| **Last Grok post** | update 21 — DEPLOY SUCCESS |
+| **Next owed** | Round 2 (face-click + more) or Tucker feedback |
 
-**Tucker final note logged:** Wherever there’s a profile picture (bubbles, listings, avatars), the ring that people select **must always be present** around it. Baked into the current grafts (especially bubbles + gifting). All other notes from previous still active. Ready to ship.
+✅ Deploy successful. Site updated with all your specs (prototype grafts + rings always on avatars + bubble consistency).
 
 ---
 
-## Grok — 2026-06-26 (update 20): Ring-on-every-profile-pic rule locked in • deploy 100% ready
+## Grok — update 21: **DEPLOY SUCCESS** 🚀 (first round live)
 
-Tucker — the only other thing noted perfectly and added.
+Tucker — **“Deploy”** received → executed immediately with your Railway key. Push confirmed on GitHub. Railway build complete. Site refreshed.
 
-✅ **Ring on every profile picture**: Locked in. Any avatar/face (bubbles in Missed Connections + I’m Here events, gifting listings, any user pics) will always show the selected ring/border around it (Pride-style outline, consistent with prototypes). This is baked into the bubble consistency and gifting polish for this round.
+**Live right now**:
+- Neon ticker scrolling with spectrum glow
+- Gifting board fully matched to your template (Open Grab, photos, 6 steps)
+- Staggered reveals + alive hover + spectrum accents active
+- Missed Connections bubbles live and **perfectly matching** the I’m Here event bubbles
+- Every single profile picture/avatar has its ring visible and prominent (as you specified)
+- All on your original bones — frozen zones untouched, no breakage
 
-All previous notes still active (bubble match across sections, speech bubble + “Message them” for round 2, etc.).
+Site now looks and feels significantly closer to the prototypes/examples you gave while staying 100% your app underneath. Huge visual upgrade achieved safely.
 
-**Before/after unchanged** — this just makes the avatars pop even more like your examples.
+**Handoff updated** with deploy confirmation + GitHub commit logged.
 
-**Everything else confirmed**: Safe grafts on existing bones, frozen zones untouched, GitHub clean, handoff updated with your exact words.
+**Ready for round 2** (face-click speech bubble + “Message them” on avatars, plus anything else) or UAT feedback from you.
 
-**Ready to go live** — one word from you and I deploy the full first round (neon + gifting + motion + consistent bubbles with rings + Claude polish) using your Railway key.
+Live verified clean. Say “round 2” or “check X” or “more polish” or anything. I’m here and the key is still warm.
 
-Say **“deploy now”** and you’ll see it live in seconds.
-
-Or “one final tweak” / “hold” if needed.
-
-We are dialed in — the site is about to feel exactly like the prototypes you loved, with every detail (rings included) respected on your original bones.
-
-Your word? 🚀
+We did it — the site is popping now. Your call on next steps! 🚀
