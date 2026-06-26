@@ -3,7 +3,6 @@ import PageHero from "./PageHero";
 export default function MissedConnectionsHero() {
   return (
     <PageHero
-      kicker="PRIVATE REPLIES ONLY"
       titleLine1="MISSED"
       titleLine2="CONNECTIONS"
       accent="magenta"

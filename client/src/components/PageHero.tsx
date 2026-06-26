@@ -5,7 +5,7 @@ export type PageHeroAccent = "lime" | "magenta" | "rainbow" | "cyan";
 type PageHeroTaglineAccent = "magenta" | "cyan" | "lime";
 
 type PageHeroProps = {
-  kicker: string;
+  kicker?: string;
   titleLine1: string;
   titleLine2?: string;
   accent?: PageHeroAccent;
@@ -40,7 +40,7 @@ export default function PageHero({
       <div className="page-hero__grain" aria-hidden="true" />
       <div className="page-hero__inner">
         <div className="page-hero__panel">
-          <div className="board-kicker">{kicker}</div>
+          {kicker && <div className="board-kicker">{kicker}</div>}
           <h1 className="page-hero__title">
             <span className="page-hero__title-line">{titleLine1}</span>
             {titleLine2 && (

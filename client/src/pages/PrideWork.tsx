@@ -119,7 +119,6 @@ export default function PrideWork() {
   return (
     <div className="zine-page gigs-page board-page">
       <PageHero
-        kicker="PRIDE SEASON · QUEER WORK"
         titleLine1="PRIDE"
         titleLine2="GIG BOARD"
         accent="lime"

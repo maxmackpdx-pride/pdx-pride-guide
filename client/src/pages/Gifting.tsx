@@ -162,7 +162,6 @@ export default function Gifting() {
   return (
     <div className="zine-page gifting-page board-page">
       <PageHero
-        kicker="PRIDE SEASON ONLY · NOW THROUGH JULY 26"
         titleLine1="GIFT WITH"
         titleLine2="PRIDE"
         accent="rainbow"
