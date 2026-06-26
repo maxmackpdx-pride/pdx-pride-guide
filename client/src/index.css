@@ -2723,6 +2723,29 @@ footer a:hover { color: #00FFFF !important; }
   scroll-margin-top: 88px;
 }
 
+/* Talent role picker — selected = neon fill, unselected = neon outline */
+.talent-role-pill {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s, box-shadow 0.12s;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.55);
+}
+.talent-role-pill:hover:not(.talent-role-pill--active) {
+  background: rgba(0, 0, 0, 0.82);
+  transform: translateY(-1px);
+}
+.talent-role-pill--active {
+  font-weight: 900;
+  color: #000;
+}
+
 /* Events poster grid — max 2 mobile, max 5 desktop */
 .events-poster-grid {
   display: grid;

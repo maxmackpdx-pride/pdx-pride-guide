@@ -20,6 +20,16 @@ export const EVENT_TALENT_ROLE_LABELS: Record<EventTalentRole, string> = {
   OTHER: "Other",
 };
 
+export const EVENT_TALENT_ROLE_COLORS: Record<EventTalentRole, { color: string; borderColor: string }> = {
+  DRAG: { color: "#FF00CC", borderColor: "#FF00CC" },
+  DJ: { color: "#00FFFF", borderColor: "#00FFFF" },
+  BARTENDER: { color: "#FF6600", borderColor: "#FF6600" },
+  MC: { color: "#CCFF00", borderColor: "#CCFF00" },
+  GOGO: { color: "#FF00CC", borderColor: "#FF00CC" },
+  PERFORMER: { color: "#CCFF00", borderColor: "#CCFF00" },
+  OTHER: { color: "#aaaaaa", borderColor: "#555555" },
+};
+
 export function isEventTalentRole(value: string): value is EventTalentRole {
   return (EVENT_TALENT_ROLES as readonly string[]).includes(value);
 }

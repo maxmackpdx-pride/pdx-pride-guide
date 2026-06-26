@@ -1,15 +1,40 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import UserAvatar from "@/components/UserAvatar";
-import EventTypeTag from "@/components/EventTypeTag";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   EVENT_TALENT_ROLES,
   EVENT_TALENT_ROLE_LABELS,
+  EVENT_TALENT_ROLE_COLORS,
   type EventTalentRow,
   type EventTalentRole,
 } from "@shared/eventTalent";
+
+function TalentRolePill({
+  role,
+  active,
+  onClick,
+}: {
+  role: EventTalentRole;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const { color, borderColor } = EVENT_TALENT_ROLE_COLORS[role];
+  const label = EVENT_TALENT_ROLE_LABELS[role].toUpperCase();
+  return (
+    <button
+      type="button"
+      className={`talent-role-pill ${active ? "talent-role-pill--active" : ""}`}
+      onClick={onClick}
+      style={active
+        ? { background: color, borderColor, boxShadow: `0 0 14px ${color}55` }
+        : { color, borderColor }}
+    >
+      {label}
+    </button>
+  );
+}
 
 type Props = {
   eventId: number;
@@ -206,8 +231,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
             {EVENT_TALENT_ROLES.map(role => (
-              <EventTypeTag key={role} label={EVENT_TALENT_ROLE_LABELS[role].toUpperCase()} interactive active={hostRole === role}
-                onClick={() => setHostRole(role)} />
+              <TalentRolePill key={role} role={role} active={hostRole === role} onClick={() => setHostRole(role)} />
             ))}
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -236,8 +260,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
             {EVENT_TALENT_ROLES.map(role => (
-              <EventTypeTag key={role} label={EVENT_TALENT_ROLE_LABELS[role].toUpperCase()} interactive active={selfRole === role}
-                onClick={() => setSelfRole(role)} />
+              <TalentRolePill key={role} role={role} active={selfRole === role} onClick={() => setSelfRole(role)} />
             ))}
           </div>
           <button type="button" className="btn-neon" style={{ fontSize: "0.72rem", padding: "8px 14px", borderColor: dayColor, color: dayColor }}
