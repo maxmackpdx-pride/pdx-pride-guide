@@ -1634,11 +1634,16 @@ h2.display,
   display: block;
 }
 
+.home-promo-title-line {
+  color: #f7f5ee;
+}
+
 .home-promo-accent {
   -webkit-text-stroke: 1px #000;
   paint-order: stroke fill;
 }
 
+.home-promo-panel-card .home-promo-accent--lime,
 .home-promo-accent--lime {
   color: #ccff00;
   text-shadow:
@@ -1646,6 +1651,7 @@ h2.display,
     0 0 20px rgba(204, 255, 0, 0.55);
 }
 
+.home-promo-panel-card .home-promo-accent--rainbow,
 .home-promo-accent--rainbow {
   background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
   -webkit-background-clip: text;
@@ -1830,9 +1836,17 @@ h2.display,
   display: block;
 }
 
+.page-hero__title-line {
+  color: #f7f5ee;
+}
+
 .page-hero__accent {
   -webkit-text-stroke: 1px #000;
   paint-order: stroke fill;
+}
+
+.page-hero__panel .page-hero__accent--lime {
+  color: #ccff00;
 }
 
 .page-hero__accent--lime {
@@ -1842,11 +1856,19 @@ h2.display,
     0 0 20px rgba(204, 255, 0, 0.65);
 }
 
+.page-hero__panel .page-hero__accent--magenta {
+  color: #ff00cc;
+}
+
 .page-hero__accent--magenta {
   color: #ff00cc;
   text-shadow:
     2px 2px 0 rgba(0, 0, 0, 0.92),
     0 0 20px rgba(255, 0, 204, 0.55);
+}
+
+.page-hero__panel .page-hero__accent--cyan {
+  color: #00ffff;
 }
 
 .page-hero__accent--cyan {
@@ -1856,6 +1878,7 @@ h2.display,
     0 0 20px rgba(0, 255, 255, 0.5);
 }
 
+.page-hero__panel .page-hero__accent--rainbow,
 .page-hero__accent--rainbow {
   background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
   -webkit-background-clip: text;
@@ -1910,13 +1933,17 @@ h2.display,
 }
 
 .board-page .section-heading {
-  color: var(--text-heading);
+  color: #f7f5ee;
   margin-top: 1.1rem;
   margin-bottom: 0;
   -webkit-text-stroke: 1px #000;
   text-shadow:
     2px 2px 0 rgba(0, 0, 0, 0.9),
     0 0 18px rgba(0, 0, 0, 0.35);
+}
+
+.board-page h1.page-hero__title {
+  color: #f7f5ee;
 }
 
 .board-page .board-sticker + .section-heading {
@@ -2553,7 +2580,7 @@ h2.display,
   .page-hero__lede {
     font-size: 1.02rem;
     line-height: 1.68;
-    padding: 0.8rem 1rem;
+    padding: 0.15rem 0 0.35rem;
   }
 
   .board-copy {
