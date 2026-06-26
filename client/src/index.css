@@ -2723,6 +2723,33 @@ footer a:hover { color: #00FFFF !important; }
   scroll-margin-top: 88px;
 }
 
+/* Events poster grid — max 2 mobile, max 5 desktop (no 6-across squeeze) */
+.events-poster-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .events-poster-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 960px) {
+  .events-poster-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .events-poster-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
 /* Submit form polish */
 .submit-page {
   max-width: 760px;

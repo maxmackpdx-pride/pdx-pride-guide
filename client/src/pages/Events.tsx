@@ -435,7 +435,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
           {/* Day stripe */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
           {/* Info overlay */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 12 }}>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 14 }}>
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 }}>
               <span className="sticker" style={{ color: dayColor, borderColor: dayColor, fontSize: "0.55rem" }}>{event.dayOfWeek}</span>
               {hasPendingClaim ? (
@@ -446,11 +446,11 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
             </div>
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(0.9rem, 2vw, 1.1rem)",
+              fontSize: "clamp(1rem, 1.4vw, 1.22rem)",
               color: "#fff", lineHeight: 1.05, marginBottom: 4,
             }}>{event.title}</div>
-            <div style={{ fontSize: "0.68rem", color: "#aaa" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.62rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
+            <div style={{ fontSize: "0.74rem", color: "#aaa" }}>{event.venueName}</div>
+            <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
             {typeTags.length > 0 && (
               <div style={{ marginTop: 6 }}>
                 <EventTypeTagList labels={typeTags} size="sm" max={3} />
@@ -488,13 +488,13 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
             </div>
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
+              fontSize: "clamp(1.02rem, 1.4vw, 1.28rem)",
               color: "#fff", lineHeight: 1.05, marginBottom: 6,
             }}>
               {event.title}
             </div>
-            <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+            <div style={{ fontSize: "0.78rem", color: "#888" }}>{event.venueName}</div>
+            <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
             {typeTags.length > 0 && (
               <div style={{ marginTop: 6 }}>
                 <EventTypeTagList labels={typeTags} size="sm" max={3} />
@@ -703,13 +703,15 @@ export default function Events() {
         </div>
 
         {isLoading ? (
-          <div style={{
-            display: viewMode === "grid" ? "grid" : "flex",
-            gridTemplateColumns: viewMode === "grid" ? "repeat(auto-fill, minmax(180px, 1fr))" : undefined,
-            flexDirection: "column",
-            gap: 16,
-          }}>
-            {Array(6).fill(0).map((_, i) => (
+          <div
+            className={viewMode === "grid" ? "events-poster-grid" : undefined}
+            style={{
+              display: viewMode === "grid" ? undefined : "flex",
+              flexDirection: "column",
+              gap: viewMode === "grid" ? undefined : 16,
+            }}
+          >
+            {Array(viewMode === "grid" ? 10 : 6).fill(0).map((_, i) => (
               <div key={i} style={{ height: viewMode === "grid" ? undefined : 72, aspectRatio: viewMode === "grid" ? "2/3" : undefined, background: "#111" }} />
             ))}
           </div>
@@ -738,7 +740,7 @@ export default function Events() {
             </button>
           </div>
         ) : viewMode === "grid" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+          <div className="events-poster-grid">
             {filtered.map(e => (
               <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="grid" />
             ))}
