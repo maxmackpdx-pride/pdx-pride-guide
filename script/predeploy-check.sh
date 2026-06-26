@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "predeploy: no git metadata — skipping branch checks (CI/Railway tarball builds)"
+  exit 0
+fi
+
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 HEAD="$(git rev-parse HEAD)"
 SHORT="$(git rev-parse --short HEAD)"
