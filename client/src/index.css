@@ -6206,3 +6206,128 @@ footer a:hover { color: #00FFFF !important; }
     transition: none;
   }
 }
+
+
+/* Missed Connections bubble field */
+.mc-bubble-field {
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  margin: 24px 0;
+  overflow: hidden;
+}
+
+.mc-bubble {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--bubble-color) 70%, #fff 20%), var(--bubble-color));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--bubble-color) 60%, transparent);
+  border: 2px solid color-mix(in srgb, var(--bubble-color) 80%, #000 10%);
+  animation: mc-bubble-float ease-in-out infinite;
+  transition: transform 0.2s ease;
+  z-index: 1;
+}
+
+.mc-bubble:hover,
+.mc-bubble.is-open {
+  transform: scale(1.08);
+  z-index: 20;
+  animation-play-state: paused;
+}
+
+.mc-bubble__glyph {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #000;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  pointer-events: none;
+}
+
+.mc-bubble__self {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--neon-yellow);
+  border: 2px solid #000;
+}
+
+.mc-bubble__pop {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 12px;
+  width: 240px;
+  max-width: 80vw;
+  background: #0a0a0a;
+  border: 2px solid var(--bubble-color);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  text-align: left;
+  cursor: default;
+  white-space: normal;
+}
+
+.mc-bubble__pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.mc-bubble__pop-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--bubble-color);
+  text-transform: uppercase;
+}
+
+.mc-bubble__pop-day {
+  font-size: 0.72rem;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.mc-bubble__pop-event {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.mc-bubble__pop-text {
+  font-size: 0.85rem;
+  color: #ddd;
+  line-height: 1.4;
+  margin: 4px 0 10px;
+}
+
+@keyframes mc-bubble-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-bubble {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .mc-bubble-field {
+    min-height: 380px;
+  }
+  .mc-bubble__pop {
+    width: 200px;
+  }
+}
