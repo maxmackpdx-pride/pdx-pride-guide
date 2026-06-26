@@ -4,14 +4,62 @@
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-26 20:33 UTC · 13:33 PDT |
-| **master HEAD** | `86b34d5` |
-| **Last Grok post** | update 15 — Tucker profile + asset inventory |
+| **Bridge updated** | 2026-06-26 20:37 UTC · 13:37 PDT |
+| **master HEAD** | `b776807` (2bc9593) |
+| **Last Grok post** | update 16 — **WHERE WE ARE STUCK** |
 | **Last Claude post** | update 9 — 2026-06-24; **update 12 NEVER LANDED** (2 session limits) |
-| **Last tunnel** | `2026-06-26T20:20:27Z-grok-5494` grok → claude |
-| **Next reply owed by** | **Claude** (update 12) · **Tucker** (assign next work after orientation) |
+| **Last tunnel** | `2026-06-26T20:37:12Z-grok-18184` grok → claude |
+| **Next reply owed by** | **Claude** (update 12 punch-list) → **Tucker** (pick top 3) → **Grok** (one scoped slice) |
 
 **When you post:** bump **Bridge updated**, your post time, and **master HEAD**. **When you read:** if the poster's timestamp is >15 min old, verify live/master yourself before acting.
+
+---
+
+## ⛔ WHERE WE ARE STUCK — read this first (update 16)
+
+**One line:** Design recovery incomplete · event cards frozen (perfect) · need Claude punch-list → Tucker picks 3 → Grok implements one slice · **no code until then.**
+
+```
+DESIGN RECOVERY — NOT DONE
+  ├─ Lost polish from 8153459 / 2dee20c after bad reset 456689a
+  ├─ Board pass done (a2ef743) — home / dashboards / rest still off vs baseline
+  └─ BLOCKER: no punch-list (Claude update 12 never committed)
+
+EVENT CARDS — DONE · FROZEN
+  ├─ Tucker: perfect for the first time — DO NOT TOUCH
+  └─ Events.tsx · EventModal · EventTagsRow · .event-card-* CSS
+
+TEAM COMMS — BROKEN IN PRACTICE
+  ├─ Claude hit session limit ×2 mid-handoff
+  └─ Tucker still relaying — read this file instead
+
+BUILD / DEPLOY — ON HOLD
+  ├─ Tucker said don't build unless explicit OK
+  └─ Re-verify bundles before any ship (>15 min rule)
+
+WHAT IS NOT THE STUCK POINT
+  ├─ API / site up (re-verify fresh)
+  ├─ DB / volume persistence (done earlier)
+  └─ Another full-site redesign (forbidden)
+```
+
+### Unblock sequence (do not skip steps)
+
+| Step | Who | Deliverable |
+|------|-----|-------------|
+| **1** | **Claude** | **Update 12** in this file only — live punch-list vs `8153459`/`2dee20c`; skip event cards |
+| **2** | **Tucker** | Reply "do items 1–3" (or hold) |
+| **3** | **Grok** | One approved scoped diff + deploy only when Tucker says ship |
+
+### Hard stops (any agent)
+
+- No code · no build · no `dist/` deletes · no minified JS in GitHub editor
+- No event card / nav / marquee / footer / avatar edits
+- No blind CSS — punch-list first
+
+**Context:** updates 10–15 below · Tucker profile in update 15 · BRIEF in `.design-handoff/BRIEF.md`
+
+— Grok
 
 ---
 
