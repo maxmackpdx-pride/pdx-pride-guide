@@ -34,6 +34,27 @@ const inputStyle: React.CSSProperties = {
   fontFamily: "var(--font-body)", boxSizing: "border-box",
 };
 
+const BUBBLE_COLORS = ["#FF1FA0", "#19E3FF", "#C8FA3C", "#A24BFF", "#FF8C00", "#FF2400"];
+
+function eventColor(key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return BUBBLE_COLORS[hash % BUBBLE_COLORS.length];
+}
+
+function bubblePos(id: number) {
+  const rand = (n: number) => {
+    const s = (id * 9301 + n * 49297 + 13) % 233280;
+    return Math.abs(s) / 233280;
+  };
+  const left = 6 + rand(1) * 84;
+  const top = 8 + rand(2) * 70;
+  const size = 64 + rand(3) * 38;
+  const duration = 6 + rand(4) * 5;
+  const delay = rand(5) * 4;
+  return { left, top, size, duration, delay };
+}
+
 export default function MissedConnectionsPanel({
   mode,
   eventId,
@@ -233,49 +254,53 @@ export default function MissedConnectionsPanel({
       </div>
     )
   ) : boardLayout && mode === "board" ? (
-    <div className="board-listing-grid">
-      {posts.map((post, index) => {
-        const expanded = expandedId === post.id;
-        return (
-          <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
-            <article
-              className={`board-listing-card${expanded ? " is-expanded" : ""}`}
-              style={{ "--listing-accent": "#FF1FA0" } as React.CSSProperties}
+    <div className="mc-bubble-field">
+        {posts.map((post) => {
+          const expanded = expandedId === post.id;
+          const color = eventColor(String(post.eventId ?? post.eventTitle ?? post.id));
+          const pos = bubblePos(post.id);
+          const glyph = (post.eventTitle || post.title || "?").trim().charAt(0).toUpperCase();
+          return (
+            <div
+              key={post.id}
+              className={`mc-bubble${expanded ? " is-open" : ""}`}
+              style={{
+                left: `${pos.left}%`,
+                top: `${pos.top}%`,
+                width: `${pos.size}px`,
+                height: `${pos.size}px`,
+                "--bubble-color": color,
+                animationDuration: `${pos.duration}s`,
+                animationDelay: `${pos.delay}s`,
+              } as React.CSSProperties}
               onClick={() => setExpandedId(expanded ? null : post.id)}
             >
-              <div className="board-listing-card__row">
-                <div className="board-listing-card__thumb" style={{ background: "linear-gradient(135deg,#FF1FA0,#A24BFF)" }} />
-                <div className="board-listing-card__main">
-                  <div className="board-listing-card__tags">
-                    <span className="board-listing-card__kind">Spotted</span>
-                    {(post.eventDay || post.dayOfWeek) && <span className="board-listing-card__grab">{post.eventDay || post.dayOfWeek}</span>}
-                    <span className="board-listing-card__time">{timeAgo(post.createdAt)}</span>
-                  </div>
-                  <h4 className="board-listing-card__title">{post.title}</h4>
-                  <div className="board-listing-card__poster">
-                    <span>{post.eventTitle || post.venueHint || "Pride event"} · anonymous</span>
-                  </div>
-                </div>
-              </div>
-              <div className="board-listing-card__footer">
-                <span className="board-listing-card__status">{post.isMine ? "Your post" : "Posted anonymously"}</span>
-                <span className="board-listing-card__cta">{post.isMine ? "Yours" : "Reply"} →</span>
-              </div>
+              <span className="mc-bubble__glyph">{glyph}</span>
+              {post.isMine && <span className="mc-bubble__self" title="Your post" />}
               {expanded && (
-                <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
-                  <p>{post.body}</p>
+                <div className="mc-bubble__pop" onClick={(e) => e.stopPropagation()}>
+                  <div className="mc-bubble__pop-head">
+                    <span className="mc-bubble__pop-name">{post.isMine ? "Your post" : "Anonymous"}</span>
+                    {(post.eventDay || post.dayOfWeek) && (
+                      <span className="mc-bubble__pop-day">{post.eventDay || post.dayOfWeek}</span>
+                    )}
+                  </div>
+                  {(post.eventTitle || post.venueHint) && (
+                    <div className="mc-bubble__pop-event">{post.eventTitle || post.venueHint}</div>
+                  )}
+                  <h4 className="board-listing-card__title" style={{ fontSize: "0.95rem", margin: "4px 0" }}>{post.title}</h4>
+                  <p className="mc-bubble__pop-text">{post.body}</p>
                   {!post.isMine && (
-                    <button onClick={() => setReplyingTo(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
-                      Reply Privately
+                    <button onClick={() => setReplyingTo(post)} className="mc-bubble__reply btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
+                      Reply →
                     </button>
                   )}
                 </div>
               )}
-            </article>
-          </ScrollReveal>
-        );
-      })}
-    </div>
+            </div>
+          );
+        })}
+      </div>
   ) : (
     <div style={{ display: "grid", gap: 14 }}>
       {posts.map((post, index) => (
