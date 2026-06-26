@@ -5,6 +5,8 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 
+import HeroAurora from "@/components/HeroAurora";
+import HeroGlitchOverlay from "@/components/HeroGlitchOverlay";
 import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
@@ -186,7 +188,9 @@ export default function Home() {
           }}
         />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
+        <HeroAurora />
         <div className="home-hero-shade" aria-hidden="true" />
+        <HeroGlitchOverlay />
         <div style={{
           position: "absolute", inset: 0, opacity: 0.06,
           backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",

@@ -7,7 +7,7 @@ import type { Event } from "@shared/schema";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "../components/EventTypeTag";
 import EventTagsRow from "../components/EventTagsRow";
-import SpectrumLoader from "@/components/SpectrumLoader";
+import BoardLoadingState from "@/components/BoardLoadingState";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventModal from "../components/EventModal";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
@@ -664,12 +664,7 @@ export default function Events() {
         </div>
 
         {isLoading ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, padding: "48px 20px" }}>
-            <SpectrumLoader variant="ring" />
-            <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", fontFamily: "var(--font-display)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Loading events
-            </p>
-          </div>
+          <BoardLoadingState label="Loading events" />
         ) : isError ? (
           <div style={{ textAlign: "center", padding: "60px 20px", border: "2px dashed #FF6600", background: "rgba(8,8,8,0.72)" }}>
             <p className="display" style={{ fontSize: "1.4rem", color: "#fff" }}>COULD NOT LOAD EVENTS</p>

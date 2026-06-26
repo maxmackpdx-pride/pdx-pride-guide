@@ -4,6 +4,8 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "./AuthModal";
+import BoardLoadingState from "./BoardLoadingState";
+import ScrollReveal from "./ScrollReveal";
 import type { Event } from "@shared/schema";
 
 export type MissedConnectionPost = {
@@ -224,7 +226,7 @@ export default function MissedConnectionsPanel({
       )}
 
       {isLoading ? (
-        <div style={{ color: "#9d9a92" }}>Loading...</div>
+        <BoardLoadingState label="Loading missed connections" />
       ) : isError ? (
         <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF00CC" }}>
           <p style={{ color: "#fff", marginBottom: 12 }}>Could not load missed connections.</p>
@@ -236,8 +238,9 @@ export default function MissedConnectionsPanel({
         </div>
       ) : (
         <div style={{ display: "grid", gap: 14 }}>
-          {posts.map(post => (
-            <article key={post.id} style={{ background: "#0b0b0b", border: "1px solid #1f1f1f", padding: compact ? 14 : 18 }}>
+          {posts.map((post, index) => (
+            <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
+            <article style={{ background: "#0b0b0b", border: "1px solid #1f1f1f", padding: compact ? 14 : 18 }}>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
                 {(post.eventDay || post.dayOfWeek) && (
                   <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{post.eventDay || post.dayOfWeek}</span>
@@ -262,6 +265,7 @@ export default function MissedConnectionsPanel({
                 )}
               </div>
             </article>
+            </ScrollReveal>
           ))}
         </div>
       )}

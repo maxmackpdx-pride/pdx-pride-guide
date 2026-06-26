@@ -1,4 +1,5 @@
 import PageHero from "@/components/PageHero";
+import ScrollReveal from "@/components/ScrollReveal";
 import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink } from "lucide-react";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
@@ -18,54 +19,55 @@ export default function About() {
 
       <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-16">
 
-        {/* Mission */}
-        <section>
-          <h2 className="display section-heading text-white mb-8">
-            THE <span style={{ color: "#FF00CC" }}>MISSION</span>
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              {
-                icon: <Zap size={20} />,
-                color: "#CCFF00",
-                title: "FIND EVENTS FAST",
-                text: "Everything happening Thu–Sun in one place. Map it, filter it, show up.",
-              },
-              {
-                icon: <Users size={20} />,
-                color: "#00FFFF",
-                title: "SUPPORT QUEER SPACES",
-                text: "Bars, venues, orgs, and collectives — every listing drives foot traffic and awareness to queer-owned and queer-friendly spaces.",
-              },
-              {
-                icon: <Heart size={20} />,
-                color: "#FF00CC",
-                title: "CONNECT PEOPLE",
-                text: "The gig board, the submit form, the claimable events — all of it is designed to help people find each other, not extract data.",
-              },
-              {
-                icon: <Shield size={20} />,
-                color: "#FF6600",
-                title: "STAY INDEPENDENT",
-                text: "No VC money. No algorithmic feed. Queer-run business support is welcome; control of the guide is not for sale.",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="p-6 border-2 border-white/10 transition-all hover:border-white/20"
-                style={{ background: "#111" }}
-              >
-                <div className="flex items-center gap-3 mb-3" style={{ color: item.color }}>
-                  {item.icon}
-                  <span className="display text-sm" style={{ color: item.color }}>{item.title}</span>
+        <ScrollReveal>
+          <section>
+            <h2 className="display section-heading text-white mb-8">
+              THE <span style={{ color: "#FF00CC" }}>MISSION</span>
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {[
+                {
+                  icon: <Zap size={20} />,
+                  color: "#CCFF00",
+                  title: "FIND EVENTS FAST",
+                  text: "Everything happening Thu–Sun in one place. Map it, filter it, show up.",
+                },
+                {
+                  icon: <Users size={20} />,
+                  color: "#00FFFF",
+                  title: "SUPPORT QUEER SPACES",
+                  text: "Bars, venues, orgs, and collectives — every listing drives foot traffic and awareness to queer-owned and queer-friendly spaces.",
+                },
+                {
+                  icon: <Heart size={20} />,
+                  color: "#FF00CC",
+                  title: "CONNECT PEOPLE",
+                  text: "The gig board, the submit form, the claimable events — all of it is designed to help people find each other, not extract data.",
+                },
+                {
+                  icon: <Shield size={20} />,
+                  color: "#FF6600",
+                  title: "STAY INDEPENDENT",
+                  text: "No VC money. No algorithmic feed. Queer-run business support is welcome; control of the guide is not for sale.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="p-6 border-2 border-white/10 transition-all hover:border-white/20"
+                  style={{ background: "#111" }}
+                >
+                  <div className="flex items-center gap-3 mb-3" style={{ color: item.color }}>
+                    {item.icon}
+                    <span className="display text-sm" style={{ color: item.color }}>{item.title}</span>
+                  </div>
+                  <p className="text-white/60 text-sm leading-relaxed">{item.text}</p>
                 </div>
-                <p className="text-white/60 text-sm leading-relaxed">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
 
-        {/* How It Works */}
+        <ScrollReveal delay={120}>
         <section>
           <h2 className="display section-heading text-white mb-8">
             HOW IT <span style={{ color: "#00FFFF" }}>WORKS</span>
@@ -106,8 +108,9 @@ export default function About() {
             ))}
           </div>
         </section>
+        </ScrollReveal>
 
-        {/* Transparency */}
+        <ScrollReveal delay={200}>
         <section>
           <h2 className="display section-heading text-white mb-8">
             TRANSPARENCY <span style={{ color: "#8800FF" }}>&</span> VALUES
@@ -135,8 +138,9 @@ export default function About() {
             </ul>
           </div>
         </section>
+        </ScrollReveal>
 
-        {/* Donate */}
+        <ScrollReveal delay={280}>
         <section>
           <div
             className="border-2 p-8 md:p-10 text-center relative overflow-hidden"
@@ -175,8 +179,9 @@ export default function About() {
             <p className="text-white/30 text-xs mt-4">@tucker_pdmax on Venmo</p>
           </div>
         </section>
+        </ScrollReveal>
 
-        {/* Tucker Credit */}
+        <ScrollReveal delay={360}>
         <section className="pb-8">
           <div style={{
             position: "relative", overflow: "hidden",
@@ -234,6 +239,7 @@ export default function About() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
       </div>
     </div>

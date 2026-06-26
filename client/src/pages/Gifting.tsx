@@ -5,7 +5,9 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHero from "@/components/PageHero";
+import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 
 const CATEGORIES = [
@@ -176,30 +178,32 @@ export default function Gifting() {
         }
       />
 
-      <section id="how-it-works" className="gifting-how">
-        <div>
-          <span className="board-sticker" style={{ color: "#00FFFF" }}>HOW IT WORKS</span>
-          <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
-          <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
-        </div>
-        <div className="gifting-steps">
-          {[
-            ["POST IT", "Gift it or search for it."],
-            ["ADD PHOTOS", "Upload up to 2. The site makes them fit."],
-            ["3 QUEERS MAX", "Only 3 people can raise their hand on a Gift post."],
-            ["PICK ONE", "Poster chooses and messages."],
-            ["HAND IT OFF", "Porch pickup, public meetup, event handoff, or whatever feels safe."],
-            ["STAMP IT DONE", "Gifted or Found. Then it leaves the active feed."],
-          ].map(([title, text], i) => (
-            <article className="gifting-step" key={title}>
-              <b>{i + 1}</b>
-              <h3 className="display panel-heading">{title}</h3>
-              <p>{text}</p>
-            </article>
-          ))}
-        </div>
-        <div className="gifting-footer-line">Keep it free. Keep it kind. Keep it moving. · Now through July 26</div>
-      </section>
+      <ScrollReveal>
+        <section id="how-it-works" className="gifting-how">
+          <div>
+            <span className="board-sticker" style={{ color: "#00FFFF" }}>HOW IT WORKS</span>
+            <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
+            <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
+          </div>
+          <div className="gifting-steps">
+            {[
+              ["POST IT", "Gift it or search for it."],
+              ["ADD PHOTOS", "Upload up to 2. The site makes them fit."],
+              ["3 QUEERS MAX", "Only 3 people can raise their hand on a Gift post."],
+              ["PICK ONE", "Poster chooses and messages."],
+              ["HAND IT OFF", "Porch pickup, public meetup, event handoff, or whatever feels safe."],
+              ["STAMP IT DONE", "Gifted or Found. Then it leaves the active feed."],
+            ].map(([title, text], i) => (
+              <article className="gifting-step" key={title}>
+                <b>{i + 1}</b>
+                <h3 className="display panel-heading">{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+          <div className="gifting-footer-line">Keep it free. Keep it kind. Keep it moving. · Now through July 26</div>
+        </section>
+      </ScrollReveal>
 
       {formOpen && (
         <section id="gifting-form" className="gifting-form-panel">
@@ -237,7 +241,7 @@ export default function Gifting() {
         </div>
 
         {isLoading ? (
-          <p className="board-copy-sm">Loading gifting posts...</p>
+          <BoardLoadingState label="Loading gifting posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#FF00CC" }}>
             <Gift size={40} style={{ color: "#FF00CC", margin: "0 auto" }} />
@@ -276,8 +280,9 @@ export default function Gifting() {
           </div>
         ) : (
           <div className="gifting-grid">
-            {filtered.map(post => (
-              <article className={`gifting-card ${post.postType.toLowerCase()}`} key={post.id}>
+            {filtered.map((post, index) => (
+              <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
+              <article className={`gifting-card ${post.postType.toLowerCase()}`}>
                 <div className="gifting-photo">
                   {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" /> : <div className="gifting-photo-empty"><Sparkles /> FREE BOARD</div>}
                   {post.photoUrls?.[1] && <span>+1 photo</span>}
@@ -332,6 +337,7 @@ export default function Gifting() {
                   </details>
                 </div>
               </article>
+              </ScrollReveal>
             ))}
           </div>
         )}

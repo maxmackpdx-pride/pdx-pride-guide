@@ -7,7 +7,9 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
+import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHero from "@/components/PageHero";
+import ScrollReveal from "@/components/ScrollReveal";
 import { Briefcase, Search, X, ChevronDown } from "lucide-react";
 
 const gigSchema = z.object({
@@ -140,23 +142,25 @@ export default function PrideWork() {
         }
       />
 
-      <section id="how-it-works" className="gigs-how">
-        <div>
-          <span className="board-sticker" style={{ color: "#CCFF00" }}>HOW IT WORKS</span>
-          <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
-          <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
-        </div>
-        <div className="gigs-steps">
-          {HOW_IT_WORKS.map(([title, text], i) => (
-            <article className="gigs-step" key={title}>
-              <b>{i + 1}</b>
-              <h3 className="display panel-heading">{title}</h3>
-              <p>{text}</p>
-            </article>
-          ))}
-        </div>
-        <div className="gigs-footer-line">Paid, respected, valued. · Pride season and beyond</div>
-      </section>
+      <ScrollReveal>
+        <section id="how-it-works" className="gigs-how">
+          <div>
+            <span className="board-sticker" style={{ color: "#CCFF00" }}>HOW IT WORKS</span>
+            <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
+            <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
+          </div>
+          <div className="gigs-steps">
+            {HOW_IT_WORKS.map(([title, text], i) => (
+              <article className="gigs-step" key={title}>
+                <b>{i + 1}</b>
+                <h3 className="display panel-heading">{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+          <div className="gigs-footer-line">Paid, respected, valued. · Pride season and beyond</div>
+        </section>
+      </ScrollReveal>
 
       {showForm && (
         <section id="gigs-form" className="gigs-form-panel" data-testid="form-pride-work">
@@ -295,7 +299,7 @@ export default function PrideWork() {
         </div>
 
         {isLoading ? (
-          <p className="board-copy-sm">Loading gig posts...</p>
+          <BoardLoadingState label="Loading gig posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#FF6600" }}>
             <Briefcase size={40} style={{ color: "#FF6600", margin: "0 auto" }} />
@@ -334,8 +338,10 @@ export default function PrideWork() {
           </div>
         ) : (
           <div className="gigs-grid">
-            {filteredGigs.map(gig => (
-              <GigCard key={gig.id} gig={gig} />
+            {filteredGigs.map((gig, index) => (
+              <ScrollReveal key={gig.id} delay={Math.min(index * 80, 400)}>
+                <GigCard gig={gig} />
+              </ScrollReveal>
             ))}
           </div>
         )}
