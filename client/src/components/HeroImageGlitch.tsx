@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useGlitchFx, type GlitchFxOptions } from "@/hooks/useGlitchFx";
 
-const PRESETS: Record<"hero" | "panel", GlitchFxOptions> = {
+const PRESETS: Record<"hero" | "panel" | "heroLines" | "panelLines", GlitchFxOptions> = {
   hero: {
     bars: false,
     text: null,
@@ -22,10 +22,28 @@ const PRESETS: Record<"hero" | "panel", GlitchFxOptions> = {
     freq: 0.048,
     pixel: 2,
   },
+  heroLines: {
+    bars: false,
+    text: null,
+    lineAlpha: 0.34,
+    scanlinesOnly: true,
+    band: 0.08,
+    bandSpeed: 0.12,
+    pixel: 2,
+  },
+  panelLines: {
+    bars: false,
+    text: null,
+    lineAlpha: 0.24,
+    scanlinesOnly: true,
+    band: 0.05,
+    bandSpeed: 0.06,
+    pixel: 2,
+  },
 };
 
 type HeroImageGlitchProps = {
-  intensity?: "hero" | "panel";
+  intensity?: "hero" | "panel" | "heroLines" | "panelLines";
   className?: string;
 };
 

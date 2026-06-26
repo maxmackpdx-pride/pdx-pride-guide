@@ -7,8 +7,11 @@ export type GlitchFxOptions = {
   heavy?: boolean;
   ghost?: number;
   band?: number;
+  bandSpeed?: number;
   freq?: number;
   pixel?: number;
+  /** CRT scanlines only — no RGB slice bursts */
+  scanlinesOnly?: boolean;
 };
 
 export function useGlitchFx(
@@ -80,27 +83,29 @@ export function useGlitchFx(
         drawText(options.text, w / 2 + jitter, h / 2, Math.min(w * 0.23, h * 0.46), dx);
       }
 
-      const freq = options.freq ?? (options.heavy ? 0.05 : 0.025);
-      const gh = options.ghost ?? 0.16;
-      if (burst <= 0 && Math.random() < freq) {
-        burst = Math.max(1, Math.round((2 + Math.random() * 5) * BURST_DURATION_SCALE));
-      }
-      if (burst > 0) {
-        burst--;
-        const count = (options.heavy ? 4 : 3) + (Math.random() * 5 | 0);
-        for (let k = 0; k < count; k++) {
-          const sy = (Math.random() * h) | 0;
-          const sh = Math.max(2, Math.round((3 + Math.random() * 24) * BURST_DURATION_SCALE));
-          const ox = ((Math.random() - 0.5) * (options.heavy ? 80 : 56)) | 0;
-          try {
-            ctx.drawImage(canvas, 0, sy, w, sh, ox, sy, w, sh);
-          } catch {
-            /* canvas read during draw */
+      if (!options.scanlinesOnly) {
+        const freq = options.freq ?? (options.heavy ? 0.05 : 0.025);
+        const gh = options.ghost ?? 0.16;
+        if (burst <= 0 && Math.random() < freq) {
+          burst = Math.max(1, Math.round((2 + Math.random() * 5) * BURST_DURATION_SCALE));
+        }
+        if (burst > 0) {
+          burst--;
+          const count = (options.heavy ? 4 : 3) + (Math.random() * 5 | 0);
+          for (let k = 0; k < count; k++) {
+            const sy = (Math.random() * h) | 0;
+            const sh = Math.max(2, Math.round((3 + Math.random() * 24) * BURST_DURATION_SCALE));
+            const ox = ((Math.random() - 0.5) * (options.heavy ? 80 : 56)) | 0;
+            try {
+              ctx.drawImage(canvas, 0, sy, w, sh, ox, sy, w, sh);
+            } catch {
+              /* canvas read during draw */
+            }
+            ctx.globalCompositeOperation = "lighter";
+            ctx.fillStyle = k % 2 ? `rgba(25,227,255,${gh})` : `rgba(255,31,160,${gh})`;
+            ctx.fillRect(0, sy, w, sh);
+            ctx.globalCompositeOperation = "source-over";
           }
-          ctx.globalCompositeOperation = "lighter";
-          ctx.fillStyle = k % 2 ? `rgba(25,227,255,${gh})` : `rgba(255,31,160,${gh})`;
-          ctx.fillRect(0, sy, w, sh);
-          ctx.globalCompositeOperation = "source-over";
         }
       }
 
@@ -108,7 +113,8 @@ export function useGlitchFx(
       for (let y = 0; y < h; y += 2) ctx.fillRect(0, y, w, 1);
 
       const bandH = Math.max(14, Math.round(h * 0.22));
-      const by = ((t * 0.5) % (h + bandH * 2)) - bandH;
+      const bandSpeed = options.bandSpeed ?? 0.5;
+      const by = ((t * bandSpeed) % (h + bandH * 2)) - bandH;
       const g = ctx.createLinearGradient(0, by, 0, by + bandH);
       g.addColorStop(0, "rgba(255,255,255,0)");
       g.addColorStop(0.5, `rgba(255,255,255,${options.band ?? (options.heavy ? 0.06 : 0.045)})`);
@@ -139,5 +145,5 @@ export function useGlitchFx(
       window.removeEventListener("resize", onResize);
       ro?.disconnect();
     };
-  }, [canvasRef, options.bars, options.text, options.lineAlpha, options.heavy, options.ghost, options.band, options.freq, options.pixel]);
+  }, [canvasRef, options.bars, options.text, options.lineAlpha, options.heavy, options.ghost, options.band, options.bandSpeed, options.freq, options.pixel, options.scanlinesOnly]);
 }

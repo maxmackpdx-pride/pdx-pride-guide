@@ -692,9 +692,43 @@ h2.display,
   will-change: transform;
 }
 
+.home-hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 53.2px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-hero-halftone {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image: radial-gradient(circle, #CCFF00 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.home-hero-watermark {
+  position: absolute;
+  right: -2%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3.5rem, 9.8vw, 7.7rem);
+  color: rgba(204, 255, 0, 0.04);
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  user-select: none;
+  white-space: nowrap;
+}
+
 .home-hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -887,8 +921,6 @@ h2.display,
   height: clamp(150px, 21vh, 210px);
   overflow: hidden;
   margin: 0;
-  border-top: 1px solid #161616;
-  border-bottom: 2px solid #1a1a1a;
   text-decoration: none;
   background: #050505;
 }
@@ -1496,8 +1528,7 @@ h2.display,
 
 .home-promo-glitch {
   z-index: 1;
-  opacity: 0.82;
-  mix-blend-mode: screen;
+  opacity: 0.5;
 }
 
 .page-hero__glitch {
@@ -1508,8 +1539,7 @@ h2.display,
 
 .home-hero-glitch {
   z-index: 2;
-  opacity: 0.9;
-  mix-blend-mode: screen;
+  opacity: 0.62;
 }
 
 .home-promo-panel::before,
@@ -1521,6 +1551,7 @@ h2.display,
 }
 
 .home-promo-panel::before {
+  z-index: 0;
   inset: -12% 0;
   background:
     linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.8) 39%, rgba(0,0,0,0.36) 67%, rgba(0,0,0,0.08) 100%),
@@ -1531,6 +1562,7 @@ h2.display,
 }
 
 .home-promo-panel::after {
+  z-index: 2;
   background:
     linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.78) 32%, rgba(0,0,0,0.34) 58%, transparent 100%),
     repeating-linear-gradient(135deg, rgba(255,255,255,0.038) 0 1px, transparent 1px 14px),
@@ -1555,7 +1587,7 @@ h2.display,
 
 .home-promo-inner {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -1564,9 +1596,10 @@ h2.display,
 
 .home-promo-panel-card {
   position: relative;
+  z-index: 2;
   max-width: 720px;
   padding: 28px 32px 30px;
-  background: rgba(5, 5, 5, 0.94);
+  background: #050505;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.55),
@@ -4480,7 +4513,8 @@ footer a:hover { color: #00FFFF !important; }
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 3;
+  z-index: 5;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 22px;

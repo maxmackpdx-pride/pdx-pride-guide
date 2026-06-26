@@ -7,7 +7,6 @@ import EventModal from "@/components/EventModal";
 
 import EventTicker from "@/components/EventTicker";
 import HeroAurora from "@/components/HeroAurora";
-import HeroGlitchOverlay from "@/components/HeroGlitchOverlay";
 import HeroImageGlitch from "@/components/HeroImageGlitch";
 import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
@@ -184,39 +183,32 @@ export default function Home() {
         className="zine-hero home-hero"
         style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}
       >
-        <div
-          className="home-hero-bg-desktop"
-          style={{
-            position: "absolute",
-            top: "-8%",
-            bottom: "-8%",
-            left: 0,
-            right: 0,
-            backgroundImage: `url(${skylineImg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center top",
-            backgroundRepeat: "no-repeat",
-            opacity: 0.9,
-            transform: "translateY(var(--parallax-y, 0px))",
-            willChange: "transform",
-          }}
-        />
-        <div className="home-hero-bg-collage" aria-hidden="true" />
-        <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <HeroAurora />
-        <div className="home-hero-shade" aria-hidden="true" />
-        <HeroGlitchOverlay />
-        <div style={{
-          position: "absolute", inset: 0, opacity: 0.06,
-          backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
-          backgroundSize: "18px 18px",
-        }} />
-        <div style={{
-          position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
-          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(3.5rem, 9.8vw, 7.7rem)",
-          color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
-          userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
-        }}>LOVE<br />LOUDER</div>
+        <div className="home-hero-backdrop" aria-hidden="true">
+          <div
+            className="home-hero-bg-desktop"
+            style={{
+              position: "absolute",
+              top: "-8%",
+              bottom: "-8%",
+              left: 0,
+              right: 0,
+              backgroundImage: `url(${skylineImg})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center top",
+              backgroundRepeat: "no-repeat",
+              opacity: 0.9,
+              transform: "translateY(var(--parallax-y, 0px))",
+              willChange: "transform",
+            }}
+          />
+          <div className="home-hero-bg-collage" />
+          <div className="home-hero-bg-mobile" />
+          <HeroAurora />
+          <div className="home-hero-shade" />
+          <HeroImageGlitch intensity="heroLines" className="home-hero-glitch" />
+          <div className="home-hero-halftone" />
+          <div className="home-hero-watermark">LOVE<br />LOUDER</div>
+        </div>
 
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
@@ -272,8 +264,9 @@ export default function Home() {
           </Link>
           <EventTicker titles={tickerTitles} />
         </section>
-        <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
+
+      <div className="torn-divider full-bleed" />
 
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
@@ -286,10 +279,12 @@ export default function Home() {
         />
       </section>
 
+      <div className="torn-divider full-bleed" />
+
       <section className="home-promo-stack">
         <ScrollReveal>
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
-          <HeroImageGlitch intensity="panel" className="home-promo-glitch" />
+          <HeroImageGlitch intensity="panelLines" className="home-promo-glitch" />
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
               <span className="board-sticker" style={{ color: "#00FFFF" }}>GIFT WITH PRIDE</span>
@@ -310,7 +305,7 @@ export default function Home() {
         <div className="torn-divider full-bleed" />
         <ScrollReveal delay={120}>
         <article className="home-promo-panel home-gigs-panel">
-          <HeroImageGlitch intensity="panel" className="home-promo-glitch" />
+          <HeroImageGlitch intensity="panelLines" className="home-promo-glitch" />
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
               <span className="board-sticker" style={{ color: "#CCFF00" }}>PRIDE WORK</span>
