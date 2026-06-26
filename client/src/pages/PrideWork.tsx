@@ -163,6 +163,7 @@ export default function PrideWork() {
       </ScrollReveal>
 
       {showForm && (
+        <ScrollReveal>
         <section id="gigs-form" className="gigs-form-panel" data-testid="form-pride-work">
           <button className="gigs-close" onClick={() => setShowForm(false)} aria-label="Close form">
             <X size={18} />
@@ -273,8 +274,10 @@ export default function PrideWork() {
             </div>
           </form>
         </section>
+        </ScrollReveal>
       )}
 
+      <ScrollReveal delay={60}>
       <section className="gigs-feed">
         <div className="gigs-feed-head">
           <div>
@@ -346,6 +349,7 @@ export default function PrideWork() {
           </div>
         )}
       </section>
+      </ScrollReveal>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
