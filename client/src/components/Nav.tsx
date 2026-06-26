@@ -66,7 +66,9 @@ export default function Nav() {
           <Link href="/" className="site-brand" aria-label="PDX Pride Guide home">
             <img src={logoPath} alt="" className="site-brand-logo" />
             <span className="display site-brand-wordmark">
-              PDX <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span> GUIDE
+              <span className="site-brand-wordmark__line">PDX</span>
+              <span className="site-brand-wordmark__line site-brand-wordmark__line--accent">PRIDE</span>
+              <span className="site-brand-wordmark__line">GUIDE</span>
             </span>
           </Link>
 

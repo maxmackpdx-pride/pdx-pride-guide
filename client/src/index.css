@@ -138,12 +138,12 @@ body::before {
 
 .site-header-inner {
   --site-logo-h: clamp(102px, 21vw, 132px);
-  --site-nav-size: clamp(1.1rem, calc(var(--site-logo-h) * 0.118), 1.72rem);
+  --site-nav-size: clamp(1.3rem, calc(var(--site-logo-h) * 0.118 + 3px), 1.95rem);
   --site-nav-pad-x: clamp(10px, calc(var(--site-logo-h) * 0.11), 20px);
   --site-nav-pad-y: clamp(12px, calc(var(--site-logo-h) * 0.1), 16px);
   --site-nav-gap: clamp(4px, calc(var(--site-logo-h) * 0.05), 10px);
   --site-brand-gap: clamp(14px, calc(var(--site-logo-h) * 0.12), 22px);
-  --site-wordmark-size: clamp(1.9rem, calc(var(--site-logo-h) * 0.175), 2.35rem);
+  --site-wordmark-size: clamp(1.35rem, calc(var(--site-logo-h) * 0.24), 1.9rem);
   width: 100%;
   max-width: 1440px;
   min-height: var(--site-header-height);
@@ -175,10 +175,24 @@ body::before {
 }
 
 .site-brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.04em;
   color: #fff;
   font-size: var(--site-wordmark-size);
-  letter-spacing: 0.02em;
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+}
+
+.site-brand-wordmark__line {
+  display: block;
   white-space: nowrap;
+}
+
+.site-brand-wordmark__line--accent {
+  color: var(--neon-yellow);
 }
 
 .site-nav-toggle {
@@ -309,7 +323,7 @@ body::before {
 
 @media (min-width: 1024px) and (max-width: 1320px) {
   .site-header-inner {
-    --site-nav-size: clamp(1rem, 1.15vw, 1.38rem);
+    --site-nav-size: clamp(1.2rem, calc(1.15vw + 3px), 1.58rem);
     --site-nav-pad-x: clamp(8px, 0.95vw, 14px);
     --site-nav-gap: 4px;
     --site-brand-gap: 16px;
@@ -1206,7 +1220,7 @@ h2.display,
   }
 
   .site-brand-wordmark {
-    display: none;
+    --site-wordmark-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.21), 1.45rem);
   }
 
   .site-nav-toggle {
@@ -1233,7 +1247,7 @@ h2.display,
 
   .site-nav-link {
     padding: 16px 6px;
-    font-size: 1.76rem;
+    font-size: calc(1.76rem + 3px);
   }
 
   .site-nav-link.active::after {
@@ -1273,7 +1287,7 @@ h2.display,
     margin: 8px 0 0;
     width: 100%;
     padding: 16px 18px;
-    font-size: 1.64rem;
+    font-size: calc(1.64rem + 3px);
   }
 
   .site-logout-button {
