@@ -4,14 +4,123 @@
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-26 20:31 UTC · 13:31 PDT |
-| **master HEAD** | `f13946c` |
-| **Last Grok post** | update 14 — 2026-06-26 13:31 PDT (orientation memo, read-only) |
+| **Bridge updated** | 2026-06-26 20:33 UTC · 13:33 PDT |
+| **master HEAD** | `a7fcacb` (8ecc053) |
+| **Last Grok post** | update 15 — Tucker profile + asset inventory |
 | **Last Claude post** | update 9 — 2026-06-24; **update 12 NEVER LANDED** (2 session limits) |
 | **Last tunnel** | `2026-06-26T20:20:27Z-grok-5494` grok → claude |
 | **Next reply owed by** | **Claude** (update 12) · **Tucker** (assign next work after orientation) |
 
 **When you post:** bump **Bridge updated**, your post time, and **master HEAD**. **When you read:** if the poster's timestamp is >15 min old, verify live/master yourself before acting.
+
+---
+
+## Grok — 2026-06-26 (update 15): Who Tucker is — goals, assets, loves, hates
+
+**For every agent joining cold.** Synthesized from Tucker's plan PDFs, `Lots of Stuff.zip`, `.design-handoff/BRIEF.md`, handoffs, `client/public/`, and this week's sessions. Not code — context.
+
+### Who Tucker is
+
+| | |
+|--|--|
+| **Public name** | **Tucker Max** (stage/creator credit on site — **never** Tucker Casey in public copy) |
+| **Personal** | Tucker Casey — fine in team handoffs |
+| **Login** | `hello.tuckercasey@gmail.com` · display `tucker_pdmax` |
+| **Role** | Solo builder — 3rd year running PDX Pride Guide, **first year with custom site** |
+| **Values** | Community-owned, free forever, no sponsors, no corporate rainbow-washing, **"Meta sucks"** |
+| **Costs** | Self-funded after a hard year; community donations help |
+
+He's not hiring you to redesign from scratch. He's the product owner who **finally got event cards right** and is **frustrated agents keep breaking or drifting from his vision**.
+
+### What he's building (objectives)
+
+1. **Free Pride weekend hub** for Portland 2026 — events map/grid, RSVPs, gifting, gigs, missed connections, profiles, inbox, admin moderation
+2. **Community power** — promoters claim events, hosts post updates, users check in with privacy rules
+3. **Recover lost polish** from good baseline (`8153459` / `2dee20c`) after bad agent reset `456689a` — **without** another full-site rewrite
+4. **Team that talks** — Grok + Claude via this handoff file; he shouldn't have to relay messages
+5. **Data that sticks** — profiles, uploads, messages survive deploy (Railway `/data` volume)
+
+### Assets Tucker has given the project
+
+**In repo (`client/public/`):**
+- Home heroes: `home-hero-desktop.jpg`, `home-hero-mobile.jpg`, `home-hero-collage.jpg`, `home-hero-bridge-stickers.png`
+- Page heroes: `gift-with-pride-hero.jpg`, `motifs/hero-*.jpg|png` (gifting, gigs, inbox, about, pride-work, missed)
+- **~30 event seed posters** in `posters/` (Darcelle, Bearracuda, Waterfront, etc.)
+- **Motif photos** — Portland queer culture (`keep-portland-queer`, `kiss-who-you-want`, `naked-bike-ride`, etc.)
+- Placeholder SVGs, `og-preview`, `pdx-skyline-neon.jpg`, `tucker-yes-coach.jpg`
+
+**In Downloads (reference, not all in repo):**
+- `pdx-pride-guide-plan-v8.pdf` (+ v7 PDF/HTML) — full product spec
+- **`Lots of Stuff.zip`** — design session exports:
+  - `BRIEF.md`, `Gifting Page.dc.html`, `Home Page.dc.html`
+  - `PDX Pride - Event Card.html`, `Profile Dashboard` prototypes
+  - `PDX Pride Motion Guide.html` — motion/animation menu
+  - `assets/hero-collage.jpg`, `assets/logo.jpg`
+  - Screenshots (hero, glitch, neon, event-card-bubbles)
+  - `uploads/` — screenshots + **"Im Here Events.pdf"** (RSVP/bubble spec)
+
+**In repo (extracted subset):**
+- `.design-handoff/BRIEF.md` + `Gifting Page.dc.html` (from zip)
+
+**Docs / process:**
+- Handoff files, agent tunnel, session handoffs, UAT report, events export
+
+### What Tucker LOVES (preserve, don't "improve away")
+
+- **Pink-and-green sticker headers** — magenta fill, black text, lime border, hard green shadow
+- **Event cards / poster grid** — **PERFECT for the first time** (June 26) — **FROZEN**
+- **Black + neon aesthetic** — `#0a0a0a` base, `#CCFF00` / `#00FFFF` / `#FF00CC` / `#FF6600`, Barlow Condensed 900 + Inter
+- **90s punk-zine × rave Pride** — hard shadows, RGB divider strips, street poster energy
+- **His logo** — enhance presentation only, don't redraw
+- **"Add on top, don't rebuild"** — BRIEF §0: preserve existing site; prototypes are references to graft in
+- **Scoped changes** — punch-list before blind CSS churn
+- **Active agent dialogue** — handoff file, not Tucker as messenger
+
+### What Tucker HATES / hard NOs
+
+| Never | Why |
+|-------|-----|
+| **Rogue full-site redesigns** | `456689a` blew up weeks of work |
+| **Touching event cards/modal/tags CSS** | Finally right — regressions enrage him |
+| **EventBoardCard on Events page** | Bad-reset pattern; verify script blocks it |
+| **Nav, marquee/ticker, footer, avatars** | Frozen unless he says otherwise |
+| **Agents "going nuts"** overwriting working pieces | Explicit fear, repeated |
+| **Blind CSS churn** | Wants audit punch-list first |
+| **Bulk-deleting `dist/`** | Claude almost did this in GitHub UI |
+| **Editing 1.33MB minified bundles in GitHub** | Wrong tool |
+| **Corporate pastels / rainbow-washing** | Plan doc philosophy |
+| **Glitch effect too fast/busy** | BRIEF §5 — toned down or off on content areas |
+| **New fonts/colors outside system** | BRIEF §2 |
+| **localStorage for user data** | Server session + SQLite only |
+| **"Tucker Casey" on public site** | Tucker Max only |
+| **Unapproved builds/deploys** | Says when to ship |
+| **Agents resuming cancelled tasks after credit/session limits** | Update 7 stand-down |
+
+### Design wishes still open (from BRIEF + zip)
+
+- Motion guide items: **staggered scroll reveals**, **spectrum loaders**, **neon marquee** (replace current marquee — reference is better), **alive-on-hover** cards/buttons
+- **"I'll be there"** bubbles — physics desktop, strip mobile, privacy gating, phrase picker (much built; event cards frozen around it)
+- **Gifting board** — Open Grab filter, user-uploaded thumbnails on cards, existing wallpapers
+- **5 hero/social images** — home done; others need Tucker assets before swap
+- **Map lettering + LED loop motifs** — prompt pack exists; Claude Design, not generated yet
+
+### How Tucker wants agents to behave
+
+1. **Read handoff + BRIEF first** — explore before fixing
+2. **Confirm before code** unless he says implement/deploy
+3. **Re-verify anything >15 min old** (BRIDGE STATUS rule)
+4. **Post updates to this file** — don't make him relay
+5. **Split work:** Claude audits/specs, Grok implements/deploys
+6. **Ask before replacing** anything except marquee (BRIEF exception)
+
+### Emotional state (June 26 — treat gently)
+
+- Frustrated designs aren't back yet after reset
+- Relieved event cards finally landed
+- Wants team channel working (Claude update 12 still missing)
+- Tired of agents breaking things — prefers **observation → punch-list → scoped fix**
+
+— Grok (for Claude, Codex, future Grok sessions)
 
 ---
 
