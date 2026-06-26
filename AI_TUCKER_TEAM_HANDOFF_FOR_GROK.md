@@ -4,29 +4,34 @@
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-26 21:30 UTC · 14:30 PDT |
+| **Bridge updated** | 2026-06-26 21:35 UTC · 14:35 PDT |
 | **master HEAD** | current (pre-deploy) |
-| **Last Grok post** | update 19 (bubble consistency + click fix queued + deploy ready) |
-| **Last Claude post** | 12 reviewed/applied |
-| **Next owed** | Tucker — “deploy now” or tweak |
+| **Last Grok post** | update 20 (ring on every profile pic + deploy ready) |
+| **Last Claude post** | 12 reviewed |
+| **Next owed** | Tucker — “deploy now” |
 
-**Key note from Tucker:** Bubbles in Missed Connections **must exactly match** the “I’m Here” event bubbles (colors, hover style, physics). Click on face in I’m Here currently does nothing — should pop speech bubble + “Message them” option. **Added to todo AFTER first round** (per your instruction). Bubbles will be made consistent in this round.
+**Tucker final note logged:** Wherever there’s a profile picture (bubbles, listings, avatars), the ring that people select **must always be present** around it. Baked into the current grafts (especially bubbles + gifting). All other notes from previous still active. Ready to ship.
 
 ---
 
-## Grok — 2026-06-26 (update 19): Bubble consistency locked in + click fix queued • deploy ready
+## Grok — 2026-06-26 (update 20): Ring-on-every-profile-pic rule locked in • deploy 100% ready
 
-Tucker — perfect, noted and locked.
+Tucker — the only other thing noted perfectly and added.
 
-✅ **Bubbles consistency** — Missed Connections bubbles will exactly match the “I’m Here” event bubbles (same colors, hover physics, speech pop style, initials/phrases) so they feel like the same feature across the site. Grafted from your Im Here Events + Pride Pulse prototypes onto existing bones.
-✅ **Click behavior fix** — Queued for round 2 (right after this deploy). Clicking a face in I’m Here will now pop the little speech bubble + “Message them” option exactly as you described.
+✅ **Ring on every profile picture**: Locked in. Any avatar/face (bubbles in Missed Connections + I’m Here events, gifting listings, any user pics) will always show the selected ring/border around it (Pride-style outline, consistent with prototypes). This is baked into the bubble consistency and gifting polish for this round.
 
-**Before/After recap (still accurate)** — Same as previous comparison. All grafts stay 100% on your existing structure.
+All previous notes still active (bubble match across sections, speech bubble + “Message them” for round 2, etc.).
 
-**Ready to ship** — GitHub clean, backup protected, frozen zones untouched, handoff updated. This round will give you the full prototype look/feel while keeping your bones intact.
+**Before/after unchanged** — this just makes the avatars pop even more like your examples.
 
-**Your move** — Just say **“deploy now”** and I’ll push + trigger Railway with your key (you’ll see the bubbles + neon + gifting + reveals live instantly). Or “hold for X tweak”.
+**Everything else confirmed**: Safe grafts on existing bones, frozen zones untouched, GitHub clean, handoff updated with your exact words.
 
-Everything aligned with what you just said. Site about to feel exactly like your examples on the foundation you built. 🚀
+**Ready to go live** — one word from you and I deploy the full first round (neon + gifting + motion + consistent bubbles with rings + Claude polish) using your Railway key.
 
-Ready for assignment when Tucker says go.
+Say **“deploy now”** and you’ll see it live in seconds.
+
+Or “one final tweak” / “hold” if needed.
+
+We are dialed in — the site is about to feel exactly like the prototypes you loved, with every detail (rings included) respected on your original bones.
+
+Your word? 🚀
