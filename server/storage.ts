@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages,
+  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -275,6 +275,30 @@ try { sqlite.exec(`
     created_at TEXT NOT NULL DEFAULT ''
   )
 `); } catch(e) {}
+
+const MAX_EVENT_HOSTS = 3;
+
+function ensureEventHostsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS event_hosts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        role TEXT NOT NULL DEFAULT 'COHOST',
+        added_by_user_id INTEGER,
+        created_at TEXT NOT NULL DEFAULT '',
+        UNIQUE(event_id, user_id)
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS event_hosts_event_idx ON event_hosts(event_id)`);
+  } catch (e) {
+    console.error("[event_hosts] schema migration failed:", e);
+  }
+}
+ensureEventHostsSchema();
+
+
 
 export function hashPassword(pw: string) {
   return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
@@ -1482,6 +1506,11 @@ export interface IStorage {
   getHostMessages(eventId: number, limit?: number): any[];
   createHostMessage(data: InsertHostMessage): HostMessage;
   notifyAttendeesOfHostUpdate(eventId: number, hostUserId: number, eventTitle: string, body: string): number;
+  getEventHosts(eventId: number): any[];
+  isUserEventHost(eventId: number, userId: number): boolean;
+  setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
+  addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
+  replaceEventPrimaryHost(eventId: number, newUserId: number): void;
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
@@ -1583,6 +1612,7 @@ export const storage: IStorage = {
         }).where(eq(events.id, sub.eventId)).run();
         if (user) {
           db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, user.id)).run();
+          storage.setPrimaryEventHost(sub.eventId, user.id, null);
         }
       } else {
         db.insert(events).values({
@@ -1678,7 +1708,7 @@ export const storage: IStorage = {
         const target = String(req.proof || "").split(" — ")[0].trim();
         const nextOwner = storage.getUserByUsername(target) || storage.getUserByEmail(target);
         if (nextOwner) {
-          db.update(events).set({ claimedBy: nextOwner.username, isClaimable: false }).where(eq(events.id, req.eventId)).run();
+          storage.replaceEventPrimaryHost(req.eventId, nextOwner.id);
         }
       }
       if (req.type === "FLAG") {
@@ -1829,6 +1859,94 @@ export const storage: IStorage = {
       sent += 1;
     }
     return sent;
+  },
+  getEventHosts(eventId) {
+    ensureEventHostsSchema();
+    return sqlite.prepare(`
+      SELECT
+        eh.user_id AS userId,
+        eh.role,
+        u.username,
+        u.display_name AS displayName,
+        u.photo_url AS photoUrl,
+        u.avatar_choice AS avatarChoice,
+        u.avatar_ring AS avatarRing
+      FROM event_hosts eh
+      LEFT JOIN users u ON u.id = eh.user_id
+      WHERE eh.event_id = ?
+      ORDER BY CASE eh.role WHEN 'PRIMARY' THEN 0 ELSE 1 END, eh.created_at ASC
+    `).all(eventId) as any[];
+  },
+  isUserEventHost(eventId, userId) {
+    ensureEventHostsSchema();
+    const row = sqlite.prepare(`
+      SELECT 1 AS ok FROM event_hosts WHERE event_id = ? AND user_id = ? LIMIT 1
+    `).get(eventId, userId) as { ok: number } | undefined;
+    if (row?.ok) return true;
+    const evt = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (!evt?.claimedBy) return false;
+    const user = db.select().from(users).where(eq(users.id, userId)).get();
+    return Boolean(user && user.username === evt.claimedBy);
+  },
+  setPrimaryEventHost(eventId, userId, addedByUserId) {
+    ensureEventHostsSchema();
+    const user = db.select().from(users).where(eq(users.id, userId)).get();
+    if (!user) return;
+    sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ? AND role = 'PRIMARY'`).run(eventId);
+    const existing = sqlite.prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`).get(eventId, userId);
+    if (existing) {
+      sqlite.prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`).run(eventId, userId);
+    } else {
+      db.insert(eventHosts).values({
+        eventId,
+        userId,
+        role: "PRIMARY",
+        addedByUserId: addedByUserId ?? null,
+        createdAt: new Date().toISOString(),
+      } as any).run();
+    }
+    db.update(events).set({ claimedBy: user.username, isClaimable: false }).where(eq(events.id, eventId)).run();
+  },
+  replaceEventPrimaryHost(eventId, newUserId) {
+    sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ?`).run(eventId);
+    storage.setPrimaryEventHost(eventId, newUserId, null);
+  },
+  addEventCoHost(eventId, inviterUserId, username, email) {
+    ensureEventHostsSchema();
+    if (!storage.isUserEventHost(eventId, inviterUserId)) {
+      return { error: "Only event hosts can add co-hosts" };
+    }
+    const countRow = sqlite.prepare(`SELECT COUNT(*) AS count FROM event_hosts WHERE event_id = ?`).get(eventId) as { count: number };
+    if (countRow.count >= MAX_EVENT_HOSTS) {
+      return { error: `Maximum ${MAX_EVENT_HOSTS} hosts per event` };
+    }
+    const uname = username.trim();
+    const em = email.trim().toLowerCase();
+    if (!uname || !em) return { error: "Username and email required" };
+    const target = storage.getUserByUsername(uname);
+    if (!target) return { error: "No account found with that username" };
+    if ((target.email || "").trim().toLowerCase() !== em) {
+      return { error: "Email does not match that username" };
+    }
+    if (storage.isUserEventHost(eventId, target.id)) {
+      return { error: "That person is already a host for this event" };
+    }
+    db.insert(eventHosts).values({
+      eventId,
+      userId: target.id,
+      role: "COHOST",
+      addedByUserId: inviterUserId,
+      createdAt: new Date().toISOString(),
+    } as any).run();
+    storage.sendMessage(
+      inviterUserId,
+      target.id,
+      `You're now a co-host`,
+      `You were added as a co-host for an event. Check your dashboard for host tools.`,
+      { contextType: "EVENT_HOST", contextId: eventId, contextLabel: db.select().from(events).where(eq(events.id, eventId)).get()?.title || "Event" },
+    );
+    const host = storage.getEventHosts(eventId).find((h: any) => h.userId === target.id);
+    return { host };
   },
   // Messages
   getInbox(userId) {
@@ -2082,6 +2200,22 @@ export const storage: IStorage = {
   },
 };
 
+try {
+  const claimedRows = sqlite.prepare(`
+    SELECT id, claimed_by AS claimedBy
+    FROM events
+    WHERE claimed_by IS NOT NULL AND TRIM(claimed_by) != ''
+  `).all() as { id: number; claimedBy: string }[];
+  for (const row of claimedRows) {
+    const countRow = sqlite.prepare(`SELECT COUNT(*) AS count FROM event_hosts WHERE event_id = ?`).get(row.id) as { count: number };
+    if (countRow.count > 0) continue;
+    const user = storage.getUserByUsername(row.claimedBy) || storage.getUserByEmail(row.claimedBy);
+    if (user) storage.setPrimaryEventHost(row.id, user.id, null);
+  }
+} catch (e) {
+  console.error("[event_hosts] backfill failed:", e);
+}
+
 const PERSISTENCE_TABLES = [
   "users",
   "messages",
@@ -2093,6 +2227,7 @@ const PERSISTENCE_TABLES = [
   "attendances",
   "missed_connections",
   "host_messages",
+  "event_hosts",
   "moderation_requests",
   "feedback_reports",
   "express_sessions",

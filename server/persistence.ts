@@ -43,12 +43,14 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
   {
     id: "event_board",
     label: "Claimed event edits & host messages",
-    tables: ["events", "host_messages"],
+    tables: ["events", "host_messages", "event_hosts"],
     uploadRoutes: ["/api/upload/poster"],
     apiRoutes: [
       "PUT /api/events/:id/edit",
       "GET /api/events/:id/host-messages",
       "POST /api/events/:id/host-messages",
+      "GET /api/events/:id/hosts",
+      "POST /api/events/:id/hosts",
     ],
   },
   {

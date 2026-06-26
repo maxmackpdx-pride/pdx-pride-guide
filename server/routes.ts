@@ -335,10 +335,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ─── CLAIMED EVENT EDIT (owner only) ──────────────────────────────────────
   // Returns events claimed by the logged-in user
   app.get("/api/events/mine/claimed", requireAuth, (req, res) => {
-    const username = storage.getUserById(req.session.userId!)?.username;
-    if (!username) return res.status(404).json({ error: "User not found" });
+    const userId = req.session.userId!;
+    if (!storage.getUserById(userId)) return res.status(404).json({ error: "User not found" });
     const all = storage.getEvents({});
-    const mine = all.filter(e => e.claimedBy === username).map(evt => ({
+    const mine = all.filter(e => storage.isUserEventHost(e.id, userId)).map(evt => ({
       ...evt,
       posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
     }));
@@ -361,7 +361,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const user = storage.getUserById(req.session.userId!);
-    if (!user || evt.claimedBy !== user.username) return res.status(403).json({ error: "Not your event" });
+    if (!user || !storage.isUserEventHost(evt.id, user.id)) return res.status(403).json({ error: "Not your event" });
     const allowed = [
       "title", "description", "venueName", "address", "neighborhood",
       "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
@@ -951,6 +951,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  app.get("/api/events/:id/hosts", (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    res.json(storage.getEventHosts(evt.id));
+  });
+
+  app.post("/api/events/:id/hosts", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    const username = String(req.body.username || "").trim();
+    const email = String(req.body.email || "").trim();
+    const result = storage.addEventCoHost(evt.id, req.session.userId!, username, email);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result.host);
+  });
+
   app.get("/api/events/:id/host-messages", (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
@@ -961,7 +977,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const user = storage.getUserById(req.session.userId!);
-    if (!user || evt.claimedBy !== user.username) {
+    if (!user || !storage.isUserEventHost(evt.id, user.id)) {
       return res.status(403).json({ error: "Only the event host can post updates" });
     }
     const body = String(req.body.body || "").trim().slice(0, 1000);
@@ -975,7 +991,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const user = storage.getUserById(req.session.userId!);
-    if (!user || evt.claimedBy !== user.username) {
+    if (!user || !storage.isUserEventHost(evt.id, user.id)) {
       return res.status(403).json({ error: "Only the current host can transfer this event" });
     }
     const target = String(req.body.target || "").trim();
@@ -995,8 +1011,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    if (!evt.claimedBy) return res.status(400).json({ error: "NO_HOST", ticketUrl: evt.ticketUrl });
-    const host = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
+    const hosts = storage.getEventHosts(evt.id);
+    const primary = hosts.find((h: any) => h.role === "PRIMARY") || hosts[0];
+    let host = primary?.userId ? storage.getUserById(primary.userId) : undefined;
+    if (!host && evt.claimedBy) {
+      host = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
+    }
     if (!host) return res.status(400).json({ error: "NO_HOST", ticketUrl: evt.ticketUrl });
     if (host.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();

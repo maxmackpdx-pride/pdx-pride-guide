@@ -1,5 +1,9 @@
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import ImageUploader from "@/components/ImageUploader";
 import EventTypeTag from "@/components/EventTypeTag";
+import UserAvatar from "@/components/UserAvatar";
+import { useToast } from "@/hooks/use-toast";
 import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
@@ -28,6 +32,34 @@ export function DashboardEventEditForm({
   saving: boolean;
   posting: boolean;
 }) {
+  const { toast } = useToast();
+  const [coHostForm, setCoHostForm] = useState({ username: "", email: "" });
+
+  const { data: eventHosts = [], refetch: refetchHosts } = useQuery<any[]>({
+    queryKey: ["/api/events", editingEvent.id, "hosts"],
+    queryFn: () => fetch(`/api/events/${editingEvent.id}/hosts`).then(r => r.ok ? r.json() : []),
+  });
+
+  const addCoHostMutation = useMutation({
+    mutationFn: async (data: { username: string; email: string }) => {
+      const res = await fetch(`/api/events/${editingEvent.id}/hosts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Could not add co-host");
+      return payload;
+    },
+    onSuccess: () => {
+      toast({ title: "Co-host added" });
+      setCoHostForm({ username: "", email: "" });
+      refetchHosts();
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
   const toggleType = (t: string) => setEventForm((f: any) => ({
     ...f,
     eventTypes: f.eventTypes.includes(t) ? f.eventTypes.filter((x: string) => x !== t) : [...f.eventTypes, t],
@@ -130,6 +162,57 @@ export function DashboardEventEditForm({
             <EventTypeTag label="NUDITY OK" interactive active={!!eventForm.nudityOk}
               onClick={() => setEventForm((f: any) => ({ ...f, nudityOk: !f.nudityOk }))} />
           </div>
+        </div>
+        <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+          <label style={labelStyle}>Event hosts ({eventHosts.length}/3)</label>
+          {eventHosts.length > 0 && (
+            <div className="event-hosts-row" style={{ marginTop: 10, marginBottom: 12 }}>
+              {eventHosts.map((host: any) => (
+                <div key={host.userId} className="event-host-card">
+                  <UserAvatar
+                    photoUrl={host.photoUrl}
+                    avatarChoice={host.avatarChoice}
+                    avatarRing={host.avatarRing}
+                    displayName={host.displayName}
+                    username={host.username}
+                    size={48}
+                  />
+                  <div className="event-host-meta">
+                    <span className="event-host-name">{host.displayName || host.username}</span>
+                    {host.role === "PRIMARY" && <span className="event-host-role">Primary</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {eventHosts.length < 3 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+              <input
+                style={inputStyle}
+                placeholder="Co-host username"
+                value={coHostForm.username}
+                onChange={e => setCoHostForm(f => ({ ...f, username: e.target.value }))}
+              />
+              <input
+                style={inputStyle}
+                type="email"
+                placeholder="Co-host email"
+                value={coHostForm.email}
+                onChange={e => setCoHostForm(f => ({ ...f, email: e.target.value }))}
+              />
+            </div>
+          )}
+          {eventHosts.length < 3 && (
+            <button
+              type="button"
+              className="dash-btn dash-btn-lime"
+              disabled={addCoHostMutation.isPending || !coHostForm.username.trim() || !coHostForm.email.trim()}
+              onClick={() => addCoHostMutation.mutate(coHostForm)}
+              style={{ marginBottom: 16, opacity: !coHostForm.username.trim() || !coHostForm.email.trim() ? 0.5 : 1 }}
+            >
+              {addCoHostMutation.isPending ? "Adding..." : "Add co-host →"}
+            </button>
+          )}
         </div>
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
           <label style={labelStyle}>Post host update</label>

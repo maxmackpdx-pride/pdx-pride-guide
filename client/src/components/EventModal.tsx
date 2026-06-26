@@ -9,6 +9,17 @@ import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "./EventTypeTag";
 import AttendanceCluster from "./AttendanceCluster";
 import AuthModal from "./AuthModal";
+import UserAvatar from "./UserAvatar";
+
+type EventHostProfile = {
+  userId: number;
+  username?: string;
+  displayName?: string | null;
+  photoUrl?: string | null;
+  avatarChoice?: number;
+  avatarRing?: string | null;
+  role: string;
+};
 
 const DAY_COLORS: Record<string, string> = {
   WED: "#CCFF00", THU: "#00FFFF", FRI: "#FF00CC", SAT: "#FF6600", SUN: "#FF2400"
@@ -28,6 +39,13 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   const [showAuth, setShowAuth] = useState(false);
   const [hostDrawer, setHostDrawer] = useState<"closed" | "compose" | "noHost">("closed");
   const [hostMessage, setHostMessage] = useState("");
+  const [coHostForm, setCoHostForm] = useState({ username: "", email: "" });
+  const [showAddCoHost, setShowAddCoHost] = useState(false);
+
+  const { data: eventHosts = [], refetch: refetchHosts } = useQuery<EventHostProfile[]>({
+    queryKey: ["/api/events", event.id, "hosts"],
+    queryFn: () => fetch(`/api/events/${event.id}/hosts`).then(r => r.ok ? r.json() : []),
+  });
 
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const types = JSON.parse(event.eventTypes || "[]") as string[];
@@ -112,7 +130,31 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     onError: () => toast({ title: "Could not request transfer", variant: "destructive" }),
   });
 
-  const isHost = user?.username === event.claimedBy;
+  const isHost = Boolean(user && eventHosts.some(h => h.userId === user.id));
+  const canAddCoHost = isHost && eventHosts.length < 3;
+
+  const addCoHostMutation = useMutation({
+    mutationFn: async (data: { username: string; email: string }) => {
+      const res = await fetch(`/api/events/${event.id}/hosts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Could not add co-host");
+      return payload;
+    },
+    onSuccess: () => {
+      toast({ title: "Co-host added", description: "They can help manage this event from their dashboard." });
+      setCoHostForm({ username: "", email: "" });
+      setShowAddCoHost(false);
+      refetchHosts();
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not add co-host", description: err.message, variant: "destructive" });
+    },
+  });
 
   const openModMode = (mode: ModerationMode) => {
     if (!user) {
@@ -209,6 +251,99 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
           <div style={{ color: "#CCFF00", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9rem", marginBottom: 16 }}>
             {event.venueName}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
           </div>
+
+          {/* Hosts */}
+          {eventHosts.length > 0 && (
+            <div className="event-hosts-panel" style={{ marginBottom: 20 }}>
+              <div className="display event-hosts-label" style={{ fontSize: "0.72rem", color: dayColor, letterSpacing: "0.1em", marginBottom: 12 }}>
+                {eventHosts.length === 1 ? "HOST" : "HOSTS"}
+              </div>
+              <div className="event-hosts-row">
+                {eventHosts.map(host => (
+                  <div key={host.userId} className="event-host-card">
+                    <UserAvatar
+                      photoUrl={host.photoUrl}
+                      avatarChoice={host.avatarChoice}
+                      avatarRing={host.avatarRing}
+                      displayName={host.displayName}
+                      username={host.username}
+                      size={56}
+                    />
+                    <div className="event-host-meta">
+                      <span className="event-host-name">{host.displayName || host.username}</span>
+                      {host.role === "PRIMARY" && (
+                        <span className="event-host-role">Primary</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {canAddCoHost && (
+                <div className="event-cohost-add" style={{ marginTop: 14 }}>
+                  {!showAddCoHost ? (
+                    <button
+                      type="button"
+                      onClick={() => user ? setShowAddCoHost(true) : setShowAuth(true)}
+                      className="display"
+                      style={{
+                        background: "none", border: "1px solid rgba(204,255,0,0.45)", color: "#CCFF00",
+                        fontSize: "0.68rem", padding: "6px 12px", cursor: "pointer", letterSpacing: "0.08em",
+                      }}
+                    >
+                      + ADD CO-HOST ({eventHosts.length}/3)
+                    </button>
+                  ) : (
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault();
+                        addCoHostMutation.mutate(coHostForm);
+                      }}
+                      style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                    >
+                      <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-meta)" }}>
+                        Add a verified organizer by username and email (max 3 hosts).
+                      </p>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        <input
+                          type="text"
+                          placeholder="Username"
+                          value={coHostForm.username}
+                          onChange={e => setCoHostForm(f => ({ ...f, username: e.target.value }))}
+                          required
+                          style={{ padding: "8px 10px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email"
+                          value={coHostForm.email}
+                          onChange={e => setCoHostForm(f => ({ ...f, email: e.target.value }))}
+                          required
+                          style={{ padding: "8px 10px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
+                        />
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          type="submit"
+                          disabled={addCoHostMutation.isPending || !coHostForm.username.trim() || !coHostForm.email.trim()}
+                          className="display"
+                          style={{
+                            padding: "6px 14px", border: "1px solid #CCFF00", background: "transparent",
+                            color: "#CCFF00", fontSize: "0.68rem", cursor: "pointer",
+                            opacity: addCoHostMutation.isPending ? 0.5 : 1,
+                          }}
+                        >
+                          {addCoHostMutation.isPending ? "ADDING..." : "ADD CO-HOST"}
+                        </button>
+                        <button type="button" onClick={() => setShowAddCoHost(false)} style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer" }}>
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Time block */}
           <div style={{ background: "#111", padding: "14px 16px", marginBottom: 20, borderLeft: `3px solid ${dayColor}` }}>

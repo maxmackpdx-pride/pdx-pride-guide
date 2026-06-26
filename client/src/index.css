@@ -1013,6 +1013,50 @@ body::before {
   background: linear-gradient(180deg, transparent, rgba(204, 255, 0, 0.06) 40%, transparent);
 }
 
+.event-hosts-panel {
+  padding: 14px 16px;
+  background: #080808;
+  border: 1px solid #1f1f1f;
+}
+
+.event-hosts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.event-host-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.event-host-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.event-host-name {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.event-host-role {
+  font-family: var(--font-board-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neon-yellow);
+}
+
 @keyframes event-ticker-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }

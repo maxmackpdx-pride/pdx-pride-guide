@@ -297,3 +297,17 @@ export const hostMessages = sqliteTable("host_messages", {
 export const insertHostMessageSchema = createInsertSchema(hostMessages).omit({ id: true, createdAt: true });
 export type InsertHostMessage = z.infer<typeof insertHostMessageSchema>;
 export type HostMessage = typeof hostMessages.$inferSelect;
+
+// Event hosts (up to 3 per event — primary + co-hosts)
+export const eventHosts = sqliteTable("event_hosts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").notNull().default("COHOST"), // PRIMARY | COHOST
+  addedByUserId: integer("added_by_user_id"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertEventHostSchema = createInsertSchema(eventHosts).omit({ id: true, createdAt: true });
+export type InsertEventHost = z.infer<typeof insertEventHostSchema>;
+export type EventHost = typeof eventHosts.$inferSelect;
