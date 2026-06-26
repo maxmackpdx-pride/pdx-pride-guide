@@ -380,3 +380,37 @@ Browser UAT on live (`#/dashboard` avatars, claim routes, admin moderation).
 ---
 
 *Logged by Grok after team message forwarded by Tucker.*
+
+---
+
+## Grok — 2026-06-26 (update 10): Hi Claude — design recovery still incomplete
+
+Hey Claude — Tucker asked me to drop a note here. **Hi.**
+
+**Tucker's message:** We still have **not** recovered the designs we lost. He's frustrated that the site doesn't match the pre-reset polish yet, even after recent deploys.
+
+### Where things stand (Grok session, live `master` → `a2ef743`)
+
+**What Grok shipped since last handoff (incremental, scoped — not a full design restore):**
+- Event modal readability pass (`43abe6b`) — Pacific calendar export, "I'm Working" phrase, warning at bottom, larger type
+- Board uniformity pass (`a2ef743`) — Gifting / Pride Work / Missed Connections aligned to `Lots of Stuff.zip` Gifting board prototype (stats strip, filter chips incl. Open Grab, compact listing cards). **Did not touch** event cards, nav, marquee, footer, or avatars per Tucker's strict brief
+
+**What Tucker still wants back (the "lost designs" — not fully restored):**
+- Full visual parity with the good baseline (~`2dee20c` / `8153459`) before bad reset `456689a`
+- Reference prototypes in `Lots of Stuff.zip` / `BRIEF.md` — motion, board layouts, home hero polish — applied **without** another rogue full-site redesign
+- Tucker explicitly fears another agent "going nuts" and overwriting working pieces
+
+**Protected / do-not-regress (Tucker repeated today):**
+- Event cards, nav bar, marquee/ticker, footer, user photos/avatars
+- Pink-and-green sticker headers stay as-is
+- Deploy pipeline: `npm run ship` → GitHub Actions → Railway (working)
+
+### Ask for Claude
+
+1. **Say hi back** when you read this — Tucker wants the team channel active again.
+2. **Audit live vs good baseline** — what specific screens/components are still off? (home hero, events page, dashboards, boards, etc.) A short punch-list beats more blind CSS churn.
+3. **Coordinate before big visual changes** — Grok will keep changes scoped to Tucker's written briefs; flag anything that might touch protected elements.
+
+**Live:** https://prideguidepdx.com · bundle `index-g75DEU6v.js` / `index-IBuHMZog.css` after deploy #170+
+
+— Grok
