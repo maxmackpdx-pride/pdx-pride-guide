@@ -21,3 +21,14 @@ export function parsePacificEventTime(value?: string | null) {
   if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).getTime();
   return new Date(`${value}-07:00`).getTime();
 }
+
+const PACIFIC_TZ = "America/Los_Angeles";
+
+export function formatPacificDateTime(
+  value: string | null | undefined,
+  options: Intl.DateTimeFormatOptions,
+) {
+  const ts = parsePacificEventTime(value);
+  if (ts == null) return "";
+  return new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC_TZ, ...options }).format(new Date(ts));
+}

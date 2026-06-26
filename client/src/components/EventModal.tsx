@@ -13,6 +13,7 @@ import AuthModal from "./AuthModal";
 import UserAvatar from "./UserAvatar";
 import EventTalentPanel from "./EventTalentPanel";
 import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from "@/lib/eventLinks";
+import { formatPacificDateTime } from "@/lib/countdown";
 
 type EventHostProfile = {
   userId: number;
@@ -32,6 +33,13 @@ type ModerationMode = null | "claim" | "remove" | "flag" | "transfer";
 
 const claimEvent = (eventId: number) => {
   window.location.hash = `/submit/claim/${eventId}`;
+};
+
+const modAccent: Record<Exclude<ModerationMode, null>, string> = {
+  claim: "#00FFFF",
+  remove: "#888",
+  flag: "#FF6600",
+  transfer: "#CCFF00",
 };
 
 export default function EventModal({ event, onClose }: { event: Event; onClose: () => void }) {
@@ -67,10 +75,10 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     queryFn: () => fetch(`/api/events/${event.id}/host-messages`).then(r => r.ok ? r.json() : []),
   });
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
-  const startTime = new Date(event.dateStart).toLocaleString([], {
-    weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+  const startTime = formatPacificDateTime(event.dateStart, {
+    weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
-  const endTime = new Date(event.dateEnd).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const endTime = formatPacificDateTime(event.dateEnd, { hour: "2-digit", minute: "2-digit" });
 
   const modMutation = useMutation({
     mutationFn: (data: { type: string; eventId: number; eventTitle: string; requesterName: string; requesterEmail: string; proof: string }) =>
@@ -184,6 +192,8 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     });
   };
 
+  const modColor = modMode ? modAccent[modMode] : "#888";
+
   return (
     <div className="event-modal-overlay" onClick={onClose}>
       <div className="event-modal" onClick={e => e.stopPropagation()} data-testid="event-modal">
@@ -243,11 +253,10 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             <p className="event-modal__description">{event.description}</p>
           )}
 
-          {/* Hosts */}
           {eventHosts.length > 0 && (
-            <div className="event-hosts-panel" style={{ marginBottom: 20 }}>
-              <div className="display event-hosts-label" style={{ fontSize: "0.72rem", color: dayColor, letterSpacing: "0.1em", marginBottom: 12 }}>
-                {eventHosts.length === 1 ? "HOST" : "HOSTS"}
+            <div className="event-modal__section event-hosts-panel" style={{ "--section-accent": dayColor } as React.CSSProperties}>
+              <div className="event-modal__section-label event-hosts-label">
+                {eventHosts.length === 1 ? "Host" : "Hosts"}
               </div>
               <div className="event-hosts-row">
                 {eventHosts.map(host => (
@@ -270,38 +279,34 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                 ))}
               </div>
               {canAddCoHost && (
-                <div className="event-cohost-add" style={{ marginTop: 14 }}>
+                <div className="event-modal__cohost">
                   {!showAddCoHost ? (
                     <button
                       type="button"
                       onClick={() => user ? setShowAddCoHost(true) : setShowAuth(true)}
-                      className="display"
-                      style={{
-                        background: "none", border: "1px solid rgba(204,255,0,0.45)", color: "#CCFF00",
-                        fontSize: "0.68rem", padding: "6px 12px", cursor: "pointer", letterSpacing: "0.08em",
-                      }}
+                      className="event-modal__btn-outline"
                     >
-                      + ADD CO-HOST ({eventHosts.length}/3)
+                      + Add co-host ({eventHosts.length}/3)
                     </button>
                   ) : (
                     <form
+                      className="event-modal__cohost-form"
                       onSubmit={e => {
                         e.preventDefault();
                         addCoHostMutation.mutate(coHostForm);
                       }}
-                      style={{ display: "flex", flexDirection: "column", gap: 8 }}
                     >
-                      <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-meta)" }}>
+                      <p className="event-modal__cohost-hint">
                         Add a verified organizer by username and email (max 3 hosts).
                       </p>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <div className="event-modal__field-row">
                         <input
                           type="text"
                           placeholder="Username"
                           value={coHostForm.username}
                           onChange={e => setCoHostForm(f => ({ ...f, username: e.target.value }))}
                           required
-                          style={{ padding: "8px 10px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
+                          className="event-modal__input"
                         />
                         <input
                           type="email"
@@ -309,23 +314,18 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                           value={coHostForm.email}
                           onChange={e => setCoHostForm(f => ({ ...f, email: e.target.value }))}
                           required
-                          style={{ padding: "8px 10px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
+                          className="event-modal__input"
                         />
                       </div>
-                      <div style={{ display: "flex", gap: 8 }}>
+                      <div className="event-modal__inline-actions">
                         <button
                           type="submit"
                           disabled={addCoHostMutation.isPending || !coHostForm.username.trim() || !coHostForm.email.trim()}
-                          className="display"
-                          style={{
-                            padding: "6px 14px", border: "1px solid #CCFF00", background: "transparent",
-                            color: "#CCFF00", fontSize: "0.68rem", cursor: "pointer",
-                            opacity: addCoHostMutation.isPending ? 0.5 : 1,
-                          }}
+                          className="event-modal__btn-outline event-modal__btn-outline--accent"
                         >
-                          {addCoHostMutation.isPending ? "ADDING..." : "ADD CO-HOST"}
+                          {addCoHostMutation.isPending ? "Adding…" : "Add co-host"}
                         </button>
-                        <button type="button" onClick={() => setShowAddCoHost(false)} style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer" }}>
+                        <button type="button" onClick={() => setShowAddCoHost(false)} className="event-modal__btn-ghost">
                           Cancel
                         </button>
                       </div>
@@ -344,42 +344,32 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             isClaimable={event.isClaimable}
           />
 
-          {/* Latest from host */}
-          <div style={{
-            marginBottom: 20,
-            border: `2px solid ${hostMessages.length > 0 ? dayColor : "#222"}`,
-            background: "#080808",
-            padding: "14px 16px",
-          }}>
-            <div className="display" style={{ fontSize: "0.78rem", color: hostMessages.length > 0 ? dayColor : "#555", letterSpacing: "0.08em", marginBottom: 10 }}>
-              LATEST FROM HOST
-            </div>
+          <div
+            className="event-modal__section event-modal__host-updates"
+            style={{ "--section-accent": hostMessages.length > 0 ? dayColor : "#222" } as React.CSSProperties}
+          >
+            <div className="event-modal__section-label">Latest from host</div>
             {hostMessages.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="event-modal__host-messages">
                 {hostMessages.map(msg => (
-                  <div key={msg.id} style={{ borderLeft: `3px solid ${dayColor}`, paddingLeft: 12 }}>
-                    <div style={{ fontSize: "0.88rem", color: "#ddd", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.body}</div>
-                    <div style={{ fontSize: "0.7rem", color: "var(--text-meta)", marginTop: 6 }}>
-                      {msg.displayName || msg.username || "Host"} · {new Date(msg.createdAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  <div key={msg.id} className="event-modal__host-message" style={{ borderLeftColor: dayColor }}>
+                    <div className="event-modal__host-message-body">{msg.body}</div>
+                    <div className="event-modal__host-message-meta">
+                      {msg.displayName || msg.username || "Host"} · {formatPacificDateTime(msg.createdAt, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5 }}>
+              <p className="event-modal__host-updates-empty">
                 No host updates yet. Check back closer to the event — organizers post timing changes, door info, and last-minute notes here.
-              </div>
+              </p>
             )}
           </div>
 
-          {/* Action buttons */}
-          <div style={{
-            display: "flex", gap: 10, flexWrap: "wrap",
-            borderTop: "1px solid #1a1a1a", paddingTop: 20, marginBottom: 4,
-          }}>
+          <div className="event-modal__actions">
             {event.ticketUrl && (
-              <a href={event.ticketUrl} target="_blank" rel="noopener"
-                className="btn-neon solid" style={{ fontSize: "0.8rem", padding: "8px 16px" }}>
+              <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
                 Get Tickets →
               </a>
             )}
@@ -388,8 +378,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                 type="button"
                 data-testid="button-add-to-calendar"
                 onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
-                className="btn-neon"
-                style={{ fontSize: "0.8rem", padding: "8px 16px" }}
+                className="btn-neon event-modal__action-btn"
               >
                 Add to Calendar
               </button>
@@ -415,8 +404,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             <button
               type="button"
               onClick={() => user ? setHostDrawer("compose") : setShowAuth(true)}
-              className="btn-neon"
-              style={{ fontSize: "0.8rem", padding: "8px 16px" }}
+              className="btn-neon event-modal__action-btn"
             >
               Message the Host
             </button>
@@ -456,28 +444,25 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
           </section>
 
           {hostDrawer === "compose" && (
-            <div style={{ background: "#080808", border: "2px solid #00FFFF", padding: 16, marginTop: 16 }}>
-              <p className="display" style={{ color: "#00FFFF", fontSize: "0.95rem", marginBottom: 8 }}>
-                MESSAGE THE HOST
-              </p>
+            <div className="event-modal__drawer event-modal__drawer--compose">
+              <p className="event-modal__drawer-title">Message the host</p>
               <textarea
                 value={hostMessage}
                 onChange={e => setHostMessage(e.target.value)}
                 rows={4}
                 placeholder={`Ask about ${event.title}...`}
-                style={{ width: "100%", boxSizing: "border-box", background: "#000", color: "#fff", border: "1px solid #333", padding: 10, fontFamily: "var(--font-body)", resize: "vertical" }}
+                className="event-modal__textarea"
               />
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <div className="event-modal__inline-actions">
                 <button
                   type="button"
                   onClick={() => hostMutation.mutate(hostMessage)}
                   disabled={!hostMessage.trim() || hostMutation.isPending}
-                  className="display"
-                  style={{ background: "#00FFFF", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer", opacity: !hostMessage.trim() || hostMutation.isPending ? 0.55 : 1 }}
+                  className="event-modal__btn-solid event-modal__btn-solid--cyan"
                 >
-                  {hostMutation.isPending ? "SENDING..." : "SEND"}
+                  {hostMutation.isPending ? "Sending…" : "Send"}
                 </button>
-                <button type="button" onClick={() => setHostDrawer("closed")} style={{ background: "transparent", color: "var(--text-meta)", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
+                <button type="button" onClick={() => setHostDrawer("closed")} className="event-modal__btn-ghost">
                   Cancel
                 </button>
               </div>
@@ -485,95 +470,77 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
           )}
 
           {hostDrawer === "noHost" && (
-            <div style={{ background: "#080808", border: "2px solid #FF2400", padding: 16, marginTop: 16 }}>
-              <p className="display" style={{ color: "#FF2400", fontSize: "1rem", marginBottom: 8 }}>
-                NO HOST IS ATTACHED TO THIS EVENT YET
-              </p>
-              <p style={{ color: "#888", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 12 }}>
+            <div className="event-modal__drawer event-modal__drawer--alert">
+              <p className="event-modal__drawer-title event-modal__drawer-title--alert">No host is attached to this event yet</p>
+              <p className="event-modal__drawer-copy">
                 This event hasn't been claimed by an organizer. You may find contact info at the link below.
               </p>
               {event.ticketUrl && (
-                <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid" style={{ fontSize: "0.78rem", padding: "8px 14px" }}>
+                <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
                   Visit Event Link →
                 </a>
               )}
-              <button type="button" onClick={() => setHostDrawer("closed")} style={{ marginLeft: 8, background: "transparent", color: "var(--text-meta)", border: "1px solid #333", padding: "8px 12px", cursor: "pointer" }}>
+              <button type="button" onClick={() => setHostDrawer("closed")} className="event-modal__btn-ghost">
                 Close
               </button>
             </div>
           )}
 
-          {event.isClaimable && (
-            <div className="event-modal__warning">
-              <span className="event-modal__warning-label">Warning</span>
-              <p className="event-modal__warning-text">
-                This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
-                {hasPendingClaim ? " A claim is pending admin review." : ""}
-              </p>
-            </div>
-          )}
-
-          {/* Claim / Remove links */}
-          <div style={{
-            display: "flex", gap: 16, padding: "16px 0 24px",
-            borderTop: "1px solid #111", marginTop: 16,
-          }}>
+          <div className="event-modal__footer">
             {hasPendingClaim && (
-              <span style={{ color: "#FF00CC", fontSize: "0.75rem", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                Claim pending admin review
-              </span>
+              <span className="event-modal__footer-pending">Claim pending admin review</span>
             )}
             {!hasPendingClaim && event.isClaimable && (
               <button
                 data-testid="button-claim-event"
                 onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}
-                style={{ background: "none", border: "none", color: "#00FFFF", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+                className="event-modal__footer-link event-modal__footer-link--cyan"
               >
-                ↗ Request to Claim This Event
+                ↗ Request to claim this event
               </button>
             )}
             {modMode !== "remove" && (
               <button
                 data-testid="button-remove-event"
                 onClick={() => openModMode("remove")}
-                style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+                className="event-modal__footer-link"
               >
-                ↗ Request Removal
+                ↗ Request removal
               </button>
             )}
             {modMode !== "flag" && (
               <button
                 data-testid="button-flag-event"
                 onClick={() => openModMode("flag")}
-                style={{ background: "none", border: "none", color: "#FF6600", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+                className="event-modal__footer-link event-modal__footer-link--orange"
               >
-                ↗ Flag Data Error
+                ↗ Flag data error
               </button>
             )}
             {isHost && modMode !== "transfer" && (
               <button
                 data-testid="button-transfer-event"
                 onClick={() => openModMode("transfer")}
-                style={{ background: "none", border: "none", color: "#CCFF00", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+                className="event-modal__footer-link event-modal__footer-link--lime"
               >
-                ↗ Transfer Host
+                ↗ Transfer host
               </button>
             )}
           </div>
 
-          {/* Moderation form */}
           {modMode && (
             <div
               data-testid="form-moderation"
-              style={{ background: "#0a0a0a", border: `2px solid ${modMode === "claim" ? "#00FFFF" : "#333"}`, padding: "20px", marginBottom: 24 }}
+              className="event-modal__mod-form"
+              style={{ borderColor: modColor, "--mod-accent": modColor } as React.CSSProperties}
             >
-              <p className="display" style={{ fontSize: "1rem", color: modMode === "claim" ? "#00FFFF" : modMode === "flag" ? "#FF6600" : modMode === "transfer" ? "#CCFF00" : "#fff", marginBottom: 4 }}>
-                {modMode === "claim" && "REQUEST TO CLAIM THIS EVENT"}
-                {modMode === "remove" && "REQUEST REMOVAL"}
-                {modMode === "flag" && "FLAG A DATA ERROR"}
-                {modMode === "transfer" && "TRANSFER HOST TO SOMEONE ELSE"}
+              <p className="event-modal__mod-title">
+                {modMode === "claim" && "Request to claim this event"}
+                {modMode === "remove" && "Request removal"}
+                {modMode === "flag" && "Flag a data error"}
+                {modMode === "transfer" && "Transfer host to someone else"}
               </p>
-              <p style={{ fontSize: "0.78rem", color: "var(--text-meta)", marginBottom: 16, lineHeight: 1.5 }}>
+              <p className="event-modal__mod-lede">
                 {modMode === "claim" && "Tell us why you're the organizer. Include a link to your website, social, or any proof. An admin will verify and transfer ownership."}
                 {modMode === "remove" && "Tell us why this event should be removed. If you're the organizer or have a specific reason, explain below. An admin will review."}
                 {modMode === "flag" && "Wrong time, venue, link, or description? Tell us what's off. Admins use this to fix the listing — not to remove it."}
@@ -581,18 +548,18 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               </p>
               <form onSubmit={handleModSubmit}>
                 {modMode !== "transfer" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                  <div className="event-modal__field-row">
                     <input
                       data-testid="input-mod-name"
                       type="text" placeholder="Your name" value={modForm.name}
                       onChange={e => setModForm(f => ({ ...f, name: e.target.value }))}
-                      style={{ padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)" }}
+                      className="event-modal__input"
                     />
                     <input
                       data-testid="input-mod-email"
                       type="email" placeholder="Your email" value={modForm.email}
                       onChange={e => setModForm(f => ({ ...f, email: e.target.value }))}
-                      style={{ padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)" }}
+                      className="event-modal__input"
                     />
                   </div>
                 )}
@@ -602,7 +569,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                     placeholder="Optional note for admin"
                     value={modForm.name}
                     onChange={e => setModForm(f => ({ ...f, name: e.target.value }))}
-                    style={{ width: "100%", padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", marginBottom: 10, boxSizing: "border-box" }}
+                    className="event-modal__input event-modal__input--full"
                   />
                 )}
                 <textarea
@@ -616,34 +583,32 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                   value={modForm.proof}
                   onChange={e => setModForm(f => ({ ...f, proof: e.target.value }))}
                   rows={3}
-                  style={{ width: "100%", padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)", resize: "vertical", boxSizing: "border-box", marginBottom: 10 }}
+                  className="event-modal__textarea"
                 />
-                <div style={{ display: "flex", gap: 8 }}>
+                <div className="event-modal__inline-actions">
                   <button
                     type="submit"
                     data-testid="button-submit-mod"
                     disabled={modMutation.isPending || transferMutation.isPending}
-                    className="display"
-                    style={{
-                      padding: "8px 20px", border: "2px solid",
-                      borderColor: modMode === "claim" ? "#00FFFF" : modMode === "flag" ? "#FF6600" : modMode === "transfer" ? "#CCFF00" : "#888",
-                      background: "transparent",
-                      color: modMode === "claim" ? "#00FFFF" : modMode === "flag" ? "#FF6600" : modMode === "transfer" ? "#CCFF00" : "#888",
-                      fontSize: "0.82rem", cursor: "pointer", opacity: modMutation.isPending || transferMutation.isPending ? 0.5 : 1,
-                      letterSpacing: "0.05em", textTransform: "uppercase",
-                    }}
+                    className="event-modal__btn-outline event-modal__btn-outline--mod"
                   >
-                    {(modMutation.isPending || transferMutation.isPending) ? "SUBMITTING..." : "SUBMIT REQUEST"}
+                    {(modMutation.isPending || transferMutation.isPending) ? "Submitting…" : "Submit request"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setModMode(null)}
-                    style={{ padding: "8px 14px", background: "none", border: "1px solid #222", color: "#444", fontSize: "0.8rem", cursor: "pointer" }}
-                  >
+                  <button type="button" onClick={() => setModMode(null)} className="event-modal__btn-ghost">
                     Cancel
                   </button>
                 </div>
               </form>
+            </div>
+          )}
+
+          {event.isClaimable && (
+            <div className="event-modal__warning">
+              <span className="event-modal__warning-label">Warning</span>
+              <p className="event-modal__warning-text">
+                This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
+                {hasPendingClaim ? " A claim is pending admin review." : ""}
+              </p>
             </div>
           )}
         </div>

@@ -19,7 +19,7 @@ export const ATTENDANCE_PHRASES: AttendancePhraseDef[] = [
   { key: "ILL_BE_HERE", label: "I'll be there", color: "#19E3FF" },
   { key: "WANT_TO_CHECK_OUT", label: "Checking it out", color: "#FF00CC" },
   { key: "LOOKING_FOR_SOMEONE", label: "Looking for someone", color: "#A24BFF" },
-  { key: "WORKING_THIS", label: "Working this one", color: "#FF6600" },
+  { key: "WORKING_THIS", label: "I'm Working", color: "#FF6600" },
 ];
 
 export const ATTENDANCE_PHRASE_BY_KEY: Record<AttendancePhraseKey, AttendancePhraseDef> =
@@ -35,6 +35,7 @@ export function resolveAttendancePhrase(message: string): AttendancePhraseDef {
   const trimmed = (message || "").trim();
   const byKey = ATTENDANCE_PHRASE_BY_KEY[trimmed as AttendancePhraseKey];
   if (byKey) return byKey;
+  if (trimmed === "Working this one") return ATTENDANCE_PHRASE_BY_KEY.WORKING_THIS;
   const byLabel = ATTENDANCE_PHRASES.find(p => p.label === trimmed);
   if (byLabel) return byLabel;
   return { key: "HEY", label: trimmed || "Hey there", color: "#C8FA3C" };
