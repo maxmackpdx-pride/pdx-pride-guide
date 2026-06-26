@@ -155,7 +155,7 @@ export default function PrideWork() {
       <BoardStatsBar stats={stats} liveLabel="Queer work board · live" />
 
       <ScrollReveal>
-        <section id="how-it-works" className="gigs-how board-how board-how--inline">
+        <section id="how-it-works" className="gigs-how board-how">
           <div>
             <span className="board-sticker board-sticker--cyan">How it works</span>
             <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
