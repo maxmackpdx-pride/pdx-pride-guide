@@ -715,7 +715,7 @@ h2.display,
   font-weight: 900;
   font-size: 4.7rem;
   line-height: 0.82;
-  -webkit-text-stroke: 1px #000;
+  -webkit-text-stroke: 3px #000;
   paint-order: stroke fill;
   text-shadow:
     2px 2px 0 rgba(0, 0, 0, 0.92),
