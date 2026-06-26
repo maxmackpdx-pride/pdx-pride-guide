@@ -243,8 +243,8 @@ export default function Gifting() {
         {isLoading ? (
           <BoardLoadingState label="Loading gifting posts" />
         ) : isError ? (
-          <div className="board-empty" style={{ borderColor: "#FF00CC" }}>
-            <Gift size={40} style={{ color: "#FF00CC", margin: "0 auto" }} />
+          <div className="board-empty" style={{ borderColor: "#00FFFF" }}>
+            <Gift size={40} style={{ color: "#00FFFF", margin: "0 auto" }} />
             <p className="display section-heading" style={{ color: "#fff" }}>COULD NOT LOAD POSTS</p>
             <p className="board-copy-sm">
               {error instanceof Error ? error.message : "The gifting board API is unavailable right now."}

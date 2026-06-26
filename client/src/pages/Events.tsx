@@ -310,24 +310,25 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
         </button>
         {locateError && <span className="map-locate-error">{locateError}</span>}
 
-        {/* Expand / collapse button */}
-        <button
-          onClick={(event) => {
-            event.stopPropagation();
-            expanded ? onCollapse() : onExpand();
-          }}
-          data-testid={expanded ? "button-collapse-map" : "button-expand-map"}
-          title={expanded ? "Collapse map" : "Expand map"}
-          style={{
-            position: "absolute", top: 10, right: expanded ? 60 : 10, zIndex: 1001,
-            background: "#000", border: "1.5px solid #CCFF00", color: "#CCFF00",
-            padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
-            fontFamily: "var(--font-display)", fontSize: "0.6rem", letterSpacing: "0.08em",
-          }}
-        >
-          {expanded ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
-          {expanded ? "COLLAPSE" : "EXPAND"}
-        </button>
+        {variant !== "home" && (
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              expanded ? onCollapse() : onExpand();
+            }}
+            data-testid={expanded ? "button-collapse-map" : "button-expand-map"}
+            title={expanded ? "Collapse map" : "Expand map"}
+            style={{
+              position: "absolute", top: 10, right: expanded ? 60 : 10, zIndex: 1001,
+              background: "#000", border: "1.5px solid #CCFF00", color: "#CCFF00",
+              padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
+              fontFamily: "var(--font-display)", fontSize: "0.6rem", letterSpacing: "0.08em",
+            }}
+          >
+            {expanded ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+            {expanded ? "COLLAPSE" : "EXPAND"}
+          </button>
+        )}
 
         <div
           className={`map-legend${variant === "home" ? " map-legend--home" : ""}`}
@@ -489,8 +490,6 @@ export default function Events() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [mapExpanded, setMapExpanded] = useState(false);
-
   const openEvent = useCallback((event: Event) => {
     setSelectedEvent(event);
   }, []);
@@ -528,19 +527,11 @@ export default function Events() {
       <PageHero
         kicker="PRIDE WEEKEND 2026"
         titleLine1="EVENTS"
-        titleLine2="MAP & GUIDE"
+        titleLine2="GUIDE"
         accent="cyan"
-        lede="Every party, brunch, protest, and after-hours happening Thu–Sun. Filter by day, pin it on the map, and show up."
+        lede="Every party, brunch, protest, and after-hours happening Thu–Sun. Filter by day, search by vibe, and show up."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 42%"
-      />
-
-      <MapView
-        events={filtered}
-        expanded={mapExpanded}
-        onExpand={() => setMapExpanded(true)}
-        onCollapse={() => setMapExpanded(false)}
-        onSelect={openEvent}
       />
 
       {/* Filters + View Toggle */}
@@ -638,19 +629,6 @@ export default function Events() {
               title="List view"
             >
               <List size={13} />
-            </button>
-            {/* Map expand button in filter bar too */}
-            <button
-              data-testid="toggle-map-expand"
-              onClick={() => setMapExpanded(p => !p)}
-              style={{
-                padding: "4px 8px", background: mapExpanded ? "#CCFF00" : "transparent",
-                border: "none", cursor: "pointer", color: mapExpanded ? "#000" : "#555",
-                display: "flex", alignItems: "center",
-              }}
-              title="Toggle map size"
-            >
-              <MapPin size={13} />
             </button>
           </div>
         </div>

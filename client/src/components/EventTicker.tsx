@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 
 type EventTickerProps = {
   titles: string[];
+  direction?: "left" | "right";
+  className?: string;
 };
 
-export default function EventTicker({ titles }: EventTickerProps) {
+export default function EventTicker({ titles, direction = "left", className = "" }: EventTickerProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const items = [...titles, ...titles];
 
@@ -29,8 +31,13 @@ export default function EventTicker({ titles }: EventTickerProps) {
       const dt = Math.min((ts - lastTs) / 1000, 0.05);
       lastTs = ts;
       const half = measureHalf();
-      offset -= speed * dt;
-      if (offset <= -half) offset += half;
+      if (direction === "right") {
+        offset += speed * dt;
+        if (offset >= half) offset -= half;
+      } else {
+        offset -= speed * dt;
+        if (offset <= -half) offset += half;
+      }
       track.style.transform = `translate3d(${offset}px, 0, 0)`;
       rafId = window.requestAnimationFrame(tick);
     };
@@ -48,10 +55,10 @@ export default function EventTicker({ titles }: EventTickerProps) {
       ro.disconnect();
       track.style.transform = "";
     };
-  }, [titles]);
+  }, [titles, direction]);
 
   return (
-    <div className="event-ticker-window">
+    <div className={`event-ticker-window${className ? ` ${className}` : ""}`}>
       <div ref={trackRef} className="event-ticker-track">
         {items.map((title, index) => (
           <span className="event-ticker-item" key={`${title}-${index}`} title={title}>

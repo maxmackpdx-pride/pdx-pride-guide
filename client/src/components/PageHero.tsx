@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import HeroImageGlitch from "./HeroImageGlitch";
 
 export type PageHeroAccent = "lime" | "magenta" | "rainbow" | "cyan";
 
@@ -32,6 +33,7 @@ export default function PageHero({
         aria-hidden="true"
         style={{ backgroundImage: `url(${bgImage})`, backgroundPosition: bgPosition }}
       />
+      <HeroImageGlitch intensity="hero" className="page-hero__glitch" />
       <div className="page-hero__scrim" aria-hidden="true" />
       <div className="page-hero__grain" aria-hidden="true" />
       <div className="page-hero__inner">

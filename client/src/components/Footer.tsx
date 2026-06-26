@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import { FeedbackButton } from "./FeedbackForm";
 
@@ -50,6 +51,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="torn-divider full-bleed" style={{ marginBottom: 20 }} />
+        <img src={logoPath} alt="" className="footer-brand-logo" />
         <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
           <FeedbackButton />
         </div>

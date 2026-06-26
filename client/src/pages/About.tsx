@@ -22,7 +22,7 @@ export default function About() {
         <ScrollReveal>
           <section>
             <h2 className="display section-heading">
-              THE <span style={{ color: "#FF00CC" }}>MISSION</span>
+              THE <span style={{ color: "#00FFFF" }}>MISSION</span>
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
               {[
@@ -40,7 +40,7 @@ export default function About() {
                 },
                 {
                   icon: <Heart size={20} />,
-                  color: "#FF00CC",
+                  color: "#00FFFF",
                   title: "CONNECT PEOPLE",
                   text: "The gig board, the submit form, the claimable events — all of it is designed to help people find each other, not extract data.",
                 },
@@ -88,7 +88,7 @@ export default function About() {
               },
               {
                 num: "03",
-                color: "#FF00CC",
+                color: "#00FFFF",
                 title: "Claimable events can be owned",
                 text: "Some events are seeded by admins and marked as claimable. If you're the organizer, submit a claim and take ownership of your listing.",
               },
@@ -153,7 +153,7 @@ export default function About() {
                 background: "linear-gradient(135deg, #CCFF00 0%, transparent 70%)",
               }}
             />
-            <Heart size={28} className="mx-auto mb-4" style={{ color: "#FF00CC" }} />
+            <Heart size={28} className="mx-auto mb-4" style={{ color: "#00FFFF" }} />
             <h2 className="display section-heading" style={{ marginBottom: "1.15rem" }}>
               KEEP THIS GUIDE <span style={{ color: "#CCFF00" }}>ALIVE</span>
             </h2>

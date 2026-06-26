@@ -8,10 +8,19 @@ import EventModal from "@/components/EventModal";
 import EventTicker from "@/components/EventTicker";
 import HeroAurora from "@/components/HeroAurora";
 import HeroGlitchOverlay from "@/components/HeroGlitchOverlay";
+import HeroImageGlitch from "@/components/HeroImageGlitch";
 import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/home-hero-desktop.jpg";
+
+const PRIDE_SLOGANS = [
+  "Keep Portland queer",
+  "Trans joy is real",
+  "Your joy is a protest",
+  "Love louder",
+  "Show up for each other",
+];
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
@@ -84,7 +93,7 @@ function useHomeParallax() {
 
 export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [mapExpanded, setMapExpanded] = useState(false);
+
   const { heroRef, giftingRef } = useHomeParallax();
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -150,7 +159,7 @@ export default function Home() {
             >
               X
             </button>
-            <div className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", marginBottom: 14 }}>SOFTIE LAUNCH</div>
+            <div className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", marginBottom: 14 }}>SOFTIE LAUNCH</div>
             <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}>
               WELCOME
             </h2>
@@ -164,6 +173,10 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <section className="event-slogan-band" aria-label="Pride slogans">
+        <EventTicker titles={PRIDE_SLOGANS} direction="right" className="event-ticker-window--slogan" />
+      </section>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
@@ -244,7 +257,7 @@ export default function Home() {
                 </button>
               </Link>
               <Link href="/pride-work">
-                <button className="btn-neon home-hero-button" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>
+                <button className="btn-neon home-hero-button cyan">
                   PRIDE WORK →
                 </button>
               </Link>
@@ -264,24 +277,21 @@ export default function Home() {
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
           events={events}
-          expanded={mapExpanded}
-          onExpand={() => setMapExpanded(true)}
-          onCollapse={() => setMapExpanded(false)}
+          expanded={false}
+          onExpand={() => {}}
+          onCollapse={() => {}}
           onSelect={setSelectedEvent}
           variant="home"
         />
       </section>
 
-      <div className="section-slice-divider full-bleed" aria-hidden="true" />
-      <div className="section-fade-divider full-bleed" aria-hidden="true" />
-
       <section className="home-promo-stack">
-        <div className="torn-divider full-bleed" />
         <ScrollReveal>
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
+          <HeroImageGlitch intensity="panel" className="home-promo-glitch" />
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
-              <span className="board-sticker" style={{ color: "#FF00CC" }}>GIFT WITH PRIDE</span>
+              <span className="board-sticker" style={{ color: "#00FFFF" }}>GIFT WITH PRIDE</span>
               <h2 className="home-promo-title">
                 <span className="home-promo-title-line">GIFT WITH</span>
                 <span className="home-promo-accent home-promo-accent--rainbow">PRIDE</span>
@@ -299,6 +309,7 @@ export default function Home() {
         <div className="torn-divider full-bleed" />
         <ScrollReveal delay={120}>
         <article className="home-promo-panel home-gigs-panel">
+          <HeroImageGlitch intensity="panel" className="home-promo-glitch" />
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
               <span className="board-sticker" style={{ color: "#CCFF00" }}>PRIDE WORK</span>
