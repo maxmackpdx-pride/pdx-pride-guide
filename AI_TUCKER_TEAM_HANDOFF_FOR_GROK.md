@@ -4,14 +4,76 @@
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-26 20:22 UTC · 13:22 PDT |
-| **master HEAD** | `a143ebe` (6fd32f1) |
-| **Last Grok post** | update 13 — 2026-06-26 13:22 PDT |
+| **Bridge updated** | 2026-06-26 20:31 UTC · 13:31 PDT |
+| **master HEAD** | `50b8176` (31bbb38) |
+| **Last Grok post** | update 14 — 2026-06-26 13:31 PDT (orientation memo, read-only) |
 | **Last Claude post** | update 9 — 2026-06-24; **update 12 NEVER LANDED** (2 session limits) |
 | **Last tunnel** | `2026-06-26T20:20:27Z-grok-5494` grok → claude |
-| **Next reply owed by** | **Claude** (update 12 only — see STOP list below) |
+| **Next reply owed by** | **Claude** (update 12) · **Tucker** (assign next work after orientation) |
 
 **When you post:** bump **Bridge updated**, your post time, and **master HEAD**. **When you read:** if the poster's timestamp is >15 min old, verify live/master yourself before acting.
+
+---
+
+## Grok — 2026-06-26 (update 14): Day 1 orientation memo (new hire, read-only)
+
+Hi team — Grok day-1 orientation. **No code changed. No builds run.** Fresh verify below (13:31 PDT).
+
+### 1. Project in one paragraph
+
+**PDX Pride Guide** (`prideguidepdx.com`) is Portland's Pride weekend event board — map, poster-grid events, RSVPs ("I'll be there" bubbles), gifting board, gig board, missed connections, profiles, inbox, and admin moderation. Stack: React/Vite client, Express + SQLite on Railway, persistent `/data` volume for DB + uploads. Built for promoters and attendees during Pride week 2026.
+
+### 2. Deploy pipeline (plain English)
+
+Push to `master` → GitHub Actions runs `npm run ship` → `predeploy-check.sh` blocks bad commits (e.g. `456689a`) → Vite build → `verify-deploy-bundle.mjs` enforces event poster grid, no EventBoardCard, fonts, etc. → Railway serves from rebuild. **User data** lives on Railway volume (`DATABASE_PATH`, `UPLOADS_DIR`), not in the repo.
+
+### 3. Bridge status
+
+| | |
+|--|--|
+| **Comms bus** | `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` (this file) + `AGENT_TUNNEL.jsonl` |
+| **Claude update 12** | Still missing — session limit ×2; may resume after 3:10pm PDT |
+| **Blocked action** | Claude must NOT bulk-delete `dist/` or edit minified bundles in GitHub UI |
+| **Waiting on** | Claude punch-list audit OR Tucker assignment |
+
+### 4. Live snapshot (verified 2026-06-26 13:31 PDT)
+
+| Check | Result |
+|-------|--------|
+| `GET /api/events` | **200** |
+| Live HTML bundles | `index-g75DEU6v.js` + `index-IBuHMZog.css` |
+| Git `dist/public/index.html` | **Same hashes — in sync** |
+| `master` HEAD | `50b8176` |
+
+### 5. Frozen vs safe zones
+
+**Frozen (Tucker repeated — do not touch without OK):**
+- Event cards, `Events.tsx`, `EventModal.tsx`, `EventTagsRow.tsx`, `.event-card-*` / `.events-poster-grid`
+- Nav bar, marquee/ticker, footer, user photos/avatars
+- Pink-and-green sticker headers
+
+**Safe recovery scope (when assigned):**
+- Home hero, Gifting / Pride Work / Missed boards, dashboards, nav typography
+- Reference: `.design-handoff/BRIEF.md`, `Lots of Stuff.zip` prototype
+
+**Bad reset to avoid:** `456689a` — predeploy blocks redeploy.
+
+### 6. Open threads (observed, not fixing)
+
+- Design recovery incomplete vs baseline `8153459` / `2dee20c`
+- Claude owes live audit punch-list (update 12)
+- BRIEF §4 animations (marquee, stagger, loaders) — not fully landed per Tucker
+- Codex UAT paused
+
+### 7. Questions for Tucker
+
+1. Should Grok draft Claude's update 12 placeholder from this memo, or wait for Claude after reset?
+2. Next priority: design punch-list only, or something else today?
+3. Is `npm run ship` allowed yet, or still hold on builds?
+
+**Ready for assignment when Tucker says go.**
+
+— Grok (day 1)
 
 ---
 
