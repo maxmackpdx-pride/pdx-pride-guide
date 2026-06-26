@@ -7,6 +7,7 @@ import type { Event } from "@shared/schema";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import EventTypeTag, { EventTypeTagList } from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
+import AttendanceCluster from "../components/AttendanceCluster";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -511,8 +512,14 @@ export default function Events() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [attendanceEvent, setAttendanceEvent] = useState<Event | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mapExpanded, setMapExpanded] = useState(false);
+
+  const openEvent = useCallback((event: Event) => {
+    setAttendanceEvent(event);
+    setSelectedEvent(event);
+  }, []);
 
   const { data: events = [], isLoading, isError, error, refetch } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -539,6 +546,17 @@ export default function Events() {
     return true;
   }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
 
+  useEffect(() => {
+    if (filtered.length === 0) {
+      setAttendanceEvent(null);
+      return;
+    }
+    setAttendanceEvent(prev => {
+      if (prev && filtered.some(e => e.id === prev.id)) return prev;
+      return filtered[0];
+    });
+  }, [filtered]);
+
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
@@ -550,7 +568,7 @@ export default function Events() {
         expanded={mapExpanded}
         onExpand={() => setMapExpanded(true)}
         onCollapse={() => setMapExpanded(false)}
-        onSelect={setSelectedEvent}
+        onSelect={openEvent}
       />
 
       {/* Filters + View Toggle */}
@@ -722,15 +740,44 @@ export default function Events() {
         ) : viewMode === "grid" ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
             {filtered.map(e => (
-              <EventCard key={e.id} event={e} onClick={() => setSelectedEvent(e)} viewMode="grid" />
+              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="grid" />
             ))}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.map(e => (
-              <EventCard key={e.id} event={e} onClick={() => setSelectedEvent(e)} viewMode="list" />
+              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="list" />
             ))}
           </div>
+        )}
+
+        {attendanceEvent && !selectedEvent && filtered.length > 0 && (
+          <section
+            id="ill-be-there"
+            className="events-attendance-section"
+            data-testid="events-attendance-section"
+            style={{ marginTop: 48 }}
+          >
+            <div style={{ marginBottom: 4 }}>
+              <span
+                className="sticker"
+                style={{
+                  color: DAY_COLORS[attendanceEvent.dayOfWeek || ""] || "#CCFF00",
+                  borderColor: DAY_COLORS[attendanceEvent.dayOfWeek || ""] || "#CCFF00",
+                  fontSize: "0.58rem",
+                }}
+              >
+                {attendanceEvent.dayOfWeek}
+              </span>
+              <h2 className="display" style={{ fontSize: "1.15rem", color: "#fff", margin: "10px 0 4px", lineHeight: 1.05 }}>
+                {attendanceEvent.title}
+              </h2>
+              <p style={{ color: "var(--text-meta)", fontSize: "0.8rem", margin: 0 }}>
+                {attendanceEvent.venueName}
+              </p>
+            </div>
+            <AttendanceCluster eventId={attendanceEvent.id} />
+          </section>
         )}
 
         <div className="zine-callout" style={{

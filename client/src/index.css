@@ -2665,3 +2665,44 @@ footer a:hover { color: #00FFFF !important; }
   margin: 0 auto;
   padding: clamp(48px, 7vw, 84px) 24px;
 }
+
+/* ── Events "I'll be there": RSVP pop-in, badge pulse, mobile sheet, message panel ── */
+.attendance-pop-in {
+  animation: attendance-pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes attendance-pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes attendance-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.attendance-badge-pulse {
+  animation: attendance-badge-pulse 2.4s ease-out infinite;
+}
+
+@keyframes attendance-badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(204, 255, 0, 0); }
+}
+
+@keyframes attendance-panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-pop-in,
+  .attendance-badge-pulse {
+    animation: none;
+  }
+}
+
+.events-attendance-section {
+  scroll-margin-top: 88px;
+}
