@@ -114,6 +114,19 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
 
   const isHost = user?.username === event.claimedBy;
 
+  const openModMode = (mode: ModerationMode) => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    setModForm({
+      name: user.displayName || user.username,
+      email: user.email || "",
+      proof: "",
+    });
+    setModMode(mode);
+  };
+
   const handleModSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (modMode === "transfer") {
@@ -363,7 +376,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             {modMode !== "remove" && (
               <button
                 data-testid="button-remove-event"
-                onClick={() => setModMode("remove")}
+                onClick={() => openModMode("remove")}
                 style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
               >
                 ↗ Request Removal
@@ -372,7 +385,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             {modMode !== "flag" && (
               <button
                 data-testid="button-flag-event"
-                onClick={() => setModMode("flag")}
+                onClick={() => openModMode("flag")}
                 style={{ background: "none", border: "none", color: "#FF6600", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
               >
                 ↗ Flag Data Error
@@ -381,7 +394,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             {isHost && modMode !== "transfer" && (
               <button
                 data-testid="button-transfer-event"
-                onClick={() => setModMode("transfer")}
+                onClick={() => openModMode("transfer")}
                 style={{ background: "none", border: "none", color: "#CCFF00", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
               >
                 ↗ Transfer Host

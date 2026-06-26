@@ -30,7 +30,7 @@ export default function Dashboard() {
   const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
   const fetchMine = async (url: string) => {
-    const r = await fetch(url);
+    const r = await fetch(url, { credentials: "include" });
     if (!r.ok) throw new Error(`Could not load ${url}`);
     return r.json();
   };

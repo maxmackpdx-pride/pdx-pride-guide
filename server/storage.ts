@@ -1675,7 +1675,7 @@ export const storage: IStorage = {
         db.update(events).set({ status: "REMOVED" }).where(eq(events.id, req.eventId)).run();
       }
       if (req.type === "TRANSFER") {
-        const target = String(req.proof || "").trim();
+        const target = String(req.proof || "").split(" — ")[0].trim();
         const nextOwner = storage.getUserByUsername(target) || storage.getUserByEmail(target);
         if (nextOwner) {
           db.update(events).set({ claimedBy: nextOwner.username, isClaimable: false }).where(eq(events.id, req.eventId)).run();
@@ -1699,7 +1699,19 @@ export const storage: IStorage = {
       `).all(eventId) as any[]);  },
   getAttendancesByUser(userId) {
     return sqlite.prepare(`
-      SELECT a.*, e.title AS eventTitle, e.venue_name AS venueName, e.date_start AS dateStart
+      SELECT
+        a.id,
+        a.event_id AS eventId,
+        a.user_id AS userId,
+        a.handle,
+        a.message,
+        a.avatar_seed AS avatarSeed,
+        a.photo_url AS photoUrl,
+        a.is_active AS isActive,
+        a.created_at AS createdAt,
+        e.title AS eventTitle,
+        e.venue_name AS venueName,
+        e.date_start AS dateStart
       FROM attendances a
       LEFT JOIN events e ON e.id = a.event_id
       WHERE a.user_id = ? AND a.is_active = 1

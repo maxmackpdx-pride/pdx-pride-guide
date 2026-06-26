@@ -168,14 +168,14 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
 
-  const { data: checkIns = [] } = useQuery<Array<{ eventId: number }>>({
+  const { data: checkIns = [] } = useQuery<Array<{ eventId?: number; event_id?: number }>>({
     queryKey: ["/api/events/mine/check-ins"],
-    queryFn: () => fetch("/api/events/mine/check-ins").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetch("/api/events/mine/check-ins", { credentials: "include" }).then(r => r.ok ? r.json() : []),
     enabled: !!user,
   });
 
   const rsvpEventIds = useMemo(
-    () => new Set(checkIns.map(row => row.eventId)),
+    () => new Set(checkIns.map(row => row.eventId ?? row.event_id).filter((id): id is number => typeof id === "number")),
     [checkIns],
   );
 
