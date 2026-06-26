@@ -1,7 +1,6 @@
-import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
-import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink, Briefcase } from "lucide-react";
+import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink } from "lucide-react";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
 
@@ -158,45 +157,30 @@ export default function About() {
             <h2 className="display section-heading" style={{ marginBottom: "1.15rem" }}>
               KEEP THIS GUIDE <span style={{ color: "#CCFF00" }}>ALIVE</span>
             </h2>
-            <p className="zine-body-text max-w-lg mx-auto" style={{ marginBottom: "1.25rem" }}>
-              Running this site costs real money — hosting, domain, hours keeping listings current, and the work it takes to keep queer Portland connected all weekend.
-              If this guide helped you find a party, a protest, a brunch, or your people, a small donation keeps it free for everyone.
+            <p className="zine-body-text max-w-md mx-auto" style={{ marginBottom: "2rem" }}>
+              Running this site costs real money — hosting, domain, time.
+              If you found it useful, buying me a coffee keeps it free for everyone.
+              Keeping it going is appreciated.
             </p>
-            <p className="zine-body-text max-w-lg mx-auto" style={{ marginBottom: "1.5rem", color: "var(--text-body-muted)" }}>
-              No pressure — but keeping it going is deeply appreciated.
+            <a
+              href={VENMO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="link-donate"
+              className="display text-xl px-8 py-4 inline-flex items-center gap-3 border-2 transition-all hover:opacity-90"
+              style={{
+                background: "#CCFF00",
+                borderColor: "#CCFF00",
+                color: "#000",
+              }}
+            >
+              BUY ME A COFFEE
+              <ExternalLink size={16} />
+            </a>
+            <p className="text-white/30 text-xs mt-4">@tucker_pdmax on Venmo</p>
+            <p className="text-white/40 text-xs mt-6" style={{ fontStyle: "italic" }}>
+              P.S. Tucker is looking for work.
             </p>
-            <p className="zine-body-text max-w-lg mx-auto" style={{ marginBottom: "2rem" }}>
-              I'm Tucker. I built this guide myself, and I'm also <strong style={{ color: "#fff" }}>looking for work</strong>.
-              If you've got a gig, collab, or lead — post on Pride Work or reach out.
-            </p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <a
-                href={VENMO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="link-donate"
-                className="display text-xl px-8 py-4 inline-flex items-center gap-3 border-2 transition-all hover:opacity-90"
-                style={{
-                  background: "#CCFF00",
-                  borderColor: "#CCFF00",
-                  color: "#000",
-                }}
-              >
-                DONATE VIA VENMO
-                <ExternalLink size={16} />
-              </a>
-              <Link href="/pride-work">
-                <button
-                  type="button"
-                  className="btn-neon cyan display"
-                  style={{ fontSize: "1rem", padding: "16px 24px", display: "inline-flex", alignItems: "center", gap: 8 }}
-                >
-                  <Briefcase size={16} />
-                  I'M LOOKING FOR WORK
-                </button>
-              </Link>
-            </div>
-            <p className="text-white/30 text-xs mt-4">@tucker_pdmax on Venmo · Pride Work board for gigs &amp; availability</p>
           </div>
         </section>
         </ScrollReveal>
