@@ -8,6 +8,7 @@ export default function About() {
   return (
     <div className="zine-page about-page board-page min-h-screen">
       <PageHero
+        kicker="About This Guide"
         titleLine1="BUILT FOR"
         titleLine2="THE COMMUNITY."
         accent="lime"
