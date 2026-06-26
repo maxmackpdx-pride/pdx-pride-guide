@@ -643,10 +643,11 @@ body::before {
 }
 
 .home-hero-title span {
-  color: var(--neon-yellow);
-  text-shadow:
-    0 0 20px rgba(204,255,0,0.72),
-    0 0 52px rgba(204,255,0,0.32);
+  background: linear-gradient(90deg, var(--neon-magenta), var(--neon-yellow), var(--neon-cyan), var(--neon-orange));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px rgba(204,255,0,0.4)) drop-shadow(0 0 14px rgba(0,255,255,0.25));
 }
 
 .home-hero-subtitle {
