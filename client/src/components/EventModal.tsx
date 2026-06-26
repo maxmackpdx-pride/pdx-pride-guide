@@ -46,6 +46,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   const [showAddCoHost, setShowAddCoHost] = useState(false);
   const [showCalPicker, setShowCalPicker] = useState(false);
   const [showMapsPicker, setShowMapsPicker] = useState(false);
+  const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<EventHostProfile[]>({
     queryKey: ["/api/events", event.id, "hosts"],
@@ -184,60 +185,63 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   };
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)",
-        zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-      }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        data-testid="event-modal"
-        style={{
-          background: "#0d0d0d", border: "1px solid #222",
-          maxWidth: 660, width: "100%", maxHeight: "90vh", overflow: "auto", position: "relative",
-        }}
-      >
-        {/* Color bar */}
-        <div style={{ height: 5, background: dayColor }} />
+    <div className="event-modal-overlay" onClick={onClose}>
+      <div className="event-modal" onClick={e => e.stopPropagation()} data-testid="event-modal">
+        <div className="event-modal__bar" style={{ background: dayColor }} />
 
-        {/* Poster image — full natural size, centered, no crop */}
-        <div style={{ width: "100%", background: "#000", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "0" }}>
-          <img
-            src={posterUrl}
-            alt={event.title}
-            style={{ display: "block", maxWidth: "100%", width: "auto", height: "auto", maxHeight: "70vh", objectFit: "contain" }}
-          />
+        <div className="event-modal__poster">
+          <img src={posterUrl} alt={event.title} className="event-modal__poster-img" />
         </div>
 
-        <div style={{ padding: "24px 24px 0" }}>
-          {/* Close */}
-          <button
-            onClick={onClose}
-            style={{
-              position: "absolute", top: 16, right: 16,
-              background: "none", border: "1px solid #333", color: "var(--text-meta)",
-              width: 28, height: 28, cursor: "pointer", fontSize: "0.85rem",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}
-          >✕</button>
+        <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
+
+        <div className="event-modal__body">
+          <h2 className="display event-modal__title">{event.title}</h2>
+
+          <div className="event-modal__meta" style={{ borderLeftColor: dayColor }}>
+            <div className="event-modal__datetime">
+              {startTime} – {endTime}
+            </div>
+            <div className="event-modal__venue">
+              {event.venueName}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
+            </div>
+            {!event.isPrivate && (event.address || event.venueName) && (
+              <div className="event-modal__address-wrap">
+                <button
+                  type="button"
+                  onClick={() => { setShowCalPicker(false); setShowMapsPicker(v => !v); }}
+                  data-testid="button-open-maps"
+                  className="event-modal__address"
+                >
+                  {event.address || event.venueName} ↗
+                </button>
+                <EventLinkChoiceMenu
+                  open={showMapsPicker}
+                  onClose={() => setShowMapsPicker(false)}
+                  title="Open in maps"
+                  options={[
+                    { label: "Google Maps", hint: "Works on all devices", onClick: () => window.open(googleMapsUrl(event), "_blank", "noopener,noreferrer") },
+                    { label: "Apple Maps", hint: "Best on iPhone / Mac", onClick: () => window.open(appleMapsUrl(event), "_blank", "noopener,noreferrer") },
+                  ]}
+                />
+              </div>
+            )}
+            {event.isPrivate && (
+              <div className="event-modal__private-note">Location provided upon RSVP</div>
+            )}
+          </div>
 
           <EventTagsRow
             event={event}
-            size="md"
+            size="sm"
             showJsonTypes
             onClaimClick={() => (user ? claimEvent(event.id) : setShowAuth(true))}
-            className="event-card-tags--modal"
-            style={{ marginBottom: 16 }}
+            className="event-modal__tags"
           />
 
-          <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", margin: "0 0 8px", lineHeight: 1 }}>
-            {event.title}
-          </h2>
-          <div style={{ color: "#CCFF00", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9rem", marginBottom: 16 }}>
-            {event.venueName}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
-          </div>
+          {event.description && (
+            <p className="event-modal__description">{event.description}</p>
+          )}
 
           {/* Hosts */}
           {eventHosts.length > 0 && (
@@ -340,48 +344,6 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             isClaimable={event.isClaimable}
           />
 
-          {/* Time block */}
-          <div style={{ background: "#111", padding: "14px 16px", marginBottom: 20, borderLeft: `3px solid ${dayColor}` }}>
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.85rem", color: "#fff" }}>
-              {startTime} – {endTime}
-            </div>
-            {!event.isPrivate && (event.address || event.venueName) && (
-              <div style={{ marginTop: 6 }}>
-                <button
-                  type="button"
-                  onClick={() => { setShowCalPicker(false); setShowMapsPicker(v => !v); }}
-                  data-testid="button-open-maps"
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    color: "#00FFFF",
-                    fontSize: "0.8rem",
-                    fontFamily: "var(--font-body)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    textDecoration: "underline",
-                    textUnderlineOffset: 3,
-                  }}
-                >
-                  {event.address || event.venueName} ↗
-                </button>
-                <EventLinkChoiceMenu
-                  open={showMapsPicker}
-                  onClose={() => setShowMapsPicker(false)}
-                  title="Open in maps"
-                  options={[
-                    { label: "Google Maps", hint: "Works on all devices", onClick: () => window.open(googleMapsUrl(event), "_blank", "noopener,noreferrer") },
-                    { label: "Apple Maps", hint: "Best on iPhone / Mac", onClick: () => window.open(appleMapsUrl(event), "_blank", "noopener,noreferrer") },
-                  ]}
-                />
-              </div>
-            )}
-            {event.isPrivate && (
-              <div style={{ fontSize: "0.8rem", color: "var(--text-meta)", marginTop: 4 }}>📍 Location provided upon RSVP</div>
-            )}
-          </div>
-
           {/* Latest from host */}
           <div style={{
             marginBottom: 20,
@@ -409,25 +371,6 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               </div>
             )}
           </div>
-
-          {/* Unclaimed warning */}
-          {event.isClaimable && (
-            <div style={{
-              display: "flex", alignItems: "flex-start", gap: 8,
-              background: "#0d0d0d", border: "1px solid #2a2a2a",
-              padding: "8px 12px", marginBottom: 16,
-            }}>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", color: "var(--text-meta)", letterSpacing: "0.08em", whiteSpace: "nowrap", paddingTop: 2 }}>[WARNING]</span>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-meta)", lineHeight: 1.5 }}>
-                This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
-                {hasPendingClaim ? " A claim is pending admin review." : ""}
-              </span>
-            </div>
-          )}
-
-          <p style={{ color: "#aaa", lineHeight: 1.7, fontSize: "0.88rem", marginBottom: 20 }}>
-            {event.description}
-          </p>
 
           {/* Action buttons */}
           <div style={{
@@ -479,22 +422,37 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             </button>
           </div>
 
-          <section className="event-attendance-header" aria-label="Event attendance">
-            <div className="event-attendance-header__orb event-attendance-header__orb--magenta" aria-hidden="true" />
-            <div className="event-attendance-header__orb event-attendance-header__orb--cyan" aria-hidden="true" />
-            <div className="event-attendance-header__inner">
-              <span className="event-attendance-header__pill">
-                {startTime}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
-              </span>
-              <p className="event-attendance-header__lede">
-                Tap <span>I'll be there</span> to drop into the room and see who's going.
-              </p>
-            </div>
-          </section>
+          <div className="event-modal__tabs" role="tablist" aria-label="Event social">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={socialTab === "attendance"}
+              className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
+              onClick={() => setSocialTab("attendance")}
+            >
+              I'll Be There
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={socialTab === "missed"}
+              className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
+              onClick={() => setSocialTab("missed")}
+            >
+              Missed Connections
+            </button>
+          </div>
 
-          {/* I'll Be There — interactive bubbles directly under tickets / calendar */}
-          <section className="event-modal-attendance" data-testid="event-modal-attendance">
-            <AttendanceCluster eventId={event.id} embedded />
+          <section
+            className="event-modal__tab-panel"
+            role="tabpanel"
+            data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
+          >
+            {socialTab === "attendance" ? (
+              <AttendanceCluster eventId={event.id} embedded />
+            ) : (
+              <MissedConnectionsPanel mode="event" eventId={event.id} compact />
+            )}
           </section>
 
           {hostDrawer === "compose" && (
@@ -545,10 +503,15 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             </div>
           )}
 
-          <div style={{ marginTop: 24, borderTop: "1px solid #1a1a1a", paddingTop: 20 }}>
-            <h3 className="display" style={{ fontSize: "1.15rem", color: "#FF00CC", marginBottom: 12 }}>MISSED CONNECTIONS</h3>
-            <MissedConnectionsPanel mode="event" eventId={event.id} compact />
-          </div>
+          {event.isClaimable && (
+            <div className="event-modal__warning">
+              <span className="event-modal__warning-label">Warning</span>
+              <p className="event-modal__warning-text">
+                This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
+                {hasPendingClaim ? " A claim is pending admin review." : ""}
+              </p>
+            </div>
+          )}
 
           {/* Claim / Remove links */}
           <div style={{
