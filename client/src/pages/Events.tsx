@@ -363,13 +363,14 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   );
 }
 
-function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary, myTalent }: {
+function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary, myTalent, selfUserId }: {
   event: Event;
   onClick: () => void;
   viewMode: "grid" | "list";
   revealDelay?: number;
   attendanceSummary?: AttendanceSummary | null;
   myTalent?: UserEventTalentCard | null;
+  selfUserId?: number;
 }) {
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
   const time = event.dateStart
@@ -422,7 +423,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
           <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
           <div style={{ fontSize: "0.65rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
           <EventWorkHereTag talent={myTalent} compact />
-          <EventAttendancePreview summary={attendanceSummary} compact selfUserId={user?.id} />
+          <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
         </div>
       </div>
       </ScrollReveal>
@@ -464,7 +465,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
             <div style={{ fontSize: "0.74rem", color: "#aaa" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
             <EventWorkHereTag talent={myTalent} compact />
-            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={user?.id} />
+            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
           </div>
         </div>
       ) : (
@@ -493,7 +494,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
             <div style={{ fontSize: "0.78rem", color: "#888" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
             <EventWorkHereTag talent={myTalent} compact />
-            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={user?.id} />
+            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
           </div>
         </>
       )}
@@ -733,6 +734,7 @@ export default function Events() {
                 revealDelay={(i % 6) * 70}
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
+                selfUserId={user?.id}
               />
             ))}
           </div>
@@ -747,6 +749,7 @@ export default function Events() {
                 revealDelay={(i % 8) * 55}
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
+                selfUserId={user?.id}
               />
             ))}
           </div>
