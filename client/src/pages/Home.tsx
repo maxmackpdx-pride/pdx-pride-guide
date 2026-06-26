@@ -10,7 +10,6 @@ import HeroAurora from "@/components/HeroAurora";
 import HeroGlitchOverlay from "@/components/HeroGlitchOverlay";
 import HeroImageGlitch from "@/components/HeroImageGlitch";
 import ScrollReveal from "@/components/ScrollReveal";
-import SpectrumDivider from "@/components/SpectrumDivider";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/home-hero-desktop.jpg";
@@ -276,8 +275,6 @@ export default function Home() {
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 
-      <SpectrumDivider />
-
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
           events={events}
@@ -288,8 +285,6 @@ export default function Home() {
           variant="home"
         />
       </section>
-
-      <SpectrumDivider reverse />
 
       <section className="home-promo-stack">
         <ScrollReveal>
