@@ -665,7 +665,7 @@ h2.display,
 .home-hero-title {
   margin-bottom: 30px;
   color: #f4f4f6;
-  font-size: 15.6rem;
+  font-size: 10.14rem;
   line-height: 0.78;
   letter-spacing: 0;
   text-shadow: 0 0 48px rgba(255,255,255,0.08);
@@ -673,7 +673,7 @@ h2.display,
 
 @media (min-width: 901px) {
   .home-hero-title {
-    font-size: 20.28rem;
+    font-size: 13.18rem;
   }
 }
 
@@ -757,7 +757,7 @@ h2.display,
 
 @media (max-width: 900px) {
   .home-hero-title {
-    font-size: 10.5rem;
+    font-size: 6.83rem;
   }
 
   .home-countdown-box div {
@@ -793,7 +793,7 @@ h2.display,
   }
 
   .home-hero-title {
-    font-size: 6.68rem;
+    font-size: 4.34rem;
   }
 
   .home-hero-subtitle {
