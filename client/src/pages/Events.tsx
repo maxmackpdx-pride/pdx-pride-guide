@@ -347,7 +347,7 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
               </div>
             ))}
             <div className="map-legend-item map-legend-item--multi">
-              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 10 10" aria-hidden="true">
                 <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF"/>
                 <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600"/>
                 <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC"/>
@@ -393,7 +393,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
         {/* Flyer thumbnail */}
         {event.posterImageUrl ? (
           <div style={{
-            width: 72, minWidth: 72, flexShrink: 0,
+            width: 108, minWidth: 108, flexShrink: 0,
             background: "#111", overflow: "hidden",
           }}>
             <img
@@ -404,24 +404,24 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
           </div>
         ) : (
           <div style={{
-            width: 72, minWidth: 72, flexShrink: 0,
+            width: 108, minWidth: 108, flexShrink: 0,
             background: "#111",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: dayColor + "22", border: `1px solid ${dayColor}44` }} />
+            <div style={{ width: 42, height: 42, borderRadius: "50%", background: dayColor + "22", border: `1px solid ${dayColor}44` }} />
           </div>
         )}
         {/* Info */}
-        <div style={{ flex: 1, padding: "10px 14px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
+        <div style={{ flex: 1, padding: "15px 21px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
           <EventTagsRow event={event} size="sm" className="event-card-tags--list" />
           <div style={{
             fontFamily: "var(--font-display)", fontWeight: 900,
-            fontSize: "clamp(0.9rem, 2vw, 1.05rem)",
-            color: "#fff", lineHeight: 1.1, marginBottom: 3,
+            fontSize: "clamp(1.35rem, 3vw, 1.575rem)",
+            color: "#fff", lineHeight: 1.1, marginBottom: 4,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>{event.title}</div>
-          <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
-          <div style={{ fontSize: "0.65rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+          <div style={{ fontSize: "1.08rem", color: "#888" }}>{event.venueName}</div>
+          <div style={{ fontSize: "0.975rem", color: "var(--text-meta)", marginTop: 3 }}>{time} · {event.neighborhood}</div>
           <EventWorkHereTag talent={myTalent} compact />
           <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
         </div>
@@ -456,14 +456,14 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
           <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--overlay" />
           {/* Info overlay */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 14 }}>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 21 }}>
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1rem, 1.4vw, 1.22rem)",
-              color: "#fff", lineHeight: 1.05, marginBottom: 4,
+              fontSize: "clamp(1.5rem, 2.1vw, 1.83rem)",
+              color: "#fff", lineHeight: 1.05, marginBottom: 6,
             }}>{event.title}</div>
-            <div style={{ fontSize: "0.74rem", color: "#aaa" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
+            <div style={{ fontSize: "1.11rem", color: "#aaa" }}>{event.venueName}</div>
+            <div style={{ fontSize: "1.02rem", color: "var(--text-meta)", marginTop: 3 }}>{time}</div>
             <EventWorkHereTag talent={myTalent} compact />
             <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
           </div>
@@ -476,7 +476,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
             className="halftone"
             style={{
               flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end",
-              padding: 14, background: "#0d0d0d", minHeight: 140, position: "relative",
+              padding: 21, background: "#0d0d0d", minHeight: 210, position: "relative",
             }}
           >
             <div style={{
@@ -486,13 +486,13 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
             }} />
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1.02rem, 1.4vw, 1.28rem)",
-              color: "#fff", lineHeight: 1.05, marginBottom: 6,
+              fontSize: "clamp(1.53rem, 2.1vw, 1.92rem)",
+              color: "#fff", lineHeight: 1.05, marginBottom: 9,
             }}>
               {event.title}
             </div>
-            <div style={{ fontSize: "0.78rem", color: "#888" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+            <div style={{ fontSize: "1.17rem", color: "#888" }}>{event.venueName}</div>
+            <div style={{ fontSize: "1.08rem", color: "var(--text-meta)", marginTop: 3 }}>{time} · {event.neighborhood}</div>
             <EventWorkHereTag talent={myTalent} compact />
             <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
           </div>
@@ -563,7 +563,6 @@ export default function Events() {
         titleLine1="EVENTS"
         titleLine2="GUIDE"
         accent="cyan"
-        lede="Every party, brunch, protest, and after-hours happening Thu–Sun. Tap I'll be there on any card to drop into the room — filter by day, search by vibe, and show up."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 42%"
       />
@@ -581,10 +580,7 @@ export default function Events() {
         background: "#000", borderBottom: "1px solid #1a1a1a",
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
       }}>
-        <div style={{
-          maxWidth: 1200, margin: "0 auto", padding: "10px 20px",
-          display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center",
-        }}>
+        <div className="events-filter-row">
           {DAYS.map(d => (
             <button
               key={d}
@@ -599,7 +595,7 @@ export default function Events() {
               {d}
             </button>
           ))}
-          <div style={{ width: 1, height: 18, background: "#222", margin: "0 2px" }} />
+          <div className="events-filter-divider" />
           {EVENT_TYPE_FILTERS.map(f => (
             <EventTypeTag
               key={f}
@@ -611,35 +607,19 @@ export default function Events() {
             />
           ))}
           {/* Search bar */}
-          <div style={{ position: "relative", display: "flex", alignItems: "center", marginLeft: 4 }}>
+          <div className="events-filter-search">
             <input
               type="text"
               placeholder="Search events..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               data-testid="event-search"
-              style={{
-                background: "#111",
-                border: "1px solid #2a2a2a",
-                color: "#fff",
-                padding: "5px 28px 5px 10px",
-                fontSize: "0.75rem",
-                fontFamily: "var(--font-body)",
-                outline: "none",
-                width: 160,
-                transition: "border-color 0.15s",
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#CCFF00")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#2a2a2a")}
+              className="events-filter-search__input"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                style={{
-                  position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer",
-                  fontSize: "0.75rem", lineHeight: 1, padding: 0,
-                }}
+                className="events-filter-search__clear"
                 title="Clear search"
               >×</button>
             )}
@@ -647,30 +627,22 @@ export default function Events() {
           {/* Spacer */}
           <div style={{ flex: 1 }} />
           {/* View toggle — grid / list only (map is always shown above) */}
-          <div style={{ display: "flex", gap: 2, border: "1px solid #222", padding: 2 }}>
+          <div className="events-view-toggle">
             <button
               data-testid="toggle-grid-view"
               onClick={() => setViewMode("grid")}
-              style={{
-                padding: "4px 8px", background: viewMode === "grid" ? "#CCFF00" : "transparent",
-                border: "none", cursor: "pointer", color: viewMode === "grid" ? "#000" : "#555",
-                display: "flex", alignItems: "center",
-              }}
+              className={`events-view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
               title="Grid view"
             >
-              <Grid size={13} />
+              <Grid size={26} />
             </button>
             <button
               data-testid="toggle-list-view"
               onClick={() => setViewMode("list")}
-              style={{
-                padding: "4px 8px", background: viewMode === "list" ? "#CCFF00" : "transparent",
-                border: "none", cursor: "pointer", color: viewMode === "list" ? "#000" : "#555",
-                display: "flex", alignItems: "center",
-              }}
+              className={`events-view-toggle__btn${viewMode === "list" ? " active" : ""}`}
               title="List view"
             >
-              <List size={13} />
+              <List size={26} />
             </button>
           </div>
         </div>

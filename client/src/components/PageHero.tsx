@@ -9,7 +9,7 @@ type PageHeroProps = {
   titleLine1: string;
   titleLine2?: string;
   accent?: PageHeroAccent;
-  lede: string;
+  lede?: string;
   tagline?: string;
   taglineAccent?: PageHeroTaglineAccent;
   actions?: ReactNode;
@@ -47,7 +47,7 @@ export default function PageHero({
               <span className={`page-hero__accent page-hero__accent--${accent}`}>{titleLine2}</span>
             )}
           </h1>
-          <p className="page-hero__lede">{lede}</p>
+          {lede && <p className="page-hero__lede">{lede}</p>}
           {tagline && (
             <p className={`page-hero__tagline page-hero__tagline--${taglineAccent}`}>{tagline}</p>
           )}
