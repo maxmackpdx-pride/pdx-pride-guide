@@ -108,19 +108,16 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
         className="zine-hero home-hero"
-        style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}
+        style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center" }}
       >
         <div
-          className="home-hero-bg-desktop"
+          className="home-hero-bg-desktop parallax-container"
           style={{
             backgroundImage: `url(${skylineImg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center center",
-            backgroundRepeat: "no-repeat",
             opacity: 0.9,
           }}
         />
-        <div className="home-hero-bg-mobile" aria-hidden="true" />
+        <div className="home-hero-bg-mobile parallax-container" aria-hidden="true" />
         <div className="home-hero-shade" aria-hidden="true" />
         <div className="home-hero-halftone" aria-hidden="true" />
         <div className="home-hero-watermark" aria-hidden="true">LOVE<br />LOUDER</div>

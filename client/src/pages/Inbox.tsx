@@ -120,7 +120,7 @@ export default function Inbox() {
 
   return (
     <div style={{ background: "#000", minHeight: "100vh" }}>
-      <div className="inbox-hero">
+      <div className="inbox-hero parallax-container">
         <div style={{ maxWidth: 980, margin: "0 auto", padding: "42px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, position: "relative", zIndex: 1 }}>
             <div>

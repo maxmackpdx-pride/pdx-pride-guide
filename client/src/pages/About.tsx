@@ -7,7 +7,7 @@ export default function About() {
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
       {/* Hero */}
       <div
-        className="about-hero relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center overflow-hidden"
+        className="about-hero parallax-container relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center"
       >
         {/* Halftone BG decoration */}
         <div

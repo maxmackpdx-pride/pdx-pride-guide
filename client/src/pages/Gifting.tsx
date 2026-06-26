@@ -159,7 +159,7 @@ export default function Gifting() {
   return (
     <div className="zine-page gifting-page board-page">
       <section className="gifting-hero">
-        <div className="gifting-hero-bg" />
+        <div className="gifting-hero-bg parallax-container" aria-hidden="true" />
         <div className="gifting-hero-inner">
           <div className="board-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
           <h1 className="display page-hero-title gifting-title">GIFT WITH<br /><span>PRIDE</span></h1>

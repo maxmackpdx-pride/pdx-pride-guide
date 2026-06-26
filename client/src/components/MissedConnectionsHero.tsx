@@ -1,6 +1,6 @@
 export default function MissedConnectionsHero() {
   return (
-    <section className="missed-connections-hero">
+    <section className="missed-connections-hero parallax-container">
       <div className="missed-connections-hero-inner">
         <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>PRIVATE REPLIES ONLY</span>
         <h1 className="display page-hero-title" style={{ color: "#fff", marginTop: 12 }}>

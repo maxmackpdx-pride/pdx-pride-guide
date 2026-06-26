@@ -116,7 +116,7 @@ export default function PrideWork() {
   return (
     <div className="zine-page gigs-page board-page">
       <section className="gigs-hero">
-        <div className="gigs-hero-bg" />
+        <div className="gigs-hero-bg parallax-container" aria-hidden="true" />
         <div className="gigs-hero-inner">
           <div className="board-kicker">PRIDE SEASON · QUEER WORK</div>
           <h1 className="display page-hero-title gigs-title">

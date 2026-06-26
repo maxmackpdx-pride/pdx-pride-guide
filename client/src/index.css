@@ -303,6 +303,21 @@ body::before {
 .text-muted { color: var(--text-muted); }
 .text-faint { color: var(--text-faint); }
 
+/* Parallax hero wallpaper — image layer only; gradient overlays stay on ::before/::after */
+.parallax-container {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+@media (max-width: 900px), (prefers-reduced-motion: reduce) {
+  .parallax-container,
+  .home-promo-panel::before {
+    background-attachment: scroll;
+  }
+}
+
 /* Display headline style */
 .display {
   font-family: var(--font-display);
@@ -470,27 +485,41 @@ h1.display {
   opacity: 0.6;
 }
 
-.pride-work-hero {
-  min-height: 430px;
+.pride-work-hero.parallax-container {
+  position: relative;
+  min-height: 100vh;
   display: flex;
   align-items: center;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 29%, rgba(0,0,0,0.46) 56%, rgba(0,0,0,0.06) 100%),
-    url("/motifs/hero-gigs.jpg") center / cover no-repeat,
-    #050505;
+  background-image: url("/motifs/hero-gigs.jpg");
+  background-color: #050505;
 }
 
-.missed-connections-hero {
+.pride-work-hero.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 29%, rgba(0,0,0,0.46) 56%, rgba(0,0,0,0.06) 100%);
+  z-index: 0;
+}
+
+.missed-connections-hero.parallax-container {
   position: relative;
-  overflow: hidden;
   min-height: clamp(360px, 42vw, 520px);
   display: flex;
   align-items: center;
   border-bottom: 2px solid rgba(255,255,255,0.08);
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.9) 32%, rgba(0,0,0,0.42) 58%, rgba(0,0,0,0.06) 100%),
-    url("/motifs/hero-missed-connections.jpg") center / cover no-repeat,
-    #050505;
+  background-image: url("/motifs/hero-missed-connections.jpg");
+  background-color: #050505;
+}
+
+.missed-connections-hero.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.9) 32%, rgba(0,0,0,0.42) 58%, rgba(0,0,0,0.06) 100%);
+  z-index: 0;
 }
 
 .missed-connections-hero::after {
@@ -656,18 +685,15 @@ h1.display {
   pointer-events: none;
 }
 
-.home-hero-bg-desktop {
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+.home-hero-bg-desktop.parallax-container {
+  min-height: 100vh;
 }
 
-.home-hero-bg-mobile {
+.home-hero-bg-mobile.parallax-container {
   display: none;
   background-image: url("/home-hero-mobile.jpg");
-  background-size: cover;
   background-position: 58% center;
-  background-repeat: no-repeat;
+  min-height: 100vh;
   opacity: 0.9;
 }
 
@@ -1359,11 +1385,21 @@ h1.display {
   transform: rotate(9deg);
 }
 
-.about-hero {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.88) 32%, rgba(0,0,0,0.38) 62%, rgba(0,0,0,0.06) 100%),
-    url("/motifs/hero-about.png") 56% 50% / cover no-repeat,
-    #0a0a0a;
+.about-hero.parallax-container {
+  position: relative;
+  min-height: min(100vh, 720px);
+  background-image: url("/motifs/hero-about.png");
+  background-position: 56% 50%;
+  background-color: #0a0a0a;
+}
+
+.about-hero.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.88) 32%, rgba(0,0,0,0.38) 62%, rgba(0,0,0,0.06) 100%);
+  z-index: 0;
 }
 
 .values-motif-badge {
@@ -1387,14 +1423,12 @@ h1.display {
   filter: saturate(1.15) contrast(1.05);
 }
 
-.inbox-hero {
+.inbox-hero.parallax-container {
   position: relative;
-  overflow: hidden;
   border-bottom: 2px solid rgba(255,255,255,0.08);
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.88) 34%, rgba(0,0,0,0.36) 68%, rgba(0,0,0,0.05) 100%),
-    url("/motifs/hero-inbox.png") 52% 42% / cover no-repeat,
-    #050505;
+  background-image: url("/motifs/hero-inbox.png");
+  background-position: 52% 42%;
+  background-color: #050505;
 }
 
 .inbox-layout {
@@ -1425,13 +1459,15 @@ h1.display {
   }
 }
 
-.inbox-hero::before {
+.inbox-hero.parallax-container::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 0;
   background:
     repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 14px),
-    radial-gradient(circle at 72% 26%, rgba(0,255,255,0.12), transparent 18rem);
+    radial-gradient(circle at 72% 26%, rgba(0,255,255,0.12), transparent 18rem),
+    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.88) 34%, rgba(0,0,0,0.36) 68%, rgba(0,0,0,0.05) 100%);
   mix-blend-mode: screen;
   opacity: 0.5;
   pointer-events: none;
@@ -1469,7 +1505,6 @@ h1.display {
 .home-promo-panel {
   position: relative;
   min-height: clamp(360px, 42vw, 520px);
-  overflow: hidden;
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -1484,16 +1519,19 @@ h1.display {
 }
 
 .home-promo-panel::before {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.8) 39%, rgba(0,0,0,0.36) 67%, rgba(0,0,0,0.08) 100%),
-    var(--promo-bg) center / cover no-repeat;
+  background-image: var(--promo-bg);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   filter: saturate(1.08) contrast(1.05);
 }
 
 .home-promo-panel::after {
   background:
     repeating-linear-gradient(135deg, rgba(255,255,255,0.038) 0 1px, transparent 1px 14px),
-    radial-gradient(circle at 12% 80%, rgba(204,255,0,0.1), transparent 18rem);
+    radial-gradient(circle at 12% 80%, rgba(204,255,0,0.1), transparent 18rem),
+    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.8) 39%, rgba(0,0,0,0.36) 67%, rgba(0,0,0,0.08) 100%);
   mix-blend-mode: screen;
   opacity: 0.48;
 }
@@ -1502,10 +1540,11 @@ h1.display {
   --promo-bg: url("/gift-with-pride-hero.jpg");
 }
 
-.home-gifting-panel::before {
+.home-gifting-panel::after {
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.72) 34%, rgba(0,0,0,0.2) 58%, rgba(0,0,0,0.02) 100%),
-    var(--promo-bg) center / cover no-repeat;
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.038) 0 1px, transparent 1px 14px),
+    radial-gradient(circle at 12% 80%, rgba(204,255,0,0.1), transparent 18rem),
+    linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.72) 34%, rgba(0,0,0,0.2) 58%, rgba(0,0,0,0.02) 100%);
 }
 
 .home-gigs-panel {
@@ -1969,18 +2008,25 @@ h1.display {
 
 .gifting-hero {
   position: relative;
-  overflow: hidden;
   min-height: clamp(920px, 92vw, 1120px);
   border-bottom: 2px solid rgba(255,255,255,0.08);
 }
 
-.gifting-hero-bg {
+.gifting-hero-bg.parallax-container {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.78) 36%, rgba(0,0,0,0.28) 62%, rgba(0,0,0,0.04) 100%),
-    url("/gift-with-pride-hero.jpg") center / cover no-repeat;
+  z-index: 0;
+  min-height: 100vh;
+  background-image: url("/gift-with-pride-hero.jpg");
   filter: saturate(1.15) contrast(1.06);
+}
+
+.gifting-hero-bg.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.78) 36%, rgba(0,0,0,0.28) 62%, rgba(0,0,0,0.04) 100%);
 }
 
 .gifting-hero::after,
@@ -2482,18 +2528,25 @@ h1.display {
 
 .gigs-hero {
   position: relative;
-  overflow: hidden;
   min-height: clamp(720px, 78vw, 980px);
   border-bottom: 2px solid rgba(255, 255, 255, 0.08);
 }
 
-.gigs-hero-bg {
+.gigs-hero-bg.parallax-container {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.78) 36%, rgba(0, 0, 0, 0.28) 62%, rgba(0, 0, 0, 0.04) 100%),
-    url("/motifs/hero-gigs.jpg") center / cover no-repeat;
+  z-index: 0;
+  min-height: 100vh;
+  background-image: url("/motifs/hero-gigs.jpg");
   filter: saturate(1.12) contrast(1.06);
+}
+
+.gigs-hero-bg.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.78) 36%, rgba(0, 0, 0, 0.28) 62%, rgba(0, 0, 0, 0.04) 100%);
 }
 
 .gigs-hero::after,
