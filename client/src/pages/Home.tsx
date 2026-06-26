@@ -161,10 +161,10 @@ export default function Home() {
               X
             </button>
             <span className="board-sticker" style={{ color: "#00FFFF", marginBottom: 14, display: "inline-block" }}>SOFTIE LAUNCH</span>
-            <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}>
+            <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(1.4rem, 5.6vw, 2.8rem)", lineHeight: 0.95, marginBottom: 14 }}>
               WELCOME
             </h2>
-            <p style={{ color: "#bbb", fontSize: "1rem", lineHeight: 1.6, marginBottom: 18 }}>
+            <p style={{ color: "#bbb", fontSize: "0.7rem", lineHeight: 1.6, marginBottom: 18 }}>
               Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around, and please submit feedback at the bottom of the website if you run into any issue.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -214,7 +214,7 @@ export default function Home() {
         }} />
         <div style={{
           position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
-          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(5rem, 14vw, 11rem)",
+          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(3.5rem, 9.8vw, 7.7rem)",
           color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
           userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
         }}>LOVE<br />LOUDER</div>

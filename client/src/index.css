@@ -711,7 +711,7 @@ h2.display,
   box-shadow: 8px 8px 0 var(--neon-cyan);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.88rem, 2vw, 1.25rem);
+  font-size: clamp(0.616rem, 1.4vw, 0.875rem);
   letter-spacing: 0.18em;
   line-height: 1;
   text-transform: uppercase;
@@ -720,7 +720,7 @@ h2.display,
 .home-hero-title {
   margin-bottom: 30px;
   color: #f4f4f6;
-  font-size: 10.14rem;
+  font-size: 7.098rem;
   line-height: 0.78;
   letter-spacing: 0;
   text-shadow: 0 0 48px rgba(255,255,255,0.08);
@@ -728,7 +728,7 @@ h2.display,
 
 @media (min-width: 901px) {
   .home-hero-title {
-    font-size: 13.18rem;
+    font-size: 9.226rem;
   }
 }
 
@@ -745,21 +745,21 @@ h2.display,
   max-width: 780px;
   margin: 0 0 44px;
   color: #e8e8ec;
-  font-size: clamp(1.875rem, 4.5vw, 3rem);
+  font-size: clamp(1.3125rem, 3.15vw, 2.1rem);
   line-height: 1.25;
 }
 
 .home-countdown-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(72px, 138px));
-  gap: 18px;
+  grid-template-columns: repeat(4, minmax(50.4px, 96.6px));
+  gap: 12.6px;
   margin-bottom: 16px;
 }
 
 .home-countdown-box {
   border: 1px solid rgba(255,255,255,0.22);
   background: rgba(0,0,0,0.32);
-  padding: 16px 14px 14px;
+  padding: 11.2px 9.8px 9.8px;
   text-align: center;
   box-shadow: inset 0 0 24px rgba(204,255,0,0.08);
 }
@@ -768,9 +768,9 @@ h2.display,
   color: var(--neon-yellow);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 4.7rem;
+  font-size: 3.29rem;
   line-height: 0.82;
-  -webkit-text-stroke: 3px #000;
+  -webkit-text-stroke: 2px #000;
   paint-order: stroke fill;
   text-shadow:
     2px 2px 0 rgba(0, 0, 0, 0.92),
@@ -789,13 +789,13 @@ h2.display,
 
 .home-countdown-box span {
   display: block;
-  margin-top: 12px;
-  font-size: 0.85rem;
+  margin-top: 8.4px;
+  font-size: 0.595rem;
 }
 
 .home-countdown-caption {
-  margin-bottom: 42px;
-  font-size: 1.25rem;
+  margin-bottom: 29.4px;
+  font-size: 0.875rem;
 }
 
 .home-hero-actions {
@@ -807,20 +807,20 @@ h2.display,
 .home-hero-button {
   min-width: min(100%, 310px);
   padding: 18px 34px !important;
-  font-size: 1.4rem !important;
+  font-size: 0.98rem !important;
 }
 
 @media (max-width: 900px) {
   .home-hero-title {
-    font-size: 6.83rem;
+    font-size: 4.781rem;
   }
 
   .home-countdown-box div {
-    font-size: 3.5rem;
+    font-size: 2.45rem;
   }
 
   .home-hero-button {
-    font-size: 1.15rem !important;
+    font-size: 0.805rem !important;
   }
 }
 
@@ -843,41 +843,41 @@ h2.display,
   }
 
   .home-hero-kicker {
-    font-size: 0.78rem;
+    font-size: 0.546rem;
     line-height: 1.25;
   }
 
   .home-hero-title {
-    font-size: 4.34rem;
+    font-size: 3.038rem;
   }
 
   .home-hero-subtitle {
-    font-size: 1.77rem;
+    font-size: 1.239rem;
   }
 
   .home-countdown-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+    gap: 5.6px;
     max-width: 100%;
   }
 
   .home-countdown-box {
-    padding: 8px 4px 6px;
+    padding: 5.6px 2.8px 4.2px;
   }
 
   .home-countdown-box div {
-    font-size: 2.28rem;
+    font-size: 1.596rem;
   }
 
   .home-countdown-box span {
-    margin-top: 6px;
-    font-size: 0.55rem;
+    margin-top: 4.2px;
+    font-size: 0.385rem;
     letter-spacing: 0.14em;
   }
 
   .home-countdown-caption {
-    font-size: 0.72rem;
-    margin-bottom: 24px;
+    font-size: 0.504rem;
+    margin-bottom: 16.8px;
   }
 }
 
@@ -907,7 +907,7 @@ h2.display,
   border: 1.5px solid var(--neon-yellow);
   color: var(--neon-yellow);
   font-family: var(--font-display);
-  font-size: 0.68rem;
+  font-size: 0.476rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -950,6 +950,11 @@ h2.display,
   right: 10px;
   bottom: auto;
   top: 10px;
+  font-size: 0.434rem;
+}
+
+.home-map-preview .map-legend-label {
+  font-size: 0.455rem;
 }
 
 .map-legend {
@@ -1580,7 +1585,7 @@ h2.display,
   margin: 1.15rem 0 1rem;
   font-family: var(--font-board-display);
   font-weight: 400;
-  font-size: clamp(2.65rem, 8.5vw, 5.25rem);
+  font-size: clamp(1.855rem, 5.95vw, 3.675rem);
   line-height: 0.88;
   letter-spacing: -0.01em;
   color: #fff;
@@ -1624,7 +1629,7 @@ h2.display,
   color: var(--neon-yellow);
   font-family: var(--font-board-mono);
   font-weight: 500;
-  font-size: 0.8125rem;
+  font-size: 0.56875rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -1645,7 +1650,7 @@ h2.display,
   margin: 0 0 1.35rem;
   padding: 0.95rem 1.15rem;
   font-family: var(--font-body);
-  font-size: 1.0625rem;
+  font-size: 0.74375rem;
   line-height: 1.72;
   color: var(--text-body);
   background: rgba(0, 0, 0, 0.78);
@@ -1660,6 +1665,14 @@ h2.display,
 
 .home-gigs-panel .home-promo-lede {
   border-left-color: var(--neon-cyan);
+}
+
+.home-page .board-sticker {
+  font-size: 7.7px;
+}
+
+.home-page .btn-neon:not(.home-hero-button) {
+  font-size: 0.595rem;
 }
 
 @keyframes board-flickr {
@@ -2469,7 +2482,7 @@ h2.display,
   }
 
   .home-promo-title {
-    font-size: clamp(2.35rem, 11vw, 3.5rem);
+    font-size: clamp(1.645rem, 7.7vw, 2.45rem);
     margin: 1rem 0 0.9rem;
   }
 
@@ -4435,8 +4448,8 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .event-slogan-band .event-ticker-track {
-  min-height: 52px;
-  padding: 8px 0;
+  min-height: 36.4px;
+  padding: 5.6px 0;
 }
 
 .event-slogan-band .event-ticker-item:nth-child(3n + 1) {
@@ -4471,7 +4484,7 @@ footer a:hover { color: #00FFFF !important; }
   display: flex;
   align-items: center;
   gap: 22px;
-  min-height: 76px;
+  min-height: 53.2px;
   overflow: hidden;
   border-top: 1px solid rgba(255,255,255,0.1);
   border-bottom: 1px solid rgba(0,0,0,0.9);
@@ -4495,7 +4508,7 @@ footer a:hover { color: #00FFFF !important; }
   color: #000;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 1.05rem;
+  font-size: 0.735rem;
   letter-spacing: 0.14em;
   text-decoration: none;
   text-transform: uppercase;
@@ -4535,8 +4548,8 @@ footer a:hover { color: #00FFFF !important; }
   align-items: center;
   gap: 0;
   width: max-content;
-  min-height: 76px;
-  padding: 10px 0;
+  min-height: 53.2px;
+  padding: 7px 0;
   white-space: nowrap;
   will-change: transform;
 }
@@ -4548,7 +4561,7 @@ footer a:hover { color: #00FFFF !important; }
   color: #fff;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.1rem, 2.2vw, 1.43rem);
+  font-size: clamp(0.77rem, 1.54vw, 1.001rem);
   letter-spacing: 0.08em;
   line-height: 1.15;
   text-transform: uppercase;
