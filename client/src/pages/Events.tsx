@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import EventTypeTag, { EventTypeTagList } from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
-import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -23,15 +25,17 @@ const PDX_ZOOM = 13;
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
   // ── Pin icon builder ──────────────────────────────────────────────────────
-function buildPinIcon(days: string[]) {
+function buildPinIcon(days: string[], rsvpPulse = false) {
   if (typeof divIcon !== 'function') return null;
   const SIZE = 22;
   const R = SIZE / 2;
+  const pulseClass = rsvpPulse ? " map-pin-rsvp-pulse" : "";
+  const pulseGlow = rsvpPulse ? `,0 0 22px #CCFF00,0 0 36px rgba(204,255,0,0.55)` : "";
 
   if (days.length === 1) {
     const color = DAY_COLORS[days[0]] || "#CCFF00";
     return divIcon({
-      html: `<div style="width:${SIZE}px;height:${SIZE}px;background:transparent;border:3px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color},0 0 16px ${color}99,0 2px 6px rgba(0,0,0,0.8);"></div>`,
+      html: `<div class="${pulseClass.trim()}" style="width:${SIZE}px;height:${SIZE}px;background:transparent;border:3px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color},0 0 16px ${color}99,0 2px 6px rgba(0,0,0,0.8)${pulseGlow};"></div>`,
       iconSize: [SIZE, SIZE], iconAnchor: [R, R], popupAnchor: [0, -R - 4], className: "",
     });
   }
@@ -52,7 +56,7 @@ function buildPinIcon(days: string[]) {
   });
 
   return divIcon({
-    html: `<div style="width:${SIZE}px;height:${SIZE}px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8));"><svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${paths}<circle cx="${R}" cy="${R}" r="${R - 1}" fill="none" stroke="#000" stroke-width="2"/></svg></div>`,
+    html: `<div class="${pulseClass.trim()}" style="width:${SIZE}px;height:${SIZE}px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8))${rsvpPulse ? " drop-shadow(0 0 10px rgba(204,255,0,0.75))" : ""};"><svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${paths}<circle cx="${R}" cy="${R}" r="${R - 1}" fill="none" stroke="#000" stroke-width="2"/></svg></div>`,
     iconSize: [SIZE, SIZE], iconAnchor: [R, R], popupAnchor: [0, -R - 4], className: "",
   });
 }
@@ -70,7 +74,18 @@ function groupEventsByVenue(events: Event[]) {
 }
 
 
-function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Event) => void }) {
+function UserLocationMarker({ position }: { position: [number, number] | null }) {
+  if (!position) return null;
+  const icon = divIcon({
+    html: `<div style="width:14px;height:14px;background:#19E3FF;border:2.5px solid #fff;border-radius:50%;box-shadow:0 0 14px #19E3FF,0 0 24px rgba(25,227,255,0.55);"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    className: "",
+  });
+  return <Marker position={position} icon={icon} />;
+}
+
+function MarkersLayer({ events, onSelect, rsvpEventIds }: { events: Event[]; onSelect: (e: Event) => void; rsvpEventIds: Set<number> }) {
   useMap();
   const byVenue = useMemo(() => groupEventsByVenue(events), [events]);
 
@@ -79,7 +94,8 @@ function MarkersLayer({ events, onSelect }: { events: Event[]; onSelect: (e: Eve
       {Object.entries(byVenue).map(([key, evts]) => {
         const [lat, lng] = key.split(",").map(Number);
         const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
-        const icon = buildPinIcon(days);
+        const hasRsvp = evts.some(e => rsvpEventIds.has(e.id));
+        const icon = buildPinIcon(days, hasRsvp);
         if (!icon) return null;
         const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
         return (
@@ -128,6 +144,15 @@ function MapResizer({ expanded }: { expanded: boolean }) {
   return null;
 }
 
+function MapFlyTo({ position }: { position: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!position) return;
+    map.flyTo(position, Math.max(map.getZoom(), 14), { duration: 0.8 });
+  }, [position, map]);
+  return null;
+}
+
 // ── Map panel — half-height by default, expands to fullscreen ──────────────
 export function MapView({ events, expanded, onExpand, onCollapse, onSelect, variant = "events" }: {
   events: Event[];
@@ -137,7 +162,43 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   onSelect: (e: Event) => void;
   variant?: "events" | "home";
 }) {
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState("");
+
+  const { data: checkIns = [] } = useQuery<Array<{ eventId: number }>>({
+    queryKey: ["/api/events/mine/check-ins"],
+    queryFn: () => fetch("/api/events/mine/check-ins").then(r => r.ok ? r.json() : []),
+    enabled: !!user,
+  });
+
+  const rsvpEventIds = useMemo(
+    () => new Set(checkIns.map(row => row.eventId)),
+    [checkIns],
+  );
+
+  const locateMe = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocateError("Geolocation not supported");
+      return;
+    }
+    setLocating(true);
+    setLocateError("");
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setUserPosition([pos.coords.latitude, pos.coords.longitude]);
+        setLocating(false);
+      },
+      () => {
+        setLocateError("Could not get location");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 12000 },
+    );
+  }, []);
+
   // Lazy-mount: only initialize Leaflet after first paint to avoid divIcon/window timing crash
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
@@ -208,10 +269,31 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
               maxZoom={19}
               subdomains="abcd"
             />
-            <MarkersLayer events={events} onSelect={onSelect} />
+            <MarkersLayer events={events} onSelect={onSelect} rsvpEventIds={rsvpEventIds} />
+            <UserLocationMarker position={userPosition} />
+            <MapFlyTo position={userPosition} />
             <MapResizer expanded={expanded} />
           </MapContainer>
         )}
+
+        {variant === "home" && (
+          <Link href="/events" className="home-map-all-events">
+            <span>View all {events.length} events</span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        )}
+
+        <button
+          type="button"
+          className="map-locate-btn"
+          onClick={(e) => { e.stopPropagation(); locateMe(); }}
+          title="Show my location on map"
+          aria-label="Show my location on map"
+        >
+          <Navigation size={14} />
+          <span>{locating ? "LOCATING..." : "YOU"}</span>
+        </button>
+        {locateError && <span className="map-locate-error">{locateError}</span>}
 
         {/* Expand / collapse button */}
         <button
@@ -586,8 +668,12 @@ export default function Events() {
 
       {/* Events listing */}
       <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 24 }}>
-          <h2 className="display" style={{ fontSize: "1.4rem", margin: 0 }}>{filtered.length} EVENTS</h2>
+        <div className="events-count-row">
+          <div className="events-count-banner">
+            <MapPin size={13} />
+            <span>{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
+            {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
+          </div>
           {activeFilters.length > 0 && (
             <button
               onClick={() => setActiveFilters([])}

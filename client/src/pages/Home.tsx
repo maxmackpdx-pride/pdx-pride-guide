@@ -272,6 +272,9 @@ export default function Home() {
         />
       </section>
 
+      <div className="section-slice-divider full-bleed" aria-hidden="true" />
+      <div className="section-fade-divider full-bleed" aria-hidden="true" />
+
       <section className="home-promo-stack">
         <div className="torn-divider full-bleed" />
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">

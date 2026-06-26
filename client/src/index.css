@@ -284,13 +284,14 @@ body::before {
   font-size: 0.68rem;
 }
 
-/* Display headline style */
+/* Display headline style — editorial condensed */
 .display {
   font-family: var(--font-display);
-  font-weight: 900;
+  font-weight: 800;
+  font-stretch: condensed;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
-  line-height: 0.95;
+  letter-spacing: 0.04em;
+  line-height: 0.92;
   text-shadow: 0 1px 0 #000, 0 0 18px rgba(255,255,255,0.05);
 }
 
@@ -449,7 +450,7 @@ body::before {
   display: flex;
   align-items: center;
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 29%, rgba(0,0,0,0.46) 56%, rgba(0,0,0,0.06) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 38%, transparent 72%),
     url("/motifs/hero-gigs.jpg") center / cover no-repeat,
     #050505;
 }
@@ -889,6 +890,129 @@ body::before {
   background: #050505;
 }
 
+.home-map-all-events {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  z-index: 1002;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.88);
+  border: 1.5px solid var(--neon-yellow);
+  color: var(--neon-yellow);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 0 16px rgba(204, 255, 0, 0.25);
+}
+
+.home-map-all-events:hover {
+  background: var(--neon-yellow);
+  color: #000;
+}
+
+.map-locate-btn {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1002;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1.5px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.map-locate-btn:hover {
+  background: var(--neon-cyan);
+  color: #000;
+}
+
+.home-map-preview .map-locate-btn {
+  left: auto;
+  right: 12px;
+  bottom: 44px;
+}
+
+.map-locate-error {
+  position: absolute;
+  left: 12px;
+  bottom: 48px;
+  z-index: 1002;
+  font-size: 0.62rem;
+  color: #ff6600;
+  background: rgba(0, 0, 0, 0.82);
+  padding: 4px 8px;
+}
+
+@keyframes map-pin-rsvp-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.14); opacity: 0.92; }
+}
+
+.map-pin-rsvp-pulse {
+  animation: map-pin-rsvp-pulse 2.2s ease-in-out infinite;
+}
+
+.events-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.events-count-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(8, 8, 8, 0.92);
+  border: 1px solid rgba(204, 255, 0, 0.35);
+  font-family: var(--font-board-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon-yellow);
+}
+
+.events-count-meta {
+  color: var(--text-meta);
+}
+
+.section-slice-divider {
+  height: 42px;
+  width: 100%;
+  background: linear-gradient(135deg, #050505 52%, transparent 52%);
+  opacity: 0.9;
+}
+
+.section-slice-divider.full-bleed,
+.section-fade-divider.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.section-fade-divider {
+  height: 28px;
+  width: 100%;
+  background: linear-gradient(180deg, transparent, rgba(204, 255, 0, 0.06) 40%, transparent);
+}
+
 @keyframes event-ticker-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -1198,7 +1322,7 @@ body::before {
 
 .about-hero {
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.88) 32%, rgba(0,0,0,0.38) 62%, rgba(0,0,0,0.06) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.5) 40%, transparent 78%),
     url("/motifs/hero-about.png") 56% 50% / cover no-repeat,
     #0a0a0a;
 }
@@ -1229,7 +1353,7 @@ body::before {
   overflow: hidden;
   border-bottom: 2px solid rgba(255,255,255,0.08);
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.88) 34%, rgba(0,0,0,0.36) 68%, rgba(0,0,0,0.05) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.5) 40%, transparent 78%),
     url("/motifs/hero-inbox.jpg") 52% 42% / cover no-repeat,
     #050505;
 }
@@ -1304,10 +1428,11 @@ body::before {
 
 .home-promo-panel::after {
   background:
+    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.78) 32%, rgba(0,0,0,0.34) 58%, transparent 100%),
     repeating-linear-gradient(135deg, rgba(255,255,255,0.038) 0 1px, transparent 1px 14px),
     radial-gradient(circle at 12% 80%, rgba(204,255,0,0.1), transparent 18rem);
-  mix-blend-mode: screen;
-  opacity: 0.48;
+  mix-blend-mode: normal;
+  opacity: 0.92;
 }
 
 .home-gifting-panel {
@@ -1384,7 +1509,7 @@ body::before {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.78) 36%, rgba(0,0,0,0.28) 62%, rgba(0,0,0,0.04) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 38%, transparent 72%),
     url("/gift-with-pride-hero.jpg") center / cover no-repeat;
   filter: saturate(1.15) contrast(1.06);
 }
@@ -2125,3 +2250,76 @@ footer a { transition: color 0.15s ease; }
 footer a:hover { color: #00FFFF !important; }
 
 /* Leaflet overrides — CartoDB Dark Matter tiles are already dark, NO filter */
+
+.parallax-container {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+@media (max-width: 900px), (prefers-reduced-motion: reduce) {
+  .parallax-container,
+  .home-promo-panel::before {
+    background-attachment: scroll;
+  }
+}
+
+.gigs-hero {
+  position: relative;
+  min-height: clamp(720px, 78vw, 980px);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.gigs-hero-bg.parallax-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  min-height: 100vh;
+  background-image: url("/motifs/hero-gigs.jpg");
+  filter: saturate(1.12) contrast(1.06);
+}
+
+.gigs-hero-bg.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 38%, transparent 72%);
+}
+
+.gigs-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(84px, 12vw, 150px) 20px;
+}
+
+.missed-connections-hero.parallax-container {
+  position: relative;
+  min-height: clamp(360px, 42vw, 520px);
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  background-image: url("/motifs/hero-missed-connections.jpg");
+  background-color: #050505;
+}
+
+.missed-connections-hero.parallax-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.48) 42%, transparent 78%);
+  z-index: 0;
+}
+
+.missed-connections-hero-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vw, 84px) 24px;
+}

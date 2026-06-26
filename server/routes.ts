@@ -967,7 +967,29 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const body = String(req.body.body || "").trim().slice(0, 1000);
     if (!body) return res.status(400).json({ error: "body required" });
     const msg = storage.createHostMessage({ eventId: evt.id, userId: user.id, body });
-    res.json(msg);
+    const notified = storage.notifyAttendeesOfHostUpdate(evt.id, user.id, evt.title, body);
+    res.json({ ...msg, notified });
+  });
+
+  app.post("/api/events/:id/transfer", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const user = storage.getUserById(req.session.userId!);
+    if (!user || evt.claimedBy !== user.username) {
+      return res.status(403).json({ error: "Only the current host can transfer this event" });
+    }
+    const target = String(req.body.target || "").trim();
+    const notes = String(req.body.notes || "").trim();
+    if (!target) return res.status(400).json({ error: "target required (username or email)" });
+    const req2 = storage.createModerationRequest({
+      type: "TRANSFER",
+      eventId: evt.id,
+      eventTitle: evt.title,
+      requesterName: user.displayName || user.username,
+      requesterEmail: user.email,
+      proof: `${target}${notes ? ` — ${notes}` : ""}`,
+    });
+    res.json(req2);
   });
 
   app.post("/api/events/:id/message-host", requireAuth, (req, res) => {

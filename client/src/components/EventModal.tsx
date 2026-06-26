@@ -14,7 +14,7 @@ const DAY_COLORS: Record<string, string> = {
   WED: "#CCFF00", THU: "#00FFFF", FRI: "#FF00CC", SAT: "#FF6600", SUN: "#FF2400"
 };
 
-type ModerationMode = null | "claim" | "remove";
+type ModerationMode = null | "claim" | "remove" | "flag" | "transfer";
 
 const claimEvent = (eventId: number) => {
   window.location.hash = `/submit/claim/${eventId}`;
@@ -101,11 +101,31 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     },
   });
 
+  const transferMutation = useMutation({
+    mutationFn: (data: { target: string; notes: string }) =>
+      apiRequest("POST", `/api/events/${event.id}/transfer`, data),
+    onSuccess: () => {
+      toast({ title: "Transfer requested", description: "An admin will verify the new host." });
+      setModMode(null);
+      setModForm({ name: "", email: "", proof: "" });
+    },
+    onError: () => toast({ title: "Could not request transfer", variant: "destructive" }),
+  });
+
+  const isHost = user?.username === event.claimedBy;
+
   const handleModSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (modMode === "transfer") {
+      if (!modForm.proof.trim()) return;
+      transferMutation.mutate({ target: modForm.proof.trim(), notes: modForm.name });
+      return;
+    }
     if (!modForm.name || !modForm.email || !modForm.proof) return;
+    const typeMap = { claim: "CLAIM", remove: "REMOVE", flag: "FLAG" } as const;
+    const modType = modMode && modMode in typeMap ? typeMap[modMode as keyof typeof typeMap] : "REMOVE";
     modMutation.mutate({
-      type: modMode === "claim" ? "CLAIM" : "REMOVE",
+      type: modType,
       eventId: event.id,
       eventTitle: event.title,
       requesterName: modForm.name,
@@ -344,9 +364,27 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               <button
                 data-testid="button-remove-event"
                 onClick={() => setModMode("remove")}
-                style={{ background: "none", border: "none", color: "#444", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+                style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
               >
                 ↗ Request Removal
+              </button>
+            )}
+            {modMode !== "flag" && (
+              <button
+                data-testid="button-flag-event"
+                onClick={() => setModMode("flag")}
+                style={{ background: "none", border: "none", color: "#FF6600", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+              >
+                ↗ Flag Data Error
+              </button>
+            )}
+            {isHost && modMode !== "transfer" && (
+              <button
+                data-testid="button-transfer-event"
+                onClick={() => setModMode("transfer")}
+                style={{ background: "none", border: "none", color: "#CCFF00", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+              >
+                ↗ Transfer Host
               </button>
             )}
           </div>
@@ -357,59 +395,73 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               data-testid="form-moderation"
               style={{ background: "#0a0a0a", border: `2px solid ${modMode === "claim" ? "#00FFFF" : "#333"}`, padding: "20px", marginBottom: 24 }}
             >
-              <p className="display" style={{ fontSize: "1rem", color: modMode === "claim" ? "#00FFFF" : "#fff", marginBottom: 4 }}>
-                {modMode === "claim" ? "REQUEST TO CLAIM THIS EVENT" : "REQUEST REMOVAL"}
+              <p className="display" style={{ fontSize: "1rem", color: modMode === "claim" ? "#00FFFF" : modMode === "flag" ? "#FF6600" : modMode === "transfer" ? "#CCFF00" : "#fff", marginBottom: 4 }}>
+                {modMode === "claim" && "REQUEST TO CLAIM THIS EVENT"}
+                {modMode === "remove" && "REQUEST REMOVAL"}
+                {modMode === "flag" && "FLAG A DATA ERROR"}
+                {modMode === "transfer" && "TRANSFER HOST TO SOMEONE ELSE"}
               </p>
               <p style={{ fontSize: "0.78rem", color: "var(--text-meta)", marginBottom: 16, lineHeight: 1.5 }}>
-                {modMode === "claim"
-                  ? "Tell us why you're the organizer. Include a link to your website, social, or any proof. An admin will verify and transfer ownership."
-                  : "Tell us why this event should be removed. If you're the organizer or have a specific reason, explain below. An admin will review."}
+                {modMode === "claim" && "Tell us why you're the organizer. Include a link to your website, social, or any proof. An admin will verify and transfer ownership."}
+                {modMode === "remove" && "Tell us why this event should be removed. If you're the organizer or have a specific reason, explain below. An admin will review."}
+                {modMode === "flag" && "Wrong time, venue, link, or description? Tell us what's off. Admins use this to fix the listing — not to remove it."}
+                {modMode === "transfer" && "Release hosting to another verified organizer. Enter their username or email. An admin confirms the handoff."}
               </p>
               <form onSubmit={handleModSubmit}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                {modMode !== "transfer" && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <input
+                      data-testid="input-mod-name"
+                      type="text" placeholder="Your name" value={modForm.name}
+                      onChange={e => setModForm(f => ({ ...f, name: e.target.value }))}
+                      style={{ padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)" }}
+                    />
+                    <input
+                      data-testid="input-mod-email"
+                      type="email" placeholder="Your email" value={modForm.email}
+                      onChange={e => setModForm(f => ({ ...f, email: e.target.value }))}
+                      style={{ padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)" }}
+                    />
+                  </div>
+                )}
+                {modMode === "transfer" && (
                   <input
-                    data-testid="input-mod-name"
-                    type="text" placeholder="Your name" value={modForm.name}
+                    type="text"
+                    placeholder="Optional note for admin"
+                    value={modForm.name}
                     onChange={e => setModForm(f => ({ ...f, name: e.target.value }))}
-                    style={{ padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)" }}
-                    onFocus={e => (e.target.style.borderColor = modMode === "claim" ? "#00FFFF" : "#888")}
-                    onBlur={e => (e.target.style.borderColor = "#333")}
+                    style={{ width: "100%", padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", marginBottom: 10, boxSizing: "border-box" }}
                   />
-                  <input
-                    data-testid="input-mod-email"
-                    type="email" placeholder="Your email" value={modForm.email}
-                    onChange={e => setModForm(f => ({ ...f, email: e.target.value }))}
-                    style={{ padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)" }}
-                    onFocus={e => (e.target.style.borderColor = modMode === "claim" ? "#00FFFF" : "#888")}
-                    onBlur={e => (e.target.style.borderColor = "#333")}
-                  />
-                </div>
+                )}
                 <textarea
                   data-testid="input-mod-proof"
-                  placeholder={modMode === "claim" ? "Proof you're the organizer (website, social link, description...)" : "Reason for removal"}
+                  placeholder={
+                    modMode === "claim" ? "Proof you're the organizer (website, social link, description...)"
+                    : modMode === "flag" ? "What's wrong with this listing?"
+                    : modMode === "transfer" ? "New host username or email"
+                    : "Reason for removal"
+                  }
                   value={modForm.proof}
                   onChange={e => setModForm(f => ({ ...f, proof: e.target.value }))}
                   rows={3}
                   style={{ width: "100%", padding: "8px 12px", background: "#000", border: "1px solid #333", color: "#fff", fontSize: "0.82rem", outline: "none", fontFamily: "var(--font-body)", resize: "vertical", boxSizing: "border-box", marginBottom: 10 }}
-                  onFocus={e => (e.target.style.borderColor = modMode === "claim" ? "#00FFFF" : "#888")}
-                  onBlur={e => (e.target.style.borderColor = "#333")}
                 />
                 <div style={{ display: "flex", gap: 8 }}>
                   <button
                     type="submit"
                     data-testid="button-submit-mod"
-                    disabled={modMutation.isPending}
+                    disabled={modMutation.isPending || transferMutation.isPending}
                     className="display"
                     style={{
                       padding: "8px 20px", border: "2px solid",
-                      borderColor: modMode === "claim" ? "#00FFFF" : "#888",
+                      borderColor: modMode === "claim" ? "#00FFFF" : modMode === "flag" ? "#FF6600" : modMode === "transfer" ? "#CCFF00" : "#888",
                       background: "transparent",
-                      color: modMode === "claim" ? "#00FFFF" : "#888",
-                      fontSize: "0.82rem", cursor: "pointer", opacity: modMutation.isPending ? 0.5 : 1,
+                      color: modMode === "claim" ? "#00FFFF" : modMode === "flag" ? "#FF6600" : modMode === "transfer" ? "#CCFF00" : "#888",
+                      fontSize: "0.82rem", cursor: "pointer", opacity: modMutation.isPending || transferMutation.isPending ? 0.5 : 1,
                       letterSpacing: "0.05em", textTransform: "uppercase",
                     }}
                   >
-                    {modMutation.isPending ? "SUBMITTING..." : "SUBMIT REQUEST"}
+                    {(modMutation.isPending || transferMutation.isPending) ? "SUBMITTING..." : "SUBMIT REQUEST"}
                   </button>
                   <button
                     type="button"

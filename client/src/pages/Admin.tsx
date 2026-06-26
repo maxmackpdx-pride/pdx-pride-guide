@@ -525,7 +525,7 @@ export default function Admin() {
         {/* ── MODERATION ── */}
         {activeTab === "moderation" && (
           <div>
-            <p className="text-white/40 text-sm mb-6">Claim and remove requests from the public.</p>
+            <p className="text-white/40 text-sm mb-6">Claim, remove, flag, and transfer requests from the public.</p>
             {modError ? (
               <AdminLoadError label="moderation requests" onRetry={() => refetchMod()} />
             ) : modLoading ? (
@@ -564,7 +564,10 @@ export default function Admin() {
                       {modRequests.filter(r => r.status.toUpperCase() !== "PENDING").map(req => (
                         <div key={req.id} className="p-4 border border-white/10 flex items-center justify-between gap-4" style={{ background: "#0d0d0d" }}>
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="sticker text-xs flex-shrink-0" style={{ color: req.type === "CLAIM" ? "#00FFFF" : "#FF6600", borderColor: req.type === "CLAIM" ? "#00FFFF" : "#FF6600" }}>{req.type}</span>
+                            <span className="sticker text-xs flex-shrink-0" style={{
+                              color: req.type === "CLAIM" ? "#00FFFF" : req.type === "TRANSFER" ? "#CCFF00" : "#FF6600",
+                              borderColor: req.type === "CLAIM" ? "#00FFFF" : req.type === "TRANSFER" ? "#CCFF00" : "#FF6600",
+                            }}>{req.type}</span>
                             <p className="display text-sm text-white/50 truncate">Event #{req.eventId}{req.eventTitle ? ` — ${req.eventTitle}` : ""}</p>
                           </div>
                           <span className="sticker text-xs flex-shrink-0" style={{ color: req.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400", borderColor: req.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400" }}>
@@ -959,7 +962,17 @@ function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove
   onApprove: () => void; onReject: () => void; resolving: boolean;
 }) {
   const isClaim = req.type === "CLAIM";
-  const accentColor = isClaim ? "#00FFFF" : "#FF6600";
+  const isFlag = req.type === "FLAG";
+  const isTransfer = req.type === "TRANSFER";
+  const accentColor = isClaim ? "#00FFFF" : isTransfer ? "#CCFF00" : isFlag ? "#FF6600" : "#FF6600";
+  const proofLabel = isClaim ? "PROOF OF OWNERSHIP"
+    : isFlag ? "DATA ERROR REPORT"
+    : isTransfer ? "TRANSFER TARGET"
+    : "REASON FOR REMOVAL";
+  const approveLabel = isClaim ? "GRANT CLAIM"
+    : isFlag ? "ACK FLAG"
+    : isTransfer ? "APPROVE TRANSFER"
+    : "APPROVE REMOVAL";
 
   return (
     <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? accentColor : "#222" }}>
@@ -967,7 +980,7 @@ function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="sticker text-xs" style={{ color: accentColor, borderColor: accentColor }}>{req.type}</span>
-            {!isClaim && <span className="sticker text-xs flex items-center gap-1" style={{ color: "#FF6600", borderColor: "#FF6600" }}><AlertTriangle size={9} /> REMOVE</span>}
+            {req.type === "REMOVE" && <span className="sticker text-xs flex items-center gap-1" style={{ color: "#FF6600", borderColor: "#FF6600" }}><AlertTriangle size={9} /> REMOVE</span>}
           </div>
           <p className="display text-lg text-white">{req.eventTitle || `Event #${req.eventId}`}</p>
           <p className="text-white/40 text-xs mt-1">{req.requesterName} · {req.requesterEmail}</p>
@@ -978,7 +991,7 @@ function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove
         <div className="px-5 pb-5 border-t border-white/10 pt-4">
           {req.proof && (
             <div className="mb-4 bg-black/30 p-3 border border-white/10">
-              <p className="text-white/30 text-xs uppercase tracking-wide mb-1">{isClaim ? "PROOF OF OWNERSHIP" : "REASON FOR REMOVAL"}</p>
+              <p className="text-white/30 text-xs uppercase tracking-wide mb-1">{proofLabel}</p>
               <p className="text-white/80 text-sm">{req.proof}</p>
             </div>
           )}
@@ -992,7 +1005,7 @@ function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove
               <button onClick={onApprove} disabled={resolving}
                 className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
                 style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
-                <CheckCircle size={14} />{resolving ? "PROCESSING..." : isClaim ? "GRANT CLAIM" : "APPROVE REMOVAL"}
+                <CheckCircle size={14} />{resolving ? "PROCESSING..." : approveLabel}
               </button>
               <button onClick={onReject} disabled={resolving}
                 className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"

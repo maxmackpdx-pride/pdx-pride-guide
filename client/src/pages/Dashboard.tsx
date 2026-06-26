@@ -101,8 +101,14 @@ export default function Dashboard() {
       if (!res.ok) throw new Error((await res.json()).error || "Could not post update");
       return res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Host update posted", description: "Visible on the event detail page." });
+    onSuccess: (data: { notified?: number }) => {
+      const n = data?.notified ?? 0;
+      toast({
+        title: "Host update posted",
+        description: n > 0
+          ? `Visible on the event page. ${n} attendee${n === 1 ? "" : "s"} notified in inbox.`
+          : "Visible on the event detail page.",
+      });
       setHostUpdate("");
     },
     onError: () => toast({ title: "Error", description: "Could not post host update.", variant: "destructive" }),

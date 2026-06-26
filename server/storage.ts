@@ -1481,6 +1481,7 @@ export interface IStorage {
   // Host messages
   getHostMessages(eventId: number, limit?: number): any[];
   createHostMessage(data: InsertHostMessage): HostMessage;
+  notifyAttendeesOfHostUpdate(eventId: number, hostUserId: number, eventTitle: string, body: string): number;
   // Messages
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
@@ -1669,8 +1670,24 @@ export const storage: IStorage = {
     db.update(moderationRequests).set({ status, adminNotes: adminNotes || null }).where(eq(moderationRequests.id, id)).run();
     if (status === "APPROVED") {
       const req = db.select().from(moderationRequests).where(eq(moderationRequests.id, id)).get();
-      if (req?.type === "REMOVE") {
+      if (!req) return;
+      if (req.type === "REMOVE") {
         db.update(events).set({ status: "REMOVED" }).where(eq(events.id, req.eventId)).run();
+      }
+      if (req.type === "TRANSFER") {
+        const target = String(req.proof || "").trim();
+        const nextOwner = storage.getUserByUsername(target) || storage.getUserByEmail(target);
+        if (nextOwner) {
+          db.update(events).set({ claimedBy: nextOwner.username, isClaimable: false }).where(eq(events.id, req.eventId)).run();
+        }
+      }
+      if (req.type === "FLAG") {
+        const evt = db.select().from(events).where(eq(events.id, req.eventId)).get();
+        if (evt) {
+          db.update(events).set({
+            adminNotes: [evt.adminNotes, `FLAG: ${req.proof}`].filter(Boolean).join(" | ").slice(0, 500),
+          }).where(eq(events.id, req.eventId)).run();
+        }
       }
     }
   },
@@ -1783,6 +1800,23 @@ export const storage: IStorage = {
       ...data,
       createdAt: new Date().toISOString(),
     }).returning().get();
+  },
+  notifyAttendeesOfHostUpdate(eventId, hostUserId, eventTitle, body) {
+    const rows = sqlite.prepare(`
+      SELECT DISTINCT user_id AS userId
+      FROM attendances
+      WHERE event_id = ? AND is_active = 1 AND user_id IS NOT NULL AND user_id != ?
+    `).all(eventId, hostUserId) as { userId: number }[];
+    let sent = 0;
+    for (const row of rows) {
+      storage.sendMessage(hostUserId, row.userId, `Host update: ${eventTitle}`, body, {
+        contextType: "HOST_UPDATE",
+        contextId: eventId,
+        contextLabel: eventTitle,
+      });
+      sent += 1;
+    }
+    return sent;
   },
   // Messages
   getInbox(userId) {

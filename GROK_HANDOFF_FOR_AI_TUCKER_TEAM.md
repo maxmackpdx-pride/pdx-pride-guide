@@ -123,11 +123,36 @@ After any deploy touching `server/` or uploads:
 
 ---
 
-## Latest session — 2026-06-25 (Grok)
+## Latest session — 2026-06-26 (Grok) — Update 11
 
-**HEAD:** `84fdb08` · **Live bundle:** `index-Bpm-pKgL.js` · **Site:** https://www.prideguidepdx.com · **API:** 44 events OK
+**HEAD:** (this commit) · **Site:** https://www.prideguidepdx.com · **API:** 44 events OK
 
 **Full memory refresh:** `SESSION_HANDOFF_2026-06-23.md` + **Saved data persistence** section above (read first).
+
+### Grok shipped — map, events UX, host notifications, design polish (Update 11)
+
+| Area | What |
+|------|------|
+| **Map personal nav** | `YOU` geolocation button on home + events maps; cyan user dot; `MapFlyTo` centers on position |
+| **Home map → events** | `View all N events` link overlay on home map preview |
+| **RSVP pulse pins** | Pins glow/pulse when logged-in user has active check-in at venue (`/api/events/mine/check-ins`) |
+| **Host update notifications** | `notifyAttendeesOfHostUpdate()` — inbox messages (`contextType: HOST_UPDATE`) to all active RSVPs when host posts |
+| **Flag data error** | Event modal → `FLAG` moderation request; admin appends to `adminNotes` on approve |
+| **Transfer host** | Event modal (current host only) → `POST /api/events/:id/transfer` → `TRANSFER` moderation; admin sets `claimedBy` on approve |
+| **Events count banner** | Replaced large heading with compact `.events-count-banner` |
+| **Home panel gradients** | Dark left → transparent right on `.home-promo-panel::after` |
+| **Hero gradients** | Dark bottom → transparent top on gifting/gigs/about/inbox/missed/pride-work heroes |
+| **Typography** | `.display` tightened: weight 800, condensed stretch, `letter-spacing: 0.04em` |
+| **Section dividers** | `.section-slice-divider` + `.section-fade-divider` on home before promo stack |
+| **Admin moderation** | FLAG / TRANSFER labels + approve copy in `ModerationCard` |
+| **Dashboard** | Host update toast shows attendee inbox notification count |
+
+**Codex UAT after deploy:**
+- [ ] Map `YOU` button on iOS (geolocation permission)
+- [ ] RSVP pulse only when logged in with check-ins
+- [ ] Host posts update → attendee sees inbox thread (`HOST UPDATE`)
+- [ ] Flag + transfer requests appear in Admin → moderation tab
+- [ ] Home map link → `/events`; events count is small banner not hero heading
 
 ### Grok shipped since Claude credits ran out (do not redo)
 
@@ -137,6 +162,7 @@ After any deploy touching `server/` or uploads:
 | `34206f6` | UX audit P0/P1: API error + retry UI (Home, Events, Gifting, Inbox, Missed Connections); gifting rules checkbox enforced; filtered empty states; on-brand 404; inbox mobile back-button; design polish (`::selection`, board film grain, `flickr` hero text, live badge blink) |
 | `2c40987` | Contrast pass (`--text-muted/meta/faint` tokens); dashboard section fetch errors + retry banner |
 | `84fdb08` | Live Portland weather (Open-Meteo); admin tab load errors + retry; submit claim unclaimed-events error |
+| `bb111dc` | Parallax on all hero panels |
 
 **Design ref decoded locally:** `.design-ref/` (gifting, ill-be-there, profile-dashboard, motion-guide) — same content as Claude's uploaded HTML in local-agent-mode-sessions.
 
@@ -397,4 +423,4 @@ If apex 404s again: check Railway custom-domain target vs Squarespace ALIAS; nev
 
 ---
 
-*Handoff For AI Tucker Team — updated by Grok 2026-06-25. HEAD `84fdb08`. Read **Saved data persistence** before any feature that saves user content.*
+*Handoff For AI Tucker Team — updated by Grok 2026-06-26 (Update 11). Read **Saved data persistence** before any feature that saves user content.*
