@@ -14,13 +14,17 @@ if (!jsFile || !cssFile) {
 const js = readFileSync(join(assetsDir, jsFile), "utf8");
 const css = readFileSync(join(assetsDir, cssFile), "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
+const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css", "utf8");
 
 const checks = {
   posterGrid: js.includes("events-poster-grid"),
   noEventBoardCard: !js.includes("EventBoardCard"),
   pageHeroPanel: sourceCss.includes(".page-hero__panel"),
   noRainbowButtonHover: !sourceCss.includes("linear-gradient(90deg, #E40303"),
-  barlowFonts: sourceCss.includes("--font-board-display: 'Barlow Condensed'") && !sourceCss.includes("Anton"),
+  barlowFonts:
+    sourceCss.includes("--font-board-display: 'Barlow Condensed'") &&
+    !sourceCss.includes("Anton") &&
+    !dashboardCss.includes("DM Mono"),
   hiddenBoardKicker: sourceCss.includes(".page-hero .board-kicker") && sourceCss.includes("display: none"),
   noPageHeroKickers: !js.includes("PRIDE WEEKEND 2026") && !js.includes("ABOUT THIS GUIDE"),
 };

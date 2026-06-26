@@ -104,7 +104,7 @@
 
 .dash-subtitle {
   margin: 6px 0 0;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--dash-muted);
@@ -117,7 +117,7 @@
 }
 
 .dash-btn {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -190,7 +190,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -207,7 +207,7 @@
 }
 
 .dash-pill-btn {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -390,7 +390,7 @@
 }
 
 .dash-drawer-count {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -450,7 +450,7 @@
 
 .dash-item-meta {
   display: block;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   letter-spacing: 0.03em;
   color: var(--dash-muted);
@@ -459,7 +459,7 @@
 
 .dash-chip {
   flex: 0 0 auto;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -475,7 +475,7 @@
 }
 
 .dash-mini-btn {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -490,7 +490,7 @@
 .dash-drawer-cta {
   display: inline-block;
   padding: 14px 0 16px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -531,7 +531,7 @@
 }
 
 .dash-metric-label {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -559,7 +559,7 @@
 }
 
 .dash-admin-tab {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;

@@ -77,7 +77,7 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
                       >
                         {name}
                       </span>
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6f736c" }}>
+                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: "#6f736c" }}>
                         {formatTime(msg.createdAt || msg.created_at)}
                       </span>
                     </span>
