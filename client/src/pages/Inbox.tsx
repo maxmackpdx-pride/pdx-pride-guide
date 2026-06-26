@@ -4,6 +4,8 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import UserAvatar from "@/components/UserAvatar";
+import { counterpartyAvatar, senderAvatar } from "@/lib/inboxAvatar";
 import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTalent";
 
 type Message = {
@@ -20,8 +22,14 @@ type Message = {
   createdAt: string;
   from_username?: string;
   from_display_name?: string;
+  from_photo_url?: string | null;
+  from_avatar_choice?: number | null;
+  from_avatar_ring?: string | null;
   to_username?: string;
   to_display_name?: string;
+  to_photo_url?: string | null;
+  to_avatar_choice?: number | null;
+  to_avatar_ring?: string | null;
   masked?: boolean;
 };
 
@@ -237,13 +245,30 @@ export default function Inbox() {
               </div>
             ) : msgs.length === 0 ? (
               <div style={{ color: "#9d9a92", padding: "24px 0" }}>No scoped messages yet.</div>
-            ) : msgs.map(msg => (
+            ) : msgs.map(msg => {
+              const party = counterpartyAvatar(msg, tab);
+              return (
               <button key={msg.id} onClick={() => openThread(msg)} style={{
                 width: "100%", textAlign: "left", padding: "14px 18px", border: "none", borderBottom: "1px solid #111",
                 cursor: "pointer", background: activeThread?.id === msg.id ? "#0d0d0d" : "transparent",
                 display: "flex", gap: 12, alignItems: "flex-start",
               }}>
-                {!msg.isRead && tab === "inbox" && <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF00CC", marginTop: 6, flexShrink: 0 }} />}
+                <span className="inbox-list-avatar" style={{ position: "relative", flexShrink: 0 }}>
+                  <UserAvatar
+                    photoUrl={party.photoUrl}
+                    avatarChoice={party.avatarChoice ?? undefined}
+                    avatarRing={party.avatarRing}
+                    displayName={party.displayName ?? undefined}
+                    username={party.username ?? undefined}
+                    size={40}
+                  />
+                  {!msg.isRead && tab === "inbox" && (
+                    <span style={{
+                      position: "absolute", top: -1, right: -1, width: 10, height: 10,
+                      borderRadius: "50%", background: "#FF00CC", border: "2px solid #000",
+                    }} />
+                  )}
+                </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span className="display" style={{ display: "block", fontSize: "0.88rem", color: "#fff", marginBottom: 3 }}>
                     {msg.subject || "(no subject)"}
@@ -257,7 +282,8 @@ export default function Inbox() {
                   </span>
                 </span>
               </button>
-            ))}
+            );
+            })}
           </div>
 
           {activeThread && (
@@ -328,18 +354,41 @@ export default function Inbox() {
               <div style={{ maxHeight: 330, overflowY: "auto", marginBottom: 16 }}>
                 {threadError ? (
                   <p style={{ color: "#FF6600", fontSize: "0.85rem" }}>Could not load this thread.</p>
-                ) : thread.map(m => (
+                ) : thread.map(m => {
+                  const isSelf = m.fromUserId === user.id;
+                  const avatar = isSelf
+                    ? {
+                        photoUrl: user.photoUrl,
+                        avatarChoice: user.avatarChoice,
+                        avatarRing: user.avatarRing,
+                        displayName: user.displayName,
+                        username: user.username,
+                      }
+                    : senderAvatar(m);
+                  return (
                   <div key={m.id} style={{
                     marginBottom: 12, padding: "10px 14px",
-                    background: m.fromUserId === user.id ? "#0a0a0a" : "#111",
-                    borderLeft: `3px solid ${m.fromUserId === user.id ? "#CCFF00" : "#555"}`,
+                    background: isSelf ? "#0a0a0a" : "#111",
+                    borderLeft: `3px solid ${isSelf ? "#CCFF00" : "#555"}`,
+                    display: "flex", gap: 10, alignItems: "flex-start",
                   }}>
-                    <div style={{ fontSize: "0.7rem", color: "#555", marginBottom: 4 }}>
-                      {m.fromUserId === user.id ? "You" : (m.from_display_name || m.from_username || "someone")} · {new Date(m.createdAt).toLocaleString()}
+                    <UserAvatar
+                      photoUrl={avatar.photoUrl}
+                      avatarChoice={avatar.avatarChoice ?? undefined}
+                      avatarRing={avatar.avatarRing}
+                      displayName={avatar.displayName ?? undefined}
+                      username={avatar.username ?? undefined}
+                      size={32}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: "0.7rem", color: "#555", marginBottom: 4 }}>
+                        {isSelf ? "You" : (m.from_display_name || m.from_username || "someone")} · {new Date(m.createdAt).toLocaleString()}
+                      </div>
+                      <div style={{ color: "#ccc", fontSize: "0.88rem", lineHeight: 1.5 }}>{m.body}</div>
                     </div>
-                    <div style={{ color: "#ccc", fontSize: "0.88rem", lineHeight: 1.5 }}>{m.body}</div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <textarea
                 style={inputStyle}

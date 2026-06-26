@@ -184,7 +184,7 @@ export function getPersistenceConfig(): PersistenceConfig {
 
 export function assertProductionPersistence() {
   const config = getPersistenceConfig();
-  if (!config.production) return config;
+  if (!config.production || process.env.LOCAL_PREVIEW === "1") return config;
   if (config.errors.length) {
     console.error("[persistence] FATAL — user data will not survive deploys:");
     config.errors.forEach((err) => console.error(`  - ${err}`));

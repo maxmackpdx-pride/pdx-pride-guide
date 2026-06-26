@@ -6,8 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import EventTypeTag, { EventTypeTagList } from "../components/EventTypeTag";
+import SpectrumLoader from "@/components/SpectrumLoader";
+import ScrollReveal from "@/components/ScrollReveal";
 import EventModal from "../components/EventModal";
-import AttendanceCluster from "../components/AttendanceCluster";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -343,7 +344,7 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   );
 }
 
-function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => void; viewMode: "grid" | "list" }) {
+function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event; onClick: () => void; viewMode: "grid" | "list"; revealDelay?: number }) {
   const typeTags = getEventTypeTagsForEvent(event);
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
@@ -353,6 +354,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
 
   if (viewMode === "list") {
     return (
+      <ScrollReveal delay={revealDelay}>
       <div
         className="poster-card"
         onClick={onClick}
@@ -408,11 +410,13 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
           <EventTypeTagList labels={typeTags} size="sm" max={3} />
         </div>
       </div>
+      </ScrollReveal>
     );
   }
 
   // Grid view
   return (
+    <ScrollReveal delay={revealDelay}>
     <div
       className="poster-card"
       onClick={onClick}
@@ -504,6 +508,7 @@ function EventCard({ event, onClick, viewMode }: { event: Event; onClick: () => 
         </>
       )}
     </div>
+    </ScrollReveal>
   );
 }
 
@@ -512,12 +517,10 @@ export default function Events() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [attendanceEvent, setAttendanceEvent] = useState<Event | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mapExpanded, setMapExpanded] = useState(false);
 
   const openEvent = useCallback((event: Event) => {
-    setAttendanceEvent(event);
     setSelectedEvent(event);
   }, []);
 
@@ -545,17 +548,6 @@ export default function Events() {
     }
     return true;
   }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
-
-  useEffect(() => {
-    if (filtered.length === 0) {
-      setAttendanceEvent(null);
-      return;
-    }
-    setAttendanceEvent(prev => {
-      if (prev && filtered.some(e => e.id === prev.id)) return prev;
-      return filtered[0];
-    });
-  }, [filtered]);
 
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
@@ -692,25 +684,6 @@ export default function Events() {
             <span>{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
             {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
           </div>
-          {attendanceEvent && !selectedEvent && filtered.length > 0 && (
-            <button
-              type="button"
-              data-testid="jump-ill-be-there"
-              onClick={() => document.getElementById("ill-be-there")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="display"
-              style={{
-                background: "transparent",
-                border: "2px solid #CCFF00",
-                color: "#CCFF00",
-                padding: "6px 14px",
-                fontSize: "0.72rem",
-                cursor: "pointer",
-                letterSpacing: "0.08em",
-              }}
-            >
-              I'LL BE THERE ↓
-            </button>
-          )}
           {activeFilters.length > 0 && (
             <button
               onClick={() => setActiveFilters([])}
@@ -722,17 +695,11 @@ export default function Events() {
         </div>
 
         {isLoading ? (
-          <div
-            className={viewMode === "grid" ? "events-poster-grid" : undefined}
-            style={{
-              display: viewMode === "grid" ? undefined : "flex",
-              flexDirection: "column",
-              gap: viewMode === "grid" ? undefined : 16,
-            }}
-          >
-            {Array(viewMode === "grid" ? 10 : 6).fill(0).map((_, i) => (
-              <div key={i} style={{ height: viewMode === "grid" ? undefined : 72, aspectRatio: viewMode === "grid" ? "2/3" : undefined, background: "#111" }} />
-            ))}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, padding: "48px 20px" }}>
+            <SpectrumLoader variant="ring" />
+            <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", fontFamily: "var(--font-display)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Loading events
+            </p>
           </div>
         ) : isError ? (
           <div style={{ textAlign: "center", padding: "60px 20px", border: "2px dashed #FF6600", background: "rgba(8,8,8,0.72)" }}>
@@ -760,67 +727,19 @@ export default function Events() {
           </div>
         ) : viewMode === "grid" ? (
           <div className="events-poster-grid">
-            {filtered.map(e => (
-              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="grid" />
+            {filtered.map((e, i) => (
+              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="grid" revealDelay={(i % 6) * 70} />
             ))}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {filtered.map(e => (
-              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="list" />
+            {filtered.map((e, i) => (
+              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="list" revealDelay={(i % 8) * 55} />
             ))}
           </div>
         )}
 
-        {attendanceEvent && !selectedEvent && filtered.length > 0 && (
-          <section
-            id="ill-be-there"
-            className="events-attendance-section"
-            data-testid="events-attendance-section"
-            style={{ marginTop: 48 }}
-          >
-            <div style={{ marginBottom: 8 }}>
-              <h2 className="display" style={{ fontSize: "1.5rem", color: "#CCFF00", margin: "0 0 10px", lineHeight: 1 }}>
-                I'LL BE THERE
-              </h2>
-              <p style={{ color: "var(--text-meta)", fontSize: "0.8rem", margin: "0 0 12px", lineHeight: 1.45 }}>
-                Floating avatar bubbles show who&apos;s going — pick a vibe, pop in, message other attendees. Open any event for the same panel on that listing.
-              </p>
-              <span
-                className="sticker"
-                style={{
-                  color: DAY_COLORS[attendanceEvent.dayOfWeek || ""] || "#CCFF00",
-                  borderColor: DAY_COLORS[attendanceEvent.dayOfWeek || ""] || "#CCFF00",
-                  fontSize: "0.58rem",
-                }}
-              >
-                {attendanceEvent.dayOfWeek}
-              </span>
-              <h3 className="display" style={{ fontSize: "1.1rem", color: "#fff", margin: "10px 0 4px", lineHeight: 1.05 }}>
-                {attendanceEvent.title}
-              </h3>
-              <p style={{ color: "var(--text-meta)", fontSize: "0.8rem", margin: 0 }}>
-                {attendanceEvent.venueName}
-                <span style={{ color: "#555" }}> · </span>
-                <button
-                  type="button"
-                  onClick={() => openEvent(attendanceEvent)}
-                  style={{ background: "none", border: "none", color: "#00FFFF", cursor: "pointer", padding: 0, fontSize: "0.8rem", fontFamily: "var(--font-body)" }}
-                >
-                  Open event details
-                </button>
-              </p>
-            </div>
-            <AttendanceCluster eventId={attendanceEvent.id} />
-          </section>
-        )}
-
-        <div className="zine-callout" style={{
-          marginTop: 60, textAlign: "center", padding: "36px 20px",
-          background: "#050505", border: "1px solid #1a1a1a",
-        }}>
-          <div className="motif events-callout-protest" style={{ backgroundImage: 'url("/motifs/pride-protest.jpg")' }} aria-hidden="true" />
-          <div className="motif events-callout-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
+        <div className="zine-callout events-submit-callout" style={{ marginTop: 60, textAlign: "center", padding: "36px 20px" }}>
           <div className="display" style={{ fontSize: "1.3rem", marginBottom: 6 }}>NOT SEEING YOUR EVENT?</div>
           <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
             Submit it or claim an existing listing.

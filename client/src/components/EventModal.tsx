@@ -9,9 +9,11 @@ import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "./EventTypeTag";
 import AttendanceCluster from "./AttendanceCluster";
 import MissedConnectionsPanel from "./MissedConnectionsPanel";
+import EventLinkChoiceMenu from "./EventLinkChoiceMenu";
 import AuthModal from "./AuthModal";
 import UserAvatar from "./UserAvatar";
 import EventTalentPanel from "./EventTalentPanel";
+import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from "@/lib/eventLinks";
 
 type EventHostProfile = {
   userId: number;
@@ -43,6 +45,8 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   const [hostMessage, setHostMessage] = useState("");
   const [coHostForm, setCoHostForm] = useState({ username: "", email: "" });
   const [showAddCoHost, setShowAddCoHost] = useState(false);
+  const [showCalPicker, setShowCalPicker] = useState(false);
+  const [showMapsPicker, setShowMapsPicker] = useState(false);
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<EventHostProfile[]>({
     queryKey: ["/api/events", event.id, "hosts"],
@@ -69,15 +73,6 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
   });
   const endTime = new Date(event.dateEnd).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-  const calUrl = () => {
-    const fmt = (iso: string) => {
-      const d = new Date(iso);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
-    };
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${fmt(event.dateStart)}/${fmt(event.dateEnd)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.address || event.venueName)}&ctz=America/Los_Angeles`;
-  };
 
   const modMutation = useMutation({
     mutationFn: (data: { type: string; eventId: number; eventTitle: string; requesterName: string; requesterEmail: string; proof: string }) =>
@@ -231,10 +226,15 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             }}
           >✕</button>
 
-          {/* Tags */}
+          {/* Tags — day, filters, and event types at top */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
             <span className="sticker" style={{ color: dayColor, borderColor: dayColor }}>{event.dayOfWeek}</span>
             <EventTypeTagList labels={typeTags} size="md" />
+            {types.map(t => (
+              <span key={t} className="sticker" style={{ color: dayColor, borderColor: dayColor, opacity: 0.92 }}>
+                {t.replace(/-/g, " ")}
+              </span>
+            ))}
             {hasPendingClaim ? (
               <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>
                 CLAIM PENDING
@@ -360,8 +360,37 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.85rem", color: "#fff" }}>
               {startTime} – {endTime}
             </div>
-            {event.address && !event.isPrivate && (
-              <div style={{ fontSize: "0.8rem", color: "var(--text-meta)", marginTop: 4 }}>{event.address}</div>
+            {!event.isPrivate && (event.address || event.venueName) && (
+              <div style={{ marginTop: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowCalPicker(false); setShowMapsPicker(v => !v); }}
+                  data-testid="button-open-maps"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    color: "#00FFFF",
+                    fontSize: "0.8rem",
+                    fontFamily: "var(--font-body)",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 3,
+                  }}
+                >
+                  {event.address || event.venueName} ↗
+                </button>
+                <EventLinkChoiceMenu
+                  open={showMapsPicker}
+                  onClose={() => setShowMapsPicker(false)}
+                  title="Open in maps"
+                  options={[
+                    { label: "Google Maps", hint: "Works on all devices", onClick: () => window.open(googleMapsUrl(event), "_blank", "noopener,noreferrer") },
+                    { label: "Apple Maps", hint: "Best on iPhone / Mac", onClick: () => window.open(appleMapsUrl(event), "_blank", "noopener,noreferrer") },
+                  ]}
+                />
+              </div>
             )}
             {event.isPrivate && (
               <div style={{ fontSize: "0.8rem", color: "var(--text-meta)", marginTop: 4 }}>📍 Location provided upon RSVP</div>
@@ -415,14 +444,6 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             {event.description}
           </p>
 
-          {types.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
-              {types.map(t => (
-                <span key={t} className="sticker" style={{ color: "var(--text-meta)", borderColor: "#222" }}>{t}</span>
-              ))}
-            </div>
-          )}
-
           {/* Action buttons */}
           <div style={{
             display: "flex", gap: 10, flexWrap: "wrap",
@@ -434,10 +455,35 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                 Get Tickets →
               </a>
             )}
-            <a href={calUrl()} target="_blank" rel="noopener"
-              className="btn-neon" style={{ fontSize: "0.8rem", padding: "8px 16px" }}>
-              Add to Calendar
-            </a>
+            <div className="event-link-choice-anchor">
+              <button
+                type="button"
+                data-testid="button-add-to-calendar"
+                onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
+                className="btn-neon"
+                style={{ fontSize: "0.8rem", padding: "8px 16px" }}
+              >
+                Add to Calendar
+              </button>
+              <EventLinkChoiceMenu
+                floating
+                open={showCalPicker}
+                onClose={() => setShowCalPicker(false)}
+                title="Add to calendar"
+                options={[
+                  {
+                    label: "Google Calendar",
+                    hint: "Opens in browser",
+                    onClick: () => window.open(googleCalendarUrl(event), "_blank", "noopener,noreferrer"),
+                  },
+                  {
+                    label: "Apple Calendar / iCal",
+                    hint: "Downloads .ics file",
+                    onClick: () => downloadIcsFile(event),
+                  },
+                ]}
+              />
+            </div>
             <button
               type="button"
               onClick={() => user ? setHostDrawer("compose") : setShowAuth(true)}
@@ -447,6 +493,11 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               Message the Host
             </button>
           </div>
+
+          {/* I'll Be There — interactive bubbles directly under tickets / calendar */}
+          <section className="event-modal-attendance" data-testid="event-modal-attendance">
+            <AttendanceCluster eventId={event.id} embedded />
+          </section>
 
           {hostDrawer === "compose" && (
             <div style={{ background: "#080808", border: "2px solid #00FFFF", padding: 16, marginTop: 16 }}>
@@ -495,9 +546,6 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               </button>
             </div>
           )}
-
-          {/* Attendance cluster */}
-          <AttendanceCluster eventId={event.id} />
 
           <div style={{ marginTop: 24, borderTop: "1px solid #1a1a1a", paddingTop: 20 }}>
             <h3 className="display" style={{ fontSize: "1.15rem", color: "#FF00CC", marginBottom: 12 }}>MISSED CONNECTIONS</h3>

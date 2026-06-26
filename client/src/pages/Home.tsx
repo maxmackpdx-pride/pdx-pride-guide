@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
+import NeonTicker from "@/components/NeonTicker";
+import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/home-hero-desktop.jpg";
@@ -83,6 +85,8 @@ export default function Home() {
   const { heroRef, giftingRef } = useHomeParallax();
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
   });
   const { data: events = [] } = useQuery<Event[]>({
@@ -97,23 +101,10 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const [isMobileTicker, setIsMobileTicker] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches,
+  const tickerEvents = useMemo(
+    () => [...events].sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0)),
+    [events],
   );
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 640px)");
-    const handler = () => setIsMobileTicker(mq.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  const tickerEvents = useMemo(() => {
-    const limit = isMobileTicker ? 3 : 5;
-    return [...events]
-      .sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0))
-      .slice(0, limit);
-  }, [events, isMobileTicker]);
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -205,7 +196,6 @@ export default function Home() {
           userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
         }}>LOVE<br />LOUDER</div>
 
-
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
             <div className="home-hero-kicker">Portland Pride Weekend · July 16–19, 2026</div>
@@ -254,22 +244,7 @@ export default function Home() {
           </div>
         </div>
 
-        {tickerEvents.length > 0 && (
-          <section className="event-ticker-band" aria-label="Live event ticker">
-            <Link href="/events" className="event-ticker-label">
-              LIVE EVENTS
-            </Link>
-            <div className="event-ticker-window">
-              <div className={`event-ticker-grid event-ticker-grid--${isMobileTicker ? "mobile" : "desktop"}`}>
-                {tickerEvents.map(event => (
-                  <span className="event-ticker-item" key={event.id} title={event.title}>
-                    {event.title}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+        {tickerEvents.length > 0 && <NeonTicker events={tickerEvents} />}
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 
@@ -289,6 +264,7 @@ export default function Home() {
 
       <section className="home-promo-stack">
         <div className="torn-divider full-bleed" />
+        <ScrollReveal>
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
           <div className="home-promo-inner">
             <div className="home-promo-copy">
@@ -303,7 +279,9 @@ export default function Home() {
             </div>
           </div>
         </article>
+        </ScrollReveal>
         <div className="torn-divider full-bleed" />
+        <ScrollReveal delay={120}>
         <article className="home-promo-panel home-gigs-panel">
           <div className="home-promo-inner">
             <div className="home-promo-copy">
@@ -318,6 +296,7 @@ export default function Home() {
             </div>
           </div>
         </article>
+        </ScrollReveal>
         <div className="torn-divider full-bleed" />
       </section>
 

@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
+import FilmGrainOverlay from "./components/FilmGrainOverlay";
 
 function ScrollToTop() {
   const [location] = useHashLocation();
@@ -31,7 +32,8 @@ export default function App() {
       <AuthProvider>
         <Router hook={useHashLocation}>
           <ScrollToTop />
-          <div className="min-h-screen flex flex-col" style={{ background: "#0a0a0a" }}>
+          <div className="min-h-screen flex flex-col app-shell" style={{ background: "#0a0a0a" }}>
+            <FilmGrainOverlay />
             <Nav />
             <main className="flex-1">
               <Switch>

@@ -1,22 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-
-const GRADIENTS = [
-  "linear-gradient(135deg,#FF1FA0,#A24BFF)",
-  "linear-gradient(135deg,#19E3FF,#008026)",
-  "linear-gradient(135deg,#FFED00,#FF8C00)",
-  "linear-gradient(135deg,#C8FA3C,#19E3FF)",
-  "linear-gradient(135deg,#FF8C00,#FF1FA0)",
-];
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(part => part[0]?.toUpperCase() || "")
-    .join("") || "?";
-}
+import UserAvatar from "@/components/UserAvatar";
+import { counterpartyAvatar } from "@/lib/inboxAvatar";
 
 function formatTime(value?: string) {
   if (!value) return "";
@@ -63,8 +48,9 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
             No messages yet. Host an event or reply on the board to start a thread.
           </div>
         ) : (
-          threads.map((msg, index) => {
+          threads.map((msg) => {
             const name = msg.fromDisplayName || msg.from_display_name || msg.fromUsername || msg.from_username || "Community";
+            const party = counterpartyAvatar(msg, "inbox");
             const unreadMsg = !msg.isRead && !msg.is_read;
             return (
               <Link key={msg.id} href="/inbox">
@@ -72,11 +58,15 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
                   type="button"
                   className={`dash-thread ${unreadMsg ? "unread" : ""}`}
                 >
-                  <span
-                    className="dash-thread-avatar"
-                    style={{ background: GRADIENTS[index % GRADIENTS.length] }}
-                  >
-                    {initials(String(name))}
+                  <span className="dash-thread-avatar">
+                    <UserAvatar
+                      photoUrl={party.photoUrl}
+                      avatarChoice={party.avatarChoice ?? undefined}
+                      avatarRing={party.avatarRing}
+                      displayName={party.displayName || name}
+                      username={party.username ?? undefined}
+                      size={40}
+                    />
                     {unreadMsg && <span className="dash-thread-dot" />}
                   </span>
                   <span style={{ flex: 1, minWidth: 0 }}>

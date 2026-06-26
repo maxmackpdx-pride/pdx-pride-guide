@@ -10,6 +10,7 @@
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
+    "preview:local": "npm run build && LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },

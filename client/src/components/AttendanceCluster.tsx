@@ -65,7 +65,7 @@ interface BubbleState {
   size: number;
 }
 
-export default function AttendanceCluster({ eventId }: { eventId: number }) {
+export default function AttendanceCluster({ eventId, embedded = false }: { eventId: number; embedded?: boolean }) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showMoreVibes, setShowMoreVibes] = useState(false);
@@ -139,18 +139,23 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
     },
   });
 
+  const BUBBLE_STAGE_H = 220;
+  const BUBBLE_TOP_MARGIN = 56;
+
   // Initialize bubbles when attendees load
   useEffect(() => {
     if (!containerRef.current || attendees.length === 0) return;
     const W = containerRef.current.offsetWidth || 600;
-    const H = 220;
+    const H = BUBBLE_STAGE_H;
     const RADIUS = 36;
+    const yMin = RADIUS + BUBBLE_TOP_MARGIN;
+    const yMax = H - RADIUS;
 
     setBubbles(
       attendees.map((att, i) => ({
         attendee: att,
         x: RADIUS + (Math.random() * (W - RADIUS * 2)),
-        y: RADIUS + (Math.random() * (H - RADIUS * 2)),
+        y: yMin + (Math.random() * Math.max(yMax - yMin, RADIUS)),
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
         visible: true,
@@ -166,7 +171,8 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
     const animate = () => {
       const W = containerRef.current?.offsetWidth || 600;
-      const H = 220;
+      const H = BUBBLE_STAGE_H;
+      const yMin = 18 + BUBBLE_TOP_MARGIN;
       const now = Date.now();
 
       setBubbles(prev => {
@@ -189,7 +195,7 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
           // Bounce off walls
           if (nx < b.size / 2) { nx = b.size / 2; nvx = Math.abs(nvx); }
           if (nx > W - b.size / 2) { nx = W - b.size / 2; nvx = -Math.abs(nvx); }
-          if (ny < b.size / 2) { ny = b.size / 2; nvy = Math.abs(nvy); }
+          if (ny < Math.max(b.size / 2, yMin)) { ny = Math.max(b.size / 2, yMin); nvy = Math.abs(nvy); }
           if (ny > H - b.size / 2) { ny = H - b.size / 2; nvy = -Math.abs(nvy); }
           // Tiny random nudge for organic feel
           nvx += (Math.random() - 0.5) * 0.04;
@@ -284,11 +290,12 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
 
   return (
     <div
+      className={embedded ? "attendance-cluster--embedded" : undefined}
       style={{
         background: "#0d0d0d",
         border: "2px solid #1a1a1a",
         padding: "24px",
-        marginTop: 32,
+        marginTop: embedded ? 0 : 32,
       }}
     >
       {/* Header */}
@@ -335,10 +342,10 @@ export default function AttendanceCluster({ eventId }: { eventId: number }) {
       {bubbles.length > 0 && !isMobile && (
         <div
           ref={containerRef}
+          className="attendance-bubble-stage"
           style={{
             position: "relative",
-            height: 220,
-            overflow: "hidden",
+            height: BUBBLE_STAGE_H,
             marginBottom: 16,
           }}
         >

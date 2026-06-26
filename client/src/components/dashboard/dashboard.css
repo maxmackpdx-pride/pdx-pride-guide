@@ -248,15 +248,9 @@
 .dash-thread-avatar {
   position: relative;
   flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Anton', sans-serif;
-  font-size: 17px;
-  color: #0a0a0a;
 }
 
 .dash-thread-dot {

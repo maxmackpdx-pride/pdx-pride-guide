@@ -14,10 +14,12 @@ import {
 function TalentRolePill({
   role,
   active,
+  disabled,
   onClick,
 }: {
   role: EventTalentRole;
   active: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }) {
   const { color, borderColor } = EVENT_TALENT_ROLE_COLORS[role];
@@ -27,9 +29,17 @@ function TalentRolePill({
       type="button"
       className={`talent-role-pill ${active ? "talent-role-pill--active" : ""}`}
       onClick={onClick}
-      style={active
-        ? { background: color, borderColor, boxShadow: `0 0 14px ${color}55` }
-        : { color, borderColor }}
+      disabled={disabled}
+      aria-pressed={active}
+      data-testid={`talent-role-${role}`}
+      style={{
+        ...(active
+          ? { background: color, borderColor, color: "#000", boxShadow: `0 0 14px ${color}55` }
+          : { color, borderColor, boxShadow: `0 0 10px ${color}33` }),
+        ["--role-color" as string]: color,
+        opacity: disabled ? 0.45 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
+      }}
     >
       {label}
     </button>
@@ -58,8 +68,8 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
   const { user } = useAuth();
   const { toast } = useToast();
   const [hostUsername, setHostUsername] = useState("");
-  const [hostRole, setHostRole] = useState<EventTalentRole>("DJ");
-  const [selfRole, setSelfRole] = useState<EventTalentRole>("DJ");
+  const [hostRole, setHostRole] = useState<EventTalentRole | null>(null);
+  const [selfRole, setSelfRole] = useState<EventTalentRole | null>(null);
 
   const { data: talent = [], refetch } = useQuery<EventTalentRow[]>({
     queryKey: ["/api/events", eventId, "talent", mode],
@@ -155,6 +165,11 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
 
   const canSelfTag = user && mode === "view";
 
+  const roleTaken = (role: EventTalentRole) =>
+    myRows.some(t => t.role === role && (t.status === "LIVE" || t.status === "PENDING"));
+
+  const pendingRoles = myRows.filter(t => t.status === "PENDING").map(t => t.role as EventTalentRole);
+
   return (
     <div className="event-talent-panel" style={{ marginBottom: 20 }}>
       <div className="display" style={{ fontSize: "0.78rem", color: dayColor, letterSpacing: "0.1em", marginBottom: 12 }}>
@@ -229,12 +244,15 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
           <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginBottom: 8, fontFamily: "var(--font-display)", letterSpacing: "0.06em" }}>
             ADD REGISTERED USER (LIVE IMMEDIATELY)
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+          <p style={{ fontSize: "0.75rem", color: "#888", margin: "0 0 8px", lineHeight: 1.45 }}>
+            Pick their role, then add by @username.
+          </p>
+          <div className="event-talent-role-grid">
             {EVENT_TALENT_ROLES.map(role => (
               <TalentRolePill key={role} role={role} active={hostRole === role} onClick={() => setHostRole(role)} />
             ))}
           </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
             <input
               value={hostUsername}
               onChange={e => setHostUsername(e.target.value)}
@@ -242,9 +260,9 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
               style={{ flex: 1, minWidth: 140, padding: "8px 10px", background: "#0a0a0a", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
             />
             <button type="button" className="btn-neon solid" style={{ fontSize: "0.72rem", padding: "8px 14px" }}
-              disabled={addMutation.isPending || !hostUsername.trim()}
-              onClick={() => addMutation.mutate()}>
-              {addMutation.isPending ? "ADDING..." : "ADD →"}
+              disabled={addMutation.isPending || !hostUsername.trim() || !hostRole}
+              onClick={() => hostRole && addMutation.mutate()}>
+              {addMutation.isPending ? "ADDING..." : hostRole ? `ADD ${EVENT_TALENT_ROLE_LABELS[hostRole].toUpperCase()} →` : "PICK ROLE ↑"}
             </button>
           </div>
         </div>
@@ -256,20 +274,32 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             I WORKED THIS EVENT
           </div>
           <p style={{ fontSize: "0.78rem", color: "#888", marginBottom: 10, lineHeight: 1.45 }}>
-            Tag yourself — {isClaimable ? "admins" : "the host"} approve before you appear on the public lineup.
+            Pick your role below — Drag, DJ, Bartender, MC, Go-Go, Performer, or Other. {isClaimable ? "Admins" : "The host"} approve before you appear on the public lineup.
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+          <div className="event-talent-role-grid">
             {EVENT_TALENT_ROLES.map(role => (
-              <TalentRolePill key={role} role={role} active={selfRole === role} onClick={() => setSelfRole(role)} />
+              <TalentRolePill
+                key={role}
+                role={role}
+                active={selfRole === role}
+                disabled={roleTaken(role)}
+                onClick={() => setSelfRole(role)}
+              />
             ))}
           </div>
-          <button type="button" className="btn-neon" style={{ fontSize: "0.72rem", padding: "8px 14px", borderColor: dayColor, color: dayColor }}
-            disabled={selfMutation.isPending || myRows.some(t => t.role === selfRole && (t.status === "LIVE" || t.status === "PENDING"))}
-            onClick={() => selfMutation.mutate(selfRole)}>
-            {selfMutation.isPending ? "SENDING..." : `REQUEST ${EVENT_TALENT_ROLE_LABELS[selfRole].toUpperCase()} TAG →`}
+          <button type="button" className="btn-neon" style={{ fontSize: "0.72rem", padding: "8px 14px", borderColor: dayColor, color: dayColor, marginTop: 10 }}
+            disabled={selfMutation.isPending || !selfRole || (selfRole ? roleTaken(selfRole) : false)}
+            onClick={() => selfRole && selfMutation.mutate(selfRole)}>
+            {selfMutation.isPending
+              ? "SENDING..."
+              : selfRole
+                ? `REQUEST ${EVENT_TALENT_ROLE_LABELS[selfRole].toUpperCase()} TAG →`
+                : "PICK YOUR ROLE ↑"}
           </button>
-          {myRows.some(t => t.status === "PENDING") && (
-            <p style={{ fontSize: "0.75rem", color: "var(--neon-magenta)", marginTop: 8 }}>You have a pending lineup request for this event.</p>
+          {pendingRoles.length > 0 && (
+            <p style={{ fontSize: "0.75rem", color: "var(--neon-magenta)", marginTop: 8 }}>
+              Pending: {pendingRoles.map(r => EVENT_TALENT_ROLE_LABELS[r]).join(", ")}
+            </p>
           )}
         </div>
       )}

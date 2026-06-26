@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { FeedbackButton } from "./FeedbackForm";
 
+
 export default function Footer() {
   const { user } = useAuth();
   return (

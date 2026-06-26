@@ -21,7 +21,6 @@ export async function setupVite(server: Server, app: Express) {
       ...viteLogger,
       error: (msg, options) => {
         viteLogger.error(msg, options);
-        process.exit(1);
       },
     },
     server: serverOptions,
@@ -31,7 +30,12 @@ export async function setupVite(server: Server, app: Express) {
   app.use(vite.middlewares);
 
   app.use("/{*path}", async (req, res, next) => {
-    const url = req.originalUrl;
+    const url = req.originalUrl.split("?")[0] ?? req.originalUrl;
+
+    // Only fall back to the SPA shell for app routes — not missing static files.
+    if (/\.[a-zA-Z0-9]+$/.test(url) && !url.endsWith(".html")) {
+      return res.status(404).end();
+    }
 
     try {
       const clientTemplate = path.resolve(

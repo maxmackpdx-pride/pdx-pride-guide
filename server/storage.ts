@@ -2234,7 +2234,12 @@ export const storage: IStorage = {
   // Messages
   getInbox(userId) {
     return sqlite.prepare(`
-      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
+      SELECT m.*,
+             u.username AS from_username,
+             u.display_name AS from_display_name,
+             u.photo_url AS from_photo_url,
+             u.avatar_choice AS from_avatar_choice,
+             u.avatar_ring AS from_avatar_ring
       FROM messages m
       LEFT JOIN users u ON u.id = m.from_user_id
       WHERE m.to_user_id = ? AND m.deleted_by_to = 0
@@ -2243,7 +2248,12 @@ export const storage: IStorage = {
   },
   getSentMessages(userId) {
     return sqlite.prepare(`
-      SELECT m.*, u.username AS to_username, u.display_name AS to_display_name
+      SELECT m.*,
+             u.username AS to_username,
+             u.display_name AS to_display_name,
+             u.photo_url AS to_photo_url,
+             u.avatar_choice AS to_avatar_choice,
+             u.avatar_ring AS to_avatar_ring
       FROM messages m
       LEFT JOIN users u ON u.id = m.to_user_id
       WHERE m.from_user_id = ? AND m.deleted_by_from = 0
@@ -2383,10 +2393,18 @@ export const storage: IStorage = {
     if (tab === "inbox" && msg.fromUserId !== viewerUserId) {
       copy.from_username = "Anonymous";
       copy.from_display_name = "Anonymous";
+      copy.from_photo_url = null;
+      copy.from_avatar_choice = null;
+      copy.from_avatar_ring = null;
+      copy.masked = true;
     }
     if (tab === "sent" && msg.toUserId !== viewerUserId) {
       copy.to_username = "Anonymous";
       copy.to_display_name = "Anonymous";
+      copy.to_photo_url = null;
+      copy.to_avatar_choice = null;
+      copy.to_avatar_ring = null;
+      copy.masked = true;
     }
     return copy;
   },
@@ -2408,6 +2426,8 @@ export const storage: IStorage = {
         from_username: isSelf ? "You" : "Anonymous",
         from_display_name: isSelf ? "You" : "Anonymous",
         from_photo_url: isSelf ? m.from_photo_url : null,
+        from_avatar_choice: isSelf ? m.from_avatar_choice : null,
+        from_avatar_ring: isSelf ? m.from_avatar_ring : null,
         masked: !isSelf,
       };
     });
