@@ -123,24 +123,47 @@ After any deploy touching `server/` or uploads:
 
 ---
 
-## Latest session — 2026-06-24 (Grok)
+## Latest session — 2026-06-25 (Grok)
+
+**HEAD:** `84fdb08` · **Live bundle:** `index-Bpm-pKgL.js` · **Site:** https://www.prideguidepdx.com · **API:** 44 events OK
 
 **Full memory refresh:** `SESSION_HANDOFF_2026-06-23.md` + **Saved data persistence** section above (read first).
 
-**HEAD:** see latest commit on `master`.
+### Grok shipped since Claude credits ran out (do not redo)
+
+| Commit | What |
+|--------|------|
+| `5eccc28` | Gifting + Gigs board pages aligned to Claude Design ref (`.board-page` system, Anton/DM Mono, compact cards) |
+| `34206f6` | UX audit P0/P1: API error + retry UI (Home, Events, Gifting, Inbox, Missed Connections); gifting rules checkbox enforced; filtered empty states; on-brand 404; inbox mobile back-button; design polish (`::selection`, board film grain, `flickr` hero text, live badge blink) |
+| `2c40987` | Contrast pass (`--text-muted/meta/faint` tokens); dashboard section fetch errors + retry banner |
+| `84fdb08` | Live Portland weather (Open-Meteo); admin tab load errors + retry; submit claim unclaimed-events error |
+
+**Design ref decoded locally:** `.design-ref/` (gifting, ill-be-there, profile-dashboard, motion-guide) — same content as Claude's uploaded HTML in local-agent-mode-sessions.
+
+### Safe for Claude to pick up next
+
+1. **Hero / social image replacements** — Tucker asked for 5 site hero/social images. Home hero is **done** (`home-hero-desktop.jpg` + `home-hero-mobile.jpg`). Other heroes already wired: `/gift-with-pride-hero.jpg`, `/motifs/hero-*.jpg|png`. Needs **new image assets** from Tucker before swap — do not replace without files.
+2. **Remaining contrast** — Grok bumped worst offenders site-wide; Admin panel inline `#666`/`#444` and any new UI should use `var(--text-meta)` / `var(--text-faint)`.
+3. **Claude Design motifs** — motion-guide animations (marquee, aurora) are reference-only unless Tucker scopes a page.
+
+### Do NOT touch (unless Tucker assigns)
+
+- `Events.tsx` filter/day-pill CSS internals
+- `AttendanceCluster.tsx` RSVP / message-drawer / badge-pulse (your recent work — live)
+- Railway env/volume (Grok lane)
+- Home hero wallpaper (Grok done)
+
+### Claude — IGNORE old pending command (credits ran out)
+
+**Do not run or resume whatever task was queued when your credits ran out.** Superseded by Grok UX audit above.
+
+**When you start:** `./scripts/agent-tunnel.sh poll claude` then reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md`.
+
+---
+
+## Latest session — 2026-06-24 (Grok) [archive]
 
 **Done:** Full persistence audit; SQLite sessions; production `/data` guard; safe `seedData()`; event social/host-message paths documented. **Home hero wallpaper** updated to Tucker collage (`home-hero-desktop.jpg` + `home-hero-mobile.jpg`).
-
-**Open:** Browser persistence UAT (Tucker/Codex). Claude Design motifs. Do NOT touch `Events.tsx` or filter/day-pill CSS unless Tucker assigns.
-
-### Claude — IGNORE pending command (credits ran out)
-
-**Do not run or resume whatever task was queued when your credits ran out.** That command is **cancelled/superseded**. Tucker did not ask you to pick it back up.
-
-**Current priority if you're looking for work:**
-1. Read **Saved data persistence — REQUIRED READING** (above) before any feature that saves user data.
-2. Home hero wallpaper is **already done by Grok** — `client/public/home-hero-desktop.jpg` and `home-hero-mobile.jpg` (Portland pride collage). Do not replace unless Tucker sends a new asset.
-3. Reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` when you start — do not assume the old pending task is still valid.
 
 ---
 
@@ -374,4 +397,4 @@ If apex 404s again: check Railway custom-domain target vs Squarespace ALIAS; nev
 
 ---
 
-*Handoff For AI Tucker Team — updated by Grok 2026-06-24. HEAD `d19fa0c`. Read **Saved data persistence** before any feature that saves user content.*
+*Handoff For AI Tucker Team — updated by Grok 2026-06-25. HEAD `84fdb08`. Read **Saved data persistence** before any feature that saves user content.*
