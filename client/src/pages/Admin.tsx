@@ -7,6 +7,7 @@ import {
   ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare,
 } from "lucide-react";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
+import AdminLoadError from "@/components/admin/AdminLoadError";
 import "@/components/dashboard/dashboard.css";
 
 interface Submission {
@@ -125,32 +126,32 @@ export default function Admin() {
     }
   };
 
-  const { data: submissions = [], isLoading: subLoading } = useQuery<Submission[]>({
+  const { data: submissions = [], isLoading: subLoading, isError: subError, refetch: refetchSubs } = useQuery<Submission[]>({
     queryKey: ["/api/admin/submissions"],
     enabled: authenticated,
   });
 
-  const { data: events = [], isLoading: eventsLoading } = useQuery<AdminEvent[]>({
+  const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } = useQuery<AdminEvent[]>({
     queryKey: ["/api/admin/events"],
     enabled: authenticated && activeTab === "events",
   });
 
-  const { data: modRequests = [], isLoading: modLoading } = useQuery<ModerationRequest[]>({
+  const { data: modRequests = [], isLoading: modLoading, isError: modError, refetch: refetchMod } = useQuery<ModerationRequest[]>({
     queryKey: ["/api/admin/moderation"],
     enabled: authenticated && activeTab === "moderation",
   });
 
-  const { data: giftingAdmin = { posts: [], reports: [] }, isLoading: giftingLoading } = useQuery<any>({
+  const { data: giftingAdmin = { posts: [], reports: [] }, isLoading: giftingLoading, isError: giftingError, refetch: refetchGifting } = useQuery<any>({
     queryKey: ["/api/admin/gifting"],
     enabled: authenticated && activeTab === "gifting",
   });
 
-  const { data: feedback = [], isLoading: feedbackLoading } = useQuery<any[]>({
+  const { data: feedback = [], isLoading: feedbackLoading, isError: feedbackError, refetch: refetchFeedback } = useQuery<any[]>({
     queryKey: ["/api/admin/feedback"],
     enabled: authenticated && activeTab === "feedback",
   });
 
-  const { data: promoterRequests = [], isLoading: promotersLoading } = useQuery<PromoterRequest[]>({
+  const { data: promoterRequests = [], isLoading: promotersLoading, isError: promotersError, refetch: refetchPromoters } = useQuery<PromoterRequest[]>({
     queryKey: ["/api/admin/promoter-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then(r => r.json()),
     enabled: authenticated && activeTab === "promoters",
@@ -408,7 +409,9 @@ export default function Admin() {
         {/* ── REVIEW QUEUE ── */}
         {activeTab === "queue" && (
           <div>
-            {subLoading ? (
+            {subError ? (
+              <AdminLoadError label="review queue" onRetry={() => refetchSubs()} />
+            ) : subLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map(i => (
                   <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />
@@ -464,7 +467,9 @@ export default function Admin() {
         {activeTab === "promoters" && (
           <div>
             <p className="text-white/40 text-sm mb-6">Users who claimed an event and requested verified promoter status.</p>
-            {promotersLoading ? (
+            {promotersError ? (
+              <AdminLoadError label="promoter requests" onRetry={() => refetchPromoters()} />
+            ) : promotersLoading ? (
               <div className="space-y-4">{[1, 2].map(i => <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : pendingPromoters.length === 0 ? (
               <div className="text-center py-16">
@@ -521,7 +526,9 @@ export default function Admin() {
         {activeTab === "moderation" && (
           <div>
             <p className="text-white/40 text-sm mb-6">Claim and remove requests from the public.</p>
-            {modLoading ? (
+            {modError ? (
+              <AdminLoadError label="moderation requests" onRetry={() => refetchMod()} />
+            ) : modLoading ? (
               <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : modRequests.length === 0 ? (
               <div className="text-center py-16">
@@ -579,7 +586,9 @@ export default function Admin() {
             <p className="text-white/40 text-sm mb-6">
               Edit any field on any event. Changes go live immediately.
             </p>
-            {eventsLoading ? (
+            {eventsError ? (
+              <AdminLoadError label="events" onRetry={() => refetchEvents()} />
+            ) : eventsLoading ? (
               <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : events.length === 0 ? (
               <p className="text-white/30 text-center py-12">No events found.</p>
@@ -747,7 +756,9 @@ export default function Admin() {
             <p className="text-white/40 text-sm mb-6">
               Review first-time gifting posts, handle reports, and change listing statuses.
             </p>
-            {giftingLoading ? (
+            {giftingError ? (
+              <AdminLoadError label="gifting moderation" onRetry={() => refetchGifting()} />
+            ) : giftingLoading ? (
               <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : (
               <div className="space-y-8">
@@ -823,7 +834,9 @@ export default function Admin() {
             <p className="text-white/40 text-sm">
               Soft launch tech feedback from the footer form. Use this for bugs, mobile layout issues, wrong event data, login issues, and confusing flows.
             </p>
-            {feedbackLoading ? (
+            {feedbackError ? (
+              <AdminLoadError label="feedback" onRetry={() => refetchFeedback()} />
+            ) : feedbackLoading ? (
               <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : feedback.length === 0 ? (
               <div className="border border-white/10 p-6 text-white/35">No open feedback right now.</div>

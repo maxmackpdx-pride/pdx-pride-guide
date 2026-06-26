@@ -44,7 +44,7 @@ export default function Submit() {
     claimReason: "", eventId: initialEventId, type: "NEW_EVENT",
   });
 
-  const { data: unclaimedEvents = [] } = useQuery<Event[]>({
+  const { data: unclaimedEvents = [], isError: unclaimedError, refetch: refetchUnclaimed } = useQuery<Event[]>({
     queryKey: ["/api/events/unclaimed"],
     queryFn: () => apiRequest("GET", "/api/events/unclaimed").then(r => r.json()),
     enabled: mode === "claim",
@@ -209,7 +209,14 @@ export default function Submit() {
                       </option>
                     ))}
                   </select>
-                  {unclaimedEvents.length === 0 && (
+                  {unclaimedError ? (
+                    <div style={{ fontSize: "0.76rem", color: "#FF6600", marginTop: 6 }}>
+                      Could not load unclaimed events.{" "}
+                      <button type="button" onClick={() => refetchUnclaimed()} style={{ background: "none", border: "none", color: "var(--neon-yellow)", cursor: "pointer", padding: 0, fontFamily: "var(--font-display)", fontSize: "0.76rem" }}>
+                        Retry
+                      </button>
+                    </div>
+                  ) : unclaimedEvents.length === 0 && (
                     <div style={{ fontSize: "0.76rem", color: "var(--text-meta)", marginTop: 6 }}>No unclaimed events are available right now.</div>
                   )}
                 </div>

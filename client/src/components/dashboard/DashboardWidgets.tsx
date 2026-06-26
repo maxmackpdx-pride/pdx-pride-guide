@@ -2,11 +2,34 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
 import { parsePacificEventTime, useCountdown } from "@/lib/countdown";
+import { fetchPortlandWeather } from "@/lib/portlandWeather";
+
+const FALLBACK_WEATHER = {
+  currentTemp: 72,
+  condition: "Clear",
+  high: 78,
+  low: 59,
+  caption: "H 78° · L 59° · Forecast unavailable",
+  forecast: [
+    { day: "FRI", high: 74, highlight: false },
+    { day: "SAT", high: 79, highlight: true },
+    { day: "SUN", high: 71, highlight: false },
+  ],
+  sunGradient: "radial-gradient(circle,#FFED00,#FF8C00)",
+  sunGlow: "0 0 24px rgba(255,140,0,.6)",
+};
 
 export default function DashboardWidgets() {
   const { data: events = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => fetch("/api/events").then(r => r.json()),
+  });
+
+  const { data: weather = FALLBACK_WEATHER, isError: weatherError } = useQuery({
+    queryKey: ["portland-weather"],
+    queryFn: fetchPortlandWeather,
+    staleTime: 1000 * 60 * 30,
+    retry: 1,
   });
 
   const prideTarget = useMemo(() => {
@@ -38,26 +61,28 @@ export default function DashboardWidgets() {
               <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
                 Portland, OR
               </div>
-              <span
-                className="dash-mono"
-                style={{
-                  fontSize: 9,
-                  color: "#0a0a0a",
-                  background: "rgba(255,255,255,0.55)",
-                  padding: "3px 7px",
-                  borderRadius: 999,
-                  letterSpacing: "0.12em",
-                }}
-              >
-                Demo forecast
-              </span>
+              {weatherError && (
+                <span
+                  className="dash-mono"
+                  style={{
+                    fontSize: 9,
+                    color: "#0a0a0a",
+                    background: "rgba(255,255,255,0.55)",
+                    padding: "3px 7px",
+                    borderRadius: 999,
+                    letterSpacing: "0.12em",
+                  }}
+                >
+                  Offline
+                </span>
+              )}
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
-              <span className="dash-weather-temp">72°</span>
-              <span className="dash-anton" style={{ fontSize: 16, color: "var(--dash-orange)" }}>Sunny</span>
+              <span className="dash-weather-temp">{weather.currentTemp}°</span>
+              <span className="dash-anton" style={{ fontSize: 16, color: "var(--dash-orange)" }}>{weather.condition}</span>
             </div>
             <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 8, textTransform: "none", letterSpacing: "0.04em" }}>
-              H 78° · L 59° · Perfect for the parade
+              {weather.caption}
             </div>
           </div>
           <div style={{ position: "relative", width: 48, height: 48, flex: "0 0 auto" }}>
@@ -66,21 +91,26 @@ export default function DashboardWidgets() {
                 position: "absolute",
                 inset: 0,
                 borderRadius: "50%",
-                background: "radial-gradient(circle,#FFED00,#FF8C00)",
-                boxShadow: "0 0 24px rgba(255,140,0,.6)",
+                background: weather.sunGradient,
+                boxShadow: weather.sunGlow,
               }}
             />
           </div>
         </div>
         <div className="dash-weather-forecast">
-          {[
-            ["FRI", "74°", "#fff"],
-            ["SAT", "79°", "#FFED00"],
-            ["SUN", "71°", "#fff"],
-          ].map(([day, temp, color]) => (
-            <div key={day} className="dash-weather-day">
-              <div className="dash-mono" style={{ fontSize: 9.5, color: "#6f736c" }}>{day}</div>
-              <div className="dash-anton" style={{ fontSize: 16, color, marginTop: 3 }}>{temp}</div>
+          {weather.forecast.map(day => (
+            <div key={day.day} className="dash-weather-day">
+              <div className="dash-mono" style={{ fontSize: 9.5, color: "#6f736c" }}>{day.day}</div>
+              <div
+                className="dash-anton"
+                style={{
+                  fontSize: 16,
+                  color: day.highlight ? "#FFED00" : "#fff",
+                  marginTop: 3,
+                }}
+              >
+                {day.high}°
+              </div>
             </div>
           ))}
         </div>
