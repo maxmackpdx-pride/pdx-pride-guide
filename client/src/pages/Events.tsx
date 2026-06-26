@@ -692,6 +692,25 @@ export default function Events() {
             <span>{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
             {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
           </div>
+          {attendanceEvent && !selectedEvent && filtered.length > 0 && (
+            <button
+              type="button"
+              data-testid="jump-ill-be-there"
+              onClick={() => document.getElementById("ill-be-there")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="display"
+              style={{
+                background: "transparent",
+                border: "2px solid #CCFF00",
+                color: "#CCFF00",
+                padding: "6px 14px",
+                fontSize: "0.72rem",
+                cursor: "pointer",
+                letterSpacing: "0.08em",
+              }}
+            >
+              I'LL BE THERE ↓
+            </button>
+          )}
           {activeFilters.length > 0 && (
             <button
               onClick={() => setActiveFilters([])}
@@ -760,7 +779,13 @@ export default function Events() {
             data-testid="events-attendance-section"
             style={{ marginTop: 48 }}
           >
-            <div style={{ marginBottom: 4 }}>
+            <div style={{ marginBottom: 8 }}>
+              <h2 className="display" style={{ fontSize: "1.5rem", color: "#CCFF00", margin: "0 0 10px", lineHeight: 1 }}>
+                I'LL BE THERE
+              </h2>
+              <p style={{ color: "var(--text-meta)", fontSize: "0.8rem", margin: "0 0 12px", lineHeight: 1.45 }}>
+                Floating avatar bubbles show who&apos;s going — pick a vibe, pop in, message other attendees. Open any event for the same panel on that listing.
+              </p>
               <span
                 className="sticker"
                 style={{
@@ -771,11 +796,19 @@ export default function Events() {
               >
                 {attendanceEvent.dayOfWeek}
               </span>
-              <h2 className="display" style={{ fontSize: "1.15rem", color: "#fff", margin: "10px 0 4px", lineHeight: 1.05 }}>
+              <h3 className="display" style={{ fontSize: "1.1rem", color: "#fff", margin: "10px 0 4px", lineHeight: 1.05 }}>
                 {attendanceEvent.title}
-              </h2>
+              </h3>
               <p style={{ color: "var(--text-meta)", fontSize: "0.8rem", margin: 0 }}>
                 {attendanceEvent.venueName}
+                <span style={{ color: "#555" }}> · </span>
+                <button
+                  type="button"
+                  onClick={() => openEvent(attendanceEvent)}
+                  style={{ background: "none", border: "none", color: "#00FFFF", cursor: "pointer", padding: 0, fontSize: "0.8rem", fontFamily: "var(--font-body)" }}
+                >
+                  Open event details
+                </button>
               </p>
             </div>
             <AttendanceCluster eventId={attendanceEvent.id} />
