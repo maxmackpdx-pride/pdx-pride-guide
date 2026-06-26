@@ -12,6 +12,9 @@ import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
+import EventAttendancePreview from "@/components/EventAttendancePreview";
+import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -358,7 +361,13 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   );
 }
 
-function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event; onClick: () => void; viewMode: "grid" | "list"; revealDelay?: number }) {
+function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary }: {
+  event: Event;
+  onClick: () => void;
+  viewMode: "grid" | "list";
+  revealDelay?: number;
+  attendanceSummary?: AttendanceSummary | null;
+}) {
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
   const time = event.dateStart
     ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -409,6 +418,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
           }}>{event.title}</div>
           <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
           <div style={{ fontSize: "0.65rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+          <EventAttendancePreview summary={attendanceSummary} compact />
         </div>
       </div>
       </ScrollReveal>
@@ -449,6 +459,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
             }}>{event.title}</div>
             <div style={{ fontSize: "0.74rem", color: "#aaa" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
+            <EventAttendancePreview summary={attendanceSummary} compact />
           </div>
         </div>
       ) : (
@@ -476,6 +487,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
             </div>
             <div style={{ fontSize: "0.78rem", color: "#888" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
+            <EventAttendancePreview summary={attendanceSummary} compact />
           </div>
         </>
       )}
@@ -497,6 +509,14 @@ export default function Events() {
   const { data: events = [], isLoading, isError, error, refetch } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+  });
+
+  useAttendanceSummariesLive();
+
+  const { data: attendanceSummaries = {} } = useQuery<Record<string, AttendanceSummary>>({
+    queryKey: ["/api/events/attendance-summaries"],
+    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
+    refetchInterval: 120_000,
   });
 
   const filtered = events.filter(e => {
@@ -683,13 +703,27 @@ export default function Events() {
         ) : viewMode === "grid" ? (
           <div className="events-poster-grid">
             {filtered.map((e, i) => (
-              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="grid" revealDelay={(i % 6) * 70} />
+              <EventCard
+                key={e.id}
+                event={e}
+                onClick={() => openEvent(e)}
+                viewMode="grid"
+                revealDelay={(i % 6) * 70}
+                attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
+              />
             ))}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.map((e, i) => (
-              <EventCard key={e.id} event={e} onClick={() => openEvent(e)} viewMode="list" revealDelay={(i % 8) * 55} />
+              <EventCard
+                key={e.id}
+                event={e}
+                onClick={() => openEvent(e)}
+                viewMode="list"
+                revealDelay={(i % 8) * 55}
+                attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
+              />
             ))}
           </div>
         )}

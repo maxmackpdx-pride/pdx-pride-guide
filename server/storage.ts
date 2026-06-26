@@ -1499,6 +1499,14 @@ function removeDemoSeedData() {
   }
 }
 
+function attendanceInitials(handle: string): string {
+  const clean = String(handle || "?").replace(/^@/, "").trim();
+  if (!clean) return "?";
+  const parts = clean.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return clean.slice(0, 2).toUpperCase();
+}
+
 function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
     const viewerRsvped = viewerUserId != null && rows.some((r: any) => r.user_id === viewerUserId);
     if (viewerRsvped) return rows;
@@ -1544,6 +1552,7 @@ export interface IStorage {
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   // Attendance
   getAttendances(eventId: number, viewerUserId?: number): any[];
+  getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
   getAttendancesByUser(userId: number): any[];
   upsertAttendance(eventId: number, user: User, message: string): Attendance;
   removeAttendance(eventId: number, userId: number): void;
@@ -1802,6 +1811,27 @@ export const storage: IStorage = {
       WHERE a.event_id = ? AND a.is_active = 1
       ORDER BY a.created_at DESC
       `).all(eventId) as any[]);  },
+  getAttendanceSummaries() {
+    const rows = sqlite.prepare(`
+      SELECT a.id, a.event_id AS eventId, a.handle, a.avatar_seed AS avatarSeed
+      FROM attendances a
+      WHERE a.is_active = 1
+      ORDER BY a.created_at DESC
+    `).all() as Array<{ id: number; eventId: number; handle: string; avatarSeed: string }>;
+    const map: Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }> = {};
+    for (const row of rows) {
+      if (!map[row.eventId]) map[row.eventId] = { count: 0, preview: [] };
+      map[row.eventId].count += 1;
+      if (map[row.eventId].preview.length < 8) {
+        map[row.eventId].preview.push({
+          id: row.id,
+          initials: attendanceInitials(row.handle),
+          avatarSeed: row.avatarSeed || row.handle,
+        });
+      }
+    }
+    return map;
+  },
   getAttendancesByUser(userId) {
     return sqlite.prepare(`
       SELECT

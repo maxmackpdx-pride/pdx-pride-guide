@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage, hashPassword, sqlite, getTableCounts, getAdminMetrics } from "./storage";
+import { initAttendanceWs } from "./attendanceWs";
 import { assertProductionPersistence, getPersistenceAudit } from "./persistence";
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
@@ -241,6 +242,7 @@ function getAdminActorUserId(req: any): number | null {
 
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
+  const attendanceWs = initAttendanceWs(httpServer);
 
   // Session middleware — persisted on the same SQLite volume as user data
   app.use(session({
@@ -297,6 +299,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       evt.isClaimable && !evt.claimedBy && !pendingClaimIds.has(evt.id)
     );
     res.json(evts.map(evt => publicEvent(evt, pendingClaimIds)));
+  });
+
+  app.get("/api/events/attendance-summaries", (_req, res) => {
+    res.json(storage.getAttendanceSummaries());
   });
 
   app.get("/api/events/:id", (req, res) => {
@@ -446,7 +452,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const message = String(req.body.message || "").trim();
       if (!message) return res.status(400).json({ error: "message required" });
-      const att = storage.upsertAttendance(Number(req.params.id), user, message);
+      const eventId = Number(req.params.id);
+      const att = storage.upsertAttendance(eventId, user, message);
+      attendanceWs.broadcastAttendance(eventId);
       res.json(att);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -454,7 +462,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.delete("/api/events/:id/attendance", requireAuth, (req, res) => {
-    storage.removeAttendance(Number(req.params.id), req.session.userId!);
+    const eventId = Number(req.params.id);
+    storage.removeAttendance(eventId, req.session.userId!);
+    attendanceWs.broadcastAttendance(eventId);
     res.json({ ok: true });
   });
 

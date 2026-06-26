@@ -5,6 +5,12 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import AttendanceVibeModal from "./AttendanceVibeModal";
 import UserAvatar from "@/components/UserAvatar";
+import { useAttendanceLive } from "@/hooks/useAttendanceLive";
+import {
+  attendanceBubbleGradient,
+  attendanceInitials,
+  attendanceSeedColor,
+} from "@/lib/attendanceBubble";
 
 const SPEECH_OPTIONS = [
   "Hey, I'll be working this one!",
@@ -26,19 +32,6 @@ const SPEECH_OPTIONS = [
 const PRIMARY_OPTIONS = SPEECH_OPTIONS.slice(0, 5);
 const MORE_OPTIONS = SPEECH_OPTIONS.slice(5);
 
-// Generate a deterministic neon color from a seed string
-function seedColor(seed: string): string {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const colors = ["#CCFF00", "#00FFFF", "#FF00CC", "#FF6600", "#8800FF", "#FF2400", "#00EE44"];
-  return colors[h % colors.length];
-}
-
-// Generate initials from handle
-function initials(handle: string): string {
-  return handle.slice(0, 2).toUpperCase();
-}
-
 function prefersReducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -47,6 +40,7 @@ interface Attendee {
   id: number;
   userId?: number;
   handle: string;
+  displayName?: string | null;
   message: string;
   avatarSeed: string;
   userPhotoUrl?: string | null;
@@ -83,18 +77,27 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
   const lastRandomizeRef = useRef<number>(Date.now());
   const seenIdsRef = useRef<Set<number> | null>(null);
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
+  const [viewTab, setViewTab] = useState<"field" | "strip">(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches ? "strip" : "field",
+  );
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
-    const handler = () => setIsMobile(mq.matches);
+    const handler = () => {
+      const mobile = mq.matches;
+      setIsMobile(mobile);
+      setViewTab(mobile ? "strip" : "field");
+    };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
 
+  useAttendanceLive(eventId);
+
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],
     queryFn: () => apiRequest("GET", `/api/events/${eventId}/attendance`).then(r => r.json()),
-    refetchInterval: 15000,
+    refetchInterval: 120_000,
   });
 
   // Track which attendees are newly arrived (vs. already seen) so their bubble
@@ -146,8 +149,11 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
 
   // Initialize bubbles when attendees load
   useEffect(() => {
-    if (!containerRef.current || attendees.length === 0) return;
-    const W = containerRef.current.offsetWidth || 600;
+    if (attendees.length === 0) {
+      setBubbles([]);
+      return;
+    }
+    const W = containerRef.current?.offsetWidth || 600;
     const H = BUBBLE_STAGE_H;
     const RADIUS = 36;
     const yMin = RADIUS + BUBBLE_TOP_MARGIN;
@@ -164,12 +170,12 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
         size: 36 + Math.random() * 12,
       }))
     );
-  }, [attendees]);
+  }, [attendees, viewTab]);
 
   // Animate bubbles: slow drift + random show/hide
   useEffect(() => {
     if (bubbles.length === 0) return;
-    if (isMobile) return;
+    if (viewTab !== "field") return;
 
     const animate = () => {
       const W = containerRef.current?.offsetWidth || 600;
@@ -215,7 +221,7 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
 
     animFrameRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [bubbles.length, isMobile]);
+  }, [bubbles.length, viewTab]);
 
   const submitVibe = () => {
     const message = customMessage.trim() || selectedMessage;
@@ -286,204 +292,135 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     </>
   );
 
+  const showBubbleField = viewTab === "field" && bubbles.length > 0;
+  const showBubbleStrip = viewTab === "strip" && bubbles.length > 0;
+
   return (
-    <div
-      className={embedded ? "attendance-cluster--embedded" : undefined}
-      style={{
-        background: "#0d0d0d",
-        border: "2px solid #1a1a1a",
-        padding: "24px",
-        marginTop: embedded ? 0 : 32,
-      }}
-    >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <span className={`board-sticker attendance-going-badge${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`}>
+    <div className={`attendance-cluster-panel${embedded ? " attendance-cluster--embedded" : ""}`}>
+      <div className="attendance-cluster-head">
+        <div className="attendance-cluster-head__title">
+          <h3 className="display attendance-cluster-headline">
+            <span>I'll be</span> <span className="attendance-cluster-headline__accent">there</span>
+          </h3>
+          <span className={`attendance-going-pill${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`}>
+            <span className="attendance-going-pill__dot" aria-hidden="true" />
             {attendees.length} GOING
           </span>
-          <h3 className="display" style={{ fontSize: "1.4rem", color: "#fff", margin: "6px 0 0" }}>
-            I'LL BE THERE
-          </h3>
         </div>
-        {!showForm && (
+        <div className="attendance-view-tabs" role="tablist" aria-label="Attendance view">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewTab === "field"}
+            className={`attendance-view-tab${viewTab === "field" ? " attendance-view-tab--active" : ""}`}
+            onClick={() => setViewTab("field")}
+          >
+            Bubble field
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewTab === "strip"}
+            className={`attendance-view-tab${viewTab === "strip" ? " attendance-view-tab--active" : ""}`}
+            onClick={() => setViewTab("strip")}
+          >
+            Mobile strip
+          </button>
+        </div>
+      </div>
+
+      {!showForm && (
+        <div className="attendance-cluster-cta">
           <button
             data-testid="button-ill-be-there"
             onClick={() => user ? setShowForm(true) : setShowAuth(true)}
-            className="display"
-            style={{
-              background: "transparent",
-              border: "2px solid #CCFF00",
-              color: "#CCFF00",
-              padding: "8px 18px",
-              fontSize: "0.85rem",
-              cursor: "pointer",
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              transition: "all 0.1s",
-            }}
-            onMouseEnter={e => {
-              (e.target as HTMLButtonElement).style.background = "#CCFF00";
-              (e.target as HTMLButtonElement).style.color = "#000";
-            }}
-            onMouseLeave={e => {
-              (e.target as HTMLButtonElement).style.background = "transparent";
-              (e.target as HTMLButtonElement).style.color = "#CCFF00";
-            }}
+            className="display attendance-cluster-cta__btn"
           >
-            {myAttendance ? "CHANGE MY VIBE" : "I'LL BE THERE"}
+            {myAttendance ? "Change phrase →" : "I'll be there →"}
           </button>
-        )}
-      </div>
+          {myAttendance && (
+            <span className="attendance-cluster-cta__status">
+              You're going as “{myAttendance.message.length > 42 ? `${myAttendance.message.slice(0, 42)}…` : myAttendance.message}”
+            </span>
+          )}
+        </div>
+      )}
 
-      {/* Animated bubble cluster (desktop) */}
-      {bubbles.length > 0 && !isMobile && (
+      {/* Animated bubble cluster */}
+      {showBubbleField && (
         <div
           ref={containerRef}
           className="attendance-bubble-stage"
-          style={{
-            position: "relative",
-            height: BUBBLE_STAGE_H,
-            marginBottom: 16,
-          }}
+          style={{ position: "relative", height: BUBBLE_STAGE_H, marginBottom: 16 }}
         >
-          {bubbles.map((b, i) => {
-            const color = seedColor(b.attendee.avatarSeed);
+          <div className="attendance-bubble-stage__hint">Hover a bubble</div>
+          {bubbles.map((b) => {
+            const accent = attendanceSeedColor(b.attendee.avatarSeed);
             const isHovered = hoveredId === b.attendee.id;
-            const avatarSize = Math.max(36, b.size - 4);
+            const bubbleSize = Math.max(48, b.size);
             const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
             const isSelf = !!user && b.attendee.userId === user.id;
+            const label = b.attendee.masked ? attendanceInitials(b.attendee.handle) : (b.attendee.displayName || b.attendee.handle);
             return (
               <div
                 key={b.attendee.id}
                 data-testid={`bubble-attendee-${b.attendee.id}`}
-                className={isNew ? "attendance-pop-in" : undefined}
+                className={`attendance-bubble${isNew ? " attendance-pop-in" : ""}`}
                 onMouseEnter={() => setHoveredId(b.attendee.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
                 style={{
-                  position: "absolute",
-                  left: b.x - b.size / 2,
-                  top: b.y - b.size / 2,
-                  width: b.size,
-                  height: b.size,
-                  borderRadius: "50%",
-                  background: "transparent",
-                  border: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  userSelect: "none",
+                  left: b.x - bubbleSize / 2,
+                  top: b.y - bubbleSize / 2,
+                  width: bubbleSize,
+                  height: bubbleSize,
                   opacity: b.visible ? 1 : 0,
-                  transition: "opacity 0.6s, transform 0.15s",
                   transform: `scale(${b.visible ? (isHovered ? 1.12 : 1) : 0.6})`,
                   zIndex: isHovered ? 20 : 10,
-                  filter: isHovered ? `drop-shadow(0 0 10px ${color})` : `drop-shadow(0 0 4px ${color}66)`,
+                  ["--speech-accent" as string]: accent,
                 }}
               >
-                <UserAvatar
-                  photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
-                  avatarChoice={b.attendee.avatarChoice}
-                  avatarRing={b.attendee.avatarRing}
-                  displayName={b.attendee.handle}
-                  size={avatarSize}
-                />
-                {isSelf && (
-                  <span
-                    data-testid="self-marker"
-                    style={{
-                      position: "absolute",
-                      bottom: -2,
-                      right: -2,
-                      width: 12,
-                      height: 12,
-                      borderRadius: "50%",
-                      background: "#CCFF00",
-                      border: "2px solid #0d0d0d",
-                      zIndex: 25,
-                    }}
-                  />
-                )}
-
-                {/* Speech bubble on hover */}
-                {isHovered && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "calc(100% + 8px)",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "#fff",
-                      color: "#000",
-                      fontSize: "0.7rem",
-                      fontFamily: "var(--font-body)",
-                      fontWeight: 500,
-                      padding: "6px 10px",
-                      borderRadius: 0,
-                      border: "2px solid #000",
-                      maxWidth: 220,
-                      whiteSpace: "normal",
-                      textAlign: "center",
-                      lineHeight: 1.3,
-                      zIndex: 30,
-                      pointerEvents: "auto",
-                      boxShadow: "3px 3px 0 #000",
-                    }}
-                  >
-                    {!b.attendee.masked && (
-                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "var(--text-meta)" }}>
-                        {b.attendee.handle}
-                      </span>
-                    )}
-                    {b.attendee.message}
-                    {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
-                        style={{
-                          display: "block",
-                          margin: "6px auto 0",
-                          border: "1px solid #000",
-                          background: "#CCFF00",
-                          color: "#000",
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 900,
-                          fontSize: "0.62rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        MESSAGE
-                      </button>
-                    )}
-                    {/* Tail */}
-                    <div style={{
-                      position: "absolute",
-                      bottom: -8,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: 0,
-                      height: 0,
-                      borderLeft: "7px solid transparent",
-                      borderRight: "7px solid transparent",
-                      borderTop: "8px solid #fff",
-                    }} />
-                  </div>
-                )}
+                <div
+                  className="attendance-bubble__avatar"
+                  style={{
+                    width: bubbleSize,
+                    height: bubbleSize,
+                    background: attendanceBubbleGradient(b.attendee.avatarSeed),
+                    fontSize: bubbleSize * 0.34,
+                  }}
+                >
+                  {attendanceInitials(b.attendee.handle)}
+                  {isSelf && <span className="attendance-bubble__self-dot" data-testid="self-marker" />}
+                </div>
+                <div className={`attendance-speech-pop${isHovered ? " attendance-speech-pop--visible" : ""}`}>
+                  {!b.attendee.masked && (
+                    <div className="attendance-speech-pop__name">{label}</div>
+                  )}
+                  <div className="attendance-speech-pop__phrase">“{b.attendee.message}”</div>
+                  {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
+                    <button
+                      type="button"
+                      className="attendance-speech-pop__msg-btn"
+                      onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
+                    >
+                      Message →
+                    </button>
+                  )}
+                  <span className="attendance-speech-pop__tail" />
+                </div>
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Mobile horizontal strip with scroll-snap */}
-      {bubbles.length > 0 && isMobile && (
+      {/* Mobile / strip view */}
+      {showBubbleStrip && (
         <>
         <p className="attendance-mobile-hint">Swipe · tap a face</p>
         <div className="attendance-mobile-strip">
           {bubbles.map((b, i) => {
             const isHovered = hoveredId === b.attendee.id;
-            const avatarSize = 48;
             const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
             const isSelf = !!user && b.attendee.userId === user.id;
             return (
@@ -493,13 +430,12 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
                 className={`attendance-mobile-strip__item${isNew ? " attendance-pop-in" : ""}`}
                 onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
               >
-                <UserAvatar
-                  photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
-                  avatarChoice={b.attendee.avatarChoice}
-                  avatarRing={b.attendee.avatarRing}
-                  displayName={b.attendee.handle}
-                  size={avatarSize}
-                />
+                <span
+                  className="attendance-mobile-strip__avatar"
+                  style={{ background: attendanceBubbleGradient(b.attendee.avatarSeed) }}
+                >
+                  {attendanceInitials(b.attendee.handle)}
+                </span>
                 {isSelf && (
                   <span
                     data-testid="self-marker-strip"

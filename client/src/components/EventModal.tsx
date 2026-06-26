@@ -479,6 +479,19 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             </button>
           </div>
 
+          <section className="event-attendance-header" aria-label="Event attendance">
+            <div className="event-attendance-header__orb event-attendance-header__orb--magenta" aria-hidden="true" />
+            <div className="event-attendance-header__orb event-attendance-header__orb--cyan" aria-hidden="true" />
+            <div className="event-attendance-header__inner">
+              <span className="event-attendance-header__pill">
+                {startTime}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
+              </span>
+              <p className="event-attendance-header__lede">
+                Tap <span>I'll be there</span> to drop into the room and see who's going.
+              </p>
+            </div>
+          </section>
+
           {/* I'll Be There — interactive bubbles directly under tickets / calendar */}
           <section className="event-modal-attendance" data-testid="event-modal-attendance">
             <AttendanceCluster eventId={event.id} embedded />
