@@ -211,7 +211,7 @@ export default function Home() {
 
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
-            <div className="home-hero-kicker">Portland Pride Weekend · July 16–19, 2026</div>
+            <div className="home-hero-kicker">July 16–19, 2026</div>
 
             <h1 className="display home-hero-title">
               PORTLAND<br />

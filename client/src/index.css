@@ -648,15 +648,15 @@ h2.display,
 .home-hero-kicker {
   display: inline-block;
   margin-bottom: 30px;
-  padding: 7px 18px;
+  padding: 10px 22px;
   transform: rotate(-0.9deg);
   background: var(--neon-yellow);
   color: #000;
   box-shadow: 8px 8px 0 var(--neon-magenta);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.88rem, 2vw, 1.25rem);
-  letter-spacing: 0.18em;
+  font-size: clamp(1.76rem, 4vw, 2.5rem);
+  letter-spacing: 0.14em;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -783,8 +783,9 @@ h2.display,
   }
 
   .home-hero-kicker {
-    font-size: 0.78rem;
-    line-height: 1.25;
+    font-size: 1.56rem;
+    line-height: 1.1;
+    padding: 8px 16px;
   }
 
   .home-hero-title {
@@ -1545,6 +1546,133 @@ h2.display,
   background: var(--neon-yellow);
   border: 2px solid var(--neon-magenta);
   box-shadow: 4px 4px 0 var(--neon-magenta);
+}
+
+/* Unified section heroes — Pride Work, Gifting, Missed, About */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(400px, 50vh, 540px);
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0, #ff8c00) 1;
+}
+
+.page-hero__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.page-hero__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(102deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.9) 32%, rgba(0,0,0,0.62) 56%, rgba(0,0,0,0.22) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 42%, transparent 72%);
+}
+
+.page-hero__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: radial-gradient(circle, #CCFF00 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.page-hero__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  min-height: inherit;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vw, 88px) 24px clamp(40px, 5vw, 64px);
+}
+
+.page-hero__panel {
+  max-width: 760px;
+  padding: clamp(18px, 2.5vw, 28px) clamp(20px, 3vw, 32px);
+  background: rgba(0, 0, 0, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.page-hero__title {
+  margin: 18px 0 12px;
+  font-size: clamp(2.75rem, 7.5vw, 5.25rem);
+  line-height: 0.88;
+  color: #f7f5ee;
+}
+
+.page-hero__accent {
+  display: block;
+  -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
+}
+
+.page-hero__accent--lime {
+  color: #ccff00;
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.92),
+    0 0 20px rgba(204, 255, 0, 0.65);
+}
+
+.page-hero__accent--magenta {
+  color: #ff00cc;
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.92),
+    0 0 20px rgba(255, 0, 204, 0.55);
+}
+
+.page-hero__accent--cyan {
+  color: #00ffff;
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.92),
+    0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+.page-hero__accent--rainbow {
+  background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(2px 2px 0 #000) drop-shadow(0 0 14px rgba(255, 255, 255, 0.15));
+}
+
+.page-hero__lede {
+  max-width: 640px;
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  line-height: 1.62;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.page-hero__tagline {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 14px;
+  background: #f2eadb;
+  color: #090909;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(0.75rem, 1.2vw, 0.88rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 6px 6px 0 var(--neon-magenta);
+}
+
+.page-hero__actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .board-sticker {

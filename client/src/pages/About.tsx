@@ -1,3 +1,4 @@
+import PageHero from "@/components/PageHero";
 import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink } from "lucide-react";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
@@ -5,32 +6,15 @@ const VENMO_URL = "https://venmo.com/tucker_pdmax";
 export default function About() {
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      {/* Hero */}
-      <div
-        className="about-hero parallax-container relative border-b-2 border-white/10 px-4 py-16 md:py-24 text-center"
-      >
-        {/* Halftone BG decoration */}
-        <div
-          className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="relative max-w-3xl mx-auto">
-          <span className="sticker mb-4 inline-block" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>
-            About This Guide
-          </span>
-          <h1 className="display page-hero-title text-white mt-4 mb-6">
-            BUILT FOR<br />
-            <span style={{ color: "#CCFF00" }}>THE COMMUNITY.</span>
-          </h1>
-          <p className="text-white/60 text-lg max-w-xl mx-auto leading-relaxed">
-            PDX Pride Guide is a free, independently built event directory for Portland Pride Weekend 2026.
-            Made by Tucker, shaped by submissions, and open to support from queer-run local businesses.
-          </p>
-        </div>
-      </div>
+      <PageHero
+        kicker="ABOUT THIS GUIDE"
+        titleLine1="BUILT FOR"
+        titleLine2="THE COMMUNITY."
+        accent="lime"
+        lede="PDX Pride Guide is a free, independently built event directory for Portland Pride Weekend 2026. Made by Tucker, shaped by submissions, and open to support from queer-run local businesses."
+        bgImage="/motifs/hero-about.png"
+        bgPosition="56% center"
+      />
 
       <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-16">
 

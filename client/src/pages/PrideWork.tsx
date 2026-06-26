@@ -7,6 +7,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
+import PageHero from "@/components/PageHero";
 import { Briefcase, Search, X, ChevronDown } from "lucide-react";
 
 const gigSchema = z.object({
@@ -115,18 +116,16 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page">
-      <section className="gigs-hero">
-        <div className="gigs-hero-bg parallax-container" aria-hidden="true" />
-        <div className="gigs-hero-inner">
-          <div className="board-kicker">PRIDE SEASON · QUEER WORK</div>
-          <h1 className="display page-hero-title gigs-title">
-            PRIDE<br /><span>GIG BOARD</span>
-          </h1>
-          <p className="gigs-lede">
-            Community-powered job board for Pride weekend and beyond. Queer workers, queer employers, queer gigs.
-          </p>
-          <p className="gigs-tagline">Paid, respected, valued.</p>
-          <div className="gifting-actions">
+      <PageHero
+        kicker="PRIDE SEASON · QUEER WORK"
+        titleLine1="PRIDE"
+        titleLine2="GIG BOARD"
+        accent="lime"
+        lede="Community-powered job board for Pride weekend and beyond. Queer workers, queer employers, queer gigs."
+        tagline="Paid, respected, valued."
+        bgImage="/motifs/hero-gigs.jpg"
+        actions={
+          <>
             <button className="btn-neon cyan" onClick={() => setFilterType("LOOKING_FOR_WORK")}>
               <Search size={16} /> Find Work
             </button>
@@ -137,9 +136,9 @@ export default function PrideWork() {
               <Search size={16} /> Post Availability
             </button>
             <a href="#how-it-works" className="gifting-how-link">How It Works ↓</a>
-          </div>
-        </div>
-      </section>
+          </>
+        }
+      />
 
       <section id="how-it-works" className="gigs-how">
         <div>

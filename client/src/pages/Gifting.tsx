@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import PageHero from "@/components/PageHero";
 import UserAvatar from "@/components/UserAvatar";
 
 const CATEGORIES = [
@@ -158,20 +159,22 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page">
-      <section className="gifting-hero">
-        <div className="gifting-hero-bg parallax-container" aria-hidden="true" />
-        <div className="gifting-hero-inner">
-          <div className="board-kicker">PRIDE SEASON ONLY · NOW THROUGH JULY 26</div>
-          <h1 className="display page-hero-title gifting-title">GIFT WITH<br /><span>PRIDE</span></h1>
-          <p className="gifting-lede">A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home.</p>
-          <p className="gifting-tagline">Give gay gifts. Queer homes. Keep it moving.</p>
-          <div className="gifting-actions">
+      <PageHero
+        kicker="PRIDE SEASON ONLY · NOW THROUGH JULY 26"
+        titleLine1="GIFT WITH"
+        titleLine2="PRIDE"
+        accent="rainbow"
+        lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home."
+        tagline="Give gay gifts. Queer homes. Keep it moving."
+        bgImage="/gift-with-pride-hero.jpg"
+        actions={
+          <>
             <button className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a Gift</button>
             <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an In Search Of</button>
             <a href="#how-it-works" className="gifting-how-link">How It Works ↓</a>
-          </div>
-        </div>
-      </section>
+          </>
+        }
+      />
 
       <section id="how-it-works" className="gifting-how">
         <div>
