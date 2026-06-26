@@ -13,15 +13,30 @@ export function attendanceSeedColor(seed: string): string {
   return colors[h % colors.length];
 }
 
+const REFERENCE_GRADIENTS = [
+  "linear-gradient(135deg, #FF00CC, #A24BFF)",
+  "linear-gradient(135deg, #19E3FF, #008026)",
+  "linear-gradient(135deg, #CCFF00, #19E3FF)",
+  "linear-gradient(135deg, #FF6600, #FF00CC)",
+  "linear-gradient(135deg, #A24BFF, #19E3FF)",
+  "linear-gradient(135deg, #FFED00, #FF6600)",
+  "linear-gradient(135deg, #CCFF00, #FF00CC)",
+];
+
 export function attendanceBubbleGradient(seed: string): string {
-  const accent = attendanceSeedColor(seed);
-  return `linear-gradient(145deg, ${accent} 0%, #19e3ff 48%, #a24bff 100%)`;
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return REFERENCE_GRADIENTS[h % REFERENCE_GRADIENTS.length];
 }
 
 export type AttendancePreviewBubble = {
   id: number;
   initials: string;
   avatarSeed: string;
+  userId?: number | null;
+  avatarRing?: string | null;
+  avatarChoice?: number | null;
+  photoUrl?: string | null;
 };
 
 export type AttendanceSummary = {

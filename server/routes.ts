@@ -1,7 +1,6 @@
 import type { Express } from "express";
 import type { Server } from "http";
-import { storage, hashPassword, sqlite, getTableCounts, getAdminMetrics } from "./storage";
-import { initAttendanceWs } from "./attendanceWs";
+import { storage, hashPassword, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, getPersistenceAudit } from "./persistence";
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
@@ -242,7 +241,6 @@ function getAdminActorUserId(req: any): number | null {
 
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
-  const attendanceWs = initAttendanceWs(httpServer);
 
   // Session middleware — persisted on the same SQLite volume as user data
   app.use(session({
@@ -388,6 +386,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getAttendancesByUser(req.session.userId!));
   });
 
+  app.get("/api/events/mine/talent", requireAuth, (req, res) => {
+    res.json(storage.getEventTalentByUser(req.session.userId!));
+  });
+
   // Owner edits a claimed event (all fields, goes back to pending review)
   app.put("/api/events/:id/edit", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
@@ -452,9 +454,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const message = String(req.body.message || "").trim();
       if (!message) return res.status(400).json({ error: "message required" });
-      const eventId = Number(req.params.id);
-      const att = storage.upsertAttendance(eventId, user, message);
-      attendanceWs.broadcastAttendance(eventId);
+      const att = storage.upsertAttendance(Number(req.params.id), user, message);
       res.json(att);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -462,9 +462,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.delete("/api/events/:id/attendance", requireAuth, (req, res) => {
-    const eventId = Number(req.params.id);
-    storage.removeAttendance(eventId, req.session.userId!);
-    attendanceWs.broadcastAttendance(eventId);
+    storage.removeAttendance(Number(req.params.id), req.session.userId!);
     res.json({ ok: true });
   });
 
@@ -1332,7 +1330,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
-    res.json(getAdminMetrics());
+    const counts = getTableCounts();
+    const pendingSubmissions = storage.getSubmissions("PENDING").length;
+    const liveEvents = storage.getEvents({ status: "LIVE" }).length;
+    const openFeedback = storage.getFeedbackReports("OPEN").length;
+    res.json({
+      users: counts.users ?? 0,
+      activeSessions: counts.express_sessions ?? 0,
+      liveEvents,
+      messages: counts.messages ?? 0,
+      attendances: counts.attendances ?? 0,
+      pendingSubmissions,
+      gigPosts: counts.gig_posts ?? 0,
+      giftingPosts: counts.gifting_posts ?? 0,
+      missedConnections: counts.missed_connections ?? 0,
+      openFeedback,
+    });
   });
 
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {

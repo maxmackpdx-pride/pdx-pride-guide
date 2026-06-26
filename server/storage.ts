@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import {
   isMissedConnectionPostable, missedConnectionClosesAt,
 } from "@shared/missedConnections";
-import { isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
+import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent,
@@ -359,18 +359,6 @@ export function hashPassword(pw: string) {
 
 // Old fake event titles used to detect stale seed data
 const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extravaganza", "Pride Brunch", "Kink & Community Fair", "Trans Joy Dance"];
-
-const SEED_GIFTING_TITLES = [
-  "Extra rainbow string lights",
-  "Black mesh party top",
-  "ISO folding chair for parade day",
-];
-
-const SEED_USERNAMES = ["community_closet"];
-
-const ACTIVE_GIFTING_STATUSES = [
-  "OPEN", "THREE_INTERESTED", "POSTER_CHOOSING", "LOOKING", "OFFER_PENDING", "REOPENED", "PENDING",
-];
 
 function seedData() {
   const existing = db.select().from(events).all();
@@ -1194,6 +1182,38 @@ function seedData() {
   for (const e of seedEvents) {
     db.insert(events).values(e).run();
   }
+
+  // Seed attendance entries for demo
+  const bubbles = [
+    "Hey, I'll be there!",
+    "Hey, come say hi!",
+    "Hey, I'm cute and slightly feral",
+    "Hey, here for the queers and the chaos",
+    "Hey, I'm friendly but bad at starting conversations",
+    "Hey, let's be awkward together",
+  ];
+  const handles = ["queercat", "neonbabe", "velvethaze", "crushpunk", "stardust", "wildthing", "radtrans", "badfemme"];
+  for (let eventId = 1; eventId <= 46; eventId++) {
+    const count = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      db.insert(attendances).values({
+        eventId,
+        handle: handles[Math.floor(Math.random() * handles.length)],
+        message: bubbles[Math.floor(Math.random() * bubbles.length)],
+        avatarSeed: `seed${eventId}${i}`,
+        createdAt: now,
+      }).run();
+    }
+  }
+
+  // Seed one real-looking gig (LOOKING_FOR_WORK only — let real users post gigs)
+  db.insert(gigPosts).values({
+    postType: "LOOKING_FOR_WORK", title: "Sound Tech & DJ Available Pride Weekend",
+    name: "DJ Queerwave", contactEmail: "djqueerwave@example.com",
+    description: "Portland-based DJ and sound tech. Experienced in queer nightlife, house, and techno. Available July 16–19. Hit me up!",
+    skills: "DJ, Sound Tech, Lighting", compensation: "Negotiable", location: "Portland, OR",
+    isRemote: false, status: "LIVE", createdAt: now,
+  } as any).run();
 }
 
 function applyVerifiedEventOverrides() {
@@ -1434,7 +1454,6 @@ function applyVerifiedEventOverrides() {
 seedData();
 applyVerifiedEventOverrides();
 removeGiftingSeedPosts();
-removeDemoSeedData();
 
 function archiveExpiredMissedConnections() {
   const now = new Date().toISOString();
@@ -1471,32 +1490,16 @@ function expireGiftingPosts() {
 }
 
 function removeGiftingSeedPosts() {
-  const titles = SEED_GIFTING_TITLES.map(() => "?").join(", ");
   sqlite.prepare(`
     DELETE FROM gifting_posts
-    WHERE title IN (${titles})
+    WHERE title IN ('Extra rainbow string lights', 'Black mesh party top', 'ISO folding chair for parade day')
        OR user_id IN (SELECT id FROM users WHERE username = 'community_closet')
-  `).run(...SEED_GIFTING_TITLES);
+  `).run();
   sqlite.prepare(`
     DELETE FROM users
     WHERE username = 'community_closet'
       AND NOT EXISTS (SELECT 1 FROM gifting_posts WHERE user_id = users.id)
   `).run();
-}
-
-/** Strip demo RSVPs, example.com gigs, and other launch filler from persisted DBs. */
-function removeDemoSeedData() {
-  const attendances = sqlite.prepare(`
-    DELETE FROM attendances
-    WHERE user_id IS NULL OR avatar_seed LIKE 'seed%'
-  `).run();
-  const gigs = sqlite.prepare(`
-    DELETE FROM gig_posts
-    WHERE LOWER(contact_email) LIKE '%@example.com'
-  `).run();
-  if (attendances.changes > 0 || gigs.changes > 0) {
-    console.log(`[seed-cleanup] removed ${attendances.changes} demo attendances, ${gigs.changes} demo gigs`);
-  }
 }
 
 function attendanceInitials(handle: string): string {
@@ -1577,6 +1580,7 @@ export interface IStorage {
   replaceEventPrimaryHost(eventId: number, newUserId: number): void;
   // Event talent
   getEventTalent(eventId: number, opts?: { includePending?: boolean }): any[];
+  getEventTalentByUser(userId: number): Record<number, { roles: EventTalentRole[]; status: "LIVE" | "PENDING" }>;
   getEventTalentById(talentId: number): any | undefined;
   addEventTalentByHost(eventId: number, hostUserId: number, username: string, role: EventTalentRole, opts?: { isAdmin?: boolean }): { talent?: any; error?: string };
   requestEventTalentSelf(eventId: number, userId: number, role: EventTalentRole): { talent?: any; error?: string };
@@ -1699,7 +1703,7 @@ export const storage: IStorage = {
           storage.setPrimaryEventHost(sub.eventId, user.id, null);
         }
       } else {
-        db.insert(events).values({
+        const created = db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
           neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
@@ -1713,7 +1717,9 @@ export const storage: IStorage = {
           isClaimable: false, claimedBy: null,
           submittedBy: sub.submitterEmail, adminNotes: null,
           createdAt: new Date().toISOString(),
-        }).run();
+        }).returning().get();
+        const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+        if (submitter) storage.setPrimaryEventHost(created.id, submitter.id, null);
       }
     }
     return db.select().from(submissions).where(eq(submissions.id, id)).get();
@@ -1813,12 +1819,30 @@ export const storage: IStorage = {
       `).all(eventId) as any[]);  },
   getAttendanceSummaries() {
     const rows = sqlite.prepare(`
-      SELECT a.id, a.event_id AS eventId, a.handle, a.avatar_seed AS avatarSeed
+      SELECT
+        a.id,
+        a.event_id AS eventId,
+        a.user_id AS userId,
+        a.handle,
+        a.avatar_seed AS avatarSeed,
+        u.avatar_ring AS avatarRing,
+        u.avatar_choice AS avatarChoice,
+        u.photo_url AS photoUrl
       FROM attendances a
+      LEFT JOIN users u ON u.id = a.user_id
       WHERE a.is_active = 1
       ORDER BY a.created_at DESC
-    `).all() as Array<{ id: number; eventId: number; handle: string; avatarSeed: string }>;
-    const map: Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }> = {};
+    `).all() as Array<{
+      id: number;
+      eventId: number;
+      userId: number | null;
+      handle: string;
+      avatarSeed: string;
+      avatarRing: string | null;
+      avatarChoice: number | null;
+      photoUrl: string | null;
+    }>;
+    const map: Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string; userId?: number | null; avatarRing?: string | null; avatarChoice?: number | null; photoUrl?: string | null }> }> = {};
     for (const row of rows) {
       if (!map[row.eventId]) map[row.eventId] = { count: 0, preview: [] };
       map[row.eventId].count += 1;
@@ -1827,6 +1851,10 @@ export const storage: IStorage = {
           id: row.id,
           initials: attendanceInitials(row.handle),
           avatarSeed: row.avatarSeed || row.handle,
+          userId: row.userId ?? null,
+          avatarRing: row.avatarRing ?? null,
+          avatarChoice: row.avatarChoice ?? undefined,
+          photoUrl: row.photoUrl ?? null,
         });
       }
     }
@@ -1989,9 +2017,12 @@ export const storage: IStorage = {
     `).get(eventId, userId) as { ok: number } | undefined;
     if (row?.ok) return true;
     const evt = db.select().from(events).where(eq(events.id, eventId)).get();
-    if (!evt?.claimedBy) return false;
+    if (!evt) return false;
     const user = db.select().from(users).where(eq(users.id, userId)).get();
-    return Boolean(user && user.username === evt.claimedBy);
+    if (!user) return false;
+    if (evt.claimedBy && user.username === evt.claimedBy) return true;
+    if (evt.submittedBy && (user.email === evt.submittedBy || user.username === evt.submittedBy)) return true;
+    return false;
   },
   setPrimaryEventHost(eventId, userId, addedByUserId) {
     ensureEventHostsSchema();
@@ -2076,6 +2107,23 @@ export const storage: IStorage = {
       ORDER BY et.role ASC, et.created_at ASC
     `).all(eventId) as any[];
   },
+  getEventTalentByUser(userId) {
+    ensureEventTalentSchema();
+    const rows = sqlite.prepare(`
+      SELECT event_id AS eventId, role, status
+      FROM event_talent
+      WHERE user_id = ? AND status IN ('LIVE', 'PENDING')
+      ORDER BY event_id ASC, role ASC
+    `).all(userId) as Array<{ eventId: number; role: string; status: string }>;
+    const map: Record<number, { roles: EventTalentRole[]; status: "LIVE" | "PENDING" }> = {};
+    for (const row of rows) {
+      if (!isEventTalentRole(row.role)) continue;
+      if (!map[row.eventId]) map[row.eventId] = { roles: [], status: "PENDING" };
+      if (!map[row.eventId].roles.includes(row.role)) map[row.eventId].roles.push(row.role);
+      if (row.status === "LIVE") map[row.eventId].status = "LIVE";
+    }
+    return map;
+  },
   getEventTalentById(talentId) {
     ensureEventTalentSchema();
     return sqlite.prepare(`
@@ -2098,14 +2146,23 @@ export const storage: IStorage = {
     `).get(talentId) as any | undefined;
   },
   getEventTalentApproverUserIds(eventId) {
-    const hosts = storage.getEventHosts(eventId);
-    if (hosts.length > 0) return hosts.map((h: any) => h.userId);
+    const ids: number[] = [];
+    const addUserId = (userId?: number | null) => {
+      if (userId && !ids.includes(userId)) ids.push(userId);
+    };
+    for (const host of storage.getEventHosts(eventId)) addUserId(host.userId);
+    if (ids.length > 0) return ids;
     const evt = db.select().from(events).where(eq(events.id, eventId)).get();
-    if (evt?.claimedBy) {
+    if (!evt) return [];
+    if (evt.claimedBy) {
       const owner = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
-      if (owner) return [owner.id];
+      addUserId(owner?.id);
     }
-    return [];
+    if (evt.submittedBy) {
+      const submitter = storage.getUserByEmail(evt.submittedBy) || storage.getUserByUsername(evt.submittedBy);
+      addUserId(submitter?.id);
+    }
+    return ids;
   },
   eventNeedsAdminTalentApproval(eventId) {
     const evt = db.select().from(events).where(eq(events.id, eventId)).get();
@@ -2174,7 +2231,7 @@ export const storage: IStorage = {
       addedByUserId: userId,
       createdAt: new Date().toISOString(),
     } as any).returning().get();
-    const roleLabel = role.charAt(0) + role.slice(1).toLowerCase();
+    const roleLabel = EVENT_TALENT_ROLE_LABELS[role];
     const body = `${user.displayName || user.username} (@${user.username}) requested to be listed as ${roleLabel} for "${evt.title}". Approve to add them to the public lineup.`;
     const approverIds = storage.getEventTalentApproverUserIds(eventId);
     if (approverIds.length > 0) {
@@ -2261,12 +2318,7 @@ export const storage: IStorage = {
   // Messages
   getInbox(userId) {
     return sqlite.prepare(`
-      SELECT m.*,
-             u.username AS from_username,
-             u.display_name AS from_display_name,
-             u.photo_url AS from_photo_url,
-             u.avatar_choice AS from_avatar_choice,
-             u.avatar_ring AS from_avatar_ring
+      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
       FROM messages m
       LEFT JOIN users u ON u.id = m.from_user_id
       WHERE m.to_user_id = ? AND m.deleted_by_to = 0
@@ -2275,12 +2327,7 @@ export const storage: IStorage = {
   },
   getSentMessages(userId) {
     return sqlite.prepare(`
-      SELECT m.*,
-             u.username AS to_username,
-             u.display_name AS to_display_name,
-             u.photo_url AS to_photo_url,
-             u.avatar_choice AS to_avatar_choice,
-             u.avatar_ring AS to_avatar_ring
+      SELECT m.*, u.username AS to_username, u.display_name AS to_display_name
       FROM messages m
       LEFT JOIN users u ON u.id = m.to_user_id
       WHERE m.from_user_id = ? AND m.deleted_by_from = 0
@@ -2420,18 +2467,10 @@ export const storage: IStorage = {
     if (tab === "inbox" && msg.fromUserId !== viewerUserId) {
       copy.from_username = "Anonymous";
       copy.from_display_name = "Anonymous";
-      copy.from_photo_url = null;
-      copy.from_avatar_choice = null;
-      copy.from_avatar_ring = null;
-      copy.masked = true;
     }
     if (tab === "sent" && msg.toUserId !== viewerUserId) {
       copy.to_username = "Anonymous";
       copy.to_display_name = "Anonymous";
-      copy.to_photo_url = null;
-      copy.to_avatar_choice = null;
-      copy.to_avatar_ring = null;
-      copy.masked = true;
     }
     return copy;
   },
@@ -2453,8 +2492,6 @@ export const storage: IStorage = {
         from_username: isSelf ? "You" : "Anonymous",
         from_display_name: isSelf ? "You" : "Anonymous",
         from_photo_url: isSelf ? m.from_photo_url : null,
-        from_avatar_choice: isSelf ? m.from_avatar_choice : null,
-        from_avatar_ring: isSelf ? m.from_avatar_ring : null,
         masked: !isSelf,
       };
     });
@@ -2640,15 +2677,18 @@ export const storage: IStorage = {
 };
 
 try {
-  const claimedRows = sqlite.prepare(`
-    SELECT id, claimed_by AS claimedBy
+  const ownerRows = sqlite.prepare(`
+    SELECT id, claimed_by AS claimedBy, submitted_by AS submittedBy
     FROM events
-    WHERE claimed_by IS NOT NULL AND TRIM(claimed_by) != ''
-  `).all() as { id: number; claimedBy: string }[];
-  for (const row of claimedRows) {
+    WHERE (claimed_by IS NOT NULL AND TRIM(claimed_by) != '')
+       OR (submitted_by IS NOT NULL AND TRIM(submitted_by) != '')
+  `).all() as { id: number; claimedBy: string | null; submittedBy: string | null }[];
+  for (const row of ownerRows) {
     const countRow = sqlite.prepare(`SELECT COUNT(*) AS count FROM event_hosts WHERE event_id = ?`).get(row.id) as { count: number };
     if (countRow.count > 0) continue;
-    const user = storage.getUserByUsername(row.claimedBy) || storage.getUserByEmail(row.claimedBy);
+    const ownerKey = row.claimedBy || row.submittedBy;
+    if (!ownerKey) continue;
+    const user = storage.getUserByUsername(ownerKey) || storage.getUserByEmail(ownerKey);
     if (user) storage.setPrimaryEventHost(row.id, user.id, null);
   }
 } catch (e) {
@@ -2684,48 +2724,4 @@ export function getTableCounts(): Record<string, number> {
     }
   }
   return counts;
-}
-
-function sqlInList(values: string[]) {
-  return values.map(v => `'${v.replace(/'/g, "''")}'`).join(", ");
-}
-
-/** Community-only counts for the admin dashboard — excludes seed/demo filler. */
-export function getAdminMetrics() {
-  const now = Date.now();
-  const count = (sql: string, ...params: unknown[]) =>
-    (sqlite.prepare(sql).get(...params) as { count: number }).count;
-
-  const oldSeedTitles = sqlInList(OLD_SEED_TITLES);
-  const seedGiftingTitles = sqlInList(SEED_GIFTING_TITLES);
-  const seedUsernames = sqlInList(SEED_USERNAMES.map(u => u.toLowerCase()));
-  const activeGiftingStatuses = sqlInList(ACTIVE_GIFTING_STATUSES);
-
-  return {
-    users: count(`SELECT COUNT(*) AS count FROM users WHERE LOWER(username) NOT IN (${seedUsernames})`),
-    activeSessions: count(`SELECT COUNT(*) AS count FROM express_sessions WHERE expired > ?`, now),
-    liveEvents: count(`
-      SELECT COUNT(*) AS count FROM events
-      WHERE status = 'LIVE'
-        AND title NOT IN (${oldSeedTitles})
-        AND title NOT LIKE '%Placeholder%'
-    `),
-    messages: count(`SELECT COUNT(*) AS count FROM messages`),
-    attendances: count(`
-      SELECT COUNT(*) AS count FROM attendances
-      WHERE is_active = 1 AND user_id IS NOT NULL
-    `),
-    pendingSubmissions: count(`SELECT COUNT(*) AS count FROM submissions WHERE status = 'PENDING'`),
-    gigPosts: count(`
-      SELECT COUNT(*) AS count FROM gig_posts
-      WHERE status = 'LIVE' AND LOWER(contact_email) NOT LIKE '%@example.com'
-    `),
-    giftingPosts: count(`
-      SELECT COUNT(*) AS count FROM gifting_posts
-      WHERE status IN (${activeGiftingStatuses})
-        AND title NOT IN (${seedGiftingTitles})
-    `),
-    missedConnections: count(`SELECT COUNT(*) AS count FROM missed_connections WHERE status = 'ACTIVE'`),
-    openFeedback: count(`SELECT COUNT(*) AS count FROM feedback_reports WHERE status = 'OPEN'`),
-  };
 }

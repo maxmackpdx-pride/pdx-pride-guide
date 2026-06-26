@@ -1,32 +1,51 @@
+import AttendanceBubbleFace from "@/components/AttendanceBubbleFace";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
-import { attendanceBubbleGradient } from "@/lib/attendanceBubble";
 
 type EventAttendancePreviewProps = {
   summary?: AttendanceSummary | null;
   compact?: boolean;
+  selfUserId?: number | null;
 };
 
-export default function EventAttendancePreview({ summary, compact = false }: EventAttendancePreviewProps) {
+export default function EventAttendancePreview({
+  summary,
+  compact = false,
+  selfUserId,
+}: EventAttendancePreviewProps) {
   if (!summary || summary.count <= 0) return null;
 
-  const bubbles = summary.preview.slice(0, compact ? 4 : 6);
+  const maxBubbles = compact ? 5 : 6;
+  const bubbles = summary.preview.slice(0, maxBubbles);
+  const bubbleSize = compact ? 26 : 30;
 
   return (
     <div className={`event-card-attendance${compact ? " event-card-attendance--compact" : ""}`}>
-      <span className="event-card-attendance__count">{summary.count} GOING</span>
+      <span className="event-card-attendance__count">
+        <span className="event-card-attendance__count-dot" aria-hidden="true" />
+        {summary.count} Going
+      </span>
       <div className="event-card-attendance__bubbles" aria-hidden="true">
-        {bubbles.map((bubble, index) => (
-          <span
-            key={bubble.id}
-            className="event-card-attendance__bubble"
-            style={{
-              background: attendanceBubbleGradient(bubble.avatarSeed),
-              zIndex: bubbles.length - index,
-            }}
-          >
-            {bubble.initials}
-          </span>
-        ))}
+        {bubbles.map((bubble, index) => {
+          const isSelf = !!selfUserId && bubble.userId === selfUserId;
+          return (
+            <span
+              key={bubble.id}
+              className={`event-card-attendance__bubble${isSelf ? " event-card-attendance__bubble--self" : ""}`}
+              style={{ zIndex: bubbles.length - index }}
+            >
+              <AttendanceBubbleFace
+                handle={bubble.avatarSeed}
+                username={bubble.avatarSeed}
+                avatarSeed={bubble.avatarSeed}
+                avatarRing={bubble.avatarRing}
+                avatarChoice={bubble.avatarChoice ?? undefined}
+                photoUrl={bubble.photoUrl}
+                size={bubbleSize}
+              />
+              {isSelf && <span className="event-card-attendance__self-dot" />}
+            </span>
+          );
+        })}
         {summary.count > bubbles.length && (
           <span className="event-card-attendance__more">+{summary.count - bubbles.length}</span>
         )}

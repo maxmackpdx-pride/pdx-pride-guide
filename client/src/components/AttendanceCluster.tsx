@@ -1,36 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import AttendanceVibeModal from "./AttendanceVibeModal";
+import AttendanceBubbleFace from "./AttendanceBubbleFace";
 import UserAvatar from "@/components/UserAvatar";
 import { useAttendanceLive } from "@/hooks/useAttendanceLive";
+import { attendanceInitials } from "@/lib/attendanceBubble";
 import {
-  attendanceBubbleGradient,
-  attendanceInitials,
-  attendanceSeedColor,
-} from "@/lib/attendanceBubble";
-
-const SPEECH_OPTIONS = [
-  "Hey, I'll be working this one!",
-  "Hey, I'll be there — come say hi!",
-  "Hey, I'll have RBF but please come say hi!",
-  "Hey, I'll be there — come say hi, I don't bite (unless asked)",
-  "Hey, I'll be there — friendly but bad at starting conversations",
-  "Hey, I'll be there — social battery's low but I'm trying",
-  "Hey, I'll be there — cute and slightly feral",
-  "Hey, I'll be there — let's be awkward together",
-  "Hey, I'll be there — eye contact first, then we talk 👀",
-  "Hey, I'll be there for the queers and the chaos",
-  "Hey, I'll be there — consent is hot, let's start there",
-  "Hey, I'll be floating around — tap me if you want company",
-];
-
-// First 5 are the default pill row; the rest are tucked behind "More vibes"
-// so nothing from the original 12 gets dropped, per Tucker's "preserve everything" rule.
-const PRIMARY_OPTIONS = SPEECH_OPTIONS.slice(0, 5);
-const MORE_OPTIONS = SPEECH_OPTIONS.slice(5);
+  ATTENDANCE_PHRASES,
+  DEFAULT_ATTENDANCE_PHRASE_KEY,
+  attendancePhraseLabel,
+  resolveAttendancePhrase,
+  type AttendancePhraseKey,
+} from "@shared/attendancePhrases";
 
 function prefersReducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -60,25 +44,10 @@ interface BubbleState {
   size: number;
 }
 
-type AttendanceClusterProps = {
-  eventId: number;
-  embedded?: boolean;
-  /** Per-event socket; disable on /events cards — page uses subscribe-summaries instead */
-  liveSocket?: boolean;
-  variant?: "default" | "card";
-};
-
-export default function AttendanceCluster({
-  eventId,
-  embedded = false,
-  liveSocket = true,
-  variant = "default",
-}: AttendanceClusterProps) {
+export default function AttendanceCluster({ eventId, embedded = false }: { eventId: number; embedded?: boolean }) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
-  const [showMoreVibes, setShowMoreVibes] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState(SPEECH_OPTIONS[0]);
-  const [customMessage, setCustomMessage] = useState("");
+  const [selectedPhraseKey, setSelectedPhraseKey] = useState<AttendancePhraseKey>(DEFAULT_ATTENDANCE_PHRASE_KEY);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [bubbles, setBubbles] = useState<BubbleState[]>([]);
   const [showAuth, setShowAuth] = useState(false);
@@ -90,22 +59,16 @@ export default function AttendanceCluster({
   const lastRandomizeRef = useRef<number>(Date.now());
   const seenIdsRef = useRef<Set<number> | null>(null);
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
-  const [viewTab, setViewTab] = useState<"field" | "strip">(() =>
-    typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches ? "strip" : "field",
-  );
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
-    const handler = () => {
-      const mobile = mq.matches;
-      setIsMobile(mobile);
-      setViewTab(mobile ? "strip" : "field");
-    };
+    const handler = () => setIsMobile(mq.matches);
+    handler();
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  useAttendanceLive(eventId, liveSocket);
+  useAttendanceLive(eventId);
 
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],
@@ -139,13 +102,17 @@ export default function AttendanceCluster({
       apiRequest("POST", `/api/events/${eventId}/attendance`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
       setShowForm(false);
     },
   });
 
   const removeMutation = useMutation({
     mutationFn: () => apiRequest("DELETE", `/api/events/${eventId}/attendance`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+    },
   });
 
   const messageMutation = useMutation({
@@ -157,7 +124,7 @@ export default function AttendanceCluster({
     },
   });
 
-  const BUBBLE_STAGE_H = variant === "card" ? 200 : 220;
+  const BUBBLE_STAGE_H = 340;
   const BUBBLE_TOP_MARGIN = 56;
 
   // Initialize bubbles when attendees load
@@ -183,12 +150,12 @@ export default function AttendanceCluster({
         size: 36 + Math.random() * 12,
       }))
     );
-  }, [attendees, viewTab]);
+  }, [attendees, isMobile]);
 
-  // Animate bubbles: slow drift + random show/hide
+  // Animate bubbles: slow drift + random show/hide (desktop field only)
   useEffect(() => {
     if (bubbles.length === 0) return;
-    if (viewTab !== "field") return;
+    if (isMobile) return;
 
     const animate = () => {
       const W = containerRef.current?.offsetWidth || 600;
@@ -234,82 +201,43 @@ export default function AttendanceCluster({
 
     animFrameRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [bubbles.length, viewTab]);
+  }, [bubbles.length, isMobile]);
 
   const submitVibe = () => {
-    const message = customMessage.trim() || selectedMessage;
-    mutation.mutate({ message });
+    mutation.mutate({ message: attendancePhraseLabel(selectedPhraseKey) });
   };
 
   const myAttendance = attendees.find(a => a.userId === user?.id);
+  const myPhrase = myAttendance ? resolveAttendancePhrase(myAttendance.message) : null;
 
   useEffect(() => {
     if (!showForm || !myAttendance) return;
-    if (SPEECH_OPTIONS.includes(myAttendance.message)) {
-      setSelectedMessage(myAttendance.message);
-      setCustomMessage("");
-    } else {
-      setCustomMessage(myAttendance.message);
-    }
+    setSelectedPhraseKey(resolveAttendancePhrase(myAttendance.message).key);
   }, [showForm, myAttendance]);
 
   const phrasePicker = (
-    <>
-      <p className="display attendance-vibe-label">PICK YOUR VIBE</p>
-      <div className="attendance-vibe-pills">
-        {PRIMARY_OPTIONS.map(opt => (
-          <button
-            key={opt}
-            type="button"
-            data-testid={`option-${opt.slice(0, 20)}`}
-            onClick={() => setSelectedMessage(opt)}
-            className={`attendance-vibe-pill${selectedMessage === opt && !customMessage.trim() ? " attendance-vibe-pill--active" : ""}`}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-      {showMoreVibes && (
-        <div className="attendance-vibe-pills">
-          {MORE_OPTIONS.map(opt => (
-            <button
-              key={opt}
-              type="button"
-              data-testid={`option-${opt.slice(0, 20)}`}
-              onClick={() => setSelectedMessage(opt)}
-              className={`attendance-vibe-pill${selectedMessage === opt && !customMessage.trim() ? " attendance-vibe-pill--active" : ""}`}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      )}
-      <button
-        type="button"
-        className="attendance-vibe-more"
-        onClick={() => setShowMoreVibes(s => !s)}
-      >
-        {showMoreVibes ? "Fewer vibes" : "More vibes"}
-      </button>
-      <label className="attendance-vibe-custom-label">
-        Say something (optional)
-        <textarea
-          value={customMessage}
-          onChange={(e) => setCustomMessage(e.target.value)}
-          placeholder="Your own line — shows on your bubble instead of a preset"
-          rows={3}
-          className="attendance-vibe-custom"
-          data-testid="input-custom-vibe"
-        />
-      </label>
-    </>
+    <div className="attendance-phrase-list">
+      {ATTENDANCE_PHRASES.map(phrase => (
+        <button
+          key={phrase.key}
+          type="button"
+          data-testid={`option-${phrase.key}`}
+          className={`attendance-phrase-option${selectedPhraseKey === phrase.key ? " attendance-phrase-option--active" : ""}`}
+          onClick={() => setSelectedPhraseKey(phrase.key)}
+          style={{ "--phrase-color": phrase.color } as CSSProperties}
+        >
+          <span className="attendance-phrase-option__dot" aria-hidden="true" />
+          <span>{phrase.label}</span>
+        </button>
+      ))}
+    </div>
   );
 
-  const showBubbleField = viewTab === "field" && bubbles.length > 0;
-  const showBubbleStrip = viewTab === "strip" && bubbles.length > 0;
+  const showBubbleField = !isMobile && bubbles.length > 0;
+  const showBubbleStrip = isMobile && bubbles.length > 0;
 
   return (
-    <div className={`attendance-cluster-panel${embedded ? " attendance-cluster--embedded" : ""}${variant === "card" ? " attendance-cluster-panel--card" : ""}`}>
+    <div className={`attendance-cluster-panel${embedded ? " attendance-cluster--embedded" : ""}`}>
       <div className="attendance-cluster-head">
         <div className="attendance-cluster-head__title">
           <h3 className="display attendance-cluster-headline">
@@ -319,26 +247,6 @@ export default function AttendanceCluster({
             <span className="attendance-going-pill__dot" aria-hidden="true" />
             {attendees.length} GOING
           </span>
-        </div>
-        <div className="attendance-view-tabs" role="tablist" aria-label="Attendance view">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewTab === "field"}
-            className={`attendance-view-tab${viewTab === "field" ? " attendance-view-tab--active" : ""}`}
-            onClick={() => setViewTab("field")}
-          >
-            Bubble field
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewTab === "strip"}
-            className={`attendance-view-tab${viewTab === "strip" ? " attendance-view-tab--active" : ""}`}
-            onClick={() => setViewTab("strip")}
-          >
-            Mobile strip
-          </button>
         </div>
       </div>
 
@@ -351,9 +259,9 @@ export default function AttendanceCluster({
           >
             {myAttendance ? "Change phrase →" : "I'll be there →"}
           </button>
-          {myAttendance && (
+          {myAttendance && myPhrase && (
             <span className="attendance-cluster-cta__status">
-              You're going as “{myAttendance.message.length > 42 ? `${myAttendance.message.slice(0, 42)}…` : myAttendance.message}”
+              ✓ You're going as “{myPhrase.label}”
             </span>
           )}
         </div>
@@ -368,7 +276,8 @@ export default function AttendanceCluster({
         >
           <div className="attendance-bubble-stage__hint">Hover a bubble</div>
           {bubbles.map((b) => {
-            const accent = attendanceSeedColor(b.attendee.avatarSeed);
+            const phrase = resolveAttendancePhrase(b.attendee.message);
+            const accent = phrase.color;
             const isHovered = hoveredId === b.attendee.id;
             const bubbleSize = Math.max(48, b.size);
             const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
@@ -393,23 +302,25 @@ export default function AttendanceCluster({
                   ["--speech-accent" as string]: accent,
                 }}
               >
-                <div
-                  className="attendance-bubble__avatar"
-                  style={{
-                    width: bubbleSize,
-                    height: bubbleSize,
-                    background: attendanceBubbleGradient(b.attendee.avatarSeed),
-                    fontSize: bubbleSize * 0.34,
-                  }}
-                >
-                  {attendanceInitials(b.attendee.handle)}
+                <div className="attendance-bubble__avatar" style={{ width: bubbleSize, height: bubbleSize }}>
+                  <AttendanceBubbleFace
+                    handle={b.attendee.handle}
+                    displayName={b.attendee.displayName}
+                    username={b.attendee.handle}
+                    photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
+                    avatarChoice={b.attendee.avatarChoice}
+                    avatarRing={b.attendee.avatarRing}
+                    avatarSeed={b.attendee.avatarSeed}
+                    masked={b.attendee.masked}
+                    size={bubbleSize}
+                  />
                   {isSelf && <span className="attendance-bubble__self-dot" data-testid="self-marker" />}
                 </div>
                 <div className={`attendance-speech-pop${isHovered ? " attendance-speech-pop--visible" : ""}`}>
                   {!b.attendee.masked && (
                     <div className="attendance-speech-pop__name">{label}</div>
                   )}
-                  <div className="attendance-speech-pop__phrase">“{b.attendee.message}”</div>
+                  <div className="attendance-speech-pop__phrase" style={{ color: accent }}>“{phrase.label}”</div>
                   {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
                     <button
                       type="button"
@@ -427,12 +338,13 @@ export default function AttendanceCluster({
         </div>
       )}
 
-      {/* Mobile / strip view */}
+      {/* Mobile-only horizontal strip */}
       {showBubbleStrip && (
-        <>
+        <section className="attendance-mobile-strip-panel" aria-label="Who's going">
         <p className="attendance-mobile-hint">Swipe · tap a face</p>
         <div className="attendance-mobile-strip">
           {bubbles.map((b, i) => {
+            const phrase = resolveAttendancePhrase(b.attendee.message);
             const isHovered = hoveredId === b.attendee.id;
             const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
             const isSelf = !!user && b.attendee.userId === user.id;
@@ -443,12 +355,18 @@ export default function AttendanceCluster({
                 className={`attendance-mobile-strip__item${isNew ? " attendance-pop-in" : ""}`}
                 onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
               >
-                <span
+                <AttendanceBubbleFace
+                  handle={b.attendee.handle}
+                  displayName={b.attendee.displayName}
+                  username={b.attendee.handle}
+                  photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
+                  avatarChoice={b.attendee.avatarChoice}
+                  avatarRing={b.attendee.avatarRing}
+                  avatarSeed={b.attendee.avatarSeed}
+                  masked={b.attendee.masked}
+                  size={56}
                   className="attendance-mobile-strip__avatar"
-                  style={{ background: attendanceBubbleGradient(b.attendee.avatarSeed) }}
-                >
-                  {attendanceInitials(b.attendee.handle)}
-                </span>
+                />
                 {isSelf && (
                   <span
                     data-testid="self-marker-strip"
@@ -493,7 +411,9 @@ export default function AttendanceCluster({
                         {b.attendee.handle}
                       </span>
                     )}
-                    {b.attendee.message}
+                    <span style={{ color: phrase.color, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.62rem" }}>
+                      “{phrase.label}”
+                    </span>
                     {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
                       <button
                         type="button"
@@ -530,7 +450,7 @@ export default function AttendanceCluster({
             );
           })}
         </div>
-        </>
+        </section>
       )}
 
       {attendees.length === 0 && !showForm && (
@@ -544,7 +464,7 @@ export default function AttendanceCluster({
         isMobile={isMobile}
         isPending={mutation.isPending}
         hasAttendance={!!myAttendance}
-        title={myAttendance ? "CHANGE YOUR VIBE" : "I'LL BE THERE"}
+        title="Say something"
         onClose={() => setShowForm(false)}
         onSubmit={submitVibe}
         onRemove={() => removeMutation.mutate()}
@@ -614,7 +534,7 @@ export default function AttendanceCluster({
                   color: "#e6e3da",
                 }}
               >
-                "{messageTarget.message}" — see you there?
+                "{resolveAttendancePhrase(messageTarget.message).label}" — see you there?
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, padding: "14px 16px", borderTop: "1px solid #222" }}>

@@ -48,3 +48,9 @@ export type EventTalentRow = {
   avatarChoice?: number;
   avatarRing?: string | null;
 };
+
+/** Logged-in user's talent tag on an event card */
+export type UserEventTalentCard = {
+  roles: EventTalentRole[];
+  status: "LIVE" | "PENDING";
+};

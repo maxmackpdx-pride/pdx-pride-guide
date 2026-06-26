@@ -22,12 +22,12 @@ type EventTagsRowProps = {
   style?: CSSProperties;
 };
 
-function tagStyle(accent: string): CSSProperties {
-  return {
-    "--tag-bg": accent,
-    "--tag-border": "var(--neon-yellow)",
-    "--tag-shadow": "var(--neon-yellow)",
-  } as CSSProperties;
+function dayTagStyle(): CSSProperties {
+  return { "--day-tag-bg": "#ffffff" } as CSSProperties;
+}
+
+function claimTagStyle(accent: string): CSSProperties {
+  return { "--tag-accent": accent } as CSSProperties;
 }
 
 export default function EventTagsRow({
@@ -41,7 +41,7 @@ export default function EventTagsRow({
   style,
 }: EventTagsRowProps) {
   const typeTags = getEventTypeTagsForEvent(event);
-  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#CCFF00";
+  const dayAccent = DAY_COLORS[event.dayOfWeek || ""] || "#CCFF00";
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const jsonTypes = showJsonTypes
     ? (JSON.parse(event.eventTypes || "[]") as string[])
@@ -50,25 +50,25 @@ export default function EventTagsRow({
   return (
     <div className={`event-card-tags${className ? ` ${className}` : ""}`} style={style}>
       {event.dayOfWeek && (
-        <span className="sticker-tag" style={tagStyle(dayColor)}>
+        <span className="event-card-day-tag" style={dayTagStyle()}>
           {event.dayOfWeek}
         </span>
       )}
       <EventTypeTagList labels={typeTags} size={size} max={max} />
       {jsonTypes.map(t => (
-        <span key={t} className="sticker-tag" style={tagStyle(dayColor)}>
+        <span key={t} className="event-card-meta-tag" style={{ color: dayAccent, borderColor: `${dayAccent}88` }}>
           {t.replace(/-/g, " ")}
         </span>
       ))}
       {showClaim && hasPendingClaim && (
-        <span className="sticker-tag" style={tagStyle("var(--neon-magenta)")}>
+        <span className="event-card-meta-tag event-card-meta-tag--claim" style={claimTagStyle("var(--neon-magenta)")}>
           CLAIM PENDING
         </span>
       )}
       {showClaim && !hasPendingClaim && event.isClaimable && (
         <span
-          className={`sticker-tag${onClaimClick ? " sticker-tag--clickable" : ""}`}
-          style={tagStyle("var(--neon-cyan)")}
+          className={`event-card-meta-tag event-card-meta-tag--claim${onClaimClick ? " event-card-meta-tag--clickable" : ""}`}
+          style={claimTagStyle("var(--neon-cyan)")}
           onClick={onClaimClick}
           onKeyDown={onClaimClick ? e => e.key === "Enter" && onClaimClick() : undefined}
           role={onClaimClick ? "button" : undefined}

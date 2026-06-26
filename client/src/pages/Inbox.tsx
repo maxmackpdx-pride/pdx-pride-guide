@@ -58,7 +58,7 @@ export default function Inbox() {
   const { data: inbox = [], isLoading: inboxLoading, isError: inboxError, refetch: refetchInbox } = useQuery<Message[]>({
     queryKey: ["/api/messages/inbox"],
     queryFn: async () => {
-      const r = await fetch("/api/messages/inbox");
+      const r = await fetch("/api/messages/inbox", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load inbox");
       return r.json();
     },
@@ -68,7 +68,7 @@ export default function Inbox() {
   const { data: sent = [], isLoading: sentLoading, isError: sentError, refetch: refetchSent } = useQuery<Message[]>({
     queryKey: ["/api/messages/sent"],
     queryFn: async () => {
-      const r = await fetch("/api/messages/sent");
+      const r = await fetch("/api/messages/sent", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load sent messages");
       return r.json();
     },
@@ -272,6 +272,11 @@ export default function Inbox() {
                   <span className="display" style={{ display: "block", fontSize: "0.88rem", color: "#fff", marginBottom: 3 }}>
                     {msg.subject || "(no subject)"}
                   </span>
+                  {msg.contextType === "EVENT_TALENT_REQUEST" && (
+                    <span style={{ display: "inline-block", fontSize: "0.62rem", color: "var(--neon-magenta)", border: "1px solid var(--neon-magenta)", padding: "2px 6px", marginBottom: 4, fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>
+                      LINEUP REQUEST
+                    </span>
+                  )}
                   {msg.contextLabel && <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>{msg.contextLabel}</span>}
                   <span style={{ display: "block", fontSize: "0.78rem", color: "#8c8980", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {tab === "inbox" ? `from ${msg.from_display_name || msg.from_username || "someone"}` : `to ${msg.to_display_name || msg.to_username || "someone"}`} · {msg.body.substring(0, 70)}{msg.body.length > 70 ? "..." : ""}

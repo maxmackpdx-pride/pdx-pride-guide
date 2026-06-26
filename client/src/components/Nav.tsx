@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
@@ -22,10 +22,34 @@ export default function Nav() {
   const { user, logout } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMenuOpen(false);
+    setProfileOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!profileRef.current?.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setProfileOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [profileOpen]);
 
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
@@ -82,22 +106,55 @@ export default function Nav() {
                 >
                   INBOX{unreadCount > 0 && <span className="site-unread-badge site-unread-badge--pulse">{unreadCount}</span>}
                 </Link>
-                <Link
-                  href="/dashboard"
-                  className="site-dashboard-link site-dashboard-link--avatar"
-                  aria-label={`Profile: ${user.displayName || user.username}`}
-                  title={user.displayName || user.username}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <UserAvatar
-                    photoUrl={user.photoUrl}
-                    avatarChoice={user.avatarChoice}
-                    avatarRing={user.avatarRing}
-                    displayName={user.displayName}
-                    username={user.username}
-                  />
-                </Link>
-                <button onClick={() => { logout(); setMenuOpen(false); }} className="site-logout-button">OUT</button>
+                <div className="site-profile-menu" ref={profileRef}>
+                  <button
+                    type="button"
+                    className="site-profile-menu__trigger"
+                    aria-expanded={profileOpen}
+                    aria-haspopup="menu"
+                    aria-label={`Profile menu: ${user.displayName || user.username}`}
+                    onClick={() => setProfileOpen(open => !open)}
+                  >
+                    <UserAvatar
+                      photoUrl={user.photoUrl}
+                      avatarChoice={user.avatarChoice}
+                      avatarRing={user.avatarRing}
+                      displayName={user.displayName}
+                      username={user.username}
+                    />
+                  </button>
+                  {profileOpen && (
+                    <div className="site-profile-menu__panel" role="menu">
+                      <div className="site-profile-menu__identity">
+                        <span className="site-profile-menu__name">{user.displayName || user.username}</span>
+                        <span className="site-profile-menu__username">@{user.username}</span>
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        role="menuitem"
+                        className="site-profile-menu__item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="site-profile-menu__item site-profile-menu__item--logout"
+                        onClick={() => {
+                          logout();
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <button
