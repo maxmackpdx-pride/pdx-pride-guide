@@ -82,16 +82,20 @@ export default function Nav() {
                 >
                   INBOX{unreadCount > 0 && <span className="site-unread-badge site-unread-badge--pulse">{unreadCount}</span>}
                 </Link>
-                <Link href="/dashboard" className="site-dashboard-link site-dashboard-link--avatar" onClick={() => setMenuOpen(false)}>
+                <Link
+                  href="/dashboard"
+                  className="site-dashboard-link site-dashboard-link--avatar"
+                  aria-label={`Profile: ${user.displayName || user.username}`}
+                  title={user.displayName || user.username}
+                  onClick={() => setMenuOpen(false)}
+                >
                   <UserAvatar
                     photoUrl={user.photoUrl}
                     avatarChoice={user.avatarChoice}
                     avatarRing={user.avatarRing}
                     displayName={user.displayName}
                     username={user.username}
-                    size={56}
                   />
-                  <span>{user.displayName || user.username}</span>
                 </Link>
                 <button onClick={() => { logout(); setMenuOpen(false); }} className="site-logout-button">OUT</button>
               </div>

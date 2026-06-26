@@ -17,7 +17,7 @@ export default function UserAvatar({
   displayName,
   username,
   avatarRing,
-  size = 48,
+  size,
   className = "",
   title,
 }: UserAvatarProps) {
@@ -30,7 +30,7 @@ export default function UserAvatar({
     <div
       className={`user-avatar ${className}`.trim()}
       data-ring={ring}
-      style={{ "--avatar-size": `${size}px` } as React.CSSProperties}
+      style={size !== undefined ? ({ "--avatar-size": `${size}px` } as React.CSSProperties) : undefined}
       title={label}
       aria-label={label}
     >
