@@ -560,7 +560,6 @@ export default function Events() {
   return (
     <div className="zine-page events-page board-page">
       <PageHero
-        kicker="PRIDE WEEKEND 2026"
         titleLine1="EVENTS"
         titleLine2="GUIDE"
         accent="cyan"

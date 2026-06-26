@@ -206,15 +206,11 @@ export default function Inbox() {
   return (
     <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
       <PageHero
-        kicker="PRIVATE THREADS"
         titleLine1="INBOX"
         accent="lime"
-        lede="Private threads from missed connections, Pride Work posts, event hosts, and check-ins."
+        lede={`Private threads from missed connections, Pride Work posts, event hosts, and check-ins.${unreadCount > 0 ? ` · ${unreadCount} unread` : ""}`}
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
-        actions={unreadCount > 0 ? (
-          <span className="board-sticker" style={{ color: "#00FFFF" }}>{unreadCount} UNREAD</span>
-        ) : undefined}
       />
       <ScrollReveal>
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "28px 24px 48px", position: "relative", zIndex: 1 }}>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800;900&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -49,8 +49,8 @@
 
   --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'Inter', sans-serif;
-  --font-board-display: 'Anton', 'Barlow Condensed', sans-serif;
-  --font-board-mono: 'DM Mono', ui-monospace, monospace;
+  --font-board-display: 'Barlow Condensed', sans-serif;
+  --font-board-mono: 'Inter', sans-serif;
   --site-header-height: 120px;
   --board-text: #f4f1ea;
   --board-muted: #bdbab2;
@@ -642,11 +642,11 @@ h2.display,
   transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .btn-neon:not(.solid):hover {
-  background: linear-gradient(90deg, #E40303, #FF8C00, #FFED00, #008026, #004DFF, #750787);
-  border-color: transparent;
+  background: var(--neon-yellow);
+  border-color: var(--neon-yellow);
   color: #000;
-  transform: translateY(-3px);
-  box-shadow: 0 14px 34px -10px rgba(200, 250, 60, 0.55);
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 rgba(255, 0, 204, 0.5);
 }
 
 .btn-neon.solid:hover {
@@ -1784,7 +1784,7 @@ h2.display,
 
 .board-page .display {
   font-family: var(--font-board-display);
-  font-weight: 400;
+  font-weight: 800;
 }
 
 .board-kicker {
@@ -1866,7 +1866,7 @@ h2.display,
 }
 
 .page-hero .board-kicker {
-  margin-bottom: 0;
+  display: none;
 }
 
 .page-hero__title {
@@ -2022,7 +2022,7 @@ h2.display,
 }
 
 .board-sticker {
-  display: inline-block;
+  display: none;
   font-family: var(--font-board-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
@@ -2030,6 +2030,10 @@ h2.display,
   padding: 6px 11px;
   border: 1.5px solid currentColor;
   background: transparent;
+}
+
+.home-page .board-sticker {
+  display: inline-block;
 }
 
 .board-page .gifting-how .section-heading,
@@ -4865,14 +4869,6 @@ footer a:hover { color: #00FFFF !important; }
   border-color: var(--neon-cyan);
   transform: translateY(-5px);
   box-shadow: 0 0 0 1px var(--neon-cyan), 0 18px 40px -16px rgba(0, 255, 255, 0.42);
-}
-
-.btn-neon:not(.solid):hover {
-  background: linear-gradient(90deg, #E40303, #FF8C00, #FFED00, #008026, #004DFF, #750787);
-  border-color: transparent;
-  color: #000;
-  transform: translateY(-3px);
-  box-shadow: 0 14px 34px -10px rgba(200, 250, 60, 0.55);
 }
 
 .spectrum-loader {

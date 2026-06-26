@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 
 .dash-page {
   --dash-lime: #C8FA3C;
@@ -10,7 +10,7 @@
   --dash-muted: #8c8980;
   background: #000;
   color: var(--dash-cream);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   min-height: 100vh;
   position: relative;
 }
@@ -39,14 +39,14 @@
 }
 
 .dash-anton {
-  font-family: 'Anton', var(--font-display), sans-serif;
-  font-weight: 400;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 
 .dash-mono {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-body), sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -89,7 +89,7 @@
 }
 
 .dash-avatar-fallback {
-  font-family: 'Anton', sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 38px;
   color: #0a0a0a;
 }
@@ -284,7 +284,7 @@
 }
 
 .dash-weather-temp {
-  font-family: 'Anton', sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 54px;
   line-height: 0.9;
   color: #fff;
@@ -333,7 +333,7 @@
 }
 
 .dash-countdown-num {
-  font-family: 'Anton', sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 26px;
   line-height: 1;
 }
@@ -383,7 +383,7 @@
 }
 
 .dash-drawer-title {
-  font-family: 'Anton', sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 22px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -524,7 +524,7 @@
 }
 
 .dash-metric-value {
-  font-family: 'Anton', sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 32px;
   line-height: 1;
   color: var(--metric-color, var(--dash-lime));

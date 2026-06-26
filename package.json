@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
+    "predeploy": "bash script/predeploy-check.sh",
+    "verify:deploy": "node script/verify-deploy-bundle.mjs",
+    "ship": "npm run predeploy && npm run build && npm run verify:deploy",
     "start": "NODE_ENV=production node dist/index.cjs",
     "preview:local": "npm run build && LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
     "check": "tsc",
