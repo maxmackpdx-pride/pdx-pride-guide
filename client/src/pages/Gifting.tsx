@@ -185,7 +185,7 @@ export default function Gifting() {
             <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
             <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
           </div>
-          <div className="gifting-steps">
+          <div className="board-steps">
             {[
               ["POST IT", "Gift it or search for it."],
               ["ADD PHOTOS", "Upload up to 2. The site makes them fit."],
@@ -194,8 +194,8 @@ export default function Gifting() {
               ["HAND IT OFF", "Porch pickup, public meetup, event handoff, or whatever feels safe."],
               ["STAMP IT DONE", "Gifted or Found. Then it leaves the active feed."],
             ].map(([title, text], i) => (
-              <article className="gifting-step" key={title}>
-                <b>{i + 1}</b>
+              <article className="board-step" key={title}>
+                <span className="board-step__num" aria-hidden="true">{i + 1}</span>
                 <h3 className="display panel-heading">{title}</h3>
                 <p>{text}</p>
               </article>

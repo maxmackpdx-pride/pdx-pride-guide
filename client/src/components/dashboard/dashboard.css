@@ -34,6 +34,10 @@
   padding: 30px clamp(18px, 4vw, 44px) 90px;
 }
 
+.board-page.dash-page .dash-inner {
+  padding-top: 24px;
+}
+
 .dash-anton {
   font-family: 'Anton', var(--font-display), sans-serif;
   font-weight: 400;

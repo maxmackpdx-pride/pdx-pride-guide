@@ -4,6 +4,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import PageHero from "@/components/PageHero";
+import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/DashboardDrawer";
 import DashboardInboxPreview from "@/components/dashboard/DashboardInboxPreview";
@@ -153,10 +155,20 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-      <div className="dash-page" style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
-        <div className="dash-anton" style={{ fontSize: "2rem", color: "#fff" }}>Profile</div>
-        <p style={{ color: "#8c8980" }}>You need to be logged in to view your dashboard.</p>
-        <AuthModal onClose={() => {}} />
+      <div className="zine-page dash-page board-page">
+        <PageHero
+          kicker="YOUR HUB"
+          titleLine1="SIGN IN TO"
+          titleLine2="YOUR PROFILE"
+          accent="cyan"
+          lede="Profile, inbox, event submissions, gig posts, gifting, and missed connections — all in one place once you're logged in."
+          bgImage="/motifs/hero-inbox.jpg"
+          bgPosition="center 35%"
+        />
+        <div className="dash-inner" style={{ minHeight: "40vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 48 }}>
+          <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>You need to be logged in to view your dashboard.</p>
+          <AuthModal onClose={() => {}} />
+        </div>
       </div>
     );
   }
@@ -235,7 +247,17 @@ export default function Dashboard() {
   const ORANGE = "#FF8C00";
 
   return (
-    <div className="dash-page">
+    <div className="zine-page dash-page board-page">
+      <PageHero
+        kicker="YOUR HUB · PROFILE & BOARDS"
+        titleLine1="YOUR"
+        titleLine2="DASHBOARD"
+        accent="cyan"
+        lede="Manage your profile, inbox, claimed events, gig posts, gifting listings, missed connections, and check-ins — everything you touch on PDX Pride Guide lives here."
+        tagline={`@${user.username} · profile · events · inbox · submissions`}
+        bgImage="/motifs/hero-inbox.jpg"
+        bgPosition="center 35%"
+      />
       <div className="dash-inner">
         <header className="dash-profile-header">
           <div className="dash-profile-identity">
@@ -250,7 +272,7 @@ export default function Dashboard() {
               />
             </div>
             <div>
-              <h1 className="dash-title dash-anton">{user.displayName || user.username}</h1>
+              <h2 className="dash-title dash-anton">{user.displayName || user.username}</h2>
               <p className="dash-subtitle">@{user.username} · {user.email}</p>
               {user.bio && <p style={{ color: "#cbc8c0", maxWidth: 520, marginTop: 8, lineHeight: 1.5, fontSize: 14 }}>{user.bio}</p>}
             </div>
@@ -309,11 +331,14 @@ export default function Dashboard() {
           />
         )}
 
+        <ScrollReveal>
         <div className="dash-top-grid">
           <DashboardInboxPreview enabled={!!user} />
           <DashboardWidgets />
         </div>
+        </ScrollReveal>
 
+        <ScrollReveal delay={60}>
         <section className="dash-connections">
           <div>
             <h2 className="dash-anton" style={{ fontSize: 18, color: "#fff", marginBottom: 4 }}>Account connections</h2>
@@ -329,7 +354,9 @@ export default function Dashboard() {
             </a>
           )}
         </section>
+        </ScrollReveal>
 
+        <ScrollReveal delay={120}>
         <div className="dash-drawers">
           <DashboardDrawer
             title="My events"
@@ -493,6 +520,7 @@ export default function Dashboard() {
             ))}
           </DashboardDrawer>
         </div>
+        </ScrollReveal>
       </div>
     </div>
   );

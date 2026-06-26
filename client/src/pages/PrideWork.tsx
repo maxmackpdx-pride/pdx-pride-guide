@@ -149,10 +149,10 @@ export default function PrideWork() {
             <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
             <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
           </div>
-          <div className="gigs-steps">
+          <div className="board-steps">
             {HOW_IT_WORKS.map(([title, text], i) => (
-              <article className="gigs-step" key={title}>
-                <b>{i + 1}</b>
+              <article className="board-step" key={title}>
+                <span className="board-step__num" aria-hidden="true">{i + 1}</span>
                 <h3 className="display panel-heading">{title}</h3>
                 <p>{text}</p>
               </article>
