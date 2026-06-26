@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -30,14 +30,62 @@ function useCountdown(target: number | null) {
   return { days, hours, minutes, seconds };
 }
 
+// Squarespace-style parallax: backgrounds drift slower than scroll on
+// alternating home panels (hero + gifting panel; map preview + gigs
+// panel stay static). Respects prefers-reduced-motion.
+function useHomeParallax() {
+  const heroRef = useRef<HTMLElement>(null);
+  const giftingRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const nodes = [heroRef.current, giftingRef.current].filter(
+      (node): node is HTMLElement => Boolean(node)
+    );
+    if (!nodes.length) return;
+
+    let rafId = 0;
+    const STRENGTH = 0.16;
+
+    const update = () => {
+      const vh = window.innerHeight;
+      for (const node of nodes) {
+        const rect = node.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const offset = (center - vh / 2) * STRENGTH;
+        node.style.setProperty("--parallax-y", `${offset}px`);
+      }
+      rafId = 0;
+    };
+
+    const onScroll = () => {
+      if (!rafId) rafId = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return { heroRef, giftingRef };
+}
+
 export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const { heroRef, giftingRef } = useHomeParallax();
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
   });
-  const { data: events = [], isError: eventsError, refetch: refetchEvents } = useQuery<Event[]>({
+  const { data: events = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
   });
@@ -107,20 +155,43 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
+        ref={heroRef}
         className="zine-hero home-hero"
-        style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center" }}
+        style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}
       >
         <div
-          className="home-hero-bg-desktop parallax-container"
+          className="home-hero-bg-desktop"
           style={{
+            position: "absolute",
+            top: "-8%",
+            bottom: "-8%",
+            left: 0,
+            right: 0,
             backgroundImage: `url(${skylineImg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            backgroundRepeat: "no-repeat",
             opacity: 0.9,
+            transform: "translateY(var(--parallax-y, 0px))",
+            willChange: "transform",
           }}
         />
-        <div className="home-hero-bg-mobile parallax-container" aria-hidden="true" />
-        <div className="home-hero-shade" aria-hidden="true" />
-        <div className="home-hero-halftone" aria-hidden="true" />
-        <div className="home-hero-watermark" aria-hidden="true">LOVE<br />LOUDER</div>
+        <div className="home-hero-bg-mobile" aria-hidden="true" />
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0, opacity: 0.06,
+          backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
+          backgroundSize: "18px 18px",
+        }} />
+        <div style={{
+          position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
+          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(5rem, 14vw, 11rem)",
+          color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
+          userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
+        }}>LOVE<br />LOUDER</div>
 
 
         <div className="home-hero-content">
@@ -190,31 +261,6 @@ export default function Home() {
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 
-      {eventsError && (
-        <div
-          role="alert"
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            padding: "16px 20px",
-            borderBottom: "2px solid #FF6600",
-            background: "rgba(255,102,0,0.08)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <p style={{ margin: 0, color: "#e8e8ec", fontSize: "0.9rem" }}>
-            Events could not load right now. The map and ticker may be empty.
-          </p>
-          <button className="btn-neon" style={{ fontSize: "0.75rem", padding: "8px 14px" }} onClick={() => refetchEvents()}>
-            RETRY
-          </button>
-        </div>
-      )}
-
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
           events={events}
@@ -228,7 +274,7 @@ export default function Home() {
 
       <section className="home-promo-stack">
         <div className="torn-divider full-bleed" />
-        <article className="home-promo-panel home-gifting-panel">
+        <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
           <div className="home-promo-inner">
             <div className="home-promo-copy">
               <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>GIFT WITH PRIDE</span>

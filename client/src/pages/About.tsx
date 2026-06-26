@@ -170,7 +170,7 @@ export default function About() {
               KEEP THIS GUIDE <span style={{ color: "#CCFF00" }}>ALIVE</span>
             </h2>
             <p className="text-white/60 max-w-md mx-auto mb-8 text-sm leading-relaxed">
-              Running this site costs real money — hosting, domain, time. 
+              Running this site costs real money — hosting, domain, time.
               If you found it useful, a small donation keeps it free for everyone.
             </p>
             <a
@@ -192,9 +192,8 @@ export default function About() {
           </div>
         </section>
 
-        {/* Portland Pride info */}
         {/* Tucker Credit */}
-        <section>
+        <section className="pb-8">
           <div style={{
             position: "relative", overflow: "hidden",
             backgroundImage: "url('/tucker-yes-coach-2.jpg')",
@@ -250,32 +249,6 @@ export default function About() {
               </a>
             </div>
           </div>
-        </section>
-
-        <section className="pb-8">
-          <h2 className="display section-heading text-white mb-8">
-            PORTLAND PRIDE <span style={{ color: "#FF6600" }}>2026</span>
-          </h2>
-          <div className="grid md:grid-cols-4 gap-4">
-            {[
-              { day: "THU", date: "JULY 16", color: "#00FFFF" },
-              { day: "FRI", date: "JULY 17", color: "#FF00CC" },
-              { day: "SAT", date: "JULY 18", color: "#FF6600" },
-              { day: "SUN", date: "JULY 19", color: "#FF2400" },
-            ].map(({ day, date, color }) => (
-              <div
-                key={day}
-                className="p-4 border-2 text-center"
-                style={{ background: "#111", borderColor: color }}
-              >
-                <div className="display text-3xl mb-1" style={{ color }}>{day}</div>
-                <div className="display text-lg text-white/60">{date}</div>
-              </div>
-            ))}
-          </div>
-          <p className="text-white/30 text-sm mt-4">
-            Portland, Oregon · Tom McCall Waterfront Park and surrounding venues · Free to attend
-          </p>
         </section>
 
       </div>
