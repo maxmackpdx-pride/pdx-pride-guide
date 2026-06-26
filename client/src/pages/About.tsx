@@ -21,7 +21,7 @@ export default function About() {
 
         <ScrollReveal>
           <section>
-            <h2 className="display section-heading text-white mb-8">
+            <h2 className="display section-heading">
               THE <span style={{ color: "#FF00CC" }}>MISSION</span>
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
@@ -60,7 +60,7 @@ export default function About() {
                     {item.icon}
                     <span className="display text-sm" style={{ color: item.color }}>{item.title}</span>
                   </div>
-                  <p className="text-white/60 text-sm leading-relaxed">{item.text}</p>
+                  <p className="zine-body-text">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -69,7 +69,7 @@ export default function About() {
 
         <ScrollReveal delay={120}>
         <section>
-          <h2 className="display section-heading text-white mb-8">
+          <h2 className="display section-heading">
             HOW IT <span style={{ color: "#00FFFF" }}>WORKS</span>
           </h2>
           <div className="space-y-0">
@@ -102,7 +102,7 @@ export default function About() {
                 </div>
                 <div>
                   <h3 className="display panel-heading text-white mb-2">{step.title}</h3>
-                  <p className="text-white/50 text-sm leading-relaxed">{step.text}</p>
+                  <p className="zine-body-text">{step.text}</p>
                 </div>
               </div>
             ))}
@@ -112,7 +112,7 @@ export default function About() {
 
         <ScrollReveal delay={200}>
         <section>
-          <h2 className="display section-heading text-white mb-8">
+          <h2 className="display section-heading">
             TRANSPARENCY <span style={{ color: "#8800FF" }}>&</span> VALUES
           </h2>
           <div
@@ -132,7 +132,7 @@ export default function About() {
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: "#8800FF" }} />
-                  <span className="text-white/70 text-sm">{item}</span>
+                  <span className="zine-body-text">{item}</span>
                 </li>
               ))}
             </ul>
@@ -154,10 +154,10 @@ export default function About() {
               }}
             />
             <Heart size={28} className="mx-auto mb-4" style={{ color: "#FF00CC" }} />
-            <h2 className="display section-heading text-white mb-4">
+            <h2 className="display section-heading" style={{ marginBottom: "1.15rem" }}>
               KEEP THIS GUIDE <span style={{ color: "#CCFF00" }}>ALIVE</span>
             </h2>
-            <p className="text-white/60 max-w-md mx-auto mb-8 text-sm leading-relaxed">
+            <p className="zine-body-text max-w-md mx-auto" style={{ marginBottom: "2rem" }}>
               Running this site costs real money — hosting, domain, time.
               If you found it useful, a small donation keeps it free for everyone.
             </p>
