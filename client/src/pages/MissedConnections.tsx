@@ -63,7 +63,7 @@ export default function MissedConnections() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: "100vh", background: "#000" }}>
+      <div className="zine-page missed-page board-page min-h-screen">
         <MissedConnectionsHero />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px 64px" }}>
           <div style={{ maxWidth: 560, textAlign: "center" }}>
@@ -79,7 +79,7 @@ export default function MissedConnections() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#000" }}>
+    <div className="zine-page missed-page board-page min-h-screen">
       <MissedConnectionsHero />
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "32px 24px 48px" }}>
         <MissedConnectionsPanel mode="board" />

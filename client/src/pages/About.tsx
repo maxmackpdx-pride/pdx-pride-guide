@@ -6,7 +6,7 @@ const VENMO_URL = "https://venmo.com/tucker_pdmax";
 
 export default function About() {
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
+    <div className="zine-page about-page board-page min-h-screen">
       <PageHero
         kicker="ABOUT THIS GUIDE"
         titleLine1="BUILT FOR"
