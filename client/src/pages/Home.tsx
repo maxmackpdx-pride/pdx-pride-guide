@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 
+import EventTicker from "@/components/EventTicker";
 import HeroAurora from "@/components/HeroAurora";
 import HeroGlitchOverlay from "@/components/HeroGlitchOverlay";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -255,19 +256,7 @@ export default function Home() {
           <Link href="/events" className="event-ticker-label">
             LIVE EVENTS
           </Link>
-          <div className="event-ticker-window">
-            <div
-              className="event-ticker-track"
-              style={{ animationDuration: `${Math.max(28, tickerTitles.length * 7)}s` }}
-            >
-              {[...tickerTitles, ...tickerTitles].map((title, index) => (
-                <span className="event-ticker-item" key={`${title}-${index}`} title={title}>
-                  {title}
-                  <span className="event-ticker-sep" aria-hidden="true">✦</span>
-                </span>
-              ))}
-            </div>
-          </div>
+          <EventTicker titles={tickerTitles} />
         </section>
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
@@ -291,11 +280,14 @@ export default function Home() {
         <ScrollReveal>
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
           <div className="home-promo-inner">
-            <div className="home-promo-copy">
-              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>GIFT WITH PRIDE</span>
-              <h2 className="display">GIFTING</h2>
-              <p className="home-promo-tag">Give gay gifts. Queer homes. Keep it moving.</p>
-              <p>A Pride-season board for giving away what you do not need and asking for what you do.</p>
+            <div className="home-promo-panel-card">
+              <span className="board-sticker" style={{ color: "#FF00CC" }}>GIFT WITH PRIDE</span>
+              <h2 className="home-promo-title">
+                <span className="home-promo-title-line">GIFT WITH</span>
+                <span className="home-promo-accent home-promo-accent--rainbow">PRIDE</span>
+              </h2>
+              <p className="home-promo-tagline home-promo-tagline--magenta">Give gay gifts. Queer homes. Keep it moving.</p>
+              <p className="home-promo-lede">A Pride-season board for giving away what you do not need and asking for what you do.</p>
               <div className="gifting-actions">
                 <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
                 <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an In Search Of</button></Link>
@@ -308,11 +300,14 @@ export default function Home() {
         <ScrollReveal delay={120}>
         <article className="home-promo-panel home-gigs-panel">
           <div className="home-promo-inner">
-            <div className="home-promo-copy">
-              <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>PRIDE WORK</span>
-              <h2 className="display">GIG BOARD</h2>
-              <p className="home-promo-tag magenta">Paid, respected, valued.</p>
-              <p>Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
+            <div className="home-promo-panel-card">
+              <span className="board-sticker" style={{ color: "#CCFF00" }}>PRIDE WORK</span>
+              <h2 className="home-promo-title">
+                <span className="home-promo-title-line">PRIDE</span>
+                <span className="home-promo-accent home-promo-accent--lime">GIG BOARD</span>
+              </h2>
+              <p className="home-promo-tagline home-promo-tagline--cyan">Paid, respected, valued.</p>
+              <p className="home-promo-lede">Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
               <div className="gifting-actions">
                 <Link href="/pride-work"><button className="btn-neon"><Search size={16} /> Find Work</button></Link>
                 <Link href="/pride-work"><button className="btn-neon cyan"><Gift size={16} /> Post a Gig</button></Link>

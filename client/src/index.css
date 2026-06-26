@@ -1505,44 +1505,109 @@ h2.display,
   padding: clamp(52px, 7vw, 92px) 20px;
 }
 
-.home-promo-copy {
+.home-promo-panel-card {
   position: relative;
-  max-width: 620px;
+  max-width: 720px;
+  padding: 28px 32px 30px;
+  background: rgba(5, 5, 5, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.home-promo-copy h2 {
-  margin: 18px 0 10px;
-  font-size: clamp(5.2rem, 11vw, 10rem);
-  line-height: 0.82;
+.home-promo-panel-card .board-sticker {
+  margin-bottom: 0;
+}
+
+.home-promo-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12em;
+  margin: 1.15rem 0 1rem;
+  font-family: var(--font-board-display);
+  font-weight: 400;
+  font-size: clamp(2.65rem, 8.5vw, 5.25rem);
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  color: #fff;
+  -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.92),
+    0 0 20px rgba(0, 0, 0, 0.35);
+}
+
+.home-promo-title-line,
+.home-promo-accent {
+  display: block;
+}
+
+.home-promo-accent {
+  -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
+}
+
+.home-promo-accent--lime {
   color: #ccff00;
-  text-shadow: 0 0 22px rgba(204,255,0,0.36);
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.92),
+    0 0 20px rgba(204, 255, 0, 0.55);
 }
 
-.home-gigs-panel .home-promo-copy h2 {
-  color: #f7f5ee;
-  text-shadow: 0 0 22px rgba(255,0,204,0.32);
+.home-promo-accent--rainbow {
+  background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.92));
 }
 
-.home-promo-copy p {
-  max-width: 560px;
-  color: rgba(255,255,255,0.75);
-  font-size: 1.08rem;
-  line-height: 1.55;
-}
-
-.home-promo-tag {
+.home-promo-tagline {
   display: inline-block;
-  padding: 8px 12px;
-  background: #f3ecdd;
-  color: #000 !important;
-  font-family: var(--font-display);
-  font-weight: 900;
+  margin: 0 0 1rem;
+  padding: 9px 16px;
+  background: rgba(5, 5, 5, 0.94);
+  color: var(--neon-yellow);
+  font-family: var(--font-board-mono);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  box-shadow: 5px 5px 0 #00ffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 4px 4px 0 var(--neon-cyan);
 }
 
-.home-promo-tag.magenta {
-  box-shadow: 5px 5px 0 #ff00cc;
+.home-promo-tagline--magenta {
+  box-shadow: 4px 4px 0 var(--neon-magenta);
+}
+
+.home-promo-tagline--cyan {
+  color: var(--neon-cyan);
+  box-shadow: 4px 4px 0 var(--neon-yellow);
+}
+
+.home-promo-lede {
+  max-width: 42rem;
+  margin: 0 0 1.35rem;
+  padding: 0.95rem 1.15rem;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.72;
+  color: var(--text-body);
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 3px solid var(--neon-yellow);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.home-gifting-panel .home-promo-lede {
+  border-left-color: var(--neon-magenta);
+}
+
+.home-gigs-panel .home-promo-lede {
+  border-left-color: var(--neon-cyan);
 }
 
 @keyframes board-flickr {
@@ -2400,8 +2465,13 @@ h2.display,
     min-height: 430px;
   }
 
-  .home-promo-copy h2 {
-    font-size: clamp(4rem, 20vw, 6rem);
+  .home-promo-panel-card {
+    padding: 22px 18px 24px;
+  }
+
+  .home-promo-title {
+    font-size: clamp(2.35rem, 11vw, 3.5rem);
+    margin: 1rem 0 0.9rem;
   }
 
   .gifting-feed-head {
@@ -3513,19 +3583,14 @@ footer a:hover { color: #00FFFF !important; }
   background: linear-gradient(to left, #000 0%, #000 35%, transparent 100%);
 }
 
-@keyframes event-ticker-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
 .event-ticker-track {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0;
+  width: max-content;
   min-height: 76px;
   padding: 10px 0;
   white-space: nowrap;
-  animation: event-ticker-marquee 36s linear infinite;
   will-change: transform;
 }
 
@@ -3732,8 +3797,7 @@ footer a:hover { color: #00FFFF !important; }
   }
 
   .event-ticker-track {
-    animation: none;
-    transform: none;
+    transform: none !important;
   }
 
   .spectrum-loader__ring,
