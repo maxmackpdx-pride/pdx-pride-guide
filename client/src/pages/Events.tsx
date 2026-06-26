@@ -327,27 +327,27 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
           {expanded ? "COLLAPSE" : "EXPAND"}
         </button>
 
-        {/* Legend */}
-        <div style={{
-          position: "absolute", bottom: 28, right: 12, zIndex: 1000,
-          background: "rgba(0,0,0,0.92)", padding: "10px 14px",
-          border: "1.5px solid #CCFF00", pointerEvents: "none",
-        }}>
-          {Object.entries(DAY_COLORS).map(([day, color]) => (
-            <div key={day} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-              <div style={{ width: 10, height: 10, background: color, borderRadius: "50%", boxShadow: `0 0 8px ${color}, 2px 2px 0 rgba(0,0,0,0.7)` }} />
-              <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>{day}</span>
+        <div
+          className={`map-legend${variant === "home" ? " map-legend--home" : ""}`}
+          aria-label="Map key"
+        >
+          <div className="map-legend-items">
+            {Object.entries(DAY_COLORS).map(([day, color]) => (
+              <div key={day} className="map-legend-item">
+                <span className="map-legend-swatch" style={{ background: color, boxShadow: `0 0 8px ${color}, 2px 2px 0 rgba(0,0,0,0.7)` }} />
+                <span className="map-legend-label">{day}</span>
+              </div>
+            ))}
+            <div className="map-legend-item map-legend-item--multi">
+              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF"/>
+                <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600"/>
+                <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC"/>
+                <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill="#FF2400"/>
+                <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1"/>
+              </svg>
+              <span className="map-legend-label">MULTI-DAY</span>
             </div>
-          ))}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, paddingTop: 5, borderTop: "1px solid #222" }}>
-            <svg width="10" height="10" viewBox="0 0 10 10">
-              <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF"/>
-              <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600"/>
-              <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC"/>
-              <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill="#FF2400"/>
-              <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1"/>
-            </svg>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "0.65rem", color: "#ccc", letterSpacing: "0.1em" }}>MULTI-DAY</span>
           </div>
         </div>
       </div>

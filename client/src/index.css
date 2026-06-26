@@ -889,6 +889,75 @@ h2.display,
   bottom: 44px;
 }
 
+.map-legend {
+  position: absolute;
+  bottom: 28px;
+  right: 12px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.92);
+  padding: 10px 14px;
+  border: 1.5px solid var(--neon-yellow);
+  pointer-events: none;
+}
+
+.map-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-legend-item--multi {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid #222;
+}
+
+.map-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-legend-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  color: #ccc;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.map-legend--home {
+  left: 50%;
+  right: auto;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+}
+
+.map-legend--home .map-legend-items {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+}
+
+.map-legend--home .map-legend-item--multi {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  padding-left: 14px;
+  border-left: 1px solid #222;
+}
+
 .map-locate-error {
   position: absolute;
   left: 12px;
