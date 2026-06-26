@@ -17,13 +17,13 @@ interface AdminMetrics {
 const METRICS: { key: keyof AdminMetrics; label: string; color: string }[] = [
   { key: "users", label: "Registered users", color: "#C8FA3C" },
   { key: "activeSessions", label: "Active sessions", color: "#19E3FF" },
-  { key: "liveEvents", label: "Live events", color: "#FF8C00" },
-  { key: "attendances", label: "Check-ins", color: "#C8FA3C" },
+  { key: "liveEvents", label: "Live events (excl. placeholders)", color: "#FF8C00" },
+  { key: "attendances", label: "Member check-ins", color: "#C8FA3C" },
   { key: "messages", label: "Messages", color: "#19E3FF" },
   { key: "pendingSubmissions", label: "Pending review", color: "#FF1FA0" },
-  { key: "gigPosts", label: "Gig posts", color: "#FF8C00" },
-  { key: "giftingPosts", label: "Gifting posts", color: "#19E3FF" },
-  { key: "missedConnections", label: "Missed connections", color: "#FF1FA0" },
+  { key: "gigPosts", label: "Live gig posts", color: "#FF8C00" },
+  { key: "giftingPosts", label: "Active gifting posts", color: "#19E3FF" },
+  { key: "missedConnections", label: "Active missed connections", color: "#FF1FA0" },
   { key: "openFeedback", label: "Open feedback", color: "#750787" },
 ];
 

@@ -360,6 +360,18 @@ export function hashPassword(pw: string) {
 // Old fake event titles used to detect stale seed data
 const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extravaganza", "Pride Brunch", "Kink & Community Fair", "Trans Joy Dance"];
 
+const SEED_GIFTING_TITLES = [
+  "Extra rainbow string lights",
+  "Black mesh party top",
+  "ISO folding chair for parade day",
+];
+
+const SEED_USERNAMES = ["community_closet"];
+
+const ACTIVE_GIFTING_STATUSES = [
+  "OPEN", "THREE_INTERESTED", "POSTER_CHOOSING", "LOOKING", "OFFER_PENDING", "REOPENED", "PENDING",
+];
+
 function seedData() {
   const existing = db.select().from(events).all();
 
@@ -1182,38 +1194,6 @@ function seedData() {
   for (const e of seedEvents) {
     db.insert(events).values(e).run();
   }
-
-  // Seed attendance entries for demo
-  const bubbles = [
-    "Hey, I'll be there!",
-    "Hey, come say hi!",
-    "Hey, I'm cute and slightly feral",
-    "Hey, here for the queers and the chaos",
-    "Hey, I'm friendly but bad at starting conversations",
-    "Hey, let's be awkward together",
-  ];
-  const handles = ["queercat", "neonbabe", "velvethaze", "crushpunk", "stardust", "wildthing", "radtrans", "badfemme"];
-  for (let eventId = 1; eventId <= 46; eventId++) {
-    const count = 2 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < count; i++) {
-      db.insert(attendances).values({
-        eventId,
-        handle: handles[Math.floor(Math.random() * handles.length)],
-        message: bubbles[Math.floor(Math.random() * bubbles.length)],
-        avatarSeed: `seed${eventId}${i}`,
-        createdAt: now,
-      }).run();
-    }
-  }
-
-  // Seed one real-looking gig (LOOKING_FOR_WORK only — let real users post gigs)
-  db.insert(gigPosts).values({
-    postType: "LOOKING_FOR_WORK", title: "Sound Tech & DJ Available Pride Weekend",
-    name: "DJ Queerwave", contactEmail: "djqueerwave@example.com",
-    description: "Portland-based DJ and sound tech. Experienced in queer nightlife, house, and techno. Available July 16–19. Hit me up!",
-    skills: "DJ, Sound Tech, Lighting", compensation: "Negotiable", location: "Portland, OR",
-    isRemote: false, status: "LIVE", createdAt: now,
-  } as any).run();
 }
 
 function applyVerifiedEventOverrides() {
@@ -1454,6 +1434,7 @@ function applyVerifiedEventOverrides() {
 seedData();
 applyVerifiedEventOverrides();
 removeGiftingSeedPosts();
+removeDemoSeedData();
 
 function archiveExpiredMissedConnections() {
   const now = new Date().toISOString();
@@ -1490,16 +1471,32 @@ function expireGiftingPosts() {
 }
 
 function removeGiftingSeedPosts() {
+  const titles = SEED_GIFTING_TITLES.map(() => "?").join(", ");
   sqlite.prepare(`
     DELETE FROM gifting_posts
-    WHERE title IN ('Extra rainbow string lights', 'Black mesh party top', 'ISO folding chair for parade day')
+    WHERE title IN (${titles})
        OR user_id IN (SELECT id FROM users WHERE username = 'community_closet')
-  `).run();
+  `).run(...SEED_GIFTING_TITLES);
   sqlite.prepare(`
     DELETE FROM users
     WHERE username = 'community_closet'
       AND NOT EXISTS (SELECT 1 FROM gifting_posts WHERE user_id = users.id)
   `).run();
+}
+
+/** Strip demo RSVPs, example.com gigs, and other launch filler from persisted DBs. */
+function removeDemoSeedData() {
+  const attendances = sqlite.prepare(`
+    DELETE FROM attendances
+    WHERE user_id IS NULL OR avatar_seed LIKE 'seed%'
+  `).run();
+  const gigs = sqlite.prepare(`
+    DELETE FROM gig_posts
+    WHERE LOWER(contact_email) LIKE '%@example.com'
+  `).run();
+  if (attendances.changes > 0 || gigs.changes > 0) {
+    console.log(`[seed-cleanup] removed ${attendances.changes} demo attendances, ${gigs.changes} demo gigs`);
+  }
 }
 
 function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
@@ -2657,4 +2654,48 @@ export function getTableCounts(): Record<string, number> {
     }
   }
   return counts;
+}
+
+function sqlInList(values: string[]) {
+  return values.map(v => `'${v.replace(/'/g, "''")}'`).join(", ");
+}
+
+/** Community-only counts for the admin dashboard — excludes seed/demo filler. */
+export function getAdminMetrics() {
+  const now = Date.now();
+  const count = (sql: string, ...params: unknown[]) =>
+    (sqlite.prepare(sql).get(...params) as { count: number }).count;
+
+  const oldSeedTitles = sqlInList(OLD_SEED_TITLES);
+  const seedGiftingTitles = sqlInList(SEED_GIFTING_TITLES);
+  const seedUsernames = sqlInList(SEED_USERNAMES.map(u => u.toLowerCase()));
+  const activeGiftingStatuses = sqlInList(ACTIVE_GIFTING_STATUSES);
+
+  return {
+    users: count(`SELECT COUNT(*) AS count FROM users WHERE LOWER(username) NOT IN (${seedUsernames})`),
+    activeSessions: count(`SELECT COUNT(*) AS count FROM express_sessions WHERE expired > ?`, now),
+    liveEvents: count(`
+      SELECT COUNT(*) AS count FROM events
+      WHERE status = 'LIVE'
+        AND title NOT IN (${oldSeedTitles})
+        AND title NOT LIKE '%Placeholder%'
+    `),
+    messages: count(`SELECT COUNT(*) AS count FROM messages`),
+    attendances: count(`
+      SELECT COUNT(*) AS count FROM attendances
+      WHERE is_active = 1 AND user_id IS NOT NULL
+    `),
+    pendingSubmissions: count(`SELECT COUNT(*) AS count FROM submissions WHERE status = 'PENDING'`),
+    gigPosts: count(`
+      SELECT COUNT(*) AS count FROM gig_posts
+      WHERE status = 'LIVE' AND LOWER(contact_email) NOT LIKE '%@example.com'
+    `),
+    giftingPosts: count(`
+      SELECT COUNT(*) AS count FROM gifting_posts
+      WHERE status IN (${activeGiftingStatuses})
+        AND title NOT IN (${seedGiftingTitles})
+    `),
+    missedConnections: count(`SELECT COUNT(*) AS count FROM missed_connections WHERE status = 'ACTIVE'`),
+    openFeedback: count(`SELECT COUNT(*) AS count FROM feedback_reports WHERE status = 'OPEN'`),
+  };
 }
