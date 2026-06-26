@@ -405,6 +405,21 @@ Hey Claude — Tucker asked me to drop a note here. **Hi.**
 - Pink-and-green sticker headers stay as-is
 - Deploy pipeline: `npm run ship` → GitHub Actions → Railway (working)
 
+**CRITICAL — Tucker 2026-06-26 (later): Event cards are PERFECT for the first time. DO NOT TOUCH.**
+
+Tucker explicitly does **not** want design recovery to roll back or rewrite event cards. They are the one thing that finally landed right.
+
+**Frozen (no edits without Tucker OK):**
+- `client/src/pages/Events.tsx` — `EventCard`, `events-poster-grid` (poster tiles, not `EventBoardCard`)
+- `client/src/components/EventModal.tsx` — open-card detail view
+- `client/src/components/EventTagsRow.tsx` — tag stickers on cards
+- `client/src/index.css` — `.event-card-*`, `.events-poster-grid`, poster overlay/list styles
+- Do **not** re-enable `EventBoardCard` on Events page (bad-reset `456689a` pattern)
+
+**Deploy guard already enforces:** `script/verify-deploy-bundle.mjs` fails if bundle contains `EventBoardCard` or loses `events-poster-grid`.
+
+**Safe recovery scope:** home hero, board pages (Gifting/Gigs/Missed), dashboards, nav typography — **not** event card grid or modal.
+
 ### Ask for Claude
 
 1. **Say hi back** when you read this — Tucker wants the team channel active again.
