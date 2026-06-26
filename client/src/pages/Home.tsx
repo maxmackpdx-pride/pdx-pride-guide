@@ -101,23 +101,13 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const [isMobileTicker, setIsMobileTicker] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches,
+  const tickerEvents = useMemo(
+    () => [...events].sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0)),
+    [events],
   );
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 640px)");
-    const handler = () => setIsMobileTicker(mq.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  const tickerEvents = useMemo(() => {
-    const limit = isMobileTicker ? 3 : 5;
-    return [...events]
-      .sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0))
-      .slice(0, limit);
-  }, [events, isMobileTicker]);
+  const tickerTitles = tickerEvents.length > 0
+    ? tickerEvents.map(event => event.title)
+    : ["Portland Pride Weekend", "View all events", "July 16–19, 2026"];
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -257,22 +247,24 @@ export default function Home() {
           </div>
         </div>
 
-        {tickerEvents.length > 0 && (
-          <section className="event-ticker-band" aria-label="Live event ticker">
-            <Link href="/events" className="event-ticker-label">
-              LIVE EVENTS
-            </Link>
-            <div className="event-ticker-window">
-              <div className={`event-ticker-grid event-ticker-grid--${isMobileTicker ? "mobile" : "desktop"}`}>
-                {tickerEvents.map(event => (
-                  <span className="event-ticker-item" key={event.id} title={event.title}>
-                    {event.title}
-                  </span>
-                ))}
-              </div>
+        <section className="event-ticker-band" aria-label="Live event ticker">
+          <Link href="/events" className="event-ticker-label">
+            LIVE EVENTS
+          </Link>
+          <div className="event-ticker-window">
+            <div
+              className="event-ticker-track"
+              style={{ animationDuration: `${Math.max(28, tickerTitles.length * 7)}s` }}
+            >
+              {[...tickerTitles, ...tickerTitles].map((title, index) => (
+                <span className="event-ticker-item" key={`${title}-${index}`} title={title}>
+                  {title}
+                  <span className="event-ticker-sep" aria-hidden="true">✦</span>
+                </span>
+              ))}
             </div>
-          </section>
-        )}
+          </div>
+        </section>
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 

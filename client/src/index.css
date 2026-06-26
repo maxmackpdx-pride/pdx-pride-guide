@@ -3255,56 +3255,43 @@ footer a:hover { color: #00FFFF !important; }
   background: linear-gradient(to left, #000 0%, #000 35%, transparent 100%);
 }
 
-.event-ticker-grid {
-  display: grid;
+@keyframes event-ticker-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.event-ticker-track {
+  display: inline-flex;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  gap: 0;
   min-height: 76px;
-  padding: 10px 20px;
-  box-sizing: border-box;
-}
-
-.event-ticker-grid--desktop {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.event-ticker-grid--mobile {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  padding: 10px 12px;
-  min-height: 64px;
+  padding: 10px 0;
+  white-space: nowrap;
+  animation: event-ticker-marquee 36s linear infinite;
+  will-change: transform;
 }
 
 .event-ticker-item {
-  display: block;
-  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
   color: #fff;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.43rem;
+  font-size: clamp(1.1rem, 2.2vw, 1.43rem);
   letter-spacing: 0.08em;
   line-height: 1.15;
-  text-align: center;
   text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   text-shadow:
     0 0 18px rgba(204,255,0,0.45),
     0 1px 0 #000,
     0 2px 8px rgba(0,0,0,0.9);
 }
 
-.event-ticker-grid--desktop .event-ticker-item:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.12);
-  padding-right: 20px;
-}
-
-.event-ticker-grid--mobile .event-ticker-item:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.12);
-  padding-right: 12px;
+.event-ticker-sep {
+  margin: 0 28px;
+  color: rgba(204, 255, 0, 0.72);
+  font-size: 0.9em;
 }
 
 .events-map-panel {
@@ -3473,6 +3460,11 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .event-ticker-track {
+    animation: none;
+    transform: none;
+  }
+
   .spectrum-loader__ring,
   .spectrum-loader__dots span,
   .spectrum-loader__bar-fill {
