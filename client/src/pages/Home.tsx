@@ -272,7 +272,6 @@ export default function Home() {
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
-              <span className="board-sticker" style={{ color: "#00FFFF" }}>GIFT WITH PRIDE</span>
               <h2 className="home-promo-title">
                 <span className="home-promo-title-line">GIFT WITH</span>
                 <span className="home-promo-accent home-promo-accent--rainbow">PRIDE</span>
@@ -292,7 +291,6 @@ export default function Home() {
         <article className="home-promo-panel home-gigs-panel">
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
-              <span className="board-sticker" style={{ color: "#CCFF00" }}>PRIDE WORK</span>
               <h2 className="home-promo-title">
                 <span className="home-promo-title-line">PRIDE</span>
                 <span className="home-promo-accent home-promo-accent--lime">GIG BOARD</span>

@@ -180,7 +180,6 @@ export default function Gifting() {
       <ScrollReveal>
         <section id="how-it-works" className="gifting-how">
           <div>
-            <span className="board-sticker" style={{ color: "#00FFFF" }}>HOW IT WORKS</span>
             <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
             <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
           </div>
@@ -228,7 +227,6 @@ export default function Gifting() {
       <section className="gifting-feed">
         <div className="gifting-feed-head">
           <div>
-            <span className="board-sticker" style={{ color: "#CCFF00" }}>ACTIVE BOARD</span>
             <h2 className="display section-heading">GIFTS & IN SEARCH OF</h2>
           </div>
           <div className="gifting-filterbar">

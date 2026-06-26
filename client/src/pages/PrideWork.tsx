@@ -145,7 +145,6 @@ export default function PrideWork() {
       <ScrollReveal>
         <section id="how-it-works" className="gigs-how">
           <div>
-            <span className="board-sticker" style={{ color: "#CCFF00" }}>HOW IT WORKS</span>
             <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
             <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
           </div>
@@ -281,7 +280,6 @@ export default function PrideWork() {
       <section className="gigs-feed">
         <div className="gigs-feed-head">
           <div>
-            <span className="board-sticker" style={{ color: "#00FFFF" }}>ACTIVE BOARD</span>
             <h2 className="display section-heading">GIGS & AVAILABILITY</h2>
           </div>
           <div className="gigs-filterbar">
