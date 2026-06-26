@@ -5,6 +5,7 @@ import { assertProductionPersistence, getPersistenceAudit } from "./persistence"
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { isMissedConnectionPostable, missedConnectionClosesAt } from "@shared/missedConnections";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -853,8 +854,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── MISSED CONNECTIONS ──────────────────────────────────────────────────
+  app.get("/api/missed-connections/postable-events", requireAuth, (req, res) => {
+    const requireToday = req.query.scope === "today";
+    const events = storage.getPostableEventsForMissedConnections(requireToday);
+    res.json(events.map(evt => ({
+      id: evt.id,
+      title: evt.title,
+      venueName: evt.venueName,
+      dayOfWeek: evt.dayOfWeek,
+      dateStart: evt.dateStart,
+      dateEnd: evt.dateEnd,
+    })));
+  });
+
   app.get("/api/missed-connections", requireAuth, (req, res) => {
-    res.json(storage.getMissedConnections("ACTIVE"));
+    res.json(storage.getMissedConnections("ACTIVE", req.session.userId!));
+  });
+
+  app.get("/api/events/:id/missed-connections", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    res.json(storage.getMissedConnectionsByEvent(evt.id, req.session.userId!));
   });
 
   app.get("/api/missed-connections/mine", requireAuth, (req, res) => {
@@ -863,9 +883,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/missed-connections", requireAuth, (req, res) => {
     try {
-      const data = insertMissedConnectionSchema.parse({ ...req.body, userId: req.session.userId! });
+      const eventId = Number(req.body.eventId);
+      if (!Number.isFinite(eventId)) return res.status(400).json({ error: "eventId required" });
+      const evt = storage.getEvent(eventId);
+      if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
+
+      const requireToday = req.body.scope === "today";
+      const window = isMissedConnectionPostable(evt.dateStart, { requireToday });
+      if (!window.ok) return res.status(400).json({ error: window.reason || "Posting not open for this event" });
+
+      const data = insertMissedConnectionSchema.parse({
+        ...req.body,
+        userId: req.session.userId!,
+        eventId,
+        dayOfWeek: evt.dayOfWeek,
+        venueHint: evt.venueName,
+        closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart),
+      });
       if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
-      res.json(storage.createMissedConnection(data));
+      const created = storage.createMissedConnection(data);
+      const { userId: _uid, ...publicPost } = created as any;
+      res.json({ ...publicPost, anonymous: true, isMine: true, eventTitle: evt.title, eventVenue: evt.venueName, eventDay: evt.dayOfWeek });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -873,7 +911,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.put("/api/missed-connections/:id", requireAuth, (req, res) => {
     const patch: any = {};
-    ["title", "body", "dayOfWeek", "venueHint", "status"].forEach(k => {
+    ["title", "body", "status"].forEach(k => {
       if (req.body[k] !== undefined) patch[k] = req.body[k];
     });
     if (patch.body && patch.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
@@ -888,8 +926,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/missed-connections/:id/reply", requireAuth, (req, res) => {
-    const post = storage.getMissedConnections("ACTIVE").find((m: any) => m.id === Number(req.params.id));
-    if (!post) return res.status(404).json({ error: "Not found" });
+    const post = storage.getMissedConnection(Number(req.params.id));
+    if (!post || post.status !== "ACTIVE") return res.status(404).json({ error: "Not found" });
     if (post.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
@@ -898,6 +936,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       contextId: post.id,
       contextLabel: post.title,
     });
+    storage.createMissedConnectionThread(msg.threadId, post.id, post.userId, req.session.userId!);
     res.json(msg);
   });
 
@@ -907,12 +946,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/messages/inbox", requireAuth, (req, res) => {
-    const inbox = storage.getInbox(req.session.userId!);
+    const inbox = storage.getInbox(req.session.userId!).map(m =>
+      storage.maskMessageParty(m, req.session.userId!, "inbox"),
+    );
     res.json(inbox);
   });
 
   app.get("/api/messages/sent", requireAuth, (req, res) => {
-    const sent = storage.getSentMessages(req.session.userId!);
+    const sent = storage.getSentMessages(req.session.userId!).map(m =>
+      storage.maskMessageParty(m, req.session.userId!, "sent"),
+    );
     res.json(sent);
   });
 
@@ -940,10 +983,40 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/messages/thread/:threadId", requireAuth, (req, res) => {
+    const thread = storage.getThreadForViewer(req.params.threadId, req.session.userId!);
+    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
+    if (!visible) return res.status(404).json({ error: "Thread not found" });
+    const mcThread = storage.getMissedConnectionThread(req.params.threadId);
+    const bothRevealed = !mcThread || Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
+    res.json({
+      messages: thread,
+      reveal: mcThread ? {
+        posterRevealed: Boolean(mcThread.poster_revealed),
+        replierRevealed: Boolean(mcThread.replier_revealed),
+        bothRevealed,
+        iAmPoster: mcThread.poster_user_id === req.session.userId,
+        iRevealed: mcThread.poster_user_id === req.session.userId
+          ? Boolean(mcThread.poster_revealed)
+          : mcThread.replier_user_id === req.session.userId
+            ? Boolean(mcThread.replier_revealed)
+            : false,
+      } : null,
+    });
+  });
+
+  app.post("/api/messages/thread/:threadId/reveal", requireAuth, (req, res) => {
     const thread = storage.getThread(req.params.threadId);
     const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
     if (!visible) return res.status(404).json({ error: "Thread not found" });
-    res.json(thread);
+    const updated = storage.revealMissedConnectionIdentity(req.params.threadId, req.session.userId!);
+    if (!updated) return res.status(400).json({ error: "Cannot reveal in this thread" });
+    res.json({
+      reveal: {
+        posterRevealed: Boolean(updated.poster_revealed),
+        replierRevealed: Boolean(updated.replier_revealed),
+        bothRevealed: Boolean(updated.poster_revealed && updated.replier_revealed),
+      },
+    });
   });
 
   app.delete("/api/messages/thread/:threadId", requireAuth, (req, res) => {

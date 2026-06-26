@@ -2,6 +2,9 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
+  isMissedConnectionPostable, missedConnectionClosesAt,
+} from "@shared/missedConnections";
+import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts,
   type Event, type InsertEvent,
@@ -298,7 +301,34 @@ function ensureEventHostsSchema() {
 }
 ensureEventHostsSchema();
 
-
+function ensureMissedConnectionsSchema() {
+  try {
+    const cols = sqlite.prepare(`PRAGMA table_info(missed_connections)`).all() as Array<{ name: string }>;
+    const names = new Set(cols.map(c => c.name));
+    if (!names.has("event_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN event_id INTEGER`);
+    if (!names.has("closes_at")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN closes_at TEXT`);
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS missed_connection_threads (
+        thread_id TEXT PRIMARY KEY,
+        missed_connection_id INTEGER NOT NULL,
+        poster_user_id INTEGER NOT NULL,
+        replier_user_id INTEGER NOT NULL,
+        poster_revealed INTEGER NOT NULL DEFAULT 0,
+        replier_revealed INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS missed_conn_event_idx ON missed_connections(event_id)`);
+    sqlite.exec(`
+      UPDATE missed_connections
+      SET closes_at = datetime(created_at, '+7 days')
+      WHERE closes_at IS NULL AND created_at != ''
+    `);
+  } catch (e) {
+    console.error("[missed_connections] schema migration failed:", e);
+  }
+}
+ensureMissedConnectionsSchema();
 
 export function hashPassword(pw: string) {
   return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
@@ -1403,9 +1433,14 @@ applyVerifiedEventOverrides();
 removeGiftingSeedPosts();
 
 function archiveExpiredMissedConnections() {
-  const archiveAt = new Date("2026-07-21T00:00:00-07:00").getTime();
-  if (Date.now() < archiveAt) return;
-  sqlite.prepare(`UPDATE missed_connections SET status = 'ARCHIVED' WHERE status = 'ACTIVE'`).run();
+  const now = new Date().toISOString();
+  sqlite.prepare(`
+    UPDATE missed_connections
+    SET status = 'ARCHIVED'
+    WHERE status = 'ACTIVE'
+      AND closes_at IS NOT NULL
+      AND datetime(closes_at) <= datetime(?)
+  `).run(now);
 }
 
 function giftingExpiry(postType: string, from = new Date()) {
@@ -1520,12 +1555,20 @@ export interface IStorage {
   getThread(threadId: string): Message[];
   softDeleteThread(threadId: string, userId: number): void;
   // Missed connections
-  getMissedConnections(status?: string): any[];
+  getMissedConnection(id: number): MissedConnection | undefined;
+  getMissedConnections(status?: string, viewerUserId?: number): any[];
+  getMissedConnectionsByEvent(eventId: number, viewerUserId?: number): any[];
   getMissedConnectionsByUser(userId: number): MissedConnection[];
-  createMissedConnection(data: InsertMissedConnection): MissedConnection;
+  getPostableEventsForMissedConnections(requireToday?: boolean): Event[];
+  createMissedConnection(data: InsertMissedConnection & { closesAt?: string | null }): MissedConnection;
   updateMissedConnection(id: number, userId: number, data: Partial<MissedConnection>): MissedConnection | undefined;
   deleteMissedConnection(id: number, userId: number): void;
   archiveExpiredMissedConnections(): void;
+  createMissedConnectionThread(threadId: string, missedConnectionId: number, posterUserId: number, replierUserId: number): void;
+  getMissedConnectionThread(threadId: string): any | undefined;
+  revealMissedConnectionIdentity(threadId: string, userId: number): any | undefined;
+  getThreadForViewer(threadId: string, viewerUserId: number): any[];
+  maskMessageParty(msg: any, viewerUserId: number, tab: "inbox" | "sent"): any;
   // Gifting
   getGiftingPosts(opts?: { includeInactive?: boolean; status?: string; userId?: number }): any[];
   getGiftingPost(id: number): any | undefined;
@@ -2003,22 +2046,131 @@ export const storage: IStorage = {
   archiveExpiredMissedConnections() {
     archiveExpiredMissedConnections();
   },
-  getMissedConnections(status = "ACTIVE") {
+  getMissedConnection(id) {
+    return db.select().from(missedConnections).where(eq(missedConnections.id, id)).get();
+  },
+  getPostableEventsForMissedConnections(requireToday = false) {
+    const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
+    return live.filter(evt => isMissedConnectionPostable(evt.dateStart, { requireToday }).ok);
+  },
+  getMissedConnections(status = "ACTIVE", viewerUserId?: number) {
     archiveExpiredMissedConnections();
-    return sqlite.prepare(`
-      SELECT m.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+    const rows = sqlite.prepare(`
+      SELECT
+        m.*,
+        e.title AS eventTitle,
+        e.venue_name AS eventVenue,
+        e.day_of_week AS eventDay,
+        e.date_start AS eventDateStart
       FROM missed_connections m
-      JOIN users u ON u.id = m.user_id
+      LEFT JOIN events e ON e.id = m.event_id
       WHERE m.status = ?
       ORDER BY m.created_at DESC
     `).all(status) as any[];
+    return rows.map(row => {
+      const isMine = viewerUserId != null && row.userId === viewerUserId;
+      const { userId: _uid, ...publicRow } = row;
+      return { ...publicRow, isMine, anonymous: !isMine };
+    });
+  },
+  getMissedConnectionsByEvent(eventId, viewerUserId?: number) {
+    archiveExpiredMissedConnections();
+    const rows = sqlite.prepare(`
+      SELECT
+        m.*,
+        e.title AS eventTitle,
+        e.venue_name AS eventVenue,
+        e.day_of_week AS eventDay,
+        e.date_start AS eventDateStart
+      FROM missed_connections m
+      LEFT JOIN events e ON e.id = m.event_id
+      WHERE m.status = 'ACTIVE' AND m.event_id = ?
+      ORDER BY m.created_at DESC
+    `).all(eventId) as any[];
+    return rows.map(row => {
+      const isMine = viewerUserId != null && row.userId === viewerUserId;
+      const { userId: _uid, ...publicRow } = row;
+      return { ...publicRow, isMine, anonymous: !isMine };
+    });
   },
   getMissedConnectionsByUser(userId) {
     archiveExpiredMissedConnections();
-    return db.select().from(missedConnections).where(eq(missedConnections.userId, userId)).all();
+    return sqlite.prepare(`
+      SELECT m.*, e.title AS eventTitle, e.venue_name AS eventVenue
+      FROM missed_connections m
+      LEFT JOIN events e ON e.id = m.event_id
+      WHERE m.user_id = ? AND m.status != 'DELETED'
+      ORDER BY m.created_at DESC
+    `).all(userId) as any[];
   },
   createMissedConnection(data) {
-    return db.insert(missedConnections).values({ ...data, status: "ACTIVE", createdAt: new Date().toISOString() }).returning().get();
+    const createdAt = new Date().toISOString();
+    return db.insert(missedConnections).values({
+      ...data,
+      status: "ACTIVE",
+      createdAt,
+    } as any).returning().get();
+  },
+  createMissedConnectionThread(threadId, missedConnectionId, posterUserId, replierUserId) {
+    sqlite.prepare(`
+      INSERT OR IGNORE INTO missed_connection_threads
+        (thread_id, missed_connection_id, poster_user_id, replier_user_id, poster_revealed, replier_revealed, created_at)
+      VALUES (?, ?, ?, ?, 0, 0, ?)
+    `).run(threadId, missedConnectionId, posterUserId, replierUserId, new Date().toISOString());
+  },
+  getMissedConnectionThread(threadId) {
+    return sqlite.prepare(`SELECT * FROM missed_connection_threads WHERE thread_id = ?`).get(threadId) as any;
+  },
+  revealMissedConnectionIdentity(threadId, userId) {
+    const row = storage.getMissedConnectionThread(threadId);
+    if (!row) return undefined;
+    if (row.poster_user_id === userId) {
+      sqlite.prepare(`UPDATE missed_connection_threads SET poster_revealed = 1 WHERE thread_id = ?`).run(threadId);
+    } else if (row.replier_user_id === userId) {
+      sqlite.prepare(`UPDATE missed_connection_threads SET replier_revealed = 1 WHERE thread_id = ?`).run(threadId);
+    } else {
+      return undefined;
+    }
+    return storage.getMissedConnectionThread(threadId);
+  },
+  maskMessageParty(msg, viewerUserId, tab) {
+    if (msg.contextType !== "MISSED_CONNECTION") return msg;
+    const mcThread = storage.getMissedConnectionThread(msg.threadId);
+    if (!mcThread) return msg;
+    const bothRevealed = Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
+    if (bothRevealed) return msg;
+    const copy = { ...msg };
+    if (tab === "inbox" && msg.fromUserId !== viewerUserId) {
+      copy.from_username = "Anonymous";
+      copy.from_display_name = "Anonymous";
+    }
+    if (tab === "sent" && msg.toUserId !== viewerUserId) {
+      copy.to_username = "Anonymous";
+      copy.to_display_name = "Anonymous";
+    }
+    return copy;
+  },
+  getThreadForViewer(threadId, viewerUserId) {
+    const thread = sqlite.prepare(`
+      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name,
+             u.photo_url AS from_photo_url, u.avatar_choice AS from_avatar_choice, u.avatar_ring AS from_avatar_ring
+      FROM messages m
+      LEFT JOIN users u ON u.id = m.from_user_id
+      WHERE m.thread_id = ? ORDER BY m.created_at ASC
+    `).all(threadId) as any[];
+    const mcThread = storage.getMissedConnectionThread(threadId);
+    const bothRevealed = !mcThread || Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
+    return thread.map(m => {
+      if (m.contextType !== "MISSED_CONNECTION" || bothRevealed) return m;
+      const isSelf = m.fromUserId === viewerUserId;
+      return {
+        ...m,
+        from_username: isSelf ? "You" : "Anonymous",
+        from_display_name: isSelf ? "You" : "Anonymous",
+        from_photo_url: isSelf ? m.from_photo_url : null,
+        masked: !isSelf,
+      };
+    });
   },
   updateMissedConnection(id, userId, data) {
     const before = db.select().from(missedConnections).where(eq(missedConnections.id, id)).get();

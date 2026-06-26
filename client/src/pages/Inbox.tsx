@@ -20,6 +20,20 @@ type Message = {
   from_display_name?: string;
   to_username?: string;
   to_display_name?: string;
+  masked?: boolean;
+};
+
+type ThreadReveal = {
+  posterRevealed: boolean;
+  replierRevealed: boolean;
+  bothRevealed: boolean;
+  iAmPoster?: boolean;
+  iRevealed: boolean;
+};
+
+type ThreadPayload = {
+  messages: Message[];
+  reveal: ThreadReveal | null;
 };
 
 export default function Inbox() {
@@ -49,15 +63,17 @@ export default function Inbox() {
     enabled: !!user,
   });
 
-  const { data: thread = [], isError: threadError } = useQuery<Message[]>({
+  const { data: threadPayload, isError: threadError } = useQuery<ThreadPayload>({
     queryKey: ["/api/messages/thread", activeThread?.threadId],
     queryFn: async () => {
-      const r = await fetch(`/api/messages/thread/${activeThread!.threadId}`);
+      const r = await fetch(`/api/messages/thread/${activeThread!.threadId}`, { credentials: "include" });
       if (!r.ok) throw new Error("Could not load thread");
       return r.json();
     },
     enabled: !!activeThread,
   });
+  const thread = threadPayload?.messages ?? [];
+  const threadReveal = threadPayload?.reveal ?? null;
 
   const replyMutation = useMutation({
     mutationFn: (body: string) => fetch(`/api/messages/thread/${activeThread!.threadId}/reply`, {
@@ -76,6 +92,23 @@ export default function Inbox() {
       queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread?.threadId] });
     },
     onError: () => toast({ title: "Reply failed", description: "Could not send your message.", variant: "destructive" }),
+  });
+
+  const revealMutation = useMutation({
+    mutationFn: () => fetch(`/api/messages/thread/${activeThread!.threadId}/reveal`, {
+      method: "POST",
+      credentials: "include",
+    }).then(async r => {
+      if (!r.ok) throw new Error("Reveal failed");
+      return r.json();
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread?.threadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
+      toast({ title: "Identity shared", description: "They'll see who you are once they reveal too." });
+    },
+    onError: () => toast({ title: "Could not reveal", variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -208,6 +241,28 @@ export default function Inbox() {
                   </button>
                 </div>
               </div>
+              {activeThread.contextType === "MISSED_CONNECTION" && threadReveal && (
+                <div style={{ marginBottom: 14, padding: "10px 12px", background: "#0d0d0d", border: "1px solid #2a2a2a", fontSize: "0.78rem", color: "#9d9a92", lineHeight: 1.5 }}>
+                  {threadReveal.bothRevealed ? (
+                    <span style={{ color: "#CCFF00" }}>Both of you revealed — real names show in this thread.</span>
+                  ) : threadReveal.iRevealed ? (
+                    <span>You're revealed. Waiting for them to reveal before names appear.</span>
+                  ) : (
+                    <span>Missed connection threads stay anonymous until you both choose to reveal.</span>
+                  )}
+                  {!threadReveal.bothRevealed && !threadReveal.iRevealed && (
+                    <button
+                      type="button"
+                      onClick={() => revealMutation.mutate()}
+                      disabled={revealMutation.isPending}
+                      className="display"
+                      style={{ display: "block", marginTop: 10, background: "#FF00CC", color: "#000", border: "none", padding: "7px 14px", cursor: "pointer", fontSize: "0.75rem", opacity: revealMutation.isPending ? 0.55 : 1 }}
+                    >
+                      {revealMutation.isPending ? "REVEALING..." : "REVEAL MYSELF"}
+                    </button>
+                  )}
+                </div>
+              )}
               <div style={{ maxHeight: 330, overflowY: "auto", marginBottom: 16 }}>
                 {threadError ? (
                   <p style={{ color: "#FF6600", fontSize: "0.85rem" }}>Could not load this thread.</p>

@@ -8,6 +8,7 @@ import type { Event } from "@shared/schema";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "./EventTypeTag";
 import AttendanceCluster from "./AttendanceCluster";
+import MissedConnectionsPanel from "./MissedConnectionsPanel";
 import AuthModal from "./AuthModal";
 import UserAvatar from "./UserAvatar";
 
@@ -488,6 +489,11 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
 
           {/* Attendance cluster */}
           <AttendanceCluster eventId={event.id} />
+
+          <div style={{ marginTop: 24, borderTop: "1px solid #1a1a1a", paddingTop: 20 }}>
+            <h3 className="display" style={{ fontSize: "1.15rem", color: "#FF00CC", marginBottom: 12 }}>MISSED CONNECTIONS</h3>
+            <MissedConnectionsPanel mode="event" eventId={event.id} compact />
+          </div>
 
           {/* Claim / Remove links */}
           <div style={{

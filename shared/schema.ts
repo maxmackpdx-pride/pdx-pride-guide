@@ -195,11 +195,23 @@ export type Message = typeof messages.$inferSelect;
 export const missedConnections = sqliteTable("missed_connections", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
+  eventId: integer("event_id"),
   title: text("title").notNull(),
   body: text("body").notNull(),
   dayOfWeek: text("day_of_week"),
   venueHint: text("venue_hint"),
+  closesAt: text("closes_at"),
   status: text("status").notNull().default("ACTIVE"), // ACTIVE | ARCHIVED | DELETED
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const missedConnectionThreads = sqliteTable("missed_connection_threads", {
+  threadId: text("thread_id").primaryKey(),
+  missedConnectionId: integer("missed_connection_id").notNull(),
+  posterUserId: integer("poster_user_id").notNull(),
+  replierUserId: integer("replier_user_id").notNull(),
+  posterRevealed: integer("poster_revealed", { mode: "boolean" }).notNull().default(false),
+  replierRevealed: integer("replier_revealed", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull().default(""),
 });
 

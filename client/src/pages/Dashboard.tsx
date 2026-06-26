@@ -431,7 +431,7 @@ export default function Dashboard() {
                 key={post.id}
                 color={MAGENTA}
                 title={post.title}
-                meta={`${post.dayOfWeek || "Any day"}${post.venueHint ? ` · ${post.venueHint}` : ""}`}
+                meta={`${post.eventTitle || post.venueHint || post.dayOfWeek || "Event"}${post.status !== "ACTIVE" ? ` · ${post.status}` : ""}`}
                 chip={post.status}
                 chipColor={MAGENTA}
                 actions={
