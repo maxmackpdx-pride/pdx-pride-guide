@@ -28,7 +28,7 @@ export default function EventTypeTag({
 }: EventTypeTagProps) {
   const colors = isEventTypeFilterLabel(label)
     ? EVENT_TYPE_TAG_COLORS[label]
-    : { color: "var(--text-meta)", borderColor: "#222222" };
+    : { color: "var(--text-meta)" };
 
   if (interactive) {
     const activeStyle = active
@@ -58,7 +58,11 @@ export default function EventTypeTag({
   return (
     <span
       className={`event-type-tag event-type-tag--${size} ${className}`.trim()}
-      style={{ color: colors.color, borderColor: colors.borderColor }}
+      style={{
+        "--tag-bg": colors.color,
+        "--tag-border": "var(--neon-yellow)",
+        "--tag-shadow": "var(--neon-yellow)",
+      } as React.CSSProperties}
     >
       {label}
     </span>

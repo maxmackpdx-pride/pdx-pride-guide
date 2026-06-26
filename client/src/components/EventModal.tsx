@@ -5,8 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
-import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
-import { EventTypeTagList } from "./EventTypeTag";
+import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
 import MissedConnectionsPanel from "./MissedConnectionsPanel";
 import EventLinkChoiceMenu from "./EventLinkChoiceMenu";
@@ -54,8 +53,6 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   });
 
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
-  const types = JSON.parse(event.eventTypes || "[]") as string[];
-  const typeTags = getEventTypeTagsForEvent(event);
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
 
   const { data: hostMessages = [] } = useQuery<Array<{
@@ -226,26 +223,14 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             }}
           >✕</button>
 
-          {/* Tags — day, filters, and event types at top */}
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-            <span className="sticker" style={{ color: dayColor, borderColor: dayColor }}>{event.dayOfWeek}</span>
-            <EventTypeTagList labels={typeTags} size="md" />
-            {types.map(t => (
-              <span key={t} className="sticker" style={{ color: dayColor, borderColor: dayColor, opacity: 0.92 }}>
-                {t.replace(/-/g, " ")}
-              </span>
-            ))}
-            {hasPendingClaim ? (
-              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>
-                CLAIM PENDING
-              </span>
-            ) : event.isClaimable && (
-              <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", cursor: "pointer" }}
-                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}>
-                CLAIM THIS EVENT →
-              </span>
-            )}
-          </div>
+          <EventTagsRow
+            event={event}
+            size="md"
+            showJsonTypes
+            onClaimClick={() => (user ? claimEvent(event.id) : setShowAuth(true))}
+            className="event-card-tags--modal"
+            style={{ marginBottom: 16 }}
+          />
 
           <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", margin: "0 0 8px", lineHeight: 1 }}>
             {event.title}

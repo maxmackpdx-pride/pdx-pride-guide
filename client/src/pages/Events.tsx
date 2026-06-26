@@ -5,7 +5,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
-import EventTypeTag, { EventTypeTagList } from "../components/EventTypeTag";
+import { EventTypeTagList } from "../components/EventTypeTag";
+import EventTagsRow from "../components/EventTagsRow";
 import SpectrumLoader from "@/components/SpectrumLoader";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventModal from "../components/EventModal";
@@ -345,9 +346,7 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
 }
 
 function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event; onClick: () => void; viewMode: "grid" | "list"; revealDelay?: number }) {
-  const typeTags = getEventTypeTagsForEvent(event);
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
-  const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const time = event.dateStart
     ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "";
@@ -388,14 +387,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
         )}
         {/* Info */}
         <div style={{ flex: 1, padding: "10px 14px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
-            <span className="sticker" style={{ color: dayColor, borderColor: dayColor, fontSize: "0.55rem" }}>{event.dayOfWeek}</span>
-            {hasPendingClaim ? (
-              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", fontSize: "0.55rem" }}>CLAIM PENDING</span>
-            ) : event.isClaimable && (
-              <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", fontSize: "0.55rem" }}>CLAIM ME</span>
-            )}
-          </div>
+          <EventTagsRow event={event} size="sm" className="event-card-tags--list" />
           <div style={{
             fontFamily: "var(--font-display)", fontWeight: 900,
             fontSize: "clamp(0.9rem, 2vw, 1.05rem)",
@@ -404,10 +396,6 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
           }}>{event.title}</div>
           <div style={{ fontSize: "0.72rem", color: "#888" }}>{event.venueName}</div>
           <div style={{ fontSize: "0.65rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
-        </div>
-        {/* Type tags */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "10px 12px", justifyContent: "center", flexShrink: 0 }}>
-          <EventTypeTagList labels={typeTags} size="sm" max={3} />
         </div>
       </div>
       </ScrollReveal>
@@ -438,16 +426,9 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
           }} />
           {/* Day stripe */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
+          <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--overlay" />
           {/* Info overlay */}
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 14 }}>
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 }}>
-              <span className="sticker" style={{ color: dayColor, borderColor: dayColor, fontSize: "0.55rem" }}>{event.dayOfWeek}</span>
-              {hasPendingClaim ? (
-                <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", fontSize: "0.55rem" }}>CLAIM PENDING</span>
-              ) : event.isClaimable && (
-                <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", fontSize: "0.55rem" }}>CLAIM ME</span>
-              )}
-            </div>
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
               fontSize: "clamp(1rem, 1.4vw, 1.22rem)",
@@ -455,11 +436,6 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
             }}>{event.title}</div>
             <div style={{ fontSize: "0.74rem", color: "#aaa" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.68rem", color: "var(--text-meta)", marginTop: 2 }}>{time}</div>
-            {typeTags.length > 0 && (
-              <div style={{ marginTop: 6 }}>
-                <EventTypeTagList labels={typeTags} size="sm" max={3} />
-              </div>
-            )}
           </div>
         </div>
       ) : (
@@ -477,19 +453,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
               background: `radial-gradient(circle at top right, ${dayColor}22, transparent 70%)`,
               pointerEvents: "none",
             }} />
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8, position: "relative" }}>
-              <span className="sticker" style={{ color: dayColor, borderColor: dayColor, fontSize: "0.58rem" }}>{event.dayOfWeek}</span>
-              {event.ageRequirement !== "ALL_AGES" && (
-                <span className="sticker" style={{ color: "#777", borderColor: "#333", fontSize: "0.58rem" }}>
-                  {event.ageRequirement?.replace("_PLUS", "+").replace("ALL_AGES", "") || ""}
-                </span>
-              )}
-              {hasPendingClaim ? (
-                <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", fontSize: "0.58rem" }}>CLAIM PENDING</span>
-              ) : event.isClaimable && (
-                <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF", fontSize: "0.58rem" }}>CLAIM ME</span>
-              )}
-            </div>
+            <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--inline" />
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
               fontSize: "clamp(1.02rem, 1.4vw, 1.28rem)",
@@ -499,11 +463,6 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0 }: { event: Event
             </div>
             <div style={{ fontSize: "0.78rem", color: "#888" }}>{event.venueName}</div>
             <div style={{ fontSize: "0.72rem", color: "var(--text-meta)", marginTop: 2 }}>{time} · {event.neighborhood}</div>
-            {typeTags.length > 0 && (
-              <div style={{ marginTop: 6 }}>
-                <EventTypeTagList labels={typeTags} size="sm" max={3} />
-              </div>
-            )}
           </div>
         </>
       )}
