@@ -97,8 +97,23 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const eventNames = events.map(event => event.title).filter(Boolean);
-  const tickerItems = eventNames.length ? [...eventNames, ...eventNames] : [];
+  const [isMobileTicker, setIsMobileTicker] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const handler = () => setIsMobileTicker(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const tickerEvents = useMemo(() => {
+    const limit = isMobileTicker ? 3 : 5;
+    return [...events]
+      .sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0))
+      .slice(0, limit);
+  }, [events, isMobileTicker]);
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -239,16 +254,16 @@ export default function Home() {
           </div>
         </div>
 
-        {tickerItems.length > 0 && (
+        {tickerEvents.length > 0 && (
           <section className="event-ticker-band" aria-label="Live event ticker">
             <Link href="/events" className="event-ticker-label">
               LIVE EVENTS
             </Link>
             <div className="event-ticker-window">
-              <div className="event-ticker-track">
-                {tickerItems.map((name, i) => (
-                  <span className="event-ticker-item" key={`${name}-${i}`}>
-                    {name}
+              <div className={`event-ticker-grid event-ticker-grid--${isMobileTicker ? "mobile" : "desktop"}`}>
+                {tickerEvents.map(event => (
+                  <span className="event-ticker-item" key={event.id} title={event.title}>
+                    {event.title}
                   </span>
                 ))}
               </div>
