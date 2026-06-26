@@ -855,7 +855,7 @@ h2.display,
 
 @media (max-width: 900px) {
   .home-hero-title {
-    font-size: 9.562rem;
+    font-size: 4.781rem;
   }
 
   .home-countdown-box div {
@@ -891,7 +891,7 @@ h2.display,
   }
 
   .home-hero-title {
-    font-size: 6.076rem;
+    font-size: 3.038rem;
   }
 
   .home-hero-subtitle {
@@ -2579,7 +2579,7 @@ h2.display,
   }
 
   .home-promo-panel {
-    min-height: 520px;
+    min-height: 430px;
   }
 
   .home-promo-panel-card {
@@ -2587,7 +2587,7 @@ h2.display,
   }
 
   .home-promo-title {
-    font-size: clamp(3.29rem, 15.4vw, 4.9rem);
+    font-size: clamp(1.645rem, 7.7vw, 2.45rem);
     margin: 1rem 0 0.9rem;
   }
 
@@ -2605,7 +2605,7 @@ h2.display,
   }
 
   .page-hero {
-    min-height: 560px;
+    min-height: 440px;
   }
 
   .page-hero__inner {
@@ -2617,26 +2617,9 @@ h2.display,
     padding: 22px 18px 24px;
   }
 
-  .page-hero__title,
-  .page-hero-title {
-    font-size: clamp(5.3rem, 22vw, 7rem);
+  .page-hero__title {
+    font-size: clamp(2.65rem, 11vw, 3.5rem);
     margin: 1rem 0 0.95rem;
-  }
-
-  .section-heading {
-    font-size: clamp(4.5rem, 10vw, 6rem);
-  }
-
-  .board-page .gifting-how .section-heading,
-  .board-page .gigs-how .section-heading {
-    font-size: clamp(4.25rem, 11vw, 7.25rem);
-  }
-
-  .board-page .gifting-feed .section-heading,
-  .board-page .gigs-feed .section-heading,
-  .board-page .gigs-form-panel .section-heading,
-  .board-page .gifting-form-panel .section-heading {
-    font-size: clamp(4rem, 8vw, 5.75rem);
   }
 
   .page-hero__lede {
