@@ -7,7 +7,6 @@ import EventModal from "@/components/EventModal";
 
 import EventTicker from "@/components/EventTicker";
 import HeroAurora from "@/components/HeroAurora";
-import HeroImageGlitch from "@/components/HeroImageGlitch";
 import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
@@ -193,7 +192,6 @@ export default function Home() {
           <div className="home-hero-bg-mobile" />
           <HeroAurora />
           <div className="home-hero-shade" />
-          <HeroImageGlitch intensity="heroLines" className="home-hero-glitch" />
           <div className="home-hero-halftone" />
           <div className="home-hero-watermark">LOVE<br />LOUDER</div>
         </div>
@@ -272,7 +270,6 @@ export default function Home() {
       <section className="home-promo-stack">
         <ScrollReveal>
         <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
-          <HeroImageGlitch intensity="panelLines" className="home-promo-glitch" />
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
               <span className="board-sticker" style={{ color: "#00FFFF" }}>GIFT WITH PRIDE</span>
@@ -293,7 +290,6 @@ export default function Home() {
         <div className="torn-divider full-bleed" />
         <ScrollReveal delay={120}>
         <article className="home-promo-panel home-gigs-panel">
-          <HeroImageGlitch intensity="panelLines" className="home-promo-glitch" />
           <div className="home-promo-inner">
             <div className="home-promo-panel-card">
               <span className="board-sticker" style={{ color: "#CCFF00" }}>PRIDE WORK</span>

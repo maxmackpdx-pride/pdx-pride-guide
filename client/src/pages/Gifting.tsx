@@ -173,7 +173,6 @@ export default function Gifting() {
           <>
             <button className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a Gift</button>
             <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an In Search Of</button>
-            <a href="#how-it-works" className="gifting-how-link">How It Works ↓</a>
           </>
         }
       />
