@@ -177,10 +177,7 @@ export default function Home() {
           }}
         />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",
-        }} />
+        <div className="home-hero-shade" aria-hidden="true" />
         <div style={{
           position: "absolute", inset: 0, opacity: 0.06,
           backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",

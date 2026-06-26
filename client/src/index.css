@@ -587,6 +587,20 @@ body::before {
   padding-bottom: 70px;
 }
 
+.home-hero-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.94) 0%,
+    rgba(0, 0, 0, 0.9) 25%,
+    rgba(0, 0, 0, 0.42) 58%,
+    rgba(0, 0, 0, 0.08) 82%,
+    transparent 100%
+  );
+}
+
 .home-hero-bg-mobile {
   display: none;
   position: absolute;
