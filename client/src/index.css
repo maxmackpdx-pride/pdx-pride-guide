@@ -185,7 +185,16 @@ body::before {
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
+  flex: 1 1 auto;
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.site-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .site-nav-link {
@@ -245,6 +254,23 @@ body::before {
   font-size: 1.1rem;
   font-weight: 900;
   line-height: 1;
+}
+
+.site-unread-badge--pulse {
+  animation: site-unread-pulse 2.4s ease-out infinite;
+}
+
+@keyframes site-unread-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.55); }
+  50% { box-shadow: 0 0 0 8px rgba(204, 255, 0, 0); }
+}
+
+.inbox-link--live {
+  color: var(--neon-cyan);
+}
+
+.inbox-link--live:hover {
+  color: var(--neon-yellow);
 }
 
 .site-dashboard-link,
@@ -1091,16 +1117,6 @@ h2.display,
     display: none;
   }
 
-  .site-nav {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .site-nav::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 @media (max-width: 640px) {
@@ -2759,7 +2775,8 @@ footer a:hover { color: #00FFFF !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .attendance-pop-in,
-  .attendance-badge-pulse {
+  .attendance-badge-pulse,
+  .site-unread-badge--pulse {
     animation: none;
   }
 }

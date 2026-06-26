@@ -77,10 +77,10 @@ export default function Nav() {
               <div className="site-auth">
                 <Link
                   href="/inbox"
-                  className={`site-nav-link inbox-link${location === "/inbox" ? " active" : ""}`}
+                  className={`site-nav-link inbox-link${location === "/inbox" ? " active" : ""}${unreadCount > 0 ? " inbox-link--live" : ""}`}
                   onClick={() => setMenuOpen(false)}
                 >
-                  INBOX{unreadCount > 0 && <span className="site-unread-badge">{unreadCount}</span>}
+                  INBOX{unreadCount > 0 && <span className="site-unread-badge site-unread-badge--pulse">{unreadCount}</span>}
                 </Link>
                 <Link href="/dashboard" className="site-dashboard-link site-dashboard-link--avatar" onClick={() => setMenuOpen(false)}>
                   <UserAvatar
