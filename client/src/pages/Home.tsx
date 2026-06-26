@@ -13,14 +13,6 @@ import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/home-hero-desktop.jpg";
 
-const PRIDE_SLOGANS = [
-  "Keep Portland queer",
-  "Trans joy is real",
-  "Your joy is a protest",
-  "Love louder",
-  "Show up for each other",
-];
-
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
   if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).getTime();
@@ -172,10 +164,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      <section className="event-slogan-band" aria-label="Pride slogans">
-        <EventTicker titles={PRIDE_SLOGANS} direction="right" className="event-ticker-window--slogan" />
-      </section>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
