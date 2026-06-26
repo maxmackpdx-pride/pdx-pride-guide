@@ -1578,11 +1578,10 @@ h2.display,
 
 .board-kicker {
   display: inline-block;
-  margin-bottom: 0.15rem;
   font-family: var(--font-board-mono);
   font-weight: 500;
-  font-size: 12.5px;
-  letter-spacing: 0.16em;
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #0a0a0a;
   padding: 8px 15px;
@@ -1591,11 +1590,11 @@ h2.display,
   box-shadow: 4px 4px 0 var(--neon-magenta);
 }
 
-/* Unified section heroes — Pride Work, Gifting, Missed, About */
+/* Board page heroes — Gigs, Gifting, About, Missed (home uses .home-hero) */
 .page-hero {
   position: relative;
   overflow: hidden;
-  min-height: clamp(400px, 50vh, 540px);
+  min-height: 520px;
   border-bottom: 3px solid transparent;
   border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0, #ff8c00) 1;
 }
@@ -1605,6 +1604,7 @@ h2.display,
   inset: 0;
   background-size: cover;
   background-repeat: no-repeat;
+  background-position: center center;
   filter: saturate(1.08) contrast(1.04);
 }
 
@@ -1631,15 +1631,18 @@ h2.display,
   z-index: 1;
   display: flex;
   align-items: flex-end;
+  justify-content: flex-start;
   min-height: inherit;
+  width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(48px, 7vw, 88px) 24px clamp(40px, 5vw, 64px);
+  padding: 56px 24px 48px;
 }
 
 .page-hero__panel {
-  max-width: 760px;
-  padding: clamp(22px, 3vw, 34px) clamp(22px, 3.2vw, 36px);
+  width: 100%;
+  max-width: 720px;
+  padding: 28px 32px 30px;
   background: rgba(5, 5, 5, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow:
@@ -1649,17 +1652,24 @@ h2.display,
   -webkit-backdrop-filter: blur(10px);
 }
 
-.page-hero__title {
-  margin: 1.35rem 0 1.25rem;
-  font-family: var(--font-board-display);
-  font-weight: 400;
-  font-size: clamp(3.5rem, 9vw, 7.5rem);
-  line-height: 0.9;
-  letter-spacing: 0.006em;
-  color: var(--text-heading);
+.page-hero .board-kicker {
+  margin-bottom: 0;
 }
 
-.page-hero .page-hero__title {
+.page-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12em;
+  margin: 1.15rem 0 1.1rem;
+  font-family: var(--font-board-display);
+  font-weight: 400;
+  font-stretch: normal;
+  font-size: clamp(3.1rem, 7.8vw, 6.25rem);
+  line-height: 0.88;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--text-heading);
   -webkit-text-stroke: 1.5px #000;
   paint-order: stroke fill;
   text-shadow:
@@ -1667,8 +1677,12 @@ h2.display,
     0 0 28px rgba(0, 0, 0, 0.55);
 }
 
+.page-hero__title-line,
 .page-hero__accent {
   display: block;
+}
+
+.page-hero__accent {
   -webkit-text-stroke: 1px #000;
   paint-order: stroke fill;
 }
@@ -1706,10 +1720,12 @@ h2.display,
 }
 
 .page-hero__lede {
+  width: 100%;
   max-width: 42rem;
-  margin: 0.25rem 0 0;
-  padding: 0.9rem 1.15rem;
-  font-size: clamp(1.05rem, 1.9vw, 1.22rem);
+  margin: 0;
+  padding: 0.95rem 1.15rem;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
   line-height: 1.72;
   color: var(--text-body);
   background: rgba(0, 0, 0, 0.78);
@@ -1720,22 +1736,21 @@ h2.display,
 
 .page-hero__tagline {
   display: inline-block;
-  margin-top: 1.35rem;
+  margin-top: 1.15rem;
   padding: 9px 16px;
   background: rgba(5, 5, 5, 0.94);
   color: var(--neon-yellow);
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(0.75rem, 1.2vw, 0.88rem);
-  letter-spacing: 0.06em;
+  font-family: var(--font-board-mono);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 4px 4px 0 var(--neon-magenta);
 }
 
 .page-hero__actions {
-  margin-top: 1.65rem;
-  padding-top: 0.25rem;
+  margin-top: 1.35rem;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -1779,13 +1794,6 @@ h2.display,
 .board-page .gifting-form-panel .section-heading {
   font-size: clamp(2rem, 4vw, 2.875rem);
   line-height: 0.88;
-}
-
-.board-page .gifting-hero,
-.board-page .gigs-hero {
-  min-height: clamp(600px, 72vw, 820px);
-  border-bottom: 3px solid transparent;
-  border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0, #ff8c00) 1;
 }
 
 .board-page .gifting-how,
@@ -2410,26 +2418,26 @@ h2.display,
   }
 
   .page-hero {
-    min-height: clamp(360px, 58vh, 480px);
+    min-height: 440px;
   }
 
   .page-hero__inner {
-    padding: 40px 16px 32px;
+    padding: 40px 16px 36px;
   }
 
   .page-hero__panel {
     max-width: 100%;
-    padding: 16px 18px;
+    padding: 22px 18px 24px;
   }
 
   .page-hero__title {
-    font-size: clamp(2.75rem, 12vw, 3.75rem);
+    font-size: clamp(2.65rem, 11vw, 3.5rem);
+    margin: 1rem 0 0.95rem;
   }
 
   .page-hero__lede {
     font-size: 1.02rem;
     line-height: 1.68;
-    margin-bottom: 0.5rem;
     padding: 0.8rem 1rem;
   }
 

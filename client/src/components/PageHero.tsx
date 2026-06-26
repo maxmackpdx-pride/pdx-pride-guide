@@ -37,13 +37,10 @@ export default function PageHero({
       <div className="page-hero__inner">
         <div className="page-hero__panel">
           <div className="board-kicker">{kicker}</div>
-          <h1 className="display page-hero-title page-hero__title">
-            {titleLine1}
+          <h1 className="page-hero__title">
+            <span className="page-hero__title-line">{titleLine1}</span>
             {titleLine2 && (
-              <>
-                <br />
-                <span className={`page-hero__accent page-hero__accent--${accent}`}>{titleLine2}</span>
-              </>
+              <span className={`page-hero__accent page-hero__accent--${accent}`}>{titleLine2}</span>
             )}
           </h1>
           <p className="page-hero__lede">{lede}</p>
