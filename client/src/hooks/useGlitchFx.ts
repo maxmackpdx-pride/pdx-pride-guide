@@ -23,6 +23,7 @@ export function useGlitchFx(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const BURST_DURATION_SCALE = 0.6;
     const neon = ["#E40303", "#FF8C00", "#FFED00", "#008026", "#004DFF", "#750787", "#FF1FA0", "#19E3FF", "#C8FA3C"];
     let w = 1;
     let h = 1;
@@ -81,13 +82,15 @@ export function useGlitchFx(
 
       const freq = options.freq ?? (options.heavy ? 0.05 : 0.025);
       const gh = options.ghost ?? 0.16;
-      if (burst <= 0 && Math.random() < freq) burst = 2 + (Math.random() * 5 | 0);
+      if (burst <= 0 && Math.random() < freq) {
+        burst = Math.max(1, Math.round((2 + Math.random() * 5) * BURST_DURATION_SCALE));
+      }
       if (burst > 0) {
         burst--;
         const count = (options.heavy ? 4 : 3) + (Math.random() * 5 | 0);
         for (let k = 0; k < count; k++) {
           const sy = (Math.random() * h) | 0;
-          const sh = (3 + Math.random() * 24) | 0;
+          const sh = Math.max(2, Math.round((3 + Math.random() * 24) * BURST_DURATION_SCALE));
           const ox = ((Math.random() - 0.5) * (options.heavy ? 80 : 56)) | 0;
           try {
             ctx.drawImage(canvas, 0, sy, w, sh, ox, sy, w, sh);
