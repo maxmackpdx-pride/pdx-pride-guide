@@ -1,14 +1,20 @@
 import { useEffect, useRef } from "react";
 
+export type EventTickerItem = {
+  id: number | string;
+  title: string;
+};
+
 type EventTickerProps = {
-  titles: string[];
+  items: EventTickerItem[];
   direction?: "left" | "right";
   className?: string;
 };
 
-export default function EventTicker({ titles, direction = "left", className = "" }: EventTickerProps) {
+export default function EventTicker({ items: sourceItems, direction = "left", className = "" }: EventTickerProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const items = [...titles, ...titles];
+  const copies = sourceItems.length > 12 ? 2 : 3;
+  const items = Array.from({ length: copies }, () => sourceItems).flat();
 
   useEffect(() => {
     const track = trackRef.current;
@@ -55,14 +61,14 @@ export default function EventTicker({ titles, direction = "left", className = ""
       ro.disconnect();
       track.style.transform = "";
     };
-  }, [titles, direction]);
+  }, [sourceItems, direction]);
 
   return (
     <div className={`event-ticker-window${className ? ` ${className}` : ""}`}>
       <div ref={trackRef} className="event-ticker-track">
-        {items.map((title, index) => (
-          <span className="event-ticker-item" key={`${title}-${index}`} title={title}>
-            {title}
+        {items.map((item, index) => (
+          <span className="event-ticker-item" key={`${item.id}-${index}`} title={item.title}>
+            {item.title}
             <span className="event-ticker-sep" aria-hidden="true">✦</span>
           </span>
         ))}

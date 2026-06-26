@@ -927,7 +927,7 @@ h2.display,
 .home-map-preview {
   position: relative;
   display: block;
-  height: clamp(150px, 21vh, 210px);
+  height: clamp(240px, 33.6vh, 336px);
   overflow: hidden;
   margin: 0;
   text-decoration: none;
@@ -4851,7 +4851,7 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .home-map-panel {
-  height: clamp(150px, 21vh, 210px);
+  height: clamp(240px, 33.6vh, 336px);
 }
 
 @media (min-width: 900px) {

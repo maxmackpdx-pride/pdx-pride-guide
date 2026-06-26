@@ -103,13 +103,19 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const tickerEvents = useMemo(
-    () => [...events].sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0)),
-    [events],
-  );
-  const tickerTitles = tickerEvents.length > 0
-    ? tickerEvents.map(event => event.title)
-    : ["Portland Pride Weekend", "View all events", "July 16–19, 2026"];
+  const tickerItems = useMemo(() => {
+    const sorted = [...events].sort(
+      (a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0),
+    );
+    if (sorted.length === 0) {
+      return [
+        { id: "fallback-1", title: "Portland Pride Weekend" },
+        { id: "fallback-2", title: "View all events" },
+        { id: "fallback-3", title: "July 16–19, 2026" },
+      ];
+    }
+    return sorted.map(event => ({ id: event.id, title: event.title }));
+  }, [events]);
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -248,7 +254,7 @@ export default function Home() {
           <Link href="/events" className="event-ticker-label">
             LIVE EVENTS
           </Link>
-          <EventTicker titles={tickerTitles} />
+          <EventTicker items={tickerItems} />
         </section>
       </section>
 
