@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
-import NeonTicker from "@/components/NeonTicker";
+
 import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
@@ -101,10 +101,23 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const tickerEvents = useMemo(
-    () => [...events].sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0)),
-    [events],
+  const [isMobileTicker, setIsMobileTicker] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches,
   );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const handler = () => setIsMobileTicker(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const tickerEvents = useMemo(() => {
+    const limit = isMobileTicker ? 3 : 5;
+    return [...events]
+      .sort((a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0))
+      .slice(0, limit);
+  }, [events, isMobileTicker]);
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -244,7 +257,22 @@ export default function Home() {
           </div>
         </div>
 
-        {tickerEvents.length > 0 && <NeonTicker events={tickerEvents} />}
+        {tickerEvents.length > 0 && (
+          <section className="event-ticker-band" aria-label="Live event ticker">
+            <Link href="/events" className="event-ticker-label">
+              LIVE EVENTS
+            </Link>
+            <div className="event-ticker-window">
+              <div className={`event-ticker-grid event-ticker-grid--${isMobileTicker ? "mobile" : "desktop"}`}>
+                {tickerEvents.map(event => (
+                  <span className="event-ticker-item" key={event.id} title={event.title}>
+                    {event.title}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
         <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
 

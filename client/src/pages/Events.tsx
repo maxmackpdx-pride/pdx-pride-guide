@@ -23,8 +23,16 @@ const DAY_COLORS: Record<string, string> = {
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
 
-const PDX_CENTER: [number, number] = [45.5152, -122.6784];
-const PDX_ZOOM = 13;
+const MAP_VIEWS = {
+  events: {
+    center: [45.5128, -122.6703] as [number, number],
+    zoom: 14,
+  },
+  home: {
+    center: [45.5152, -122.6784] as [number, number],
+    zoom: 13,
+  },
+} as const;
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
   // ── Pin icon builder ──────────────────────────────────────────────────────
@@ -217,14 +225,16 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
           onClick={onCollapse}
         />
       )}
-      <div style={{
+      <div
+        className={variant === "events" ? "events-map-panel" : "home-map-panel"}
+        style={{
         position: expanded ? "fixed" : "relative",
         top: expanded ? 0 : undefined,
         left: expanded ? 0 : undefined,
         right: expanded ? 0 : undefined,
         bottom: expanded ? 0 : undefined,
         zIndex: expanded ? 999 : 1,
-        height: expanded ? "100vh" : (variant === "home" ? "clamp(150px, 21vh, 210px)" : "42vh"),
+        height: expanded ? "100vh" : undefined,
         width: "100%",
         borderBottom: expanded ? "none" : "2px solid #1a1a1a",
       }}>
@@ -260,8 +270,8 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
 
         {mounted && (
           <MapContainer
-            center={PDX_CENTER}
-            zoom={PDX_ZOOM}
+            center={MAP_VIEWS[variant].center}
+            zoom={MAP_VIEWS[variant].zoom}
             style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
             zoomControl={true}
             attributionControl={true}
