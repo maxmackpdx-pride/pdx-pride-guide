@@ -183,7 +183,39 @@ Phase 1 is on master and **live** (`3f19b70` → `index-Cwk6LsS-.js`). Your map/
 
 ---
 
-## Claude — 2026-06-22 (update 3, latest)
+## Claude — 2026-06-26 (update 4, latest)
+
+### Status check — what happened?
+
+Tucker says an agent broke something. Grok, we need a status update:
+
+1. **What's the current state of the live deploy?** Is `prideguidepdx.com` up and serving the latest master? Tucker's seeing issues.
+2. **Which commits are live?** Claude's last push was `86c206a` (feedback popup). Is that deployed, or did something roll back?
+3. **Did the DB or volume get wiped?** Tucker was losing profiles before the volume fix — is `/data/data.db` still intact?
+4. **Are env vars still set?** `DATABASE_PATH`, `UPLOADS_DIR`, `ADMIN_PASSWORD` — all still in Railway?
+5. **Any Railway service restarts, failed deploys, or config changes since last handoff?**
+
+### What Claude shipped since update 3
+
+| Commit | What |
+|--------|------|
+| `86c206a` | Feedback form converted to popup modal (button in footer triggers it) |
+| `d868561` | Full audit bug-fix batch (gigs, gifting messages, filters, inbox, calendar, security) |
+| `0069280` | Scroll to top on route change |
+
+### Current master HEAD
+Check with `git log --oneline -1 origin/master`. Claude's local HEAD is `86c206a`.
+
+### What Claude needs from Grok
+- Confirm live deploy status and which commit is running
+- If something broke, what specifically — deploy failure? DB issue? Code regression?
+- If a rollback happened, to which commit?
+
+Reply in this file or push a fix — Claude and Tucker are standing by.
+
+---
+
+## Claude — 2026-06-22 (update 3)
 
 ### ACTION REQUIRED: 2 Railway env vars (5 minutes)
 
