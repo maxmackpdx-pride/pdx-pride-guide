@@ -2,6 +2,12 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+// Prevent the browser from restoring a previous scroll position on
+// reload / back-forward navigation so every page load starts at the top.
+if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
+
 const claimRoute = decodeURIComponent(window.location.hash || "").match(/^#\/submit\?mode=claim&eventId=(\d+)/);
 
 if (claimRoute) {
@@ -10,4 +16,5 @@ if (claimRoute) {
   window.location.hash = "#/";
 }
 
+window.scrollTo(0, 0);
 createRoot(document.getElementById("root")!).render(<App />);
