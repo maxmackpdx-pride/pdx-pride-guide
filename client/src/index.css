@@ -2722,3 +2722,93 @@ footer a:hover { color: #00FFFF !important; }
 .events-attendance-section {
   scroll-margin-top: 88px;
 }
+
+/* Submit form polish */
+.submit-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.submit-form__steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  padding: 14px 16px;
+  border: 1px solid #1a1a1a;
+  background: #080808;
+}
+
+.submit-form__step {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #444;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.submit-form__step.active {
+  color: var(--neon-yellow);
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 12px rgba(204, 255, 0, 0.2);
+}
+
+.submit-form__step.done {
+  color: var(--neon-cyan);
+}
+
+.submit-form__step-arrow {
+  color: #333;
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.submit-form__field input,
+.submit-form__field select,
+.submit-form__field textarea {
+  width: 100%;
+  background: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.submit-form__field input:focus,
+.submit-form__field select:focus,
+.submit-form__field textarea:focus {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 0 1px var(--neon-yellow), 0 0 14px rgba(204, 255, 0, 0.25);
+}
+
+.submit-form__field--cyan input:focus,
+.submit-form__field--cyan select:focus,
+.submit-form__field--cyan textarea:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 1px var(--neon-cyan), 0 0 14px rgba(0, 255, 255, 0.25);
+}
+
+.submit-form__field--magenta input:focus,
+.submit-form__field--magenta select:focus,
+.submit-form__field--magenta textarea:focus {
+  border-color: var(--neon-magenta);
+  box-shadow: 0 0 0 1px var(--neon-magenta), 0 0 14px rgba(255, 0, 204, 0.25);
+}
+
+.submit-form__field--orange input:focus,
+.submit-form__field--orange select:focus,
+.submit-form__field--orange textarea:focus {
+  border-color: var(--neon-orange);
+  box-shadow: 0 0 0 1px var(--neon-orange), 0 0 14px rgba(255, 102, 0, 0.25);
+}
