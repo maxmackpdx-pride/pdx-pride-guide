@@ -216,7 +216,7 @@ export default function Gifting() {
       <BoardStatsBar stats={stats} />
 
       <ScrollReveal>
-        <section id="how-it-works" className="gifting-how board-how board-how--inline">
+        <section id="how-it-works" className="gifting-how board-how">
           <div>
             <span className="board-sticker board-sticker--cyan">How it works</span>
             <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
