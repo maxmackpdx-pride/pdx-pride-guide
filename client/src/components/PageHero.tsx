@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 export type PageHeroAccent = "lime" | "magenta" | "rainbow" | "cyan";
 
+type PageHeroTaglineAccent = "magenta" | "cyan" | "lime";
+
 type PageHeroProps = {
   kicker: string;
   titleLine1: string;
@@ -9,6 +11,7 @@ type PageHeroProps = {
   accent?: PageHeroAccent;
   lede: string;
   tagline?: string;
+  taglineAccent?: PageHeroTaglineAccent;
   actions?: ReactNode;
   bgImage: string;
   bgPosition?: string;
@@ -21,6 +24,7 @@ export default function PageHero({
   accent = "lime",
   lede,
   tagline,
+  taglineAccent = "magenta",
   actions,
   bgImage,
   bgPosition = "center",
@@ -44,7 +48,9 @@ export default function PageHero({
             )}
           </h1>
           <p className="page-hero__lede">{lede}</p>
-          {tagline && <p className="page-hero__tagline">{tagline}</p>}
+          {tagline && (
+            <p className={`page-hero__tagline page-hero__tagline--${taglineAccent}`}>{tagline}</p>
+          )}
           {actions && <div className="page-hero__actions">{actions}</div>}
         </div>
       </div>

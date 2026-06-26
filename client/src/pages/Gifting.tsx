@@ -168,6 +168,7 @@ export default function Gifting() {
         accent="rainbow"
         lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home."
         tagline="Give gay gifts. Queer homes. Keep it moving."
+        taglineAccent="cyan"
         bgImage="/gift-with-pride-hero.jpg"
         actions={
           <>

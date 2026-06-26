@@ -125,6 +125,7 @@ export default function PrideWork() {
         accent="lime"
         lede="Community-powered job board for Pride weekend and beyond. Queer workers, queer employers, queer gigs."
         tagline="Paid, respected, valued."
+        taglineAccent="lime"
         bgImage="/motifs/hero-gigs.jpg"
         actions={
           <>
