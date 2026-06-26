@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsHero from "@/components/MissedConnectionsHero";
 import MissedConnectionsPanel, { type MissedConnectionPost } from "@/components/MissedConnectionsPanel";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export default function MissedConnections() {
   const { user } = useAuth();
@@ -82,9 +83,12 @@ export default function MissedConnections() {
     <div className="zine-page missed-page board-page min-h-screen">
       <MissedConnectionsHero />
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "32px 24px 48px" }}>
-        <MissedConnectionsPanel mode="board" />
+        <ScrollReveal>
+          <MissedConnectionsPanel mode="board" />
+        </ScrollReveal>
 
         {myPosts.filter(p => p.status === "ACTIVE").length > 0 && (
+          <ScrollReveal delay={80}>
           <section style={{ marginTop: 36, paddingTop: 24, borderTop: "1px solid #222" }}>
             <h2 className="display" style={{ color: "#FF00CC", fontSize: "1.1rem", marginBottom: 14 }}>YOUR ACTIVE POSTS</h2>
             <div style={{ display: "grid", gap: 10 }}>
@@ -104,6 +108,7 @@ export default function MissedConnections() {
               ))}
             </div>
           </section>
+          </ScrollReveal>
         )}
       </div>
 

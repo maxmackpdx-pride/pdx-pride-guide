@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
+import PageHero from "@/components/PageHero";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 
@@ -125,16 +127,19 @@ export default function Submit() {
   const step2Label = mode === "claim" ? "Claim Details" : "Event Details";
 
   return (
-    <div className="submit-page">
+    <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <div className="sticker" style={{ color: "var(--neon-cyan)", borderColor: "var(--neon-cyan)", marginBottom: 16 }}>Promoters &amp; Organizers</div>
-      <h1 className="display page-hero-title" style={{ marginBottom: 8 }}>
-        {mode === "submit" ? "SUBMIT AN EVENT" : "CLAIM AN EVENT"}
-      </h1>
-      <p style={{ color: "var(--text-meta)", marginBottom: 24, lineHeight: 1.6 }}>
-        Log in or create an account first. Submissions and claims stay tied to your dashboard while admins review them.
-      </p>
+      <PageHero
+        kicker="PROMOTERS & ORGANIZERS"
+        titleLine1={mode === "submit" ? "SUBMIT" : "CLAIM"}
+        titleLine2="AN EVENT"
+        accent={mode === "submit" ? "lime" : "cyan"}
+        lede="Log in or create an account first. Submissions and claims stay tied to your dashboard while admins review them."
+        bgImage="/motifs/portland-sign.jpg"
+        bgPosition="center 38%"
+      />
 
+      <div className="submit-page__body">
       <div className="submit-form__steps" aria-label="Form progress">
         <span className={`submit-form__step ${activeStep === 1 ? "active" : activeStep > 1 ? "done" : ""}`}>Your Info</span>
         <span className="submit-form__step-arrow">→</span>
@@ -178,6 +183,7 @@ export default function Submit() {
         if (mode === "submit" && !canSubmitNew) return;
         mutation.mutate(form);
       }} style={{ display: "flex", flexDirection: "column", gap: 20, opacity: user ? 1 : 0.6 }}>
+        <ScrollReveal>
         <section ref={infoRef}>
           <div className="display" style={sectionHeadStyle}>YOUR INFO</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -190,7 +196,9 @@ export default function Submit() {
             ))}
           </div>
         </section>
+        </ScrollReveal>
 
+        <ScrollReveal delay={40}>
         <section ref={detailsRef}>
           {mode === "claim" && (
             <>
@@ -315,8 +323,9 @@ export default function Submit() {
             </div>
           </>}
         </section>
+        </ScrollReveal>
 
-        {mode === "submit" && <section>
+        {mode === "submit" && <ScrollReveal delay={60}><section>
           <div className="display" style={sectionHeadStyle}>EVENT TYPES</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {EVENT_TYPES.map(t => (
@@ -324,9 +333,9 @@ export default function Submit() {
                 className={`filter-tag ${form.selectedTypes.includes(t) ? "active" : ""}`}>{t}</button>
             ))}
           </div>
-        </section>}
+        </section></ScrollReveal>}
 
-        {mode === "submit" && <section>
+        {mode === "submit" && <ScrollReveal delay={80}><section>
           <div className="display" style={sectionHeadStyle}>EVENT FLAGS</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             <EventTypeTag
@@ -369,8 +378,9 @@ export default function Submit() {
               </div>
             </div>
           )}
-        </section>}
+        </section></ScrollReveal>}
 
+        <ScrollReveal delay={100}>
         <section ref={reviewRef}>
           <div className="display" style={sectionHeadStyle}>REVIEW</div>
           <p style={{ color: "#888", fontSize: "0.84rem", lineHeight: 1.6, marginBottom: 16 }}>
@@ -389,7 +399,9 @@ export default function Submit() {
           </button>
           <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>All submissions are reviewed before going live.</p>
         </section>
+        </ScrollReveal>
       </form>
+      </div>
     </div>
   );
 }

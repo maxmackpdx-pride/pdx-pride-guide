@@ -4,6 +4,8 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import PageHero from "@/components/PageHero";
+import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import { counterpartyAvatar, senderAvatar } from "@/lib/inboxAvatar";
 import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTalent";
@@ -202,23 +204,20 @@ export default function Inbox() {
   };
 
   return (
-    <div style={{ background: "#000", minHeight: "100vh" }}>
-      <div className="inbox-hero parallax-container">
-        <div style={{ maxWidth: 980, margin: "0 auto", padding: "42px 24px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, position: "relative", zIndex: 1 }}>
-            <div>
-              <h1 className="display page-hero-title" style={{ color: "#CCFF00" }}>INBOX</h1>
-              <p style={{ color: "#bbb", fontSize: "0.9rem", marginTop: 6, maxWidth: 560 }}>
-                Private threads from missed connections, Pride Work posts, event hosts, and check-ins.
-              </p>
-            </div>
-            {unreadCount > 0 && (
-              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", background: "rgba(0,0,0,0.65)" }}>{unreadCount} UNREAD</span>
-            )}
-          </div>
-        </div>
-      </div>
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "28px 24px 48px" }}>
+    <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
+      <PageHero
+        kicker="PRIVATE THREADS"
+        titleLine1="INBOX"
+        accent="lime"
+        lede="Private threads from missed connections, Pride Work posts, event hosts, and check-ins."
+        bgImage="/motifs/hero-inbox.jpg"
+        bgPosition="center 35%"
+        actions={unreadCount > 0 ? (
+          <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>{unreadCount} UNREAD</span>
+        ) : undefined}
+      />
+      <ScrollReveal>
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "28px 24px 48px", position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
           {(["inbox", "sent"] as const).map(t => (
             <button key={t} onClick={() => { setTab(t); setActiveThread(null); }} style={{
@@ -403,6 +402,7 @@ export default function Inbox() {
           )}
         </div>
       </div>
+      </ScrollReveal>
     </div>
   );
 }

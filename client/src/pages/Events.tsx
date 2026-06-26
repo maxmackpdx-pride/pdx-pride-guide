@@ -8,7 +8,9 @@ import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeT
 import { EventTypeTagList } from "../components/EventTypeTag";
 import EventTagsRow from "../components/EventTagsRow";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
+import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
@@ -522,8 +524,17 @@ export default function Events() {
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
   return (
-    <div className="zine-page events-page">
-      {/* Map — always visible at top, half-height by default */}
+    <div className="zine-page events-page board-page">
+      <PageHero
+        kicker="PRIDE WEEKEND 2026"
+        titleLine1="EVENTS"
+        titleLine2="MAP & GUIDE"
+        accent="cyan"
+        lede="Every party, brunch, protest, and after-hours happening Thu–Sun. Filter by day, pin it on the map, and show up."
+        bgImage="/motifs/portland-sign.jpg"
+        bgPosition="center 42%"
+      />
+
       <MapView
         events={filtered}
         expanded={mapExpanded}
@@ -647,21 +658,23 @@ export default function Events() {
 
       {/* Events listing */}
       <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
-        <div className="events-count-row">
-          <div className="events-count-banner">
-            <MapPin size={13} />
-            <span>{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
-            {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
+        <ScrollReveal>
+          <div className="events-count-row">
+            <div className="events-count-banner">
+              <MapPin size={13} />
+              <span>{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
+              {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
+            </div>
+            {activeFilters.length > 0 && (
+              <button
+                onClick={() => setActiveFilters([])}
+                style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
+              >
+                CLEAR FILTERS ×
+              </button>
+            )}
           </div>
-          {activeFilters.length > 0 && (
-            <button
-              onClick={() => setActiveFilters([])}
-              style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
-            >
-              CLEAR FILTERS ×
-            </button>
-          )}
-        </div>
+        </ScrollReveal>
 
         {isLoading ? (
           <BoardLoadingState label="Loading events" />
@@ -703,13 +716,15 @@ export default function Events() {
           </div>
         )}
 
-        <div className="zine-callout events-submit-callout" style={{ marginTop: 60, textAlign: "center", padding: "36px 20px" }}>
-          <div className="display" style={{ fontSize: "1.3rem", marginBottom: 6 }}>NOT SEEING YOUR EVENT?</div>
-          <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
-            Submit it or claim an existing listing.
+        <ScrollReveal delay={60}>
+          <div className="zine-callout events-submit-callout" style={{ marginTop: 60, textAlign: "center", padding: "36px 20px" }}>
+            <div className="display" style={{ fontSize: "1.3rem", marginBottom: 6 }}>NOT SEEING YOUR EVENT?</div>
+            <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
+              Submit it or claim an existing listing.
+            </div>
+            <a href="#/submit" className="btn-neon solid">Get Started →</a>
           </div>
-          <a href="#/submit" className="btn-neon solid">Get Started →</a>
-        </div>
+        </ScrollReveal>
       </div>
 
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
