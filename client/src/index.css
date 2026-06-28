@@ -3029,7 +3029,6 @@ h2.display,
 
 .user-avatar[data-ring]:not([data-ring="none"])::before {
   opacity: 1;
-  box-shadow: 0 0 10px rgba(204, 255, 0, 0.22), 0 0 18px rgba(0, 255, 255, 0.12);
 }
 
 .user-avatar__inner {
@@ -3130,19 +3129,23 @@ h2.display,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border: 2px solid var(--neon-yellow);
+  padding: 0;
+  border: none;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.88);
-  box-shadow: 4px 4px 0 rgba(255, 0, 204, 0.5);
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: opacity 0.12s;
 }
 
 .site-profile-menu__trigger:hover,
 .site-profile-menu__trigger[aria-expanded="true"] {
-  border-color: var(--neon-cyan);
-  box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.4);
+  opacity: 0.9;
+}
+
+.site-profile-menu__trigger:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
 }
 
 .site-profile-menu__trigger .user-avatar {
