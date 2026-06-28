@@ -19,6 +19,9 @@ type PageHeroProps = {
   bgPosition?: string;
   /** Left-aligned hero on the photo scrim (Gifting / Gigs template). */
   flush?: boolean;
+  /** Shorter hero for home promo panels (75% of default height). */
+  compact?: boolean;
+  className?: string;
 };
 
 export default function PageHero({
@@ -34,9 +37,18 @@ export default function PageHero({
   bgImage,
   bgPosition = "center",
   flush = false,
+  compact = false,
+  className = "",
 }: PageHeroProps) {
+  const classes = [
+    "page-hero",
+    flush && "page-hero--flush",
+    compact && "page-hero--compact",
+    className,
+  ].filter(Boolean).join(" ");
+
   return (
-    <section className={`page-hero${flush ? " page-hero--flush" : ""}`}>
+    <section className={classes}>
       <div
         className="page-hero__bg"
         aria-hidden="true"

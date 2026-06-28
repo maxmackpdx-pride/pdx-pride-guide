@@ -5,8 +5,9 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import { MapView } from "./Events";
-import { Gift, Search } from "lucide-react";
+import { Briefcase, Gift, Search, UserRound } from "lucide-react";
 import GlitchWord from "@/components/GlitchWord";
+import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 const skylineImg = "/home-hero-desktop.jpg";
 
@@ -223,43 +224,67 @@ export default function Home() {
       <section className="home-promo-stack">
         <div className="torn-divider full-bleed" />
         <ScrollReveal>
-          <article className="home-promo-panel home-gifting-panel">
-            <div className="home-promo-inner">
-              <div className="home-promo-panel-card">
-                <span className="board-sticker board-sticker--magenta">Gift with Pride</span>
-                <h2 className="home-promo-title">
-                  <span className="home-promo-title-line">GIFT WITH</span>
-                  <span className="home-promo-accent home-promo-accent--rainbow">PRIDE</span>
-                </h2>
-                <p className="home-promo-tagline home-promo-tagline--magenta">Give gay gifts. Queer homes. Keep it moving.</p>
-                <p className="home-promo-lede">A Pride-season board for giving away what you do not need and asking for what you do.</p>
-                <div className="gifting-actions">
-                  <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
-                  <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an In Search Of</button></Link>
-                </div>
-              </div>
-            </div>
-          </article>
+          <PageHero
+            className="home-promo-panel home-gifting-panel"
+            compact
+            flush
+            kicker="Pride season only · Now through July 26"
+            titleLine1="GIFT WITH"
+            titleLine2="PRIDE"
+            accent="rainbow"
+            lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home."
+            tagline="Give gay gifts. Queer homes. Keep it moving."
+            taglineAccent="magenta"
+            bgImage="/gift-with-pride-hero.jpg"
+            actions={
+              <>
+                <Link href="/gifting"><button type="button" className="btn-neon"><Gift size={16} /> Post a gift</button></Link>
+                <Link href="/gifting"><button type="button" className="btn-neon cyan"><Search size={16} /> Post an in search of</button></Link>
+              </>
+            }
+          />
         </ScrollReveal>
         <div className="torn-divider full-bleed" />
         <ScrollReveal delay={120}>
-          <article className="home-promo-panel home-gigs-panel">
-            <div className="home-promo-inner">
-              <div className="home-promo-panel-card">
-                <span className="board-sticker board-sticker--lime">Pride Work</span>
-                <h2 className="home-promo-title">
-                  <span className="home-promo-title-line">PRIDE</span>
-                  <span className="home-promo-accent home-promo-accent--lime">GIG BOARD</span>
-                </h2>
-                <p className="home-promo-tagline home-promo-tagline--cyan">Paid, respected, valued.</p>
-                <p className="home-promo-lede">Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
-                <div className="gifting-actions">
-                  <Link href="/pride-work"><button className="btn-neon"><Search size={16} /> Find Work</button></Link>
-                  <Link href="/pride-work"><button className="btn-neon cyan"><Gift size={16} /> Post a Gig</button></Link>
-                </div>
-              </div>
-            </div>
-          </article>
+          <PageHero
+            className="home-promo-panel home-gigs-panel"
+            compact
+            flush
+            kicker="Pride season & beyond"
+            titleLine1="PRIDE"
+            titleLine1Accent="rainbow"
+            titleLine2="GIG BOARD"
+            accent="lime"
+            lede="Two-way board for Pride season and beyond. Post your availability, post a gig, or browse both. Workers and hosts in one place."
+            tagline="Need work? Need help? Both belong here."
+            taglineAccent="cyan"
+            bgImage="/motifs/hero-gigs.jpg"
+            actions={
+              <>
+                <Link href="/pride-work"><button type="button" className="btn-neon cyan"><UserRound size={16} /> Post your availability</button></Link>
+                <Link href="/pride-work"><button type="button" className="btn-neon"><Briefcase size={16} /> Post a gig</button></Link>
+              </>
+            }
+          />
+        </ScrollReveal>
+        <div className="torn-divider full-bleed" />
+        <ScrollReveal delay={180}>
+          <PageHero
+            className="home-promo-panel home-spotted-panel"
+            compact
+            kicker="Spotted & seeking · Pride weekend"
+            titleLine1="MISSED"
+            titleLine2="CONNECTIONS"
+            accent="magenta"
+            lede="Post a short note from Pride weekend. Replies never appear on the board; they open a private two-way inbox thread."
+            tagline="Anonymous until you both reveal."
+            taglineAccent="magenta"
+            bgImage="/motifs/hero-missed-connections.jpg"
+            bgPosition="center 35%"
+            actions={
+              <Link href="/spotted"><button type="button" className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>Go to Spotted! →</button></Link>
+            }
+          />
         </ScrollReveal>
         <div className="torn-divider full-bleed" />
       </section>

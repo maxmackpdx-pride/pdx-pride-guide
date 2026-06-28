@@ -323,7 +323,7 @@ export default function Admin() {
         <div className="w-full max-w-sm" style={{ background: "#0d0d0d", border: "2px solid #C8FA3C", borderRadius: 16, padding: 32 }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <Lock size={28} style={{ color: "#C8FA3C", margin: "0 auto 16px" }} />
-            <h1 className="dash-anton dash-admin-title" style={{ fontSize: 36 }}>Admin</h1>
+            <h1 className="dash-anton dash-admin-title">Admin</h1>
             <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginTop: 6 }}>PDX Pride Guide</p>
           </div>
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>

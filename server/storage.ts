@@ -227,6 +227,8 @@ sqlite.exec(`
 `);
 
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
+let gigPostsLegacyCols = false;
+
 function ensureGigPostsSchema() {
   const table = sqlite.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'gig_posts'`).get();
   if (!table) return;
@@ -252,8 +254,65 @@ function ensureGigPostsSchema() {
 
   const finalColumns = sqlite.prepare(`PRAGMA table_info(gig_posts)`).all() as Array<{ name: string }>;
   console.log("[gig_posts] schema columns:", finalColumns.map((c) => c.name).join(", "));
+  gigPostsLegacyCols = finalColumns.some(c => c.name === "type") && finalColumns.some(c => c.name === "role");
 }
 ensureGigPostsSchema();
+
+function legacyGigRole(postType: string) {
+  return postType === "LOOKING_FOR_WORK" ? "Talent" : "Gig";
+}
+
+function mapGigPostRow(row: Record<string, unknown>): GigPost {
+  return {
+    id: row.id as number,
+    postType: String(row.post_type ?? row.type ?? "POSTING_GIG"),
+    title: row.title as string,
+    name: row.name as string,
+    contactEmail: row.contact_email as string,
+    description: row.description as string,
+    skills: (row.skills as string | null) ?? null,
+    compensation: (row.compensation as string | null) ?? null,
+    location: (row.location as string | null) ?? null,
+    isRemote: Boolean(row.is_remote),
+    status: row.status as string,
+    createdAt: row.created_at as string,
+    userId: (row.user_id as number | null) ?? null,
+    imageUrl: (row.image_url as string | null) ?? null,
+    gigDate: (row.gig_date as string | null) ?? null,
+    gigTime: (row.gig_time as string | null) ?? null,
+  };
+}
+
+function insertGigPostCompat(payload: InsertGigPost & { status: string; createdAt: string }): GigPost {
+  if (gigPostsLegacyCols) {
+    const result = sqlite.prepare(`
+      INSERT INTO gig_posts (
+        type, role, post_type, title, name, contact_email, description,
+        skills, compensation, location, is_remote, status, created_at, user_id
+      ) VALUES (
+        @postType, @role, @postType, @title, @name, @contactEmail, @description,
+        @skills, @compensation, @location, @isRemote, @status, @createdAt, @userId
+      )
+    `).run({
+      postType: payload.postType,
+      role: legacyGigRole(payload.postType),
+      title: payload.title,
+      name: payload.name,
+      contactEmail: payload.contactEmail,
+      description: payload.description,
+      skills: payload.skills ?? null,
+      compensation: payload.compensation ?? null,
+      location: payload.location ?? null,
+      isRemote: payload.isRemote ? 1 : 0,
+      status: payload.status,
+      createdAt: payload.createdAt,
+      userId: payload.userId ?? null,
+    });
+    const row = sqlite.prepare(`SELECT * FROM gig_posts WHERE id = ?`).get(result.lastInsertRowid) as Record<string, unknown>;
+    return mapGigPostRow(row);
+  }
+  return db.insert(gigPosts).values(payload as any).returning().get();
+}
 
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e) {}
@@ -1210,13 +1269,13 @@ function seedData() {
   }
 
   // Seed one real-looking gig (LOOKING_FOR_WORK only — let real users post gigs)
-  db.insert(gigPosts).values({
+  insertGigPostCompat({
     postType: "LOOKING_FOR_WORK", title: "Sound Tech & DJ Available Pride Weekend",
     name: "DJ Queerwave", contactEmail: "djqueerwave@example.com",
     description: "Portland-based DJ and sound tech. Experienced in queer nightlife, house, and techno. Available July 16–19. Hit me up!",
     skills: "DJ, Sound Tech, Lighting", compensation: "Negotiable", location: "Portland, OR",
     isRemote: false, status: "LIVE", createdAt: now,
-  } as any).run();
+  });
 }
 
 function applyVerifiedEventOverrides() {
@@ -1457,7 +1516,6 @@ function applyVerifiedEventOverrides() {
 seedData();
 applyVerifiedEventOverrides();
 removeGiftingSeedPosts();
-ensureSiteAdminGigPost();
 
 function archiveExpiredMissedConnections() {
   const now = new Date().toISOString();
@@ -1567,9 +1625,11 @@ function ensureSiteAdminGigPost() {
       id: existing.id,
     });
   } else {
-    db.insert(gigPosts).values(payload as any).run();
+    insertGigPostCompat(payload);
   }
 }
+
+ensureSiteAdminGigPost();
 
 function removeGiftingSeedPosts() {
   sqlite.prepare(`
@@ -1859,7 +1919,7 @@ export const storage: IStorage = {
     return rows;
   },
   createGigPost(data) {
-    return db.insert(gigPosts).values({ ...data, status: "LIVE", createdAt: new Date().toISOString() }).returning().get();
+    return insertGigPostCompat({ ...data, status: "LIVE", createdAt: new Date().toISOString() });
   },
   getGigPostsByUser(userId) {
     return db.select().from(gigPosts).where(eq(gigPosts.userId, userId)).all();

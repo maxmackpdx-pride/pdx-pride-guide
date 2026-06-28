@@ -249,12 +249,15 @@ export default function Dashboard() {
   return (
     <div className="zine-page dash-page board-page">
       <PageHero
+        flush
+        compact
         kicker="YOUR HUB · PROFILE & BOARDS"
         titleLine1="YOUR"
         titleLine2="DASHBOARD"
         accent="cyan"
         lede="Manage your profile, inbox, claimed events, gig posts, gifting listings, missed connections, and check-ins — everything you touch on PDX Pride Guide lives here."
         tagline={`@${user.username} · profile · events · inbox · submissions`}
+        taglineAccent="cyan"
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
       />

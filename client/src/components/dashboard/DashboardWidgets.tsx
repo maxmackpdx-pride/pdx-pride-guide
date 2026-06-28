@@ -2,22 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
 import { parsePacificEventTime, useCountdown } from "@/lib/countdown";
-import { fetchPortlandWeather } from "@/lib/portlandWeather";
-
-const FALLBACK_WEATHER = {
-  currentTemp: 72,
-  condition: "Clear",
-  high: 78,
-  low: 59,
-  caption: "H 78° · L 59° · Forecast unavailable",
-  forecast: [
-    { day: "FRI", high: 74, highlight: false },
-    { day: "SAT", high: 79, highlight: true },
-    { day: "SUN", high: 71, highlight: false },
-  ],
-  sunGradient: "radial-gradient(circle,#FFED00,#FF8C00)",
-  sunGlow: "0 0 24px rgba(255,140,0,.6)",
-};
+import { fetchPortlandWeather, isAfterPrideWeekend } from "@/lib/portlandWeather";
 
 export default function DashboardWidgets() {
   const { data: events = [] } = useQuery<Event[]>({
@@ -25,11 +10,14 @@ export default function DashboardWidgets() {
     queryFn: () => fetch("/api/events").then(r => r.json()),
   });
 
-  const { data: weather = FALLBACK_WEATHER, isError: weatherError } = useQuery({
-    queryKey: ["portland-weather"],
+  const showPrideWeather = !isAfterPrideWeekend();
+
+  const { data: weather, isError: weatherError } = useQuery({
+    queryKey: ["portland-weather", "pride-weekend-2026"],
     queryFn: fetchPortlandWeather,
     staleTime: 1000 * 60 * 30,
     retry: 1,
+    enabled: showPrideWeather,
   });
 
   const prideTarget = useMemo(() => {
@@ -54,67 +42,69 @@ export default function DashboardWidgets() {
 
   return (
     <div className="dash-widget-stack">
-      <section className="dash-weather">
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
-                Portland, OR
+      {showPrideWeather && weather && (
+        <section className="dash-weather">
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
+                  Pride Weekend · Jul 16–19
+                </div>
+                {(weatherError || weather.isEstimate) && (
+                  <span
+                    className="dash-mono"
+                    style={{
+                      fontSize: 9,
+                      color: "#0a0a0a",
+                      background: weatherError ? "rgba(255,255,255,0.55)" : "rgba(255,237,0,0.85)",
+                      padding: "3px 7px",
+                      borderRadius: 999,
+                      letterSpacing: "0.12em",
+                    }}
+                  >
+                    {weatherError ? "Offline" : "Estimate"}
+                  </span>
+                )}
               </div>
-              {weatherError && (
-                <span
-                  className="dash-mono"
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
+                <span className="dash-weather-temp">{weather.currentTemp}°</span>
+                <span className="dash-anton" style={{ fontSize: 16, color: "var(--dash-orange)" }}>{weather.condition}</span>
+              </div>
+              <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 8, textTransform: "none", letterSpacing: "0.04em" }}>
+                {weather.caption}
+              </div>
+            </div>
+            <div style={{ position: "relative", width: 48, height: 48, flex: "0 0 auto" }}>
+              <span
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "50%",
+                  background: weather.sunGradient,
+                  boxShadow: weather.sunGlow,
+                }}
+              />
+            </div>
+          </div>
+          <div className="dash-weather-forecast">
+            {weather.forecast.map(day => (
+              <div key={day.day} className="dash-weather-day">
+                <div className="dash-mono" style={{ fontSize: 9.5, color: "#6f736c" }}>{day.day}</div>
+                <div
+                  className="dash-anton"
                   style={{
-                    fontSize: 9,
-                    color: "#0a0a0a",
-                    background: "rgba(255,255,255,0.55)",
-                    padding: "3px 7px",
-                    borderRadius: 999,
-                    letterSpacing: "0.12em",
+                    fontSize: 16,
+                    color: day.highlight ? "#FFED00" : "#fff",
+                    marginTop: 3,
                   }}
                 >
-                  Offline
-                </span>
-              )}
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
-              <span className="dash-weather-temp">{weather.currentTemp}°</span>
-              <span className="dash-anton" style={{ fontSize: 16, color: "var(--dash-orange)" }}>{weather.condition}</span>
-            </div>
-            <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 8, textTransform: "none", letterSpacing: "0.04em" }}>
-              {weather.caption}
-            </div>
-          </div>
-          <div style={{ position: "relative", width: 48, height: 48, flex: "0 0 auto" }}>
-            <span
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background: weather.sunGradient,
-                boxShadow: weather.sunGlow,
-              }}
-            />
-          </div>
-        </div>
-        <div className="dash-weather-forecast">
-          {weather.forecast.map(day => (
-            <div key={day.day} className="dash-weather-day">
-              <div className="dash-mono" style={{ fontSize: 9.5, color: "#6f736c" }}>{day.day}</div>
-              <div
-                className="dash-anton"
-                style={{
-                  fontSize: 16,
-                  color: day.highlight ? "#FFED00" : "#fff",
-                  marginTop: 3,
-                }}
-              >
-                {day.high}°
+                  {day.high}°
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="dash-countdown">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>

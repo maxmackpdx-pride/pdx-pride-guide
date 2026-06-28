@@ -96,10 +96,9 @@
 
 .dash-title {
   margin: 0;
-  font-size: clamp(34px, 5vw, 58px);
-  line-height: 0.92;
+  font-size: 24px;
+  line-height: 1.1;
   color: var(--dash-lime);
-  text-shadow: 0 0 28px rgba(200, 250, 60, 0.35);
 }
 
 .dash-subtitle {
@@ -545,9 +544,9 @@
 
 .dash-admin-title {
   margin: 0;
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: 22px;
+  line-height: 1.1;
   color: var(--dash-lime);
-  text-shadow: 0 0 24px rgba(200, 250, 60, 0.3);
 }
 
 .dash-admin-tabs {
