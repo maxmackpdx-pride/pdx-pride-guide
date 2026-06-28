@@ -2347,11 +2347,68 @@ h2.display,
   background: linear-gradient(180deg, #16101c, #0c0c0c);
 }
 
+.gifting-page .gifting-how {
+  padding: clamp(28px, 4vw, 52px) 20px;
+}
+
+.gifting-page .gifting-how .section-heading {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 0.92;
+  font-weight: 700;
+}
+
+.gifting-page .gifting-how .board-copy {
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9375rem;
+}
+
+.gifting-page .board-how--inline .board-steps {
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+
+.gifting-page .board-how--inline .board-step {
+  gap: 10px;
+  padding: 8px 10px;
+  min-height: 0;
+  background: #fff;
+  color: #060606;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 3px 3px 0 rgba(25, 227, 255, 0.55);
+  transform: none;
+}
+
+.gifting-page .board-how--inline .board-step:nth-child(even) {
+  box-shadow: 3px 3px 0 rgba(255, 31, 160, 0.55);
+  transform: none;
+}
+
+.gifting-page .board-how--inline .board-step h3,
+.gifting-page .board-how--inline .board-step .panel-heading {
+  min-width: 96px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #060606;
+}
+
+.gifting-page .board-how--inline .board-step p {
+  font-size: 12px;
+  font-weight: 700;
+  color: #060606;
+  line-height: 1.4;
+}
+
 .gifting-page .board-how--inline .board-step__num {
   position: static;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 800;
   border-radius: 0;
   -webkit-text-stroke: 0;
   text-shadow: none;
@@ -2365,6 +2422,10 @@ h2.display,
 .gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num {
   background: #ff1fa0;
   color: #0a0a0a;
+}
+
+.gifting-page .gifting-how .gifting-footer-line {
+  margin-top: 16px;
 }
 
 .board-page .gigs-how {
