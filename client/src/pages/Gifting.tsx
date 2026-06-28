@@ -195,6 +195,10 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page">
+      {/* TEST-BANNER-REMOVE-ME */}
+      <div style={{ background: "#0044FF", color: "#fff", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
+        TEST BANNER — GIFTING — SAFE TO REMOVE
+      </div>
       <PageHero
         kicker="Pride season only · Now through July 26"
         titleLine1="GIFT WITH"

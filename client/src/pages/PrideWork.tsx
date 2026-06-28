@@ -127,6 +127,10 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page">
+      {/* TEST-BANNER-REMOVE-ME */}
+      <div style={{ background: "#8800FF", color: "#fff", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
+        TEST BANNER — GIGS — SAFE TO REMOVE
+      </div>
       <PageHero
         kicker="Pride season & beyond"
         titleLine1="PRIDE"
@@ -155,7 +159,7 @@ export default function PrideWork() {
       <BoardStatsBar stats={stats} liveLabel="Queer work board · live" />
 
       <ScrollReveal>
-        <section id="how-it-works" className="gigs-how board-how">
+        <section id="how-it-works" className="gigs-how board-how board-how--inline">
           <div>
             <span className="board-sticker board-sticker--cyan">How it works</span>
             <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>

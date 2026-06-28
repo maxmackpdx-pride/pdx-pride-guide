@@ -1,13 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
-
-import EventTicker from "@/components/EventTicker";
-import HeroAurora from "@/components/HeroAurora";
-import ScrollReveal from "@/components/ScrollReveal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
 const skylineImg = "/home-hero-desktop.jpg";
@@ -34,61 +30,11 @@ function useCountdown(target: number | null) {
   return { days, hours, minutes, seconds };
 }
 
-// Squarespace-style parallax: backgrounds drift slower than scroll on
-// alternating home panels (hero + gifting panel; map preview + gigs
-// panel stay static). Respects prefers-reduced-motion.
-function useHomeParallax() {
-  const heroRef = useRef<HTMLElement>(null);
-  const giftingRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) return;
-
-    const nodes = [heroRef.current, giftingRef.current].filter(
-      (node): node is HTMLElement => Boolean(node)
-    );
-    if (!nodes.length) return;
-
-    let rafId = 0;
-    const STRENGTH = 0.16;
-
-    const update = () => {
-      const vh = window.innerHeight;
-      for (const node of nodes) {
-        const rect = node.getBoundingClientRect();
-        const center = rect.top + rect.height / 2;
-        const offset = (center - vh / 2) * STRENGTH;
-        node.style.setProperty("--parallax-y", `${offset}px`);
-      }
-      rafId = 0;
-    };
-
-    const onScroll = () => {
-      if (!rafId) rafId = window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (rafId) window.cancelAnimationFrame(rafId);
-    };
-  }, []);
-
-  return { heroRef, giftingRef };
-}
-
 export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-
-  const { heroRef, giftingRef } = useHomeParallax();
+  const [mapExpanded, setMapExpanded] = useState(false);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
-    const host = window.location.hostname;
-    if (host === "localhost" || host === "127.0.0.1") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
   });
   const { data: events = [] } = useQuery<Event[]>({
@@ -103,19 +49,8 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const tickerItems = useMemo(() => {
-    const sorted = [...events].sort(
-      (a, b) => (parsePacificEventTime(a.dateStart) ?? 0) - (parsePacificEventTime(b.dateStart) ?? 0),
-    );
-    if (sorted.length === 0) {
-      return [
-        { id: "fallback-1", title: "Portland Pride Weekend" },
-        { id: "fallback-2", title: "View all events" },
-        { id: "fallback-3", title: "July 16–19, 2026" },
-      ];
-    }
-    return sorted.map(event => ({ id: event.id, title: event.title }));
-  }, [events]);
+  const eventNames = events.map(event => event.title).filter(Boolean);
+  const tickerItems = eventNames.length ? [...eventNames, ...eventNames] : [];
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -123,6 +58,10 @@ export default function Home() {
 
   return (
     <div className="zine-page home-page" style={{ background: "#000", minHeight: "100vh" }}>
+      {/* TEST-BANNER-REMOVE-ME */}
+      <div style={{ background: "#00EE44", color: "#000", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
+        TEST BANNER — HOME — SAFE TO REMOVE
+      </div>
       {showSoftLaunch && (
         <div
           role="dialog"
@@ -143,7 +82,7 @@ export default function Home() {
             width: "min(560px, 100%)",
             border: "3px solid var(--neon-yellow)",
             background: "#050505",
-            boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(0,255,255,0.18)",
+            boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(255,0,204,0.16)",
             padding: 24,
             position: "relative",
           }}>
@@ -155,11 +94,11 @@ export default function Home() {
             >
               X
             </button>
-            <span className="board-sticker" style={{ color: "#00FFFF", marginBottom: 14, display: "inline-block" }}>SOFTIE LAUNCH</span>
-            <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(1.4rem, 5.6vw, 2.8rem)", lineHeight: 0.95, marginBottom: 14 }}>
+            <div className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", marginBottom: 14 }}>SOFTIE LAUNCH</div>
+            <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}>
               WELCOME
             </h2>
-            <p style={{ color: "#bbb", fontSize: "0.7rem", lineHeight: 1.6, marginBottom: 18 }}>
+            <p style={{ color: "#bbb", fontSize: "1rem", lineHeight: 1.6, marginBottom: 18 }}>
               Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around, and please submit feedback at the bottom of the website if you run into any issue.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -172,39 +111,42 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
-        ref={heroRef}
         className="zine-hero home-hero"
         style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}
       >
-        <div className="home-hero-backdrop" aria-hidden="true">
-          <div
-            className="home-hero-bg-desktop"
-            style={{
-              position: "absolute",
-              top: "-8%",
-              bottom: "-8%",
-              left: 0,
-              right: 0,
-              backgroundImage: `url(${skylineImg})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center top",
-              backgroundRepeat: "no-repeat",
-              opacity: 0.9,
-              transform: "translateY(var(--parallax-y, 0px))",
-              willChange: "transform",
-            }}
-          />
-          <div className="home-hero-bg-collage" />
-          <div className="home-hero-bg-mobile" />
-          <HeroAurora />
-          <div className="home-hero-shade" />
-          <div className="home-hero-halftone" />
-          <div className="home-hero-watermark">LOVE<br />LOUDER</div>
-        </div>
+        <div
+          className="home-hero-bg-desktop"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url(${skylineImg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            backgroundRepeat: "no-repeat",
+            opacity: 0.9,
+          }}
+        />
+        <div className="home-hero-bg-mobile" aria-hidden="true" />
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0, opacity: 0.06,
+          backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
+          backgroundSize: "18px 18px",
+        }} />
+        <div style={{
+          position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
+          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(5rem, 14vw, 11rem)",
+          color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
+          userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
+        }}>LOVE<br />LOUDER</div>
+
 
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
-            <div className="home-hero-kicker">July 16–19, 2026</div>
+            <div className="home-hero-kicker">Portland Pride Weekend · July 16–19, 2026</div>
 
             <h1 className="display home-hero-title">
               PORTLAND<br />
@@ -242,7 +184,7 @@ export default function Home() {
                 </button>
               </Link>
               <Link href="/pride-work">
-                <button className="btn-neon home-hero-button cyan">
+                <button className="btn-neon home-hero-button" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>
                   PRIDE WORK →
                 </button>
               </Link>
@@ -250,41 +192,45 @@ export default function Home() {
           </div>
         </div>
 
-        <section className="event-ticker-band" aria-label="Live event ticker">
-          <Link href="/events" className="event-ticker-label">
-            LIVE EVENTS
-          </Link>
-          <EventTicker items={tickerItems} />
-        </section>
+        {tickerItems.length > 0 && (
+          <section className="event-ticker-band" aria-label="Live event ticker">
+            <Link href="/events" className="event-ticker-label">
+              LIVE EVENTS
+            </Link>
+            <div className="event-ticker-window">
+              <div className="event-ticker-track">
+                {tickerItems.map((name, i) => (
+                  <span className="event-ticker-item" key={`${name}-${i}`}>
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+        <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
-
-      <div className="torn-divider full-bleed" />
 
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
           events={events}
-          expanded={false}
-          onExpand={() => {}}
-          onCollapse={() => {}}
+          expanded={mapExpanded}
+          onExpand={() => setMapExpanded(true)}
+          onCollapse={() => setMapExpanded(false)}
           onSelect={setSelectedEvent}
           variant="home"
         />
       </section>
 
-      <div className="torn-divider full-bleed" />
-
       <section className="home-promo-stack">
-        <ScrollReveal>
-        <article ref={giftingRef} className="home-promo-panel home-gifting-panel">
+        <div className="torn-divider full-bleed" />
+        <article className="home-promo-panel home-gifting-panel">
           <div className="home-promo-inner">
-            <div className="home-promo-panel-card">
-              <span className="board-sticker board-sticker--lime">Free board</span>
-              <h2 className="home-promo-title">
-                <span className="home-promo-title-line">GIFT WITH</span>
-                <span className="home-promo-accent home-promo-accent--rainbow">PRIDE</span>
-              </h2>
-              <p className="home-promo-tagline home-promo-tagline--magenta">Give gay gifts. Queer homes. Keep it moving.</p>
-              <p className="home-promo-lede">A Pride-season board for giving away what you do not need and asking for what you do.</p>
+            <div className="home-promo-copy">
+              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>GIFT WITH PRIDE</span>
+              <h2 className="display">GIFTING</h2>
+              <p className="home-promo-tag">Give gay gifts. Queer homes. Keep it moving.</p>
+              <p>A Pride-season board for giving away what you do not need and asking for what you do.</p>
               <div className="gifting-actions">
                 <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
                 <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an In Search Of</button></Link>
@@ -292,19 +238,14 @@ export default function Home() {
             </div>
           </div>
         </article>
-        </ScrollReveal>
         <div className="torn-divider full-bleed" />
-        <ScrollReveal delay={120}>
         <article className="home-promo-panel home-gigs-panel">
           <div className="home-promo-inner">
-            <div className="home-promo-panel-card">
-              <span className="board-sticker board-sticker--cyan">Queer work</span>
-              <h2 className="home-promo-title">
-                <span className="home-promo-title-line">PRIDE</span>
-                <span className="home-promo-accent home-promo-accent--lime">GIG BOARD</span>
-              </h2>
-              <p className="home-promo-tagline home-promo-tagline--cyan">Paid, respected, valued.</p>
-              <p className="home-promo-lede">Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
+            <div className="home-promo-copy">
+              <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>PRIDE WORK</span>
+              <h2 className="display">GIG BOARD</h2>
+              <p className="home-promo-tag magenta">Paid, respected, valued.</p>
+              <p>Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
               <div className="gifting-actions">
                 <Link href="/pride-work"><button className="btn-neon"><Search size={16} /> Find Work</button></Link>
                 <Link href="/pride-work"><button className="btn-neon cyan"><Gift size={16} /> Post a Gig</button></Link>
@@ -312,7 +253,6 @@ export default function Home() {
             </div>
           </div>
         </article>
-        </ScrollReveal>
         <div className="torn-divider full-bleed" />
       </section>
 
