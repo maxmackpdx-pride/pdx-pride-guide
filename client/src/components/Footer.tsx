@@ -7,7 +7,7 @@ import { FeedbackButton } from "./FeedbackForm";
 export default function Footer() {
   const { user } = useAuth();
   return (
-    <footer style={{ background: "#000", borderTop: "2px solid #1a1a1a" }}>
+    <footer style={{ background: "#000" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between", marginBottom: 32 }}>
           <div>
@@ -50,7 +50,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="rainbow-bar rainbow-bar--bleed" style={{ marginBottom: 20 }} />
         <img src={logoPath} alt="" className="footer-brand-logo" />
         <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
           <FeedbackButton />
@@ -78,6 +77,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      <div className="rainbow-bar rainbow-bar--bleed rainbow-bar--thick" aria-hidden="true" />
     </footer>
   );
 }

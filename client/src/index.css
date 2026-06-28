@@ -53,6 +53,8 @@
   --font-board-mono: 'Inter', sans-serif;
   --site-header-height: 120px;
   --site-rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  --site-rainbow-bar-height: 2px;
+  --site-rainbow-bar-height-thick: 2.7px;
   --board-text: #f4f1ea;
   --board-muted: #bdbab2;
   --text-heading: #ffffff;
@@ -142,17 +144,22 @@ body::before {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -2px;
-  height: 2px;
+  bottom: calc(-1 * var(--site-rainbow-bar-height-thick));
+  height: var(--site-rainbow-bar-height-thick);
   background: var(--site-rainbow-bar);
   opacity: 0.8;
 }
 
 .rainbow-bar {
-  height: 2px;
+  height: var(--site-rainbow-bar-height);
   width: 100%;
   background: var(--site-rainbow-bar);
   opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.rainbow-bar--thick {
+  height: var(--site-rainbow-bar-height-thick);
 }
 
 .rainbow-bar--bleed {

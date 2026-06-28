@@ -58,6 +58,7 @@ export default function App() {
                 <Route component={NotFound} />
               </Switch>
             </main>
+            <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
             <Footer />
           </div>
           <Toaster />
