@@ -1457,6 +1457,7 @@ function applyVerifiedEventOverrides() {
 seedData();
 applyVerifiedEventOverrides();
 removeGiftingSeedPosts();
+ensureSiteAdminGigPost();
 
 function archiveExpiredMissedConnections() {
   const now = new Date().toISOString();
@@ -1496,6 +1497,78 @@ function expireGiftingPosts() {
     WHERE status IN ('OPEN','THREE_INTERESTED','POSTER_CHOOSING','LOOKING','OFFER_PENDING','REOPENED')
       AND datetime(expires_at) <= datetime('now')
   `).run();
+}
+
+export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+
+const SITE_ADMIN_GIG_DESCRIPTION = `PDX Pride Guide is looking for site admins to help during Pride season and beyond.
+
+What you would help with:
+• Review new event submissions and promoter claims before they go live
+• Approve or hold gifting posts when first-time posters need a check
+• Triage moderation requests and site feedback reports
+• Keep event listings accurate during Pride weekend crunch
+• Step in when something breaks or needs a human
+
+Volunteer community labor for now. Remote OK. Training and admin access provided for the right person.
+
+Reply to this post through the gig board (messages go to @tucker_pdmax). Include why you want to help and any relevant experience.`;
+
+function ensureSiteAdminGigPost() {
+  ensureGigPostsSchema();
+  const owner = sqlite.prepare(`
+    SELECT id, email, display_name AS displayName
+    FROM users
+    WHERE username = 'tucker_pdmax'
+    LIMIT 1
+  `).get() as { id: number; email: string; displayName: string | null } | undefined;
+  const now = new Date().toISOString();
+  const existing = sqlite.prepare(`SELECT id FROM gig_posts WHERE title = ? LIMIT 1`).get(SITE_ADMIN_GIG_TITLE) as { id: number } | undefined;
+  const payload = {
+    postType: "POSTING_GIG",
+    title: SITE_ADMIN_GIG_TITLE,
+    name: owner?.displayName || "Tucker",
+    contactEmail: owner?.email || "hello@pdxprideguide.com",
+    description: SITE_ADMIN_GIG_DESCRIPTION,
+    skills: "Moderation, Event review, Community support, Detail-oriented",
+    compensation: "Volunteer (stipend possible)",
+    location: "Portland / Remote",
+    isRemote: true,
+    status: "LIVE",
+    userId: owner?.id ?? null,
+    createdAt: now,
+  };
+
+  if (existing) {
+    sqlite.prepare(`
+      UPDATE gig_posts
+      SET post_type = @postType,
+          name = @name,
+          contact_email = @contactEmail,
+          description = @description,
+          skills = @skills,
+          compensation = @compensation,
+          location = @location,
+          is_remote = @isRemote,
+          status = @status,
+          user_id = COALESCE(@userId, user_id)
+      WHERE id = @id
+    `).run({
+      postType: payload.postType,
+      name: payload.name,
+      contactEmail: payload.contactEmail,
+      description: payload.description,
+      skills: payload.skills,
+      compensation: payload.compensation,
+      location: payload.location,
+      isRemote: payload.isRemote ? 1 : 0,
+      status: payload.status,
+      userId: payload.userId,
+      id: existing.id,
+    });
+  } else {
+    db.insert(gigPosts).values(payload as any).run();
+  }
 }
 
 function removeGiftingSeedPosts() {
@@ -1555,6 +1628,7 @@ export interface IStorage {
   updateGigPost(id: number, userId: number, data: Partial<GigPost>): void;
   deleteGigPost(id: number, userId: number): void;
   adminUpdateGigStatus(id: number, status: string): void;
+  ensureSiteAdminGigPost(): void;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -1821,6 +1895,9 @@ export const storage: IStorage = {
   },
   adminUpdateGigStatus(id: number, status: string) {
     sqlite.prepare(`UPDATE gig_posts SET status = ? WHERE id = ?`).run(status, id);
+  },
+  ensureSiteAdminGigPost() {
+    ensureSiteAdminGigPost();
   },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();

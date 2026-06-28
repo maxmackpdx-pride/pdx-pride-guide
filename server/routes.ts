@@ -247,6 +247,7 @@ function getAdminActorUserId(req: any): number | null {
 
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
+  storage.ensureSiteAdminGigPost();
 
   // Session middleware — persisted on the same SQLite volume as user data
   app.use(session({
@@ -724,6 +725,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (existingUsername) return res.status(409).json({ error: "Username already taken" });
 
       const user = storage.createUser({ username, email, passwordHash: password, displayName });
+      if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
       req.session.userId = user.id;
       res.json(authUserResponse(req, user));
     } catch (e: any) {
@@ -740,6 +742,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const hashed = hashPassword(password);
     if (user.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
     req.session.userId = user.id;
+    if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
     res.json(authUserResponse(req, user));
   });
 
@@ -854,6 +857,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
 
       req.session.userId = user.id;
+      if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
       markAdminSessionForUser(req, user);
       req.session.save((saveErr) => {
         if (saveErr) {
