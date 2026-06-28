@@ -2337,7 +2337,8 @@ h2.display,
 .board-sticker--magenta { color: var(--neon-magenta); border-color: var(--neon-magenta); }
 
 .board-page .gifting-how .section-heading,
-.board-page .gigs-how .section-heading {
+.board-page .gigs-how .section-heading,
+.board-page .missed-how .section-heading {
   font-size: clamp(2.125rem, 5.5vw, 3.625rem);
   line-height: 0.9;
 }
@@ -2351,42 +2352,49 @@ h2.display,
 }
 
 .board-page .gifting-how,
-.board-page .gigs-how {
+.board-page .gigs-how,
+.board-page .missed-how {
   border-bottom: 3px solid transparent;
   border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0) 1;
 }
 
-.board-page .gifting-how {
+.board-page .gifting-how,
+.board-page .missed-how {
   background: linear-gradient(180deg, #16101c, #0c0c0c);
 }
 
 .gifting-page .gifting-how,
-.gigs-page .gigs-how {
+.gigs-page .gigs-how,
+.missed-page .missed-how {
   padding: clamp(28px, 4vw, 52px) 20px;
 }
 
 .gifting-page .gifting-how .section-heading,
-.gigs-page .gigs-how .section-heading {
+.gigs-page .gigs-how .section-heading,
+.missed-page .missed-how .section-heading {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   line-height: 0.92;
   font-weight: 700;
 }
 
 .gifting-page .gifting-how .board-copy,
-.gigs-page .gigs-how .board-copy {
+.gigs-page .gigs-how .board-copy,
+.missed-page .missed-how .board-copy {
   margin-top: 0.75rem;
   margin-bottom: 1.25rem;
   font-size: 0.9375rem;
 }
 
 .gifting-page .board-how--inline .board-steps,
-.gigs-page .board-how--inline .board-steps {
+.gigs-page .board-how--inline .board-steps,
+.missed-page .board-how--inline .board-steps {
   gap: 8px 14px;
   margin-top: 12px;
 }
 
 .gifting-page .board-how--inline .board-step,
-.gigs-page .board-how--inline .board-step {
+.gigs-page .board-how--inline .board-step,
+.missed-page .board-how--inline .board-step {
   gap: 10px;
   padding: 8px 10px;
   min-height: 0;
@@ -2399,7 +2407,8 @@ h2.display,
 }
 
 .gifting-page .board-how--inline .board-step:nth-child(even),
-.gigs-page .board-how--inline .board-step:nth-child(even) {
+.gigs-page .board-how--inline .board-step:nth-child(even),
+.missed-page .board-how--inline .board-step:nth-child(even) {
   box-shadow: 3px 3px 0 rgba(255, 31, 160, 0.55);
   transform: none;
 }
@@ -2407,7 +2416,9 @@ h2.display,
 .gifting-page .board-how--inline .board-step h3,
 .gifting-page .board-how--inline .board-step .panel-heading,
 .gigs-page .board-how--inline .board-step h3,
-.gigs-page .board-how--inline .board-step .panel-heading {
+.gigs-page .board-how--inline .board-step .panel-heading,
+.missed-page .board-how--inline .board-step h3,
+.missed-page .board-how--inline .board-step .panel-heading {
   min-width: 96px;
   font-size: 13px;
   font-weight: 800;
@@ -2415,7 +2426,8 @@ h2.display,
 }
 
 .gifting-page .board-how--inline .board-step p,
-.gigs-page .board-how--inline .board-step p {
+.gigs-page .board-how--inline .board-step p,
+.missed-page .board-how--inline .board-step p {
   font-size: 12px;
   font-weight: 700;
   color: #060606;
@@ -2423,7 +2435,8 @@ h2.display,
 }
 
 .gifting-page .board-how--inline .board-step__num,
-.gigs-page .board-how--inline .board-step__num {
+.gigs-page .board-how--inline .board-step__num,
+.missed-page .board-how--inline .board-step__num {
   position: static;
   display: flex;
   align-items: center;
@@ -2438,20 +2451,56 @@ h2.display,
 }
 
 .gifting-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
-.gigs-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
+.gigs-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
+.missed-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
   background: #19e3ff;
   color: #0a0a0a;
 }
 
 .gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num,
-.gigs-page .board-how--inline .board-step:nth-child(even) .board-step__num {
+.gigs-page .board-how--inline .board-step:nth-child(even) .board-step__num,
+.missed-page .board-how--inline .board-step:nth-child(even) .board-step__num {
   background: #ff1fa0;
   color: #0a0a0a;
 }
 
 .gifting-page .gifting-how .gifting-footer-line,
-.gigs-page .gigs-how .gigs-footer-line {
+.gigs-page .gigs-how .gigs-footer-line,
+.missed-page .missed-how .missed-footer-line {
   margin-top: 16px;
+}
+
+.missed-how {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  margin: 0;
+  overflow: hidden;
+}
+
+.missed-how > * {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.missed-how::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 13px),
+    radial-gradient(circle at 14% 80%, rgba(255,31,160,0.1), transparent 15rem);
+  mix-blend-mode: screen;
+  opacity: 0.45;
+}
+
+.missed-footer-line {
+  font-family: var(--font-display);
+  color: #ff1fa0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .gigs-path-cards {
@@ -2601,7 +2650,8 @@ h2.display,
 }
 
 .board-page .gigs-how .board-copy,
-.board-page .gifting-how .board-copy {
+.board-page .gifting-how .board-copy,
+.board-page .missed-how .board-copy {
   margin-top: 1.15rem;
   margin-bottom: 2.25rem;
 }
@@ -6880,10 +6930,6 @@ footer a:hover { color: #00FFFF !important; }
   width: 100%;
   margin-top: 12px;
   border-radius: 999px;
-}
-
-.mc-how-strip {
-  margin-top: 8px;
 }
 
 @media (max-width: 720px) {

@@ -9,6 +9,13 @@ import MissedConnectionsPanel, { type MissedConnectionPost } from "@/components/
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardStatsBar from "@/components/BoardStatsBar";
 
+const HOW_IT_WORKS: Array<[string, string]> = [
+  ["Pick a spot", "Link a live or past Pride event, write your own spot, or choose Around town."],
+  ["Write it", "Short, kind, specific — you stay anonymous."],
+  ["Wait", "Someone who was there can reply privately."],
+  ["Reveal", "Choose to show your profile in inbox when you're both ready."],
+];
+
 export default function MissedConnections() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -104,19 +111,14 @@ export default function MissedConnections() {
       <MissedConnectionsPanel mode="board" boardLayout />
 
       <ScrollReveal delay={60}>
-        <section className="gifting-how board-how board-how--inline mc-how-strip" style={{ background: "linear-gradient(180deg,#16101c,#0c0c0c)" }}>
+        <section id="how-it-works" className="missed-how board-how board-how--inline diag">
           <div>
             <span className="board-sticker board-sticker--magenta">How it works</span>
             <h2 className="display section-heading">PRIVATE BY DEFAULT</h2>
             <p className="board-copy">Post a spotted note tied to an event or around town. Replies never show on the board — they open a private inbox thread.</p>
           </div>
           <div className="board-steps">
-            {[
-              ["PICK A SPOT", "Link a live or past Pride event, write your own spot, or choose Around town."],
-              ["WRITE IT", "Short, kind, specific — you stay anonymous."],
-              ["WAIT", "Someone who was there can reply privately."],
-              ["REVEAL", "Choose to show your profile in inbox when ready."],
-            ].map(([title, text], i) => (
+            {HOW_IT_WORKS.map(([title, text], i) => (
               <article className="board-step" key={title}>
                 <span className="board-step__num" aria-hidden="true">{i + 1}</span>
                 <h3 className="display panel-heading">{title}</h3>
@@ -124,6 +126,7 @@ export default function MissedConnections() {
               </article>
             ))}
           </div>
+          <div className="missed-footer-line">Stay kind. Stay anonymous. Reveal when ready.</div>
         </section>
       </ScrollReveal>
 
