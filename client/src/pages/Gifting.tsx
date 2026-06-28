@@ -49,7 +49,7 @@ type GiftingPost = {
 const HOW_IT_WORKS: Array<[string, string]> = [
   ["Post it", "Gift it or search for it."],
   ["Add photos", "Upload up to 2. The site makes them fit."],
-  ["3 queers max", "Only 3 people can raise their hand on a Gift post."],
+  ["3 People max", "Only 3 people can raise their hand on a Gift post."],
   ["Pick one", "Poster chooses and messages."],
   ["Hand it off", "Porch pickup, public meetup, event handoff, or whatever feels safe."],
   ["Stamp it done", "Gifted or Found. Then it leaves the active feed."],
