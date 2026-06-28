@@ -1748,7 +1748,39 @@ export const storage: IStorage = {
   },
   getGigPosts(status) {
     ensureGigPostsSchema();
-    const rows = db.select().from(gigPosts).all();
+    const rows = sqlite.prepare(`
+      SELECT g.*,
+             u.username,
+             u.display_name AS displayName,
+             u.photo_url AS posterPhotoUrl,
+             u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS posterAvatarRing
+      FROM gig_posts g
+      LEFT JOIN users u ON u.id = g.user_id
+      ORDER BY g.created_at DESC
+    `).all().map((row: any) => ({
+      id: row.id,
+      postType: row.post_type,
+      title: row.title,
+      name: row.name,
+      contactEmail: row.contact_email,
+      description: row.description,
+      skills: row.skills,
+      compensation: row.compensation,
+      location: row.location,
+      isRemote: Boolean(row.is_remote),
+      status: row.status,
+      createdAt: row.created_at,
+      userId: row.user_id,
+      imageUrl: row.image_url,
+      gigDate: row.gig_date,
+      gigTime: row.gig_time,
+      username: row.username,
+      displayName: row.displayName,
+      posterPhotoUrl: row.posterPhotoUrl,
+      avatarChoice: row.avatarChoice,
+      posterAvatarRing: row.posterAvatarRing,
+    }));
     if (status) return rows.filter(g => g.status === status);
     return rows;
   },

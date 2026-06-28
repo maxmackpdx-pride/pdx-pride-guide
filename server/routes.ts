@@ -490,7 +490,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── GIGS ─────────────────────────────────────────────────────────────────
   app.get("/api/gigs", (req, res) => {
-    const gigs = storage.getGigPosts("LIVE");
+    const viewerId = req.session?.userId;
+    const gigs = storage.getGigPosts("LIVE").map(gig => ({
+      ...gig,
+      isMine: viewerId ? gig.userId === viewerId : false,
+    }));
     res.json(gigs);
   });
 

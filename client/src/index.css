@@ -2347,28 +2347,33 @@ h2.display,
   background: linear-gradient(180deg, #16101c, #0c0c0c);
 }
 
-.gifting-page .gifting-how {
+.gifting-page .gifting-how,
+.gigs-page .gigs-how {
   padding: clamp(28px, 4vw, 52px) 20px;
 }
 
-.gifting-page .gifting-how .section-heading {
+.gifting-page .gifting-how .section-heading,
+.gigs-page .gigs-how .section-heading {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   line-height: 0.92;
   font-weight: 700;
 }
 
-.gifting-page .gifting-how .board-copy {
+.gifting-page .gifting-how .board-copy,
+.gigs-page .gigs-how .board-copy {
   margin-top: 0.75rem;
   margin-bottom: 1.25rem;
   font-size: 0.9375rem;
 }
 
-.gifting-page .board-how--inline .board-steps {
+.gifting-page .board-how--inline .board-steps,
+.gigs-page .board-how--inline .board-steps {
   gap: 8px 14px;
   margin-top: 12px;
 }
 
-.gifting-page .board-how--inline .board-step {
+.gifting-page .board-how--inline .board-step,
+.gigs-page .board-how--inline .board-step {
   gap: 10px;
   padding: 8px 10px;
   min-height: 0;
@@ -2380,27 +2385,32 @@ h2.display,
   transform: none;
 }
 
-.gifting-page .board-how--inline .board-step:nth-child(even) {
+.gifting-page .board-how--inline .board-step:nth-child(even),
+.gigs-page .board-how--inline .board-step:nth-child(even) {
   box-shadow: 3px 3px 0 rgba(255, 31, 160, 0.55);
   transform: none;
 }
 
 .gifting-page .board-how--inline .board-step h3,
-.gifting-page .board-how--inline .board-step .panel-heading {
+.gifting-page .board-how--inline .board-step .panel-heading,
+.gigs-page .board-how--inline .board-step h3,
+.gigs-page .board-how--inline .board-step .panel-heading {
   min-width: 96px;
   font-size: 13px;
   font-weight: 800;
   color: #060606;
 }
 
-.gifting-page .board-how--inline .board-step p {
+.gifting-page .board-how--inline .board-step p,
+.gigs-page .board-how--inline .board-step p {
   font-size: 12px;
   font-weight: 700;
   color: #060606;
   line-height: 1.4;
 }
 
-.gifting-page .board-how--inline .board-step__num {
+.gifting-page .board-how--inline .board-step__num,
+.gigs-page .board-how--inline .board-step__num {
   position: static;
   display: flex;
   align-items: center;
@@ -2414,24 +2424,25 @@ h2.display,
   text-shadow: none;
 }
 
-.gifting-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
+.gifting-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
+.gigs-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
   background: #19e3ff;
   color: #0a0a0a;
 }
 
-.gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num {
+.gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num,
+.gigs-page .board-how--inline .board-step:nth-child(even) .board-step__num {
   background: #ff1fa0;
   color: #0a0a0a;
 }
 
-.gifting-page .gifting-how .gifting-footer-line {
+.gifting-page .gifting-how .gifting-footer-line,
+.gigs-page .gigs-how .gigs-footer-line {
   margin-top: 16px;
 }
 
 .board-page .gigs-how {
-  background:
-    linear-gradient(90deg, rgba(204, 255, 0, 0.1), rgba(255, 0, 204, 0.08)),
-    #080808;
+  background: linear-gradient(180deg, #16101c, #0c0c0c);
 }
 
 .board-page .gifting-feed,
@@ -3490,7 +3501,7 @@ footer a:hover { color: #00FFFF !important; }
 .gigs-footer-line {
   margin-top: 28px;
   font-family: var(--font-display);
-  color: #00ffff;
+  color: #ccff00;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -6939,5 +6950,17 @@ footer a:hover { color: #00FFFF !important; }
     linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
 }
 .gifting-page .page-hero__grain {
+  opacity: 0.12;
+}
+
+.gigs-page .page-hero__bg {
+  filter: saturate(0.92) contrast(0.98) brightness(0.9);
+}
+.gigs-page .page-hero__scrim {
+  background:
+    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
+    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+}
+.gigs-page .page-hero__grain {
   opacity: 0.12;
 }

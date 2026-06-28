@@ -339,7 +339,7 @@ export default function Gifting() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">{posts.length === 0 ? "Nothing here yet" : "Nothing here yet"}</p>
+            <p className="display section-heading">Nothing here yet</p>
             <p className="board-copy-sm">
               {posts.length === 0
                 ? "No posts match this filter right now. Be the first — post a gift or an in search of."
