@@ -202,10 +202,6 @@ body::before {
   white-space: nowrap;
 }
 
-.site-brand-wordmark__line--accent {
-  color: var(--neon-yellow);
-}
-
 /* Slow chunky glitch — nav + hero PRIDE */
 .glitch-word {
   position: relative;
@@ -892,12 +888,15 @@ h2.display,
 }
 
 .home-hero-title-pride,
-.home-hero-title-pride .glitch-word {
+.home-hero-title-pride .glitch-word,
+.site-brand-wordmark__line--accent,
+.site-brand-wordmark__line--accent .glitch-word {
   background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
   filter: drop-shadow(2px 2px 0 #000) drop-shadow(0 0 24px rgba(204,255,0,0.4)) drop-shadow(0 0 14px rgba(0,255,255,0.25));
 }
 
