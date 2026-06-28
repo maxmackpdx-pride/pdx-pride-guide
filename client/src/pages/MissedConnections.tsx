@@ -115,7 +115,7 @@ export default function MissedConnections() {
           <div>
             <span className="board-sticker board-sticker--magenta">How it works</span>
             <h2 className="display section-heading">PRIVATE BY DEFAULT</h2>
-            <p className="board-copy">Post a spotted note tied to an event or around town. Replies never show on the board — they open a private inbox thread.</p>
+            <p className="board-copy">Spotted is our missed connections board. Post who you saw tied to an event or around town. Replies never show on the board — they open a private inbox thread.</p>
           </div>
           <div className="board-steps">
             {HOW_IT_WORKS.map(([title, text], i) => (

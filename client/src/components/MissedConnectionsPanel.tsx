@@ -281,7 +281,7 @@ export default function MissedConnectionsPanel({
         <div className="board-active-feed__inner">
           <div className="board-active-feed__head">
             <span className="board-sticker board-sticker--magenta">Active board</span>
-            <h2 className="display section-heading board-active-feed__title">SPOTTED & SEEKING</h2>
+            <h2 className="display section-heading board-active-feed__title">SPOTTED!</h2>
           </div>
           <div className="board-active-feed__body">
             <MissedConnectionsBubbleBoard
@@ -303,10 +303,10 @@ export default function MissedConnectionsPanel({
 
       {mode === "event" && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
-          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>POST A MISSED CONNECTION</h3>
+          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>POST TO SPOTTED!</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
-            Linked to this event · anonymous on the board until you both reveal in inbox.
-            {!canPostToEventStrict && " (Posting early — goes live on the Spotted board now.)"}
+            Missed connections for this event · anonymous on the board until you both reveal in inbox.
+            {!canPostToEventStrict && " (Posting early — goes live on Spotted now.)"}
           </p>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />
           <textarea

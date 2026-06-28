@@ -9,6 +9,7 @@ import { Briefcase, Gift, Search, UserRound } from "lucide-react";
 import GlitchWord from "@/components/GlitchWord";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
+import { spottedHeroProps } from "@/lib/spottedHero";
 const skylineImg = "/home-hero-desktop.jpg";
 
 function parsePacificEventTime(value?: string | null) {
@@ -270,20 +271,17 @@ export default function Home() {
         <div className="torn-divider full-bleed" />
         <ScrollReveal delay={180}>
           <PageHero
-            className="home-promo-panel home-spotted-panel"
-            compact
-            kicker="Spotted & seeking · Pride weekend"
-            titleLine1="MISSED"
-            titleLine2="CONNECTIONS"
-            accent="magenta"
-            lede="Post a short note from Pride weekend. Replies never appear on the board; they open a private two-way inbox thread."
-            tagline="Anonymous until you both reveal."
-            taglineAccent="magenta"
-            bgImage="/motifs/hero-missed-connections.jpg"
-            bgPosition="center 35%"
-            actions={
-              <Link href="/spotted"><button type="button" className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>Go to Spotted! →</button></Link>
-            }
+            {...spottedHeroProps({
+              className: "home-promo-panel home-spotted-panel",
+              compact: true,
+              actions: (
+                <Link href="/spotted">
+                  <button type="button" className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>
+                    Go to Spotted! →
+                  </button>
+                </Link>
+              ),
+            })}
           />
         </ScrollReveal>
         <div className="torn-divider full-bleed" />

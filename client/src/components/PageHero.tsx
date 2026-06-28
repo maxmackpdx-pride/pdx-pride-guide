@@ -4,7 +4,7 @@ export type PageHeroAccent = "lime" | "magenta" | "rainbow" | "cyan";
 
 type PageHeroTaglineAccent = "magenta" | "cyan" | "lime";
 
-type PageHeroProps = {
+export type PageHeroProps = {
   kicker?: string;
   titleLine1: string;
   /** Accent treatment for line 1 (e.g. rainbow PRIDE on gig board). */

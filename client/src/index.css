@@ -1882,8 +1882,21 @@ h2.display,
   opacity: 0.12;
 }
 
-.home-spotted-panel.page-hero .page-hero__bg {
+.home-spotted-panel.page-hero .page-hero__bg,
+.missed-page .page-hero__bg {
   filter: saturate(0.95) contrast(1.02) brightness(0.88);
+}
+
+.home-spotted-panel.page-hero .page-hero__scrim,
+.missed-page .page-hero__scrim {
+  background:
+    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
+    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+}
+
+.home-spotted-panel.page-hero .page-hero__grain,
+.missed-page .page-hero__grain {
+  opacity: 0.12;
 }
 
 @keyframes board-flickr {
