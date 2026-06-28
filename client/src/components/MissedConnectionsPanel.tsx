@@ -6,8 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "./AuthModal";
 import BoardLoadingState from "./BoardLoadingState";
 import BoardActiveSection, { BoardSelectField, BoardTextField } from "./BoardActiveSection";
+import MissedConnectionsBubbleBoard from "./MissedConnectionsBubbleBoard";
 import ScrollReveal from "./ScrollReveal";
-import { timeAgo } from "@/lib/boardFeed";
 import type { Event } from "@shared/schema";
 
 export type MissedConnectionPost = {
@@ -34,27 +34,6 @@ const inputStyle: React.CSSProperties = {
   fontFamily: "var(--font-body)", boxSizing: "border-box",
 };
 
-const BUBBLE_COLORS = ["#FF1FA0", "#19E3FF", "#C8FA3C", "#A24BFF", "#FF8C00", "#FF2400"];
-
-function eventColor(key: string): string {
-  let hash = 0;
-  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  return BUBBLE_COLORS[hash % BUBBLE_COLORS.length];
-}
-
-function bubblePos(id: number) {
-  const rand = (n: number) => {
-    const s = (id * 9301 + n * 49297 + 13) % 233280;
-    return Math.abs(s) / 233280;
-  };
-  const left = 6 + rand(1) * 84;
-  const top = 8 + rand(2) * 70;
-  const size = 64 + rand(3) * 38;
-  const duration = 6 + rand(4) * 5;
-  const delay = rand(5) * 4;
-  return { left, top, size, duration, delay };
-}
-
 export default function MissedConnectionsPanel({
   mode,
   eventId,
@@ -72,8 +51,6 @@ export default function MissedConnectionsPanel({
   const [form, setForm] = useState({ title: "", body: "", eventId: eventId ? String(eventId) : "" });
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
   const [replyBody, setReplyBody] = useState("");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-
   const postsQueryKey = mode === "event" && eventId
     ? ["/api/events", eventId, "missed-connections"]
     : ["/api/missed-connections"];
@@ -253,54 +230,6 @@ export default function MissedConnectionsPanel({
         {mode === "event" ? "No missed connections for this event yet." : "No active missed connections yet."}
       </div>
     )
-  ) : boardLayout && mode === "board" ? (
-    <div className="mc-bubble-field">
-        {posts.map((post) => {
-          const expanded = expandedId === post.id;
-          const color = eventColor(String(post.eventId ?? post.eventTitle ?? post.id));
-          const pos = bubblePos(post.id);
-          const glyph = (post.eventTitle || post.title || "?").trim().charAt(0).toUpperCase();
-          return (
-            <div
-              key={post.id}
-              className={`mc-bubble${expanded ? " is-open" : ""}`}
-              style={{
-                left: `${pos.left}%`,
-                top: `${pos.top}%`,
-                width: `${pos.size}px`,
-                height: `${pos.size}px`,
-                "--bubble-color": color,
-                animationDuration: `${pos.duration}s`,
-                animationDelay: `${pos.delay}s`,
-              } as React.CSSProperties}
-              onClick={() => setExpandedId(expanded ? null : post.id)}
-            >
-              <span className="mc-bubble__glyph">{glyph}</span>
-              {post.isMine && <span className="mc-bubble__self" title="Your post" />}
-              {expanded && (
-                <div className="mc-bubble__pop" onClick={(e) => e.stopPropagation()}>
-                  <div className="mc-bubble__pop-head">
-                    <span className="mc-bubble__pop-name">{post.isMine ? "Your post" : "Anonymous"}</span>
-                    {(post.eventDay || post.dayOfWeek) && (
-                      <span className="mc-bubble__pop-day">{post.eventDay || post.dayOfWeek}</span>
-                    )}
-                  </div>
-                  {(post.eventTitle || post.venueHint) && (
-                    <div className="mc-bubble__pop-event">{post.eventTitle || post.venueHint}</div>
-                  )}
-                  <h4 className="board-listing-card__title" style={{ fontSize: "0.95rem", margin: "4px 0" }}>{post.title}</h4>
-                  <p className="mc-bubble__pop-text">{post.body}</p>
-                  {!post.isMine && (
-                    <button onClick={() => setReplyingTo(post)} className="mc-bubble__reply btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
-                      Reply →
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
   ) : (
     <div style={{ display: "grid", gap: 14 }}>
       {posts.map((post, index) => (
@@ -355,12 +284,22 @@ export default function MissedConnectionsPanel({
 
   if (boardLayout && mode === "board") {
     return (
-      <div>
-        <BoardActiveSection sticker="Active board" stickerTone="magenta" title="Spotted & Seeking">
-          {composeForm}
-          {listings}
-        </BoardActiveSection>
-        {replyModal}
+      <div className="board-active-feed diag">
+        <div className="board-active-feed__inner">
+          <div className="board-active-feed__head">
+            <span className="board-sticker board-sticker--magenta">Active board</span>
+            <h2 className="display section-heading board-active-feed__title">SPOTTED & SEEKING</h2>
+          </div>
+          <div className="board-active-feed__body">
+            <MissedConnectionsBubbleBoard
+              posts={posts}
+              isLoading={isLoading}
+              isError={isError}
+              refetch={refetch}
+              postableEvents={postableEvents}
+            />
+          </div>
+        </div>
       </div>
     );
   }

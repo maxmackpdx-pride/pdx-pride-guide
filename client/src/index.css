@@ -6213,7 +6213,340 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 
-/* Missed Connections bubble field */
+/* Missed Connections — prototype bubble board */
+.mc-board {
+  width: 100%;
+}
+
+.mc-compose {
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0f0f0f, #080808);
+  overflow: hidden;
+}
+
+.mc-compose__toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mc-compose__badge {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  padding: 6px 12px;
+  background: var(--neon-magenta);
+  border: 2px solid var(--neon-yellow);
+  box-shadow: 3px 3px 0 var(--neon-yellow);
+}
+
+.mc-compose__toggle-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.mc-compose__toggle-meta {
+  margin-left: auto;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6a6e66;
+}
+
+.mc-compose__panel {
+  padding: 0 18px 18px;
+}
+
+.mc-compose__textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  box-sizing: border-box;
+  border-radius: 12px;
+}
+
+.mc-compose__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.mc-compose__label {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6e66;
+  margin-bottom: 8px;
+}
+
+.mc-draft-chips,
+.mc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.mc-filters {
+  margin-bottom: 16px;
+}
+
+.mc-draft-chip,
+.mc-filters__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid #2a2a2a;
+  background: #0d0d0d;
+  color: #bdbab2;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.mc-draft-chip.is-active,
+.mc-filters__chip.is-active {
+  background: var(--chip-color, var(--neon-lime));
+  border-color: var(--chip-color, var(--neon-lime));
+  color: #0a0a0a;
+}
+
+.mc-draft-chip__dot,
+.mc-filters__chip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chip-color, var(--neon-magenta));
+  flex-shrink: 0;
+}
+
+.mc-filters__chip-count {
+  opacity: 0.75;
+  font-size: 0.62rem;
+}
+
+.mc-compose__submit {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 12px 28px;
+}
+
+.mc-compose__count {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: #555;
+  text-align: right;
+}
+
+.mc-pulse-field {
+  position: relative;
+  width: 100%;
+  height: min(72vh, 680px);
+  min-height: 520px;
+  margin: 0 0 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: radial-gradient(130% 130% at 50% -10%, #111110, #060606 70%);
+}
+
+.mc-pulse-field--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 24px;
+}
+
+.mc-pulse-field__hint {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  z-index: 8;
+  pointer-events: none;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5a5e57;
+}
+
+.mc-bubble--physics {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  will-change: transform;
+  animation: none;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mc-bubble--physics.is-dim {
+  opacity: 0.35;
+}
+
+.mc-bubble--physics.is-hovered {
+  z-index: 30;
+}
+
+.mc-bubble__orb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--bubble-color) 70%, #fff 18%), var(--bubble-color));
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.55);
+  transition: transform 0.18s ease;
+}
+
+.mc-bubble--physics.is-hovered .mc-bubble__orb {
+  transform: scale(1.06);
+}
+
+.mc-bubble__pop-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 4px 0;
+  line-height: 1.2;
+}
+
+.mc-bubble--physics .mc-bubble__pop {
+  bottom: calc(100% + 12px);
+  top: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mc-reply-drawer__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.mc-reply-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1100;
+  width: min(100%, 380px);
+  padding: 24px 22px;
+  background: #0a0a0a;
+  border-left: 3px solid var(--neon-lime);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.65);
+  overflow-y: auto;
+}
+
+.mc-reply-drawer__close {
+  float: right;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.mc-reply-drawer__kicker {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon-lime);
+  margin: 0 0 8px;
+}
+
+.mc-reply-drawer__title {
+  color: var(--neon-magenta);
+  margin-bottom: 8px;
+  clear: right;
+}
+
+.mc-reply-drawer__lede {
+  font-size: 0.85rem;
+  color: #888;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.mc-reply-drawer__input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 120px;
+  resize: vertical;
+  border-radius: 12px;
+}
+
+.mc-reply-drawer__send {
+  width: 100%;
+  margin-top: 12px;
+  border-radius: 999px;
+}
+
+.mc-how-strip {
+  margin-top: 8px;
+}
+
+@media (max-width: 720px) {
+  .mc-compose__toggle-meta {
+    margin-left: 0;
+    width: 100%;
+  }
+  .mc-pulse-field {
+    min-height: 420px;
+    height: min(68vh, 560px);
+  }
+  .mc-reply-drawer {
+    width: 100%;
+    border-left: none;
+    border-top: 3px solid var(--neon-lime);
+    top: auto;
+    max-height: 85vh;
+  }
+}
+
+/* Missed Connections bubble field (legacy listing layout) */
 .mc-bubble-field {
   position: relative;
   width: 100%;

@@ -101,12 +101,14 @@ export default function MissedConnections() {
       <MissedConnectionsHero />
       <BoardStatsBar stats={stats} liveLabel="Anonymous board · replies stay private" />
 
-      <ScrollReveal>
-        <section className="gifting-how board-how board-how--inline" style={{ background: "linear-gradient(180deg,#16101c,#0c0c0c)" }}>
+      <MissedConnectionsPanel mode="board" boardLayout />
+
+      <ScrollReveal delay={60}>
+        <section className="gifting-how board-how board-how--inline mc-how-strip" style={{ background: "linear-gradient(180deg,#16101c,#0c0c0c)" }}>
           <div>
             <span className="board-sticker board-sticker--magenta">How it works</span>
-            <h2 className="display section-heading">SPOTTED & SEEKING</h2>
-            <p className="board-copy">Post a note tied to today's event. Replies never show on the board — they open a private inbox thread.</p>
+            <h2 className="display section-heading">PRIVATE BY DEFAULT</h2>
+            <p className="board-copy">Post a note tied to today&apos;s event. Replies never show on the board — they open a private inbox thread.</p>
           </div>
           <div className="board-steps">
             {[
@@ -124,8 +126,6 @@ export default function MissedConnections() {
           </div>
         </section>
       </ScrollReveal>
-
-      <MissedConnectionsPanel mode="board" boardLayout />
 
       {myPosts.filter(p => p.status === "ACTIVE").length > 0 && (
         <ScrollReveal delay={80}>
