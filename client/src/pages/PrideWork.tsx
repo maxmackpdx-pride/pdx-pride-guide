@@ -170,7 +170,6 @@ export default function PrideWork() {
             <button type="button" className="btn-neon cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>
               <Search size={16} /> Post availability
             </button>
-            <a href="#how-it-works" className="gifting-how-link">How it works ↓</a>
           </>
         }
       />
