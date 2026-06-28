@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Briefcase, Search, X } from "lucide-react";
+import { Briefcase, Search, UserRound, X } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -53,17 +53,17 @@ type GigPost = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  LOOKING_FOR_WORK: "Looking for work",
-  POSTING_GIG: "Posting a gig",
+  LOOKING_FOR_WORK: "Talent available",
+  POSTING_GIG: "Gig posted",
 };
 
 const HOW_IT_WORKS: Array<[string, string]> = [
-  ["Post it", "Share a gig or say what work you're looking for."],
-  ["Add details", "Skills, pay, location, and what makes it queer Pride work."],
-  ["Get seen", "Your post hits the active board right away."],
-  ["Connect", "Reply privately through the site inbox."],
+  ["Pick your lane", "Hiring? Post the gig. Looking? Post your availability."],
+  ["Say what you do", "Skills, rates, dates, remote or on-site — be specific."],
+  ["Get seen", "Talent and gigs both show on the active board right away."],
+  ["Connect", "Reply privately through the site inbox. No public DMs."],
   ["Do the work", "Show up, get paid, build queer community labor."],
-  ["Stamp it done", "Mark filled or found when the gig wraps."],
+  ["Stamp it done", "Mark filled or found when the match wraps."],
 ];
 
 const ACCENT: Record<string, string> = {
@@ -89,8 +89,8 @@ export default function PrideWork() {
   });
 
   const stats = useMemo(() => [
-    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "Gigs posted", color: "#C8FA3C" },
-    { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Workers available", color: "#19E3FF" },
+    { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent available now", color: "#19E3FF" },
+    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "Gigs open", color: "#C8FA3C" },
     { num: gigs.filter(g => g.isRemote).length, label: "Remote-friendly", color: "#FF1FA0" },
   ], [gigs]);
 
@@ -111,9 +111,14 @@ export default function PrideWork() {
 
   const mutation = useMutation({
     mutationFn: (data: GigFormData) => apiRequest("POST", "/api/gigs", data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
-      toast({ title: "Posted", description: "Your post is live on the gig board." });
+      toast({
+        title: "Posted",
+        description: variables.postType === "LOOKING_FOR_WORK"
+          ? "Your availability is live — hosts can find you on the board."
+          : "Your gig is live on the board.",
+      });
       form.reset();
       setFormOpen(false);
     },
@@ -145,10 +150,13 @@ export default function PrideWork() {
 
   const cardStatus = (gig: GigPost) => {
     const parts = [gig.compensation, gig.location].filter(Boolean);
-    return parts.length ? parts.join(" · ") : "Open — reply privately";
+    if (parts.length) return parts.join(" · ");
+    return gig.postType === "LOOKING_FOR_WORK" ? "Available — message to connect" : "Open — reply privately";
   };
 
-  const cardCta = () => "Reply";
+  const cardCta = (gig: GigPost) => (
+    gig.postType === "LOOKING_FOR_WORK" ? "Reach out" : "Reply"
+  );
 
   return (
     <div className="zine-page gigs-page board-page">
@@ -159,30 +167,42 @@ export default function PrideWork() {
         titleLine1Accent="rainbow"
         titleLine2="GIG BOARD"
         accent="lime"
-        lede="Community-powered job board for Pride weekend and beyond. Queer workers, queer employers, queer gigs."
-        tagline="Paid, respected, valued."
-        taglineAccent="lime"
+        lede="Two-way board for Pride season and beyond. Post your availability, post a gig, or browse both — queer talent and queer employers meeting in one place."
+        tagline="Need work? Need help? Both belong here."
+        taglineAccent="cyan"
         bgImage="/motifs/hero-gigs.jpg"
         actions={
           <>
+            <button type="button" className="btn-neon cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>
+              <UserRound size={16} /> Post your availability
+            </button>
             <button type="button" className="btn-neon" data-testid="button-post-gig" onClick={() => openForm("POSTING_GIG")}>
               <Briefcase size={16} /> Post a gig
-            </button>
-            <button type="button" className="btn-neon cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>
-              <Search size={16} /> Post availability
             </button>
           </>
         }
       />
 
-      <BoardStatsBar stats={stats} />
+      <BoardStatsBar stats={stats} liveLabel="Talent & gigs · live" />
 
       <ScrollReveal>
         <section id="how-it-works" className="gigs-how board-how board-how--inline diag">
           <div>
             <span className="board-sticker board-sticker--cyan">How it works</span>
             <h2 className="display section-heading">HOW THE GIG BOARD WORKS</h2>
-            <p className="board-copy">Post gigs, find collaborators, and connect queer workers with queer work.</p>
+            <p className="board-copy">Same board, two doors. Talent posts what they do. Hirers post what they need. Everyone browses both.</p>
+          </div>
+          <div className="gigs-path-cards">
+            <article className="gigs-path-card gigs-path-card--talent">
+              <span className="gigs-path-card__label">For talent</span>
+              <h3 className="display panel-heading">Looking for Pride work?</h3>
+              <p>Post your skills, availability, and pay range. Stage crew, photographers, bartenders, door staff, designers, producers — if you want the gig, say so here.</p>
+            </article>
+            <article className="gigs-path-card gigs-path-card--hirer">
+              <span className="gigs-path-card__label">For hirers</span>
+              <h3 className="display panel-heading">Need queer help?</h3>
+              <p>Post paid gigs, volunteer shifts, and short-term Pride roles. Browse available talent or wait for replies in your inbox.</p>
+            </article>
           </div>
           <div className="board-steps">
             {HOW_IT_WORKS.map(([title, text], i) => (
@@ -193,7 +213,7 @@ export default function PrideWork() {
               </article>
             ))}
           </div>
-          <div className="gigs-footer-line">Paid, respected, valued. · Pride season and beyond</div>
+          <div className="gigs-footer-line">Paid, respected, valued. · Talent and gigs · Pride season and beyond</div>
         </section>
       </ScrollReveal>
 
@@ -204,10 +224,12 @@ export default function PrideWork() {
               <X size={18} />
             </button>
             <h2 className="display section-heading">
-              Post {postType === "POSTING_GIG" ? "a gig" : "your availability"}
+              {postType === "POSTING_GIG" ? "Post a gig" : "Post your availability"}
             </h2>
             <p className="board-copy-sm">
-              Posts go live on the board right away. Keep it Pride-related, queer-community-safe, and respectful.
+              {postType === "POSTING_GIG"
+                ? "Describe the role, pay, and timing. Goes live right away — keep it Pride-related and community-safe."
+                : "Tell hosts what you do, when you're free, and what you're looking for. Your post goes live so organizers can find you."}
             </p>
             <form onSubmit={form.handleSubmit(d => mutation.mutate(d))} className="gifting-form-grid">
               <label className="span">
@@ -217,8 +239,8 @@ export default function PrideWork() {
                   value={postType}
                   onChange={e => form.setValue("postType", e.target.value as GigFormData["postType"])}
                 >
-                  <option value="POSTING_GIG">Posting a gig</option>
-                  <option value="LOOKING_FOR_WORK">Looking for work</option>
+                  <option value="LOOKING_FOR_WORK">I'm looking for work</option>
+                  <option value="POSTING_GIG">I'm posting a gig</option>
                 </select>
               </label>
 
@@ -259,17 +281,37 @@ export default function PrideWork() {
 
               <label>
                 Skills / tags
-                <input className="board-text-field" data-testid="input-skills" placeholder="e.g. Sound, Lighting, Photography" {...form.register("skills")} />
+                <input
+                  className="board-text-field"
+                  data-testid="input-skills"
+                  placeholder={postType === "POSTING_GIG" ? "e.g. Sound, Lighting, Photography" : "e.g. Bar back, Stage hand, Social media, Drag security"}
+                  {...form.register("skills")}
+                />
               </label>
 
               <label>
-                Compensation
-                <input className="board-text-field" data-testid="input-compensation" placeholder="e.g. $25/hr, Volunteer, Negotiable" {...form.register("compensation")} />
+                {postType === "POSTING_GIG" ? "Compensation" : "Pay sought / rate"}
+                <input
+                  className="board-text-field"
+                  data-testid="input-compensation"
+                  placeholder={postType === "POSTING_GIG" ? "e.g. $25/hr, Volunteer, Negotiable" : "e.g. $25/hr minimum, Day rate, Volunteer OK"}
+                  {...form.register("compensation")}
+                />
               </label>
 
               <label className="span">
                 Location
-                <input className="board-text-field" data-testid="input-location" placeholder="e.g. Portland, OR / Remote / Washington Park" {...form.register("location")} />
+                <input
+                  className="board-text-field"
+                  data-testid="input-location"
+                  placeholder={postType === "POSTING_GIG" ? "e.g. Portland, OR / Remote / Washington Park" : "e.g. Inner SE, Downtown, Remote OK, Will travel"}
+                  {...form.register("location")}
+                />
+              </label>
+
+              <label className="span gigs-form-check">
+                <input type="checkbox" {...form.register("isRemote")} />
+                {postType === "POSTING_GIG" ? "Remote / hybrid friendly" : "Open to remote or hybrid work"}
               </label>
 
               <div className="span">
@@ -285,14 +327,14 @@ export default function PrideWork() {
       <BoardActiveSection
         className="diag"
         sticker="Active board"
-        stickerTone="lime"
-        title="Gigs & Availability"
+        stickerTone="cyan"
+        title="Open gigs & available talent"
         filters={
           <>
             {([
               { key: "ALL", label: "All" },
-              { key: "POSTING_GIG", label: "Posting a gig" },
-              { key: "LOOKING_FOR_WORK", label: "Looking for work" },
+              { key: "LOOKING_FOR_WORK", label: "Available talent" },
+              { key: "POSTING_GIG", label: "Open gigs" },
             ] as const).map(f => (
               <BoardFilterChip key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)}>
                 {f.label}
@@ -302,7 +344,7 @@ export default function PrideWork() {
         }
       >
         {isLoading ? (
-          <BoardLoadingState label="Loading gig posts" />
+          <BoardLoadingState label="Loading talent & gig posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#C8FA3C" }}>
             <Briefcase size={40} style={{ color: "#C8FA3C", margin: "0 auto" }} />
@@ -315,11 +357,14 @@ export default function PrideWork() {
             <p className="display section-heading">Nothing here yet</p>
             <p className="board-copy-sm">
               {gigs.length === 0
-                ? "No posts match this filter right now. Be the first — post a gig or your availability."
-                : "No posts match this filter right now. Try showing all posts."}
+                ? "No posts yet. Talent can post availability. Hirers can post gigs. Start with whichever side you are."
+                : "No posts match this filter. Try all posts or switch between talent and gigs."}
             </p>
             {gigs.length === 0 ? (
-              <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("POSTING_GIG")}>Post a gig</button>
+              <div className="gifting-actions" style={{ justifyContent: "center", marginTop: 20 }}>
+                <button type="button" className="btn-neon cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>Post availability</button>
+                <button type="button" className="btn-neon" onClick={() => openForm("POSTING_GIG")}>Post a gig</button>
+              </div>
             ) : (
               <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => setFilter("ALL")}>Show all</button>
             )}
@@ -340,7 +385,7 @@ export default function PrideWork() {
                     skills={skills}
                     isLooking={isLooking}
                     cardStatus={cardStatus(gig)}
-                    cardCta={cardCta()}
+                    cardCta={cardCta(gig)}
                     onToggle={() => setExpandedId(expanded ? null : gig.id)}
                   />
                 </ScrollReveal>
@@ -456,7 +501,11 @@ function GigListingCard({
               <textarea
                 value={messageBody}
                 onChange={e => setMessageBody(e.target.value)}
-                placeholder={`Write a private reply about "${gig.title}"...`}
+                placeholder={
+                  isLooking
+                    ? `Ask about their skills and availability for "${gig.title}"...`
+                    : `Write a private reply about "${gig.title}"...`
+                }
                 maxLength={500}
               />
               <button
@@ -468,7 +517,7 @@ function GigListingCard({
                 }}
                 disabled={!messageBody.trim() || messageMutation.isPending}
               >
-                {messageMutation.isPending ? "Sending…" : "Send reply"}
+                {messageMutation.isPending ? "Sending…" : isLooking ? "Reach out" : "Send reply"}
               </button>
             </div>
           )}

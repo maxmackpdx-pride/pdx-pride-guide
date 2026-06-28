@@ -2454,6 +2454,82 @@ h2.display,
   margin-top: 16px;
 }
 
+.gigs-path-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin: 0 0 18px;
+}
+
+.gigs-path-card {
+  padding: 12px 14px;
+  background: #fff;
+  color: #060606;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(25, 227, 255, 0.55);
+}
+
+.gigs-path-card--hirer {
+  box-shadow: 3px 3px 0 rgba(255, 31, 160, 0.55);
+}
+
+.gigs-path-card__label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-family: var(--font-board-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gigs-path-card--talent .gigs-path-card__label {
+  color: #0a6e80;
+}
+
+.gigs-path-card--hirer .gigs-path-card__label {
+  color: #9e1570;
+}
+
+.gigs-path-card h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #060606;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.gigs-path-card p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1a1a1a;
+}
+
+.gigs-form-check {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  color: #f2eadb !important;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.82rem !important;
+  font-family: var(--font-body) !important;
+}
+
+.gigs-form-check input {
+  width: auto;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .gigs-path-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 .board-page .gigs-how {
   background: linear-gradient(180deg, #16101c, #0c0c0c);
 }
