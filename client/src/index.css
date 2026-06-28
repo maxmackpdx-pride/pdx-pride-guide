@@ -52,6 +52,7 @@
   --font-board-display: 'Barlow Condensed', sans-serif;
   --font-board-mono: 'Inter', sans-serif;
   --site-header-height: 120px;
+  --site-rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
   --board-text: #f4f1ea;
   --board-muted: #bdbab2;
   --text-heading: #ffffff;
@@ -143,8 +144,21 @@ body::before {
   right: 0;
   bottom: -2px;
   height: 2px;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  background: var(--site-rainbow-bar);
   opacity: 0.8;
+}
+
+.rainbow-bar {
+  height: 2px;
+  width: 100%;
+  background: var(--site-rainbow-bar);
+  opacity: 0.8;
+}
+
+.rainbow-bar--bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 .site-header-inner {

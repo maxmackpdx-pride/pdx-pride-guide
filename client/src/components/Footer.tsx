@@ -50,7 +50,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="torn-divider full-bleed" style={{ marginBottom: 20 }} />
+        <div className="rainbow-bar rainbow-bar--bleed" style={{ marginBottom: 20 }} />
         <img src={logoPath} alt="" className="footer-brand-logo" />
         <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
           <FeedbackButton />
