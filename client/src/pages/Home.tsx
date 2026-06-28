@@ -208,8 +208,9 @@ export default function Home() {
             </div>
           </section>
         )}
-        <div className="torn-divider" style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
       </section>
+
+      <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
 
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
@@ -222,8 +223,9 @@ export default function Home() {
         />
       </section>
 
+      <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
+
       <section className="home-promo-stack">
-        <div className="torn-divider full-bleed" />
         <ScrollReveal>
           <PageHero
             className="home-promo-panel home-gifting-panel"
@@ -245,7 +247,7 @@ export default function Home() {
             }
           />
         </ScrollReveal>
-        <div className="torn-divider full-bleed" />
+        <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
         <ScrollReveal delay={120}>
           <PageHero
             className="home-promo-panel home-gigs-panel"
@@ -268,7 +270,7 @@ export default function Home() {
             }
           />
         </ScrollReveal>
-        <div className="torn-divider full-bleed" />
+        <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
         <ScrollReveal delay={180}>
           <PageHero
             {...spottedHeroProps({
@@ -284,7 +286,6 @@ export default function Home() {
             })}
           />
         </ScrollReveal>
-        <div className="torn-divider full-bleed" />
       </section>
 
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}

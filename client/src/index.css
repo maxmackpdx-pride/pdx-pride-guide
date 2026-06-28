@@ -1029,6 +1029,10 @@ h2.display,
   }
 }
 
+.home-section-divider {
+  flex-shrink: 0;
+}
+
 .home-map-preview {
   position: relative;
   display: block;
@@ -1785,8 +1789,10 @@ h2.display,
 }
 
 /* Home promo panels — compact flush heroes matching board page heads */
-.home-promo-stack .home-promo-panel {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.home-promo-stack .home-promo-panel,
+.home-promo-stack .page-hero {
+  border-bottom: none;
+  border-image: none;
 }
 
 .home-promo-panel .board-kicker {
