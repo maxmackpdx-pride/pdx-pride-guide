@@ -3,6 +3,7 @@ import { useHashLocation } from "wouter/use-hash-location";
 import { useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { resetPageScroll } from "./lib/resetPageScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import Nav from "./components/Nav";
@@ -11,7 +12,10 @@ import FilmGrainOverlay from "./components/FilmGrainOverlay";
 
 function ScrollToTop() {
   const [location] = useHashLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [location]);
+  useEffect(() => {
+    resetPageScroll();
+    requestAnimationFrame(resetPageScroll);
+  }, [location]);
   return null;
 }
 import Home from "./pages/Home";

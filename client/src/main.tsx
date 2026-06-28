@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { resetPageScroll } from "./lib/resetPageScroll";
 import "./index.css";
 
 // Prevent the browser from restoring a previous scroll position on
@@ -16,5 +17,8 @@ if (claimRoute) {
   window.location.hash = "#/";
 }
 
-window.scrollTo(0, 0);
+resetPageScroll();
+requestAnimationFrame(resetPageScroll);
+window.addEventListener("load", resetPageScroll, { once: true });
+
 createRoot(document.getElementById("root")!).render(<App />);

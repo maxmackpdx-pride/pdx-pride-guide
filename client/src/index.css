@@ -62,11 +62,19 @@
 
 * { box-sizing: border-box; }
 
+html {
+  width: 100%;
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+}
+
 body {
   background: #0a0a0a;
   color: #fff;
   font-family: var(--font-body);
   margin: 0;
+  width: 100%;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -89,6 +97,9 @@ body::before {
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .zine-page {
@@ -1141,9 +1152,9 @@ h2.display,
 
 .section-slice-divider.full-bleed,
 .section-fade-divider.full-bleed {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .section-fade-divider {
@@ -1342,9 +1353,9 @@ h2.display,
 }
 
 .torn-divider.full-bleed {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 @keyframes rainbow-divider-flow {
@@ -5846,6 +5857,9 @@ footer a:hover { color: #00FFFF !important; }
 .app-shell {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .app-shell > main,
