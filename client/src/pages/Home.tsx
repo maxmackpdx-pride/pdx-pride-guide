@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
+import EventTicker from "@/components/EventTicker";
 import { MapView } from "./Events";
 import { Briefcase, Gift, Search, UserRound } from "lucide-react";
 import GlitchWord from "@/components/GlitchWord";
@@ -53,8 +54,10 @@ export default function Home() {
     return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
-  const eventNames = events.map(event => event.title).filter(Boolean);
-  const tickerItems = eventNames.length ? [...eventNames, ...eventNames] : [];
+  const tickerSource = useMemo(
+    () => events.map(event => ({ id: event.id, title: event.title })).filter(item => item.title),
+    [events],
+  );
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
@@ -192,25 +195,23 @@ export default function Home() {
           </div>
         </div>
 
-        {tickerItems.length > 0 && (
-          <section className="event-ticker-band" aria-label="Live event ticker">
-            <Link href="/events" className="event-ticker-label">
-              LIVE EVENTS
-            </Link>
-            <div className="event-ticker-window">
-              <div className="event-ticker-track">
-                {tickerItems.map((name, i) => (
-                  <span className="event-ticker-item" key={`${name}-${i}`}>
-                    {name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </section>
+        {tickerSource.length > 0 && (
+          <div className="home-hero-ticker">
+            <div className="rainbow-bar rainbow-bar--bleed" aria-hidden="true" />
+            <section className="event-ticker-band" aria-label="Live event ticker">
+              <Link href="/events" className="event-ticker-label">
+                LIVE EVENTS
+              </Link>
+              <EventTicker items={tickerSource} />
+            </section>
+            <div className="rainbow-bar rainbow-bar--bleed" aria-hidden="true" />
+          </div>
         )}
       </section>
 
-      <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
+      {tickerSource.length === 0 && (
+        <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
+      )}
 
       <section className="home-map-preview" aria-label="Events map preview">
         <MapView
