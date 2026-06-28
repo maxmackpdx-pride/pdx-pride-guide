@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: railway-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -84,7 +84,7 @@ jobs:
               FAILED|CRASHED|REMOVED) echo "Railway deployment failed: $STATUS"; echo "$status_response" | jq .; exit 1 ;;
             esac
 
-            sleep 15
+            sleep 8
           done
 
           echo "Timed out waiting for Railway deployment"
