@@ -127,10 +127,6 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page">
-      {/* TEST-BANNER-REMOVE-ME */}
-      <div style={{ background: "#8800FF", color: "#fff", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
-        TEST BANNER — GIGS — SAFE TO REMOVE
-      </div>
       <PageHero
         kicker="Pride season & beyond"
         titleLine1="PRIDE"

@@ -58,10 +58,6 @@ export default function Home() {
 
   return (
     <div className="zine-page home-page" style={{ background: "#000", minHeight: "100vh" }}>
-      {/* TEST-BANNER-REMOVE-ME */}
-      <div style={{ background: "#00EE44", color: "#000", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
-        TEST BANNER — HOME — SAFE TO REMOVE
-      </div>
       {showSoftLaunch && (
         <div
           role="dialog"

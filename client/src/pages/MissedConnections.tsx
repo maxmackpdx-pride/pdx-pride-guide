@@ -82,10 +82,6 @@ export default function MissedConnections() {
   if (!user) {
     return (
       <div className="zine-page missed-page board-page min-h-screen">
-        {/* TEST-BANNER-REMOVE-ME */}
-        <div style={{ background: "#FF00CC", color: "#000", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
-          TEST BANNER — MISSED CONNECTIONS — SAFE TO REMOVE
-        </div>
         <MissedConnectionsHero />
         <div className="board-active-feed">
           <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "48px 24px 64px" }}>
@@ -102,10 +98,6 @@ export default function MissedConnections() {
 
   return (
     <div className="zine-page missed-page board-page min-h-screen">
-      {/* TEST-BANNER-REMOVE-ME */}
-      <div style={{ background: "#FF00CC", color: "#000", textAlign: "center", padding: "10px", fontWeight: 900, fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", position: "relative", zIndex: 999 }}>
-        TEST BANNER — MISSED CONNECTIONS — SAFE TO REMOVE
-      </div>
       <MissedConnectionsHero />
       <BoardStatsBar stats={stats} liveLabel="Anonymous board · replies stay private" />
 
