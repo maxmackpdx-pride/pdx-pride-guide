@@ -6,6 +6,8 @@ import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import { MapView } from "./Events";
 import { Gift, Search } from "lucide-react";
+import GlitchWord from "@/components/GlitchWord";
+import ScrollReveal from "@/components/ScrollReveal";
 const skylineImg = "/home-hero-desktop.jpg";
 
 function parsePacificEventTime(value?: string | null) {
@@ -146,7 +148,7 @@ export default function Home() {
 
             <h1 className="display home-hero-title">
               PORTLAND<br />
-              <span>PRIDE</span><br />
+              <span className="home-hero-title-pride"><GlitchWord text="PRIDE" /></span><br />
               GUIDE
             </h1>
 
@@ -220,35 +222,45 @@ export default function Home() {
 
       <section className="home-promo-stack">
         <div className="torn-divider full-bleed" />
-        <article className="home-promo-panel home-gifting-panel">
-          <div className="home-promo-inner">
-            <div className="home-promo-copy">
-              <span className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>GIFT WITH PRIDE</span>
-              <h2 className="display">GIFTING</h2>
-              <p className="home-promo-tag">Give gay gifts. Queer homes. Keep it moving.</p>
-              <p>A Pride-season board for giving away what you do not need and asking for what you do.</p>
-              <div className="gifting-actions">
-                <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
-                <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an In Search Of</button></Link>
+        <ScrollReveal>
+          <article className="home-promo-panel home-gifting-panel">
+            <div className="home-promo-inner">
+              <div className="home-promo-panel-card">
+                <span className="board-sticker board-sticker--magenta">Gift with Pride</span>
+                <h2 className="home-promo-title">
+                  <span className="home-promo-title-line">GIFT WITH</span>
+                  <span className="home-promo-accent home-promo-accent--rainbow">PRIDE</span>
+                </h2>
+                <p className="home-promo-tagline home-promo-tagline--magenta">Give gay gifts. Queer homes. Keep it moving.</p>
+                <p className="home-promo-lede">A Pride-season board for giving away what you do not need and asking for what you do.</p>
+                <div className="gifting-actions">
+                  <Link href="/gifting"><button className="btn-neon"><Gift size={16} /> Post a Gift</button></Link>
+                  <Link href="/gifting"><button className="btn-neon cyan"><Search size={16} /> Post an In Search Of</button></Link>
+                </div>
               </div>
             </div>
-          </div>
-        </article>
+          </article>
+        </ScrollReveal>
         <div className="torn-divider full-bleed" />
-        <article className="home-promo-panel home-gigs-panel">
-          <div className="home-promo-inner">
-            <div className="home-promo-copy">
-              <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>PRIDE WORK</span>
-              <h2 className="display">GIG BOARD</h2>
-              <p className="home-promo-tag magenta">Paid, respected, valued.</p>
-              <p>Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
-              <div className="gifting-actions">
-                <Link href="/pride-work"><button className="btn-neon"><Search size={16} /> Find Work</button></Link>
-                <Link href="/pride-work"><button className="btn-neon cyan"><Gift size={16} /> Post a Gig</button></Link>
+        <ScrollReveal delay={120}>
+          <article className="home-promo-panel home-gigs-panel">
+            <div className="home-promo-inner">
+              <div className="home-promo-panel-card">
+                <span className="board-sticker board-sticker--lime">Pride Work</span>
+                <h2 className="home-promo-title">
+                  <span className="home-promo-title-line">PRIDE</span>
+                  <span className="home-promo-accent home-promo-accent--lime">GIG BOARD</span>
+                </h2>
+                <p className="home-promo-tagline home-promo-tagline--cyan">Paid, respected, valued.</p>
+                <p className="home-promo-lede">Post Pride work, find collaborators, and connect queer workers with queer gigs.</p>
+                <div className="gifting-actions">
+                  <Link href="/pride-work"><button className="btn-neon"><Search size={16} /> Find Work</button></Link>
+                  <Link href="/pride-work"><button className="btn-neon cyan"><Gift size={16} /> Post a Gig</button></Link>
+                </div>
               </div>
             </div>
-          </div>
-        </article>
+          </article>
+        </ScrollReveal>
         <div className="torn-divider full-bleed" />
       </section>
 

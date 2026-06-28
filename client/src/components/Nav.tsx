@@ -6,6 +6,7 @@ import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
+import GlitchWord from "@/components/GlitchWord";
 
 const links = [
   { href: "/", label: "Home" },
@@ -67,7 +68,9 @@ export default function Nav() {
             <img src={logoPath} alt="" className="site-brand-logo" />
             <span className="display site-brand-wordmark">
               <span className="site-brand-wordmark__line">PDX</span>
-              <span className="site-brand-wordmark__line site-brand-wordmark__line--accent">PRIDE</span>
+              <span className="site-brand-wordmark__line site-brand-wordmark__line--accent">
+                <GlitchWord text="PRIDE" />
+              </span>
               <span className="site-brand-wordmark__line">GUIDE</span>
             </span>
           </Link>
