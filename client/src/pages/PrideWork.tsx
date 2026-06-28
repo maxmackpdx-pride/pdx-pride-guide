@@ -156,6 +156,7 @@ export default function PrideWork() {
         flush
         kicker="Pride season & beyond"
         titleLine1="PRIDE"
+        titleLine1Accent="rainbow"
         titleLine2="GIG BOARD"
         accent="lime"
         lede="Community-powered job board for Pride weekend and beyond. Queer workers, queer employers, queer gigs."

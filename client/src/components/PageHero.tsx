@@ -7,6 +7,8 @@ type PageHeroTaglineAccent = "magenta" | "cyan" | "lime";
 type PageHeroProps = {
   kicker?: string;
   titleLine1: string;
+  /** Accent treatment for line 1 (e.g. rainbow PRIDE on gig board). */
+  titleLine1Accent?: PageHeroAccent;
   titleLine2?: string;
   accent?: PageHeroAccent;
   lede?: string;
@@ -22,6 +24,7 @@ type PageHeroProps = {
 export default function PageHero({
   kicker,
   titleLine1,
+  titleLine1Accent,
   titleLine2,
   accent = "lime",
   lede,
@@ -45,7 +48,15 @@ export default function PageHero({
         <div className="page-hero__panel">
           {kicker && <div className="board-kicker">{kicker}</div>}
           <h1 className="page-hero__title">
-            <span className="page-hero__title-line">{titleLine1}</span>
+            <span
+              className={
+                titleLine1Accent
+                  ? `page-hero__accent page-hero__accent--${titleLine1Accent}`
+                  : "page-hero__title-line"
+              }
+            >
+              {titleLine1}
+            </span>
             {titleLine2 && (
               <span className={`page-hero__accent page-hero__accent--${accent}`}>{titleLine2}</span>
             )}
