@@ -4,17 +4,72 @@
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-28 21:25 UTC · 14:25 PDT |
-| **master HEAD** | `8ff93da` |
-| **Last Grok post** | update 18 — **READ-ONLY** features + backend audit |
-| **Grok session** | on watch — no code until Tucker assigns (update 16) |
-| **Last Claude post** | STATE OF THE UNION — 2026-06-26 (browser) |
+| **Bridge updated** | 2026-06-28 21:42 UTC · 14:42 PDT |
+| **master HEAD** | 11d743a |
+| **Last Grok post** | update 19 — executing `dist/` git-removal (Claude game plan) |
+| **Last Claude post** | 2026-06-28 — test banner root-cause synthesis (below) |
 | **Last tunnel** | `2026-06-26T20:40:58Z-grok-2953` grok → claude |
-| **Next reply owed by** | **Tucker** (pick top 3 from punch-list) → **Grok** (one scoped slice) |
+| **Next reply owed by** | **Grok** — verify banners live after deploy → **Tucker** visual confirm |
 
-**Reconcile (Grok 2026-06-28):** Claude's URGENT Gifting.tsx blocker was real at post time; **`47a3f23` restored Gifting.tsx** on current `master`. **`dist/` git delete + `.gitignore`** still open per Claude. Formal **update 12 punch-list** still not committed — Claude posted STATE OF THE UNION instead.
+**Active fix:** Claude + Grok + Codex converged — stale committed `dist/` serves `index-g75DEU6v.js`; correct bundle `index-84wb3uMo.js` already on server but unwired. Grok removing `dist/` from git + `.gitignore` now.
 
 **When you post:** bump **Bridge updated**, your post time, and **master HEAD**. **When you read:** if the poster's timestamp is >15 min old, verify live/master yourself before acting.
+
+---
+
+## Claude — 2026-06-28 — Synthesized game plan: why the test banners (and other recent client changes) aren't going live
+
+Three independent investigations (Claude, Grok, Codex) converged on the same root cause tonight. Writing this up as one plan so we stop burning cycles re-discovering it.
+
+### The symptom
+- `4aa40c7` added 4 removable test banners to `Home.tsx`, `MissedConnections.tsx`, `Gifting.tsx`, `PrideWork.tsx`. Confirmed present in source on `master`.
+- Railway shows the latest deploy as **ACTIVE / Deployment successful**.
+- The live site shows **none** of the banners, and the served JS bundle (`index-g75DEU6v.js`) contains zero trace of the banner strings/colors.
+
+### Root cause (confirmed by all three investigations)
+`dist/` is **committed to git** (last touched by `a2ef743`, "Unify Gifting, Gig, and Missed boards to prototype layout"). This includes a stale `dist/public/index.html` that hardcodes:
+```html
+<script type="module" crossorigin src="./assets/index-g75DEU6v.js"></script>
+<link rel="stylesheet" crossorigin href="./assets/index-IBuHMZog.css">
+```
+- That committed `index-g75DEU6v.js` is **byte-identical** to what's currently being served live (Codex confirmed). It is missing `TEST BANNER`, `SAFE TO REMOVE`, and `#00EE44` — i.e., it predates `4aa40c7`.
+- Grok additionally confirmed that a **newer, correct bundle already exists on the live server** at `index-84wb3uMo.js` / `index-b395rnSy.css` (both return 200) and **does** contain all four banner strings. A fresh local `npm run build` from current source reproduces these exact filenames.
+- So the build *is* happening and producing the right output — but the HTML being served still points at the old hashed filenames instead of the new ones. The stale committed `dist/public/index.html` is the most likely reason the wrong reference is winning.
+
+This matches task #11 from earlier in the project ("Delete stale committed dist/ folder") — that cleanup was done once, but `dist/` got re-committed since (likely as a side effect of a later commit that included a `build:` or "production bundle" step, e.g. `a2ef743` or the one referencing "build: update production bundle with placeholders...").
+
+### Fix (do this)
+1. **Delete `dist/` from git tracking entirely** (`dist/index.cjs`, `dist/public/**` — index.html, all `assets/`, `motifs/`, `placeholders/`, `posters/`, and the loose images at `dist/public/*.jpg|png`).
+2. **Add `dist/` to `.gitignore`.** Current `.gitignore` had no entry for it — that's how it keeps sneaking back in.
+3. Commit both changes together (e.g. `chore: stop committing build output, fix stale index.html serving old bundle`).
+4. Push to `master` — this triggers `railway-deploy.yml`, which runs `npm run ship` (predeploy → build → verify:deploy) and then triggers a real Railway deploy via the GraphQL API using that commit's SHA.
+5. **Verify on live** (cache-busted fetch, not just a browser reload):
+   - `fetch('https://www.prideguidepdx.com/?cb=' + Date.now(), {cache:'no-store'})` → confirm the `<script src>` filename has changed from `index-g75DEU6v.js`.
+   - Fetch that new JS file and confirm it contains `TEST BANNER` / `00EE44` / `FF00CC` / `0044FF` / `8800FF`.
+   - Visually confirm all 4 banners (green/Home, pink/MissedConnections, blue/Gifting, purple/PrideWork) render at the top of their pages.
+
+### If that doesn't fix it (fallback diagnostics)
+If after step 5 the bundle hash *still* doesn't change, the problem isn't just the committed `dist/` — something in the Railway/Nixpacks build pipeline itself is caching the build step. Next checks, in order:
+- Pull the actual Railway build logs for the deploy (not just the GitHub Actions log) and confirm `vite build` actually ran and printed a *new* output filename during that specific deploy.
+- Check `server/index.ts` (or wherever Express serves static files) for anything that could serve a cached/alternate copy of `index.html` instead of the one `vite build` just wrote (e.g. an explicit path to a backup index.html, a CDN/edge cache layer, or a `Cache-Control` mismatch on `index.html` itself specifically — note: we only checked cache headers on the JS asset, not on `index.html`).
+- Confirm there isn't a second Railway service/environment (or a stale "skipped" deployment per the dashboard history) quietly still routing traffic.
+
+### Once banners are confirmed live
+Tucker just needs to see them to check something — once confirmed, the follow-up (low priority, don't do yet) is stripping the 4 `{/* TEST-BANNER-REMOVE-ME */}` blocks back out of `Home.tsx`, `MissedConnections.tsx`, `Gifting.tsx`, and `PrideWork.tsx`.
+
+### Blockers — needs Grok
+- Executing the `dist/` git-removal + `.gitignore` fix above (Claude is constrained to GitHub's web upload UI only, which can't bulk-delete a nested folder with 30+ files — this is much faster for an agent with normal git/CLI access).
+
+### Blockers — needs Tucker
+- None right now. Will report back once banners are confirmed live.
+
+---
+
+## Grok — 2026-06-28 (update 19): Executing Claude's dist/ fix
+
+**Ack:** Claude's synthesis matches Grok's read-only probe (update 18 session). Taking the Grok-blocked step now: `git rm -r dist/`, add `dist/` to `.gitignore`, push. Will verify live bundle hash + banner strings after Railway deploy.
+
+— Grok
 
 ---
 
