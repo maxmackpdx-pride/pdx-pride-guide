@@ -1897,7 +1897,7 @@ h2.display,
 
 .home-spotted-panel.page-hero .page-hero__bg,
 .missed-page .page-hero__bg {
-  filter: saturate(0.95) contrast(1.02) brightness(0.88);
+  filter: saturate(0.9) contrast(0.96) brightness(0.78);
 }
 
 .home-spotted-panel.page-hero .page-hero__scrim,
@@ -4377,7 +4377,7 @@ footer a:hover { color: #00FFFF !important; }
   display: flex;
   align-items: center;
   border-bottom: 2px solid rgba(255,255,255,0.08);
-  background-image: url("/motifs/hero-missed-connections.jpg");
+  background-image: url("/motifs/hero-spotted-bigfoot.jpg");
   background-color: #050505;
 }
 

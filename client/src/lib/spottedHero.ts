@@ -7,8 +7,8 @@ export const spottedHeroContent = {
   lede: "The missed connections board for Pride weekend. Post who you spotted, where you saw them, and what you remember. Replies never show on the board — they open a private inbox thread.",
   tagline: "Not sure what missed connections are? Grab your nearest daddy.",
   taglineAccent: "magenta",
-  bgImage: "/motifs/hero-missed-connections.jpg",
-  bgPosition: "center 35%",
+  bgImage: "/motifs/hero-spotted-bigfoot.jpg",
+  bgPosition: "center 42%",
 } as const satisfies Partial<PageHeroProps>;
 
 export function spottedHeroProps(overrides: Partial<PageHeroProps> = {}): PageHeroProps {
