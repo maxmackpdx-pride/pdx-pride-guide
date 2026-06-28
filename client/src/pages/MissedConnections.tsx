@@ -27,9 +27,9 @@ export default function MissedConnections() {
   });
 
   const stats = useMemo(() => [
-    { num: allPosts.length, label: "Notes live now", color: "#FF1FA0" },
-    { num: new Set(allPosts.map(p => p.eventId).filter(Boolean)).size, label: "Events with notes", color: "#19E3FF" },
-    { num: allPosts.filter(p => p.isMine).length, label: "Your active posts", color: "#C8FA3C" },
+    { num: allPosts.length, label: "Spotted live", color: "#FF1FA0" },
+    { num: allPosts.filter(p => p.eventId != null).length, label: "At events", color: "#19E3FF" },
+    { num: allPosts.filter(p => p.eventId == null).length, label: "Around town", color: "#FF8C00" },
   ], [allPosts]);
 
   const { data: myPosts = [] } = useQuery<MissedConnectionPost[]>({
@@ -108,11 +108,11 @@ export default function MissedConnections() {
           <div>
             <span className="board-sticker board-sticker--magenta">How it works</span>
             <h2 className="display section-heading">PRIVATE BY DEFAULT</h2>
-            <p className="board-copy">Post a note tied to today&apos;s event. Replies never show on the board — they open a private inbox thread.</p>
+            <p className="board-copy">Post a spotted note tied to an event or around town. Replies never show on the board — they open a private inbox thread.</p>
           </div>
           <div className="board-steps">
             {[
-              ["PICK EVENT", "Choose an event happening today."],
+              ["PICK A SPOT", "Link a live or past Pride event, write your own spot, or choose Around town."],
               ["WRITE IT", "Short, kind, specific — you stay anonymous."],
               ["WAIT", "Someone who was there can reply privately."],
               ["REVEAL", "Choose to show your profile in inbox when ready."],
@@ -141,7 +141,7 @@ export default function MissedConnections() {
                     <div className="board-listing-card__main">
                       <h4 className="board-listing-card__title">{post.title}</h4>
                       <p style={{ margin: "8px 0 0", color: "#9d9a92", fontSize: "0.85rem" }}>
-                        {post.eventTitle || post.venueHint || "Event"} · anonymous to everyone else
+                        {post.eventTitle || post.venueHint || "Around town"} · anonymous to everyone else
                       </p>
                     </div>
                     <div className="board-listing-card__expand" style={{ borderTop: "none", paddingTop: 0, marginTop: 12 }}>

@@ -92,4 +92,49 @@ export function isMissedConnectionPostable(
   return { ok: true, closesAt: new Date(window.closesAt).toISOString() };
 }
 
+export type MissedConnectionEventTiming = "upcoming" | "live" | "past";
+
+export function getEventTiming(
+  dateStart?: string | null,
+  dateEnd?: string | null,
+  now = Date.now(),
+): MissedConnectionEventTiming {
+  const start = parsePacificDateTime(dateStart);
+  if (start == null) return "past";
+  if (now < start) return "upcoming";
+  if (isMissedConnectionPostable(dateStart, { now }).ok) return "live";
+  const end = parsePacificDateTime(dateEnd);
+  if (end != null && now > end) return "past";
+  if (now >= start + POST_WINDOW_MS) return "past";
+  return "past";
+}
+
+/** Board compose: any scheduled LIVE event can be linked (post window enforced separately). */
+export function isMissedConnectionLinkable(dateStart?: string | null): boolean {
+  return parsePacificDateTime(dateStart) != null;
+}
+
+export function formatCustomSpottedVenue(eventLabel: string, location?: string): string {
+  const label = eventLabel.trim().slice(0, 80);
+  const place = location?.trim().slice(0, 80) || "";
+  if (label && place) return `${label} · ${place}`;
+  return label || place || "Around town";
+}
+
 export const MISSED_CONNECTION_ANON_LABEL = "Anonymous";
+
+/** Posts not tied to a calendar event expire 7 days after creation. */
+export function generalSpottedClosesAt(now = Date.now()): string {
+  return new Date(now + POST_WINDOW_MS).toISOString();
+}
+
+export function pacificDayOfWeek(now = Date.now()): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: PACIFIC_TZ,
+    weekday: "short",
+  })
+    .format(new Date(now))
+    .replace(/\./g, "")
+    .toUpperCase()
+    .slice(0, 3);
+}

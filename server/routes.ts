@@ -5,7 +5,13 @@ import { assertProductionPersistence, getPersistenceAudit } from "./persistence"
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import { isMissedConnectionPostable, missedConnectionClosesAt } from "@shared/missedConnections";
+import {
+  formatCustomSpottedVenue,
+  generalSpottedClosesAt,
+  isMissedConnectionPostable,
+  missedConnectionClosesAt,
+  pacificDayOfWeek,
+} from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
 import crypto from "crypto";
 import session from "express-session";
@@ -888,7 +894,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── MISSED CONNECTIONS ──────────────────────────────────────────────────
   app.get("/api/missed-connections/postable-events", requireAuth, (req, res) => {
-    const requireToday = req.query.scope === "today";
+    const scope = String(req.query.scope || "today");
+    if (scope === "board") {
+      return res.json(storage.getLinkableEventsForMissedConnections());
+    }
+    const requireToday = scope === "today";
     const events = storage.getPostableEventsForMissedConnections(requireToday);
     res.json(events.map(evt => ({
       id: evt.id,
@@ -916,27 +926,76 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/missed-connections", requireAuth, (req, res) => {
     try {
-      const eventId = Number(req.body.eventId);
-      if (!Number.isFinite(eventId)) return res.status(400).json({ error: "eventId required" });
-      const evt = storage.getEvent(eventId);
-      if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
+      const rawEventId = req.body.eventId;
+      const hasEvent = rawEventId !== undefined && rawEventId !== null && rawEventId !== "";
+      const eventId = hasEvent ? Number(rawEventId) : null;
 
-      const requireToday = req.body.scope === "today";
-      const window = isMissedConnectionPostable(evt.dateStart, { requireToday });
-      if (!window.ok) return res.status(400).json({ error: window.reason || "Posting not open for this event" });
+      if (hasEvent && !Number.isFinite(eventId)) {
+        return res.status(400).json({ error: "Invalid event" });
+      }
 
-      const data = insertMissedConnectionSchema.parse({
-        ...req.body,
-        userId: req.session.userId!,
-        eventId,
-        dayOfWeek: evt.dayOfWeek,
-        venueHint: evt.venueName,
-        closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart),
-      });
+      let payload: Record<string, unknown>;
+      let eventMeta: { title: string; venueName: string; dayOfWeek: string } | null = null;
+
+      const scope = String(req.body.scope || "");
+      const boardScope = scope === "board";
+
+      if (eventId != null) {
+        const evt = storage.getEvent(eventId);
+        if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
+
+        if (boardScope) {
+          const strict = isMissedConnectionPostable(evt.dateStart, { requireToday: false });
+          payload = {
+            ...req.body,
+            userId: req.session.userId!,
+            eventId,
+            dayOfWeek: evt.dayOfWeek,
+            venueHint: evt.venueName,
+            closesAt: strict.ok && strict.closesAt ? strict.closesAt : generalSpottedClosesAt(),
+          };
+        } else {
+          const requireToday = scope === "today";
+          const window = isMissedConnectionPostable(evt.dateStart, { requireToday });
+          if (!window.ok) return res.status(400).json({ error: window.reason || "Posting not open for this event" });
+
+          payload = {
+            ...req.body,
+            userId: req.session.userId!,
+            eventId,
+            dayOfWeek: evt.dayOfWeek,
+            venueHint: evt.venueName,
+            closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart),
+          };
+        }
+        eventMeta = { title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek || "" };
+      } else {
+        const customLabel = String(req.body.eventLabel || "").trim();
+        const venueHint = formatCustomSpottedVenue(
+          customLabel,
+          String(req.body.venueHint || "").trim(),
+        );
+        payload = {
+          ...req.body,
+          userId: req.session.userId!,
+          eventId: null,
+          dayOfWeek: pacificDayOfWeek(),
+          venueHint,
+          closesAt: generalSpottedClosesAt(),
+        };
+      }
+
+      const data = insertMissedConnectionSchema.parse(payload);
       if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
       const created = storage.createMissedConnection(data);
-      const { userId: _uid, ...publicPost } = created as any;
-      res.json({ ...publicPost, anonymous: true, isMine: true, eventTitle: evt.title, eventVenue: evt.venueName, eventDay: evt.dayOfWeek });
+      res.json({
+        ...created,
+        eventTitle: eventMeta?.title ?? null,
+        eventVenue: eventMeta?.venueName ?? null,
+        eventDay: eventMeta?.dayOfWeek ?? created.dayOfWeek ?? null,
+        isMine: true,
+        anonymous: false,
+      });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }

@@ -2,7 +2,10 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 import {
-  isMissedConnectionPostable, missedConnectionClosesAt,
+  getEventTiming,
+  isMissedConnectionPostable,
+  isMissedConnectionLinkable,
+  missedConnectionClosesAt,
 } from "@shared/missedConnections";
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import {
@@ -1466,6 +1469,12 @@ function archiveExpiredMissedConnections() {
   `).run(now);
 }
 
+function mapMissedConnectionRow(row: any, viewerUserId?: number) {
+  const isMine = viewerUserId != null && row.user_id === viewerUserId;
+  const { user_id: _uid, eventDateStart: _eds, ...publicRow } = row;
+  return { ...publicRow, isMine, anonymous: !isMine };
+}
+
 function giftingExpiry(postType: string, from = new Date()) {
   const d = new Date(from);
   d.setDate(d.getDate() + (postType === "ISO" ? 14 : 7));
@@ -1605,6 +1614,16 @@ export interface IStorage {
   getMissedConnectionsByEvent(eventId: number, viewerUserId?: number): any[];
   getMissedConnectionsByUser(userId: number): MissedConnection[];
   getPostableEventsForMissedConnections(requireToday?: boolean): Event[];
+  getLinkableEventsForMissedConnections(): Array<{
+    id: number;
+    title: string;
+    venueName: string;
+    dayOfWeek: string | null;
+    dateStart: string;
+    dateEnd: string | null;
+    postable: boolean;
+    timing: "upcoming" | "live" | "past";
+  }>;
   createMissedConnection(data: InsertMissedConnection & { closesAt?: string | null }): MissedConnection;
   updateMissedConnection(id: number, userId: number, data: Partial<MissedConnection>): MissedConnection | undefined;
   deleteMissedConnection(id: number, userId: number): void;
@@ -2377,11 +2396,41 @@ export const storage: IStorage = {
     const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
     return live.filter(evt => isMissedConnectionPostable(evt.dateStart, { requireToday }).ok);
   },
+  getLinkableEventsForMissedConnections() {
+    const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
+    const timingRank = { live: 0, upcoming: 1, past: 2 } as const;
+    return live
+      .filter(evt => isMissedConnectionLinkable(evt.dateStart))
+      .map(evt => ({
+        id: evt.id,
+        title: evt.title,
+        venueName: evt.venueName,
+        dayOfWeek: evt.dayOfWeek,
+        dateStart: evt.dateStart,
+        dateEnd: evt.dateEnd,
+        postable: isMissedConnectionPostable(evt.dateStart).ok,
+        timing: getEventTiming(evt.dateStart, evt.dateEnd),
+      }))
+      .sort((a, b) => {
+        const byTiming = timingRank[a.timing] - timingRank[b.timing];
+        if (byTiming !== 0) return byTiming;
+        return String(a.dateStart).localeCompare(String(b.dateStart));
+      });
+  },
   getMissedConnections(status = "ACTIVE", viewerUserId?: number) {
     archiveExpiredMissedConnections();
     const rows = sqlite.prepare(`
       SELECT
-        m.*,
+        m.id,
+        m.title,
+        m.body,
+        m.day_of_week AS dayOfWeek,
+        m.venue_hint AS venueHint,
+        m.event_id AS eventId,
+        m.status,
+        m.created_at AS createdAt,
+        m.closes_at AS closesAt,
+        m.user_id,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
         e.day_of_week AS eventDay,
@@ -2391,17 +2440,22 @@ export const storage: IStorage = {
       WHERE m.status = ?
       ORDER BY m.created_at DESC
     `).all(status) as any[];
-    return rows.map(row => {
-      const isMine = viewerUserId != null && row.userId === viewerUserId;
-      const { userId: _uid, ...publicRow } = row;
-      return { ...publicRow, isMine, anonymous: !isMine };
-    });
+    return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
   },
   getMissedConnectionsByEvent(eventId, viewerUserId?: number) {
     archiveExpiredMissedConnections();
     const rows = sqlite.prepare(`
       SELECT
-        m.*,
+        m.id,
+        m.title,
+        m.body,
+        m.day_of_week AS dayOfWeek,
+        m.venue_hint AS venueHint,
+        m.event_id AS eventId,
+        m.status,
+        m.created_at AS createdAt,
+        m.closes_at AS closesAt,
+        m.user_id,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
         e.day_of_week AS eventDay,
@@ -2411,21 +2465,30 @@ export const storage: IStorage = {
       WHERE m.status = 'ACTIVE' AND m.event_id = ?
       ORDER BY m.created_at DESC
     `).all(eventId) as any[];
-    return rows.map(row => {
-      const isMine = viewerUserId != null && row.userId === viewerUserId;
-      const { userId: _uid, ...publicRow } = row;
-      return { ...publicRow, isMine, anonymous: !isMine };
-    });
+    return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
   },
   getMissedConnectionsByUser(userId) {
     archiveExpiredMissedConnections();
-    return sqlite.prepare(`
-      SELECT m.*, e.title AS eventTitle, e.venue_name AS eventVenue
+    const rows = sqlite.prepare(`
+      SELECT
+        m.id,
+        m.title,
+        m.body,
+        m.day_of_week AS dayOfWeek,
+        m.venue_hint AS venueHint,
+        m.event_id AS eventId,
+        m.status,
+        m.created_at AS createdAt,
+        m.closes_at AS closesAt,
+        m.user_id,
+        e.title AS eventTitle,
+        e.venue_name AS eventVenue
       FROM missed_connections m
       LEFT JOIN events e ON e.id = m.event_id
       WHERE m.user_id = ? AND m.status != 'DELETED'
       ORDER BY m.created_at DESC
     `).all(userId) as any[];
+    return rows.map(row => mapMissedConnectionRow(row, userId));
   },
   createMissedConnection(data) {
     const createdAt = new Date().toISOString();

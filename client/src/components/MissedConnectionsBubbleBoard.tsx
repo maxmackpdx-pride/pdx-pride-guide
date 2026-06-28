@@ -3,14 +3,15 @@ import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "./BoardLoadingState";
-import type { MissedConnectionPost } from "./MissedConnectionsPanel";
-import type { Event } from "@shared/schema";
+import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./MissedConnectionsPanel";
 
 const BUBBLE_COLORS = ["#FF1FA0", "#19E3FF", "#C8FA3C", "#A24BFF", "#FF8C00", "#E40303"];
-
-type PostableEvent = Pick<Event, "id" | "title" | "venueName" | "dayOfWeek" | "dateStart">;
+const AROUND_TOWN_KEY = "around";
+const CUSTOM_SPOT_KEY = "custom";
+const GENERAL_SPOT_COLOR = "#FF8C00";
 
 type Phys = { x: number; y: number; vx: number; vy: number; size: number };
+type SpotMode = typeof AROUND_TOWN_KEY | typeof CUSTOM_SPOT_KEY | "event";
 
 function eventColor(eventId: number | null | undefined, fallbackKey: string): string {
   const key = eventId != null ? String(eventId) : fallbackKey;
@@ -30,7 +31,9 @@ function postGlyph(title: string): string {
   return title.trim().slice(0, 2).toUpperCase() || "?";
 }
 
-function deriveTitle(body: string): string {
+function deriveTitle(title: string, body: string): string {
+  const trimmed = title.trim();
+  if (trimmed) return trimmed.slice(0, 80);
   const line = body.trim().split(/\n/)[0] || body.trim();
   return line.slice(0, 80) || "Spotted";
 }
@@ -40,7 +43,7 @@ type Props = {
   isLoading: boolean;
   isError: boolean;
   refetch: () => void;
-  postableEvents: PostableEvent[];
+  linkableEvents: LinkableMissedConnectionEvent[];
 };
 
 export default function MissedConnectionsBubbleBoard({
@@ -48,20 +51,25 @@ export default function MissedConnectionsBubbleBoard({
   isLoading,
   isError,
   refetch,
-  postableEvents,
+  linkableEvents,
 }: Props) {
   const { toast } = useToast();
   const fieldRef = useRef<HTMLDivElement>(null);
   const physicsRef = useRef<Record<number, Phys>>({});
   const [, setFrame] = useState(0);
 
-  const [activeEventFilter, setActiveEventFilter] = useState<number | null>(null);
+  const [activeEventFilter, setActiveEventFilter] = useState<number | typeof AROUND_TOWN_KEY | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
   const [replyBody, setReplyBody] = useState("");
 
+  const [spotMode, setSpotMode] = useState<SpotMode>(AROUND_TOWN_KEY);
   const [draftEventId, setDraftEventId] = useState("");
+  const [draftTitle, setDraftTitle] = useState("");
   const [draftBody, setDraftBody] = useState("");
+  const [draftVenueHint, setDraftVenueHint] = useState("");
+  const [draftCustomEventName, setDraftCustomEventName] = useState("");
+  const [draftCustomLocation, setDraftCustomLocation] = useState("");
   const [composeOpen, setComposeOpen] = useState(false);
 
   const prefersReducedMotion = useMemo(
@@ -69,19 +77,21 @@ export default function MissedConnectionsBubbleBoard({
     [],
   );
 
-  useEffect(() => {
-    if (postableEvents.length && !draftEventId) {
-      setDraftEventId(String(postableEvents[0].id));
-    }
-  }, [postableEvents, draftEventId]);
+  const groupedEvents = useMemo(() => ({
+    live: linkableEvents.filter(evt => evt.timing === "live"),
+    upcoming: linkableEvents.filter(evt => evt.timing === "upcoming"),
+    past: linkableEvents.filter(evt => evt.timing === "past"),
+  }), [linkableEvents]);
 
   const eventMeta = useMemo(() => {
-    const map = new Map<number, { name: string; color: string; count: number }>();
-    for (const evt of postableEvents) {
-      map.set(evt.id, { name: evt.title, color: eventColor(evt.id, evt.title), count: 0 });
-    }
+    const map = new Map<number | typeof AROUND_TOWN_KEY, { name: string; color: string; count: number }>();
     for (const post of posts) {
-      if (post.eventId == null) continue;
+      if (post.eventId == null) {
+        const general = map.get(AROUND_TOWN_KEY) ?? { name: "Around town", color: GENERAL_SPOT_COLOR, count: 0 };
+        general.count += 1;
+        map.set(AROUND_TOWN_KEY, general);
+        continue;
+      }
       const existing = map.get(post.eventId);
       const color = eventColor(post.eventId, post.eventTitle || String(post.eventId));
       const name = post.eventTitle || existing?.name || `Event #${post.eventId}`;
@@ -92,32 +102,70 @@ export default function MissedConnectionsBubbleBoard({
       }
     }
     return map;
-  }, [posts, postableEvents]);
+  }, [posts]);
 
   const filterChips = useMemo(
     () => Array.from(eventMeta.entries()).filter(([, v]) => v.count > 0),
     [eventMeta],
   );
 
+  const postMatchesFilter = (post: MissedConnectionPost) => {
+    if (activeEventFilter == null) return true;
+    if (activeEventFilter === AROUND_TOWN_KEY) return post.eventId == null;
+    return post.eventId === activeEventFilter;
+  };
+
+  const canSubmit = useMemo(() => {
+    if (!draftBody.trim()) return false;
+    if (spotMode === "event") return !!draftEventId;
+    if (spotMode === CUSTOM_SPOT_KEY) return !!draftCustomEventName.trim() || !!draftCustomLocation.trim();
+    return true;
+  }, [draftBody, spotMode, draftEventId, draftCustomEventName, draftCustomLocation]);
+
+  const resetDraftSpotFields = (mode: SpotMode) => {
+    setSpotMode(mode);
+    if (mode !== "event") setDraftEventId("");
+    if (mode !== CUSTOM_SPOT_KEY) {
+      setDraftCustomEventName("");
+      setDraftCustomLocation("");
+    }
+    if (mode !== AROUND_TOWN_KEY) setDraftVenueHint("");
+  };
+
   const createMutation = useMutation({
-    mutationFn: () =>
-      fetch("/api/missed-connections", {
+    mutationFn: () => {
+      const payload: Record<string, unknown> = {
+        title: deriveTitle(draftTitle, draftBody),
+        body: draftBody.trim(),
+        scope: "board",
+      };
+      if (spotMode === "event") {
+        payload.eventId = Number(draftEventId);
+      } else if (spotMode === CUSTOM_SPOT_KEY) {
+        payload.eventLabel = draftCustomEventName.trim();
+        payload.venueHint = draftCustomLocation.trim();
+      } else {
+        payload.venueHint = draftVenueHint.trim() || "Around town";
+      }
+      return fetch("/api/missed-connections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          title: deriveTitle(draftBody),
-          body: draftBody.trim(),
-          eventId: Number(draftEventId),
-          scope: "today",
-        }),
+        body: JSON.stringify(payload),
       }).then(async r => {
         const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.error || "Could not post");
         return data;
-      }),
+      });
+    },
     onSuccess: () => {
+      setDraftTitle("");
       setDraftBody("");
+      setDraftVenueHint("");
+      setDraftCustomEventName("");
+      setDraftCustomLocation("");
+      setDraftEventId("");
+      setSpotMode(AROUND_TOWN_KEY);
       setComposeOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
@@ -166,24 +214,18 @@ export default function MissedConnectionsBubbleBoard({
       if (field) {
         const W = field.clientWidth;
         const H = field.clientHeight;
-        const speedMul = (id: number) => {
-          if (activeEventFilter == null) return 1;
-          const post = posts.find(p => p.id === id);
-          return post?.eventId === activeEventFilter ? 1 : 0.3;
-        };
-
         for (const post of posts) {
           let phys = physicsRef.current[post.id];
           if (!phys) {
             initPhysics(post.id, W, H);
             phys = physicsRef.current[post.id];
           }
-          const dim = activeEventFilter != null && post.eventId !== activeEventFilter;
-          const mul = dim ? 0.3 : 1;
+          const dim = !postMatchesFilter(post);
+          const mul = dim ? 0.35 : 1;
           const sz = phys.size;
 
-          phys.x += phys.vx * mul * speedMul(post.id);
-          phys.y += phys.vy * mul * speedMul(post.id);
+          phys.x += phys.vx * mul;
+          phys.y += phys.vy * mul;
 
           if (phys.x < 24) { phys.x = 24; phys.vx = Math.abs(phys.vx); }
           if (phys.x > W - sz - 24) { phys.x = W - sz - 24; phys.vx = -Math.abs(phys.vx); }
@@ -221,7 +263,21 @@ export default function MissedConnectionsBubbleBoard({
   const fieldHint =
     activeEventFilter == null
       ? "Hover a bubble · tap Reply for a private thread"
-      : `Filtering · ${eventMeta.get(activeEventFilter)?.name || "event"}`;
+      : `Showing · ${eventMeta.get(activeEventFilter)?.name || "filter"}`;
+
+  const renderEventOptions = (items: LinkableMissedConnectionEvent[], label: string) => {
+    if (!items.length) return null;
+    return (
+      <optgroup label={label}>
+        {items.map(evt => (
+          <option key={evt.id} value={String(evt.id)}>
+            {evt.dayOfWeek} · {evt.title} @ {evt.venueName}
+            {evt.postable ? "" : " (early link)"}
+          </option>
+        ))}
+      </optgroup>
+    );
+  };
 
   return (
     <div className="mc-board">
@@ -239,51 +295,105 @@ export default function MissedConnectionsBubbleBoard({
 
         {composeOpen && (
           <div className="mc-compose__panel">
-            {postableEvents.length === 0 ? (
-              <p className="board-copy-sm">No events are open for missed-connection posts right now.</p>
-            ) : (
-              <>
-                <textarea
-                  className="mc-compose__textarea board-text-field"
-                  value={draftBody}
-                  onChange={e => setDraftBody(e.target.value.slice(0, 500))}
-                  placeholder="You handed me a flag near the bridge and I have thought about it ever since…"
-                  rows={4}
-                />
-                <div className="mc-compose__footer">
-                  <div>
-                    <div className="mc-compose__label">Which event?</div>
-                    <div className="mc-draft-chips">
-                      {postableEvents.map(evt => {
-                        const color = eventColor(evt.id, evt.title);
-                        const on = draftEventId === String(evt.id);
-                        return (
-                          <button
-                            key={evt.id}
-                            type="button"
-                            className={`mc-draft-chip${on ? " is-active" : ""}`}
-                            style={{ "--chip-color": color } as React.CSSProperties}
-                            onClick={() => setDraftEventId(String(evt.id))}
-                          >
-                            <span className="mc-draft-chip__dot" aria-hidden="true" />
-                            <span>{evt.title}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+            <input
+              className="board-text-field mc-compose__title"
+              value={draftTitle}
+              onChange={e => setDraftTitle(e.target.value.slice(0, 80))}
+              placeholder="Title (optional)"
+              maxLength={80}
+            />
+            <textarea
+              className="mc-compose__textarea board-text-field"
+              value={draftBody}
+              onChange={e => setDraftBody(e.target.value.slice(0, 500))}
+              placeholder="You handed me a flag near the bridge and I have thought about it ever since…"
+              rows={4}
+            />
+            <div className="mc-compose__footer">
+              <div>
+                <div className="mc-compose__label">Where was it?</div>
+                <div className="mc-draft-chips">
                   <button
                     type="button"
-                    className="mc-compose__submit btn-neon solid"
-                    disabled={!draftBody.trim() || !draftEventId || createMutation.isPending}
-                    onClick={() => createMutation.mutate()}
+                    className={`mc-draft-chip${spotMode === AROUND_TOWN_KEY ? " is-active" : ""}`}
+                    style={{ "--chip-color": GENERAL_SPOT_COLOR } as React.CSSProperties}
+                    onClick={() => resetDraftSpotFields(AROUND_TOWN_KEY)}
                   >
-                    {createMutation.isPending ? "Posting…" : "Post it →"}
+                    <span className="mc-draft-chip__dot" aria-hidden="true" />
+                    <span>Around town</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`mc-draft-chip${spotMode === "event" ? " is-active" : ""}`}
+                    style={{ "--chip-color": "#19E3FF" } as React.CSSProperties}
+                    onClick={() => resetDraftSpotFields("event")}
+                  >
+                    <span className="mc-draft-chip__dot" aria-hidden="true" />
+                    <span>Link event</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`mc-draft-chip${spotMode === CUSTOM_SPOT_KEY ? " is-active" : ""}`}
+                    style={{ "--chip-color": "#FF1FA0" } as React.CSSProperties}
+                    onClick={() => resetDraftSpotFields(CUSTOM_SPOT_KEY)}
+                  >
+                    <span className="mc-draft-chip__dot" aria-hidden="true" />
+                    <span>Write your own</span>
                   </button>
                 </div>
-                <div className="mc-compose__count">{draftBody.length}/500</div>
-              </>
-            )}
+
+                {spotMode === AROUND_TOWN_KEY && (
+                  <input
+                    className="board-text-field mc-compose__venue"
+                    value={draftVenueHint}
+                    onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
+                    placeholder="Optional — e.g. Waterfront Park, Hawthorne, parade route…"
+                    maxLength={80}
+                  />
+                )}
+
+                {spotMode === "event" && (
+                  <select
+                    className="board-select mc-compose__select"
+                    value={draftEventId}
+                    onChange={e => setDraftEventId(e.target.value)}
+                  >
+                    <option value="">Select a Pride event…</option>
+                    {renderEventOptions(groupedEvents.live, "Live / in posting window")}
+                    {renderEventOptions(groupedEvents.upcoming, "Upcoming")}
+                    {renderEventOptions(groupedEvents.past, "Past events")}
+                  </select>
+                )}
+
+                {spotMode === CUSTOM_SPOT_KEY && (
+                  <div className="mc-compose__custom-fields">
+                    <input
+                      className="board-text-field mc-compose__venue"
+                      value={draftCustomEventName}
+                      onChange={e => setDraftCustomEventName(e.target.value.slice(0, 80))}
+                      placeholder="Event or moment name — e.g. Backyard pregame, Afterparty…"
+                      maxLength={80}
+                    />
+                    <input
+                      className="board-text-field mc-compose__venue"
+                      value={draftCustomLocation}
+                      onChange={e => setDraftCustomLocation(e.target.value.slice(0, 80))}
+                      placeholder="Where — bar, park, neighborhood, cross streets…"
+                      maxLength={80}
+                    />
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                className="mc-compose__submit btn-neon solid"
+                disabled={!canSubmit || createMutation.isPending}
+                onClick={() => createMutation.mutate()}
+              >
+                {createMutation.isPending ? "Posting…" : "Post it →"}
+              </button>
+            </div>
+            <div className="mc-compose__count">{draftBody.length}/500</div>
           </div>
         )}
       </section>
@@ -325,14 +435,16 @@ export default function MissedConnectionsBubbleBoard({
       ) : posts.length === 0 ? (
         <div className="mc-pulse-field mc-pulse-field--empty">
           <p className="display section-heading">Nothing here yet</p>
-          <p className="board-copy-sm">Be the first to post a note from today&apos;s events.</p>
+          <p className="board-copy-sm">Be the first — tie it to an event, write your own spot, or post around town.</p>
         </div>
       ) : (
         <div ref={fieldRef} className="mc-pulse-field">
           <div className="mc-pulse-field__hint">{fieldHint}</div>
           {posts.map(post => {
-            const color = eventColor(post.eventId, post.eventTitle || String(post.id));
-            const dim = activeEventFilter != null && post.eventId !== activeEventFilter;
+            const color = post.eventId == null
+              ? GENERAL_SPOT_COLOR
+              : eventColor(post.eventId, post.eventTitle || String(post.id));
+            const dim = !postMatchesFilter(post);
             const glyph = postGlyph(post.title);
             const phys = physicsRef.current[post.id];
             const staticP = staticPos(post.id);
@@ -367,7 +479,7 @@ export default function MissedConnectionsBubbleBoard({
                       )}
                     </div>
                     {(post.eventTitle || post.venueHint) && (
-                      <div className="mc-bubble__pop-event">{post.eventTitle || post.venueHint}</div>
+                      <div className="mc-bubble__pop-event">{post.eventTitle ?? post.venueHint}</div>
                     )}
                     <h4 className="mc-bubble__pop-title">{post.title}</h4>
                     <p className="mc-bubble__pop-text">{post.body}</p>

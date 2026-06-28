@@ -6437,6 +6437,28 @@ footer a:hover { color: #00FFFF !important; }
   padding: 12px 28px;
 }
 
+.mc-compose__venue {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+.mc-compose__title {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.mc-compose__select {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.mc-compose__custom-fields {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .mc-compose__count {
   margin-top: 8px;
   font-size: 0.72rem;
