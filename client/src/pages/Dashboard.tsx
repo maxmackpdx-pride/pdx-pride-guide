@@ -463,7 +463,7 @@ export default function Dashboard() {
                 chipColor={MAGENTA}
                 actions={
                   <>
-                    <a href="#/missed-connections" className="dash-mini-btn" style={{ color: MAGENTA, textDecoration: "none" }}>Edit</a>
+                    <a href="#/spotted" className="dash-mini-btn" style={{ color: MAGENTA, textDecoration: "none" }}>Edit</a>
                     <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteMissed(post.id)}>Delete</button>
                   </>
                 }
