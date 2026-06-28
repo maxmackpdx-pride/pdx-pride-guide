@@ -230,8 +230,8 @@ export default function Gifting() {
       <PageHero
         flush
         kicker="Pride season only · Now through July 26"
-        titleLine1="Gift with"
-        titleLine2="Pride"
+        titleLine1="GIFT WITH"
+        titleLine2="PRIDE"
         accent="rainbow"
         lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home."
         tagline="Give gay gifts. Queer homes. Keep it moving."
@@ -252,8 +252,8 @@ export default function Gifting() {
         <section id="how-it-works" className="gifting-how board-how board-how--inline diag">
           <div>
             <span className="board-sticker board-sticker--cyan">How it works</span>
-            <h2 className="display section-heading gifting-how__title">How Gift with Pride works</h2>
-            <p className="board-copy gifting-how__lede">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
+            <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
+            <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
           </div>
           <div className="board-steps">
             {HOW_IT_WORKS.map(([title, text], i) => (

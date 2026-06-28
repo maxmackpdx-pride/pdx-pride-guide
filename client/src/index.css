@@ -2054,12 +2054,8 @@ h2.display,
   align-items: flex-start;
   margin: 22px 0 0;
   font-size: clamp(3.5rem, 9vw, 7.5rem);
-  line-height: 0.86;
-  text-transform: none;
-}
-
-.page-hero--flush .page-hero__title-line {
-  text-transform: capitalize;
+  line-height: 0.88;
+  text-transform: uppercase;
 }
 
 .page-hero--flush .page-hero__accent--rainbow {
@@ -2070,9 +2066,10 @@ h2.display,
   margin: 22px 0 0;
   padding: 0;
   max-width: 520px;
-  font-size: 16px;
-  line-height: 1.62;
-  color: #cbc8c0;
+  font-family: var(--font-body);
+  font-size: clamp(1.05rem, 2vw, 1.0625rem);
+  line-height: 1.72;
+  color: var(--text-body);
   text-align: left;
   background: transparent;
   border: none;
@@ -2350,17 +2347,6 @@ h2.display,
   background: linear-gradient(180deg, #16101c, #0c0c0c);
 }
 
-.gifting-page .gifting-how__title {
-  text-transform: none;
-  font-size: clamp(2.125rem, 5.5vw, 3.625rem);
-}
-
-.gifting-page .gifting-how__lede {
-  margin: 10px 0 30px;
-  font-size: 15.5px;
-  color: #bdbab2;
-}
-
 .gifting-page .board-how--inline .board-step__num {
   position: static;
   display: flex;
@@ -2379,12 +2365,6 @@ h2.display,
 .gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num {
   background: #ff1fa0;
   color: #0a0a0a;
-}
-
-.gifting-page .gifting-footer-line {
-  font-family: var(--font-board-mono);
-  color: #c8fa3c;
-  text-transform: uppercase;
 }
 
 .board-page .gigs-how {
