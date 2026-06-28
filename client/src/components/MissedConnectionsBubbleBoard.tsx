@@ -7,6 +7,9 @@ import type { MissedConnectionPost } from "./MissedConnectionsPanel";
 import type { Event } from "@shared/schema";
 
 const BUBBLE_COLORS = ["#FF1FA0", "#19E3FF", "#C8FA3C", "#A24BFF", "#FF8C00", "#E40303"];
+const BUBBLE_SPEED = 2.6;
+const BUBBLE_JITTER = 0.85;
+const BUBBLE_DRAG = 0.992;
 
 type PostableEvent = Pick<Event, "id" | "title" | "venueName" | "dayOfWeek" | "dateStart">;
 
@@ -152,8 +155,8 @@ export default function MissedConnectionsBubbleBoard({
     physicsRef.current[postId] = {
       x: 40 + Math.random() * Math.max(W - size - 80, 40),
       y: 56 + Math.random() * Math.max(H - size - 80, 40),
-      vx: (Math.random() - 0.5) * 1.2,
-      vy: (Math.random() - 0.5) * 1.2,
+      vx: (Math.random() - 0.5) * BUBBLE_SPEED,
+      vy: (Math.random() - 0.5) * BUBBLE_SPEED,
       size,
     };
   }, []);
@@ -179,7 +182,7 @@ export default function MissedConnectionsBubbleBoard({
             phys = physicsRef.current[post.id];
           }
           const dim = activeEventFilter != null && post.eventId !== activeEventFilter;
-          const mul = dim ? 0.3 : 1;
+          const mul = dim ? 0.55 : 1;
           const sz = phys.size;
 
           phys.x += phys.vx * mul * speedMul(post.id);
@@ -190,10 +193,10 @@ export default function MissedConnectionsBubbleBoard({
           if (phys.y < 48) { phys.y = 48; phys.vy = Math.abs(phys.vy); }
           if (phys.y > H - sz - 24) { phys.y = H - sz - 24; phys.vy = -Math.abs(phys.vy); }
 
-          phys.vx *= 0.98;
-          phys.vy *= 0.98;
-          phys.vx += (Math.random() - 0.5) * 0.35;
-          phys.vy += (Math.random() - 0.5) * 0.35;
+          phys.vx *= BUBBLE_DRAG;
+          phys.vy *= BUBBLE_DRAG;
+          phys.vx += (Math.random() - 0.5) * BUBBLE_JITTER;
+          phys.vy += (Math.random() - 0.5) * BUBBLE_JITTER;
         }
         setFrame(f => f + 1);
       }
