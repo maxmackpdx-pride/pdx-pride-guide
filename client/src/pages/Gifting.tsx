@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Gift, HeartHandshake, RefreshCw, Search, ShieldAlert, Sparkles, X } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Gift, HeartHandshake, RefreshCw, Search, ShieldAlert, X } from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
@@ -46,6 +46,15 @@ type GiftingPost = {
   interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
 };
 
+const HOW_IT_WORKS: Array<[string, string]> = [
+  ["Post it", "Gift it or search for it."],
+  ["Add photos", "Upload up to 2. The site makes them fit."],
+  ["3 queers max", "Only 3 people can raise their hand on a Gift post."],
+  ["Pick one", "Poster chooses and messages."],
+  ["Hand it off", "Porch pickup, public meetup, event handoff, or whatever feels safe."],
+  ["Stamp it done", "Gifted or Found. Then it leaves the active feed."],
+];
+
 const blankForm = {
   postType: "GIFT",
   title: "",
@@ -79,7 +88,14 @@ export default function Gifting() {
   const [report, setReport] = useState<Record<number, string>>({});
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const { data: posts = [], isLoading, isError, error } = useQuery<GiftingPost[]>({ queryKey: ["/api/gifting"] });
+  const { data: posts = [], isLoading, isError, error } = useQuery<GiftingPost[]>({
+    queryKey: ["/api/gifting"],
+    queryFn: async () => {
+      const r = await fetch("/api/gifting", { credentials: "include" });
+      if (!r.ok) throw new Error(`${r.status}: ${(await r.text()) || r.statusText}`);
+      return r.json();
+    },
+  });
 
   const stats = useMemo(() => {
     const active = (p: GiftingPost) => !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(p.status);
@@ -117,11 +133,18 @@ export default function Gifting() {
       if (photos?.length) {
         const fd = new FormData();
         Array.from(photos).slice(0, 2).forEach(file => fd.append("photos", file));
-        const uploadRes = await fetch("/api/upload/gifting", { method: "POST", body: fd });
+        const uploadRes = await fetch("/api/upload/gifting", { method: "POST", body: fd, credentials: "include" });
         if (!uploadRes.ok) throw new Error(await uploadRes.text());
         photoUrls = (await uploadRes.json()).urls || [];
       }
-      return apiRequest("POST", "/api/gifting", { ...form, photoUrls });
+      const res = await fetch("/api/gifting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ ...form, photoUrls }),
+      });
+      if (!res.ok) throw new Error((await res.text()) || res.statusText);
+      return res;
     },
     onSuccess: async res => {
       const body = await res.json();
@@ -135,7 +158,16 @@ export default function Gifting() {
   });
 
   const actionMutation = useMutation({
-    mutationFn: ({ url, data }: { url: string; data?: any }) => apiRequest("POST", url, data || {}),
+    mutationFn: async ({ url, data }: { url: string; data?: any }) => {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data || {}),
+      });
+      if (!res.ok) throw new Error((await res.text()) || res.statusText);
+      return res;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
       toast({ title: "Updated" });
@@ -196,18 +228,19 @@ export default function Gifting() {
   return (
     <div className="zine-page gifting-page board-page">
       <PageHero
+        flush
         kicker="Pride season only · Now through July 26"
-        titleLine1="GIFT WITH"
-        titleLine2="PRIDE"
+        titleLine1="Gift with"
+        titleLine2="Pride"
         accent="rainbow"
         lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home."
         tagline="Give gay gifts. Queer homes. Keep it moving."
-        taglineAccent="cyan"
+        taglineAccent="magenta"
         bgImage="/gift-with-pride-hero.jpg"
         actions={
           <>
-            <button className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a Gift</button>
-            <button className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an In Search Of</button>
+            <button type="button" className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a gift</button>
+            <button type="button" className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an in search of</button>
             <a href="#how-it-works" className="gifting-how-link">How it works ↓</a>
           </>
         }
@@ -216,21 +249,14 @@ export default function Gifting() {
       <BoardStatsBar stats={stats} />
 
       <ScrollReveal>
-        <section id="how-it-works" className="gifting-how board-how">
+        <section id="how-it-works" className="gifting-how board-how board-how--inline diag">
           <div>
             <span className="board-sticker board-sticker--cyan">How it works</span>
-            <h2 className="display section-heading">HOW GIFT WITH PRIDE WORKS</h2>
-            <p className="board-copy">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
+            <h2 className="display section-heading gifting-how__title">How Gift with Pride works</h2>
+            <p className="board-copy gifting-how__lede">Give what you can. Ask for what you need. Keep it local, free, and kind.</p>
           </div>
           <div className="board-steps">
-            {[
-              ["POST IT", "Gift it or search for it."],
-              ["ADD PHOTOS", "Upload up to 2. The site makes them fit."],
-              ["3 QUEERS MAX", "Only 3 people can raise their hand on a Gift post."],
-              ["PICK ONE", "Poster chooses and messages."],
-              ["HAND IT OFF", "Porch pickup, public meetup, event handoff, or whatever feels safe."],
-              ["STAMP IT DONE", "Gifted or Found. Then it leaves the active feed."],
-            ].map(([title, text], i) => (
+            {HOW_IT_WORKS.map(([title, text], i) => (
               <article className="board-step" key={title}>
                 <span className="board-step__num" aria-hidden="true">{i + 1}</span>
                 <h3 className="display panel-heading">{title}</h3>
@@ -243,27 +269,30 @@ export default function Gifting() {
       </ScrollReveal>
 
       {formOpen && (
-        <section id="gifting-form" className="gifting-form-panel">
-          <button className="gifting-close" onClick={() => setFormOpen(false)}><X size={18} /></button>
-          <h2 className="display section-heading">POST A {form.postType === "ISO" ? "IN SEARCH OF" : "GIFT"}</h2>
-          <p>No selling, trading, bartering, exact addresses, unsafe items, or hookup behavior. First-time posts are held for admin review.</p>
-          <div className="gifting-form-grid">
-            <label>Post Type<select value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}><option value="GIFT">Gift</option><option value="ISO">In Search Of</option></select></label>
-            <label>Category<select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></label>
-            <label className="span">Title<input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} maxLength={90} /></label>
-            <label className="span">Description<textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={5} /></label>
-            <label>Neighborhood / pickup area<input value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label>
-            <label>Pickup preference<select value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(p => <option key={p}>{p}</option>)}</select></label>
-            <label className="span">Photos, up to 2<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label>
-          </div>
-          <label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} /> I agree: Keep it free. Keep it kind. Keep it moving.</label>
-          <button className="btn-neon" disabled={createMutation.isPending || !form.acceptRules} onClick={submitPost}>
-            {createMutation.isPending ? "POSTING..." : "SUBMIT"}
-          </button>
-        </section>
+        <ScrollReveal>
+          <section id="gifting-form" className="gifting-form-panel">
+            <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form"><X size={18} /></button>
+            <h2 className="display section-heading">Post a {form.postType === "ISO" ? "in search of" : "gift"}</h2>
+            <p className="board-copy-sm">No selling, trading, bartering, exact addresses, unsafe items, or hookup behavior. First-time posts are held for admin review.</p>
+            <div className="gifting-form-grid">
+              <label>Post type<select className="board-text-field" value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}><option value="GIFT">Gift</option><option value="ISO">In search of</option></select></label>
+              <label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></label>
+              <label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} maxLength={90} /></label>
+              <label className="span">Description<textarea className="board-text-field" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={5} /></label>
+              <label>Neighborhood / pickup area<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label>
+              <label>Pickup preference<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(p => <option key={p}>{p}</option>)}</select></label>
+              <label className="span">Photos, up to 2<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label>
+            </div>
+            <label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} /> I agree: Keep it free. Keep it kind. Keep it moving.</label>
+            <button type="button" className="btn-neon solid" disabled={createMutation.isPending || !form.acceptRules} onClick={submitPost}>
+              {createMutation.isPending ? "Posting…" : "Submit →"}
+            </button>
+          </section>
+        </ScrollReveal>
       )}
 
       <BoardActiveSection
+        className="diag"
         sticker="Active board"
         stickerTone="lime"
         title="Gifts & In Search Of"
@@ -340,7 +369,11 @@ export default function Gifting() {
                         {post.photoUrls?.[0] ? (
                           <img src={post.photoUrls[0]} alt="" />
                         ) : (
-                          <div className="gifting-photo-empty" style={{ height: "100%", fontSize: "0.55rem" }}><Sparkles /></div>
+                          <div
+                            className="board-listing-card__thumb-fallback"
+                            style={{ background: `linear-gradient(135deg, ${accent}, ${post.postType === "ISO" ? "#A24BFF" : "#19E3FF"})` }}
+                            aria-hidden="true"
+                          />
                         )}
                         {(post.photoUrls?.length || 0) > 0 && (
                           <span className="board-listing-card__thumb-badge">▦ {post.photoUrls.length}</span>

@@ -15,6 +15,8 @@ type PageHeroProps = {
   actions?: ReactNode;
   bgImage: string;
   bgPosition?: string;
+  /** Left-aligned hero on the photo scrim (Gifting / Gigs template). */
+  flush?: boolean;
 };
 
 export default function PageHero({
@@ -28,9 +30,10 @@ export default function PageHero({
   actions,
   bgImage,
   bgPosition = "center",
+  flush = false,
 }: PageHeroProps) {
   return (
-    <section className="page-hero">
+    <section className={`page-hero${flush ? " page-hero--flush" : ""}`}>
       <div
         className="page-hero__bg"
         aria-hidden="true"

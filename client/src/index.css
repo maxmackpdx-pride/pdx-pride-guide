@@ -2018,6 +2018,77 @@ h2.display,
   border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #19e3ff, #ff8c00) 1;
 }
 
+/* Gifting template — flush hero on photo scrim */
+.page-hero--flush {
+  min-height: 600px;
+  border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0, #ff8c00) 1;
+}
+
+.page-hero--flush .page-hero__scrim {
+  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.88) 34%, rgba(0, 0, 0, 0.45) 64%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.page-hero--flush .page-hero__inner {
+  align-items: center;
+  justify-content: flex-start;
+  padding: 54px clamp(18px, 4vw, 44px);
+}
+
+.page-hero--flush .page-hero__panel {
+  align-items: flex-start;
+  text-align: left;
+  max-width: 640px;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.page-hero--flush .board-kicker {
+  display: inline-block;
+  margin-bottom: 0;
+}
+
+.page-hero--flush .page-hero__title {
+  align-items: flex-start;
+  margin: 22px 0 0;
+  font-size: clamp(3.5rem, 9vw, 7.5rem);
+  line-height: 0.86;
+  text-transform: none;
+}
+
+.page-hero--flush .page-hero__title-line {
+  text-transform: capitalize;
+}
+
+.page-hero--flush .page-hero__accent--rainbow {
+  animation: board-flickr 6s linear infinite;
+}
+
+.page-hero--flush .page-hero__lede {
+  margin: 22px 0 0;
+  padding: 0;
+  max-width: 520px;
+  font-size: 16px;
+  line-height: 1.62;
+  color: #cbc8c0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.page-hero--flush .page-hero__tagline {
+  margin-top: 20px;
+}
+
+.page-hero--flush .page-hero__actions {
+  justify-content: flex-start;
+  margin-top: 24px;
+  max-width: none;
+}
+
 .page-hero__bg {
   position: absolute;
   inset: 0;
@@ -2276,9 +2347,44 @@ h2.display,
 }
 
 .board-page .gifting-how {
-  background:
-    linear-gradient(90deg, rgba(0, 255, 255, 0.12), rgba(0, 255, 255, 0.09)),
-    #080808;
+  background: linear-gradient(180deg, #16101c, #0c0c0c);
+}
+
+.gifting-page .gifting-how__title {
+  text-transform: none;
+  font-size: clamp(2.125rem, 5.5vw, 3.625rem);
+}
+
+.gifting-page .gifting-how__lede {
+  margin: 10px 0 30px;
+  font-size: 15.5px;
+  color: #bdbab2;
+}
+
+.gifting-page .board-how--inline .board-step__num {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.gifting-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
+  background: #19e3ff;
+  color: #0a0a0a;
+}
+
+.gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num {
+  background: #ff1fa0;
+  color: #0a0a0a;
+}
+
+.gifting-page .gifting-footer-line {
+  font-family: var(--font-board-mono);
+  color: #c8fa3c;
+  text-transform: uppercase;
 }
 
 .board-page .gigs-how {
@@ -2382,8 +2488,11 @@ h2.display,
   position: relative;
   z-index: 1;
   max-width: 1180px;
-  margin: 0 auto;
-  padding: clamp(84px, 12vw, 150px) 20px;
+  margin: 28px auto;
+  padding: clamp(32px, 5vw, 48px) 20px;
+  background: rgba(8, 8, 8, 0.96);
+  border: 3px solid #c8fa3c;
+  box-shadow: 9px 9px 0 rgba(255, 31, 160, 0.65);
 }
 
 .gifting-how,
@@ -2550,6 +2659,7 @@ h2.display,
   grid-column: 1 / -1;
 }
 
+.gifting-form-grid .board-text-field,
 .gifting-form-grid input,
 .gifting-form-grid textarea,
 .gifting-form-grid select,
@@ -3887,7 +3997,8 @@ footer a:hover { color: #00FFFF !important; }
   background: linear-gradient(135deg, rgba(200, 250, 60, 0.35), rgba(25, 227, 255, 0.35));
 }
 
-.board-listing-card__thumb img {
+.board-listing-card__thumb img,
+.board-listing-card__thumb-fallback {
   width: 100%;
   height: 100%;
   object-fit: cover;
