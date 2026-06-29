@@ -1,5 +1,6 @@
 import { storage } from "./storage";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { expandMultiDayEvents } from "@shared/multiDayEvents";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.prideguidepdx.com").replace(/\/$/, "");
 
@@ -31,8 +32,7 @@ function escapeHtml(value: string) {
 }
 
 export function getLiveEventsForSeo(): SeoEvent[] {
-  return storage
-    .getEvents({ status: "LIVE" })
+  return expandMultiDayEvents(storage.getEvents({ status: "LIVE" }))
     .map(evt => ({
       id: evt.id,
       title: evt.title,

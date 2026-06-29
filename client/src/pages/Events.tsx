@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
+import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "../components/EventTypeTag";
 import EventTagsRow from "../components/EventTagsRow";
@@ -31,7 +32,7 @@ const DAY_COLORS: Record<string, string> = {
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
 
 function filterLiveEvents(
-  events: Event[],
+  events: EventListing[],
   activeDay: string,
   activeFilters: string[],
   searchQuery: string,
@@ -158,7 +159,7 @@ function MarkersLayer({ events, onSelect, rsvpEventIds }: { events: Event[]; onS
                   const dc = DAY_COLORS[e.dayOfWeek || ""] || "#fff";
                   const typeTags = getEventTypeTagsForEvent(e);
                   return (
-                    <div key={e.id} onClick={() => onSelect(e)} style={{ fontSize: 11, color: "#aaa", padding: "5px 0", borderTop: "1px solid #1a1a1a", cursor: "pointer" }}>
+                    <div key={listingKey(e)} onClick={() => onSelect(e)} style={{ fontSize: 11, color: "#aaa", padding: "5px 0", borderTop: "1px solid #1a1a1a", cursor: "pointer" }}>
                       <div>
                         <span style={{ color: dc, fontWeight: 700, marginRight: 4 }}>{e.dayOfWeek}</span>
                         {e.title}
@@ -544,7 +545,7 @@ export default function Events() {
     setSelectedEvent(event);
   }, []);
 
-  const { data: events = [], isLoading, isError, error, refetch } = useQuery<Event[]>({
+  const { data: events = [], isLoading, isError, error, refetch } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
@@ -729,7 +730,7 @@ export default function Events() {
           <div className="events-poster-grid">
             {filtered.map((e, i) => (
               <EventCard
-                key={e.id}
+                key={listingKey(e)}
                 event={e}
                 onClick={() => openEvent(e)}
                 viewMode="grid"
@@ -744,7 +745,7 @@ export default function Events() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.map((e, i) => (
               <EventCard
-                key={e.id}
+                key={listingKey(e)}
                 event={e}
                 onClick={() => openEvent(e)}
                 viewMode="list"

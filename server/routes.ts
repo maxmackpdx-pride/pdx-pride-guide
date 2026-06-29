@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
+import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import { storage, hashPassword, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, getPersistenceAudit } from "./persistence";
 import { BetterSqliteSessionStore } from "./sessionStore";
@@ -306,8 +307,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
   app.get("/api/events", (req, res) => {
-    const { status, day } = req.query;
-    const evts = storage.getEvents({ status: "LIVE", day: day as string });
+    const { day } = req.query;
+    let evts = expandMultiDayEvents(storage.getEvents({ status: "LIVE" }));
+    if (typeof day === "string" && day.length > 0) {
+      evts = evts.filter(evt => evt.dayOfWeek === day);
+    }
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     res.json(evts.map(evt => publicEvent(evt, pendingClaimIds)));
   });
