@@ -15,7 +15,8 @@ export function serveStatic(app: Express) {
   const indexPath = path.resolve(distPath, "index.html");
   const baseIndexHtml = fs.readFileSync(indexPath, "utf8");
   const sendSeoIndex = (req: express.Request, res: express.Response) => {
-    res.type("html").send(injectSeoIntoHtml(baseIndexHtml, req.path || "/"));
+    const requestPath = (req.originalUrl || req.url || req.path || "/").split("?")[0] || "/";
+    res.type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 
   // Serve injected HTML for the homepage — express.static would bypass SEO injection.

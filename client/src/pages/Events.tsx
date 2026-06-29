@@ -19,7 +19,8 @@ import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
-import { eventPath } from "@shared/eventSlug";
+import { eventPath, eventUrl } from "@shared/eventSlug";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation, Link2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -569,11 +570,18 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
   );
 }
 
+function absoluteShareImage(path?: string | null) {
+  if (!path) return "https://www.prideguidepdx.com/og-preview.jpg";
+  if (path.startsWith("http")) return path;
+  return `https://www.prideguidepdx.com${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function truncateSeo(text: string, max = 160) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length <= max ? clean : `${clean.slice(0, max - 1).trim()}…`;
+}
+
 export default function Events() {
-  usePageSeo(
-    "Portland Pride 2026 Events — PDX Pride Guide",
-    "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
-  );
   const { user } = useAuth();
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
   const [, setLocation] = useLocation();
@@ -619,6 +627,26 @@ export default function Events() {
     queryFn: () => apiRequest("GET", `/api/events/${routeEventId}`).then(r => r.json()),
     enabled: routeEventId != null && Number.isFinite(routeEventId),
   });
+
+  const shareEvent = selectedEvent || routeEvent || null;
+  usePageSeo(
+    shareEvent
+      ? `${shareEvent.title} — Portland Pride 2026 | PDX Pride Guide`
+      : "Portland Pride 2026 Events — PDX Pride Guide",
+    shareEvent
+      ? truncateSeo(
+          `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,
+        )
+      : "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
+    shareEvent
+      ? {
+          url: eventUrl(shareEvent.id, shareEvent.title),
+          image: absoluteShareImage(resolveEventPosterUrl(shareEvent.id, shareEvent.posterImageUrl)),
+          imageAlt: shareEvent.title,
+          type: "article",
+        }
+      : undefined,
+  );
 
   useEffect(() => {
     if (!routeEventId || !Number.isFinite(routeEventId)) {

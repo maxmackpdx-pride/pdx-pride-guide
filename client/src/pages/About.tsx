@@ -250,6 +250,45 @@ export default function About() {
         </section>
         </ScrollReveal>
 
+        <ScrollReveal delay={80}>
+          <section>
+            <h2 className="display section-heading">
+              PORTLAND PRIDE 2026 <span style={{ color: "#CCFF00" }}>FAQ</span>
+            </h2>
+            <div className="space-y-4">
+              {[
+                {
+                  q: "When is Portland Pride 2026?",
+                  a: "Portland Pride Weekend 2026 is July 16–19 (Thursday through Sunday). PDX Pride Guide lists official festivals, parties, marches, and community events across the full weekend.",
+                },
+                {
+                  q: "Where do I find PDX Pride events?",
+                  a: "Use the Events page to browse every live listing on a map and board — filter by day (Thu–Sun), type, and neighborhood, or open any event for times, venue, and tickets.",
+                },
+                {
+                  q: "How is this different from other Pride apps?",
+                  a: "PDX Pride Guide is free, community-run, and built for Portland — no corporate feed, no pay-to-rank listings. Promoters submit or claim events; the community shows up.",
+                },
+                {
+                  q: "How do I list my event?",
+                  a: "Create an account and submit a new event or claim an existing listing from the Promoters page. Verified promoters can publish directly after review.",
+                },
+              ].map(item => (
+                <details
+                  key={item.q}
+                  className="border-2 border-white/10 p-5"
+                  style={{ background: "#111" }}
+                >
+                  <summary className="display text-sm cursor-pointer" style={{ color: "#CCFF00" }}>
+                    {item.q}
+                  </summary>
+                  <p className="zine-body-text mt-3">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
+
       </div>
     </div>
   );
