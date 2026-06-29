@@ -1547,11 +1547,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const counts = getTableCounts();
     const pendingSubmissions = storage.getSubmissions("PENDING").length;
     const liveEvents = storage.getEvents({ status: "LIVE" }).length;
+    const userSubmittedEvents = storage.countEventsBySource("user_submitted", "LIVE");
     const openFeedback = storage.getFeedbackReports("OPEN").length;
     res.json({
       users: counts.users ?? 0,
       activeSessions: counts.express_sessions ?? 0,
       liveEvents,
+      userSubmittedEvents,
       messages: counts.messages ?? 0,
       attendances: counts.attendances ?? 0,
       pendingSubmissions,

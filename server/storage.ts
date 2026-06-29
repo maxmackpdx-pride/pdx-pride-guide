@@ -2110,6 +2110,7 @@ function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
 export interface IStorage {
   // Events
   getEvents(filters?: { status?: string; day?: string }): Event[];
+  countEventsBySource(source: string, status?: string): number;
   getEvent(id: number): Event | undefined;
   getPendingClaimEventIds(): number[];
   createEvent(data: InsertEvent): Event;
@@ -2261,6 +2262,18 @@ export const storage: IStorage = {
       if (filters?.day && e.dayOfWeek !== filters.day) return false;
       return true;
     });
+  },
+  countEventsBySource(source, status) {
+    if (status) {
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM events WHERE source = ? AND status = ?
+      `).get(source, status) as { count: number };
+      return row?.count ?? 0;
+    }
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count FROM events WHERE source = ?
+    `).get(source) as { count: number };
+    return row?.count ?? 0;
   },
   getEvent(id) {
     return db.select().from(events).where(eq(events.id, id)).get();

@@ -57,6 +57,9 @@ interface AdminEvent {
   isSexPositive: boolean;
   nudityOk: boolean;
   status: string;
+  source: string;
+  submittedBy: string | null;
+  claimedBy: string | null;
 }
 
 interface ModerationRequest {
@@ -112,7 +115,7 @@ interface AdminGig {
 }
 
 type AdminTab = "inbox" | "events" | "gigs" | "team";
-type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer";
+type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer" | "user_submitted";
 
 interface SiteAdminMember {
   userId: number;
@@ -244,6 +247,8 @@ export default function Admin() {
       apiRequest("POST", `/api/admin/submissions/${id}/approve`, { adminName }),
     onSuccess: () => {
       invalidateInboxQueries();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/unclaimed"] });
       toast({ title: "Approved", description: "Submission approved successfully." });
@@ -547,10 +552,12 @@ export default function Admin() {
   };
   const eventSearchQuery = eventSearch.trim().toLowerCase();
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
+  const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const filteredEvents = events.filter(ev => {
     if (eventStatusFilter === "LIVE" && ev.status !== "LIVE") return false;
     if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
     if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
+    if (eventStatusFilter === "user_submitted" && ev.source !== "user_submitted") return false;
     if (!eventSearchQuery) return true;
     const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""}`.toLowerCase();
     return haystack.includes(eventSearchQuery);
@@ -593,7 +600,13 @@ export default function Admin() {
           </div>
         </header>
 
-        <AdminMetricsPanel enabled={authenticated} onMetricClick={tab => setActiveTab(tab as AdminTab)} />
+        <AdminMetricsPanel
+          enabled={authenticated}
+          onMetricClick={(tab, metricKey) => {
+            setActiveTab(tab as AdminTab);
+            if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
+          }}
+        />
 
         <div className="dash-admin-tabs">
           {([
@@ -673,6 +686,7 @@ export default function Admin() {
                 { key: "LIVE" as EventStatusFilter, label: "Live" },
                 { key: "HIDDEN" as EventStatusFilter, label: "Hidden" },
                 { key: "missing_flyer" as EventStatusFilter, label: `Missing flyer${missingFlyerCount > 0 ? ` (${missingFlyerCount})` : ""}` },
+                { key: "user_submitted" as EventStatusFilter, label: `Community submitted${userSubmittedCount > 0 ? ` (${userSubmittedCount})` : ""}` },
               ]).map(filter => (
                 <button
                   key={filter.key}
@@ -730,12 +744,22 @@ export default function Admin() {
                         {isMissingEventFlyer(ev.posterImageUrl) && (
                           <p className="text-white/35 text-[10px] mt-1 uppercase tracking-wide">Missing flyer</p>
                         )}
+                        {ev.source === "user_submitted" && (
+                          <p className="text-[#00FFFF]/80 text-[10px] mt-1 uppercase tracking-wide">
+                            Community submitted{ev.submittedBy ? ` · ${ev.submittedBy}` : ""}
+                          </p>
+                        )}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
                         <span className="sticker text-xs" style={{ color: ev.status === "LIVE" ? "#CCFF00" : "#666", borderColor: ev.status === "LIVE" ? "#CCFF00" : "#333" }}>
                           {ev.status}
                         </span>
+                        {ev.source === "user_submitted" && (
+                          <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>
+                            COMMUNITY
+                          </span>
+                        )}
                         <button
                           onClick={() => claimableMutation.mutate({ id: ev.id, isClaimable: !ev.isClaimable })}
                           className="flex items-center gap-1 text-sm transition-all"

@@ -5,6 +5,7 @@ interface AdminMetrics {
   users: number;
   activeSessions: number;
   liveEvents: number;
+  userSubmittedEvents: number;
   messages: number;
   attendances: number;
   pendingSubmissions: number;
@@ -18,6 +19,7 @@ const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: st
   { key: "users", label: "Registered users", color: "#C8FA3C" },
   { key: "activeSessions", label: "Active sessions", color: "#19E3FF" },
   { key: "liveEvents", label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events" },
+  { key: "userSubmittedEvents", label: "Community-submitted events", color: "#00FFFF", tab: "events" },
   { key: "attendances", label: "Member check-ins", color: "#C8FA3C" },
   { key: "messages", label: "Messages", color: "#19E3FF" },
   { key: "pendingSubmissions", label: "Pending review", color: "#FF1FA0", tab: "inbox" },
@@ -32,7 +34,7 @@ export default function AdminMetricsPanel({
   onMetricClick,
 }: {
   enabled: boolean;
-  onMetricClick?: (tab: string) => void;
+  onMetricClick?: (tab: string, metricKey: keyof AdminMetrics) => void;
 }) {
   const { data } = useQuery<AdminMetrics>({
     queryKey: ["/api/admin/metrics"],
@@ -52,7 +54,7 @@ export default function AdminMetricsPanel({
           <Tag
             key={metric.key}
             type={clickable ? "button" : undefined}
-            onClick={clickable ? () => onMetricClick!(metric.tab!) : undefined}
+            onClick={clickable ? () => onMetricClick!(metric.tab!, metric.key) : undefined}
             className={`dash-metric-card accent${clickable ? " dash-metric-card-clickable" : ""}`}
             style={{ ["--metric-color" as string]: metric.color }}
           >
