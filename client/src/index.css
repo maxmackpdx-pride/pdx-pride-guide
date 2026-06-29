@@ -2353,6 +2353,18 @@ h2.display,
   box-shadow: 6px 6px 0 var(--neon-yellow);
 }
 
+.dash-tagline-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 2px;
+    cursor: pointer;
+}
+
+.dash-tagline-link:hover {
+    color: var(--neon-magenta);
+}
+
 .page-hero__actions {
   margin-top: 1.5rem;
   display: flex;
