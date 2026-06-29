@@ -34,6 +34,55 @@ const DAY_COLORS: Record<string, string> = {
   SUN: "#FF6600",
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
+const DAY_SORT_ORDER: Record<string, number> = { THU: 0, FRI: 1, SAT: 2, SUN: 3 };
+
+type SortMode =
+  | "start_time"
+  | "end_time"
+  | "day_start"
+  | "title_az"
+  | "title_za"
+  | "venue_az";
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: "start_time", label: "Start time" },
+  { value: "end_time", label: "End time" },
+  { value: "day_start", label: "Day, then start time" },
+  { value: "title_az", label: "Title A–Z" },
+  { value: "title_za", label: "Title Z–A" },
+  { value: "venue_az", label: "Venue A–Z" },
+];
+
+function compareTitles(a: EventListing, b: EventListing) {
+  return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+}
+
+function sortEvents(events: EventListing[], sortMode: SortMode): EventListing[] {
+  const sorted = [...events];
+  switch (sortMode) {
+    case "start_time":
+      return sorted.sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+    case "end_time":
+      return sorted.sort((a, b) => new Date(a.dateEnd).getTime() - new Date(b.dateEnd).getTime());
+    case "day_start":
+      return sorted.sort((a, b) => {
+        const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;
+        const dayB = DAY_SORT_ORDER[b.dayOfWeek ?? ""] ?? 99;
+        if (dayA !== dayB) return dayA - dayB;
+        return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+      });
+    case "title_az":
+      return sorted.sort(compareTitles);
+    case "title_za":
+      return sorted.sort((a, b) => compareTitles(b, a));
+    case "venue_az":
+      return sorted.sort((a, b) =>
+        (a.venueName || "").localeCompare(b.venueName || "", undefined, { sensitivity: "base" }),
+      );
+    default:
+      return sorted;
+  }
+}
 
 function eventCardA11yProps(onClick: () => void) {
   return {
@@ -74,8 +123,7 @@ function filterLiveEvents(
         if (!haystack.includes(q)) return false;
       }
       return true;
-    })
-    .sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+    });
 }
 
 function EventShareLink({ href, title }: { href: string; title: string }) {
@@ -294,6 +342,7 @@ export default function Events() {
   });
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortMode, setSortMode] = useState<SortMode>("start_time");
   const [mapExpanded, setMapExpanded] = useState(false);
   const openEvent = useCallback((event: EventListing) => {
     setSelectedEvent(event);
@@ -383,8 +432,8 @@ export default function Events() {
   }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
 
   const filtered = useMemo(
-    () => filterLiveEvents(events, activeDay, activeFilters, searchQuery),
-    [events, activeDay, activeFilters, searchQuery],
+    () => sortEvents(filterLiveEvents(events, activeDay, activeFilters, searchQuery), sortMode),
+    [events, activeDay, activeFilters, searchQuery, sortMode],
   );
 
   const hasActiveFilters =
@@ -507,14 +556,35 @@ export default function Events() {
               </span>
               {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
             </div>
-            {(activeFilters.length > 0 || searchQuery.trim()) && (
-              <button
-                onClick={() => { setActiveFilters([]); setSearchQuery(""); }}
-                style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
-              >
-                CLEAR FILTERS ×
-              </button>
-            )}
+            <div className="events-count-actions">
+              {!isLoading && filtered.length > 0 && (
+                <label className="events-sort">
+                  <span className="events-sort__label">Sort</span>
+                  <div className="board-select-wrap">
+                    <select
+                      className="board-select events-sort__select"
+                      value={sortMode}
+                      onChange={e => setSortMode(e.target.value as SortMode)}
+                      data-testid="events-sort"
+                      aria-label="Sort events"
+                    >
+                      {SORT_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                    <span className="board-select-caret">▼</span>
+                  </div>
+                </label>
+              )}
+              {(activeFilters.length > 0 || searchQuery.trim()) && (
+                <button
+                  onClick={() => { setActiveFilters([]); setSearchQuery(""); }}
+                  style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
+                >
+                  CLEAR FILTERS ×
+                </button>
+              )}
+            </div>
           </div>
         </ScrollReveal>
 
@@ -552,7 +622,7 @@ export default function Events() {
                 event={e}
                 onClick={() => openEvent(e)}
                 viewMode="grid"
-                revealDelay={(i % 6) * 70}
+                revealDelay={(i % 8) * 70}
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
                 selfUserId={user?.id}
