@@ -1645,6 +1645,17 @@ function applyEventDataAuditFixes() {
     )
       AND date_start LIKE '2026-07-18%'
   `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      status = 'HIDDEN',
+      admin_notes = 'Duplicate Night 1 row — consolidated to single Friday listing'
+    WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+      AND id NOT IN (
+        SELECT MIN(id) FROM events
+        WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+          AND date_start LIKE '2026-07-17%'
+      )
+  `).run();
 }
 
 function runDismissStaleTestModerationRequests() {
@@ -1698,6 +1709,20 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("event_data_audit_v1")) {
     applyEventDataAuditFixes();
     recordBootMigration("event_data_audit_v1");
+  }
+  if (!hasBootMigration("event_data_audit_v2")) {
+    sqlite.prepare(`
+      UPDATE events SET
+        status = 'HIDDEN',
+        admin_notes = 'Duplicate Night 1 row — consolidated to single Friday listing'
+      WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+        AND id NOT IN (
+          SELECT MIN(id) FROM events
+          WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+            AND date_start LIKE '2026-07-17%'
+        )
+    `).run();
+    recordBootMigration("event_data_audit_v2");
   }
 }
 
