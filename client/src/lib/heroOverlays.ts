@@ -17,12 +17,13 @@ export const HERO_OVERLAY_LAYERS: Record<HeroOverlayId, HeroOverlayLayer> = {
     src: "/overlays/light-leaks.webm",
     blendMode: "screen",
     opacity: 0.44,
+    playbackRate: 0.5,
   },
   filmGrain: {
     id: "filmGrain",
     src: "/overlays/scanlines.webm",
     blendMode: "overlay",
-    opacity: 0.14,
+    opacity: 0.168,
     playbackRate: 0.85,
   },
   scanlines: {
