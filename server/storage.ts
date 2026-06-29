@@ -1724,9 +1724,11 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("event_data_audit_v2");
   }
+  if (!hasBootMigration("sync_site_owner_portfolio_v1")) {
+    syncSiteOwnerPortfolio();
+    recordBootMigration("sync_site_owner_portfolio_v1");
+  }
 }
-
-runBootMigrationsOnce();
 
 function archiveExpiredMissedConnections() {
   const now = new Date().toISOString();
@@ -1770,6 +1772,7 @@ function expireGiftingPosts() {
 
 export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 export const SITE_ADMIN_GIG_OWNER_USERNAME = "tucker_pdmax";
+export const SITE_OWNER_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
 
 const SITE_ADMIN_GIG_DESCRIPTION = `PDX Pride Guide is looking for site admins to help during Pride season and beyond.
 
@@ -1814,6 +1817,72 @@ function linkSiteAdminGigPostToOwner(ownerId: number) {
   const gigId = findSiteAdminGigPostId();
   if (gigId == null) return;
   sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(ownerId, gigId);
+}
+
+function findSiteOwnerEventId(): number | undefined {
+  const exact = sqlite.prepare(`SELECT id FROM events WHERE title = ? LIMIT 1`).get(SITE_OWNER_EVENT_TITLE) as { id: number } | undefined;
+  if (exact) return exact.id;
+  const fuzzy = sqlite.prepare(`
+    SELECT id FROM events
+    WHERE title LIKE '%Yes Coach%'
+    ORDER BY id ASC
+    LIMIT 1
+  `).get() as { id: number } | undefined;
+  return fuzzy?.id;
+}
+
+/** Keep @tucker_pdmax portfolio limited to Yes Coach + the site-admin gig post. */
+function syncSiteOwnerPortfolio() {
+  ensureSiteAdminGigPost();
+  ensureEventHostsSchema();
+  const owner = getSiteAdminGigOwner();
+  if (!owner) return;
+
+  const adminGigId = findSiteAdminGigPostId();
+  if (adminGigId != null) {
+    sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(owner.id, adminGigId);
+    sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ? AND id != ?`).run(owner.id, adminGigId);
+  } else {
+    sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ?`).run(owner.id);
+  }
+
+  const yesCoachId = findSiteOwnerEventId();
+  if (yesCoachId == null) {
+    console.warn("[site_owner] Yes Coach event not found — skipping event portfolio sync");
+    return;
+  }
+
+  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ? AND role = 'PRIMARY'`).run(yesCoachId);
+  const existingHost = sqlite.prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`).get(yesCoachId, owner.id);
+  if (existingHost) {
+    sqlite.prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`).run(yesCoachId, owner.id);
+  } else {
+    db.insert(eventHosts).values({
+      eventId: yesCoachId,
+      userId: owner.id,
+      role: "PRIMARY",
+      addedByUserId: null,
+      createdAt: new Date().toISOString(),
+    } as any).run();
+  }
+  db.update(events).set({ isClaimable: false, claimedBy: owner.username }).where(eq(events.id, yesCoachId)).run();
+
+  sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ? AND event_id != ?`).run(owner.id, yesCoachId);
+  sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ? AND event_id != ?`).run(owner.id, yesCoachId);
+
+  const ownerUsername = owner.username.trim().toLowerCase();
+  const ownerEmail = (owner.email || "").trim().toLowerCase();
+  sqlite.prepare(`
+    UPDATE events
+    SET claimed_by = NULL
+    WHERE id != ?
+      AND claimed_by IS NOT NULL
+      AND (
+        LOWER(TRIM(claimed_by)) = ?
+        OR LOWER(TRIM(claimed_by)) = ?
+      )
+  `).run(yesCoachId, ownerUsername, ownerEmail);
+
 }
 
 function notifyGuideInbox(
@@ -1882,9 +1951,8 @@ function ensureSiteAdminGigPost() {
     return;
   }
   insertGigPostCompat(payload);
+  if (owner?.id != null) linkSiteAdminGigPostToOwner(owner.id);
 }
-
-ensureSiteAdminGigPost();
 
 function removeGiftingSeedPosts() {
   sqlite.prepare(`
@@ -1947,6 +2015,7 @@ export interface IStorage {
   adminUpdateGigStatus(id: number, status: string): void;
   adminUpdateGigPost(id: number, data: Partial<GigPost>): GigPost | undefined;
   ensureSiteAdminGigPost(): void;
+  syncSiteOwnerPortfolio(): void;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -2263,6 +2332,9 @@ export const storage: IStorage = {
   },
   ensureSiteAdminGigPost() {
     ensureSiteAdminGigPost();
+  },
+  syncSiteOwnerPortfolio() {
+    syncSiteOwnerPortfolio();
   },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();
@@ -3365,3 +3437,6 @@ export function getTableCounts(): Record<string, number> {
   }
   return counts;
 }
+
+runBootMigrationsOnce();
+syncSiteOwnerPortfolio();

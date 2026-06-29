@@ -259,7 +259,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
   assertProductionSecrets();
   attendanceHub = initAttendanceWs(httpServer);
-  storage.ensureSiteAdminGigPost();
+  storage.syncSiteOwnerPortfolio();
 
   // Machine-readable discovery for search engines and AI crawlers.
   app.get("/llms.txt", (_req, res) => {
@@ -794,7 +794,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (existingUsername) return res.status(409).json({ error: "Username already taken" });
 
       const user = storage.createUser({ username, email, passwordHash: password, displayName });
-      if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
+      if (user.username === "tucker_pdmax") storage.syncSiteOwnerPortfolio();
       req.session.userId = user.id;
       res.json(authUserResponse(req, user));
     } catch (e: any) {
@@ -814,7 +814,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const finishLogin = () => {
       req.session.userId = user.id;
-      if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
+      if (user.username === "tucker_pdmax") storage.syncSiteOwnerPortfolio();
       res.json(authUserResponse(req, user));
     };
     if (typeof req.session.regenerate === "function") {
@@ -937,7 +937,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
 
       req.session.userId = user.id;
-      if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
+      if (user.username === "tucker_pdmax") storage.syncSiteOwnerPortfolio();
       markAdminSessionForUser(req, user);
       req.session.save((saveErr) => {
         if (saveErr) {
