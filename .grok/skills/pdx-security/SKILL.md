@@ -12,9 +12,13 @@ description: >
 
 Specialized agent for the **Security (next)** bucket.
 
-## Assigned task
+## Assigned task — COMPLETE (P0/P1)
 
-**Scrypt password hashing with legacy SHA-256 migration on login**, **attendance PII masking** (no `user_id`/photos in public summaries), **RSVP-gated attendance messaging**, and **admin event PUT allowlist**.
+Scrypt passwords + legacy migration, attendance PII masking, RSVP-gated messaging, admin PUT allowlist, auth rate limits, production log redaction, session regenerate/destroy, upload extension whitelist.
+
+## Remaining (P2, optional)
+
+CSP report-only, magic-byte upload validation, promoter password scrypt migration.
 
 ## Standing rules
 

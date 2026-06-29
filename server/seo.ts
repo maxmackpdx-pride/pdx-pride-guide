@@ -172,6 +172,7 @@ Allow: /api/events
 Allow: /llms.txt
 Disallow: /admin
 Disallow: /dashboard
+Disallow: /inbox
 Disallow: /api/admin
 
 Sitemap: ${SITE_URL}/sitemap.xml

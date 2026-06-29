@@ -12,9 +12,13 @@ description: >
 
 Specialized agent for the **Events UX** approval bucket on `pdx-pride-guide`.
 
-## Assigned task
+## Assigned task — COMPLETE
 
-**Multi-day deep links + search URL sync + clear-filters fix**: `?day=` on event URLs, match clicked listing on refresh, sync `?q=` to address bar, reset search when clearing filters. **No map layout changes.**
+Multi-day `?day=` deep links, `?q=` URL sync, clear-filters resets search, keyboard-accessible event cards. **No map layout changes.**
+
+## Orchestrator note
+
+This skill is for the lead agent's workflow, not the site owner. Re-open only for new Events UX scope.
 
 ## Standing rules (non-negotiable)
 

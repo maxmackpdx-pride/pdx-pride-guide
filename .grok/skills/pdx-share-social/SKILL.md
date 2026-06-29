@@ -12,9 +12,13 @@ description: >
 
 Specialized agent for the **Share / Social** approval bucket.
 
-## Assigned task
+## Assigned task — COMPLETE
 
-**Wire copy-link + Web Share API** in `EventShareLink` and `EventModal`. Sync `twitter:card` / `og:site_name` in `usePageSeo` on SPA navigation. **Do not replace or regenerate** the uploaded social image (`og-preview.jpg` / user's existing asset). **No new 1200×630 share card pipeline** unless Tucker explicitly requests it later.
+Web Share + copy link on cards/modal; `twitter:card` / `og:site_name` in `usePageSeo`. **OG image untouched.**
+
+## Blocked unless requested
+
+Per-event 1200×630 share cards (separate from site default social image).
 
 ## Standing rules
 

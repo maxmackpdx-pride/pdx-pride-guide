@@ -30,7 +30,8 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
     filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
+      const rawExt = path.extname(file.originalname).toLowerCase();
+      const ext = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(rawExt) ? rawExt : ".jpg";
       cb(null, `poster-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
     },
   }),
@@ -811,9 +812,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (isLegacyPasswordHash(user.passwordHash)) {
       storage.updatePasswordHash(user.id, hashPassword(password));
     }
-    req.session.userId = user.id;
-    if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
-    res.json(authUserResponse(req, user));
+    const finishLogin = () => {
+      req.session.userId = user.id;
+      if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
+      res.json(authUserResponse(req, user));
+    };
+    if (typeof req.session.regenerate === "function") {
+      return req.session.regenerate(err => {
+        if (err) return res.status(500).json({ error: "Session error" });
+        finishLogin();
+      });
+    }
+    finishLogin();
   });
 
   app.get("/api/auth/google", (req, res) => {
@@ -943,9 +953,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/auth/logout", (req, res) => {
-    req.session.userId = undefined;
-    req.session.isAdmin = undefined;
-    res.json({ ok: true });
+    req.session.destroy(err => {
+      if (err) return res.status(500).json({ error: "Logout failed" });
+      res.clearCookie("connect.sid");
+      res.json({ ok: true });
+    });
   });
 
   app.get("/api/auth/me", (req, res) => {

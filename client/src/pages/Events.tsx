@@ -35,6 +35,20 @@ const DAY_COLORS: Record<string, string> = {
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
 
+function eventCardA11yProps(onClick: () => void) {
+  return {
+    role: "button" as const,
+    tabIndex: 0,
+    onClick,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick();
+      }
+    },
+  };
+}
+
 function filterLiveEvents(
   events: EventListing[],
   activeDay: string,
@@ -125,7 +139,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
       <ScrollReveal delay={revealDelay}>
       <div
         className="poster-card"
-        onClick={onClick}
+        {...eventCardA11yProps(onClick)}
         data-testid={`event-card-${event.id}`}
         style={{
           display: "flex", gap: 0, alignItems: "stretch",
@@ -179,7 +193,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
     <ScrollReveal delay={revealDelay}>
     <div
       className="poster-card"
-      onClick={onClick}
+      {...eventCardA11yProps(onClick)}
       data-testid={`event-card-${event.id}`}
       style={{ aspectRatio: "2/3", display: "flex", flexDirection: "column" }}
     >
