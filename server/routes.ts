@@ -418,10 +418,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(updated);
   });
 
-  // ─── MODERATION REQUESTS (claim/remove) ──────────────────────────────────
+  // ─── MODERATION REQUESTS (remove/flag — claims go through /api/submit) ───
   app.post("/api/moderation-request", requireAuth, (req, res) => {
     try {
       const data = insertModerationRequestSchema.parse(req.body);
+      if (data.type === "CLAIM") {
+        const user = storage.getUserById(req.session.userId!);
+        if (!user) return res.status(401).json({ error: "Not authenticated" });
+        const claimEventId = Number(data.eventId);
+        const claimEvent = Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
+        if (!claimEvent || claimEvent.status !== "LIVE" || !claimEvent.isClaimable || claimEvent.claimedBy) {
+          return res.status(400).json({ error: "This event is not available to claim." });
+        }
+        if (storage.getPendingClaimEventIds().includes(claimEventId)) {
+          return res.status(409).json({ error: "This event already has a pending claim." });
+        }
+        const sub = storage.createSubmission(insertSubmissionSchema.parse({
+          ...claimEvent,
+          type: "CLAIM",
+          eventId: claimEventId,
+          submitterName: user.displayName || user.username,
+          submitterEmail: user.email,
+          submitterOrg: null,
+          claimReason: data.proof,
+          eventTypes: claimEvent.eventTypes,
+        }));
+        const promoterStatus = user.promoterStatus || "none";
+        if (promoterStatus !== "approved" && !isMainAdminUser(user)) {
+          storage.setPromoterStatus(user.id, "pending");
+        }
+        return res.json({ redirected: "submission", submission: sub });
+      }
       const req2 = storage.createModerationRequest(data);
       res.json(req2);
     } catch (e: any) {
@@ -1452,6 +1479,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!["APPROVED", "REJECTED"].includes(status)) return res.status(400).json({ error: "status must be APPROVED or REJECTED" });
     storage.resolveModerationRequest(Number(req.params.id), status, adminNotes);
     res.json({ ok: true });
+  });
+
+  app.post("/api/admin/moderation/dismiss-stale-tests", requireAdmin, (req, res) => {
+    const count = storage.dismissStaleTestModerationRequests();
+    res.json({ ok: true, dismissed: count });
   });
 
   app.get("/api/admin/gifting", requireAdmin, (req, res) => {

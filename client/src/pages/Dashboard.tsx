@@ -502,31 +502,51 @@ export default function Dashboard() {
             cta={{ label: "Open gifting board →", href: "#/gifting" }}
           >
             {myGifting.map((post: any) => (
-              <DashboardItemRow
-                key={post.id}
-                color={post.postType === "GIFT" ? LIME : "#B451FF"}
-                title={post.title}
-                meta={`${post.postType === "ISO" ? "In search of" : post.postType} · ${post.category} · ${post.neighborhood}`}
-                chip={post.status}
-                chipColor={CYAN}
-                actions={
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                    <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
-                      {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
+              <div key={post.id}>
+                <DashboardItemRow
+                  color={post.postType === "GIFT" ? LIME : "#B451FF"}
+                  title={post.title}
+                  meta={`${post.postType === "ISO" ? "In search of" : post.postType} · ${post.category} · ${post.neighborhood}`}
+                  chip={post.status}
+                  chipColor={CYAN}
+                  actions={
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                      <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
+                        {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
+                      </span>
+                      <a href="#/gifting" className="dash-mini-btn" style={{ color: CYAN, textDecoration: "none" }}>Board</a>
+                      {post.postType === "GIFT" && !["GIFTED", "EXPIRED"].includes(post.status) && (
+                        <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-gifted`)}>Mark gifted</button>
+                      )}
+                      {post.postType === "ISO" && !["FOUND", "EXPIRED"].includes(post.status) && (
+                        <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-found`)}>Mark found</button>
+                      )}
+                      {!["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
+                        <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/renew`)}>Renew</button>
+                      )}
+                    </div>
+                  }
+                />
+                {(post.interests || []).filter((i: any) => i.status === "INTERESTED").slice(0, 3).map((interest: any) => (
+                  <div key={interest.id} className="dash-item" style={{ marginLeft: 18, marginTop: -4, paddingTop: 0 }}>
+                    <span className="dash-item-main">
+                      <span className="dash-item-meta" style={{ textTransform: "none" }}>
+                        {interest.displayName || interest.username}: {interest.note}
+                      </span>
                     </span>
-                    <a href="#/gifting" className="dash-mini-btn" style={{ color: CYAN, textDecoration: "none" }}>Board</a>
-                    {post.postType === "GIFT" && !["GIFTED", "EXPIRED"].includes(post.status) && (
-                      <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-gifted`)}>Mark gifted</button>
-                    )}
-                    {post.postType === "ISO" && !["FOUND", "EXPIRED"].includes(post.status) && (
-                      <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-found`)}>Mark found</button>
-                    )}
-                    {!["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
-                      <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/renew`)}>Renew</button>
-                    )}
+                    <div className="dash-item-actions">
+                      <button
+                        type="button"
+                        className="dash-mini-btn"
+                        style={{ color: LIME }}
+                        onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/interests/${interest.id}/choose`)}
+                      >
+                        Pick
+                      </button>
+                    </div>
                   </div>
-                }
-              />
+                ))}
+              </div>
             ))}
           </DashboardDrawer>
 

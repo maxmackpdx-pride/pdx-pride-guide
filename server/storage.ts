@@ -1057,7 +1057,7 @@ function seedData() {
       ageRequirement: "ALL_AGES",
       eventTypes: JSON.stringify(["MARCH", "COMMUNITY", "FREE", "TRANS", "OFFICIAL"]),
       admission: "FREE",
-      ticketUrl: "https://portlandpride.org",
+      ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events/portland-trans-pride-march",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "HIDDEN", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
@@ -1386,7 +1386,11 @@ function applyVerifiedEventOverrides() {
   runTitle("Portland Trans Pride March", {
     description: "Official PrideNW programming. Free, all ages, masks encouraged. Organized by and for the trans community.",
     status: "LIVE",
+    ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events/portland-trans-pride-march",
     eventTypes: JSON.stringify(["MARCH", "COMMUNITY", "FREE", "TRANS", "OFFICIAL"]),
+  });
+  runTitle("Dyke March Portland Pride", {
+    ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events/the-portland-dyke-march",
   });
 
   runTitle("Portland Pickles Pride Night", {
@@ -1515,12 +1519,28 @@ function applyVerifiedEventOverrides() {
       ageRequirement: "ALL_AGES",
       eventTypes: JSON.stringify(["MARCH", "COMMUNITY", "FREE", "OFFICIAL"]),
       admission: "FREE",
-      ticketUrl: "https://portlandpride.org",
+      ticketUrl: "https://portlandpride.org/2026-portland-pride-official-events/the-portland-dyke-march",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: "Added from updated official PrideNW event info; route/start should be checked closer to date.", createdAt: now,
     }).run();
   }
+}
+
+function runDismissStaleTestModerationRequests() {
+  const result = sqlite.prepare(`
+    UPDATE moderation_requests
+    SET status = 'REJECTED',
+        admin_notes = COALESCE(admin_notes, 'Dismissed stale test queue item')
+    WHERE status = 'PENDING'
+      AND (
+        LOWER(requester_email) LIKE '%+test%'
+        OR LOWER(requester_email) LIKE '%test@%'
+        OR LOWER(proof) LIKE '%test request%'
+        OR LOWER(proof) LIKE '%uat test%'
+      )
+  `).run();
+  return result.changes;
 }
 
 seedData();
@@ -1751,6 +1771,7 @@ export interface IStorage {
   getModerationRequests(status?: string): ModerationRequest[];
   createModerationRequest(data: InsertModerationRequest): ModerationRequest;
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
+  dismissStaleTestModerationRequests(): number;
   // Attendance
   getAttendances(eventId: number, viewerUserId?: number): any[];
   getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
@@ -2069,6 +2090,9 @@ export const storage: IStorage = {
   },
   createModerationRequest(data) {
     return db.insert(moderationRequests).values({ ...data, status: "PENDING", createdAt: new Date().toISOString() }).returning().get();
+  },
+  dismissStaleTestModerationRequests() {
+    return runDismissStaleTestModerationRequests();
   },
   resolveModerationRequest(id, status, adminNotes) {
     const req = db.select().from(moderationRequests).where(eq(moderationRequests.id, id)).get();

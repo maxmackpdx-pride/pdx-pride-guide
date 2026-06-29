@@ -163,9 +163,14 @@ body::before {
 }
 
 .rainbow-bar--bleed {
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
+}
+
+.home-page {
+  overflow-x: clip;
 }
 
 .site-header-inner {
@@ -855,7 +860,7 @@ h2.display,
 
 .home-hero-watermark {
   position: absolute;
-  right: -2%;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   font-family: var(--font-display);
@@ -865,7 +870,10 @@ h2.display,
   letter-spacing: -0.02em;
   line-height: 0.9;
   user-select: none;
+  pointer-events: none;
   white-space: nowrap;
+  max-width: 42vw;
+  overflow: hidden;
 }
 
 .home-hero-content {

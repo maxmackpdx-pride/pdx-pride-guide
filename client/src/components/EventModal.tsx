@@ -29,14 +29,13 @@ const DAY_COLORS: Record<string, string> = {
   WED: "#CCFF00", THU: "#00FFFF", FRI: "#FF00CC", SAT: "#FF6600", SUN: "#FF2400"
 };
 
-type ModerationMode = null | "claim" | "remove" | "flag" | "transfer";
+type ModerationMode = null | "remove" | "flag" | "transfer";
 
 const claimEvent = (eventId: number) => {
   window.location.hash = `/submit/claim/${eventId}`;
 };
 
 const modAccent: Record<Exclude<ModerationMode, null>, string> = {
-  claim: "#00FFFF",
   remove: "#888",
   flag: "#FF6600",
   transfer: "#CCFF00",
@@ -98,6 +97,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
       const res = await fetch(`/api/events/${event.id}/message-host`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ body }),
       });
       const payload = await res.json().catch(() => ({}));
@@ -180,7 +180,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
       return;
     }
     if (!modForm.name || !modForm.email || !modForm.proof) return;
-    const typeMap = { claim: "CLAIM", remove: "REMOVE", flag: "FLAG" } as const;
+    const typeMap = { remove: "REMOVE", flag: "FLAG" } as const;
     const modType = modMode && modMode in typeMap ? typeMap[modMode as keyof typeof typeMap] : "REMOVE";
     modMutation.mutate({
       type: modType,
@@ -535,13 +535,11 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
               style={{ borderColor: modColor, "--mod-accent": modColor } as React.CSSProperties}
             >
               <p className="event-modal__mod-title">
-                {modMode === "claim" && "Request to claim this event"}
                 {modMode === "remove" && "Request removal"}
                 {modMode === "flag" && "Flag a data error"}
                 {modMode === "transfer" && "Transfer host to someone else"}
               </p>
               <p className="event-modal__mod-lede">
-                {modMode === "claim" && "Tell us why you're the organizer. Include a link to your website, social, or any proof. An admin will verify and transfer ownership."}
                 {modMode === "remove" && "Tell us why this event should be removed. If you're the organizer or have a specific reason, explain below. An admin will review."}
                 {modMode === "flag" && "Wrong time, venue, link, or description? Tell us what's off. Admins use this to fix the listing — not to remove it."}
                 {modMode === "transfer" && "Release hosting to another verified organizer. Enter their username or email. An admin confirms the handoff."}
@@ -575,8 +573,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                 <textarea
                   data-testid="input-mod-proof"
                   placeholder={
-                    modMode === "claim" ? "Proof you're the organizer (website, social link, description...)"
-                    : modMode === "flag" ? "What's wrong with this listing?"
+                    modMode === "flag" ? "What's wrong with this listing?"
                     : modMode === "transfer" ? "New host username or email"
                     : "Reason for removal"
                   }

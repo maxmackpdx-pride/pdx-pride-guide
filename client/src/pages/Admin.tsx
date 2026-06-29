@@ -270,6 +270,16 @@ export default function Admin() {
     },
   });
 
+  const dismissStaleTestsMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/moderation/dismiss-stale-tests", {}),
+    onSuccess: async (res) => {
+      const data = await res.json();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
+      toast({ title: "Stale test requests dismissed", description: `${data.dismissed ?? 0} item(s) cleared.` });
+    },
+    onError: () => toast({ title: "Could not dismiss test requests", variant: "destructive" }),
+  });
+
   const editGigMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<AdminGig> }) =>
       apiRequest("PUT", `/api/admin/gigs/${id}`, data),
@@ -670,7 +680,18 @@ export default function Admin() {
         {/* ── MODERATION ── */}
         {activeTab === "moderation" && (
           <div>
-            <p className="text-white/40 text-sm mb-6">Claim, remove, flag, and transfer requests from the public.</p>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+              <p className="text-white/40 text-sm m-0">Remove, flag, and transfer requests. New claims go through the submission queue.</p>
+              <button
+                type="button"
+                onClick={() => dismissStaleTestsMutation.mutate()}
+                disabled={dismissStaleTestsMutation.isPending}
+                className="sticker text-xs"
+                style={{ color: "#666", borderColor: "#444" }}
+              >
+                {dismissStaleTestsMutation.isPending ? "CLEARING..." : "DISMISS STALE TESTS"}
+              </button>
+            </div>
             {modError ? (
               <AdminLoadError label="moderation requests" onRetry={() => refetchMod()} />
             ) : modLoading ? (

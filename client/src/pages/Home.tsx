@@ -139,12 +139,7 @@ export default function Home() {
           backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
           backgroundSize: "18px 18px",
         }} />
-        <div style={{
-          position: "absolute", right: "-2%", top: "50%", transform: "translateY(-50%)",
-          fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(5rem, 14vw, 11rem)",
-          color: "rgba(204,255,0,0.04)", letterSpacing: "-0.02em", lineHeight: 0.9,
-          userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap",
-        }}>LOVE<br />LOUDER</div>
+        <div className="home-hero-watermark" aria-hidden="true">LOVE<br />LOUDER</div>
 
 
         <div className="home-hero-content">
@@ -188,7 +183,7 @@ export default function Home() {
               </Link>
               <Link href="/pride-work">
                 <button className="btn-neon home-hero-button" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>
-                  PRIDE WORK →
+                  PRIDE WERK →
                 </button>
               </Link>
             </div>
