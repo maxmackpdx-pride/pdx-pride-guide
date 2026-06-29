@@ -131,7 +131,7 @@ export default function Home() {
           }}
         />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <HeroVideoOverlay preset="panel" />
+        <HeroVideoOverlay preset="panel" flipLightLeaks={false} />
         <div className="home-hero__panel-scrim" aria-hidden="true" />
         <div className="home-hero__panel-grain" aria-hidden="true" />
 
@@ -221,6 +221,7 @@ export default function Home() {
             className="home-promo-panel home-gifting-panel"
             compact
             flush
+            flipLightLeaks
             kicker="Pride season only · Now through July 26"
             titleLine1="GIFT WITH"
             titleLine2="PRIDE"
@@ -266,6 +267,7 @@ export default function Home() {
             {...spottedHeroProps({
               className: "home-promo-panel home-spotted-panel",
               compact: true,
+              flipLightLeaks: true,
               titleLine1: "SPOTTED! THEM AT",
               titleLine2: "PRIDE",
               accent: "rainbow",

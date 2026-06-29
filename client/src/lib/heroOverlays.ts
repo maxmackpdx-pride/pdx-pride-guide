@@ -23,7 +23,7 @@ export const HERO_OVERLAY_LAYERS: Record<HeroOverlayId, HeroOverlayLayer> = {
     id: "filmGrain",
     src: "/overlays/scanlines.webm",
     blendMode: "overlay",
-    opacity: 0.168,
+    opacity: 0.202,
     playbackRate: 0.85,
   },
   scanlines: {

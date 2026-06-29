@@ -560,6 +560,7 @@ export default function Events() {
   return (
     <div className="zine-page events-page board-page">
       <PageHero
+        flipLightLeaks
         titleLine1="EVENTS"
         titleLine2="GUIDE"
         accent="cyan"

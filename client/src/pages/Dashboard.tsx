@@ -173,6 +173,7 @@ export default function Dashboard() {
     return (
       <div className="zine-page dash-page board-page">
         <PageHero
+          flipLightLeaks
           kicker="YOUR HUB"
           titleLine1="SIGN IN TO"
           titleLine2="YOUR PROFILE"

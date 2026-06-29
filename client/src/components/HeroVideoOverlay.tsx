@@ -24,7 +24,13 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
-function OverlayVideo({ layer }: { layer: HeroOverlayLayer }) {
+function OverlayVideo({
+  layer,
+  flipHorizontally = false,
+}: {
+  layer: HeroOverlayLayer;
+  flipHorizontally?: boolean;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -60,6 +66,7 @@ function OverlayVideo({ layer }: { layer: HeroOverlayLayer }) {
       style={{
         mixBlendMode: layer.blendMode,
         opacity: layer.opacity,
+        transform: flipHorizontally ? "scaleX(-1)" : undefined,
       }}
       onError={() => setFailed(true)}
     />
@@ -69,6 +76,8 @@ function OverlayVideo({ layer }: { layer: HeroOverlayLayer }) {
 type HeroVideoOverlayProps = {
   preset?: HeroOverlayPreset;
   layers?: HeroOverlayId[];
+  /** Mirror the light-leaks layer horizontally (alternate across panels). */
+  flipLightLeaks?: boolean;
   className?: string;
 };
 
@@ -76,6 +85,7 @@ type HeroVideoOverlayProps = {
 export default function HeroVideoOverlay({
   preset = "atmosphere",
   layers,
+  flipLightLeaks = false,
   className = "",
 }: HeroVideoOverlayProps) {
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
@@ -93,7 +103,11 @@ export default function HeroVideoOverlay({
   return (
     <div className={`hero-video-overlays${className ? ` ${className}` : ""}`} aria-hidden="true">
       {activeLayers.map(id => (
-        <OverlayVideo key={id} layer={HERO_OVERLAY_LAYERS[id]} />
+        <OverlayVideo
+          key={id}
+          layer={HERO_OVERLAY_LAYERS[id]}
+          flipHorizontally={flipLightLeaks && id === "lightLeaks"}
+        />
       ))}
     </div>
   );

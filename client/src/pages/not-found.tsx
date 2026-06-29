@@ -5,6 +5,7 @@ export default function NotFound() {
   return (
     <div className="zine-page board-page min-h-screen">
       <PageHero
+        flipLightLeaks
         titleLine1="404"
         accent="magenta"
         lede="This page is not on the Pride Guide map. Head back to events, gifting, or Pride Werk."

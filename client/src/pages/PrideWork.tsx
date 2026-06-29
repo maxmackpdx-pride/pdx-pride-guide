@@ -162,6 +162,7 @@ export default function PrideWork() {
     <div className="zine-page gigs-page board-page">
       <PageHero
         flush
+        flipLightLeaks
         kicker="Pride season & beyond"
         titleLine1="PRIDE"
         titleLine1Accent="rainbow"

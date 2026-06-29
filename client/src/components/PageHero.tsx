@@ -27,6 +27,8 @@ export type PageHeroProps = {
   /** WebM overlay stack on the hero photo. `false` disables overlays. */
   overlayPreset?: HeroOverlayPreset | false;
   overlays?: HeroOverlayId[];
+  /** Mirror light-leaks video horizontally — alternate across panels. */
+  flipLightLeaks?: boolean;
   className?: string;
 };
 
@@ -46,6 +48,7 @@ export default function PageHero({
   compact = false,
   overlayPreset = "panel",
   overlays,
+  flipLightLeaks = false,
   className = "",
 }: PageHeroProps) {
   const classes = [
@@ -63,7 +66,7 @@ export default function PageHero({
         style={{ backgroundImage: `url(${bgImage})`, backgroundPosition: bgPosition }}
       />
       {overlayPreset !== false && (
-        <HeroVideoOverlay preset={overlayPreset} layers={overlays} />
+        <HeroVideoOverlay preset={overlayPreset} layers={overlays} flipLightLeaks={flipLightLeaks} />
       )}
       <div className="page-hero__scrim" aria-hidden="true" />
       <div className="page-hero__grain" aria-hidden="true" />

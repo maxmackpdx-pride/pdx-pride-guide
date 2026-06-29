@@ -130,6 +130,7 @@ export default function Submit() {
     <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <PageHero
+        flipLightLeaks
         titleLine1={mode === "submit" ? "SUBMIT" : "CLAIM"}
         titleLine2="AN EVENT"
         accent={mode === "submit" ? "lime" : "cyan"}
