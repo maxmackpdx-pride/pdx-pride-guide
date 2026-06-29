@@ -631,7 +631,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── OUT OF MY CLOSET: GIFTING ───────────────────────────────────────────
   app.get("/api/gifting", (req: any, res) => {
-    const posts = storage.getGiftingPosts();
+    const posts = storage.getGiftingPosts({ viewerUserId: req.session?.userId });
     res.json(posts.map(post => publicGiftingPost(post, req.session?.userId)));
   });
 
@@ -661,8 +661,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
         pickupPreference: String(req.body.pickupPreference || "").trim(),
         photoUrls: JSON.stringify(photoUrls),
       });
+      const poster = storage.getUserById(req.session.userId!);
       const priorPosts = storage.getGiftingPostsByUser(req.session.userId!);
-      const firstPostHeld = priorPosts.length === 0;
+      const skipReview = isMainAdminUser(poster) || storage.isSiteOwnerUser(poster);
+      const firstPostHeld = priorPosts.length === 0 && !skipReview;
       const post = storage.createGiftingPost(data, firstPostHeld ? "PENDING" : undefined);
       res.json({
         ...post,
@@ -786,6 +788,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
       res.json({ ok: true });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/gifting/:id", requireAuth, (req, res) => {
+    try {
+      const user = storage.getUserById(req.session.userId!);
+      if (!user) return res.status(401).json({ error: "Not authenticated" });
+      storage.deleteGiftingPost(Number(req.params.id), user.id, { isAdmin: isMainAdminUser(user) });
+      res.json({ ok: true });
+    } catch (e: any) {
+      const status = e.message === "Not allowed" ? 403 : e.message === "Post not found" ? 404 : 400;
+      res.status(status).json({ error: e.message });
     }
   });
 

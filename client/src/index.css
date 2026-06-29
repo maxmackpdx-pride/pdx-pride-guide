@@ -3174,6 +3174,22 @@ h2.display,
   gap: 6px;
 }
 
+.gifting-pending-note {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: #ff8c00;
+  line-height: 1.45;
+}
+
+.gifting-delete-btn {
+  border-color: #ff2400 !important;
+  color: #ff2400 !important;
+}
+
+.gifting-delete-btn:hover {
+  background: rgba(255, 36, 0, 0.12);
+}
+
 .gifting-interest-list {
   flex-basis: 100%;
   display: grid;

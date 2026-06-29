@@ -62,6 +62,7 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
       "GET /api/gigs/mine",
       "PUT /api/gigs/:id",
       "DELETE /api/gigs/:id",
+      "DELETE /api/gifting/:id",
     ],
   },
   {

@@ -235,6 +235,18 @@ export default function Dashboard() {
     queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
   };
 
+  const handleDeleteGifting = async (id: number, title: string) => {
+    if (!confirm(`Delete "${title}" from the gifting board?`)) return;
+    const res = await fetch(`/api/gifting/${id}`, { method: "DELETE", credentials: "include" });
+    if (!res.ok) {
+      toast({ title: "Could not delete post", variant: "destructive" });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+    toast({ title: "Gifting post deleted" });
+  };
+
   const startGigEdit = (gig: any) => {
     setEditingGig(gig);
     setGigForm({
@@ -581,6 +593,7 @@ export default function Dashboard() {
                       {!["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
                         <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/renew`)}>Renew</button>
                       )}
+                      <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteGifting(post.id, post.title)}>Delete</button>
                     </div>
                   }
                 />

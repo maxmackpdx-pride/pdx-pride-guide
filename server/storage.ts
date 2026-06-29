@@ -1738,6 +1738,16 @@ function runBootMigrationsOnce() {
     syncSiteOwnerPortfolio();
     recordBootMigration("sync_site_owner_portfolio_v2");
   }
+  if (!hasBootMigration("release_site_owner_gifting_v1")) {
+    const owner = resolveSiteOwner();
+    if (owner) {
+      releaseSiteOwnerPendingGifts(owner.id);
+      for (const candidate of listSiteOwnerCandidates()) {
+        releaseSiteOwnerPendingGifts(candidate.id);
+      }
+    }
+    recordBootMigration("release_site_owner_gifting_v1");
+  }
   if (!hasBootMigration("site_admin_grants_v1")) {
     seedSiteAdminGrantsFromEnv();
     recordBootMigration("site_admin_grants_v1");
@@ -1999,6 +2009,19 @@ function syncSiteOwnerPortfolio() {
       AND status IN ('APPROVED', 'REJECTED')
   `);
   for (const email of emails) clearHistoricalSubmissions.run(email);
+
+  releaseSiteOwnerPendingGifts(owner.id);
+  for (const userId of userIds) {
+    if (userId !== owner.id) releaseSiteOwnerPendingGifts(userId);
+  }
+}
+
+function releaseSiteOwnerPendingGifts(userId: number) {
+  sqlite.prepare(`
+    UPDATE gifting_posts
+    SET status = CASE WHEN post_type = 'ISO' THEN 'LOOKING' ELSE 'OPEN' END
+    WHERE user_id = ? AND status = 'PENDING'
+  `).run(userId);
 }
 
 function notifyGuideInbox(
@@ -2234,7 +2257,8 @@ export interface IStorage {
   getThreadForViewer(threadId: string, viewerUserId: number): any[];
   maskMessageParty(msg: any, viewerUserId: number, tab: "inbox" | "sent"): any;
   // Gifting
-  getGiftingPosts(opts?: { includeInactive?: boolean; status?: string; userId?: number }): any[];
+  getGiftingPosts(opts?: { includeInactive?: boolean; status?: string; userId?: number; viewerUserId?: number }): any[];
+  deleteGiftingPost(id: number, userId: number, opts?: { isAdmin?: boolean }): void;
   getGiftingPost(id: number): any | undefined;
   getGiftingPostsByUser(userId: number): any[];
   createGiftingPost(data: InsertGiftingPost, status?: string): GiftingPost;
@@ -3453,7 +3477,13 @@ export const storage: IStorage = {
     const where: string[] = [];
     const params: any[] = [];
     if (!opts.includeInactive) {
-      where.push(`p.status IN ('OPEN','THREE_INTERESTED','POSTER_CHOOSING','PICKUP_PENDING','REOPENED','LOOKING','OFFER_PENDING')`);
+      const activeStatuses = `'OPEN','THREE_INTERESTED','POSTER_CHOOSING','PICKUP_PENDING','REOPENED','LOOKING','OFFER_PENDING'`;
+      if (opts.viewerUserId) {
+        where.push(`(p.status IN (${activeStatuses}) OR (p.status = 'PENDING' AND p.user_id = ?))`);
+        params.push(opts.viewerUserId);
+      } else {
+        where.push(`p.status IN (${activeStatuses})`);
+      }
     }
     if (opts.status) {
       where.push(`p.status = ?`);
@@ -3506,7 +3536,15 @@ export const storage: IStorage = {
     return { ...post, photoUrls: safeJson(post.photo_urls || "[]"), interests };
   },
   getGiftingPostsByUser(userId) {
-    return this.getGiftingPosts({ includeInactive: true, userId });
+    return this.getGiftingPosts({ includeInactive: true, userId })
+      .filter((post: any) => post.status !== "REMOVED");
+  },
+  deleteGiftingPost(id, userId, opts = {}) {
+    const post = this.getGiftingPost(id);
+    if (!post) throw new Error("Post not found");
+    const ownerId = Number(post.user_id ?? post.userId);
+    if (!opts.isAdmin && ownerId !== userId) throw new Error("Not allowed");
+    db.update(giftingPosts).set({ status: "REMOVED" } as any).where(eq(giftingPosts.id, id)).run();
   },
   createGiftingPost(data, status) {
     const postType = data.postType === "ISO" ? "ISO" : "GIFT";

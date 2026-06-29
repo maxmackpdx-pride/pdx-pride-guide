@@ -154,6 +154,7 @@ export default function Gifting() {
     onSuccess: async res => {
       const body = await res.json();
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
       toast({ title: body.firstPostHeld ? "Held for review" : "Posted", description: body.message });
       setForm(blankForm);
       setPhotos(null);
@@ -175,10 +176,31 @@ export default function Gifting() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
       toast({ title: "Updated" });
     },
     onError: (err: any) => toast({ title: "Could not update", description: err.message, variant: "destructive" }),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/gifting/${id}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
+      setExpandedId(null);
+      toast({ title: "Post deleted" });
+    },
+    onError: (err: any) => toast({ title: "Could not delete", description: err.message, variant: "destructive" }),
+  });
+
+  const handleDeletePost = (post: GiftingPost) => {
+    if (!confirm(`Delete "${post.title}"? This removes it from the board.`)) return;
+    deleteMutation.mutate(post.id);
+  };
 
   const submitPost = () => {
     if (!form.acceptRules) {
@@ -217,6 +239,7 @@ export default function Gifting() {
   };
 
   const cardStatus = (post: GiftingPost) => {
+    if (post.status === "PENDING") return "Pending admin review";
     if (post.postType === "ISO") return "Open — make an offer";
     if (isOpenGrabPost(post)) return "First come — grab it";
     if (post.interestCount >= 3) return "3 of 3 hands up";
@@ -439,6 +462,9 @@ export default function Gifting() {
                         )}
                         {post.isMine && (
                           <div className="gifting-owner">
+                            {post.status === "PENDING" && (
+                              <p className="gifting-pending-note">Held for admin review — only you see this on the board until it&apos;s approved.</p>
+                            )}
                             {post.interests?.length ? (
                               <div className="gifting-interest-list">
                                 {post.interests.map(i => (
@@ -454,6 +480,9 @@ export default function Gifting() {
                             {post.postType === "ISO" && <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-found` })}><HeartHandshake size={14} /> Mark Found</button>}
                             <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/reopen` })}><RefreshCw size={14} /> Reopen one spot</button>
                             <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/renew` })}><RefreshCw size={14} /> Renew once</button>
+                            <button type="button" className="gifting-delete-btn" onClick={() => handleDeletePost(post)} disabled={deleteMutation.isPending}>
+                              <X size={14} /> Delete post
+                            </button>
                           </div>
                         )}
                         <details className="gifting-report">
