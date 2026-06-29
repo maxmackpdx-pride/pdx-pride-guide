@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import GlitchWord from "@/components/GlitchWord";
 import HeroVideoOverlay from "@/components/HeroVideoOverlay";
 import type { HeroOverlayId, HeroOverlayPreset } from "@/lib/heroOverlays";
 
@@ -70,17 +71,29 @@ export default function PageHero({
         <div className="page-hero__panel">
           {kicker && <div className="board-kicker">{kicker}</div>}
           <h1 className="page-hero__title">
-            <span
-              className={
-                titleLine1Accent
-                  ? `page-hero__accent page-hero__accent--${titleLine1Accent}`
-                  : "page-hero__title-line"
-              }
-            >
-              {titleLine1}
-            </span>
+            {titleLine1Accent === "rainbow" ? (
+              <span className="page-hero__accent page-hero__accent--rainbow">
+                <GlitchWord text={titleLine1} />
+              </span>
+            ) : (
+              <span
+                className={
+                  titleLine1Accent
+                    ? `page-hero__accent page-hero__accent--${titleLine1Accent}`
+                    : "page-hero__title-line"
+                }
+              >
+                {titleLine1}
+              </span>
+            )}
             {titleLine2 && (
-              <span className={`page-hero__accent page-hero__accent--${accent}`}>{titleLine2}</span>
+              accent === "rainbow" ? (
+                <span className="page-hero__accent page-hero__accent--rainbow">
+                  <GlitchWord text={titleLine2} />
+                </span>
+              ) : (
+                <span className={`page-hero__accent page-hero__accent--${accent}`}>{titleLine2}</span>
+              )
             )}
           </h1>
           {lede && <p className="page-hero__lede">{lede}</p>}

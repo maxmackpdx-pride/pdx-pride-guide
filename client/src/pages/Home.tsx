@@ -131,10 +131,9 @@ export default function Home() {
           }}
         />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <HeroVideoOverlay preset="home" />
-        <div className="home-hero-scrim" aria-hidden="true" />
-        <div className="home-hero-halftone" aria-hidden="true" />
-        <div className="home-hero-watermark" aria-hidden="true">LOVE<br />LOUDER</div>
+        <HeroVideoOverlay preset="panel" />
+        <div className="home-hero__panel-scrim" aria-hidden="true" />
+        <div className="home-hero__panel-grain" aria-hidden="true" />
 
 
         <div className="home-hero-content">
