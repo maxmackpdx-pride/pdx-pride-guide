@@ -1,295 +1,239 @@
+import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
-import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink } from "lucide-react";
+import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink, Calendar, MapPin } from "lucide-react";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
+
+const MISSION = [
+  {
+    icon: <Zap size={18} />,
+    tone: "cyan",
+    title: "Find events fast",
+    text: "Everything happening Thu–Sun in one place. Map it, filter it, show up.",
+  },
+  {
+    icon: <Users size={18} />,
+    tone: "lime",
+    title: "Support local spaces",
+    text: "Bars, venues, orgs, and collectives — every listing drives foot traffic to the places that host us.",
+  },
+  {
+    icon: <Heart size={18} />,
+    tone: "magenta",
+    title: "Connect people",
+    text: "The gig board, submit form, and claimable events help people find each other — not extract data.",
+  },
+  {
+    icon: <Shield size={18} />,
+    tone: "orange",
+    title: "Stay independent",
+    text: "No VC money. No algorithmic feed. Local sponsor support is welcome; control of the guide is not for sale.",
+  },
+] as const;
+
+const HOW_IT_WORKS = [
+  [
+    "Submit your event",
+    "Create a free account, fill out the Promoters form, and it enters the review queue. Accounts keep listings accountable — no anonymous spam.",
+  ],
+  [
+    "Admin review",
+    "Events, claims, edits, and gig posts go through review before going live. No spam, no favoritism.",
+  ],
+  [
+    "Claim a listing",
+    "Some events are seeded and marked claimable. If you're the organizer, submit a claim and take ownership.",
+  ],
+] as const;
+
+const VALUES = [
+  "Free to browse. No paywalls, no junk ads, no selling user data.",
+  "Open to sponsors from local businesses that align with this guide and the community it serves.",
+  "Submitting an event or posting a gig requires a free account — so spam stays out and listings stay accountable.",
+  "No personal data sold or shared. Ever.",
+  "Pride is a protest. Sex-positive and nude events are listed here and tagged accurately — not judgmentally.",
+  "Built and maintained by Tucker. Review tools and outside eyes help, but this is not a committee project.",
+] as const;
+
+const FAQ = [
+  {
+    q: "When is Portland Pride 2026?",
+    a: "Portland Pride Weekend 2026 is July 16–19 (Thursday through Sunday). PDX Pride Guide lists festivals, parties, marches, and community events across the full weekend.",
+  },
+  {
+    q: "Where do I find PDX Pride events?",
+    a: "Use the Events page to browse every live listing on a map and board — filter by day (Thu–Sun), type, and neighborhood, or open any event for times, venue, and tickets.",
+  },
+  {
+    q: "How is this different from other Pride apps?",
+    a: "PDX Pride Guide is free, community-run, and built for Portland — no corporate feed, no pay-to-rank listings. Promoters submit or claim events; the community shows up.",
+  },
+  {
+    q: "How do I list my event?",
+    a: "Create an account and submit a new event or claim an existing listing from the Promoters page. Verified promoters can publish directly after review.",
+  },
+] as const;
 
 export default function About() {
   usePageSeo(
     "About PDX Pride Guide — Portland Pride 2026",
-    "Community-run Portland Pride 2026 event directory for PDX. Built for queer Portland by submissions and local support.",
+    "Community-run Portland Pride 2026 event directory for PDX. Built by submissions and local support.",
   );
+
   return (
-    <div className="zine-page about-page board-page min-h-screen">
+    <div className="zine-page about-page board-page">
       <PageHero
-        kicker="About This Guide"
+        flush
+        flipLightLeaks
+        kicker="About this guide"
         titleLine1="BUILT FOR"
-        titleLine2="THE COMMUNITY."
+        titleLine2="THE COMMUNITY"
         accent="lime"
-        lede="PDX Pride Guide is a free, independently built event directory for Portland Pride Weekend 2026. Made by Tucker, shaped by submissions, and open to support from queer-run local businesses."
+        lede="A free, independently built event directory for Portland Pride Weekend 2026. Made by Tucker, shaped by submissions, and open to support from local businesses that fit the mission."
         bgImage="/motifs/hero-about.png"
         bgPosition="56% center"
+        actions={
+          <>
+            <Link href="/events" className="btn-neon solid">Browse events</Link>
+            <Link href="/submit" className="btn-neon cyan">Submit or claim</Link>
+          </>
+        }
       />
 
-      <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-16">
+      <div className="about-quick-facts">
+        <div className="about-quick-facts__inner">
+          <span className="about-quick-fact"><Calendar size={14} /> July 16–19, 2026</span>
+          <span className="about-quick-fact"><MapPin size={14} /> Portland, OR</span>
+          <span className="about-quick-fact">Free to browse</span>
+          <span className="about-quick-fact">Community-run</span>
+        </div>
+      </div>
 
-        <ScrollReveal>
-          <section>
-            <h2 className="display section-heading">
-              THE <span style={{ color: "#00FFFF" }}>MISSION</span>
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                {
-                  icon: <Zap size={20} />,
-                  color: "#CCFF00",
-                  title: "FIND EVENTS FAST",
-                  text: "Everything happening Thu–Sun in one place. Map it, filter it, show up.",
-                },
-                {
-                  icon: <Users size={20} />,
-                  color: "#00FFFF",
-                  title: "SUPPORT QUEER SPACES",
-                  text: "Bars, venues, orgs, and collectives — every listing drives foot traffic and awareness to queer-owned and queer-friendly spaces.",
-                },
-                {
-                  icon: <Heart size={20} />,
-                  color: "#00FFFF",
-                  title: "CONNECT PEOPLE",
-                  text: "The gig board, the submit form, the claimable events — all of it is designed to help people find each other, not extract data.",
-                },
-                {
-                  icon: <Shield size={20} />,
-                  color: "#FF6600",
-                  title: "STAY INDEPENDENT",
-                  text: "No VC money. No algorithmic feed. Queer-run business support is welcome; control of the guide is not for sale.",
-                },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className="p-6 border-2 border-white/10 transition-all hover:border-white/20"
-                  style={{ background: "#111" }}
-                >
-                  <div className="flex items-center gap-3 mb-3" style={{ color: item.color }}>
-                    {item.icon}
-                    <span className="display text-sm" style={{ color: item.color }}>{item.title}</span>
-                  </div>
-                  <p className="zine-body-text">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </ScrollReveal>
-
-        <ScrollReveal delay={120}>
-        <section>
-          <h2 className="display section-heading">
-            HOW IT <span style={{ color: "#00FFFF" }}>WORKS</span>
-          </h2>
-          <div className="space-y-0">
-            {[
-              {
-                num: "01",
-                color: "#CCFF00",
-                title: "Events can be submitted by organizers",
-                text: "Create a free account, fill out the Submit form, and it enters the review queue. Account required to keep listings accountable — no anonymous spam.",
-              },
-              {
-                num: "02",
-                color: "#00FFFF",
-                title: "Admins review every submission",
-                text: "All submissions — events, claims, edits, and gig posts — go through admin review before going live. No spam, no favoritism.",
-              },
-              {
-                num: "03",
-                color: "#00FFFF",
-                title: "Claimable events can be owned",
-                text: "Some events are seeded by admins and marked as claimable. If you're the organizer, submit a claim and take ownership of your listing.",
-              },
-            ].map((step, i) => (
-              <div
-                key={step.num}
-                className="flex gap-6 py-6 border-t border-white/10"
-              >
-                <div className="display text-3xl flex-shrink-0 w-12" style={{ color: step.color }}>
-                  {step.num}
-                </div>
-                <div>
-                  <h3 className="display panel-heading text-white mb-2">{step.title}</h3>
-                  <p className="zine-body-text">{step.text}</p>
-                </div>
-              </div>
+      <ScrollReveal>
+        <section className="about-mission board-how diag">
+          <span className="board-sticker board-sticker--lime">Why this exists</span>
+          <h2 className="display section-heading">THE MISSION</h2>
+          <p className="board-copy">
+            One place for Pride weekend — independent, accountable, and built to send people to real events in real venues.
+          </p>
+          <div className="about-mission-grid">
+            {MISSION.map(item => (
+              <article key={item.title} className={`about-mission-card about-mission-card--${item.tone}`}>
+                <div className="about-mission-card__icon" aria-hidden="true">{item.icon}</div>
+                <h3 className="display panel-heading">{item.title}</h3>
+                <p>{item.text}</p>
+              </article>
             ))}
           </div>
+          <div className="about-footer-line">Free. Independent. Built for PDX.</div>
         </section>
-        </ScrollReveal>
+      </ScrollReveal>
 
-        <ScrollReveal delay={200}>
-        <section>
-          <h2 className="display section-heading">
-            TRANSPARENCY <span style={{ color: "#8800FF" }}>&</span> VALUES
-          </h2>
-          <div
-            className="p-6 md:p-8 border-2 relative overflow-hidden"
-            style={{ background: "#111", borderColor: "#8800FF" }}
-          >
+      <ScrollReveal delay={80}>
+        <section id="how-it-works" className="about-how board-how board-how--inline diag">
+          <span className="board-sticker board-sticker--cyan">How it works</span>
+          <h2 className="display section-heading">FROM SUBMISSION TO LIVE</h2>
+          <p className="board-copy">Every listing on the guide goes through the same review path — whether it's brand new or a claim on an existing event.</p>
+          <div className="board-steps">
+            {HOW_IT_WORKS.map(([title, text], i) => (
+              <article className="board-step" key={title}>
+                <span className="board-step__num" aria-hidden="true">{i + 1}</span>
+                <h3 className="display panel-heading">{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+          <div className="about-footer-line">Account required · Admin review · No pay-to-rank</div>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal delay={140}>
+        <section className="about-values zine-content">
+          <span className="board-sticker board-sticker--magenta">Transparency</span>
+          <h2 className="display section-heading">VALUES &amp; RULES</h2>
+          <div className="about-values-panel">
             <div className="motif values-motif-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
-            <ul className="space-y-4">
-              {[
-                "Free to browse. No paywalls, no junk ads, no selling user data.",
-                "I am open to sponsors and support from queer-run local businesses that align with the guide and the community it serves.",
-                "Submitting an event or posting a gig requires a free account — so I can keep out spam and keep listings accountable.",
-                "No personal data sold or shared. Ever.",
-                "Pride is a protest. Our bodies have always been political. Sex-positive and nude events are listed here — because they belong in our community and always have. I only tag them accurately, not judgmentally.",
-                "Right now this is built and maintained by me, Tucker. I am using review tools and outside eyes where I can, but this is not a committee-built project.",
-                "This site is queer-owned because I own it.",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: "#8800FF" }} />
-                  <span className="zine-body-text">{item}</span>
+            <ul className="about-values-list">
+              {VALUES.map(item => (
+                <li key={item}>
+                  <CheckCircle size={16} className="about-values-list__icon" aria-hidden="true" />
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
           </div>
         </section>
-        </ScrollReveal>
+      </ScrollReveal>
 
-        <ScrollReveal delay={280}>
-        <section>
-          <div
-            className="border-2 p-8 md:p-10 text-center relative overflow-hidden"
-            style={{ background: "#0a0a0a", borderColor: "#CCFF00" }}
-          >
-            {/* Corner decoration */}
-            <div
-              className="absolute top-0 right-0 w-24 h-24 opacity-20"
-              style={{
-                background: "linear-gradient(135deg, #CCFF00 0%, transparent 70%)",
-              }}
-            />
-            <Heart size={28} className="mx-auto mb-4" style={{ color: "#00FFFF" }} />
-            <h2 className="display section-heading" style={{ marginBottom: "1.15rem" }}>
-              KEEP THIS GUIDE <span style={{ color: "#CCFF00" }}>ALIVE</span>
-            </h2>
-            <p className="zine-body-text max-w-md mx-auto" style={{ marginBottom: "2rem" }}>
-              Running this site costs real money — hosting, domain, time.
-              If you found it useful, buying me a coffee keeps it free for everyone.
-              Keeping it going is appreciated.
+      <ScrollReveal delay={200}>
+        <section className="about-creator zine-content">
+          <div className="about-creator-panel">
+            <div className="about-creator-panel__overlay" aria-hidden="true" />
+            <div className="about-creator-panel__content">
+              <span className="board-sticker board-sticker--lime">About the creator</span>
+              <h2 className="display section-heading">
+                MADE BY <span className="about-creator-panel__accent">TUCKER MAX</span>
+              </h2>
+              <p className="board-copy about-creator-panel__copy">
+                I'm Tucker Max, host and creator of <em>Yes Coach</em>. I built this guide because Portland deserves something that isn't controlled by a corporation, buried by algorithms, or shaped by whoever pays the most.
+              </p>
+              <p className="board-copy about-creator-panel__copy">
+                Thank you to everyone who helped and donated when I fell on extremely hard times this year. Your support helped make a third year possible — and for the first time, a fully custom site built just for this community.
+              </p>
+              <p className="about-creator-panel__meta">Meta sucks. We deserve better. Free to use, independently run, built to last.</p>
+              <a
+                href="https://www.instagram.com/tucker_pdmax"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="about-creator-panel__link"
+              >
+                @tucker_pdmax on Instagram
+              </a>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal delay={260}>
+        <section className="about-faq zine-content">
+          <span className="board-sticker board-sticker--lime">FAQ</span>
+          <h2 className="display section-heading">PORTLAND PRIDE 2026</h2>
+          <div className="about-faq-list">
+            {FAQ.map(item => (
+              <details key={item.q} className="about-faq-item">
+                <summary className="display panel-heading">{item.q}</summary>
+                <p className="board-copy-sm">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal delay={320}>
+        <section className="about-donate zine-content">
+          <div className="zine-callout about-donate-callout">
+            <Heart size={26} className="about-donate-callout__icon" aria-hidden="true" />
+            <h2 className="display section-heading">KEEP THIS GUIDE ALIVE</h2>
+            <p className="board-copy about-donate-callout__copy">
+              Hosting, domain, and time add up. If the guide helped you find something good this weekend, buying me a coffee keeps it free for everyone.
             </p>
             <a
               href={VENMO_URL}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="link-donate"
-              className="display text-xl px-8 py-4 inline-flex items-center gap-3 border-2 transition-all hover:opacity-90"
-              style={{
-                background: "#CCFF00",
-                borderColor: "#CCFF00",
-                color: "#000",
-              }}
+              className="btn-neon solid about-donate-callout__btn"
             >
-              BUY ME A COFFEE
-              <ExternalLink size={16} />
+              Buy me a coffee
+              <ExternalLink size={15} />
             </a>
-            <p className="text-white/30 text-xs mt-4">@tucker_pdmax on Venmo</p>
-            <p className="text-white/40 text-xs mt-6" style={{ fontStyle: "italic" }}>
-              P.S. Tucker is looking for work.
-            </p>
+            <p className="about-donate-callout__note">@tucker_pdmax on Venmo</p>
+            <p className="about-donate-callout__ps">P.S. Tucker is looking for work.</p>
           </div>
         </section>
-        </ScrollReveal>
-
-        <ScrollReveal delay={360}>
-        <section className="pb-8">
-          <div style={{
-            position: "relative", overflow: "hidden",
-            backgroundImage: "url('/tucker-yes-coach-2.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center center",
-            border: "2px solid #1a1a1a",
-            minHeight: 380,
-          }}>
-            {/* Dark overlay — heavier on left so text is readable */}
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(100deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 50%, rgba(0,0,0,0.35) 100%)",
-              zIndex: 1,
-            }} />
-            {/* Content */}
-            <div style={{ position: "relative", zIndex: 2, padding: "40px 40px 36px" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.7rem", letterSpacing: "0.14em", color: "#CCFF00", marginBottom: 12 }}>ABOUT THE CREATOR</div>
-              <h2 className="display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", marginBottom: 16, lineHeight: 1.05, textShadow: "0 2px 12px #000" }}>
-                MADE BY <span style={{ color: "#CCFF00" }}>TUCKER MAX</span>
-              </h2>
-            <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
-                I'm Tucker Max, host and creator of <em>Yes Coach</em>. I built this guide myself, because I believe Portland's queer community deserves something that isn't controlled by a corporation, buried by algorithms, or shaped by whoever pays the most.
-            </p>
-              <p style={{ color: "#ccc", fontSize: "0.92rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 14, textShadow: "0 1px 6px #000" }}>
-                I also want to say thank you to everyone who helped and donated when I fell on extremely hard times this year. I'm still working through it, but your support helped make sure I could do this for the third year in a row. And for the first time ever, I was able to build a completely customized website made just for us.
-              </p>
-            <p style={{ color: "#aaa", fontSize: "0.88rem", lineHeight: 1.7, maxWidth: 480, marginBottom: 24, textShadow: "0 1px 6px #000" }}>
-                Meta sucks. We deserve better. This guide is free to use, independently run, and built to last.
-              </p>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.72rem", color: "#CCFF00", letterSpacing: "0.1em", opacity: 0.7, marginBottom: 16 }}>
-                QUEER-RUN SUPPORT WELCOME · INDEPENDENTLY RUN · BUILT WITH LOVE FOR PDX
-              </div>
-              <a
-                href="https://www.instagram.com/tucker_pdmax"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 8,
-                  color: "#fff", textDecoration: "none", opacity: 0.75,
-                  fontFamily: "var(--font-body)", fontSize: "0.82rem",
-                  transition: "opacity 0.15s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0.75")}
-              >
-                {/* Instagram SVG icon */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                  <circle cx="12" cy="12" r="4"/>
-                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-                </svg>
-                @tucker_pdmax
-              </a>
-            </div>
-          </div>
-        </section>
-        </ScrollReveal>
-
-        <ScrollReveal delay={80}>
-          <section>
-            <h2 className="display section-heading">
-              PORTLAND PRIDE 2026 <span style={{ color: "#CCFF00" }}>FAQ</span>
-            </h2>
-            <div className="space-y-4">
-              {[
-                {
-                  q: "When is Portland Pride 2026?",
-                  a: "Portland Pride Weekend 2026 is July 16–19 (Thursday through Sunday). PDX Pride Guide lists official festivals, parties, marches, and community events across the full weekend.",
-                },
-                {
-                  q: "Where do I find PDX Pride events?",
-                  a: "Use the Events page to browse every live listing on a map and board — filter by day (Thu–Sun), type, and neighborhood, or open any event for times, venue, and tickets.",
-                },
-                {
-                  q: "How is this different from other Pride apps?",
-                  a: "PDX Pride Guide is free, community-run, and built for Portland — no corporate feed, no pay-to-rank listings. Promoters submit or claim events; the community shows up.",
-                },
-                {
-                  q: "How do I list my event?",
-                  a: "Create an account and submit a new event or claim an existing listing from the Promoters page. Verified promoters can publish directly after review.",
-                },
-              ].map(item => (
-                <details
-                  key={item.q}
-                  className="border-2 border-white/10 p-5"
-                  style={{ background: "#111" }}
-                >
-                  <summary className="display text-sm cursor-pointer" style={{ color: "#CCFF00" }}>
-                    {item.q}
-                  </summary>
-                  <p className="zine-body-text mt-3">{item.a}</p>
-                </details>
-              ))}
-            </div>
-          </section>
-        </ScrollReveal>
-
-      </div>
+      </ScrollReveal>
     </div>
   );
 }
