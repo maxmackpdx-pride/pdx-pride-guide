@@ -30,6 +30,35 @@ const DAY_COLORS: Record<string, string> = {
 };
 const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
 
+function filterLiveEvents(
+  events: Event[],
+  activeDay: string,
+  activeFilters: string[],
+  searchQuery: string,
+) {
+  return events
+    .filter(e => {
+      if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
+      if (activeFilters.length > 0) {
+        const admissionFilters = activeFilters.filter(f => f === "FREE" || f === "TICKETED");
+        if (admissionFilters.length > 0 && !admissionFilters.some(f => f === e.admission)) return false;
+        if (activeFilters.includes("21+") && e.ageRequirement !== "21_PLUS") return false;
+        if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
+        if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
+        if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
+        if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
+        if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const haystack = `${e.title} ${e.venueName} ${e.neighborhood} ${e.description}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+}
+
 const MAP_VIEWS = {
   events: {
     center: [45.5128, -122.6703] as [number, number],
@@ -518,6 +547,8 @@ export default function Events() {
   const { data: events = [], isLoading, isError, error, refetch } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+    staleTime: 60_000,
+    refetchOnMount: "always",
   });
 
   useAttendanceSummariesLive();
@@ -534,25 +565,22 @@ export default function Events() {
     enabled: !!user,
   });
 
-  const filtered = events.filter(e => {
-    if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
-    if (activeFilters.length > 0) {
-      const admissionFilters = activeFilters.filter(f => f === "FREE" || f === "TICKETED");
-      if (admissionFilters.length > 0 && !admissionFilters.some(f => f === e.admission)) return false;
-      if (activeFilters.includes("21+") && e.ageRequirement !== "21_PLUS") return false;
-      if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
-      if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
-      if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
-      if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
-      if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
+  const filtered = useMemo(
+    () => filterLiveEvents(events, activeDay, activeFilters, searchQuery),
+    [events, activeDay, activeFilters, searchQuery],
+  );
+
+  const hasActiveFilters =
+    activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0;
+
+  const eventsCountLabel = useMemo(() => {
+    const total = events.length;
+    const visible = filtered.length;
+    if (hasActiveFilters && visible !== total) {
+      return `${visible} of ${total} events`;
     }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const haystack = `${e.title} ${e.venueName} ${e.neighborhood} ${e.description}`.toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-    return true;
-  }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+    return `${total} event${total === 1 ? "" : "s"}`;
+  }, [events.length, filtered.length, hasActiveFilters]);
 
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
@@ -655,7 +683,9 @@ export default function Events() {
           <div className="events-count-row">
             <div className="events-count-banner">
               <MapPin size={13} />
-              <span>{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
+              <span data-testid="events-count">
+                {isLoading ? "Loading events…" : eventsCountLabel}
+              </span>
               {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
             </div>
             {activeFilters.length > 0 && (

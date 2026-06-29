@@ -46,6 +46,8 @@ export default function Home() {
   const { data: events = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+    staleTime: 60_000,
+    refetchOnMount: "always",
   });
   const firstEventTarget = useMemo(() => {
     const starts = events
