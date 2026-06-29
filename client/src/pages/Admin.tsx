@@ -4,7 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare, Briefcase,
+  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare, Briefcase, Users, Search,
 } from "lucide-react";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
@@ -108,7 +108,19 @@ interface AdminGig {
   displayName?: string | null;
 }
 
-type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gigs" | "gifting" | "feedback";
+type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gigs" | "gifting" | "feedback" | "team";
+
+interface SiteAdminMember {
+  userId: number;
+  username: string;
+  email: string;
+  displayName: string | null;
+  source: "env" | "granted";
+  protected: boolean;
+  grantedAt: string;
+  grantedByUsername: string | null;
+  note: string | null;
+}
 
 const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
@@ -130,6 +142,9 @@ export default function Admin() {
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
   const [editingGigId, setEditingGigId] = useState<number | null>(null);
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
+  const [eventSearch, setEventSearch] = useState("");
+  const [teamIdentifier, setTeamIdentifier] = useState("");
+  const [teamNote, setTeamNote] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -199,6 +214,12 @@ export default function Admin() {
     queryKey: ["/api/admin/talent-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/talent-requests").then(r => r.json()),
     enabled: authenticated && activeTab === "talent",
+  });
+
+  const { data: teamAdmins = [], isLoading: teamLoading, isError: teamError, refetch: refetchTeam } = useQuery<SiteAdminMember[]>({
+    queryKey: ["/api/admin/team"],
+    queryFn: () => apiRequest("GET", "/api/admin/team").then(r => r.json()),
+    enabled: authenticated,
   });
 
   const approveMutation = useMutation({
@@ -358,6 +379,40 @@ export default function Admin() {
     onError: () => toast({ title: "Error", description: "Could not deny talent.", variant: "destructive" }),
   });
 
+  const grantAdminMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/team", { identifier: teamIdentifier.trim(), note: teamNote.trim() || undefined }),
+    onSuccess: async () => {
+      setTeamIdentifier("");
+      setTeamNote("");
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/team"] });
+      toast({ title: "Site admin added", description: "They can open /admin while logged into their site account." });
+    },
+    onError: async (err: any) => {
+      let message = "Could not add site admin.";
+      try {
+        const body = await err?.response?.json?.();
+        if (body?.error) message = body.error;
+      } catch {}
+      toast({ title: "Error", description: message, variant: "destructive" });
+    },
+  });
+
+  const revokeAdminMutation = useMutation({
+    mutationFn: (userId: number) => apiRequest("DELETE", `/api/admin/team/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/team"] });
+      toast({ title: "Site admin removed" });
+    },
+    onError: async (err: any) => {
+      let message = "Could not remove site admin.";
+      try {
+        const body = await err?.response?.json?.();
+        if (body?.error) message = body.error;
+      } catch {}
+      toast({ title: "Error", description: message, variant: "destructive" });
+    },
+  });
+
   const startEdit = (ev: AdminEvent) => {
     setEditingId(ev.id);
     setEditForm({ ...ev });
@@ -403,14 +458,15 @@ export default function Admin() {
               />
             </div>
             <div>
-              <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Admin name</label>
+              <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Approval signature</label>
               <input
                 type="text"
                 value={adminName}
                 onChange={e => setAdminName(e.target.value)}
                 style={{ width: "100%", padding: "10px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 14 }}
-                placeholder="Admin1"
+                placeholder="Tucker"
               />
+              <p className="dash-mono" style={{ fontSize: 9, color: "var(--dash-muted)", marginTop: 6 }}>Shown on approvals — not your login username</p>
             </div>
             <div>
               <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Password</label>
@@ -453,6 +509,20 @@ export default function Admin() {
   const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
   const pendingPromoters = promoterRequests;
   const pendingTalent = talentRequests;
+  const totalActionItems =
+    pendingSubs.length
+    + pendingMod.length
+    + pendingPromoters.length
+    + pendingTalent.length
+    + pendingGifting.length
+    + pendingGiftingReports.length
+    + openFeedback.length;
+  const eventSearchQuery = eventSearch.trim().toLowerCase();
+  const filteredEvents = events.filter(ev => {
+    if (!eventSearchQuery) return true;
+    const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""}`.toLowerCase();
+    return haystack.includes(eventSearchQuery);
+  });
 
   return (
     <div className="dash-page">
@@ -466,11 +536,8 @@ export default function Admin() {
             </div>
           </div>
           <div className="dash-actions">
-            {pendingSubs.length > 0 && (
-              <span className="dash-chip" style={{ color: "#FF1FA0" }}>{pendingSubs.length} pending</span>
-            )}
-            {pendingMod.length > 0 && (
-              <span className="dash-chip" style={{ color: "#FF8C00" }}>{pendingMod.length} requests</span>
+            {totalActionItems > 0 && (
+              <span className="dash-chip" style={{ color: "#FF1FA0" }}>{totalActionItems} action items</span>
             )}
             <button
               type="button"
@@ -482,7 +549,7 @@ export default function Admin() {
           </div>
         </header>
 
-        <AdminMetricsPanel enabled={authenticated} />
+        <AdminMetricsPanel enabled={authenticated} onMetricClick={tab => setActiveTab(tab as AdminTab)} />
 
         <div className="dash-admin-tabs">
           {([
@@ -494,6 +561,7 @@ export default function Admin() {
             { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
             { key: "gifting" as AdminTab, label: `Gifting${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
             { key: "feedback" as AdminTab, label: `Feedback${openFeedback.length > 0 ? ` (${openFeedback.length})` : ""}`, icon: <MessageSquare size={12} /> },
+            { key: "team" as AdminTab, label: `Team (${teamAdmins.length})`, icon: <Users size={12} /> },
           ]).map(tab => (
             <button
               key={tab.key}
@@ -752,18 +820,34 @@ export default function Admin() {
         {/* ── MANAGE EVENTS ── */}
         {activeTab === "events" && (
           <div>
-            <p className="text-white/40 text-sm mb-6">
+            <p className="text-white/40 text-sm mb-4">
               Edit any field on any event. Changes go live immediately.
             </p>
+            <div className="relative mb-6 max-w-md">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
+              <input
+                type="search"
+                value={eventSearch}
+                onChange={e => setEventSearch(e.target.value)}
+                placeholder="Search title, venue, day, status..."
+                className={adminFieldClass}
+                style={{ paddingLeft: 34 }}
+              />
+            </div>
             {eventsError ? (
               <AdminLoadError label="events" onRetry={() => refetchEvents()} />
             ) : eventsLoading ? (
               <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : events.length === 0 ? (
               <p className="text-white/30 text-center py-12">No events found.</p>
+            ) : filteredEvents.length === 0 ? (
+              <p className="text-white/30 text-center py-12">No events match “{eventSearch}”.</p>
             ) : (
               <div className="space-y-2">
-                {events.map(ev => (
+                {eventSearchQuery && (
+                  <p className="text-white/35 text-xs mb-2">{filteredEvents.length} of {events.length} events</p>
+                )}
+                {filteredEvents.map(ev => (
                   <div key={ev.id} className="border border-white/10" style={{ background: "#111" }}>
                     {/* Row */}
                     <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
@@ -1130,6 +1214,96 @@ export default function Admin() {
           </div>
         )}
 
+        {/* ── TEAM ── */}
+        {activeTab === "team" && (
+          <div className="space-y-8">
+            <div>
+              <p className="text-white/40 text-sm mb-4">
+                Site admins can open this dashboard while logged into their PDX Pride Guide account (footer Admin Panel link). Owner accounts in Railway env cannot be removed here.
+              </p>
+              <form
+                className="border border-white/10 p-5 space-y-4 max-w-xl"
+                style={{ background: "#111" }}
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (!teamIdentifier.trim()) return;
+                  grantAdminMutation.mutate();
+                }}
+              >
+                <h3 className="display text-lg text-white">Add site admin</h3>
+                <div>
+                  <label className="display text-xs text-white/40 block mb-1">USERNAME OR EMAIL</label>
+                  <input
+                    value={teamIdentifier}
+                    onChange={e => setTeamIdentifier(e.target.value)}
+                    placeholder="@username or email@example.com"
+                    className={adminFieldClass}
+                  />
+                </div>
+                <div>
+                  <label className="display text-xs text-white/40 block mb-1">NOTE (OPTIONAL)</label>
+                  <input
+                    value={teamNote}
+                    onChange={e => setTeamNote(e.target.value)}
+                    placeholder="e.g. Pride weekend moderation"
+                    className={adminFieldClass}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={grantAdminMutation.isPending || !teamIdentifier.trim()}
+                  className="display text-sm px-6 py-2 border-2 disabled:opacity-50"
+                  style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
+                >
+                  {grantAdminMutation.isPending ? "ADDING..." : "GRANT ADMIN ACCESS"}
+                </button>
+              </form>
+            </div>
+
+            {teamError ? (
+              <AdminLoadError label="site admins" onRetry={() => refetchTeam()} />
+            ) : teamLoading ? (
+              <div className="space-y-3">{[1, 2].map(i => <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : teamAdmins.length === 0 ? (
+              <p className="text-white/30">No site admins yet. Add someone who already has a registered account.</p>
+            ) : (
+              <div className="space-y-3">
+                {teamAdmins.map(member => (
+                  <div key={member.userId} className="p-4 border border-white/10 flex items-start justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="display text-lg text-white">{member.displayName || member.username}</p>
+                        <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>@{member.username}</span>
+                        {member.protected && (
+                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>OWNER</span>
+                        )}
+                      </div>
+                      <p className="text-white/40 text-sm mt-1">{member.email}</p>
+                      {member.note && <p className="text-white/55 text-sm mt-2">{member.note}</p>}
+                      <p className="text-white/30 text-xs mt-2">
+                        {member.protected ? "Protected via Railway env" : `Granted${member.grantedByUsername ? ` by @${member.grantedByUsername}` : ""}`}
+                        {" · "}
+                        {new Date(member.grantedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {!member.protected && (
+                      <button
+                        type="button"
+                        onClick={() => revokeAdminMutation.mutate(member.userId)}
+                        disabled={revokeAdminMutation.isPending}
+                        className="display text-xs px-4 py-2 border-2"
+                        style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                      >
+                        REMOVE
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── FEEDBACK ── */}
         {activeTab === "feedback" && (
           <div className="space-y-4">
@@ -1207,7 +1381,7 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="board-sticker text-xs" style={{ color: "#00FFFF" }}>{sub.type}</span>
-            {approvalCount > 0 && <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{approvalCount}/2 APPROVED</span>}
+            {approvalCount > 0 && <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>APPROVED</span>}
           </div>
           <p className="display text-xl text-white">{sub.title || `Submission #${sub.id}`}</p>
           <p className="text-white/40 text-xs mt-1">{sub.submitterName} · {sub.submitterEmail}</p>
@@ -1246,7 +1420,7 @@ function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonC
                 <XCircle size={14} />{rejecting ? "REJECTING..." : "REJECT"}
               </button>
             </div>
-            {approvalCount === 1 && <p className="text-white/30 text-xs">Approved by 1 admin — live.</p>}
+            {approvalCount > 0 && <p className="text-white/30 text-xs">Approved — live on site.</p>}
           </div>
         </div>
       )}

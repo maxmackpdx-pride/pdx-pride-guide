@@ -14,20 +14,26 @@ interface AdminMetrics {
   openFeedback: number;
 }
 
-const METRICS: { key: keyof AdminMetrics; label: string; color: string }[] = [
+const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: string }[] = [
   { key: "users", label: "Registered users", color: "#C8FA3C" },
   { key: "activeSessions", label: "Active sessions", color: "#19E3FF" },
-  { key: "liveEvents", label: "Live events (excl. placeholders)", color: "#FF8C00" },
+  { key: "liveEvents", label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events" },
   { key: "attendances", label: "Member check-ins", color: "#C8FA3C" },
   { key: "messages", label: "Messages", color: "#19E3FF" },
-  { key: "pendingSubmissions", label: "Pending review", color: "#FF1FA0" },
-  { key: "gigPosts", label: "Live gig posts", color: "#FF8C00" },
-  { key: "giftingPosts", label: "Active gifting posts", color: "#19E3FF" },
+  { key: "pendingSubmissions", label: "Pending review", color: "#FF1FA0", tab: "queue" },
+  { key: "gigPosts", label: "Live gig posts", color: "#FF8C00", tab: "gigs" },
+  { key: "giftingPosts", label: "Active gifting posts", color: "#19E3FF", tab: "gifting" },
   { key: "missedConnections", label: "Active missed connections", color: "#FF1FA0" },
-  { key: "openFeedback", label: "Open feedback", color: "#750787" },
+  { key: "openFeedback", label: "Open feedback", color: "#750787", tab: "feedback" },
 ];
 
-export default function AdminMetricsPanel({ enabled }: { enabled: boolean }) {
+export default function AdminMetricsPanel({
+  enabled,
+  onMetricClick,
+}: {
+  enabled: boolean;
+  onMetricClick?: (tab: string) => void;
+}) {
   const { data } = useQuery<AdminMetrics>({
     queryKey: ["/api/admin/metrics"],
     queryFn: () => apiRequest("GET", "/api/admin/metrics").then(r => r.json()),
@@ -39,16 +45,22 @@ export default function AdminMetricsPanel({ enabled }: { enabled: boolean }) {
 
   return (
     <div className="dash-admin-metrics">
-      {METRICS.map(metric => (
-        <div
-          key={metric.key}
-          className="dash-metric-card accent"
-          style={{ ["--metric-color" as string]: metric.color }}
-        >
-          <div className="dash-metric-value">{data[metric.key] ?? 0}</div>
-          <div className="dash-metric-label">{metric.label}</div>
-        </div>
-      ))}
+      {METRICS.map(metric => {
+        const clickable = !!metric.tab && !!onMetricClick && (data[metric.key] ?? 0) > 0;
+        const Tag = clickable ? "button" : "div";
+        return (
+          <Tag
+            key={metric.key}
+            type={clickable ? "button" : undefined}
+            onClick={clickable ? () => onMetricClick!(metric.tab!) : undefined}
+            className={`dash-metric-card accent${clickable ? " dash-metric-card-clickable" : ""}`}
+            style={{ ["--metric-color" as string]: metric.color }}
+          >
+            <div className="dash-metric-value">{data[metric.key] ?? 0}</div>
+            <div className="dash-metric-label">{metric.label}</div>
+          </Tag>
+        );
+      })}
     </div>
   );
 }

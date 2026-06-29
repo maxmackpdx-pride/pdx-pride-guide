@@ -84,7 +84,9 @@ function isMainAdminUser(user: any) {
   if (!user) return false;
   const email = String(user.email || "").trim().toLowerCase();
   const username = String(user.username || "").trim().replace(/^@/, "").toLowerCase();
-  return ADMIN_USER_EMAILS.includes(email) || ADMIN_USERNAMES.includes(username);
+  return ADMIN_USER_EMAILS.includes(email)
+    || ADMIN_USERNAMES.includes(username)
+    || storage.hasSiteAdminGrant(user.id);
 }
 
 function markAdminSessionForUser(req: any, user: any) {
@@ -1426,7 +1428,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
       isAdmin: true,
       username: syncedUser?.displayName || syncedUser?.username || ADMIN_USERNAME,
       email: syncedUser?.email || null,
+      canManageTeam: true,
     });
+  });
+
+  app.get("/api/admin/team", requireAdmin, (_req, res) => {
+    res.json(storage.listSiteAdmins());
+  });
+
+  app.post("/api/admin/team", requireAdmin, (req, res) => {
+    const actor = getSessionAdminUser(req);
+    const { identifier, note } = req.body || {};
+    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), actor?.id ?? null, note);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result.admin);
+  });
+
+  app.delete("/api/admin/team/:userId", requireAdmin, (req, res) => {
+    const result = storage.revokeSiteAdmin(Number(req.params.userId));
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json({ ok: true });
   });
 
   // ─── ADMIN ────────────────────────────────────────────────────────────────

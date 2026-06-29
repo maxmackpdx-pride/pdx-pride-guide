@@ -224,6 +224,12 @@ sqlite.exec(`
     status TEXT NOT NULL DEFAULT 'OPEN',
     created_at TEXT NOT NULL DEFAULT ''
   );
+  CREATE TABLE IF NOT EXISTS site_admin_grants (
+    user_id INTEGER PRIMARY KEY,
+    granted_by_user_id INTEGER,
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
 `);
 
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
@@ -1728,6 +1734,42 @@ function runBootMigrationsOnce() {
     syncSiteOwnerPortfolio();
     recordBootMigration("sync_site_owner_portfolio_v1");
   }
+  if (!hasBootMigration("site_admin_grants_v1")) {
+    seedSiteAdminGrantsFromEnv();
+    recordBootMigration("site_admin_grants_v1");
+  }
+}
+
+function parseEnvAdminLists() {
+  const emails = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@gmail.com")
+    .split(",")
+    .map(value => value.trim().toLowerCase())
+    .filter(Boolean);
+  const usernames = (process.env.ADMIN_USERNAMES || "hello_tuckercasey,tucker_pdmax")
+    .split(",")
+    .map(value => value.trim().replace(/^@/, "").toLowerCase())
+    .filter(Boolean);
+  return { emails, usernames };
+}
+
+function isEnvListedSiteAdmin(user: { email?: string | null; username?: string | null }) {
+  const { emails, usernames } = parseEnvAdminLists();
+  const email = String(user.email || "").trim().toLowerCase();
+  const username = String(user.username || "").trim().replace(/^@/, "").toLowerCase();
+  return emails.includes(email) || usernames.includes(username);
+}
+
+function seedSiteAdminGrantsFromEnv() {
+  const { emails, usernames } = parseEnvAdminLists();
+  const now = new Date().toISOString();
+  for (const email of emails) {
+    const user = storage.getUserByEmail(email);
+    if (user) storage.ensureSiteAdminGrant(user.id, null, "Owner admin (env)", now);
+  }
+  for (const username of usernames) {
+    const user = storage.getUserByUsername(username);
+    if (user) storage.ensureSiteAdminGrant(user.id, null, "Owner admin (env)", now);
+  }
 }
 
 function archiveExpiredMissedConnections() {
@@ -2025,6 +2067,21 @@ export interface IStorage {
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   dismissStaleTestModerationRequests(): number;
   getAdminPendingCount(): number;
+  hasSiteAdminGrant(userId: number): boolean;
+  ensureSiteAdminGrant(userId: number, grantedByUserId: number | null, note?: string | null, createdAt?: string): void;
+  listSiteAdmins(): Array<{
+    userId: number;
+    username: string;
+    email: string;
+    displayName: string | null;
+    source: "env" | "granted";
+    protected: boolean;
+    grantedAt: string;
+    grantedByUsername: string | null;
+    note: string | null;
+  }>;
+  grantSiteAdminByIdentifier(identifier: string, grantedByUserId: number | null, note?: string): { admin?: any; error?: string };
+  revokeSiteAdmin(userId: number): { ok?: boolean; error?: string };
   // Attendance
   getAttendances(eventId: number, viewerUserId?: number): any[];
   getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
@@ -2366,6 +2423,88 @@ export const storage: IStorage = {
       + this.getGiftingReports("PENDING").length
       + this.getFeedbackReports("OPEN").length
     );
+  },
+  hasSiteAdminGrant(userId) {
+    return !!sqlite.prepare("SELECT 1 FROM site_admin_grants WHERE user_id = ?").get(userId);
+  },
+  ensureSiteAdminGrant(userId, grantedByUserId, note = null, createdAt = new Date().toISOString()) {
+    sqlite.prepare(`
+      INSERT INTO site_admin_grants (user_id, granted_by_user_id, note, created_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(user_id) DO NOTHING
+    `).run(userId, grantedByUserId, note, createdAt);
+  },
+  listSiteAdmins() {
+    const seen = new Set<number>();
+    const admins: Array<{
+      userId: number;
+      username: string;
+      email: string;
+      displayName: string | null;
+      source: "env" | "granted";
+      protected: boolean;
+      grantedAt: string;
+      grantedByUsername: string | null;
+      note: string | null;
+    }> = [];
+    const pushUser = (user: User, source: "env" | "granted", grantRow?: any) => {
+      if (!user || seen.has(user.id)) return;
+      seen.add(user.id);
+      const protectedAdmin = isEnvListedSiteAdmin(user);
+      const grantedBy = grantRow?.granted_by_user_id
+        ? storage.getUserById(grantRow.granted_by_user_id)
+        : null;
+      admins.push({
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        displayName: user.displayName,
+        source: protectedAdmin ? "env" : source,
+        protected: protectedAdmin,
+        grantedAt: grantRow?.created_at || user.createdAt,
+        grantedByUsername: grantedBy?.username || null,
+        note: grantRow?.note || null,
+      });
+    };
+    const { emails, usernames } = parseEnvAdminLists();
+    for (const email of emails) {
+      pushUser(storage.getUserByEmail(email)!, "env");
+    }
+    for (const username of usernames) {
+      pushUser(storage.getUserByUsername(username)!, "env");
+    }
+    const grantRows = sqlite.prepare(`
+      SELECT g.user_id, g.granted_by_user_id, g.note, g.created_at
+      FROM site_admin_grants g
+      ORDER BY g.created_at ASC
+    `).all() as any[];
+    for (const row of grantRows) {
+      const user = storage.getUserById(row.user_id);
+      if (user) pushUser(user, "granted", row);
+    }
+    return admins.sort((a, b) => a.username.localeCompare(b.username));
+  },
+  grantSiteAdminByIdentifier(identifier, grantedByUserId, note) {
+    const raw = String(identifier || "").trim();
+    if (!raw) return { error: "Username or email required" };
+    const normalized = raw.replace(/^@/, "").toLowerCase();
+    const user = raw.includes("@")
+      ? storage.getUserByEmail(normalized)
+      : storage.getUserByUsername(normalized);
+    if (!user) return { error: "No registered user found with that username or email" };
+    if (isEnvListedSiteAdmin(user) || storage.hasSiteAdminGrant(user.id)) {
+      return { error: "User is already a site admin" };
+    }
+    storage.ensureSiteAdminGrant(user.id, grantedByUserId, note || "Granted from admin dashboard");
+    return { admin: storage.listSiteAdmins().find(a => a.userId === user.id) };
+  },
+  revokeSiteAdmin(userId) {
+    const user = storage.getUserById(userId);
+    if (!user) return { error: "User not found" };
+    if (isEnvListedSiteAdmin(user)) return { error: "Owner admins configured in Railway env cannot be removed here" };
+    if (!storage.hasSiteAdminGrant(userId)) return { error: "User is not a granted site admin" };
+    sqlite.prepare("DELETE FROM site_admin_grants WHERE user_id = ?").run(userId);
+    return { ok: true };
   },
   resolveModerationRequest(id, status, adminNotes) {
     const req = db.select().from(moderationRequests).where(eq(moderationRequests.id, id)).get();
