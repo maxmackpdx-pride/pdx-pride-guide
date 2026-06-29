@@ -73,7 +73,7 @@ export function DashboardEventEditForm({
         <button type="button" onClick={onCancel} className="dash-mini-btn" style={{ color: "var(--text-meta)" }}>Cancel</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="dash-edit-grid">
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Event title *</label>
             <input style={inputStyle} value={eventForm.title} onChange={e => setEventForm((f: any) => ({ ...f, title: e.target.value }))} required />
@@ -187,7 +187,7 @@ export function DashboardEventEditForm({
             </div>
           )}
           {eventHosts.length < 3 && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+            <div className="dash-edit-grid dash-edit-grid--tight" style={{ marginBottom: 12 }}>
               <input
                 style={inputStyle}
                 placeholder="Co-host username"
@@ -270,7 +270,7 @@ export function DashboardGigEditForm({
       <h3 className="dash-anton" style={{ color: "#FF8C00", fontSize: "1rem", marginBottom: 12 }}>Edit gig post</h3>
       <input style={inputStyle} value={gigForm.title} onChange={e => setGigForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" />
       <textarea style={{ ...inputStyle, marginTop: 10, minHeight: 90, resize: "vertical" }} value={gigForm.description} onChange={e => setGigForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 10 }}>
+      <div className="dash-gig-edit-grid" style={{ marginTop: 10 }}>
         <input style={inputStyle} value={gigForm.skills} onChange={e => setGigForm(f => ({ ...f, skills: e.target.value }))} placeholder="Skills" />
         <input style={inputStyle} value={gigForm.compensation} onChange={e => setGigForm(f => ({ ...f, compensation: e.target.value }))} placeholder="Compensation" />
         <input style={inputStyle} value={gigForm.location} onChange={e => setGigForm(f => ({ ...f, location: e.target.value }))} placeholder="Location" />

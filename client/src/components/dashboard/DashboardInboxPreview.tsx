@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
+import { contextLabelOf, contextTypeOf, inboxContextBadge } from "@/lib/inboxContext";
+import DashboardThreadSkeleton from "./DashboardThreadSkeleton";
 
 function formatTime(value?: string) {
   if (!value) return "";
@@ -20,20 +22,24 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
     enabled,
   });
 
-  const { data: inbox = [] } = useQuery<any[]>({
+  const { data: inbox = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/messages/inbox"],
     queryFn: () => fetch("/api/messages/inbox", { credentials: "include" }).then(r => r.ok ? r.json() : []),
     enabled,
   });
 
   const threads = inbox.slice(0, 5);
+  const hasUnread = unread.count > 0;
 
   return (
-    <section className="dash-inbox">
+    <section
+      id="inbox"
+      className={`dash-inbox${hasUnread ? " dash-inbox--priority" : ""}`}
+    >
       <div className="dash-inbox-head">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <h2 className="dash-inbox-title dash-anton">Inbox</h2>
-          {unread.count > 0 && (
+          {hasUnread && (
             <span className="dash-badge-pulse">
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#0a0a0a" }} />
               {unread.count} unread
@@ -43,9 +49,16 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
         <Link href="/inbox" className="dash-pill-btn">Open inbox →</Link>
       </div>
       <div>
-        {threads.length === 0 ? (
-          <div style={{ padding: "20px", color: "var(--dash-muted)", fontSize: 14 }}>
-            No messages yet. Host an event or reply on the board to start a thread.
+        {isLoading ? (
+          <DashboardThreadSkeleton />
+        ) : threads.length === 0 ? (
+          <div className="dash-inbox-empty">
+            <p>No threads yet. Replies from Spotted, Pride Werk, event hosts, and check-ins show up here.</p>
+            <div className="dash-inbox-empty__links">
+              <Link href="/spotted" className="dash-inbox-empty__link">Spotted</Link>
+              <Link href="/pride-work" className="dash-inbox-empty__link">Pride Werk</Link>
+              <Link href="/submit" className="dash-inbox-empty__link">Submit event</Link>
+            </div>
           </div>
         ) : (
           threads.map((msg) => {
@@ -54,6 +67,8 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
             const unreadMsg = !msg.isRead && !msg.is_read;
             const threadId = msg.threadId || msg.thread_id;
             const href = threadId ? `/inbox?thread=${encodeURIComponent(threadId)}` : "/inbox";
+            const badge = inboxContextBadge(contextTypeOf(msg));
+            const contextLabel = contextLabelOf(msg);
             return (
               <Link
                 key={msg.id}
@@ -83,6 +98,10 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
                       {formatTime(msg.createdAt || msg.created_at)}
                     </span>
                   </span>
+                  {badge && <span className="dash-thread-context">{badge}</span>}
+                  {contextLabel && (
+                    <span className="dash-thread-context-label">{contextLabel}</span>
+                  )}
                   <span
                     style={{
                       display: "block",

@@ -10,7 +10,8 @@ export default function DashboardWidgets() {
     queryFn: () => fetch("/api/events").then(r => r.json()),
   });
 
-  const showPrideWeather = !isAfterPrideWeekend();
+  const showPrideWidgets = !isAfterPrideWeekend();
+  const showPrideWeather = showPrideWidgets;
 
   const { data: weather, isError: weatherError } = useQuery({
     queryKey: ["portland-weather", "pride-weekend-2026"],
@@ -106,9 +107,10 @@ export default function DashboardWidgets() {
         </section>
       )}
 
+      {showPrideWidgets && (
       <section className="dash-countdown">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Week</div>
+          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Weekend</div>
           <span
             className={`dash-mono${live ? " dash-live-badge" : ""}`}
             style={{
@@ -161,6 +163,7 @@ export default function DashboardWidgets() {
           </div>
         )}
       </section>
+      )}
     </div>
   );
 }

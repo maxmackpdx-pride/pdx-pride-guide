@@ -11,6 +11,8 @@ import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/Dashbo
 import DashboardInboxPreview from "@/components/dashboard/DashboardInboxPreview";
 import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
+import DashboardHubSummary from "@/components/dashboard/DashboardHubSummary";
+import DashboardAdminTeaser from "@/components/dashboard/DashboardAdminTeaser";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
 import "@/components/dashboard/dashboard.css";
 
@@ -74,6 +76,26 @@ export default function Dashboard() {
   const myMissed = myMissedQuery.data ?? [];
   const myGifting = myGiftingQuery.data ?? [];
   const myCheckIns = myCheckInsQuery.data ?? [];
+
+  const { data: adminSession } = useQuery<{ isAdmin?: boolean } | null>({
+    queryKey: ["/api/admin/me"],
+    queryFn: async () => {
+      const r = await fetch("/api/admin/me", { credentials: "include" });
+      return r.ok ? r.json() : null;
+    },
+    enabled: !!user,
+    retry: false,
+  });
+
+  const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ["/api/messages/unread-count"],
+    queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
+    enabled: !!user,
+  });
+
+  const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
+  const pendingSubmissions = submittedEvents.filter((evt: any) => evt.status === "PENDING").length;
+  const unreadCount = unread.count || 0;
 
   const dashboardQueryErrors = [
     myGigsQuery.isError && "gigs",
@@ -178,7 +200,7 @@ export default function Dashboard() {
           titleLine1="SIGN IN TO"
           titleLine2="YOUR PROFILE"
           accent="cyan"
-          lede="Profile, inbox, event submissions, gig posts, gifting, and missed connections — all in one place once you're logged in."
+          lede="Free, community-run — log in to manage submissions, boards, and private threads."
           bgImage="/motifs/hero-inbox.jpg"
           bgPosition="center 35%"
         />
@@ -269,12 +291,20 @@ export default function Dashboard() {
       <PageHero
         flush
         compact
-        kicker="YOUR HUB · PROFILE & BOARDS"
+        kicker="YOUR HUB"
         titleLine1="YOUR"
-        titleLine2="DASHBOARD"
+        titleLine2="HUB"
         accent="cyan"
-        lede="Manage your profile, inbox, claimed events, gig posts, gifting listings, missed connections, and check-ins — everything you touch on PDX Pride Guide lives here."
-        tagline={createElement(Fragment, null, "@", user.username, " · ", createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({behavior:"smooth"}); } }, "profile"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "events"), " · ", createElement("a", { href: "/inbox", className: "dash-tagline-link" }, "inbox"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "submissions"))}
+        lede="Community-run and free. Manage your submissions and claims, board posts, and inbox threads in one place."
+        tagline={createElement(Fragment, null,
+          "@", user.username, " · ",
+          createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" }); } }, "profile"), " · ",
+          createElement("a", { href: "#inbox", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("inbox")?.scrollIntoView({ behavior: "smooth" }); } }, "inbox"), " · ",
+          createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, events: true })); document.getElementById("events")?.scrollIntoView({ behavior: "smooth" }); } }, "events"), " · ",
+          createElement("a", { href: "#gigs", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gigs: true })); document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" }); } }, "gigs"), " · ",
+          createElement("a", { href: "#gifting", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gifting: true })); document.getElementById("gifting")?.scrollIntoView({ behavior: "smooth" }); } }, "gifting"), " · ",
+          createElement("a", { href: "#spotted", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, spotted: true })); document.getElementById("spotted")?.scrollIntoView({ behavior: "smooth" }); } }, "spotted"),
+        )}
         taglineAccent="cyan"
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
@@ -353,7 +383,23 @@ export default function Dashboard() {
         )}
 
         <ScrollReveal>
-        <div className="dash-top-grid">
+        <DashboardHubSummary
+          counts={{
+            unread: unreadCount,
+            pendingSubmissions,
+            gigCount: myGigs.length,
+            giftingCount: myGifting.length,
+            spottedCount: myMissed.length,
+            checkInCount: myCheckIns.length,
+            eventCount,
+          }}
+        />
+        </ScrollReveal>
+
+        <DashboardAdminTeaser enabled={isAdmin} />
+
+        <ScrollReveal delay={30}>
+        <div className={`dash-top-grid${unreadCount > 0 ? " dash-top-grid--inbox-priority" : ""}`}>
           <DashboardInboxPreview enabled={!!user} />
           <DashboardWidgets />
         </div>
@@ -381,13 +427,15 @@ export default function Dashboard() {
         <div className="dash-drawers">
           <DashboardDrawer
             title="My events"
-                    id="events"
+            id="events"
             color={CYAN}
             countLabel={`${eventCount} total`}
             open={!!openSections.events}
             onToggle={() => toggleSection("events")}
+            loading={myEventsQuery.isLoading || submittedEventsQuery.isLoading}
             isEmpty={eventCount === 0}
             emptyText="No submitted or claimed events yet."
+            cta={eventCount === 0 ? { label: "Submit or claim an event →", href: "/submit" } : undefined}
           >
             {editingEvent && eventForm && (
               <DashboardEventEditForm
@@ -432,10 +480,12 @@ export default function Dashboard() {
 
           <DashboardDrawer
             title="Gig posts"
+            id="gigs"
             color={ORANGE}
             countLabel={`${myGigs.length} posts`}
             open={!!openSections.gigs}
             onToggle={() => toggleSection("gigs")}
+            loading={myGigsQuery.isLoading}
             isEmpty={myGigs.length === 0}
             emptyText="No gig posts yet."
             cta={{ label: "Post on Pride Werk board →", href: "/pride-work" }}
@@ -467,13 +517,16 @@ export default function Dashboard() {
           </DashboardDrawer>
 
           <DashboardDrawer
-            title="Missed connections"
+            title="Spotted"
+            id="spotted"
             color={MAGENTA}
             countLabel={`${myMissed.length} posts`}
-            open={!!openSections.missed}
-            onToggle={() => toggleSection("missed")}
+            open={!!openSections.spotted}
+            onToggle={() => toggleSection("spotted")}
+            loading={myMissedQuery.isLoading}
             isEmpty={myMissed.length === 0}
-            emptyText="No missed connections yet."
+            emptyText="No Spotted posts yet."
+            cta={{ label: "Post on Spotted →", href: "/spotted" }}
           >
             {myMissed.map((post: any) => (
               <DashboardItemRow
@@ -495,10 +548,12 @@ export default function Dashboard() {
 
           <DashboardDrawer
             title="Gifting"
+            id="gifting"
             color={CYAN}
             countLabel={`${myGifting.length} posts`}
             open={!!openSections.gifting}
             onToggle={() => toggleSection("gifting")}
+            loading={myGiftingQuery.isLoading}
             isEmpty={myGifting.length === 0}
             emptyText="No gifting posts yet."
             cta={{ label: "Open gifting board →", href: "/gifting" }}
@@ -554,12 +609,15 @@ export default function Dashboard() {
 
           <DashboardDrawer
             title="Check-ins"
+            id="checkins"
             color={LIME}
             countLabel={`${myCheckIns.length} active`}
             open={!!openSections.checkins}
             onToggle={() => toggleSection("checkins")}
+            loading={myCheckInsQuery.isLoading}
             isEmpty={myCheckIns.length === 0}
             emptyText="No active check-ins yet."
+            cta={{ label: "Browse events to check in →", href: "/events" }}
           >
             {myCheckIns.map((check: any) => (
               <DashboardItemRow

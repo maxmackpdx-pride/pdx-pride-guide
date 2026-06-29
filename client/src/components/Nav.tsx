@@ -157,7 +157,7 @@ export default function Nav() {
               <div className="site-auth">
                 <NavLink
                   href="/dashboard"
-                  label="INBOX"
+                  label="HUB"
                   active={hubActive}
                   showNotify={unreadCount > 0}
                   notifyLabel={
@@ -208,7 +208,7 @@ export default function Nav() {
                           setMenuOpen(false);
                         }}
                       >
-                        Dashboard
+                        Hub
                       </Link>
                       <Link
                         href="/inbox"
@@ -219,7 +219,7 @@ export default function Nav() {
                           setMenuOpen(false);
                         }}
                       >
-                        Inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
+                        Full inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
                       </Link>
                       <button
                         type="button"

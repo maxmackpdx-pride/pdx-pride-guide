@@ -6,8 +6,11 @@ import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
   ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare, Briefcase, Users, Search,
 } from "lucide-react";
+import ImageUploader from "@/components/ImageUploader";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
+import AdminInbox from "@/components/admin/AdminInbox";
+import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import "@/components/dashboard/dashboard.css";
 
 interface Submission {
@@ -108,7 +111,8 @@ interface AdminGig {
   displayName?: string | null;
 }
 
-type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gigs" | "gifting" | "feedback" | "team";
+type AdminTab = "inbox" | "events" | "gigs" | "team";
+type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer";
 
 interface SiteAdminMember {
   userId: number;
@@ -134,8 +138,8 @@ export default function Admin() {
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
-  const [activeTab, setActiveTab] = useState<AdminTab>("queue");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<AdminTab>("inbox");
+  const [expandedInboxKey, setExpandedInboxKey] = useState<string | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -143,6 +147,7 @@ export default function Admin() {
   const [editingGigId, setEditingGigId] = useState<number | null>(null);
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
   const [eventSearch, setEventSearch] = useState("");
+  const [eventStatusFilter, setEventStatusFilter] = useState<EventStatusFilter>("all");
   const [teamIdentifier, setTeamIdentifier] = useState("");
   const [teamNote, setTeamNote] = useState("");
 
@@ -174,8 +179,18 @@ export default function Admin() {
     }
   };
 
+  const invalidateInboxQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+  };
+
   const { data: submissions = [], isLoading: subLoading, isError: subError, refetch: refetchSubs } = useQuery<Submission[]>({
-    queryKey: ["/api/admin/submissions"],
+    queryKey: ["/api/admin/submissions", "all"],
+    queryFn: () => apiRequest("GET", "/api/admin/submissions?all=true").then(r => r.json()),
     enabled: authenticated,
   });
 
@@ -185,8 +200,9 @@ export default function Admin() {
   });
 
   const { data: modRequests = [], isLoading: modLoading, isError: modError, refetch: refetchMod } = useQuery<ModerationRequest[]>({
-    queryKey: ["/api/admin/moderation"],
-    enabled: authenticated && activeTab === "moderation",
+    queryKey: ["/api/admin/moderation", "all"],
+    queryFn: () => apiRequest("GET", "/api/admin/moderation?all=true").then(r => r.json()),
+    enabled: authenticated,
   });
 
   const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: refetchGigs } = useQuery<AdminGig[]>({
@@ -196,24 +212,25 @@ export default function Admin() {
 
   const { data: giftingAdmin = { posts: [], reports: [] }, isLoading: giftingLoading, isError: giftingError, refetch: refetchGifting } = useQuery<any>({
     queryKey: ["/api/admin/gifting"],
-    enabled: authenticated && activeTab === "gifting",
+    enabled: authenticated,
   });
 
   const { data: feedback = [], isLoading: feedbackLoading, isError: feedbackError, refetch: refetchFeedback } = useQuery<any[]>({
-    queryKey: ["/api/admin/feedback"],
-    enabled: authenticated && activeTab === "feedback",
+    queryKey: ["/api/admin/feedback", "all"],
+    queryFn: () => apiRequest("GET", "/api/admin/feedback?all=true").then(r => r.json()),
+    enabled: authenticated,
   });
 
   const { data: promoterRequests = [], isLoading: promotersLoading, isError: promotersError, refetch: refetchPromoters } = useQuery<PromoterRequest[]>({
     queryKey: ["/api/admin/promoter-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then(r => r.json()),
-    enabled: authenticated && activeTab === "promoters",
+    enabled: authenticated,
   });
 
   const { data: talentRequests = [], isLoading: talentLoading, isError: talentError, refetch: refetchTalent } = useQuery<TalentRequest[]>({
     queryKey: ["/api/admin/talent-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/talent-requests").then(r => r.json()),
-    enabled: authenticated && activeTab === "talent",
+    enabled: authenticated,
   });
 
   const { data: teamAdmins = [], isLoading: teamLoading, isError: teamError, refetch: refetchTeam } = useQuery<SiteAdminMember[]>({
@@ -226,7 +243,7 @@ export default function Admin() {
     mutationFn: ({ id }: { id: number }) =>
       apiRequest("POST", `/api/admin/submissions/${id}/approve`, { adminName }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
+      invalidateInboxQueries();
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/unclaimed"] });
       toast({ title: "Approved", description: "Submission approved successfully." });
@@ -240,7 +257,7 @@ export default function Admin() {
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       apiRequest("POST", `/api/admin/submissions/${id}/reject`, { adminName, reason }),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
+      invalidateInboxQueries();
       setRejectReasons(prev => ({ ...prev, [id]: "" }));
       toast({ title: "Rejected", description: "Submission rejected." });
     },
@@ -282,7 +299,7 @@ export default function Admin() {
         adminName,
       }),
     onSuccess: (_, { action }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
+      invalidateInboxQueries();
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({ title: action === "approve" ? "Request Approved" : "Request Rejected" });
     },
@@ -295,7 +312,7 @@ export default function Admin() {
     mutationFn: () => apiRequest("POST", "/api/admin/moderation/dismiss-stale-tests", {}),
     onSuccess: async (res) => {
       const data = await res.json();
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
+      invalidateInboxQueries();
       toast({ title: "Stale test requests dismissed", description: `${data.dismissed ?? 0} item(s) cleared.` });
     },
     onError: () => toast({ title: "Could not dismiss test requests", variant: "destructive" }),
@@ -320,7 +337,7 @@ export default function Admin() {
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       apiRequest("POST", `/api/admin/gifting/${id}/status`, { status }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+      invalidateInboxQueries();
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
       toast({ title: "Gifting post updated" });
     },
@@ -330,7 +347,7 @@ export default function Admin() {
     mutationFn: ({ id, adminNotes }: { id: number; adminNotes?: string }) =>
       apiRequest("POST", `/api/admin/gifting/reports/${id}/resolve`, { adminNotes }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+      invalidateInboxQueries();
       toast({ title: "Report resolved" });
     },
   });
@@ -338,7 +355,7 @@ export default function Admin() {
   const resolveFeedbackMutation = useMutation({
     mutationFn: (id: number) => apiRequest("POST", `/api/admin/feedback/${id}/resolve`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+      invalidateInboxQueries();
       toast({ title: "Feedback resolved" });
     },
   });
@@ -346,7 +363,7 @@ export default function Admin() {
   const approvePromoterMutation = useMutation({
     mutationFn: (userId: number) => apiRequest("POST", `/api/admin/promoter-requests/${userId}/approve`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+      invalidateInboxQueries();
       toast({ title: "Promoter approved", description: "User can now submit new events." });
     },
     onError: () => toast({ title: "Error", description: "Could not approve promoter.", variant: "destructive" }),
@@ -355,7 +372,7 @@ export default function Admin() {
   const denyPromoterMutation = useMutation({
     mutationFn: (userId: number) => apiRequest("POST", `/api/admin/promoter-requests/${userId}/deny`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+      invalidateInboxQueries();
       toast({ title: "Promoter denied" });
     },
     onError: () => toast({ title: "Error", description: "Could not deny promoter.", variant: "destructive" }),
@@ -364,7 +381,7 @@ export default function Admin() {
   const approveTalentMutation = useMutation({
     mutationFn: (talentId: number) => apiRequest("POST", `/api/admin/talent-requests/${talentId}/approve`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
+      invalidateInboxQueries();
       toast({ title: "Talent approved", description: "Lineup tag is now live." });
     },
     onError: () => toast({ title: "Error", description: "Could not approve talent.", variant: "destructive" }),
@@ -373,7 +390,7 @@ export default function Admin() {
   const denyTalentMutation = useMutation({
     mutationFn: (talentId: number) => apiRequest("POST", `/api/admin/talent-requests/${talentId}/reject`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
+      invalidateInboxQueries();
       toast({ title: "Talent request denied" });
     },
     onError: () => toast({ title: "Error", description: "Could not deny talent.", variant: "destructive" }),
@@ -502,7 +519,6 @@ export default function Admin() {
   }
 
   const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
-  const resolvedSubs = submissions.filter(s => s.status.toUpperCase() !== "PENDING");
   const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
   const pendingGifting = (giftingAdmin.posts || []).filter((p: any) => p.status === "PENDING");
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
@@ -517,12 +533,40 @@ export default function Admin() {
     + pendingGifting.length
     + pendingGiftingReports.length
     + openFeedback.length;
+  const inboxLoading =
+    subLoading || modLoading || giftingLoading || feedbackLoading || promotersLoading || talentLoading;
+  const inboxError =
+    subError || modError || giftingError || feedbackError || promotersError || talentError;
+  const refetchInbox = () => {
+    refetchSubs();
+    refetchMod();
+    refetchGifting();
+    refetchFeedback();
+    refetchPromoters();
+    refetchTalent();
+  };
   const eventSearchQuery = eventSearch.trim().toLowerCase();
+  const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const filteredEvents = events.filter(ev => {
+    if (eventStatusFilter === "LIVE" && ev.status !== "LIVE") return false;
+    if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
+    if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
     if (!eventSearchQuery) return true;
     const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""}`.toLowerCase();
     return haystack.includes(eventSearchQuery);
   });
+  const inboxActionPending =
+    approveMutation.isPending
+    || rejectMutation.isPending
+    || resolveModerationMutation.isPending
+    || dismissStaleTestsMutation.isPending
+    || approvePromoterMutation.isPending
+    || denyPromoterMutation.isPending
+    || approveTalentMutation.isPending
+    || denyTalentMutation.isPending
+    || updateGiftingStatusMutation.isPending
+    || resolveGiftingReportMutation.isPending
+    || resolveFeedbackMutation.isPending;
 
   return (
     <div className="dash-page">
@@ -553,14 +597,9 @@ export default function Admin() {
 
         <div className="dash-admin-tabs">
           {([
-            { key: "queue" as AdminTab, label: `Review queue (${pendingSubs.length})`, icon: <Inbox size={12} /> },
-            { key: "promoters" as AdminTab, label: `Promoters${pendingPromoters.length > 0 ? ` (${pendingPromoters.length})` : ""}`, icon: <Shield size={12} /> },
-            { key: "talent" as AdminTab, label: `Talent${pendingTalent.length > 0 ? ` (${pendingTalent.length})` : ""}`, icon: <Tag size={12} /> },
-            { key: "moderation" as AdminTab, label: `Claim / remove${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
+            { key: "inbox" as AdminTab, label: `Inbox${totalActionItems > 0 ? ` (${totalActionItems})` : ""}`, icon: <Inbox size={12} /> },
             { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
             { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
-            { key: "gifting" as AdminTab, label: `Gifting${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
-            { key: "feedback" as AdminTab, label: `Feedback${openFeedback.length > 0 ? ` (${openFeedback.length})` : ""}`, icon: <MessageSquare size={12} /> },
             { key: "team" as AdminTab, label: `Team (${teamAdmins.length})`, icon: <Users size={12} /> },
           ]).map(tab => (
             <button
@@ -575,246 +614,38 @@ export default function Admin() {
           ))}
         </div>
 
-        {/* ── REVIEW QUEUE ── */}
-        {activeTab === "queue" && (
-          <div>
-            {subError ? (
-              <AdminLoadError label="review queue" onRetry={() => refetchSubs()} />
-            ) : subLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />
-                ))}
-              </div>
-            ) : pendingSubs.length === 0 ? (
-              <div className="text-center py-16">
-                <CheckCircle size={40} className="mx-auto mb-4" style={{ color: "#CCFF00" }} />
-                <p className="display text-2xl text-white/30">QUEUE CLEAR</p>
-                <p className="text-white/30 text-sm mt-2">No pending submissions to review.</p>
-              </div>
-            ) : (
-              <div className="space-y-4 mb-12">
-                <p className="text-white/40 text-sm">{pendingSubs.length} pending — admin review required</p>
-                {pendingSubs.map(sub => (
-                  <SubmissionCard
-                    key={sub.id}
-                    sub={sub}
-                    expanded={expandedId === sub.id}
-                    onToggle={() => setExpandedId(expandedId === sub.id ? null : sub.id)}
-                    rejectReason={rejectReasons[sub.id] || ""}
-                    onRejectReasonChange={val => setRejectReasons(prev => ({ ...prev, [sub.id]: val }))}
-                    onApprove={() => approveMutation.mutate({ id: sub.id })}
-                    onReject={() => rejectMutation.mutate({ id: sub.id, reason: rejectReasons[sub.id] || "" })}
-                    approving={approveMutation.isPending}
-                    rejecting={rejectMutation.isPending}
-                  />
-                ))}
-              </div>
-            )}
-            {resolvedSubs.length > 0 && (
-              <div>
-                <h3 className="display text-xl text-white/30 mb-4">RESOLVED ({resolvedSubs.length})</h3>
-                <div className="space-y-2">
-                  {resolvedSubs.map(sub => (
-                    <div key={sub.id} className="p-4 border border-white/10 flex items-center justify-between gap-4" style={{ background: "#0d0d0d" }}>
-                      <div>
-                        <span className="display text-sm text-white/50">{sub.type}</span>
-                        <p className="text-white/30 text-xs mt-0.5">{new Date(sub.createdAt).toLocaleDateString()}</p>
-                      </div>
-                      <span className="sticker text-xs" style={{ color: sub.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400", borderColor: sub.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400" }}>
-                        {sub.status.toUpperCase()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── PROMOTER REQUESTS ── */}
-        {activeTab === "promoters" && (
-          <div>
-            <p className="text-white/40 text-sm mb-6">Users who claimed an event and requested verified promoter status.</p>
-            {promotersError ? (
-              <AdminLoadError label="promoter requests" onRetry={() => refetchPromoters()} />
-            ) : promotersLoading ? (
-              <div className="space-y-4">{[1, 2].map(i => <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />)}</div>
-            ) : pendingPromoters.length === 0 ? (
-              <div className="text-center py-16">
-                <CheckCircle size={40} className="mx-auto mb-4" style={{ color: "#CCFF00" }} />
-                <p className="display text-2xl text-white/30">NO PENDING PROMOTERS</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {pendingPromoters.map(req => (
-                  <div key={req.id} className="p-5 border border-white/10" style={{ background: "#0d0d0d" }}>
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div>
-                        <p className="display text-lg text-white">{req.displayName || req.username}</p>
-                        <p className="text-white/40 text-sm">{req.email}{req.submitterOrg ? ` · ${req.submitterOrg}` : ""}</p>
-                        {req.eventTitle && (
-                          <p className="text-white/60 text-sm mt-2">
-                            Claiming: <span style={{ color: "#00FFFF" }}>{req.eventTitle}</span>
-                          </p>
-                        )}
-                        {req.claimReason && (
-                          <p className="text-white/70 text-sm mt-3 whitespace-pre-wrap border-l-2 pl-3" style={{ borderColor: "#00FFFF" }}>
-                            {req.claimReason}
-                          </p>
-                        )}
-                        <p className="text-white/30 text-xs mt-2">{new Date(req.requestedAt).toLocaleString()}</p>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => approvePromoterMutation.mutate(req.id)}
-                          disabled={approvePromoterMutation.isPending}
-                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
-                          style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
-                        >
-                          <CheckCircle size={14} /> APPROVE
-                        </button>
-                        <button
-                          onClick={() => denyPromoterMutation.mutate(req.id)}
-                          disabled={denyPromoterMutation.isPending}
-                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
-                          style={{ borderColor: "#FF2400", color: "#FF2400" }}
-                        >
-                          <XCircle size={14} /> DENY
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── TALENT (unclaimed events) ── */}
-        {activeTab === "talent" && (
-          <div>
-            <p className="text-white/40 text-sm mb-6">
-              Self-tag lineup requests on unclaimed events. Claimed events go to the host&apos;s inbox.
-            </p>
-            {talentError ? (
-              <AdminLoadError label="talent requests" onRetry={() => refetchTalent()} />
-            ) : talentLoading ? (
-              <div className="space-y-4">{[1, 2].map(i => <div key={i} className="h-24 bg-white/5 animate-pulse border border-white/10" />)}</div>
-            ) : pendingTalent.length === 0 ? (
-              <div className="text-center py-16">
-                <CheckCircle size={40} className="mx-auto mb-4" style={{ color: "#CCFF00" }} />
-                <p className="display text-2xl text-white/30">NO PENDING TALENT</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {pendingTalent.map(req => (
-                  <div key={req.id} className="p-5 border border-white/10" style={{ background: "#0d0d0d" }}>
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div>
-                        <p className="display text-lg text-white">{req.displayName || req.username}</p>
-                        <p className="text-white/40 text-sm">@{req.username} · {req.role}</p>
-                        <p className="text-white/60 text-sm mt-2">
-                          Event: <span style={{ color: "#00FFFF" }}>{req.eventTitle}</span>
-                        </p>
-                        <p className="text-white/30 text-xs mt-2">{new Date(req.createdAt).toLocaleString()}</p>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => approveTalentMutation.mutate(req.id)}
-                          disabled={approveTalentMutation.isPending}
-                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
-                          style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
-                        >
-                          <CheckCircle size={14} /> APPROVE
-                        </button>
-                        <button
-                          onClick={() => denyTalentMutation.mutate(req.id)}
-                          disabled={denyTalentMutation.isPending}
-                          className="display text-xs px-4 py-2 border-2 flex items-center gap-2"
-                          style={{ borderColor: "#FF2400", color: "#FF2400" }}
-                        >
-                          <XCircle size={14} /> DENY
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── MODERATION ── */}
-        {activeTab === "moderation" && (
-          <div>
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              <p className="text-white/40 text-sm m-0">Remove, flag, and transfer requests. New claims go through the submission queue.</p>
-              <button
-                type="button"
-                onClick={() => dismissStaleTestsMutation.mutate()}
-                disabled={dismissStaleTestsMutation.isPending}
-                className="sticker text-xs"
-                style={{ color: "#666", borderColor: "#444" }}
-              >
-                {dismissStaleTestsMutation.isPending ? "CLEARING..." : "DISMISS STALE TESTS"}
-              </button>
-            </div>
-            {modError ? (
-              <AdminLoadError label="moderation requests" onRetry={() => refetchMod()} />
-            ) : modLoading ? (
-              <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
-            ) : modRequests.length === 0 ? (
-              <div className="text-center py-16">
-                <Inbox size={36} className="mx-auto mb-4 text-white/20" />
-                <p className="display text-xl text-white/30">INBOX EMPTY</p>
-              </div>
-            ) : (
-              <div>
-                {pendingMod.length > 0 && (
-                  <div className="mb-8">
-                    <h3 className="display text-base text-white/40 mb-3">PENDING ({pendingMod.length})</h3>
-                    <div className="space-y-3">
-                      {pendingMod.map(req => (
-                        <ModerationCard
-                          key={req.id}
-                          req={req}
-                          expanded={expandedId === req.id + 10000}
-                          onToggle={() => setExpandedId(expandedId === req.id + 10000 ? null : req.id + 10000)}
-                          note={modNote[req.id] || ""}
-                          onNoteChange={val => setModNote(prev => ({ ...prev, [req.id]: val }))}
-                          onApprove={() => resolveModerationMutation.mutate({ id: req.id, action: "approve", note: modNote[req.id] })}
-                          onReject={() => resolveModerationMutation.mutate({ id: req.id, action: "reject", note: modNote[req.id] })}
-                          resolving={resolveModerationMutation.isPending}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {modRequests.filter(r => r.status.toUpperCase() !== "PENDING").length > 0 && (
-                  <div>
-                    <h3 className="display text-base text-white/30 mb-3">RESOLVED</h3>
-                    <div className="space-y-2">
-                      {modRequests.filter(r => r.status.toUpperCase() !== "PENDING").map(req => (
-                        <div key={req.id} className="p-4 border border-white/10 flex items-center justify-between gap-4" style={{ background: "#0d0d0d" }}>
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="sticker text-xs flex-shrink-0" style={{
-                              color: req.type === "CLAIM" ? "#00FFFF" : req.type === "TRANSFER" ? "#CCFF00" : "#FF6600",
-                              borderColor: req.type === "CLAIM" ? "#00FFFF" : req.type === "TRANSFER" ? "#CCFF00" : "#FF6600",
-                            }}>{req.type}</span>
-                            <p className="display text-sm text-white/50 truncate">Event #{req.eventId}{req.eventTitle ? ` — ${req.eventTitle}` : ""}</p>
-                          </div>
-                          <span className="sticker text-xs flex-shrink-0" style={{ color: req.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400", borderColor: req.status.toUpperCase() === "APPROVED" ? "#CCFF00" : "#FF2400" }}>
-                            {req.status.toUpperCase()}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        {/* ── INBOX ── */}
+        {activeTab === "inbox" && (
+          <AdminInbox
+            submissions={submissions}
+            promoterRequests={promoterRequests}
+            talentRequests={talentRequests}
+            modRequests={modRequests}
+            giftingPosts={giftingAdmin.posts || []}
+            giftingReports={giftingAdmin.reports || []}
+            feedback={feedback}
+            loading={inboxLoading}
+            error={inboxError}
+            onRetry={refetchInbox}
+            expandedKey={expandedInboxKey}
+            onToggleExpand={setExpandedInboxKey}
+            rejectReasons={rejectReasons}
+            onRejectReasonChange={(id, val) => setRejectReasons(prev => ({ ...prev, [id]: val }))}
+            modNotes={modNote}
+            onModNoteChange={(id, val) => setModNote(prev => ({ ...prev, [id]: val }))}
+            onApproveSubmission={id => approveMutation.mutate({ id })}
+            onRejectSubmission={(id, reason) => rejectMutation.mutate({ id, reason })}
+            onApprovePromoter={id => approvePromoterMutation.mutate(id)}
+            onDenyPromoter={id => denyPromoterMutation.mutate(id)}
+            onApproveTalent={id => approveTalentMutation.mutate(id)}
+            onDenyTalent={id => denyTalentMutation.mutate(id)}
+            onResolveModeration={(id, action, note) => resolveModerationMutation.mutate({ id, action, note })}
+            onDismissStaleTests={() => dismissStaleTestsMutation.mutate()}
+            onGiftingStatus={(id, status) => updateGiftingStatusMutation.mutate({ id, status })}
+            onResolveGiftingReport={id => resolveGiftingReportMutation.mutate({ id })}
+            onResolveFeedback={id => resolveFeedbackMutation.mutate(id)}
+            actionPending={inboxActionPending}
+          />
         )}
 
         {/* ── MANAGE EVENTS ── */}
@@ -1136,84 +967,6 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── GIFTING ── */}
-        {activeTab === "gifting" && (
-          <div>
-            <p className="text-white/40 text-sm mb-6">
-              Review first-time gifting posts, handle reports, and change listing statuses.
-            </p>
-            {giftingError ? (
-              <AdminLoadError label="gifting moderation" onRetry={() => refetchGifting()} />
-            ) : giftingLoading ? (
-              <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
-            ) : (
-              <div className="space-y-8">
-                <section>
-                  <h3 className="display text-xl text-white mb-3">PENDING / REPORTED</h3>
-                  {[...pendingGifting, ...(giftingAdmin.posts || []).filter((p: any) => p.reportCount > 0 && p.status !== "PENDING")].length === 0 ? (
-                    <p className="text-white/30">No gifting items need review.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {[...pendingGifting, ...(giftingAdmin.posts || []).filter((p: any) => p.reportCount > 0 && p.status !== "PENDING")].map((post: any) => (
-                        <div key={post.id} className="p-4 border border-white/10" style={{ background: "#111" }}>
-                          <div className="flex justify-between gap-3 flex-wrap">
-                            <div>
-                              <span className="sticker text-xs" style={{ color: post.postType === "GIFT" ? "#CCFF00" : "#B451FF", borderColor: post.postType === "GIFT" ? "#CCFF00" : "#B451FF" }}>{post.postType === "ISO" ? "IN SEARCH OF" : post.postType}</span>
-                              <p className="display text-lg text-white mt-2">{post.title}</p>
-                              <p className="text-white/45 text-sm">{post.category} · {post.neighborhood} · {post.status} · {post.reportCount || 0} report(s)</p>
-                              <p className="text-white/65 text-sm mt-2">{post.description}</p>
-                            </div>
-                            <div className="flex gap-2 flex-wrap content-start">
-                              <button className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => updateGiftingStatusMutation.mutate({ id: post.id, status: post.postType === "ISO" ? "LOOKING" : "OPEN" })}>APPROVE</button>
-                              <button className="sticker" style={{ color: "#FF6600", borderColor: "#FF6600" }} onClick={() => updateGiftingStatusMutation.mutate({ id: post.id, status: "HIDDEN" })}>HIDE</button>
-                              <button className="sticker" style={{ color: "#FF2400", borderColor: "#FF2400" }} onClick={() => updateGiftingStatusMutation.mutate({ id: post.id, status: "REMOVED" })}>REMOVE</button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                <section>
-                  <h3 className="display text-xl text-white mb-3">REPORTS</h3>
-                  {pendingGiftingReports.length === 0 ? <p className="text-white/30">No open gifting reports.</p> : (
-                    <div className="space-y-2">
-                      {pendingGiftingReports.map((report: any) => (
-                        <div key={report.id} className="p-4 border border-white/10 flex justify-between gap-3 flex-wrap" style={{ background: "#0d0d0d" }}>
-                          <div>
-                            <p className="display text-white">{report.postTitle}</p>
-                            <p className="text-white/60 text-sm">{report.reason}</p>
-                          </div>
-                          <button className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => resolveGiftingReportMutation.mutate({ id: report.id })}>RESOLVE</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                <section>
-                  <h3 className="display text-xl text-white mb-3">ALL GIFTING POSTS</h3>
-                  <div className="space-y-2">
-                    {(giftingAdmin.posts || []).map((post: any) => (
-                      <div key={post.id} className="p-3 border border-white/10 flex justify-between gap-3 flex-wrap" style={{ background: "#0b0b0b" }}>
-                        <div>
-                          <p className="display text-white/80">{post.title}</p>
-                          <p className="text-white/35 text-xs">{post.postType === "ISO" ? "IN SEARCH OF" : post.postType} · {post.status} · {post.displayName || post.username}</p>
-                        </div>
-                        <select value={post.status} onChange={e => updateGiftingStatusMutation.mutate({ id: post.id, status: e.target.value })}
-                          className="px-3 py-2 bg-black text-white border border-white/20">
-                          {["OPEN","LOOKING","PENDING","POSTER_CHOOSING","PICKUP_PENDING","OFFER_PENDING","GIFTED","FOUND","EXPIRED","HIDDEN","REMOVED"].map(s => <option key={s}>{s}</option>)}
-                        </select>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ── TEAM ── */}
         {activeTab === "team" && (
           <div className="space-y-8">
@@ -1304,191 +1057,7 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── FEEDBACK ── */}
-        {activeTab === "feedback" && (
-          <div className="space-y-4">
-            <p className="text-white/40 text-sm">
-              Soft launch tech feedback from the footer form. Use this for bugs, mobile layout issues, wrong event data, login issues, and confusing flows.
-            </p>
-            {feedbackError ? (
-              <AdminLoadError label="feedback" onRetry={() => refetchFeedback()} />
-            ) : feedbackLoading ? (
-              <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
-            ) : feedback.length === 0 ? (
-              <div className="border border-white/10 p-6 text-white/35">No open feedback right now.</div>
-            ) : (
-              feedback.map((item: any) => (
-                <div key={item.id} className="border border-white/10 bg-black/40 p-5">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{item.category}</span>
-                    <span
-                      className="sticker text-xs"
-                      style={{
-                        color: item.severity === "BLOCKER" || item.severity === "HIGH" ? "#FF2400" : "#CCFF00",
-                        borderColor: item.severity === "BLOCKER" || item.severity === "HIGH" ? "#FF2400" : "#CCFF00",
-                      }}
-                    >
-                      {item.severity}
-                    </span>
-                    <span className="text-white/30 text-xs">{new Date(item.createdAt || item.created_at).toLocaleString()}</span>
-                  </div>
-                  <p className="text-white/90 text-sm whitespace-pre-wrap mb-3">{item.message}</p>
-                  {item.steps && <p className="text-white/55 text-xs whitespace-pre-wrap mb-3">Steps / notes: {item.steps}</p>}
-                  <div className="text-white/35 text-xs space-y-1 mb-4">
-                    <div>Page: {item.pageUrl || item.page_url}</div>
-                    {item.email && <div>Email: {item.email}</div>}
-                    {(item.userAgent || item.user_agent) && <div>User agent: {item.userAgent || item.user_agent}</div>}
-                  </div>
-                  <button className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => resolveFeedbackMutation.mutate(item.id)}>
-                    MARK RESOLVED
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        )}
       </div>
-    </div>
-  );
-}
-
-// ── Submission Card ──────────────────────────────────────────────────────────
-function SubmissionCard({ sub, expanded, onToggle, rejectReason, onRejectReasonChange, onApprove, onReject, approving, rejecting }: {
-  sub: Submission; expanded: boolean; onToggle: () => void;
-  rejectReason: string; onRejectReasonChange: (v: string) => void;
-  onApprove: () => void; onReject: () => void; approving: boolean; rejecting: boolean;
-}) {
-  let approvals: string[] = [];
-  try { approvals = JSON.parse(sub.approvals || "[]"); } catch {}
-  const approvalCount = approvals.length;
-  const details: Record<string, any> = {
-    eventId: sub.eventId,
-    title: sub.title,
-    venue: sub.venueName,
-    day: sub.dayOfWeek,
-    start: sub.dateStart,
-    end: sub.dateEnd,
-    submitter: sub.submitterName,
-    email: sub.submitterEmail,
-    organization: sub.submitterOrg,
-    claimReason: sub.claimReason,
-    description: sub.description,
-  };
-
-  return (
-    <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? "#00FFFF" : "#222" }}>
-      <button className="w-full text-left p-5 flex items-start justify-between gap-4" onClick={onToggle}>
-        <div>
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="board-sticker text-xs" style={{ color: "#00FFFF" }}>{sub.type}</span>
-            {approvalCount > 0 && <span className="sticker text-xs" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>APPROVED</span>}
-          </div>
-          <p className="display text-xl text-white">{sub.title || `Submission #${sub.id}`}</p>
-          <p className="text-white/40 text-xs mt-1">{sub.submitterName} · {sub.submitterEmail}</p>
-          <p className="text-white/30 text-xs mt-1 flex items-center gap-1">
-            <Clock size={10} />
-            {new Date(sub.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-          </p>
-        </div>
-        <ChevronDown size={18} className="text-white/30 flex-shrink-0 mt-1 transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
-      </button>
-      {expanded && (
-        <div className="px-5 pb-5 border-t border-white/10 pt-4">
-          <div className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-3">
-            {Object.entries(details).filter(([, val]) => val !== null && val !== undefined && val !== "").map(([key, val]) => (
-              <div key={key} className="bg-black/30 p-2 border border-white/10">
-                <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{key}</p>
-                <p className="text-white text-sm truncate">{String(val)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="display text-xs text-white/30 block mb-1">REJECT REASON (optional)</label>
-              <input type="text" value={rejectReason} onChange={e => onRejectReasonChange(e.target.value)}
-                placeholder="Reason for rejection..." className="w-full px-3 py-2 text-white text-sm border border-white/10 bg-black/40 focus:outline-none focus:border-red-500" />
-            </div>
-            <div className="flex gap-3 flex-wrap">
-              <button onClick={onApprove} disabled={approving}
-                className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
-                <CheckCircle size={14} />{approving ? "APPROVING..." : "APPROVE"}
-              </button>
-              <button onClick={onReject} disabled={rejecting}
-                className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ borderColor: "#FF2400", color: "#FF2400" }}>
-                <XCircle size={14} />{rejecting ? "REJECTING..." : "REJECT"}
-              </button>
-            </div>
-            {approvalCount > 0 && <p className="text-white/30 text-xs">Approved — live on site.</p>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Moderation Card ──────────────────────────────────────────────────────────
-function ModerationCard({ req, expanded, onToggle, note, onNoteChange, onApprove, onReject, resolving }: {
-  req: ModerationRequest; expanded: boolean; onToggle: () => void;
-  note: string; onNoteChange: (v: string) => void;
-  onApprove: () => void; onReject: () => void; resolving: boolean;
-}) {
-  const isClaim = req.type === "CLAIM";
-  const isFlag = req.type === "FLAG";
-  const isTransfer = req.type === "TRANSFER";
-  const accentColor = isClaim ? "#00FFFF" : isTransfer ? "#CCFF00" : isFlag ? "#FF6600" : "#FF6600";
-  const proofLabel = isClaim ? "PROOF OF OWNERSHIP"
-    : isFlag ? "DATA ERROR REPORT"
-    : isTransfer ? "TRANSFER TARGET"
-    : "REASON FOR REMOVAL";
-  const approveLabel = isClaim ? "GRANT CLAIM"
-    : isFlag ? "ACK FLAG"
-    : isTransfer ? "APPROVE TRANSFER"
-    : "APPROVE REMOVAL";
-
-  return (
-    <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? accentColor : "#222" }}>
-      <button className="w-full text-left p-5 flex items-start justify-between gap-4" onClick={onToggle}>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="sticker text-xs" style={{ color: accentColor, borderColor: accentColor }}>{req.type}</span>
-            {req.type === "REMOVE" && <span className="sticker text-xs flex items-center gap-1" style={{ color: "#FF6600", borderColor: "#FF6600" }}><AlertTriangle size={9} /> REMOVE</span>}
-          </div>
-          <p className="display text-lg text-white">{req.eventTitle || `Event #${req.eventId}`}</p>
-          <p className="text-white/40 text-xs mt-1">{req.requesterName} · {req.requesterEmail}</p>
-        </div>
-        <ChevronDown size={18} className="text-white/30 flex-shrink-0 mt-1 transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
-      </button>
-      {expanded && (
-        <div className="px-5 pb-5 border-t border-white/10 pt-4">
-          {req.proof && (
-            <div className="mb-4 bg-black/30 p-3 border border-white/10">
-              <p className="text-white/30 text-xs uppercase tracking-wide mb-1">{proofLabel}</p>
-              <p className="text-white/80 text-sm">{req.proof}</p>
-            </div>
-          )}
-          <div className="space-y-3">
-            <div>
-              <label className="display text-xs text-white/30 block mb-1">ADMIN NOTE (optional)</label>
-              <input type="text" value={note} onChange={e => onNoteChange(e.target.value)}
-                placeholder="Internal note..." className="w-full px-3 py-2 text-white text-sm border border-white/10 bg-black/40 focus:outline-none focus:border-yellow-400" />
-            </div>
-            <div className="flex gap-3 flex-wrap">
-              <button onClick={onApprove} disabled={resolving}
-                className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
-                <CheckCircle size={14} />{resolving ? "PROCESSING..." : approveLabel}
-              </button>
-              <button onClick={onReject} disabled={resolving}
-                className="display text-base px-6 py-2 border-2 transition-all disabled:opacity-50 flex items-center gap-2"
-                style={{ borderColor: "#FF2400", color: "#FF2400" }}>
-                <XCircle size={14} />{resolving ? "PROCESSING..." : "DENY"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

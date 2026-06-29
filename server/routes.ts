@@ -298,6 +298,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ url: `/uploads/${req.file.filename}` });
   });
 
+  app.post("/api/admin/upload/poster", requireAdmin, upload.single("poster"), (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
+    res.json({ url: `/uploads/${req.file.filename}` });
+  });
+
   // Profile photo upload (client sends pre-cropped circle JPEG from AvatarEditor)
   app.post("/api/upload/avatar", requireAuth, upload.single("avatar"), async (req: any, res: any) => {
     if (!req.file) return res.status(400).json({ error: "No file or invalid type" });
@@ -1452,7 +1457,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── ADMIN ────────────────────────────────────────────────────────────────
   app.get("/api/admin/submissions", requireAdmin, (req, res) => {
-    const subs = storage.getSubmissions("PENDING");
+    const subs = req.query.all === "true" ? storage.getSubmissions() : storage.getSubmissions("PENDING");
     res.json(subs);
   });
 
@@ -1553,7 +1558,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {
-    res.json(storage.getFeedbackReports("OPEN"));
+    res.json(req.query.all === "true" ? storage.getFeedbackReports() : storage.getFeedbackReports("OPEN"));
   });
 
   app.post("/api/admin/feedback/:id/resolve", requireAdmin, (req, res) => {
@@ -1593,7 +1598,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // GET admin moderation requests
   app.get("/api/admin/moderation", requireAdmin, (req, res) => {
-    const reqs = storage.getModerationRequests("PENDING");
+    const reqs = req.query.all === "true" ? storage.getModerationRequests() : storage.getModerationRequests("PENDING");
     res.json(reqs);
   });
 

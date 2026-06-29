@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
+import { DashboardItemSkeleton } from "./DashboardThreadSkeleton";
 
 export interface DashboardDrawerProps {
   title: string;
@@ -9,6 +10,7 @@ export interface DashboardDrawerProps {
   onToggle: () => void;
   emptyText?: string;
   isEmpty?: boolean;
+  loading?: boolean;
   cta?: { label: string; href: string };
   children?: ReactNode;
 }
@@ -18,29 +20,40 @@ export default function DashboardDrawer({
   color,
   countLabel,
   open,
-id,
+  id,
   onToggle,
   emptyText,
   isEmpty,
+  loading,
   cta,
   children,
 }: DashboardDrawerProps) {
+  const bodyId = useId();
+
   return (
     <article
-        id={id}
+      id={id}
       className={`dash-drawer ${open ? "open" : ""}`}
       style={{ ["--drawer-color" as string]: color }}
     >
-      <button type="button" className="dash-drawer-toggle" onClick={onToggle}>
+      <button
+        type="button"
+        className="dash-drawer-toggle"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={bodyId}
+      >
         <span style={{ display: "flex", alignItems: "center", gap: 13 }}>
           <span className="dash-drawer-title" style={{ color }}>{title}</span>
           <span className="dash-drawer-count" style={{ background: color }}>{countLabel}</span>
         </span>
-        <span className="dash-drawer-chevron" style={{ color }}>▾</span>
+        <span className="dash-drawer-chevron" style={{ color }} aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div className="dash-drawer-body">
-          {isEmpty && emptyText ? (
+        <div id={bodyId} className="dash-drawer-body">
+          {loading ? (
+            <DashboardItemSkeleton />
+          ) : isEmpty && emptyText ? (
             <div style={{ padding: "16px 0", fontSize: 14, color: "var(--dash-muted)" }}>{emptyText}</div>
           ) : (
             children

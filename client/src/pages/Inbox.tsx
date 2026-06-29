@@ -11,14 +11,8 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import UserAvatar from "@/components/UserAvatar";
 import { counterpartyAvatar, senderAvatar } from "@/lib/inboxAvatar";
+import { contextTypeOf, inboxContextBadge } from "@/lib/inboxContext";
 import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTalent";
-
-function inboxContextBadge(contextType?: string | null) {
-  if (contextType === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
-  if (contextType === "MISSED_CONNECTION") return "MISSED CONNECTION";
-  if (contextType === "HOST_MESSAGE") return "HOST UPDATE";
-  return null;
-}
 
 function threadFromQuery() {
   if (typeof window === "undefined") return "";
@@ -31,10 +25,6 @@ function threadIdOf(msg: { threadId?: string; thread_id?: string } | null | unde
 
 function isMessageRead(msg: { isRead?: boolean; is_read?: boolean }): boolean {
   return Boolean(msg.isRead ?? msg.is_read);
-}
-
-function contextTypeOf(msg: { contextType?: string; context_type?: string } | null | undefined): string | undefined {
-  return msg?.contextType || msg?.context_type;
 }
 
 function contextIdOf(msg: { contextId?: number | null; context_id?: number | null } | null | undefined): number | null {
