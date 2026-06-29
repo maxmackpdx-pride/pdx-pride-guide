@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import logoPath from "@assets/logo.png";
+import footerLogoPath from "@assets/logo-footer.png";
 import { useAuth } from "@/context/AuthContext";
 import { FeedbackButton } from "./FeedbackForm";
 
@@ -50,7 +50,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <img src={logoPath} alt="" className="footer-brand-logo" />
+        <img src={footerLogoPath} alt="Portland Pride Guide 2026" className="footer-brand-logo" />
         <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
           <FeedbackButton />
         </div>
