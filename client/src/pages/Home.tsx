@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import EventTicker from "@/components/EventTicker";
-import { MapView } from "./Events";
+import { MapViewFallback } from "@/components/EventsMapFallback";
+
+const MapView = lazy(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 import { Briefcase, Gift, Search, UserRound } from "lucide-react";
 import GlitchWord from "@/components/GlitchWord";
 import HeroVideoOverlay from "@/components/HeroVideoOverlay";
@@ -210,14 +212,16 @@ export default function Home() {
       )}
 
       <section className="home-map-preview" aria-label="Events map preview">
-        <MapView
-          events={events}
-          expanded={mapExpanded}
-          onExpand={() => setMapExpanded(true)}
-          onCollapse={() => setMapExpanded(false)}
-          onSelect={setSelectedEvent}
-          variant="home"
-        />
+        <Suspense fallback={<MapViewFallback variant="home" />}>
+          <MapView
+            events={events}
+            expanded={mapExpanded}
+            onExpand={() => setMapExpanded(true)}
+            onCollapse={() => setMapExpanded(false)}
+            onSelect={setSelectedEvent}
+            variant="home"
+          />
+        </Suspense>
       </section>
 
       <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />

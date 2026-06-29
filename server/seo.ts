@@ -397,6 +397,9 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     process.env.GOOGLE_SITE_VERIFICATION
       ? `<meta name="google-site-verification" content="${escapeHtml(process.env.GOOGLE_SITE_VERIFICATION)}" />`
       : "",
+    process.env.BING_SITE_VERIFICATION
+      ? `<meta name="msvalidate.01" content="${escapeHtml(process.env.BING_SITE_VERIFICATION)}" />`
+      : "",
   ].filter(Boolean).join("\n    ");
 
   const crawlerDirectory = buildCrawlerEventDirectory(events);
