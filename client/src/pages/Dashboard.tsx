@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, createElement, Fragment } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -273,13 +273,13 @@ export default function Dashboard() {
         titleLine2="DASHBOARD"
         accent="cyan"
         lede="Manage your profile, inbox, claimed events, gig posts, gifting listings, missed connections, and check-ins — everything you touch on PDX Pride Guide lives here."
-        tagline={`@${user.username} · profile · events · inbox · submissions`}
+        tagline={createElement(Fragment, null, "@", user.username, " · ", createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({behavior:"smooth"}); } }, "profile"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "events"), " · ", createElement("a", { href: "#/inbox", className: "dash-tagline-link" }, "inbox"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "submissions"))}
         taglineAccent="cyan"
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
       />
       <div className="dash-inner">
-        <header className="dash-profile-header">
+        <header id="profile" className="dash-profile-header">
           <div className="dash-profile-identity">
             <div className="dash-avatar-ring">
               <UserAvatar
@@ -380,6 +380,7 @@ export default function Dashboard() {
         <div className="dash-drawers">
           <DashboardDrawer
             title="My events"
+                    id="events"
             color={CYAN}
             countLabel={`${eventCount} total`}
             open={!!openSections.events}
