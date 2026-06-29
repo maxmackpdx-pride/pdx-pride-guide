@@ -33,6 +33,27 @@ function isMessageRead(msg: { isRead?: boolean; is_read?: boolean }): boolean {
   return Boolean(msg.isRead ?? msg.is_read);
 }
 
+function contextTypeOf(msg: { contextType?: string; context_type?: string } | null | undefined): string | undefined {
+  return msg?.contextType || msg?.context_type;
+}
+
+function contextIdOf(msg: { contextId?: number | null; context_id?: number | null } | null | undefined): number | null {
+  const raw = msg?.contextId ?? msg?.context_id;
+  return raw == null ? null : Number(raw);
+}
+
+function createdAtOf(msg: { createdAt?: string; created_at?: string }): string {
+  return msg.createdAt || msg.created_at || "";
+}
+
+async function refreshMessageQueries() {
+  await Promise.all([
+    queryClient.refetchQueries({ queryKey: ["/api/messages/inbox"] }),
+    queryClient.refetchQueries({ queryKey: ["/api/messages/sent"] }),
+    queryClient.refetchQueries({ queryKey: ["/api/messages/unread-count"] }),
+  ]);
+}
+
 type Message = {
   id: number;
   fromUserId: number;
@@ -110,7 +131,7 @@ export default function Inbox() {
   const { data: threadPayload, isError: threadError } = useQuery<ThreadPayload>({
     queryKey: ["/api/messages/thread", threadIdOf(activeThread)],
     queryFn: async () => {
-      const r = await fetch(`/api/messages/thread/${threadIdOf(activeThread)}`, { credentials: "include" });
+      const r = await fetch(`/api/messages/thread/${encodeURIComponent(threadIdOf(activeThread))}`, { credentials: "include" });
       if (!r.ok) throw new Error("Could not load thread");
       return r.json();
     },
@@ -119,7 +140,7 @@ export default function Inbox() {
   const thread = threadPayload?.messages ?? [];
   const threadReveal = threadPayload?.reveal ?? null;
 
-  const talentRequestId = activeThread?.contextType === "EVENT_TALENT_REQUEST" ? activeThread.contextId : null;
+  const talentRequestId = contextTypeOf(activeThread) === "EVENT_TALENT_REQUEST" ? contextIdOf(activeThread) : null;
 
   const { data: talentRequest } = useQuery({
     queryKey: ["/api/talent-request", talentRequestId],
@@ -135,9 +156,9 @@ export default function Inbox() {
       if (!res.ok) throw new Error(p.error || "Approve failed");
       return p;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Lineup approved" });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      await refreshMessageQueries();
       setActiveThread(null);
       setLocation("/inbox");
     },
@@ -152,9 +173,9 @@ export default function Inbox() {
       if (!res.ok) throw new Error(p.error || "Deny failed");
       return p;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Lineup declined" });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      await refreshMessageQueries();
       setActiveThread(null);
       setLocation("/inbox");
     },
@@ -162,7 +183,7 @@ export default function Inbox() {
   });
 
   const replyMutation = useMutation({
-    mutationFn: (body: string) => fetch(`/api/messages/thread/${threadIdOf(activeThread)}/reply`, {
+    mutationFn: (body: string) => fetch(`/api/messages/thread/${encodeURIComponent(threadIdOf(activeThread))}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -182,7 +203,7 @@ export default function Inbox() {
   });
 
   const revealMutation = useMutation({
-    mutationFn: () => fetch(`/api/messages/thread/${threadIdOf(activeThread)}/reveal`, {
+    mutationFn: () => fetch(`/api/messages/thread/${encodeURIComponent(threadIdOf(activeThread))}/reveal`, {
       method: "POST",
       credentials: "include",
     }).then(async r => {
@@ -200,17 +221,30 @@ export default function Inbox() {
 
   const deleteMutation = useMutation({
     mutationFn: async (threadId: string) => {
-      const r = await fetch(`/api/messages/thread/${threadId}`, { method: "DELETE", credentials: "include" });
+      const r = await fetch(`/api/messages/thread/${encodeURIComponent(threadId)}`, { method: "DELETE", credentials: "include" });
       if (!r.ok) throw new Error("Delete failed");
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setActiveThread(null);
       setLocation("/inbox");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+      await refreshMessageQueries();
     },
     onError: () => toast({ title: "Delete failed", description: "Could not remove this thread.", variant: "destructive" }),
+  });
+
+  const clearFolderMutation = useMutation({
+    mutationFn: async (folder: "inbox" | "sent") => {
+      const r = await fetch(`/api/messages/folder/${folder}`, { method: "DELETE", credentials: "include" });
+      if (!r.ok) throw new Error("Clear failed");
+      return r.json();
+    },
+    onSuccess: async (_data, folder) => {
+      setActiveThread(null);
+      setLocation("/inbox");
+      await refreshMessageQueries();
+      toast({ title: folder === "inbox" ? "Inbox cleared" : "Sent cleared" });
+    },
+    onError: () => toast({ title: "Clear failed", description: "Could not clear messages.", variant: "destructive" }),
   });
 
   const syncThreadUrl = useCallback((threadId: string | null) => {
@@ -292,8 +326,16 @@ export default function Inbox() {
   };
 
   const handleDeleteThread = (threadId: string) => {
+    if (!threadId) return;
     if (!window.confirm("Delete this thread from your inbox? This cannot be undone.")) return;
     deleteMutation.mutate(threadId);
+  };
+
+  const handleClearFolder = () => {
+    const folder = tab;
+    const label = folder === "inbox" ? "received messages" : "sent messages";
+    if (!window.confirm(`Clear all ${label}? This cannot be undone.`)) return;
+    clearFolderMutation.mutate(folder);
   };
 
   return (
@@ -310,7 +352,8 @@ export default function Inbox() {
           Private threads from missed connections, Pride Werk, event hosts, and check-ins.
           {unreadCount > 0 ? ` · ${unreadCount} unread` : ""}
         </p>
-        <div role="tablist" aria-label="Message folders" style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+        <div role="tablist" aria-label="Message folders" style={{ display: "flex", borderBottom: "2px solid #1a1a1a" }}>
           {(["inbox", "sent"] as const).map(t => (
             <button
               key={t}
@@ -329,6 +372,21 @@ export default function Inbox() {
               marginBottom: -2,
             }}>{t === "inbox" ? `RECEIVED${unreadCount > 0 ? ` (${unreadCount})` : ""}` : "SENT"}</button>
           ))}
+        </div>
+        {msgs.length > 0 && (
+          <button
+            type="button"
+            onClick={handleClearFolder}
+            disabled={clearFolderMutation.isPending}
+            style={{
+              background: "transparent", border: "1px solid #333", color: "#8c8980",
+              padding: "6px 12px", cursor: "pointer", fontSize: "0.72rem",
+              opacity: clearFolderMutation.isPending ? 0.5 : 1,
+            }}
+          >
+            {clearFolderMutation.isPending ? "Clearing…" : tab === "inbox" ? "Clear inbox" : "Clear sent"}
+          </button>
+        )}
         </div>
 
         <div className={`inbox-layout${activeThread ? " inbox-layout--split" : ""}`}>
@@ -351,15 +409,22 @@ export default function Inbox() {
               <div style={{ color: "#9d9a92", padding: "24px 0" }}>No messages yet.</div>
             ) : msgs.map(msg => {
               const party = counterpartyAvatar(msg, tab);
+              const rowThreadId = threadIdOf(msg);
               return (
+              <div
+                key={`${tab}-${rowThreadId || msg.id}`}
+                style={{
+                  display: "flex", alignItems: "stretch", borderBottom: "1px solid #111",
+                  background: threadIdOf(activeThread) === rowThreadId ? "#0d0d0d" : "transparent",
+                }}
+              >
               <button
-                key={msg.id}
                 type="button"
-                aria-current={threadIdOf(activeThread) === threadIdOf(msg) ? "true" : undefined}
+                aria-current={threadIdOf(activeThread) === rowThreadId ? "true" : undefined}
                 onClick={() => openThread(msg, tab)}
                 style={{
-                width: "100%", textAlign: "left", padding: "14px 18px", border: "none", borderBottom: "1px solid #111",
-                cursor: "pointer", background: threadIdOf(activeThread) === threadIdOf(msg) ? "#0d0d0d" : "transparent",
+                flex: 1, textAlign: "left", padding: "14px 18px", border: "none",
+                cursor: "pointer", background: "transparent",
                 display: "flex", gap: 12, alignItems: "flex-start",
               }}>
                 <span className="inbox-list-avatar" style={{ position: "relative", flexShrink: 0 }}>
@@ -382,20 +447,38 @@ export default function Inbox() {
                   <span className="display" style={{ display: "block", fontSize: "0.88rem", color: "#fff", marginBottom: 3 }}>
                     {msg.subject || "(no subject)"}
                   </span>
-                  {inboxContextBadge(msg.contextType) && (
+                  {inboxContextBadge(contextTypeOf(msg)) && (
                     <span style={{ display: "inline-block", fontSize: "0.62rem", color: "var(--neon-magenta)", border: "1px solid var(--neon-magenta)", padding: "2px 6px", marginBottom: 4, fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>
-                      {inboxContextBadge(msg.contextType)}
+                      {inboxContextBadge(contextTypeOf(msg))}
                     </span>
                   )}
-                  {msg.contextLabel && <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>{msg.contextLabel}</span>}
+                  {(msg.contextLabel || (msg as { context_label?: string }).context_label) && (
+                    <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>
+                      {msg.contextLabel || (msg as { context_label?: string }).context_label}
+                    </span>
+                  )}
                   <span style={{ display: "block", fontSize: "0.78rem", color: "#8c8980", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {tab === "inbox" ? `from ${msg.from_display_name || msg.from_username || "someone"}` : `to ${msg.to_display_name || msg.to_username || "someone"}`} · {msg.body.substring(0, 70)}{msg.body.length > 70 ? "..." : ""}
                   </span>
                   <span style={{ display: "block", fontSize: "0.7rem", color: "#6f736c", marginTop: 4 }}>
-                    {new Date(msg.createdAt).toLocaleString()}
+                    {createdAtOf(msg) ? new Date(createdAtOf(msg)).toLocaleString() : ""}
                   </span>
                 </span>
               </button>
+              <button
+                type="button"
+                aria-label="Delete thread"
+                onClick={() => handleDeleteThread(rowThreadId)}
+                disabled={deleteMutation.isPending || !rowThreadId}
+                style={{
+                  alignSelf: "center", marginRight: 12, background: "transparent", border: "1px solid #333",
+                  color: "#8c8980", padding: "5px 8px", cursor: "pointer", fontSize: "0.68rem", flexShrink: 0,
+                  opacity: deleteMutation.isPending || !rowThreadId ? 0.45 : 1,
+                }}
+              >
+                Delete
+              </button>
+              </div>
             );
             })}
           </div>
@@ -405,13 +488,15 @@ export default function Inbox() {
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
                 <div>
                   <div className="display" style={{ fontSize: "1rem", color: "#fff" }}>{activeThread.subject || "(no subject)"}</div>
-                  {inboxContextBadge(activeThread.contextType) && (
+                  {inboxContextBadge(contextTypeOf(activeThread)) && (
                     <span style={{ display: "inline-block", fontSize: "0.62rem", color: "var(--neon-magenta)", border: "1px solid var(--neon-magenta)", padding: "2px 6px", marginTop: 6, fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>
-                      {inboxContextBadge(activeThread.contextType)}
+                      {inboxContextBadge(contextTypeOf(activeThread))}
                     </span>
                   )}
-                  {activeThread.contextLabel && (
-                    <div style={{ color: "#00FFFF", fontSize: "0.75rem", marginTop: 6 }}>{activeThread.contextLabel}</div>
+                  {(activeThread.contextLabel || (activeThread as { context_label?: string }).context_label) && (
+                    <div style={{ color: "#00FFFF", fontSize: "0.75rem", marginTop: 6 }}>
+                      {activeThread.contextLabel || (activeThread as { context_label?: string }).context_label}
+                    </div>
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -428,7 +513,7 @@ export default function Inbox() {
                   </button>
                 </div>
               </div>
-              {activeThread.contextType === "EVENT_TALENT_REQUEST" && talentRequest?.status === "PENDING" && (
+              {contextTypeOf(activeThread) === "EVENT_TALENT_REQUEST" && talentRequest?.status === "PENDING" && (
                 <div style={{ marginBottom: 14, padding: "12px 14px", background: "#0d0d0d", border: "2px solid var(--neon-cyan)" }}>
                   <div className="display" style={{ fontSize: "0.78rem", color: "var(--neon-cyan)", marginBottom: 8 }}>LINEUP REQUEST</div>
                   <p style={{ fontSize: "0.82rem", color: "#ccc", lineHeight: 1.5, marginBottom: 12 }}>
@@ -448,7 +533,7 @@ export default function Inbox() {
                   </div>
                 </div>
               )}
-              {activeThread.contextType === "MISSED_CONNECTION" && threadReveal && (
+              {contextTypeOf(activeThread) === "MISSED_CONNECTION" && threadReveal && (
                 <div style={{ marginBottom: 14, padding: "10px 12px", background: "#0d0d0d", border: "1px solid #2a2a2a", fontSize: "0.78rem", color: "#9d9a92", lineHeight: 1.5 }}>
                   {threadReveal.bothRevealed ? (
                     <span style={{ color: "#CCFF00" }}>Both of you revealed — real names show in this thread.</span>

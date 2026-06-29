@@ -1203,12 +1203,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.delete("/api/messages/thread/:threadId", requireAuth, (req, res) => {
-    const thread = storage.getThread(req.params.threadId);
+    const threadId = decodeURIComponent(req.params.threadId || "").trim();
+    if (!threadId) return res.status(400).json({ error: "Thread id required" });
+    const thread = storage.getThread(threadId);
     const userId = req.session.userId!;
     const visible = thread.some((m: any) => m.fromUserId === userId || m.toUserId === userId);
     if (!visible) return res.status(404).json({ error: "Thread not found" });
-    storage.softDeleteThread(req.params.threadId, userId);
-    res.json({ ok: true });
+    const cleared = storage.softDeleteThread(threadId, userId);
+    if (cleared === 0) return res.status(404).json({ error: "Nothing to delete" });
+    res.json({ ok: true, cleared });
+  });
+
+  app.delete("/api/messages/folder/:folder", requireAuth, (req, res) => {
+    const folder = String(req.params.folder || "").toLowerCase();
+    if (!["inbox", "sent", "all"].includes(folder)) {
+      return res.status(400).json({ error: "folder must be inbox, sent, or all" });
+    }
+    const cleared = storage.clearInboxFolder(req.session.userId!, folder as "inbox" | "sent" | "all");
+    res.json({ ok: true, cleared });
   });
 
   app.get("/api/events/:id/hosts", (req, res) => {
@@ -1284,15 +1296,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/talent-request/:talentId/approve", requireAuth, (req, res) => {
     const talentId = Number(req.params.talentId);
-    const result = storage.approveEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    const userId = req.session.userId!;
+    const result = storage.approveEventTalent(talentId, userId, { isAdmin: sessionIsAdmin(req) });
     if (result.error) return res.status(400).json({ error: result.error });
+    storage.softDeleteTalentRequestThreads(talentId, userId);
     res.json(result.talent);
   });
 
   app.post("/api/talent-request/:talentId/reject", requireAuth, (req, res) => {
     const talentId = Number(req.params.talentId);
-    const result = storage.rejectEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
+    const userId = req.session.userId!;
+    const result = storage.rejectEventTalent(talentId, userId, { isAdmin: sessionIsAdmin(req) });
     if (result.error) return res.status(400).json({ error: result.error });
+    storage.softDeleteTalentRequestThreads(talentId, userId);
     res.json(result);
   });
 
@@ -1440,16 +1456,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/talent-requests/:talentId/approve", requireAdmin, (req, res) => {
     const approverId = getAdminActorUserId(req);
     if (!approverId) return res.status(401).json({ error: "No admin user account configured" });
-    const result = storage.approveEventTalent(Number(req.params.talentId), approverId, { isAdmin: true });
+    const talentId = Number(req.params.talentId);
+    const result = storage.approveEventTalent(talentId, approverId, { isAdmin: true });
     if (result.error) return res.status(400).json({ error: result.error });
+    storage.softDeleteTalentRequestThreads(talentId, approverId);
+    if (req.session.userId && req.session.userId !== approverId) {
+      storage.softDeleteTalentRequestThreads(talentId, req.session.userId);
+    }
     res.json(result.talent);
   });
 
   app.post("/api/admin/talent-requests/:talentId/reject", requireAdmin, (req, res) => {
     const approverId = getAdminActorUserId(req);
     if (!approverId) return res.status(401).json({ error: "No admin user account configured" });
-    const result = storage.rejectEventTalent(Number(req.params.talentId), approverId, { isAdmin: true });
+    const talentId = Number(req.params.talentId);
+    const result = storage.rejectEventTalent(talentId, approverId, { isAdmin: true });
     if (result.error) return res.status(400).json({ error: result.error });
+    storage.softDeleteTalentRequestThreads(talentId, approverId);
+    if (req.session.userId && req.session.userId !== approverId) {
+      storage.softDeleteTalentRequestThreads(talentId, req.session.userId);
+    }
     res.json(result);
   });
 

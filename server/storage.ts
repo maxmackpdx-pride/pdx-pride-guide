@@ -1901,7 +1901,9 @@ export interface IStorage {
   markRead(messageId: number): void;
   markReadForUser(messageId: number, userId: number): boolean;
   getThread(threadId: string): Message[];
-  softDeleteThread(threadId: string, userId: number): void;
+  softDeleteThread(threadId: string, userId: number): number;
+  softDeleteTalentRequestThreads(talentId: number, userId: number): void;
+  clearInboxFolder(userId: number, folder: "inbox" | "sent" | "all"): number;
   // Missed connections
   getMissedConnection(id: number): MissedConnection | undefined;
   getMissedConnections(status?: string, viewerUserId?: number): any[];
@@ -2771,18 +2773,30 @@ export const storage: IStorage = {
       SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
       FROM messages m
       LEFT JOIN users u ON u.id = m.from_user_id
+      INNER JOIN (
+        SELECT thread_id, MAX(id) AS latest_id
+        FROM messages
+        WHERE to_user_id = ? AND deleted_by_to = 0
+        GROUP BY thread_id
+      ) latest ON m.id = latest.latest_id
       WHERE m.to_user_id = ? AND m.deleted_by_to = 0
       ORDER BY m.created_at DESC
-    `).all(userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
+    `).all(userId, userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   getSentMessages(userId) {
     return sqlite.prepare(`
       SELECT m.*, u.username AS to_username, u.display_name AS to_display_name
       FROM messages m
       LEFT JOIN users u ON u.id = m.to_user_id
+      INNER JOIN (
+        SELECT thread_id, MAX(id) AS latest_id
+        FROM messages
+        WHERE from_user_id = ? AND deleted_by_from = 0
+        GROUP BY thread_id
+      ) latest ON m.id = latest.latest_id
       WHERE m.from_user_id = ? AND m.deleted_by_from = 0
       ORDER BY m.created_at DESC
-    `).all(userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
+    `).all(userId, userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   getUnreadCount(userId) {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM messages WHERE to_user_id = ? AND is_read = 0 AND deleted_by_to = 0`).get(userId) as any;
@@ -2820,8 +2834,31 @@ export const storage: IStorage = {
     `).all(threadId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   softDeleteThread(threadId, userId) {
-    sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE thread_id = ? AND from_user_id = ?`).run(threadId, userId);
-    sqlite.prepare(`UPDATE messages SET deleted_by_to = 1 WHERE thread_id = ? AND to_user_id = ?`).run(threadId, userId);
+    const tid = decodeURIComponent(String(threadId || "")).trim();
+    if (!tid) return 0;
+    const from = sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE thread_id = ? AND from_user_id = ? AND deleted_by_from = 0`).run(tid, userId);
+    const to = sqlite.prepare(`UPDATE messages SET deleted_by_to = 1 WHERE thread_id = ? AND to_user_id = ? AND deleted_by_to = 0`).run(tid, userId);
+    return (from.changes || 0) + (to.changes || 0);
+  },
+  softDeleteTalentRequestThreads(talentId, userId) {
+    sqlite.prepare(`
+      UPDATE messages SET deleted_by_to = 1
+      WHERE context_type = 'EVENT_TALENT_REQUEST' AND context_id = ? AND to_user_id = ?
+    `).run(talentId, userId);
+    sqlite.prepare(`
+      UPDATE messages SET deleted_by_from = 1
+      WHERE context_type = 'EVENT_TALENT_REQUEST' AND context_id = ? AND from_user_id = ?
+    `).run(talentId, userId);
+  },
+  clearInboxFolder(userId, folder) {
+    let total = 0;
+    if (folder === "inbox" || folder === "all") {
+      total += sqlite.prepare(`UPDATE messages SET deleted_by_to = 1 WHERE to_user_id = ? AND deleted_by_to = 0`).run(userId).changes || 0;
+    }
+    if (folder === "sent" || folder === "all") {
+      total += sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE from_user_id = ? AND deleted_by_from = 0`).run(userId).changes || 0;
+    }
+    return total;
   },
   archiveExpiredMissedConnections() {
     archiveExpiredMissedConnections();
