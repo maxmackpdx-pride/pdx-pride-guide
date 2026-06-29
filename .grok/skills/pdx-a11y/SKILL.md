@@ -12,6 +12,14 @@ description: >
 
 Specialized agent for the **A11y** approval bucket.
 
+## Status: PAUSED
+
+Tucker declined a11y work for now ("no a11y stuff"). **Do not implement** until explicitly re-enabled.
+
+## Assigned task (when resumed)
+
+EventModal focus trap, Escape-to-close, scroll lock, and keyboard-accessible event cards.
+
 ## Standing rules
 
 1. **User approval required** before implementing modal behavior, focus management, or card interaction changes.

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
-import { storage, hashPassword, sqlite, getTableCounts } from "./storage";
+import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
 import { BetterSqliteSessionStore } from "./sessionStore";
@@ -539,14 +539,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/events/:eventId/attendance/:attendanceId/message", requireAuth, (req, res) => {
-    const list = storage.getAttendances(Number(req.params.eventId));
-    const att = list.find((a: any) => a.id === Number(req.params.attendanceId));
-    if (!att?.userId) return res.status(404).json({ error: "Check-in not found" });
-    if (att.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+    const eventId = Number(req.params.eventId);
+    const senderList = storage.getAttendances(eventId, req.session.userId);
+    const senderRsvped = senderList.some((a: any) => a.user_id === req.session.userId);
+    if (!senderRsvped) return res.status(403).json({ error: "RSVP required to message attendees" });
+    const att = senderList.find((a: any) => a.id === Number(req.params.attendanceId));
+    if (!att?.user_id) return res.status(404).json({ error: "Check-in not found" });
+    if (att.user_id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
     const evt = storage.getEvent(Number(req.params.eventId));
-    const msg = storage.sendMessage(req.session.userId!, Number(att.userId), `Check-in: ${evt?.title || "Event"}`, body, {
+    const msg = storage.sendMessage(req.session.userId!, Number(att.user_id), `Check-in: ${evt?.title || "Event"}`, body, {
       contextType: "CHECK_IN",
       contextId: Number(req.params.eventId),
       contextLabel: evt?.title || null,
@@ -804,8 +807,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     // Accept username or email
     const user = storage.getUserByEmail(email) || storage.getUserByUsername(email);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
-    const hashed = hashPassword(password);
-    if (user.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
+    if (!verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
+    if (isLegacyPasswordHash(user.passwordHash)) {
+      storage.updatePasswordHash(user.id, hashPassword(password));
+    }
     req.session.userId = user.id;
     if (user.username === "tucker_pdmax") storage.ensureSiteAdminGigPost();
     res.json(authUserResponse(req, user));
@@ -1363,8 +1368,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!email || !password) return res.status(400).json({ error: "email and password required" });
     const promoter = storage.getPromoterByEmail(email);
     if (!promoter) return res.status(401).json({ error: "Invalid credentials" });
-    const hashed = hashPassword(password);
-    if (promoter.passwordHash !== hashed) return res.status(401).json({ error: "Invalid credentials" });
+    if (!verifyPassword(password, promoter.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
     req.session.promoterId = promoter.id;
     res.json({ id: promoter.id, name: promoter.name, email: promoter.email, org: promoter.org });
   });
@@ -1498,7 +1502,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.put("/api/admin/events/:id", requireAdmin, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    const updated = storage.updateEvent(Number(req.params.id), req.body);
+    const allowed = [
+      "title", "description", "venueName", "address", "neighborhood", "lat", "lng",
+      "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
+      "ticketUrl", "posterImageUrl", "eventTypes", "status",
+      "isPublic", "isHouseParty", "isSexPositive", "nudityOk", "isClaimable",
+      "claimedBy", "source",
+    ];
+    const patch: Record<string, unknown> = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) patch[key] = req.body[key];
+    }
+    if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
+      patch.eventTypes = JSON.stringify(patch.eventTypes);
+    }
+    const updated = storage.updateEvent(Number(req.params.id), patch);
     res.json(updated);
   });
 

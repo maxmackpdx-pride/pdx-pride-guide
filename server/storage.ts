@@ -415,8 +415,36 @@ function ensureMissedConnectionsSchema() {
 }
 ensureMissedConnectionsSchema();
 
+const LEGACY_PASSWORD_SALT = "pdxpride_salt";
+const SCRYPT_HASH_PREFIX = "$scrypt$";
+
+function legacyPasswordHash(pw: string) {
+  return crypto.createHash("sha256").update(pw + LEGACY_PASSWORD_SALT).digest("hex");
+}
+
+export function isLegacyPasswordHash(stored: string) {
+  return !stored.startsWith(SCRYPT_HASH_PREFIX);
+}
+
 export function hashPassword(pw: string) {
-  return crypto.createHash("sha256").update(pw + "pdxpride_salt").digest("hex");
+  const salt = crypto.randomBytes(16);
+  const hash = crypto.scryptSync(pw, salt, 64);
+  return `${SCRYPT_HASH_PREFIX}${salt.toString("hex")}:${hash.toString("hex")}`;
+}
+
+export function verifyPassword(pw: string, stored: string) {
+  if (stored.startsWith(SCRYPT_HASH_PREFIX)) {
+    const payload = stored.slice(SCRYPT_HASH_PREFIX.length);
+    const [saltHex, hashHex] = payload.split(":");
+    if (!saltHex || !hashHex) return false;
+    const derived = crypto.scryptSync(pw, Buffer.from(saltHex, "hex"), 64);
+    const expected = Buffer.from(hashHex, "hex");
+    if (derived.length !== expected.length) return false;
+    return crypto.timingSafeEqual(derived, expected);
+  }
+  const legacy = legacyPasswordHash(pw);
+  if (legacy.length !== stored.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(legacy), Buffer.from(stored));
 }
 
 // Old fake event titles used to detect stale seed data
@@ -1762,13 +1790,15 @@ function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
     const viewerRsvped = viewerUserId != null && rows.some((r: any) => r.user_id === viewerUserId);
     if (viewerRsvped) return rows;
     return rows.map((r: any) => ({
-          ...r,
-          username: null,
-          displayName: null,
-          userPhotoUrl: null,
-          avatarChoice: null,
-          avatarRing: null,
-          masked: true,
+      id: r.id,
+      event_id: r.event_id,
+      handle: r.handle,
+      message: r.message,
+      avatar_seed: r.avatar_seed,
+      photo_url: null,
+      created_at: r.created_at,
+      is_active: r.is_active,
+      masked: true,
     }));
 }
 
@@ -1819,6 +1849,7 @@ export interface IStorage {
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
   updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus'>>): void;
+  updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
   getPendingPromoterRequests(): any[];
   // Host messages
@@ -2237,10 +2268,6 @@ export const storage: IStorage = {
           id: row.id,
           initials: attendanceInitials(row.handle),
           avatarSeed: row.avatarSeed || row.handle,
-          userId: row.userId ?? null,
-          avatarRing: row.avatarRing ?? null,
-          avatarChoice: row.avatarChoice ?? undefined,
-          photoUrl: row.photoUrl ?? null,
         });
       }
     }
@@ -2318,6 +2345,9 @@ export const storage: IStorage = {
   },
   updateUser(id, data) {
     db.update(users).set(data).where(eq(users.id, id)).run();
+  },
+  updatePasswordHash(id, passwordHash) {
+    db.update(users).set({ passwordHash }).where(eq(users.id, id)).run();
   },
   setPromoterStatus(userId, status) {
     db.update(users).set({ promoterStatus: status }).where(eq(users.id, userId)).run();

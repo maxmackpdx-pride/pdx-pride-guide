@@ -3,6 +3,8 @@ import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { shareEventLink } from "@/lib/shareEvent";
 import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
@@ -63,12 +65,23 @@ function filterLiveEvents(
 }
 
 function EventShareLink({ href, title }: { href: string; title: string }) {
+  const { toast } = useToast();
   return (
-    <a
-      href={href}
-      title={`Share link to ${title}`}
-      aria-label={`Share link to ${title}`}
-      onClick={(e) => e.stopPropagation()}
+    <button
+      type="button"
+      title={`Share ${title}`}
+      aria-label={`Share ${title}`}
+      onClick={async (e) => {
+        e.stopPropagation();
+        try {
+          const result = await shareEventLink(href, title);
+          toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
+        } catch (err) {
+          if ((err as DOMException)?.name !== "AbortError") {
+            toast({ title: "Could not share link", variant: "destructive" });
+          }
+        }
+      }}
       style={{
         position: "absolute",
         top: 8,
@@ -83,11 +96,12 @@ function EventShareLink({ href, title }: { href: string; title: string }) {
         background: "rgba(0,0,0,0.72)",
         border: "1px solid #333",
         color: "#aaa",
-        textDecoration: "none",
+        cursor: "pointer",
+        padding: 0,
       }}
     >
       <Link2 size={14} />
-    </a>
+    </button>
   );
 }
 
@@ -247,11 +261,17 @@ function truncateSeo(text: string, max = 160) {
   return clean.length <= max ? clean : `${clean.slice(0, max - 1).trim()}…`;
 }
 
+function readSearchParam(key: string) {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get(key)?.trim() || "";
+}
+
 export default function Events() {
   const { user } = useAuth();
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
+  const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
   const [activeDay, setActiveDay] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -261,14 +281,27 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mapExpanded, setMapExpanded] = useState(false);
-  const openEvent = useCallback((event: Event) => {
+  const openEvent = useCallback((event: EventListing) => {
     setSelectedEvent(event);
-    setLocation(eventPath(event.id, event.title));
+    setLocation(eventPath(event.id, event.title, event.dayOfWeek));
   }, [setLocation]);
   const closeEvent = useCallback(() => {
     setSelectedEvent(null);
-    setLocation("/events");
-  }, [setLocation]);
+    const q = searchQuery.trim();
+    setLocation(q ? `/events?q=${encodeURIComponent(q)}` : "/events");
+  }, [setLocation, searchQuery]);
+
+  useEffect(() => {
+    if (routeMatch) return;
+    const params = new URLSearchParams(window.location.search);
+    const currentQ = params.get("q") || "";
+    const nextQ = searchQuery.trim();
+    if (currentQ === nextQ) return;
+    if (nextQ) params.set("q", nextQ);
+    else params.delete("q");
+    const qs = params.toString();
+    setLocation(qs ? `/events?${qs}` : "/events");
+  }, [searchQuery, routeMatch, setLocation]);
 
   const { data: events = [], isLoading, isError, error, refetch } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -292,8 +325,8 @@ export default function Events() {
   });
 
   const { data: routeEvent } = useQuery<Event>({
-    queryKey: ["/api/events", routeEventId],
-    queryFn: () => apiRequest("GET", `/api/events/${routeEventId}`).then(r => r.json()),
+    queryKey: ["/api/events", routeEventId, routeDay],
+    queryFn: () => apiRequest("GET", `/api/events/${routeEventId}${routeDay ? `?day=${routeDay}` : ""}`).then(r => r.json()),
     enabled: routeEventId != null && Number.isFinite(routeEventId),
   });
 
@@ -322,13 +355,18 @@ export default function Events() {
       if (!routeMatch) setSelectedEvent(null);
       return;
     }
-    const fromList = events.find(e => e.id === routeEventId);
+    const matches = events.filter(e => e.id === routeEventId);
+    const fromList = routeDay
+      ? matches.find(e => e.dayOfWeek === routeDay)
+      : matches.length === 1
+        ? matches[0]
+        : undefined;
     if (fromList) {
       setSelectedEvent(fromList);
       return;
     }
     if (routeEvent) setSelectedEvent(routeEvent);
-  }, [routeEventId, routeMatch, events, routeEvent]);
+  }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
 
   const filtered = useMemo(
     () => filterLiveEvents(events, activeDay, activeFilters, searchQuery),
@@ -455,9 +493,9 @@ export default function Events() {
               </span>
               {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
             </div>
-            {activeFilters.length > 0 && (
+            {(activeFilters.length > 0 || searchQuery.trim()) && (
               <button
-                onClick={() => setActiveFilters([])}
+                onClick={() => { setActiveFilters([]); setSearchQuery(""); }}
                 style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
               >
                 CLEAR FILTERS ×
@@ -486,7 +524,7 @@ export default function Events() {
           <div style={{ textAlign: "center", padding: "60px 20px", color: "#9d9a92" }}>
             <p className="display" style={{ fontSize: "1.4rem" }}>NO EVENTS MATCH</p>
             <button
-              onClick={() => { setActiveDay("ALL"); setActiveFilters([]); }}
+              onClick={() => { setActiveDay("ALL"); setActiveFilters([]); setSearchQuery(""); }}
               style={{ marginTop: 12, background: "none", border: "1px solid #333", color: "#888", padding: "8px 18px", cursor: "pointer", fontSize: "0.8rem" }}
             >
               Clear Filters
@@ -504,7 +542,7 @@ export default function Events() {
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
                 selfUserId={user?.id}
-                shareHref={eventPath(e.id, e.title)}
+                shareHref={eventPath(e.id, e.title, e.dayOfWeek)}
               />
             ))}
           </div>
@@ -520,7 +558,7 @@ export default function Events() {
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
                 selfUserId={user?.id}
-                shareHref={eventPath(e.id, e.title)}
+                shareHref={eventPath(e.id, e.title, e.dayOfWeek)}
               />
             ))}
           </div>

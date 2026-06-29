@@ -11,10 +11,11 @@ import EventTypeTag from "@/components/EventTypeTag";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 
-const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
+const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
 
 const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
 const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", marginBottom: 12, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
@@ -106,7 +107,7 @@ export default function Submit() {
     mutationFn: async (data: any) => {
       const r = await apiRequest("POST", "/api/submit", {
         ...data,
-        eventTypes: data.selectedTypes,
+        eventTypes: submitLabelsToJsonTags(data.selectedTypes),
         type: mode === "claim" ? "CLAIM" : "NEW_EVENT",
       });
       const payload = await r.json();

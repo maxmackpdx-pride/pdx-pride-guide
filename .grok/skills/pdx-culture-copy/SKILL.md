@@ -13,6 +13,10 @@ description: >
 
 Specialized agent for the **Culture / Copy** approval bucket.
 
+## Assigned task
+
+**Align Submit event types to canonical JSON tags** (`MARCH`, `TRANS`, `QTBIPOC`, etc.) via `shared/eventTypeTags.ts`. **No new Events page filters, FAQ rewrites, land acknowledgments, or "ally" framing** until Tucker approves copy drafts.
+
 ## Standing rules
 
 1. **User approval required** for all copy, taxonomy, filter labels, FAQ text, and any UI that surfaces community programming differently.

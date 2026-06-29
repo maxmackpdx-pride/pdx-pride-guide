@@ -54,3 +54,29 @@ export function getEventTypeTagsForEvent(event: EventTagSource): EventTypeFilter
 export function isEventTypeFilterLabel(label: string): label is EventTypeFilterLabel {
   return (EVENT_TYPE_FILTERS as readonly string[]).includes(label);
 }
+
+/** Submit form labels mapped to canonical JSON tags used in seed data */
+export const SUBMIT_EVENT_TYPE_OPTIONS = [
+  { label: "Dance Party", jsonTag: "DANCE" },
+  { label: "Drag", jsonTag: "DRAG" },
+  { label: "Kink", jsonTag: "KINK" },
+  { label: "Social", jsonTag: "SOCIAL" },
+  { label: "Brunch", jsonTag: "BRUNCH" },
+  { label: "Performance", jsonTag: "PERFORMANCE" },
+  { label: "Fair", jsonTag: "FAIR" },
+  { label: "Education", jsonTag: "EDUCATION" },
+  { label: "Trans", jsonTag: "TRANS" },
+  { label: "March / Rally", jsonTag: "MARCH" },
+  { label: "QTBIPOC", jsonTag: "QTBIPOC" },
+  { label: "Nightlife", jsonTag: "NIGHTLIFE" },
+  { label: "Sex Positive", jsonTag: "SEX_POSITIVE" },
+  { label: "Nudity OK", jsonTag: "NUDITY_OK" },
+  { label: "Other", jsonTag: "OTHER" },
+] as const;
+
+export function submitLabelsToJsonTags(labels: string[]): string[] {
+  return labels.map(label => {
+    const match = SUBMIT_EVENT_TYPE_OPTIONS.find(opt => opt.label === label);
+    return match?.jsonTag ?? label.toUpperCase().replace(/\s+/g, "_");
+  });
+}

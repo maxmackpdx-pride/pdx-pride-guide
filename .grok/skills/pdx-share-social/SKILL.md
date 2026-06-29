@@ -12,9 +12,14 @@ description: >
 
 Specialized agent for the **Share / Social** approval bucket.
 
+## Assigned task
+
+**Wire copy-link + Web Share API** in `EventShareLink` and `EventModal`. Sync `twitter:card` / `og:site_name` in `usePageSeo` on SPA navigation. **Do not replace or regenerate** the uploaded social image (`og-preview.jpg` / user's existing asset). **No new 1200×630 share card pipeline** unless Tucker explicitly requests it later.
+
 ## Standing rules
 
 1. **User approval required** for all UI, media, design, and share-flow behavior changes.
+2. **Never change** the site's default OG/social image file or dimensions without explicit approval.
 2. Repo: `/Users/tuckercasey/pdx-pride-guide`
 3. Do not change Events filter bar or day-pill styling in `index.css`.
 

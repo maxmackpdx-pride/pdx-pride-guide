@@ -12,11 +12,13 @@ export function slugifyEventTitle(title: string): string {
 /** @deprecated Use slugifyEventTitle — kept for existing imports */
 export const eventSlug = slugifyEventTitle;
 
-export function eventPath(id: number, title: string): string {
-  return `/events/${id}/${slugifyEventTitle(title)}`;
+export function eventPath(id: number, title: string, day?: string | null): string {
+  const base = `/events/${id}/${slugifyEventTitle(title)}`;
+  if (day) return `${base}?day=${encodeURIComponent(day.toUpperCase())}`;
+  return base;
 }
 
-export function eventUrl(id: number, title: string, siteUrl = "https://www.prideguidepdx.com"): string {
+export function eventUrl(id: number, title: string, siteUrl = "https://www.prideguidepdx.com", day?: string | null): string {
   const base = siteUrl.replace(/\/$/, "");
-  return `${base}${eventPath(id, title)}`;
+  return `${base}${eventPath(id, title, day)}`;
 }

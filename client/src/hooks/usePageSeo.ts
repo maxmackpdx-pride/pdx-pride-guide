@@ -53,10 +53,12 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     for (const [attr, key, value] of ogKeys) {
       upsertMeta(attr, key, value);
     }
+    upsertMeta("name", "twitter:card", "summary_large_image");
     upsertMeta("name", "twitter:title", title);
     upsertMeta("name", "twitter:description", description);
     upsertMeta("name", "twitter:image", image);
     upsertMeta("name", "twitter:image:alt", imageAlt);
+    upsertMeta("property", "og:site_name", "PDX Pride Guide");
 
     return () => {
       document.title = prevTitle;

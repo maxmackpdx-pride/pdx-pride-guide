@@ -12,6 +12,10 @@ description: >
 
 Specialized agent for the **Security (next)** bucket.
 
+## Assigned task
+
+**Scrypt password hashing with legacy SHA-256 migration on login**, **attendance PII masking** (no `user_id`/photos in public summaries), **RSVP-gated attendance messaging**, and **admin event PUT allowlist**.
+
 ## Standing rules
 
 1. **Backend-only fixes** (no visitor-visible behavior change) may implement after brief heads-up.

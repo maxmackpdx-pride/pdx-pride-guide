@@ -15,6 +15,9 @@ import UserAvatar from "./UserAvatar";
 import EventTalentPanel from "./EventTalentPanel";
 import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from "@/lib/eventLinks";
 import { formatPacificDateTime } from "@/lib/countdown";
+import { eventPath } from "@shared/eventSlug";
+import { shareEventLink } from "@/lib/shareEvent";
+import { Link2 } from "lucide-react";
 
 type EventHostProfile = {
   userId: number;
@@ -205,6 +208,25 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
         </div>
 
         <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
+        <button
+          type="button"
+          className="event-modal__close"
+          aria-label={`Share ${event.title}`}
+          title="Share event"
+          style={{ right: 52 }}
+          onClick={async () => {
+            try {
+              const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
+              toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
+            } catch (err) {
+              if ((err as DOMException)?.name !== "AbortError") {
+                toast({ title: "Could not share link", variant: "destructive" });
+              }
+            }
+          }}
+        >
+          <Link2 size={18} />
+        </button>
 
         <div className="event-modal__body">
           <h2 className="display event-modal__title">{event.title}</h2>

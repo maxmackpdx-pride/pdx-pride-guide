@@ -12,6 +12,10 @@ description: >
 
 Specialized agent for the **Events UX** approval bucket on `pdx-pride-guide`.
 
+## Assigned task
+
+**Multi-day deep links + search URL sync + clear-filters fix**: `?day=` on event URLs, match clicked listing on refresh, sync `?q=` to address bar, reset search when clearing filters. **No map layout changes.**
+
 ## Standing rules (non-negotiable)
 
 1. **User approval required** before implementing any change to how the site looks, feels, or behaves for visitors.
