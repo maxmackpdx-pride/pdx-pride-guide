@@ -201,6 +201,10 @@ function makeUsername(email: string) {
   return username;
 }
 
+function maybeSyncSiteOwnerPortfolio(user: { id?: number; email?: string | null; username?: string | null } | null | undefined) {
+  if (storage.isSiteOwnerUser(user)) storage.syncSiteOwnerPortfolio();
+}
+
 function requireAuth(req: any, res: any, next: any) {
   if (!req.session?.userId) {
     return res.status(401).json({ error: "Not authenticated" });
@@ -427,6 +431,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/events/mine/submitted", requireAuth, (req, res) => {
     const user = storage.getUserById(req.session.userId!);
     if (!user) return res.status(404).json({ error: "User not found" });
+    if (storage.isSiteOwnerUser(user)) return res.json([]);
     const mine = storage.getSubmissions().filter(s => s.submitterEmail === user.email);
     res.json(mine);
   });
@@ -801,7 +806,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (existingUsername) return res.status(409).json({ error: "Username already taken" });
 
       const user = storage.createUser({ username, email, passwordHash: password, displayName });
-      if (user.username === "tucker_pdmax") storage.syncSiteOwnerPortfolio();
+      maybeSyncSiteOwnerPortfolio(user);
       req.session.userId = user.id;
       res.json(authUserResponse(req, user));
     } catch (e: any) {
@@ -821,7 +826,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const finishLogin = () => {
       req.session.userId = user.id;
-      if (user.username === "tucker_pdmax") storage.syncSiteOwnerPortfolio();
+      maybeSyncSiteOwnerPortfolio(user);
       res.json(authUserResponse(req, user));
     };
     if (typeof req.session.regenerate === "function") {
@@ -944,7 +949,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
 
       req.session.userId = user.id;
-      if (user.username === "tucker_pdmax") storage.syncSiteOwnerPortfolio();
+      maybeSyncSiteOwnerPortfolio(user);
       markAdminSessionForUser(req, user);
       req.session.save((saveErr) => {
         if (saveErr) {

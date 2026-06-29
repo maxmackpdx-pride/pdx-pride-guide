@@ -1734,6 +1734,10 @@ function runBootMigrationsOnce() {
     syncSiteOwnerPortfolio();
     recordBootMigration("sync_site_owner_portfolio_v1");
   }
+  if (!hasBootMigration("sync_site_owner_portfolio_v2")) {
+    syncSiteOwnerPortfolio();
+    recordBootMigration("sync_site_owner_portfolio_v2");
+  }
   if (!hasBootMigration("site_admin_grants_v1")) {
     seedSiteAdminGrantsFromEnv();
     recordBootMigration("site_admin_grants_v1");
@@ -1815,6 +1819,18 @@ function expireGiftingPosts() {
 export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 export const SITE_ADMIN_GIG_OWNER_USERNAME = "tucker_pdmax";
 export const SITE_OWNER_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
+export const SITE_OWNER_EMAIL = (
+  process.env.SITE_OWNER_EMAIL
+  || process.env.ADMIN_USER_EMAILS?.split(",")[0]
+  || "hello.tuckercasey@gmail.com"
+).trim().toLowerCase();
+
+type SiteOwnerRow = {
+  id: number;
+  email: string;
+  displayName: string | null;
+  username: string;
+};
 
 const SITE_ADMIN_GIG_DESCRIPTION = `PDX Pride Guide is looking for site admins to help during Pride season and beyond.
 
@@ -1829,18 +1845,56 @@ Volunteer community labor for now. Remote OK. Training and admin access provided
 
 Reply to this post through the gig board (messages go to @tucker_pdmax). Include why you want to help and any relevant experience.`;
 
-function getSiteAdminGigOwner() {
-  return sqlite.prepare(`
-    SELECT id, email, display_name AS displayName, username
-    FROM users
-    WHERE username = ?
-    LIMIT 1
-  `).get(SITE_ADMIN_GIG_OWNER_USERNAME) as {
-    id: number;
-    email: string;
-    displayName: string | null;
-    username: string;
-  } | undefined;
+function toSiteOwnerRow(user: User | undefined): SiteOwnerRow | undefined {
+  if (!user) return undefined;
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.displayName ?? null,
+    username: user.username,
+  };
+}
+
+function listSiteOwnerCandidates(): SiteOwnerRow[] {
+  const { emails, usernames } = parseEnvAdminLists();
+  const seen = new Set<number>();
+  const rows: SiteOwnerRow[] = [];
+  const push = (user: User | undefined) => {
+    const row = toSiteOwnerRow(user);
+    if (!row || seen.has(row.id)) return;
+    seen.add(row.id);
+    rows.push(row);
+  };
+  for (const email of emails) {
+    push(db.select().from(users).where(eq(users.email, email)).get());
+  }
+  for (const username of usernames) {
+    push(db.select().from(users).where(eq(users.username, username)).get());
+  }
+  push(db.select().from(users).where(eq(users.username, SITE_ADMIN_GIG_OWNER_USERNAME)).get());
+  return rows;
+}
+
+function resolveSiteOwner(): SiteOwnerRow | undefined {
+  const candidates = listSiteOwnerCandidates();
+  if (!candidates.length) return undefined;
+  const byEmail = candidates.find(c => c.email.trim().toLowerCase() === SITE_OWNER_EMAIL);
+  if (byEmail) return byEmail;
+  const byUsername = candidates.find(c => c.username === SITE_ADMIN_GIG_OWNER_USERNAME);
+  return byUsername || candidates[0];
+}
+
+function isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean {
+  if (!user?.id) return false;
+  return listSiteOwnerCandidates().some(candidate => candidate.id === user.id);
+}
+
+function ownerIdentitySets(candidates: SiteOwnerRow[]) {
+  return {
+    userIds: [...new Set(candidates.map(c => c.id))],
+    emails: [...new Set(candidates.map(c => c.email.trim().toLowerCase()).filter(Boolean))],
+    usernames: [...new Set(candidates.map(c => c.username.trim().toLowerCase()).filter(Boolean))],
+  };
 }
 
 function findSiteAdminGigPostId(): number | undefined {
@@ -1873,58 +1927,78 @@ function findSiteOwnerEventId(): number | undefined {
   return fuzzy?.id;
 }
 
-/** Keep @tucker_pdmax portfolio limited to Yes Coach + the site-admin gig post. */
+/** Keep site owner portfolio limited to Yes Coach + the site-admin gig post. */
 function syncSiteOwnerPortfolio() {
   ensureSiteAdminGigPost();
   ensureEventHostsSchema();
-  const owner = getSiteAdminGigOwner();
+  const owner = resolveSiteOwner();
   if (!owner) return;
+
+  const candidates = listSiteOwnerCandidates();
+  const { userIds, emails, usernames } = ownerIdentitySets(candidates);
 
   const adminGigId = findSiteAdminGigPostId();
   if (adminGigId != null) {
     sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(owner.id, adminGigId);
-    sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ? AND id != ?`).run(owner.id, adminGigId);
+    for (const userId of userIds) {
+      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ? AND id != ?`).run(userId, adminGigId);
+    }
   } else {
-    sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ?`).run(owner.id);
+    for (const userId of userIds) {
+      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ?`).run(userId);
+    }
   }
 
   const yesCoachId = findSiteOwnerEventId();
   if (yesCoachId == null) {
-    console.warn("[site_owner] Yes Coach event not found — skipping event portfolio sync");
-    return;
-  }
-
-  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ? AND role = 'PRIMARY'`).run(yesCoachId);
-  const existingHost = sqlite.prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`).get(yesCoachId, owner.id);
-  if (existingHost) {
-    sqlite.prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`).run(yesCoachId, owner.id);
+    console.warn("[site_owner] Yes Coach event not found — skipping event host sync");
   } else {
-    db.insert(eventHosts).values({
-      eventId: yesCoachId,
-      userId: owner.id,
-      role: "PRIMARY",
-      addedByUserId: null,
-      createdAt: new Date().toISOString(),
-    } as any).run();
+    sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ? AND role = 'PRIMARY'`).run(yesCoachId);
+    const existingHost = sqlite.prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`).get(yesCoachId, owner.id);
+    if (existingHost) {
+      sqlite.prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`).run(yesCoachId, owner.id);
+    } else {
+      db.insert(eventHosts).values({
+        eventId: yesCoachId,
+        userId: owner.id,
+        role: "PRIMARY",
+        addedByUserId: null,
+        createdAt: new Date().toISOString(),
+      } as any).run();
+    }
+    db.update(events).set({ isClaimable: false, claimedBy: owner.username }).where(eq(events.id, yesCoachId)).run();
+
+    for (const userId of userIds) {
+      sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ? AND event_id != ?`).run(userId, yesCoachId);
+      sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ? AND event_id != ?`).run(userId, yesCoachId);
+    }
+
+    const clearClaimed = sqlite.prepare(`
+      UPDATE events
+      SET claimed_by = NULL
+      WHERE id != ?
+        AND claimed_by IS NOT NULL
+        AND LOWER(TRIM(claimed_by)) = ?
+    `);
+    const clearSubmitted = sqlite.prepare(`
+      UPDATE events
+      SET submitted_by = NULL
+      WHERE id != ?
+        AND submitted_by IS NOT NULL
+        AND LOWER(TRIM(submitted_by)) = ?
+    `);
+    for (const identity of [...usernames, ...emails]) {
+      clearClaimed.run(yesCoachId, identity);
+      clearSubmitted.run(yesCoachId, identity);
+    }
   }
-  db.update(events).set({ isClaimable: false, claimedBy: owner.username }).where(eq(events.id, yesCoachId)).run();
 
-  sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ? AND event_id != ?`).run(owner.id, yesCoachId);
-  sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ? AND event_id != ?`).run(owner.id, yesCoachId);
-
-  const ownerUsername = owner.username.trim().toLowerCase();
-  const ownerEmail = (owner.email || "").trim().toLowerCase();
-  sqlite.prepare(`
-    UPDATE events
-    SET claimed_by = NULL
-    WHERE id != ?
-      AND claimed_by IS NOT NULL
-      AND (
-        LOWER(TRIM(claimed_by)) = ?
-        OR LOWER(TRIM(claimed_by)) = ?
-      )
-  `).run(yesCoachId, ownerUsername, ownerEmail);
-
+  const clearHistoricalSubmissions = sqlite.prepare(`
+    DELETE FROM submissions
+    WHERE LOWER(TRIM(submitter_email)) = ?
+      AND status IN ('APPROVED', 'REJECTED')
+  `);
+  for (const email of emails) clearHistoricalSubmissions.run(email);
 }
 
 function notifyGuideInbox(
@@ -1933,7 +2007,7 @@ function notifyGuideInbox(
   body: string,
   opts?: { contextType?: string; contextId?: number | null; contextLabel?: string | null },
 ) {
-  const sender = getSiteAdminGigOwner();
+  const sender = resolveSiteOwner();
   if (!sender) return;
   storage.sendMessage(sender.id, toUserId, subject, body, {
     contextType: opts?.contextType || "GUIDE_UPDATE",
@@ -1970,7 +2044,7 @@ function notifySubmissionOutcome(
 
 function ensureSiteAdminGigPost() {
   ensureGigPostsSchema();
-  const owner = getSiteAdminGigOwner();
+  const owner = resolveSiteOwner();
   const now = new Date().toISOString();
   const existingId = findSiteAdminGigPostId();
   const payload = {
@@ -2058,6 +2132,7 @@ export interface IStorage {
   adminUpdateGigPost(id: number, data: Partial<GigPost>): GigPost | undefined;
   ensureSiteAdminGigPost(): void;
   syncSiteOwnerPortfolio(): void;
+  isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -2392,6 +2467,9 @@ export const storage: IStorage = {
   },
   syncSiteOwnerPortfolio() {
     syncSiteOwnerPortfolio();
+  },
+  isSiteOwnerUser(user) {
+    return isSiteOwnerUser(user);
   },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();
