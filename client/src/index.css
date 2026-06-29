@@ -1530,6 +1530,36 @@ h2.display,
   box-shadow: 0 10px 26px rgba(0,0,0,0.58);
 }
 
+/* Inbox — compact utility hero (messages are the focus) */
+.inbox-page .page-hero {
+  min-height: clamp(108px, 14vh, 148px);
+}
+
+.inbox-page .page-hero__inner {
+  padding: 14px 20px 12px;
+  min-height: inherit;
+  align-items: center;
+}
+
+.inbox-page .page-hero__panel {
+  padding: 8px 16px 10px;
+  max-width: 100%;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.inbox-page .page-hero__title {
+  font-size: clamp(1.85rem, 4.5vw, 2.75rem);
+  margin: 0;
+  line-height: 0.95;
+}
+
+.inbox-page-lede {
+  margin: 0 0 18px;
+  color: #9d9a92;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
 /* Events page — compact title hero, roomier map */
 .events-page .page-hero {
   min-height: clamp(148px, 20vh, 210px);
@@ -3119,6 +3149,27 @@ h2.display,
     font-size: 1.06rem;
     line-height: 1.74;
     padding: 0.95rem 1rem;
+  }
+
+  .inbox-page .page-hero {
+    min-height: 96px;
+  }
+
+  .inbox-page .page-hero__inner {
+    padding: 12px 16px 10px;
+  }
+
+  .inbox-page .page-hero__panel {
+    padding: 6px 12px 8px;
+  }
+
+  .inbox-page .page-hero__title {
+    font-size: clamp(1.55rem, 7.5vw, 2rem);
+  }
+
+  .inbox-page-lede {
+    font-size: 0.82rem;
+    margin-bottom: 14px;
   }
 
   .events-page .page-hero {

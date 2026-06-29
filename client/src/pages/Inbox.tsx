@@ -208,13 +208,16 @@ export default function Inbox() {
     <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
       <PageHero
         titleLine1="INBOX"
-        accent="lime"
-        lede={`Private threads from missed connections, Pride Werk posts, event hosts, and check-ins.${unreadCount > 0 ? ` · ${unreadCount} unread` : ""}`}
+        titleLine1Accent="lime"
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
       />
       <ScrollReveal>
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "28px 24px 48px", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "20px 24px 48px", position: "relative", zIndex: 1 }}>
+        <p className="inbox-page-lede">
+          Private threads from missed connections, Pride Werk, event hosts, and check-ins.
+          {unreadCount > 0 ? ` · ${unreadCount} unread` : ""}
+        </p>
         <div style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
           {(["inbox", "sent"] as const).map(t => (
             <button key={t} onClick={() => { setTab(t); setActiveThread(null); }} style={{
