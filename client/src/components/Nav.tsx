@@ -110,7 +110,7 @@ export default function Nav() {
   const unreadCount = unread.count || 0;
   const adminPendingCount = adminPending.count || 0;
   const closeMenu = () => setMenuOpen(false);
-  const inboxActive = location === "/inbox" || location.startsWith("/inbox?");
+  const hubActive = location === "/dashboard" || location.startsWith("/dashboard?");
 
   return (
     <>
@@ -156,14 +156,14 @@ export default function Nav() {
             {user && (
               <div className="site-auth">
                 <NavLink
-                  href="/inbox"
+                  href="/dashboard"
                   label="INBOX"
-                  active={inboxActive}
+                  active={hubActive}
                   showNotify={unreadCount > 0}
                   notifyLabel={
                     unreadCount > 0
-                      ? `Inbox, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
-                      : "Inbox"
+                      ? `Your hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
+                      : "Your hub"
                   }
                   onClick={closeMenu}
                 />
