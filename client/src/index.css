@@ -259,6 +259,30 @@ body::before {
   animation-delay: 0.12s;
 }
 
+.site-brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.04em;
+  color: #fff;
+  font-size: var(--site-wordmark-size);
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+}
+
+.site-brand-wordmark__line {
+  display: block;
+  white-space: nowrap;
+}
+
+.site-brand-wordmark__line--accent {
+  filter:
+    drop-shadow(2px 2px 0 #000)
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+}
+
 /* Slow chunky glitch — nav + hero PRIDE */
 .glitch-word {
   position: relative;
@@ -1409,6 +1433,10 @@ h2.display,
     flex-wrap: wrap;
     align-items: center;
     gap: 14px;
+  }
+
+  .site-brand-wordmark {
+    --site-wordmark-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.21), 1.45rem);
   }
 
   .site-nav-toggle {
