@@ -16,7 +16,7 @@ export const HERO_OVERLAY_LAYERS: Record<HeroOverlayId, HeroOverlayLayer> = {
     id: "lightLeaks",
     src: "/overlays/light-leaks.webm",
     blendMode: "screen",
-    opacity: 0.44,
+    opacity: 0.308,
     playbackRate: 0.5,
   },
   filmGrain: {
