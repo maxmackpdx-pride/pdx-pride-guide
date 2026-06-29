@@ -62,6 +62,11 @@
   --hero-layer-scrim: 2;
   --hero-layer-fx: 3;
   --hero-layer-content: 4;
+  /* Gifting, Gigs, Spotted — home promo panels + individual page heroes */
+  --board-promo-scrim:
+    linear-gradient(102deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.66) 32%, rgba(0, 0, 0, 0.56) 56%, rgba(0, 0, 0, 0.35) 100%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0.32) 42%, rgba(0, 0, 0, 0.04) 72%);
+  --board-promo-grain-opacity: 0.084;
   --board-text: #f4f1ea;
   --board-muted: #bdbab2;
   --text-heading: #ffffff;
@@ -1984,13 +1989,11 @@ h2.display,
 }
 
 .home-gifting-panel.page-hero .page-hero__scrim {
-  background:
-    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
-    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+  background: var(--board-promo-scrim);
 }
 
 .home-gifting-panel.page-hero .page-hero__grain {
-  opacity: 0.12;
+  opacity: var(--board-promo-grain-opacity);
 }
 
 .home-gigs-panel.page-hero .page-hero__bg {
@@ -1998,13 +2001,11 @@ h2.display,
 }
 
 .home-gigs-panel.page-hero .page-hero__scrim {
-  background:
-    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
-    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+  background: var(--board-promo-scrim);
 }
 
 .home-gigs-panel.page-hero .page-hero__grain {
-  opacity: 0.12;
+  opacity: var(--board-promo-grain-opacity);
 }
 
 .home-spotted-panel.page-hero .page-hero__bg,
@@ -2014,14 +2015,12 @@ h2.display,
 
 .home-spotted-panel.page-hero .page-hero__scrim,
 .missed-page .page-hero__scrim {
-  background:
-    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
-    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+  background: var(--board-promo-scrim);
 }
 
 .home-spotted-panel.page-hero .page-hero__grain,
 .missed-page .page-hero__grain {
-  opacity: 0.12;
+  opacity: var(--board-promo-grain-opacity);
 }
 
 @keyframes board-flickr {
@@ -2085,7 +2084,7 @@ h2.display,
 }
 
 .page-hero--flush .page-hero__scrim {
-  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.88) 34%, rgba(0, 0, 0, 0.45) 64%, rgba(0, 0, 0, 0.55) 100%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.62) 34%, rgba(0, 0, 0, 0.32) 64%, rgba(0, 0, 0, 0.39) 100%);
 }
 
 .page-hero--flush .page-hero__inner {
@@ -7182,24 +7181,20 @@ footer a:hover { color: #00FFFF !important; }
   filter: saturate(0.9) contrast(0.97) brightness(0.92);
 }
 .gifting-page .page-hero__scrim {
-  background:
-    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
-    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+  background: var(--board-promo-scrim);
 }
 .gifting-page .page-hero__grain {
-  opacity: 0.12;
+  opacity: var(--board-promo-grain-opacity);
 }
 
 .gigs-page .page-hero__bg {
   filter: saturate(0.92) contrast(0.98) brightness(0.9);
 }
 .gigs-page .page-hero__scrim {
-  background:
-    linear-gradient(102deg, rgba(0,0,0,0.97), rgba(0,0,0,0.94) 32%, rgba(0,0,0,0.8) 56%, rgba(0,0,0,0.5)),
-    linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.05) 72%);
+  background: var(--board-promo-scrim);
 }
 .gigs-page .page-hero__grain {
-  opacity: 0.12;
+  opacity: var(--board-promo-grain-opacity);
 }
 
 /* Inbox: list + thread split layout */
