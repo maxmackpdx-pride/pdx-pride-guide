@@ -2,6 +2,7 @@ import express from 'express';
 import type { Express } from 'express';
 import fs from "node:fs";
 import path from "node:path";
+import { injectSeoIntoHtml } from "./seo";
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, "public");
@@ -11,10 +12,20 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  const indexPath = path.resolve(distPath, "index.html");
+  const baseIndexHtml = fs.readFileSync(indexPath, "utf8");
+  const seoIndexHtml = () => injectSeoIntoHtml(baseIndexHtml);
 
-  // fall through to index.html if the file doesn't exist
-  app.use("/{*path}", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
-  });
+  const sendSeoIndex = (_req: express.Request, res: express.Response) => {
+    res.type("html").send(seoIndexHtml());
+  };
+
+  // Serve injected HTML for the homepage — express.static would bypass SEO injection.
+  app.get("/", sendSeoIndex);
+  app.get("/index.html", sendSeoIndex);
+
+  app.use(express.static(distPath, { index: false }));
+
+  // SPA fallback with server-injected event listings for crawlers and AI fetchers.
+  app.use("/{*path}", sendSeoIndex);
 }

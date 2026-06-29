@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import type { Server } from "http";
+import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { storage, hashPassword, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, getPersistenceAudit } from "./persistence";
 import { BetterSqliteSessionStore } from "./sessionStore";
@@ -248,6 +249,19 @@ function getAdminActorUserId(req: any): number | null {
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
   storage.ensureSiteAdminGigPost();
+
+  // Machine-readable discovery for search engines and AI crawlers.
+  app.get("/llms.txt", (_req, res) => {
+    res.type("text/plain; charset=utf-8").send(buildLlmsTxt(getLiveEventsForSeo()));
+  });
+
+  app.get("/sitemap.xml", (_req, res) => {
+    res.type("application/xml; charset=utf-8").send(buildSitemapXml(getLiveEventsForSeo()));
+  });
+
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain; charset=utf-8").send(buildRobotsTxt());
+  });
 
   // Session middleware — persisted on the same SQLite volume as user data
   app.use(session({

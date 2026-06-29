@@ -21,4 +21,6 @@ resetPageScroll();
 requestAnimationFrame(resetPageScroll);
 window.addEventListener("load", resetPageScroll, { once: true });
 
+document.querySelector("[data-crawler-feed]")?.remove();
+
 createRoot(document.getElementById("root")!).render(<App />);
