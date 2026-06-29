@@ -8,6 +8,7 @@ import EventTicker from "@/components/EventTicker";
 import { MapView } from "./Events";
 import { Briefcase, Gift, Search, UserRound } from "lucide-react";
 import GlitchWord from "@/components/GlitchWord";
+import HeroVideoOverlay from "@/components/HeroVideoOverlay";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { spottedHeroProps } from "@/lib/spottedHero";
@@ -115,7 +116,7 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
         className="zine-hero home-hero"
-        style={{ position: "relative", overflow: "hidden", minHeight: 720, display: "flex", alignItems: "center" }}
+        style={{ position: "relative", overflow: "hidden", isolation: "isolate", minHeight: 720, display: "flex", alignItems: "center" }}
       >
         <div
           className="home-hero-bg-desktop"
@@ -130,15 +131,9 @@ export default function Home() {
           }}
         />
         <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.75) 100%)",
-        }} />
-        <div style={{
-          position: "absolute", inset: 0, opacity: 0.06,
-          backgroundImage: "radial-gradient(circle, #CCFF00 1px, transparent 1px)",
-          backgroundSize: "18px 18px",
-        }} />
+        <HeroVideoOverlay preset="home" />
+        <div className="home-hero-scrim" aria-hidden="true" />
+        <div className="home-hero-halftone" aria-hidden="true" />
         <div className="home-hero-watermark" aria-hidden="true">LOVE<br />LOUDER</div>
 
 

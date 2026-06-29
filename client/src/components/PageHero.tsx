@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import HeroVideoOverlay from "@/components/HeroVideoOverlay";
+import type { HeroOverlayId, HeroOverlayPreset } from "@/lib/heroOverlays";
 
 export type PageHeroAccent = "lime" | "magenta" | "rainbow" | "cyan";
 
@@ -21,6 +23,9 @@ export type PageHeroProps = {
   flush?: boolean;
   /** Shorter hero for home promo panels (75% of default height). */
   compact?: boolean;
+  /** WebM overlay stack on the hero photo. `false` disables overlays. */
+  overlayPreset?: HeroOverlayPreset | false;
+  overlays?: HeroOverlayId[];
   className?: string;
 };
 
@@ -38,6 +43,8 @@ export default function PageHero({
   bgPosition = "center",
   flush = false,
   compact = false,
+  overlayPreset = "panel",
+  overlays,
   className = "",
 }: PageHeroProps) {
   const classes = [
@@ -54,6 +61,9 @@ export default function PageHero({
         aria-hidden="true"
         style={{ backgroundImage: `url(${bgImage})`, backgroundPosition: bgPosition }}
       />
+      {overlayPreset !== false && (
+        <HeroVideoOverlay preset={overlayPreset} layers={overlays} />
+      )}
       <div className="page-hero__scrim" aria-hidden="true" />
       <div className="page-hero__grain" aria-hidden="true" />
       <div className="page-hero__inner">
