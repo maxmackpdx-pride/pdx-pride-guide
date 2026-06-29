@@ -6,7 +6,7 @@ import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
-import GlitchWord from "@/components/GlitchWord";
+import GlitchLogo from "@/components/GlitchLogo";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -113,14 +113,7 @@ export default function Nav() {
       <header className="site-header">
         <div className="site-header-inner">
           <Link href="/" className="site-brand" aria-label="PDX Pride Guide home">
-            <img src={logoPath} alt="" className="site-brand-logo" />
-            <span className="display site-brand-wordmark">
-              <span className="site-brand-wordmark__line">PDX</span>
-              <span className="site-brand-wordmark__line site-brand-wordmark__line--accent">
-                <GlitchWord text="PRIDE" />
-              </span>
-              <span className="site-brand-wordmark__line">GUIDE</span>
-            </span>
+            <GlitchLogo src={logoPath} alt="PDX Pride Guide" />
           </Link>
 
           <button

@@ -207,10 +207,24 @@ body::before {
   text-decoration: none;
 }
 
-.site-brand-logo {
-  width: auto;
+.glitch-logo {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
   height: var(--site-logo-h);
   flex: 0 0 auto;
+}
+
+.glitch-logo__main,
+.glitch-logo__ghost {
+  display: block;
+  width: auto;
+  height: 100%;
+}
+
+.glitch-logo__main {
+  position: relative;
+  z-index: 1;
   mix-blend-mode: screen;
   filter:
     saturate(1.2) contrast(1.1)
@@ -218,21 +232,26 @@ body::before {
     drop-shadow(0 0 18px rgba(204, 255, 0, 0.22));
 }
 
-.site-brand-wordmark {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0.04em;
-  color: #fff;
-  font-size: var(--site-wordmark-size);
-  line-height: 0.9;
-  letter-spacing: 0.03em;
+.glitch-logo__ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
 }
 
-.site-brand-wordmark__line {
-  display: block;
-  white-space: nowrap;
+.glitch-logo__ghost--cyan {
+  z-index: 2;
+  filter: saturate(2.4) brightness(1.15) hue-rotate(165deg);
+  animation: glitch-word-cyan 7.5s infinite steps(1, end);
+}
+
+.glitch-logo__ghost--magenta {
+  z-index: 3;
+  filter: saturate(2.6) brightness(1.1) hue-rotate(285deg);
+  animation: glitch-word-magenta 7.5s infinite steps(1, end);
+  animation-delay: 0.12s;
 }
 
 /* Slow chunky glitch — nav + hero PRIDE */
@@ -353,7 +372,8 @@ body::before {
 
 @media (prefers-reduced-motion: reduce) {
   .glitch-word::before,
-  .glitch-word::after {
+  .glitch-word::after,
+  .glitch-logo__ghost {
     animation: none;
   }
 }
@@ -981,13 +1001,6 @@ h2.display,
     drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
 }
 
-.site-brand-wordmark__line--accent {
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
-    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
-}
-
 .display .glitch-word--rainbow,
 .display .glitch-word__gradient,
 .display .glitch-word__outline {
@@ -1391,10 +1404,6 @@ h2.display,
     flex-wrap: wrap;
     align-items: center;
     gap: 14px;
-  }
-
-  .site-brand-wordmark {
-    --site-wordmark-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.21), 1.45rem);
   }
 
   .site-nav-toggle {
