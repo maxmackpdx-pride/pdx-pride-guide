@@ -12,7 +12,7 @@ export type PageHeroProps = {
   titleLine2?: string;
   accent?: PageHeroAccent;
   lede?: string;
-  tagline?: string;
+  tagline?: ReactNode;
   taglineAccent?: PageHeroTaglineAccent;
   actions?: ReactNode;
   bgImage: string;
