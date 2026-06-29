@@ -8,7 +8,7 @@ import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import GlitchWord from "@/components/GlitchWord";
 
-const publicLinks = [
+const navLinks = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/submit", label: "Promoters" },
@@ -16,12 +16,6 @@ const publicLinks = [
   { href: "/gifting", label: "Gifting" },
   { href: "/spotted", label: "Spotted!" },
   { href: "/about", label: "About" },
-];
-
-const adminLinks = [
-  { href: "/about", label: "About" },
-  { href: "/dashboard", label: "INBOX", notifyKey: "inbox" as const },
-  { href: "/admin", label: "ADMIN", notifyKey: "admin" as const },
 ];
 
 function NavLink({
@@ -93,7 +87,7 @@ export default function Nav() {
     refetchInterval: 120000,
   });
 
-  const isAdminNav = Boolean(user?.isAdmin || adminSession?.isAdmin);
+  const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
 
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
@@ -105,26 +99,14 @@ export default function Nav() {
   const { data: adminPending = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () => fetch("/api/admin/pending-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
-    enabled: isAdminNav,
+    enabled: isAdmin,
     refetchInterval: 90000,
   });
 
   const unreadCount = unread.count || 0;
   const adminPendingCount = adminPending.count || 0;
-  const navLinks = isAdminNav ? adminLinks : publicLinks;
   const closeMenu = () => setMenuOpen(false);
-
   const inboxActive = location === "/dashboard" || location === "/inbox";
-  const linkActive = (href: string) => {
-    if (href === "/dashboard") return inboxActive;
-    return location === href;
-  };
-
-  const linkNotify = (key?: "inbox" | "admin") => {
-    if (key === "inbox") return unreadCount > 0;
-    if (key === "admin") return adminPendingCount > 0;
-    return false;
-  };
 
   return (
     <>
@@ -159,16 +141,15 @@ export default function Nav() {
           >
             {navLinks.map(l => (
               <NavLink
-                key={l.href + l.label}
+                key={l.href}
                 href={l.href}
                 label={l.label}
-                active={linkActive(l.href)}
-                showNotify={"notifyKey" in l ? linkNotify(l.notifyKey) : false}
+                active={location === l.href}
                 onClick={closeMenu}
               />
             ))}
 
-            {user && !isAdminNav && (
+            {user && (
               <div className="site-auth">
                 <NavLink
                   href="/dashboard"
@@ -177,6 +158,15 @@ export default function Nav() {
                   showNotify={unreadCount > 0}
                   onClick={closeMenu}
                 />
+                {isAdmin && (
+                  <NavLink
+                    href="/admin"
+                    label="ADMIN"
+                    active={location === "/admin"}
+                    showNotify={adminPendingCount > 0}
+                    onClick={closeMenu}
+                  />
+                )}
                 <div className="site-profile-menu" ref={profileRef}>
                   <button
                     type="button"
@@ -229,46 +219,15 @@ export default function Nav() {
               </div>
             )}
 
-            {user && isAdminNav && (
+            {!user && isAdmin && (
               <div className="site-auth">
-                <div className="site-profile-menu" ref={profileRef}>
-                  <button
-                    type="button"
-                    className="site-profile-menu__trigger"
-                    aria-expanded={profileOpen}
-                    aria-haspopup="menu"
-                    aria-label={`Profile menu: ${user.displayName || user.username}`}
-                    onClick={() => setProfileOpen(open => !open)}
-                  >
-                    <UserAvatar
-                      photoUrl={user.photoUrl}
-                      avatarChoice={user.avatarChoice}
-                      avatarRing={user.avatarRing}
-                      displayName={user.displayName}
-                      username={user.username}
-                    />
-                  </button>
-                  {profileOpen && (
-                    <div className="site-profile-menu__panel" role="menu">
-                      <div className="site-profile-menu__identity">
-                        <span className="site-profile-menu__name">{user.displayName || user.username}</span>
-                        <span className="site-profile-menu__username">@{user.username}</span>
-                      </div>
-                      <button
-                        type="button"
-                        role="menuitem"
-                        className="site-profile-menu__item site-profile-menu__item--logout"
-                        onClick={() => {
-                          logout();
-                          setProfileOpen(false);
-                          setMenuOpen(false);
-                        }}
-                      >
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <NavLink
+                  href="/admin"
+                  label="ADMIN"
+                  active={location === "/admin"}
+                  showNotify={adminPendingCount > 0}
+                  onClick={closeMenu}
+                />
               </div>
             )}
 
