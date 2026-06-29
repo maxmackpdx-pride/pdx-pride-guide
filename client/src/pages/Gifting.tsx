@@ -12,6 +12,7 @@ import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
 import { isOpenGrabPost, timeAgo } from "@/lib/boardFeed";
+import { usePageSeo } from "@/hooks/usePageSeo";
 
 const CATEGORIES = [
   "Clothing", "Queer Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -74,6 +75,10 @@ const ACCENT: Record<string, string> = {
 };
 
 export default function Gifting() {
+  usePageSeo(
+    "Gifting Board — PDX Pride Guide | Portland Pride 2026",
+    "Give and find free stuff in Portland's queer community during Pride 2026 and beyond. PDX Pride gifting and ISO board.",
+  );
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);

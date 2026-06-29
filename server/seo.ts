@@ -1,5 +1,6 @@
 import { storage } from "./storage";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { eventUrl } from "@shared/eventSlug";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.prideguidepdx.com").replace(/\/$/, "");
@@ -74,7 +75,7 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
         offers: evt.admission
           ? { "@type": "Offer", price: evt.admission === "FREE" ? "0" : undefined, priceCurrency: "USD" }
           : undefined,
-        url: `${SITE_URL}/#/events`,
+        url: eventUrl(evt.id, evt.title, SITE_URL),
         image: resolveEventPosterUrl(evt.id, null) || undefined,
       },
     })),
@@ -140,7 +141,7 @@ export function buildLlmsTxt(events: SeoEvent[]) {
     "> Portland's community-run Pride event directory for 2026.",
     "",
     `- Website: ${SITE_URL}`,
-    `- Events page: ${SITE_URL}/#/events`,
+    `- Events page: ${SITE_URL}/events`,
     `- Live events JSON API: ${SITE_URL}/api/events`,
     `- Event count: ${events.length}`,
     "",
@@ -155,6 +156,7 @@ export function buildLlmsTxt(events: SeoEvent[]) {
     lines.push(`- When: ${when || "TBA"}`);
     if (where) lines.push(`- Where: ${where}`);
     if (evt.admission) lines.push(`- Admission: ${evt.admission}`);
+    lines.push(`- URL: ${eventUrl(evt.id, evt.title, SITE_URL)}`);
     if (evt.description) lines.push(`- ${evt.description.replace(/\s+/g, " ").trim()}`);
     lines.push("");
   }
@@ -167,32 +169,49 @@ export function buildRobotsTxt() {
 Allow: /
 Allow: /api/events
 Allow: /llms.txt
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/admin
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `;
 }
 
 export function buildSitemapXml(events: SeoEvent[]) {
-  const staticPaths = ["/", "/#/events", "/#/gifting", "/#/pride-work", "/#/spotted", "/#/about", "/#/submit"];
-  const urls = staticPaths
-    .map(path => `  <url><loc>${SITE_URL}${path}</loc><changefreq>daily</changefreq><priority>${path === "/" ? "1.0" : "0.8"}</priority></url>`)
+  const staticPaths = ["/", "/events", "/gifting", "/pride-work", "/spotted", "/about", "/submit"];
+  const staticUrls = staticPaths
+    .map(path => `  <url><loc>${SITE_URL}${path === "/" ? "/" : path}</loc><changefreq>daily</changefreq><priority>${path === "/" ? "1.0" : "0.8"}</priority></url>`)
+    .join("\n");
+  const eventUrls = events
+    .map(evt => `  <url><loc>${eventUrl(evt.id, evt.title, SITE_URL)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
+${staticUrls}
+${eventUrls}
 </urlset>
 `;
 }
 
-export function injectSeoIntoHtml(html: string) {
+export function buildCanonicalUrl(requestPath: string) {
+  const path = (requestPath.split("?")[0]?.split("#")[0] || "/").trim() || "/";
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return normalized === "/" ? `${SITE_URL}/` : `${SITE_URL}${normalized}`;
+}
+
+export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const events = getLiveEventsForSeo();
   const jsonLd = JSON.stringify(buildEventsJsonLd(events));
   const headExtras = buildSeoHeadExtras(events.length);
+  const canonicalTag = `<link rel="canonical" href="${buildCanonicalUrl(requestPath)}" />`;
   const crawlerDirectory = buildCrawlerEventDirectory(events);
   const noscript = buildNoscriptEventDirectory(events);
 
   let out = html;
+  if (!out.includes('rel="canonical"')) {
+    out = out.replace("</head>", `    ${canonicalTag}\n  </head>`);
+  }
   if (!out.includes("pdx-pride-guide:event-count")) {
     out = out.replace("</head>", `    ${headExtras}\n  </head>`);
   }

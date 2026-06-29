@@ -15,6 +15,7 @@ import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardActiveSection, { BoardFilterChip } from "@/components/BoardActiveSection";
 import { timeAgo } from "@/lib/boardFeed";
+import { usePageSeo } from "@/hooks/usePageSeo";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -72,6 +73,10 @@ const ACCENT: Record<string, string> = {
 };
 
 export default function PrideWork() {
+  usePageSeo(
+    "Pride Work — Jobs & Gigs — PDX Pride Guide",
+    "Find queer-friendly gigs and workers for Portland Pride 2026. Post or browse Pride Work listings in PDX.",
+  );
   const { toast } = useToast();
   const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);

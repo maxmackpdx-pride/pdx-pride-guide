@@ -1,10 +1,15 @@
 import PageHero from "@/components/PageHero";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink } from "lucide-react";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
 
 export default function About() {
+  usePageSeo(
+    "About PDX Pride Guide — Portland Pride 2026",
+    "Community-run Portland Pride 2026 event directory for PDX. Built for queer Portland by submissions and local support.",
+  );
   return (
     <div className="zine-page about-page board-page min-h-screen">
       <PageHero

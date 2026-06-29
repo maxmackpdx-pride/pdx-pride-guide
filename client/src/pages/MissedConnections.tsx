@@ -8,6 +8,7 @@ import MissedConnectionsHero from "@/components/MissedConnectionsHero";
 import MissedConnectionsPanel, { type MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardStatsBar from "@/components/BoardStatsBar";
+import { usePageSeo } from "@/hooks/usePageSeo";
 
 const HOW_IT_WORKS: Array<[string, string]> = [
   ["Pick a spot", "Link a live or past Pride event, write your own spot, or choose Around town."],
@@ -17,6 +18,10 @@ const HOW_IT_WORKS: Array<[string, string]> = [
 ];
 
 export default function MissedConnections() {
+  usePageSeo(
+    "Spotted — Missed Connections — PDX Pride Guide",
+    "Post anonymous missed connections from Portland Pride 2026 events. Spotted someone at PDX Pride? Say hi privately.",
+  );
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);

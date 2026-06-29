@@ -12,6 +12,7 @@ import HeroVideoOverlay from "@/components/HeroVideoOverlay";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { spottedHeroProps } from "@/lib/spottedHero";
+import { usePageSeo } from "@/hooks/usePageSeo";
 const skylineImg = "/home-hero-desktop.jpg";
 
 function parsePacificEventTime(value?: string | null) {
@@ -37,6 +38,10 @@ function useCountdown(target: number | null) {
 }
 
 export default function Home() {
+  usePageSeo(
+    "PDX Pride Guide — Portland Pride 2026 Events",
+    "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 16–19 and year-round Pride listings.",
+  );
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {

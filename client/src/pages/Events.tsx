@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link } from "wouter";
+import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -16,9 +16,11 @@ import EventModal from "../components/EventModal";
 import EventAttendancePreview from "@/components/EventAttendancePreview";
 import EventWorkHereTag from "@/components/EventWorkHereTag";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
-import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
+import { eventPath } from "@shared/eventSlug";
+import { ArrowLeft, List, Grid, MapPin, Maximize2, Minimize2, Navigation, Link2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -393,7 +395,21 @@ export function MapView({ events, expanded, onExpand, onCollapse, onSelect, vari
   );
 }
 
-function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary, myTalent, selfUserId }: {
+function EventShareLink({ href, title }: { href: string; title: string }) {
+  return (
+    <a
+      href={href}
+      className="event-card-share"
+      title={`Share link to ${title}`}
+      aria-label={`Share link to ${title}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Link2 size={14} />
+    </a>
+  );
+}
+
+function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary, myTalent, selfUserId, shareHref }: {
   event: Event;
   onClick: () => void;
   viewMode: "grid" | "list";
@@ -401,6 +417,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
   attendanceSummary?: AttendanceSummary | null;
   myTalent?: UserEventTalentCard | null;
   selfUserId?: number;
+  shareHref: string;
 }) {
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
   const time = event.dateStart
@@ -442,7 +459,8 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
           </div>
         )}
         {/* Info */}
-        <div style={{ flex: 1, padding: "15px 21px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
+        <div style={{ flex: 1, padding: "15px 21px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0, position: "relative" }}>
+          <EventShareLink href={shareHref} title={event.title} />
           <EventTagsRow event={event} size="sm" className="event-card-tags--list" />
           <div style={{
             fontFamily: "var(--font-display)", fontWeight: 900,
@@ -472,6 +490,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
       {/* Flyer image if available, else halftone bg */}
       {event.posterImageUrl ? (
         <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+          <EventShareLink href={shareHref} title={event.title} />
           <img
             src={event.posterImageUrl}
             alt={event.title}
@@ -500,7 +519,9 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
         </div>
       ) : (
         <>
-          <div style={{ height: 5, background: dayColor }} />
+          <div style={{ height: 5, background: dayColor, position: "relative" }}>
+            <EventShareLink href={shareHref} title={event.title} />
+          </div>
           <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--top" />
           <div
             className="halftone"
@@ -534,6 +555,10 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
 }
 
 export default function Events() {
+  usePageSeo(
+    "Portland Pride 2026 Events — PDX Pride Guide",
+    "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
+  );
   const { user } = useAuth();
   const [activeDay, setActiveDay] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -565,6 +590,25 @@ export default function Events() {
     queryFn: () => apiRequest("GET", "/api/events/mine/talent").then(r => r.json()),
     enabled: !!user,
   });
+
+  const { data: routeEvent } = useQuery<Event>({
+    queryKey: ["/api/events", routeEventId],
+    queryFn: () => apiRequest("GET", `/api/events/${routeEventId}`).then(r => r.json()),
+    enabled: routeEventId != null && Number.isFinite(routeEventId),
+  });
+
+  useEffect(() => {
+    if (!routeEventId || !Number.isFinite(routeEventId)) {
+      if (!routeMatch) setSelectedEvent(null);
+      return;
+    }
+    const fromList = events.find(e => e.id === routeEventId);
+    if (fromList) {
+      setSelectedEvent(fromList);
+      return;
+    }
+    if (routeEvent) setSelectedEvent(routeEvent);
+  }, [routeEventId, routeMatch, events, routeEvent]);
 
   const filtered = useMemo(
     () => filterLiveEvents(events, activeDay, activeFilters, searchQuery),
@@ -738,6 +782,7 @@ export default function Events() {
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
                 selfUserId={user?.id}
+                shareHref={eventPath(e.id, e.title)}
               />
             ))}
           </div>
@@ -753,6 +798,7 @@ export default function Events() {
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
                 myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
                 selfUserId={user?.id}
+                shareHref={eventPath(e.id, e.title)}
               />
             ))}
           </div>
@@ -764,12 +810,12 @@ export default function Events() {
             <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
               Submit it or claim an existing listing.
             </div>
-            <a href="#/submit" className="btn-neon solid">Get Started →</a>
+            <Link href="/submit" className="btn-neon solid">Get Started →</Link>
           </div>
         </ScrollReveal>
       </div>
 
-      {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {selectedEvent && <EventModal event={selectedEvent} onClose={closeEvent} />}
     </div>
   );
 }

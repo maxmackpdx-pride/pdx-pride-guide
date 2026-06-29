@@ -10,6 +10,7 @@ import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
+import { usePageSeo } from "@/hooks/usePageSeo";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 
@@ -21,6 +22,10 @@ const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", margin
 type FormStep = 1 | 2 | 3;
 
 export default function Submit() {
+  usePageSeo(
+    "Submit an Event — PDX Pride Guide | Portland Pride 2026",
+    "Add your Portland Pride 2026 event to the free PDX Pride community directory. Submit or claim listings for Pride Weekend.",
+  );
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);

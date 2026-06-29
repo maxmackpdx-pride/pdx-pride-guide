@@ -14,6 +14,15 @@ const httpServer = createServer(app);
 // Railway terminates TLS at the edge; required for secure session cookies.
 app.set("trust proxy", 1);
 
+// Apex → www canonical host (301, preserve path + query).
+app.use((req, res, next) => {
+  const host = (req.headers.host || "").split(":")[0].toLowerCase();
+  if (host === "prideguidepdx.com") {
+    return res.redirect(301, `https://www.prideguidepdx.com${req.originalUrl}`);
+  }
+  next();
+});
+
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
