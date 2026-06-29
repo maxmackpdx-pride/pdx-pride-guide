@@ -666,13 +666,13 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Pride in Demand — Portland Queer Takeover",
-      description: "Organized by DotGay. Queer superhero theme. Multi-day takeover event.",
+      title: "Pride in Demand — Portland Queer Takeover — Night 1",
+      description: "Night 1 of DotGay's Pride in Demand Portland Queer Takeover at Star Theater. Queer superhero theme. Friday July 17, 2026 at 9pm.",
       venueName: "Star Theater and Starlight Lounge",
       address: "13 NW 6th Ave, Portland, OR 97209",
       neighborhood: "Old Town",
       lat: 45.523204065035, lng: -122.676518408183,
-      dateStart: "2026-07-17T21:00:00", dateEnd: "2026-07-18T23:59:00",
+      dateStart: "2026-07-17T21:00:00", dateEnd: "2026-07-17T23:59:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "TAKEOVER", "MULTI-DAY"]),
@@ -711,7 +711,7 @@ function seedData() {
       dayOfWeek: "SAT",
       ageRequirement: "ALL_AGES",
       eventTypes: JSON.stringify(["DAYTIME", "MARKET", "WITCH"]),
-      admission: "TBD",
+      admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/gay-witch-appreciation-day-pride-at-seagrape-tickets-1988446704621",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: "/posters/gay-witch-appreciation-day.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
@@ -902,7 +902,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/portland-pride-drag-brunch-saturday-tickets-1989269042255",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/stag-pdx-drag-brunch-saturday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -912,7 +912,7 @@ function seedData() {
       address: "3000 NE Alberta St, Portland, OR 97211",
       neighborhood: "Alberta Arts District",
       lat: 45.5581, lng: -122.6478,
-      dateStart: "2026-07-18T19:00:00", dateEnd: "2026-07-18T23:00:00",
+      dateStart: "2026-07-18T20:00:00", dateEnd: "2026-07-18T23:00:00",
       dayOfWeek: "SAT",
       ageRequirement: "ALL_AGES",
       eventTypes: JSON.stringify(["DRAG", "BURLESQUE", "PERFORMANCE"]),
@@ -1055,8 +1055,8 @@ function seedData() {
       admission: "FREE",
       ticketUrl: "https://hawkspdx.com/calendar-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: "/posters/transocial-hawks.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+      posterImageUrl: "/posters/transocial-hawks.png", status: "HIDDEN", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: "Hidden: no 2026 Pride schedule on hawkspdx.com", createdAt: now,
     },
     {
       title: "Hawks PDX Pride Weekend Placeholder",
@@ -1072,8 +1072,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://hawkspdx.com/calendar-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: "/posters/transocial-hawks.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+      posterImageUrl: "/posters/transocial-hawks.png", status: "HIDDEN", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: "Hidden: no 2026 Pride schedule on hawkspdx.com", createdAt: now,
     },
     {
       title: "Hawks PDX Pride Weekend Placeholder",
@@ -1089,8 +1089,8 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://hawkspdx.com/calendar-events",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: "/posters/transocial-hawks.png", status: "LIVE", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
+      posterImageUrl: "/posters/transocial-hawks.png", status: "HIDDEN", source: "admin_seeded", isClaimable: true,
+      claimedBy: null, submittedBy: null, adminNotes: "Hidden: no 2026 Pride schedule on hawkspdx.com", createdAt: now,
     },
     {
       title: "Portland Trans Pride March",
@@ -1191,7 +1191,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/divapalooza-pdx-pride-2026-tickets-1991334196186",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/divapalooza-5th-anniversary.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
@@ -1293,7 +1293,7 @@ function seedData() {
       admission: "TICKETED",
       ticketUrl: "https://www.eventbrite.com/e/portland-pride-drag-brunch-sunday-tickets-1989269916871",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: "/posters/sports-bra-pride-block-party.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
+      posterImageUrl: "/posters/stag-pdx-drag-brunch-sunday.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
   ];
@@ -1574,6 +1574,79 @@ function applyVerifiedEventOverrides() {
   }
 }
 
+function applyEventDataAuditFixes() {
+  sqlite.prepare(`
+    UPDATE events SET
+      status = 'HIDDEN',
+      admin_notes = 'Hidden: no 2026 Pride schedule confirmed on hawkspdx.com'
+    WHERE title = 'Hawks PDX Pride Weekend Placeholder'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      status = 'HIDDEN',
+      admin_notes = 'Hidden: unverified TBD placeholder — no 2026 Pride details on steamportland.com'
+    WHERE title = 'Steam Portland Pride Weekend TBD'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      status = 'HIDDEN',
+      admin_notes = 'Hidden: incorrect stub — Fri is AWOO at 835 N Lombard, Sat is Under Gear; not verified Eagle Pup Night'
+    WHERE title = 'Eagle Portland Pup Night Pride Edition TBD'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      date_start = '2026-07-18T20:00:00',
+      description = 'BOYeurism Pride Spectacular at Alberta Rose Theatre. Doors 7pm, show 8pm. Created by IZOHNNY — Isaiah Esquire and Johnny Nuriel.'
+    WHERE title = 'BOYeurism: Pride Spectacular'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET admission = 'TICKETED'
+    WHERE title = 'Gay Witch Appreciation Day + Pride at Seagrape'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET poster_image_url = '/posters/stag-pdx-drag-brunch-saturday.jpg'
+    WHERE title = 'Portland Pride Drag Brunch at Stag PDX'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET poster_image_url = '/posters/stag-pdx-drag-brunch-sunday.jpg'
+    WHERE title = 'Portland Pride Drag Brunch at Stag PDX — Sunday'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET poster_image_url = '/posters/divapalooza-5th-anniversary.jpg'
+    WHERE title = 'DIVAPALOOZA 5th Anniversary'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      title = 'Pride in Demand — Portland Queer Takeover — Night 1',
+      description = 'Night 1 of DotGay''s Pride in Demand Portland Queer Takeover at Star Theater. Queer superhero theme. Friday July 17, 2026 at 9pm.',
+      poster_image_url = '/posters/pride-in-demand.jpg',
+      status = 'LIVE',
+      date_start = '2026-07-17T21:00:00',
+      date_end = '2026-07-17T23:59:00',
+      day_of_week = 'FRI'
+    WHERE title IN (
+      'Pride in Demand — Friday Night',
+      'Pride in Demand — Portland Queer Takeover'
+    )
+      AND date_start LIKE '2026-07-17%'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET
+      title = 'Pride in Demand — Portland Queer Takeover — Night 2',
+      description = 'Night 2 of DotGay''s Pride in Demand Portland Queer Takeover at Star Theater. Queer superhero theme. Saturday July 18, 2026 at 9pm.',
+      poster_image_url = CASE
+        WHEN poster_image_url IS NULL OR poster_image_url LIKE '/placeholders/%'
+        THEN '/posters/pride-in-demand.jpg'
+        ELSE poster_image_url
+      END
+    WHERE title IN (
+      'Pride in Demand — Portland Queer Takeover',
+      'Pride in Demand — Portland Queer Takeover — Night 2'
+    )
+      AND date_start LIKE '2026-07-18%'
+  `).run();
+}
+
 function runDismissStaleTestModerationRequests() {
   const result = sqlite.prepare(`
     UPDATE moderation_requests
@@ -1621,6 +1694,10 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("remove_gifting_seed_posts_v1")) {
     removeGiftingSeedPosts();
     recordBootMigration("remove_gifting_seed_posts_v1");
+  }
+  if (!hasBootMigration("event_data_audit_v1")) {
+    applyEventDataAuditFixes();
+    recordBootMigration("event_data_audit_v1");
   }
 }
 
