@@ -8,7 +8,7 @@ import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import GlitchWord from "@/components/GlitchWord";
 
-const links = [
+const publicLinks = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/submit", label: "Promoters" },
@@ -17,6 +17,37 @@ const links = [
   { href: "/spotted", label: "Spotted!" },
   { href: "/about", label: "About" },
 ];
+
+const adminLinks = [
+  { href: "/about", label: "About" },
+  { href: "/dashboard", label: "INBOX", notifyKey: "inbox" as const },
+  { href: "/admin", label: "ADMIN", notifyKey: "admin" as const },
+];
+
+function NavLink({
+  href,
+  label,
+  active,
+  showNotify,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  showNotify?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}`}
+      onClick={onClick}
+    >
+      {label}
+      {showNotify && <span className="site-nav-notify-dot" aria-label="Notifications" />}
+    </Link>
+  );
+}
 
 export default function Nav() {
   const [location] = useLocation();
@@ -52,13 +83,48 @@ export default function Nav() {
     };
   }, [profileOpen]);
 
+  const { data: adminSession } = useQuery<{ isAdmin?: boolean } | null>({
+    queryKey: ["/api/admin/me"],
+    queryFn: async () => {
+      const r = await fetch("/api/admin/me", { credentials: "include" });
+      return r.ok ? r.json() : null;
+    },
+    retry: false,
+    refetchInterval: 120000,
+  });
+
+  const isAdminNav = Boolean(user?.isAdmin || adminSession?.isAdmin);
+
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
     queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
     enabled: !!user,
     refetchInterval: 90000,
   });
+
+  const { data: adminPending = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ["/api/admin/pending-count"],
+    queryFn: () => fetch("/api/admin/pending-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
+    enabled: isAdminNav,
+    refetchInterval: 90000,
+  });
+
   const unreadCount = unread.count || 0;
+  const adminPendingCount = adminPending.count || 0;
+  const navLinks = isAdminNav ? adminLinks : publicLinks;
+  const closeMenu = () => setMenuOpen(false);
+
+  const inboxActive = location === "/dashboard" || location === "/inbox";
+  const linkActive = (href: string) => {
+    if (href === "/dashboard") return inboxActive;
+    return location === href;
+  };
+
+  const linkNotify = (key?: "inbox" | "admin") => {
+    if (key === "inbox") return unreadCount > 0;
+    if (key === "admin") return adminPendingCount > 0;
+    return false;
+  };
 
   return (
     <>
@@ -91,26 +157,26 @@ export default function Nav() {
             className={`site-nav${menuOpen ? " open" : ""}`}
             aria-label="Primary navigation"
           >
-            {links.map(l => (
-              <Link
-                key={l.href}
+            {navLinks.map(l => (
+              <NavLink
+                key={l.href + l.label}
                 href={l.href}
-                className={`site-nav-link${location === l.href ? " active" : ""}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                {l.label}
-              </Link>
+                label={l.label}
+                active={linkActive(l.href)}
+                showNotify={"notifyKey" in l ? linkNotify(l.notifyKey) : false}
+                onClick={closeMenu}
+              />
             ))}
 
-            {user ? (
+            {user && !isAdminNav && (
               <div className="site-auth">
-                <Link
-                  href="/inbox"
-                  className={`site-nav-link inbox-link${location === "/inbox" ? " active" : ""}${unreadCount > 0 ? " inbox-link--live" : ""}`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  INBOX{unreadCount > 0 && <span className="site-unread-badge site-unread-badge--pulse">{unreadCount}</span>}
-                </Link>
+                <NavLink
+                  href="/dashboard"
+                  label="INBOX"
+                  active={inboxActive}
+                  showNotify={unreadCount > 0}
+                  onClick={closeMenu}
+                />
                 <div className="site-profile-menu" ref={profileRef}>
                   <button
                     type="button"
@@ -161,7 +227,52 @@ export default function Nav() {
                   )}
                 </div>
               </div>
-            ) : (
+            )}
+
+            {user && isAdminNav && (
+              <div className="site-auth">
+                <div className="site-profile-menu" ref={profileRef}>
+                  <button
+                    type="button"
+                    className="site-profile-menu__trigger"
+                    aria-expanded={profileOpen}
+                    aria-haspopup="menu"
+                    aria-label={`Profile menu: ${user.displayName || user.username}`}
+                    onClick={() => setProfileOpen(open => !open)}
+                  >
+                    <UserAvatar
+                      photoUrl={user.photoUrl}
+                      avatarChoice={user.avatarChoice}
+                      avatarRing={user.avatarRing}
+                      displayName={user.displayName}
+                      username={user.username}
+                    />
+                  </button>
+                  {profileOpen && (
+                    <div className="site-profile-menu__panel" role="menu">
+                      <div className="site-profile-menu__identity">
+                        <span className="site-profile-menu__name">{user.displayName || user.username}</span>
+                        <span className="site-profile-menu__username">@{user.username}</span>
+                      </div>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="site-profile-menu__item site-profile-menu__item--logout"
+                        onClick={() => {
+                          logout();
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!user && (
               <button
                 onClick={() => { setShowAuth(true); setMenuOpen(false); }}
                 className="site-login-button"

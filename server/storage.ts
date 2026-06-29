@@ -1772,6 +1772,7 @@ export interface IStorage {
   createModerationRequest(data: InsertModerationRequest): ModerationRequest;
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   dismissStaleTestModerationRequests(): number;
+  getAdminPendingCount(): number;
   // Attendance
   getAttendances(eventId: number, viewerUserId?: number): any[];
   getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
@@ -2093,6 +2094,19 @@ export const storage: IStorage = {
   },
   dismissStaleTestModerationRequests() {
     return runDismissStaleTestModerationRequests();
+  },
+  getAdminPendingCount() {
+    const giftingPending = this.getGiftingPosts({ includeInactive: true })
+      .filter((post: any) => post.status === "PENDING").length;
+    return (
+      this.getSubmissions("PENDING").length
+      + this.getModerationRequests("PENDING").length
+      + this.getPendingPromoterRequests().length
+      + this.getPendingTalentForUnclaimedEvents().length
+      + giftingPending
+      + this.getGiftingReports("PENDING").length
+      + this.getFeedbackReports("OPEN").length
+    );
   },
   resolveModerationRequest(id, status, adminNotes) {
     const req = db.select().from(moderationRequests).where(eq(moderationRequests.id, id)).get();

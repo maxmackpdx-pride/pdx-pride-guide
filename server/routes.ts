@@ -1423,6 +1423,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(getPersistenceAudit(getTableCounts()));
   });
 
+  app.get("/api/admin/pending-count", requireAdmin, (_req, res) => {
+    res.json({ count: storage.getAdminPendingCount() });
+  });
+
   app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
     const counts = getTableCounts();
     const pendingSubmissions = storage.getSubmissions("PENDING").length;
