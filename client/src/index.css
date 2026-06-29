@@ -2500,7 +2500,7 @@ h2.display,
 .missed-page .board-how--inline .board-step h3,
 .missed-page .board-how--inline .board-step .panel-heading {
   min-width: 96px;
-  font-size: 13px;
+  font-size: 19.5px;
   font-weight: 800;
   color: #060606;
 }
@@ -2508,7 +2508,7 @@ h2.display,
 .gifting-page .board-how--inline .board-step p,
 .gigs-page .board-how--inline .board-step p,
 .missed-page .board-how--inline .board-step p {
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 700;
   color: #060606;
   line-height: 1.4;
