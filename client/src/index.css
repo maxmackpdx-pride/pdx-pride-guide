@@ -53,15 +53,6 @@
   --font-board-mono: 'Inter', sans-serif;
   --site-header-height: 120px;
   --site-rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
-  --rainbow-text-wordmark: linear-gradient(
-    92deg,
-    #00ffff 0%,
-    #e4ff00 20%,
-    #fff700 40%,
-    #ff00f5 62%,
-    #ff7a00 82%,
-    #00ffff 100%
-  );
   --rainbow-text-panel: linear-gradient(
     92deg,
     #ff3a12 0%,
@@ -274,8 +265,7 @@ body::before {
 .glitch-word__gradient {
   position: relative;
   z-index: 1;
-  background: var(--rainbow-text-wordmark);
-  background-size: 120% 100%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -963,22 +953,16 @@ h2.display,
 .home-hero-title-pride {
   display: inline-block;
   filter:
-    saturate(1.4)
-    brightness(1.1)
     drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 30px rgba(228, 255, 0, 0.72))
-    drop-shadow(0 0 22px rgba(0, 255, 255, 0.55))
-    drop-shadow(0 0 34px rgba(255, 0, 245, 0.42));
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
 }
 
 .site-brand-wordmark__line--accent {
   filter:
-    saturate(1.4)
-    brightness(1.1)
     drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 30px rgba(228, 255, 0, 0.72))
-    drop-shadow(0 0 22px rgba(0, 255, 255, 0.55))
-    drop-shadow(0 0 34px rgba(255, 0, 245, 0.42));
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
 }
 
 .display .glitch-word--rainbow,
