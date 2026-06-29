@@ -245,6 +245,10 @@ body::before {
   height: 100%;
   opacity: 0;
   pointer-events: none;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
   -webkit-text-stroke: 0;
   text-shadow: none;
   filter: none;
@@ -907,17 +911,38 @@ h2.display,
   }
 }
 
-.home-hero-title-pride,
+/* Rainbow gradient text — Chrome needs -webkit-text-fill-color; avoid stroke/paint-order/filter on clipped text */
+.home-hero-title-pride {
+  display: inline-block;
+  filter:
+    drop-shadow(2px 2px 0 #000)
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+}
+
+.site-brand-wordmark__line--accent {
+  filter:
+    drop-shadow(2px 2px 0 #000)
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+}
+
 .home-hero-title-pride .glitch-word,
-.site-brand-wordmark__line--accent,
 .site-brand-wordmark__line--accent .glitch-word {
   background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
-  -webkit-text-stroke: 1px #000;
-  paint-order: stroke fill;
-  filter: drop-shadow(2px 2px 0 #000) drop-shadow(0 0 24px rgba(204,255,0,0.4)) drop-shadow(0 0 14px rgba(0,255,255,0.25));
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 -1px 0 #000,
+    0 1px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000;
 }
 
 .home-hero-subtitle {
@@ -2199,14 +2224,16 @@ h2.display,
 
 .page-hero__panel .page-hero__accent--rainbow,
 .page-hero__accent--rainbow {
+  display: inline-block;
   background: linear-gradient(90deg, #ff2400, #ff8c00, #ffe600, #00d084, #0693e3, #9b51e0);
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 18px rgba(0, 0, 0, 0.85))
-    drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+  text-shadow:
+    2px 2px 0 #000,
+    0 0 18px rgba(0, 0, 0, 0.85),
+    0 0 6px rgba(255, 255, 255, 0.35);
 }
 
 .page-hero__lede {
