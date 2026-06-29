@@ -3,8 +3,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare, Briefcase, Users, Search,
+  Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
+  ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, Search,
 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
@@ -654,16 +654,41 @@ export default function Admin() {
             <p className="text-white/40 text-sm mb-4">
               Edit any field on any event. Changes go live immediately.
             </p>
-            <div className="relative mb-6 max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
-              <input
-                type="search"
-                value={eventSearch}
-                onChange={e => setEventSearch(e.target.value)}
-                placeholder="Search title, venue, day, status..."
-                className={adminFieldClass}
-                style={{ paddingLeft: 34 }}
-              />
+            <div className="flex flex-wrap gap-3 mb-4">
+              <div className="relative flex-1 min-w-[220px] max-w-md">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
+                <input
+                  type="search"
+                  value={eventSearch}
+                  onChange={e => setEventSearch(e.target.value)}
+                  placeholder="Search title, venue, day, status..."
+                  className={adminFieldClass}
+                  style={{ paddingLeft: 34 }}
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {([
+                { key: "all" as EventStatusFilter, label: "All" },
+                { key: "LIVE" as EventStatusFilter, label: "Live" },
+                { key: "HIDDEN" as EventStatusFilter, label: "Hidden" },
+                { key: "missing_flyer" as EventStatusFilter, label: `Missing flyer${missingFlyerCount > 0 ? ` (${missingFlyerCount})` : ""}` },
+              ]).map(filter => (
+                <button
+                  key={filter.key}
+                  type="button"
+                  onClick={() => setEventStatusFilter(filter.key)}
+                  className={`dash-admin-tab ${eventStatusFilter === filter.key ? "active" : ""}`}
+                  style={{
+                    borderBottom: eventStatusFilter === filter.key ? "2px solid #C8FA3C" : "2px solid transparent",
+                    marginBottom: 0,
+                    padding: "8px 12px",
+                    fontSize: 10,
+                  }}
+                >
+                  {filter.label}
+                </button>
+              ))}
             </div>
             {eventsError ? (
               <AdminLoadError label="events" onRetry={() => refetchEvents()} />
@@ -672,21 +697,40 @@ export default function Admin() {
             ) : events.length === 0 ? (
               <p className="text-white/30 text-center py-12">No events found.</p>
             ) : filteredEvents.length === 0 ? (
-              <p className="text-white/30 text-center py-12">No events match “{eventSearch}”.</p>
+              <p className="text-white/30 text-center py-12">No events match the current search and filters.</p>
             ) : (
               <div className="space-y-2">
-                {eventSearchQuery && (
+                {(eventSearchQuery || eventStatusFilter !== "all") && (
                   <p className="text-white/35 text-xs mb-2">{filteredEvents.length} of {events.length} events</p>
                 )}
-                {filteredEvents.map(ev => (
+                {filteredEvents.map(ev => {
+                  const posterSrc = eventPosterSrc(ev.posterImageUrl);
+                  return (
                   <div key={ev.id} className="border border-white/10" style={{ background: "#111" }}>
                     {/* Row */}
                     <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
-                      <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div
+                          className="flex-shrink-0 border border-white/15 bg-black/50 overflow-hidden"
+                          style={{ width: 48, height: 64 }}
+                        >
+                          {posterSrc ? (
+                            <img src={posterSrc} alt="" className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = "none"; }} />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white/25 text-[9px] uppercase tracking-wide px-1 text-center">
+                              No flyer
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
                         <p className="display text-base text-white truncate">{ev.title}</p>
                         <p className="text-white/40 text-xs mt-0.5">
                           {ev.venueName} · {ev.dayOfWeek} · {new Date(ev.dateStart).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                         </p>
+                        {isMissingEventFlyer(ev.posterImageUrl) && (
+                          <p className="text-white/35 text-[10px] mt-1 uppercase tracking-wide">Missing flyer</p>
+                        )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
                         <span className="sticker text-xs" style={{ color: ev.status === "LIVE" ? "#CCFF00" : "#666", borderColor: ev.status === "LIVE" ? "#CCFF00" : "#333" }}>
@@ -776,10 +820,19 @@ export default function Admin() {
                             <input value={editForm.ticketUrl || ""} onChange={e => setEditForm(f => ({ ...f, ticketUrl: e.target.value || null }))}
                               placeholder="https://..." className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
                           </div>
-                          <div>
-                            <label className="display text-xs text-white/40 block mb-1">POSTER IMAGE PATH</label>
-                            <input value={editForm.posterImageUrl || ""} onChange={e => setEditForm(f => ({ ...f, posterImageUrl: e.target.value || null }))}
-                              placeholder="/posters/filename.jpg" className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400" />
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">EVENT FLYER / POSTER</label>
+                            <ImageUploader
+                              key={`poster-${editingId}`}
+                              endpoint="/api/admin/upload/poster"
+                              fieldName="poster"
+                              currentUrl={editForm.posterImageUrl || ""}
+                              onUploaded={url => setEditForm(f => ({ ...f, posterImageUrl: url || null }))}
+                              label="UPLOAD FLYER"
+                            />
+                            {editForm.posterImageUrl && (
+                              <p className="text-white/35 text-xs mt-2 break-all">{editForm.posterImageUrl}</p>
+                            )}
                           </div>
                           <div>
                             <label className="display text-xs text-white/40 block mb-1">STATUS</label>
@@ -828,7 +881,7 @@ export default function Admin() {
                       </form>
                     )}
                   </div>
-                ))}
+                );})}
               </div>
             )}
           </div>
