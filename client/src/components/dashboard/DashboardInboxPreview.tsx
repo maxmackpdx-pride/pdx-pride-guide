@@ -16,13 +16,13 @@ function formatTime(value?: string) {
 export default function DashboardInboxPreview({ enabled }: { enabled: boolean }) {
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
-    queryFn: () => fetch("/api/messages/unread-count").then(r => r.ok ? r.json() : { count: 0 }),
+    queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
     enabled,
   });
 
   const { data: inbox = [] } = useQuery<any[]>({
     queryKey: ["/api/messages/inbox"],
-    queryFn: () => fetch("/api/messages/inbox").then(r => r.ok ? r.json() : []),
+    queryFn: () => fetch("/api/messages/inbox", { credentials: "include" }).then(r => r.ok ? r.json() : []),
     enabled,
   });
 

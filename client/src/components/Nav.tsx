@@ -12,7 +12,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/submit", label: "Promoters" },
-  { href: "/pride-work", label: "Pride Work" },
+  { href: "/pride-work", label: "Pride Werk" },
   { href: "/gifting", label: "Gifting" },
   { href: "/spotted", label: "Spotted!" },
   { href: "/about", label: "About" },
@@ -54,7 +54,7 @@ export default function Nav() {
 
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
-    queryFn: () => fetch("/api/messages/unread-count").then(r => r.ok ? r.json() : { count: 0 }),
+    queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
     enabled: !!user,
     refetchInterval: 90000,
   });

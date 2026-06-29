@@ -4,7 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare,
+  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare, Briefcase,
 } from "lucide-react";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
@@ -91,7 +91,28 @@ interface TalentRequest {
   createdAt: string;
 }
 
-type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gifting" | "feedback";
+interface AdminGig {
+  id: number;
+  postType: "POSTING_GIG" | "LOOKING_FOR_WORK";
+  title: string;
+  name: string;
+  contactEmail: string;
+  description: string;
+  skills: string | null;
+  compensation: string | null;
+  location: string | null;
+  isRemote: boolean;
+  status: string;
+  createdAt: string;
+  username?: string;
+  displayName?: string | null;
+}
+
+type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gigs" | "gifting" | "feedback";
+
+const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
+const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -107,6 +128,8 @@ export default function Admin() {
   const [modNote, setModNote] = useState<Record<number, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
+  const [editingGigId, setEditingGigId] = useState<number | null>(null);
+  const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -149,6 +172,11 @@ export default function Admin() {
   const { data: modRequests = [], isLoading: modLoading, isError: modError, refetch: refetchMod } = useQuery<ModerationRequest[]>({
     queryKey: ["/api/admin/moderation"],
     enabled: authenticated && activeTab === "moderation",
+  });
+
+  const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: refetchGigs } = useQuery<AdminGig[]>({
+    queryKey: ["/api/admin/gigs"],
+    enabled: authenticated,
   });
 
   const { data: giftingAdmin = { posts: [], reports: [] }, isLoading: giftingLoading, isError: giftingError, refetch: refetchGifting } = useQuery<any>({
@@ -242,6 +270,21 @@ export default function Admin() {
     },
   });
 
+  const editGigMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<AdminGig> }) =>
+      apiRequest("PUT", `/api/admin/gigs/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+      setEditingGigId(null);
+      setGigEditForm({});
+      toast({ title: "Gig post updated", description: "Changes are live on Pride Werk." });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Could not save gig post.", variant: "destructive" });
+    },
+  });
+
   const updateGiftingStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       apiRequest("POST", `/api/admin/gifting/${id}/status`, { status }),
@@ -314,6 +357,17 @@ export default function Admin() {
     e.preventDefault();
     if (!editingId) return;
     editEventMutation.mutate({ id: editingId, data: editForm });
+  };
+
+  const startGigEdit = (gig: AdminGig) => {
+    setEditingGigId(gig.id);
+    setGigEditForm({ ...gig });
+  };
+
+  const handleGigEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGigId) return;
+    editGigMutation.mutate({ id: editingGigId, data: gigEditForm });
   };
 
   // Login screen
@@ -427,6 +481,7 @@ export default function Admin() {
             { key: "talent" as AdminTab, label: `Talent${pendingTalent.length > 0 ? ` (${pendingTalent.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "moderation" as AdminTab, label: `Claim / remove${pendingMod.length > 0 ? ` (${pendingMod.length})` : ""}`, icon: <Tag size={12} /> },
             { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
+            { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
             { key: "gifting" as AdminTab, label: `Gifting${pendingGifting.length + pendingGiftingReports.length > 0 ? ` (${pendingGifting.length + pendingGiftingReports.length})` : ""}`, icon: <Gift size={12} /> },
             { key: "feedback" as AdminTab, label: `Feedback${openFeedback.length > 0 ? ` (${openFeedback.length})` : ""}`, icon: <MessageSquare size={12} /> },
           ]).map(tab => (
@@ -829,6 +884,139 @@ export default function Admin() {
                             {editEventMutation.isPending ? "SAVING..." : "SAVE CHANGES"}
                           </button>
                           <button type="button" onClick={() => setEditingId(null)}
+                            className="display text-sm px-6 py-2 border"
+                            style={{ borderColor: "#333", color: "#666", background: "transparent" }}>
+                            CANCEL
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PRIDE WERK / GIGS ── */}
+        {activeTab === "gigs" && (
+          <div>
+            <p className="text-white/40 text-sm mb-6">
+              Edit gig board posts — including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
+            </p>
+            {gigsError ? (
+              <AdminLoadError label="gig posts" onRetry={() => refetchGigs()} />
+            ) : gigsLoading ? (
+              <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : gigs.length === 0 ? (
+              <p className="text-white/30 text-center py-12">No gig posts yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {gigs.map(gig => (
+                  <div key={gig.id} className="border border-white/10" style={{ background: "#111" }}>
+                    <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="display text-base text-white truncate">{gig.title}</p>
+                          {(gig.title === SITE_ADMIN_GIG_TITLE || gig.username === SITE_ADMIN_GIG_OWNER) && (
+                            <span className="sticker text-xs" style={{ color: "#FF1FA0", borderColor: "#FF1FA0" }}>
+                              {gig.username === SITE_ADMIN_GIG_OWNER ? `@${SITE_ADMIN_GIG_OWNER}` : "YOUR POST"}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-white/40 text-xs mt-0.5">
+                          {gig.postType === "LOOKING_FOR_WORK" ? "Looking for work" : "Posting gig"}
+                          {gig.username ? ` · @${gig.username}` : ""}
+                          {gig.compensation ? ` · ${gig.compensation}` : ""}
+                          {gig.location ? ` · ${gig.location}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="sticker text-xs" style={{ color: gig.status === "LIVE" ? "#CCFF00" : "#666", borderColor: gig.status === "LIVE" ? "#CCFF00" : "#333" }}>
+                          {gig.status}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => editingGigId === gig.id ? setEditingGigId(null) : startGigEdit(gig)}
+                          className="flex items-center gap-1 display text-xs px-3 py-1 border transition-all"
+                          style={{
+                            borderColor: editingGigId === gig.id ? "#00FFFF" : "#333",
+                            color: editingGigId === gig.id ? "#00FFFF" : "#666",
+                            background: "transparent",
+                          }}
+                        >
+                          {editingGigId === gig.id ? <><X size={11} /> CANCEL</> : <><Pencil size={11} /> EDIT</>}
+                        </button>
+                      </div>
+                    </div>
+
+                    {editingGigId === gig.id && (
+                      <form onSubmit={handleGigEditSave} className="border-t border-white/10 p-5 space-y-4" style={{ background: "#0d0d0d" }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">POST TYPE</label>
+                            <select value={gigEditForm.postType || "POSTING_GIG"} onChange={e => setGigEditForm(f => ({ ...f, postType: e.target.value as AdminGig["postType"] }))}
+                              className={adminFieldClass}>
+                              <option value="POSTING_GIG">Posting gig</option>
+                              <option value="LOOKING_FOR_WORK">Looking for work</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">STATUS</label>
+                            <select value={gigEditForm.status || "LIVE"} onChange={e => setGigEditForm(f => ({ ...f, status: e.target.value }))}
+                              className={adminFieldClass}>
+                              {["LIVE", "PENDING", "REMOVED"].map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">TITLE</label>
+                            <input value={gigEditForm.title || ""} onChange={e => setGigEditForm(f => ({ ...f, title: e.target.value }))}
+                              className={adminFieldClass} />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">CONTACT NAME</label>
+                            <input value={gigEditForm.name || ""} onChange={e => setGigEditForm(f => ({ ...f, name: e.target.value }))}
+                              className={adminFieldClass} />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">CONTACT EMAIL</label>
+                            <input type="email" value={gigEditForm.contactEmail || ""} onChange={e => setGigEditForm(f => ({ ...f, contactEmail: e.target.value }))}
+                              className={adminFieldClass} />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">COMPENSATION</label>
+                            <input value={gigEditForm.compensation || ""} onChange={e => setGigEditForm(f => ({ ...f, compensation: e.target.value }))}
+                              placeholder="e.g. Volunteer — community help" className={adminFieldClass} />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">LOCATION</label>
+                            <input value={gigEditForm.location || ""} onChange={e => setGigEditForm(f => ({ ...f, location: e.target.value }))}
+                              placeholder="Portland / Remote" className={adminFieldClass} />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">SKILLS</label>
+                            <input value={gigEditForm.skills || ""} onChange={e => setGigEditForm(f => ({ ...f, skills: e.target.value }))}
+                              className={adminFieldClass} />
+                          </div>
+                          <div className="flex items-center">
+                            <label className="display text-xs text-white/40 flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={!!gigEditForm.isRemote} onChange={e => setGigEditForm(f => ({ ...f, isRemote: e.target.checked }))} />
+                              REMOTE OK
+                            </label>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">DESCRIPTION</label>
+                            <textarea rows={8} value={gigEditForm.description || ""} onChange={e => setGigEditForm(f => ({ ...f, description: e.target.value }))}
+                              className={`${adminFieldClass} resize-y`} />
+                          </div>
+                        </div>
+                        <div className="flex gap-3 flex-wrap pt-2">
+                          <button type="submit" disabled={editGigMutation.isPending}
+                            className="display text-sm px-6 py-2 border-2 disabled:opacity-50"
+                            style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
+                            {editGigMutation.isPending ? "SAVING..." : "SAVE CHANGES"}
+                          </button>
+                          <button type="button" onClick={() => setEditingGigId(null)}
                             className="display text-sm px-6 py-2 border"
                             style={{ borderColor: "#333", color: "#666", background: "transparent" }}>
                             CANCEL

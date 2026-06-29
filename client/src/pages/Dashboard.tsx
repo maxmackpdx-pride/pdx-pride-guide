@@ -98,6 +98,7 @@ export default function Dashboard() {
       const res = await fetch(`/api/events/${eventId}/host-messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ body }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Could not post update");
@@ -121,6 +122,7 @@ export default function Dashboard() {
       const res = await fetch(`/api/events/${id}/edit`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Save failed");
@@ -135,11 +137,25 @@ export default function Dashboard() {
     onError: () => toast({ title: "Error", description: "Could not save event.", variant: "destructive" }),
   });
 
+  const giftingActionMutation = useMutation({
+    mutationFn: async (url: string) => {
+      const res = await fetch(url, { method: "POST", credentials: "include" });
+      if (!res.ok) throw new Error((await res.text()) || "Update failed");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+      toast({ title: "Gifting post updated" });
+    },
+    onError: () => toast({ title: "Could not update gifting post", variant: "destructive" }),
+  });
+
   const gigEditMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const res = await fetch(`/api/gigs/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Save failed");
@@ -178,6 +194,7 @@ export default function Dashboard() {
     const res = await fetch("/api/users/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ displayName, bio, avatarChoice }),
     });
     if (res.ok) {
@@ -191,7 +208,7 @@ export default function Dashboard() {
 
   const handleDeleteGig = async (id: number) => {
     if (!confirm("Delete this gig post?")) return;
-    await fetch(`/api/gigs/${id}`, { method: "DELETE" });
+    await fetch(`/api/gigs/${id}`, { method: "DELETE", credentials: "include" });
     queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
   };
 
@@ -208,7 +225,7 @@ export default function Dashboard() {
 
   const handleDeleteMissed = async (id: number) => {
     if (!confirm("Delete this missed connection?")) return;
-    await fetch(`/api/missed-connections/${id}`, { method: "DELETE" });
+    await fetch(`/api/missed-connections/${id}`, { method: "DELETE", credentials: "include" });
     queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
   };
 
@@ -419,7 +436,7 @@ export default function Dashboard() {
             onToggle={() => toggleSection("gigs")}
             isEmpty={myGigs.length === 0}
             emptyText="No gig posts yet."
-            cta={{ label: "Post on Pride Work board →", href: "#/pride-work" }}
+            cta={{ label: "Post on Pride Werk board →", href: "#/pride-work" }}
           >
             {editingGig && (
               <DashboardGigEditForm
@@ -493,9 +510,21 @@ export default function Dashboard() {
                 chip={post.status}
                 chipColor={CYAN}
                 actions={
-                  <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
-                    {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
-                  </span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                    <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
+                      {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
+                    </span>
+                    <a href="#/gifting" className="dash-mini-btn" style={{ color: CYAN, textDecoration: "none" }}>Board</a>
+                    {post.postType === "GIFT" && !["GIFTED", "EXPIRED"].includes(post.status) && (
+                      <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-gifted`)}>Mark gifted</button>
+                    )}
+                    {post.postType === "ISO" && !["FOUND", "EXPIRED"].includes(post.status) && (
+                      <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-found`)}>Mark found</button>
+                    )}
+                    {!["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
+                      <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/renew`)}>Renew</button>
+                    )}
+                  </div>
                 }
               />
             ))}

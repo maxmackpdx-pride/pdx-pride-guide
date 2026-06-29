@@ -29,7 +29,7 @@ export default function ImageUploader({
     const fd = new FormData();
     fd.append(fieldName, file);
     try {
-      const res = await fetch(endpoint, { method: "POST", body: fd });
+      const res = await fetch(endpoint, { method: "POST", body: fd, credentials: "include" });
       if (!res.ok) throw new Error("Upload failed");
       const { url } = await res.json();
       setPreview(url);

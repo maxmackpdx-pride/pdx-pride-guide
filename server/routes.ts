@@ -918,14 +918,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     })));
   });
 
-  app.get("/api/missed-connections", requireAuth, (req, res) => {
-    res.json(storage.getMissedConnections("ACTIVE", req.session.userId!));
+  app.get("/api/missed-connections", (req: any, res) => {
+    res.json(storage.getMissedConnections("ACTIVE", req.session?.userId));
   });
 
-  app.get("/api/events/:id/missed-connections", requireAuth, (req, res) => {
+  app.get("/api/events/:id/missed-connections", (req: any, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    res.json(storage.getMissedConnectionsByEvent(evt.id, req.session.userId!));
+    res.json(storage.getMissedConnectionsByEvent(evt.id, req.session?.userId));
   });
 
   app.get("/api/missed-connections/mine", requireAuth, (req, res) => {
@@ -1483,6 +1483,28 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!["LIVE", "PENDING", "REMOVED"].includes(status)) return res.status(400).json({ error: "Invalid status" });
     storage.adminUpdateGigStatus(Number(req.params.id), status);
     res.json({ ok: true });
+  });
+
+  app.put("/api/admin/gigs/:id", requireAdmin, (req, res) => {
+    const id = Number(req.params.id);
+    const patch: Record<string, unknown> = {};
+    const fields = [
+      "postType", "title", "name", "contactEmail", "description", "skills",
+      "compensation", "location", "isRemote", "status", "gigDate", "gigTime", "imageUrl",
+    ] as const;
+    for (const key of fields) {
+      if (req.body[key] !== undefined) patch[key] = req.body[key];
+    }
+    if (patch.postType && !["POSTING_GIG", "LOOKING_FOR_WORK"].includes(String(patch.postType))) {
+      return res.status(400).json({ error: "Invalid post type" });
+    }
+    if (patch.status && !["LIVE", "PENDING", "REMOVED"].includes(String(patch.status).toUpperCase())) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+    if (patch.status) patch.status = String(patch.status).toUpperCase();
+    const updated = storage.adminUpdateGigPost(id, patch as any);
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
   });
 
   // GET admin inbox summary (notification counts)

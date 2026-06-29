@@ -7,7 +7,7 @@ export default function NotFound() {
       <PageHero
         titleLine1="404"
         accent="magenta"
-        lede="This page is not on the Pride Guide map. Head back to events, gifting, or Pride Work."
+        lede="This page is not on the Pride Guide map. Head back to events, gifting, or Pride Werk."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 45%"
         actions={(

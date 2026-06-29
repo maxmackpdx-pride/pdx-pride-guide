@@ -421,13 +421,23 @@ export function hashPassword(pw: string) {
 
 // Old fake event titles used to detect stale seed data
 const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extravaganza", "Pride Brunch", "Kink & Community Fair", "Trans Joy Dance"];
+const SEED_EVENT_TARGET = 46;
 
 function seedData() {
   const existing = db.select().from(events).all();
 
-  // Force re-seed if old fake events, no lat/lng, no poster images, or event count too low (new events added)
   if (existing.length > 0) {
-    const needsReseed = OLD_SEED_TITLES.includes(existing[0].title) || existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < 46 || existing.some((e: any) => e.title === "Bearracuda Portland Pride Saturday" && e.address === "18 NW 3rd Ave, Portland, OR 97209");
+    const isProduction = process.env.NODE_ENV === "production";
+    const allowReseed = process.env.ALLOW_SEED_RESEED === "true";
+    const hasLegacySeed =
+      OLD_SEED_TITLES.includes(existing[0].title) ||
+      existing.some((e: any) => e.title === "Bearracuda Portland Pride Saturday" && e.address === "18 NW 3rd Ave, Portland, OR 97209");
+    const needsDevRepair =
+      !isProduction &&
+      (existing[0].lat === null || existing[0].posterImageUrl === null || existing.length < SEED_EVENT_TARGET);
+    const needsReseed =
+      (hasLegacySeed && (!isProduction || allowReseed)) ||
+      needsDevRepair;
     if (needsReseed) {
       // Only replace admin seed events — never wipe user gigs, claims, or submissions.
       sqlite.exec(`
@@ -1558,6 +1568,7 @@ function expireGiftingPosts() {
 }
 
 export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+export const SITE_ADMIN_GIG_OWNER_USERNAME = "tucker_pdmax";
 
 const SITE_ADMIN_GIG_DESCRIPTION = `PDX Pride Guide is looking for site admins to help during Pride season and beyond.
 
@@ -1572,16 +1583,84 @@ Volunteer community labor for now. Remote OK. Training and admin access provided
 
 Reply to this post through the gig board (messages go to @tucker_pdmax). Include why you want to help and any relevant experience.`;
 
+function getSiteAdminGigOwner() {
+  return sqlite.prepare(`
+    SELECT id, email, display_name AS displayName, username
+    FROM users
+    WHERE username = ?
+    LIMIT 1
+  `).get(SITE_ADMIN_GIG_OWNER_USERNAME) as {
+    id: number;
+    email: string;
+    displayName: string | null;
+    username: string;
+  } | undefined;
+}
+
+function findSiteAdminGigPostId(): number | undefined {
+  const byTitle = sqlite.prepare(`SELECT id FROM gig_posts WHERE title = ? LIMIT 1`).get(SITE_ADMIN_GIG_TITLE) as { id: number } | undefined;
+  if (byTitle) return byTitle.id;
+  const byMarker = sqlite.prepare(`
+    SELECT id FROM gig_posts
+    WHERE description LIKE 'PDX Pride Guide is looking for site admins%'
+    ORDER BY id ASC
+    LIMIT 1
+  `).get() as { id: number } | undefined;
+  return byMarker?.id;
+}
+
+function linkSiteAdminGigPostToOwner(ownerId: number) {
+  const gigId = findSiteAdminGigPostId();
+  if (gigId == null) return;
+  sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(ownerId, gigId);
+}
+
+function notifyGuideInbox(
+  toUserId: number,
+  subject: string,
+  body: string,
+  opts?: { contextType?: string; contextId?: number | null; contextLabel?: string | null },
+) {
+  const sender = getSiteAdminGigOwner();
+  if (!sender) return;
+  storage.sendMessage(sender.id, toUserId, subject, body, {
+    contextType: opts?.contextType || "GUIDE_UPDATE",
+    contextId: opts?.contextId ?? null,
+    contextLabel: opts?.contextLabel || null,
+  });
+}
+
+function notifySubmissionOutcome(
+  sub: { id: number; title: string; type: string; submitterEmail: string },
+  approved: boolean,
+  reason?: string,
+) {
+  const recipient = storage.getUserByEmail(sub.submitterEmail);
+  if (!recipient) return;
+  if (approved) {
+    const body = sub.type === "CLAIM"
+      ? `Your claim for "${sub.title}" was approved. Open your dashboard to manage the event and post host updates.`
+      : `Your event "${sub.title}" is live on the Pride Guide. Open your dashboard to see it listed.`;
+    notifyGuideInbox(recipient.id, `Approved: ${sub.title}`, body, {
+      contextType: "SUBMISSION",
+      contextId: sub.id,
+      contextLabel: sub.title,
+    });
+    return;
+  }
+  const body = `Your submission "${sub.title}" was not approved.${reason ? `\n\nReason: ${reason}` : ""}\n\nYou can revise and submit again from the Promoters page.`;
+  notifyGuideInbox(recipient.id, `Submission update: ${sub.title}`, body, {
+    contextType: "SUBMISSION",
+    contextId: sub.id,
+    contextLabel: sub.title,
+  });
+}
+
 function ensureSiteAdminGigPost() {
   ensureGigPostsSchema();
-  const owner = sqlite.prepare(`
-    SELECT id, email, display_name AS displayName
-    FROM users
-    WHERE username = 'tucker_pdmax'
-    LIMIT 1
-  `).get() as { id: number; email: string; displayName: string | null } | undefined;
+  const owner = getSiteAdminGigOwner();
   const now = new Date().toISOString();
-  const existing = sqlite.prepare(`SELECT id FROM gig_posts WHERE title = ? LIMIT 1`).get(SITE_ADMIN_GIG_TITLE) as { id: number } | undefined;
+  const existingId = findSiteAdminGigPostId();
   const payload = {
     postType: "POSTING_GIG",
     title: SITE_ADMIN_GIG_TITLE,
@@ -1589,7 +1668,7 @@ function ensureSiteAdminGigPost() {
     contactEmail: owner?.email || "hello@pdxprideguide.com",
     description: SITE_ADMIN_GIG_DESCRIPTION,
     skills: "Moderation, Event review, Community support, Detail-oriented",
-    compensation: "Volunteer (stipend possible)",
+    compensation: "Volunteer — community help",
     location: "Portland / Remote",
     isRemote: true,
     status: "LIVE",
@@ -1597,36 +1676,11 @@ function ensureSiteAdminGigPost() {
     createdAt: now,
   };
 
-  if (existing) {
-    sqlite.prepare(`
-      UPDATE gig_posts
-      SET post_type = @postType,
-          name = @name,
-          contact_email = @contactEmail,
-          description = @description,
-          skills = @skills,
-          compensation = @compensation,
-          location = @location,
-          is_remote = @isRemote,
-          status = @status,
-          user_id = COALESCE(@userId, user_id)
-      WHERE id = @id
-    `).run({
-      postType: payload.postType,
-      name: payload.name,
-      contactEmail: payload.contactEmail,
-      description: payload.description,
-      skills: payload.skills,
-      compensation: payload.compensation,
-      location: payload.location,
-      isRemote: payload.isRemote ? 1 : 0,
-      status: payload.status,
-      userId: payload.userId,
-      id: existing.id,
-    });
-  } else {
-    insertGigPostCompat(payload);
+  if (existingId != null) {
+    if (owner?.id != null) linkSiteAdminGigPostToOwner(owner.id);
+    return;
   }
+  insertGigPostCompat(payload);
 }
 
 ensureSiteAdminGigPost();
@@ -1688,6 +1742,7 @@ export interface IStorage {
   updateGigPost(id: number, userId: number, data: Partial<GigPost>): void;
   deleteGigPost(id: number, userId: number): void;
   adminUpdateGigStatus(id: number, status: string): void;
+  adminUpdateGigPost(id: number, data: Partial<GigPost>): GigPost | undefined;
   ensureSiteAdminGigPost(): void;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
@@ -1874,11 +1929,14 @@ export const storage: IStorage = {
         const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
         if (submitter) storage.setPrimaryEventHost(created.id, submitter.id, null);
       }
+      notifySubmissionOutcome(sub, true);
     }
     return db.select().from(submissions).where(eq(submissions.id, id)).get();
   },
   rejectSubmission(id, reason) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
     db.update(submissions).set({ status: "REJECTED", adminNotes: reason }).where(eq(submissions.id, id)).run();
+    if (sub) notifySubmissionOutcome(sub, false, reason);
   },
   getGigPosts(status) {
     ensureGigPostsSchema();
@@ -1956,6 +2014,44 @@ export const storage: IStorage = {
   adminUpdateGigStatus(id: number, status: string) {
     sqlite.prepare(`UPDATE gig_posts SET status = ? WHERE id = ?`).run(status, id);
   },
+  adminUpdateGigPost(id, data) {
+    const existing = sqlite.prepare(`SELECT id FROM gig_posts WHERE id = ?`).get(id);
+    if (!existing) return undefined;
+    const params = {
+      id,
+      postType: data.postType ?? null,
+      title: data.title ?? null,
+      name: data.name ?? null,
+      contactEmail: data.contactEmail ?? null,
+      description: data.description ?? null,
+      skills: data.skills ?? null,
+      compensation: data.compensation ?? null,
+      location: data.location ?? null,
+      isRemote: data.isRemote === undefined ? null : data.isRemote ? 1 : 0,
+      status: data.status ?? null,
+      gigDate: data.gigDate ?? null,
+      gigTime: data.gigTime ?? null,
+      imageUrl: data.imageUrl ?? null,
+    };
+    sqlite.prepare(`
+      UPDATE gig_posts
+      SET post_type = COALESCE(@postType, post_type),
+          title = COALESCE(@title, title),
+          name = COALESCE(@name, name),
+          contact_email = COALESCE(@contactEmail, contact_email),
+          description = COALESCE(@description, description),
+          skills = COALESCE(@skills, skills),
+          compensation = COALESCE(@compensation, compensation),
+          location = COALESCE(@location, location),
+          is_remote = COALESCE(@isRemote, is_remote),
+          status = COALESCE(@status, status),
+          gig_date = COALESCE(@gigDate, gig_date),
+          gig_time = COALESCE(@gigTime, gig_time),
+          image_url = COALESCE(@imageUrl, image_url)
+      WHERE id = @id
+    `).run(params);
+    return storage.getGigPosts().find(g => g.id === id);
+  },
   ensureSiteAdminGigPost() {
     ensureSiteAdminGigPost();
   },
@@ -1975,10 +2071,10 @@ export const storage: IStorage = {
     return db.insert(moderationRequests).values({ ...data, status: "PENDING", createdAt: new Date().toISOString() }).returning().get();
   },
   resolveModerationRequest(id, status, adminNotes) {
+    const req = db.select().from(moderationRequests).where(eq(moderationRequests.id, id)).get();
     db.update(moderationRequests).set({ status, adminNotes: adminNotes || null }).where(eq(moderationRequests.id, id)).run();
+    if (!req) return;
     if (status === "APPROVED") {
-      const req = db.select().from(moderationRequests).where(eq(moderationRequests.id, id)).get();
-      if (!req) return;
       if (req.type === "REMOVE") {
         db.update(events).set({ status: "REMOVED" }).where(eq(events.id, req.eventId)).run();
       }
@@ -1996,6 +2092,37 @@ export const storage: IStorage = {
             adminNotes: [evt.adminNotes, `FLAG: ${req.proof}`].filter(Boolean).join(" | ").slice(0, 500),
           }).where(eq(events.id, req.eventId)).run();
         }
+      }
+      if (req.type === "CLAIM") {
+        const evt = db.select().from(events).where(eq(events.id, req.eventId)).get();
+        const user = storage.getUserByEmail(req.requesterEmail);
+        if (evt && user) {
+          db.update(events).set({
+            isClaimable: false,
+            claimedBy: user.username || req.requesterEmail,
+            adminNotes: null,
+          }).where(eq(events.id, req.eventId)).run();
+          storage.setPrimaryEventHost(req.eventId, user.id, null);
+          if (user.promoterStatus !== "approved") {
+            db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, user.id)).run();
+          }
+          notifyGuideInbox(
+            user.id,
+            `Claim approved: ${evt.title}`,
+            `Your claim for "${evt.title}" was approved. Open your dashboard to manage the event and post host updates.`,
+            { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
+          );
+        }
+      }
+    } else if (status === "REJECTED" && req.type === "CLAIM") {
+      const user = storage.getUserByEmail(req.requesterEmail);
+      if (user) {
+        notifyGuideInbox(
+          user.id,
+          `Claim update: ${req.eventTitle || `Event #${req.eventId}`}`,
+          `Your claim wasn't approved right now.${adminNotes ? `\n\nNote: ${adminNotes}` : ""}\n\nYou can submit again with more proof from the event page.`,
+          { contextType: "EVENT_CLAIM", contextId: req.eventId, contextLabel: req.eventTitle || null },
+        );
       }
     }
   },
@@ -2123,6 +2250,21 @@ export const storage: IStorage = {
   },
   setPromoterStatus(userId, status) {
     db.update(users).set({ promoterStatus: status }).where(eq(users.id, userId)).run();
+    if (status === "approved") {
+      notifyGuideInbox(
+        userId,
+        "Promoter access approved",
+        "You can now submit new events from the Promoters page. Claims you make will also move through review.",
+        { contextType: "PROMOTER" },
+      );
+    } else if (status === "rejected") {
+      notifyGuideInbox(
+        userId,
+        "Promoter request update",
+        "Your promoter request wasn't approved right now. You can still claim existing listings — those go through the review queue.",
+        { contextType: "PROMOTER" },
+      );
+    }
   },
   getPendingPromoterRequests() {
     const pendingUsers = db.select().from(users).all().filter(u => u.promoterStatus === "pending");

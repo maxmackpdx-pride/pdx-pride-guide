@@ -30,7 +30,6 @@ export default function MissedConnections() {
       if (!r.ok) return [];
       return r.json();
     },
-    enabled: !!user,
   });
 
   const stats = useMemo(() => [
@@ -86,29 +85,23 @@ export default function MissedConnections() {
     setEditForm({ title: post.title || "", body: post.body || "" });
   };
 
-  if (!user) {
-    return (
-      <div className="zine-page missed-page board-page min-h-screen">
-        <MissedConnectionsHero />
-        <div className="board-active-feed">
-          <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "48px 24px 64px" }}>
-            <p className="board-copy-sm" style={{ marginInline: "auto" }}>
-              Log in to read or post. Replies stay anonymous until you both choose to reveal in inbox.
-            </p>
-            <button className="btn-neon solid" style={{ marginTop: 20 }} onClick={() => setShowAuth(true)}>Log in / Join</button>
-            {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="zine-page missed-page board-page min-h-screen">
       <MissedConnectionsHero />
       <BoardStatsBar stats={stats} liveLabel="Anonymous board · replies stay private" />
 
-      <MissedConnectionsPanel mode="board" boardLayout />
+      {!user && (
+        <div className="board-active-feed" style={{ paddingTop: 0 }}>
+          <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 24px" }}>
+            <p className="board-copy-sm" style={{ marginInline: "auto" }}>
+              Browse Spotted posts without an account. Log in to post or reply — threads stay anonymous until you both reveal in inbox.
+            </p>
+            <button className="btn-neon solid" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>Log in / Join</button>
+          </div>
+        </div>
+      )}
+
+      <MissedConnectionsPanel mode="board" boardLayout onRequireAuth={() => setShowAuth(true)} />
 
       <ScrollReveal delay={60}>
         <section id="how-it-works" className="missed-how board-how board-how--inline diag">
@@ -160,6 +153,8 @@ export default function MissedConnections() {
           </section>
         </ScrollReveal>
       )}
+
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {editingPost && (
         <div onClick={() => setEditingPost(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>

@@ -4378,7 +4378,7 @@ footer a:hover { color: #00FFFF !important; }
   align-items: center;
   border-bottom: 2px solid rgba(255,255,255,0.08);
   background-image: url("/motifs/hero-spotted-bigfoot.jpg");
-  background-position: 18% 40%;
+  background-position: center 42%;
   background-size: cover;
   background-color: #050505;
 }
@@ -7052,4 +7052,54 @@ footer a:hover { color: #00FFFF !important; }
 }
 .gigs-page .page-hero__grain {
   opacity: 0.12;
+}
+
+/* Inbox: list + thread split layout */
+.inbox-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  min-height: 420px;
+}
+
+.inbox-list-pane {
+  border: 1px solid #1a1a1a;
+  background: #050505;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.inbox-thread-pane {
+  min-height: 360px;
+}
+
+.inbox-back-btn {
+  display: inline-flex;
+}
+
+@media (min-width: 768px) {
+  .inbox-layout--split {
+    grid-template-columns: minmax(260px, 36%) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .inbox-layout--split .inbox-list-pane {
+    max-height: 65vh;
+    border-right: 1px solid #1a1a1a;
+  }
+
+  .inbox-layout--split .inbox-back-btn {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .inbox-layout--split .inbox-list-pane {
+    display: none;
+  }
+
+  .inbox-layout--split .inbox-thread-pane {
+    border: 1px solid #1a1a1a;
+  }
 }

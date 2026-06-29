@@ -38,7 +38,7 @@ export function DashboardEventEditForm({
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<any[]>({
     queryKey: ["/api/events", editingEvent.id, "hosts"],
-    queryFn: () => fetch(`/api/events/${editingEvent.id}/hosts`).then(r => r.ok ? r.json() : []),
+    queryFn: () => fetch(`/api/events/${editingEvent.id}/hosts`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
 
   const addCoHostMutation = useMutation({

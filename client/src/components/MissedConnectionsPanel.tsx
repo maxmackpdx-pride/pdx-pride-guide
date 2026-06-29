@@ -44,11 +44,13 @@ export default function MissedConnectionsPanel({
   eventId,
   compact = false,
   boardLayout = false,
+  onRequireAuth,
 }: {
   mode: "board" | "event";
   eventId?: number;
   compact?: boolean;
   boardLayout?: boolean;
+  onRequireAuth?: () => void;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -77,7 +79,6 @@ export default function MissedConnectionsPanel({
       if (!r.ok) throw new Error("Could not load missed connections");
       return r.json();
     },
-    enabled: !!user,
   });
 
   const { data: linkableEvents = [] } = useQuery<PostableEvent[]>({
@@ -160,13 +161,20 @@ export default function MissedConnectionsPanel({
     onError: () => toast({ title: "Could not send reply", variant: "destructive" }),
   });
 
-  if (!user) {
+  const requireAuth = () => {
+    if (user) return true;
+    if (onRequireAuth) onRequireAuth();
+    else setShowAuth(true);
+    return false;
+  };
+
+  if (!user && !boardLayout) {
     return (
       <div style={{ textAlign: "center", padding: compact ? "16px 0" : "24px 0" }}>
         <p style={{ color: "#aaa", lineHeight: 1.6, marginBottom: 14 }}>
           Log in to read or post. Replies stay anonymous until you both choose to reveal in inbox.
         </p>
-        <button className="btn-neon solid" onClick={() => setShowAuth(true)}>Log in / Join</button>
+        <button className="btn-neon solid" onClick={() => requireAuth()}>Log in / Join</button>
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       </div>
     );
@@ -246,7 +254,7 @@ export default function MissedConnectionsPanel({
               {post.isMine ? "Your post (anonymous to others)" : "Posted anonymously"} · {new Date(post.createdAt).toLocaleDateString()}
             </span>
             {!post.isMine && (
-              <button onClick={() => setReplyingTo(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
+              <button onClick={() => { if (requireAuth()) setReplyingTo(post); }} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
                 Reply Privately
               </button>
             )}
@@ -290,6 +298,8 @@ export default function MissedConnectionsPanel({
               isError={isError}
               refetch={refetch}
               linkableEvents={linkableEvents}
+              canInteract={!!user}
+              onRequireAuth={requireAuth}
             />
           </div>
         </div>
@@ -329,6 +339,7 @@ export default function MissedConnectionsPanel({
 
       {listings}
       {replyModal}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

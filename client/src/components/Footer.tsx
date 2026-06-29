@@ -24,7 +24,7 @@ export default function Footer() {
               {[
                 ["/events", "Events"],
                 ["/submit", "Promoters"],
-                ["/pride-work", "Pride Work"],
+                ["/pride-work", "Pride Werk"],
                 ["/gifting", "Gifting"],
                 ["/about", "About"],
                 ...(user?.isAdmin ? [["/admin", "Admin Panel"]] : []),

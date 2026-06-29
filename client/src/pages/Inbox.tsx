@@ -131,6 +131,7 @@ export default function Inbox() {
     mutationFn: (body: string) => fetch(`/api/messages/thread/${activeThread!.threadId}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ body }),
     }).then(r => {
       if (!r.ok) throw new Error("Reply failed");
@@ -165,7 +166,7 @@ export default function Inbox() {
 
   const deleteMutation = useMutation({
     mutationFn: async (threadId: string) => {
-      const r = await fetch(`/api/messages/thread/${threadId}`, { method: "DELETE" });
+      const r = await fetch(`/api/messages/thread/${threadId}`, { method: "DELETE", credentials: "include" });
       if (!r.ok) throw new Error("Delete failed");
     },
     onSuccess: () => {
@@ -196,7 +197,7 @@ export default function Inbox() {
   const openThread = (msg: Message) => {
     setActiveThread(msg);
     if (!msg.isRead && tab === "inbox") {
-      fetch(`/api/messages/${msg.id}/read`, { method: "PUT" }).then(() => {
+      fetch(`/api/messages/${msg.id}/read`, { method: "PUT", credentials: "include" }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
         queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
       });
@@ -208,7 +209,7 @@ export default function Inbox() {
       <PageHero
         titleLine1="INBOX"
         accent="lime"
-        lede={`Private threads from missed connections, Pride Work posts, event hosts, and check-ins.${unreadCount > 0 ? ` · ${unreadCount} unread` : ""}`}
+        lede={`Private threads from missed connections, Pride Werk posts, event hosts, and check-ins.${unreadCount > 0 ? ` · ${unreadCount} unread` : ""}`}
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
       />
@@ -239,7 +240,7 @@ export default function Inbox() {
                 </button>
               </div>
             ) : msgs.length === 0 ? (
-              <div style={{ color: "#9d9a92", padding: "24px 0" }}>No scoped messages yet.</div>
+              <div style={{ color: "#9d9a92", padding: "24px 0" }}>No messages yet.</div>
             ) : msgs.map(msg => {
               const party = counterpartyAvatar(msg, tab);
               return (

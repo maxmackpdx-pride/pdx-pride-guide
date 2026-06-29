@@ -8,7 +8,7 @@ export const spottedHeroContent = {
   tagline: "Not sure what missed connections are? Grab your nearest daddy.",
   taglineAccent: "magenta",
   bgImage: "/motifs/hero-spotted-bigfoot.jpg",
-  bgPosition: "18% 40%",
+  bgPosition: "center 42%",
 } as const satisfies Partial<PageHeroProps>;
 
 export function spottedHeroProps(overrides: Partial<PageHeroProps> = {}): PageHeroProps {

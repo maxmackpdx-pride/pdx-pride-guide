@@ -277,6 +277,10 @@ export default function Home() {
             {...spottedHeroProps({
               className: "home-promo-panel home-spotted-panel",
               compact: true,
+              titleLine1: "SPOTTED! THEM AT",
+              titleLine2: "PRIDE",
+              accent: "rainbow",
+              titleLine1Accent: undefined,
               actions: (
                 <Link href="/spotted">
                   <button type="button" className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>

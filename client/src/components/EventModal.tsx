@@ -58,7 +58,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<EventHostProfile[]>({
     queryKey: ["/api/events", event.id, "hosts"],
-    queryFn: () => fetch(`/api/events/${event.id}/hosts`).then(r => r.ok ? r.json() : []),
+    queryFn: () => fetch(`/api/events/${event.id}/hosts`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
 
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
@@ -72,7 +72,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     username?: string;
   }>>({
     queryKey: ["/api/events", event.id, "host-messages"],
-    queryFn: () => fetch(`/api/events/${event.id}/host-messages`).then(r => r.ok ? r.json() : []),
+    queryFn: () => fetch(`/api/events/${event.id}/host-messages`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const startTime = formatPacificDateTime(event.dateStart, {

@@ -122,7 +122,7 @@ export default function AvatarEditor({
         const blob = await renderCroppedAvatarBlob(sourceImage, crop);
         const fd = new FormData();
         fd.append("avatar", blob, "avatar.jpg");
-        const uploadRes = await fetch("/api/upload/avatar", { method: "POST", body: fd });
+        const uploadRes = await fetch("/api/upload/avatar", { method: "POST", body: fd, credentials: "include" });
         if (!uploadRes.ok) throw new Error("Upload failed");
         const data = await uploadRes.json();
         url = data.url;
@@ -131,6 +131,7 @@ export default function AvatarEditor({
       const profileRes = await fetch("/api/users/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           avatarRing: ring,
           avatarCrop: sourceImage ? serializeAvatarCrop(crop) : avatarCrop,

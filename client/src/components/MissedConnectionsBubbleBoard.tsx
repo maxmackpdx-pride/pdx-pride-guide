@@ -44,6 +44,8 @@ type Props = {
   isError: boolean;
   refetch: () => void;
   linkableEvents: LinkableMissedConnectionEvent[];
+  canInteract?: boolean;
+  onRequireAuth?: () => boolean;
 };
 
 export default function MissedConnectionsBubbleBoard({
@@ -52,6 +54,8 @@ export default function MissedConnectionsBubbleBoard({
   isError,
   refetch,
   linkableEvents,
+  canInteract = true,
+  onRequireAuth,
 }: Props) {
   const { toast } = useToast();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -285,7 +289,13 @@ export default function MissedConnectionsBubbleBoard({
         <button
           type="button"
           className="mc-compose__toggle"
-          onClick={() => setComposeOpen(o => !o)}
+          onClick={() => {
+            if (!canInteract) {
+              onRequireAuth?.();
+              return;
+            }
+            setComposeOpen(o => !o);
+          }}
           aria-expanded={composeOpen}
         >
           <span className="mc-compose__badge">Saw someone?</span>
@@ -488,6 +498,10 @@ export default function MissedConnectionsBubbleBoard({
                         type="button"
                         className="mc-bubble__reply btn-neon solid"
                         onClick={() => {
+                          if (!canInteract) {
+                            onRequireAuth?.();
+                            return;
+                          }
                           setReplyingTo(post);
                           setHoveredId(null);
                         }}
