@@ -230,6 +230,14 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Submit an Event — PDX Pride Guide",
     description: "Submit or claim a Portland Pride 2026 event listing on the community-run PDX Pride Guide.",
   },
+  "/inbox": {
+    title: "Inbox — PDX Pride Guide",
+    description: "Private messages from missed connections, Pride Werk, event hosts, and check-ins on the PDX Pride Guide.",
+  },
+  "/dashboard": {
+    title: "Dashboard — PDX Pride Guide",
+    description: "Your PDX Pride Guide profile, submissions, gigs, gifting, and event check-ins.",
+  },
 };
 
 function parseEventIdFromPath(requestPath: string): number | null {

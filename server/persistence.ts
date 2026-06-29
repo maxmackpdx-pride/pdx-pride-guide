@@ -182,6 +182,29 @@ export function getPersistenceConfig(): PersistenceConfig {
   };
 }
 
+const INSECURE_DEFAULTS: Record<string, string> = {
+  SESSION_SECRET: "pdxpride_secret_2026",
+  ADMIN_PASSWORD: "pdx_pride_admin_2026",
+};
+
+export function assertProductionSecrets() {
+  if (process.env.NODE_ENV !== "production" || process.env.LOCAL_PREVIEW === "1") return;
+  const missing: string[] = [];
+  const insecure: string[] = [];
+  for (const [key, defaultValue] of Object.entries(INSECURE_DEFAULTS)) {
+    const value = process.env[key];
+    if (!value) missing.push(key);
+    else if (value === defaultValue) insecure.push(key);
+  }
+  if (missing.length || insecure.length) {
+    const parts = [
+      ...missing.map(k => `${k} is not set`),
+      ...insecure.map(k => `${k} is still the repository default`),
+    ];
+    throw new Error(`Production secrets misconfigured: ${parts.join("; ")}`);
+  }
+}
+
 export function assertProductionPersistence() {
   const config = getPersistenceConfig();
   if (!config.production || process.env.LOCAL_PREVIEW === "1") return config;

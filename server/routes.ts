@@ -3,7 +3,8 @@ import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import { storage, hashPassword, sqlite, getTableCounts } from "./storage";
-import { assertProductionPersistence, getPersistenceAudit } from "./persistence";
+import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
+import { initAttendanceWs } from "./attendanceWs";
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -247,8 +248,16 @@ function getAdminActorUserId(req: any): number | null {
   return null;
 }
 
+let attendanceHub: ReturnType<typeof initAttendanceWs> | null = null;
+
+function notifyAttendanceUpdate(eventId: number) {
+  attendanceHub?.broadcastAttendance(eventId);
+}
+
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
+  assertProductionSecrets();
+  attendanceHub = initAttendanceWs(httpServer);
   storage.ensureSiteAdminGigPost();
 
   // Machine-readable discovery for search engines and AI crawlers.
@@ -332,7 +341,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
-    res.json(publicEvent(evt, pendingClaimIds));
+    const expanded = expandMultiDayEvents([evt]);
+    const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
+    const listing = day
+      ? expanded.find(e => e.dayOfWeek === day) || expanded[0]
+      : expanded.length === 1
+        ? expanded[0]
+        : evt;
+    res.json(publicEvent(listing, pendingClaimIds));
   });
 
   // ─── SUBMISSIONS ─────────────────────────────────────────────────────────
@@ -506,7 +522,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const message = String(req.body.message || "").trim();
       if (!message) return res.status(400).json({ error: "message required" });
-      const att = storage.upsertAttendance(Number(req.params.id), user, message);
+      const eventId = Number(req.params.id);
+      const att = storage.upsertAttendance(eventId, user, message);
+      notifyAttendanceUpdate(eventId);
       res.json(att);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -514,7 +532,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.delete("/api/events/:id/attendance", requireAuth, (req, res) => {
-    storage.removeAttendance(Number(req.params.id), req.session.userId!);
+    const eventId = Number(req.params.id);
+    storage.removeAttendance(eventId, req.session.userId!);
+    notifyAttendanceUpdate(eventId);
     res.json({ ok: true });
   });
 
@@ -1123,7 +1143,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.put("/api/messages/:id/read", requireAuth, (req, res) => {
-    storage.markRead(Number(req.params.id));
+    const ok = storage.markReadForUser(Number(req.params.id), req.session.userId!);
+    if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ ok: true });
   });
 

@@ -52,50 +52,51 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
             const name = msg.fromDisplayName || msg.from_display_name || msg.fromUsername || msg.from_username || "Community";
             const party = counterpartyAvatar(msg, "inbox");
             const unreadMsg = !msg.isRead && !msg.is_read;
+            const threadId = msg.threadId || msg.thread_id;
+            const href = threadId ? `/inbox?thread=${encodeURIComponent(threadId)}` : "/inbox";
             return (
-              <Link key={msg.id} href="/inbox">
-                <button
-                  type="button"
-                  className={`dash-thread ${unreadMsg ? "unread" : ""}`}
-                >
-                  <span className="dash-thread-avatar">
-                    <UserAvatar
-                      photoUrl={party.photoUrl}
-                      avatarChoice={party.avatarChoice ?? undefined}
-                      avatarRing={party.avatarRing}
-                      displayName={party.displayName || name}
-                      username={party.username ?? undefined}
-                      size={40}
-                    />
-                    {unreadMsg && <span className="dash-thread-dot" />}
-                  </span>
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                      <span
-                        className="dash-anton"
-                        style={{ fontSize: 15, color: unreadMsg ? "#fff" : "#bdbab2" }}
-                      >
-                        {name}
-                      </span>
-                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: "#6f736c" }}>
-                        {formatTime(msg.createdAt || msg.created_at)}
-                      </span>
-                    </span>
+              <Link
+                key={msg.id}
+                href={href}
+                className={`dash-thread${unreadMsg ? " unread" : ""}`}
+              >
+                <span className="dash-thread-avatar">
+                  <UserAvatar
+                    photoUrl={party.photoUrl}
+                    avatarChoice={party.avatarChoice ?? undefined}
+                    avatarRing={party.avatarRing}
+                    displayName={party.displayName || name}
+                    username={party.username ?? undefined}
+                    size={40}
+                  />
+                  {unreadMsg && <span className="dash-thread-dot" />}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
                     <span
-                      style={{
-                        display: "block",
-                        fontSize: 13,
-                        color: unreadMsg ? "#cbc8c0" : "#7c807a",
-                        marginTop: 2,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
+                      className="dash-anton"
+                      style={{ fontSize: 15, color: unreadMsg ? "#fff" : "#bdbab2" }}
                     >
-                      {msg.body || msg.subject || "New message"}
+                      {name}
+                    </span>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: "#6f736c" }}>
+                      {formatTime(msg.createdAt || msg.created_at)}
                     </span>
                   </span>
-                </button>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 13,
+                      color: unreadMsg ? "#cbc8c0" : "#7c807a",
+                      marginTop: 2,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {msg.subject || msg.body || "New message"}
+                  </span>
+                </span>
               </Link>
             );
           })

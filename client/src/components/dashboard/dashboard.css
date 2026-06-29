@@ -226,6 +226,12 @@
   color: #000;
 }
 
+a.dash-thread {
+  text-decoration: none;
+  color: inherit;
+  box-sizing: border-box;
+}
+
 .dash-thread {
   display: flex;
   align-items: center;

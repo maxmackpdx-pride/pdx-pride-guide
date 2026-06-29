@@ -24,12 +24,14 @@ function NavLink({
   label,
   active,
   showNotify,
+  notifyLabel,
   onClick,
 }: {
   href: string;
   label: string;
   active: boolean;
   showNotify?: boolean;
+  notifyLabel?: string;
   onClick?: () => void;
 }) {
   return (
@@ -37,9 +39,10 @@ function NavLink({
       href={href}
       className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}`}
       onClick={onClick}
+      aria-label={notifyLabel}
     >
       {label}
-      {showNotify && <span className="site-nav-notify-dot" aria-label="Notifications" />}
+      {showNotify && <span className="site-nav-notify-dot" aria-hidden="true" />}
     </Link>
   );
 }
@@ -107,7 +110,7 @@ export default function Nav() {
   const unreadCount = unread.count || 0;
   const adminPendingCount = adminPending.count || 0;
   const closeMenu = () => setMenuOpen(false);
-  const inboxActive = location === "/dashboard" || location === "/inbox";
+  const inboxActive = location === "/inbox" || location.startsWith("/inbox?");
 
   return (
     <>
@@ -153,10 +156,15 @@ export default function Nav() {
             {user && (
               <div className="site-auth">
                 <NavLink
-                  href="/dashboard"
+                  href="/inbox"
                   label="INBOX"
                   active={inboxActive}
                   showNotify={unreadCount > 0}
+                  notifyLabel={
+                    unreadCount > 0
+                      ? `Inbox, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
+                      : "Inbox"
+                  }
                   onClick={closeMenu}
                 />
                 {isAdmin && (
@@ -200,7 +208,18 @@ export default function Nav() {
                           setMenuOpen(false);
                         }}
                       >
-                        Profile
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/inbox"
+                        role="menuitem"
+                        className="site-profile-menu__item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
                       </Link>
                       <button
                         type="button"

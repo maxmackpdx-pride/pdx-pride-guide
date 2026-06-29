@@ -1543,9 +1543,41 @@ function runDismissStaleTestModerationRequests() {
   return result.changes;
 }
 
-seedData();
-applyVerifiedEventOverrides();
-removeGiftingSeedPosts();
+function ensureBootMigrationsTable() {
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS boot_migrations (
+      id TEXT PRIMARY KEY,
+      applied_at TEXT NOT NULL
+    )
+  `);
+}
+
+function hasBootMigration(id: string) {
+  ensureBootMigrationsTable();
+  return !!sqlite.prepare("SELECT 1 FROM boot_migrations WHERE id = ?").get(id);
+}
+
+function recordBootMigration(id: string) {
+  sqlite.prepare("INSERT INTO boot_migrations (id, applied_at) VALUES (?, ?)").run(
+    id,
+    new Date().toISOString(),
+  );
+}
+
+function runBootMigrationsOnce() {
+  ensureBootMigrationsTable();
+  seedData();
+  if (!hasBootMigration("verified_event_overrides_v1")) {
+    applyVerifiedEventOverrides();
+    recordBootMigration("verified_event_overrides_v1");
+  }
+  if (!hasBootMigration("remove_gifting_seed_posts_v1")) {
+    removeGiftingSeedPosts();
+    recordBootMigration("remove_gifting_seed_posts_v1");
+  }
+}
+
+runBootMigrationsOnce();
 
 function archiveExpiredMissedConnections() {
   const now = new Date().toISOString();
@@ -1817,6 +1849,7 @@ export interface IStorage {
   getUnreadCount(userId: number): number;
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
   markRead(messageId: number): void;
+  markReadForUser(messageId: number, userId: number): boolean;
   getThread(threadId: string): Message[];
   softDeleteThread(threadId: string, userId: number): void;
   // Missed connections
@@ -2722,6 +2755,12 @@ export const storage: IStorage = {
   },
   markRead(messageId) {
     db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();
+  },
+  markReadForUser(messageId, userId) {
+    const row = db.select().from(messages).where(eq(messages.id, messageId)).get();
+    if (!row || row.toUserId !== userId) return false;
+    db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();
+    return true;
   },
   getThread(threadId) {
     return sqlite.prepare(`

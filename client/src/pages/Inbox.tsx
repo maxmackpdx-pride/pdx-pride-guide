@@ -1,14 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useId } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import AuthModal from "@/components/AuthModal";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
+import BoardLoadingState from "@/components/BoardLoadingState";
 import UserAvatar from "@/components/UserAvatar";
 import { counterpartyAvatar, senderAvatar } from "@/lib/inboxAvatar";
 import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTalent";
+
+function inboxContextBadge(contextType?: string | null) {
+  if (contextType === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
+  if (contextType === "MISSED_CONNECTION") return "MISSED CONNECTION";
+  if (contextType === "HOST_MESSAGE") return "HOST UPDATE";
+  return null;
+}
+
+function threadFromQuery() {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("thread")?.trim() || "";
+}
 
 type Message = {
   id: number;
@@ -51,9 +66,18 @@ type ThreadPayload = {
 export default function Inbox() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const replyFieldId = useId();
+  const [showAuth, setShowAuth] = useState(false);
   const [tab, setTab] = useState<"inbox" | "sent">("inbox");
   const [activeThread, setActiveThread] = useState<Message | null>(null);
   const [replyBody, setReplyBody] = useState("");
+  const [pendingThreadId, setPendingThreadId] = useState(threadFromQuery);
+
+  usePageSeo(
+    "Inbox — PDX Pride Guide",
+    "Private messages from missed connections, Pride Werk, event hosts, and check-ins.",
+  );
 
   const { data: inbox = [], isLoading: inboxLoading, isError: inboxError, refetch: refetchInbox } = useQuery<Message[]>({
     queryKey: ["/api/messages/inbox"],
@@ -107,6 +131,7 @@ export default function Inbox() {
       toast({ title: "Lineup approved" });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       setActiveThread(null);
+      setLocation("/inbox");
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -123,6 +148,7 @@ export default function Inbox() {
       toast({ title: "Lineup declined" });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       setActiveThread(null);
+      setLocation("/inbox");
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -171,6 +197,7 @@ export default function Inbox() {
     },
     onSuccess: () => {
       setActiveThread(null);
+      setLocation("/inbox");
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
@@ -178,12 +205,69 @@ export default function Inbox() {
     onError: () => toast({ title: "Delete failed", description: "Could not remove this thread.", variant: "destructive" }),
   });
 
+  const syncThreadUrl = useCallback((threadId: string | null) => {
+    setLocation(threadId ? `/inbox?thread=${encodeURIComponent(threadId)}` : "/inbox");
+  }, [setLocation]);
+
+  const openThread = useCallback((msg: Message, sourceTab: "inbox" | "sent") => {
+    setActiveThread(msg);
+    syncThreadUrl(msg.threadId);
+    if (!msg.isRead && sourceTab === "inbox") {
+      fetch(`/api/messages/${msg.id}/read`, { method: "PUT", credentials: "include" }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+      });
+    }
+  }, [syncThreadUrl]);
+
+  useEffect(() => {
+    if (!user || !pendingThreadId) return;
+    const fromInbox = inbox.find(m => m.threadId === pendingThreadId);
+    if (fromInbox) {
+      setTab("inbox");
+      openThread(fromInbox, "inbox");
+      setPendingThreadId("");
+      return;
+    }
+    const fromSent = sent.find(m => m.threadId === pendingThreadId);
+    if (fromSent) {
+      setTab("sent");
+      openThread(fromSent, "sent");
+      setPendingThreadId("");
+    }
+  }, [user, pendingThreadId, inbox, sent, openThread]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const threadId = threadFromQuery();
+      if (!threadId) {
+        setActiveThread(null);
+        return;
+      }
+      setPendingThreadId(threadId);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   if (!user) {
     return (
-      <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
-        <div className="display" style={{ fontSize: "2rem", color: "#fff" }}>INBOX</div>
-        <p style={{ color: "#666" }}>Log in to view your messages.</p>
-        <AuthModal onClose={() => {}} />
+      <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
+        <PageHero
+          titleLine1="INBOX"
+          titleLine1Accent="lime"
+          bgImage="/motifs/hero-inbox.jpg"
+          bgPosition="center 35%"
+        />
+        <div style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px 80px", textAlign: "center" }}>
+          <p style={{ color: "#9d9a92", marginBottom: 24, lineHeight: 1.6 }}>
+            Log in to read private threads from missed connections, Pride Werk, event hosts, and check-ins.
+          </p>
+          <button type="button" className="btn-neon" onClick={() => setShowAuth(true)}>
+            LOG IN / JOIN
+          </button>
+        </div>
+        {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       </div>
     );
   }
@@ -194,14 +278,14 @@ export default function Inbox() {
   const refetchMsgs = tab === "inbox" ? refetchInbox : refetchSent;
   const unreadCount = inbox.filter(m => !m.isRead).length;
 
-  const openThread = (msg: Message) => {
-    setActiveThread(msg);
-    if (!msg.isRead && tab === "inbox") {
-      fetch(`/api/messages/${msg.id}/read`, { method: "PUT", credentials: "include" }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-      });
-    }
+  const closeThread = () => {
+    setActiveThread(null);
+    syncThreadUrl(null);
+  };
+
+  const handleDeleteThread = (threadId: string) => {
+    if (!window.confirm("Delete this thread from your inbox? This cannot be undone.")) return;
+    deleteMutation.mutate(threadId);
   };
 
   return (
@@ -218,9 +302,17 @@ export default function Inbox() {
           Private threads from missed connections, Pride Werk, event hosts, and check-ins.
           {unreadCount > 0 ? ` · ${unreadCount} unread` : ""}
         </p>
-        <div style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
+        <div role="tablist" aria-label="Message folders" style={{ display: "flex", borderBottom: "2px solid #1a1a1a", marginBottom: 24 }}>
           {(["inbox", "sent"] as const).map(t => (
-            <button key={t} onClick={() => { setTab(t); setActiveThread(null); }} style={{
+            <button
+              key={t}
+              role="tab"
+              type="button"
+              aria-selected={tab === t}
+              aria-controls={`inbox-panel-${t}`}
+              id={`inbox-tab-${t}`}
+              onClick={() => { setTab(t); closeThread(); }}
+              style={{
               fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem",
               letterSpacing: "0.1em", textTransform: "uppercase",
               padding: "10px 20px", border: "none", background: "none",
@@ -232,9 +324,14 @@ export default function Inbox() {
         </div>
 
         <div className={`inbox-layout${activeThread ? " inbox-layout--split" : ""}`}>
-          <div className="inbox-list-pane">
+          <div
+            className="inbox-list-pane"
+            role="tabpanel"
+            id={`inbox-panel-${tab}`}
+            aria-labelledby={`inbox-tab-${tab}`}
+          >
             {msgsLoading ? (
-              <div style={{ color: "#9d9a92", padding: "24px 0" }}>Loading messages...</div>
+              <BoardLoadingState label="Loading messages" />
             ) : msgsError ? (
               <div style={{ padding: "24px 0", textAlign: "center" }}>
                 <p style={{ color: "#fff", marginBottom: 8 }}>Could not load messages.</p>
@@ -247,9 +344,14 @@ export default function Inbox() {
             ) : msgs.map(msg => {
               const party = counterpartyAvatar(msg, tab);
               return (
-              <button key={msg.id} onClick={() => openThread(msg)} style={{
+              <button
+                key={msg.id}
+                type="button"
+                aria-current={activeThread?.threadId === msg.threadId ? "true" : undefined}
+                onClick={() => openThread(msg, tab)}
+                style={{
                 width: "100%", textAlign: "left", padding: "14px 18px", border: "none", borderBottom: "1px solid #111",
-                cursor: "pointer", background: activeThread?.id === msg.id ? "#0d0d0d" : "transparent",
+                cursor: "pointer", background: activeThread?.threadId === msg.threadId ? "#0d0d0d" : "transparent",
                 display: "flex", gap: 12, alignItems: "flex-start",
               }}>
                 <span className="inbox-list-avatar" style={{ position: "relative", flexShrink: 0 }}>
@@ -272,9 +374,9 @@ export default function Inbox() {
                   <span className="display" style={{ display: "block", fontSize: "0.88rem", color: "#fff", marginBottom: 3 }}>
                     {msg.subject || "(no subject)"}
                   </span>
-                  {msg.contextType === "EVENT_TALENT_REQUEST" && (
+                  {inboxContextBadge(msg.contextType) && (
                     <span style={{ display: "inline-block", fontSize: "0.62rem", color: "var(--neon-magenta)", border: "1px solid var(--neon-magenta)", padding: "2px 6px", marginBottom: 4, fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>
-                      LINEUP REQUEST
+                      {inboxContextBadge(msg.contextType)}
                     </span>
                   )}
                   {msg.contextLabel && <span style={{ display: "block", fontSize: "0.72rem", color: "#00FFFF", marginBottom: 3 }}>{msg.contextLabel}</span>}
@@ -291,24 +393,29 @@ export default function Inbox() {
           </div>
 
           {activeThread && (
-            <div className="inbox-thread-pane" style={{ background: "#060606", border: "1px solid #1a1a1a", padding: 20 }}>
+            <div className="inbox-thread-pane" role="region" aria-label="Message thread" style={{ background: "#060606", border: "1px solid #1a1a1a", padding: 20 }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
                 <div>
                   <div className="display" style={{ fontSize: "1rem", color: "#fff" }}>{activeThread.subject || "(no subject)"}</div>
-                  {activeThread.contextType && (
-                    <div style={{ color: "#8c8980", fontSize: "0.75rem", marginTop: 4 }}>{activeThread.contextType.replaceAll("_", " ")}</div>
+                  {inboxContextBadge(activeThread.contextType) && (
+                    <span style={{ display: "inline-block", fontSize: "0.62rem", color: "var(--neon-magenta)", border: "1px solid var(--neon-magenta)", padding: "2px 6px", marginTop: 6, fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>
+                      {inboxContextBadge(activeThread.contextType)}
+                    </span>
+                  )}
+                  {activeThread.contextLabel && (
+                    <div style={{ color: "#00FFFF", fontSize: "0.75rem", marginTop: 6 }}>{activeThread.contextLabel}</div>
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button
                     type="button"
                     className="inbox-back-btn"
-                    onClick={() => setActiveThread(null)}
+                    onClick={closeThread}
                     style={{ background: "transparent", border: "1px solid #333", color: "#bdbab2", padding: "5px 10px", cursor: "pointer" }}
                   >
                     Back
                   </button>
-                  <button onClick={() => deleteMutation.mutate(activeThread.threadId)} style={{ background: "transparent", border: "1px solid #333", color: "#8c8980", padding: "5px 10px", cursor: "pointer" }}>
+                  <button type="button" onClick={() => handleDeleteThread(activeThread.threadId)} style={{ background: "transparent", border: "1px solid #333", color: "#8c8980", padding: "5px 10px", cursor: "pointer" }}>
                     Delete
                   </button>
                 </div>
@@ -355,7 +462,7 @@ export default function Inbox() {
                   )}
                 </div>
               )}
-              <div style={{ maxHeight: 330, overflowY: "auto", marginBottom: 16 }}>
+              <div style={{ maxHeight: "min(52vh, 480px)", overflowY: "auto", marginBottom: 16 }}>
                 {threadError ? (
                   <p style={{ color: "#FF6600", fontSize: "0.85rem" }}>Could not load this thread.</p>
                 ) : thread.map(m => {
@@ -394,7 +501,9 @@ export default function Inbox() {
                   );
                 })}
               </div>
+              <label htmlFor={replyFieldId} className="sr-only">Reply to thread</label>
               <textarea
+                id={replyFieldId}
                 style={inputStyle}
                 placeholder="Write a private reply..."
                 value={replyBody}
