@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 export interface DashboardDrawerProps {
   title: string;
+  id?: string;
   color: string;
   countLabel: string;
   open: boolean;
@@ -17,6 +18,7 @@ export default function DashboardDrawer({
   color,
   countLabel,
   open,
+id,
   onToggle,
   emptyText,
   isEmpty,
@@ -25,6 +27,7 @@ export default function DashboardDrawer({
 }: DashboardDrawerProps) {
   return (
     <article
+        id={id}
       className={`dash-drawer ${open ? "open" : ""}`}
       style={{ ["--drawer-color" as string]: color }}
     >
