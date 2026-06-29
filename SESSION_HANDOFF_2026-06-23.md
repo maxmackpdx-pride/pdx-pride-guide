@@ -6,7 +6,7 @@
 
 ## Quick start prompt (paste into any agent)
 
-> Read `SESSION_HANDOFF_2026-06-23.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Site: prideguidepdx.com. Standing constraint: Tucker likes the site as-is — only make requested changes. Do NOT touch `client/src/pages/Events.tsx` or filter bar / day-pill styling in `client/src/index.css` (handled separately). Local path: `/Users/tuckercasey/Documents/Codex/2026-06-20/c/work/pdx-pride-guide`.
+> Read `SESSION_HANDOFF_2026-06-23.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Site: prideguidepdx.com. Standing constraint: Tucker likes the site as-is — only make requested changes. Do NOT touch `client/src/pages/Events.tsx` or filter bar / day-pill styling in `client/src/index.css` (handled separately). Local path: `/Users/tuckercasey/pdx-pride-guide`.
 
 ---
 
@@ -17,7 +17,7 @@
 | **Site** | https://prideguidepdx.com / https://www.prideguidepdx.com |
 | **Repo** | `maxmackpdx-pride/pdx-pride-guide` |
 | **Branch** | `master` |
-| **Local path** | `/Users/tuckercasey/Documents/Codex/2026-06-20/c/work/pdx-pride-guide` |
+| **Local path** | `/Users/tuckercasey/pdx-pride-guide` |
 | **Stack** | React + TypeScript + Vite (`client/src`), Express + SQLite (`server/`) |
 | **Owner** | Tucker Casey — `hello.tuckercasey@gmail.com`, display `tucker_pdmax` |
 | **AI team** | Grok (deploy/shell), Claude Cowork (commits), Codex paused |

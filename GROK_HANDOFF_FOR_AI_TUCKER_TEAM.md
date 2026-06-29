@@ -335,7 +335,7 @@ Grok applied via Railway GraphQL API (project token):
 
 | Item | Value |
 |------|-------|
-| Canonical repo | `/Users/tuckercasey/Documents/Codex/2026-06-20/c/work/pdx-pride-guide` |
+| Canonical repo | `/Users/tuckercasey/pdx-pride-guide` (Codex local workspace retired — git history unchanged) |
 | GitHub | `maxmackpdx-pride/pdx-pride-guide` (branch `master`) |
 | Plan PDF | `/Users/tuckercasey/Downloads/pdx-pride-guide-plan-v8.pdf` |
 | UAT report | `SOFT_LAUNCH_UAT_REPORT_CODEX.md` |
