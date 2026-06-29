@@ -1999,8 +1999,8 @@ h2.display,
 
 .board-kicker {
   display: inline-block;
-  font-family: var(--font-board-mono);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 0.8125rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2308,7 +2308,8 @@ h2.display,
 
 .board-sticker {
   display: none;
-  font-family: var(--font-board-mono);
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
