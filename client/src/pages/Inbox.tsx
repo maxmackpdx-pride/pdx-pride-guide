@@ -25,6 +25,14 @@ function threadFromQuery() {
   return new URLSearchParams(window.location.search).get("thread")?.trim() || "";
 }
 
+function threadIdOf(msg: { threadId?: string; thread_id?: string } | null | undefined): string {
+  return (msg?.threadId || msg?.thread_id || "").trim();
+}
+
+function isMessageRead(msg: { isRead?: boolean; is_read?: boolean }): boolean {
+  return Boolean(msg.isRead ?? msg.is_read);
+}
+
 type Message = {
   id: number;
   fromUserId: number;
@@ -100,9 +108,9 @@ export default function Inbox() {
   });
 
   const { data: threadPayload, isError: threadError } = useQuery<ThreadPayload>({
-    queryKey: ["/api/messages/thread", activeThread?.threadId],
+    queryKey: ["/api/messages/thread", threadIdOf(activeThread)],
     queryFn: async () => {
-      const r = await fetch(`/api/messages/thread/${activeThread!.threadId}`, { credentials: "include" });
+      const r = await fetch(`/api/messages/thread/${threadIdOf(activeThread)}`, { credentials: "include" });
       if (!r.ok) throw new Error("Could not load thread");
       return r.json();
     },
@@ -154,7 +162,7 @@ export default function Inbox() {
   });
 
   const replyMutation = useMutation({
-    mutationFn: (body: string) => fetch(`/api/messages/thread/${activeThread!.threadId}/reply`, {
+    mutationFn: (body: string) => fetch(`/api/messages/thread/${threadIdOf(activeThread)}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -168,13 +176,13 @@ export default function Inbox() {
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread?.threadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", threadIdOf(activeThread)] });
     },
     onError: () => toast({ title: "Reply failed", description: "Could not send your message.", variant: "destructive" }),
   });
 
   const revealMutation = useMutation({
-    mutationFn: () => fetch(`/api/messages/thread/${activeThread!.threadId}/reveal`, {
+    mutationFn: () => fetch(`/api/messages/thread/${threadIdOf(activeThread)}/reveal`, {
       method: "POST",
       credentials: "include",
     }).then(async r => {
@@ -182,7 +190,7 @@ export default function Inbox() {
       return r.json();
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeThread?.threadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", threadIdOf(activeThread)] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
       toast({ title: "Identity shared", description: "They'll see who you are once they reveal too." });
@@ -211,8 +219,8 @@ export default function Inbox() {
 
   const openThread = useCallback((msg: Message, sourceTab: "inbox" | "sent") => {
     setActiveThread(msg);
-    syncThreadUrl(msg.threadId);
-    if (!msg.isRead && sourceTab === "inbox") {
+    syncThreadUrl(threadIdOf(msg));
+    if (!isMessageRead(msg) && sourceTab === "inbox") {
       fetch(`/api/messages/${msg.id}/read`, { method: "PUT", credentials: "include" }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
         queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
@@ -222,14 +230,14 @@ export default function Inbox() {
 
   useEffect(() => {
     if (!user || !pendingThreadId) return;
-    const fromInbox = inbox.find(m => m.threadId === pendingThreadId);
+    const fromInbox = inbox.find(m => threadIdOf(m) === pendingThreadId);
     if (fromInbox) {
       setTab("inbox");
       openThread(fromInbox, "inbox");
       setPendingThreadId("");
       return;
     }
-    const fromSent = sent.find(m => m.threadId === pendingThreadId);
+    const fromSent = sent.find(m => threadIdOf(m) === pendingThreadId);
     if (fromSent) {
       setTab("sent");
       openThread(fromSent, "sent");
@@ -276,7 +284,7 @@ export default function Inbox() {
   const msgsLoading = tab === "inbox" ? inboxLoading : sentLoading;
   const msgsError = tab === "inbox" ? inboxError : sentError;
   const refetchMsgs = tab === "inbox" ? refetchInbox : refetchSent;
-  const unreadCount = inbox.filter(m => !m.isRead).length;
+  const unreadCount = inbox.filter(m => !isMessageRead(m)).length;
 
   const closeThread = () => {
     setActiveThread(null);
@@ -347,11 +355,11 @@ export default function Inbox() {
               <button
                 key={msg.id}
                 type="button"
-                aria-current={activeThread?.threadId === msg.threadId ? "true" : undefined}
+                aria-current={threadIdOf(activeThread) === threadIdOf(msg) ? "true" : undefined}
                 onClick={() => openThread(msg, tab)}
                 style={{
                 width: "100%", textAlign: "left", padding: "14px 18px", border: "none", borderBottom: "1px solid #111",
-                cursor: "pointer", background: activeThread?.threadId === msg.threadId ? "#0d0d0d" : "transparent",
+                cursor: "pointer", background: threadIdOf(activeThread) === threadIdOf(msg) ? "#0d0d0d" : "transparent",
                 display: "flex", gap: 12, alignItems: "flex-start",
               }}>
                 <span className="inbox-list-avatar" style={{ position: "relative", flexShrink: 0 }}>
@@ -363,7 +371,7 @@ export default function Inbox() {
                     username={party.username ?? undefined}
                     size={40}
                   />
-                  {!msg.isRead && tab === "inbox" && (
+                  {!isMessageRead(msg) && tab === "inbox" && (
                     <span style={{
                       position: "absolute", top: -1, right: -1, width: 10, height: 10,
                       borderRadius: "50%", background: "#FF00CC", border: "2px solid #000",
@@ -415,7 +423,7 @@ export default function Inbox() {
                   >
                     Back
                   </button>
-                  <button type="button" onClick={() => handleDeleteThread(activeThread.threadId)} style={{ background: "transparent", border: "1px solid #333", color: "#8c8980", padding: "5px 10px", cursor: "pointer" }}>
+                  <button type="button" onClick={() => handleDeleteThread(threadIdOf(activeThread))} disabled={deleteMutation.isPending || !threadIdOf(activeThread)} style={{ background: "transparent", border: "1px solid #333", color: "#8c8980", padding: "5px 10px", cursor: "pointer", opacity: deleteMutation.isPending ? 0.5 : 1 }}>
                     Delete
                   </button>
                 </div>

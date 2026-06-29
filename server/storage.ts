@@ -262,6 +262,25 @@ function legacyGigRole(postType: string) {
   return postType === "LOOKING_FOR_WORK" ? "Talent" : "Gig";
 }
 
+function mapMessageRow(row: Record<string, unknown>): any {
+  return {
+    ...row,
+    id: row.id as number,
+    fromUserId: (row.fromUserId ?? row.from_user_id) as number,
+    toUserId: (row.toUserId ?? row.to_user_id) as number,
+    subject: row.subject as string,
+    body: row.body as string,
+    isRead: Boolean(row.isRead ?? row.is_read),
+    threadId: String(row.threadId ?? row.thread_id ?? ""),
+    contextType: String(row.contextType ?? row.context_type ?? "THREAD"),
+    contextId: (row.contextId ?? row.context_id ?? null) as number | null,
+    contextLabel: (row.contextLabel ?? row.context_label ?? null) as string | null,
+    deletedByFrom: Boolean(row.deletedByFrom ?? row.deleted_by_from),
+    deletedByTo: Boolean(row.deletedByTo ?? row.deleted_by_to),
+    createdAt: String(row.createdAt ?? row.created_at ?? ""),
+  };
+}
+
 function mapGigPostRow(row: Record<string, unknown>): GigPost {
   return {
     id: row.id as number,
@@ -2754,7 +2773,7 @@ export const storage: IStorage = {
       LEFT JOIN users u ON u.id = m.from_user_id
       WHERE m.to_user_id = ? AND m.deleted_by_to = 0
       ORDER BY m.created_at DESC
-    `).all(userId) as Message[];
+    `).all(userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   getSentMessages(userId) {
     return sqlite.prepare(`
@@ -2763,7 +2782,7 @@ export const storage: IStorage = {
       LEFT JOIN users u ON u.id = m.to_user_id
       WHERE m.from_user_id = ? AND m.deleted_by_from = 0
       ORDER BY m.created_at DESC
-    `).all(userId) as Message[];
+    `).all(userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   getUnreadCount(userId) {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM messages WHERE to_user_id = ? AND is_read = 0 AND deleted_by_to = 0`).get(userId) as any;
@@ -2798,7 +2817,7 @@ export const storage: IStorage = {
       FROM messages m
       LEFT JOIN users u ON u.id = m.from_user_id
       WHERE m.thread_id = ? ORDER BY m.created_at ASC
-    `).all(threadId) as Message[];
+    `).all(threadId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   softDeleteThread(threadId, userId) {
     sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE thread_id = ? AND from_user_id = ?`).run(threadId, userId);
@@ -2965,14 +2984,15 @@ export const storage: IStorage = {
     `).all(threadId) as any[];
     const mcThread = storage.getMissedConnectionThread(threadId);
     const bothRevealed = !mcThread || Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
-    return thread.map(m => {
+    return thread.map(raw => {
+      const m = mapMessageRow(raw as Record<string, unknown>);
       if (m.contextType !== "MISSED_CONNECTION" || bothRevealed) return m;
       const isSelf = m.fromUserId === viewerUserId;
       return {
         ...m,
         from_username: isSelf ? "You" : "Anonymous",
         from_display_name: isSelf ? "You" : "Anonymous",
-        from_photo_url: isSelf ? m.from_photo_url : null,
+        from_photo_url: isSelf ? raw.from_photo_url : null,
         masked: !isSelf,
       };
     });

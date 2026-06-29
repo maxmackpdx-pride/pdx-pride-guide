@@ -1203,7 +1203,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.delete("/api/messages/thread/:threadId", requireAuth, (req, res) => {
-    storage.softDeleteThread(req.params.threadId, req.session.userId!);
+    const thread = storage.getThread(req.params.threadId);
+    const userId = req.session.userId!;
+    const visible = thread.some((m: any) => m.fromUserId === userId || m.toUserId === userId);
+    if (!visible) return res.status(404).json({ error: "Thread not found" });
+    storage.softDeleteThread(req.params.threadId, userId);
     res.json({ ok: true });
   });
 
