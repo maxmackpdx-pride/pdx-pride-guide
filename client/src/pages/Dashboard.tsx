@@ -274,7 +274,7 @@ export default function Dashboard() {
         titleLine2="DASHBOARD"
         accent="cyan"
         lede="Manage your profile, inbox, claimed events, gig posts, gifting listings, missed connections, and check-ins — everything you touch on PDX Pride Guide lives here."
-        tagline={createElement(Fragment, null, "@", user.username, " · ", createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({behavior:"smooth"}); } }, "profile"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "events"), " · ", createElement("a", { href: "#/inbox", className: "dash-tagline-link" }, "inbox"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "submissions"))}
+        tagline={createElement(Fragment, null, "@", user.username, " · ", createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({behavior:"smooth"}); } }, "profile"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "events"), " · ", createElement("a", { href: "/inbox", className: "dash-tagline-link" }, "inbox"), " · ", createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({...prev, events: true})); document.getElementById("events")?.scrollIntoView({behavior:"smooth"}); } }, "submissions"))}
         taglineAccent="cyan"
         bgImage="/motifs/hero-inbox.jpg"
         bgPosition="center 35%"
@@ -438,7 +438,7 @@ export default function Dashboard() {
             onToggle={() => toggleSection("gigs")}
             isEmpty={myGigs.length === 0}
             emptyText="No gig posts yet."
-            cta={{ label: "Post on Pride Werk board →", href: "#/pride-work" }}
+            cta={{ label: "Post on Pride Werk board →", href: "/pride-work" }}
           >
             {editingGig && (
               <DashboardGigEditForm
@@ -485,7 +485,7 @@ export default function Dashboard() {
                 chipColor={MAGENTA}
                 actions={
                   <>
-                    <a href="#/spotted" className="dash-mini-btn" style={{ color: MAGENTA, textDecoration: "none" }}>Edit</a>
+                    <a href="/spotted" className="dash-mini-btn" style={{ color: MAGENTA, textDecoration: "none" }}>Edit</a>
                     <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteMissed(post.id)}>Delete</button>
                   </>
                 }
@@ -501,7 +501,7 @@ export default function Dashboard() {
             onToggle={() => toggleSection("gifting")}
             isEmpty={myGifting.length === 0}
             emptyText="No gifting posts yet."
-            cta={{ label: "Open gifting board →", href: "#/gifting" }}
+            cta={{ label: "Open gifting board →", href: "/gifting" }}
           >
             {myGifting.map((post: any) => (
               <div key={post.id}>
@@ -516,7 +516,7 @@ export default function Dashboard() {
                       <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
                         {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
                       </span>
-                      <a href="#/gifting" className="dash-mini-btn" style={{ color: CYAN, textDecoration: "none" }}>Board</a>
+                      <a href="/gifting" className="dash-mini-btn" style={{ color: CYAN, textDecoration: "none" }}>Board</a>
                       {post.postType === "GIFT" && !["GIFTED", "EXPIRED"].includes(post.status) && (
                         <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-gifted`)}>Mark gifted</button>
                       )}

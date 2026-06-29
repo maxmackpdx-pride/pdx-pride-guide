@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,9 +32,7 @@ const DAY_COLORS: Record<string, string> = {
 
 type ModerationMode = null | "remove" | "flag" | "transfer";
 
-const claimEvent = (eventId: number) => {
-  window.location.hash = `/submit/claim/${eventId}`;
-};
+
 
 const modAccent: Record<Exclude<ModerationMode, null>, string> = {
   remove: "#888",
@@ -42,8 +41,10 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
 };
 
 export default function EventModal({ event, onClose }: { event: Event; onClose: () => void }) {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  const claimEvent = (eventId: number) => setLocation(`/submit/claim/${eventId}`);
   const [modMode, setModMode] = useState<ModerationMode>(null);
   const [modForm, setModForm] = useState({ name: "", email: "", proof: "" });
   const [showAuth, setShowAuth] = useState(false);

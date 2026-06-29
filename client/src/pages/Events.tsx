@@ -399,10 +399,25 @@ function EventShareLink({ href, title }: { href: string; title: string }) {
   return (
     <a
       href={href}
-      className="event-card-share"
       title={`Share link to ${title}`}
       aria-label={`Share link to ${title}`}
       onClick={(e) => e.stopPropagation()}
+      style={{
+        position: "absolute",
+        top: 8,
+        right: 8,
+        zIndex: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        background: "rgba(0,0,0,0.72)",
+        border: "1px solid #333",
+        color: "#aaa",
+        textDecoration: "none",
+      }}
     >
       <Link2 size={14} />
     </a>
@@ -560,6 +575,9 @@ export default function Events() {
     "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
   );
   const { user } = useAuth();
+  const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
+  const [, setLocation] = useLocation();
+  const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
   const [activeDay, setActiveDay] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -568,7 +586,12 @@ export default function Events() {
   const [mapExpanded, setMapExpanded] = useState(false);
   const openEvent = useCallback((event: Event) => {
     setSelectedEvent(event);
-  }, []);
+    setLocation(eventPath(event.id, event.title));
+  }, [setLocation]);
+  const closeEvent = useCallback(() => {
+    setSelectedEvent(null);
+    setLocation("/events");
+  }, [setLocation]);
 
   const { data: events = [], isLoading, isError, error, refetch } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],

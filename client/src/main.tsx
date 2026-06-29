@@ -9,12 +9,22 @@ if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
   window.history.scrollRestoration = "manual";
 }
 
-const claimRoute = decodeURIComponent(window.location.hash || "").match(/^#\/submit\?mode=claim&eventId=(\d+)/);
+// Migrate legacy hash routes (#/events → /events) and claim query URLs.
+if (typeof window !== "undefined") {
+  const { pathname, search, hash } = window.location;
 
-if (claimRoute) {
-  window.location.hash = `#/submit/claim/${claimRoute[1]}`;
-} else if (!window.location.hash) {
-  window.location.hash = "#/";
+  const hashClaim = decodeURIComponent(hash || "").match(/^#\/submit\?mode=claim&eventId=(\d+)/);
+  if (hashClaim) {
+    window.history.replaceState(null, "", `/submit/claim/${hashClaim[1]}`);
+  } else if (hash.startsWith("#/")) {
+    const target = hash.slice(1) + search;
+    window.history.replaceState(null, "", target);
+  } else {
+    const params = new URLSearchParams(search);
+    if (pathname === "/submit" && params.get("mode") === "claim" && params.get("eventId")) {
+      window.history.replaceState(null, "", `/submit/claim/${params.get("eventId")}`);
+    }
+  }
 }
 
 resetPageScroll();

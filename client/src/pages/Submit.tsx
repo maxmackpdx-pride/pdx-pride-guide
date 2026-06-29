@@ -34,7 +34,7 @@ export default function Submit() {
   const infoRef = useRef<HTMLElement>(null);
   const detailsRef = useRef<HTMLElement>(null);
   const reviewRef = useRef<HTMLElement>(null);
-  const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
   const initialMode = (claimPathEventId || params.get("mode") === "claim") ? "claim" : "submit";
   const initialEventId = claimPathEventId || params.get("eventId") || "";

@@ -880,7 +880,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
             console.error("Google link session save failed:", saveErr);
             return res.status(500).send("Google sign-in failed.");
           }
-          res.redirect("/#/dashboard?google=linked");
+          res.redirect("/dashboard?google=linked");
         });
       }
 
@@ -909,7 +909,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
           console.error("Google sign-in session save failed:", saveErr);
           return res.status(500).send("Google sign-in failed.");
         }
-        res.redirect("/#/dashboard");
+        res.redirect("/dashboard");
       });
     } catch (e) {
       console.error("Google sign-in error:", e);
