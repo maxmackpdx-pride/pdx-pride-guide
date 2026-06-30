@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 .env.local
+.railway/production-secrets.txt
 .vercel/.env*
 *.log
 # Runtime DB should not be re-committed after initial seed; Railway uses deployed copy + startup migrations.
