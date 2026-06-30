@@ -406,19 +406,87 @@ function InboxCard({
               {payload.submitterProfile && (
                 <AdminUserIdentity profile={payload.submitterProfile} showEmail size={40} />
               )}
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                {Object.entries({
-                  type: payload.type,
-                  venue: payload.venueName,
-                  day: payload.dayOfWeek,
-                  description: payload.description,
-                }).filter(([, val]) => val).map(([key, val]) => (
-                  <div key={key} className="bg-black/30 p-2 border border-white/10">
-                    <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{key}</p>
-                    <p className="text-white text-sm truncate">{String(val)}</p>
+
+              {/* Submitter info */}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ["Type", payload.type],
+                  ["Submitter", payload.submitterName],
+                  ["Email", payload.submitterEmail],
+                  ["Org", payload.submitterOrg],
+                ].filter(([, v]) => v).map(([k, v]) => (
+                  <div key={k as string} className="bg-black/30 p-2 border border-white/10">
+                    <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{k}</p>
+                    <p className="text-white text-sm break-all">{v}</p>
                   </div>
                 ))}
               </div>
+
+              {/* Application / claim reason (most important for PROMOTER_APPLICATION) */}
+              {payload.claimReason && (
+                <div className="bg-black/30 p-3 border border-white/10">
+                  <p className="text-white/30 text-xs uppercase tracking-wide mb-1">
+                    {payload.type === "PROMOTER_APPLICATION" ? "Promoter Application" : payload.type === "SUGGEST" ? "Where Spotted" : "Claim Reason / Proof"}
+                  </p>
+                  <p className="text-white/80 text-sm whitespace-pre-wrap">{payload.claimReason}</p>
+                </div>
+              )}
+
+              {/* Proof / portfolio link */}
+              {payload.type === "PROMOTER_APPLICATION" && payload.ticketUrl && (
+                <div className="bg-black/30 p-3 border border-white/10">
+                  <p className="text-white/30 text-xs uppercase tracking-wide mb-1">Proof / Portfolio Link</p>
+                  <a href={payload.ticketUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 text-sm underline break-all">{payload.ticketUrl}</a>
+                </div>
+              )}
+
+              {/* Event details (for NEW_EVENT and SUGGEST) */}
+              {payload.type !== "PROMOTER_APPLICATION" && (
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    ["Title", payload.title],
+                    ["Venue", payload.venueName],
+                    ["Address", payload.address],
+                    ["Neighborhood", payload.neighborhood],
+                    ["Day", payload.dayOfWeek],
+                    ["Start", payload.dateStart ? new Date(payload.dateStart).toLocaleString() : null],
+                    ["End", payload.dateEnd ? new Date(payload.dateEnd).toLocaleString() : null],
+                    ["Age", payload.ageRequirement],
+                    ["Admission", payload.admission],
+                  ].filter(([, v]) => v).map(([k, v]) => (
+                    <div key={k as string} className="bg-black/30 p-2 border border-white/10">
+                      <p className="text-white/30 text-xs uppercase tracking-wide mb-0.5">{k}</p>
+                      <p className="text-white text-sm break-all">{v}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Description */}
+              {payload.type !== "PROMOTER_APPLICATION" && payload.description && (
+                <div className="bg-black/30 p-3 border border-white/10">
+                  <p className="text-white/30 text-xs uppercase tracking-wide mb-1">Description</p>
+                  <p className="text-white/80 text-sm whitespace-pre-wrap">{payload.description}</p>
+                </div>
+              )}
+
+              {/* Ticket / info link */}
+              {payload.type !== "PROMOTER_APPLICATION" && payload.ticketUrl && (
+                <div className="bg-black/30 p-3 border border-white/10">
+                  <p className="text-white/30 text-xs uppercase tracking-wide mb-1">Ticket / Info Link</p>
+                  <a href={payload.ticketUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 text-sm underline break-all">{payload.ticketUrl}</a>
+                </div>
+              )}
+
+              {/* Uploaded poster/flyer */}
+              {payload.posterImageUrl && (
+                <div>
+                  <p className="text-white/30 text-xs uppercase tracking-wide mb-2">Uploaded Flyer</p>
+                  <img src={payload.posterImageUrl} alt="Event flyer" className="max-h-64 border border-white/10 object-contain" style={{ maxWidth: "100%" }} />
+                  <p className="text-white/30 text-xs mt-1 break-all">{payload.posterImageUrl}</p>
+                </div>
+              )}
+
               {item.pending && (
                 <>
                   <input
