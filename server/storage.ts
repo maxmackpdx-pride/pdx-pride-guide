@@ -357,6 +357,7 @@ try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_label TEXT`); } catch
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_from INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_to INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN promoter_status TEXT NOT NULL DEFAULT 'none'`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN sub_admin INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS host_messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2194,9 +2195,11 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus' | 'subAdmin'>>): void;
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
+  getAllUsers(): User[];
+  autoApproveSubmission(id: number, claimedByUsername: string): void;
   getPendingPromoterRequests(): any[];
   // Host messages
   getHostMessages(eventId: number, limit?: number): any[];
@@ -2337,6 +2340,29 @@ export const storage: IStorage = {
       approvals: "[]",
       createdAt: new Date().toISOString(),
     }).returning().get();
+  },
+  getAllUsers() {
+    return db.select().from(users).all();
+  },
+  autoApproveSubmission(id, claimedByUsername) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub || sub.type !== "NEW_EVENT") return;
+    db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
+    db.insert(events).values({
+      title: sub.title, description: sub.description,
+      venueName: sub.venueName, address: sub.address,
+      neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+      dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+      ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+      admission: sub.admission, ticketUrl: sub.ticketUrl,
+      isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+      isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+      nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+      status: "LIVE", source: "user_submitted",
+      isClaimable: false, claimedBy: claimedByUsername,
+      submittedBy: sub.submitterEmail, adminNotes: null,
+      createdAt: new Date().toISOString(),
+    }).run();
   },
   approveSubmission(id, adminName) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
@@ -2817,11 +2843,24 @@ export const storage: IStorage = {
     }
   },
   getPendingPromoterRequests() {
-    const pendingUsers = db.select().from(users).all().filter(u => u.promoterStatus === "pending");
-    return pendingUsers.map(u => {
+    const pendingByStatus = db.select().from(users).all().filter((u: any) => u.promoterStatus === "pending");
+    const seenIds = new Set(pendingByStatus.map((u: any) => u.id));
+    const allUsers = [...pendingByStatus];
+
+    const pendingClaimSubs = db.select().from(submissions).all()
+      .filter((s: any) => s.type === "CLAIM" && s.status === "PENDING" && !!s.submitterEmail);
+    for (const sub of pendingClaimSubs) {
+      const u = db.select().from(users).where(eq(users.email, sub.submitterEmail!)).get();
+      if (u && !seenIds.has(u.id) && u.promoterStatus !== "approved") {
+        seenIds.add(u.id);
+        allUsers.push(u);
+      }
+    }
+
+    return allUsers.map((u: any) => {
       const claimSub = db.select().from(submissions).all()
-        .filter(s => s.submitterEmail === u.email && s.type === "CLAIM" && s.status === "PENDING")
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+        .filter((s: any) => s.submitterEmail === u.email && s.type === "CLAIM")
+        .sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
       const evt = claimSub?.eventId
         ? db.select().from(events).where(eq(events.id, claimSub.eventId)).get()
         : undefined;
@@ -2838,7 +2877,7 @@ export const storage: IStorage = {
         requestedAt: claimSub?.createdAt ?? u.createdAt,
         eventTitle: evt?.title ?? null,
       };
-    }).sort((a, b) => String(b.requestedAt).localeCompare(String(a.requestedAt)));
+    }).sort((a: any, b: any) => String(b.requestedAt).localeCompare(String(a.requestedAt)));
   },
   getHostMessages(eventId, limit = 2) {
     return sqlite.prepare(`

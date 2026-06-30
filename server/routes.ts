@@ -94,6 +94,10 @@ function markAdminSessionForUser(req: any, user: any) {
     req.session.isAdmin = true;
     return true;
   }
+  if (user?.subAdmin) {
+    req.session.isAdmin = true;
+    return true;
+  }
   return false;
 }
 
@@ -104,7 +108,6 @@ function syncOwnerDisplayName(user: any) {
 }
 
 function authUserResponse(req: any, user: any) {
-  
   const isAdmin = markAdminSessionForUser(req, user);
   return {
     id: user.id, username: user.username, email: user.email,
@@ -113,6 +116,8 @@ function authUserResponse(req: any, user: any) {
     bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
     promoterStatus: user.promoterStatus || "none",
     isAdmin,
+    isSuperAdmin: isMainAdminUser(user),
+    subAdmin: !!user.subAdmin,
   };
 }
 
@@ -406,7 +411,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
           : JSON.stringify(req.body.eventTypes || []),
       });
       const sub = storage.createSubmission(data);
-      if (type === "CLAIM" && promoterStatus !== "approved" && !isAdminUser) {
+
+      // Approved promoters submitting a new event bypass the review queue
+      if (type === "NEW_EVENT" && (user.promoterStatus === "approved" || req.session.isAdmin)) {
+        storage.autoApproveSubmission(sub.id, user.username);
+        return res.json({ ...sub, autoApproved: true });
+      }
+
+      // Claim submission from unapproved user → flag for promoter review
+      if (type === "CLAIM" && user.promoterStatus !== "approved" && !req.session.isAdmin) {
         storage.setPromoterStatus(user.id, "pending");
       }
       res.json(sub);
@@ -1542,6 +1555,48 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user) return res.status(404).json({ error: "User not found" });
     storage.setPromoterStatus(userId, "rejected");
     res.json({ ok: true, promoterStatus: "rejected" });
+  });
+
+  app.get("/api/admin/users/search", requireAdmin, (req, res) => {
+    const q = String(req.query.q || "").trim().toLowerCase();
+    if (!q) return res.json([]);
+    const all = storage.getAllUsers ? storage.getAllUsers() : [];
+    const matches = all.filter((u: any) =>
+      u.username?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.displayName?.toLowerCase().includes(q)
+    ).slice(0, 10).map((u: any) => ({
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      displayName: u.displayName,
+      promoterStatus: u.promoterStatus,
+      subAdmin: !!u.subAdmin,
+    }));
+    res.json(matches);
+  });
+
+  app.post("/api/admin/users/:userId/set-sub-admin", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    const userId = Number(req.params.userId);
+    const { grant } = req.body as { grant: boolean };
+    const target = storage.getUserById(userId);
+    if (!target) return res.status(404).json({ error: "User not found" });
+    if (isMainAdminUser(target)) return res.status(400).json({ error: "Cannot modify super admin" });
+    storage.updateUser(userId, { subAdmin: grant });
+    res.json({ ok: true, subAdmin: grant });
+  });
+
+  app.post("/api/admin/users/:userId/set-promoter-status", requireAdmin, (req, res) => {
+    const userId = Number(req.params.userId);
+    const { status } = req.body as { status: string };
+    const allowed = ["none", "pending", "approved", "rejected"];
+    if (!allowed.includes(status)) return res.status(400).json({ error: "Invalid status" });
+    const user = storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    storage.setPromoterStatus(userId, status);
+    res.json({ ok: true, promoterStatus: status });
   });
 
   app.get("/api/admin/events", requireAdmin, (req, res) => {
