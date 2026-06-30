@@ -2145,6 +2145,7 @@ export interface IStorage {
   getSubmissions(status?: string): Submission[];
   getSubmission(id: number): Submission | undefined;
   createSubmission(data: InsertSubmission): Submission;
+  autoApproveClaim(id: number, claimedByUsername: string): void;
   approveSubmission(id: number, adminName: string): Submission | undefined;
   rejectSubmission(id: number, reason: string): void;
   // Gigs
@@ -2380,6 +2381,28 @@ export const storage: IStorage = {
       deleted.push(user.username);
     }
     return { deleted: deleted.length, usernames: deleted };
+  },
+  autoApproveClaim(id: number, claimedByUsername: string) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub || sub.type !== "CLAIM" || !sub.eventId) return;
+    const now = new Date().toISOString();
+    db.update(submissions).set({
+      status: "APPROVED",
+      approvals: JSON.stringify([claimedByUsername]),
+      adminNotes: `Auto-approved: @${claimedByUsername} is a verified promoter — no manual review required.`,
+    }).where(eq(submissions.id, id)).run();
+    db.update(events).set({
+      isClaimable: false,
+      claimedBy: claimedByUsername,
+      adminNotes: null,
+    }).where(eq(events.id, sub.eventId)).run();
+    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+    if (submitter) {
+      if (submitter.promoterStatus !== "approved") {
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      }
+      storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
+    }
   },
   autoApproveSubmission(id, claimedByUsername) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();

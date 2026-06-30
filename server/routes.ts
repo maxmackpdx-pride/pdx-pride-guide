@@ -480,9 +480,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       });
       const sub = storage.createSubmission(data);
 
-      // Approved promoters / admins submitting a new event bypass the review queue
+      // Approved promoters / admins bypass the review queue
       if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser)) {
         storage.autoApproveSubmission(sub.id, user.username);
+        return res.json({ ...sub, autoApproved: true });
+      }
+      if (type === "CLAIM" && (promoterStatus === "approved" || isAdminUser)) {
+        storage.autoApproveClaim(sub.id, user.username);
         return res.json({ ...sub, autoApproved: true });
       }
 

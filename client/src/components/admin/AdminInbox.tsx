@@ -370,9 +370,11 @@ function InboxCard({
           )}
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="sticker text-xs" style={{ color: accent, borderColor: accent }}>{kindLabel(item.kind)}</span>
-            {!item.pending && (
+            {!item.pending && item.kind === "submission" && item.payload.adminNotes?.startsWith("Auto-approved:") ? (
+              <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>AUTO-APPROVED</span>
+            ) : !item.pending ? (
               <span className="sticker text-xs" style={{ color: "#666", borderColor: "#444" }}>RESOLVED</span>
-            )}
+            ) : null}
             {item.severity && (
               <span
                 className="sticker text-xs"
@@ -403,6 +405,13 @@ function InboxCard({
         <div className="px-5 pb-5 border-t border-white/10 pt-4 space-y-4">
           {item.kind === "submission" && (
             <>
+              {payload.adminNotes?.startsWith("Auto-approved:") && (
+                <div className="p-3 border" style={{ background: "#0d1a00", borderColor: "#C8FA3C" }}>
+                  <p className="text-xs uppercase tracking-wide mb-0.5" style={{ color: "#C8FA3C" }}>System Notice</p>
+                  <p className="text-sm" style={{ color: "#C8FA3C" }}>{payload.adminNotes}</p>
+                </div>
+              )}
+
               {payload.submitterProfile && (
                 <AdminUserIdentity profile={payload.submitterProfile} showEmail size={40} />
               )}
