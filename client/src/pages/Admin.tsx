@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -146,7 +147,8 @@ const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white
 
 export default function Admin() {
   const { toast } = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
+  const [, navigate] = useLocation();
   const [authenticated, setAuthenticated] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [username, setUsername] = useState("");
@@ -809,7 +811,7 @@ export default function Admin() {
             <button
               type="button"
               className="dash-btn dash-btn-ghost"
-              onClick={() => { apiRequest("POST", "/api/admin/logout", {}); setAuthenticated(false); }}
+              onClick={async () => { await logout(); navigate("/"); }}
             >
               Log out
             </button>
