@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
-  ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, Search,
+  ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, UserCircle, Search, RefreshCw,
 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
@@ -213,6 +213,49 @@ export default function Admin() {
     };
   }, [authLoading, user]);
 
+  useEffect(() => {
+    if (!authenticated) return;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    const allowed: AdminTab[] = ["inbox", "events", "gigs", "promoters", "users", "team"];
+    if (tab && allowed.includes(tab as AdminTab)) {
+      setActiveTab(tab as AdminTab);
+    }
+  }, [authenticated]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/metrics"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
+  }, [authenticated]);
+
+  const purgeQaMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/users/purge-qa", {}),
+    onSuccess: async (res) => {
+      const data = await res.json();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+      toast({
+        title: "QA accounts purged",
+        description: data.deleted
+          ? `Removed ${data.deleted}: ${(data.usernames || []).join(", ")}`
+          : "No QA test accounts found.",
+      });
+    },
+    onError: (err: unknown) => {
+      toast({
+        title: "Purge failed",
+        description: parseApiError(err, "Could not purge QA accounts."),
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -286,10 +329,20 @@ export default function Admin() {
     enabled: authenticated,
   });
 
+  const { data: adminMetrics } = useQuery<{ users: number }>({
+    queryKey: ["/api/admin/metrics"],
+    queryFn: () => apiRequest("GET", "/api/admin/metrics").then(r => r.json()),
+    enabled: authenticated,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+
   const { data: allUsers = [], isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useQuery<AdminUser[]>({
     queryKey: ["/api/admin/users"],
     queryFn: () => apiRequest("GET", "/api/admin/users").then(r => r.json()),
-    enabled: authenticated && activeTab === "users",
+    enabled: authenticated,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const filteredAllUsers = useMemo(() => {
@@ -691,6 +744,24 @@ export default function Admin() {
     refetchPromoters();
     refetchTalent();
   };
+
+  const refreshAdminData = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+    refetchInbox();
+    refetchUsers();
+    refetchEvents();
+    refetchGigs();
+    refetchTeam();
+  };
+
+  const setAdminTab = (tab: AdminTab) => {
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  const userCount = adminMetrics?.users ?? allUsers.length;
   const eventSearchQuery = eventSearch.trim().toLowerCase();
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
@@ -734,6 +805,14 @@ export default function Admin() {
             <button
               type="button"
               className="dash-btn dash-btn-ghost"
+              onClick={refreshAdminData}
+            >
+              <RefreshCw size={12} style={{ marginRight: 6 }} />
+              Refresh all
+            </button>
+            <button
+              type="button"
+              className="dash-btn dash-btn-ghost"
               onClick={() => { apiRequest("POST", "/api/admin/logout", {}); setAuthenticated(false); }}
             >
               Log out
@@ -744,7 +823,7 @@ export default function Admin() {
         <AdminMetricsPanel
           enabled={authenticated}
           onMetricClick={(tab, metricKey) => {
-            setActiveTab(tab as AdminTab);
+            setAdminTab(tab as AdminTab);
             if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
           }}
         />
@@ -752,16 +831,16 @@ export default function Admin() {
         <div className="dash-admin-tabs">
           {([
             { key: "inbox" as AdminTab, label: `Inbox${totalActionItems > 0 ? ` (${totalActionItems})` : ""}`, icon: <Inbox size={12} /> },
+            { key: "users" as AdminTab, label: `All users (${userCount})`, icon: <UserCircle size={12} /> },
             { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
             { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
             { key: "promoters" as AdminTab, label: "Promoters", icon: <Users size={12} /> },
-            { key: "users" as AdminTab, label: `All users${allUsers.length ? ` (${allUsers.length})` : ""}`, icon: <Users size={12} /> },
             { key: "team" as AdminTab, label: `Team (${teamAdmins.length})`, icon: <Users size={12} /> },
           ]).map(tab => (
             <button
               key={tab.key}
               type="button"
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => setAdminTab(tab.key)}
               className={`dash-admin-tab ${activeTab === tab.key ? "active" : ""}`}
             >
               {tab.icon}
@@ -1255,9 +1334,22 @@ export default function Admin() {
 
         {activeTab === "users" && (
           <div>
-            <p className="text-white/40 text-sm mb-4">
-              Every registered account on PDX Pride Guide. Search by username, email, or display name.
-            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+              <p className="text-white/40 text-sm" style={{ margin: 0 }}>
+                Every registered account on PDX Pride Guide. Search by username, email, or display name.
+              </p>
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  className="display text-xs px-4 py-2 border"
+                  style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                  disabled={purgeQaMutation.isPending}
+                  onClick={() => purgeQaMutation.mutate()}
+                >
+                  {purgeQaMutation.isPending ? "PURGING…" : "PURGE QA TEST ACCOUNTS"}
+                </button>
+              )}
+            </div>
             <div className="flex gap-2 mb-4 max-w-xl">
               <input
                 className="flex-1 bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"

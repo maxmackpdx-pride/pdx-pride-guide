@@ -2199,6 +2199,8 @@ export interface IStorage {
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
   getAllUsers(): User[];
+  purgeQaTestUsers(): { deleted: number; usernames: string[] };
+  countActiveMessages(): number;
   autoApproveSubmission(id: number, claimedByUsername: string): void;
   getPendingPromoterRequests(): any[];
   // Host messages
@@ -2343,6 +2345,41 @@ export const storage: IStorage = {
   },
   getAllUsers() {
     return db.select().from(users).all();
+  },
+  countActiveMessages() {
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count FROM messages
+      WHERE deleted_by_from = 0 AND deleted_by_to = 0
+    `).get() as { count: number };
+    return row?.count ?? 0;
+  },
+  purgeQaTestUsers() {
+    const targets = db.select().from(users).all().filter((u: User) => {
+      if (isEnvListedSiteAdmin(u) || storage.hasSiteAdminGrant(u.id)) return false;
+      const email = String(u.email || "").toLowerCase();
+      const username = String(u.username || "").toLowerCase();
+      return email.includes("testmail.local")
+        || email.includes("+qa")
+        || username.startsWith("qa_")
+        || username.endsWith("_qa");
+    });
+    const deleted: string[] = [];
+    for (const user of targets) {
+      const userId = user.id;
+      const email = user.email;
+      sqlite.prepare(`DELETE FROM gig_posts WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM gifting_interests WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM gifting_posts WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM missed_connections WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM attendances WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM messages WHERE from_user_id = ? OR to_user_id = ?`).run(userId, userId);
+      sqlite.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM submissions WHERE submitter_email = ?`).run(email);
+      deleted.push(user.username);
+    }
+    return { deleted: deleted.length, usernames: deleted };
   },
   autoApproveSubmission(id, claimedByUsername) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();

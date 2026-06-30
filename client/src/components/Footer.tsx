@@ -27,7 +27,8 @@ export default function Footer() {
                 ["/pride-work", "Pride Werk"],
                 ["/gifting", "Gifting"],
                 ["/about", "About"],
-                ...(user?.isAdmin ? [["/admin", "Admin Panel"]] : []),
+                ["/legal", "Legal"],
+                ...(user?.isAdmin ? [["/admin?tab=users", "Admin · All users"], ["/admin", "Admin Panel"]] : []),
               ].map(([href, label]) => (
                 <div key={href} style={{ marginBottom: 8 }}>
                   <Link href={href} style={{ color: "#888", fontSize: "0.82rem", textDecoration: "none" }}>{label}</Link>
@@ -72,8 +73,9 @@ export default function Footer() {
           <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>
             Portland, Oregon · Made by Tucker · Independently run
           </div>
-          <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>
-            © 2026 PDX Pride Guide · Free to Browse · Independently Run
+          <div style={{ color: "var(--text-faint)", fontSize: "0.75rem", display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <span>© 2026 PDX Pride Guide · Free to Browse · Independently Run</span>
+            <Link href="/legal" style={{ color: "var(--text-faint)", textDecoration: "underline" }}>Legal</Link>
           </div>
         </div>
       </div>

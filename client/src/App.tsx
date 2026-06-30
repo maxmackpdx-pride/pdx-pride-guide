@@ -23,6 +23,7 @@ import Submit from "./pages/Submit";
 import PrideWork from "./pages/PrideWork";
 import Gifting from "./pages/Gifting";
 import About from "./pages/About";
+import Legal from "./pages/Legal";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
 import Inbox from "./pages/Inbox";
@@ -48,6 +49,7 @@ export default function App() {
                 <Route path="/pride-work" component={PrideWork} />
                 <Route path="/gifting" component={Gifting} />
                 <Route path="/about" component={About} />
+                <Route path="/legal" component={Legal} />
                 <Route path="/admin" component={Admin} />
                 <Route path="/dashboard" component={Dashboard} />
                 <Route path="/inbox" component={Inbox} />

@@ -180,7 +180,7 @@ Sitemap: ${SITE_URL}/sitemap.xml
 }
 
 export function buildSitemapXml(events: SeoEvent[]) {
-  const staticPaths = ["/", "/events", "/gifting", "/pride-work", "/spotted", "/about", "/submit"];
+  const staticPaths = ["/", "/events", "/gifting", "/pride-work", "/spotted", "/about", "/legal", "/submit"];
   const staticUrls = staticPaths
     .map(path => `  <url><loc>${SITE_URL}${path === "/" ? "/" : path}</loc><changefreq>daily</changefreq><priority>${path === "/" ? "1.0" : "0.8"}</priority></url>`)
     .join("\n");
@@ -214,6 +214,10 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/about": {
     title: "About PDX Pride Guide — Portland Pride 2026",
     description: "Community-run Portland Pride 2026 event directory for PDX. Built for queer Portland by submissions and local support.",
+  },
+  "/legal": {
+    title: "Legal — PDX Pride Guide",
+    description: "Terms of use, privacy policy, and community guidelines for PDX Pride Guide.",
   },
   "/gifting": {
     title: "Gift with Pride — PDX Pride Guide",

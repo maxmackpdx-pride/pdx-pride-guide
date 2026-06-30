@@ -1649,14 +1649,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
       activeSessions: counts.express_sessions ?? 0,
       liveEvents,
       userSubmittedEvents,
-      messages: counts.messages ?? 0,
+      messages: storage.countActiveMessages(),
       attendances: counts.attendances ?? 0,
       pendingSubmissions,
-      gigPosts: counts.gig_posts ?? 0,
-      giftingPosts: counts.gifting_posts ?? 0,
-      missedConnections: counts.missed_connections ?? 0,
+      gigPosts: storage.getGigPosts("LIVE").length,
+      giftingPosts: storage.getGiftingPosts().length,
+      missedConnections: storage.getMissedConnections("ACTIVE").length,
       openFeedback,
+      generatedAt: new Date().toISOString(),
     });
+  });
+
+  app.post("/api/admin/users/purge-qa", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    const result = storage.purgeQaTestUsers();
+    res.json(result);
   });
 
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {
