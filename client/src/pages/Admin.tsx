@@ -4,7 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock, Clock,
-  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare,
+  ToggleLeft, ToggleRight, ChevronDown, Inbox, Tag, AlertTriangle, Pencil, X, Gift, MessageSquare, Search,
 } from "lucide-react";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
@@ -102,6 +102,9 @@ export default function Admin() {
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
   const [activeTab, setActiveTab] = useState<AdminTab>("queue");
+  const [userSearchQ, setUserSearchQ] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<Array<{ id: number; username: string; email: string; displayName: string | null; promoterStatus: string | null }>>([]);
+  const [userSearching, setUserSearching] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
@@ -286,6 +289,28 @@ export default function Admin() {
     },
     onError: () => toast({ title: "Error", description: "Could not deny promoter.", variant: "destructive" }),
   });
+
+  const setPromoterStatusMutation = useMutation({
+    mutationFn: ({ userId, status }: { userId: number; status: string }) =>
+      apiRequest("POST", `/api/admin/users/${userId}/set-promoter-status`, { status }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+      setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, promoterStatus: vars.status } : u));
+      toast({ title: `Status set to ${vars.status}` });
+    },
+    onError: () => toast({ title: "Error", description: "Could not update status.", variant: "destructive" }),
+  });
+
+  async function handleUserSearch() {
+    if (!userSearchQ.trim()) return;
+    setUserSearching(true);
+    try {
+      const r = await apiRequest("GET", `/api/admin/users/search?q=${encodeURIComponent(userSearchQ)}`);
+      setUserSearchResults(await r.json());
+    } finally {
+      setUserSearching(false);
+    }
+  }
 
   const approveTalentMutation = useMutation({
     mutationFn: (talentId: number) => apiRequest("POST", `/api/admin/talent-requests/${talentId}/approve`, {}),
@@ -555,6 +580,63 @@ export default function Admin() {
                 ))}
               </div>
             )}
+
+            {/* Manual user override */}
+            <div className="mt-10 pt-8 border-t border-white/10">
+              <p className="display text-sm mb-3" style={{ color: "#FF6600" }}>MANUAL PROMOTER OVERRIDE</p>
+              <p className="text-white/40 text-xs mb-4">Search any user by username, email, or display name to manually set their promoter status.</p>
+              <div className="flex gap-2 mb-4">
+                <input
+                  className="flex-1 bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
+                  placeholder="Search by username, email, or name..."
+                  value={userSearchQ}
+                  onChange={e => setUserSearchQ(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleUserSearch()}
+                />
+                <button
+                  onClick={handleUserSearch}
+                  disabled={userSearching}
+                  className="display text-xs px-4 py-2 border border-white/30 text-white/60 flex items-center gap-2 hover:border-white/60"
+                >
+                  <Search size={12} /> {userSearching ? "..." : "SEARCH"}
+                </button>
+              </div>
+              {userSearchResults.length > 0 && (
+                <div className="space-y-2">
+                  {userSearchResults.map(u => (
+                    <div key={u.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
+                      <div>
+                        <p className="text-white text-sm font-medium">@{u.username}{u.displayName ? ` · ${u.displayName}` : ""}</p>
+                        <p className="text-white/40 text-xs">{u.email}</p>
+                        <p className="text-xs mt-1" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                          status: {u.promoterStatus || "none"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {u.promoterStatus !== "approved" && (
+                          <button
+                            onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
+                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                          >APPROVE</button>
+                        )}
+                        {u.promoterStatus !== "pending" && (
+                          <button
+                            onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
+                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
+                          >SET PENDING</button>
+                        )}
+                        {u.promoterStatus !== "none" && u.promoterStatus !== null && (
+                          <button
+                            onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
+                            className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                          >RESET</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

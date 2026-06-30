@@ -1568,6 +1568,7 @@ export interface IStorage {
   linkGoogleToUser(id: number, googleId: string): void;
   updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus'>>): void;
   setPromoterStatus(userId: number, status: string): void;
+  getAllUsers(): User[];
   getPendingPromoterRequests(): any[];
   // Host messages
   getHostMessages(eventId: number, limit?: number): any[];
@@ -1936,11 +1937,30 @@ export const storage: IStorage = {
   setPromoterStatus(userId, status) {
     db.update(users).set({ promoterStatus: status }).where(eq(users.id, userId)).run();
   },
+  getAllUsers() {
+    return db.select().from(users).all();
+  },
   getPendingPromoterRequests() {
-    const pendingUsers = db.select().from(users).all().filter(u => u.promoterStatus === "pending");
-    return pendingUsers.map(u => {
+    // Primary: users explicitly flagged as pending
+    const pendingByStatus = db.select().from(users).all().filter(u => u.promoterStatus === "pending");
+    const seenIds = new Set(pendingByStatus.map(u => u.id));
+    const allUsers = [...pendingByStatus];
+
+    // Secondary: users who submitted a CLAIM that's still PENDING but whose promoterStatus wasn't set
+    const pendingClaimSubs = db.select().from(submissions).all()
+      .filter(s => s.type === "CLAIM" && s.status === "PENDING" && !!s.submitterEmail);
+    for (const sub of pendingClaimSubs) {
+      const u = db.select().from(users).where(eq(users.email, sub.submitterEmail!)).get();
+      if (u && !seenIds.has(u.id) && u.promoterStatus !== "approved") {
+        seenIds.add(u.id);
+        allUsers.push(u);
+      }
+    }
+
+    return allUsers.map(u => {
+      // Find most recent CLAIM submission regardless of submission status
       const claimSub = db.select().from(submissions).all()
-        .filter(s => s.submitterEmail === u.email && s.type === "CLAIM" && s.status === "PENDING")
+        .filter(s => s.submitterEmail === u.email && s.type === "CLAIM")
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
       const evt = claimSub?.eventId
         ? db.select().from(events).where(eq(events.id, claimSub.eventId)).get()

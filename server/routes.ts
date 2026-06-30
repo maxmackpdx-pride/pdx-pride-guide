@@ -1320,6 +1320,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true, promoterStatus: "rejected" });
   });
 
+  app.get("/api/admin/users/search", requireAdmin, (req, res) => {
+    const q = String(req.query.q || "").trim().toLowerCase();
+    if (!q) return res.json([]);
+    const all = storage.getAllUsers ? storage.getAllUsers() : [];
+    const matches = all.filter(u =>
+      u.username?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.displayName?.toLowerCase().includes(q)
+    ).slice(0, 10).map(u => ({
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      displayName: u.displayName,
+      promoterStatus: u.promoterStatus,
+    }));
+    res.json(matches);
+  });
+
+  app.post("/api/admin/users/:userId/set-promoter-status", requireAdmin, (req, res) => {
+    const userId = Number(req.params.userId);
+    const { status } = req.body as { status: string };
+    const allowed = ["none", "pending", "approved", "rejected"];
+    if (!allowed.includes(status)) return res.status(400).json({ error: "Invalid status" });
+    const user = storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    storage.setPromoterStatus(userId, status);
+    res.json({ ok: true, promoterStatus: status });
+  });
+
   app.get("/api/admin/events", requireAdmin, (req, res) => {
     const evts = storage.getEvents({});
     res.json(evts);
