@@ -193,7 +193,7 @@ export default function Submit() {
             {/* Card 1: Submit New Event */}
             <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("submit"); setSubmitStep(isApproved ? "event_details" : "promoter_app"); }}
               style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #C8FA3C", padding: "20px 20px", cursor: "pointer" }}>
-              <div className="display" style={{ color: "#C8FA3C", fontSize: "1.1rem", marginBottom: 6 }}>SUBMIT NEW EVENT + SIGN UP TO BE A PROMOTER →</div>
+              <div className="display" style={{ color: "#C8FA3C", fontSize: "1.1rem", marginBottom: 6 }}>{isApproved ? "SUBMIT NEW EVENT →" : "SUBMIT NEW EVENT + SIGN UP TO BE A PROMOTER →"}</div>
               <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
                 {isApproved
                   ? "You're a verified promoter — your event goes live after you submit."
