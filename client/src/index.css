@@ -6738,13 +6738,6 @@ footer a:hover { color: #00FFFF !important; }
     drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
 }
 
-html.calm-mode .footer-brand-wordmark {
-  color: #0d0d0d;
-}
-
-html.calm-mode .footer-brand-wordmark__line--accent {
-  filter: none;
-}
 
 .event-slogan-band {
   position: relative;
@@ -7660,55 +7653,40 @@ html.calm-mode .footer-brand-wordmark__line--accent {
 
 
 /* ═══════════════════════════════════════════════════════════
-   CALM MODE
+   CALM MODE — grayscale dark
    Toggled via html.calm-mode class (ThemeContext).
-   Flips to a light, no-glow aesthetic while keeping all
-   neon colors on interactive elements (tags, buttons, maps,
-   flyers). Only visual properties are overridden — no layout
-   or functional changes.
+   Keeps the dark aesthetic; strips every neon color to gray.
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Base font bump ── */
+/* ── Remap every neon CSS variable to neutral gray ── */
 html.calm-mode {
+  --neon-yellow:  #b0b0b0;
+  --neon-cyan:    #999999;
+  --neon-magenta: #999999;
+  --neon-orange:  #999999;
+  --neon-violet:  #999999;
+  --neon-green:   #999999;
+  --neon-red:     #999999;
+  --neon-blue:    #999999;
+  --day-thu: #777;
+  --day-fri: #777;
+  --day-sat: #777;
+  --day-sun: #777;
+  --site-film-grain-opacity: 0;
+  --board-page-grain-opacity: 0;
   font-size: 106%;
 }
 
-/* ── CSS variable overrides ── */
-html.calm-mode {
-  --site-film-grain-opacity: 0;
-  --board-page-grain-opacity: 0;
-  --text-heading: #0d0d0d;
-  --text-body: #2a2826;
-  --text-meta: #5a5855;
-  --text-faint: #8a8785;
-  --board-text: #0d0d0d;
-  --board-muted: #5a5855;
+/* ── Kill film grain ── */
+html.calm-mode .film-grain-overlay {
+  opacity: 0;
 }
 
-/* ── Page / shell background ── */
-html.calm-mode body,
-html.calm-mode .app-shell {
-  background: #eae8e3;
-  color: #0d0d0d;
-}
-
-/* ── Header / nav ── */
-html.calm-mode .site-header {
-  background: #f2f0ed;
-  border-bottom-color: #c8c4be;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-html.calm-mode .site-nav-link {
-  color: #5a5855;
-}
-
-html.calm-mode .site-nav-link:hover {
-  color: #0d0d0d;
-}
-
-html.calm-mode .site-nav-link.active {
-  color: #0d0d0d;
+/* ── Nav MENU button → gray, no magenta shadow ── */
+html.calm-mode .site-nav-toggle {
+  border-color: #666 !important;
+  color: #aaa !important;
+  box-shadow: none !important;
 }
 
 html.calm-mode .site-nav-link.active::after {
@@ -7716,227 +7694,135 @@ html.calm-mode .site-nav-link.active::after {
 }
 
 html.calm-mode .site-nav-notify-dot {
+  background: #777 !important;
   box-shadow: none;
   animation: none;
 }
 
-/* ── Pages / content areas ── */
-html.calm-mode .zine-page {
-  background: #eae8e3;
+/* ── Logo: grayscale, kill glitch ghosts and animations ── */
+html.calm-mode .glitch-logo__main {
+  filter: grayscale(1) brightness(0.9) !important;
 }
 
-html.calm-mode .zine-page::before {
-  opacity: 0;
+html.calm-mode .glitch-logo__ghost {
+  opacity: 0 !important;
 }
 
-html.calm-mode .board-page {
-  background: #eae8e3;
+html.calm-mode .glitch-logo {
+  animation: none !important;
 }
 
-html.calm-mode .submit-page__body {
-  background: #eae8e3;
+/* ── Wordmark "PRIDE" rainbow gradient → gray ── */
+html.calm-mode .glitch-word__gradient {
+  background: #a0a0a0 !important;
+  -webkit-text-fill-color: #a0a0a0 !important;
+  animation: none !important;
 }
 
-/* ── Hero panels ── */
-html.calm-mode .page-hero__panel {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+html.calm-mode .glitch-word::before,
+html.calm-mode .glitch-word::after {
+  display: none !important;
 }
 
-html.calm-mode .page-hero__title,
-html.calm-mode .page-hero-title {
-  color: #0d0d0d;
+/* ── Wordmark accent lines (nav + footer) → gray ── */
+html.calm-mode .site-brand-wordmark__line--accent,
+html.calm-mode .footer-brand-wordmark__line--accent {
+  color: #a0a0a0 !important;
+  filter: none !important;
 }
 
-html.calm-mode .page-hero__lede,
-html.calm-mode .page-hero__tagline {
-  color: #2a2826;
+/* ── Rainbow bars → dark gray ── */
+html.calm-mode .rainbow-bar {
+  background: #2a2a2a !important;
+  opacity: 1;
 }
 
-/* Remove hero accent glows — color stays, glow goes */
+html.calm-mode .site-header::after {
+  background: #2a2a2a !important;
+}
+
+/* ── Hero border-image → gray ── */
+html.calm-mode .page-hero {
+  border-image: linear-gradient(90deg, #555, #444, #555, #444) 1 !important;
+}
+
+/* ── Remove text glows and drop shadows ── */
 html.calm-mode .page-hero__accent--lime,
 html.calm-mode .page-hero__accent--cyan,
 html.calm-mode .page-hero__accent--magenta,
-html.calm-mode .page-hero__accent--orange {
-  text-shadow: none;
-}
-
-html.calm-mode .page-hero__accent--rainbow {
-  filter: none;
+html.calm-mode .page-hero__accent--orange,
+html.calm-mode .page-hero__accent--rainbow,
+html.calm-mode .page-hero__title,
+html.calm-mode .page-hero-title {
+  text-shadow: none !important;
+  filter: none !important;
 }
 
 /* ── Countdown ── */
 html.calm-mode .home-countdown-box {
-  background: #ffffff;
-  border-color: #d0cdc8;
+  border-color: #444;
   box-shadow: none;
 }
 
 html.calm-mode .home-countdown-box div {
-  color: #111111;
   text-shadow: none;
   -webkit-text-stroke: 0;
+  color: #e0e0e0;
 }
 
-html.calm-mode .home-countdown-box span {
-  color: #5a5855;
-}
-
-/* ── Event cards ── */
-html.calm-mode .event-board-card {
-  background: #f7f5f1;
-  border-color: #d0cdc8;
-}
-
-html.calm-mode .event-board-card__title {
-  color: #0d0d0d;
-}
-
-html.calm-mode .event-board-card__venue,
-html.calm-mode .event-board-card__when {
-  color: #5a5855;
-}
-
-html.calm-mode .event-board-card__details-link {
-  color: #0044aa;
-}
-
-/* ── Poster cards ── */
-html.calm-mode .poster-card {
-  background: #f7f5f1;
-  border-color: #d0cdc8;
-}
-
-html.calm-mode .poster-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* ── Buttons — keep neon colors, remove glow shadows ── */
-html.calm-mode .btn-neon {
-  box-shadow: none;
-}
-
+/* ── Buttons → no glow ── */
+html.calm-mode .btn-neon,
 html.calm-mode .btn-neon:hover {
-  box-shadow: none;
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
-/* ── Filter tags — keep neon border/color, remove glow ── */
-html.calm-mode .filter-tag.active {
-  box-shadow: none;
+/* ── Tags / stickers → no glow ── */
+html.calm-mode .filter-tag,
+html.calm-mode .filter-tag.active,
+html.calm-mode .sticker {
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
-/* ── Logo / wordmark ── */
-html.calm-mode .glitch-logo__main {
-  filter: none;
+/* ── Cards → no glow ── */
+html.calm-mode .poster-card:hover,
+html.calm-mode .event-board-card {
+  box-shadow: none !important;
 }
 
-html.calm-mode .site-brand-wordmark__line--accent {
-  filter: none;
-}
-
-/* ── Sticker motifs / decorative elements ── */
+/* ── Decorative elements ── */
 html.calm-mode .sticker-motif {
-  filter: none;
+  filter: grayscale(1) brightness(0.6) !important;
 }
 
 html.calm-mode .torn-divider {
-  box-shadow: none;
-  filter: none;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
 }
 
-/* ── Home map button ── */
-html.calm-mode .home-map-all-events {
-  box-shadow: none;
-}
-
+/* ── Map ── */
+html.calm-mode .home-map-all-events,
 html.calm-mode .map-legend--home {
-  box-shadow: none;
-  background: rgba(255, 255, 255, 0.9);
-  color: #0d0d0d;
+  box-shadow: none !important;
 }
 
-/* ── Film grain overlay ── */
-html.calm-mode .film-grain-overlay {
-  opacity: 0;
+/* ── Schedule day headers ── */
+html.calm-mode .schedule-day-col__header {
+  border-color: #555 !important;
 }
 
 /* ── Footer ── */
-html.calm-mode footer {
-  background: #d8d4ce;
-}
-
 html.calm-mode footer a {
-  color: #5a5855;
-}
-
-/* ── Calm mode toggle button (in footer) ── */
-.calm-mode-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: 1px solid #444;
-  padding: 7px 14px 7px 10px;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
   color: #888;
-  transition: border-color 0.15s, color 0.15s;
 }
 
-.calm-mode-toggle:hover {
-  border-color: #aaa;
-  color: #ccc;
+html.calm-mode .footer-brand-logo {
+  filter: grayscale(1) brightness(0.7) !important;
+  animation: none !important;
 }
 
-html.calm-mode .calm-mode-toggle {
-  border-color: #999;
-  color: #2a2826;
-}
 
-html.calm-mode .calm-mode-toggle:hover {
-  border-color: #555;
-  color: #0d0d0d;
-}
-
-.calm-mode-toggle__icon {
-  font-size: 0.9rem;
-  line-height: 1;
-}
-
-.calm-mode-toggle__pill {
-  display: inline-flex;
-  align-items: center;
-  width: 28px;
-  height: 14px;
-  border: 1px solid #555;
-  border-radius: 7px;
-  padding: 2px;
-  position: relative;
-  background: #222;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-html.calm-mode .calm-mode-toggle__pill {
-  background: #c8c4be;
-  border-color: #999;
-}
-
-.calm-mode-toggle__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #666;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.calm-mode-toggle__dot--on {
-  transform: translateX(14px);
-  background: #2a2826;
-}
 
 /* ===== Schedule view ===== */
 
