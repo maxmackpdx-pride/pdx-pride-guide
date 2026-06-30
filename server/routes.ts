@@ -422,18 +422,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const user = storage.getUserById(req.session.userId!);
       if (!user) return res.status(401).json({ error: "Not authenticated" });
-      const type = req.body.type === "CLAIM" ? "CLAIM" : "NEW_EVENT";
+      const rawType = req.body.type;
+      const type = rawType === "CLAIM" ? "CLAIM" : rawType === "SUGGEST" ? "SUGGEST" : "NEW_EVENT";
       const promoterStatus = user.promoterStatus || "none";
       const isAdminUser = isMainAdminUser(user) || !!req.session.isAdmin;
-
-      if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
-        return res.status(403).json({
-          error: "PROMOTER_NOT_APPROVED",
-          message: promoterStatus === "pending"
-            ? "Your promoter verification is pending admin review. You can claim an existing event to request verification."
-            : "Submit a claim request first to become a verified promoter, or wait for admin approval.",
-        });
-      }
 
       const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
       const claimEventId = eventId ?? 0;
@@ -461,16 +453,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
       });
       const sub = storage.createSubmission(data);
 
-      // Approved promoters submitting a new event bypass the review queue
-      if (type === "NEW_EVENT" && (user.promoterStatus === "approved" || req.session.isAdmin)) {
+      // Approved promoters / admins submitting a new event bypass the review queue
+      if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser)) {
         storage.autoApproveSubmission(sub.id, user.username);
         return res.json({ ...sub, autoApproved: true });
       }
 
-      // Claim submission from unapproved user → flag for promoter review
-      if (type === "CLAIM" && user.promoterStatus !== "approved" && !req.session.isAdmin) {
-        storage.setPromoterStatus(user.id, "pending");
+      // NEW_EVENT from unapproved user → goes to queue + flags them for promoter review
+      if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
+        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
+        return res.json({ ...sub, pendingPromoterReview: true });
       }
+
+      // CLAIM from unapproved user → flag for promoter review
+      if (type === "CLAIM" && promoterStatus !== "approved" && !isAdminUser) {
+        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
+      }
+
+      // SUGGEST goes straight to queue, no promoter status change
       res.json(sub);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -723,16 +723,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
         pickupPreference: String(req.body.pickupPreference || "").trim(),
         photoUrls: JSON.stringify(photoUrls),
       });
-      const poster = storage.getUserById(req.session.userId!);
-      const priorPosts = storage.getGiftingPostsByUser(req.session.userId!);
-      const skipReview = isMainAdminUser(poster) || storage.isSiteOwnerUser(poster);
-      const firstPostHeld = priorPosts.length === 0 && !skipReview;
-      const post = storage.createGiftingPost(data, firstPostHeld ? "PENDING" : undefined);
-      res.json({
-        ...post,
-        firstPostHeld,
-        message: firstPostHeld ? "Your first gifting post is held for admin review." : "Your gifting post is live.",
-      });
+      const post = storage.createGiftingPost(data);
+      res.json({ ...post, message: "Your gifting post is live." });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -1320,6 +1312,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/events/:id/hosts", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    if (!sessionIsAdmin(req) && !storage.isUserEventHost(evt.id, req.session.userId!)) {
+      return res.status(403).json({ error: "Only event hosts can add co-hosts" });
+    }
     const username = String(req.body.username || "").trim();
     const email = String(req.body.email || "").trim();
     const result = storage.addEventCoHost(evt.id, req.session.userId!, username, email);
@@ -1340,6 +1335,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/events/:id/talent", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    if (!sessionIsAdmin(req) && !storage.isUserEventHost(evt.id, req.session.userId!)) {
+      return res.status(403).json({ error: "Only event hosts can add talent" });
+    }
     const role = String(req.body.role || "").trim().toUpperCase();
     if (!isEventTalentRole(role)) return res.status(400).json({ error: "Invalid role" });
     const username = String(req.body.username || "").trim();
