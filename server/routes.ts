@@ -1537,12 +1537,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/me", requireAdmin, (req, res) => {
-    const user = getSessionAdminUser(req);
-    const syncedUser = user ? syncOwnerDisplayName(user) : null;
+    const mainUser = getSessionAdminUser(req);
+    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+    const resolved = mainUser ? syncOwnerDisplayName(mainUser) : sessionUser;
     res.json({
       isAdmin: true,
-      username: syncedUser?.displayName || syncedUser?.username || ADMIN_USERNAME,
-      email: syncedUser?.email || null,
+      username: resolved?.displayName || resolved?.username || ADMIN_USERNAME,
+      email: resolved?.email || null,
+      isSuperAdmin: !!mainUser,
       canManageTeam: true,
     });
   });
