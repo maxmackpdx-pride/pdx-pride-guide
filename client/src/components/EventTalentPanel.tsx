@@ -117,8 +117,10 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
     },
     onSuccess: (data) => {
       toast({
-        title: "Request sent",
-        description: data.needsAdmin
+        title: data.isHostSelf ? "Added to lineup!" : "Request sent",
+        description: data.isHostSelf
+          ? "You're live on the lineup."
+          : data.needsAdmin
           ? "Unclaimed event — admins will review your lineup request."
           : "The event host will review your request in their inbox.",
       });

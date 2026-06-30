@@ -3071,11 +3071,17 @@ export const storage: IStorage = {
     }
     const uname = username.trim();
     const em = email.trim().toLowerCase();
-    if (!uname || !em) return { error: "Username and email required" };
-    const target = storage.getUserByUsername(uname);
-    if (!target) return { error: "No account found with that username" };
-    if ((target.email || "").trim().toLowerCase() !== em) {
-      return { error: "Email does not match that username" };
+    if (!em) return { error: "Email is required" };
+    let target: any;
+    if (uname) {
+      target = storage.getUserByUsername(uname);
+      if (!target) return { error: "No account found with that username" };
+      if ((target.email || "").trim().toLowerCase() !== em) {
+        return { error: "Email does not match that username" };
+      }
+    } else {
+      target = storage.getUserByEmail(em);
+      if (!target) return { error: "No account found with that email" };
     }
     if (storage.isUserEventHost(eventId, target.id)) {
       return { error: "That person is already a host for this event" };
@@ -3236,30 +3242,34 @@ export const storage: IStorage = {
     `).get(eventId, userId, role) as { id: number; status: string } | undefined;
     if (existing?.status === "LIVE") return { error: "You're already on the lineup for this role" };
     if (existing?.status === "PENDING") return { error: "Your request is already pending approval" };
+    const isHost = storage.isUserEventHost(eventId, userId);
+    const status = isHost ? "LIVE" : "PENDING";
     const created = db.insert(eventTalent).values({
       eventId,
       userId,
       role,
-      status: "PENDING",
+      status,
       addedByUserId: userId,
       createdAt: new Date().toISOString(),
     } as any).returning().get();
-    const roleLabel = EVENT_TALENT_ROLE_LABELS[role];
-    const body = `${user.displayName || user.username} (@${user.username}) requested to be listed as ${roleLabel} for "${evt.title}". Approve to add them to the public lineup.`;
-    const approverIds = storage.getEventTalentApproverUserIds(eventId);
-    if (approverIds.length > 0) {
-      for (const approverId of approverIds) {
-        storage.sendMessage(
-          userId,
-          approverId,
-          `Talent request: ${roleLabel}`,
-          body,
-          { contextType: "EVENT_TALENT_REQUEST", contextId: created.id, contextLabel: evt.title },
-        );
+    if (!isHost) {
+      const roleLabel = EVENT_TALENT_ROLE_LABELS[role];
+      const body = `${user.displayName || user.username} (@${user.username}) requested to be listed as ${roleLabel} for "${evt.title}". Approve to add them to the public lineup.`;
+      const approverIds = storage.getEventTalentApproverUserIds(eventId);
+      if (approverIds.length > 0) {
+        for (const approverId of approverIds) {
+          storage.sendMessage(
+            userId,
+            approverId,
+            `Talent request: ${roleLabel}`,
+            body,
+            { contextType: "EVENT_TALENT_REQUEST", contextId: created.id, contextLabel: evt.title },
+          );
+        }
       }
     }
     const talent = storage.getEventTalent(eventId, { includePending: true }).find((t: any) => t.id === created.id);
-    return { talent, needsAdmin: storage.eventNeedsAdminTalentApproval(eventId) };
+    return { talent, needsAdmin: storage.eventNeedsAdminTalentApproval(eventId), isHostSelf: isHost };
   },
   approveEventTalent(talentId, approverUserId, opts) {
     ensureEventTalentSchema();

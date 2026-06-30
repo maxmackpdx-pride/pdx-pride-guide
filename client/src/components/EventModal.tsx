@@ -320,20 +320,19 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                       }}
                     >
                       <p className="event-modal__cohost-hint">
-                        Add a verified organizer by username and email (max 3 hosts).
+                        Add a verified organizer by their email (max 3 hosts).
                       </p>
                       <div className="event-modal__field-row">
                         <input
                           type="text"
-                          placeholder="Username"
+                          placeholder="Username (optional)"
                           value={coHostForm.username}
                           onChange={e => setCoHostForm(f => ({ ...f, username: e.target.value }))}
-                          required
                           className="event-modal__input"
                         />
                         <input
                           type="email"
-                          placeholder="Email"
+                          placeholder="Email *"
                           value={coHostForm.email}
                           onChange={e => setCoHostForm(f => ({ ...f, email: e.target.value }))}
                           required
@@ -343,7 +342,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                       <div className="event-modal__inline-actions">
                         <button
                           type="submit"
-                          disabled={addCoHostMutation.isPending || !coHostForm.username.trim() || !coHostForm.email.trim()}
+                          disabled={addCoHostMutation.isPending || !coHostForm.email.trim()}
                           className="event-modal__btn-outline event-modal__btn-outline--accent"
                         >
                           {addCoHostMutation.isPending ? "Adding…" : "Add co-host"}
@@ -363,7 +362,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             eventId={event.id}
             eventTitle={event.title}
             dayColor={dayColor}
-            mode="view"
+            mode={isHost || user?.isAdmin ? "manage" : "view"}
             isClaimable={event.isClaimable}
           />
 
