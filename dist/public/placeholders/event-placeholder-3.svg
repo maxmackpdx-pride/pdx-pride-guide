@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1" fill="#FF00CC" opacity="0.3"/>
+    </pattern>
+    <filter id="pinkglow"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <rect width="800" height="1000" fill="#080005"/>
+  <rect width="800" height="1000" fill="url(#dots)"/>
+  <line x1="100" y1="0" x2="300" y2="1000" stroke="#FF00CC" stroke-width="1" opacity="0.25"/>
+  <line x1="500" y1="0" x2="700" y2="1000" stroke="#FF00CC" stroke-width="1" opacity="0.25"/>
+  <line x1="0" y1="300" x2="800" y2="500" stroke="#FF00CC" stroke-width="1.5" opacity="0.35"/>
+  <circle cx="400" cy="480" r="100" fill="#FF00CC" opacity="0.1" filter="url(#pinkglow)"/>
+  <rect x="70" y="70" width="660" height="860" fill="none" stroke="#FF00CC" stroke-width="3"/>
+  <rect x="90" y="90" width="620" height="820" fill="none" stroke="#331133" stroke-width="1"/>
+  <text x="400" y="410" text-anchor="middle" font-family="Impact, Haettenschweiler, sans-serif" font-size="68" font-weight="900" fill="#FF00CC" letter-spacing="2">RAVE</text>
+  <text x="400" y="490" text-anchor="middle" font-family="Impact, Haettenschweiler, sans-serif" font-size="32" font-weight="900" fill="#fff" letter-spacing="10" opacity="0.65">ZINE</text>
+  <text x="400" y="570" text-anchor="middle" font-family="monospace" font-size="17" fill="#FF00CC" opacity="0.5" letter-spacing="4">FLYER COMING SOON</text>
+  <line x1="200" y1="650" x2="250" y2="550" stroke="#CCFF00" stroke-width="3" opacity="0.7"/>
+  <line x1="550" y1="620" x2="600" y2="520" stroke="#00FFFF" stroke-width="3" opacity="0.7"/>
+  <rect x="0" y="992" width="800" height="4" fill="#FF00CC"/>
+  <rect x="0" y="996" width="800" height="4" fill="#CCFF00"/>
+</svg>

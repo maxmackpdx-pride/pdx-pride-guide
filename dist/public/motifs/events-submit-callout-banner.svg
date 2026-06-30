@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" width="1600" height="400">
+  <defs>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#CCFF00" stroke-width="0.6" opacity="0.28"/>
+    </pattern>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.2" fill="#FF00CC" opacity="0.22"/>
+    </pattern>
+    <pattern id="waves" width="80" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 20 Q20 6 40 20 T80 20" fill="none" stroke="#00FFFF" stroke-width="0.8" opacity="0.22"/>
+    </pattern>
+    <linearGradient id="limeGlow" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#CCFF00" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#CCFF00" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#00FFFF" stop-opacity="0.14"/>
+    </linearGradient>
+    <radialGradient id="magentaPulse" cx="78%" cy="42%" r="42%">
+      <stop offset="0%" stop-color="#FF00CC" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#050505" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cyanPulse" cx="18%" cy="58%" r="38%">
+      <stop offset="0%" stop-color="#00FFFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#050505" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+
+  <rect width="1600" height="400" fill="#050505"/>
+  <rect width="1600" height="400" fill="url(#grid)"/>
+  <rect width="1600" height="400" fill="url(#dots)"/>
+  <rect width="1600" height="400" fill="url(#waves)"/>
+  <rect width="1600" height="400" fill="url(#limeGlow)"/>
+  <rect width="1600" height="400" fill="url(#magentaPulse)"/>
+  <rect width="1600" height="400" fill="url(#cyanPulse)"/>
+
+  <line x1="0" y1="120" x2="520" y2="280" stroke="#CCFF00" stroke-width="2" opacity="0.45"/>
+  <line x1="1600" y1="90" x2="1080" y2="310" stroke="#CCFF00" stroke-width="1.5" opacity="0.32"/>
+  <line x1="220" y1="0" x2="420" y2="400" stroke="#FF00CC" stroke-width="1" opacity="0.22"/>
+  <line x1="1180" y1="0" x2="1380" y2="400" stroke="#FF00CC" stroke-width="1" opacity="0.22"/>
+  <line x1="0" y1="250" x2="1600" y2="170" stroke="#00FFFF" stroke-width="1.2" opacity="0.28"/>
+
+  <ellipse cx="260" cy="200" rx="140" ry="70" fill="#00FFFF" opacity="0.07" filter="url(#softGlow)"/>
+  <ellipse cx="1340" cy="210" rx="160" ry="80" fill="#FF00CC" opacity="0.08" filter="url(#softGlow)"/>
+  <circle cx="800" cy="200" r="90" fill="#CCFF00" opacity="0.06" filter="url(#softGlow)"/>
+
+  <rect x="36" y="28" width="1528" height="344" fill="none" stroke="#CCFF00" stroke-width="2.5" opacity="0.38"/>
+  <rect x="56" y="48" width="1488" height="304" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="10 8" opacity="0.9"/>
+
+  <g opacity="0.55" stroke="#CCFF00" stroke-width="2.5" fill="none">
+    <path d="M96 96 H176 V176"/>
+    <path d="M1504 96 H1424 V176"/>
+    <path d="M96 304 H176 V224"/>
+    <path d="M1504 304 H1424 V224"/>
+  </g>
+
+  <g opacity="0.7">
+    <rect x="118" y="148" width="118" height="104" fill="none" stroke="#00FFFF" stroke-width="2" transform="rotate(-8 177 200)"/>
+    <rect x="1364" y="148" width="118" height="104" fill="none" stroke="#FF00CC" stroke-width="2" transform="rotate(8 1423 200)"/>
+  </g>
+
+  <g opacity="0.42" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-weight="900" fill="#CCFF00">
+    <text x="210" y="188" font-size="54" letter-spacing="3" transform="rotate(-90 210 188)">ADD</text>
+    <text x="1390" y="188" font-size="54" letter-spacing="3" transform="rotate(90 1390 188)">EVENT</text>
+  </g>
+
+  <g opacity="0.18" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-weight="900" fill="#fff" letter-spacing="18">
+    <text x="800" y="215" text-anchor="middle" font-size="92">PDX PRIDE</text>
+  </g>
+
+  <g opacity="0.75">
+    <circle cx="800" cy="200" r="34" fill="none" stroke="#CCFF00" stroke-width="2.5"/>
+    <line x1="800" y1="158" x2="800" y2="242" stroke="#CCFF00" stroke-width="2.5"/>
+    <line x1="758" y1="200" x2="842" y2="200" stroke="#CCFF00" stroke-width="2.5"/>
+  </g>
+
+  <rect x="0" y="384" width="400" height="8" fill="#FF00CC"/>
+  <rect x="400" y="384" width="400" height="8" fill="#CCFF00"/>
+  <rect x="800" y="384" width="400" height="8" fill="#00FFFF"/>
+  <rect x="1200" y="384" width="400" height="8" fill="#FF6600"/>
+  <rect x="0" y="392" width="400" height="8" fill="#8800FF" opacity="0.85"/>
+  <rect x="400" y="392" width="400" height="8" fill="#FF2400" opacity="0.85"/>
+  <rect x="800" y="392" width="400" height="8" fill="#39FF14" opacity="0.85"/>
+  <rect x="1200" y="392" width="400" height="8" fill="#fff" opacity="0.35"/>
+</svg>

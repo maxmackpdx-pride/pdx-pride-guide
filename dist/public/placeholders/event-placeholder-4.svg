@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <pattern id="diag" width="30" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="30" stroke="#FF6600" stroke-width="1" opacity="0.25"/>
+    </pattern>
+    <filter id="orangeglow"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="800" height="1000" fill="#060300"/>
+  <rect width="800" height="1000" fill="url(#diag)"/>
+  <polygon points="400,200 600,500 400,800 200,500" fill="none" stroke="#FF6600" stroke-width="2" opacity="0.4"/>
+  <polygon points="400,280 520,500 400,720 280,500" fill="#FF6600" opacity="0.06" filter="url(#orangeglow)"/>
+  <rect x="55" y="55" width="690" height="890" fill="none" stroke="#FF6600" stroke-width="2.5" opacity="0.45"/>
+  <text x="400" y="420" text-anchor="middle" font-family="Impact, Haettenschweiler, sans-serif" font-size="70" font-weight="900" fill="#FF6600" letter-spacing="5">SUNDAY</text>
+  <text x="400" y="500" text-anchor="middle" font-family="Impact, Haettenschweiler, sans-serif" font-size="34" font-weight="900" fill="#fff" letter-spacing="8" opacity="0.6">VIBES</text>
+  <text x="400" y="580" text-anchor="middle" font-family="monospace" font-size="16" fill="#FF6600" opacity="0.5" letter-spacing="3">POSTER PENDING</text>
+  <rect x="100" y="700" width="600" height="6" fill="#FF6600" opacity="0.3"/>
+  <rect x="150" y="720" width="500" height="4" fill="#CCFF00" opacity="0.2"/>
+  <rect x="0" y="0" width="800" height="6" fill="#FF00CC"/>
+  <rect x="0" y="6" width="800" height="6" fill="#CCFF00"/>
+  <rect x="0" y="12" width="800" height="6" fill="#00FFFF"/>
+  <rect x="0" y="18" width="800" height="6" fill="#FF6600"/>
+</svg>

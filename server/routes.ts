@@ -424,7 +424,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const type = req.body.type === "CLAIM" ? "CLAIM" : "NEW_EVENT";
       const promoterStatus = user.promoterStatus || "none";
-      const isAdminUser = isMainAdminUser(user);
+      const isAdminUser = isMainAdminUser(user) || !!req.session.isAdmin;
 
       if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
         return res.status(403).json({
