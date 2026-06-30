@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import BoardLoadingState from "@/components/BoardLoadingState";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
   ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, Search,
@@ -135,7 +137,9 @@ const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white
 
 export default function Admin() {
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [authenticated, setAuthenticated] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
@@ -159,20 +163,40 @@ export default function Admin() {
   const [userSearching, setUserSearching] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
+
     let cancelled = false;
-    fetch("/api/admin/me", { credentials: "include" })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (cancelled || !data?.isAdmin) return;
-        setAuthenticated(true);
-        if (data.username) setAdminName(data.username);
-        if (data.isSuperAdmin) setIsSuperAdmin(true);
-      })
-      .catch(() => {});
+
+    const bootstrapAdmin = async () => {
+      if (user?.isAdmin) {
+        if (!cancelled) {
+          setAuthenticated(true);
+          if (user.displayName || user.username) setAdminName(user.displayName || user.username);
+        }
+        if (!cancelled) setSessionReady(true);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/admin/me", { credentials: "include" });
+        const data = res.ok ? await res.json() : null;
+        if (!cancelled && data?.isAdmin) {
+          setAuthenticated(true);
+          if (data.username) setAdminName(data.username);
+          if (data.isSuperAdmin) setIsSuperAdmin(true);
+        }
+      } catch {
+        // fall through to legacy login gate
+      } finally {
+        if (!cancelled) setSessionReady(true);
+      }
+    };
+
+    bootstrapAdmin();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [authLoading, user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -492,8 +516,29 @@ export default function Admin() {
     editGigMutation.mutate({ id: editingGigId, data: gigEditForm });
   };
 
-  // Login screen
+  if (authLoading || !sessionReady) {
+    return (
+      <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
+        <BoardLoadingState label="Loading admin" />
+      </div>
+    );
+  }
+
+  // Legacy password gate — only when not already signed in as a site admin
   if (!authenticated) {
+    if (user) {
+      return (
+        <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
+          <div className="w-full max-w-sm" style={{ background: "#0d0d0d", border: "2px solid rgba(255,255,255,0.15)", borderRadius: 16, padding: 32, textAlign: "center" }}>
+            <h1 className="dash-anton dash-admin-title">Admin access needed</h1>
+            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginTop: 12, textTransform: "none", letterSpacing: "0.04em" }}>
+              You&apos;re signed in as @{user.username}, but this account doesn&apos;t have admin access.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
         <div className="w-full max-w-sm" style={{ background: "#0d0d0d", border: "2px solid #C8FA3C", borderRadius: 16, padding: 32 }}>

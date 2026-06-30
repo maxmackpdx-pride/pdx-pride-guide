@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
+import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
@@ -17,8 +18,9 @@ import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashb
 import "@/components/dashboard/dashboard.css";
 
 export default function Dashboard() {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
+  const [showAuth, setShowAuth] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -191,6 +193,16 @@ export default function Dashboard() {
     onError: () => toast({ title: "Error", description: "Could not update gig post.", variant: "destructive" }),
   });
 
+  if (loading) {
+    return (
+      <div className="zine-page dash-page board-page">
+        <div className="dash-inner" style={{ minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <BoardLoadingState label="Loading your hub" />
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="zine-page dash-page board-page">
@@ -206,7 +218,10 @@ export default function Dashboard() {
         />
         <div className="dash-inner" style={{ minHeight: "40vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 48 }}>
           <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>You need to be logged in to view your dashboard.</p>
-          <AuthModal onClose={() => {}} />
+          <button type="button" className="dash-btn dash-btn-lime" onClick={() => setShowAuth(true)}>
+            Log in / Join
+          </button>
+          {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
         </div>
       </div>
     );
