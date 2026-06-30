@@ -39,7 +39,7 @@ export default function Submit() {
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
   const initialMode = (claimPathEventId || params.get("mode") === "claim") ? "claim" : "submit";
   const initialEventId = claimPathEventId || params.get("eventId") || "";
-  const [mode, setMode] = useState<"submit" | "claim">(initialMode);
+  const [mode, setMode] = useState<"submit" | "claim" | "suggest">(initialMode);
   const [form, setForm] = useState({
     title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
     dateStart: "", dateEnd: "", dayOfWeek: "FRI",
@@ -50,6 +50,7 @@ export default function Submit() {
     selectedTypes: [] as string[],
     submitterName: "", submitterEmail: "", submitterOrg: "",
     claimReason: "", eventId: initialEventId, type: "NEW_EVENT",
+    suggestNote: "",
   });
 
   const { data: unclaimedEvents = [], isError: unclaimedError, refetch: refetchUnclaimed } = useQuery<Event[]>({
@@ -105,23 +106,34 @@ export default function Submit() {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
+      const type = mode === "claim" ? "CLAIM" : mode === "suggest" ? "SUGGEST" : "NEW_EVENT";
       const r = await apiRequest("POST", "/api/submit", {
         ...data,
         eventTypes: submitLabelsToJsonTags(data.selectedTypes),
-        type: mode === "claim" ? "CLAIM" : "NEW_EVENT",
+        type,
+        // SUGGEST: fill required backend fields with sensible defaults
+        ...(mode === "suggest" && {
+          description: data.suggestNote || "Community tip",
+          dateStart: data.dateStart || new Date().toISOString(),
+          dateEnd: data.dateEnd || new Date().toISOString(),
+          ageRequirement: "ALL_AGES",
+          admission: "FREE",
+          isPublic: true,
+        }),
       });
       const payload = await r.json();
       if (!r.ok) throw new Error(payload.message || payload.error || "Submission failed");
       return payload;
     },
     onSuccess: () => {
-      toast({
-        title: mode === "claim" ? "Claim submitted!" : "Submitted!",
-        description: mode === "claim"
-          ? "Your claim and promoter verification request are pending review."
-          : "Your submission is pending review.",
-      });
-      setForm(f => ({ ...f, title: "", description: "", claimReason: "", eventId: "" }));
+      const titles = { claim: "Claim submitted!", submit: "Submitted!", suggest: "Tip received!" };
+      const descs = {
+        claim: "Your claim and promoter verification request are pending review.",
+        submit: "Your event goes to the review queue before going live. You've been flagged for promoter verification too.",
+        suggest: "Thanks for the tip — admins will review and may add it to the guide.",
+      };
+      toast({ title: titles[mode], description: descs[mode] });
+      setForm(f => ({ ...f, title: "", description: "", claimReason: "", eventId: "", suggestNote: "" }));
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -130,16 +142,16 @@ export default function Submit() {
     ...f, selectedTypes: f.selectedTypes.includes(t) ? f.selectedTypes.filter(x => x !== t) : [...f.selectedTypes, t]
   }));
 
-  const step2Label = mode === "claim" ? "Claim Details" : "Event Details";
+  const step2Label = mode === "claim" ? "Claim Details" : mode === "suggest" ? "Event Tip" : "Event Details";
 
   return (
     <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <PageHero
         flipLightLeaks
-        titleLine1={mode === "submit" ? "SUBMIT" : "CLAIM"}
-        titleLine2="AN EVENT"
-        accent={mode === "submit" ? "lime" : "cyan"}
+        titleLine1={mode === "submit" ? "SUBMIT" : mode === "suggest" ? "SPOTTED" : "CLAIM"}
+        titleLine2={mode === "suggest" ? "AN EVENT" : "AN EVENT"}
+        accent={mode === "submit" ? "lime" : mode === "suggest" ? "orange" : "cyan"}
         lede=""
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 38%"
@@ -155,10 +167,20 @@ export default function Submit() {
       </div>
 
       {/* Mode toggle */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 32, border: "1px solid #222" }}>
-        <button onClick={() => setMode("submit")} className={mode === "submit" ? "btn-neon solid" : "btn-neon"} style={{ flex: 1, justifyContent: "center", border: "none" }} data-testid="mode-submit">Submit New Event</button>
-        <button onClick={() => setMode("claim")} className={mode === "claim" ? "btn-neon solid" : "btn-neon"} style={{ flex: 1, justifyContent: "center", border: "none", borderLeft: "1px solid #222" }} data-testid="mode-claim">Claim Existing Event</button>
+      <div style={{ display: "flex", gap: 0, marginBottom: 32, border: "1px solid #222", flexWrap: "wrap" }}>
+        <button onClick={() => setMode("submit")} className={mode === "submit" ? "btn-neon solid" : "btn-neon"} style={{ flex: 1, justifyContent: "center", border: "none", minWidth: 120 }} data-testid="mode-submit">Submit New Event</button>
+        <button onClick={() => setMode("claim")} className={mode === "claim" ? "btn-neon solid" : "btn-neon"} style={{ flex: 1, justifyContent: "center", border: "none", borderLeft: "1px solid #222", minWidth: 120 }} data-testid="mode-claim">Claim Existing Event</button>
+        <button onClick={() => setMode("suggest")} className={mode === "suggest" ? "btn-neon solid" : "btn-neon"} style={{ flex: 1, justifyContent: "center", border: "none", borderLeft: "1px solid #222", minWidth: 120 }} data-testid="mode-suggest">Spotted an Event</button>
       </div>
+
+      {mode === "suggest" && (
+        <div style={{ border: "2px solid var(--neon-orange)", background: "rgba(255,102,0,0.06)", padding: 18, marginBottom: 24 }}>
+          <div className="display" style={{ color: "var(--neon-orange)", fontSize: "0.95rem", marginBottom: 6 }}>SPOTTED SOMETHING?</div>
+          <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5 }}>
+            No promoter account needed. Just tip us off — admins review all suggestions and may add the event to the guide. You won't be listed as the organizer.
+          </p>
+        </div>
+      )}
 
       {mode === "submit" && user && !canSubmitNew && (
         <div style={{ border: "2px solid var(--neon-cyan)", background: "rgba(0,255,255,0.06)", padding: 18, marginBottom: 24 }}>
@@ -186,7 +208,6 @@ export default function Submit() {
       <form onSubmit={e => {
         e.preventDefault();
         if (!user) { setShowAuth(true); return; }
-        if (mode === "submit" && !canSubmitNew) return;
         mutation.mutate(form);
       }} style={{ display: "flex", flexDirection: "column", gap: 20, opacity: user ? 1 : 0.6 }}>
         <ScrollReveal>
@@ -239,6 +260,43 @@ export default function Submit() {
                   <textarea value={form.claimReason} onChange={e => setForm(f => ({ ...f, claimReason: e.target.value }))} rows={4} required
                     placeholder="Tell us your organizer role and include a website, ticketing dashboard, social link, or other proof."
                     style={{ resize: "vertical" }} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {mode === "suggest" && (
+            <>
+              <div className="display" style={sectionHeadStyle}>EVENT TIP</div>
+              <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 14, marginTop: -4 }}>
+                Fill in what you know — even partial info helps. Admins will research and fill in the rest.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div className="submit-form__field submit-form__field--orange">
+                  <label style={labelStyle}>Event Name *</label>
+                  <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Queer Dance Night at the Wonder Ballroom" />
+                </div>
+                <div className="submit-form__field">
+                  <label style={labelStyle}>Venue / Location</label>
+                  <input value={form.venueName} onChange={e => setForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood (optional)" />
+                </div>
+                <div className="submit-form__field submit-form__field--orange">
+                  <label style={labelStyle}>Day</label>
+                  <select value={form.dayOfWeek} onChange={e => setForm(f => ({ ...f, dayOfWeek: e.target.value }))}>
+                    <option value="THU">Thursday July 16</option>
+                    <option value="FRI">Friday July 17</option>
+                    <option value="SAT">Saturday July 18</option>
+                    <option value="SUN">Sunday July 19</option>
+                  </select>
+                </div>
+                <div className="submit-form__field submit-form__field--cyan">
+                  <label style={labelStyle}>Ticket / Info Link</label>
+                  <input value={form.ticketUrl} onChange={e => setForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://... (optional)" />
+                </div>
+                <div className="submit-form__field">
+                  <label style={labelStyle}>Where did you spot this?</label>
+                  <textarea value={form.suggestNote} onChange={e => setForm(f => ({ ...f, suggestNote: e.target.value }))} rows={3}
+                    placeholder="Instagram, flyer, word of mouth, etc. Any extra context helps." style={{ resize: "vertical" }} />
                 </div>
               </div>
             </>
@@ -392,18 +450,22 @@ export default function Submit() {
           <p style={{ color: "#888", fontSize: "0.84rem", lineHeight: 1.6, marginBottom: 16 }}>
             {mode === "claim"
               ? "Double-check your claim proof and selected event. Submitting sends both the claim and your promoter verification request to the admin queue."
-              : "All fields look good? Hit submit — your event goes to the review queue before going live."}
+              : mode === "suggest"
+              ? "Submitting sends your tip to the admin team. They'll look it up and add it if it checks out. You won't be listed as the host."
+              : "All fields look good? Submitting puts your event in the admin queue and flags your account for promoter verification."}
           </p>
           <button
             type="submit"
-            disabled={mutation.isPending || (mode === "submit" && !canSubmitNew)}
+            disabled={mutation.isPending}
             className="btn-neon solid"
-            style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%", opacity: mode === "submit" && !canSubmitNew ? 0.5 : 1 }}
+            style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}
             data-testid="submit-button"
           >
-            {mutation.isPending ? "Submitting..." : mode === "claim" ? "Submit Claim + Promoter Request →" : "Submit for Review →"}
+            {mutation.isPending ? "Submitting..." : mode === "claim" ? "Submit Claim + Promoter Request →" : mode === "suggest" ? "Send Tip →" : "Submit for Review →"}
           </button>
-          <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>All submissions are reviewed before going live.</p>
+          <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>
+            {mode === "suggest" ? "Tips go to admins only — not publicly posted." : "All submissions are reviewed before going live."}
+          </p>
         </section>
         </ScrollReveal>
       </form>
