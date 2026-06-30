@@ -903,8 +903,8 @@ export default function Admin() {
                 { key: "all" as EventStatusFilter, label: "All" },
                 { key: "LIVE" as EventStatusFilter, label: "Live" },
                 { key: "HIDDEN" as EventStatusFilter, label: "Hidden" },
-                { key: "missing_flyer" as EventStatusFilter, label: `Missing flyer${missingFlyerCount > 0 ? ` (${missingFlyerCount})` : ""}` },
-                { key: "user_submitted" as EventStatusFilter, label: `Community submitted${userSubmittedCount > 0 ? ` (${userSubmittedCount})` : ""}` },
+                { key: "missing_flyer" as EventStatusFilter, label: `No flyer${missingFlyerCount > 0 ? ` (${missingFlyerCount})` : ""}` },
+                { key: "user_submitted" as EventStatusFilter, label: `User submitted${userSubmittedCount > 0 ? ` (${userSubmittedCount})` : ""}` },
               ]).map(filter => (
                 <button
                   key={filter.key}
