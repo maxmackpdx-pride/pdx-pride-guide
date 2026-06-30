@@ -140,7 +140,7 @@ export default function Submit() {
         titleLine1={mode === "submit" ? "SUBMIT" : "CLAIM"}
         titleLine2="AN EVENT"
         accent={mode === "submit" ? "lime" : "cyan"}
-        lede="Log in or create an account first. Submissions and claims stay tied to your dashboard while admins review them."
+        lede=""
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 38%"
       />
