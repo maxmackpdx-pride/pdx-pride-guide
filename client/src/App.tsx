@@ -20,6 +20,7 @@ function ScrollToTop() {
 }
 import Home from "./pages/Home";
 import Events from "./pages/Events";
+import Schedule from "./pages/Schedule";
 import Submit from "./pages/Submit";
 import PrideWork from "./pages/PrideWork";
 import Gifting from "./pages/Gifting";
@@ -46,6 +47,7 @@ export default function App() {
                 <Route path="/" component={Home} />
                 <Route path="/events/:id/:slug?" component={Events} />
                 <Route path="/events" component={Events} />
+                <Route path="/schedule" component={Schedule} />
                 <Route path="/submit/claim/:eventId" component={Submit} />
                 <Route path="/submit" component={Submit} />
                 <Route path="/pride-work" component={PrideWork} />

@@ -523,6 +523,9 @@ export default function Events() {
           </div>
           {/* Spacer */}
           <div style={{ flex: 1 }} />
+          <Link href="/schedule" className="events-schedule-link" data-testid="link-schedule-view">
+            View as Schedule →
+          </Link>
           {/* View toggle — grid / list only (map is always shown above) */}
           <div className="events-view-toggle">
             <button
