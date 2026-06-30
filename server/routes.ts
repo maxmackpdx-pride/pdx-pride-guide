@@ -423,9 +423,36 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const user = storage.getUserById(req.session.userId!);
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const rawType = req.body.type;
-      const type = rawType === "CLAIM" ? "CLAIM" : rawType === "SUGGEST" ? "SUGGEST" : "NEW_EVENT";
+      const type = rawType === "CLAIM" ? "CLAIM"
+        : rawType === "SUGGEST" ? "SUGGEST"
+        : rawType === "PROMOTER_APPLICATION" ? "PROMOTER_APPLICATION"
+        : "NEW_EVENT";
       const promoterStatus = user.promoterStatus || "none";
       const isAdminUser = isMainAdminUser(user) || !!req.session.isAdmin;
+
+      // Standalone promoter application — no event fields needed
+      if (type === "PROMOTER_APPLICATION") {
+        const now = new Date().toISOString();
+        const data = insertSubmissionSchema.parse({
+          type: "PROMOTER_APPLICATION",
+          title: `Promoter Application — ${user.displayName || user.username}`,
+          description: String(req.body.claimReason || req.body.description || "").trim() || "No details provided",
+          venueName: "N/A",
+          dateStart: now,
+          dateEnd: now,
+          ageRequirement: "ALL_AGES",
+          eventTypes: "[]",
+          admission: "FREE",
+          isPublic: true,
+          submitterName: user.displayName || user.username,
+          submitterEmail: user.email,
+          submitterOrg: req.body.submitterOrg || null,
+          claimReason: String(req.body.claimReason || "").trim() || null,
+        });
+        const sub = storage.createSubmission(data);
+        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
+        return res.json({ ...sub, pendingPromoterReview: true });
+      }
 
       const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
       const claimEventId = eventId ?? 0;

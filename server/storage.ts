@@ -2409,18 +2409,40 @@ export const storage: IStorage = {
     const newStatus = approvalList.length >= 1 ? "APPROVED" : "PENDING";
     db.update(submissions).set({ approvals: JSON.stringify(approvalList), status: newStatus }).where(eq(submissions.id, id)).run();
     if (newStatus === "APPROVED") {
-      if (sub.type === "CLAIM" && sub.eventId) {
-        const user = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+      const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+
+      if (sub.type === "PROMOTER_APPLICATION") {
+        // Standalone promoter application — approve user, no event created
+        if (submitter) db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      } else if (sub.type === "CLAIM" && sub.eventId) {
         db.update(events).set({
           isClaimable: false,
-          claimedBy: user?.username || sub.submitterEmail,
+          claimedBy: submitter?.username || sub.submitterEmail,
           adminNotes: null,
         }).where(eq(events.id, sub.eventId)).run();
-        if (user) {
-          db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, user.id)).run();
-          storage.setPrimaryEventHost(sub.eventId, user.id, null);
+        if (submitter) {
+          db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+          storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
         }
+      } else if (sub.type === "SUGGEST") {
+        // Community tip — goes live as unclaimed (anyone can claim it later)
+        db.insert(events).values({
+          title: sub.title, description: sub.description,
+          venueName: sub.venueName, address: sub.address,
+          neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+          dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+          ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+          admission: sub.admission, ticketUrl: sub.ticketUrl,
+          isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+          isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+          nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+          status: "LIVE", source: "community_tip",
+          isClaimable: true, claimedBy: null,
+          submittedBy: sub.submitterEmail, adminNotes: null,
+          createdAt: new Date().toISOString(),
+        }).run();
       } else {
+        // NEW_EVENT — create event, and if user was pending promoter, approve them too
         const created = db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
@@ -2432,12 +2454,16 @@ export const storage: IStorage = {
           isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
           nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
           status: "LIVE", source: "user_submitted",
-          isClaimable: false, claimedBy: null,
+          isClaimable: false, claimedBy: submitter?.username || null,
           submittedBy: sub.submitterEmail, adminNotes: null,
           createdAt: new Date().toISOString(),
         }).returning().get();
-        const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
-        if (submitter) storage.setPrimaryEventHost(created.id, submitter.id, null);
+        if (submitter) {
+          if (submitter.promoterStatus === "pending") {
+            db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+          }
+          storage.setPrimaryEventHost(created.id, submitter.id, null);
+        }
       }
       notifySubmissionOutcome(sub, true);
     }
