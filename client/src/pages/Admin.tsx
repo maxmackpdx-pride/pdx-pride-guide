@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -116,7 +116,20 @@ interface AdminGig {
   displayName?: string | null;
 }
 
-type AdminTab = "inbox" | "events" | "gigs" | "promoters" | "team";
+interface AdminUser {
+  id: number;
+  username: string;
+  email: string;
+  displayName: string | null;
+  promoterStatus: string;
+  subAdmin: boolean;
+  googleLinked: boolean;
+  status: string;
+  createdAt: string;
+  isOwner: boolean;
+}
+
+type AdminTab = "inbox" | "events" | "gigs" | "promoters" | "users" | "team";
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer" | "user_submitted";
 
 interface SiteAdminMember {
@@ -161,6 +174,7 @@ export default function Admin() {
   const [userSearchQ, setUserSearchQ] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<Array<{ id: number; username: string; email: string; displayName: string | null; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
+  const [allUsersFilter, setAllUsersFilter] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -172,6 +186,7 @@ export default function Admin() {
         if (!cancelled) {
           setAuthenticated(true);
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
+          if (user.isSuperAdmin) setIsSuperAdmin(true);
         }
         if (!cancelled) setSessionReady(true);
         return;
@@ -270,6 +285,22 @@ export default function Admin() {
     queryFn: () => apiRequest("GET", "/api/admin/team").then(r => r.json()),
     enabled: authenticated,
   });
+
+  const { data: allUsers = [], isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useQuery<AdminUser[]>({
+    queryKey: ["/api/admin/users"],
+    queryFn: () => apiRequest("GET", "/api/admin/users").then(r => r.json()),
+    enabled: authenticated && activeTab === "users",
+  });
+
+  const filteredAllUsers = useMemo(() => {
+    const q = allUsersFilter.trim().toLowerCase();
+    if (!q) return allUsers;
+    return allUsers.filter(u =>
+      u.username.toLowerCase().includes(q)
+      || u.email.toLowerCase().includes(q)
+      || (u.displayName || "").toLowerCase().includes(q)
+    );
+  }, [allUsers, allUsersFilter]);
 
   const approveMutation = useMutation({
     mutationFn: ({ id }: { id: number }) =>
@@ -452,6 +483,7 @@ export default function Admin() {
       apiRequest("POST", `/api/admin/users/${userId}/set-promoter-status`, { status }),
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, promoterStatus: vars.status } : u));
       toast({ title: `Status set to ${vars.status}` });
     },
@@ -462,6 +494,7 @@ export default function Admin() {
     mutationFn: ({ userId, grant }: { userId: number; grant: boolean }) =>
       apiRequest("POST", `/api/admin/users/${userId}/set-sub-admin`, { grant }),
     onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, subAdmin: vars.grant } : u));
       toast({ title: vars.grant ? "Sub-admin granted" : "Sub-admin revoked" });
     },
@@ -618,6 +651,34 @@ export default function Admin() {
     + pendingGifting.length
     + pendingGiftingReports.length
     + openFeedback.length;
+
+  const renderPromoterControls = (u: Pick<AdminUser, "id" | "promoterStatus" | "subAdmin" | "isOwner">) => {
+    if (u.isOwner) return null;
+    return (
+      <div className="flex gap-2 flex-wrap">
+        {u.promoterStatus !== "approved" && (
+          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
+            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
+        )}
+        {u.promoterStatus !== "pending" && (
+          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
+            className="display text-xs px-3 py-1 border" style={{ borderColor: "#00FFFF", color: "#00FFFF" }}>SET PENDING</button>
+        )}
+        {u.promoterStatus !== "none" && (
+          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
+            className="display text-xs px-3 py-1 border border-white/30 text-white/40">RESET</button>
+        )}
+        {isSuperAdmin && (
+          <button type="button" onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
+            className="display text-xs px-3 py-1 border"
+            style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}>
+            {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const inboxLoading =
     subLoading || modLoading || giftingLoading || feedbackLoading || promotersLoading || talentLoading;
   const inboxError =
@@ -694,6 +755,7 @@ export default function Admin() {
             { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
             { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
             { key: "promoters" as AdminTab, label: "Promoters", icon: <Users size={12} /> },
+            { key: "users" as AdminTab, label: `All users${allUsers.length ? ` (${allUsers.length})` : ""}`, icon: <Users size={12} /> },
             { key: "team" as AdminTab, label: `Team (${teamAdmins.length})`, icon: <Users size={12} /> },
           ]).map(tab => (
             <button
@@ -1188,6 +1250,73 @@ export default function Admin() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === "users" && (
+          <div>
+            <p className="text-white/40 text-sm mb-4">
+              Every registered account on PDX Pride Guide. Search by username, email, or display name.
+            </p>
+            <div className="flex gap-2 mb-4 max-w-xl">
+              <input
+                className="flex-1 bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
+                placeholder="Filter users..."
+                value={allUsersFilter}
+                onChange={e => setAllUsersFilter(e.target.value)}
+              />
+              {allUsersFilter && (
+                <button
+                  type="button"
+                  onClick={() => setAllUsersFilter("")}
+                  className="display text-xs px-4 py-2 border border-white/30 text-white/60"
+                >
+                  CLEAR
+                </button>
+              )}
+            </div>
+
+            {usersError ? (
+              <AdminLoadError label="users" onRetry={() => refetchUsers()} />
+            ) : usersLoading ? (
+              <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : filteredAllUsers.length === 0 ? (
+              <p className="text-white/30">{allUsersFilter ? "No users match that filter." : "No registered users yet."}</p>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-white/30 text-xs mb-2">
+                  Showing {filteredAllUsers.length}{allUsersFilter ? ` of ${allUsers.length}` : ""} users · newest first
+                </p>
+                {filteredAllUsers.map(u => (
+                  <div key={u.id} className="p-4 border border-white/10 flex items-start justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-white text-sm font-medium">@{u.username}{u.displayName ? ` · ${u.displayName}` : ""}</p>
+                        {u.isOwner && (
+                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>OWNER</span>
+                        )}
+                        {u.subAdmin && (
+                          <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>SUB-ADMIN</span>
+                        )}
+                      </div>
+                      <p className="text-white/40 text-xs mt-1 break-all">{u.email}</p>
+                      <div className="flex flex-wrap gap-3 mt-2 text-xs">
+                        <span style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                          promoter: {u.promoterStatus}
+                        </span>
+                        <span className="text-white/35">id: {u.id}</span>
+                        {u.googleLinked && <span className="text-white/35">Google linked</span>}
+                        <span className="text-white/35">status: {u.status}</span>
+                        {u.createdAt && (
+                          <span className="text-white/35">joined {new Date(u.createdAt).toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                    {renderPromoterControls(u)}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

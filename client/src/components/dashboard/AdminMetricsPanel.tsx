@@ -16,7 +16,7 @@ interface AdminMetrics {
 }
 
 const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: string }[] = [
-  { key: "users", label: "Registered users", color: "#C8FA3C" },
+  { key: "users", label: "Registered users", color: "#C8FA3C", tab: "users" },
   { key: "activeSessions", label: "Active sessions", color: "#19E3FF" },
   { key: "liveEvents", label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events" },
   { key: "userSubmittedEvents", label: "Community-submitted events", color: "#00FFFF", tab: "events" },

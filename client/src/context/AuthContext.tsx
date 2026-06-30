@@ -13,6 +13,8 @@ export interface AuthUser {
   googleLinked: boolean;
   promoterStatus?: "none" | "pending" | "approved" | "rejected";
   isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+  subAdmin?: boolean;
 }
 
 interface AuthContextType {

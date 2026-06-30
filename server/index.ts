@@ -28,7 +28,6 @@ app.use(helmet({ contentSecurityPolicy: false }));
 
 // Rate limiting
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
-const strictLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -40,7 +39,8 @@ app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
 app.use("/api/promoter/login", authLimiter);
 app.use("/api/admin/login", authLimiter);
-app.use("/api/admin", strictLimiter);
+// Admin JSON routes rely on requireAdmin session checks; avoid a separate strict
+// cap — the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
 app.use("/api", limiter);
 
 declare module "http" {

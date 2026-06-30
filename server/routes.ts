@@ -80,6 +80,21 @@ function publicUser(user: any) {
   return safe;
 }
 
+function adminUserSummary(user: any) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    displayName: user.displayName,
+    promoterStatus: user.promoterStatus || "none",
+    subAdmin: !!user.subAdmin,
+    googleLinked: !!user.googleId,
+    status: user.status || "active",
+    createdAt: user.createdAt || "",
+    isOwner: isMainAdminUser(user),
+  };
+}
+
 function isMainAdminUser(user: any) {
   if (!user) return false;
   const email = String(user.email || "").trim().toLowerCase();
@@ -1557,6 +1572,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true, promoterStatus: "rejected" });
   });
 
+  app.get("/api/admin/users", requireAdmin, (req, res) => {
+    const q = String(req.query.q || "").trim().toLowerCase();
+    const all = storage.getAllUsers ? storage.getAllUsers() : [];
+    const filtered = q
+      ? all.filter((u: any) =>
+        u.username?.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q) ||
+        u.displayName?.toLowerCase().includes(q)
+      )
+      : all;
+    const sorted = [...filtered].sort((a: any, b: any) => {
+      const aTime = Date.parse(a.createdAt || "") || a.id || 0;
+      const bTime = Date.parse(b.createdAt || "") || b.id || 0;
+      return bTime - aTime;
+    });
+    res.json(sorted.map(adminUserSummary));
+  });
+
   app.get("/api/admin/users/search", requireAdmin, (req, res) => {
     const q = String(req.query.q || "").trim().toLowerCase();
     if (!q) return res.json([]);
@@ -1565,14 +1598,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       u.username?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q) ||
       u.displayName?.toLowerCase().includes(q)
-    ).slice(0, 10).map((u: any) => ({
-      id: u.id,
-      username: u.username,
-      email: u.email,
-      displayName: u.displayName,
-      promoterStatus: u.promoterStatus,
-      subAdmin: !!u.subAdmin,
-    }));
+    ).slice(0, 10).map(adminUserSummary);
     res.json(matches);
   });
 
