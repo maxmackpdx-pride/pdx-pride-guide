@@ -6707,6 +6707,45 @@ footer a:hover { color: #00FFFF !important; }
   animation: floatY 6s ease-in-out infinite;
 }
 
+.footer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 0 auto 24px;
+}
+
+.footer-brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.04em;
+  color: #fff;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+}
+
+.footer-brand-wordmark__line {
+  display: block;
+  white-space: nowrap;
+}
+
+.footer-brand-wordmark__line--accent {
+  filter:
+    drop-shadow(2px 2px 0 #000)
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+}
+
+html.calm-mode .footer-brand-wordmark {
+  color: #0d0d0d;
+}
+
+html.calm-mode .footer-brand-wordmark__line--accent {
+  filter: none;
+}
+
 .event-slogan-band {
   position: relative;
   z-index: 2;

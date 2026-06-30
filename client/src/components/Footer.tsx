@@ -1,8 +1,10 @@
 import { Link } from "wouter";
-import footerLogoPath from "@assets/logo-footer.png";
+import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { FeedbackButton } from "./FeedbackForm";
+import GlitchLogo from "@/components/GlitchLogo";
+import GlitchWord from "@/components/GlitchWord";
 
 
 export default function Footer() {
@@ -53,7 +55,16 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <img src={footerLogoPath} alt="Portland Pride Guide 2026" className="footer-brand-logo" />
+        <div className="footer-brand" aria-label="PDX Pride Guide">
+          <GlitchLogo src={logoPath} alt="" />
+          <span className="display footer-brand-wordmark">
+            <span className="footer-brand-wordmark__line">PDX</span>
+            <span className="footer-brand-wordmark__line footer-brand-wordmark__line--accent">
+              <GlitchWord text="PRIDE" />
+            </span>
+            <span className="footer-brand-wordmark__line">GUIDE</span>
+          </span>
+        </div>
         <div style={{ marginBottom: 20, display: "flex", justifyContent: "center", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <FeedbackButton />
           <button
