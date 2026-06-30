@@ -15,15 +15,36 @@ import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/event
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
+
+// Pride weekend dates by day-of-week key
+const DAY_DATES: Record<string, string> = {
+  THU: "2026-07-16",
+  FRI: "2026-07-17",
+  SAT: "2026-07-18",
+  SUN: "2026-07-19",
+};
+const DAY_NEXT: Record<string, string> = {
+  THU: "2026-07-17",
+  FRI: "2026-07-18",
+  SAT: "2026-07-19",
+  SUN: "2026-07-20",
+};
+const defaultDateTimes = (day: string) => ({
+  dateStart: `${DAY_DATES[day] || DAY_DATES.FRI}T21:00`,
+  dateEnd: `${DAY_NEXT[day] || DAY_NEXT.FRI}T02:00`,
+});
+
 const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
 const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", marginBottom: 12, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
+const backBtnStyle: React.CSSProperties = { background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", letterSpacing: "0.06em", marginBottom: 20, padding: 0 };
 
 type PageMode = "landing" | "submit" | "apply" | "suggest" | "claim";
 type SubmitStep = "promoter_app" | "event_details";
 
 const emptyEventForm = () => ({
   title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
-  dateStart: "", dateEnd: "", dayOfWeek: "FRI",
+  ...defaultDateTimes("FRI"),
+  dayOfWeek: "FRI",
   ageRequirement: "ALL_AGES", admission: "FREE", ticketUrl: "",
   posterImageUrl: "", isPublic: true, isHouseParty: false,
   isSexPositive: false, nudityOk: false, selectedTypes: [] as string[],
@@ -78,7 +99,7 @@ export default function Submit() {
     ...f, selectedTypes: f.selectedTypes.includes(t) ? f.selectedTypes.filter(x => x !== t) : [...f.selectedTypes, t],
   }));
 
-  // Promoter application mutation (used by "apply" path and step 1 of "submit" path)
+  // Promoter application mutation (standalone "apply" path only)
   const applyMutation = useMutation({
     mutationFn: async () => {
       const r = await apiRequest("POST", "/api/submit", {
@@ -86,7 +107,6 @@ export default function Submit() {
         submitterOrg,
         ticketUrl: promoterForm.proofUrl,
         claimReason: promoterForm.appReason,
-        description: promoterForm.appReason,
       });
       const payload = await r.json();
       if (!r.ok) throw new Error(payload.message || payload.error || "Submission failed");
@@ -134,11 +154,24 @@ export default function Submit() {
       if (!r.ok) throw new Error(payload.message || payload.error || "Submission failed");
       return payload;
     },
-    onSuccess: (_, vars) => {
+    onSuccess: (payload, vars) => {
+      const autoApproved = !!payload.autoApproved;
       const msgs: Record<string, { title: string; desc: string }> = {
-        NEW_EVENT: { title: "Event submitted!", desc: isApproved ? "Your event is now live." : "Your event and promoter application are in the admin queue." },
+        NEW_EVENT: {
+          title: "Event submitted!",
+          desc: autoApproved
+            ? "Your event is now live."
+            : isApproved
+              ? "Your event is now live."
+              : "Your event and promoter application are in the admin queue.",
+        },
         SUGGEST: { title: "Tip received!", desc: "Admins will review and may add this event to the guide." },
-        CLAIM: { title: "Claim submitted!", desc: "Your claim and promoter request are pending admin review." },
+        CLAIM: {
+          title: autoApproved ? "Event claimed!" : "Claim submitted!",
+          desc: autoApproved
+            ? "You're now the host of this event — it's live on your profile."
+            : "Your claim is pending admin review.",
+        },
       };
       const m = msgs[vars.type] || msgs.NEW_EVENT;
       toast({ title: m.title, description: m.desc });
@@ -153,14 +186,18 @@ export default function Submit() {
   const handleSubmitWithEvent = async () => {
     if (!user) { setShowAuth(true); return; }
     if (!isApproved) {
-      // Fire both: promoter application + event submission
-      await apiRequest("POST", "/api/submit", {
+      // Fire promoter application first — bail out if it fails
+      const r = await apiRequest("POST", "/api/submit", {
         type: "PROMOTER_APPLICATION",
         submitterOrg,
         ticketUrl: promoterForm.proofUrl,
         claimReason: promoterForm.appReason,
-        description: promoterForm.appReason,
       });
+      if (!r.ok) {
+        const payload = await r.json().catch(() => ({}));
+        toast({ title: "Error", description: payload.error || "Could not submit promoter application. Please try again.", variant: "destructive" });
+        return;
+      }
     }
     eventMutation.mutate({ type: "NEW_EVENT" });
   };
@@ -175,6 +212,7 @@ export default function Submit() {
   const hero = heroCopy[mode];
 
   const fieldClass = "submit-form__field";
+  const ticketRequired = eventForm.admission !== "FREE";
 
   return (
     <div className="zine-page submit-page board-page">
@@ -192,8 +230,10 @@ export default function Submit() {
 
             {/* Card 1: Submit New Event */}
             <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("submit"); setSubmitStep(isApproved ? "event_details" : "promoter_app"); }}
-              style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #C8FA3C", padding: "20px 20px", cursor: "pointer" }}>
-              <div className="display" style={{ color: "#C8FA3C", fontSize: "1.1rem", marginBottom: 6 }}>{isApproved ? "SUBMIT NEW EVENT →" : "SUBMIT NEW EVENT + SIGN UP TO BE A PROMOTER →"}</div>
+              style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid var(--neon-yellow)", padding: 20, cursor: "pointer" }}>
+              <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1.1rem", marginBottom: 6 }}>
+                {isApproved ? "SUBMIT NEW EVENT →" : "SUBMIT NEW EVENT + SIGN UP TO BE A PROMOTER →"}
+              </div>
               <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
                 {isApproved
                   ? "You're a verified promoter — your event goes live after you submit."
@@ -204,7 +244,7 @@ export default function Submit() {
             {/* Card 2: Apply as Promoter (only shown if not approved) */}
             {!isApproved && (
               <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("apply"); }}
-                style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #00FFFF", padding: "20px 20px", cursor: "pointer" }}>
+                style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #00FFFF", padding: 20, cursor: "pointer" }}>
                 <div className="display" style={{ color: "#00FFFF", fontSize: "1.1rem", marginBottom: 6 }}>APPLY AS PROMOTER →</div>
                 <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
                   Not ready to submit an event yet? Apply to be a verified promoter now. Once approved, you can post new events that go live immediately.
@@ -214,9 +254,9 @@ export default function Submit() {
 
             {/* Card 3: Suggest an Event */}
             <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("suggest"); }}
-              style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #FF6600", padding: "20px 20px", cursor: "pointer" }}>
+              style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #FF6600", padding: 20, cursor: "pointer" }}>
               <div className="display" style={{ color: "#FF6600", fontSize: "1.1rem", marginBottom: 2 }}>SPOTTED AN EVENT →</div>
-              <div className="display" style={{ color: "#FF6600", fontSize: "0.7rem", marginBottom: 8, opacity: 0.7 }}>(EVERYONE)</div>
+              <div className="display" style={{ color: "#FF6600", fontSize: "0.7rem", marginBottom: 8, opacity: 0.7 }}>(NO PROMOTER STATUS NEEDED)</div>
               <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
                 Saw a Pride event somewhere and want to tip us off? No promoter account needed. Admins review all tips — approved ones go live as unclaimed listings.
               </p>
@@ -224,7 +264,7 @@ export default function Submit() {
 
             {/* Card 4: Claim Existing Event */}
             <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("claim"); }}
-              style={{ textAlign: "left", background: "#0d0d0d", border: "1px solid #333", padding: "20px 20px", cursor: "pointer" }}>
+              style={{ textAlign: "left", background: "#0d0d0d", border: "1px solid #333", padding: 20, cursor: "pointer" }}>
               <div className="display" style={{ color: "#aaa", fontSize: "1rem", marginBottom: 6 }}>CLAIM EXISTING EVENT →</div>
               <p style={{ color: "#666", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
                 See your event already listed but unclaimed? Claim it to get host access and request promoter verification.
@@ -246,9 +286,9 @@ export default function Submit() {
         {/* ── SUBMIT: Step 1 — Promoter Application (non-approved only) ── */}
         {mode === "submit" && !isApproved && submitStep === "promoter_app" && (
           <div>
-            <button type="button" onClick={() => setMode("landing")} style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", marginBottom: 20 }}>← BACK</button>
-            <div style={{ border: "2px solid #C8FA3C", background: "rgba(200,250,60,0.04)", padding: 18, marginBottom: 24 }}>
-              <div className="display" style={{ color: "#C8FA3C", fontSize: "0.95rem", marginBottom: 6 }}>STEP 1 OF 2 — PROMOTER APPLICATION</div>
+            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
+            <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(200,250,60,0.04)", padding: 18, marginBottom: 24 }}>
+              <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "0.95rem", marginBottom: 6 }}>STEP 1 OF 2 — PROMOTER APPLICATION</div>
               <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5, margin: 0 }}>
                 {promoterStatus === "pending"
                   ? "Your promoter application is already in the admin queue. You can still submit your event below — both will be reviewed together."
@@ -279,13 +319,12 @@ export default function Submit() {
         {/* ── SUBMIT: Event Details (approved users skip straight here) ── */}
         {mode === "submit" && (isApproved || submitStep === "event_details") && (
           <div>
-            <button type="button" onClick={() => isApproved ? setMode("landing") : setSubmitStep("promoter_app")}
-              style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", marginBottom: 20 }}>
+            <button type="button" style={backBtnStyle} onClick={() => isApproved ? setMode("landing") : setSubmitStep("promoter_app")}>
               ← {isApproved ? "BACK" : "BACK TO PROMOTER APPLICATION"}
             </button>
             {!isApproved && (
-              <div style={{ border: "2px solid #C8FA3C", background: "rgba(200,250,60,0.04)", padding: 14, marginBottom: 20 }}>
-                <div className="display" style={{ color: "#C8FA3C", fontSize: "0.82rem" }}>STEP 2 OF 2 — EVENT DETAILS</div>
+              <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(200,250,60,0.04)", padding: 14, marginBottom: 20 }}>
+                <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "0.82rem" }}>STEP 2 OF 2 — EVENT DETAILS</div>
               </div>
             )}
             <form onSubmit={e => { e.preventDefault(); handleSubmitWithEvent(); }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -318,7 +357,10 @@ export default function Submit() {
                   </div>
                   <div className={`${fieldClass} submit-form__field--orange`}>
                     <label style={labelStyle}>Day of Week</label>
-                    <select value={eventForm.dayOfWeek} onChange={e => setEventForm(f => ({ ...f, dayOfWeek: e.target.value }))}>
+                    <select value={eventForm.dayOfWeek} onChange={e => {
+                      const day = e.target.value;
+                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultDateTimes(day) }));
+                    }}>
                       <option value="THU">Thursday July 16</option>
                       <option value="FRI">Friday July 17</option>
                       <option value="SAT">Saturday July 18</option>
@@ -351,9 +393,11 @@ export default function Submit() {
                   </div>
                 </div>
                 <div className={`${fieldClass} submit-form__field--cyan`}>
-                  <label style={labelStyle}>Ticket / RSVP Link *</label>
-                  <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required />
-                  <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>All events must have a link.</div>
+                  <label style={labelStyle}>Ticket / RSVP Link{ticketRequired ? " *" : ""}</label>
+                  <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required={ticketRequired} />
+                  <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
+                    {ticketRequired ? "Required for ticketed events." : "Optional for free events — add one if you have it."}
+                  </div>
                 </div>
                 <div>
                   <label style={labelStyle}>Event Flyer / Poster (optional)</label>
@@ -416,7 +460,7 @@ export default function Submit() {
         {/* ── APPLY AS PROMOTER ── */}
         {mode === "apply" && (
           <div>
-            <button type="button" onClick={() => setMode("landing")} style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", marginBottom: 20 }}>← BACK</button>
+            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
             {promoterStatus === "pending" && (
               <div style={{ border: "2px solid #00FFFF", background: "rgba(0,255,255,0.06)", padding: 16, marginBottom: 20 }}>
                 <div className="display" style={{ color: "#00FFFF", fontSize: "0.9rem", marginBottom: 4 }}>APPLICATION ALREADY SUBMITTED</div>
@@ -461,7 +505,7 @@ export default function Submit() {
         {/* ── SUGGEST AN EVENT ── */}
         {mode === "suggest" && (
           <div>
-            <button type="button" onClick={() => setMode("landing")} style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", marginBottom: 20 }}>← BACK</button>
+            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
             <div style={{ border: "2px solid #FF6600", background: "rgba(255,102,0,0.06)", padding: 16, marginBottom: 20 }}>
               <div className="display" style={{ color: "#FF6600", fontSize: "0.9rem", marginBottom: 4 }}>NO PROMOTER ACCOUNT NEEDED</div>
               <p style={{ color: "#aaa", fontSize: "0.84rem", margin: 0 }}>
@@ -497,7 +541,7 @@ export default function Submit() {
                   placeholder="Instagram, flyer, word of mouth — any context helps." style={{ resize: "vertical" }} />
               </div>
               <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid"
-                style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%", borderColor: "#FF6600", background: "#FF6600", color: "#000" }}>
+                style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
                 {eventMutation.isPending ? "Sending..." : "Send Tip →"}
               </button>
               <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 4 }}>
@@ -510,12 +554,14 @@ export default function Submit() {
         {/* ── CLAIM EXISTING EVENT ── */}
         {mode === "claim" && (
           <div>
-            <button type="button" onClick={() => setMode("landing")} style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", marginBottom: 20 }}>← BACK</button>
+            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
             <form onSubmit={e => { e.preventDefault(); if (!user) { setShowAuth(true); return; } eventMutation.mutate({ type: "CLAIM" }); }}
               style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="display" style={sectionHeadStyle}>CLAIM DETAILS</div>
               <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", lineHeight: 1.5, marginTop: -4 }}>
-                Claiming an event also requests verified promoter status so you can post new listings after approval.
+                {isApproved
+                  ? "As a verified promoter, your claim goes live immediately — no admin review needed."
+                  : "Claiming an event also requests verified promoter status so you can post new listings after approval."}
               </p>
               <div className={`${fieldClass} submit-form__field--cyan`}>
                 <label style={labelStyle}>Event to Claim *</label>
@@ -541,10 +587,10 @@ export default function Submit() {
               </div>
               <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid"
                 style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }} data-testid="submit-button">
-                {eventMutation.isPending ? "Submitting..." : "Submit Claim + Promoter Request →"}
+                {eventMutation.isPending ? "Submitting..." : isApproved ? "Claim This Event →" : "Submit Claim + Promoter Request →"}
               </button>
               <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 4 }}>
-                All claims are reviewed before going live.
+                {isApproved ? "Your claim goes live immediately." : "All claims are reviewed before going live."}
               </p>
             </form>
           </div>
