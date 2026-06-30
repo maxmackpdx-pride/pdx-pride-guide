@@ -7915,27 +7915,36 @@ html.calm-mode .footer-brand-logo {
 .schedule-export-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.85rem;
-  letter-spacing: 0.03em;
-  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: #000;
   background: var(--neon-magenta);
   border: none;
-  border-radius: 10px;
-  padding: 12px 18px;
+  border-radius: 12px;
+  padding: 16px 24px;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 0 18px var(--neon-magenta), 0 0 36px color-mix(in srgb, var(--neon-magenta) 45%, transparent);
+  animation: exportGlow 2.2s ease-in-out infinite;
+  transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+@keyframes exportGlow {
+  0%, 100% { box-shadow: 0 0 18px var(--neon-magenta), 0 0 36px color-mix(in srgb, var(--neon-magenta) 45%, transparent); }
+  50%       { box-shadow: 0 0 30px var(--neon-magenta), 0 0 60px color-mix(in srgb, var(--neon-magenta) 55%, transparent); }
 }
 
 .schedule-export-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px var(--neon-magenta), 0 0 80px color-mix(in srgb, var(--neon-magenta) 60%, transparent);
 }
 
 .schedule-export-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: default;
+  animation: none;
 }
 
 .schedule-empty-banner {
@@ -8075,16 +8084,68 @@ html.calm-mode .footer-brand-logo {
 }
 
 @media (max-width: 880px) {
+  .schedule-page {
+    padding: 16px 0 60px;
+  }
+
+  .schedule-header {
+    padding: 0 16px;
+  }
+
+  .schedule-empty-banner {
+    margin: 0 16px;
+  }
+
   .schedule-grid {
-    grid-template-columns: 44px;
+    /* Time axis stays fixed; each day column snaps to fill remaining width */
+    grid-template-columns: 40px;
     grid-auto-flow: column;
-    grid-auto-columns: 78%;
+    grid-auto-columns: calc(100vw - 56px);
     scroll-snap-type: x mandatory;
+    gap: 6px;
+    /* Slight left padding so the time axis has breathing room */
+    padding-left: 8px;
   }
 
   .schedule-day-col {
     scroll-snap-align: start;
     min-width: 0;
+  }
+
+  .schedule-day-col__label {
+    font-size: 0.82rem;
+  }
+
+  .schedule-day-col__date {
+    font-size: 0.65rem;
+  }
+
+  /* Compact time labels on mobile */
+  .schedule-time-axis__label {
+    font-size: 0.55rem;
+  }
+
+  /* Export button: full-width on mobile for max visibility */
+  .schedule-export-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.9rem;
+    padding: 14px 18px;
+  }
+
+  .schedule-header__controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .schedule-toggle {
+    width: 100%;
+  }
+
+  .schedule-toggle__btn {
+    flex: 1;
   }
 }
 

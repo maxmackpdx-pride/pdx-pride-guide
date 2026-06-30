@@ -25,7 +25,8 @@ const ACCENT_CYCLE = ["#19E3FF", "#FF6600", "#39FF14", "#A855F7", "#FF00CC"];
 
 const SCHEDULE_START_HOUR = 11; // 11 AM
 const SCHEDULE_END_HOUR = 24; // midnight
-const HOUR_HEIGHT = 60; // px per hour
+// Responsive hour height: on mobile, fit 13hrs into ~600px so full day is visible at default zoom
+const HOUR_HEIGHT = typeof window !== "undefined" && window.innerWidth < 700 ? 48 : 64;
 const TOTAL_HEIGHT = (SCHEDULE_END_HOUR - SCHEDULE_START_HOUR) * HOUR_HEIGHT;
 
 function pacificClockMinutes(value: string): number | null {
