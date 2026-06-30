@@ -2637,6 +2637,9 @@ export const storage: IStorage = {
         username: user.username,
         email: user.email,
         displayName: user.displayName,
+        photoUrl: user.photoUrl ?? null,
+        avatarChoice: user.avatarChoice ?? 1,
+        avatarRing: user.avatarRing || "none",
         source: protectedAdmin ? "env" : source,
         protected: protectedAdmin,
         grantedAt: grantRow?.created_at || user.createdAt,
@@ -2908,6 +2911,9 @@ export const storage: IStorage = {
         username: u.username,
         email: u.email,
         displayName: u.displayName,
+        photoUrl: u.photoUrl ?? null,
+        avatarChoice: u.avatarChoice ?? 1,
+        avatarRing: u.avatarRing || "none",
         promoterStatus: u.promoterStatus,
         submissionId: claimSub?.id ?? null,
         eventId: claimSub?.eventId ?? null,
@@ -3265,7 +3271,10 @@ export const storage: IStorage = {
         e.title AS eventTitle,
         e.is_claimable AS isClaimable,
         u.username,
-        u.display_name AS displayName
+        u.display_name AS displayName,
+        u.photo_url AS photoUrl,
+        u.avatar_choice AS avatarChoice,
+        u.avatar_ring AS avatarRing
       FROM event_talent et
       JOIN events e ON e.id = et.event_id
       JOIN users u ON u.id = et.user_id

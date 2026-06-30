@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle, ChevronDown, Clock, XCircle } from "lucide-react";
 import AdminLoadError from "@/components/admin/AdminLoadError";
+import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 
 export type InboxKind =
   | "submission"
@@ -24,6 +25,34 @@ interface InboxItem {
   pending: boolean;
   severity?: string;
   payload: any;
+  profile?: AdminUserProfile | null;
+}
+
+function inboxUserProfile(kind: InboxKind, payload: any): AdminUserProfile | null {
+  if (kind === "submission" && payload.submitterProfile) return payload.submitterProfile;
+  if (kind === "promoter" || kind === "talent") {
+    return {
+      id: payload.id,
+      username: payload.username,
+      displayName: payload.displayName,
+      email: payload.email,
+      photoUrl: payload.photoUrl,
+      avatarChoice: payload.avatarChoice,
+      avatarRing: payload.avatarRing,
+    };
+  }
+  if (kind === "moderation" && payload.requesterProfile) return payload.requesterProfile;
+  if (kind === "gifting_post" && payload.username) {
+    return {
+      id: payload.userId,
+      username: payload.username,
+      displayName: payload.displayName,
+      photoUrl: payload.posterPhotoUrl,
+      avatarChoice: payload.avatarChoice,
+      avatarRing: payload.posterAvatarRing,
+    };
+  }
+  return null;
 }
 
 const KIND_META: Record<InboxKind, { label: string; color: string }> = {
@@ -97,10 +126,11 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       id: sub.id,
       createdAt: sub.createdAt,
       title: sub.title || `Submission #${sub.id}`,
-      subtitle: `${sub.type} · ${sub.submitterName} · ${sub.submitterEmail}`,
+      subtitle: `${sub.type} · ${sub.submitterName}${sub.submitterEmail ? ` · ${sub.submitterEmail}` : ""}`,
       status: sub.status,
       pending,
       payload: sub,
+      profile: sub.submitterProfile || null,
     });
   }
 
@@ -115,6 +145,7 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       status: "PENDING",
       pending: true,
       payload: req,
+      profile: inboxUserProfile("promoter", req),
     });
   }
 
@@ -129,6 +160,7 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       status: "PENDING",
       pending: true,
       payload: req,
+      profile: inboxUserProfile("talent", req),
     });
   }
 
@@ -144,6 +176,7 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       status: req.status,
       pending,
       payload: req,
+      profile: req.requesterProfile || null,
     });
   }
 
@@ -159,6 +192,7 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       status: post.status,
       pending: post.status === "PENDING" || post.reportCount > 0,
       payload: post,
+      profile: inboxUserProfile("gifting_post", post),
     });
   }
 
@@ -329,6 +363,11 @@ function InboxCard({
     <div className="border-2 transition-all" style={{ background: "#111", borderColor: expanded ? accent : "#222" }}>
       <button type="button" className="w-full text-left p-5 flex items-start justify-between gap-4" onClick={onToggle}>
         <div className="flex-1 min-w-0">
+          {item.profile && (
+            <div className="mb-3" onClick={e => e.stopPropagation()}>
+              <AdminUserIdentity profile={item.profile} showEmail={!!item.profile.email} size={36} />
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="sticker text-xs" style={{ color: accent, borderColor: accent }}>{kindLabel(item.kind)}</span>
             {!item.pending && (
@@ -364,13 +403,14 @@ function InboxCard({
         <div className="px-5 pb-5 border-t border-white/10 pt-4 space-y-4">
           {item.kind === "submission" && (
             <>
+              {payload.submitterProfile && (
+                <AdminUserIdentity profile={payload.submitterProfile} showEmail size={40} />
+              )}
               <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                 {Object.entries({
                   type: payload.type,
                   venue: payload.venueName,
                   day: payload.dayOfWeek,
-                  submitter: payload.submitterName,
-                  email: payload.submitterEmail,
                   description: payload.description,
                 }).filter(([, val]) => val).map(([key, val]) => (
                   <div key={key} className="bg-black/30 p-2 border border-white/10">
@@ -400,6 +440,7 @@ function InboxCard({
 
           {item.kind === "promoter" && item.pending && (
             <>
+              <AdminUserIdentity profile={item.profile} showEmail size={40} />
               {payload.claimReason && (
                 <p className="text-white/70 text-sm whitespace-pre-wrap border-l-2 pl-3" style={{ borderColor: accent }}>
                   {payload.claimReason}
@@ -414,15 +455,21 @@ function InboxCard({
           )}
 
           {item.kind === "talent" && item.pending && (
+            <>
+            <AdminUserIdentity profile={item.profile} size={40} />
             <ActionRow
               pending={actionPending}
               onApprove={() => onApproveTalent(payload.id)}
               onReject={() => onDenyTalent(payload.id)}
             />
+            </>
           )}
 
           {item.kind === "moderation" && (
             <>
+              {payload.requesterProfile && (
+                <AdminUserIdentity profile={payload.requesterProfile} showEmail size={40} />
+              )}
               {payload.proof && (
                 <div className="bg-black/30 p-3 border border-white/10">
                   <p className="text-white/30 text-xs uppercase tracking-wide mb-1">Details</p>
@@ -450,6 +497,7 @@ function InboxCard({
 
           {item.kind === "gifting_post" && item.pending && (
             <>
+              {item.profile && <AdminUserIdentity profile={item.profile} size={40} />}
               <p className="text-white/65 text-sm">{payload.description}</p>
               <div className="flex gap-2 flex-wrap">
                 <button type="button" className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => onGiftingStatus(payload.id, payload.postType === "ISO" ? "LOOKING" : "OPEN")}>

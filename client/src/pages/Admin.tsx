@@ -12,6 +12,7 @@ import ImageUploader from "@/components/ImageUploader";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminInbox from "@/components/admin/AdminInbox";
+import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import "@/components/dashboard/dashboard.css";
 
@@ -35,6 +36,7 @@ interface Submission {
   approvals: string;
   adminNotes: string | null;
   createdAt: string;
+  submitterProfile?: AdminUserProfile | null;
 }
 
 interface AdminEvent {
@@ -62,6 +64,8 @@ interface AdminEvent {
   source: string;
   submittedBy: string | null;
   claimedBy: string | null;
+  submittedByProfile?: AdminUserProfile | null;
+  claimedByProfile?: AdminUserProfile | null;
 }
 
 interface ModerationRequest {
@@ -77,25 +81,21 @@ interface ModerationRequest {
   adminNotes?: string;
 }
 
-interface PromoterRequest {
+interface PromoterRequest extends AdminUserProfile {
   id: number;
-  username: string;
-  email: string;
-  displayName: string | null;
   eventId: number | null;
   eventTitle: string | null;
   claimReason: string | null;
   submitterOrg: string | null;
   requestedAt: string;
+  promoterStatus?: string;
 }
 
-interface TalentRequest {
+interface TalentRequest extends AdminUserProfile {
   id: number;
   eventId: number;
   eventTitle: string;
   role: string;
-  username: string;
-  displayName: string | null;
   createdAt: string;
 }
 
@@ -114,13 +114,12 @@ interface AdminGig {
   createdAt: string;
   username?: string;
   displayName?: string | null;
+  posterPhotoUrl?: string | null;
+  avatarChoice?: number;
+  posterAvatarRing?: string | null;
 }
 
-interface AdminUser {
-  id: number;
-  username: string;
-  email: string;
-  displayName: string | null;
+interface AdminUser extends AdminUserProfile {
   promoterStatus: string;
   subAdmin: boolean;
   googleLinked: boolean;
@@ -132,11 +131,8 @@ interface AdminUser {
 type AdminTab = "inbox" | "events" | "gigs" | "promoters" | "users" | "team";
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer" | "user_submitted";
 
-interface SiteAdminMember {
+interface SiteAdminMember extends AdminUserProfile {
   userId: number;
-  username: string;
-  email: string;
-  displayName: string | null;
   source: "env" | "granted";
   protected: boolean;
   grantedAt: string;
@@ -172,7 +168,7 @@ export default function Admin() {
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userSearchQ, setUserSearchQ] = useState("");
-  const [userSearchResults, setUserSearchResults] = useState<Array<{ id: number; username: string; email: string; displayName: string | null; promoterStatus: string | null; subAdmin: boolean }>>([]);
+  const [userSearchResults, setUserSearchResults] = useState<Array<AdminUserProfile & { id: number; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
   const [allUsersFilter, setAllUsersFilter] = useState("");
 
@@ -967,9 +963,20 @@ export default function Admin() {
                           <p className="text-white/35 text-[10px] mt-1 uppercase tracking-wide">Missing flyer</p>
                         )}
                         {ev.source === "user_submitted" && (
-                          <p className="text-[#00FFFF]/80 text-[10px] mt-1 uppercase tracking-wide">
-                            Community submitted{ev.submittedBy ? ` · ${ev.submittedBy}` : ""}
-                          </p>
+                          <p className="text-[#00FFFF]/80 text-[10px] mt-1 uppercase tracking-wide">Community submitted</p>
+                        )}
+                        {(ev.submittedByProfile || ev.claimedByProfile) && (
+                          <div className="mt-2 space-y-1">
+                            {ev.submittedByProfile && (
+                              <AdminUserIdentity profile={ev.submittedByProfile} size={28} />
+                            )}
+                            {ev.claimedByProfile && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-white/30 text-[10px] uppercase tracking-wide">Host</span>
+                                <AdminUserIdentity profile={ev.claimedByProfile} size={28} />
+                              </div>
+                            )}
+                          </div>
                         )}
                         </div>
                       </div>
@@ -1151,6 +1158,21 @@ export default function Admin() {
                   <div key={gig.id} className="border border-white/10" style={{ background: "#111" }}>
                     <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
                       <div className="flex-1 min-w-0">
+                        {gig.username && (
+                          <AdminUserIdentity
+                            profile={{
+                              username: gig.username,
+                              displayName: gig.displayName,
+                              photoUrl: gig.posterPhotoUrl,
+                              avatarChoice: gig.avatarChoice,
+                              avatarRing: gig.posterAvatarRing,
+                              email: gig.contactEmail,
+                            }}
+                            showEmail
+                            size={36}
+                            className="mb-2"
+                          />
+                        )}
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="display text-base text-white truncate">{gig.title}</p>
                           {(gig.title === SITE_ADMIN_GIG_TITLE || gig.username === SITE_ADMIN_GIG_OWNER) && (
@@ -1161,7 +1183,6 @@ export default function Admin() {
                         </div>
                         <p className="text-white/40 text-xs mt-0.5">
                           {gig.postType === "LOOKING_FOR_WORK" ? "Looking for work" : "Posting gig"}
-                          {gig.username ? ` · @${gig.username}` : ""}
                           {gig.compensation ? ` · ${gig.compensation}` : ""}
                           {gig.location ? ` · ${gig.location}` : ""}
                         </p>
@@ -1295,10 +1316,9 @@ export default function Admin() {
                 <div className="space-y-2">
                   {userSearchResults.map(u => (
                     <div key={u.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
-                      <div>
-                        <p className="text-white text-sm font-medium">@{u.username}{u.displayName ? ` · ${u.displayName}` : ""}</p>
-                        <p className="text-white/40 text-xs">{u.email}</p>
-                        <p className="text-xs mt-1" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                      <div className="min-w-0 flex-1">
+                        <AdminUserIdentity profile={u} showEmail size={40} />
+                        <p className="text-xs mt-2 ml-[52px]" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
                           promoter: {u.promoterStatus || "none"}
                           {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
                         </p>
@@ -1381,9 +1401,9 @@ export default function Admin() {
                 </p>
                 {filteredAllUsers.map(u => (
                   <div key={u.id} className="p-4 border border-white/10 flex items-start justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-white text-sm font-medium">@{u.username}{u.displayName ? ` · ${u.displayName}` : ""}</p>
+                    <div className="min-w-0 flex-1">
+                      <AdminUserIdentity profile={u} showEmail size={44} />
+                      <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
                         {u.isOwner && (
                           <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>OWNER</span>
                         )}
@@ -1391,8 +1411,7 @@ export default function Admin() {
                           <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>SUB-ADMIN</span>
                         )}
                       </div>
-                      <p className="text-white/40 text-xs mt-1 break-all">{u.email}</p>
-                      <div className="flex flex-wrap gap-3 mt-2 text-xs">
+                      <div className="flex flex-wrap gap-3 mt-2 text-xs ml-[56px]">
                         <span style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
                           promoter: {u.promoterStatus}
                         </span>
@@ -1467,15 +1486,13 @@ export default function Admin() {
               <div className="space-y-3">
                 {teamAdmins.map(member => (
                   <div key={member.userId} className="p-4 border border-white/10 flex items-start justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="display text-lg text-white">{member.displayName || member.username}</p>
-                        <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>@{member.username}</span>
+                    <div className="min-w-0 flex-1">
+                      <AdminUserIdentity profile={{ ...member, id: member.userId }} showEmail size={44} />
+                      <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
                         {member.protected && (
                           <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>OWNER</span>
                         )}
                       </div>
-                      <p className="text-white/40 text-sm mt-1">{member.email}</p>
                       {member.note && <p className="text-white/55 text-sm mt-2">{member.note}</p>}
                       <p className="text-white/30 text-xs mt-2">
                         {member.protected ? "Protected via Railway env" : `Granted${member.grantedByUsername ? ` by @${member.grantedByUsername}` : ""}`}

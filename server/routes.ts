@@ -86,12 +86,46 @@ function adminUserSummary(user: any) {
     username: user.username,
     email: user.email,
     displayName: user.displayName,
+    photoUrl: user.photoUrl || null,
+    avatarChoice: user.avatarChoice ?? 1,
+    avatarRing: user.avatarRing || "none",
     promoterStatus: user.promoterStatus || "none",
     subAdmin: !!user.subAdmin,
     googleLinked: !!user.googleId,
     status: user.status || "active",
     createdAt: user.createdAt || "",
     isOwner: isMainAdminUser(user),
+  };
+}
+
+function lookupUserProfile(identifier: string | null | undefined) {
+  const raw = String(identifier || "").trim().replace(/^@/, "");
+  if (!raw) return null;
+  const user = storage.getUserByEmail(raw) || storage.getUserByUsername(raw);
+  return user ? adminUserSummary(user) : null;
+}
+
+function enrichSubmissionForAdmin(sub: any) {
+  const user = storage.getUserByEmail(sub.submitterEmail);
+  return {
+    ...sub,
+    submitterProfile: user ? adminUserSummary(user) : null,
+  };
+}
+
+function enrichModerationForAdmin(req: any) {
+  const user = storage.getUserByEmail(req.requesterEmail);
+  return {
+    ...req,
+    requesterProfile: user ? adminUserSummary(user) : null,
+  };
+}
+
+function enrichEventForAdmin(evt: any) {
+  return {
+    ...evt,
+    submittedByProfile: lookupUserProfile(evt.submittedBy),
+    claimedByProfile: lookupUserProfile(evt.claimedBy),
   };
 }
 
@@ -1505,7 +1539,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ─── ADMIN ────────────────────────────────────────────────────────────────
   app.get("/api/admin/submissions", requireAdmin, (req, res) => {
     const subs = req.query.all === "true" ? storage.getSubmissions() : storage.getSubmissions("PENDING");
-    res.json(subs);
+    res.json(subs.map(enrichSubmissionForAdmin));
   });
 
   app.post("/api/admin/submissions/:id/approve", requireAdmin, (req, res) => {
@@ -1627,7 +1661,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/admin/events", requireAdmin, (req, res) => {
     const evts = storage.getEvents({});
-    res.json(evts);
+    res.json(evts.map(enrichEventForAdmin));
   });
 
   app.get("/api/admin/persistence", requireAdmin, (_req, res) => {
@@ -1709,7 +1743,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // GET admin moderation requests
   app.get("/api/admin/moderation", requireAdmin, (req, res) => {
     const reqs = req.query.all === "true" ? storage.getModerationRequests() : storage.getModerationRequests("PENDING");
-    res.json(reqs);
+    res.json(reqs.map(enrichModerationForAdmin));
   });
 
   // POST resolve moderation request
@@ -1746,7 +1780,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── ADMIN: GIGS ────────────────────────────────────────────────────────
   app.get("/api/admin/gigs", requireAdmin, (req, res) => {
-    res.json(storage.getGigPosts());
+    res.json(storage.getGigPosts().map(gig => {
+      const user = gig.userId ? storage.getUserById(gig.userId) : null;
+      return {
+        ...gig,
+        username: user?.username,
+        displayName: user?.displayName,
+        posterPhotoUrl: user?.photoUrl ?? null,
+        avatarChoice: user?.avatarChoice ?? 1,
+        posterAvatarRing: user?.avatarRing || "none",
+      };
+    }));
   });
 
   app.post("/api/admin/gigs/:id/status", requireAdmin, (req, res) => {
