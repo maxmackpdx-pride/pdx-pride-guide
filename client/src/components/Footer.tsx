@@ -1,11 +1,13 @@
 import { Link } from "wouter";
 import footerLogoPath from "@assets/logo-footer.png";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { FeedbackButton } from "./FeedbackForm";
 
 
 export default function Footer() {
   const { user } = useAuth();
+  const { calmMode, toggleCalmMode } = useTheme();
   return (
     <footer style={{ background: "#000" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
@@ -52,8 +54,20 @@ export default function Footer() {
           </div>
         </div>
         <img src={footerLogoPath} alt="Portland Pride Guide 2026" className="footer-brand-logo" />
-        <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
+        <div style={{ marginBottom: 20, display: "flex", justifyContent: "center", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <FeedbackButton />
+          <button
+            type="button"
+            onClick={toggleCalmMode}
+            aria-label={calmMode ? "Switch to neon mode" : "Switch to calm mode"}
+            className="calm-mode-toggle"
+          >
+            <span className="calm-mode-toggle__icon">{calmMode ? "✦" : "◐"}</span>
+            <span className="calm-mode-toggle__label">{calmMode ? "NEON MODE" : "CALM MODE"}</span>
+            <span className="calm-mode-toggle__pill">
+              <span className={`calm-mode-toggle__dot ${calmMode ? "calm-mode-toggle__dot--on" : ""}`} />
+            </span>
+          </button>
         </div>
         {/* Subtle donation line — footer only */}
         <div style={{ textAlign: "center", marginBottom: 20, padding: "12px 0", borderTop: "1px solid #111", borderBottom: "1px solid #111" }}>

@@ -5,6 +5,7 @@ import { queryClient } from "./lib/queryClient";
 import { resetPageScroll } from "./lib/resetPageScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import FilmGrainOverlay from "./components/FilmGrainOverlay";
@@ -33,6 +34,7 @@ import NotFound from "./pages/not-found";
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
       <AuthProvider>
         <Router>
           <ScrollToTop />
@@ -66,6 +68,7 @@ export default function App() {
           <Toaster />
         </Router>
       </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -7618,3 +7618,283 @@ footer a:hover { color: #00FFFF !important; }
     border: 1px solid #1a1a1a;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   CALM MODE
+   Toggled via html.calm-mode class (ThemeContext).
+   Flips to a light, no-glow aesthetic while keeping all
+   neon colors on interactive elements (tags, buttons, maps,
+   flyers). Only visual properties are overridden — no layout
+   or functional changes.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Base font bump ── */
+html.calm-mode {
+  font-size: 106%;
+}
+
+/* ── CSS variable overrides ── */
+html.calm-mode {
+  --site-film-grain-opacity: 0;
+  --board-page-grain-opacity: 0;
+  --text-heading: #0d0d0d;
+  --text-body: #2a2826;
+  --text-meta: #5a5855;
+  --text-faint: #8a8785;
+  --board-text: #0d0d0d;
+  --board-muted: #5a5855;
+}
+
+/* ── Page / shell background ── */
+html.calm-mode body,
+html.calm-mode .app-shell {
+  background: #eae8e3;
+  color: #0d0d0d;
+}
+
+/* ── Header / nav ── */
+html.calm-mode .site-header {
+  background: #f2f0ed;
+  border-bottom-color: #c8c4be;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.calm-mode .site-nav-link {
+  color: #5a5855;
+}
+
+html.calm-mode .site-nav-link:hover {
+  color: #0d0d0d;
+}
+
+html.calm-mode .site-nav-link.active {
+  color: #0d0d0d;
+}
+
+html.calm-mode .site-nav-link.active::after {
+  box-shadow: none;
+}
+
+html.calm-mode .site-nav-notify-dot {
+  box-shadow: none;
+  animation: none;
+}
+
+/* ── Pages / content areas ── */
+html.calm-mode .zine-page {
+  background: #eae8e3;
+}
+
+html.calm-mode .zine-page::before {
+  opacity: 0;
+}
+
+html.calm-mode .board-page {
+  background: #eae8e3;
+}
+
+html.calm-mode .submit-page__body {
+  background: #eae8e3;
+}
+
+/* ── Hero panels ── */
+html.calm-mode .page-hero__panel {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+html.calm-mode .page-hero__title,
+html.calm-mode .page-hero-title {
+  color: #0d0d0d;
+}
+
+html.calm-mode .page-hero__lede,
+html.calm-mode .page-hero__tagline {
+  color: #2a2826;
+}
+
+/* Remove hero accent glows — color stays, glow goes */
+html.calm-mode .page-hero__accent--lime,
+html.calm-mode .page-hero__accent--cyan,
+html.calm-mode .page-hero__accent--magenta,
+html.calm-mode .page-hero__accent--orange {
+  text-shadow: none;
+}
+
+html.calm-mode .page-hero__accent--rainbow {
+  filter: none;
+}
+
+/* ── Countdown ── */
+html.calm-mode .home-countdown-box {
+  background: #ffffff;
+  border-color: #d0cdc8;
+  box-shadow: none;
+}
+
+html.calm-mode .home-countdown-box div {
+  color: #111111;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}
+
+html.calm-mode .home-countdown-box span {
+  color: #5a5855;
+}
+
+/* ── Event cards ── */
+html.calm-mode .event-board-card {
+  background: #f7f5f1;
+  border-color: #d0cdc8;
+}
+
+html.calm-mode .event-board-card__title {
+  color: #0d0d0d;
+}
+
+html.calm-mode .event-board-card__venue,
+html.calm-mode .event-board-card__when {
+  color: #5a5855;
+}
+
+html.calm-mode .event-board-card__details-link {
+  color: #0044aa;
+}
+
+/* ── Poster cards ── */
+html.calm-mode .poster-card {
+  background: #f7f5f1;
+  border-color: #d0cdc8;
+}
+
+html.calm-mode .poster-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Buttons — keep neon colors, remove glow shadows ── */
+html.calm-mode .btn-neon {
+  box-shadow: none;
+}
+
+html.calm-mode .btn-neon:hover {
+  box-shadow: none;
+}
+
+/* ── Filter tags — keep neon border/color, remove glow ── */
+html.calm-mode .filter-tag.active {
+  box-shadow: none;
+}
+
+/* ── Logo / wordmark ── */
+html.calm-mode .glitch-logo__main {
+  filter: none;
+}
+
+html.calm-mode .site-brand-wordmark__line--accent {
+  filter: none;
+}
+
+/* ── Sticker motifs / decorative elements ── */
+html.calm-mode .sticker-motif {
+  filter: none;
+}
+
+html.calm-mode .torn-divider {
+  box-shadow: none;
+  filter: none;
+}
+
+/* ── Home map button ── */
+html.calm-mode .home-map-all-events {
+  box-shadow: none;
+}
+
+html.calm-mode .map-legend--home {
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0d0d0d;
+}
+
+/* ── Film grain overlay ── */
+html.calm-mode .film-grain-overlay {
+  opacity: 0;
+}
+
+/* ── Footer ── */
+html.calm-mode footer {
+  background: #d8d4ce;
+}
+
+html.calm-mode footer a {
+  color: #5a5855;
+}
+
+/* ── Calm mode toggle button (in footer) ── */
+.calm-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid #444;
+  padding: 7px 14px 7px 10px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #888;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.calm-mode-toggle:hover {
+  border-color: #aaa;
+  color: #ccc;
+}
+
+html.calm-mode .calm-mode-toggle {
+  border-color: #999;
+  color: #2a2826;
+}
+
+html.calm-mode .calm-mode-toggle:hover {
+  border-color: #555;
+  color: #0d0d0d;
+}
+
+.calm-mode-toggle__icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.calm-mode-toggle__pill {
+  display: inline-flex;
+  align-items: center;
+  width: 28px;
+  height: 14px;
+  border: 1px solid #555;
+  border-radius: 7px;
+  padding: 2px;
+  position: relative;
+  background: #222;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+html.calm-mode .calm-mode-toggle__pill {
+  background: #c8c4be;
+  border-color: #999;
+}
+
+.calm-mode-toggle__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #666;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.calm-mode-toggle__dot--on {
+  transform: translateX(14px);
+  background: #2a2826;
+}
