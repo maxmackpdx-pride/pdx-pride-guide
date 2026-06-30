@@ -8187,3 +8187,8 @@ html.calm-mode .calm-mode-toggle__pill {
     min-width: 0;
   }
 }
+
+/* Footer logo — compact, matching the visual size of the nav bar logo */
+.footer-brand .glitch-logo {
+  height: 44px;
+}
