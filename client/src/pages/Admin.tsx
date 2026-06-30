@@ -1400,8 +1400,8 @@ export default function Admin() {
                   Showing {filteredAllUsers.length}{allUsersFilter ? ` of ${allUsers.length}` : ""} users · newest first
                 </p>
                 {filteredAllUsers.map(u => (
-                  <div key={u.id} className="p-4 border border-white/10 flex items-start justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
-                    <div className="min-w-0 flex-1">
+                  <div key={u.id} className="p-4 border border-white/10 flex flex-col gap-3" style={{ background: "#0d0d0d" }}>
+                    <div className="min-w-0">
                       <AdminUserIdentity profile={u} showEmail size={44} />
                       <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
                         {u.isOwner && (
