@@ -1845,6 +1845,20 @@ h2.display,
   gap: 9px;
 }
 
+@media (max-width: 640px) {
+  /* Hide overlay tags on mobile — day stripe + bottom info is enough */
+  .event-card-tags--overlay {
+    display: none;
+  }
+  /* Tighten grid card bottom info padding so more poster shows */
+  .poster-card__info-overlay {
+    padding: 12px 14px !important;
+  }
+  .events-page .events-poster-grid {
+    gap: 10px;
+  }
+}
+
 .zine-content {
   position: relative;
 }

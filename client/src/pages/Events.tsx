@@ -263,14 +263,14 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
           <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--overlay" />
           {/* Info overlay */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 21 }}>
+          <div className="poster-card__info-overlay" style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 21 }}>
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1.5rem, 2.1vw, 1.83rem)",
+              fontSize: "clamp(1.1rem, 2.1vw, 1.83rem)",
               color: "#fff", lineHeight: 1.05, marginBottom: 6,
             }}>{event.title}</div>
-            <div style={{ fontSize: "1.11rem", color: "#aaa" }}>{event.venueName}</div>
-            <div style={{ fontSize: "1.02rem", color: "var(--text-meta)", marginTop: 3 }}>{time}</div>
+            <div style={{ fontSize: "1.0rem", color: "#aaa" }}>{event.venueName}</div>
+            <div style={{ fontSize: "0.9rem", color: "var(--text-meta)", marginTop: 3 }}>{time}</div>
             <EventWorkHereTag talent={myTalent} compact />
             <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
           </div>
