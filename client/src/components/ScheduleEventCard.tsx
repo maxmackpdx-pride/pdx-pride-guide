@@ -20,6 +20,8 @@ export default function ScheduleEventCard({
   accentColor,
   top,
   height,
+  col = 0,
+  totalCols = 1,
   onClick,
 }: {
   event: EventListing;
@@ -27,10 +29,14 @@ export default function ScheduleEventCard({
   accentColor: string;
   top: number;
   height: number;
+  col?: number;
+  totalCols?: number;
   onClick: () => void;
 }) {
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const compact = height < 70;
+  const colWidthPct = 100 / totalCols;
+  const GAP = 3;
 
   return (
     <div
@@ -44,8 +50,8 @@ export default function ScheduleEventCard({
         position: "absolute",
         top,
         height,
-        left: 4,
-        right: 4,
+        left: `calc(${col * colWidthPct}% + ${GAP}px)`,
+        width: `calc(${colWidthPct}% - ${GAP * 2}px)`,
         backgroundImage: `url(${posterUrl})`,
       }}
     >

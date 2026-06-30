@@ -23,9 +23,9 @@ const DAYS: { key: string; label: string; date: string; color: string }[] = [
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF6600", "#39FF14", "#A855F7", "#FF00CC"];
 
-const SCHEDULE_START_HOUR = 4; // 4 AM
+const SCHEDULE_START_HOUR = 11; // 11 AM
 const SCHEDULE_END_HOUR = 24; // midnight
-const HOUR_HEIGHT = 72; // px per hour
+const HOUR_HEIGHT = 60; // px per hour
 const TOTAL_HEIGHT = (SCHEDULE_END_HOUR - SCHEDULE_START_HOUR) * HOUR_HEIGHT;
 
 function pacificClockMinutes(value: string): number | null {
@@ -59,6 +59,30 @@ function eventPosition(event: EventListing): { top: number; height: number } | n
   const top = ((clampedStart - rangeStart) / 60) * HOUR_HEIGHT;
   const height = Math.max(((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT, 36);
   return { top, height };
+}
+
+function computeDayLayout(events: EventListing[]): Map<string | number, { col: number; totalCols: number }> {
+  const result = new Map<string | number, { col: number; totalCols: number }>();
+  if (events.length === 0) return result;
+  const key = (e: EventListing) => e.listingInstanceKey ?? e.id;
+  const startOf = (e: EventListing) => pacificClockMinutes(e.dateStart) ?? 0;
+  const endOf = (e: EventListing) => { const s = startOf(e); const end = pacificClockMinutes(e.dateEnd); return end == null || end <= s ? s + 60 : end; };
+  const sorted = [...events].sort((a, b) => startOf(a) - startOf(b));
+  const colEnds: number[] = [];
+  const colAssign = new Map<string | number, number>();
+  for (const ev of sorted) {
+    const s = startOf(ev); const e = endOf(ev);
+    let col = colEnds.findIndex(t => t <= s);
+    if (col === -1) { col = colEnds.length; colEnds.push(e); } else colEnds[col] = e;
+    colAssign.set(key(ev), col);
+  }
+  for (const ev of sorted) {
+    const s = startOf(ev); const e = endOf(ev);
+    const concurrent = sorted.filter(o => startOf(o) < e && endOf(o) > s);
+    const maxCol = Math.max(...concurrent.map(o => colAssign.get(key(o)) ?? 0));
+    result.set(key(ev), { col: colAssign.get(key(ev))!, totalCols: maxCol + 1 });
+  }
+  return result;
 }
 
 function formatHourLabel(hour: number): string {
@@ -195,34 +219,42 @@ export default function Schedule() {
             <div key={i} className="schedule-time-axis__label" style={{ top: i * HOUR_HEIGHT }}>{label}</div>
           ))}
         </div>
-        {DAYS.map(day => (
-          <div key={day.key} className="schedule-day-col">
-            <div className="schedule-day-col__header" style={{ borderColor: day.color }}>
-              <div className="schedule-day-col__label">{day.label}</div>
-              <div className="schedule-day-col__date">{day.date}</div>
+        {DAYS.map(day => {
+          const dayEvents = eventsByDay[day.key];
+          const layout = computeDayLayout(dayEvents);
+          return (
+            <div key={day.key} className="schedule-day-col">
+              <div className="schedule-day-col__header" style={{ borderColor: day.color }}>
+                <div className="schedule-day-col__label">{day.label}</div>
+                <div className="schedule-day-col__date">{day.date}</div>
+              </div>
+              <div className="schedule-day-col__body" style={{ height: TOTAL_HEIGHT }}>
+                {TIME_LABELS.map((_, i) => (
+                  <div key={i} className="schedule-day-col__hour-line" style={{ top: i * HOUR_HEIGHT }} />
+                ))}
+                {dayEvents.map((event, idx) => {
+                  const pos = eventPosition(event);
+                  if (!pos) return null;
+                  const lk = event.listingInstanceKey ?? event.id;
+                  const { col, totalCols } = layout.get(lk) ?? { col: 0, totalCols: 1 };
+                  return (
+                    <ScheduleEventCard
+                      key={event.listingInstanceKey || event.id}
+                      event={event}
+                      attendanceSummary={attendanceSummaries[event.id] ?? attendanceSummaries[String(event.id)]}
+                      accentColor={ACCENT_CYCLE[idx % ACCENT_CYCLE.length]}
+                      top={pos.top}
+                      height={pos.height}
+                      col={col}
+                      totalCols={totalCols}
+                      onClick={() => handleEventClick(event)}
+                    />
+                  );
+                })}
+              </div>
             </div>
-            <div className="schedule-day-col__body" style={{ height: TOTAL_HEIGHT }}>
-              {TIME_LABELS.map((_, i) => (
-                <div key={i} className="schedule-day-col__hour-line" style={{ top: i * HOUR_HEIGHT }} />
-              ))}
-              {eventsByDay[day.key].map((event, idx) => {
-                const pos = eventPosition(event);
-                if (!pos) return null;
-                return (
-                  <ScheduleEventCard
-                    key={event.listingInstanceKey || event.id}
-                    event={event}
-                    attendanceSummary={attendanceSummaries[event.id] ?? attendanceSummaries[String(event.id)]}
-                    accentColor={ACCENT_CYCLE[idx % ACCENT_CYCLE.length]}
-                    top={pos.top}
-                    height={pos.height}
-                    onClick={() => handleEventClick(event)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
