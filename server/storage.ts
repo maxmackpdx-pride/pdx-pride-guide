@@ -2628,11 +2628,13 @@ export const storage: IStorage = {
   grantSiteAdminByIdentifier(identifier, grantedByUserId, note) {
     const raw = String(identifier || "").trim();
     if (!raw) return { error: "Username or email required" };
-    const normalized = raw.replace(/^@/, "").toLowerCase();
-    const user = raw.includes("@")
-      ? storage.getUserByEmail(normalized)
-      : storage.getUserByUsername(normalized);
-    if (!user) return { error: "No registered user found with that username or email" };
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw);
+    const user = isEmail
+      ? storage.getUserByEmail(raw.toLowerCase())
+      : (sqlite.prepare(`
+          SELECT * FROM users WHERE LOWER(username) = ? LIMIT 1
+        `).get(raw.replace(/^@/, "").toLowerCase()) as User | undefined);
+    if (!user) return { error: "No registered user found with that username or email. They need a site account first." };
     if (isEnvListedSiteAdmin(user) || storage.hasSiteAdminGrant(user.id)) {
       return { error: "User is already a site admin" };
     }

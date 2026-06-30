@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
@@ -414,13 +414,12 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/team"] });
       toast({ title: "Site admin added", description: "They can open /admin while logged into their site account." });
     },
-    onError: async (err: any) => {
-      let message = "Could not add site admin.";
-      try {
-        const body = await err?.response?.json?.();
-        if (body?.error) message = body.error;
-      } catch {}
-      toast({ title: "Error", description: message, variant: "destructive" });
+    onError: (err: unknown) => {
+      toast({
+        title: "Error",
+        description: parseApiError(err, "Could not add site admin."),
+        variant: "destructive",
+      });
     },
   });
 
@@ -462,13 +461,12 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/team"] });
       toast({ title: "Site admin removed" });
     },
-    onError: async (err: any) => {
-      let message = "Could not remove site admin.";
-      try {
-        const body = await err?.response?.json?.();
-        if (body?.error) message = body.error;
-      } catch {}
-      toast({ title: "Error", description: message, variant: "destructive" });
+    onError: (err: unknown) => {
+      toast({
+        title: "Error",
+        description: parseApiError(err, "Could not remove site admin."),
+        variant: "destructive",
+      });
     },
   });
 

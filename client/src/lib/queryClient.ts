@@ -9,6 +9,19 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+export function parseApiError(err: unknown, fallback: string): string {
+  const message = err instanceof Error ? err.message : String(err ?? "");
+  const jsonPrefix = message.match(/^\d{3}:\s*(\{[\s\S]*\})$/);
+  if (jsonPrefix) {
+    try {
+      const body = JSON.parse(jsonPrefix[1]) as { error?: string };
+      if (body.error) return body.error;
+    } catch {}
+  }
+  if (message && !/^\d{3}:/.test(message)) return message;
+  return fallback;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
