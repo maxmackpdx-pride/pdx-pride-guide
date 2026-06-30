@@ -260,6 +260,8 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN google_id TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_ring TEXT DEFAULT 'none'`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_crop TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN promoter_status TEXT NOT NULL DEFAULT 'none'`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN sub_admin INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_unique ON users(google_id)`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN photo_url TEXT`); } catch(e) {}
@@ -1537,6 +1539,7 @@ export interface IStorage {
   getSubmissions(status?: string): Submission[];
   getSubmission(id: number): Submission | undefined;
   createSubmission(data: InsertSubmission): Submission;
+  autoApproveSubmission(id: number, claimedByUsername: string): void;
   approveSubmission(id: number, adminName: string): Submission | undefined;
   rejectSubmission(id: number, reason: string): void;
   // Gigs
@@ -1566,7 +1569,7 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus' | 'subAdmin'>>): void;
   setPromoterStatus(userId: number, status: string): void;
   getAllUsers(): User[];
   getPendingPromoterRequests(): any[];
@@ -1683,6 +1686,26 @@ export const storage: IStorage = {
       approvals: "[]",
       createdAt: new Date().toISOString(),
     }).returning().get();
+  },
+  autoApproveSubmission(id, claimedByUsername) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub || sub.type !== "NEW_EVENT") return;
+    db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
+    db.insert(events).values({
+      title: sub.title, description: sub.description,
+      venueName: sub.venueName, address: sub.address,
+      neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+      dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+      ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+      admission: sub.admission, ticketUrl: sub.ticketUrl,
+      isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+      isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+      nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+      status: "LIVE", source: "user_submitted",
+      isClaimable: false, claimedBy: claimedByUsername,
+      submittedBy: sub.submitterEmail, adminNotes: null,
+      createdAt: new Date().toISOString(),
+    }).run();
   },
   approveSubmission(id, adminName) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();

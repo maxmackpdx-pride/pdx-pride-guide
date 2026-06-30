@@ -96,6 +96,7 @@ type AdminTab = "queue" | "promoters" | "talent" | "moderation" | "events" | "gi
 export default function Admin() {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
@@ -103,7 +104,7 @@ export default function Admin() {
   const [adminName, setAdminName] = useState("Admin1");
   const [activeTab, setActiveTab] = useState<AdminTab>("queue");
   const [userSearchQ, setUserSearchQ] = useState("");
-  const [userSearchResults, setUserSearchResults] = useState<Array<{ id: number; username: string; email: string; displayName: string | null; promoterStatus: string | null }>>([]);
+  const [userSearchResults, setUserSearchResults] = useState<Array<{ id: number; username: string; email: string; displayName: string | null; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
@@ -119,6 +120,7 @@ export default function Admin() {
         if (cancelled || !data?.isAdmin) return;
         setAuthenticated(true);
         if (data.username) setAdminName(data.username);
+        if (data.isSuperAdmin) setIsSuperAdmin(true);
       })
       .catch(() => {});
     return () => {
@@ -299,6 +301,16 @@ export default function Admin() {
       toast({ title: `Status set to ${vars.status}` });
     },
     onError: () => toast({ title: "Error", description: "Could not update status.", variant: "destructive" }),
+  });
+
+  const setSubAdminMutation = useMutation({
+    mutationFn: ({ userId, grant }: { userId: number; grant: boolean }) =>
+      apiRequest("POST", `/api/admin/users/${userId}/set-sub-admin`, { grant }),
+    onSuccess: (_, vars) => {
+      setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, subAdmin: vars.grant } : u));
+      toast({ title: vars.grant ? "Sub-admin granted" : "Sub-admin revoked" });
+    },
+    onError: () => toast({ title: "Error", description: "Could not update sub-admin status.", variant: "destructive" }),
   });
 
   async function handleUserSearch() {
@@ -609,7 +621,8 @@ export default function Admin() {
                         <p className="text-white text-sm font-medium">@{u.username}{u.displayName ? ` · ${u.displayName}` : ""}</p>
                         <p className="text-white/40 text-xs">{u.email}</p>
                         <p className="text-xs mt-1" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
-                          status: {u.promoterStatus || "none"}
+                          promoter: {u.promoterStatus || "none"}
+                          {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
                         </p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
@@ -630,6 +643,13 @@ export default function Admin() {
                             onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
                             className="display text-xs px-3 py-1 border border-white/30 text-white/40"
                           >RESET</button>
+                        )}
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
+                            className="display text-xs px-3 py-1 border"
+                            style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}
+                          >{u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}</button>
                         )}
                       </div>
                     </div>
