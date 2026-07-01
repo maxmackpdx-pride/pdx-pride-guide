@@ -16,6 +16,7 @@ const navLinks = [
   { href: "/pride-work", label: "Pride Werk" },
   { href: "/gifting", label: "Gifting" },
   { href: "/spotted", label: "Spotted!" },
+  { href: "/directory", label: "Directory" },
   { href: "/about", label: "About" },
 ];
 

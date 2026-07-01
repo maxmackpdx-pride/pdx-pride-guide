@@ -8456,6 +8456,144 @@ html.calm-mode .footer-brand-logo {
   animation: scheduleCardIn 0.3s ease both;
 }
 
+/* ── Business Directory ─────────────────────────────────────────────────── */
+.directory-grid {
+  columns: 3;
+  column-gap: 18px;
+}
+
+@media (max-width: 900px) { .directory-grid { columns: 2; } }
+@media (max-width: 560px) { .directory-grid { columns: 1; } }
+
+.directory-card {
+  break-inside: avoid;
+  margin-bottom: 18px;
+  background: #0a0a0a;
+  border: 1px solid #222;
+  border-top: 3px solid var(--card-accent, #FF00CC);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.directory-card:hover {
+  border-color: var(--card-accent, #FF00CC);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--card-accent, #FF00CC) 30%, transparent);
+}
+
+.directory-card__img {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.directory-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.directory-card__body {
+  padding: 14px 16px 16px;
+}
+
+.directory-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.directory-card__type-badge {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.directory-card__owned-badge {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(255, 0, 204, 0.15);
+  border: 1px solid #FF00CC;
+  color: #FF00CC;
+}
+
+.directory-card__name {
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  color: #fff;
+  margin: 0 0 4px;
+  line-height: 1.1;
+}
+
+.directory-card__neighborhood {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--text-meta);
+  margin-bottom: 8px;
+}
+
+.directory-card__desc {
+  font-size: 0.82rem;
+  color: #aaa;
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+.directory-card__address {
+  font-size: 0.72rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.directory-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.directory-card__link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--card-accent, #FF00CC);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.directory-card__link:hover {
+  text-decoration: underline;
+}
+
+html.calm-mode .directory-card {
+  border-top-color: #555 !important;
+  --card-accent: #888 !important;
+}
+
+html.calm-mode .directory-card__type-badge {
+  background: #444 !important;
+  color: #ccc !important;
+}
+
+html.calm-mode .directory-card__owned-badge {
+  border-color: #666 !important;
+  color: #aaa !important;
+  background: #1a1a1a !important;
+}
+
 /* Footer logo — compact, matching the visual size of the nav bar logo */
 .footer-brand .glitch-logo {
   height: 44px;

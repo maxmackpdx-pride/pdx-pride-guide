@@ -10,7 +10,7 @@ import {
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent,
+  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -22,6 +22,7 @@ import {
   type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
   type FeedbackReport, type InsertFeedbackReport,
   type HostMessage, type InsertHostMessage,
+  type Business, type InsertBusiness,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -228,6 +229,23 @@ sqlite.exec(`
     user_id INTEGER PRIMARY KEY,
     granted_by_user_id INTEGER,
     note TEXT,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS businesses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'bar',
+    description TEXT NOT NULL,
+    address TEXT,
+    neighborhood TEXT,
+    website TEXT,
+    instagram TEXT,
+    queer_owned INTEGER NOT NULL DEFAULT 0,
+    queer_friendly INTEGER NOT NULL DEFAULT 1,
+    image_url TEXT,
+    lat REAL,
+    lng REAL,
+    active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
@@ -2282,6 +2300,12 @@ export interface IStorage {
   createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
   getFeedbackReports(status?: string): FeedbackReport[];
   resolveFeedbackReport(id: number): void;
+  // Business directory
+  getBusinesses(opts?: { type?: string; neighborhood?: string; queerOwned?: boolean }): Business[];
+  getBusiness(id: number): Business | undefined;
+  createBusiness(data: InsertBusiness): Business;
+  updateBusiness(id: number, data: Partial<InsertBusiness>): Business | undefined;
+  toggleBusinessActive(id: number, active: boolean): void;
 }
 
 export const storage: IStorage = {
@@ -3799,6 +3823,27 @@ export const storage: IStorage = {
   },
   resolveFeedbackReport(id) {
     db.update(feedbackReports).set({ status: "RESOLVED" } as any).where(eq(feedbackReports.id, id)).run();
+  },
+  // Business directory
+  getBusinesses(opts) {
+    let rows = db.select().from(businesses).all().filter(b => b.active);
+    if (opts?.type) rows = rows.filter(b => b.type === opts.type);
+    if (opts?.neighborhood) rows = rows.filter(b => b.neighborhood === opts.neighborhood);
+    if (opts?.queerOwned) rows = rows.filter(b => b.queerOwned);
+    return rows;
+  },
+  getBusiness(id) {
+    return db.select().from(businesses).where(eq(businesses.id, id)).get();
+  },
+  createBusiness(data) {
+    return db.insert(businesses).values({ ...data, createdAt: new Date().toISOString() }).returning().get();
+  },
+  updateBusiness(id, data) {
+    db.update(businesses).set(data as any).where(eq(businesses.id, id)).run();
+    return db.select().from(businesses).where(eq(businesses.id, id)).get();
+  },
+  toggleBusinessActive(id, active) {
+    db.update(businesses).set({ active }).where(eq(businesses.id, id)).run();
   },
 };
 

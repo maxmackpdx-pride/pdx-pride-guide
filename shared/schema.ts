@@ -101,6 +101,29 @@ export const insertGigPostSchema = createInsertSchema(gigPosts).omit({ id: true,
 export type InsertGigPost = z.infer<typeof insertGigPostSchema>;
 export type GigPost = typeof gigPosts.$inferSelect;
 
+// LGBTQ+ Business Directory
+export const businesses = sqliteTable("businesses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  type: text("type").notNull().default("bar"), // bar|restaurant|cafe|venue|service|shop|hotel
+  description: text("description").notNull(),
+  address: text("address"),
+  neighborhood: text("neighborhood"),
+  website: text("website"),
+  instagram: text("instagram"),
+  queerOwned: integer("queer_owned", { mode: "boolean" }).notNull().default(false),
+  queerFriendly: integer("queer_friendly", { mode: "boolean" }).notNull().default(true),
+  imageUrl: text("image_url"),
+  lat: real("lat"),
+  lng: real("lng"),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertBusinessSchema = createInsertSchema(businesses).omit({ id: true, createdAt: true });
+export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
+export type Business = typeof businesses.$inferSelect;
+
 // Promoter accounts (session-based, simple)
 export const promoters = sqliteTable("promoters", {
   id: integer("id").primaryKey({ autoIncrement: true }),

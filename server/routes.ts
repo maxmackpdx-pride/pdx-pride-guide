@@ -664,6 +664,45 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── GIGS ─────────────────────────────────────────────────────────────────
+  // ── Business Directory ──────────────────────────────────────────────────
+  app.get("/api/directory", (req, res) => {
+    const { type, neighborhood, queerOwned } = req.query as Record<string, string>;
+    const businesses = storage.getBusinesses({
+      type: type || undefined,
+      neighborhood: neighborhood || undefined,
+      queerOwned: queerOwned === "true" ? true : undefined,
+    });
+    res.json(businesses);
+  });
+
+  app.post("/api/admin/directory", requireAdmin, (req, res) => {
+    const data = req.body;
+    if (!data.name || !data.type || !data.description) {
+      return res.status(400).json({ error: "name, type, and description are required" });
+    }
+    const biz = storage.createBusiness({
+      ...data,
+      active: data.active !== false,
+      queerOwned: !!data.queerOwned,
+      queerFriendly: data.queerFriendly !== false,
+    });
+    res.json(biz);
+  });
+
+  app.put("/api/admin/directory/:id", requireAdmin, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const updated = storage.updateBusiness(id, req.body);
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
+  });
+
+  app.patch("/api/admin/directory/:id/active", requireAdmin, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    storage.toggleBusinessActive(id, !!req.body.active);
+    res.json({ ok: true });
+  });
+
+  // ── Gigs ─────────────────────────────────────────────────────────────────
   app.get("/api/gigs", (req, res) => {
     const viewerId = req.session?.userId;
     const gigs = storage.getGigPosts("LIVE").map(gig => ({
