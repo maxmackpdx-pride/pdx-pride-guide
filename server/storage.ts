@@ -1980,6 +1980,15 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("fix_brohoejams_talent_v1");
   }
+
+  // Force brohoejams display name to "Bro Hoe" regardless of prior value
+  if (!hasBootMigration("fix_brohoejams_displayname_v2")) {
+    const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
+    if (brohoe) {
+      sqlite.prepare(`UPDATE users SET display_name = 'Bro Hoe' WHERE id = ?`).run(brohoe.id);
+    }
+    recordBootMigration("fix_brohoejams_displayname_v2");
+  }
 }
 
 function parseEnvAdminLists() {
