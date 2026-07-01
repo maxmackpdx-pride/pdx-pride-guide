@@ -557,7 +557,7 @@ You can revise and submit again from the Promoters page.`;ca(i.id,`Submission up
     DELETE FROM users
     WHERE username = 'community_closet'
       AND NOT EXISTS (SELECT 1 FROM gifting_posts WHERE user_id = users.id)
-  `).run()}function yj(t){let e=String(t||"?").replace(/^@/,"").trim();if(!e)return"?";let n=e.split(/[\s._-]+/).filter(Boolean);return n.length>=2?(n[0][0]+n[1][0]).toUpperCase():e.slice(0,2).toUpperCase()}function bj(t,e){return t!=null&&e.some(i=>i.user_id===t)?e:e.map(i=>({id:i.id,event_id:i.event_id,handle:i.handle,message:i.message,avatar_seed:i.avatar_seed,photo_url:null,created_at:i.created_at,is_active:i.is_active,masked:!0}))}var m={getEvents(t){return T.select().from($).all().filter(n=>!(t?.status&&t.status!==""&&n.status!==t.status||t?.day&&n.dayOfWeek!==t.day))},countEventsBySource(t,e){return e?b.prepare(`
+  `).run()}function yj(t){let e=String(t||"?").replace(/^@/,"").trim();if(!e)return"?";let n=e.split(/[\s._-]+/).filter(Boolean);return n.length>=2?(n[0][0]+n[1][0]).toUpperCase():e.slice(0,2).toUpperCase()}function bj(t,e){return t!=null&&e.some(i=>(i.userId??i.user_id)===t)?e:e.map(i=>({id:i.id,event_id:i.event_id,handle:i.handle,message:i.message,avatar_seed:i.avatar_seed,photo_url:null,created_at:i.created_at,is_active:i.is_active,masked:!0}))}var m={getEvents(t){return T.select().from($).all().filter(n=>!(t?.status&&t.status!==""&&n.status!==t.status||t?.day&&n.dayOfWeek!==t.day))},countEventsBySource(t,e){return e?b.prepare(`
         SELECT COUNT(*) AS count FROM events WHERE source = ? AND status = ?
       `).get(t,e)?.count??0:b.prepare(`
       SELECT COUNT(*) AS count FROM events WHERE source = ?
@@ -619,7 +619,7 @@ You can revise and submit again from the Promoters page.`;ca(i.id,`Submission up
 
 Note: ${n}`:""}
 
-You can submit again with more proof from the event page.`,{contextType:"EVENT_CLAIM",contextId:i.eventId,contextLabel:i.eventTitle||null})}}},getAttendances(t,e){return bj(e,b.prepare(`      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+You can submit again with more proof from the event page.`,{contextType:"EVENT_CLAIM",contextId:i.eventId,contextLabel:i.eventTitle||null})}}},getAttendances(t,e){return bj(e,b.prepare(`      SELECT a.id, a.event_id, a.user_id AS userId, a.handle, a.message, a.avatar_seed AS avatarSeed, a.photo_url AS photoUrl, a.is_active, a.created_at, a.masked, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.event_id = ? AND a.is_active = 1

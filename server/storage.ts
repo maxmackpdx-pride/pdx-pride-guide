@@ -2351,7 +2351,7 @@ function attendanceInitials(handle: string): string {
 }
 
 function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
-    const viewerRsvped = viewerUserId != null && rows.some((r: any) => r.user_id === viewerUserId);
+    const viewerRsvped = viewerUserId != null && rows.some((r: any) => (r.userId ?? r.user_id) === viewerUserId);
     if (viewerRsvped) return rows;
     return rows.map((r: any) => ({
       id: r.id,
@@ -3035,7 +3035,7 @@ export const storage: IStorage = {
       }
     }
   },
-    getAttendances(eventId, viewerUserId) {      return maskAttendances(viewerUserId, sqlite.prepare(`      SELECT a.*, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+    getAttendances(eventId, viewerUserId) {      return maskAttendances(viewerUserId, sqlite.prepare(`      SELECT a.id, a.event_id, a.user_id AS userId, a.handle, a.message, a.avatar_seed AS avatarSeed, a.photo_url AS photoUrl, a.is_active, a.created_at, a.masked, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.event_id = ? AND a.is_active = 1
