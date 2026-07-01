@@ -1,3 +1,4 @@
+import type React from "react";
 import type { Event } from "@shared/schema";
 import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
@@ -36,6 +37,7 @@ export default function EventBoardCard({
       <article
         className={`event-board-card event-board-card--${layout}`}
         data-testid={`event-card-${event.id}`}
+        style={{ "--card-day-color": dayColor } as React.CSSProperties}
       >
         <header className="event-board-card__head">
           <button

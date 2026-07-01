@@ -781,18 +781,23 @@ a.dash-thread {
 
 .dash-metric-card.accent {
   border-color: var(--metric-color, var(--dash-lime));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--metric-color, var(--dash-lime)) 22%, transparent);
 }
 
 .dash-metric-card-clickable {
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dash-metric-card-clickable:hover {
   transform: translateY(-1px);
   background: #111;
+}
+
+.dash-metric-card.accent.dash-metric-card-clickable:hover {
+  box-shadow: 0 0 22px color-mix(in srgb, var(--metric-color, var(--dash-lime)) 40%, transparent);
 }
 
 .dash-metric-value {
