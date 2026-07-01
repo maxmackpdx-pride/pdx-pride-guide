@@ -1845,7 +1845,7 @@ h2.display,
   gap: 9px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 880px) {
   /* Hide overlay tags on mobile — day stripe + bottom info is enough */
   .event-card-tags--overlay {
     display: none;
