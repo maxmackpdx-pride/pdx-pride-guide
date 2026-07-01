@@ -132,7 +132,7 @@ interface AdminUser extends AdminUserProfile {
 }
 
 type AdminTab = "inbox" | "events" | "gigs" | "promoters" | "users" | "team";
-type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer" | "user_submitted";
+type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer" | "user_submitted" | "has_checkins";
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -288,6 +288,13 @@ export default function Admin() {
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } = useQuery<AdminEvent[]>({
     queryKey: ["/api/admin/events"],
     enabled: authenticated && activeTab === "events",
+  });
+
+  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count: number }>>({
+    queryKey: ["/api/events/attendance-summaries"],
+    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
+    enabled: authenticated && activeTab === "events",
+    staleTime: 60_000,
   });
 
   const { data: modRequests = [], isLoading: modLoading, isError: modError, refetch: refetchMod } = useQuery<ModerationRequest[]>({
@@ -794,6 +801,7 @@ export default function Admin() {
     if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
     if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
     if (eventStatusFilter === "user_submitted" && ev.source !== "user_submitted") return false;
+    if (eventStatusFilter === "has_checkins" && !((attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count > 0)) return false;
     if (!eventSearchQuery) return true;
     const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""}`.toLowerCase();
     return haystack.includes(eventSearchQuery);
@@ -849,6 +857,7 @@ export default function Admin() {
           onMetricClick={(tab, metricKey) => {
             setAdminTab(tab as AdminTab);
             if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
+            if (metricKey === "attendances") setEventStatusFilter("has_checkins");
             if (metricKey === "newUsersToday") setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
           }}
         />
@@ -934,6 +943,7 @@ export default function Admin() {
                 { key: "HIDDEN" as EventStatusFilter, label: "Hidden" },
                 { key: "missing_flyer" as EventStatusFilter, label: `No flyer${missingFlyerCount > 0 ? ` (${missingFlyerCount})` : ""}` },
                 { key: "user_submitted" as EventStatusFilter, label: `User submitted${userSubmittedCount > 0 ? ` (${userSubmittedCount})` : ""}` },
+                { key: "has_checkins" as EventStatusFilter, label: `Has check-ins` },
               ]).map(filter => (
                 <button
                   key={filter.key}
@@ -966,6 +976,7 @@ export default function Admin() {
                 )}
                 {filteredEvents.map(ev => {
                   const posterSrc = eventPosterSrc(ev.posterImageUrl);
+                  const checkInCount = (attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count ?? 0;
                   return (
                   <div key={ev.id} className="border border-white/10" style={{ background: "#111" }}>
                     {/* Row */}
@@ -993,6 +1004,9 @@ export default function Admin() {
                         )}
                         {ev.source === "user_submitted" && (
                           <p className="text-[#00FFFF]/80 text-[10px] mt-1 uppercase tracking-wide">Community submitted</p>
+                        )}
+                        {checkInCount > 0 && (
+                          <p className="text-[#C8FA3C]/80 text-[10px] mt-1 uppercase tracking-wide">{checkInCount} check-in{checkInCount === 1 ? "" : "s"}</p>
                         )}
                         {(ev.submittedByProfile || ev.claimedByProfile) && (
                           <div className="mt-2 space-y-1">
