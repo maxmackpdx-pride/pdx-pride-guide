@@ -1880,6 +1880,25 @@ function runBootMigrationsOnce() {
     } as any).run();
     recordBootMigration("seed_businesses_directory_v4");
   }
+  if (!hasBootMigration("seed_businesses_directory_v5")) {
+    const now = new Date().toISOString();
+    sqlite.prepare(`UPDATE businesses SET queer_owned = 1 WHERE name = 'Peacock PDX'`).run();
+    db.insert(businesses).values({
+      name: "Ring Ding Ding",
+      type: "bar",
+      description: "Queer-friendly bar in SE Portland with Thai-influenced cocktails, playful decor, late nights, and rotating guest chef pop-ups. Opened May 2026 in the former Libre space.",
+      address: "2601 SE Clinton St",
+      neighborhood: "SE Portland",
+      website: null,
+      instagram: null,
+      queerOwned: false,
+      queerFriendly: true,
+      isNew: true,
+      active: true,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_businesses_directory_v5");
+  }
 }
 
 function parseEnvAdminLists() {
