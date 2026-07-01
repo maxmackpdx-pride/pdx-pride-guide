@@ -121,6 +121,12 @@ function enrichModerationForAdmin(req: any) {
   };
 }
 
+function validateEventDates(dateStart?: string, dateEnd?: string): string | null {
+  if (!dateStart || !dateEnd) return null;
+  if (new Date(dateEnd) <= new Date(dateStart)) return "End date must be after start date";
+  return null;
+}
+
 function enrichEventForAdmin(evt: any) {
   return {
     ...evt,
@@ -554,6 +560,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
       patch.eventTypes = JSON.stringify(patch.eventTypes);
     }
+    const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
+    if (dateErr) return res.status(400).json({ error: dateErr });
     const updated = storage.updateEvent(Number(req.params.id), patch);
     res.json(updated);
   });
@@ -1630,6 +1638,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/submissions/:id/approve", requireAdmin, (req, res) => {
     const { adminName } = req.body;
     if (!adminName) return res.status(400).json({ error: "adminName required" });
+    const pending = storage.getSubmissions().find(s => s.id === Number(req.params.id));
+    if (pending) {
+      const dateErr = validateEventDates(pending.dateStart, pending.dateEnd);
+      if (dateErr) return res.status(400).json({ error: `Cannot approve: ${dateErr}` });
+    }
     const sub = storage.approveSubmission(Number(req.params.id), adminName);
     if (!sub) return res.status(404).json({ error: "Not found" });
     res.json(sub);
@@ -1847,6 +1860,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
       patch.eventTypes = JSON.stringify(patch.eventTypes);
     }
+    const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
+    if (dateErr) return res.status(400).json({ error: dateErr });
     const updated = storage.updateEvent(Number(req.params.id), patch);
     res.json(updated);
   });
