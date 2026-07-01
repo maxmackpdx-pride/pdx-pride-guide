@@ -1,4 +1,5 @@
 import { useState, createElement, Fragment } from "react";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -18,6 +19,7 @@ import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashb
 import "@/components/dashboard/dashboard.css";
 
 export default function Dashboard() {
+  usePageSeo("My Dashboard — PDX Pride Guide", "Your PDX Pride Guide hub — events, gigs, messages, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);

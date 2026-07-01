@@ -53,8 +53,8 @@ declare module "express-session" {
   }
 }
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Tcasey90";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "pdx_pride_admin_2026";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "";
 const ADMIN_USER_EMAILS = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@gmail.com")
   .split(",")
   .map(value => value.trim().toLowerCase())
@@ -336,7 +336,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Session middleware — persisted on the same SQLite volume as user data
   app.use(session({
-    secret: process.env.SESSION_SECRET || "pdxpride_secret_2026",
+    secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? (() => { throw new Error("SESSION_SECRET env var is required in production"); })() : "pdxpride_secret_dev_only"),
     store: new BetterSqliteSessionStore(sqlite),
     proxy: true,
     resave: false,

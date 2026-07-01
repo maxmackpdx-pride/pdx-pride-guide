@@ -282,7 +282,6 @@ function ensureGigPostsSchema() {
   if (!colNames.has("is_remote")) addColumn(`ALTER TABLE gig_posts ADD COLUMN is_remote INTEGER DEFAULT 0`);
 
   const finalColumns = sqlite.prepare(`PRAGMA table_info(gig_posts)`).all() as Array<{ name: string }>;
-  console.log("[gig_posts] schema columns:", finalColumns.map((c) => c.name).join(", "));
   gigPostsLegacyCols = finalColumns.some(c => c.name === "type") && finalColumns.some(c => c.name === "role");
 }
 ensureGigPostsSchema();

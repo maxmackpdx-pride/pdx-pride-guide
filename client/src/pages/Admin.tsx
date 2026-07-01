@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
@@ -147,6 +148,7 @@ const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
 
 export default function Admin() {
+  usePageSeo("Admin — PDX Pride Guide", "Site administration panel.");
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
