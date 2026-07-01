@@ -86,9 +86,13 @@ export default function Directory() {
   return (
     <div className="zine-page directory-page board-page">
       <PageHero
+        flush
+        flipLightLeaks
+        kicker="Queer-owned · Queer-friendly · Community-rooted"
         titleLine1="QUEER"
         titleLine2="PORTLAND"
         accent="magenta"
+        lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 55%"
       />

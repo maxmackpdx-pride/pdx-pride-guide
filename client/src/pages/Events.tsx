@@ -453,10 +453,13 @@ export default function Events() {
   return (
     <div className="zine-page events-page board-page">
       <PageHero
+        flush
         flipLightLeaks
+        kicker="Portland Pride 2026 · July 18–19"
         titleLine1="EVENTS"
         titleLine2="GUIDE"
         accent="cyan"
+        lede="Every queer party, parade, show, and gathering for Pride Weekend 2026 and beyond — all in one place."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 42%"
       />
