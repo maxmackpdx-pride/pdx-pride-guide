@@ -261,7 +261,6 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
           }} />
           {/* Day stripe */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
-          <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--overlay" />
           {/* Info overlay */}
           <div className="poster-card__info-overlay" style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 21 }}>
             <div style={{
