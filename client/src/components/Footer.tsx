@@ -32,7 +32,6 @@ export default function Footer() {
                 ["/gifting", "Gifting"],
                 ["/about", "About"],
                 ["/legal", "Legal"],
-                ...(user?.isAdmin ? [["/admin?tab=users", "Admin · All users"], ["/admin", "Admin Panel"]] : []),
               ].map(([href, label]) => (
                 <div key={href} style={{ marginBottom: 8 }}>
                   <Link href={href} style={{ color: "#888", fontSize: "0.82rem", textDecoration: "none" }}>{label}</Link>
