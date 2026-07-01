@@ -5,7 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Globe, Instagram } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 type Business = {
   id: number;
@@ -68,7 +68,7 @@ export default function Directory() {
       if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
       return true;
     });
-  }, [businesses, activeType, activeNeighborhood, queerOwnedOnly]);
+  }, [businesses, activeType, activeNeighborhood]);
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(businesses.map(b => b.neighborhood).filter(Boolean));
@@ -178,21 +178,6 @@ function DirectoryCard({ biz }: { biz: Business }) {
             {biz.address ? biz.address : biz.neighborhood}
           </div>
         )}
-        <div className="directory-card__links">
-          {biz.website && (
-            <a href={biz.website} target="_blank" rel="noopener noreferrer" className="directory-card__link">
-              <Globe size={13} /> Website
-            </a>
-          )}
-          {biz.instagram && (
-            <a
-              href={biz.instagram.startsWith("http") ? biz.instagram : `https://instagram.com/${biz.instagram.replace("@", "")}`}
-              target="_blank" rel="noopener noreferrer" className="directory-card__link"
-            >
-              <Instagram size={13} /> {biz.instagram.startsWith("@") ? biz.instagram : `@${biz.instagram}`}
-            </a>
-          )}
-        </div>
       </div>
     </div>
   );
