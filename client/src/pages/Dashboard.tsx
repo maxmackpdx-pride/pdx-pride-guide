@@ -515,6 +515,7 @@ export default function Dashboard() {
             loading={myGigsQuery.isLoading}
             isEmpty={myGigs.length === 0}
             emptyText="No gig posts yet."
+            pageHref="/pride-work"
             cta={{ label: "Post on Pride Werk board →", href: "/pride-work" }}
           >
             {editingGig && (
@@ -553,6 +554,7 @@ export default function Dashboard() {
             loading={myMissedQuery.isLoading}
             isEmpty={myMissed.length === 0}
             emptyText="No Spotted posts yet."
+            pageHref="/spotted"
             cta={{ label: "Post on Spotted →", href: "/spotted" }}
           >
             {myMissed.map((post: any) => (
@@ -583,6 +585,7 @@ export default function Dashboard() {
             loading={myGiftingQuery.isLoading}
             isEmpty={myGifting.length === 0}
             emptyText="No gifting posts yet."
+            pageHref="/gifting"
             cta={{ label: "Open gifting board →", href: "/gifting" }}
           >
             {myGifting.map((post: any) => (
@@ -645,6 +648,7 @@ export default function Dashboard() {
             loading={myCheckInsQuery.isLoading}
             isEmpty={myCheckIns.length === 0}
             emptyText="No active check-ins yet."
+            pageHref="/events"
             cta={{ label: "Browse events to check in →", href: "/events" }}
           >
             {myCheckIns.map((check: any) => (

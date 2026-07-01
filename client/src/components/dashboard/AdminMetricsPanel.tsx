@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface AdminMetrics {
   users: number;
+  newUsersToday: number;
   activeSessions: number;
   liveEvents: number;
   userSubmittedEvents: number;
@@ -18,17 +19,18 @@ interface AdminMetrics {
 }
 
 const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: string; alwaysClickable?: boolean }[] = [
-  { key: "users", label: "Registered users", color: "#C8FA3C", tab: "users", alwaysClickable: true },
-  { key: "activeSessions", label: "Active sessions", color: "#19E3FF" },
-  { key: "liveEvents", label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events" },
-  { key: "userSubmittedEvents", label: "Community-submitted events", color: "#00FFFF", tab: "events" },
-  { key: "attendances", label: "Member check-ins", color: "#C8FA3C" },
-  { key: "messages", label: "Active messages", color: "#19E3FF" },
-  { key: "pendingSubmissions", label: "Pending review", color: "#FF1FA0", tab: "inbox" },
-  { key: "gigPosts", label: "Live gig posts", color: "#FF8C00", tab: "gigs" },
-  { key: "giftingPosts", label: "Active gifting posts", color: "#19E3FF", tab: "inbox" },
-  { key: "missedConnections", label: "Active missed connections", color: "#FF1FA0" },
-  { key: "openFeedback", label: "Open feedback", color: "#750787", tab: "inbox" },
+  { key: "users",              label: "Registered users",               color: "#C8FA3C", tab: "users",    alwaysClickable: true },
+  { key: "newUsersToday",      label: "New users today",                color: "#C8FA3C", tab: "users",    alwaysClickable: true },
+  { key: "activeSessions",     label: "Active sessions",                color: "#19E3FF" },
+  { key: "liveEvents",         label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events", alwaysClickable: true },
+  { key: "userSubmittedEvents",label: "Community-submitted events",     color: "#00FFFF", tab: "events" },
+  { key: "attendances",        label: "Member check-ins",               color: "#C8FA3C", tab: "events",  alwaysClickable: false },
+  { key: "messages",           label: "Active messages",                color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
+  { key: "pendingSubmissions", label: "Pending review",                 color: "#FF1FA0", tab: "inbox" },
+  { key: "gigPosts",           label: "Live gig posts",                 color: "#FF8C00", tab: "gigs",    alwaysClickable: true },
+  { key: "giftingPosts",       label: "Active gifting posts",           color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
+  { key: "missedConnections",  label: "Active missed connections",      color: "#FF1FA0", tab: "inbox",   alwaysClickable: true },
+  { key: "openFeedback",       label: "Open feedback",                  color: "#750787", tab: "inbox" },
 ];
 
 export default function AdminMetricsPanel({
@@ -85,6 +87,7 @@ export default function AdminMetricsPanel({
             >
               <div className="dash-metric-value">{data[metric.key] ?? 0}</div>
               <div className="dash-metric-label">{metric.label}</div>
+              {clickable && <div className="dash-metric-cta">View →</div>}
             </Tag>
           );
         })}

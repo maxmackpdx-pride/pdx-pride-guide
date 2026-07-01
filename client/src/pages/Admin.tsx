@@ -336,6 +336,13 @@ export default function Admin() {
     refetchOnMount: "always",
   });
 
+  const { data: newUsersToday = [] } = useQuery<{ id: number; username: string; displayName: string | null; email: string; createdAt: string; photoUrl: string | null }[]>({
+    queryKey: ["/api/admin/users/new-today"],
+    queryFn: () => apiRequest("GET", "/api/admin/users/new-today").then(r => r.json()),
+    enabled: authenticated && activeTab === "users",
+    staleTime: 60_000,
+  });
+
   const { data: allUsers = [], isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useQuery<AdminUser[]>({
     queryKey: ["/api/admin/users"],
     queryFn: () => apiRequest("GET", "/api/admin/users").then(r => r.json()),
@@ -824,6 +831,7 @@ export default function Admin() {
           onMetricClick={(tab, metricKey) => {
             setAdminTab(tab as AdminTab);
             if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
+            if (metricKey === "newUsersToday") setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
           }}
         />
 
@@ -1357,6 +1365,26 @@ export default function Admin() {
 
         {activeTab === "users" && (
           <div>
+            {newUsersToday.length > 0 && (
+              <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #C8FA3C33", background: "#0a0f00" }}>
+                <p className="display text-sm" style={{ color: "#C8FA3C", marginBottom: 12 }}>
+                  🌱 NEW TODAY — {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {newUsersToday.map(u => (
+                    <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1a1a1a", border: "1px solid #C8FA3C44", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#C8FA3C", fontFamily: "var(--font-display)", fontSize: 14 }}>
+                        {u.photoUrl ? <img src={u.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (u.displayName || u.username).slice(0, 1).toUpperCase()}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>{u.displayName || u.username}</div>
+                        <div style={{ color: "#666", fontSize: 11 }}>@{u.username} · {u.email} · {new Date(u.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
               <p className="text-white/40 text-sm" style={{ margin: 0 }}>
                 Every registered account on PDX Pride Guide. Search by username, email, or display name.

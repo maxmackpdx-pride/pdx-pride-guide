@@ -811,6 +811,20 @@ a.dash-thread {
   margin-top: 6px;
 }
 
+.dash-metric-cta {
+  font-family: var(--font-display), sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--metric-color, var(--dash-lime));
+  opacity: 0.5;
+  margin-top: 8px;
+}
+
+.dash-metric-card-clickable:hover .dash-metric-cta {
+  opacity: 1;
+}
+
 .dash-admin-header {
   margin-bottom: 24px;
 }

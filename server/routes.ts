@@ -1750,8 +1750,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const liveEvents = storage.getEvents({ status: "LIVE" }).length;
     const userSubmittedEvents = storage.countEventsBySource("user_submitted", "LIVE");
     const openFeedback = storage.getFeedbackReports("OPEN").length;
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const newUsersToday = (sqlite.prepare(`SELECT COUNT(*) AS count FROM users WHERE created_at >= ?`).get(todayStart.toISOString()) as { count: number })?.count ?? 0;
     res.json({
       users: counts.users ?? 0,
+      newUsersToday,
       activeSessions: counts.express_sessions ?? 0,
       liveEvents,
       userSubmittedEvents,
@@ -1764,6 +1767,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
       openFeedback,
       generatedAt: new Date().toISOString(),
     });
+  });
+
+  app.get("/api/admin/users/new-today", requireAdmin, (_req, res) => {
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const rows = sqlite.prepare(`
+      SELECT id, username, display_name AS displayName, email, created_at AS createdAt, avatar_choice AS avatarChoice, photo_url AS photoUrl
+      FROM users WHERE created_at >= ? ORDER BY created_at DESC
+    `).all(todayStart.toISOString());
+    res.json(rows);
   });
 
   app.post("/api/admin/users/purge-qa", requireAdmin, (req, res) => {

@@ -12,6 +12,7 @@ export interface DashboardDrawerProps {
   isEmpty?: boolean;
   loading?: boolean;
   cta?: { label: string; href: string };
+  pageHref?: string;
   children?: ReactNode;
 }
 
@@ -26,6 +27,7 @@ export default function DashboardDrawer({
   isEmpty,
   loading,
   cta,
+  pageHref,
   children,
 }: DashboardDrawerProps) {
   const bodyId = useId();
@@ -47,7 +49,18 @@ export default function DashboardDrawer({
           <span className="dash-drawer-title" style={{ color }}>{title}</span>
           <span className="dash-drawer-count" style={{ background: color }}>{countLabel}</span>
         </span>
-        <span className="dash-drawer-chevron" style={{ color }} aria-hidden="true">▾</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {pageHref && (
+            <a
+              href={pageHref}
+              onClick={e => e.stopPropagation()}
+              style={{ fontSize: "0.65rem", color, fontFamily: "var(--font-display)", letterSpacing: "0.06em", opacity: 0.7, textDecoration: "none" }}
+            >
+              VIEW ALL →
+            </a>
+          )}
+          <span className="dash-drawer-chevron" style={{ color }} aria-hidden="true">▾</span>
+        </span>
       </button>
       {open && (
         <div id={bodyId} className="dash-drawer-body">
