@@ -199,6 +199,17 @@ export default function AttendanceCluster({ eventId, embedded = false, extraPeop
               ✓ You're going as "{myPhrase.label}"
             </span>
           )}
+          {myAttendance && (
+            <button
+              type="button"
+              data-testid="button-withdraw-rsvp"
+              onClick={() => removeMutation.mutate()}
+              disabled={removeMutation.isPending}
+              className="attendance-cluster-cta__withdraw"
+            >
+              {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
+            </button>
+          )}
         </div>
       )}
 

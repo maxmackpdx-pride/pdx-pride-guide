@@ -5280,6 +5280,26 @@ footer a:hover { color: #00FFFF !important; }
   color: var(--neon-yellow);
 }
 
+.attendance-cluster-cta__withdraw {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-board-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.attendance-cluster-cta__withdraw:hover {
+  opacity: 1;
+  color: #ff4444;
+}
+
 .attendance-mobile-strip__avatar {
   width: 56px;
   height: 56px;

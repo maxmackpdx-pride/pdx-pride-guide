@@ -462,6 +462,11 @@ export default function Events() {
         lede="Every queer party, parade, show, and gathering for Pride Weekend 2026 and beyond — all in one place."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 42%"
+        actions={
+          <Link href="/schedule" className="btn-neon" style={{ fontSize: "0.85rem", letterSpacing: "0.12em" }}>
+            VIEW AS SCHEDULE →
+          </Link>
+        }
       />
 
       <Suspense fallback={<MapViewFallback variant="events" />}>
@@ -525,9 +530,6 @@ export default function Events() {
           </div>
           {/* Spacer */}
           <div style={{ flex: 1 }} />
-          <Link href="/schedule" className="events-schedule-link" data-testid="link-schedule-view">
-            View as Schedule →
-          </Link>
           {/* View toggle — grid / list only (map is always shown above) */}
           <div className="events-view-toggle">
             <button

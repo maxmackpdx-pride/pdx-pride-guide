@@ -24,7 +24,7 @@ const DAYS: { key: string; label: string; date: string; color: string }[] = [
 const ACCENT_CYCLE = ["#19E3FF", "#FF6600", "#39FF14", "#A855F7", "#FF00CC"];
 
 const SCHEDULE_START_HOUR = 11; // 11 AM
-const SCHEDULE_END_HOUR = 24; // midnight
+const SCHEDULE_END_HOUR = 27; // 3 AM next day
 // Responsive hour height: on mobile, fit 13hrs into ~600px so full day is visible at default zoom
 const HOUR_HEIGHT = typeof window !== "undefined" && window.innerWidth < 700 ? 48 : 64;
 const TOTAL_HEIGHT = (SCHEDULE_END_HOUR - SCHEDULE_START_HOUR) * HOUR_HEIGHT;
@@ -49,6 +49,8 @@ function eventPosition(event: EventListing): { top: number; height: number } | n
   const startMin = pacificClockMinutes(event.dateStart);
   let endMin = pacificClockMinutes(event.dateEnd);
   if (startMin == null) return null;
+  // Normalize events that cross midnight: endMin wraps to a small value (0–3 AM = 0–180)
+  if (endMin != null && endMin < startMin) endMin += 24 * 60;
   if (endMin == null || endMin <= startMin) endMin = startMin + 60;
 
   const rangeStart = SCHEDULE_START_HOUR * 60;
@@ -67,7 +69,7 @@ function computeDayLayout(events: EventListing[]): Map<string | number, { col: n
   if (events.length === 0) return result;
   const key = (e: EventListing) => e.listingInstanceKey ?? e.id;
   const startOf = (e: EventListing) => pacificClockMinutes(e.dateStart) ?? 0;
-  const endOf = (e: EventListing) => { const s = startOf(e); const end = pacificClockMinutes(e.dateEnd); return end == null || end <= s ? s + 60 : end; };
+  const endOf = (e: EventListing) => { const s = startOf(e); let end = pacificClockMinutes(e.dateEnd); if (end != null && end < s) end += 24 * 60; return end == null || end <= s ? s + 60 : end; };
   const sorted = [...events].sort((a, b) => startOf(a) - startOf(b));
   const colEnds: number[] = [];
   const colAssign = new Map<string | number, number>();
@@ -110,7 +112,9 @@ export default function Schedule() {
     const parts = now.toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour12: false, hour: "2-digit", minute: "2-digit" }).split(":");
     const h = parseInt(parts[0], 10);
     const m = parseInt(parts[1], 10);
-    const totalMins = h * 60 + m;
+    // After midnight (0–3 AM) treat as next-day hours (24–27)
+    let totalMins = h * 60 + m;
+    if (h < 4) totalMins += 24 * 60;
     const startMins = SCHEDULE_START_HOUR * 60;
     const endMins = SCHEDULE_END_HOUR * 60;
     if (totalMins < startMins || totalMins > endMins) return null;
