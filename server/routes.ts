@@ -1567,9 +1567,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/login", (req, res) => {
     const { username, password } = req.body;
     if (!password) return res.status(400).json({ error: "password required" });
-    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) return res.status(401).json({ error: "Invalid credentials" });
-    req.session.isAdmin = true;
-    res.json({ isAdmin: true, username: ADMIN_USERNAME });
+
+    // Accept regular user account credentials if that user is a site admin
+    const userByHandle = storage.getUserByUsername(username) || storage.getUserByEmail(username);
+    if (userByHandle && verifyPassword(password, userByHandle.passwordHash) && isMainAdminUser(userByHandle)) {
+      req.session.isAdmin = true;
+      req.session.userId = userByHandle.id;
+      return res.json({ isAdmin: true, username: userByHandle.username });
+    }
+
+    // Legacy env-var credential fallback (set ADMIN_USERNAME + ADMIN_PASSWORD in Railway if needed)
+    if (ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      req.session.isAdmin = true;
+      return res.json({ isAdmin: true, username: ADMIN_USERNAME });
+    }
+
+    return res.status(401).json({ error: "Invalid credentials" });
   });
 
   app.post("/api/admin/logout", (req, res) => {
