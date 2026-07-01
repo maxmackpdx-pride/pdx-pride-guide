@@ -1968,7 +1968,7 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("fix_brohoejams_talent_v1")) {
     const tucker = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'tucker_pdmax'`).get() as { id: number } | undefined;
     const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
-    const yesCoachEvt = sqlite.prepare(`SELECT id FROM events WHERE LOWER(slug) = 'yes-coach' OR LOWER(title) LIKE '%yes coach%' LIMIT 1`).get() as { id: number } | undefined;
+    const yesCoachEvt = sqlite.prepare(`SELECT id FROM events WHERE LOWER(title) LIKE '%yes coach%' LIMIT 1`).get() as { id: number } | undefined;
     if (tucker && brohoe && yesCoachEvt) {
       sqlite.prepare(`UPDATE event_talent SET user_id = ? WHERE event_id = ? AND user_id = ?`).run(brohoe.id, yesCoachEvt.id, tucker.id);
     }
