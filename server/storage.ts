@@ -1943,6 +1943,26 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_businesses_directory_v6");
   }
+  if (!hasBootMigration("seed_businesses_directory_v7")) {
+    const now = new Date().toISOString();
+    const venues = [
+      { name: "Holocene", type: "venue", description: "Beloved Portland nightclub and event space in SE. Regularly hosts LGBTQ+ nights, drag shows, and Pride events.", address: "1001 SE Morrison St", neighborhood: "SE Portland", lat: 45.5173, lng: -122.6556, queerOwned: false, queerFriendly: true },
+      { name: "Alberta Rose Theatre", type: "venue", description: "Historic 300-seat theater on Alberta hosting music, burlesque, comedy, and community events with a strong queer presence.", address: "3000 NE Alberta St", neighborhood: "Alberta Arts District", lat: 45.5581, lng: -122.6478, queerOwned: false, queerFriendly: true },
+      { name: "Jackie's", type: "bar", description: "Laid-back queer-friendly bar on SE Sandy. Regular host of LGBTQ+ community nights and Pride events.", address: "930 SE Sandy Blvd", neighborhood: "SE Portland", lat: 45.5192, lng: -122.6478, queerOwned: false, queerFriendly: true },
+      { name: "Sanctuary Club", type: "venue", description: "LGBTQ+-centered event space and club in the Pearl. Hosts drag, dance parties, and community gatherings.", address: "33 NW 9th Ave", neighborhood: "Pearl District", lat: 45.5232, lng: -122.6802, queerOwned: false, queerFriendly: true },
+      { name: "Seagrape Apothecary", type: "shop", description: "Herb-forward apothecary and wellness shop on NE Sandy. Holistic remedies, tinctures, and botanical goods in a welcoming space.", address: "2823 NE Sandy Blvd", neighborhood: "NE Portland", lat: 45.5330, lng: -122.6327, queerOwned: false, queerFriendly: true },
+      { name: "REALM PDX", type: "venue", description: "SE Portland event space and club hosting LGBTQ+ dance nights, kink-positive events, and community parties.", address: "615 SE Alder St", neighborhood: "SE Portland", lat: 45.5180, lng: -122.6595, queerOwned: false, queerFriendly: true },
+      { name: "Nova PDX", type: "venue", description: "Inner East music and event venue. Queer-welcoming space hosting Pride events and community nights.", address: "722 E Burnside St", neighborhood: "Inner East", lat: 45.5234, lng: -122.6574, queerOwned: false, queerFriendly: true },
+      { name: "Star Theater", type: "venue", description: "Old Town concert venue and nightclub. Hosts drag shows, LGBTQ+ parties, and music events throughout Pride season.", address: "13 NW 6th Ave", neighborhood: "Old Town", lat: 45.5232, lng: -122.6765, queerOwned: false, queerFriendly: true },
+      { name: "The Get Down", type: "venue", description: "Central Eastside venue and bar hosting a rotating lineup of queer nights, drag, dancing, and community events.", address: "680 SE 6th Ave", neighborhood: "Central Eastside", lat: 45.5181, lng: -122.6596, queerOwned: false, queerFriendly: true },
+      { name: "Happylucky No. 1", type: "bar", description: "Central Eastside bar and gathering spot. Queer-friendly with a cozy neighborhood vibe and community programming.", address: "330 SE 6th Ave", neighborhood: "Central Eastside", lat: 45.5205, lng: -122.6596, queerOwned: false, queerFriendly: true },
+      { name: "Escape Bar & Grill", type: "bar", description: "NE Portland bar and grill hosting community events including LGBTQ+ nights and Pride programming.", address: "9004 NE Sandy Blvd", neighborhood: "NE Portland", lat: 45.5559, lng: -122.5700, queerOwned: false, queerFriendly: true },
+    ];
+    for (const v of venues) {
+      db.insert(businesses).values({ ...v, active: true, isNew: false, createdAt: now } as any).run();
+    }
+    recordBootMigration("seed_businesses_directory_v7");
+  }
 }
 
 function parseEnvAdminLists() {
