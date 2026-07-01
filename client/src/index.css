@@ -8359,25 +8359,27 @@ html.calm-mode .footer-brand-logo {
   }
 
   .schedule-grid {
-    /* All 4 day columns visible side-by-side; single vertical scroll */
-    grid-template-columns: 30px repeat(4, 1fr);
+    /* 2 day columns visible; scroll horizontally to see all 4 */
+    grid-template-columns: 38px repeat(4, calc((100vw - 50px) / 2));
     grid-auto-flow: unset;
     grid-auto-columns: unset;
-    overflow-x: unset;
-    scroll-snap-type: unset;
-    gap: 3px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
     padding-left: 4px;
+    padding-right: 8px;
   }
 
   .schedule-day-col {
-    scroll-snap-align: unset;
+    scroll-snap-align: start;
     min-width: 0;
   }
 
-  /* Compact event cards for narrow columns */
+  /* Slightly compact cards — venue hidden, slightly smaller time */
   .schedule-event-card {
-    padding: 3px 4px;
-    border-radius: 4px;
+    padding: 4px 6px;
+    border-radius: 5px;
   }
 
   .schedule-event-card__venue {
@@ -8385,7 +8387,7 @@ html.calm-mode .footer-brand-logo {
   }
 
   .schedule-event-card__time {
-    font-size: 0.5rem;
+    font-size: 0.58rem;
   }
 
   .schedule-day-col__label {
