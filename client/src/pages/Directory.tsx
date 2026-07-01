@@ -64,11 +64,13 @@ export default function Directory() {
   });
 
   const filtered = useMemo(() => {
-    return businesses.filter(b => {
-      if (activeType !== "ALL" && b.type !== activeType) return false;
-      if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
-      return true;
-    });
+    return businesses
+      .filter(b => {
+        if (activeType !== "ALL" && b.type !== activeType) return false;
+        if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
+        return true;
+      })
+      .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
   }, [businesses, activeType, activeNeighborhood]);
 
   const neighborhoodsInUse = useMemo(() => {
