@@ -118,6 +118,8 @@ export const businesses = sqliteTable("businesses", {
   lng: real("lng"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   isNew: integer("is_new", { mode: "boolean" }).notNull().default(false),
+  hours: text("hours"),
+  phone: text("phone"),
   createdAt: text("created_at").notNull().default(""),
 });
 

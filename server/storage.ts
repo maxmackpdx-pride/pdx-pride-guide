@@ -250,8 +250,10 @@ sqlite.exec(`
   );
 `);
 
-// Add is_new column to businesses if not present
+// Add is_new, hours, phone columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN hours TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN phone TEXT`); } catch {}
 
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
 let gigPostsLegacyCols = false;
@@ -1898,6 +1900,48 @@ function runBootMigrationsOnce() {
       createdAt: now,
     } as any).run();
     recordBootMigration("seed_businesses_directory_v5");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v6")) {
+    const updates: Array<{ name: string; lat?: number; lng?: number; hours?: string; phone?: string }> = [
+      { name: "CC Slaughters",        lat: 45.5236, lng: -122.6737, hours: "Mon–Sun 2pm–2:30am", phone: "(503) 248-9135" },
+      { name: "Darcelle XV Showplace",lat: 45.5238, lng: -122.6743, hours: "Tue 6–9pm, Fri 7–10pm, Sat 7pm–12am, Sun 11:30am–2:30pm", phone: "(503) 222-5338" },
+      { name: "Stag PDX",             lat: 45.5240, lng: -122.6755, hours: "Mon–Fri 7pm–2:30am, Sat 4pm–2:30am, Sun 7pm–2:30am", phone: "(503) 894-9679" },
+      { name: "Badlands",             lat: 45.5236, lng: -122.6754, hours: "Mon–Fri 4pm–2am, Sat–Sun 2pm–2am", phone: "(503) 972-7572" },
+      { name: "Silverado",            lat: 45.5224, lng: -122.6748, phone: "(503) 224-4493" },
+      { name: "Camp Bar PDX",         lat: 45.5193, lng: -122.6775, instagram: "@campbarpdx" },
+      { name: "Scandals East",        lat: 45.5614, lng: -122.6527, hours: "Daily 4pm–midnight", phone: "(971) 275-6494" },
+      { name: "Eagle Portland",       lat: 45.5803, lng: -122.6856, phone: "(503) 283-9734" },
+      { name: "The Nest Lounge",      lat: 45.5165, lng: -122.6432, hours: "Mon–Sun 3pm–2:30am", phone: "(503) 764-9023" },
+      { name: "Living Room Wines",    lat: 45.5805, lng: -122.6857, hours: "Mon–Thu 3–9pm, Fri–Sat 3–10pm, Sun 3–8pm" },
+      { name: "Peacock PDX",          lat: 45.5169, lng: -122.6490, hours: "Mon–Thu 3pm–12am, Fri–Sat 3pm–2am, Sun 3pm–12am", phone: "(503) 946-8929" },
+      { name: "Back 2 Earth",         lat: 45.5529, lng: -122.6597 },
+      { name: "Stem Wine Bar",        lat: 45.5638, lng: -122.6785, hours: "Tue–Thu 5–9pm, Fri 3–10pm, Sat 1–10pm, Sun 1–9pm", phone: "(971) 427-8085" },
+      { name: "Kann",                 lat: 45.5218, lng: -122.6569, hours: "Wed 4–7pm, Thu–Sat 4–9:30pm, Sun 4–7pm" },
+      { name: "The Sports Bra",       lat: 45.5374, lng: -122.6354, hours: "Daily 11am–12am" },
+      { name: "Mis Tacones",          lat: 45.5574, lng: -122.6623, hours: "Mon–Wed 3–9pm, Thu 12–9pm, Fri 12–10pm, Sat 10am–10pm, Sun 10am–8pm", phone: "(503) 444-7972" },
+      { name: "Taqueria Los Puñales", lat: 45.5165, lng: -122.6432 },
+      { name: "Friendship Kitchen",   lat: 45.5274, lng: -122.6391 },
+      { name: "Either/Or",            lat: 45.5627, lng: -122.6658, hours: "Mon–Sun 8am–2pm" },
+      { name: "Tin Shed Garden Cafe", lat: 45.5588, lng: -122.6478, hours: "Mon–Fri 8am–2pm, Sat–Sun 7am–3pm", phone: "(503) 288-6966" },
+      { name: "Speed-o Cappuccino",   lat: 45.5176, lng: -122.6510 },
+      { name: "Coffee Beer",          lat: 45.5026, lng: -122.6225, hours: "Mon–Fri 8am–10pm, Sat–Sun 8am–8pm", phone: "(503) 946-8029" },
+      { name: "Roots & Crowns",       lat: 45.5374, lng: -122.6949, hours: "Mon 11am–3pm, Wed–Fri 11am–3pm, Sat 9am–2pm" },
+      { name: "Arium Botanicals",     lat: 45.5485, lng: -122.6597, phone: "(503) 719-4763" },
+      { name: "Gold+Grit Barber Co.", lat: 45.5374, lng: -122.6987 },
+      { name: "Pizza Thief",          lat: 45.5374, lng: -122.6987 },
+      { name: "Ring Ding Ding",       lat: 45.5049, lng: -122.6432 },
+      { name: "Honeyed Words",        lat: 45.5327, lng: -122.6318, hours: "Thu–Fri 12–5pm, Sat–Sun 10am–5pm" },
+    ];
+    for (const u of updates) {
+      const parts: string[] = [];
+      if (u.lat !== undefined) parts.push(`lat = ${u.lat}`, `lng = ${u.lng}`);
+      if (u.hours) parts.push(`hours = '${u.hours.replace(/'/g, "''")}'`);
+      if (u.phone) parts.push(`phone = '${u.phone}'`);
+      if (parts.length) {
+        sqlite.prepare(`UPDATE businesses SET ${parts.join(", ")} WHERE name = ?`).run(u.name);
+      }
+    }
+    recordBootMigration("seed_businesses_directory_v6");
   }
 }
 

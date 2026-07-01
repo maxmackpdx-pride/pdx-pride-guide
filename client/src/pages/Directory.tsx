@@ -1,11 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin } from "lucide-react";
+import { MapPin, Globe, Instagram, Clock, Phone } from "lucide-react";
+
+const DirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 
 type Business = {
   id: number;
@@ -16,6 +18,8 @@ type Business = {
   neighborhood: string | null;
   website: string | null;
   instagram: string | null;
+  hours: string | null;
+  phone: string | null;
   queerOwned: boolean;
   queerFriendly: boolean;
   imageUrl: string | null;
@@ -57,6 +61,7 @@ export default function Directory() {
 
   const [activeType, setActiveType] = useState("ALL");
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
+
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
@@ -88,13 +93,19 @@ export default function Directory() {
         bgPosition="center 55%"
       />
 
+      {/* Map */}
+      {!isLoading && (
+        <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
+          <DirectoryMap businesses={filtered} />
+        </Suspense>
+      )}
+
       {/* Filter bar */}
       <div className="zine-filter-bar" style={{
         background: "#000", borderBottom: "1px solid #1a1a1a",
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
       }}>
         <div className="events-filter-row" style={{ flexWrap: "wrap", rowGap: 8 }}>
-          {/* Type chips */}
           <button
             className={`filter-tag${activeType === "ALL" ? " active" : ""}`}
             onClick={() => setActiveType("ALL")}
@@ -112,7 +123,6 @@ export default function Directory() {
           ))}
         </div>
 
-        {/* Neighborhood row */}
         <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
           {neighborhoodsInUse.map(n => (
             <button
@@ -181,9 +191,37 @@ function DirectoryCard({ biz }: { biz: Business }) {
         {(biz.address || biz.neighborhood) && (
           <div className="directory-card__address">
             <MapPin size={11} />
-            {biz.address ? biz.address : biz.neighborhood}
+            {biz.address ?? biz.neighborhood}
           </div>
         )}
+        {biz.hours && (
+          <div className="directory-card__hours">
+            <Clock size={11} /> {biz.hours}
+          </div>
+        )}
+        {biz.phone && (
+          <div className="directory-card__phone">
+            <Phone size={11} /> <a href={`tel:${biz.phone}`}>{biz.phone}</a>
+          </div>
+        )}
+        {biz.description && (
+          <p className="directory-card__desc">{biz.description}</p>
+        )}
+        <div className="directory-card__links">
+          {biz.website && (
+            <a href={biz.website} target="_blank" rel="noopener noreferrer" className="directory-card__link">
+              <Globe size={13} /> Website
+            </a>
+          )}
+          {biz.instagram && (
+            <a
+              href={biz.instagram.startsWith("http") ? biz.instagram : `https://instagram.com/${biz.instagram.replace("@", "")}`}
+              target="_blank" rel="noopener noreferrer" className="directory-card__link"
+            >
+              <Instagram size={13} /> {biz.instagram.startsWith("@") ? biz.instagram : `@${biz.instagram}`}
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
