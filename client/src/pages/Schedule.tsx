@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -105,6 +105,25 @@ export default function Schedule() {
   const [myScheduleOnly, setMyScheduleOnly] = useState(true);
   const [exporting, setExporting] = useState(false);
 
+  const getNowPx = (): number | null => {
+    const now = new Date();
+    const parts = now.toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour12: false, hour: "2-digit", minute: "2-digit" }).split(":");
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const totalMins = h * 60 + m;
+    const startMins = SCHEDULE_START_HOUR * 60;
+    const endMins = SCHEDULE_END_HOUR * 60;
+    if (totalMins < startMins || totalMins > endMins) return null;
+    return ((totalMins - startMins) / 60) * HOUR_HEIGHT;
+  };
+
+  const [nowPx, setNowPx] = useState<number | null>(() => getNowPx());
+
+  useEffect(() => {
+    const id = setInterval(() => setNowPx(getNowPx()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   usePageSeo("Schedule — Portland Pride 2026 | PDX Pride Guide", "Your full 4-day Pride Weekend schedule, side by side.");
 
   const { data: events = [] } = useQuery<EventListing[]>({
@@ -148,12 +167,8 @@ export default function Schedule() {
   };
 
   const handleExport = async () => {
-    if (!myScheduleOnly) {
-      toast({ title: "Switch to My Schedule", description: "Export uses your RSVP'd events — toggle My Schedule on first.", variant: "destructive" });
-      return;
-    }
     if (visibleEvents.length === 0) {
-      toast({ title: "Nothing to export yet", description: "RSVP to a few events first, then export your schedule.", variant: "destructive" });
+      toast({ title: "Nothing to export", description: myScheduleOnly ? "RSVP to a few events first, then export your schedule." : "No events to export.", variant: "destructive" });
       return;
     }
     setExporting(true);
@@ -233,6 +248,7 @@ export default function Schedule() {
                 {TIME_LABELS.map((_, i) => (
                   <div key={i} className="schedule-day-col__hour-line" style={{ top: i * HOUR_HEIGHT }} />
                 ))}
+                {nowPx != null && <div className="schedule-now-line" style={{ top: nowPx }} />}
                 {dayEvents.map((event, idx) => {
                   const pos = eventPosition(event);
                   if (!pos) return null;

@@ -8359,19 +8359,33 @@ html.calm-mode .footer-brand-logo {
   }
 
   .schedule-grid {
-    /* Time axis stays fixed; each day column snaps to fill remaining width */
-    grid-template-columns: 40px;
-    grid-auto-flow: column;
-    grid-auto-columns: calc(100vw - 56px);
-    scroll-snap-type: x mandatory;
-    gap: 6px;
-    /* Slight left padding so the time axis has breathing room */
-    padding-left: 8px;
+    /* All 4 day columns visible side-by-side; single vertical scroll */
+    grid-template-columns: 30px repeat(4, 1fr);
+    grid-auto-flow: unset;
+    grid-auto-columns: unset;
+    overflow-x: unset;
+    scroll-snap-type: unset;
+    gap: 3px;
+    padding-left: 4px;
   }
 
   .schedule-day-col {
-    scroll-snap-align: start;
+    scroll-snap-align: unset;
     min-width: 0;
+  }
+
+  /* Compact event cards for narrow columns */
+  .schedule-event-card {
+    padding: 3px 4px;
+    border-radius: 4px;
+  }
+
+  .schedule-event-card__venue {
+    display: none;
+  }
+
+  .schedule-event-card__time {
+    font-size: 0.5rem;
   }
 
   .schedule-day-col__label {
@@ -8409,6 +8423,37 @@ html.calm-mode .footer-brand-logo {
   .schedule-toggle__btn {
     flex: 1;
   }
+}
+
+/* Schedule: current time indicator */
+.schedule-now-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--neon-magenta);
+  box-shadow: 0 0 8px var(--neon-magenta), 0 0 16px var(--neon-magenta);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.schedule-now-line::before {
+  content: "";
+  position: absolute;
+  left: -4px; top: -4px;
+  width: 10px; height: 10px;
+  background: var(--neon-magenta);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--neon-magenta);
+}
+
+/* Schedule: card entrance animation */
+@keyframes scheduleCardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.schedule-event-card {
+  animation: scheduleCardIn 0.3s ease both;
 }
 
 /* Footer logo — compact, matching the visual size of the nav bar logo */
