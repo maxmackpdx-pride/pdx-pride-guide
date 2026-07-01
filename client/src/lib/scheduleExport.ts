@@ -3,6 +3,15 @@ import type { EventListing } from "@shared/multiDayEvents";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 
+function loadLogoImage(): Promise<HTMLImageElement | null> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = "/favicon.png";
+  });
+}
+
 const DAY_LABELS: Record<string, string> = {
   THU: "THURSDAY · JULY 16",
   FRI: "FRIDAY · JULY 17",
@@ -87,18 +96,25 @@ export async function exportScheduleToStories(events: EventListing[]): Promise<v
 
   const node = document.createElement("div");
   node.style.cssText = `
-    position: fixed; left: -9999px; top: 0; width: 1080px;
+    position: absolute; left: -9999px; top: 0;
+    width: 1080px; height: 1920px; overflow: hidden;
     background: #050505; color: #f0ede4;
     font-family: 'Inter', system-ui, sans-serif;
     display: flex; flex-direction: column; padding: ${PAD}px;
     box-sizing: border-box; gap: 28px;
   `;
 
+  // Load logo
+  const logoImg = await loadLogoImage();
+
   // Header
   const header = document.createElement("div");
   header.innerHTML = `
-    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:52px;letter-spacing:0.03em;color:#C8FA3C;line-height:1;">PDX PRIDE GUIDE</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;letter-spacing:0.05em;color:#fff;margin-top:4px;">MY SCHEDULE</div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      ${logoImg ? `<img src="/favicon.png" width="52" height="52" style="border-radius:8px;flex-shrink:0;" />` : ""}
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:52px;letter-spacing:0.03em;color:#C8FA3C;line-height:1;">PDX PRIDE GUIDE</div>
+    </div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;letter-spacing:0.05em;color:#fff;margin-top:6px;">MY SCHEDULE</div>
     <div style="height:4px;background:linear-gradient(90deg,#00FFFF,#FF00CC,#39FF14,#FF6600);margin-top:16px;border-radius:2px;"></div>
   `;
   node.appendChild(header);
@@ -147,15 +163,15 @@ export async function exportScheduleToStories(events: EventListing[]): Promise<v
 
   document.body.appendChild(node);
   try {
-    // Measure actual height after layout
-    const h = Math.max(node.scrollHeight, 1920);
     const canvas = await html2canvas(node, {
       width: 1080,
-      height: h,
+      height: 1920,
       backgroundColor: "#050505",
       scale: 1,
       useCORS: true,
       allowTaint: false,
+      windowWidth: 1080,
+      windowHeight: 1920,
     });
     const link = document.createElement("a");
     link.download = "my-pdx-pride-schedule.png";
