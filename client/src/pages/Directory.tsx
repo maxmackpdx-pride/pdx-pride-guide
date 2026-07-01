@@ -21,6 +21,7 @@ type Business = {
   imageUrl: string | null;
   lat: number | null;
   lng: number | null;
+  isNew: boolean;
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -166,6 +167,9 @@ function DirectoryCard({ biz }: { biz: Business }) {
   return (
     <div className="directory-card" style={{ "--card-accent": color } as React.CSSProperties}>
       <div className="directory-card__body">
+        {biz.isNew && (
+          <div className="directory-card__grand-opening">GRAND OPENING</div>
+        )}
         <div className="directory-card__badges">
           <span className="directory-card__type-badge" style={{ background: color, color: "#000" }}>
             {TYPE_LABELS[biz.type] || biz.type}

@@ -250,6 +250,9 @@ sqlite.exec(`
   );
 `);
 
+// Add is_new column to businesses if not present
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
+
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
 let gigPostsLegacyCols = false;
 
@@ -1858,6 +1861,24 @@ function runBootMigrationsOnce() {
       db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
     }
     recordBootMigration("seed_businesses_directory_v3");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v4")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "Camp Bar PDX",
+      type: "bar",
+      description: "Modern inclusive gay bar in downtown Portland's Gayborhood, taking over the historic former Scandals space on Harvey Milk Street. Grand opening June 2026.",
+      address: "1125 SW Harvey Milk St",
+      neighborhood: "Downtown",
+      website: "https://campbarpdx.com",
+      instagram: "@campbarpdx",
+      queerOwned: true,
+      queerFriendly: true,
+      isNew: true,
+      active: true,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_businesses_directory_v4");
   }
 }
 

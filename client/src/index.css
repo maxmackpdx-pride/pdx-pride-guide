@@ -8529,6 +8529,24 @@ html.calm-mode .footer-brand-logo {
   color: #FF00CC;
 }
 
+.directory-card__grand-opening {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: #000;
+  background: #FFD700;
+  padding: 3px 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+  animation: grandOpeningPulse 2s ease-in-out infinite;
+}
+
+@keyframes grandOpeningPulse {
+  0%, 100% { box-shadow: 0 0 6px #FFD700aa; }
+  50% { box-shadow: 0 0 18px #FFD700, 0 0 30px #FFD70066; }
+}
+
 .directory-card__name {
   font-size: clamp(1rem, 2.2vw, 1.3rem);
   color: #fff;
