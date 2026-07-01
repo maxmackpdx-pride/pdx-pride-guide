@@ -298,7 +298,6 @@ export default function MissedConnectionsPanel({
           <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>POST TO SPOTTED!</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
             Missed connections for this event · anonymous on the board until you both reveal in inbox.
-            {!canPostToEventStrict && " (Posting early — goes live on Spotted now.)"}
           </p>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />
           <textarea

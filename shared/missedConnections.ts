@@ -1,5 +1,4 @@
 const PACIFIC_TZ = "America/Los_Angeles";
-const POST_OPEN_DELAY_MS = 20 * 60 * 1000;
 const POST_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function parsePacificDateTime(value?: string | null): number | null {
@@ -32,10 +31,11 @@ export function pacificTodayDate(now = Date.now()): string {
   }).format(new Date(now));
 }
 
-export function missedConnectionClosesAt(dateStart?: string | null): string | null {
+export function missedConnectionClosesAt(dateStart?: string | null, dateEnd?: string | null): string | null {
   const start = parsePacificDateTime(dateStart);
   if (start == null) return null;
-  return new Date(start + POST_WINDOW_MS).toISOString();
+  const end = parsePacificDateTime(dateEnd) ?? start;
+  return new Date(end + POST_WINDOW_MS).toISOString();
 }
 
 export type MissedConnectionWindow = {
@@ -47,18 +47,20 @@ export type MissedConnectionWindow = {
 
 export function getMissedConnectionWindow(
   dateStart?: string | null,
+  dateEnd?: string | null,
   now = Date.now(),
 ): MissedConnectionWindow | null {
   const start = parsePacificDateTime(dateStart);
   if (start == null) return null;
-  const opensAt = start + POST_OPEN_DELAY_MS;
-  const closesAt = start + POST_WINDOW_MS;
+  const end = parsePacificDateTime(dateEnd) ?? start;
+  const opensAt = start;
+  const closesAt = end + POST_WINDOW_MS;
   if (now < opensAt) {
     return {
       opensAt,
       closesAt,
       canPost: false,
-      reason: "Opens 20 minutes after the event starts",
+      reason: "Opens when the event starts",
     };
   }
   if (now >= closesAt) {
@@ -66,7 +68,7 @@ export function getMissedConnectionWindow(
       opensAt,
       closesAt,
       canPost: false,
-      reason: "Posting closed — window ended 7 days after the event started",
+      reason: "Posting closed — window ended 7 days after the event ended",
     };
   }
   return { opensAt, closesAt, canPost: true };
@@ -80,13 +82,14 @@ export function isEventHappeningToday(dateStart?: string | null, now = Date.now(
 
 export function isMissedConnectionPostable(
   dateStart?: string | null,
+  dateEnd?: string | null,
   opts?: { requireToday?: boolean; now?: number },
 ): { ok: boolean; reason?: string; closesAt?: string } {
   const now = opts?.now ?? Date.now();
   if (opts?.requireToday && !isEventHappeningToday(dateStart, now)) {
     return { ok: false, reason: "Only events happening today can be selected" };
   }
-  const window = getMissedConnectionWindow(dateStart, now);
+  const window = getMissedConnectionWindow(dateStart, dateEnd, now);
   if (!window) return { ok: false, reason: "Invalid event schedule" };
   if (!window.canPost) return { ok: false, reason: window.reason };
   return { ok: true, closesAt: new Date(window.closesAt).toISOString() };
@@ -102,10 +105,7 @@ export function getEventTiming(
   const start = parsePacificDateTime(dateStart);
   if (start == null) return "past";
   if (now < start) return "upcoming";
-  if (isMissedConnectionPostable(dateStart, { now }).ok) return "live";
-  const end = parsePacificDateTime(dateEnd);
-  if (end != null && now > end) return "past";
-  if (now >= start + POST_WINDOW_MS) return "past";
+  if (isMissedConnectionPostable(dateStart, dateEnd, { now }).ok) return "live";
   return "past";
 }
 

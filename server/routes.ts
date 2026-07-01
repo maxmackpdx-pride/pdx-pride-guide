@@ -1145,30 +1145,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
         const evt = storage.getEvent(eventId);
         if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
 
-        if (boardScope) {
-          const strict = isMissedConnectionPostable(evt.dateStart, { requireToday: false });
-          payload = {
-            ...req.body,
-            userId: req.session.userId!,
-            eventId,
-            dayOfWeek: evt.dayOfWeek,
-            venueHint: evt.venueName,
-            closesAt: strict.ok && strict.closesAt ? strict.closesAt : generalSpottedClosesAt(),
-          };
-        } else {
-          const requireToday = scope === "today";
-          const window = isMissedConnectionPostable(evt.dateStart, { requireToday });
-          if (!window.ok) return res.status(400).json({ error: window.reason || "Posting not open for this event" });
+        const requireToday = !boardScope && scope === "today";
+        const window = isMissedConnectionPostable(evt.dateStart, evt.dateEnd, { requireToday });
+        if (!window.ok) return res.status(400).json({ error: window.reason || "Posting not open for this event yet" });
 
-          payload = {
-            ...req.body,
-            userId: req.session.userId!,
-            eventId,
-            dayOfWeek: evt.dayOfWeek,
-            venueHint: evt.venueName,
-            closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart),
-          };
-        }
+        payload = {
+          ...req.body,
+          userId: req.session.userId!,
+          eventId,
+          dayOfWeek: evt.dayOfWeek,
+          venueHint: evt.venueName,
+          closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart, evt.dateEnd),
+        };
         eventMeta = { title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek || "" };
       } else {
         const customLabel = String(req.body.eventLabel || "").trim();

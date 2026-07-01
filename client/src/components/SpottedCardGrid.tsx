@@ -162,7 +162,7 @@ export default function SpottedCardGrid({
         {items.map(evt => (
           <option key={evt.id} value={String(evt.id)}>
             {evt.dayOfWeek} · {evt.title} @ {evt.venueName}
-            {evt.postable ? "" : " (early link)"}
+            {evt.postable ? "" : " (not started yet)"}
           </option>
         ))}
       </optgroup>
