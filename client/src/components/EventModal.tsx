@@ -18,7 +18,9 @@ import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from 
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink } from "@/lib/shareEvent";
-import { Link2 } from "lucide-react";
+import { Link2, Lock } from "lucide-react";
+import { getEventTiming } from "@shared/missedConnections";
+import type { EventTalentRow } from "@shared/eventTalent";
 
 type EventHostProfile = {
   userId: number;
@@ -64,6 +66,39 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     queryKey: ["/api/events", event.id, "hosts"],
     queryFn: () => fetch(`/api/events/${event.id}/hosts`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
+
+  const { data: talentRows = [] } = useQuery<EventTalentRow[]>({
+    queryKey: ["/api/events", event.id, "talent"],
+    queryFn: () => fetch(`/api/events/${event.id}/talent`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
+  });
+
+  const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
+
+  const extraPeople = [
+    ...eventHosts.map(h => ({
+      userId: h.userId,
+      username: h.username,
+      displayName: h.displayName,
+      photoUrl: h.photoUrl,
+      avatarChoice: h.avatarChoice,
+      avatarRing: h.avatarRing,
+      roleChip: h.role || "HOST",
+      roleColor: dayColor,
+    })),
+    ...talentRows
+      .filter(t => t.status === "LIVE")
+      .filter(t => !eventHosts.some(h => h.userId === t.userId))
+      .map(t => ({
+        userId: t.userId,
+        username: t.username,
+        displayName: t.displayName,
+        photoUrl: t.photoUrl,
+        avatarChoice: t.avatarChoice,
+        avatarRing: t.avatarRing,
+        roleChip: t.role,
+        roleColor: "#FF8C00",
+      })),
+  ];
 
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
@@ -451,7 +486,14 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
             data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
           >
             {socialTab === "attendance" ? (
-              <AttendanceCluster eventId={event.id} embedded />
+              <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} />
+            ) : eventTiming === "upcoming" ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "40px 20px", color: "var(--text-faint)", textAlign: "center" }}>
+                <Lock size={28} style={{ opacity: 0.5 }} />
+                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", margin: 0 }}>
+                  Missed connections unlock when this event starts
+                </p>
+              </div>
             ) : (
               <MissedConnectionsPanel mode="event" eventId={event.id} compact />
             )}

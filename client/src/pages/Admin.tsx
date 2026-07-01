@@ -551,6 +551,21 @@ export default function Admin() {
     onError: () => toast({ title: "Error", description: "Could not update status.", variant: "destructive" }),
   });
 
+  const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
+  const [fixUsernameValue, setFixUsernameValue] = useState("");
+  const setUsernameMutation = useMutation({
+    mutationFn: ({ userId, username }: { userId: number; username: string }) =>
+      apiRequest("POST", `/api/admin/users/${userId}/set-username`, { username }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, username: vars.username } : u));
+      setFixUsernameTarget(null);
+      setFixUsernameValue("");
+      toast({ title: "Username updated", description: `Set to @${vars.username}` });
+    },
+    onError: () => toast({ title: "Error", description: "Could not update username.", variant: "destructive" }),
+  });
+
   const setSubAdminMutation = useMutation({
     mutationFn: ({ userId, grant }: { userId: number; grant: boolean }) =>
       apiRequest("POST", `/api/admin/users/${userId}/set-sub-admin`, { grant }),
@@ -1357,7 +1372,31 @@ export default function Admin() {
                             {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
                           </button>
                         )}
+                        {isSuperAdmin && (
+                          <button onClick={() => { setFixUsernameTarget({ id: u.id, current: u.username }); setFixUsernameValue(u.username); }}
+                            className="display text-xs px-3 py-1 border border-white/20 text-white/40">
+                            FIX USERNAME
+                          </button>
+                        )}
                       </div>
+                      {fixUsernameTarget?.id === u.id && (
+                        <div className="flex gap-2 mt-2 items-center">
+                          <input
+                            value={fixUsernameValue}
+                            onChange={e => setFixUsernameValue(e.target.value)}
+                            placeholder="new username"
+                            className="display text-xs px-2 py-1 border border-white/20 bg-black text-white"
+                            style={{ width: 160 }}
+                          />
+                          <button
+                            onClick={() => setUsernameMutation.mutate({ userId: u.id, username: fixUsernameValue })}
+                            disabled={!fixUsernameValue.trim() || setUsernameMutation.isPending}
+                            className="display text-xs px-3 py-1 border"
+                            style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                          >SAVE</button>
+                          <button onClick={() => setFixUsernameTarget(null)} className="display text-xs px-2 py-1 text-white/40">CANCEL</button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

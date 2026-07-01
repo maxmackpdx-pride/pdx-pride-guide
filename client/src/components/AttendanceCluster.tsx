@@ -1,13 +1,11 @@
-import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import AttendanceVibeModal from "./AttendanceVibeModal";
-import AttendanceBubbleFace from "./AttendanceBubbleFace";
 import UserAvatar from "@/components/UserAvatar";
 import { useAttendanceLive } from "@/hooks/useAttendanceLive";
-import { attendanceInitials } from "@/lib/attendanceBubble";
 import {
   ATTENDANCE_PHRASES,
   DEFAULT_ATTENDANCE_PHRASE_KEY,
@@ -34,30 +32,24 @@ interface Attendee {
   masked?: boolean;
 }
 
-interface BubbleState {
-  attendee: Attendee;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  visible: boolean;
-  size: number;
+interface ExtraPerson {
+  userId: number;
+  username?: string;
+  displayName?: string | null;
+  photoUrl?: string | null;
+  avatarChoice?: number;
+  avatarRing?: string | null;
+  roleChip: string;
+  roleColor?: string;
 }
 
-export default function AttendanceCluster({ eventId, embedded = false }: { eventId: number; embedded?: boolean }) {
+export default function AttendanceCluster({ eventId, embedded = false, extraPeople = [] }: { eventId: number; embedded?: boolean; extraPeople?: ExtraPerson[] }) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedPhraseKey, setSelectedPhraseKey] = useState<AttendancePhraseKey>(DEFAULT_ATTENDANCE_PHRASE_KEY);
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [bubbles, setBubbles] = useState<BubbleState[]>([]);
   const [showAuth, setShowAuth] = useState(false);
   const [messageTarget, setMessageTarget] = useState<Attendee | null>(null);
   const [messageBody, setMessageBody] = useState("");
-  const [newAttendeeIds, setNewAttendeeIds] = useState<Set<number>>(new Set());
-  const containerRef = useRef<HTMLDivElement>(null);
-  const animFrameRef = useRef<number>(0);
-  const lastRandomizeRef = useRef<number>(Date.now());
-  const seenIdsRef = useRef<Set<number> | null>(null);
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
 
   useEffect(() => {
@@ -75,27 +67,6 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     queryFn: () => apiRequest("GET", `/api/events/${eventId}/attendance`).then(r => r.json()),
     refetchInterval: 120_000,
   });
-
-  // Track which attendees are newly arrived (vs. already seen) so their bubble
-  // can pop in instead of just appearing. First load seeds the "seen" set with
-  // no animation; every load after that, anyone not previously seen gets the pop.
-  useEffect(() => {
-    const currentIds = new Set(attendees.map(a => a.id));
-    if (seenIdsRef.current === null) {
-      seenIdsRef.current = currentIds;
-      return;
-    }
-    const freshIds = new Set<number>();
-    currentIds.forEach(id => {
-      if (!seenIdsRef.current!.has(id)) freshIds.add(id);
-    });
-    seenIdsRef.current = currentIds;
-    if (freshIds.size > 0) {
-      setNewAttendeeIds(freshIds);
-      const t = setTimeout(() => setNewAttendeeIds(new Set()), 900);
-      return () => clearTimeout(t);
-    }
-  }, [attendees]);
 
   const mutation = useMutation({
     mutationFn: (data: { message: string }) =>
@@ -124,84 +95,6 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     },
   });
 
-  const BUBBLE_STAGE_H = 340;
-  const BUBBLE_TOP_MARGIN = 56;
-
-  // Initialize bubbles when attendees load
-  useEffect(() => {
-    if (attendees.length === 0) {
-      setBubbles([]);
-      return;
-    }
-    const W = containerRef.current?.offsetWidth || 600;
-    const H = BUBBLE_STAGE_H;
-    const RADIUS = 36;
-    const yMin = RADIUS + BUBBLE_TOP_MARGIN;
-    const yMax = H - RADIUS;
-
-    setBubbles(
-      attendees.map((att, i) => ({
-        attendee: att,
-        x: RADIUS + (Math.random() * (W - RADIUS * 2)),
-        y: yMin + (Math.random() * Math.max(yMax - yMin, RADIUS)),
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-        visible: true,
-        size: 36 + Math.random() * 12,
-      }))
-    );
-  }, [attendees, isMobile]);
-
-  // Animate bubbles: slow drift + random show/hide (desktop field only)
-  useEffect(() => {
-    if (bubbles.length === 0) return;
-    if (isMobile) return;
-
-    const animate = () => {
-      const W = containerRef.current?.offsetWidth || 600;
-      const H = BUBBLE_STAGE_H;
-      const yMin = 18 + BUBBLE_TOP_MARGIN;
-      const now = Date.now();
-
-      setBubbles(prev => {
-        // Every 3–5 seconds, toggle 1–3 random bubbles
-        let newBubbles = prev;
-        if (now - lastRandomizeRef.current > 3000 + Math.random() * 2000) {
-          lastRandomizeRef.current = now;
-          const count = 1 + Math.floor(Math.random() * 3);
-          const indices = Array.from({ length: prev.length }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, count);
-          newBubbles = prev.map((b, i) =>
-            indices.includes(i) ? { ...b, visible: !b.visible } : b
-          );
-        }
-
-        return newBubbles.map(b => {
-          let nx = b.x + b.vx;
-          let ny = b.y + b.vy;
-          let nvx = b.vx;
-          let nvy = b.vy;
-          // Bounce off walls
-          if (nx < b.size / 2) { nx = b.size / 2; nvx = Math.abs(nvx); }
-          if (nx > W - b.size / 2) { nx = W - b.size / 2; nvx = -Math.abs(nvx); }
-          if (ny < Math.max(b.size / 2, yMin)) { ny = Math.max(b.size / 2, yMin); nvy = Math.abs(nvy); }
-          if (ny > H - b.size / 2) { ny = H - b.size / 2; nvy = -Math.abs(nvy); }
-          // Tiny random nudge for organic feel
-          nvx += (Math.random() - 0.5) * 0.04;
-          nvy += (Math.random() - 0.5) * 0.04;
-          // Clamp speed
-          const speed = Math.sqrt(nvx * nvx + nvy * nvy);
-          if (speed > 0.6) { nvx *= 0.6 / speed; nvy *= 0.6 / speed; }
-          if (speed < 0.1) { nvx *= 1.5; nvy *= 1.5; }
-          return { ...b, x: nx, y: ny, vx: nvx, vy: nvy };
-        });
-      });
-
-      animFrameRef.current = requestAnimationFrame(animate);
-    };
-
-    animFrameRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animFrameRef.current);
-  }, [bubbles.length, isMobile]);
 
   const submitVibe = () => {
     mutation.mutate({ message: attendancePhraseLabel(selectedPhraseKey) });
@@ -233,8 +126,50 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
     </div>
   );
 
-  const showBubbleField = !isMobile && bubbles.length > 0;
-  const showBubbleStrip = isMobile && bubbles.length > 0;
+  // Merged grid: extraPeople (hosts/talent) first, then attendees
+  const gridPeople: Array<{
+    key: string;
+    userId?: number;
+    handle: string;
+    displayName?: string | null;
+    photoUrl?: string | null;
+    avatarChoice?: number;
+    avatarRing?: string | null;
+    masked?: boolean;
+    chip?: string;
+    chipColor?: string;
+    subText?: string;
+    attendeeRef?: Attendee;
+  }> = [
+    ...extraPeople.map(p => ({
+      key: `extra-${p.userId}`,
+      userId: p.userId,
+      handle: p.username || p.displayName || String(p.userId),
+      displayName: p.displayName,
+      photoUrl: p.photoUrl,
+      avatarChoice: p.avatarChoice,
+      avatarRing: p.avatarRing,
+      chip: p.roleChip,
+      chipColor: p.roleColor,
+    })),
+    ...attendees
+      .filter(a => !extraPeople.some(p => p.userId === a.userId))
+      .map(a => {
+        const phrase = resolveAttendancePhrase(a.message);
+        return {
+          key: `att-${a.id}`,
+          userId: a.userId,
+          handle: a.handle,
+          displayName: a.displayName,
+          photoUrl: a.userPhotoUrl || a.photoUrl,
+          avatarChoice: a.avatarChoice,
+          avatarRing: a.avatarRing,
+          masked: a.masked,
+          subText: `"${phrase.label}"`,
+          attendeeRef: a,
+        };
+      }),
+  ];
 
   return (
     <div className={`attendance-cluster-panel${embedded ? " attendance-cluster--embedded" : ""}`}>
@@ -261,199 +196,60 @@ export default function AttendanceCluster({ eventId, embedded = false }: { event
           </button>
           {myAttendance && myPhrase && (
             <span className="attendance-cluster-cta__status">
-              ✓ You're going as “{myPhrase.label}”
+              ✓ You're going as "{myPhrase.label}"
             </span>
           )}
         </div>
       )}
 
-      {/* Animated bubble cluster */}
-      {showBubbleField && (
-        <div
-          ref={containerRef}
-          className="attendance-bubble-stage"
-          style={{ position: "relative", height: BUBBLE_STAGE_H, marginBottom: 16 }}
-        >
-          <div className="attendance-bubble-stage__hint">Hover a bubble</div>
-          {bubbles.map((b) => {
-            const phrase = resolveAttendancePhrase(b.attendee.message);
-            const accent = phrase.color;
-            const isHovered = hoveredId === b.attendee.id;
-            const bubbleSize = Math.max(48, b.size);
-            const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
-            const isSelf = !!user && b.attendee.userId === user.id;
-            const label = b.attendee.masked ? attendanceInitials(b.attendee.handle) : (b.attendee.displayName || b.attendee.handle);
+      {/* Avatar grid — hosts, talent, and attendees */}
+      {gridPeople.length > 0 && (
+        <div className="attendance-avatar-grid">
+          {gridPeople.map(p => {
+            const isSelf = !!user && p.userId === user?.id;
+            const canMessage = user && myAttendance && p.userId && p.userId !== user.id && !p.masked;
             return (
               <div
-                key={b.attendee.id}
-                data-testid={`bubble-attendee-${b.attendee.id}`}
-                className={`attendance-bubble${isNew ? " attendance-pop-in" : ""}`}
-                onMouseEnter={() => setHoveredId(b.attendee.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
-                style={{
-                  left: b.x - bubbleSize / 2,
-                  top: b.y - bubbleSize / 2,
-                  width: bubbleSize,
-                  height: bubbleSize,
-                  opacity: b.visible ? 1 : 0,
-                  transform: `scale(${b.visible ? (isHovered ? 1.12 : 1) : 0.6})`,
-                  zIndex: isHovered ? 20 : 10,
-                  ["--speech-accent" as string]: accent,
+                key={p.key}
+                className="attendance-avatar-cell"
+                onClick={() => {
+                  if (canMessage && p.attendeeRef) setMessageTarget(p.attendeeRef);
                 }}
+                style={{ cursor: canMessage ? "pointer" : "default" }}
+                data-testid={`grid-attendee-${p.key}`}
               >
-                <div className="attendance-bubble__avatar" style={{ width: bubbleSize, height: bubbleSize }}>
-                  <AttendanceBubbleFace
-                    handle={b.attendee.handle}
-                    displayName={b.attendee.displayName}
-                    username={b.attendee.handle}
-                    photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
-                    avatarChoice={b.attendee.avatarChoice}
-                    avatarRing={b.attendee.avatarRing}
-                    avatarSeed={b.attendee.avatarSeed}
-                    masked={b.attendee.masked}
-                    size={bubbleSize}
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <UserAvatar
+                    photoUrl={p.photoUrl}
+                    avatarChoice={p.avatarChoice}
+                    avatarRing={p.avatarRing}
+                    displayName={p.masked ? undefined : (p.displayName || p.handle)}
+                    size={52}
                   />
-                  {isSelf && <span className="attendance-bubble__self-dot" data-testid="self-marker" />}
-                </div>
-                <div className={`attendance-speech-pop${isHovered ? " attendance-speech-pop--visible" : ""}`}>
-                  {!b.attendee.masked && (
-                    <div className="attendance-speech-pop__name">{label}</div>
+                  {isSelf && (
+                    <span data-testid="self-marker" style={{ position: "absolute", bottom: 0, right: 0, width: 10, height: 10, borderRadius: "50%", background: "#CCFF00", border: "2px solid #0d0d0d", zIndex: 5 }} />
                   )}
-                  <div className="attendance-speech-pop__phrase" style={{ color: accent }}>“{phrase.label}”</div>
-                  {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
-                    <button
-                      type="button"
-                      className="attendance-speech-pop__msg-btn"
-                      onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
-                    >
-                      Message →
-                    </button>
-                  )}
-                  <span className="attendance-speech-pop__tail" />
                 </div>
+                {!p.masked && (
+                  <span className="attendance-avatar-cell__name">
+                    @{p.handle}
+                  </span>
+                )}
+                {p.chip && (
+                  <span className="attendance-avatar-cell__chip" style={{ color: p.chipColor || "#fff", borderColor: p.chipColor || "#fff" }}>
+                    {p.chip}
+                  </span>
+                )}
+                {p.subText && !p.chip && (
+                  <span className="attendance-avatar-cell__sub">{p.subText}</span>
+                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Mobile-only horizontal strip */}
-      {showBubbleStrip && (
-        <section className="attendance-mobile-strip-panel" aria-label="Who's going">
-        <p className="attendance-mobile-hint">Swipe · tap a face</p>
-        <div className="attendance-mobile-strip">
-          {bubbles.map((b, i) => {
-            const phrase = resolveAttendancePhrase(b.attendee.message);
-            const isHovered = hoveredId === b.attendee.id;
-            const isNew = newAttendeeIds.has(b.attendee.id) && !prefersReducedMotion();
-            const isSelf = !!user && b.attendee.userId === user.id;
-            return (
-              <div
-                key={b.attendee.id}
-                data-testid={`bubble-strip-attendee-${b.attendee.id}`}
-                className={`attendance-mobile-strip__item${isNew ? " attendance-pop-in" : ""}`}
-                onClick={() => setHoveredId(isHovered ? null : b.attendee.id)}
-              >
-                <AttendanceBubbleFace
-                  handle={b.attendee.handle}
-                  displayName={b.attendee.displayName}
-                  username={b.attendee.handle}
-                  photoUrl={b.attendee.userPhotoUrl || b.attendee.photoUrl}
-                  avatarChoice={b.attendee.avatarChoice}
-                  avatarRing={b.attendee.avatarRing}
-                  avatarSeed={b.attendee.avatarSeed}
-                  masked={b.attendee.masked}
-                  size={56}
-                  className="attendance-mobile-strip__avatar"
-                />
-                {isSelf && (
-                  <span
-                    data-testid="self-marker-strip"
-                    style={{
-                      position: "absolute",
-                      bottom: -2,
-                      right: -2,
-                      width: 12,
-                      height: 12,
-                      borderRadius: "50%",
-                      background: "#CCFF00",
-                      border: "2px solid #0d0d0d",
-                      zIndex: 5,
-                    }}
-                  />
-                )}
-                {isHovered && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "calc(100% + 8px)",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "#fff",
-                      color: "#000",
-                      fontSize: "0.7rem",
-                      fontFamily: "var(--font-body)",
-                      fontWeight: 500,
-                      padding: "6px 10px",
-                      border: "2px solid #000",
-                      maxWidth: 220,
-                      whiteSpace: "normal",
-                      textAlign: "center",
-                      lineHeight: 1.3,
-                      zIndex: 30,
-                      pointerEvents: "auto",
-                      boxShadow: "3px 3px 0 #000",
-                    }}
-                  >
-                    {!b.attendee.masked && (
-                      <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: "0.65rem", marginBottom: 2, color: "var(--text-meta)" }}>
-                        {b.attendee.handle}
-                      </span>
-                    )}
-                    <span style={{ color: phrase.color, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.62rem" }}>
-                      “{phrase.label}”
-                    </span>
-                    {user && myAttendance && b.attendee.userId && b.attendee.userId !== user.id && !b.attendee.masked && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setMessageTarget(b.attendee); }}
-                        style={{
-                          display: "block",
-                          margin: "6px auto 0",
-                          border: "1px solid #000",
-                          background: "#CCFF00",
-                          color: "#000",
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 900,
-                          fontSize: "0.62rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        MESSAGE
-                      </button>
-                    )}
-                    <div style={{
-                      position: "absolute",
-                      bottom: -8,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: 0,
-                      height: 0,
-                      borderLeft: "7px solid transparent",
-                      borderRight: "7px solid transparent",
-                      borderTop: "8px solid #fff",
-                    }} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        </section>
-      )}
-
-      {attendees.length === 0 && !showForm && (
+      {attendees.length === 0 && extraPeople.length === 0 && !showForm && (
         <div style={{ textAlign: "center", padding: "20px 0", color: "var(--text-faint)" }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO SAY YOU'LL BE THERE</p>
         </div>

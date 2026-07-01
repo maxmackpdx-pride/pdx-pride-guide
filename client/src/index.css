@@ -4981,6 +4981,56 @@ footer a:hover { color: #00FFFF !important; }
   scroll-margin-top: 88px;
 }
 
+.attendance-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 16px 12px;
+  padding: 16px 0;
+}
+
+.attendance-avatar-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  min-width: 0;
+}
+
+.attendance-avatar-cell__name {
+  font-family: var(--font-board-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--text-meta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+
+.attendance-avatar-cell__chip {
+  font-family: var(--font-board-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 1px 5px;
+  line-height: 1.4;
+}
+
+.attendance-avatar-cell__sub {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+
 .attendance-bubble-stage {
   overflow: hidden;
   z-index: 2;

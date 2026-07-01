@@ -1739,6 +1739,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true, subAdmin: grant });
   });
 
+  app.post("/api/admin/users/:userId/set-username", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    const userId = Number(req.params.userId);
+    const { username } = req.body as { username: string };
+    if (!username || username.trim().length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
+    const clean = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (clean.length < 3) return res.status(400).json({ error: "Invalid username" });
+    const target = storage.getUserById(userId);
+    if (!target) return res.status(404).json({ error: "User not found" });
+    const existing = storage.getUserByUsername(clean);
+    if (existing && existing.id !== userId) return res.status(409).json({ error: "Username already taken" });
+    sqlite.prepare("UPDATE users SET username = ? WHERE id = ?").run(clean, userId);
+    res.json({ ok: true, username: clean });
+  });
+
   app.post("/api/admin/users/:userId/set-promoter-status", requireAdmin, (req, res) => {
     const userId = Number(req.params.userId);
     const { status } = req.body as { status: string };
