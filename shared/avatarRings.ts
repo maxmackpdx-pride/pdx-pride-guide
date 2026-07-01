@@ -55,5 +55,5 @@ export const AVATAR_EMOJI_OPTIONS = [
 
 export function normalizeAvatarRing(value?: string | null): AvatarRingId {
   const found = AVATAR_RING_OPTIONS.find(r => r.id === value);
-  return found ? found.id : "none";
+  return found ? found.id : "progress";
 }

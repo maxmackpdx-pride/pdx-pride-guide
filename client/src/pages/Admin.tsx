@@ -715,6 +715,7 @@ export default function Admin() {
 
   const renderPromoterControls = (u: Pick<AdminUser, "id" | "promoterStatus" | "subAdmin" | "isOwner">) => {
     if (u.isOwner) return null;
+    if (!u.promoterStatus || u.promoterStatus === "none") return null;
     return (
       <div className="flex gap-2 flex-wrap">
         {u.promoterStatus !== "approved" && (
@@ -1438,16 +1439,18 @@ export default function Admin() {
                       <AdminUserIdentity profile={u} showEmail size={44} />
                       <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
                         {u.isOwner && (
-                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>OWNER</span>
+                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>SITE ADMIN</span>
                         )}
                         {u.subAdmin && (
                           <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>SUB-ADMIN</span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-3 mt-2 text-xs ml-[56px]">
-                        <span style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
-                          promoter: {u.promoterStatus}
-                        </span>
+                        {u.promoterStatus && u.promoterStatus !== "none" && (
+                          <span style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                            promoter: {u.promoterStatus}
+                          </span>
+                        )}
                         <span className="text-white/35">id: {u.id}</span>
                         {u.googleLinked && <span className="text-white/35">Google linked</span>}
                         <span className="text-white/35">status: {u.status}</span>
@@ -1524,7 +1527,7 @@ export default function Admin() {
                       <AdminUserIdentity profile={{ ...member, id: member.userId }} showEmail size={44} />
                       <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
                         {member.protected && (
-                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>OWNER</span>
+                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>SITE ADMIN</span>
                         )}
                       </div>
                       {member.note && <p className="text-white/55 text-sm mt-2">{member.note}</p>}

@@ -1730,6 +1730,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!target) return res.status(404).json({ error: "User not found" });
     if (isMainAdminUser(target)) return res.status(400).json({ error: "Cannot modify super admin" });
     storage.updateUser(userId, { subAdmin: grant });
+    const now = new Date().toISOString();
+    if (grant) {
+      storage.ensureSiteAdminGrant(userId, req.session.userId ?? null, "Sub-admin", now);
+    } else {
+      storage.revokeSiteAdmin(userId);
+    }
     res.json({ ok: true, subAdmin: grant });
   });
 

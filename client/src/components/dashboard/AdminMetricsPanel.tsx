@@ -24,13 +24,13 @@ const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: st
   { key: "activeSessions",     label: "Active sessions",                color: "#19E3FF" },
   { key: "liveEvents",         label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events", alwaysClickable: true },
   { key: "userSubmittedEvents",label: "Community-submitted events",     color: "#00FFFF", tab: "events" },
-  { key: "attendances",        label: "Member check-ins",               color: "#C8FA3C", tab: "events",  alwaysClickable: false },
+  { key: "attendances",        label: "Member check-ins",               color: "#C8FA3C", tab: "events",  alwaysClickable: true },
   { key: "messages",           label: "Active messages",                color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
   { key: "pendingSubmissions", label: "Pending review",                 color: "#FF1FA0", tab: "inbox" },
   { key: "gigPosts",           label: "Live gig posts",                 color: "#FF8C00", tab: "gigs",    alwaysClickable: true },
   { key: "giftingPosts",       label: "Active gifting posts",           color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
   { key: "missedConnections",  label: "Active missed connections",      color: "#FF1FA0", tab: "inbox",   alwaysClickable: true },
-  { key: "openFeedback",       label: "Open feedback",                  color: "#750787", tab: "inbox" },
+  { key: "openFeedback",       label: "Open feedback",                  color: "#750787", tab: "inbox",   alwaysClickable: true },
 ];
 
 export default function AdminMetricsPanel({
