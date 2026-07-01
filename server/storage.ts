@@ -1720,6 +1720,44 @@ function recordBootMigration(id: string) {
   );
 }
 
+function seedBusinessesDirectory() {
+  const existing = db.select().from(businesses).all();
+  if (existing.length > 0) return;
+  const now = new Date().toISOString();
+  const entries = [
+    // ── Bars & Clubs ──────────────────────────────────────────────────────
+    { name: "CC Slaughters", type: "bar", description: "Portland's beloved LGBTQ+ nightclub since 1981. Dance floor, drag shows, themed nights, and a welcoming crowd in the heart of Old Town.", address: "219 NW Davis St", neighborhood: "Old Town", website: "https://ccslaughterspdx.com", instagram: "@ccslaughterspdx", queerOwned: true, queerFriendly: true },
+    { name: "Darcelle XV Showplace", type: "venue", description: "The oldest continuously operating drag venue in the United States, founded in 1967. A Portland institution and landmark of LGBTQ+ history.", address: "208 NW 3rd Ave", neighborhood: "Old Town", website: "https://darcellexv.com", instagram: "@darcellexvshowplace", queerOwned: true, queerFriendly: true },
+    { name: "Stag PDX", type: "bar", description: "Gay bar and lounge on Broadway in Old Town. Part of Portland's historic Burnside Triangle nightlife district.", address: "317 NW Broadway", neighborhood: "Old Town", website: null, instagram: "@stagpdx", queerOwned: true, queerFriendly: true },
+    { name: "Badlands", type: "bar", description: "High-energy queer dance bar known for a diverse crowd, strong drinks, and a packed floor on weekend nights.", address: "208 NW Davis St", neighborhood: "Old Town", website: null, instagram: "@badlandspdx", queerOwned: true, queerFriendly: true },
+    { name: "Eagle Portland", type: "bar", description: "Leather and bear bar on N Lombard serving the leather, fetish, and bear community with themed nights and a no-frills vibe.", address: "835 N Lombard St", neighborhood: "N Portland", website: null, instagram: "@eagleportland", queerOwned: true, queerFriendly: true },
+    { name: "The Nest Lounge", type: "bar", description: "A queer sanctuary on SE Belmont — relaxed, inclusive dive bar beloved for its welcoming atmosphere and community feel.", address: "2715 SE Belmont St", neighborhood: "SE Belmont", website: null, instagram: "@nestloungepdx", queerOwned: true, queerFriendly: true },
+    { name: "Silverado", type: "bar", description: "Long-running gay bar and club in Old Town. A staple of Portland's queer nightlife scene.", address: "318 SW 3rd Ave", neighborhood: "Old Town", website: null, instagram: null, queerOwned: true, queerFriendly: true },
+    // ── Restaurants ───────────────────────────────────────────────────────
+    { name: "Kann", type: "restaurant", description: "James Beard Award–winning wood-fired Haitian restaurant by Chef Gregory Gourdet. One of Portland's most celebrated dining destinations.", address: "548 SE Ankeny St", neighborhood: "SE Portland", website: "https://kannrestaurant.com", instagram: "@kannrestaurant", queerOwned: true, queerFriendly: true },
+    { name: "The Sports Bra", type: "restaurant", description: "The first sports bar dedicated exclusively to women's sports, founded by Jenny Nguyen. A national phenomenon rooted in Portland.", address: "623 NE 21st Ave", neighborhood: "NE Portland", website: "https://thesportsbrabar.com", instagram: "@thesportsbrabar", queerOwned: true, queerFriendly: true },
+    { name: "Mis Tacones", type: "restaurant", description: "100% vegan Chicano & queer-owned taqueria in NE Portland. Offers trans people of color free meals upon request. Community cornerstone.", address: "1670 NE Killingsworth St", neighborhood: "NE Portland", website: "https://mistaconespdx.com", instagram: "@mistaconespdx", queerOwned: true, queerFriendly: true },
+    { name: "Taqueria Los Puñales", type: "restaurant", description: "Queer-owned taqueria specializing in soul-satisfying guisados made with a variety of proteins. Beloved neighborhood spot.", address: null, neighborhood: "Portland", website: null, instagram: null, queerOwned: true, queerFriendly: true },
+    { name: "Friendship Kitchen", type: "restaurant", description: "Wife-and-wife owned Vietnamese restaurant serving Impossible egg rolls, shaken beef or tofu, pho, and lemongrass chicken skewers.", address: null, neighborhood: "Portland", website: null, instagram: null, queerOwned: true, queerFriendly: true },
+    { name: "Chelo", type: "restaurant", description: "Chef Luna Contreras's vegetable-driven multifaceted Mexican fare inspired by street food. Shrimp-and-huitlacoche quesadillas, local mushroom empanadas.", address: null, neighborhood: "Portland", website: null, instagram: "@cheloportland", queerOwned: true, queerFriendly: true },
+    // ── Cafes & Coffee ────────────────────────────────────────────────────
+    { name: "Either/Or", type: "cafe", description: "LGBTQ+-owned coffee bar known for creative coffee cocktails and zero-proof mocktails. A queer-welcoming neighborhood anchor in N Portland.", address: "4003 N Williams Ave", neighborhood: "N Portland", website: "https://eitherorpdx.com", instagram: "@eitherorpdx", queerOwned: true, queerFriendly: true },
+    { name: "Tin Shed Garden Cafe", type: "cafe", description: "Eco-friendly, dog-friendly breakfast and brunch cafe run by Christie Griffin and Janette Kaden since 2002. Featured on Food Network and in the New York Times.", address: "1438 NE Alberta St", neighborhood: "NE Alberta", website: null, instagram: "@tinshedgardencafe", queerOwned: true, queerFriendly: true },
+    { name: "Speed-o Cappuccino", type: "cafe", description: "LGBTQ+, sex worker, and Latinx-owned coffee cart with espresso drinks, a vegan burger, and fruit tamales. Cheeky, community-rooted, and iconic.", address: null, neighborhood: "Portland", website: null, instagram: "@speedocappuccino", queerOwned: true, queerFriendly: true },
+    { name: "Coffee Beer", type: "cafe", description: "Queer-owned vegan coffee shop run by artist Phillip Stewart. Vegan handhelds like Phatt Dawgs and Higher Taste burritos. Home to senior pug mascot A$AP Douglas.", address: null, neighborhood: "Portland", website: null, instagram: null, queerOwned: true, queerFriendly: true },
+    // ── Wine Bars ─────────────────────────────────────────────────────────
+    { name: "Living Room Wines", type: "bar", description: "Queer-owned wine bar and bottle shop on N Lombard. Small plates, free wine tastings on Wednesdays, drag bingo, live music, and queer socials.", address: "4818 N Lombard St", neighborhood: "N Portland", website: "https://livingroomwinespdx.com", instagram: "@livingroomwinespdx", queerOwned: true, queerFriendly: true },
+    { name: "Stem Wine Bar", type: "bar", description: "Queer-owned wine bar offering tastings, wine flights, and weekend tarot readings. A cozy, intimate spot from the team behind Friendship Kitchen.", address: null, neighborhood: "Portland", website: null, instagram: null, queerOwned: true, queerFriendly: true },
+    // ── Shops & Services ──────────────────────────────────────────────────
+    { name: "Roots & Crowns", type: "shop", description: "Queer-owned apothecary in Portland's Slabtown neighborhood offering all-natural skincare, perfume, herbal remedies, and self-care items.", address: null, neighborhood: "Slabtown", website: null, instagram: "@rootsandcrownspdx", queerOwned: true, queerFriendly: true },
+    { name: "Gold+Grit Barber Co.", type: "service", description: "All-inclusive two-chair barbershop in Slabtown run by Alaina and Nate. Everyone welcome, every style celebrated.", address: null, neighborhood: "Slabtown", website: null, instagram: "@goldandgritbarber", queerOwned: true, queerFriendly: true },
+    { name: "Arium Botanicals", type: "shop", description: "Queer, Latinx, and vegan-owned houseplant shop in Northeast Portland. A lush, welcoming plant oasis run by Tyler Rogers and Anthony Sanchez.", address: null, neighborhood: "NE Portland", website: null, instagram: "@ariumbotanicals", queerOwned: true, queerFriendly: true },
+  ];
+  for (const entry of entries) {
+    db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+  }
+}
+
 function runBootMigrationsOnce() {
   ensureBootMigrationsTable();
   seedData();
@@ -1770,6 +1808,10 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("site_admin_grants_v1")) {
     seedSiteAdminGrantsFromEnv();
     recordBootMigration("site_admin_grants_v1");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v1")) {
+    seedBusinessesDirectory();
+    recordBootMigration("seed_businesses_directory_v1");
   }
 }
 

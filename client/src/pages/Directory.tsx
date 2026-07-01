@@ -5,7 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Globe, Instagram, ExternalLink } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 type Business = {
   id: number;
@@ -175,11 +175,6 @@ function DirectoryCard({ biz }: { biz: Business }) {
   const color = TYPE_COLORS[biz.type] || "#FF00CC";
   return (
     <div className="directory-card" style={{ "--card-accent": color } as React.CSSProperties}>
-      {biz.imageUrl && (
-        <div className="directory-card__img">
-          <img src={biz.imageUrl} alt={biz.name} />
-        </div>
-      )}
       <div className="directory-card__body">
         <div className="directory-card__badges">
           <span className="directory-card__type-badge" style={{ background: color, color: "#000" }}>
@@ -190,30 +185,12 @@ function DirectoryCard({ biz }: { biz: Business }) {
           )}
         </div>
         <h3 className="directory-card__name display">{biz.name}</h3>
-        {biz.neighborhood && (
-          <div className="directory-card__neighborhood">
-            <MapPin size={11} /> {biz.neighborhood}
+        {(biz.address || biz.neighborhood) && (
+          <div className="directory-card__address">
+            <MapPin size={11} />
+            {biz.address ? biz.address : biz.neighborhood}
           </div>
         )}
-        <p className="directory-card__desc">{biz.description}</p>
-        {biz.address && (
-          <div className="directory-card__address">{biz.address}</div>
-        )}
-        <div className="directory-card__links">
-          {biz.website && (
-            <a href={biz.website} target="_blank" rel="noopener noreferrer" className="directory-card__link">
-              <Globe size={13} /> Website
-            </a>
-          )}
-          {biz.instagram && (
-            <a
-              href={biz.instagram.startsWith("http") ? biz.instagram : `https://instagram.com/${biz.instagram.replace("@", "")}`}
-              target="_blank" rel="noopener noreferrer" className="directory-card__link"
-            >
-              <Instagram size={13} /> {biz.instagram.startsWith("@") ? biz.instagram : `@${biz.instagram}`}
-            </a>
-          )}
-        </div>
       </div>
     </div>
   );
