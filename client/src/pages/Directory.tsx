@@ -5,7 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin } from "lucide-react";
+import { MapPin, Globe, Instagram } from "lucide-react";
 
 type Business = {
   id: number;
@@ -191,6 +191,21 @@ function DirectoryCard({ biz }: { biz: Business }) {
             {biz.address ? biz.address : biz.neighborhood}
           </div>
         )}
+        <div className="directory-card__links">
+          {biz.website && (
+            <a href={biz.website} target="_blank" rel="noopener noreferrer" className="directory-card__link">
+              <Globe size={13} /> Website
+            </a>
+          )}
+          {biz.instagram && (
+            <a
+              href={biz.instagram.startsWith("http") ? biz.instagram : `https://instagram.com/${biz.instagram.replace("@", "")}`}
+              target="_blank" rel="noopener noreferrer" className="directory-card__link"
+            >
+              <Instagram size={13} /> {biz.instagram.startsWith("@") ? biz.instagram : `@${biz.instagram}`}
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1813,6 +1813,16 @@ function runBootMigrationsOnce() {
     seedBusinessesDirectory();
     recordBootMigration("seed_businesses_directory_v1");
   }
+  if (!hasBootMigration("seed_businesses_directory_v2")) {
+    const now = new Date().toISOString();
+    const additions = [
+      { name: "Pizza Thief", type: "restaurant", description: "Queer-owned pizza spot beloved by Portland's LGBTQ+ community.", address: null, neighborhood: "Portland", website: null, instagram: "@pizzathiefpdx", queerOwned: true, queerFriendly: true },
+    ];
+    for (const entry of additions) {
+      db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+    }
+    recordBootMigration("seed_businesses_directory_v2");
+  }
 }
 
 function parseEnvAdminLists() {
