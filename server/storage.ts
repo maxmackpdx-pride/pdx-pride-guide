@@ -1816,12 +1816,48 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_businesses_directory_v2")) {
     const now = new Date().toISOString();
     const additions = [
-      { name: "Pizza Thief", type: "restaurant", description: "Queer-owned pizza spot beloved by Portland's LGBTQ+ community.", address: null, neighborhood: "Portland", website: null, instagram: "@pizzathiefpdx", queerOwned: true, queerFriendly: true },
+      { name: "Pizza Thief", type: "restaurant", description: "Queer-owned thin crust New York-style pizza.", address: "2610 NW Vaughn St", neighborhood: "NW Portland", website: "https://pizzathief.com", instagram: "@pizzathiefpdx", queerOwned: true, queerFriendly: true },
     ];
     for (const entry of additions) {
       db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
     }
     recordBootMigration("seed_businesses_directory_v2");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v3")) {
+    const now = new Date().toISOString();
+    // Remove Chelo — closed Dec 19, 2025 after owner's arrest
+    sqlite.prepare(`DELETE FROM businesses WHERE name = 'Chelo'`).run();
+    // Fix CC Slaughters instagram (new ownership changed handle)
+    sqlite.prepare(`UPDATE businesses SET instagram = '@slaughterspdx', website = 'https://ccslaughterspdx.com' WHERE name = 'CC Slaughters'`).run();
+    // Fix Badlands address
+    sqlite.prepare(`UPDATE businesses SET address = '110 NW Broadway', website = 'https://badlandsportland.com' WHERE name = 'Badlands'`).run();
+    // Fix Silverado address
+    sqlite.prepare(`UPDATE businesses SET address = '610 NW Couch St' WHERE name = 'Silverado'`).run();
+    // Fix Kann address
+    sqlite.prepare(`UPDATE businesses SET address = '548 SE Ash St' WHERE name = 'Kann'`).run();
+    // Fix Sports Bra address
+    sqlite.prepare(`UPDATE businesses SET address = '2512 NE Broadway', website = 'https://thesportsbraofficial.com' WHERE name = 'The Sports Bra'`).run();
+    // Fix Either/Or instagram
+    sqlite.prepare(`UPDATE businesses SET instagram = '@eitherorcafe' WHERE name = 'Either/Or'`).run();
+    // Fill missing addresses
+    sqlite.prepare(`UPDATE businesses SET address = '3312 SE Belmont St', website = 'https://lospunales.com' WHERE name = 'Taqueria Los Puñales'`).run();
+    sqlite.prepare(`UPDATE businesses SET address = '2333 NE Glisan St', website = 'https://friendshipkitchenpdx.com', instagram = '@friendshipkitchen' WHERE name = 'Friendship Kitchen'`).run();
+    sqlite.prepare(`UPDATE businesses SET address = '1015 SE Stark St' WHERE name = 'Speed-o Cappuccino'`).run();
+    sqlite.prepare(`UPDATE businesses SET address = '4142 SE 42nd Ave', website = 'https://coffeebeer.me', instagram = '@coffeebeerme' WHERE name = 'Coffee Beer'`).run();
+    sqlite.prepare(`UPDATE businesses SET address = '3920 N Mississippi Ave', website = 'https://stemwinebarpdx.com' WHERE name = 'Stem Wine Bar'`).run();
+    sqlite.prepare(`UPDATE businesses SET address = '1812 NW 24th Ave', website = 'https://rootsandcrowns.com' WHERE name = 'Roots & Crowns'`).run();
+    sqlite.prepare(`UPDATE businesses SET address = '2574 NW Thurman St', website = 'https://goldandgritbarberco.com', instagram = '@goldandgritbarberco' WHERE name = 'Gold+Grit Barber Co.'`).run();
+    // Add new businesses
+    const newEntries = [
+      { name: "Peacock PDX", type: "bar", description: "Inclusive queer bar with karaoke, trivia, drag shows, and astrology-themed comedy nights.", address: "1400 SE Morrison St", neighborhood: "SE Portland", website: "https://peacockpdx.com", instagram: "@peacock.pdx", queerOwned: true, queerFriendly: true },
+      { name: "Back 2 Earth", type: "bar", description: "Queer bar on MLK with karaoke, trivia, comedy, and themed dance nights. From the team behind Eagle Portland.", address: "3536 NE Martin Luther King Jr Blvd", neighborhood: "NE Portland", website: "https://back2earthpdx.com", instagram: "@back2earthpdx", queerOwned: true, queerFriendly: true },
+      { name: "Scandals East", type: "bar", description: "Portland's iconic gay bar, open since 1978, reopened in NE Alberta in March 2026. All-ages, dinner service, drag.", address: "827 NE Alberta St", neighborhood: "NE Alberta", website: "https://scandalspdx.com", instagram: "@scandals_pdx", queerOwned: true, queerFriendly: true },
+      { name: "Honeyed Words", type: "shop", description: "Queer bookstore inside Sonny's House focused on trans joy and LGBTQ+ literature. Events include cozy reading hours and story fests.", address: "2504 NE Sandy Blvd", neighborhood: "NE Portland", website: null, instagram: "@honeyedwordspdx", queerOwned: true, queerFriendly: true },
+    ];
+    for (const entry of newEntries) {
+      db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+    }
+    recordBootMigration("seed_businesses_directory_v3");
   }
 }
 
