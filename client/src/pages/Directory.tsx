@@ -56,8 +56,6 @@ export default function Directory() {
 
   const [activeType, setActiveType] = useState("ALL");
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
-  const [queerOwnedOnly, setQueerOwnedOnly] = useState(false);
-
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
@@ -68,7 +66,6 @@ export default function Directory() {
     return businesses.filter(b => {
       if (activeType !== "ALL" && b.type !== activeType) return false;
       if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
-      if (queerOwnedOnly && !b.queerOwned) return false;
       return true;
     });
   }, [businesses, activeType, activeNeighborhood, queerOwnedOnly]);
@@ -110,13 +107,6 @@ export default function Directory() {
               onClick={() => setActiveType(key)}
             >{label}</button>
           ))}
-          <div className="events-filter-divider" />
-          {/* Queer-owned toggle */}
-          <button
-            className={`filter-tag${queerOwnedOnly ? " active" : ""}`}
-            style={queerOwnedOnly ? { color: "#000", background: "#FF00CC", borderColor: "#FF00CC", boxShadow: "0 0 14px #FF00CCaa" } : {}}
-            onClick={() => setQueerOwnedOnly(v => !v)}
-          >🌈 QUEER-OWNED</button>
         </div>
 
         {/* Neighborhood row */}
@@ -180,9 +170,6 @@ function DirectoryCard({ biz }: { biz: Business }) {
           <span className="directory-card__type-badge" style={{ background: color, color: "#000" }}>
             {TYPE_LABELS[biz.type] || biz.type}
           </span>
-          {biz.queerOwned && (
-            <span className="directory-card__owned-badge">🌈 QUEER-OWNED</span>
-          )}
         </div>
         <h3 className="directory-card__name display">{biz.name}</h3>
         {(biz.address || biz.neighborhood) && (
