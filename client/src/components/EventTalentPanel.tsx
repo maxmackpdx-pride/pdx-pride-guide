@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import UserAvatar from "@/components/UserAvatar";
+import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -255,11 +256,11 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             ))}
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-            <input
+            <UsernameAutocomplete
               value={hostUsername}
-              onChange={e => setHostUsername(e.target.value)}
-              placeholder="@username"
-              style={{ flex: 1, minWidth: 140, padding: "8px 10px", background: "#0a0a0a", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
+              onChange={setHostUsername}
+              style={{ flex: 1, minWidth: 140 }}
+              inputStyle={{ width: "100%", padding: "8px 10px", background: "#0a0a0a", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
             />
             <button type="button" className="btn-neon solid" style={{ fontSize: "0.72rem", padding: "8px 14px" }}
               disabled={addMutation.isPending || !hostUsername.trim() || !hostRole}

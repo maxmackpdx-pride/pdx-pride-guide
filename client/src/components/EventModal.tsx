@@ -1,4 +1,5 @@
 import { useState } from "react";
+import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -323,12 +324,11 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                         Add a co-host by their @username (max 3 hosts).
                       </p>
                       <div className="event-modal__field-row">
-                        <input
-                          type="text"
-                          placeholder="@username"
+                        <UsernameAutocomplete
                           value={coHostUsername}
-                          onChange={e => setCoHostUsername(e.target.value)}
-                          className="event-modal__input"
+                          onChange={setCoHostUsername}
+                          style={{ flex: 1 }}
+                          inputStyle={{ width: "100%", padding: "8px 10px", background: "#0a0a0a", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
                         />
                       </div>
                       <div className="event-modal__inline-actions">

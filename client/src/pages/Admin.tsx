@@ -5,6 +5,7 @@ import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
   ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, UserCircle, Search, RefreshCw,
@@ -1451,10 +1452,11 @@ export default function Admin() {
                 <h3 className="display text-lg text-white">Add site admin</h3>
                 <div>
                   <label className="display text-xs text-white/40 block mb-1">USERNAME OR EMAIL</label>
-                  <input
+                  <UsernameAutocomplete
                     value={teamIdentifier}
-                    onChange={e => setTeamIdentifier(e.target.value)}
+                    onChange={setTeamIdentifier}
                     placeholder="@username or email@example.com"
+                    inputStyle={{ width: "100%" }}
                     className={adminFieldClass}
                   />
                 </div>

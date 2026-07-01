@@ -1117,6 +1117,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(authUserResponse(req, user));
   });
 
+  // Username autocomplete — requires auth, returns up to 8 matches
+  app.get("/api/users/search", requireAuth, (req, res) => {
+    const q = String(req.query.q || "").trim().replace(/^@/, "").toLowerCase();
+    if (!q || q.length < 2) return res.json([]);
+    const rows = sqlite.prepare(`
+      SELECT username, display_name AS displayName, photo_url AS photoUrl, avatar_choice AS avatarChoice
+      FROM users
+      WHERE LOWER(username) LIKE ? OR LOWER(display_name) LIKE ?
+      ORDER BY username COLLATE NOCASE
+      LIMIT 8
+    `).all(`${q}%`, `${q}%`) as { username: string; displayName: string | null; photoUrl: string | null; avatarChoice: string | null }[];
+    res.json(rows);
+  });
+
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
     const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl } = req.body;

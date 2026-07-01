@@ -6,6 +6,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { useToast } from "@/hooks/use-toast";
 import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 import EventTalentPanel from "@/components/EventTalentPanel";
+import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -188,11 +189,11 @@ export function DashboardEventEditForm({
           )}
           {eventHosts.length < 3 && (
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-              <input
-                style={{ ...inputStyle, flex: 1 }}
-                placeholder="@username"
+              <UsernameAutocomplete
                 value={coHostUsername}
-                onChange={e => setCoHostUsername(e.target.value)}
+                onChange={setCoHostUsername}
+                style={{ flex: 1 }}
+                inputStyle={{ ...inputStyle, width: "100%" }}
               />
               <button
                 type="button"
