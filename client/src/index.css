@@ -8335,11 +8335,18 @@ html.calm-mode .footer-brand-logo {
   text-align: center;
 }
 
+.schedule-grid-wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+}
+
 .schedule-grid {
   display: grid;
   grid-template-columns: 56px repeat(4, minmax(0, 1fr));
   gap: 10px;
-  overflow-x: auto;
+  min-width: 0;
 }
 
 .schedule-time-axis {
@@ -8474,17 +8481,23 @@ html.calm-mode .footer-brand-logo {
     margin: 0 16px;
   }
 
+  .schedule-grid-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    scroll-snap-type: x proximity;
+    padding-left: 4px;
+    padding-right: 8px;
+  }
+
   .schedule-grid {
     /* 2 day columns visible; scroll horizontally to see all 4 */
     grid-template-columns: 38px repeat(4, calc((100vw - 50px) / 2));
     grid-auto-flow: unset;
     grid-auto-columns: unset;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
     gap: 6px;
-    padding-left: 4px;
-    padding-right: 8px;
   }
 
   .schedule-day-col {

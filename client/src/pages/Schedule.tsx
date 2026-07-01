@@ -233,6 +233,7 @@ export default function Schedule() {
         </div>
       )}
 
+      <div className="schedule-grid-wrapper">
       <div className="schedule-grid">
         <div className="schedule-time-axis" style={{ height: TOTAL_HEIGHT }}>
           {TIME_LABELS.map((label, i) => (
@@ -276,6 +277,7 @@ export default function Schedule() {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );
