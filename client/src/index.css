@@ -7118,7 +7118,269 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 
-/* Missed Connections — prototype bubble board */
+/* ── Spotted Card Grid ── */
+.spotted-board {
+  width: 100%;
+}
+
+.spotted-card-grid {
+  columns: 2;
+  column-gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .spotted-card-grid { columns: 1; }
+}
+
+.spotted-card {
+  break-inside: avoid;
+  position: relative;
+  background: #0b0b0b;
+  border: 2px solid var(--spotted-accent, #FF00CC);
+  border-radius: 14px;
+  padding: 22px 20px 16px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--spotted-accent, #FF00CC) 30%, transparent);
+  animation: spottedCardGlow 3s ease-in-out infinite;
+  animation-delay: var(--spotted-anim-delay, 0ms);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.spotted-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--spotted-accent, #FF00CC) 55%, transparent);
+}
+
+@keyframes spottedCardGlow {
+  0%, 100% {
+    box-shadow: 0 0 14px color-mix(in srgb, var(--spotted-accent, #FF00CC) 28%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 28px color-mix(in srgb, var(--spotted-accent, #FF00CC) 52%, transparent);
+  }
+}
+
+.spotted-card__found-stamp {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.spotted-card__found-stamp::after {
+  content: "FOUND ✓";
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.8rem, 7vw, 2.8rem);
+  color: #39FF14;
+  border: 3px solid #39FF14;
+  padding: 6px 16px;
+  border-radius: 6px;
+  transform: rotate(-12deg);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 16px #39FF14, 0 0 32px rgba(57, 255, 20, 0.5);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.35);
+}
+
+.spotted-card__quote-mark {
+  display: block;
+  font-size: 2.8rem;
+  line-height: 0.85;
+  color: var(--spotted-accent, #FF00CC);
+  opacity: 0.5;
+  margin-bottom: 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  user-select: none;
+}
+
+.spotted-card__body {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.5;
+  margin: 0 0 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.spotted-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.spotted-card__location {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-family: var(--font-board-mono);
+  letter-spacing: 0.04em;
+  color: var(--spotted-accent, #FF00CC);
+  border: 1px solid color-mix(in srgb, var(--spotted-accent, #FF00CC) 50%, transparent);
+  background: color-mix(in srgb, var(--spotted-accent, #FF00CC) 8%, transparent);
+  padding: 4px 10px;
+  border-radius: 999px;
+  max-width: 60%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.spotted-card__meta {
+  font-size: 0.62rem;
+  color: #555;
+  font-family: var(--font-board-mono);
+  white-space: nowrap;
+}
+
+.spotted-card__msg-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 0;
+  background: color-mix(in srgb, var(--spotted-accent, #FF00CC) 10%, transparent);
+  border: 1.5px solid var(--spotted-accent, #FF00CC);
+  color: var(--spotted-accent, #FF00CC);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, background 0.15s ease;
+}
+
+.spotted-card:hover .spotted-card__msg-btn,
+.spotted-card:focus-within .spotted-card__msg-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.spotted-card__msg-btn:hover {
+  background: color-mix(in srgb, var(--spotted-accent, #FF00CC) 22%, transparent);
+}
+
+/* Always visible on touch screens */
+@media (hover: none) {
+  .spotted-card__msg-btn {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Compose panel */
+.spotted-compose-toggle {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 14px 0;
+  background: none;
+  border: 2px solid #FF00CC;
+  color: #FF00CC;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.spotted-compose-toggle:hover {
+  background: #FF00CC;
+  color: #000;
+}
+
+.spotted-compose-panel {
+  border: 2px solid rgba(255, 0, 204, 0.4);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 20px;
+  background: #080808;
+}
+
+.spotted-compose-panel .board-text-field {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.spotted-compose-panel__textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.spotted-compose-panel__charcount {
+  font-size: 0.7rem;
+  color: #555;
+  text-align: right;
+  margin-bottom: 12px;
+}
+
+.spotted-compose-panel__label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: #777;
+  margin-bottom: 8px;
+}
+
+/* Calm mode overrides */
+html.calm-mode .spotted-card {
+  animation: none;
+  box-shadow: none;
+  border-color: #444;
+}
+
+html.calm-mode .spotted-card:hover {
+  box-shadow: none;
+}
+
+html.calm-mode .spotted-card__found-stamp::after {
+  color: #aaa;
+  border-color: #aaa;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+html.calm-mode .spotted-card__location {
+  color: #888;
+  border-color: #555;
+  background: transparent;
+}
+
+html.calm-mode .spotted-card__msg-btn {
+  border-color: #666;
+  color: #aaa;
+  background: transparent;
+}
+
+html.calm-mode .spotted-compose-toggle {
+  border-color: #555;
+  color: #999;
+}
+
+html.calm-mode .spotted-compose-toggle:hover {
+  background: #333;
+  color: #ccc;
+}
+
+/* ── Missed Connections — legacy bubble board (kept for reference) ── */
 .mc-board {
   width: 100%;
 }

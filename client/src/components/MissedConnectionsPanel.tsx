@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "./AuthModal";
 import BoardLoadingState from "./BoardLoadingState";
 import BoardActiveSection, { BoardSelectField, BoardTextField } from "./BoardActiveSection";
-import MissedConnectionsBubbleBoard from "./MissedConnectionsBubbleBoard";
+import SpottedCardGrid from "./SpottedCardGrid";
+import SpottedCard, { spottedAccent } from "./SpottedCard";
 import ScrollReveal from "./ScrollReveal";
 import type { Event } from "@shared/schema";
 
@@ -232,34 +233,15 @@ export default function MissedConnectionsPanel({
       </div>
     )
   ) : (
-    <div style={{ display: "grid", gap: 14 }}>
+    <div className="spotted-card-grid" style={compact ? { columns: 1 } : undefined}>
       {posts.map((post, index) => (
         <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
-        <article style={{ background: "#0b0b0b", border: "1px solid #1f1f1f", padding: compact ? 14 : 18 }}>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-            {(post.eventDay || post.dayOfWeek) && (
-              <span className="sticker" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>{post.eventDay || post.dayOfWeek}</span>
-            )}
-            {(post.eventVenue || post.venueHint) && (
-              <span className="sticker" style={{ color: "#777", borderColor: "#333" }}>{post.eventVenue || post.venueHint}</span>
-            )}
-            {post.eventTitle && (
-              <span className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }}>{post.eventTitle}</span>
-            )}
-          </div>
-          <h3 className="display panel-heading" style={{ color: "#fff", marginBottom: 8, fontSize: compact ? "1rem" : undefined }}>{post.title}</h3>
-          <p style={{ color: "#bbb", lineHeight: 1.6, whiteSpace: "pre-wrap", fontSize: compact ? "0.88rem" : undefined }}>{post.body}</p>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
-            <span style={{ color: "#444", fontSize: "0.76rem" }}>
-              {post.isMine ? "Your post (anonymous to others)" : "Posted anonymously"} · {new Date(post.createdAt).toLocaleDateString()}
-            </span>
-            {!post.isMine && (
-              <button onClick={() => { if (requireAuth()) setReplyingTo(post); }} className="btn-neon" style={{ fontSize: "0.78rem", padding: "7px 14px" }}>
-                Reply Privately
-              </button>
-            )}
-          </div>
-        </article>
+          <SpottedCard
+            post={post}
+            accentColor={spottedAccent(post.id)}
+            animDelay={index * 400}
+            onReply={() => { if (requireAuth()) setReplyingTo(post); }}
+          />
         </ScrollReveal>
       ))}
     </div>
@@ -292,7 +274,7 @@ export default function MissedConnectionsPanel({
             <h2 className="display section-heading board-active-feed__title">SPOTTED!</h2>
           </div>
           <div className="board-active-feed__body">
-            <MissedConnectionsBubbleBoard
+            <SpottedCardGrid
               posts={posts}
               isLoading={isLoading}
               isError={isError}
