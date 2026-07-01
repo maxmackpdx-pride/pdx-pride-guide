@@ -53,7 +53,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
   const [showAuth, setShowAuth] = useState(false);
   const [hostDrawer, setHostDrawer] = useState<"closed" | "compose" | "noHost">("closed");
   const [hostMessage, setHostMessage] = useState("");
-  const [coHostForm, setCoHostForm] = useState({ username: "", email: "" });
+  const [coHostUsername, setCoHostUsername] = useState("");
   const [showAddCoHost, setShowAddCoHost] = useState(false);
   const [showCalPicker, setShowCalPicker] = useState(false);
   const [showMapsPicker, setShowMapsPicker] = useState(false);
@@ -154,7 +154,7 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
     },
     onSuccess: () => {
       toast({ title: "Co-host added", description: "They can help manage this event from their dashboard." });
-      setCoHostForm({ username: "", email: "" });
+      setCoHostUsername("");
       setShowAddCoHost(false);
       refetchHosts();
     },
@@ -316,33 +316,25 @@ export default function EventModal({ event, onClose }: { event: Event; onClose: 
                       className="event-modal__cohost-form"
                       onSubmit={e => {
                         e.preventDefault();
-                        addCoHostMutation.mutate(coHostForm);
+                        addCoHostMutation.mutate({ username: coHostUsername, email: "" });
                       }}
                     >
                       <p className="event-modal__cohost-hint">
-                        Add a verified organizer by their email (max 3 hosts).
+                        Add a co-host by their @username (max 3 hosts).
                       </p>
                       <div className="event-modal__field-row">
                         <input
                           type="text"
-                          placeholder="Username (optional)"
-                          value={coHostForm.username}
-                          onChange={e => setCoHostForm(f => ({ ...f, username: e.target.value }))}
-                          className="event-modal__input"
-                        />
-                        <input
-                          type="email"
-                          placeholder="Email *"
-                          value={coHostForm.email}
-                          onChange={e => setCoHostForm(f => ({ ...f, email: e.target.value }))}
-                          required
+                          placeholder="@username"
+                          value={coHostUsername}
+                          onChange={e => setCoHostUsername(e.target.value)}
                           className="event-modal__input"
                         />
                       </div>
                       <div className="event-modal__inline-actions">
                         <button
                           type="submit"
-                          disabled={addCoHostMutation.isPending || !coHostForm.email.trim()}
+                          disabled={addCoHostMutation.isPending || !coHostUsername.trim()}
                           className="event-modal__btn-outline event-modal__btn-outline--accent"
                         >
                           {addCoHostMutation.isPending ? "Adding…" : "Add co-host"}

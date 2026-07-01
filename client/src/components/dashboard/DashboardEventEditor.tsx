@@ -34,7 +34,7 @@ export function DashboardEventEditForm({
   posting: boolean;
 }) {
   const { toast } = useToast();
-  const [coHostForm, setCoHostForm] = useState({ username: "", email: "" });
+  const [coHostUsername, setCoHostUsername] = useState("");
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<any[]>({
     queryKey: ["/api/events", editingEvent.id, "hosts"],
@@ -42,7 +42,7 @@ export function DashboardEventEditForm({
   });
 
   const addCoHostMutation = useMutation({
-    mutationFn: async (data: { username: string; email: string }) => {
+    mutationFn: async (data: { username: string; email: string; }) => {
       const res = await fetch(`/api/events/${editingEvent.id}/hosts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -55,7 +55,7 @@ export function DashboardEventEditForm({
     },
     onSuccess: () => {
       toast({ title: "Co-host added" });
-      setCoHostForm({ username: "", email: "" });
+      setCoHostUsername("");
       refetchHosts();
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
@@ -187,32 +187,23 @@ export function DashboardEventEditForm({
             </div>
           )}
           {eventHosts.length < 3 && (
-            <div className="dash-edit-grid dash-edit-grid--tight" style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
               <input
-                style={inputStyle}
-                placeholder="Co-host username"
-                value={coHostForm.username}
-                onChange={e => setCoHostForm(f => ({ ...f, username: e.target.value }))}
+                style={{ ...inputStyle, flex: 1 }}
+                placeholder="@username"
+                value={coHostUsername}
+                onChange={e => setCoHostUsername(e.target.value)}
               />
-              <input
-                style={inputStyle}
-                type="email"
-                placeholder="Co-host email"
-                value={coHostForm.email}
-                onChange={e => setCoHostForm(f => ({ ...f, email: e.target.value }))}
-              />
+              <button
+                type="button"
+                className="dash-btn dash-btn-lime"
+                disabled={addCoHostMutation.isPending || !coHostUsername.trim()}
+                onClick={() => addCoHostMutation.mutate({ username: coHostUsername, email: "" })}
+                style={{ opacity: !coHostUsername.trim() ? 0.5 : 1 }}
+              >
+                {addCoHostMutation.isPending ? "Adding…" : "Add →"}
+              </button>
             </div>
-          )}
-          {eventHosts.length < 3 && (
-            <button
-              type="button"
-              className="dash-btn dash-btn-lime"
-              disabled={addCoHostMutation.isPending || !coHostForm.username.trim() || !coHostForm.email.trim()}
-              onClick={() => addCoHostMutation.mutate(coHostForm)}
-              style={{ marginBottom: 16, opacity: !coHostForm.username.trim() || !coHostForm.email.trim() ? 0.5 : 1 }}
-            >
-              {addCoHostMutation.isPending ? "Adding..." : "Add co-host →"}
-            </button>
           )}
         </div>
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>

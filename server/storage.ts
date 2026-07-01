@@ -1963,6 +1963,23 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_businesses_directory_v7");
   }
+
+  // Fix brohoejams talent row: the DJ credit on yes_coach event has tucker's user_id instead of brohoejams'
+  if (!hasBootMigration("fix_brohoejams_talent_v1")) {
+    const tucker = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'tucker_pdmax'`).get() as { id: number } | undefined;
+    const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
+    const yesCoachEvt = sqlite.prepare(`SELECT id FROM events WHERE LOWER(slug) = 'yes-coach' OR LOWER(title) LIKE '%yes coach%' LIMIT 1`).get() as { id: number } | undefined;
+    if (tucker && brohoe && yesCoachEvt) {
+      sqlite.prepare(`UPDATE event_talent SET user_id = ? WHERE event_id = ? AND user_id = ?`).run(brohoe.id, yesCoachEvt.id, tucker.id);
+    }
+    if (brohoe) {
+      const bh = sqlite.prepare(`SELECT display_name FROM users WHERE id = ?`).get(brohoe.id) as { display_name: string | null } | undefined;
+      if (!bh?.display_name) {
+        sqlite.prepare(`UPDATE users SET display_name = 'Bro Hoe' WHERE id = ?`).run(brohoe.id);
+      }
+    }
+    recordBootMigration("fix_brohoejams_talent_v1");
+  }
 }
 
 function parseEnvAdminLists() {
@@ -3285,16 +3302,13 @@ export const storage: IStorage = {
     if (countRow.count >= MAX_EVENT_HOSTS) {
       return { error: `Maximum ${MAX_EVENT_HOSTS} hosts per event` };
     }
-    const uname = username.trim();
-    const em = email.trim().toLowerCase();
-    if (!em) return { error: "Email is required" };
+    const uname = (username || "").trim().replace(/^@/, "");
+    const em = (email || "").trim().toLowerCase();
+    if (!uname && !em) return { error: "Username or email required" };
     let target: any;
     if (uname) {
-      target = storage.getUserByUsername(uname);
+      target = sqlite.prepare(`SELECT * FROM users WHERE LOWER(username) = LOWER(?)`).get(uname);
       if (!target) return { error: "No account found with that username" };
-      if ((target.email || "").trim().toLowerCase() !== em) {
-        return { error: "Email does not match that username" };
-      }
     } else {
       target = storage.getUserByEmail(em);
       if (!target) return { error: "No account found with that email" };
