@@ -638,7 +638,7 @@ You can submit again with more proof from the event page.`,{contextType:"EVENT_C
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.is_active = 1
       ORDER BY a.created_at DESC
-    `).all(),e={};for(let n of t)e[n.eventId]||(e[n.eventId]={count:0,preview:[]}),e[n.eventId].count+=1,e[n.eventId].preview.length<8&&e[n.eventId].preview.push({id:n.id,initials:gj(n.handle),avatarSeed:n.avatarSeed||n.handle});return e},getAttendancesByUser(t){return b.prepare(`
+    `).all(),e={};for(let n of t)e[n.eventId]||(e[n.eventId]={count:0,preview:[]}),e[n.eventId].count+=1,e[n.eventId].preview.length<8&&e[n.eventId].preview.push({id:n.id,initials:gj(n.handle),avatarSeed:n.avatarSeed||n.handle,userId:n.userId,avatarRing:n.avatarRing,avatarChoice:n.avatarChoice,photoUrl:n.photoUrl});return e},getAttendancesByUser(t){return b.prepare(`
       SELECT
         a.id,
         a.event_id AS eventId,

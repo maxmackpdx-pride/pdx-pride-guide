@@ -3076,6 +3076,10 @@ export const storage: IStorage = {
           id: row.id,
           initials: attendanceInitials(row.handle),
           avatarSeed: row.avatarSeed || row.handle,
+          userId: row.userId,
+          avatarRing: row.avatarRing,
+          avatarChoice: row.avatarChoice,
+          photoUrl: row.photoUrl,
         });
       }
     }
