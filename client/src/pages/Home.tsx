@@ -76,20 +76,6 @@ export default function Home() {
 
   return (
     <div className="zine-page home-page" style={{ background: "#000", minHeight: "100vh" }}>
-      <div
-        data-testid="claude-test-banner"
-        style={{
-          background: "var(--neon-yellow, #CCFF00)",
-          color: "#000",
-          textAlign: "center",
-          padding: "10px 16px",
-          fontWeight: 700,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-        }}
-      >
-        Test banner — Claude deploy check
-      </div>
       {showSoftLaunch && (
         <div
           role="dialog"
