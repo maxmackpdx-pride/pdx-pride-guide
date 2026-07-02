@@ -78,6 +78,8 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
   });
 
   const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
+  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
 
   const extraPeople = [
     ...eventHosts.map(h => ({
@@ -104,9 +106,6 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
         roleColor: "#FF8C00",
       })),
   ];
-
-  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
-  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
 
   const { data: hostMessages = [] } = useQuery<Array<{
     id: number;

@@ -12,7 +12,10 @@ export default defineConfig({
     },
   },
   root: path.resolve(import.meta.dirname, "client"),
-  base: "./",
+  // Absolute base: with "./" the bundle script resolved relative to nested
+  // SPA routes (/events/13/slug -> /events/13/assets/*.js), got the HTML
+  // fallback, and the app never booted on deep links.
+  base: "/",
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
