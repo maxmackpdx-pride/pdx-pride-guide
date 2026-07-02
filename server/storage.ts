@@ -1988,6 +1988,29 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("fix_brohoejams_displayname_v2");
   }
+
+  // syncOwnerDisplayName mistakenly renamed granted admins to Tucker_PDmaX — undo + fix Sugar Pill.
+  if (!hasBootMigration("fix_owner_displayname_clobber_v1")) {
+    const ownerDisplay = (
+      process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX"
+    ).trim();
+    const owner = resolveSiteOwner();
+    if (owner) {
+      sqlite.prepare(`
+        UPDATE users SET display_name = NULL
+        WHERE display_name = ? AND id != ?
+      `).run(ownerDisplay, owner.id);
+    }
+    const heygirl = sqlite.prepare(`
+      SELECT id FROM users
+      WHERE LOWER(username) = 'heygirl' OR LOWER(email) = 'heygirl@sugarpillpdx.com'
+      LIMIT 1
+    `).get() as { id: number } | undefined;
+    if (heygirl) {
+      sqlite.prepare(`UPDATE users SET display_name = 'Sugar Pill' WHERE id = ?`).run(heygirl.id);
+    }
+    recordBootMigration("fix_owner_displayname_clobber_v1");
+  }
 }
 
 function parseEnvAdminLists() {
