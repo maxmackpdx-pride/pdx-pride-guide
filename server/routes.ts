@@ -1639,7 +1639,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { adminName } = req.body;
     if (!adminName) return res.status(400).json({ error: "adminName required" });
     const pending = storage.getSubmissions().find(s => s.id === Number(req.params.id));
-    if (pending) {
+    // Only event submissions carry real dates — promoter applications and
+    // claims store a placeholder timestamp where start === end.
+    if (pending && (pending.type === "NEW_EVENT" || pending.type === "SUGGEST")) {
       const dateErr = validateEventDates(pending.dateStart, pending.dateEnd);
       if (dateErr) return res.status(400).json({ error: `Cannot approve: ${dateErr}` });
     }
