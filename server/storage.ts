@@ -1962,6 +1962,29 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_businesses_directory_v7");
   }
+  if (!hasBootMigration("seed_businesses_directory_v8")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "The Lodge Bar and Grill",
+      type: "bar",
+      description:
+        "Neighborhood dive bar and grill on SE Powell with comfort-food hits — eggs benedict, fries, poutine, and collard greens — plus a heated enclosed dog-friendly patio, karaoke Saturdays, pool, darts, and pinball.",
+      address: "6605 SE Powell Blvd",
+      neighborhood: "SE Portland",
+      website: "https://thelodgebarandgrill.shop/",
+      instagram: "@lodgebarandgrill",
+      queerOwned: false,
+      queerFriendly: true,
+      lat: 45.4977,
+      lng: -122.5955,
+      hours: "Sun 9am–2am, Mon–Thu 11am–2am, Fri 11am–2:30am, Sat 9am–2:30am",
+      phone: "(503) 788-9677",
+      active: true,
+      isNew: false,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_businesses_directory_v8");
+  }
 
   // Fix brohoejams talent row: the DJ credit on yes_coach event has tucker's user_id instead of brohoejams'
   if (!hasBootMigration("fix_brohoejams_talent_v1")) {
