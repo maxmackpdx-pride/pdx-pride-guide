@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -187,14 +188,15 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
     return (
       <ScrollReveal delay={revealDelay}>
       <div
-        className="poster-card"
+        className="poster-card poster-card--glow"
         {...eventCardA11yProps(onClick)}
         data-testid={`event-card-${event.id}`}
         style={{
           display: "flex", gap: 0, alignItems: "stretch",
           borderLeft: `4px solid ${dayColor}`,
           cursor: "pointer",
-        }}
+          "--card-day-color": dayColor,
+        } as React.CSSProperties}
       >
         {/* Flyer thumbnail */}
         {event.posterImageUrl ? (
@@ -241,10 +243,10 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
   return (
     <ScrollReveal delay={revealDelay}>
     <div
-      className="poster-card"
+      className="poster-card poster-card--glow"
       {...eventCardA11yProps(onClick)}
       data-testid={`event-card-${event.id}`}
-      style={{ aspectRatio: "2/3", display: "flex", flexDirection: "column" }}
+      style={{ aspectRatio: "2/3", display: "flex", flexDirection: "column", "--card-day-color": dayColor } as React.CSSProperties}
     >
       {/* Flyer image if available, else halftone bg */}
       {event.posterImageUrl ? (

@@ -5856,6 +5856,15 @@ footer a:hover { color: #00FFFF !important; }
   transform: translateY(-2px);
 }
 
+.poster-card--glow {
+  box-shadow: 0 0 14px color-mix(in srgb, var(--card-day-color, #00FFFF) 18%, transparent);
+  animation: eventCardGlow 4s ease-in-out infinite;
+}
+
+.poster-card--glow:hover {
+  box-shadow: 0 0 28px color-mix(in srgb, var(--card-day-color, #00FFFF) 40%, transparent);
+}
+
 @keyframes eventCardGlow {
   0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--card-day-color, #00FFFF) 18%, transparent); }
   50%       { box-shadow: 0 0 24px color-mix(in srgb, var(--card-day-color, #00FFFF) 32%, transparent); }
@@ -8192,6 +8201,7 @@ html.calm-mode .sticker {
 
 /* ── Cards → no glow ── */
 html.calm-mode .poster-card:hover,
+html.calm-mode .poster-card--glow,
 html.calm-mode .event-board-card {
   box-shadow: none !important;
 }
