@@ -8,6 +8,7 @@ import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import GlitchLogo from "@/components/GlitchLogo";
 import GlitchWord from "@/components/GlitchWord";
+import CalmModeToggle from "@/components/CalmModeToggle";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -128,16 +129,19 @@ export default function Nav() {
             </span>
           </Link>
 
-          <button
-            type="button"
-            className="site-nav-toggle"
-            aria-expanded={menuOpen}
-            aria-controls="site-nav-menu"
-            onClick={() => setMenuOpen(open => !open)}
-          >
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-            <span>{menuOpen ? "CLOSE" : "MENU"}</span>
-          </button>
+          <div className="site-header-controls">
+            <CalmModeToggle compact />
+            <button
+              type="button"
+              className="site-nav-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="site-nav-menu"
+              onClick={() => setMenuOpen(open => !open)}
+            >
+              {menuOpen ? <X size={28} /> : <Menu size={28} />}
+              <span>{menuOpen ? "CLOSE" : "MENU"}</span>
+            </button>
+          </div>
 
           <nav
             id="site-nav-menu"

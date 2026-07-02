@@ -408,6 +408,13 @@ body::before {
   }
 }
 
+.site-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 .site-nav-toggle {
   display: none;
   align-items: center;
@@ -1469,9 +1476,12 @@ h2.display,
     --site-wordmark-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.21), 1.45rem);
   }
 
+  .site-header-controls {
+    margin-left: auto;
+  }
+
   .site-nav-toggle {
     display: inline-flex;
-    margin-left: auto;
   }
 
   .site-nav {
@@ -7478,44 +7488,46 @@ footer a:hover { color: #00FFFF !important; }
   margin-bottom: 8px;
 }
 
-/* Calm mode overrides */
+/* Calm mode — spotted cards (see main calm block below for shared rules) */
 html.calm-mode .spotted-card {
   animation: none;
   box-shadow: none;
-  border-color: #444;
+  border-color: #333;
 }
 
 html.calm-mode .spotted-card:hover {
   box-shadow: none;
+  border-color: #444;
 }
 
 html.calm-mode .spotted-card__found-stamp::after {
-  color: #aaa;
-  border-color: #aaa;
+  color: #b0b0b0;
+  border-color: #666;
   text-shadow: none;
   box-shadow: none;
 }
 
 html.calm-mode .spotted-card__location {
-  color: #888;
-  border-color: #555;
-  background: transparent;
+  color: #a3a3a3;
+  border-color: #333;
+  background: #0a0a0a;
 }
 
 html.calm-mode .spotted-card__msg-btn {
-  border-color: #666;
-  color: #aaa;
-  background: transparent;
+  border-color: #444;
+  color: #e5e5e5;
+  background: #111;
 }
 
 html.calm-mode .spotted-compose-toggle {
-  border-color: #555;
-  color: #999;
+  border-color: #333;
+  color: #d4d4d4;
+  background: #0a0a0a;
 }
 
 html.calm-mode .spotted-compose-toggle:hover {
-  background: #333;
-  color: #ccc;
+  background: #1a1a1a;
+  color: #fff;
 }
 
 /* ── Missed Connections — legacy bubble board (kept for reference) ── */
@@ -8067,55 +8079,237 @@ html.calm-mode .spotted-compose-toggle:hover {
 
 
 /* ═══════════════════════════════════════════════════════════
-   CALM MODE — grayscale dark
-   Toggled via html.calm-mode class (ThemeContext).
-   Keeps the dark aesthetic; strips every neon color to gray.
+   CALM MODE TOGGLE
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Remap every neon CSS variable to neutral gray ── */
-html.calm-mode {
-  --neon-yellow:  #b0b0b0;
-  --neon-cyan:    #999999;
-  --neon-magenta: #999999;
-  --neon-orange:  #999999;
-  --neon-violet:  #999999;
-  --neon-green:   #999999;
-  --neon-red:     #999999;
-  --neon-blue:    #999999;
-  --day-thu: #777;
-  --day-fri: #777;
-  --day-sat: #777;
-  --day-sun: #777;
-  --site-film-grain-opacity: 0;
-  --board-page-grain-opacity: 0;
-  font-size: 106%;
+.calm-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 10px;
+  border: 1.5px solid #2a2a2a;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+  color: #f5f5f5;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-/* ── Kill film grain ── */
+.calm-mode-toggle:hover {
+  border-color: #444;
+  background: linear-gradient(180deg, #161616 0%, #0d0d0d 100%);
+}
+
+.calm-mode-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.calm-mode-toggle__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.calm-mode-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #666 0%, #444 100%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.calm-mode-toggle--on .calm-mode-toggle__track {
+  background: #0a0a0a;
+  border-color: #555;
+}
+
+.calm-mode-toggle--on .calm-mode-toggle__thumb {
+  transform: translateX(20px);
+  background: linear-gradient(145deg, #fff 0%, #d4d4d4 100%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35), 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.calm-mode-toggle__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+
+.calm-mode-toggle__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.calm-mode-toggle__hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: #737373;
+  line-height: 1.2;
+}
+
+.calm-mode-toggle--on {
+  border-color: #3a3a3a;
+  background: linear-gradient(180deg, #0d0d0d 0%, #000 100%);
+}
+
+.calm-mode-toggle--on .calm-mode-toggle__hint {
+  color: #a3a3a3;
+}
+
+.calm-mode-toggle--compact {
+  padding: 6px 10px 6px 8px;
+  gap: 8px;
+}
+
+.calm-mode-toggle--compact .calm-mode-toggle__track {
+  width: 38px;
+  height: 22px;
+}
+
+.calm-mode-toggle--compact .calm-mode-toggle__thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.calm-mode-toggle--compact.calm-mode-toggle--on .calm-mode-toggle__thumb {
+  transform: translateX(16px);
+}
+
+.calm-mode-toggle--compact .calm-mode-toggle__label {
+  font-size: 0.72rem;
+}
+
+/* Neon site: toggle gets a subtle chartreuse accent when off */
+html:not(.calm-mode) .calm-mode-toggle {
+  border-color: rgba(204, 255, 0, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(204, 255, 0, 0.06);
+}
+
+html:not(.calm-mode) .calm-mode-toggle:hover {
+  border-color: rgba(204, 255, 0, 0.38);
+}
+
+html:not(.calm-mode) .calm-mode-toggle__label {
+  color: #e8e8e8;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CALM MODE — high-contrast grayscale dark
+   Toggled via html.calm-mode (ThemeContext).
+   Keeps color: avatars + rings, event flyers, active filter tags.
+   ═══════════════════════════════════════════════════════════ */
+
+html.calm-mode {
+  /* Calm palette */
+  --calm-bg: #000000;
+  --calm-surface: #0a0a0a;
+  --calm-elevated: #111111;
+  --calm-border: #262626;
+  --calm-border-strong: #3a3a3a;
+  --calm-text: #ffffff;
+  --calm-text-muted: #a3a3a3;
+  --calm-text-subtle: #737373;
+  --calm-accent-active: #CCFF00;
+
+  /* Remap neon tokens → neutral gray (exceptions override below) */
+  --neon-yellow: #d4d4d4;
+  --neon-cyan: #a3a3a3;
+  --neon-magenta: #a3a3a3;
+  --neon-orange: #a3a3a3;
+  --neon-violet: #8a8a8a;
+  --neon-green: #a3a3a3;
+  --neon-red: #a3a3a3;
+  --neon-blue: #a3a3a3;
+  --day-thu: #888;
+  --day-fri: #888;
+  --day-sat: #888;
+  --day-sun: #888;
+  --day-wed: #888;
+  --accent-pop: #b0b0b0;
+  --accent-pop-shadow: transparent;
+  --site-film-grain-opacity: 0;
+  --board-page-grain-opacity: 0;
+  --text-heading: #ffffff;
+  --text-body: #e5e5e5;
+  --text-body-muted: #a3a3a3;
+  --board-text: #f0f0f0;
+  --board-muted: #a3a3a3;
+  font-size: 108%;
+}
+
+html.calm-mode body {
+  background: var(--calm-bg);
+  color: var(--calm-text);
+}
+
+html.calm-mode body::before {
+  opacity: 0;
+}
+
+/* ── Kill film grain & neon ambience ── */
 html.calm-mode .film-grain-overlay {
   opacity: 0;
 }
 
-/* ── Nav MENU button → gray, no magenta shadow ── */
+/* ── Nav ── */
 html.calm-mode .site-nav-toggle {
-  border-color: #666 !important;
-  color: #aaa !important;
+  border-color: #444 !important;
+  color: #e5e5e5 !important;
   box-shadow: none !important;
+  background: #0a0a0a !important;
+}
+
+html.calm-mode .site-nav-link {
+  color: #a3a3a3;
+}
+
+html.calm-mode .site-nav-link:hover {
+  color: #fff;
+}
+
+html.calm-mode .site-nav-link.active {
+  color: #fff;
 }
 
 html.calm-mode .site-nav-link.active::after {
+  background: #fff;
   box-shadow: none;
 }
 
 html.calm-mode .site-nav-notify-dot {
-  background: #777 !important;
+  background: #fff !important;
   box-shadow: none;
   animation: none;
 }
 
-/* ── Logo: grayscale, kill glitch ghosts and animations ── */
+html.calm-mode .site-login-button {
+  border-color: #444 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  background: #111 !important;
+}
+
+/* ── Logo & wordmark → grayscale, no glitch ── */
 html.calm-mode .glitch-logo__main {
-  filter: grayscale(1) brightness(0.9) !important;
+  filter: grayscale(1) brightness(0.95) !important;
 }
 
 html.calm-mode .glitch-logo__ghost {
@@ -8126,10 +8320,9 @@ html.calm-mode .glitch-logo {
   animation: none !important;
 }
 
-/* ── Wordmark "PRIDE" rainbow gradient → gray ── */
 html.calm-mode .glitch-word__gradient {
-  background: #a0a0a0 !important;
-  -webkit-text-fill-color: #a0a0a0 !important;
+  background: #d4d4d4 !important;
+  -webkit-text-fill-color: #d4d4d4 !important;
   animation: none !important;
 }
 
@@ -8138,29 +8331,25 @@ html.calm-mode .glitch-word::after {
   display: none !important;
 }
 
-/* ── Wordmark accent lines (nav + footer) → gray ── */
 html.calm-mode .site-brand-wordmark__line--accent,
 html.calm-mode .footer-brand-wordmark__line--accent {
-  color: #a0a0a0 !important;
+  color: #d4d4d4 !important;
   filter: none !important;
 }
 
-/* ── Rainbow bars → dark gray ── */
-html.calm-mode .rainbow-bar {
-  background: #2a2a2a !important;
+/* ── Rainbow bars → solid dark gray ── */
+html.calm-mode .rainbow-bar,
+html.calm-mode .site-header::after {
+  background: #1a1a1a !important;
   opacity: 1;
 }
 
-html.calm-mode .site-header::after {
-  background: #2a2a2a !important;
-}
-
-/* ── Hero border-image → gray ── */
+/* ── Heroes & headings ── */
 html.calm-mode .page-hero {
-  border-image: linear-gradient(90deg, #555, #444, #555, #444) 1 !important;
+  border-image: linear-gradient(90deg, #333, #222, #333) 1 !important;
+  background-color: #000 !important;
 }
 
-/* ── Remove text glows and drop shadows ── */
 html.calm-mode .page-hero__accent--lime,
 html.calm-mode .page-hero__accent--cyan,
 html.calm-mode .page-hero__accent--magenta,
@@ -8168,47 +8357,158 @@ html.calm-mode .page-hero__accent--orange,
 html.calm-mode .page-hero__accent--rainbow,
 html.calm-mode .page-hero__title,
 html.calm-mode .page-hero-title {
+  color: #fff !important;
   text-shadow: none !important;
   filter: none !important;
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
-/* ── Countdown ── */
 html.calm-mode .home-countdown-box {
-  border-color: #444;
+  border-color: #333;
+  background: #0a0a0a;
   box-shadow: none;
 }
 
 html.calm-mode .home-countdown-box div {
   text-shadow: none;
   -webkit-text-stroke: 0;
-  color: #e0e0e0;
+  color: #fff;
 }
 
-/* ── Buttons → no glow ── */
-html.calm-mode .btn-neon,
-html.calm-mode .btn-neon:hover {
+/* ── Buttons → clean gray borders, white text ── */
+html.calm-mode .btn-neon {
+  border-color: #444 !important;
+  color: #fff !important;
+  background: #111 !important;
   box-shadow: none !important;
   text-shadow: none !important;
 }
 
-/* ── Tags / stickers → no glow ── */
-html.calm-mode .filter-tag,
+html.calm-mode .btn-neon:hover,
+html.calm-mode .btn-neon.solid {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+}
+
+/* ── Filter tags: inactive gray, ACTIVE keeps neon yellow ── */
+html.calm-mode .filter-tag {
+  border-color: #333 !important;
+  color: #a3a3a3 !important;
+  background: #0a0a0a !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+html.calm-mode .filter-tag:hover {
+  border-color: #555 !important;
+  color: #fff !important;
+}
+
 html.calm-mode .filter-tag.active,
-html.calm-mode .sticker {
+html.calm-mode .board-filter-chip.active,
+html.calm-mode .gigs-filterbar button.active,
+html.calm-mode .gifting-filterbar button.active,
+html.calm-mode .events-view-toggle__btn.active,
+html.calm-mode .schedule-toggle__btn.active {
+  border-color: var(--calm-accent-active) !important;
+  color: var(--calm-accent-active) !important;
+  background: rgba(204, 255, 0, 0.1) !important;
+  box-shadow: 0 0 12px rgba(204, 255, 0, 0.14) !important;
+}
+
+html.calm-mode .events-view-toggle__btn.active,
+html.calm-mode .schedule-toggle__btn.active,
+html.calm-mode .board-filter-chip.active {
+  color: #000 !important;
+  background: var(--calm-accent-active) !important;
+}
+
+/* ── Other stickers/tags → grayscale ── */
+html.calm-mode .sticker,
+html.calm-mode .board-sticker,
+html.calm-mode .sticker-tag,
+html.calm-mode .event-type-tag {
+  border-color: #444 !important;
+  color: #d4d4d4 !important;
+  background: #111 !important;
   box-shadow: none !important;
   text-shadow: none !important;
 }
 
-/* ── Cards → no glow ── */
-html.calm-mode .poster-card:hover,
-html.calm-mode .poster-card--glow,
-html.calm-mode .event-board-card {
+/* ── KEEP COLOR: avatars + pride rings ── */
+html.calm-mode .user-avatar,
+html.calm-mode .user-avatar__inner,
+html.calm-mode .user-avatar__photo,
+html.calm-mode .user-avatar__fallback,
+html.calm-mode .user-avatar::before {
+  filter: none !important;
+}
+
+html.calm-mode .site-dashboard-link--avatar {
+  border-color: #444 !important;
+  box-shadow: none !important;
+  background: #0a0a0a !important;
+}
+
+/* ── KEEP COLOR: event flyers / posters ── */
+html.calm-mode .poster-card img,
+html.calm-mode .event-modal__poster-img,
+html.calm-mode .event-board-card__poster img,
+html.calm-mode .schedule-event-card {
+  filter: none !important;
+}
+
+html.calm-mode .poster-card {
+  background: #000 !important;
+  border-color: #262626 !important;
+}
+
+html.calm-mode .poster-card::before {
+  opacity: 0.08;
+}
+
+html.calm-mode .poster-card:hover {
+  border-color: #444 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.calm-mode .poster-card--glow {
+  animation: none !important;
   box-shadow: none !important;
 }
 
-/* ── Decorative elements ── */
+html.calm-mode .event-board-card {
+  background: #0a0a0a !important;
+  border-color: #262626 !important;
+  box-shadow: none !important;
+}
+
+/* ── Cards & surfaces → solid dark ── */
+html.calm-mode .map-container {
+  background: #0a0a0a;
+  border-color: #262626;
+}
+
+html.calm-mode .zine-filter-bar {
+  background: #000 !important;
+  border-color: #262626 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .events-view-toggle {
+  border-color: #333;
+  background: #0a0a0a;
+}
+
+html.calm-mode .events-view-toggle__btn {
+  color: #737373;
+}
+
 html.calm-mode .sticker-motif {
-  filter: grayscale(1) brightness(0.6) !important;
+  filter: grayscale(1) brightness(0.5) !important;
 }
 
 html.calm-mode .torn-divider {
@@ -8216,25 +8516,98 @@ html.calm-mode .torn-divider {
   filter: grayscale(1) !important;
 }
 
-/* ── Map ── */
 html.calm-mode .home-map-all-events,
 html.calm-mode .map-legend--home {
   box-shadow: none !important;
+  border-color: #333 !important;
 }
 
-/* ── Schedule day headers ── */
+html.calm-mode .map-exit-button {
+  border-color: #444 !important;
+  color: #fff !important;
+  background: #111 !important;
+  box-shadow: none !important;
+}
+
 html.calm-mode .schedule-day-col__header {
-  border-color: #555 !important;
+  border-color: #333 !important;
+  color: #fff !important;
+}
+
+html.calm-mode .halftone {
+  background-image: none !important;
+  background: #111 !important;
 }
 
 /* ── Footer ── */
+html.calm-mode footer {
+  background: #000 !important;
+}
+
 html.calm-mode footer a {
-  color: #888;
+  color: #a3a3a3;
+}
+
+html.calm-mode footer a:hover {
+  color: #fff;
 }
 
 html.calm-mode .footer-brand-logo {
-  filter: grayscale(1) brightness(0.7) !important;
+  filter: grayscale(1) brightness(0.75) !important;
   animation: none !important;
+}
+
+/* ── Board / directory cards ── */
+html.calm-mode .board-listing-card,
+html.calm-mode .board-page {
+  background: #000;
+}
+
+html.calm-mode .board-listing-card__thumb {
+  background: #111;
+}
+
+html.calm-mode .site-header {
+  background: #000 !important;
+  border-bottom-color: #1a1a1a !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .site-profile-menu__panel {
+  background: #0a0a0a !important;
+  border-color: #333 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
+}
+
+html.calm-mode .site-profile-menu__trigger {
+  border-color: #333 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .event-modal,
+html.calm-mode .event-modal-overlay {
+  background: #000;
+}
+
+html.calm-mode .event-modal {
+  border-color: #262626 !important;
+}
+
+html.calm-mode .event-modal__bar {
+  border-color: #262626 !important;
+}
+
+html.calm-mode input,
+html.calm-mode textarea,
+html.calm-mode select {
+  background: #0a0a0a !important;
+  border-color: #333 !important;
+  color: #fff !important;
+}
+
+html.calm-mode .schedule-now-line {
+  background: #fff !important;
+  box-shadow: none !important;
 }
 
 
