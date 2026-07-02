@@ -73,10 +73,15 @@ function buildPinIcon(days: string[], rsvpPulse = false) {
   });
 }
 
+function hasMapPin(event: Event) {
+  return typeof event.lat === "number" && Number.isFinite(event.lat)
+    && typeof event.lng === "number" && Number.isFinite(event.lng);
+}
+
 function groupEventsByVenue(events: Event[]) {
   const groups: Record<string, Event[]> = {};
   events.forEach(e => {
-    if (!e.lat || !e.lng) return;
+    if (!hasMapPin(e)) return;
     const key = `${e.lat},${e.lng}`;
     if (!groups[key]) groups[key] = [];
     groups[key].push(e);

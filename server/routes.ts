@@ -9,6 +9,12 @@ import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
+  enrichEventForMap,
+  fillEventMapCoordinates,
+  fillFieldsMapCoordinates,
+  scheduleMapCoordinateBackfill,
+} from "./mapCoordinateSync";
+import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
   isMissedConnectionPostable,
@@ -66,7 +72,7 @@ const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey,tucke
 const OWNER_DISPLAY_NAME = process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX";
 
 function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
-  const { adminNotes, submittedBy, claimedBy, ...safe } = evt;
+  const { adminNotes, submittedBy, claimedBy, ...safe } = enrichEventForMap(evt);
   return {
     ...safe,
     posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
@@ -493,6 +499,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       // Approved promoters / admins bypass the review queue
       if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser)) {
         storage.autoApproveSubmission(sub.id, user.username);
+        const created = storage.getEvents({ status: "LIVE" })
+          .filter(evt => evt.submittedBy === user.email && evt.title === sub.title)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+        if (created) void fillEventMapCoordinates(created.id);
         return res.json({ ...sub, autoApproved: true });
       }
       if (type === "CLAIM" && (promoterStatus === "approved" || isAdminUser)) {
@@ -548,7 +558,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Owner edits a claimed event (all fields, goes back to pending review)
-  app.put("/api/events/:id/edit", requireAuth, (req, res) => {
+  app.put("/api/events/:id/edit", requireAuth, async (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const user = storage.getUserById(req.session.userId!);
@@ -567,7 +577,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
     if (dateErr) return res.status(400).json({ error: dateErr });
     const updated = storage.updateEvent(Number(req.params.id), patch);
-    res.json(updated);
+    if (updated && (patch.address !== undefined || patch.venueName !== undefined)) {
+      await fillEventMapCoordinates(updated.id);
+    }
+    const fresh = storage.getEvent(Number(req.params.id));
+    res.json(fresh ? enrichEventForMap(fresh) : fresh);
   });
 
   // ─── MODERATION REQUESTS (remove/flag — claims go through /api/submit) ───
@@ -687,13 +701,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(businesses);
   });
 
-  app.post("/api/admin/directory", requireAdmin, (req, res) => {
+  app.post("/api/admin/directory", requireAdmin, async (req, res) => {
     const data = req.body;
     if (!data.name || !data.type || !data.description) {
       return res.status(400).json({ error: "name, type, and description are required" });
     }
+    const withCoords = await fillFieldsMapCoordinates({
+      venueName: data.name,
+      address: data.address,
+      lat: data.lat,
+      lng: data.lng,
+    });
     const biz = storage.createBusiness({
       ...data,
+      lat: withCoords.lat ?? data.lat,
+      lng: withCoords.lng ?? data.lng,
       active: data.active !== false,
       queerOwned: !!data.queerOwned,
       queerFriendly: data.queerFriendly !== false,
@@ -701,9 +723,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(biz);
   });
 
-  app.put("/api/admin/directory/:id", requireAdmin, (req, res) => {
+  app.put("/api/admin/directory/:id", requireAdmin, async (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const updated = storage.updateBusiness(id, req.body);
+    const existing = storage.getBusiness(id);
+    if (!existing) return res.status(404).json({ error: "Not found" });
+    const withCoords = await fillFieldsMapCoordinates({
+      venueName: req.body.name ?? existing.name,
+      address: req.body.address ?? existing.address,
+      lat: req.body.lat ?? existing.lat,
+      lng: req.body.lng ?? existing.lng,
+    });
+    const updated = storage.updateBusiness(id, {
+      ...req.body,
+      ...(withCoords.lat != null ? { lat: withCoords.lat } : {}),
+      ...(withCoords.lng != null ? { lng: withCoords.lng } : {}),
+    });
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
   });
@@ -1651,6 +1685,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const sub = storage.approveSubmission(Number(req.params.id), adminName);
     if (!sub) return res.status(404).json({ error: "Not found" });
+    if (sub.status === "APPROVED" && (sub.type === "NEW_EVENT" || sub.type === "SUGGEST")) {
+      const created = storage.getEvents({ status: "LIVE" })
+        .filter(evt => evt.submittedBy === sub.submitterEmail && evt.title === sub.title)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      if (created) void fillEventMapCoordinates(created.id);
+    }
     res.json(sub);
   });
 
@@ -1849,7 +1889,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // PUT full event edit (admin only)
-  app.put("/api/admin/events/:id", requireAdmin, (req, res) => {
+  app.put("/api/admin/events/:id", requireAdmin, async (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const allowed = [
@@ -1869,7 +1909,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
     if (dateErr) return res.status(400).json({ error: dateErr });
     const updated = storage.updateEvent(Number(req.params.id), patch);
-    res.json(updated);
+    if (updated && (patch.address !== undefined || patch.venueName !== undefined || patch.lat !== undefined || patch.lng !== undefined)) {
+      await fillEventMapCoordinates(updated.id);
+    }
+    const fresh = storage.getEvent(Number(req.params.id));
+    res.json(fresh ? enrichEventForMap(fresh) : fresh);
   });
 
   app.patch("/api/admin/events/:id/claimable", requireAdmin, (req, res) => {
@@ -1968,4 +2012,6 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const pendingMod = storage.getModerationRequests("PENDING").length;
     res.json({ pendingSubmissions: pendingSubs, pendingModeration: pendingMod, total: pendingSubs + pendingMod });
   });
+
+  scheduleMapCoordinateBackfill();
 }

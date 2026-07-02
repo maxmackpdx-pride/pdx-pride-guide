@@ -67,7 +67,8 @@ export default function Directory() {
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
-    staleTime: 300_000,
+    staleTime: 60_000,
+    refetchOnMount: "always",
   });
 
   const filtered = useMemo(() => {

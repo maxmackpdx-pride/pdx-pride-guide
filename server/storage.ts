@@ -25,6 +25,7 @@ import {
   type Business, type InsertBusiness,
 } from "@shared/schema";
 import crypto from "crypto";
+import { mergeMapCoordinates } from "./venueCoordinates";
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
@@ -1985,6 +1986,21 @@ function runBootMigrationsOnce() {
     } as any).run();
     recordBootMigration("seed_businesses_directory_v8");
   }
+  if (!hasBootMigration("sync_event_map_coordinates_v1")) {
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const missing = sqlite.prepare(`
+      SELECT id, venue_name AS venueName, address, lat, lng
+      FROM events
+      WHERE status = 'LIVE' AND (lat IS NULL OR lng IS NULL)
+    `).all() as Array<{ id: number; venueName: string; address: string | null; lat: number | null; lng: number | null }>;
+    for (const row of missing) {
+      const merged = mergeMapCoordinates(row, directoryRows);
+      if (merged.lat != null && merged.lng != null) {
+        sqlite.prepare(`UPDATE events SET lat = ?, lng = ? WHERE id = ?`).run(merged.lat, merged.lng, row.id);
+      }
+    }
+    recordBootMigration("sync_event_map_coordinates_v1");
+  }
 
   // Fix brohoejams talent row: the DJ credit on yes_coach event has tucker's user_id instead of brohoejams'
   if (!hasBootMigration("fix_brohoejams_talent_v1")) {
@@ -2721,11 +2737,18 @@ export const storage: IStorage = {
   autoApproveSubmission(id, claimedByUsername) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
     if (!sub || sub.type !== "NEW_EVENT") return;
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const coords = mergeMapCoordinates({
+      venueName: sub.venueName,
+      address: sub.address,
+      lat: sub.lat,
+      lng: sub.lng,
+    }, directoryRows);
     db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
     db.insert(events).values({
       title: sub.title, description: sub.description,
       venueName: sub.venueName, address: sub.address,
-      neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+      neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
       dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
       ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
       admission: sub.admission, ticketUrl: sub.ticketUrl,
@@ -2762,11 +2785,18 @@ export const storage: IStorage = {
           storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
         }
       } else if (sub.type === "SUGGEST") {
+        const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+        const coords = mergeMapCoordinates({
+          venueName: sub.venueName,
+          address: sub.address,
+          lat: sub.lat,
+          lng: sub.lng,
+        }, directoryRows);
         // Community tip — goes live as unclaimed (anyone can claim it later)
         db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
-          neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+          neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
           dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
           ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
           admission: sub.admission, ticketUrl: sub.ticketUrl,
@@ -2779,11 +2809,18 @@ export const storage: IStorage = {
           createdAt: new Date().toISOString(),
         }).run();
       } else {
+        const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+        const coords = mergeMapCoordinates({
+          venueName: sub.venueName,
+          address: sub.address,
+          lat: sub.lat,
+          lng: sub.lng,
+        }, directoryRows);
         // NEW_EVENT — create event, and if user was pending promoter, approve them too
         const created = db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
-          neighborhood: sub.neighborhood, lat: sub.lat, lng: sub.lng,
+          neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
           dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
           ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
           admission: sub.admission, ticketUrl: sub.ticketUrl,
