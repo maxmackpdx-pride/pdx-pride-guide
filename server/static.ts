@@ -13,9 +13,11 @@ export function serveStatic(app: Express) {
   }
 
   const indexPath = path.resolve(distPath, "index.html");
-  const baseIndexHtml = fs.readFileSync(indexPath, "utf8");
   const sendSeoIndex = (req: express.Request, res: express.Response) => {
     const requestPath = (req.originalUrl || req.url || req.path || "/").split("?")[0] || "/";
+    // Read from disk each request so a deploy never serves a stale bundle hash
+    // from an in-memory snapshot taken at process startup.
+    const baseIndexHtml = fs.readFileSync(indexPath, "utf8");
     res.set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 

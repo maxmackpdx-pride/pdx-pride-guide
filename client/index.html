@@ -24,6 +24,29 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // After a deploy, a cached page can reference a main bundle that 404s.
+      // Reload once so the browser picks up fresh index.html + assets.
+      (function () {
+        var key = "bundle-reload";
+        window.addEventListener(
+          "error",
+          function (e) {
+            var el = e.target;
+            if (
+              el &&
+              el.tagName === "SCRIPT" &&
+              el.type === "module" &&
+              !sessionStorage.getItem(key)
+            ) {
+              sessionStorage.setItem(key, "1");
+              window.location.reload();
+            }
+          },
+          true,
+        );
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

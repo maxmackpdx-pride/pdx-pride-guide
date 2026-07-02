@@ -4,7 +4,7 @@ import { lazy, type ComponentType } from "react";
 // request a chunk that no longer exists. When that happens, reload once
 // to pick up the fresh bundle instead of crashing to the error boundary.
 export function lazyWithReload<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
-  const key = "chunk-reload";
+  const key = "bundle-reload";
   return lazy(() =>
     factory().then((mod) => {
       if (typeof window !== "undefined") sessionStorage.removeItem(key);
