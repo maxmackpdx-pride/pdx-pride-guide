@@ -8277,6 +8277,19 @@ html.calm-mode {
   --text-body-muted: #a3a3a3;
   --board-text: #f0f0f0;
   --board-muted: #a3a3a3;
+  --calm-hero-bg-opacity: 0.1;
+  --calm-hero-scrim-alpha: 0.9;
+  --calm-hero-scrim: linear-gradient(
+    102deg,
+    rgba(0, 0, 0, var(--calm-hero-scrim-alpha)) 0%,
+    rgba(0, 0, 0, var(--calm-hero-scrim-alpha)) 40%,
+    rgba(0, 0, 0, calc(var(--calm-hero-scrim-alpha) - 0.04)) 100%
+  );
+  --calm-hero-scrim-vertical: linear-gradient(
+    to top,
+    rgba(0, 0, 0, var(--calm-hero-scrim-alpha)) 0%,
+    rgba(0, 0, 0, var(--calm-hero-scrim-alpha)) 72%
+  );
   font-size: 108%;
 }
 
@@ -8378,10 +8391,93 @@ html.calm-mode .site-header::after {
   opacity: 1;
 }
 
-/* ── Heroes & headings ── */
+/* ── Heroes & panels — 10% photo, 90% dark scrim, no FX overlays ── */
+html.calm-mode .hero-video-overlays,
+html.calm-mode .hero-video-overlay {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+html.calm-mode .page-hero__bg,
+html.calm-mode .home-hero-bg-desktop,
+html.calm-mode .home-hero-bg-mobile,
+html.calm-mode .home-hero-bg-collage {
+  opacity: var(--calm-hero-bg-opacity) !important;
+  filter: grayscale(1) saturate(0) contrast(1.02) !important;
+  mix-blend-mode: normal !important;
+}
+
+html.calm-mode .page-hero__scrim,
+html.calm-mode .home-hero__panel-scrim,
+html.calm-mode .page-hero--flush .page-hero__scrim,
+html.calm-mode .home-gifting-panel.page-hero .page-hero__scrim,
+html.calm-mode .home-gigs-panel.page-hero .page-hero__scrim,
+html.calm-mode .home-spotted-panel.page-hero .page-hero__scrim,
+html.calm-mode .missed-page .page-hero__scrim {
+  opacity: 1 !important;
+  background: var(--calm-hero-scrim), var(--calm-hero-scrim-vertical) !important;
+}
+
+html.calm-mode .page-hero__grain,
+html.calm-mode .home-hero__panel-grain,
+html.calm-mode .home-hero-halftone,
+html.calm-mode .home-hero-shade {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+html.calm-mode .zine-hero::before,
+html.calm-mode .zine-section-head::before,
+html.calm-mode .inbox-hero::before,
+html.calm-mode .about-hero::after,
+html.calm-mode .inbox-hero::after,
+html.calm-mode .pride-work-hero::after {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Legacy heroes with baked-in background images — 10% photo via 90% scrim wash */
+html.calm-mode .about-hero {
+  background:
+    linear-gradient(rgba(0, 0, 0, var(--calm-hero-scrim-alpha)), rgba(0, 0, 0, var(--calm-hero-scrim-alpha))),
+    var(--calm-hero-scrim-vertical),
+    url("/motifs/hero-about.png") 56% 50% / cover no-repeat,
+    #000 !important;
+  filter: grayscale(1);
+}
+
+html.calm-mode .inbox-hero {
+  background:
+    linear-gradient(rgba(0, 0, 0, var(--calm-hero-scrim-alpha)), rgba(0, 0, 0, var(--calm-hero-scrim-alpha))),
+    var(--calm-hero-scrim-vertical),
+    url("/motifs/hero-inbox.jpg") 52% 42% / cover no-repeat,
+    #000 !important;
+  filter: grayscale(1);
+}
+
+html.calm-mode .pride-work-hero {
+  background:
+    linear-gradient(rgba(0, 0, 0, var(--calm-hero-scrim-alpha)), rgba(0, 0, 0, var(--calm-hero-scrim-alpha))),
+    var(--calm-hero-scrim-vertical),
+    url("/motifs/hero-gigs.jpg") center / cover no-repeat,
+    #000 !important;
+  filter: grayscale(1);
+}
+
+html.calm-mode .about-hero > *,
+html.calm-mode .inbox-hero > *,
+html.calm-mode .pride-work-hero > * {
+  filter: none;
+}
+
 html.calm-mode .page-hero {
   border-image: linear-gradient(90deg, #333, #222, #333) 1 !important;
   background-color: #000 !important;
+}
+
+html.calm-mode .home-hero,
+html.calm-mode .zine-hero.home-hero {
+  background: #000 !important;
 }
 
 html.calm-mode .page-hero__accent--lime,
