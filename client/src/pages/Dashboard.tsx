@@ -15,6 +15,8 @@ import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
 import DashboardHubSummary from "@/components/dashboard/DashboardHubSummary";
 import DashboardAdminTeaser from "@/components/dashboard/DashboardAdminTeaser";
+import PwaInstallBanner from "@/components/PwaInstallBanner";
+import DashboardNotificationPrefs from "@/components/DashboardNotificationPrefs";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
 import "@/components/dashboard/dashboard.css";
 
@@ -339,6 +341,8 @@ export default function Dashboard() {
         bgPosition="center 35%"
       />
       <div className="dash-inner">
+        <PwaInstallBanner />
+        <DashboardNotificationPrefs isAdmin={isAdmin} />
         <header id="profile" className="dash-profile-header">
           <div className="dash-profile-identity">
             <div className="dash-avatar-ring">

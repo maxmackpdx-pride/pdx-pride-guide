@@ -7,7 +7,7 @@ export function contextTypeOf(
 export function inboxContextBadge(contextType?: string | null): string | null {
   if (contextType === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
   if (contextType === "MISSED_CONNECTION") return "MISSED CONNECTION";
-  if (contextType === "HOST_MESSAGE") return "HOST UPDATE";
+  if (contextType === "HOST_UPDATE" || contextType === "HOST_MESSAGE") return "HOST UPDATE";
   return null;
 }
 

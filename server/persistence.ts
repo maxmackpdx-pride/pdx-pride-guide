@@ -19,6 +19,18 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
     apiRoutes: ["PUT /api/users/me", "POST /api/upload/avatar"],
   },
   {
+    id: "push_notifications",
+    label: "Web push subscriptions & notification prefs",
+    tables: ["push_subscriptions", "users"],
+    apiRoutes: [
+      "GET /api/push/vapid-public-key",
+      "POST /api/push/subscribe",
+      "DELETE /api/push/subscribe",
+      "GET /api/users/me/notification-prefs",
+      "PUT /api/users/me/notification-prefs",
+    ],
+  },
+  {
     id: "inbox",
     label: "Inbox & mail threads",
     tables: ["messages"],

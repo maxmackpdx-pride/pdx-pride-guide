@@ -23,6 +23,8 @@ import {
   pacificDayOfWeek,
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
+import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
+import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
 import session from "express-session";
 import multer from "multer";
@@ -1320,6 +1322,73 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     storage.createMissedConnectionThread(msg.threadId, post.id, post.userId, req.session.userId!);
     res.json(msg);
+  });
+
+  // ─── PUSH NOTIFICATIONS ─────────────────────────────────────────────────
+  app.get("/api/push/vapid-public-key", (_req, res) => {
+    if (!isPushConfigured()) return res.json({ configured: false, publicKey: null });
+    res.json({ configured: true, publicKey: getVapidPublicKey() });
+  });
+
+  app.get("/api/users/me/notification-prefs", requireAuth, (req, res) => {
+    const user = storage.getUserById(req.session.userId!);
+    res.json({
+      prefs: storage.getNotificationPrefs(req.session.userId!),
+      pushConfigured: Boolean(process.env.VAPID_PUBLIC_KEY),
+      isAdmin: Boolean(user?.subAdmin),
+    });
+  });
+
+  app.put("/api/users/me/notification-prefs", requireAuth, (req, res) => {
+    const user = storage.getUserById(req.session.userId!);
+    const body = req.body || {};
+    const patch: Record<string, boolean> = {};
+    for (const key of ["messages", "my_events", "account", "admin"] as const) {
+      if (typeof body[key] === "boolean") patch[key] = body[key];
+    }
+    const prefs = storage.setNotificationPrefs(
+      req.session.userId!,
+      patch,
+      Boolean(user?.subAdmin || isMainAdminUser(user)),
+    );
+    res.json({ prefs });
+  });
+
+  app.post("/api/push/subscribe", requireAuth, (req, res) => {
+    const endpoint = String(req.body?.endpoint || "").trim();
+    const p256dh = String(req.body?.keys?.p256dh || req.body?.p256dh || "").trim();
+    const auth = String(req.body?.keys?.auth || req.body?.auth || "").trim();
+    if (!endpoint || !p256dh || !auth) return res.status(400).json({ error: "Invalid subscription" });
+    const sub = storage.upsertPushSubscription(req.session.userId!, {
+      endpoint,
+      p256dh,
+      auth,
+      userAgent: String(req.get("user-agent") || "").slice(0, 500),
+      platform: String(req.body?.platform || "").slice(0, 40) || null,
+    });
+    res.json({ ok: true, id: (sub as any)?.id });
+  });
+
+  app.delete("/api/push/subscribe", requireAuth, (req, res) => {
+    const endpoint = String(req.body?.endpoint || "").trim();
+    if (!endpoint) return res.status(400).json({ error: "endpoint required" });
+    storage.deactivatePushSubscriptionByEndpoint(req.session.userId!, endpoint);
+    res.json({ ok: true });
+  });
+
+  app.post("/api/push/test", requireAdmin, async (req, res) => {
+    const userId = req.session.userId!;
+    const subs = storage.getActivePushSubscriptions(userId);
+    if (subs.length === 0) return res.status(400).json({ error: "No active push subscription for this admin account" });
+    const payload = buildDeclarativePayload({
+      title: "PDX Pride Guide test",
+      body: "Push notifications are working.",
+      navigate: "/dashboard",
+    });
+    const results = await Promise.all(subs.map((sub) => sendPushToSubscription(sub, payload)));
+    const sent = results.filter((r) => r.ok).length;
+    if (sent === 0) return res.status(502).json({ error: "Push send failed", results });
+    res.json({ ok: true, sent });
   });
 
   // ─── MESSAGES ────────────────────────────────────────────────────────────

@@ -26,6 +26,8 @@ import {
 } from "@shared/schema";
 import crypto from "crypto";
 import { mergeMapCoordinates } from "./venueCoordinates";
+import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
+import { schedulePushForMessage } from "./push/dispatch";
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
@@ -381,6 +383,21 @@ try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_from INTEGER NOT N
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_to INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN promoter_status TEXT NOT NULL DEFAULT 'none'`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN sub_admin INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN notification_prefs TEXT`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    endpoint TEXT NOT NULL UNIQUE,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    user_agent TEXT,
+    platform TEXT,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT '',
+    last_used_at TEXT
+  )
+`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS host_messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2555,6 +2572,13 @@ export interface IStorage {
   getSentMessages(userId: number): Message[];
   getUnreadCount(userId: number): number;
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
+  getNotificationPrefs(userId: number): NotificationPrefs;
+  setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin?: boolean): NotificationPrefs;
+  upsertPushSubscription(userId: number, data: { endpoint: string; p256dh: string; auth: string; userAgent?: string | null; platform?: string | null }): unknown;
+  deactivatePushSubscription(id: number): void;
+  deactivatePushSubscriptionByEndpoint(userId: number, endpoint: string): void;
+  touchPushSubscription(id: number): void;
+  getActivePushSubscriptions(userId: number): Array<{ id: number; endpoint: string; p256dh: string; auth: string }>;
   markRead(messageId: number): void;
   markReadForUser(messageId: number, userId: number): boolean;
   getThread(threadId: string): Message[];
@@ -3733,7 +3757,7 @@ export const storage: IStorage = {
   },
   sendMessage(fromUserId, toUserId, subject, body, opts) {
     const threadId = opts?.threadId || `thread_${Date.now()}_${fromUserId}_${toUserId}`;
-    return db.insert(messages).values({
+    const created = db.insert(messages).values({
       fromUserId, toUserId, subject, body,
       isRead: false,
       threadId,
@@ -3744,6 +3768,66 @@ export const storage: IStorage = {
       deletedByTo: false,
       createdAt: new Date().toISOString(),
     } as any).returning().get();
+    schedulePushForMessage(created);
+    return created;
+  },
+  getNotificationPrefs(userId: number): NotificationPrefs {
+    const row = sqlite.prepare(`SELECT notification_prefs, sub_admin FROM users WHERE id = ?`).get(userId) as {
+      notification_prefs?: string | null;
+      sub_admin?: number;
+    } | undefined;
+    if (!row) return { ...DEFAULT_NOTIFICATION_PREFS };
+    let raw: unknown = null;
+    if (row.notification_prefs) {
+      try { raw = JSON.parse(row.notification_prefs); } catch { raw = null; }
+    }
+    return parseNotificationPrefs(raw, Boolean(row.sub_admin));
+  },
+  setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin = false) {
+    const current = storage.getNotificationPrefs(userId);
+    const next = { ...current, ...prefs };
+    if (!isAdmin) next.admin = false;
+    sqlite.prepare(`UPDATE users SET notification_prefs = ? WHERE id = ?`).run(JSON.stringify(next), userId);
+    return next;
+  },
+  upsertPushSubscription(userId: number, data: {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    userAgent?: string | null;
+    platform?: string | null;
+  }) {
+    const now = new Date().toISOString();
+    const existing = sqlite.prepare(`SELECT id FROM push_subscriptions WHERE endpoint = ?`).get(data.endpoint) as { id: number } | undefined;
+    if (existing) {
+      sqlite.prepare(`
+        UPDATE push_subscriptions
+        SET user_id = ?, p256dh = ?, auth = ?, user_agent = ?, platform = ?, active = 1, last_used_at = ?
+        WHERE id = ?
+      `).run(userId, data.p256dh, data.auth, data.userAgent || null, data.platform || null, now, existing.id);
+      return sqlite.prepare(`SELECT * FROM push_subscriptions WHERE id = ?`).get(existing.id);
+    }
+    const inserted = sqlite.prepare(`
+      INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, user_agent, platform, active, created_at, last_used_at)
+      VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
+    `).run(userId, data.endpoint, data.p256dh, data.auth, data.userAgent || null, data.platform || null, now, now);
+    return sqlite.prepare(`SELECT * FROM push_subscriptions WHERE id = ?`).get(Number(inserted.lastInsertRowid));
+  },
+  deactivatePushSubscription(id: number) {
+    sqlite.prepare(`UPDATE push_subscriptions SET active = 0 WHERE id = ?`).run(id);
+  },
+  deactivatePushSubscriptionByEndpoint(userId: number, endpoint: string) {
+    sqlite.prepare(`UPDATE push_subscriptions SET active = 0 WHERE user_id = ? AND endpoint = ?`).run(userId, endpoint);
+  },
+  touchPushSubscription(id: number) {
+    sqlite.prepare(`UPDATE push_subscriptions SET last_used_at = ? WHERE id = ?`).run(new Date().toISOString(), id);
+  },
+  getActivePushSubscriptions(userId: number) {
+    return sqlite.prepare(`
+      SELECT id, endpoint, p256dh, auth
+      FROM push_subscriptions
+      WHERE user_id = ? AND active = 1
+    `).all(userId) as Array<{ id: number; endpoint: string; p256dh: string; auth: string }>;
   },
   markRead(messageId) {
     db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();

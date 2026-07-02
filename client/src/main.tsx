@@ -3,6 +3,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import App from "./App";
 
 import { resetPageScroll } from "./lib/resetPageScroll";
+import { captureInstallPrompt, registerServiceWorker } from "./lib/pwa";
+import { listenForPushSubscriptionChanges } from "./lib/pushNotifications";
 import "./fonts.css";
 import "./index.css";
 
@@ -35,5 +37,10 @@ requestAnimationFrame(resetPageScroll);
 window.addEventListener("load", resetPageScroll, { once: true });
 
 document.querySelector("[data-crawler-feed]")?.remove();
+
+captureInstallPrompt();
+if (import.meta.env.PROD) {
+  void registerServiceWorker().then(() => listenForPushSubscriptionChanges());
+}
 
 createRoot(document.getElementById("root")!).render(<ErrorBoundary><App /></ErrorBoundary>);

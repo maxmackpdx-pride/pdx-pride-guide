@@ -365,3 +365,18 @@ export const eventTalent = sqliteTable("event_talent", {
 export const insertEventTalentSchema = createInsertSchema(eventTalent).omit({ id: true, createdAt: true });
 export type InsertEventTalent = z.infer<typeof insertEventTalentSchema>;
 export type EventTalent = typeof eventTalent.$inferSelect;
+
+// Web Push subscriptions
+export const pushSubscriptions = sqliteTable("push_subscriptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userAgent: text("user_agent"),
+  platform: text("platform"),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull().default(""),
+  lastUsedAt: text("last_used_at"),
+});
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
