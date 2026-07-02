@@ -16,15 +16,10 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/leaflet") || id.includes("node_modules/react-leaflet")) {
-            return "leaflet";
-          }
-        },
-      },
-    },
+    // No manualChunks: hand-splitting leaflet created a circular chunk
+    // dependency that crashed Safari with a TDZ error ("Cannot access 'Q'
+    // before initialization") when the leaflet chunk evaluated first.
+    // Vite's automatic chunking keeps evaluation order correct.
   },
   server: {
     fs: {
