@@ -8757,10 +8757,70 @@ html.calm-mode .footer-brand-logo {
   line-height: 1.5;
 }
 
+.directory-card__events {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #1f1f1f;
+}
+
+.directory-card__events-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-meta);
+  margin-bottom: 8px;
+}
+
+.directory-card__events-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.directory-card__event-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid #222;
+  border-left: 3px solid var(--event-day-color, #CCFF00);
+  background: rgba(255, 255, 255, 0.02);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.directory-card__event-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--event-day-color, #CCFF00);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--event-day-color, #CCFF00) 24%, transparent);
+}
+
+.directory-card__event-when {
+  font-size: 0.72rem;
+  color: var(--event-day-color, #CCFF00);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.directory-card__event-title {
+  font-size: 0.82rem;
+  color: #fff;
+  line-height: 1.25;
+}
+
 .directory-card__links {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: 12px;
 }
 
 .directory-card__link {

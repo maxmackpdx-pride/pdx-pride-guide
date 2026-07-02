@@ -14,6 +14,7 @@ import {
   fillFieldsMapCoordinates,
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
+import { attachUpcomingEventsToBusinesses } from "./directoryEvents";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -698,7 +699,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       neighborhood: neighborhood || undefined,
       queerOwned: queerOwned === "true" ? true : undefined,
     });
-    res.json(businesses);
+    const liveEvents = storage.getEvents({ status: "LIVE" });
+    res.json(attachUpcomingEventsToBusinesses(businesses, liveEvents));
   });
 
   app.post("/api/admin/directory", requireAdmin, async (req, res) => {

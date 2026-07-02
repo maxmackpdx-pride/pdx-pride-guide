@@ -39,6 +39,35 @@ export function hasMapCoordinates(fields: MapCoordinateFields): boolean {
   );
 }
 
+export function eventMatchesBusiness(
+  event: MapCoordinateFields & { venueName: string },
+  business: MapCoordinateFields & { name?: string; venueName?: string },
+): boolean {
+  const eventVenueKey = normalizeVenueKey(event.venueName);
+  const businessKey = normalizeVenueKey(business.name || business.venueName || "");
+  const eventAddressKey = event.address ? normalizeAddressKey(event.address) : "";
+  const businessAddressKey = business.address ? normalizeAddressKey(business.address) : "";
+
+  if (eventAddressKey && businessAddressKey && eventAddressKey === businessAddressKey) {
+    return true;
+  }
+
+  if (eventVenueKey && businessKey) {
+    if (eventVenueKey === businessKey) return true;
+    if (eventVenueKey.length >= 4 && businessKey.length >= 4) {
+      if (eventVenueKey.includes(businessKey) || businessKey.includes(eventVenueKey)) return true;
+    }
+  }
+
+  if (hasMapCoordinates(event) && hasMapCoordinates(business)) {
+    const latDiff = Math.abs(event.lat! - business.lat!);
+    const lngDiff = Math.abs(event.lng! - business.lng!);
+    if (latDiff < 0.0003 && lngDiff < 0.0003) return true;
+  }
+
+  return false;
+}
+
 export function resolveCoordinatesFromDirectory(
   venueName?: string | null,
   address?: string | null,

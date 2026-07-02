@@ -1,15 +1,27 @@
 import { useState, useMemo, Suspense } from "react";
+import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Globe, Instagram, Clock, Phone } from "lucide-react";
+import { MapPin, Globe, Instagram, Clock, Phone, CalendarDays } from "lucide-react";
+import { eventPath } from "@shared/eventSlug";
+import { parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
+
+type DirectoryEventSummary = {
+  id: number;
+  title: string;
+  dateStart: string;
+  dateEnd: string;
+  dayOfWeek: string | null;
+  listingInstanceKey?: string;
+};
 
 type Business = {
   id: number;
@@ -28,6 +40,14 @@ type Business = {
   lat: number | null;
   lng: number | null;
   isNew: boolean;
+  upcomingEvents?: DirectoryEventSummary[];
+};
+
+const DAY_COLORS: Record<string, string> = {
+  THU: "#00FFFF",
+  FRI: "#FF00CC",
+  SAT: "#39FF14",
+  SUN: "#FF6600",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -181,8 +201,27 @@ export default function Directory() {
   );
 }
 
+function formatDirectoryEventWhen(event: DirectoryEventSummary) {
+  const startMs = parsePacificDateTime(event.dateStart);
+  if (startMs == null) return event.dayOfWeek || "Upcoming";
+  const start = new Date(startMs);
+  const dateLabel = start.toLocaleDateString("en-US", {
+    timeZone: "America/Los_Angeles",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  const timeLabel = start.toLocaleTimeString("en-US", {
+    timeZone: "America/Los_Angeles",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${dateLabel} · ${timeLabel}`;
+}
+
 function DirectoryCard({ biz }: { biz: Business }) {
   const color = TYPE_COLORS[biz.type] || "#FF00CC";
+  const upcomingEvents = biz.upcomingEvents ?? [];
   return (
     <div className="directory-card" style={{ "--card-accent": color } as React.CSSProperties}>
       <div className="directory-card__body">
@@ -213,6 +252,31 @@ function DirectoryCard({ biz }: { biz: Business }) {
         )}
         {biz.description && (
           <p className="directory-card__desc">{biz.description}</p>
+        )}
+        {upcomingEvents.length > 0 && (
+          <div className="directory-card__events">
+            <div className="directory-card__events-label">
+              <CalendarDays size={11} />
+              <span>Upcoming Pride events</span>
+            </div>
+            <ul className="directory-card__events-list">
+              {upcomingEvents.map(event => {
+                const dayColor = DAY_COLORS[event.dayOfWeek || ""] || color;
+                return (
+                  <li key={event.listingInstanceKey || `${event.id}-${event.dateStart}`}>
+                    <Link
+                      href={eventPath(event.id, event.title, event.dayOfWeek)}
+                      className="directory-card__event-link"
+                      style={{ "--event-day-color": dayColor } as React.CSSProperties}
+                    >
+                      <span className="directory-card__event-when">{formatDirectoryEventWhen(event)}</span>
+                      <span className="directory-card__event-title">{event.title}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
         <div className="directory-card__links">
           {biz.website && (
