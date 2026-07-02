@@ -7513,47 +7513,7 @@ footer a:hover { color: #00FFFF !important; }
   margin-bottom: 8px;
 }
 
-/* Calm mode — spotted cards (see main calm block below for shared rules) */
-html.calm-mode .spotted-card {
-  animation: none;
-  box-shadow: none;
-  border-color: #333;
-}
-
-html.calm-mode .spotted-card:hover {
-  box-shadow: none;
-  border-color: #444;
-}
-
-html.calm-mode .spotted-card__found-stamp::after {
-  color: #b0b0b0;
-  border-color: #666;
-  text-shadow: none;
-  box-shadow: none;
-}
-
-html.calm-mode .spotted-card__location {
-  color: #a3a3a3;
-  border-color: #333;
-  background: #0a0a0a;
-}
-
-html.calm-mode .spotted-card__msg-btn {
-  border-color: #444;
-  color: #e5e5e5;
-  background: #111;
-}
-
-html.calm-mode .spotted-compose-toggle {
-  border-color: #333;
-  color: #d4d4d4;
-  background: #0a0a0a;
-}
-
-html.calm-mode .spotted-compose-toggle:hover {
-  background: #1a1a1a;
-  color: #fff;
-}
+/* Spotted calm mode — see board pages calm block below */
 
 /* ── Missed Connections — legacy bubble board (kept for reference) ── */
 .mc-board {
@@ -8690,14 +8650,369 @@ html.calm-mode .footer-brand-logo {
   animation: none !important;
 }
 
-/* ── Board / directory cards ── */
-html.calm-mode .board-listing-card,
-html.calm-mode .board-page {
-  background: #000;
+/* ═══════════════════════════════════════════════════════════
+   CALM MODE — Gifting, Gigs & Spotted board pages
+   ═══════════════════════════════════════════════════════════ */
+
+/* Page shells — kill cyan radial washes & film grain */
+html.calm-mode .gifting-page,
+html.calm-mode .gigs-page,
+html.calm-mode .missed-page {
+  background: #000 !important;
+}
+
+html.calm-mode .board-page::after {
+  opacity: 0 !important;
+}
+
+html.calm-mode .diag {
+  background-image: none !important;
+}
+
+/* Hero chrome on board pages */
+html.calm-mode .gifting-page .page-hero__bg,
+html.calm-mode .gigs-page .page-hero__bg,
+html.calm-mode .missed-page .page-hero__bg {
+  opacity: var(--calm-hero-bg-opacity) !important;
+  filter: grayscale(1) saturate(0) contrast(1.02) !important;
+}
+
+html.calm-mode .gifting-page .page-hero__scrim,
+html.calm-mode .gigs-page .page-hero__scrim,
+html.calm-mode .missed-page .page-hero__scrim {
+  background: var(--calm-hero-scrim), var(--calm-hero-scrim-vertical) !important;
+}
+
+html.calm-mode .board-kicker {
+  background: #141414 !important;
+  color: #fff !important;
+  border-color: #333 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .page-hero__tagline {
+  background: #111 !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .page-hero__lede {
+  background: transparent !important;
+  border: none !important;
+  border-left: 2px solid #333 !important;
+  color: #e5e5e5 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .page-hero__glitch,
+html.calm-mode .home-promo-glitch {
+  display: none !important;
+}
+
+/* Stats strip */
+html.calm-mode .board-stats-bar {
+  background: #000 !important;
+  border-image: none !important;
+  border-bottom: 1px solid #1a1a1a !important;
+}
+
+html.calm-mode .board-stats-bar__num {
+  color: #fff !important;
+}
+
+html.calm-mode .board-stats-bar__label,
+html.calm-mode .board-stats-bar__live {
+  color: #a3a3a3 !important;
+}
+
+html.calm-mode .board-stats-bar__dot {
+  background: #fff !important;
+  animation: none !important;
+}
+
+/* How-it-works sections */
+html.calm-mode .gifting-how,
+html.calm-mode .gigs-how,
+html.calm-mode .missed-how,
+html.calm-mode .board-active-feed {
+  background: #000 !important;
+  border-color: #1a1a1a !important;
+}
+
+html.calm-mode .gifting-how::before,
+html.calm-mode .gifting-feed::before,
+html.calm-mode .gigs-how::before,
+html.calm-mode .gigs-feed::before,
+html.calm-mode .missed-how::before {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+html.calm-mode .board-page .gigs-how {
+  background: #000 !important;
+}
+
+html.calm-mode .gifting-footer-line,
+html.calm-mode .gigs-footer-line,
+html.calm-mode .missed-footer-line {
+  color: #a3a3a3 !important;
+}
+
+/* Path cards (Gigs) */
+html.calm-mode .gigs-path-card {
+  background: #111 !important;
+  color: #e5e5e5 !important;
+  border-color: #333 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .gigs-path-card__label,
+html.calm-mode .gigs-path-card h3,
+html.calm-mode .gigs-path-card p {
+  color: #e5e5e5 !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+/* How-it-works steps */
+html.calm-mode .board-how--inline .board-step {
+  border-bottom-color: #222 !important;
+}
+
+html.calm-mode .board-step {
+  background: #111 !important;
+  color: #e5e5e5 !important;
+  border-color: #333 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html.calm-mode .board-step h3,
+html.calm-mode .board-step .panel-heading,
+html.calm-mode .board-how--inline .board-step h3,
+html.calm-mode .board-how--inline .board-step .panel-heading {
+  color: #fff !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+html.calm-mode .board-step p,
+html.calm-mode .board-how--inline .board-step p {
+  color: #a3a3a3 !important;
+}
+
+html.calm-mode .board-step__num,
+html.calm-mode .board-step:nth-child(odd) .board-step__num,
+html.calm-mode .board-step:nth-child(even) .board-step__num,
+html.calm-mode .board-how--inline .board-step__num,
+html.calm-mode .gifting-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
+html.calm-mode .gigs-page .board-how--inline .board-step:nth-child(even) .board-step__num,
+html.calm-mode .missed-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
+  color: #737373 !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Forms */
+html.calm-mode .gifting-form-panel,
+html.calm-mode .board-compose-panel {
+  background: #0a0a0a !important;
+  border-color: #333 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .gifting-details {
+  color: #a3a3a3 !important;
+}
+
+/* Active feed & listing cards */
+html.calm-mode .board-listing-card {
+  background: #0a0a0a !important;
+  border-color: #262626 !important;
+}
+
+html.calm-mode .board-listing-card:hover,
+html.calm-mode .board-listing-card.is-expanded {
+  border-color: #444 !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 html.calm-mode .board-listing-card__thumb {
-  background: #111;
+  background: #111 !important;
+}
+
+html.calm-mode .board-listing-card__thumb img {
+  filter: none !important;
+}
+
+html.calm-mode .board-listing-card__kind {
+  color: #0a0a0a !important;
+  background: #737373 !important;
+}
+
+html.calm-mode .board-listing-card__grab,
+html.calm-mode .board-listing-card__status,
+html.calm-mode .board-listing-card__cta {
+  color: #d4d4d4 !important;
+  border-color: #444 !important;
+}
+
+html.calm-mode .board-listing-card__dot {
+  border-color: #555 !important;
+}
+
+html.calm-mode .board-listing-card__dot.is-filled {
+  background: #d4d4d4 !important;
+}
+
+html.calm-mode .board-listing-card__title {
+  color: #fff !important;
+}
+
+html.calm-mode .board-listing-card__poster,
+html.calm-mode .board-listing-card__time {
+  color: #a3a3a3 !important;
+}
+
+html.calm-mode .board-filter-chip {
+  border-color: #333 !important;
+  color: #a3a3a3 !important;
+  background: #0a0a0a !important;
+}
+
+html.calm-mode .board-filter-chip:hover {
+  border-color: #555 !important;
+  color: #fff !important;
+}
+
+html.calm-mode .gigs-filterbar button,
+html.calm-mode .gigs-type-toggle button,
+html.calm-mode .gifting-filterbar button {
+  border-color: #333 !important;
+  color: #a3a3a3 !important;
+  background: #0a0a0a !important;
+}
+
+html.calm-mode .gigs-type-toggle button.active.posting,
+html.calm-mode .gigs-filterbar button.active:not(.looking) {
+  border-color: var(--calm-accent-active) !important;
+  background: var(--calm-accent-active) !important;
+  color: #000 !important;
+}
+
+html.calm-mode .gigs-type-toggle button.active.looking,
+html.calm-mode .gigs-filterbar button.active.looking {
+  border-color: #19E3FF !important;
+  background: #19E3FF !important;
+  color: #000 !important;
+}
+
+html.calm-mode .gigs-remote {
+  color: #a3a3a3 !important;
+  border-color: #444 !important;
+}
+
+html.calm-mode .btn-outline {
+  border-color: #444 !important;
+  color: #fff !important;
+}
+
+html.calm-mode .btn-outline:hover {
+  background: #1a1a1a !important;
+}
+
+/* Spotted cards */
+html.calm-mode .spotted-card {
+  animation: none !important;
+  background: #0a0a0a !important;
+  border-color: #333 !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .spotted-card:hover {
+  border-color: #444 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .spotted-card__quote-mark {
+  color: #555 !important;
+  opacity: 1 !important;
+}
+
+html.calm-mode .spotted-card__body {
+  color: #fff !important;
+}
+
+html.calm-mode .spotted-card__found-stamp::after {
+  color: #d4d4d4 !important;
+  border-color: #666 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+html.calm-mode .spotted-card__location {
+  color: #a3a3a3 !important;
+  border-color: #333 !important;
+  background: #111 !important;
+}
+
+html.calm-mode .spotted-card__meta {
+  color: #737373 !important;
+}
+
+html.calm-mode .spotted-card__msg-btn {
+  border-color: #444 !important;
+  color: #fff !important;
+  background: #111 !important;
+}
+
+html.calm-mode .spotted-card__msg-btn:hover {
+  background: #1a1a1a !important;
+}
+
+html.calm-mode .spotted-compose-toggle {
+  border-color: #444 !important;
+  color: #fff !important;
+  background: #0a0a0a !important;
+}
+
+html.calm-mode .spotted-compose-toggle:hover {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+html.calm-mode .spotted-compose-panel {
+  background: #0a0a0a !important;
+  border-color: #333 !important;
+}
+
+/* Legacy spotted hero (if used) */
+html.calm-mode .missed-connections-hero.parallax-container {
+  background:
+    linear-gradient(rgba(0, 0, 0, var(--calm-hero-scrim-alpha)), rgba(0, 0, 0, var(--calm-hero-scrim-alpha))),
+    var(--calm-hero-scrim-vertical),
+    url("/motifs/hero-spotted-bigfoot.jpg") center 42% / cover no-repeat,
+    #000 !important;
+  filter: grayscale(1);
+  border-bottom-color: #1a1a1a !important;
+}
+
+html.calm-mode .missed-connections-hero.parallax-container::before {
+  background: var(--calm-hero-scrim), var(--calm-hero-scrim-vertical) !important;
+  opacity: 1 !important;
+}
+
+html.calm-mode .missed-connections-hero-inner > * {
+  filter: none;
+}
+
+/* Board / directory cards (shared) */
+html.calm-mode .board-page {
+  background: #000;
 }
 
 html.calm-mode .site-header {
