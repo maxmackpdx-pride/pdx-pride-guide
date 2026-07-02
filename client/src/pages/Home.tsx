@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
+import { PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
 import EventModal from "@/components/EventModal";
 import EventTicker from "@/components/EventTicker";
 import { lazyWithReload } from "@/lib/lazyWithReload";
@@ -43,7 +44,7 @@ function useCountdown(target: number | null) {
 export default function Home() {
   usePageSeo(
     "PDX Pride Guide — Portland Pride 2026 Events",
-    "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 16–19 and year-round Pride listings.",
+    "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 13–19 and year-round Pride listings.",
   );
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
@@ -62,7 +63,7 @@ export default function Home() {
       .map(event => parsePacificEventTime(event.dateStart))
       .filter((time): time is number => typeof time === "number" && Number.isFinite(time))
       .sort((a, b) => a - b);
-    return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
+    return starts[0] || new Date(`${PRIDE_WEEK_START_DATE}T00:00:00-07:00`).getTime();
   }, [events]);
   const countdown = useCountdown(firstEventTarget);
   const tickerSource = useMemo(
@@ -148,7 +149,7 @@ export default function Home() {
 
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
-            <div className="home-hero-kicker">Portland Pride Weekend · July 16–19, 2026</div>
+            <div className="home-hero-kicker">Portland Pride Week · July 13–19, 2026</div>
 
             <h1 className="display home-hero-title">
               PORTLAND<br />

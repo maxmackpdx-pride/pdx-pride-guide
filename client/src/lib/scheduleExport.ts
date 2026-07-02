@@ -2,6 +2,7 @@ import html2canvas from "html2canvas";
 import type { EventListing } from "@shared/multiDayEvents";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { PRIDE_WEEK_DAYS, PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
 
 function loadLogoImage(): Promise<HTMLImageElement | null> {
   return new Promise(resolve => {
@@ -12,13 +13,13 @@ function loadLogoImage(): Promise<HTMLImageElement | null> {
   });
 }
 
-const DAY_LABELS: Record<string, string> = {
-  THU: "THURSDAY · JULY 16",
-  FRI: "FRIDAY · JULY 17",
-  SAT: "SATURDAY · JULY 18",
-  SUN: "SUNDAY · JULY 19",
-};
-const DAY_ORDER = ["THU", "FRI", "SAT", "SUN"];
+const DAY_LABELS: Record<string, string> = Object.fromEntries(
+  PRIDE_WEEK_DAY_OPTIONS.map(d => [
+    d.value,
+    `${d.label.split(" ")[0].toUpperCase()} · JULY ${Number(d.date.slice(-2))}`,
+  ]),
+);
+const DAY_ORDER: readonly string[] = PRIDE_WEEK_DAYS;
 const ACCENT_CYCLE = ["#19E3FF", "#FF6600", "#39FF14", "#A855F7", "#FF00CC"];
 
 function formatTime(value: string): string {
@@ -81,7 +82,9 @@ function makeCard(event: EventListing, accent: string, cardW: number, cardH: num
  * poster cards with background images, dark gradient overlay, and neon accents.
  */
 export async function exportScheduleToStories(events: EventListing[]): Promise<void> {
-  const byDay: Record<string, EventListing[]> = { THU: [], FRI: [], SAT: [], SUN: [] };
+  const byDay: Record<string, EventListing[]> = Object.fromEntries(
+    PRIDE_WEEK_DAYS.map(d => [d, [] as EventListing[]]),
+  );
   for (const e of events) {
     const bucket = e.dayOfWeek ? byDay[e.dayOfWeek] : undefined;
     if (bucket) bucket.push(e);

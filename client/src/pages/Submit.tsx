@@ -48,7 +48,7 @@ const emptyPromoterForm = () => ({
 export default function Submit() {
   usePageSeo(
     "Submit an Event — PDX Pride Guide | Portland Pride 2026",
-    "Add your Portland Pride 2026 event to the free PDX Pride community directory. Submit or claim listings for Pride Weekend.",
+    "Add your Portland Pride 2026 event to the free PDX Pride community directory. Submit or claim listings for Pride Week.",
   );
   const { toast } = useToast();
   const { user, loading } = useAuth();
@@ -260,7 +260,7 @@ export default function Submit() {
       line1: "SUBMIT",
       line2: "AN EVENT",
       accent: "lime",
-      lede: "Add your Pride Weekend event to the guide. Verified promoters go live immediately; new accounts enter the review queue.",
+      lede: "Add your Pride Week event to the guide. Verified promoters go live immediately; new accounts enter the review queue.",
     },
     apply: {
       kicker: "Promoter verification",

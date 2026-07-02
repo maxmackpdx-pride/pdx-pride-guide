@@ -11,12 +11,18 @@ import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-l
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const DAY_COLORS: Record<string, string> = {
-  THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#39FF14",
-  SUN: "#FF6600",
-};
+import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS, RSVP_COLOR } from "@shared/prideWeek";
+
+/** Pin color when an event has no recognizable day — neutral so it can't read as a day. */
+const UNKNOWN_DAY_COLOR = "#FFFFFF";
+
+function sortByPrideDay(days: string[]): string[] {
+  return [...days].sort(
+    (a, b) =>
+      (DAY_SORT_ORDER[a as keyof typeof DAY_SORT_ORDER] ?? 99) -
+      (DAY_SORT_ORDER[b as keyof typeof DAY_SORT_ORDER] ?? 99),
+  );
+}
 
 const MAP_VIEWS = {
   events: {
@@ -36,10 +42,10 @@ function buildPinIcon(days: string[], rsvpPulse = false) {
   const SIZE = 22;
   const R = SIZE / 2;
   const pulseClass = rsvpPulse ? " map-pin-rsvp-pulse" : "";
-  const pulseGlow = rsvpPulse ? `,0 0 22px #CCFF00,0 0 36px rgba(204,255,0,0.55)` : "";
+  const pulseGlow = rsvpPulse ? `,0 0 22px ${RSVP_COLOR},0 0 36px rgba(204,255,0,0.55)` : "";
 
   if (days.length === 1) {
-    const color = DAY_COLORS[days[0]] || "#CCFF00";
+    const color = DAY_COLORS[days[0] as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
     return divIcon({
       html: `<div class="${pulseClass.trim()}" style="width:${SIZE}px;height:${SIZE}px;background:transparent;border:3px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color},0 0 16px ${color}99,0 2px 6px rgba(0,0,0,0.8)${pulseGlow};"></div>`,
       iconSize: [SIZE, SIZE],
@@ -53,7 +59,7 @@ function buildPinIcon(days: string[], rsvpPulse = false) {
   const sliceAngle = (2 * Math.PI) / n;
   let paths = "";
   days.forEach((day, i) => {
-    const color = DAY_COLORS[day] || "#CCFF00";
+    const color = DAY_COLORS[day as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
     const a0 = i * sliceAngle - Math.PI / 2;
     const a1 = a0 + sliceAngle;
     const x1 = +(R + R * Math.cos(a0)).toFixed(2);
@@ -116,11 +122,11 @@ function MarkersLayer({
     <>
       {Object.entries(byVenue).map(([key, evts]) => {
         const [lat, lng] = key.split(",").map(Number);
-        const days = Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[];
+        const days = sortByPrideDay(Array.from(new Set(evts.map(e => e.dayOfWeek).filter(Boolean))) as string[]);
         const hasRsvp = evts.some(e => rsvpEventIds.has(e.id));
         const icon = buildPinIcon(days, hasRsvp);
         if (!icon) return null;
-        const primaryColor = DAY_COLORS[days[0]] || "#CCFF00";
+        const primaryColor = DAY_COLORS[days[0] as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
         return (
           <Marker key={key} position={[lat, lng]} icon={icon}>
             <Tooltip direction="top" offset={[0, -16]} opacity={1} className="venue-hover-tooltip">
@@ -367,7 +373,7 @@ export function MapView({
 
         <div className={`map-legend${variant === "home" ? " map-legend--home" : ""}`} aria-label="Map key">
           <div className="map-legend-items">
-            {Object.entries(DAY_COLORS).map(([day, color]) => (
+            {PRIDE_WEEK_DAYS.map((day) => [day, DAY_COLORS[day]] as const).map(([day, color]) => (
               <div key={day} className="map-legend-item">
                 <span
                   className="map-legend-swatch"
@@ -378,10 +384,10 @@ export function MapView({
             ))}
             <div className="map-legend-item map-legend-item--multi">
               <svg width="20" height="20" viewBox="0 0 10 10" aria-hidden="true">
-                <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill="#00FFFF" />
-                <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill="#FF6600" />
-                <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill="#FF00CC" />
-                <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill="#FF2400" />
+                <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill={DAY_COLORS.MON} />
+                <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill={DAY_COLORS.WED} />
+                <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill={DAY_COLORS.FRI} />
+                <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill={DAY_COLORS.SUN} />
                 <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1" />
               </svg>
               <span className="map-legend-label">MULTI-DAY</span>

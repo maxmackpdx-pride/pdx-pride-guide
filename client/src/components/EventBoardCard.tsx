@@ -4,12 +4,7 @@ import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
 import ScrollReveal from "./ScrollReveal";
 
-const DAY_COLORS: Record<string, string> = {
-  THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#39FF14",
-  SUN: "#FF6600",
-};
+import { DAY_COLORS } from "@shared/prideWeek";
 
 type EventBoardCardProps = {
   event: Event;
@@ -24,7 +19,7 @@ export default function EventBoardCard({
   revealDelay = 0,
   layout = "stack",
 }: EventBoardCardProps) {
-  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
+  const dayColor = DAY_COLORS[event.dayOfWeek as keyof typeof DAY_COLORS] || "#fff";
   const time = event.dateStart
     ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "";

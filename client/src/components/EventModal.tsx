@@ -32,9 +32,7 @@ type EventHostProfile = {
   role: string;
 };
 
-const DAY_COLORS: Record<string, string> = {
-  WED: "#CCFF00", THU: "#00FFFF", FRI: "#FF00CC", SAT: "#FF6600", SUN: "#FF2400"
-};
+import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 
 type ModerationMode = null | "remove" | "flag" | "transfer";
 
@@ -79,7 +77,7 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
 
   const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
-  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
+  const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#fff";
 
   const extraPeople = [
     ...eventHosts.map(h => ({

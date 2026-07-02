@@ -1,3 +1,10 @@
+import {
+  PRIDE_WEEK_DAYS,
+  PRIDE_WEEK_DAY_OPTIONS,
+  PRIDE_WEEK_START_DATE,
+  PRIDE_WEEK_END_DATE,
+} from "@shared/prideWeek";
+
 export type PortlandForecastDay = {
   day: string;
   high: number;
@@ -16,16 +23,11 @@ export type PortlandWeather = {
   isEstimate: boolean;
 };
 
-export const PRIDE_WEEKEND_START = "2026-07-16";
-export const PRIDE_WEEKEND_END = "2026-07-19";
-export const PRIDE_DAY_LABELS = ["THU", "FRI", "SAT", "SUN"] as const;
+export const PRIDE_WEEKEND_START = PRIDE_WEEK_START_DATE;
+export const PRIDE_WEEKEND_END = PRIDE_WEEK_END_DATE;
+export const PRIDE_DAY_LABELS = PRIDE_WEEK_DAYS;
 
-const PRIDE_DATES = [
-  "2026-07-16",
-  "2026-07-17",
-  "2026-07-18",
-  "2026-07-19",
-];
+const PRIDE_DATES = PRIDE_WEEK_DAY_OPTIONS.map(d => d.date);
 
 const WMO_LABELS: Record<number, string> = {
   0: "Clear",
@@ -78,7 +80,7 @@ function weatherStyle(code: number) {
 
 function prideCaption(high: number, low: number, code: number, isEstimate: boolean) {
   const range = `H ${high}° · L ${low}°`;
-  if (isEstimate) return `${range} · Jul 16–19 · Forecast updates closer to Pride`;
+  if (isEstimate) return `${range} · Jul 13–19 · Forecast updates closer to Pride`;
   if (code >= 51 && code <= 82) return `${range} · Pack a light layer`;
   if (high >= 75) return `${range} · Hot out — hydrate`;
   if (high >= 65) return `${range} · Solid parade weather`;
@@ -102,6 +104,9 @@ export function isAfterPrideWeekend(now = new Date()) {
 
 function prideFallback(): PortlandWeather {
   const forecast: PortlandForecastDay[] = [
+    { day: "MON", high: 72, highlight: false },
+    { day: "TUE", high: 73, highlight: false },
+    { day: "WED", high: 74, highlight: false },
     { day: "THU", high: 74, highlight: false },
     { day: "FRI", high: 76, highlight: false },
     { day: "SAT", high: 79, highlight: true },

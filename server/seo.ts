@@ -55,7 +55,7 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Portland Pride 2026 Events — PDX Pride Guide",
-    description: "Community-run directory of Portland Pride Weekend and year-round queer events.",
+    description: "Community-run directory of Portland Pride Week and year-round queer events.",
     numberOfItems: events.length,
     itemListElement: events.map((evt, index) => ({
       "@type": "ListItem",
@@ -115,7 +115,7 @@ export function buildCrawlerEventDirectory(events: SeoEvent[]) {
 
   return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}">
       <h1>PDX Pride Guide — Portland Pride 2026 Events</h1>
-      <p>${events.length} live events listed for Portland Pride Weekend and summer 2026. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
+      <p>${events.length} live events listed for Portland Pride Week and summer 2026. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
       <ul>
       ${items}
       </ul>
@@ -132,7 +132,7 @@ export function buildNoscriptEventDirectory(events: SeoEvent[]) {
   return `<noscript>
     <section aria-label="Portland Pride 2026 events" style="max-width:960px;margin:0 auto;padding:24px;font-family:system-ui,sans-serif;color:#f5f5f0;background:#0a0a0a">
       <h1>PDX Pride Guide — Portland Pride 2026 Events</h1>
-      <p>${events.length} live events listed for Portland Pride Weekend and summer 2026. Full JSON API: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a></p>
+      <p>${events.length} live events listed for Portland Pride Week and summer 2026. Full JSON API: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a></p>
       <ul>
       ${items}
       </ul>
@@ -210,7 +210,7 @@ export function buildCanonicalUrl(requestPath: string) {
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
     title: "PDX Pride Guide — Portland Pride 2026 Events",
-    description: "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 16–19 and year-round Pride listings.",
+    description: "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 13–19 and year-round Pride listings.",
   },
   "/events": {
     title: "Portland Pride 2026 Events — PDX Pride Guide",
@@ -319,7 +319,7 @@ export function buildFaqJsonLd() {
         name: "When is Portland Pride 2026?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Portland Pride Weekend 2026 runs July 16–19, 2026 (Thursday through Sunday). PDX Pride Guide lists events across the full weekend and related summer listings.",
+          text: "Portland Pride Week 2026 runs July 13–19, 2026 (Monday through Sunday). PDX Pride Guide lists events across the full week and related summer listings.",
         },
       },
       {

@@ -18,7 +18,7 @@ export default function Footer() {
               PDX <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span> GUIDE
             </div>
             <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 260, lineHeight: 1.6 }}>
-              Independently built directory for Portland Pride Weekend 2026.
+              Independently built directory for Portland Pride Week 2026.
             </div>
           </div>
           <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>

@@ -10,7 +10,7 @@ const SECTIONS = [
     tone: "cyan",
     title: "Terms of use",
     bullets: [
-      "PDX Pride Guide is a free community directory for Portland Pride Weekend and related queer events.",
+      "PDX Pride Guide is a free community directory for Portland Pride Week and related queer events.",
       "Listings are submitted by promoters and community members; accuracy is not guaranteed — verify details with official venues and organizers.",
       "Do not use this site to harass, spam, scrape personal data, or post misleading or harmful content.",
       "We may remove listings or accounts that violate community standards or applicable law.",

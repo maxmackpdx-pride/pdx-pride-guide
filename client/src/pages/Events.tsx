@@ -29,14 +29,11 @@ import { MapViewFallback } from "@/components/EventsMapFallback";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
-const DAY_COLORS: Record<string, string> = {
-  THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#39FF14",
-  SUN: "#FF6600",
-};
-const DAYS = ["ALL", "THU", "FRI", "SAT", "SUN"];
-const DAY_SORT_ORDER: Record<string, number> = { THU: 0, FRI: 1, SAT: 2, SUN: 3 };
+import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+
+const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
+/** MON/TUE fills are too dark for black pill text — flip to white. */
+const DARK_FILL_DAYS = new Set(["MON", "TUE"]);
 
 type SortMode =
   | "start_time"
@@ -179,7 +176,7 @@ function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummar
   selfUserId?: number;
   shareHref: string;
 }) {
-  const dayColor = DAY_COLORS[event.dayOfWeek || ""] || "#fff";
+  const dayColor = DAY_COLORS[event.dayOfWeek as keyof typeof DAY_COLORS] || "#fff";
   const time = event.dateStart
     ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "";
@@ -463,11 +460,11 @@ export default function Events() {
       <PageHero
         flush
         flipLightLeaks
-        kicker="Portland Pride 2026 · July 18–19"
+        kicker="Portland Pride Week 2026 · July 13–19"
         titleLine1="EVENTS"
         titleLine2="GUIDE"
         accent="cyan"
-        lede="Every queer party, parade, show, and gathering for Pride Weekend 2026 and beyond — all in one place."
+        lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond — all in one place."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 42%"
         actions={
@@ -500,8 +497,11 @@ export default function Events() {
               onClick={() => setActiveDay(d)}
               data-testid={`filter-day-${d}`}
               style={activeDay === d && d !== "ALL" ? {
-                color: "#000", borderColor: DAY_COLORS[d],
-                background: DAY_COLORS[d], boxShadow: `0 0 14px ${DAY_COLORS[d]}aa, 2px 2px 0 rgba(0,0,0,0.7)`, fontWeight: 900,
+                color: DARK_FILL_DAYS.has(d) ? "#fff" : "#000",
+                borderColor: DAY_COLORS[d as keyof typeof DAY_COLORS],
+                background: DAY_COLORS[d as keyof typeof DAY_COLORS],
+                boxShadow: `0 0 14px ${DAY_COLORS[d as keyof typeof DAY_COLORS]}aa, 2px 2px 0 rgba(0,0,0,0.7)`,
+                fontWeight: 900,
               } : {}}
             >
               {d}

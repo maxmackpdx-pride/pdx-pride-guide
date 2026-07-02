@@ -18,12 +18,16 @@
   --neon-blue: #0044FF;
   --accent-pop: var(--neon-cyan);
 
-  /* Day colors (event system) */
-  --day-wed: #CCFF00;
+  /* Day colors (event system) — mirror of shared/prideWeek.ts */
+  --day-mon: #8800FF;
+  --day-tue: #0044FF;
+  --day-wed: #FFEE00;
   --day-thu: #00FFFF;
   --day-fri: #FF00CC;
-  --day-sat: #FF6600;
-  --day-sun: #FF2400;
+  --day-sat: #39FF14;
+  --day-sun: #FF6600;
+  --day-mon-text: #AA66FF;
+  --day-tue-text: #4488FF;
 
   /* Text */
   --text: #ffffff;

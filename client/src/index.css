@@ -37,13 +37,18 @@
   --neon-green: #00EE44;
   --neon-blue: #0044FF;
 
-  /* Day colors */
-  --day-wed: #CCFF00;
+  /* Day colors — mirror of shared/prideWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
+  --day-mon: #8800FF;
+  --day-tue: #0044FF;
+  --day-wed: #FFEE00;
   --day-thu: #00FFFF;
   --day-fri: #FF00CC;
-  --day-sat: #FF6600;
-  --day-sun: #FF2400;
-  --day-multi: linear-gradient(90deg, #FF2400, #FF6600, #FFEE00, #00EE44, #0044FF, #8800FF);
+  --day-sat: #39FF14;
+  --day-sun: #FF6600;
+  /* Text-safe variants for the two dark hues (≥4.5:1 on near-black) */
+  --day-mon-text: #AA66FF;
+  --day-tue-text: #4488FF;
+  --day-multi: linear-gradient(90deg, #8800FF, #0044FF, #FFEE00, #00FFFF, #FF00CC, #39FF14, #FF6600);
 
   --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -835,6 +840,8 @@ h2.display,
 }
 
 /* Day badge colors */
+.day-MON, .day-mon { color: var(--day-mon-text, var(--day-mon)); border-color: var(--day-mon); }
+.day-TUE, .day-tue { color: var(--day-tue-text, var(--day-tue)); border-color: var(--day-tue); }
 .day-WED, .day-wed { color: var(--day-wed); border-color: var(--day-wed); }
 .day-THU, .day-thu { color: var(--day-thu); border-color: var(--day-thu); }
 .day-FRI, .day-fri { color: var(--day-fri); border-color: var(--day-fri); }
@@ -8223,11 +8230,15 @@ html.calm-mode {
   --neon-green: #a3a3a3;
   --neon-red: #a3a3a3;
   --neon-blue: #a3a3a3;
+  --day-mon: #888;
+  --day-tue: #888;
+  --day-wed: #888;
   --day-thu: #888;
   --day-fri: #888;
   --day-sat: #888;
   --day-sun: #888;
-  --day-wed: #888;
+  --day-mon-text: #888;
+  --day-tue-text: #888;
   --accent-pop: #b0b0b0;
   --accent-pop-shadow: transparent;
   --site-film-grain-opacity: 0;
@@ -9188,7 +9199,7 @@ html.calm-mode .schedule-now-line {
 
 .schedule-grid {
   display: grid;
-  grid-template-columns: 56px repeat(4, minmax(0, 1fr));
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
   gap: 10px;
   min-width: 0;
 }
@@ -9336,8 +9347,8 @@ html.calm-mode .schedule-now-line {
   }
 
   .schedule-grid {
-    /* 2 day columns visible; scroll horizontally to see all 4 */
-    grid-template-columns: 38px repeat(4, calc((100vw - 50px) / 2));
+    /* 2 day columns visible; scroll horizontally to see all 7 */
+    grid-template-columns: 38px repeat(7, calc((100vw - 50px) / 2));
     grid-auto-flow: unset;
     grid-auto-columns: unset;
     overflow-x: visible;

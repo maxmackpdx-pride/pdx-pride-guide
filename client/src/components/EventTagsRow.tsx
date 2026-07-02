@@ -3,13 +3,7 @@ import type { Event } from "@shared/schema";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "./EventTypeTag";
 
-const DAY_COLORS: Record<string, string> = {
-  WED: "#CCFF00",
-  THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#FF6600",
-  SUN: "#FF2400",
-};
+import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 
 type EventTagsRowProps = {
   event: Event;
@@ -41,7 +35,7 @@ export default function EventTagsRow({
   style,
 }: EventTagsRowProps) {
   const typeTags = getEventTypeTagsForEvent(event);
-  const dayAccent = DAY_COLORS[event.dayOfWeek || ""] || "#CCFF00";
+  const dayAccent = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#fff";
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const jsonTypes = showJsonTypes
     ? (JSON.parse(event.eventTypes || "[]") as string[])

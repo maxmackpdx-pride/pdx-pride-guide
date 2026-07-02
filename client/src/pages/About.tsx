@@ -11,7 +11,7 @@ const MISSION = [
     icon: <Zap size={18} />,
     tone: "cyan",
     title: "Find events fast",
-    text: "Everything happening Thu–Sun in one place. Map it, filter it, show up.",
+    text: "Everything happening Mon–Sun in one place. Map it, filter it, show up.",
   },
   {
     icon: <Users size={18} />,
@@ -60,11 +60,11 @@ const VALUES = [
 const FAQ = [
   {
     q: "When is Portland Pride 2026?",
-    a: "Portland Pride Weekend 2026 is July 16–19 (Thursday through Sunday). PDX Pride Guide lists festivals, parties, marches, and community events across the full weekend.",
+    a: "Portland Pride Week 2026 is July 13–19 (Monday through Sunday). PDX Pride Guide lists festivals, parties, marches, and community events across the full week.",
   },
   {
     q: "Where do I find PDX Pride events?",
-    a: "Use the Events page to browse every live listing on a map and board — filter by day (Thu–Sun), type, and neighborhood, or open any event for times, venue, and tickets.",
+    a: "Use the Events page to browse every live listing on a map and board — filter by day (Mon–Sun), type, and neighborhood, or open any event for times, venue, and tickets.",
   },
   {
     q: "How is this different from other Pride apps?",
@@ -91,7 +91,7 @@ export default function About() {
         titleLine1="BUILT FOR"
         titleLine2="THE COMMUNITY"
         accent="lime"
-        lede="A free, independently built event directory for Portland Pride Weekend 2026. Made by Tucker, shaped by submissions, and open to support from local businesses that fit the mission."
+        lede="A free, independently built event directory for Portland Pride Week 2026. Made by Tucker, shaped by submissions, and open to support from local businesses that fit the mission."
         bgImage="/motifs/hero-about.png"
         bgPosition="56% center"
         actions={
@@ -104,7 +104,7 @@ export default function About() {
 
       <div className="about-quick-facts">
         <div className="about-quick-facts__inner">
-          <span className="about-quick-fact"><Calendar size={14} /> July 16–19, 2026</span>
+          <span className="about-quick-fact"><Calendar size={14} /> July 13–19, 2026</span>
           <span className="about-quick-fact"><MapPin size={14} /> Portland, OR</span>
           <span className="about-quick-fact">Free to browse</span>
           <span className="about-quick-fact">Community-run</span>
@@ -116,7 +116,7 @@ export default function About() {
           <span className="board-sticker board-sticker--lime">Why this exists</span>
           <h2 className="display section-heading">THE MISSION</h2>
           <p className="board-copy">
-            One place for Pride weekend — independent, accountable, and built to send people to real events in real venues.
+            One place for Pride week — independent, accountable, and built to send people to real events in real venues.
           </p>
           <div className="about-mission-grid">
             {MISSION.map(item => (

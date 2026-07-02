@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
+import { PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
 import { parsePacificEventTime, useCountdown } from "@/lib/countdown";
 import { fetchPortlandWeather, isAfterPrideWeekend } from "@/lib/portlandWeather";
 
@@ -26,7 +27,7 @@ export default function DashboardWidgets() {
       .map(event => parsePacificEventTime(event.dateStart))
       .filter((time): time is number => typeof time === "number" && Number.isFinite(time))
       .sort((a, b) => a - b);
-    return starts[0] || new Date("2026-07-16T00:00:00-07:00").getTime();
+    return starts[0] || new Date(`${PRIDE_WEEK_START_DATE}T00:00:00-07:00`).getTime();
   }, [events]);
 
   const countdown = useCountdown(prideTarget);
@@ -49,7 +50,7 @@ export default function DashboardWidgets() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
-                  Pride Weekend · Jul 16–19
+                  Pride Week · Jul 13–19
                 </div>
                 {(weatherError || weather.isEstimate) && (
                   <span
@@ -110,7 +111,7 @@ export default function DashboardWidgets() {
       {showPrideWidgets && (
       <section className="dash-countdown">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Weekend</div>
+          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Week</div>
           <span
             className={`dash-mono${live ? " dash-live-badge" : ""}`}
             style={{
@@ -125,7 +126,7 @@ export default function DashboardWidgets() {
           </span>
         </div>
         <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 4 }}>
-          Jul 16 – 19 · Portland
+          Jul 13 – 19 · Portland
         </div>
         {countdown ? (
           <div className="dash-countdown-grid">

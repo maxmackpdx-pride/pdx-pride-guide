@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { parsePacificDateTime } from "@shared/missedConnections";
+import { PRIDE_WEEK_DAYS, PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
@@ -14,12 +15,13 @@ import ScheduleEventCard from "@/components/ScheduleEventCard";
 import { exportScheduleToStories } from "@/lib/scheduleExport";
 import { Download } from "lucide-react";
 
-const DAYS: { key: string; label: string; date: string; color: string }[] = [
-  { key: "THU", label: "THURSDAY", date: "JUL 16", color: "var(--day-thu, #00FFFF)" },
-  { key: "FRI", label: "FRIDAY", date: "JUL 17", color: "var(--day-fri, #FF00CC)" },
-  { key: "SAT", label: "SATURDAY", date: "JUL 18", color: "var(--day-sat, #39FF14)" },
-  { key: "SUN", label: "SUNDAY", date: "JUL 19", color: "var(--day-sun, #FF6600)" },
-];
+const DAYS: { key: string; label: string; date: string; color: string }[] =
+  PRIDE_WEEK_DAY_OPTIONS.map(d => ({
+    key: d.value,
+    label: d.label.split(" ")[0].toUpperCase(),
+    date: `JUL ${Number(d.date.slice(-2))}`,
+    color: `var(--day-${d.value.toLowerCase()}, ${d.color})`,
+  }));
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF6600", "#39FF14", "#A855F7", "#FF00CC"];
 
@@ -128,7 +130,7 @@ export default function Schedule() {
     return () => clearInterval(id);
   }, []);
 
-  usePageSeo("Schedule — Portland Pride 2026 | PDX Pride Guide", "Your full 4-day Pride Weekend schedule, side by side.");
+  usePageSeo("Schedule — Portland Pride 2026 | PDX Pride Guide", "Your full Pride Week schedule, July 13–19, side by side.");
 
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -158,7 +160,9 @@ export default function Schedule() {
   }, [events, myScheduleOnly, myEventIds]);
 
   const eventsByDay = useMemo(() => {
-    const map: Record<string, EventListing[]> = { THU: [], FRI: [], SAT: [], SUN: [] };
+    const map: Record<string, EventListing[]> = Object.fromEntries(
+      PRIDE_WEEK_DAYS.map(d => [d, [] as EventListing[]]),
+    );
     for (const e of visibleEvents) {
       const bucket = e.dayOfWeek ? map[e.dayOfWeek] : undefined;
       if (bucket) bucket.push(e);

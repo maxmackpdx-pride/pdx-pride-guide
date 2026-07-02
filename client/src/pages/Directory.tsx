@@ -43,12 +43,7 @@ type Business = {
   upcomingEvents?: DirectoryEventSummary[];
 };
 
-const DAY_COLORS: Record<string, string> = {
-  THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#39FF14",
-  SUN: "#FF6600",
-};
+import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 
 const TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",
@@ -261,7 +256,7 @@ function DirectoryCard({ biz }: { biz: Business }) {
             </div>
             <ul className="directory-card__events-list">
               {upcomingEvents.map(event => {
-                const dayColor = DAY_COLORS[event.dayOfWeek || ""] || color;
+                const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || color;
                 return (
                   <li key={event.listingInstanceKey || `${event.id}-${event.dateStart}`}>
                     <Link

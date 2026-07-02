@@ -6,6 +6,7 @@ import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import { PRIDE_WEEK_DAYS } from "@shared/prideWeek";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
@@ -1082,7 +1083,7 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">DAY</label>
                             <select value={editForm.dayOfWeek || ""} onChange={e => setEditForm(f => ({ ...f, dayOfWeek: e.target.value }))}
                               className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
-                              {["THU","FRI","SAT","SUN"].map(d => <option key={d} value={d}>{d}</option>)}
+                              {PRIDE_WEEK_DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                             </select>
                           </div>
                           <div>

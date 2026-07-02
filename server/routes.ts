@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
+import { prideDayFromDate } from "@shared/prideWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
@@ -134,6 +135,25 @@ function validateEventDates(dateStart?: string, dateEnd?: string): string | null
   if (!dateStart || !dateEnd) return null;
   if (new Date(dateEnd) <= new Date(dateStart)) return "End date must be after start date";
   return null;
+}
+
+/**
+ * dateStart is authoritative for dayOfWeek — derive it on every write so a
+ * stale or mistaken client value can never disagree with the actual date.
+ */
+function syncDayOfWeek(patch: Record<string, unknown>, existing?: { dateStart?: string | null }) {
+  const dateStart = (patch.dateStart as string | undefined) ?? existing?.dateStart ?? undefined;
+  if (!dateStart) return;
+  const derived = prideDayFromDate(dateStart);
+  if (!derived) return;
+  if (patch.dayOfWeek !== undefined && patch.dayOfWeek !== derived) {
+    console.warn(
+      `[events] dayOfWeek "${String(patch.dayOfWeek)}" corrected to "${derived}" from dateStart ${dateStart}`,
+    );
+  }
+  if (patch.dayOfWeek !== undefined || patch.dateStart !== undefined) {
+    patch.dayOfWeek = derived;
+  }
 }
 
 function enrichEventForAdmin(evt: any) {
@@ -579,6 +599,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
     if (dateErr) return res.status(400).json({ error: dateErr });
+    syncDayOfWeek(patch, evt);
     const updated = storage.updateEvent(Number(req.params.id), patch);
     if (updated && (patch.address !== undefined || patch.venueName !== undefined)) {
       await fillEventMapCoordinates(updated.id);
@@ -1979,6 +2000,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
     if (dateErr) return res.status(400).json({ error: dateErr });
+    syncDayOfWeek(patch, evt);
     const updated = storage.updateEvent(Number(req.params.id), patch);
     if (updated && (patch.address !== undefined || patch.venueName !== undefined || patch.lat !== undefined || patch.lng !== undefined)) {
       await fillEventMapCoordinates(updated.id);
