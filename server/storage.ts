@@ -2011,6 +2011,25 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("fix_owner_displayname_clobber_v1");
   }
+
+  // v1 migration could run then syncOwnerDisplayName re-clobbered env-listed admins on login.
+  if (!hasBootMigration("fix_heygirl_displayname_v2")) {
+    const owner = resolveSiteOwner();
+    const ownerDisplay = (process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX").trim();
+    if (owner) {
+      sqlite.prepare(`
+        UPDATE users SET display_name = NULL
+        WHERE display_name = ? AND id != ?
+      `).run(ownerDisplay, owner.id);
+    }
+    sqlite.prepare(`
+      UPDATE users SET display_name = 'Sugar Pill'
+      WHERE id = 15
+         OR LOWER(username) = 'heygirl'
+         OR LOWER(email) = 'heygirl@sugarpillpdx.com'
+    `).run();
+    recordBootMigration("fix_heygirl_displayname_v2");
+  }
 }
 
 function parseEnvAdminLists() {
@@ -2156,6 +2175,13 @@ function resolveSiteOwner(): SiteOwnerRow | undefined {
 function isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean {
   if (!user?.id) return false;
   return listSiteOwnerCandidates().some(candidate => candidate.id === user.id);
+}
+
+/** True only for Tucker (primary owner), not other env-listed or granted admins. */
+function isPrimarySiteOwner(user: { id?: number | null } | null | undefined): boolean {
+  if (!user?.id) return false;
+  const owner = resolveSiteOwner();
+  return !!owner && owner.id === user.id;
 }
 
 function ownerIdentitySets(candidates: SiteOwnerRow[]) {
@@ -2417,6 +2443,7 @@ export interface IStorage {
   ensureSiteAdminGigPost(): void;
   syncSiteOwnerPortfolio(): void;
   isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
+  isPrimarySiteOwner(user: { id?: number | null } | null | undefined): boolean;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -2883,6 +2910,9 @@ export const storage: IStorage = {
   },
   isSiteOwnerUser(user) {
     return isSiteOwnerUser(user);
+  },
+  isPrimarySiteOwner(user) {
+    return isPrimarySiteOwner(user);
   },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();

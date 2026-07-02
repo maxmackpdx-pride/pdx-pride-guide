@@ -157,8 +157,8 @@ function markAdminSessionForUser(req: any, user: any) {
 }
 
 function syncOwnerDisplayName(user: any) {
-  // Only the site owner (Tucker) — never other granted admins like @heygirl.
-  if (!storage.isSiteOwnerUser(user) || user.displayName === OWNER_DISPLAY_NAME) return user;
+  // Only Tucker (primary owner) — not env-listed co-admins or granted admins like @heygirl.
+  if (!storage.isPrimarySiteOwner(user) || user.displayName === OWNER_DISPLAY_NAME) return user;
   storage.updateUser(user.id, { displayName: OWNER_DISPLAY_NAME });
   return { ...user, displayName: OWNER_DISPLAY_NAME };
 }
