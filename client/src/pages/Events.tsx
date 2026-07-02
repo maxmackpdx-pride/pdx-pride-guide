@@ -430,7 +430,12 @@ export default function Events() {
       setSelectedEvent(fromList);
       return;
     }
-    if (routeEvent) setSelectedEvent(routeEvent);
+    // Keep an already-open modal for this id (set optimistically on click)
+    // rather than clearing or replacing it while routeEvent settles.
+    setSelectedEvent(prev => {
+      if (prev && prev.id === routeEventId) return prev;
+      return routeEvent ?? prev;
+    });
   }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
 
   const filtered = useMemo(

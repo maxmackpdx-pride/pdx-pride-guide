@@ -415,11 +415,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const expanded = expandMultiDayEvents([evt]);
     const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
-    const listing = day
-      ? expanded.find(e => e.dayOfWeek === day) || expanded[0]
-      : expanded.length === 1
-        ? expanded[0]
-        : evt;
+    // Always return a sliced listing so the detail shape matches the list shape.
+    const listing = (day ? expanded.find(e => e.dayOfWeek === day) : undefined) || expanded[0] || evt;
     res.json(publicEvent(listing, pendingClaimIds));
   });
 

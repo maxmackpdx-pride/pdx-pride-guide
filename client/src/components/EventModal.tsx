@@ -47,6 +47,11 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
 };
 
 export default function EventModal({ event, onClose }: { event: Event; onClose: () => void }) {
+  if (!event || typeof event.id !== "number") return null;
+  return <EventModalInner event={event} onClose={onClose} />;
+}
+
+function EventModalInner({ event, onClose }: { event: Event; onClose: () => void }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();

@@ -1,5 +1,5 @@
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { resetPageScroll } from "./lib/resetPageScroll";
@@ -9,6 +9,13 @@ import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import FilmGrainOverlay from "./components/FilmGrainOverlay";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+function RouteBoundary({ children }: { children: ReactNode }) {
+  const [location] = useLocation();
+  // Key by path so navigating away from a crashed page recovers.
+  return <ErrorBoundary key={location.split("?")[0]}>{children}</ErrorBoundary>;
+}
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -44,6 +51,7 @@ export default function App() {
             <FilmGrainOverlay />
             <Nav />
             <main className="flex-1">
+              <RouteBoundary>
               <Switch>
                 <Route path="/" component={Home} />
                 <Route path="/events/:id/:slug?" component={Events} />
@@ -65,6 +73,7 @@ export default function App() {
                 </Route>
                 <Route component={NotFound} />
               </Switch>
+              </RouteBoundary>
             </main>
             <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
             <Footer />
