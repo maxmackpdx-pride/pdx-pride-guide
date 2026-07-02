@@ -324,6 +324,12 @@ function notifyAttendanceUpdate(eventId: number) {
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
   assertProductionSecrets();
+
+  // Lightweight probe for Railway healthchecks — must not hit the DB.
+  app.get("/api/health", (_req, res) => {
+    res.json({ ok: true, ts: new Date().toISOString() });
+  });
+
   attendanceHub = initAttendanceWs(httpServer);
   storage.syncSiteOwnerPortfolio();
 

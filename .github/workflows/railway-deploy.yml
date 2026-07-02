@@ -5,9 +5,11 @@ on:
     branches:
       - master
 
+# Queue deploys — cancel-in-progress caused overlapping Railway deploys that
+# showed up as CRASHED/REMOVED in the dashboard and failed GitHub Actions runs.
 concurrency:
   group: railway-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -50,21 +52,32 @@ jobs:
             --arg commitSha "$COMMIT_SHA" \
             '{query: $query, variables: {serviceId: $serviceId, environmentId: $environmentId, commitSha: $commitSha}}')
 
-          response=$(curl -sS -X POST https://backboard.railway.com/graphql/v2 \
-            -H "Content-Type: application/json" \
-            -H "Project-Access-Token: $RAILWAY_PROJECT_TOKEN" \
-            -d "$payload")
+          DEPLOY_ID=""
+          for attempt in 1 2 3; do
+            response=$(curl -sS -X POST https://backboard.railway.com/graphql/v2 \
+              -H "Content-Type: application/json" \
+              -H "Project-Access-Token: $RAILWAY_PROJECT_TOKEN" \
+              -d "$payload")
 
-          echo "$response" | jq .
+            echo "Deploy attempt $attempt:"
+            echo "$response" | jq .
 
-          if echo "$response" | jq -e '.errors' >/dev/null; then
-            echo "Railway deploy mutation failed"
-            exit 1
-          fi
+            if echo "$response" | jq -e '.errors' >/dev/null; then
+              echo "Railway deploy mutation returned errors (attempt $attempt)"
+              sleep 10
+              continue
+            fi
 
-          DEPLOY_ID=$(echo "$response" | jq -r '.data.serviceInstanceDeployV2')
+            DEPLOY_ID=$(echo "$response" | jq -r '.data.serviceInstanceDeployV2')
+            if [ -n "$DEPLOY_ID" ] && [ "$DEPLOY_ID" != "null" ]; then
+              break
+            fi
+            echo "No deployment id returned (attempt $attempt)"
+            sleep 10
+          done
+
           if [ -z "$DEPLOY_ID" ] || [ "$DEPLOY_ID" = "null" ]; then
-            echo "No deployment id returned"
+            echo "Railway deploy mutation failed after retries"
             exit 1
           fi
 
@@ -81,7 +94,15 @@ jobs:
 
             case "$STATUS" in
               SUCCESS) echo "Railway deployment succeeded"; exit 0 ;;
-              FAILED|CRASHED|REMOVED) echo "Railway deployment failed: $STATUS"; echo "$status_response" | jq .; exit 1 ;;
+              REMOVED)
+                echo "Railway deployment was superseded (REMOVED) — another deploy took over; not a crash."
+                exit 0
+                ;;
+              FAILED|CRASHED)
+                echo "Railway deployment failed: $STATUS"
+                echo "$status_response" | jq .
+                exit 1
+                ;;
             esac
 
             sleep 8
