@@ -1,0 +1,44 @@
+/* PDX Pride Guide — canonical design tokens (source of truth: client/src/index.css) */
+:root {
+  /* Surfaces */
+  --bg: #0a0a0a;
+  --surface: #0b0b0b;
+  --surface-raised: #141414;
+  --border: #2b2b2b;
+  --border-faint: #1a1a1a;
+
+  /* Neon palette */
+  --neon-yellow: #CCFF00;
+  --neon-cyan: #00FFFF;
+  --neon-magenta: #FF00CC;
+  --neon-orange: #FF6600;
+  --neon-violet: #8800FF;
+  --neon-red: #FF2400;
+  --neon-green: #00EE44;
+  --neon-blue: #0044FF;
+  --accent-pop: var(--neon-cyan);
+
+  /* Day colors (event system) */
+  --day-wed: #CCFF00;
+  --day-thu: #00FFFF;
+  --day-fri: #FF00CC;
+  --day-sat: #FF6600;
+  --day-sun: #FF2400;
+
+  /* Text */
+  --text: #ffffff;
+  --text-body: #e6e3da;
+  --text-meta: #999999;
+  --text-faint: #666666;
+
+  /* Type */
+  --font-display: 'Barlow Condensed', sans-serif; /* 700–900, uppercase */
+  --font-body: 'Inter', sans-serif;
+
+  /* Signature effects */
+  --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  --brutal-shadow: 4px 4px 0 rgba(255, 0, 204, 0.36);
+  --glow: 0 0 14px color-mix(in srgb, var(--neon-cyan) 18%, transparent);
+
+  --radius: 0.25rem;
+}

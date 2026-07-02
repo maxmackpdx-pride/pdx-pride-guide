@@ -1,0 +1,34 @@
+<!-- @dsCard group="Buttons" -->
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#0a0a0a; color:#fff; font-family:'Inter',sans-serif; padding:28px; display:flex; flex-direction:column; gap:22px; align-items:flex-start; }
+.lbl { font-size:10px; color:#666; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:-14px; }
+.btn-neon {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.85rem;
+  text-transform:uppercase; letter-spacing:0.08em; padding:10px 20px;
+  border:2px solid #CCFF00; color:#CCFF00; background:rgba(0,0,0,0.62);
+  cursor:pointer; box-shadow:4px 4px 0 rgba(255,0,204,0.36);
+  transition:background .15s,color .15s,transform .15s,box-shadow .15s;
+}
+.btn-neon:hover { background:#CCFF00; color:#000; transform:translate(-1px,-1px); box-shadow:6px 6px 0 rgba(255,0,204,0.5); }
+.btn-neon.solid { background:#CCFF00; color:#000; }
+.btn-neon.cyan { border-color:#00FFFF; color:#00FFFF; box-shadow:4px 4px 0 rgba(204,255,0,0.3); }
+.btn-neon.cyan:hover { background:#00FFFF; color:#000; }
+.btn-pill { background:#C8FA3C; color:#000; border:none; border-radius:6px; padding:10px 24px; font-weight:700; font-size:14px; font-family:'Inter',sans-serif; cursor:pointer; }
+.btn-ghost { background:none; border:1px solid #333; color:#999; border-radius:999px; padding:8px 18px; font-size:12px; cursor:pointer; }
+.btn-ghost:hover { border-color:#CCFF00; color:#CCFF00; }
+</style></head><body>
+<div class="lbl">Primary — btn-neon (brutalist offset shadow)</div>
+<button class="btn-neon">VIEW AS SCHEDULE →</button>
+<div class="lbl">Solid variant</div>
+<button class="btn-neon solid">I'll be there →</button>
+<div class="lbl">Cyan accent variant</div>
+<button class="btn-neon cyan">EVENT DETAILS →</button>
+<div class="lbl">Soft pill — system dialogs (error boundary, confirms)</div>
+<button class="btn-pill">Reload page</button>
+<div class="lbl">Ghost — tertiary actions</div>
+<button class="btn-ghost">Withdraw RSVP</button>
+</body></html>

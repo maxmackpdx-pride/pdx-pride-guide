@@ -1,0 +1,41 @@
+<!-- @dsCard group="Cards" -->
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=Inter:wght@400&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#0a0a0a; color:#fff; font-family:'Inter',sans-serif; padding:28px; display:flex; gap:20px; flex-wrap:wrap; }
+.poster-card {
+  width:230px; background:linear-gradient(160deg,rgba(255,255,255,0.045),transparent 30%),#0b0b0b;
+  border:2px solid #2b2b2b; box-shadow:0 0 0 1px #050505, 0 14px 30px rgba(0,0,0,0.42);
+  cursor:pointer; overflow:hidden; position:relative;
+  transition:all .35s cubic-bezier(0.2,0.8,0.2,1);
+}
+.glow { box-shadow:0 0 14px color-mix(in srgb, var(--dc, #00FFFF) 18%, transparent); animation:pulse 4s ease-in-out infinite; }
+.glow:hover { box-shadow:0 0 28px color-mix(in srgb, var(--dc, #00FFFF) 40%, transparent); transform:translateY(-2px); }
+@keyframes pulse { 0%,100%{box-shadow:0 0 14px color-mix(in srgb, var(--dc) 18%, transparent)} 50%{box-shadow:0 0 24px color-mix(in srgb, var(--dc) 32%, transparent)} }
+.flyer { height:190px; background:linear-gradient(135deg,#131313,#1d1d1d); display:flex; align-items:center; justify-content:center; color:#333; font-size:11px; }
+.body { padding:14px 16px; border-left:4px solid var(--dc); }
+.title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:21px; text-transform:uppercase; line-height:1.05; margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.venue { font-size:13px; color:#888; }
+.when { font-size:12px; color:#999; margin-top:3px; }
+.tag { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:0.08em; border:1px solid var(--dc); color:var(--dc); padding:2px 7px; margin-bottom:8px; }
+</style></head><body>
+<div class="poster-card glow" style="--dc:#FF00CC">
+  <div class="flyer">flyer 2:3</div>
+  <div class="body">
+    <span class="tag">Ticketed · 21+</span>
+    <h3 class="title">Horse Meat Disco</h3>
+    <div class="venue">Crystal Ballroom</div>
+    <div class="when">Fri, Jul 17 · 09:00 PM · Pearl District</div>
+  </div>
+</div>
+<div class="poster-card glow" style="--dc:#00FFFF">
+  <div class="flyer">flyer 2:3</div>
+  <div class="body">
+    <span class="tag">Free · All ages</span>
+    <h3 class="title">Sad Girl Summer</h3>
+    <div class="venue">Black Water</div>
+    <div class="when">Thu, Jul 16 · 07:00 PM · NE Portland</div>
+  </div>
+</div>
+</body></html>
