@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -23,9 +23,10 @@ import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { List, Grid, MapPin, Link2 } from "lucide-react";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
 
-const MapView = lazy(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
+const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
 const DAY_COLORS: Record<string, string> = {
   THU: "#00FFFF",

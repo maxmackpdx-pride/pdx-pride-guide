@@ -16,12 +16,22 @@ export function serveStatic(app: Express) {
   const baseIndexHtml = fs.readFileSync(indexPath, "utf8");
   const sendSeoIndex = (req: express.Request, res: express.Response) => {
     const requestPath = (req.originalUrl || req.url || req.path || "/").split("?")[0] || "/";
-    res.type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
+    res.set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 
   // Serve injected HTML for the homepage — express.static would bypass SEO injection.
   app.get("/", sendSeoIndex);
   app.get("/index.html", sendSeoIndex);
+
+  // Hashed build assets are content-addressed — cache forever. A hash miss
+  // (stale page after a deploy) must 404, not fall through to the SPA HTML,
+  // so the client can detect it and reload.
+  app.use("/assets", express.static(path.join(distPath, "assets"), {
+    index: false,
+    immutable: true,
+    maxAge: "1y",
+    fallthrough: false,
+  }));
 
   app.use(express.static(distPath, { index: false }));
 

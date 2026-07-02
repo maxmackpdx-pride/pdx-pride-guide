@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -7,7 +7,9 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin, Globe, Instagram, Clock, Phone } from "lucide-react";
 
-const DirectoryMap = lazy(() => import("@/components/DirectoryMap"));
+import { lazyWithReload } from "@/lib/lazyWithReload";
+
+const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
 type Business = {
   id: number;

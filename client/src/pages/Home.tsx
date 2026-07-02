@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import EventModal from "@/components/EventModal";
 import EventTicker from "@/components/EventTicker";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
 
-const MapView = lazy(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
+const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 import { Briefcase, Gift, Search, UserRound } from "lucide-react";
 import GlitchWord from "@/components/GlitchWord";
 import HeroVideoOverlay from "@/components/HeroVideoOverlay";
