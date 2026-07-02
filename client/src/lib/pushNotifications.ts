@@ -19,6 +19,22 @@ export function shouldShowInstallBeforePush(): boolean {
   return isIosDevice() && !isStandalonePwa();
 }
 
+export function isPushPermissionPending(): boolean {
+  return typeof Notification !== "undefined" && Notification.permission === "default";
+}
+
+export async function hasPushSubscription(): Promise<boolean> {
+  if (!("serviceWorker" in navigator)) return false;
+  try {
+    const registration = await navigator.serviceWorker.getRegistration("/");
+    if (!registration) return false;
+    const subscription = await registration.pushManager.getSubscription();
+    return Boolean(subscription);
+  } catch {
+    return false;
+  }
+}
+
 export async function subscribeToPush(): Promise<"granted" | "denied" | "unsupported" | "install_required" | "not_configured"> {
   if (!canUseWebPush()) return "unsupported";
   if (shouldShowInstallBeforePush()) return "install_required";

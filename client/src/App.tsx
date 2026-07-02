@@ -10,6 +10,7 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import FilmGrainOverlay from "./components/FilmGrainOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
+import PushNotificationPrompt from "./components/PushNotificationPrompt";
 
 function RouteBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -45,6 +46,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
       <AuthProvider>
+        <PushNotificationPrompt />
         <Router>
           <ScrollToTop />
           <div className="min-h-screen flex flex-col app-shell" style={{ background: "#0a0a0a" }}>
