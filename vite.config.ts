@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: false,
       injectManifest: {
         globPatterns: [
-          "index.html",
+          // index.html is served network-first only — precaching it strands PWA users on stale bundles.
           "manifest.webmanifest",
           "favicon.png",
           "icons/*.png",

@@ -30,11 +30,41 @@
   </head>
   <body>
     <div id="root"></div>
+    <div id="boot-fallback" hidden style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#fff;font-family:sans-serif;text-align:center;padding:32px;">
+      <div style="font-size:42px;margin-bottom:12px;">🏳️‍🌈</div>
+      <h1 style="font-size:1.25rem;margin:0 0 8px;">Pride Guide is loading…</h1>
+      <p style="opacity:0.65;max-width:320px;line-height:1.5;margin:0 0 20px;">If this screen stays blank, clear the cached app shell and try again.</p>
+      <button type="button" id="boot-reload-btn" style="background:#C8FA3C;color:#000;border:none;border-radius:6px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:14px;">Reload app</button>
+    </div>
     <script>
-      // After a deploy, a cached page can reference a main bundle that 404s.
-      // Reload once so the browser picks up fresh index.html + assets.
+      // Installed PWA users can get a stale precached shell after deploy.
+      // Clear service worker caches once, then reload with fresh index.html + bundles.
       (function () {
         var key = "bundle-reload";
+
+        function clearCachesAndReload() {
+          var finish = function () {
+            sessionStorage.removeItem(key);
+            window.location.reload();
+          };
+          if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.getRegistrations()
+              .then(function (regs) {
+                return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+              })
+              .then(function () {
+                if (!window.caches) return;
+                return caches.keys().then(function (names) {
+                  return Promise.all(names.map(function (name) { return caches.delete(name); }));
+                });
+              })
+              .then(finish)
+              .catch(finish);
+            return;
+          }
+          finish();
+        }
+
         window.addEventListener(
           "error",
           function (e) {
@@ -42,15 +72,29 @@
             if (
               el &&
               el.tagName === "SCRIPT" &&
-              el.type === "module" &&
+              el.src &&
+              el.src.indexOf("/assets/") !== -1 &&
               !sessionStorage.getItem(key)
             ) {
               sessionStorage.setItem(key, "1");
-              window.location.reload();
+              clearCachesAndReload();
             }
           },
           true,
         );
+
+        window.setTimeout(function () {
+          var root = document.getElementById("root");
+          var fallback = document.getElementById("boot-fallback");
+          if (root && !root.childElementCount && fallback) {
+            fallback.hidden = false;
+          }
+        }, 6000);
+
+        var reloadBtn = document.getElementById("boot-reload-btn");
+        if (reloadBtn) {
+          reloadBtn.addEventListener("click", clearCachesAndReload);
+        }
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>

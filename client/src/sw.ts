@@ -1,24 +1,38 @@
 /// <reference lib="webworker" />
+import { clientsClaim } from "workbox-core";
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { NetworkFirst } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope & {
-  __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
+  __WB_MANIFEST: Array<string | { url: string; revision: string | null }>;
 };
 
-precacheAndRoute(self.__WB_MANIFEST);
-cleanupOutdatedCaches();
+// Never precache index.html — a stale shell breaks installed PWA launches after deploy.
+const precacheManifest = self.__WB_MANIFEST.filter(entry => {
+  const url = typeof entry === "string" ? entry : entry.url;
+  return url !== "index.html" && !url.endsWith("/index.html");
+});
 
-// Network-first for SPA navigations — avoids stale HTML after deploy.
+precacheAndRoute(precacheManifest);
+cleanupOutdatedCaches();
+clientsClaim();
+
+// Always try the network for navigations so the installed app gets fresh HTML + bundle hashes.
 registerRoute(
   new NavigationRoute(
     new NetworkFirst({
       cacheName: "pdx-navigations",
-      networkTimeoutSeconds: 4,
+      networkTimeoutSeconds: 5,
     }),
   ),
 );
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 
 // Phase 2+ extends these handlers for Web Push.
 self.addEventListener("push", (event) => {
