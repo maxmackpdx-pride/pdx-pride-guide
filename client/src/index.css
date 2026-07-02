@@ -6002,6 +6002,31 @@ footer a:hover { color: #00FFFF !important; }
   border-radius: 12px;
 }
 
+/* Submit / Promoters page — compact flush hero (matches Events, Dashboard) */
+.submit-page .page-hero {
+  min-height: clamp(148px, 20vh, 210px);
+}
+
+.submit-page .page-hero__inner {
+  padding: 20px 20px 16px;
+  min-height: inherit;
+}
+
+.submit-page .page-hero__panel {
+  padding: 12px 22px 14px;
+}
+
+.submit-page .page-hero__title {
+  font-size: clamp(2.4rem, 5.5vw, 4.25rem);
+  margin: 0.25rem 0 0.15rem;
+}
+
+.submit-page .page-hero__lede {
+  font-size: clamp(0.95rem, 1.8vw, 1.02rem);
+  line-height: 1.6;
+  max-width: 42rem;
+}
+
 /* Submit form polish */
 .submit-page__body {
   max-width: 760px;

@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
-import PageHero from "@/components/PageHero";
+import PageHero, { type PageHeroAccent } from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
@@ -202,12 +202,42 @@ export default function Submit() {
     eventMutation.mutate({ type: "NEW_EVENT" });
   };
 
-  const heroCopy: Record<PageMode, { line1: string; line2: string; accent: "lime" | "cyan" | "orange" | "magenta" }> = {
-    landing: { line1: "PROMOTERS", line2: "& EVENTS", accent: "lime" },
-    submit:  { line1: "SUBMIT", line2: "AN EVENT", accent: "lime" },
-    apply:   { line1: "APPLY AS", line2: "PROMOTER", accent: "cyan" },
-    suggest: { line1: "SPOTTED", line2: "AN EVENT", accent: "orange" },
-    claim:   { line1: "CLAIM", line2: "AN EVENT", accent: "cyan" },
+  const heroCopy: Record<PageMode, { kicker: string; line1: string; line2: string; accent: PageHeroAccent; lede: string }> = {
+    landing: {
+      kicker: "Portland Pride 2026 · Community submissions",
+      line1: "PROMOTERS &",
+      line2: "EVENTS",
+      accent: "lime",
+      lede: "Got an event? Want to be a verified promoter? Spotted something we're missing? Pick your path below.",
+    },
+    submit: {
+      kicker: "New listing",
+      line1: "SUBMIT",
+      line2: "AN EVENT",
+      accent: "lime",
+      lede: "Add your Pride Weekend event to the guide. Verified promoters go live immediately; new accounts enter the review queue.",
+    },
+    apply: {
+      kicker: "Promoter verification",
+      line1: "APPLY AS",
+      line2: "PROMOTER",
+      accent: "cyan",
+      lede: "Apply to post events that go live without admin review. Tell us who you are and what you run.",
+    },
+    suggest: {
+      kicker: "Community tip",
+      line1: "SPOTTED",
+      line2: "AN EVENT",
+      accent: "magenta",
+      lede: "Saw a Pride event we're missing? Tip us off — no promoter account needed. Admins review every suggestion.",
+    },
+    claim: {
+      kicker: "Host your listing",
+      line1: "CLAIM",
+      line2: "AN EVENT",
+      accent: "cyan",
+      lede: "Already listed but unclaimed? Take ownership to manage your event and connect with the community.",
+    },
   };
   const hero = heroCopy[mode];
 
@@ -217,17 +247,24 @@ export default function Submit() {
   return (
     <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <PageHero flipLightLeaks titleLine1={hero.line1} titleLine2={hero.line2} accent={hero.accent} lede="" bgImage="/motifs/portland-sign.jpg" bgPosition="center 38%" />
+      <PageHero
+        flush
+        compact
+        flipLightLeaks
+        kicker={hero.kicker}
+        titleLine1={hero.line1}
+        titleLine2={hero.line2}
+        accent={hero.accent}
+        lede={hero.lede}
+        bgImage="/motifs/portland-sign.jpg"
+        bgPosition="center 38%"
+      />
 
       <div className="submit-page__body">
 
         {/* ── LANDING ── */}
         {mode === "landing" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <p style={{ color: "var(--text-meta)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: 8 }}>
-              Got an event? Want to be a verified promoter? Spotted something we're missing? Pick your path.
-            </p>
-
             {/* Card 1: Submit New Event */}
             <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("submit"); setSubmitStep(isApproved ? "event_details" : "promoter_app"); }}
               style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid var(--neon-yellow)", padding: 20, cursor: "pointer" }}>
