@@ -49,7 +49,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
       position: "fixed", inset: 0, zIndex: 9999,
       background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center",
       backdropFilter: "blur(4px)",
-    }} onClick={onClose}>
+    }}>
       <div onClick={e => e.stopPropagation()} style={{
         background: "#fff", color: "#000",
         border: "3px solid #000",

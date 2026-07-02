@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
@@ -12,27 +12,12 @@ import PageHero, { type PageHeroAccent } from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
+import { PRIDE_WEEK_DAY_OPTIONS, defaultPrideDateTimes } from "@shared/prideWeek";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
 
-// Pride weekend dates by day-of-week key
-const DAY_DATES: Record<string, string> = {
-  THU: "2026-07-16",
-  FRI: "2026-07-17",
-  SAT: "2026-07-18",
-  SUN: "2026-07-19",
-};
-const DAY_NEXT: Record<string, string> = {
-  THU: "2026-07-17",
-  FRI: "2026-07-18",
-  SAT: "2026-07-19",
-  SUN: "2026-07-20",
-};
-const defaultDateTimes = (day: string) => ({
-  dateStart: `${DAY_DATES[day] || DAY_DATES.FRI}T21:00`,
-  dateEnd: `${DAY_NEXT[day] || DAY_NEXT.FRI}T02:00`,
-});
+const SUBMIT_RETURN_KEY = "pdx-submit-return";
 
 const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
 const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", marginBottom: 12, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
@@ -41,9 +26,14 @@ const backBtnStyle: React.CSSProperties = { background: "none", border: "none", 
 type PageMode = "landing" | "submit" | "apply" | "suggest" | "claim";
 type SubmitStep = "promoter_app" | "event_details";
 
+type SubmitReturnState = {
+  mode: PageMode;
+  submitStep: SubmitStep;
+};
+
 const emptyEventForm = () => ({
   title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
-  ...defaultDateTimes("FRI"),
+  ...defaultPrideDateTimes("FRI"),
   dayOfWeek: "FRI",
   ageRequirement: "ALL_AGES", admission: "FREE", ticketUrl: "",
   posterImageUrl: "", isPublic: true, isHouseParty: false,
@@ -63,6 +53,8 @@ export default function Submit() {
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+  const [authDismissed, setAuthDismissed] = useState(false);
+  const [eventSubmitSuccess, setEventSubmitSuccess] = useState<{ title: string; desc: string } | null>(null);
   const [location] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
@@ -83,9 +75,44 @@ export default function Submit() {
     enabled: mode === "claim",
   });
 
+  const openAuth = () => {
+    setAuthDismissed(false);
+    setShowAuth(true);
+    if (mode !== "landing") {
+      sessionStorage.setItem(SUBMIT_RETURN_KEY, JSON.stringify({ mode, submitStep }));
+    }
+  };
+
+  const closeAuth = () => {
+    setAuthDismissed(true);
+    setShowAuth(false);
+  };
+
   useEffect(() => {
-    if (!loading && !user && mode !== "landing") setShowAuth(true);
-  }, [loading, user, mode]);
+    if (loading) return;
+    const saved = sessionStorage.getItem(SUBMIT_RETURN_KEY);
+    if (saved && user) {
+      try {
+        const parsed = JSON.parse(saved) as SubmitReturnState;
+        setMode(parsed.mode);
+        setSubmitStep(parsed.submitStep);
+      } catch { /* ignore */ }
+      sessionStorage.removeItem(SUBMIT_RETURN_KEY);
+    }
+  }, [loading, user]);
+
+  useEffect(() => {
+    if (mode === "landing") setAuthDismissed(false);
+  }, [mode]);
+
+  useEffect(() => {
+    if (user) {
+      setShowAuth(false);
+      setAuthDismissed(false);
+    } else if (!loading && mode !== "landing" && !authDismissed) {
+      setShowAuth(true);
+    }
+  }, [loading, user, mode, authDismissed]);
 
   useEffect(() => {
     const eventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1];
@@ -175,6 +202,10 @@ export default function Submit() {
       };
       const m = msgs[vars.type] || msgs.NEW_EVENT;
       toast({ title: m.title, description: m.desc });
+      if (vars.type === "NEW_EVENT") {
+        setEventSubmitSuccess({ title: m.title, desc: m.desc });
+        return;
+      }
       setEventForm(emptyEventForm());
       setPromoterForm(emptyPromoterForm());
       setSubmitStep("promoter_app");
@@ -183,8 +214,22 @@ export default function Submit() {
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
+  const startAnotherEvent = () => {
+    setEventForm(emptyEventForm());
+    setEventSubmitSuccess(null);
+    setSubmitStep("event_details");
+  };
+
+  const finishSubmitFlow = () => {
+    setEventForm(emptyEventForm());
+    setPromoterForm(emptyPromoterForm());
+    setSubmitStep("promoter_app");
+    setEventSubmitSuccess(null);
+    setMode("landing");
+  };
+
   const handleSubmitWithEvent = async () => {
-    if (!user) { setShowAuth(true); return; }
+    if (!user) { openAuth(); return; }
     if (!isApproved) {
       // Fire promoter application first — bail out if it fails
       const r = await apiRequest("POST", "/api/submit", {
@@ -246,7 +291,7 @@ export default function Submit() {
 
   return (
     <div className="zine-page submit-page board-page">
-      {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+      {showAuth && !user && <AuthModal onClose={closeAuth} defaultTab="register" />}
       <PageHero
         flush
         compact
@@ -266,7 +311,7 @@ export default function Submit() {
         {mode === "landing" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Card 1: Submit New Event */}
-            <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("submit"); setSubmitStep(isApproved ? "event_details" : "promoter_app"); }}
+            <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("submit"); setSubmitStep(isApproved ? "event_details" : "promoter_app"); }}
               style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid var(--neon-yellow)", padding: 20, cursor: "pointer" }}>
               <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1.1rem", marginBottom: 6 }}>
                 {isApproved ? "SUBMIT NEW EVENT →" : "SUBMIT NEW EVENT + SIGN UP TO BE A PROMOTER →"}
@@ -280,7 +325,7 @@ export default function Submit() {
 
             {/* Card 2: Apply as Promoter (only shown if not approved) */}
             {!isApproved && (
-              <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("apply"); }}
+              <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("apply"); }}
                 style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #00FFFF", padding: 20, cursor: "pointer" }}>
                 <div className="display" style={{ color: "#00FFFF", fontSize: "1.1rem", marginBottom: 6 }}>APPLY AS PROMOTER →</div>
                 <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
@@ -290,7 +335,7 @@ export default function Submit() {
             )}
 
             {/* Card 3: Suggest an Event */}
-            <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("suggest"); }}
+            <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("suggest"); }}
               style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #FF6600", padding: 20, cursor: "pointer" }}>
               <div className="display" style={{ color: "#FF6600", fontSize: "1.1rem", marginBottom: 2 }}>SPOTTED AN EVENT →</div>
               <div className="display" style={{ color: "#FF6600", fontSize: "0.7rem", marginBottom: 8, opacity: 0.7 }}>(NO PROMOTER STATUS NEEDED)</div>
@@ -300,7 +345,7 @@ export default function Submit() {
             </button>
 
             {/* Card 4: Claim Existing Event */}
-            <button type="button" onClick={() => { if (!user) { setShowAuth(true); return; } setMode("claim"); }}
+            <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("claim"); }}
               style={{ textAlign: "left", background: "#0d0d0d", border: "1px solid #333", padding: 20, cursor: "pointer" }}>
               <div className="display" style={{ color: "#aaa", fontSize: "1rem", marginBottom: 6 }}>CLAIM EXISTING EVENT →</div>
               <p style={{ color: "#666", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
@@ -314,7 +359,7 @@ export default function Submit() {
                 <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5, marginBottom: 14 }}>
                   Create a free account or log in to submit, apply, or suggest.
                 </p>
-                <button type="button" className="btn-neon solid" onClick={() => setShowAuth(true)}>Log In / Join →</button>
+                <button type="button" className="btn-neon solid" onClick={() => openAuth()}>Log In / Join →</button>
               </div>
             )}
           </div>
@@ -356,6 +401,27 @@ export default function Submit() {
         {/* ── SUBMIT: Event Details (approved users skip straight here) ── */}
         {mode === "submit" && (isApproved || submitStep === "event_details") && (
           <div>
+            {eventSubmitSuccess ? (
+              <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(200,250,60,0.06)", padding: 24 }}>
+                <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1.2rem", marginBottom: 8 }}>
+                  {eventSubmitSuccess.title}
+                </div>
+                <p style={{ color: "#aaa", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: 24 }}>
+                  {eventSubmitSuccess.desc}
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <button type="button" className="btn-neon solid" onClick={startAnotherEvent}
+                    style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
+                    Create Another Event →
+                  </button>
+                  <button type="button" onClick={finishSubmitFlow}
+                    style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", letterSpacing: "0.06em" }}>
+                    Back to promoters hub
+                  </button>
+                </div>
+              </div>
+            ) : (
+            <>
             <button type="button" style={backBtnStyle} onClick={() => isApproved ? setMode("landing") : setSubmitStep("promoter_app")}>
               ← {isApproved ? "BACK" : "BACK TO PROMOTER APPLICATION"}
             </button>
@@ -396,12 +462,11 @@ export default function Submit() {
                     <label style={labelStyle}>Day of Week</label>
                     <select value={eventForm.dayOfWeek} onChange={e => {
                       const day = e.target.value;
-                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultDateTimes(day) }));
+                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
                     }}>
-                      <option value="THU">Thursday July 16</option>
-                      <option value="FRI">Friday July 17</option>
-                      <option value="SAT">Saturday July 18</option>
-                      <option value="SUN">Sunday July 19</option>
+                      {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                        <option key={d.value} value={d.value}>{d.label}</option>
+                      ))}
                     </select>
                   </div>
                   <div className={fieldClass}>
@@ -491,6 +556,8 @@ export default function Submit() {
               </p>
               </ScrollReveal>
             </form>
+            </>
+            )}
           </div>
         )}
 
@@ -504,7 +571,7 @@ export default function Submit() {
                 <p style={{ color: "#aaa", fontSize: "0.84rem", margin: 0 }}>Your promoter application is in the admin queue. You'll be notified when it's reviewed.</p>
               </div>
             )}
-            <form onSubmit={e => { e.preventDefault(); if (!user) { setShowAuth(true); return; } applyMutation.mutate(); }}
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } applyMutation.mutate(); }}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div className="display" style={sectionHeadStyle}>PROMOTER APPLICATION</div>
               <div className={fieldClass}>
@@ -549,7 +616,7 @@ export default function Submit() {
                 Tip us off — admins review all suggestions. If approved, the event goes live as an unclaimed listing anyone can claim.
               </p>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { setShowAuth(true); return; } eventMutation.mutate({ type: "SUGGEST" }); }}
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}
               style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className={`${fieldClass} submit-form__field--orange`}>
                 <label style={labelStyle}>Event Name *</label>
@@ -561,11 +628,13 @@ export default function Submit() {
               </div>
               <div className={`${fieldClass} submit-form__field--orange`}>
                 <label style={labelStyle}>Day</label>
-                <select value={eventForm.dayOfWeek} onChange={e => setEventForm(f => ({ ...f, dayOfWeek: e.target.value }))}>
-                  <option value="THU">Thursday July 16</option>
-                  <option value="FRI">Friday July 17</option>
-                  <option value="SAT">Saturday July 18</option>
-                  <option value="SUN">Sunday July 19</option>
+                <select value={eventForm.dayOfWeek} onChange={e => {
+                  const day = e.target.value;
+                  setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
+                }}>
+                  {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                    <option key={d.value} value={d.value}>{d.label}</option>
+                  ))}
                 </select>
               </div>
               <div className={`${fieldClass} submit-form__field--cyan`}>
@@ -592,7 +661,7 @@ export default function Submit() {
         {mode === "claim" && (
           <div>
             <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { setShowAuth(true); return; } eventMutation.mutate({ type: "CLAIM" }); }}
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}
               style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="display" style={sectionHeadStyle}>CLAIM DETAILS</div>
               <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", lineHeight: 1.5, marginTop: -4 }}>

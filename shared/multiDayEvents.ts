@@ -2,7 +2,7 @@ import type { Event } from "./schema";
 import { pacificCalendarDate, pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
 
 const PACIFIC_TZ = "America/Los_Angeles";
-const PRIDE_LISTING_DAYS = new Set(["THU", "FRI", "SAT", "SUN"]);
+const PRIDE_LISTING_DAYS = new Set(["WED", "THU", "FRI", "SAT", "SUN", "MON"]);
 
 export type EventListing = Event & { listingInstanceKey?: string };
 

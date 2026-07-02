@@ -1,6 +1,9 @@
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+const DEFAULT_ACCEPT = "image/jpeg,image/png,image/gif,image/webp";
+const FORMAT_HINT = "JPG, PNG, WebP, or GIF — max 8MB";
+
 interface Props {
   endpoint: string;        // e.g. "/api/upload/poster"
   fieldName?: string;      // multer field name, default "poster"
@@ -8,6 +11,7 @@ interface Props {
   onUploaded: (url: string) => void;
   label?: string;
   accept?: string;
+  hint?: string;
 }
 
 export default function ImageUploader({
@@ -16,7 +20,8 @@ export default function ImageUploader({
   currentUrl,
   onUploaded,
   label = "Upload Image",
-  accept = "image/jpeg,image/png,image/gif,image/webp",
+  accept = DEFAULT_ACCEPT,
+  hint = FORMAT_HINT,
 }: Props) {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -30,12 +35,19 @@ export default function ImageUploader({
     fd.append(fieldName, file);
     try {
       const res = await fetch(endpoint, { method: "POST", body: fd, credentials: "include" });
-      if (!res.ok) throw new Error("Upload failed");
-      const { url } = await res.json();
-      setPreview(url);
-      onUploaded(url);
-    } catch {
-      toast({ title: "Upload failed", description: "Try a jpg/png under 8MB.", variant: "destructive" });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Upload failed");
+      setPreview(payload.url);
+      onUploaded(payload.url);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Upload failed";
+      toast({
+        title: "Upload failed",
+        description: message.includes("invalid") || message.includes("8MB")
+          ? message
+          : `${message}. Use ${FORMAT_HINT.toLowerCase()}.`,
+        variant: "destructive",
+      });
     } finally {
       setUploading(false);
     }
@@ -84,6 +96,11 @@ export default function ImageUploader({
           </button>
         )}
       </div>
+      {hint && (
+        <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 6 }}>
+          {hint}
+        </div>
+      )}
     </div>
   );
 }

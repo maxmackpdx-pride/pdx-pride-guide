@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 import EventTalentPanel from "@/components/EventTalentPanel";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
+import { PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
 
 const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -100,10 +101,9 @@ export function DashboardEventEditForm({
           <div>
             <label style={labelStyle}>Day</label>
             <select style={inputStyle} value={eventForm.dayOfWeek} onChange={e => setEventForm((f: any) => ({ ...f, dayOfWeek: e.target.value }))}>
-              <option value="THU">Thursday July 16</option>
-              <option value="FRI">Friday July 17</option>
-              <option value="SAT">Saturday July 18</option>
-              <option value="SUN">Sunday July 19</option>
+              {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                <option key={d.value} value={d.value}>{d.label}</option>
+              ))}
             </select>
           </div>
           <div>
