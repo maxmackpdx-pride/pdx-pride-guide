@@ -101,14 +101,19 @@ function formatEventLine(evt: SeoEvent) {
   };
 }
 
+// Inline visually-hidden style so the crawler feed never paints before the app
+// bundle removes it — a stylesheet class would still flash while CSS loads.
+const CRAWLER_FEED_HIDDEN_STYLE =
+  "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";
+
 export function buildCrawlerEventDirectory(events: SeoEvent[]) {
   if (events.length === 0) {
-    return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events"><p>No live events are listed yet. Visit ${SITE_URL}/api/events for the JSON feed or ${SITE_URL}/llms.txt for a plain-text listing.</p></section>`;
+    return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}"><p>No live events are listed yet. Visit ${SITE_URL}/api/events for the JSON feed or ${SITE_URL}/llms.txt for a plain-text listing.</p></section>`;
   }
 
   const items = events.map(evt => formatEventLine(evt).html).join("\n      ");
 
-  return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events">
+  return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}">
       <h1>PDX Pride Guide — Portland Pride 2026 Events</h1>
       <p>${events.length} live events listed for Portland Pride Weekend and summer 2026. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
       <ul>
