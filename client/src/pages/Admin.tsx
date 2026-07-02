@@ -166,6 +166,7 @@ export default function Admin() {
   const [modNote, setModNote] = useState<Record<number, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
+  const [assignHostName, setAssignHostName] = useState("");
   const [editingGigId, setEditingGigId] = useState<number | null>(null);
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
   const [eventSearch, setEventSearch] = useState("");
@@ -410,6 +411,32 @@ export default function Admin() {
     },
   });
 
+  const assignHostMutation = useMutation({
+    mutationFn: ({ id, username }: { id: number; username: string }) =>
+      apiRequest("POST", `/api/admin/events/${id}/host`, { username }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setAssignHostName("");
+      toast({ title: "Promoter assigned", description: "They now host this event and were notified." });
+    },
+    onError: (err) => {
+      toast({ title: "Error", description: parseApiError(err, "Could not assign promoter."), variant: "destructive" });
+    },
+  });
+
+  const unassignHostMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/events/${id}/host`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      toast({ title: "Promoter removed", description: "Event is back in the claimable pool." });
+    },
+    onError: (err) => {
+      toast({ title: "Error", description: parseApiError(err, "Could not remove promoter."), variant: "destructive" });
+    },
+  });
+
   const editEventMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<AdminEvent> }) =>
       apiRequest("PUT", `/api/admin/events/${id}`, data),
@@ -614,6 +641,7 @@ export default function Admin() {
   const startEdit = (ev: AdminEvent) => {
     setEditingId(ev.id);
     setEditForm({ ...ev });
+    setAssignHostName("");
   };
 
   const handleEditSave = (e: React.FormEvent) => {
@@ -1161,6 +1189,47 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">DESCRIPTION</label>
                             <textarea rows={3} value={editForm.description || ""} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
                               className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400 resize-y" />
+                          </div>
+                          <div className="md:col-span-2 border-t border-white/10 pt-4">
+                            <label className="display text-xs text-white/40 block mb-1">PROMOTER (PRIMARY HOST)</label>
+                            {ev.claimedBy ? (
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <span className="text-sm" style={{ color: "#CCFF00" }}>
+                                  @{ev.claimedByProfile?.username || ev.claimedBy}
+                                  {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
+                                </span>
+                                <button type="button" disabled={unassignHostMutation.isPending}
+                                  onClick={() => {
+                                    if (window.confirm(`Remove @${ev.claimedBy} from "${ev.title}" and make it claimable again?`)) {
+                                      unassignHostMutation.mutate(ev.id);
+                                    }
+                                  }}
+                                  className="display text-xs px-3 py-1 border disabled:opacity-50"
+                                  style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}>
+                                  {unassignHostMutation.isPending ? "REMOVING..." : "UNASSIGN"}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex-1 min-w-[220px]">
+                                  <UsernameAutocomplete
+                                    value={assignHostName}
+                                    onChange={setAssignHostName}
+                                    placeholder="@promoter to assign"
+                                    inputStyle={{ width: "100%", padding: "8px 12px", fontSize: 14, color: "#fff", background: "#000", border: "1px solid rgba(255,255,255,0.2)" }}
+                                  />
+                                </div>
+                                <button type="button" disabled={!assignHostName.trim() || assignHostMutation.isPending}
+                                  onClick={() => assignHostMutation.mutate({ id: ev.id, username: assignHostName })}
+                                  className="display text-xs px-4 py-2 border-2 disabled:opacity-50"
+                                  style={{ borderColor: "#00FFFF", color: "#00FFFF", background: "transparent" }}>
+                                  {assignHostMutation.isPending ? "ASSIGNING..." : "ASSIGN PROMOTER"}
+                                </button>
+                                <span className="text-white/35 text-xs w-full">
+                                  Unclaimed — assigning makes them the host, approves them as a promoter, and turns off claimable.
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-3 flex-wrap pt-2">

@@ -2554,6 +2554,7 @@ export interface IStorage {
   setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
   addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
   replaceEventPrimaryHost(eventId: number, newUserId: number): void;
+  unassignEventHosts(eventId: number): void;
   // Event talent
   getEventTalent(eventId: number, opts?: { includePending?: boolean }): any[];
   getEventTalentByUser(userId: number): Record<number, { roles: EventTalentRole[]; status: "LIVE" | "PENDING" }>;
@@ -3441,6 +3442,11 @@ export const storage: IStorage = {
   replaceEventPrimaryHost(eventId, newUserId) {
     sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ?`).run(eventId);
     storage.setPrimaryEventHost(eventId, newUserId, null);
+  },
+  unassignEventHosts(eventId) {
+    ensureEventHostsSchema();
+    sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ?`).run(eventId);
+    db.update(events).set({ claimedBy: null, isClaimable: true }).where(eq(events.id, eventId)).run();
   },
   addEventCoHost(eventId, inviterUserId, username, email) {
     ensureEventHostsSchema();

@@ -2017,6 +2017,38 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  // Assign a promoter as the event's primary host (same effect as an approved claim)
+  app.post("/api/admin/events/:id/host", requireAdmin, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const username = String(req.body.username || "").trim().replace(/^@/, "");
+    if (!username) return res.status(400).json({ error: "username required" });
+    const user = storage.getUserByUsername(username);
+    if (!user) return res.status(404).json({ error: "No account found with that username" });
+    storage.setPrimaryEventHost(evt.id, user.id, req.session.userId ?? null);
+    if ((user.promoterStatus || "none") !== "approved") {
+      storage.setPromoterStatus(user.id, "approved");
+    }
+    storage.sendMessage(
+      req.session.userId!,
+      user.id,
+      `You now host: ${evt.title}`,
+      `An admin assigned you as the promoter for "${evt.title}". Open your dashboard to manage the event and post host updates.`,
+      { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
+    );
+    const fresh = storage.getEvent(evt.id);
+    res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
+  });
+
+  // Remove all hosts and return the event to the unclaimed/claimable pool
+  app.delete("/api/admin/events/:id/host", requireAdmin, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    storage.unassignEventHosts(evt.id);
+    const fresh = storage.getEvent(evt.id);
+    res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
+  });
+
   // GET admin moderation requests
   app.get("/api/admin/moderation", requireAdmin, (req, res) => {
     const reqs = req.query.all === "true" ? storage.getModerationRequests() : storage.getModerationRequests("PENDING");
