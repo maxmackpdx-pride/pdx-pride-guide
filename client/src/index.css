@@ -8320,10 +8320,17 @@ html.calm-mode .glitch-logo {
   animation: none !important;
 }
 
+/* GlitchWord uses background-clip:text — solid fill + solid bg = grey rectangle in calm mode */
 html.calm-mode .glitch-word__gradient {
-  background: #d4d4d4 !important;
-  -webkit-text-fill-color: #d4d4d4 !important;
-  animation: none !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+html.calm-mode .glitch-word__outline {
+  display: none !important;
 }
 
 html.calm-mode .glitch-word::before,
@@ -8331,9 +8338,11 @@ html.calm-mode .glitch-word::after {
   display: none !important;
 }
 
+html.calm-mode .home-hero-title-pride,
 html.calm-mode .site-brand-wordmark__line--accent,
-html.calm-mode .footer-brand-wordmark__line--accent {
-  color: #d4d4d4 !important;
+html.calm-mode .footer-brand-wordmark__line--accent,
+html.calm-mode .page-hero__accent--rainbow {
+  color: #ffffff !important;
   filter: none !important;
 }
 
@@ -8354,14 +8363,17 @@ html.calm-mode .page-hero__accent--lime,
 html.calm-mode .page-hero__accent--cyan,
 html.calm-mode .page-hero__accent--magenta,
 html.calm-mode .page-hero__accent--orange,
-html.calm-mode .page-hero__accent--rainbow,
 html.calm-mode .page-hero__title,
 html.calm-mode .page-hero-title {
   color: #fff !important;
   text-shadow: none !important;
   filter: none !important;
   background: none !important;
-  -webkit-text-fill-color: #fff !important;
+}
+
+html.calm-mode .page-hero__accent--rainbow .glitch-word__gradient {
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 html.calm-mode .home-countdown-box {
