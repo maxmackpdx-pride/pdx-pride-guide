@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
@@ -10,15 +10,35 @@ import GlitchLogo from "@/components/GlitchLogo";
 import GlitchWord from "@/components/GlitchWord";
 import CalmModeToggle from "@/components/CalmModeToggle";
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/events", label: "Events" },
-  { href: "/submit", label: "Promoters" },
-  { href: "/pride-work", label: "Pride Werk" },
-  { href: "/gifting", label: "Gifting" },
-  { href: "/spotted", label: "Spotted!" },
-  { href: "/directory", label: "Buy US" },
-  { href: "/about", label: "About" },
+type NavItem = { href: string; label: string };
+
+type NavEntry =
+  | { type: "link"; href: string; label: string }
+  | { type: "dropdown"; id: string; label: string; items: NavItem[] };
+
+const navEntries: NavEntry[] = [
+  { type: "link", href: "/", label: "Home" },
+  { type: "link", href: "/events", label: "Events" },
+  {
+    type: "dropdown",
+    id: "community",
+    label: "Community",
+    items: [
+      { href: "/pride-work", label: "Pride Werk" },
+      { href: "/spotted", label: "Spotted!" },
+      { href: "/gifting", label: "Gifting" },
+    ],
+  },
+  {
+    type: "dropdown",
+    id: "guide",
+    label: "Guide",
+    items: [
+      { href: "/submit", label: "Promoters" },
+      { href: "/directory", label: "Buy US" },
+      { href: "/about", label: "About" },
+    ],
+  },
 ];
 
 function NavLink({
@@ -49,17 +69,70 @@ function NavLink({
   );
 }
 
+function NavDropdown({
+  id,
+  label,
+  items,
+  location,
+  open,
+  onToggle,
+  onClose,
+}: {
+  id: string;
+  label: string;
+  items: NavItem[];
+  location: string;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) {
+  const active = items.some(item => location === item.href || location.startsWith(`${item.href}/`));
+  const panelId = `site-nav-dropdown-${id}`;
+
+  return (
+    <div className={`site-nav-dropdown${open ? " open" : ""}`}>
+      <button
+        type="button"
+        className={`site-nav-dropdown__trigger${active ? " active" : ""}`}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-controls={panelId}
+        onClick={onToggle}
+      >
+        {label}
+        <ChevronDown size={16} className="site-nav-dropdown__chevron" aria-hidden="true" />
+      </button>
+      <div id={panelId} className="site-nav-dropdown__panel" role="menu">
+        {items.map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            role="menuitem"
+            className={`site-nav-dropdown__item${location === item.href ? " active" : ""}`}
+            onClick={onClose}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Nav() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const navScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMenuOpen(false);
     setProfileOpen(false);
+    setOpenDropdown(null);
   }, [location]);
 
   useEffect(() => {
@@ -82,6 +155,27 @@ export default function Nav() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [profileOpen]);
+
+  useEffect(() => {
+    if (!openDropdown) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!navScrollRef.current?.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenDropdown(null);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openDropdown]);
 
   const { data: adminSession } = useQuery<{ isAdmin?: boolean } | null>({
     queryKey: ["/api/admin/me"],
@@ -111,8 +205,13 @@ export default function Nav() {
 
   const unreadCount = unread.count || 0;
   const adminPendingCount = adminPending.count || 0;
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setOpenDropdown(null);
+  };
   const hubActive = location === "/dashboard" || location.startsWith("/dashboard?");
+  const profilePath = user ? `/u/${encodeURIComponent(user.username)}` : "";
+  const profileActive = Boolean(user && (location === profilePath || location.startsWith(`${profilePath}/`)));
 
   return (
     <>
@@ -134,32 +233,37 @@ export default function Nav() {
             className={`site-nav${menuOpen ? " open" : ""}`}
             aria-label="Primary navigation"
           >
-            <div className="site-nav-scroll">
-              {navLinks.map(l => (
-                <NavLink
-                  key={l.href}
-                  href={l.href}
-                  label={l.label}
-                  active={location === l.href}
-                  onClick={closeMenu}
-                />
-              ))}
+            <div className="site-nav-scroll" ref={navScrollRef}>
+              {navEntries.map(entry => {
+                if (entry.type === "link") {
+                  return (
+                    <NavLink
+                      key={entry.href}
+                      href={entry.href}
+                      label={entry.label}
+                      active={location === entry.href}
+                      onClick={closeMenu}
+                    />
+                  );
+                }
+
+                return (
+                  <NavDropdown
+                    key={entry.id}
+                    id={entry.id}
+                    label={entry.label}
+                    items={entry.items}
+                    location={location}
+                    open={openDropdown === entry.id}
+                    onToggle={() => setOpenDropdown(current => (current === entry.id ? null : entry.id))}
+                    onClose={closeMenu}
+                  />
+                );
+              })}
             </div>
 
             {user && (
               <div className="site-auth">
-                <NavLink
-                  href="/dashboard"
-                  label="HUB"
-                  active={hubActive}
-                  showNotify={unreadCount > 0}
-                  notifyLabel={
-                    unreadCount > 0
-                      ? `Your hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
-                      : "Your hub"
-                  }
-                  onClick={closeMenu}
-                />
                 {isAdmin && (
                   <NavLink
                     href="/admin"
@@ -169,13 +273,17 @@ export default function Nav() {
                     onClick={closeMenu}
                   />
                 )}
-                <div className="site-profile-menu" ref={profileRef}>
+                <div className={`site-profile-menu${profileActive ? " site-profile-menu--active" : ""}`} ref={profileRef}>
                   <button
                     type="button"
-                    className="site-profile-menu__trigger"
+                    className={`site-profile-menu__trigger${profileOpen ? " site-profile-menu__trigger--open" : ""}`}
                     aria-expanded={profileOpen}
                     aria-haspopup="menu"
-                    aria-label={`Profile menu: ${user.displayName || user.username}`}
+                    aria-label={
+                      unreadCount > 0
+                        ? `Profile menu: ${user.displayName || user.username}, ${unreadCount} unread`
+                        : `Profile menu: ${user.displayName || user.username}`
+                    }
                     onClick={() => setProfileOpen(open => !open)}
                   >
                     <UserAvatar
@@ -185,23 +293,33 @@ export default function Nav() {
                       displayName={user.displayName}
                       username={user.username}
                     />
+                    {unreadCount > 0 && <span className="site-profile-menu__notify-dot" aria-hidden="true" />}
                   </button>
                   {profileOpen && (
                     <div className="site-profile-menu__panel" role="menu">
-                      <div className="site-profile-menu__identity">
-                        <span className="site-profile-menu__name">{user.displayName || user.username}</span>
-                        <span className="site-profile-menu__username">@{user.username}</span>
-                      </div>
                       <Link
-                        href="/dashboard"
+                        href={profilePath}
                         role="menuitem"
-                        className="site-profile-menu__item"
+                        className="site-profile-menu__identity site-profile-menu__identity--link"
                         onClick={() => {
                           setProfileOpen(false);
                           setMenuOpen(false);
                         }}
                       >
-                        Hub
+                        <span className="site-profile-menu__name">{user.displayName || user.username}</span>
+                        <span className="site-profile-menu__username">@{user.username}</span>
+                        <span className="site-profile-menu__identity-hint">View public profile</span>
+                      </Link>
+                      <Link
+                        href="/dashboard"
+                        role="menuitem"
+                        className={`site-profile-menu__item${hubActive ? " active" : ""}`}
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Hub{unreadCount > 0 ? ` (${unreadCount})` : ""}
                       </Link>
                       <Link
                         href="/inbox"

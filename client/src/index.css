@@ -520,6 +520,94 @@ body::before {
   box-shadow: 0 0 8px rgba(0,255,255,0.45);
 }
 
+.site-nav-dropdown {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.site-nav-dropdown__trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: var(--site-nav-pad-y) var(--site-nav-pad-x);
+  border: 0;
+  background: transparent;
+  color: #aaa;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--site-nav-size);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.site-nav-dropdown__trigger:hover,
+.site-nav-dropdown__trigger.active,
+.site-nav-dropdown.open .site-nav-dropdown__trigger {
+  color: var(--neon-yellow);
+}
+
+.site-nav-dropdown__trigger.active::after {
+  content: "";
+  position: absolute;
+  left: var(--site-nav-pad-x);
+  right: var(--site-nav-pad-x);
+  bottom: 4px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow));
+  box-shadow: 0 0 8px rgba(0,255,255,0.45);
+}
+
+.site-nav-dropdown__chevron {
+  opacity: 0.75;
+  transition: transform 0.15s ease;
+}
+
+.site-nav-dropdown.open .site-nav-dropdown__chevron {
+  transform: rotate(180deg);
+}
+
+.site-nav-dropdown__panel {
+  display: none;
+}
+
+.site-nav-dropdown.open .site-nav-dropdown__panel {
+  display: block;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 120;
+  min-width: 188px;
+  padding: 6px 0;
+  background: rgba(5, 5, 5, 0.98);
+  border: 1.5px solid var(--neon-yellow);
+  box-shadow: 6px 6px 0 rgba(255, 0, 204, 0.45), 0 16px 36px rgba(0, 0, 0, 0.75);
+}
+
+.site-nav-dropdown__item {
+  display: block;
+  padding: 10px 14px;
+  color: #ccc;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.1s, background 0.1s;
+}
+
+.site-nav-dropdown__item:hover,
+.site-nav-dropdown__item.active {
+  color: var(--neon-yellow);
+  background: rgba(204, 255, 0, 0.08);
+}
+
 .site-auth {
   display: flex;
   align-items: center;
@@ -1569,6 +1657,37 @@ h2.display,
 
   .site-nav.open {
     display: flex;
+  }
+
+  .site-nav-dropdown__panel {
+    position: static;
+    min-width: 0;
+    margin: 0 0 4px 12px;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .site-nav-dropdown:not(.open) .site-nav-dropdown__panel {
+    display: none;
+  }
+
+  .site-nav-dropdown.open .site-nav-dropdown__panel {
+    display: block;
+  }
+
+  .site-nav-dropdown__trigger {
+    width: 100%;
+    justify-content: space-between;
+    padding: 16px 6px;
+    font-size: calc(1.76rem + 3px);
+  }
+
+  .site-nav-dropdown__item {
+    padding: 12px 6px 12px 14px;
+    font-size: calc(1.28rem + 2px);
+    border-left: 2px solid #222;
   }
 
   .site-nav-link {
@@ -3915,6 +4034,27 @@ h2.display,
   --avatar-size: clamp(44px, 5vw, 52px);
 }
 
+.site-profile-menu__trigger {
+  position: relative;
+}
+
+.site-profile-menu--active .site-profile-menu__trigger .user-avatar {
+  box-shadow: 0 0 0 2px var(--neon-yellow), 0 0 14px rgba(204, 255, 0, 0.35);
+}
+
+.site-profile-menu__notify-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--neon-magenta);
+  border: 1.5px solid #0a0a0a;
+  box-shadow: 0 0 8px rgba(255, 0, 204, 0.85);
+  pointer-events: none;
+}
+
 .site-profile-menu__panel {
   position: absolute;
   top: calc(100% + 10px);
@@ -3934,6 +4074,25 @@ h2.display,
   padding: 8px 14px 10px;
   border-bottom: 1px solid #222;
   margin-bottom: 4px;
+}
+
+.site-profile-menu__identity--link {
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.1s;
+}
+
+.site-profile-menu__identity--link:hover {
+  background: rgba(204, 255, 0, 0.08);
+}
+
+.site-profile-menu__identity-hint {
+  margin-top: 4px;
+  font-family: var(--font-board-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
 }
 
 .site-profile-menu__name {
@@ -3977,7 +4136,8 @@ h2.display,
   transition: color 0.1s, background 0.1s;
 }
 
-.site-profile-menu__item:hover {
+.site-profile-menu__item:hover,
+.site-profile-menu__item.active {
   color: var(--neon-yellow);
   background: rgba(204, 255, 0, 0.08);
 }
