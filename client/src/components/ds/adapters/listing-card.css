@@ -43,3 +43,15 @@
 .events-poster-grid .ds-listing-card--grid .pdxBoard {
   flex: 1;
 }
+
+.ds-listing-card:hover .pdxBoard {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--_day, var(--neon-cyan)) 40%, var(--border-default, #2b2b2b));
+  box-shadow: 0 0 28px color-mix(in srgb, var(--_day, var(--neon-cyan)) 40%, transparent);
+}
+
+.ds-listing-card--list:hover .pdxRow {
+  transform: translateY(-1px);
+  background: var(--surface-card-hover, #141414);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--_day, var(--neon-cyan)) 24%, transparent);
+}

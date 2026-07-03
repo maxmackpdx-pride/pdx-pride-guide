@@ -14,12 +14,11 @@ const CSS = `
   background:linear-gradient(160deg,rgba(255,255,255,.045),transparent 30%),var(--surface-card);
   border:2px solid var(--border-default); border-radius:var(--radius-md);
   overflow:hidden; text-decoration:none; color:inherit; cursor:pointer;
-  box-shadow:0 0 14px color-mix(in srgb, var(--_day) 18%, transparent);
-  animation:pdxPulse var(--dur-pulse) ease-in-out infinite;
-  --dc:var(--_day);
+  box-shadow:none;
   transition:transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out),
              border-color var(--dur-base) var(--ease-out);
 }
+.pdxBoard:hover,
 a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color:color-mix(in srgb,var(--_day) 40%,var(--border-default));
   box-shadow:0 0 28px color-mix(in srgb, var(--_day) 40%, transparent); }
 

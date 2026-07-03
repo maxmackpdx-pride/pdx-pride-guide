@@ -985,7 +985,7 @@ h2.display,
   inset: 0;
   z-index: var(--hero-layer-scrim);
   pointer-events: none;
-  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.88) 34%, rgba(0, 0, 0, 0.45) 64%, rgba(0, 0, 0, 0.55) 100%);
+  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.92) 38%, rgba(0, 0, 0, 0.55) 68%, rgba(0, 0, 0, 0.68) 100%);
 }
 
 .home-hero__panel-grain {
@@ -1005,9 +1005,9 @@ h2.display,
   bottom: -8%;
   left: 0;
   right: 0;
-  background-image: url("/home-hero-mobile.jpg");
+  background-image: url("/home-hero-collage-pride.jpg");
   background-size: cover;
-  background-position: center top;
+  background-position: 30% center;
   background-repeat: no-repeat;
   opacity: 0.9;
   transform: translateY(var(--parallax-y, 0px));
@@ -5936,8 +5936,7 @@ footer a:hover { color: #00FFFF !important; }
   border: 2px solid #1a1a1a;
   background: #050505;
   overflow: hidden;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--card-day-color, #00FFFF) 18%, transparent);
-  animation: eventCardGlow 4s ease-in-out infinite;
+  box-shadow: none;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -5947,17 +5946,12 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .poster-card--glow {
-  box-shadow: 0 0 14px color-mix(in srgb, var(--card-day-color, #00FFFF) 18%, transparent);
-  animation: eventCardGlow 4s ease-in-out infinite;
+  box-shadow: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .poster-card--glow:hover {
   box-shadow: 0 0 28px color-mix(in srgb, var(--card-day-color, #00FFFF) 40%, transparent);
-}
-
-@keyframes eventCardGlow {
-  0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--card-day-color, #00FFFF) 18%, transparent); }
-  50%       { box-shadow: 0 0 24px color-mix(in srgb, var(--card-day-color, #00FFFF) 32%, transparent); }
 }
 
 .event-board-card__head {
@@ -7037,7 +7031,7 @@ footer a:hover { color: #00FFFF !important; }
   color: var(--neon-yellow);
 }
 
-/* Homepage live event ticker */
+/* Homepage live event ticker (DS Marquee engine) */
 .home-hero {
   padding-bottom: 78px;
 }
@@ -7052,39 +7046,65 @@ footer a:hover { color: #00FFFF !important; }
   flex-direction: column;
 }
 
-.event-ticker-band {
-  position: relative;
-  isolation: isolate;
+.home-live-ticker {
+  display: flex;
+  align-items: stretch;
+  min-height: 53px;
+  overflow: hidden;
+  border-block: 3px solid #000;
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.75);
+}
+
+.home-live-ticker__label {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 22px;
-  min-height: 53.2px;
-  overflow: hidden;
-  border: none;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.98) 0%, #000 100%);
-  box-shadow:
-    0 -12px 32px rgba(0,0,0,0.85),
-    inset 0 1px 0 rgba(204,255,0,0.22);
+  padding: 0 22px 0 26px;
+  border-right: 3px solid #000;
+  background: #000;
+  color: var(--neon-yellow);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.event-ticker-band .event-ticker-item:nth-child(3n + 1) {
-  color: var(--neon-cyan);
-  text-shadow: 0 0 14px rgba(0, 255, 255, 0.45);
+.home-live-ticker__label:hover {
+  color: #fff;
+  background: #111;
 }
 
-.event-ticker-band .event-ticker-item:nth-child(3n + 2) {
-  color: var(--neon-magenta);
-  text-shadow: 0 0 14px rgba(255, 0, 204, 0.35);
+.home-live-ticker__marquee {
+  padding-block: 10px;
 }
 
-.event-ticker-band .event-ticker-item:nth-child(3n) {
+.home-live-ticker__marquee .pdxMarquee__star {
+  color: #000;
+  opacity: 0.65;
+}
+
+html.calm-mode .home-live-ticker {
+  border-block-color: #262626;
+  box-shadow: none;
+}
+
+html.calm-mode .home-live-ticker__label {
+  background: #111;
+  border-right-color: #262626;
   color: #fff;
 }
 
-.event-ticker-band .event-ticker-sep {
-  color: var(--neon-yellow);
-  text-shadow: 0 0 12px rgba(204, 255, 0, 0.55);
+html.calm-mode .home-live-ticker__marquee.pdxMarquee--rainbow {
+  background: #1a1a1a !important;
+}
+
+html.calm-mode .home-live-ticker__marquee .pdxMarquee__item,
+html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
+  color: #d4d4d4 !important;
+  text-shadow: none !important;
 }
 
 .event-ticker-label {
@@ -7394,9 +7414,7 @@ footer a:hover { color: #00FFFF !important; }
   padding: 22px 20px 16px;
   margin-bottom: 14px;
   overflow: hidden;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--spotted-accent, #FF00CC) 30%, transparent);
-  animation: spottedCardGlow 3s ease-in-out infinite;
-  animation-delay: var(--spotted-anim-delay, 0ms);
+  box-shadow: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: default;
 }
@@ -7404,15 +7422,6 @@ footer a:hover { color: #00FFFF !important; }
 .spotted-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 0 30px color-mix(in srgb, var(--spotted-accent, #FF00CC) 55%, transparent);
-}
-
-@keyframes spottedCardGlow {
-  0%, 100% {
-    box-shadow: 0 0 14px color-mix(in srgb, var(--spotted-accent, #FF00CC) 28%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 28px color-mix(in srgb, var(--spotted-accent, #FF00CC) 52%, transparent);
-  }
 }
 
 .spotted-card__found-stamp {

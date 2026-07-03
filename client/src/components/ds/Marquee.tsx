@@ -9,6 +9,11 @@ const CSS = `
   padding-block:8px; position:relative;
 }
 .pdxMarquee--rainbow{ background:var(--grad-rainbow); }
+.pdxMarquee--band{ flex:1; min-width:0; border-block:none; }
+.pdxMarquee--rainbow .pdxMarquee__item{
+  color:#000; font-weight:900; font-size:clamp(0.82rem,1.6vw,1.05rem); letter-spacing:.06em;
+  text-shadow:none;
+}
 .pdxMarquee__track{ display:inline-flex; align-items:center; gap:0;
   animation:pdxMarquee var(--_dur,26s) linear infinite; }
 .pdxMarquee:hover .pdxMarquee__track{ animation-play-state:paused; }

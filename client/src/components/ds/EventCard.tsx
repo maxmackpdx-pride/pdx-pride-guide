@@ -15,6 +15,7 @@ const CSS = `
   transition:transform var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out),
              box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
+.pdxRow:hover,
 a.pdxRow:hover{ transform:translateY(-1px); text-decoration:none; background:var(--surface-card-hover);
   box-shadow:0 0 18px color-mix(in srgb, var(--_day) 24%, transparent); }
 

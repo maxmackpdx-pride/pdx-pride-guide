@@ -65,7 +65,59 @@
   }
 }
 :root[data-calm="true"] *,
-.calm * {
+html.calm-mode * {
   animation: none !important;
+}
+
+:root[data-calm="true"] .pdxBoard,
+:root[data-calm="true"] .pdxRow,
+:root[data-calm="true"] .pdxPlace,
+:root[data-calm="true"] .pdxStatPill--glow,
+:root[data-calm="true"] .pdxBadge--glow,
+:root[data-calm="true"] .pdxCountdown__num,
+:root[data-calm="true"] .pdxCountdown__done,
+:root[data-calm="true"] .pdxChip[aria-pressed="true"],
+:root[data-calm="true"] .spotted-card,
+:root[data-calm="true"] .poster-card--glow,
+:root[data-calm="true"] .event-board-card,
+html.calm-mode .pdxBoard,
+html.calm-mode .pdxRow,
+html.calm-mode .pdxPlace,
+html.calm-mode .pdxStatPill--glow,
+html.calm-mode .pdxBadge--glow,
+html.calm-mode .pdxCountdown__num,
+html.calm-mode .pdxCountdown__done,
+html.calm-mode .pdxChip[aria-pressed="true"],
+html.calm-mode .spotted-card,
+html.calm-mode .poster-card--glow,
+html.calm-mode .event-board-card,
+html.calm-mode .pdxBtn,
+html.calm-mode .btn-neon,
+html.calm-mode .map-pin-rsvp-pulse {
   box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+:root[data-calm="true"] .pdxBoard:hover,
+:root[data-calm="true"] .pdxRow:hover,
+:root[data-calm="true"] .ds-listing-card:hover .pdxBoard,
+:root[data-calm="true"] .ds-listing-card:hover .pdxRow,
+html.calm-mode .pdxBoard:hover,
+html.calm-mode .pdxRow:hover,
+html.calm-mode .ds-listing-card:hover .pdxBoard,
+html.calm-mode .ds-listing-card:hover .pdxRow,
+html.calm-mode .spotted-card:hover,
+html.calm-mode .poster-card--glow:hover,
+html.calm-mode .event-board-card:hover {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+:root[data-calm="true"] .pdxBoard,
+:root[data-calm="true"] .pdxRow,
+html.calm-mode .pdxBoard,
+html.calm-mode .pdxRow {
+  --_day: #888;
+  --_dayt: #888;
 }

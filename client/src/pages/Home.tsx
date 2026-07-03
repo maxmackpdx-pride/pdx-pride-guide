@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import { PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
 import EventModal from "@/components/EventModal";
-import EventTicker from "@/components/EventTicker";
+import { Marquee } from "@/components/ds";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
 
@@ -19,7 +19,7 @@ import { spottedHeroProps } from "@/lib/spottedHero";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { Button, Countdown } from "@/components/ds";
 
-const skylineImg = "/home-hero-desktop.jpg";
+const heroCollageImg = "/home-hero-collage-pride.jpg";
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
@@ -122,9 +122,9 @@ export default function Home() {
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage: `url(${skylineImg})`,
+            backgroundImage: `url(${heroCollageImg})`,
             backgroundSize: "cover",
-            backgroundPosition: "center top",
+            backgroundPosition: "18% center",
             backgroundRepeat: "no-repeat",
             opacity: 0.9,
           }}
@@ -173,14 +173,17 @@ export default function Home() {
 
         {tickerSource.length > 0 && (
           <div className="home-hero-ticker">
-            <div className="rainbow-bar rainbow-bar--bleed" aria-hidden="true" />
-            <section className="event-ticker-band" aria-label="Live event ticker">
-              <Link href="/events" className="event-ticker-label">
+            <section className="home-live-ticker" aria-label="Live event ticker">
+              <Link href="/events" className="home-live-ticker__label">
                 LIVE EVENTS
               </Link>
-              <EventTicker items={tickerSource} />
+              <Marquee
+                color="rainbow"
+                items={tickerSource.map(event => event.title)}
+                className="home-live-ticker__marquee pdxMarquee--band"
+                speed={36}
+              />
             </section>
-            <div className="rainbow-bar rainbow-bar--bleed" aria-hidden="true" />
           </div>
         )}
       </section>
