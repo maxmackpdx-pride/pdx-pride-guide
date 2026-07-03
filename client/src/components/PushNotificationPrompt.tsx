@@ -83,7 +83,7 @@ export default function PushNotificationPrompt() {
       if (result === "denied") {
         toast({
           title: "Notifications blocked",
-          description: "You can enable them later in Dashboard → Notifications or device settings.",
+          description: "You can enable them later in the site footer or device settings.",
           variant: "destructive",
         });
         setVisible(false);
@@ -157,7 +157,7 @@ export default function PushNotificationPrompt() {
         <p style={{ color: "#bbb", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: 20 }}>
           {installFirst
             ? "On iPhone, push alerts only work from the installed Pride Guide app. Tap Share, then Add to Home Screen. Open it from your home screen and we'll ask again."
-            : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in your Dashboard."}
+            : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer."}
         </p>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>

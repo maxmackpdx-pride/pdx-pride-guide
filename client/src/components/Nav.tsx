@@ -129,34 +129,22 @@ export default function Nav() {
             </span>
           </Link>
 
-          <div className="site-header-controls">
-            <CalmModeToggle compact />
-            <button
-              type="button"
-              className="site-nav-toggle"
-              aria-expanded={menuOpen}
-              aria-controls="site-nav-menu"
-              onClick={() => setMenuOpen(open => !open)}
-            >
-              {menuOpen ? <X size={28} /> : <Menu size={28} />}
-              <span>{menuOpen ? "CLOSE" : "MENU"}</span>
-            </button>
-          </div>
-
           <nav
             id="site-nav-menu"
             className={`site-nav${menuOpen ? " open" : ""}`}
             aria-label="Primary navigation"
           >
-            {navLinks.map(l => (
-              <NavLink
-                key={l.href}
-                href={l.href}
-                label={l.label}
-                active={location === l.href}
-                onClick={closeMenu}
-              />
-            ))}
+            <div className="site-nav-scroll">
+              {navLinks.map(l => (
+                <NavLink
+                  key={l.href}
+                  href={l.href}
+                  label={l.label}
+                  active={location === l.href}
+                  onClick={closeMenu}
+                />
+              ))}
+            </div>
 
             {user && (
               <div className="site-auth">
@@ -265,6 +253,20 @@ export default function Nav() {
               </button>
             )}
           </nav>
+
+          <div className="site-header-controls">
+            <CalmModeToggle minimal />
+            <button
+              type="button"
+              className="site-nav-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="site-nav-menu"
+              onClick={() => setMenuOpen(open => !open)}
+            >
+              {menuOpen ? <X size={28} /> : <Menu size={28} />}
+              <span>{menuOpen ? "CLOSE" : "MENU"}</span>
+            </button>
+          </div>
         </div>
       </header>
 

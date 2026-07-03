@@ -3,6 +3,7 @@ import logoPath from "@assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
 import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
+import PushNotificationToggle from "./PushNotificationToggle";
 import GlitchLogo from "@/components/GlitchLogo";
 import GlitchWord from "@/components/GlitchWord";
 
@@ -63,8 +64,9 @@ export default function Footer() {
             <span className="footer-brand-wordmark__line">GUIDE</span>
           </span>
         </div>
-        <div style={{ marginBottom: 20, display: "flex", justifyContent: "center", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div className="footer-controls">
           <FeedbackButton />
+          <PushNotificationToggle />
           <CalmModeToggle />
         </div>
         {/* Subtle donation line — footer only */}
