@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
+import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Shield, FileText, Lock, Users } from "lucide-react";
@@ -70,8 +71,8 @@ export default function Legal() {
         bgPosition="40% center"
         actions={
           <>
-            <Link href="/about" className="btn-neon solid">About the guide</Link>
-            <a href="mailto:hello.tuckercasey@gmail.com" className="btn-neon cyan">Contact</a>
+            <Link href="/about"><Button as="span" variant="solid">About the guide</Button></Link>
+            <Button as="a" href="mailto:hello.tuckercasey@gmail.com" accent="cyan">Contact</Button>
           </>
         }
       />

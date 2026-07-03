@@ -11,6 +11,8 @@ import { eventPath } from "@shared/eventSlug";
 import { parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
+import { FilterChip } from "@/components/ds";
+import { dayAccentToken } from "@/lib/dsColors";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
@@ -128,32 +130,46 @@ export default function Directory() {
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
       }}>
         <div className="events-filter-row" style={{ flexWrap: "wrap", rowGap: 8 }}>
-          <button
-            className={`filter-tag${activeType === "ALL" ? " active" : ""}`}
-            onClick={() => setActiveType("ALL")}
-          >ALL</button>
-          {Object.entries(TYPE_LABELS).map(([key, label]) => (
-            <button
-              key={key}
-              className={`filter-tag${activeType === key ? " active" : ""}`}
-              style={activeType === key ? {
-                color: "#000", borderColor: TYPE_COLORS[key],
-                background: TYPE_COLORS[key], boxShadow: `0 0 14px ${TYPE_COLORS[key]}aa`,
-              } : {}}
-              onClick={() => setActiveType(key)}
-            >{label}</button>
-          ))}
+          <FilterChip
+            selected={activeType === "ALL"}
+            fill={activeType === "ALL"}
+            accent={dayAccentToken("ALL")}
+            onToggle={() => setActiveType("ALL")}
+          >
+            ALL
+          </FilterChip>
+          {Object.entries(TYPE_LABELS).map(([key, label]) => {
+            const selected = activeType === key;
+            return (
+              <FilterChip
+                key={key}
+                selected={selected}
+                fill={selected}
+                accent={TYPE_COLORS[key]}
+                onToggle={() => setActiveType(key)}
+              >
+                {label}
+              </FilterChip>
+            );
+          })}
         </div>
 
         <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
-          {neighborhoodsInUse.map(n => (
-            <button
-              key={n}
-              className={`filter-tag${activeNeighborhood === n ? " active" : ""}`}
-              style={{ fontSize: "0.7rem" }}
-              onClick={() => setActiveNeighborhood(n)}
-            >{n}</button>
-          ))}
+          {neighborhoodsInUse.map(n => {
+            const selected = activeNeighborhood === n;
+            return (
+              <FilterChip
+                key={n}
+                selected={selected}
+                fill={selected}
+                accent={n === "ALL" ? dayAccentToken("ALL") : "lime"}
+                onToggle={() => setActiveNeighborhood(n)}
+                style={{ fontSize: "0.7rem" }}
+              >
+                {n}
+              </FilterChip>
+            );
+          })}
         </div>
       </div>
 

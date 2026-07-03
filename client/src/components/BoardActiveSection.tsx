@@ -1,4 +1,11 @@
 import type { ReactNode } from "react";
+import { FilterChip, StickerBadge } from "@/components/ds";
+
+const STICKER_DS_COLOR = {
+  lime: "lime",
+  cyan: "cyan",
+  magenta: "pink",
+} as const;
 
 type BoardActiveSectionProps = {
   sticker: string;
@@ -23,7 +30,13 @@ export default function BoardActiveSection({
     <section className={`board-active-feed diag ${className}`.trim()}>
       <div className="board-active-feed__inner">
         <div className="board-active-feed__head">
-          <span className={`board-sticker board-sticker--${stickerTone}`}>{sticker}</span>
+          <StickerBadge
+            color={STICKER_DS_COLOR[stickerTone]}
+            size="sm"
+            rotate={-3}
+          >
+            {sticker}
+          </StickerBadge>
           <h2 className="display section-heading board-active-feed__title">{title}</h2>
         </div>
         <div className="board-active-feed__controls">
@@ -40,15 +53,17 @@ export function BoardFilterChip({
   active,
   onClick,
   children,
+  accent = "lime",
 }: {
   active: boolean;
   onClick: () => void;
   children: ReactNode;
+  accent?: string;
 }) {
   return (
-    <button type="button" className={`board-filter-chip${active ? " active" : ""}`} onClick={onClick}>
+    <FilterChip selected={active} onToggle={onClick} fill={active} accent={accent}>
       {children}
-    </button>
+    </FilterChip>
   );
 }
 

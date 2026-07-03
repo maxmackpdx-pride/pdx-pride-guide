@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { StatCard } from "@/components/ds";
 
 interface AdminMetrics {
   users: number;
@@ -32,6 +33,21 @@ const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: st
   { key: "missedConnections",  label: "Active missed connections",      color: "#FF1FA0", tab: "inbox",   alwaysClickable: true },
   { key: "openFeedback",       label: "Open feedback",                  color: "#750787", tab: "inbox",   alwaysClickable: true },
 ];
+
+type StatCardColor = "lime" | "cyan" | "orange" | "pink" | "purple";
+
+const METRIC_COLOR_MAP: Record<string, StatCardColor> = {
+  "#C8FA3C": "lime",
+  "#19E3FF": "cyan",
+  "#FF8C00": "orange",
+  "#00FFFF": "cyan",
+  "#FF1FA0": "pink",
+  "#750787": "purple",
+};
+
+function metricColor(hex: string): StatCardColor {
+  return METRIC_COLOR_MAP[hex.toUpperCase()] ?? "lime";
+}
 
 export default function AdminMetricsPanel({
   enabled,
@@ -76,19 +92,17 @@ export default function AdminMetricsPanel({
         {METRICS.map(metric => {
           const clickable = !!metric.tab && !!onMetricClick
             && (metric.alwaysClickable || (data[metric.key] ?? 0) > 0);
-          const Tag = clickable ? "button" : "div";
           return (
-            <Tag
+            <StatCard
               key={metric.key}
-              type={clickable ? "button" : undefined}
+              size="sm"
+              value={data[metric.key] ?? 0}
+              label={metric.label}
+              color={metricColor(metric.color)}
+              action={clickable ? "View" : false}
               onClick={clickable ? () => onMetricClick!(metric.tab!, metric.key) : undefined}
-              className={`dash-metric-card accent${clickable ? " dash-metric-card-clickable" : ""}`}
-              style={{ ["--metric-color" as string]: metric.color }}
-            >
-              <div className="dash-metric-value">{data[metric.key] ?? 0}</div>
-              <div className="dash-metric-label">{metric.label}</div>
-              {clickable && <div className="dash-metric-cta">View →</div>}
-            </Tag>
+              className={clickable ? "dash-metric-card-clickable" : ""}
+            />
           );
         })}
       </div>

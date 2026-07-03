@@ -18,6 +18,7 @@ import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminInbox from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
+import { Button, Badge } from "@/components/ds";
 import "@/components/dashboard/dashboard.css";
 
 interface Submission {
@@ -812,23 +813,24 @@ export default function Admin() {
     return (
       <div className="flex gap-2 flex-wrap">
         {u.promoterStatus !== "approved" && (
-          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
-            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
+          <Button type="button" size="sm" accent="lime" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}>
+            APPROVE
+          </Button>
         )}
         {u.promoterStatus !== "pending" && (
-          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
-            className="display text-xs px-3 py-1 border" style={{ borderColor: "#00FFFF", color: "#00FFFF" }}>SET PENDING</button>
+          <Button type="button" size="sm" accent="cyan" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}>
+            SET PENDING
+          </Button>
         )}
         {u.promoterStatus !== "none" && (
-          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
-            className="display text-xs px-3 py-1 border border-white/30 text-white/40">RESET</button>
+          <Button type="button" size="sm" variant="ghost" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}>
+            RESET
+          </Button>
         )}
         {isSuperAdmin && (
-          <button type="button" onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
-            className="display text-xs px-3 py-1 border"
-            style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}>
+          <Button type="button" size="sm" accent="pink" onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}>
             {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -1086,16 +1088,20 @@ export default function Admin() {
                           </div>
                         )}
                         {!ev.claimedBy && (
-                          <span className="sticker text-[10px] mt-2 inline-block" style={{ color: "#FF8C00", borderColor: "#FF8C00" }}>
+                          <Badge variant="outline" color="orange" size="sm" className="mt-2">
                             UNCLAIMED
-                          </span>
+                          </Badge>
                         )}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="sticker text-xs" style={{ color: ev.status === "LIVE" ? "#CCFF00" : "#666", borderColor: ev.status === "LIVE" ? "#CCFF00" : "#333" }}>
+                        <Badge
+                          variant="outline"
+                          color={ev.status === "LIVE" ? "lime" : "neutral"}
+                          size="sm"
+                        >
                           {ev.status}
-                        </span>
+                        </Badge>
                         {ev.source === "user_submitted" && (
                           <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>
                             COMMUNITY
@@ -1137,15 +1143,15 @@ export default function Admin() {
                             inputStyle={{ width: "100%", padding: "8px 12px", fontSize: 14, color: "#fff", background: "#000", border: "1px solid rgba(255,255,255,0.2)" }}
                           />
                         </div>
-                        <button
+                        <Button
                           type="button"
+                          size="sm"
+                          accent="cyan"
                           disabled={!assignDraft.trim() || (assignHostMutation.isPending && assignHostMutation.variables?.id === ev.id)}
                           onClick={() => assignHostMutation.mutate({ id: ev.id, username: assignDraft })}
-                          className="display text-xs px-4 py-2 border-2 disabled:opacity-50"
-                          style={{ borderColor: "#00FFFF", color: "#00FFFF", background: "transparent" }}
                         >
                           {assignHostMutation.isPending && assignHostMutation.variables?.id === ev.id ? "ASSIGNING..." : "ASSIGN"}
-                        </button>
+                        </Button>
                       </div>
                     )}
 
@@ -1156,19 +1162,19 @@ export default function Admin() {
                           @{ev.claimedByProfile?.username || ev.claimedBy}
                           {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
                         </span>
-                        <button
+                        <Button
                           type="button"
+                          size="sm"
+                          accent="pink"
                           disabled={unassignHostMutation.isPending && unassignHostMutation.variables === ev.id}
                           onClick={() => {
                             if (window.confirm(`Remove @${ev.claimedBy} from "${ev.title}" and make it claimable again?`)) {
                               unassignHostMutation.mutate(ev.id);
                             }
                           }}
-                          className="display text-[10px] px-2 py-1 border disabled:opacity-50"
-                          style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}
                         >
                           {unassignHostMutation.isPending && unassignHostMutation.variables === ev.id ? "REMOVING..." : "UNASSIGN"}
-                        </button>
+                        </Button>
                       </div>
                     )}
 
@@ -1287,16 +1293,15 @@ export default function Admin() {
                                   @{ev.claimedByProfile?.username || ev.claimedBy}
                                   {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
                                 </span>
-                                <button type="button" disabled={unassignHostMutation.isPending && unassignHostMutation.variables === ev.id}
+                                <Button type="button" size="sm" accent="pink"
+                                  disabled={unassignHostMutation.isPending && unassignHostMutation.variables === ev.id}
                                   onClick={() => {
                                     if (window.confirm(`Remove @${ev.claimedBy} from "${ev.title}" and make it claimable again?`)) {
                                       unassignHostMutation.mutate(ev.id);
                                     }
-                                  }}
-                                  className="display text-xs px-3 py-1 border disabled:opacity-50"
-                                  style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}>
+                                  }}>
                                   {unassignHostMutation.isPending && unassignHostMutation.variables === ev.id ? "REMOVING..." : "UNASSIGN"}
-                                </button>
+                                </Button>
                               </div>
                             ) : (
                               <p className="text-white/35 text-xs">
@@ -1374,9 +1379,13 @@ export default function Admin() {
                         </p>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="sticker text-xs" style={{ color: gig.status === "LIVE" ? "#CCFF00" : "#666", borderColor: gig.status === "LIVE" ? "#CCFF00" : "#333" }}>
+                        <Badge
+                          variant="outline"
+                          color={gig.status === "LIVE" ? "lime" : "neutral"}
+                          size="sm"
+                        >
                           {gig.status}
-                        </span>
+                        </Badge>
                         <button
                           type="button"
                           onClick={() => editingGigId === gig.id ? setEditingGigId(null) : startGigEdit(gig)}

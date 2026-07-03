@@ -39,6 +39,7 @@ import Dashboard from "./pages/Dashboard";
 import Inbox from "./pages/Inbox";
 import MissedConnections from "./pages/MissedConnections";
 import Directory from "./pages/Directory";
+import DesignSystemSandbox from "./pages/DesignSystemSandbox";
 import NotFound from "./pages/not-found";
 
 export default function App() {
@@ -70,6 +71,7 @@ export default function App() {
                 <Route path="/inbox" component={Inbox} />
                 <Route path="/spotted" component={MissedConnections} />
                 <Route path="/directory" component={Directory} />
+                <Route path="/design-preview" component={DesignSystemSandbox} />
                 <Route path="/missed-connections">
                   {() => <Redirect to="/spotted" />}
                 </Route>

@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
+import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink, Calendar, MapPin } from "lucide-react";
@@ -96,8 +97,8 @@ export default function About() {
         bgPosition="56% center"
         actions={
           <>
-            <Link href="/events" className="btn-neon solid">Browse events</Link>
-            <Link href="/submit" className="btn-neon cyan">Submit or claim</Link>
+            <Link href="/events"><Button as="span" variant="solid">Browse events</Button></Link>
+            <Link href="/submit"><Button as="span" accent="cyan">Submit or claim</Button></Link>
           </>
         }
       />
@@ -219,16 +220,18 @@ export default function About() {
             <p className="board-copy about-donate-callout__copy">
               Hosting, domain, and time add up. If the guide helped you find something good this weekend, buying me a coffee keeps it free for everyone.
             </p>
-            <a
+            <Button
+              as="a"
               href={VENMO_URL}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="link-donate"
-              className="btn-neon solid about-donate-callout__btn"
+              variant="solid"
+              className="about-donate-callout__btn"
+              trailingIcon={<ExternalLink size={15} />}
             >
               Buy me a coffee
-              <ExternalLink size={15} />
-            </a>
+            </Button>
             <p className="about-donate-callout__note">@tucker_pdmax on Venmo</p>
             <p className="about-donate-callout__ps">P.S. Tucker is looking for work.</p>
           </div>

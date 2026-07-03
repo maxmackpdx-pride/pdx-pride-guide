@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
+import { Button } from "@/components/ds";
 
 export default function NotFound() {
   return (
@@ -13,8 +14,8 @@ export default function NotFound() {
         bgPosition="center 45%"
         actions={(
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link href="/"><button className="btn-neon solid">HOME</button></Link>
-            <Link href="/events"><button className="btn-neon" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>EVENTS</button></Link>
+            <Link href="/"><Button as="span" variant="solid">HOME</Button></Link>
+            <Link href="/events"><Button as="span" accent="cyan">EVENTS</Button></Link>
           </div>
         )}
       />

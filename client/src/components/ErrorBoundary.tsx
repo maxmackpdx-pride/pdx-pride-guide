@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from "react";
+import { Button } from "@/components/ds";
 
 export default class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -27,9 +28,9 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
           <div style={{ fontSize: 48, marginBottom: 16 }}>🏳️‍🌈</div>
           <h1 style={{ marginBottom: 8 }}>Something went sideways</h1>
           <p style={{ opacity: 0.6, marginBottom: 24 }}>An unexpected error occurred. Try refreshing the page.</p>
-          <button onClick={() => window.location.reload()} style={{ background: "#C8FA3C", color: "#000", border: "none", borderRadius: 6, padding: "10px 24px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+          <Button variant="pill" accent="lime" onClick={() => window.location.reload()}>
             Reload page
-          </button>
+          </Button>
           <pre style={{ marginTop: 28, maxWidth: "100%", overflow: "auto", textAlign: "left", fontSize: 10, lineHeight: 1.5, color: "#888", background: "#111", border: "1px solid #222", borderRadius: 6, padding: "10px 14px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
             {error.message}
             {"\n"}

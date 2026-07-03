@@ -17,6 +17,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle("calm-mode", calmMode);
+    if (calmMode) {
+      document.documentElement.setAttribute("data-calm", "true");
+    } else {
+      document.documentElement.removeAttribute("data-calm");
+    }
     localStorage.setItem("pdx-calm-mode", String(calmMode));
   }, [calmMode]);
 

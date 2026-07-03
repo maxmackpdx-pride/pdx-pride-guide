@@ -26,6 +26,8 @@ import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { List, Grid, MapPin, Link2 } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
+import { FilterChip, SearchInput } from "@/components/ds";
+import { dayAccentToken } from "@/lib/dsColors";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
@@ -490,23 +492,22 @@ export default function Events() {
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
       }}>
         <div className="events-filter-row">
-          {DAYS.map(d => (
-            <button
-              key={d}
-              className={`filter-tag ${activeDay === d ? "active" : ""}`}
-              onClick={() => setActiveDay(d)}
-              data-testid={`filter-day-${d}`}
-              style={activeDay === d && d !== "ALL" ? {
-                color: DARK_FILL_DAYS.has(d) ? "#fff" : "#000",
-                borderColor: DAY_COLORS[d as keyof typeof DAY_COLORS],
-                background: DAY_COLORS[d as keyof typeof DAY_COLORS],
-                boxShadow: `0 0 14px ${DAY_COLORS[d as keyof typeof DAY_COLORS]}aa, 2px 2px 0 rgba(0,0,0,0.7)`,
-                fontWeight: 900,
-              } : {}}
-            >
-              {d}
-            </button>
-          ))}
+          {DAYS.map(d => {
+            const selected = activeDay === d;
+            return (
+              <FilterChip
+                key={d}
+                selected={selected}
+                fill={selected}
+                accent={dayAccentToken(d)}
+                onToggle={() => setActiveDay(d)}
+                data-testid={`filter-day-${d}`}
+                style={selected && DARK_FILL_DAYS.has(d) ? { color: "#fff" } : undefined}
+              >
+                {d}
+              </FilterChip>
+            );
+          })}
           <div className="events-filter-divider" />
           {EVENT_TYPE_FILTERS.map(f => (
             <EventTypeTag
@@ -520,21 +521,14 @@ export default function Events() {
           ))}
           {/* Search bar */}
           <div className="events-filter-search">
-            <input
-              type="text"
+            <SearchInput
               placeholder="Search events..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery("")}
               data-testid="event-search"
-              className="events-filter-search__input"
+              size="sm"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="events-filter-search__clear"
-                title="Clear search"
-              >×</button>
-            )}
           </div>
           {/* Spacer */}
           <div style={{ flex: 1 }} />
