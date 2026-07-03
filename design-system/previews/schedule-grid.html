@@ -1,0 +1,83 @@
+<!-- @dsCard group="Layouts" -->
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --day-thu:#00FFFF; --day-fri:#FF00CC; --day-sat:#39FF14;
+}
+body{margin:0;background:#0a0a0a;color:#fff;font-family:'Inter',sans-serif;padding:24px}
+.note{font-size:11px;color:#666;margin:0 0 14px;letter-spacing:.05em;text-transform:uppercase}
+h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:34px;text-transform:uppercase;margin:0}
+.header-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.toggle{display:flex;border:1px solid #2b2b2b;margin-left:auto}
+.toggle span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;padding:7px 14px;color:#888}
+.toggle .on{background:#CCFF00;color:#000;font-weight:900}
+.export{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;background:#FF00CC;color:#000;border:none;padding:9px 16px;box-shadow:0 0 18px rgba(255,0,204,.5);cursor:pointer}
+
+/* Real page: grid is 56px + repeat(7, 1fr) inside an overflow-x wrapper.
+   This sample shows 3 of the 7 day columns. */
+.schedule-grid-wrapper{overflow-x:auto}
+.schedule-grid{display:grid;grid-template-columns:44px repeat(3,minmax(150px,1fr));gap:10px;min-width:520px}
+.time-axis{position:relative;height:320px}
+.time-axis .t{position:absolute;right:4px;font-size:9px;color:#555;transform:translateY(-50%)}
+.day-col header{border-bottom:3px solid var(--dc);padding:0 0 6px;margin-bottom:0}
+.day-col .label{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;letter-spacing:.06em}
+.day-col .date{font-size:10px;color:#888;letter-spacing:.12em}
+.day-body{position:relative;height:320px;border-left:1px solid #161616}
+.hour{position:absolute;left:0;right:0;height:1px;background:#141414}
+.now{position:absolute;left:0;right:0;height:2px;background:#FF00CC;box-shadow:0 0 8px #FF00CC}
+/* Schedule cards use the ACCENT CYCLE (#19E3FF #FF6600 #39FF14 #A855F7 #FF00CC), NOT day colors */
+.sec{position:absolute;left:3px;right:3px;background:#101010;border:1px solid #222;border-left:3px solid var(--ac);padding:5px 7px;overflow:hidden;cursor:pointer}
+.sec .time{font-size:9px;color:var(--ac);letter-spacing:.04em}
+.sec strong{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;text-transform:uppercase;line-height:1.05}
+.sec .venue{font-size:10px;color:#888}
+.half{width:calc(50% - 5px)}
+</style></head><body>
+
+<p class="note">Schedule page — 7-column day×time grid (3 columns shown) · time axis 11 AM→3 AM · day color only on the header underline · overlapping events split the column</p>
+
+<div class="header-row">
+  <h1>Schedule</h1>
+  <div class="toggle"><span class="on">MY SCHEDULE</span><span>ALL EVENTS</span></div>
+  <button class="export">⤓ EXPORT TO INSTAGRAM STORIES</button>
+</div>
+
+<div class="schedule-grid-wrapper">
+<div class="schedule-grid">
+  <div class="time-axis">
+    <span class="t" style="top:0">12 PM</span><span class="t" style="top:80px">4 PM</span>
+    <span class="t" style="top:160px">8 PM</span><span class="t" style="top:240px">12 AM</span>
+  </div>
+
+  <div class="day-col" style="--dc:var(--day-thu)">
+    <header><div class="label">THURSDAY</div><div class="date">JUL 16</div></header>
+    <div class="day-body">
+      <div class="hour" style="top:80px"></div><div class="hour" style="top:160px"></div><div class="hour" style="top:240px"></div>
+      <div class="sec" style="--ac:#19E3FF;top:120px;height:70px"><span class="time">5:00pm–8:30pm</span><strong>Queer Makers Market</strong><span class="venue">North Park Blocks</span></div>
+      <div class="sec" style="--ac:#FF6600;top:200px;height:90px"><span class="time">9:00pm–1:00am</span><strong>Opening Night</strong><span class="venue">Sanctuary Club</span></div>
+    </div>
+  </div>
+
+  <div class="day-col" style="--dc:var(--day-fri)">
+    <header><div class="label">FRIDAY</div><div class="date">JUL 17</div></header>
+    <div class="day-body">
+      <div class="hour" style="top:80px"></div><div class="hour" style="top:160px"></div><div class="hour" style="top:240px"></div>
+      <div class="now" style="top:150px"></div>
+      <!-- Two overlapping events share the column width -->
+      <div class="sec half" style="--ac:#39FF14;top:180px;height:110px"><span class="time">8pm–2am</span><strong>Horse Meat Disco</strong><span class="venue">Crystal Ballroom</span></div>
+      <div class="sec half" style="--ac:#A855F7;top:200px;height:80px;left:auto"><span class="time">9pm–1am</span><strong>Dyke Night</strong><span class="venue">Bullard Tavern</span></div>
+    </div>
+  </div>
+
+  <div class="day-col" style="--dc:var(--day-sat)">
+    <header><div class="label">SATURDAY</div><div class="date">JUL 18</div></header>
+    <div class="day-body">
+      <div class="hour" style="top:80px"></div><div class="hour" style="top:160px"></div><div class="hour" style="top:240px"></div>
+      <div class="sec" style="--ac:#FF00CC;top:20px;height:120px"><span class="time">12:00pm–6:00pm</span><strong>Waterfront Festival</strong><span class="venue">Tom McCall Park</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+</body></html>

@@ -33,7 +33,11 @@ Commit the synced folder in the **same PR/commit** as the app changes. If
   accent pop; magenta `#FF00CC` mostly lives in offset shadows and glows.
 - Day colors are semantic Pride Week (Mon Jul 13 – Sun Jul 19): MON purple,
   TUE blue, WED yellow, THU cyan, FRI magenta, SAT green, SUN orange.
-  See `shared/prideWeek.ts` and `npm run sync:design-system`.
+  MON/TUE have lighter text variants (`--day-mon-text` / `--day-tue-text`);
+  `#CCFF00` is reserved for RSVP/primary-action — never a day. Source of
+  truth: `shared/prideWeek.ts` + `npm run sync:design-system`. Full
+  event-system explainer with layout samples: `EVENTS_GUIDE.md` +
+  `previews/events-page-layout.html` + `previews/schedule-grid.html`.
 - Signature effects: rainbow bar divider; brutalist offset shadow
   `4px 4px 0 rgba(255,0,204,0.36)`; soft neon glow
   `0 0 14px color-mix(in srgb, <accent> 18%, transparent)` with a slow pulse.
