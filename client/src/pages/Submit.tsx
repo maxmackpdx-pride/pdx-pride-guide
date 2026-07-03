@@ -21,17 +21,24 @@ const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
 
 const SUBMIT_RETURN_KEY = "pdx-submit-return";
 
-const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 5, letterSpacing: "0.06em", textTransform: "uppercase" as const };
-const sectionHeadStyle = { fontSize: "1rem", color: "var(--neon-yellow)", marginBottom: 12, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
-const backBtnStyle: React.CSSProperties = { background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", letterSpacing: "0.06em", marginBottom: 20, padding: 0 };
+const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" as const, fontWeight: 700 };
+const sectionHeadStyle: React.CSSProperties = { fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.05rem", letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--neon-yellow)", marginBottom: 14, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
+const backBtnStyle: React.CSSProperties = { background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.78rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 20, padding: 0 };
 
 type PageMode = "landing" | "submit" | "apply" | "suggest" | "claim";
 type SubmitStep = "promoter_app" | "event_details";
+type FlowSuccess = "apply" | "suggest" | "claim";
 
 type SubmitReturnState = {
   mode: PageMode;
   submitStep: SubmitStep;
 };
+
+/* ── Inline line-glyph icons (stroke set matches the brand icon system) ── */
+const BoltIcon = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 9-12h-7z" /></svg>
+);
+const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
 const emptyEventForm = () => ({
   title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
@@ -61,6 +68,7 @@ export default function Submit() {
     desc: string;
     potentialMatches?: Array<{ title: string; venueName: string; confidence: string }>;
   } | null>(null);
+  const [flowSuccess, setFlowSuccess] = useState<FlowSuccess | null>(null);
   const [location] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
@@ -107,7 +115,10 @@ export default function Submit() {
     }
   }, [loading, user]);
 
+  // Reset transient success + dismissal state whenever the top-level mode changes.
   useEffect(() => {
+    setFlowSuccess(null);
+    setEventSubmitSuccess(null);
     if (mode === "landing") setAuthDismissed(false);
   }, [mode]);
 
@@ -132,6 +143,14 @@ export default function Submit() {
     ...f, selectedTypes: f.selectedTypes.includes(t) ? f.selectedTypes.filter(x => x !== t) : [...f.selectedTypes, t],
   }));
 
+  const goMode = (m: PageMode) => {
+    if (!user) { openAuth(); return; }
+    setMode(m);
+    if (m === "submit") setSubmitStep(isApproved ? "event_details" : "promoter_app");
+  };
+
+  const backToLanding = () => setMode("landing");
+
   // Promoter application mutation (standalone "apply" path only)
   const applyMutation = useMutation({
     mutationFn: async () => {
@@ -149,7 +168,7 @@ export default function Submit() {
       toast({ title: "Application submitted!", description: "Admins will review your promoter request and be in touch." });
       setPromoterForm(emptyPromoterForm());
       setSubmitterOrg("");
-      setMode("landing");
+      setFlowSuccess("apply");
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -230,7 +249,7 @@ export default function Submit() {
       setEventForm(emptyEventForm());
       setPromoterForm(emptyPromoterForm());
       setSubmitStep("promoter_app");
-      setMode("landing");
+      setFlowSuccess(vars.type === "SUGGEST" ? "suggest" : "claim");
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -306,6 +325,8 @@ export default function Submit() {
   const ticketRequired = admissionRequiresTicketUrl(eventForm.admission);
   const admissionHint = ADMISSION_OPTIONS.find(o => o.value === eventForm.admission)?.hint;
 
+  const showStepper = !isApproved && mode === "submit" && submitStep && !eventSubmitSuccess;
+
   return (
     <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={closeAuth} defaultTab="register" />}
@@ -321,72 +342,156 @@ export default function Submit() {
 
         {/* ── LANDING ── */}
         {mode === "landing" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Card 1: Submit New Event */}
-            <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("submit"); setSubmitStep(isApproved ? "event_details" : "promoter_app"); }}
-              style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid var(--neon-yellow)", padding: 20, cursor: "pointer" }}>
-              <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1.1rem", marginBottom: 6 }}>
-                {isApproved ? "SUBMIT NEW EVENT →" : "SUBMIT NEW EVENT + SIGN UP TO BE A PROMOTER →"}
+          <div className="submit-stack">
+
+            {/* Status banners */}
+            {isApproved && (
+              <div className="submit-banner">
+                <span className="submit-banner__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" {...stroke} strokeWidth={2.4} aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+                </span>
+                <div>
+                  <div className="submit-banner__title">Verified promoter</div>
+                  <p className="submit-banner__body">You're verified. New events you submit go live immediately, no review queue.</p>
+                </div>
               </div>
-              <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
-                {isApproved
-                  ? "You're a verified promoter — your event goes live after you submit."
-                  : "Fill out a short promoter application, then add your event. Both go to admin review. Approved events and promoter status go live together."}
-              </p>
+            )}
+            {!isApproved && promoterStatus === "pending" && (
+              <div className="submit-banner">
+                <span className="submit-banner__icon">
+                  <svg width="17" height="17" viewBox="0 0 24 24" {...stroke} strokeWidth={2.2} aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                </span>
+                <div>
+                  <div className="submit-banner__title">Application pending</div>
+                  <p className="submit-banner__body">Your promoter application is in the admin queue. You'll get a message when it's reviewed.</p>
+                </div>
+              </div>
+            )}
+            {!user && (
+              <div className="submit-banner submit-banner--yellow submit-banner--stacked">
+                <div>
+                  <div className="submit-banner__title">Account required</div>
+                  <p className="submit-banner__body">Create a free account or log in to submit, apply, or suggest. It takes a minute.</p>
+                  <button type="button" className="btn-neon solid submit-banner__cta" onClick={() => openAuth()}>Log in / Join →</button>
+                </div>
+              </div>
+            )}
+
+            {/* Card 1: Submit New Event (+ become a promoter) */}
+            <button type="button" className="submit-card" onClick={() => goMode("submit")}>
+              <span className="submit-card__icon"><BoltIcon /></span>
+              <span className="submit-card__main">
+                <span className="submit-card__head">
+                  <span className="submit-card__title">{isApproved ? "Submit new event" : "Submit an event + become a promoter"}</span>
+                  <span className="submit-card__tag">{isApproved ? "Goes live instantly" : "2 steps · first-time review"}</span>
+                </span>
+                <span className="submit-card__body">
+                  {isApproved
+                    ? "You're a verified promoter. Your event goes live the moment you submit."
+                    : "Fill out a short promoter application, then add your event. Both go to admin review and go live together once approved."}
+                </span>
+              </span>
+              <span className="submit-card__arrow">→</span>
             </button>
 
-            {/* Card 2: Apply as Promoter (only shown if not approved) */}
+            {/* Card 2: Apply as Promoter (only when not approved) */}
             {!isApproved && (
-              <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("apply"); }}
-                style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #00FFFF", padding: 20, cursor: "pointer" }}>
-                <div className="display" style={{ color: "#00FFFF", fontSize: "1.1rem", marginBottom: 6 }}>APPLY AS PROMOTER →</div>
-                <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
-                  Not ready to submit an event yet? Apply to be a verified promoter now. Once approved, you can post new events that go live immediately.
-                </p>
+              <button type="button" className="submit-card submit-card--cyan" onClick={() => goMode("apply")}>
+                <span className="submit-card__icon">
+                  <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V5z" /><path d="m9 12 2 2 4-4" /></svg>
+                </span>
+                <span className="submit-card__main">
+                  <span className="submit-card__head">
+                    <span className="submit-card__title">Apply as promoter</span>
+                    <span className="submit-card__tag">Verification</span>
+                  </span>
+                  <span className="submit-card__body">Not ready to post an event yet? Get verified now. Once approved, future events go live immediately.</span>
+                </span>
+                <span className="submit-card__arrow">→</span>
               </button>
             )}
 
-            {/* Card 3: Suggest an Event */}
-            <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("suggest"); }}
-              style={{ textAlign: "left", background: "#0d0d0d", border: "2px solid #FF6600", padding: 20, cursor: "pointer" }}>
-              <div className="display" style={{ color: "#FF6600", fontSize: "1.1rem", marginBottom: 2 }}>SPOTTED AN EVENT →</div>
-              <div className="display" style={{ color: "#FF6600", fontSize: "0.7rem", marginBottom: 8, opacity: 0.7 }}>(NO PROMOTER STATUS NEEDED)</div>
-              <p style={{ color: "#aaa", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
-                Saw a Pride event somewhere and want to tip us off? No promoter account needed. Admins review all tips — approved ones go live as unclaimed listings.
-              </p>
+            {/* Card 3: Spotted / Suggest an Event */}
+            <button type="button" className="submit-card submit-card--orange" onClick={() => goMode("suggest")}>
+              <span className="submit-card__icon">
+                <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+              </span>
+              <span className="submit-card__main">
+                <span className="submit-card__head">
+                  <span className="submit-card__title">Spotted an event</span>
+                  <span className="submit-card__tag submit-card__tag--ghost">No promoter status needed</span>
+                </span>
+                <span className="submit-card__body">Saw a Pride event we're missing? Tip us off. Admins review all tips, approved ones go live as unclaimed listings.</span>
+              </span>
+              <span className="submit-card__arrow">→</span>
             </button>
 
-            {/* Card 4: Claim Existing Event */}
-            <button type="button" onClick={() => { if (!user) { openAuth(); return; } setMode("claim"); }}
-              style={{ textAlign: "left", background: "#0d0d0d", border: "1px solid #333", padding: 20, cursor: "pointer" }}>
-              <div className="display" style={{ color: "#aaa", fontSize: "1rem", marginBottom: 6 }}>CLAIM EXISTING EVENT →</div>
-              <p style={{ color: "#666", fontSize: "0.84rem", lineHeight: 1.5, margin: 0 }}>
-                See your event already listed but unclaimed? Claim it to get host access and request promoter verification.
-              </p>
+            {/* Card 4: Claim an Existing Event */}
+            <button type="button" className="submit-card submit-card--neutral" onClick={() => goMode("claim")}>
+              <span className="submit-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M4 22V4" /><path d="M4 4h13l-2.5 4L17 12H4" /></svg>
+              </span>
+              <span className="submit-card__main">
+                <span className="submit-card__head">
+                  <span className="submit-card__title">Claim an existing event</span>
+                  <span className="submit-card__tag">Host access</span>
+                </span>
+                <span className="submit-card__body">See your event already listed but unclaimed? Claim it for host access and request promoter verification.</span>
+              </span>
+              <span className="submit-card__arrow">→</span>
             </button>
 
-            {!user && (
-              <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(204,255,0,0.08)", padding: 18, marginTop: 8 }}>
-                <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1rem", marginBottom: 6 }}>ACCOUNT REQUIRED</div>
-                <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5, marginBottom: 14 }}>
-                  Create a free account or log in to submit, apply, or suggest.
-                </p>
-                <button type="button" className="btn-neon solid" onClick={() => openAuth()}>Log In / Join →</button>
+            {/* What verified promoters get */}
+            <div className="submit-benefits">
+              <div className="rainbow-bar rainbow-bar--thick" aria-hidden="true" />
+              <div className="submit-benefits__head">
+                <h2 className="submit-benefits__title">What verified promoters get</h2>
+                <span className="submit-benefits__sticker">Level up</span>
               </div>
-            )}
+              <div className="submit-benefits__grid">
+                <div className="submit-benefit submit-benefit--cyan">
+                  <span className="submit-benefit__icon"><BoltIcon size={26} /></span>
+                  <div className="submit-benefit__title">Go live instantly</div>
+                  <p className="submit-benefit__body">Skip the review queue. Every event you post publishes the moment you hit submit.</p>
+                </div>
+                <div className="submit-benefit submit-benefit--magenta">
+                  <span className="submit-benefit__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="m3 11 15-6v14L3 13z" /><path d="M3 11v3h3" /><path d="M8 20v-6" /></svg>
+                  </span>
+                  <div className="submit-benefit__title">Host tools</div>
+                  <p className="submit-benefit__body">Claim your listings, add co-hosts and talent, and pin host broadcasts on your event page.</p>
+                </div>
+                <div className="submit-benefit submit-benefit--yellow">
+                  <span className="submit-benefit__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="M14 9h4M14 13h4M6 16c.8-1.4 4.2-1.4 5 0" /></svg>
+                  </span>
+                  <div className="submit-benefit__title">A promoter profile</div>
+                  <p className="submit-benefit__body">Your own public page at prideguidepdx.com/u/you, with every event and link in one spot.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Stepper (non-approved submit flow) ── */}
+        {showStepper && (
+          <div className="submit-form__steps">
+            <span className={`submit-form__step ${submitStep === "promoter_app" ? "active" : "done"}`}>1 · Promoter</span>
+            <span className="submit-form__step-arrow" aria-hidden="true">→</span>
+            <span className={`submit-form__step ${submitStep === "event_details" ? "active" : ""}`}>2 · Event</span>
           </div>
         )}
 
         {/* ── SUBMIT: Step 1 — Promoter Application (non-approved only) ── */}
         {mode === "submit" && !isApproved && submitStep === "promoter_app" && (
           <div>
-            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
-            <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(200,250,60,0.04)", padding: 18, marginBottom: 24 }}>
-              <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "0.95rem", marginBottom: 6 }}>STEP 1 OF 2 — PROMOTER APPLICATION</div>
-              <p style={{ color: "#aaa", fontSize: "0.86rem", lineHeight: 1.5, margin: 0 }}>
+            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
+            <div className="submit-note">
+              <div className="submit-note__title">Step 1 of 2 · Promoter application</div>
+              <p className="submit-note__body">
                 {promoterStatus === "pending"
                   ? "Your promoter application is already in the admin queue. You can still submit your event below — both will be reviewed together."
-                  : "Tell us a bit about yourself as a promoter. Once approved, future events you submit will go live immediately without review."}
+                  : "Tell us a bit about yourself as a promoter. Once approved, future events you submit go live immediately without review."}
               </p>
             </div>
             <form onSubmit={e => { e.preventDefault(); setSubmitStep("event_details"); }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -395,7 +500,7 @@ export default function Submit() {
                 <input value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
               </div>
               <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Website, Instagram, or Portfolio Link</label>
+                <label style={labelStyle}>Website, Instagram, or portfolio link</label>
                 <input value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
               </div>
               <div className={`${fieldClass} submit-form__field--magenta`}>
@@ -404,7 +509,7 @@ export default function Submit() {
                   placeholder="What events do you run or have you run? Your connection to PDX Pride? Any links to your work." style={{ resize: "vertical" }} />
               </div>
               <button type="submit" className="btn-neon solid" style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                NEXT — ADD YOUR EVENT →
+                Next, add your event →
               </button>
             </form>
           </div>
@@ -414,17 +519,15 @@ export default function Submit() {
         {mode === "submit" && (isApproved || submitStep === "event_details") && (
           <div>
             {eventSubmitSuccess ? (
-              <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(200,250,60,0.06)", padding: 24 }}>
-                <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1.2rem", marginBottom: 8 }}>
-                  {eventSubmitSuccess.title}
-                </div>
-                <p style={{ color: "#aaa", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: eventSubmitSuccess.potentialMatches?.length ? 16 : 24 }}>
+              <div className="submit-success">
+                <div className="submit-success__title">{eventSubmitSuccess.title}</div>
+                <p className="submit-success__body" style={{ marginBottom: eventSubmitSuccess.potentialMatches?.length ? 16 : 22 }}>
                   {eventSubmitSuccess.desc}
                 </p>
                 {eventSubmitSuccess.potentialMatches && eventSubmitSuccess.potentialMatches.length > 0 && (
-                  <div style={{ border: "1px solid #444", background: "#111", padding: 14, marginBottom: 24 }}>
-                    <p style={{ color: "var(--neon-orange)", fontFamily: "var(--font-display)", fontSize: "0.72rem", letterSpacing: "0.06em", margin: "0 0 8px" }}>
-                      SIMILAR EVENTS IN THE GUIDE
+                  <div style={{ border: "1px solid #444", background: "#111", padding: 14, marginBottom: 22, borderRadius: 3 }}>
+                    <p style={{ color: "var(--neon-orange)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>
+                      Similar events in the guide
                     </p>
                     <ul style={{ margin: 0, paddingLeft: 18, color: "#aaa", fontSize: "0.85rem", lineHeight: 1.5 }}>
                       {eventSubmitSuccess.potentialMatches.map(match => (
@@ -439,40 +542,34 @@ export default function Submit() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <button type="button" className="btn-neon solid" onClick={startAnotherEvent}
                     style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                    Create Another Event →
+                    Create another event →
                   </button>
-                  <button type="button" onClick={finishSubmitFlow}
-                    style={{ background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontSize: "0.76rem", letterSpacing: "0.06em" }}>
+                  <button type="button" onClick={finishSubmitFlow} className="submit-hub-link">
                     Back to promoters hub
                   </button>
                 </div>
               </div>
             ) : (
             <>
-            <button type="button" style={backBtnStyle} onClick={() => isApproved ? setMode("landing") : setSubmitStep("promoter_app")}>
-              ← {isApproved ? "BACK" : "BACK TO PROMOTER APPLICATION"}
+            <button type="button" style={backBtnStyle} onClick={() => isApproved ? backToLanding() : setSubmitStep("promoter_app")}>
+              ← {isApproved ? "Back" : "Back to promoter application"}
             </button>
-            {!isApproved && (
-              <div style={{ border: "2px solid var(--neon-yellow)", background: "rgba(200,250,60,0.04)", padding: 14, marginBottom: 20 }}>
-                <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "0.82rem" }}>STEP 2 OF 2 — EVENT DETAILS</div>
-              </div>
-            )}
-            <form onSubmit={e => { e.preventDefault(); handleSubmitWithEvent(); }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <form onSubmit={e => { e.preventDefault(); handleSubmitWithEvent(); }} style={{ display: "flex", flexDirection: "column", gap: 22 }}>
               <ScrollReveal>
-              <div className="display" style={sectionHeadStyle}>EVENT DETAILS</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={sectionHeadStyle}>Event details</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div className={fieldClass}>
-                  <label style={labelStyle}>Event Title *</label>
-                  <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required />
+                  <label style={labelStyle}>Event title *</label>
+                  <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="Horse Meat Disco" />
                 </div>
                 <div className={`${fieldClass} submit-form__field--magenta`}>
                   <label style={labelStyle}>Description *</label>
-                  <textarea value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} required rows={4} style={{ resize: "vertical" }} />
+                  <textarea value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} required rows={4} placeholder="What's the vibe? Who's it for?" style={{ resize: "vertical" }} />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div className={fieldClass}>
-                    <label style={labelStyle}>Venue Name *</label>
-                    <input value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} required />
+                    <label style={labelStyle}>Venue name *</label>
+                    <input value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} required placeholder="Crystal Ballroom" />
                   </div>
                   <div className={`${fieldClass} submit-form__field--cyan`}>
                     <label style={labelStyle}>Neighborhood</label>
@@ -481,12 +578,12 @@ export default function Submit() {
                     </select>
                   </div>
                   <div className={fieldClass} style={{ gridColumn: "1/-1" }}>
-                    <label style={labelStyle}>Venue Address *</label>
+                    <label style={labelStyle}>Venue address *</label>
                     <input value={eventForm.address} onChange={e => setEventForm(f => ({ ...f, address: e.target.value }))}
-                      required={!eventForm.isHouseParty} placeholder={eventForm.isHouseParty ? "Optional for house parties" : "Street address (required)"} />
+                      required={!eventForm.isHouseParty} placeholder={eventForm.isHouseParty ? "Optional for house parties" : "Street address"} />
                   </div>
                   <div className={`${fieldClass} submit-form__field--orange`}>
-                    <label style={labelStyle}>Day of Week</label>
+                    <label style={labelStyle}>Day of week</label>
                     <select value={eventForm.dayOfWeek} onChange={e => {
                       const day = e.target.value;
                       setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
@@ -497,7 +594,7 @@ export default function Submit() {
                     </select>
                   </div>
                   <div className={fieldClass}>
-                    <label style={labelStyle}>Age Requirement</label>
+                    <label style={labelStyle}>Age requirement</label>
                     <select value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
                       <option value="ALL_AGES">All Ages</option>
                       <option value="18_PLUS">18+</option>
@@ -520,27 +617,27 @@ export default function Submit() {
                       ))}
                     </select>
                   </div>
-                </div>
-                <div className={`${fieldClass} submit-form__field--cyan`}>
-                  <label style={labelStyle}>Ticket / RSVP Link{ticketRequired ? " *" : ""}</label>
-                  <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required={ticketRequired} />
-                  <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
-                    {ticketRequired
-                      ? "Required for ticketed events."
-                      : admissionHint || "Optional — add a link if you have one."}
+                  <div className={`${fieldClass} submit-form__field--cyan`}>
+                    <label style={labelStyle}>Ticket / RSVP link{ticketRequired ? " *" : ""}</label>
+                    <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required={ticketRequired} />
+                    <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
+                      {ticketRequired
+                        ? "Required for ticketed events."
+                        : admissionHint || "Optional — add a link if you have one."}
+                    </div>
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle}>Event Flyer / Poster (optional)</label>
+                  <label style={labelStyle}>Event flyer / poster (optional)</label>
                   <ImageUploader endpoint="/api/upload/poster" fieldName="poster" currentUrl={eventForm.posterImageUrl}
-                    onUploaded={url => setEventForm(f => ({ ...f, posterImageUrl: url }))} label="UPLOAD FLYER" />
+                    onUploaded={url => setEventForm(f => ({ ...f, posterImageUrl: url }))} label="Upload flyer" />
                 </div>
               </div>
               </ScrollReveal>
 
               <ScrollReveal delay={40}>
-              <div className="display" style={sectionHeadStyle}>EVENT TYPES</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              <div style={sectionHeadStyle}>Event types</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {EVENT_TYPES.map(t => (
                   <button key={t} type="button" onClick={() => toggleType(t)} className={`filter-tag ${eventForm.selectedTypes.includes(t) ? "active" : ""}`}>{t}</button>
                 ))}
@@ -548,21 +645,19 @@ export default function Submit() {
               </ScrollReveal>
 
               <ScrollReveal delay={60}>
-              <div className="display" style={sectionHeadStyle}>EVENT FLAGS</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              <div style={sectionHeadStyle}>Event flags</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 <EventTypeTag label="HOUSE PARTY" interactive active={eventForm.isHouseParty} onClick={() => setEventForm(f => ({ ...f, isHouseParty: !f.isHouseParty }))} testId="toggle-house-party" />
                 <EventTypeTag label="SEX POSITIVE" interactive active={eventForm.isSexPositive} onClick={() => setEventForm(f => ({ ...f, isSexPositive: !f.isSexPositive }))} testId="toggle-sex-positive" />
                 <EventTypeTag label="NUDITY OK" interactive active={eventForm.nudityOk} onClick={() => setEventForm(f => ({ ...f, nudityOk: !f.nudityOk }))} testId="toggle-nudity-ok" />
               </div>
               {eventForm.isHouseParty && (
-                <div style={{ marginTop: 16, padding: "14px 16px", border: "2px solid var(--neon-orange)", background: "rgba(255,102,0,0.08)", display: "flex", gap: 12 }} data-testid="house-party-warning">
-                  <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>⚠️</span>
+                <div className="submit-warning" data-testid="house-party-warning">
+                  <span className="submit-warning__mark" aria-hidden="true">⚠</span>
                   <div>
-                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.82rem", color: "var(--neon-orange)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 4 }}>
-                      Heads up — House Parties Are Public
-                    </div>
-                    <div style={{ fontSize: "0.82rem", color: "#aaa", lineHeight: 1.5 }}>
-                      We don't have a way to do invite-only. Anyone browsing this guide can see it and show up. Only post if you're genuinely open to the community attending.
+                    <div className="submit-warning__title">Heads up, house parties are public</div>
+                    <div className="submit-warning__body">
+                      We don't have a way to do invite-only. Anyone browsing the guide can see it and show up. Only post if you're genuinely open to the community attending.
                     </div>
                   </div>
                 </div>
@@ -570,19 +665,16 @@ export default function Submit() {
               </ScrollReveal>
 
               <ScrollReveal delay={80}>
-              <div className="display" style={sectionHeadStyle}>REVIEW &amp; SUBMIT</div>
-              <p style={{ color: "#888", fontSize: "0.84rem", lineHeight: 1.6, marginBottom: 16 }}>
+              <div style={sectionHeadStyle}>Review &amp; submit</div>
+              <p style={{ color: "#8f8c87", fontSize: "0.84rem", lineHeight: 1.6, margin: "0 0 16px" }}>
                 {isApproved
-                  ? "You're verified — your event goes live immediately after submitting."
-                  : "Both your promoter application and this event go to the admin queue. Once approved, your event goes live and you'll be a verified promoter."}
+                  ? "You're verified. Your event goes live immediately after submitting."
+                  : "Both your promoter application and this event go to the admin queue, approved together."}
               </p>
               <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid"
                 style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }} data-testid="submit-button">
                 {eventMutation.isPending ? "Submitting..." : isApproved ? "Submit Event →" : "Submit Event + Promoter Application →"}
               </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>
-                {isApproved ? "Event goes live immediately." : "All submissions are reviewed before going live."}
-              </p>
               </ScrollReveal>
             </form>
             </>
@@ -591,32 +683,40 @@ export default function Submit() {
         )}
 
         {/* ── APPLY AS PROMOTER ── */}
-        {mode === "apply" && (
+        {mode === "apply" && (flowSuccess === "apply" ? (
+          <div className="submit-success submit-success--cyan">
+            <div className="submit-success__title">Application submitted!</div>
+            <p className="submit-success__body">Admins will review your promoter request and be in touch. You'll get a message when you're approved.</p>
+            <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
+          </div>
+        ) : (
           <div>
-            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
+            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
             {promoterStatus === "pending" && (
-              <div style={{ border: "2px solid #00FFFF", background: "rgba(0,255,255,0.06)", padding: 16, marginBottom: 20 }}>
-                <div className="display" style={{ color: "#00FFFF", fontSize: "0.9rem", marginBottom: 4 }}>APPLICATION ALREADY SUBMITTED</div>
-                <p style={{ color: "#aaa", fontSize: "0.84rem", margin: 0 }}>Your promoter application is in the admin queue. You'll be notified when it's reviewed.</p>
+              <div className="submit-note submit-note--cyan">
+                <div className="submit-note__title">Application already submitted</div>
+                <p className="submit-note__body">Your promoter application is in the admin queue. You'll be notified when it's reviewed.</p>
               </div>
             )}
             <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } applyMutation.mutate(); }}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div className="display" style={sectionHeadStyle}>PROMOTER APPLICATION</div>
-              <div className={fieldClass}>
-                <label style={labelStyle}>Your Name</label>
-                <input value={user?.displayName || user?.username || ""} disabled style={{ opacity: 0.6 }} />
-              </div>
-              <div className={fieldClass}>
-                <label style={labelStyle}>Email</label>
-                <input value={user?.email || ""} disabled style={{ opacity: 0.6 }} />
+              <div style={{ ...sectionHeadStyle, color: "var(--neon-cyan)" }}>Promoter application</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className={fieldClass}>
+                  <label style={labelStyle}>Your name</label>
+                  <input value={user?.displayName || user?.username || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.6 }} />
+                </div>
+                <div className={fieldClass}>
+                  <label style={labelStyle}>Email</label>
+                  <input value={user?.email || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.6 }} />
+                </div>
               </div>
               <div className={fieldClass}>
                 <label style={labelStyle}>Organization / Event Name (optional)</label>
                 <input value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
               </div>
               <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Website, Instagram, or Portfolio Link</label>
+                <label style={labelStyle}>Website, Instagram, or portfolio link</label>
                 <input value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
               </div>
               <div className={`${fieldClass} submit-form__field--magenta`}>
@@ -624,35 +724,39 @@ export default function Submit() {
                 <textarea value={promoterForm.appReason} onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))} rows={6} required
                   placeholder="What events do you run or have you run? Your connection to PDX Pride? Any links, social pages, or proof of your work." style={{ resize: "vertical" }} />
               </div>
-              <button type="submit" disabled={applyMutation.isPending} className="btn-neon solid"
+              <button type="submit" disabled={applyMutation.isPending} className="btn-neon solid solid-cyan"
                 style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                {applyMutation.isPending ? "Submitting..." : "Submit Promoter Application →"}
+                {applyMutation.isPending ? "Submitting..." : "Submit promoter application →"}
               </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 10 }}>
+              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center" }}>
                 Admins will review your application. You'll get a message when approved.
               </p>
             </form>
           </div>
-        )}
+        ))}
 
         {/* ── SUGGEST AN EVENT ── */}
-        {mode === "suggest" && (
+        {mode === "suggest" && (flowSuccess === "suggest" ? (
+          <div className="submit-success submit-success--magenta">
+            <div className="submit-success__title">Tip received!</div>
+            <p className="submit-success__body">Admins will review and may add this event to the guide. Thanks for the heads up.</p>
+            <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
+          </div>
+        ) : (
           <div>
-            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
-            <div style={{ border: "2px solid #FF6600", background: "rgba(255,102,0,0.06)", padding: 16, marginBottom: 20 }}>
-              <div className="display" style={{ color: "#FF6600", fontSize: "0.9rem", marginBottom: 4 }}>NO PROMOTER ACCOUNT NEEDED</div>
-              <p style={{ color: "#aaa", fontSize: "0.84rem", margin: 0 }}>
-                Tip us off — admins review all suggestions. If approved, the event goes live as an unclaimed listing anyone can claim.
-              </p>
+            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
+            <div className="submit-note submit-note--orange">
+              <div className="submit-note__title">No promoter account needed</div>
+              <p className="submit-note__body">Tip us off, admins review all suggestions. If approved, the event goes live as an unclaimed listing anyone can claim.</p>
             </div>
             <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}
               style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className={`${fieldClass} submit-form__field--orange`}>
-                <label style={labelStyle}>Event Name *</label>
+                <label style={labelStyle}>Event name *</label>
                 <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Queer Dance Night at Wonder Ballroom" />
               </div>
               <div className={fieldClass}>
-                <label style={labelStyle}>Venue / Location (if known)</label>
+                <label style={labelStyle}>Venue / location (if known)</label>
                 <input value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood" />
               </div>
               <div className={`${fieldClass} submit-form__field--orange`}>
@@ -667,39 +771,47 @@ export default function Submit() {
                 </select>
               </div>
               <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Ticket / Info Link (if you have it)</label>
+                <label style={labelStyle}>Ticket / info link (if you have it)</label>
                 <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://..." />
               </div>
               <div className={fieldClass}>
                 <label style={labelStyle}>Where did you spot this?</label>
                 <textarea value={promoterForm.suggestNote} onChange={e => setPromoterForm(f => ({ ...f, suggestNote: e.target.value }))} rows={3}
-                  placeholder="Instagram, flyer, word of mouth — any context helps." style={{ resize: "vertical" }} />
+                  placeholder="Instagram, flyer, word of mouth, any context helps." style={{ resize: "vertical" }} />
               </div>
-              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid"
+              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid solid-magenta"
                 style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                {eventMutation.isPending ? "Sending..." : "Send Tip →"}
+                {eventMutation.isPending ? "Sending..." : "Send tip →"}
               </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 4 }}>
-                Tips go to admins only — not publicly posted.
+              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center" }}>
+                Tips go to admins only, not publicly posted.
               </p>
             </form>
           </div>
-        )}
+        ))}
 
         {/* ── CLAIM EXISTING EVENT ── */}
-        {mode === "claim" && (
+        {mode === "claim" && (flowSuccess === "claim" ? (
+          <div className="submit-success submit-success--cyan">
+            <div className="submit-success__title">{isApproved ? "Event claimed!" : "Claim submitted!"}</div>
+            <p className="submit-success__body">
+              {isApproved ? "You're now the host of this event, it's live on your profile." : "Your claim is pending admin review."}
+            </p>
+            <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
+          </div>
+        ) : (
           <div>
-            <button type="button" style={backBtnStyle} onClick={() => setMode("landing")}>← BACK</button>
+            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
             <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}
               style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div className="display" style={sectionHeadStyle}>CLAIM DETAILS</div>
-              <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", lineHeight: 1.5, marginTop: -4 }}>
+              <div style={{ ...sectionHeadStyle, color: "var(--neon-cyan)" }}>Claim details</div>
+              <p style={{ color: "#8f8c87", fontSize: "0.84rem", lineHeight: 1.55, margin: 0 }}>
                 {isApproved
-                  ? "As a verified promoter, your claim goes live immediately — no admin review needed."
-                  : "Claiming an event also requests verified promoter status so you can post new listings after approval."}
+                  ? "As a verified promoter, your claim goes live immediately, no admin review."
+                  : "Claiming also requests verified promoter status so you can post new listings after approval."}
               </p>
               <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Event to Claim *</label>
+                <label style={labelStyle}>Event to claim *</label>
                 <select value={promoterForm.claimEventId} onChange={e => setPromoterForm(f => ({ ...f, claimEventId: e.target.value }))} required data-testid="select-claim-event">
                   <option value="">Select an unclaimed event...</option>
                   {unclaimedEvents.map(ev => (
@@ -720,16 +832,16 @@ export default function Submit() {
                 <textarea value={promoterForm.claimReason} onChange={e => setPromoterForm(f => ({ ...f, claimReason: e.target.value }))} rows={4} required
                   placeholder="Tell us your organizer role and include a website, ticketing dashboard, social link, or other proof." style={{ resize: "vertical" }} />
               </div>
-              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid"
+              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid solid-cyan"
                 style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }} data-testid="submit-button">
                 {eventMutation.isPending ? "Submitting..." : isApproved ? "Claim This Event →" : "Submit Claim + Promoter Request →"}
               </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 4 }}>
+              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center" }}>
                 {isApproved ? "Your claim goes live immediately." : "All claims are reviewed before going live."}
               </p>
             </form>
           </div>
-        )}
+        ))}
 
       </div>
     </div>

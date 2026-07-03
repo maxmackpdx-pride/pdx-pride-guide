@@ -11330,3 +11330,458 @@ html.calm-mode .mp-social-card:hover {
   box-shadow: none !important;
   transform: none !important;
 }
+
+/* ============================================================
+   Promoter hub (Submit) — landing redesign
+   Path cards, status banners, benefits, success + note panels.
+   ============================================================ */
+.submit-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Status banners (approved / pending / account-required) ── */
+.submit-banner {
+  --banner-accent: var(--neon-cyan);
+  --banner-tint: rgba(0, 255, 255, 0.05);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 2px solid var(--banner-accent);
+  background: var(--banner-tint);
+  border-radius: 4px;
+  padding: 16px 18px;
+}
+
+.submit-banner--yellow {
+  --banner-accent: var(--neon-yellow);
+  --banner-tint: rgba(204, 255, 0, 0.07);
+}
+
+.submit-banner--stacked {
+  display: block;
+}
+
+.submit-banner__icon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid var(--banner-accent);
+  color: var(--banner-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-banner__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--banner-accent);
+  margin-bottom: 3px;
+}
+
+.submit-banner__body {
+  margin: 0;
+  color: #b6b3aa;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.submit-banner__cta {
+  margin-top: 14px;
+}
+
+/* ── Path cards ── */
+.submit-card {
+  --card-accent: var(--neon-yellow);
+  --card-shadow: rgba(255, 0, 204, 0.26);
+  --card-shadow-hover: rgba(255, 0, 204, 0.42);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+  background: #0d0d0d;
+  border: 2px solid var(--card-accent);
+  border-radius: 4px;
+  padding: 20px;
+  cursor: pointer;
+  color: inherit;
+  box-shadow: 4px 4px 0 var(--card-shadow);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.submit-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--card-shadow-hover);
+}
+
+.submit-card--cyan {
+  --card-accent: var(--neon-cyan);
+  --card-shadow: rgba(204, 255, 0, 0.2);
+  --card-shadow-hover: rgba(204, 255, 0, 0.34);
+}
+
+.submit-card--orange {
+  --card-accent: var(--neon-orange);
+  --card-shadow: rgba(255, 0, 204, 0.2);
+  --card-shadow-hover: rgba(255, 0, 204, 0.34);
+}
+
+.submit-card--neutral {
+  --card-accent: #3a3a3a;
+  background: #0b0b0b;
+  box-shadow: none;
+}
+
+.submit-card--neutral:hover {
+  border-color: #666;
+  box-shadow: none;
+}
+
+.submit-card__icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--card-accent);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--card-accent);
+}
+
+.submit-card--neutral .submit-card__icon {
+  border-color: #555;
+  color: #999;
+}
+
+.submit-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.submit-card__head {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 7px;
+}
+
+.submit-card__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.08rem;
+  line-height: 1;
+  color: var(--card-accent);
+}
+
+.submit-card--neutral .submit-card__title {
+  font-size: 1.02rem;
+  color: #d8d5cd;
+}
+
+.submit-card__tag {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--card-accent);
+  padding: 3px 7px;
+  border-radius: 2px;
+}
+
+.submit-card--neutral .submit-card__tag {
+  color: #bbb;
+  background: #2a2a2a;
+}
+
+.submit-card__tag--ghost {
+  color: var(--card-accent);
+  background: transparent;
+  padding: 0;
+  opacity: 0.75;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.submit-card__body {
+  display: block;
+  color: #a8a5a0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.submit-card--neutral .submit-card__body {
+  color: #8f8c87;
+}
+
+.submit-card__arrow {
+  flex: none;
+  align-self: center;
+  color: var(--card-accent);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+/* ── What verified promoters get ── */
+.submit-benefits {
+  margin-top: 22px;
+}
+
+.submit-benefits > .rainbow-bar {
+  opacity: 0.7;
+  margin-bottom: 20px;
+}
+
+.submit-benefits__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.submit-benefits__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.4vw, 2rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #f4f1ea;
+}
+
+.submit-benefits__sticker {
+  display: inline-block;
+  transform: rotate(-3deg);
+  background: var(--neon-yellow);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+}
+
+.submit-benefits__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.submit-benefit {
+  --dc: var(--neon-cyan);
+  background: #0b0b0b;
+  border: 2px solid var(--dc);
+  border-radius: 4px;
+  padding: 18px;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--dc) 13%, transparent);
+  animation: submit-benefit-pulse 4s ease-in-out infinite;
+}
+
+.submit-benefit--cyan { --dc: var(--neon-cyan); }
+.submit-benefit--magenta { --dc: var(--neon-magenta); }
+.submit-benefit--yellow { --dc: var(--neon-yellow); }
+
+.submit-benefit__icon {
+  display: inline-flex;
+  color: var(--dc);
+  margin-bottom: 11px;
+}
+
+.submit-benefit__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.submit-benefit__body {
+  margin: 0;
+  color: #9d9a92;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+@keyframes submit-benefit-pulse {
+  0%, 100% { box-shadow: 0 0 15px color-mix(in srgb, var(--dc) 15%, transparent); }
+  50% { box-shadow: 0 0 26px color-mix(in srgb, var(--dc) 30%, transparent); }
+}
+
+/* ── Inline note panels (step intro, no-account, already-applied) ── */
+.submit-note {
+  --note-accent: var(--neon-yellow);
+  --note-tint: rgba(204, 255, 0, 0.04);
+  border: 2px solid var(--note-accent);
+  background: var(--note-tint);
+  border-radius: 3px;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+}
+
+.submit-note--cyan {
+  --note-accent: var(--neon-cyan);
+  --note-tint: rgba(0, 255, 255, 0.06);
+}
+
+.submit-note--orange {
+  --note-accent: var(--neon-orange);
+  --note-tint: rgba(255, 102, 0, 0.06);
+}
+
+.submit-note__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--note-accent);
+  margin-bottom: 6px;
+}
+
+.submit-note__body {
+  margin: 0;
+  color: #a8a5a0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+/* ── House-party warning ── */
+.submit-warning {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 2px solid var(--neon-orange);
+  background: rgba(255, 102, 0, 0.08);
+  border-radius: 3px;
+  display: flex;
+  gap: 12px;
+}
+
+.submit-warning__mark {
+  color: var(--neon-orange);
+  flex: none;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.submit-warning__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--neon-orange);
+  margin-bottom: 4px;
+}
+
+.submit-warning__body {
+  font-size: 0.82rem;
+  color: #aaa;
+  line-height: 1.5;
+}
+
+/* ── Success panels ── */
+.submit-success {
+  --success-accent: var(--neon-yellow);
+  --success-tint: rgba(204, 255, 0, 0.05);
+  border: 2px solid var(--success-accent);
+  background: var(--success-tint);
+  border-radius: 4px;
+  padding: 26px;
+}
+
+.submit-success--cyan {
+  --success-accent: var(--neon-cyan);
+  --success-tint: rgba(0, 255, 255, 0.05);
+}
+
+.submit-success--magenta {
+  --success-accent: var(--neon-magenta);
+  --success-tint: rgba(255, 0, 204, 0.05);
+}
+
+.submit-success__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--success-accent);
+  margin-bottom: 8px;
+}
+
+.submit-success__body {
+  margin: 0 0 22px;
+  color: #b6b3aa;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Text link back to the hub */
+.submit-hub-link {
+  background: none;
+  border: none;
+  color: var(--text-meta);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0;
+}
+
+.submit-hub-link:hover {
+  color: var(--neon-yellow);
+}
+
+/* Solid button color variants (primary stays lime) */
+.btn-neon.solid.solid-cyan {
+  background: var(--neon-cyan);
+  box-shadow: 4px 4px 0 rgba(204, 255, 0, 0.3);
+}
+
+.btn-neon.solid.solid-magenta {
+  background: var(--neon-magenta);
+  box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.3);
+}
+
+/* Calm mode + reduced motion: kill the ambient neon pulse and card lift */
+html.calm-mode .submit-benefit {
+  animation: none;
+  box-shadow: none;
+}
+
+html.calm-mode .submit-card:hover {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit-benefit {
+    animation: none;
+  }
+  .submit-card {
+    transition: border-color 0.15s;
+  }
+  .submit-card:hover {
+    transform: none;
+  }
+}
