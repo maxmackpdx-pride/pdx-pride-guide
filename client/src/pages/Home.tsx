@@ -274,7 +274,13 @@ export default function Home() {
         </ScrollReveal>
       </section>
 
-      {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {selectedEvent && (
+        <EventModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onEventUpdated={updated => setSelectedEvent(updated)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -18,7 +18,15 @@ import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from 
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink } from "@/lib/shareEvent";
-import { Link2, Lock } from "lucide-react";
+import { Link2, Lock, Pencil } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
+import {
+  editFormToApiPayload,
+  eventToEditForm,
+  userCanEditEvent,
+  type EventEditFormState,
+} from "@/lib/eventEditForm";
 import { getEventTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
 
@@ -44,15 +52,32 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
   transfer: "#CCFF00",
 };
 
-export default function EventModal({ event, onClose }: { event: Event; onClose: () => void }) {
+export default function EventModal({
+  event,
+  onClose,
+  onEventUpdated,
+}: {
+  event: Event;
+  onClose: () => void;
+  onEventUpdated?: (event: Event) => void;
+}) {
   if (!event || typeof event.id !== "number") return null;
-  return <EventModalInner event={event} onClose={onClose} />;
+  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} />;
 }
 
-function EventModalInner({ event, onClose }: { event: Event; onClose: () => void }) {
+function EventModalInner({
+  event,
+  onClose,
+  onEventUpdated,
+}: {
+  event: Event;
+  onClose: () => void;
+  onEventUpdated?: (event: Event) => void;
+}) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const claimEvent = (eventId: number) => setLocation(`/submit/claim/${eventId}`);
   const [modMode, setModMode] = useState<ModerationMode>(null);
   const [modForm, setModForm] = useState({ name: "", email: "", proof: "" });
@@ -64,6 +89,15 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
   const [showCalPicker, setShowCalPicker] = useState(false);
   const [showMapsPicker, setShowMapsPicker] = useState(false);
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
+  const [editing, setEditing] = useState(false);
+  const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
+  const [editHostUpdate, setEditHostUpdate] = useState("");
+
+  useEffect(() => {
+    setEditing(false);
+    setEventForm(null);
+    setEditHostUpdate("");
+  }, [event.id]);
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<EventHostProfile[]>({
     queryKey: ["/api/events", event.id, "hosts"],
@@ -175,8 +209,44 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
     onError: () => toast({ title: "Could not request transfer", variant: "destructive" }),
   });
 
-  const isHost = Boolean(user && eventHosts.some(h => h.userId === user.id));
+  const hostUserIds = eventHosts.map(h => h.userId);
+  const isHost = Boolean(user && hostUserIds.includes(user.id));
+  const canEditEvent = userCanEditEvent(event, user, hostUserIds);
   const canAddCoHost = isHost && eventHosts.length < 3;
+
+  const editEventMutation = useMutation({
+    mutationFn: async (data: EventEditFormState) => {
+      const res = await fetch(`/api/events/${event.id}/edit`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(editFormToApiPayload(data)),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Save failed");
+      return payload as Event;
+    },
+    onSuccess: (updated) => {
+      toast({ title: "Event updated", description: "Your changes have been saved." });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+      onEventUpdated?.(updated);
+      setEditing(false);
+      setEventForm(null);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not save event", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const startEditing = () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    setEventForm(eventToEditForm(event));
+    setEditing(true);
+  };
 
   const addCoHostMutation = useMutation({
     mutationFn: async (data: { username: string; email: string }) => {
@@ -269,6 +339,23 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
         <div className="event-modal__body">
           <h2 className="display event-modal__title">{event.title}</h2>
 
+          {editing && eventForm ? (
+            <DashboardEventEditForm
+              embedded
+              showExtras={false}
+              editingEvent={event}
+              eventForm={eventForm}
+              setEventForm={setEventForm}
+              hostUpdate={editHostUpdate}
+              setHostUpdate={setEditHostUpdate}
+              onCancel={() => { setEditing(false); setEventForm(null); }}
+              onSave={() => editEventMutation.mutate(eventForm)}
+              onPostUpdate={() => undefined}
+              saving={editEventMutation.isPending}
+              posting={false}
+            />
+          ) : (
+          <>
           <div className="event-modal__meta" style={{ borderLeftColor: dayColor }}>
             <div className="event-modal__datetime">
               {startTime} – {endTime}
@@ -419,6 +506,17 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
           </div>
 
           <div className="event-modal__actions">
+            {canEditEvent && (
+              <button
+                type="button"
+                data-testid="button-edit-event"
+                onClick={startEditing}
+                className="btn-neon event-modal__action-btn event-modal__action-btn--edit"
+              >
+                <Pencil size={16} aria-hidden="true" />
+                Edit event
+              </button>
+            )}
             {event.ticketUrl && (
               <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
                 Get Tickets →
@@ -665,6 +763,8 @@ function EventModalInner({ event, onClose }: { event: Event; onClose: () => void
                 {hasPendingClaim ? " A claim is pending admin review." : ""}
               </p>
             </div>
+          )}
+          </>
           )}
         </div>
       </div>

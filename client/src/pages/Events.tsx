@@ -464,7 +464,13 @@ export default function Events() {
         </ScrollReveal>
       </div>
 
-      {selectedEvent && <EventModal event={selectedEvent} onClose={closeEvent} />}
+      {selectedEvent && (
+        <EventModal
+          event={selectedEvent}
+          onClose={closeEvent}
+          onEventUpdated={updated => setSelectedEvent(updated)}
+        />
+      )}
     </div>
   );
 }

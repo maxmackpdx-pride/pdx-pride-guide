@@ -18,6 +18,7 @@ import DashboardAdminTeaser from "@/components/dashboard/DashboardAdminTeaser";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import DashboardNotificationPrefs from "@/components/DashboardNotificationPrefs";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
+import { editFormToApiPayload, eventToEditForm } from "@/lib/eventEditForm";
 import "@/components/dashboard/dashboard.css";
 
 export default function Dashboard() {
@@ -286,29 +287,12 @@ export default function Dashboard() {
   const startEventEdit = (evt: any) => {
     setEditingEvent(evt);
     setHostUpdate("");
-    setEventForm({
-      title: evt.title || "",
-      description: evt.description || "",
-      venueName: evt.venueName || "",
-      address: evt.address || "",
-      neighborhood: evt.neighborhood || "SE Portland",
-      dateStart: evt.dateStart || "",
-      dateEnd: evt.dateEnd || "",
-      dayOfWeek: evt.dayOfWeek || "FRI",
-      ageRequirement: evt.ageRequirement || "ALL_AGES",
-      admission: evt.admission || "FREE",
-      ticketUrl: evt.ticketUrl || "",
-      posterImageUrl: evt.posterImageUrl || "",
-      isHouseParty: !!evt.isHouseParty,
-      isSexPositive: !!evt.isSexPositive,
-      nudityOk: !!evt.nudityOk,
-      eventTypes: JSON.parse(evt.eventTypes || "[]"),
-    });
+    setEventForm(eventToEditForm(evt));
   };
 
   const saveEventEdit = () => {
     if (!editingEvent || !eventForm) return;
-    eventEditMutation.mutate({ id: editingEvent.id, data: eventForm });
+    eventEditMutation.mutate({ id: editingEvent.id, data: editFormToApiPayload(eventForm) });
   };
 
   const eventCount = submittedEvents.length + myEvents.length;

@@ -8,8 +8,8 @@ import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 import EventTalentPanel from "@/components/EventTalentPanel";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
-
-const EVENT_TYPES = ["Dance Party", "Drag", "Kink", "Social", "Brunch", "Performance", "Fair", "Education", "Trans", "Nightlife", "Sex Positive", "Nudity OK", "Other"];
+import { EVENT_TYPE_PICKER_LABELS } from "@shared/eventTypeTags";
+import type { EventEditFormState } from "@/lib/eventEditForm";
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 
 export function DashboardEventEditForm({
@@ -23,10 +23,12 @@ export function DashboardEventEditForm({
   onPostUpdate,
   saving,
   posting,
+  showExtras = true,
+  embedded = false,
 }: {
-  editingEvent: any;
-  eventForm: any;
-  setEventForm: (fn: (f: any) => any) => void;
+  editingEvent: { id: number; title: string; isClaimable?: boolean };
+  eventForm: EventEditFormState;
+  setEventForm: (fn: (f: EventEditFormState) => EventEditFormState) => void;
   hostUpdate: string;
   setHostUpdate: (v: string) => void;
   onCancel: () => void;
@@ -34,6 +36,8 @@ export function DashboardEventEditForm({
   onPostUpdate: () => void;
   saving: boolean;
   posting: boolean;
+  showExtras?: boolean;
+  embedded?: boolean;
 }) {
   const { toast } = useToast();
   const [coHostUsername, setCoHostUsername] = useState("");
@@ -63,44 +67,51 @@ export function DashboardEventEditForm({
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
-  const toggleType = (t: string) => setEventForm((f: any) => ({
+  const toggleType = (t: string) => setEventForm(f => ({
     ...f,
-    eventTypes: f.eventTypes.includes(t) ? f.eventTypes.filter((x: string) => x !== t) : [...f.eventTypes, t],
+    selectedTypes: f.selectedTypes.includes(t)
+      ? f.selectedTypes.filter(x => x !== t)
+      : [...f.selectedTypes, t],
   }));
 
+  const panelClass = embedded ? "event-modal__edit-panel" : "dash-edit-panel";
+  const accent = embedded ? "var(--neon-cyan)" : "#19E3FF";
+
   return (
-    <div className="dash-edit-panel" style={{ borderColor: "#19E3FF" }}>
+    <div className={panelClass} style={embedded ? undefined : { borderColor: accent }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h3 className="dash-anton" style={{ fontSize: "1.1rem", color: "#19E3FF" }}>Editing: {editingEvent.title}</h3>
-        <button type="button" onClick={onCancel} className="dash-mini-btn" style={{ color: "var(--text-meta)" }}>Cancel</button>
+        <h3 className={embedded ? "display" : "dash-anton"} style={{ fontSize: "1.1rem", color: accent }}>
+          {embedded ? "Edit event" : `Editing: ${editingEvent.title}`}
+        </h3>
+        <button type="button" onClick={onCancel} className={embedded ? "event-modal__btn-ghost" : "dash-mini-btn"} style={{ color: "var(--text-meta)" }}>Cancel</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div className="dash-edit-grid">
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Event title *</label>
-            <input style={inputStyle} value={eventForm.title} onChange={e => setEventForm((f: any) => ({ ...f, title: e.target.value }))} required />
+            <input style={inputStyle} value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Description *</label>
-            <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} value={eventForm.description} onChange={e => setEventForm((f: any) => ({ ...f, description: e.target.value }))} />
+            <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} />
           </div>
           <div>
             <label style={labelStyle}>Venue name *</label>
-            <input style={inputStyle} value={eventForm.venueName} onChange={e => setEventForm((f: any) => ({ ...f, venueName: e.target.value }))} />
+            <input style={inputStyle} value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} />
           </div>
           <div>
             <label style={labelStyle}>Neighborhood</label>
-            <select style={inputStyle} value={eventForm.neighborhood} onChange={e => setEventForm((f: any) => ({ ...f, neighborhood: e.target.value }))}>
+            <select style={inputStyle} value={eventForm.neighborhood} onChange={e => setEventForm(f => ({ ...f, neighborhood: e.target.value }))}>
               {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Address *</label>
-            <input style={inputStyle} value={eventForm.address} onChange={e => setEventForm((f: any) => ({ ...f, address: e.target.value }))} />
+            <input style={inputStyle} value={eventForm.address} onChange={e => setEventForm(f => ({ ...f, address: e.target.value }))} />
           </div>
           <div>
             <label style={labelStyle}>Day</label>
-            <select style={inputStyle} value={eventForm.dayOfWeek} onChange={e => setEventForm((f: any) => ({ ...f, dayOfWeek: e.target.value }))}>
+            <select style={inputStyle} value={eventForm.dayOfWeek} onChange={e => setEventForm(f => ({ ...f, dayOfWeek: e.target.value }))}>
               {PRIDE_WEEK_DAY_OPTIONS.map(d => (
                 <option key={d.value} value={d.value}>{d.label}</option>
               ))}
@@ -108,7 +119,7 @@ export function DashboardEventEditForm({
           </div>
           <div>
             <label style={labelStyle}>Age requirement</label>
-            <select style={inputStyle} value={eventForm.ageRequirement} onChange={e => setEventForm((f: any) => ({ ...f, ageRequirement: e.target.value }))}>
+            <select style={inputStyle} value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
               <option value="ALL_AGES">All Ages</option>
               <option value="18_PLUS">18+</option>
               <option value="21_PLUS">21+</option>
@@ -116,15 +127,15 @@ export function DashboardEventEditForm({
           </div>
           <div>
             <label style={labelStyle}>Start</label>
-            <input type="datetime-local" style={inputStyle} value={eventForm.dateStart} onChange={e => setEventForm((f: any) => ({ ...f, dateStart: e.target.value }))} />
+            <input type="datetime-local" style={inputStyle} value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} />
           </div>
           <div>
             <label style={labelStyle}>End</label>
-            <input type="datetime-local" style={inputStyle} value={eventForm.dateEnd} onChange={e => setEventForm((f: any) => ({ ...f, dateEnd: e.target.value }))} />
+            <input type="datetime-local" style={inputStyle} value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} />
           </div>
           <div>
             <label style={labelStyle}>Admission</label>
-            <select style={inputStyle} value={eventForm.admission} onChange={e => setEventForm((f: any) => ({ ...f, admission: e.target.value }))}>
+            <select style={inputStyle} value={eventForm.admission} onChange={e => setEventForm(f => ({ ...f, admission: e.target.value }))}>
               <option value="FREE">Free</option>
               <option value="TICKETED">Ticketed</option>
               <option value="SUGGESTED_DONATION">Suggested Donation</option>
@@ -132,7 +143,7 @@ export function DashboardEventEditForm({
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Ticket / RSVP link *</label>
-            <input type="url" style={inputStyle} value={eventForm.ticketUrl} onChange={e => setEventForm((f: any) => ({ ...f, ticketUrl: e.target.value }))} placeholder="https://..." />
+            <input type="url" style={inputStyle} value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} placeholder="https://..." />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Event flyer / poster</label>
@@ -140,7 +151,7 @@ export function DashboardEventEditForm({
               endpoint="/api/upload/poster"
               fieldName="poster"
               currentUrl={eventForm.posterImageUrl}
-              onUploaded={(url: string) => setEventForm((f: any) => ({ ...f, posterImageUrl: url }))}
+              onUploaded={(url: string) => setEventForm(f => ({ ...f, posterImageUrl: url }))}
               label="UPLOAD FLYER"
             />
           </div>
@@ -148,9 +159,9 @@ export function DashboardEventEditForm({
         <div>
           <label style={labelStyle}>Event types</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
-            {EVENT_TYPES.map(t => (
+            {EVENT_TYPE_PICKER_LABELS.map(t => (
               <button key={t} type="button" onClick={() => toggleType(t)}
-                className={`filter-tag ${eventForm.eventTypes.includes(t) ? "active" : ""}`}>{t}</button>
+                className={`filter-tag ${eventForm.selectedTypes.includes(t) ? "active" : ""}`}>{t}</button>
             ))}
           </div>
         </div>
@@ -158,14 +169,14 @@ export function DashboardEventEditForm({
           <label style={labelStyle}>Flags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
             <EventTypeTag label="HOUSE PARTY" interactive active={!!eventForm.isHouseParty}
-              onClick={() => setEventForm((f: any) => ({ ...f, isHouseParty: !f.isHouseParty }))} />
+              onClick={() => setEventForm(f => ({ ...f, isHouseParty: !f.isHouseParty }))} />
             <EventTypeTag label="SEX POSITIVE" interactive active={!!eventForm.isSexPositive}
-              onClick={() => setEventForm((f: any) => ({ ...f, isSexPositive: !f.isSexPositive }))} />
+              onClick={() => setEventForm(f => ({ ...f, isSexPositive: !f.isSexPositive }))} />
             <EventTypeTag label="NUDITY OK" interactive active={!!eventForm.nudityOk}
-              onClick={() => setEventForm((f: any) => ({ ...f, nudityOk: !f.nudityOk }))} />
+              onClick={() => setEventForm(f => ({ ...f, nudityOk: !f.nudityOk }))} />
           </div>
         </div>
-        <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+        {showExtras && <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
           <label style={labelStyle}>Event hosts ({eventHosts.length}/3)</label>
           {eventHosts.length > 0 && (
             <div className="event-hosts-row" style={{ marginTop: 10, marginBottom: 12 }}>
@@ -206,8 +217,8 @@ export function DashboardEventEditForm({
               </button>
             </div>
           )}
-        </div>
-        <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+        </div>}
+        {showExtras && <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
           <EventTalentPanel
             eventId={editingEvent.id}
             eventTitle={editingEvent.title}
@@ -215,8 +226,8 @@ export function DashboardEventEditForm({
             mode="manage"
             isClaimable={editingEvent.isClaimable}
           />
-        </div>
-        <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+        </div>}
+        {showExtras && <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
           <label style={labelStyle}>Post host update</label>
           <p style={{ fontSize: "0.76rem", color: "var(--text-meta)", marginBottom: 8, lineHeight: 1.4 }}>
             Pinned on your event detail page (max 2 visible, newest first).
@@ -237,9 +248,15 @@ export function DashboardEventEditForm({
           >
             {posting ? "Posting..." : "Post update →"}
           </button>
-        </div>
-        <button type="button" onClick={onSave} disabled={saving} className="dash-btn dash-btn-lime active" style={{ alignSelf: "flex-start" }}>
-          {saving ? "Saving..." : "Save event →"}
+        </div>}
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={saving}
+          className={embedded ? "btn-neon solid event-modal__action-btn" : "dash-btn dash-btn-lime active"}
+          style={embedded ? undefined : { alignSelf: "flex-start" }}
+        >
+          {saving ? "Saving..." : embedded ? "Save changes" : "Save event →"}
         </button>
       </div>
     </div>

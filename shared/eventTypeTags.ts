@@ -80,3 +80,36 @@ export function submitLabelsToJsonTags(labels: string[]): string[] {
     return match?.jsonTag ?? label.toUpperCase().replace(/\s+/g, "_");
   });
 }
+
+const JSON_TAG_TO_LABEL = Object.fromEntries(
+  SUBMIT_EVENT_TYPE_OPTIONS.map(opt => [opt.jsonTag, opt.label]),
+) as Record<string, string>;
+
+function normalizeJsonTag(tag: string): string {
+  return tag.trim().toUpperCase().replace(/[\s-]+/g, "_");
+}
+
+/** Map stored event_types JSON value to a submit-form label, if known. */
+export function jsonTagToSubmitLabel(tag: string): string | null {
+  const norm = normalizeJsonTag(tag);
+  if (JSON_TAG_TO_LABEL[norm]) return JSON_TAG_TO_LABEL[norm];
+  const byLabel = SUBMIT_EVENT_TYPE_OPTIONS.find(
+    opt => opt.label.toUpperCase() === tag.trim().toUpperCase(),
+  );
+  return byLabel?.label ?? null;
+}
+
+/** Parse event.eventTypes JSON for editing in the tag picker UI. */
+export function jsonTagsToSubmitLabels(tags: string[]): string[] {
+  const out: string[] = [];
+  for (const tag of tags) {
+    const label = jsonTagToSubmitLabel(tag);
+    if (label && !out.includes(label)) out.push(label);
+  }
+  return out;
+}
+
+/** Labels shown in submit + dashboard event-type pickers (excludes flag-only duplicates). */
+export const EVENT_TYPE_PICKER_LABELS = SUBMIT_EVENT_TYPE_OPTIONS
+  .filter(opt => opt.jsonTag !== "SEX_POSITIVE" && opt.jsonTag !== "NUDITY_OK")
+  .map(opt => opt.label);

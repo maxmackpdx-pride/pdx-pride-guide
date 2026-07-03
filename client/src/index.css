@@ -6433,6 +6433,21 @@ footer a:hover { color: #00FFFF !important; }
   padding: 10px 18px !important;
 }
 
+.event-modal__action-btn--edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-color: var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+}
+
+.event-modal__edit-panel {
+  margin: 16px 0 8px;
+  padding: 16px;
+  border: 2px solid var(--neon-cyan);
+  background: #080808;
+}
+
 .event-modal__tabs {
   display: flex;
   gap: 0;
