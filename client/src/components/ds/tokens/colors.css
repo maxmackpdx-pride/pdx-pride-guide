@@ -125,7 +125,11 @@
   --text-meta:     var(--text-lo);
 
   --border-default: var(--ink-border);
+  --border-faint:   var(--ink-border-faint);
   --border-strong:  var(--ink-border-strong);
+
+  --paper:     #e9e5da;
+  --paper-ink: #0a0a0a;
 
   --accent:           var(--neon-yellow);   /* PRIMARY action */
   --accent-ink:       var(--text-inverse);

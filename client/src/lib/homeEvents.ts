@@ -67,6 +67,18 @@ function uniqueByEventId(list: EventListing[]): EventListing[] {
   return out;
 }
 
+/** Shuffled event titles for the home ticker (capped so the band scrolls smoothly). */
+export function pickMarqueeItems(events: EventListing[], limit = 12): string[] {
+  const titles = shuffleArray(events.map(e => e.title).filter(Boolean));
+  if (titles.length > 0) return titles.slice(0, limit);
+  return shuffleArray(HOME_MARQUEE_FALLBACK).slice(0, limit);
+}
+
+/** Random directory picks for the home "Where to Go" column. */
+export function pickRandomBusinesses<T>(businesses: T[], count = 3): T[] {
+  return shuffleArray(businesses).slice(0, count);
+}
+
 /** Four random Pride-week events; ~12.5% chance the Sanctuary headliner is included. */
 export function pickFourToTry(events: EventListing[], sanctuary: EventListing | null): EventListing[] {
   const pool = shuffleArray(uniqueByEventId(events.filter(isPrideListing)));

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -22,12 +22,10 @@ import {
   Divider,
   EventCard,
   FilterChip,
-  MapPanel,
   Marquee,
   PlaceCard,
   PosterCard,
   SectionHeader,
-  StickerBadge,
 } from "@/components/ds";
 import heroCollageImg from "@/assets/hero-collage.png";
 import {
@@ -35,7 +33,6 @@ import {
   HOME_DAY_META,
   HOME_DAY_ORDER,
   HOME_MARQUEE_FALLBACK,
-  buildHomeMapPins,
   countEventsByHomeDay,
   dayColorVar,
   eventsForHomeDay,
@@ -43,12 +40,23 @@ import {
   homeListingProps,
   isWhatsOnVisible,
   pickFourToTry,
+  pickMarqueeItems,
+  pickRandomBusinesses,
   prideDayChipDate,
   type HomeDayKey,
 } from "@/lib/homeEvents";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
 
+const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
+
 const SAVED_KEY = "pdx-home-saved-event-ids";
+
+const COMMUNITY_LINKS = {
+  spotted: { href: "/spotted", label: "Spotted", color: "var(--pink)" },
+  gifting: { href: "/gifting", label: "Gifting", color: "var(--lime)" },
+  gigs: { href: "/pride-work", label: "Gigs", color: "var(--cyan)" },
+} as const;
 
 const NOTE_ACCENTS = ["var(--pink)", "var(--cyan)", "var(--purple)", "var(--lime)", "var(--amber)"];
 
@@ -84,6 +92,8 @@ type DirectoryBusiness = {
   hours: string | null;
   phone: string | null;
   isNew: boolean;
+  lat: number | null;
+  lng: number | null;
 };
 
 type GiftingFeedPost = GiftingPost & {
@@ -141,6 +151,8 @@ export default function Home() {
   const [activeDay, setActiveDay] = useState<HomeDayKey>("SAT");
   const [savedIds, setSavedIds] = useState<Set<number>>(readSavedIds);
   const [fourToTry, setFourToTry] = useState<EventListing[]>([]);
+  const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
+  const [featuredPlaces, setFeaturedPlaces] = useState<DirectoryBusiness[]>([]);
   const [showAuth, setShowAuth] = useState(false);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -201,20 +213,26 @@ export default function Home() {
     setFourToTry(prev => (prev.length > 0 ? prev : pickFourToTry(events, sanctuary)));
   }, [events, sanctuary]);
 
+  useEffect(() => {
+    if (events.length === 0) return;
+    setMarqueeItems(prev =>
+      prev.length > 0 ? prev : pickMarqueeItems(events),
+    );
+  }, [events]);
+
+  useEffect(() => {
+    if (businesses.length === 0) return;
+    setFeaturedPlaces(prev => (prev.length > 0 ? prev : pickRandomBusinesses(businesses, 3)));
+  }, [businesses]);
+
   const dayCounts = useMemo(() => countEventsByHomeDay(events), [events]);
   const whatsOnVisible = isWhatsOnVisible(
     typeof window !== "undefined" ? window.location.search : "",
   );
   const dayEvents = useMemo(() => eventsForHomeDay(events, activeDay), [events, activeDay]);
-  const mapPins = useMemo(() => buildHomeMapPins(events), [events]);
 
-  const marqueeItems = useMemo(() => {
-    const titles = events.map(e => e.title).filter(Boolean);
-    return titles.length > 0 ? titles : HOME_MARQUEE_FALLBACK;
-  }, [events]);
-
-  const featuredPlaces = useMemo(
-    () => [...businesses].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)).slice(0, 3),
+  const mappedBusinesses = useMemo(
+    () => businesses.filter(b => b.lat != null && b.lng != null),
     [businesses],
   );
 
@@ -279,7 +297,7 @@ export default function Home() {
   const dayMeta = HOME_DAY_META[activeDay];
 
   return (
-    <div className="zine-page home-page home-main-stage">
+    <div className="home-main-stage">
       {showSoftLaunch && (
         <div
           role="dialog"
@@ -355,17 +373,6 @@ export default function Home() {
       <section className="pg-hero" aria-label="Portland Pride Guide hero">
         <img className="pg-hero__img" src={heroCollageImg} alt="" />
         <div className="pg-hero__scrim" aria-hidden="true" />
-        <div className="pg-hero__stickers" aria-hidden="true">
-          <StickerBadge color="rainbow" size="lg" rotate={-6}>
-            Rainbow Rave
-          </StickerBadge>
-          <StickerBadge color="cyan" size="md" rotate={4}>
-            Gay All Day
-          </StickerBadge>
-          <StickerBadge color="pink" size="md" rotate={-3}>
-            Made by the Scene
-          </StickerBadge>
-        </div>
         <div className="pg-hero__body">
           <div className="pg-hero__kicker">
             <span className="d" aria-hidden="true" />
@@ -399,7 +406,18 @@ export default function Home() {
         </div>
       </section>
 
-      <Marquee color="rainbow" items={marqueeItems} />
+      <div className="home-live-ticker" aria-label="Live event ticker">
+        <Link href="/events" className="home-live-ticker__label">
+          Live
+        </Link>
+        <Marquee
+          color="rainbow"
+          items={marqueeItems.length > 0 ? marqueeItems : HOME_MARQUEE_FALLBACK.slice(0, 12)}
+          className="home-live-ticker__marquee pdxMarquee--band"
+          speed={42}
+          separator="★"
+        />
+      </div>
 
       <div className="pg-block" style={{ paddingTop: 58 }}>
         <ScrollReveal>
@@ -567,17 +585,17 @@ export default function Home() {
           />
           <div className="pg-board3">
             <div>
-              <div className="pg-colhd">
-                <span className="pg-colhd__t" style={{ color: "var(--pink)" }}>
-                  Spotted
+              <Link href={COMMUNITY_LINKS.spotted.href} className="pg-colhd pg-colhd--link">
+                <span className="pg-colhd__t" style={{ color: COMMUNITY_LINKS.spotted.color }}>
+                  {COMMUNITY_LINKS.spotted.label}
                 </span>
                 <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--pink), transparent)" }} />
-              </div>
+              </Link>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {spotted.slice(0, 3).map((post, i) => {
                   const spottedWhen = formatSpottedWhen(post);
                   return (
-                  <Link key={post.id} href="/spotted" className="pg-note pg-note--spot" style={{ "--_av": NOTE_ACCENTS[i % NOTE_ACCENTS.length] }}>
+                  <Link key={post.id} href={COMMUNITY_LINKS.spotted.href} className="pg-note pg-note--spot" style={{ "--_av": NOTE_ACCENTS[i % NOTE_ACCENTS.length] }}>
                     <div className="pg-note__where">
                       <span className="d" aria-hidden="true" />
                       {post.venueHint || post.title}
@@ -586,67 +604,78 @@ export default function Home() {
                       )}
                     </div>
                     <p className="pg-note__text">{post.body}</p>
-                    <span className="pg-note__reply">Reply →</span>
+                    <span className="pg-note__reply">View on Spotted →</span>
                   </Link>
                   );
                 })}
                 {spotted.length === 0 && (
-                  <Link href="/spotted" className="pg-note" style={{ "--_av": "var(--pink)" }}>
+                  <Link href={COMMUNITY_LINKS.spotted.href} className="pg-note" style={{ "--_av": "var(--pink)" }}>
                     <p className="pg-note__text">No spotted posts yet. Be the first to leave a note.</p>
                     <span className="pg-note__reply">Go to Spotted →</span>
                   </Link>
                 )}
               </div>
+              <Link href={COMMUNITY_LINKS.spotted.href} className="pg-board-more" style={{ color: COMMUNITY_LINKS.spotted.color }}>
+                All Spotted posts →
+              </Link>
             </div>
             <div>
-              <div className="pg-colhd">
-                <span className="pg-colhd__t" style={{ color: "var(--lime)" }}>
-                  Gifting
+              <Link href={COMMUNITY_LINKS.gifting.href} className="pg-colhd pg-colhd--link">
+                <span className="pg-colhd__t" style={{ color: COMMUNITY_LINKS.gifting.color }}>
+                  {COMMUNITY_LINKS.gifting.label}
                 </span>
                 <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--lime), transparent)" }} />
-              </div>
+              </Link>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {gifting.slice(0, 3).map((post, i) => (
-                  <Link key={post.id} href="/gifting" className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 1) % NOTE_ACCENTS.length] }}>
+                  <Link key={post.id} href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 1) % NOTE_ACCENTS.length] }}>
                     <div className="pg-note__title">{post.title}</div>
                     <div className="pg-note__meta">
                       {post.category} · {post.neighborhood}
                     </div>
                     <p className="pg-note__text">{post.description}</p>
+                    <span className="pg-note__reply">View on Gifting →</span>
                   </Link>
                 ))}
                 {gifting.length === 0 && (
-                  <Link href="/gifting" className="pg-note" style={{ "--_av": "var(--lime)" }}>
+                  <Link href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ "--_av": "var(--lime)" }}>
                     <p className="pg-note__text">The gift board is quiet. Post something queer homes need.</p>
                     <span className="pg-note__reply">Post a gift →</span>
                   </Link>
                 )}
               </div>
+              <Link href={COMMUNITY_LINKS.gifting.href} className="pg-board-more" style={{ color: COMMUNITY_LINKS.gifting.color }}>
+                All Gifting posts →
+              </Link>
             </div>
             <div>
-              <div className="pg-colhd">
-                <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>
-                  Gigs
+              <Link href={COMMUNITY_LINKS.gigs.href} className="pg-colhd pg-colhd--link">
+                <span className="pg-colhd__t" style={{ color: COMMUNITY_LINKS.gigs.color }}>
+                  {COMMUNITY_LINKS.gigs.label}
                 </span>
                 <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
-              </div>
+              </Link>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {gigs.slice(0, 3).map((post, i) => (
-                  <Link key={post.id} href="/pride-work" className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 2) % NOTE_ACCENTS.length] }}>
+                  <Link key={post.id} href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 2) % NOTE_ACCENTS.length] }}>
                     <div className="pg-note__title">{post.title}</div>
                     <div className="pg-note__meta">
                       {[post.compensation, post.location].filter(Boolean).join(" · ") || "Pride season gig"}
                     </div>
                     <p className="pg-note__text">{post.description}</p>
+                    <span className="pg-note__reply">View on Gigs →</span>
                   </Link>
                 ))}
                 {gigs.length === 0 && (
-                  <Link href="/pride-work" className="pg-note" style={{ "--_av": "var(--cyan)" }}>
+                  <Link href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ "--_av": "var(--cyan)" }}>
                     <p className="pg-note__text">No gigs posted yet. Workers and hosts both belong here.</p>
                     <span className="pg-note__reply">Browse gigs →</span>
                   </Link>
                 )}
               </div>
+              <Link href={COMMUNITY_LINKS.gigs.href} className="pg-board-more" style={{ color: COMMUNITY_LINKS.gigs.color }}>
+                All Gigs →
+              </Link>
             </div>
           </div>
         </ScrollReveal>
@@ -660,12 +689,22 @@ export default function Home() {
           <SectionHeader
             kicker="Queer Places"
             title="Where to Go"
-            subtitle="Bars, cafes, and venues run by and for the community, mapped by day."
+            subtitle="Bars, cafes, and venues run by and for the community — three picks reshuffled every visit."
             accent="cyan"
           />
           <div className="pg-places">
             <div id="home-map">
-              <MapPanel pins={mapPins} height={466} legend />
+              <Suspense
+                fallback={
+                  <div
+                    style={{ height: 466, background: "#0a0a0a" }}
+                    role="status"
+                    aria-label="Loading directory map"
+                  />
+                }
+              >
+                <DirectoryMap businesses={mappedBusinesses} height={466} />
+              </Suspense>
             </div>
             <div className="pg-placescol">
               {featuredPlaces.map(biz => (

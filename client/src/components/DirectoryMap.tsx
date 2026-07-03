@@ -32,10 +32,16 @@ function buildPin(color: string) {
   });
 }
 
-export default function DirectoryMap({ businesses }: { businesses: Business[] }) {
+export default function DirectoryMap({
+  businesses,
+  height = 380,
+}: {
+  businesses: Business[];
+  height?: number;
+}) {
   const mapped = businesses.filter(b => b.lat != null && b.lng != null);
   return (
-    <div style={{ height: 380, width: "100%", position: "relative" }}>
+    <div style={{ height, width: "100%", position: "relative" }}>
       <MapContainer
         center={[45.5231, -122.6765]}
         zoom={13}

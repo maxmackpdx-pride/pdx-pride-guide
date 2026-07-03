@@ -1,3 +1,4 @@
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import type { EventListing } from "@shared/multiDayEvents";
 import { PRIDE_WEEK_DAYS, type AdmKey, type DayKey, type EventType, type PrideEvent } from "@shared/prideWeek";
@@ -24,6 +25,8 @@ const JSON_TAG_TO_TYPE: Record<string, EventType> = {
 export type ScheduleEvent = PrideEvent & {
   /** Unique per grid block (handles multi-day listing slices). */
   scheduleKey: string;
+  /** Resolved flyer URL for grid blocks and popover header. */
+  posterUrl: string;
 };
 
 function pacificClockMinutes(value: string): number | null {
@@ -121,6 +124,7 @@ export function eventListingToScheduleEvent(
     going,
     blurb: event.description,
     feat: isHeadliner(event, going),
+    posterUrl: resolveEventPosterUrl(event.id, event.posterImageUrl),
   };
 }
 

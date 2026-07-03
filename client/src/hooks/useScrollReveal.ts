@@ -8,23 +8,38 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(delay = 
     const el = ref.current;
     if (!el) return;
 
+    const reveal = () => setVisible(true);
+
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      setVisible(true);
+      reveal();
+      return;
+    }
+
+    // Already on screen when mounted — don't leave sections at opacity 0.
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      reveal();
       return;
     }
 
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisible(true);
+          reveal();
           obs.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: "0px 0px -32px 0px" },
+      { threshold: 0.08, rootMargin: "0px 0px -24px 0px" },
     );
     obs.observe(el);
-    return () => obs.disconnect();
+
+    // Safety net: never keep content permanently hidden if IO misfires.
+    const fallback = window.setTimeout(reveal, 1200);
+    return () => {
+      obs.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, []);
 
   return {

@@ -1,8 +1,11 @@
 /* Main Stage home (direction 1a) — page layout from pdxprideguidehome.html */
 
 .home-main-stage {
+  position: relative;
+  isolation: isolate;
   background: var(--ink-900);
   overflow-x: clip;
+  color: var(--text-mid);
 }
 
 .home-main-stage .pg-block {
@@ -225,12 +228,44 @@
   margin-bottom: 14px;
 }
 
+.home-main-stage .pg-colhd--link {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.16s ease;
+}
+
+.home-main-stage .pg-colhd--link:hover {
+  opacity: 0.82;
+}
+
+.home-main-stage .pg-colhd--link:hover .pg-colhd__t {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home-main-stage .pg-board-more {
+  display: inline-flex;
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.home-main-stage .pg-board-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .home-main-stage .pg-colhd__t {
   font-family: var(--font-display);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 1.15rem;
+  font-size: clamp(1.5rem, 3.2vw, 1.75rem);
+  line-height: 1;
 }
 
 .home-main-stage .pg-colhd__rule {
@@ -324,6 +359,17 @@
   align-items: start;
 }
 
+.home-main-stage #home-map {
+  min-height: 466px;
+  border: 2px solid var(--border-default);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.home-main-stage #home-map > div {
+  height: 466px;
+}
+
 .home-main-stage .pg-placescol {
   display: flex;
   flex-direction: column;
@@ -362,17 +408,35 @@
   cursor: pointer;
 }
 
+.home-main-stage .scroll-reveal {
+  opacity: 1;
+  transform: none;
+}
+
 .home-main-stage .scroll-reveal--visible {
   animation: pgReveal 0.6s var(--ease-out) both;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .home-main-stage .scroll-reveal,
+  .home-main-stage .scroll-reveal--visible {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+html.calm-mode .home-main-stage .scroll-reveal,
+html.calm-mode .home-main-stage .scroll-reveal--visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @keyframes pgReveal {
   from {
-    opacity: 0;
     transform: translateY(20px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }

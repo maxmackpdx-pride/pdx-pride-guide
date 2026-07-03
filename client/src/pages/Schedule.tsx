@@ -21,7 +21,6 @@ import {
   fmtHour,
   hexA,
   layoutDay,
-  posterBg,
   type AdmKey,
   type EventType,
   type LaneInfo,
@@ -42,7 +41,7 @@ import AuthModal from "@/components/AuthModal";
 import heroUrl from "@/assets/hero-collage.png";
 import "./Schedule.css";
 
-/** Poster treatment — how event blocks render their day poster. */
+/** Legacy prop — event blocks always use full-bleed flyer backgrounds. */
 export type PosterStyle = 'Color blocks' | 'Poster chip' | 'Poster peek';
 /** Row density — vertical scale of the grid. */
 export type Density = 'Comfortable' | 'Compact';
@@ -77,7 +76,6 @@ function nowMinutes(): number {
 }
 
 export default function Schedule({
-  posterStyle = 'Color blocks',
   density = 'Comfortable',
 }: ScheduleProps) {
   const { user } = useAuth();
@@ -363,9 +361,6 @@ export default function Schedule({
 
   /* ---- derived layout constants ----------------------------------- */
 
-  const mode = ({ 'Color blocks': 'none', 'Poster chip': 'chip', 'Poster peek': 'peek' } as const)[
-    posterStyle
-  ];
   const compact = density === 'Compact';
   const HOUR_H = compact ? 58 : 74;
   const MIN_LANE = compact ? 124 : 152;
@@ -425,19 +420,15 @@ export default function Schedule({
     showVenue: boolean;
     showQuick: boolean;
     showCheck: boolean;
-    chip: boolean;
-    showPeek: boolean;
     live: boolean;
+    overlayStyle: React.CSSProperties;
     quickIcon: string;
-    chipInitial: string;
     timeStyle: React.CSSProperties;
     titleStyle: React.CSSProperties;
     venueStyle: React.CSSProperties;
-    chipStyle: React.CSSProperties;
     liveDotStyle: React.CSSProperties;
     checkStyle: React.CSSProperties;
     quickStyle: React.CSSProperties;
-    peekStyle: React.CSSProperties;
     contentStyle: React.CSSProperties;
   };
   type DayVM = {
@@ -472,8 +463,6 @@ export default function Schedule({
         const twoLine = height >= 54;
         const showVenue = height >= 74 && width >= 116;
         const showQuick = height >= 56 && width >= 100;
-        const showPeek = mode === 'peek' && height >= 96;
-        const chip = mode === 'chip' && width >= 88;
         const style = S({
           position: 'absolute',
           top: top + 'px',
@@ -485,12 +474,10 @@ export default function Schedule({
           cursor: 'pointer',
           border: '1px solid ' + hexA(dc, rsvp ? 0.6 : 0.22),
           borderLeft: '3px solid ' + dc,
-          background:
-            'linear-gradient(180deg,' +
-            hexA(dc, rsvp ? 0.32 : 0.14) +
-            ',' +
-            hexA(dc, rsvp ? 0.14 : 0.05) +
-            '), #0b0b0e',
+          backgroundColor: '#0b0b0e',
+          backgroundImage: 'url(' + e.posterUrl + ')',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           display: 'flex',
           flexDirection: 'column',
           boxShadow:
@@ -510,11 +497,16 @@ export default function Schedule({
           showVenue,
           showQuick,
           showCheck: rsvp && !showQuick,
-          chip,
-          showPeek,
           live,
           quickIcon: rsvp ? '♥' : '♡',
-          chipInitial: e.title.charAt(0),
+          overlayStyle: S({
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, rgba(11,11,14,0.78) 100%)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }),
           timeStyle: S({
             fontFamily: 'var(--font-body)',
             fontSize: (compact ? 10 : 11) + 'px',
@@ -538,6 +530,7 @@ export default function Schedule({
             overflow: 'hidden',
             wordBreak: 'break-word',
             marginTop: '1px',
+            textShadow: '0 1px 8px rgba(0,0,0,.75)',
           }),
           venueStyle: S({
             fontFamily: 'var(--font-body)',
@@ -547,21 +540,6 @@ export default function Schedule({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             marginTop: '3px',
-          }),
-          chipStyle: S({
-            width: (compact ? 18 : 22) + 'px',
-            height: (compact ? 18 : 22) + 'px',
-            borderRadius: '4px',
-            flex: 'none',
-            background: posterBg(dc),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 900,
-            fontSize: (compact ? 10 : 12) + 'px',
-            color: '#fff',
-            border: '1px solid ' + hexA(dc, 0.5),
           }),
           liveDotStyle: S({
             width: '7px',
@@ -604,12 +582,6 @@ export default function Schedule({
             lineHeight: 1,
             padding: 0,
           }),
-          peekStyle: S({
-            position: 'absolute',
-            inset: 0,
-            background: posterBg(dc),
-            opacity: 0.42,
-          }),
           contentStyle: S({
             position: 'relative',
             zIndex: 2,
@@ -619,9 +591,6 @@ export default function Schedule({
             display: 'flex',
             flexDirection: 'column',
             gap: '1px',
-            background: showPeek
-              ? 'linear-gradient(180deg,rgba(11,11,14,.1),rgba(11,11,14,.86))'
-              : 'transparent',
           }),
         };
       });
@@ -685,7 +654,6 @@ export default function Schedule({
     HOUR_H,
     MIN_H,
     compact,
-    mode,
     scheduleEvents,
     myEventIds,
     now,
@@ -929,7 +897,14 @@ export default function Schedule({
         boxShadow:
           '0 24px 60px -12px rgba(0,0,0,.8)' + (calm ? '' : ', 0 0 30px -6px ' + hexA(dc, 0.5)),
       }),
-      posterStyle: S({ position: 'relative', height: '128px', background: posterBg(dc) }),
+      posterStyle: S({
+        position: 'relative',
+        height: '128px',
+        backgroundColor: '#0b0b0e',
+        backgroundImage: 'url(' + e.posterUrl + ')',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }),
       dayBadgeStyle: badge(dc),
       admBadgeStyle: badge(adm.color),
       tags: e.types
@@ -1292,7 +1267,7 @@ export default function Schedule({
                   {nowShown && <div style={nowLineStyle} />}
                   {day.blocks.map((b) => (
                     <div key={b.id} className="sch-block" onClick={b.onClick} style={b.style}>
-                      {b.showPeek && <div style={b.peekStyle} />}
+                      <div style={b.overlayStyle} aria-hidden />
                       {b.showQuick && (
                         <button onClick={b.onQuick} style={b.quickStyle}>
                           {b.quickIcon}
@@ -1300,7 +1275,6 @@ export default function Schedule({
                       )}
                       <div style={b.contentStyle}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          {b.chip && <div style={b.chipStyle}>{b.chipInitial}</div>}
                           {b.live && <span className="sch-livedot" style={b.liveDotStyle} />}
                           <span style={b.timeStyle}>{b.time}</span>
                           {b.showCheck && <span style={b.checkStyle}>✓</span>}
@@ -1316,65 +1290,6 @@ export default function Schedule({
           </div>
         </div>
       </div>
-
-      {/* ---- Footer ---- */}
-      <footer style={{ background: '#0a0a0a', marginTop: '8px' }}>
-        <div style={{ height: '3px', background: 'var(--grad-flag)' }} />
-        <div
-          style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            padding: '24px clamp(16px,4vw,40px)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                fontFamily: 'var(--font-display)',
-                fontWeight: 900,
-                lineHeight: 0.82,
-                textTransform: 'uppercase',
-                fontSize: '15px',
-              }}
-            >
-              <span style={{ color: '#fff' }}>PDX</span>
-              <span
-                style={{
-                  background: 'var(--grad-rainbow)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
-                PRIDE
-              </span>
-              <span style={{ color: '#fff' }}>GUIDE</span>
-            </span>
-            <span style={{ color: 'var(--text-faint)', fontSize: '12.5px', maxWidth: '34ch', lineHeight: 1.4 }}>
-              Independently built directory. No sponsors, no logins, no cover charge.
-            </span>
-          </div>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '.06em',
-              textTransform: 'uppercase',
-              color: 'var(--text-meta)',
-            }}
-          >
-            Pride is a protest. Take care of each other. <span style={{ color: '#FF00CC' }}>✦</span>
-          </span>
-        </div>
-      </footer>
 
       {/* ---- Detail popover ---- */}
       {selected && (
