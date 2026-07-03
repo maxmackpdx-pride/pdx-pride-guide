@@ -43,6 +43,7 @@ const COLORS = {
 const ADMISSION = {
   FREE: { color: "lime", label: "Free" },
   TICKETED: { color: "cyan", label: "Ticketed" },
+  DOOR_FEE: { color: "orange", label: "Door fee" },
   SUGGESTED_DONATION: { color: "amber", label: "Donation" },
 };
 /* Day -> color (paper look by default like the detail modal "FRI") */

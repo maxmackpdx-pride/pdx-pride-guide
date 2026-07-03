@@ -11,6 +11,7 @@ import EventTypeTag from "@/components/EventTypeTag";
 import PageHero, { type PageHeroAccent } from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
 import { PRIDE_WEEK_DAY_OPTIONS, defaultPrideDateTimes } from "@shared/prideWeek";
 
@@ -287,7 +288,8 @@ export default function Submit() {
   const hero = heroCopy[mode];
 
   const fieldClass = "submit-form__field";
-  const ticketRequired = eventForm.admission !== "FREE";
+  const ticketRequired = admissionRequiresTicketUrl(eventForm.admission);
+  const admissionHint = ADMISSION_OPTIONS.find(o => o.value === eventForm.admission)?.hint;
 
   return (
     <div className="zine-page submit-page board-page">
@@ -488,9 +490,9 @@ export default function Submit() {
                   <div className={fieldClass}>
                     <label style={labelStyle}>Admission</label>
                     <select value={eventForm.admission} onChange={e => setEventForm(f => ({ ...f, admission: e.target.value }))}>
-                      <option value="FREE">Free</option>
-                      <option value="TICKETED">Ticketed</option>
-                      <option value="SUGGESTED_DONATION">Suggested Donation</option>
+                      {ADMISSION_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -498,7 +500,9 @@ export default function Submit() {
                   <label style={labelStyle}>Ticket / RSVP Link{ticketRequired ? " *" : ""}</label>
                   <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required={ticketRequired} />
                   <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
-                    {ticketRequired ? "Required for ticketed events." : "Optional for free events — add one if you have it."}
+                    {ticketRequired
+                      ? "Required for ticketed events."
+                      : admissionHint || "Optional — add a link if you have one."}
                   </div>
                 </div>
                 <div>

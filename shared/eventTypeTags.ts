@@ -6,6 +6,7 @@ export const EVENT_TYPE_FILTERS = [
   "NUDITY OK",
   "FREE",
   "TICKETED",
+  "DOOR FEE",
   "21+",
   "ALL AGES",
   "PUBLIC",
@@ -24,6 +25,7 @@ export const EVENT_TYPE_TAG_COLORS: Record<EventTypeFilterLabel, EventTypeTagCol
   "NUDITY OK": { color: "#FF00CC", borderColor: "#FF00CC" },
   FREE: { color: "#39FF14", borderColor: "#39FF14" },
   TICKETED: { color: "#00FFFF", borderColor: "#00FFFF" },
+  "DOOR FEE": { color: "#FF6600", borderColor: "#FF6600" },
   "21+": { color: "#CCFF00", borderColor: "#CCFF00" },
   "ALL AGES": { color: "#CCFF00", borderColor: "#CCFF00" },
   PUBLIC: { color: "#888888", borderColor: "#555555" },
@@ -41,6 +43,7 @@ export function getEventTypeTagsForEvent(event: EventTagSource): EventTypeFilter
 
   if (event.admission === "FREE") tags.push("FREE");
   if (event.admission === "TICKETED") tags.push("TICKETED");
+  if (event.admission === "DOOR_FEE") tags.push("DOOR FEE");
   if (event.ageRequirement === "21_PLUS") tags.push("21+");
   if (event.ageRequirement === "ALL_AGES") tags.push("ALL AGES");
   if (event.isPublic) tags.push("PUBLIC");

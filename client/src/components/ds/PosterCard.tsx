@@ -77,7 +77,7 @@ const DAY_BASE = { MON:"var(--day-mon)", TUE:"var(--day-tue)", WED:"var(--day-we
 const DAY_TEXT = { MON:"var(--day-mon-text)", TUE:"var(--day-tue-text)", WED:"var(--day-wed)",
   THU:"var(--day-thu)", FRI:"var(--day-fri)", SAT:"var(--day-sat)", SUN:"var(--day-sun)" };
 
-const ADM_LABEL = { FREE:"Free", TICKETED:"Ticketed", SUGGESTED_DONATION:"Donation" };
+const ADM_LABEL = { FREE:"Free", TICKETED:"Ticketed", DOOR_FEE:"Door fee", SUGGESTED_DONATION:"Donation" };
 const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 
 /** PosterCard, the event board card. */

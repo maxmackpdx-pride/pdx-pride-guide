@@ -18,6 +18,7 @@ import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminInbox from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
+import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
 import "@/components/dashboard/dashboard.css";
 
@@ -1225,7 +1226,9 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">ADMISSION</label>
                             <select value={editForm.admission || "FREE"} onChange={e => setEditForm(f => ({ ...f, admission: e.target.value }))}
                               className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
-                              {["FREE","TICKETED","DONATION","TBD"].map(a => <option key={a} value={a}>{a}</option>)}
+                              {ADMISSION_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
                             </select>
                           </div>
                           <div>

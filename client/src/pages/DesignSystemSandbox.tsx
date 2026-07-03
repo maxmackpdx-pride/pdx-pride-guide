@@ -359,6 +359,7 @@ export default function DesignSystemSandbox() {
                 <>
                   <C.Badge admission="FREE" />
                   <C.Badge admission="TICKETED" />
+                  <C.Badge admission="DOOR_FEE" />
                   <C.Badge day="SAT" />
                   <C.Badge color="yellow" glow>
                     Grand Opening

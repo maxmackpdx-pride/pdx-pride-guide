@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 
 import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
+import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
@@ -93,8 +94,10 @@ function filterLiveEvents(
     .filter(e => {
       if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
       if (activeFilters.length > 0) {
-        const admissionFilters = activeFilters.filter(f => f === "FREE" || f === "TICKETED");
-        if (admissionFilters.length > 0 && !admissionFilters.some(f => f === e.admission)) return false;
+        const admissionFilters = activeFilters
+          .map(admissionFromFilterTag)
+          .filter((v): v is NonNullable<typeof v> => v != null);
+        if (admissionFilters.length > 0 && !admissionFilters.some(a => e.admission === a)) return false;
         if (activeFilters.includes("21+") && e.ageRequirement !== "21_PLUS") return false;
         if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
         if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;

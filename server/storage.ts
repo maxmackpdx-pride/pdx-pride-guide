@@ -669,7 +669,7 @@ function seedData() {
       dayOfWeek: "SAT",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "SPORTS", "LEATHER"]),
-      admission: "TICKETED",
+      admission: "DOOR_FEE",
       ticketUrl: "https://members.pdxsanctuary.com/events/93071",
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: true, nudityOk: true,
       posterImageUrl: "/posters/stank-yes-coach.jpg",
@@ -1649,6 +1649,10 @@ function applyEventDataAuditFixes() {
   sqlite.prepare(`
     UPDATE events SET admission = 'TICKETED'
     WHERE title = 'Gay Witch Appreciation Day + Pride at Seagrape'
+  `).run();
+  sqlite.prepare(`
+    UPDATE events SET admission = 'DOOR_FEE'
+    WHERE title = 'Stank Yes Coach — PDX PRIDE' AND admission = 'TICKETED'
   `).run();
   sqlite.prepare(`
     UPDATE events SET poster_image_url = '/posters/stag-pdx-drag-brunch-saturday.jpg'

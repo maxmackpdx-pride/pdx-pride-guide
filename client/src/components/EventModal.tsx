@@ -27,6 +27,7 @@ import {
   userCanEditEvent,
   type EventEditFormState,
 } from "@/lib/eventEditForm";
+import { admissionEventLinkLabel } from "@shared/admission";
 import { getEventTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
 
@@ -519,7 +520,7 @@ function EventModalInner({
             )}
             {event.ticketUrl && (
               <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
-                Get Tickets →
+                {admissionEventLinkLabel(event.admission)} →
               </a>
             )}
             <div className="event-link-choice-anchor">

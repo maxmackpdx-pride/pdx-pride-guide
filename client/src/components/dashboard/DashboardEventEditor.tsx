@@ -8,6 +8,7 @@ import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 import EventTalentPanel from "@/components/EventTalentPanel";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
+import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { EVENT_TYPE_PICKER_LABELS } from "@shared/eventTypeTags";
 import type { EventEditFormState } from "@/lib/eventEditForm";
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -136,14 +137,27 @@ export function DashboardEventEditForm({
           <div>
             <label style={labelStyle}>Admission</label>
             <select style={inputStyle} value={eventForm.admission} onChange={e => setEventForm(f => ({ ...f, admission: e.target.value }))}>
-              <option value="FREE">Free</option>
-              <option value="TICKETED">Ticketed</option>
-              <option value="SUGGESTED_DONATION">Suggested Donation</option>
+              {ADMISSION_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
           </div>
           <div style={{ gridColumn: "1/-1" }}>
-            <label style={labelStyle}>Ticket / RSVP link *</label>
-            <input type="url" style={inputStyle} value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} placeholder="https://..." />
+            <label style={labelStyle}>
+              Ticket / RSVP link{admissionRequiresTicketUrl(eventForm.admission) ? " *" : ""}
+            </label>
+            <input
+              type="url"
+              style={inputStyle}
+              value={eventForm.ticketUrl}
+              onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))}
+              placeholder="https://..."
+              required={admissionRequiresTicketUrl(eventForm.admission)}
+            />
+            <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
+              {ADMISSION_OPTIONS.find(o => o.value === eventForm.admission)?.hint
+                || "Optional — add a link if you have one."}
+            </div>
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label style={labelStyle}>Event flyer / poster</label>

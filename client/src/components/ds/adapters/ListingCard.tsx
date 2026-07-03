@@ -1,4 +1,5 @@
 import type React from "react";
+import type { AdmissionType } from "@shared/admission";
 import type { Event } from "@shared/schema";
 import { EventCard as DsEventRow, PosterCard } from "@/components/ds";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -99,7 +100,7 @@ export default function ListingCard({
             day={day}
             image={image}
             types={types}
-            admission={event.admission as "FREE" | "TICKETED" | "SUGGESTED_DONATION" | undefined}
+            admission={event.admission as AdmissionType | undefined}
             age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
             going={showAttendance ? attendanceSummary!.count : undefined}
             style={{ cursor: "pointer" }}
@@ -130,7 +131,7 @@ export default function ListingCard({
           day={day}
           image={image}
           types={types}
-          admission={event.admission as "FREE" | "TICKETED" | "SUGGESTED_DONATION" | undefined}
+          admission={event.admission as AdmissionType | undefined}
           age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
           claimable={claimable}
           going={showAttendance ? attendanceSummary!.count : undefined}
