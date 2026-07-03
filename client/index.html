@@ -83,10 +83,24 @@
           true,
         );
 
-        window.setTimeout(function () {
+        function syncBootFallback() {
           var root = document.getElementById("root");
           var fallback = document.getElementById("boot-fallback");
-          if (root && !root.childElementCount && fallback) {
+          if (!root || !fallback) return;
+          // Hide as soon as React mounts; only show after a delay if the app never boots.
+          fallback.hidden = root.childElementCount > 0;
+        }
+
+        var root = document.getElementById("root");
+        if (root && window.MutationObserver) {
+          var bootObserver = new MutationObserver(syncBootFallback);
+          bootObserver.observe(root, { childList: true });
+        }
+
+        window.setTimeout(function () {
+          var rootEl = document.getElementById("root");
+          var fallback = document.getElementById("boot-fallback");
+          if (rootEl && !rootEl.childElementCount && fallback) {
             fallback.hidden = false;
           }
         }, 6000);

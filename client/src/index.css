@@ -155,6 +155,7 @@ body::before {
   position: sticky;
   top: 0;
   z-index: 100;
+  overflow: visible;
 }
 
 .site-header::after {
@@ -460,29 +461,8 @@ body::before {
     flex: 1 1 auto;
     flex-wrap: nowrap;
     justify-content: flex-end;
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .site-nav-scroll::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .site-nav-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .site-nav-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.22);
-    border-radius: 999px;
-  }
-
-  .site-nav-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.38);
+    /* Keep overflow visible so absolutely positioned dropdown panels aren't clipped. */
+    overflow: visible;
   }
 }
 

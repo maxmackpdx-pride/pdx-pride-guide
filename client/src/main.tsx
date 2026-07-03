@@ -46,3 +46,4 @@ if (import.meta.env.PROD) {
 }
 
 createRoot(document.getElementById("root")!).render(<ErrorBoundary><App /></ErrorBoundary>);
+document.getElementById("boot-fallback")?.setAttribute("hidden", "");
