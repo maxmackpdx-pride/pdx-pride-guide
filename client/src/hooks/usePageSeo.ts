@@ -5,6 +5,8 @@ export type PageSeoOptions = {
   image?: string;
   imageAlt?: string;
   type?: "website" | "article";
+  /** When true, leaves the parent page's title/meta untouched (e.g. embedded schedule on Home). */
+  skip?: boolean;
 };
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
@@ -21,6 +23,7 @@ function upsertMeta(attr: "name" | "property", key: string, content: string) {
 /** Sets document.title, description, and Open Graph / Twitter tags for the current route. */
 export function usePageSeo(title: string, description: string, options?: PageSeoOptions) {
   useEffect(() => {
+    if (options?.skip) return;
     const prevTitle = document.title;
     document.title = title;
 
@@ -68,5 +71,5 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
         if (el && value) el.setAttribute("content", value);
       }
     };
-  }, [title, description, options?.url, options?.image, options?.imageAlt, options?.type]);
+  }, [title, description, options?.url, options?.image, options?.imageAlt, options?.type, options?.skip]);
 }

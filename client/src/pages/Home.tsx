@@ -1,30 +1,17 @@
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { Event, GiftingPost, GigPost, MissedConnection } from "@shared/schema";
+import type { GiftingPost, GigPost, MissedConnection } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import type { AdmissionType } from "@shared/admission";
 
-import EventModal from "@/components/EventModal";
 import GlitchWord from "@/components/GlitchWord";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import {
   Button,
   Countdown,
   Divider,
-  EventCard,
-  FilterChip,
   Marquee,
   PlaceCard,
   SectionHeader,
@@ -33,25 +20,16 @@ import heroWallpaperImg from "@/assets/hero-wallpaper.jpg";
 import {
   HOME_COUNTDOWN_TARGET,
   HOME_DAY_META,
-  HOME_DAY_ORDER,
   HOME_MARQUEE_FALLBACK,
-  countEventsByHomeDay,
-  dayColorVar,
-  eventsForHomeDay,
-  homeListingProps,
   pickMarqueeItems,
   pickRandomBusinesses,
-  prideDayChipDate,
   type HomeDayKey,
 } from "@/lib/homeEvents";
-
-type HomeSchedDay = HomeDayKey | "ALL";
+import Schedule from "@/pages/Schedule";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
-
-const SAVED_KEY = "pdx-home-saved-event-ids";
 
 const COMMUNITY_LINKS = {
   spotted: { href: "/spotted", label: "Spotted", color: "var(--pink)" },
@@ -106,21 +84,6 @@ type GigFeedPost = GigPost & {
   compensation: string | null;
 };
 
-function readSavedIds(): Set<number> {
-  if (typeof window === "undefined") return new Set();
-  try {
-    const raw = window.localStorage.getItem(SAVED_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return new Set(Array.isArray(parsed) ? parsed.map(Number).filter(Number.isFinite) : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function writeSavedIds(ids: Set<number>) {
-  window.localStorage.setItem(SAVED_KEY, JSON.stringify([...ids]));
-}
-
 function formatSpottedWhen(post: MissedConnection): string {
   if (post.dayOfWeek) {
     const meta = HOME_DAY_META[post.dayOfWeek as HomeDayKey];
@@ -137,21 +100,12 @@ function formatSpottedWhen(post: MissedConnection): string {
   }).format(new Date(ms));
 }
 
-function isCardActionTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && Boolean(target.closest(".pdxBoard__rsvp, .pdxRow__save"));
-}
-
 export default function Home() {
   usePageSeo(
     "PDX Pride Guide — Portland Pride 2026 Events",
     "A community-run guide to Portland Pride Week 2026. Find the parties, the parade, and your people, then dance til the sun comes up.",
   );
 
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [schedDay, setSchedDay] = useState<HomeSchedDay>("ALL");
-  const [schedAtEnd, setSchedAtEnd] = useState(false);
-  const schedScrollRef = useRef<HTMLDivElement>(null);
-  const [savedIds, setSavedIds] = useState<Set<number>>(readSavedIds);
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
   const [featuredPlaces, setFeaturedPlaces] = useState<DirectoryBusiness[]>([]);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
@@ -159,19 +113,11 @@ export default function Home() {
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
   });
 
-  useAttendanceSummariesLive();
-
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
-  });
-
-  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count: number }>>({
-    queryKey: ["/api/events/attendance-summaries"],
-    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
-    refetchInterval: 120_000,
   });
 
   const { data: spotted = [] } = useQuery<MissedConnection[]>({
@@ -210,36 +156,6 @@ export default function Home() {
     setFeaturedPlaces(prev => (prev.length > 0 ? prev : pickRandomBusinesses(businesses, 3)));
   }, [businesses]);
 
-  const dayCounts = useMemo(() => countEventsByHomeDay(events), [events]);
-  const totalPrideCount = useMemo(
-    () => HOME_DAY_ORDER.reduce((sum, day) => sum + dayCounts[day], 0),
-    [dayCounts],
-  );
-  const schedDays = useMemo(
-    () => (schedDay === "ALL" ? [...HOME_DAY_ORDER] : [schedDay]),
-    [schedDay],
-  );
-
-  const updateSchedFade = useCallback(() => {
-    const sc = schedScrollRef.current;
-    if (!sc) return;
-    const atEnd =
-      sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4 ||
-      sc.scrollHeight <= sc.clientHeight;
-    setSchedAtEnd(atEnd);
-  }, []);
-
-  useEffect(() => {
-    const sc = schedScrollRef.current;
-    if (sc) sc.scrollTop = 0;
-    updateSchedFade();
-  }, [schedDay, events, updateSchedFade]);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateSchedFade);
-    return () => window.removeEventListener("resize", updateSchedFade);
-  }, [updateSchedFade]);
-
   const mappedBusinesses = useMemo(
     () => businesses.filter(b => b.lat != null && b.lng != null),
     [businesses],
@@ -249,26 +165,6 @@ export default function Home() {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
   };
-
-  const toggleSaved = useCallback((eventId: number) => {
-    setSavedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(eventId)) next.delete(eventId);
-      else next.add(eventId);
-      writeSavedIds(next);
-      return next;
-    });
-  }, []);
-
-  const goingCount = useCallback(
-    (eventId: number) =>
-      attendanceSummaries[eventId]?.count ??
-      attendanceSummaries[String(eventId)]?.count ??
-      0,
-    [attendanceSummaries],
-  );
-
-  const openEvent = useCallback((event: Event) => setSelectedEvent(event), []);
 
   const dismissSoftLaunchOnEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") dismissSoftLaunch();
@@ -410,7 +306,7 @@ export default function Home() {
           <SectionHeader
             kicker="All Week"
             title="The Schedule"
-            subtitle="Every party, march, and after-hours, Thursday to Sunday. Scroll the whole week, or tap a day to jump."
+            subtitle="The whole week, side by side — same view as the full schedule. Scroll horizontally through the days, vertically through the hours."
             accent="cyan"
             style={{ marginBottom: 0 }}
             action={
@@ -421,85 +317,8 @@ export default function Home() {
               </Link>
             }
           />
-          <div className="pg-schedchips">
-            <FilterChip
-              selected={schedDay === "ALL"}
-              fill={schedDay === "ALL"}
-              accent="cyan"
-              count={totalPrideCount}
-              onToggle={() => setSchedDay("ALL")}
-            >
-              All Week
-            </FilterChip>
-            {HOME_DAY_ORDER.map(day => {
-              const meta = HOME_DAY_META[day];
-              const selected = schedDay === day;
-              return (
-                <FilterChip
-                  key={day}
-                  selected={selected}
-                  fill={selected}
-                  accent={meta.accent}
-                  count={dayCounts[day]}
-                  showDot
-                  onToggle={() => setSchedDay(day)}
-                >
-                  {meta.label} {prideDayChipDate(day)}
-                </FilterChip>
-              );
-            })}
-          </div>
-          <div className={`pg-schedwrap${schedAtEnd ? " is-end" : ""}`}>
-            <div className="pg-sched" ref={schedScrollRef} onScroll={updateSchedFade}>
-              {schedDays.map(day => {
-                const meta = HOME_DAY_META[day];
-                const dayEvents = eventsForHomeDay(events, day);
-                return (
-                  <div key={day} className="pg-schedgroup" data-group={day}>
-                    <div className="pg-sched__day" style={{ "--_dc": meta.color } as CSSProperties}>
-                      <span className="pg-sched__daynum">{meta.long}</span>
-                      <span className="pg-sched__daydate">{meta.date}</span>
-                      <span className="pg-sched__dayrule" />
-                      <span className="pg-sched__daycount">{dayEvents.length} events</span>
-                    </div>
-                    {dayEvents.length === 0 && (
-                      <p style={{ color: "var(--text-lo)", margin: 0 }}>
-                        Nothing scheduled for {meta.long} yet.
-                      </p>
-                    )}
-                    {dayEvents.map(event => {
-                      const props = homeListingProps(event);
-                      const going = goingCount(event.id);
-                      return (
-                        <div
-                          key={event.listingInstanceKey ?? event.id}
-                          className="pg-home-card"
-                          onClick={e => {
-                            if (isCardActionTarget(e.target)) return;
-                            openEvent(event);
-                          }}
-                        >
-                          <EventCard
-                            title={event.title}
-                            venue={event.venueName}
-                            when=""
-                            day={props.day}
-                            image={props.image}
-                            types={props.types}
-                            admission={event.admission as AdmissionType | undefined}
-                            age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
-                            going={going > 0 ? going : undefined}
-                            saved={savedIds.has(event.id)}
-                            onSave={() => toggleSaved(event.id)}
-                            style={{ "--_day": dayColorVar(event.dayOfWeek) } as CSSProperties}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
+          <div className="pg-home-schedule">
+            <Schedule embed />
           </div>
         </ScrollReveal>
       </div>
@@ -671,15 +490,6 @@ export default function Home() {
           </div>
         </ScrollReveal>
       </div>
-
-      {selectedEvent && (
-        <EventModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          onEventUpdated={updated => setSelectedEvent(updated)}
-        />
-      )}
-
 
     </div>
   );

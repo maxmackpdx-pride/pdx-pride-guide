@@ -51,6 +51,8 @@ export interface ScheduleProps {
   posterStyle?: PosterStyle;
   /** default "Comfortable" */
   density?: Density;
+  /** Home embed: horizontal week grid only (no hero, toolbar, or filters). */
+  embed?: boolean;
 }
 
 type View = 'mine' | 'all';
@@ -77,6 +79,7 @@ function nowMinutes(): number {
 
 export default function Schedule({
   density = 'Comfortable',
+  embed = false,
 }: ScheduleProps) {
   const { user } = useAuth();
   const [view, setViewState] = useState<View>('all');
@@ -98,6 +101,7 @@ export default function Schedule({
   usePageSeo(
     "Schedule — Portland Pride 2026 | PDX Pride Guide",
     "Your full Pride Week schedule, July 13–19, side by side.",
+    { skip: embed },
   );
 
   useAttendanceSummariesLive();
@@ -377,8 +381,8 @@ export default function Schedule({
     'px)';
 
   const inView = useCallback(
-    (e: ScheduleEvent) => view === 'all' || myEventIds.has(e.id),
-    [view, myEventIds],
+    (e: ScheduleEvent) => embed || view === 'all' || myEventIds.has(e.id),
+    [embed, view, myEventIds],
   );
   const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
   const viewSet = useMemo(() => scheduleEvents.filter(inView), [scheduleEvents, inView]);
@@ -964,7 +968,8 @@ export default function Schedule({
 
   const scrollStyle = S({
     overflow: 'auto',
-    maxHeight: 'min(80vh, ' + (TOTAL_H + HEADER_H + 4) + 'px)',
+    maxHeight:
+      (embed ? 'min(72vh, ' : 'min(80vh, ') + (TOTAL_H + HEADER_H + 4) + 'px)',
     border: '2px solid #2b2b2b',
     borderRadius: '8px',
     background: '#0a0a0a',
@@ -979,12 +984,14 @@ export default function Schedule({
     <div
       className={calm ? 'sch-root calm' : 'sch-root'}
       style={{
-        minHeight: '100vh',
-        background: '#0a0a0a',
+        minHeight: embed ? undefined : '100vh',
+        background: embed ? 'transparent' : '#0a0a0a',
         color: 'var(--text-mid)',
         fontFamily: 'var(--font-body)',
       }}
     >
+      {!embed && (
+      <>
       {/* ---- Hero ---- */}
       <section style={{ position: 'relative', overflow: 'hidden', background: '#0a0a0a' }}>
         <div
@@ -1195,9 +1202,11 @@ export default function Schedule({
           </div>
         </div>
       </div>
+      </>
+      )}
 
       {/* ---- Empty banner ---- */}
-      {emptyBanner && (
+      {!embed && emptyBanner && (
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px,4vw,40px)' }}>
           <div
             style={{
@@ -1217,7 +1226,13 @@ export default function Schedule({
       )}
 
       {/* ---- Grid ---- */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '18px clamp(16px,4vw,40px) 40px' }}>
+      <div
+        style={{
+          maxWidth: embed ? '100%' : '1400px',
+          margin: '0 auto',
+          padding: embed ? '0' : '18px clamp(16px,4vw,40px) 40px',
+        }}
+      >
         <div className="sch-scroll" ref={scrollElRef} style={scrollStyle}>
           <div style={{ display: 'flex', width: 'max-content', minWidth: '100%' }}>
             {/* time axis */}
