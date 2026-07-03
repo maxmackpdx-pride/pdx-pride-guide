@@ -95,20 +95,49 @@ export function PlaceCard({
 
       {(website || instagram) && (
         <div className="pdxPlace__links">
-          {website && <a className="pdxPlace__link" href={website} onClick={(e)=>e.preventDefault()}><Icon d={GLOBE} />Website</a>}
-          {instagram && <a className="pdxPlace__link" href="#" onClick={(e)=>e.preventDefault()}><Icon d={IG} />{instagram}</a>}
+          {website && (
+            <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer">
+              <Icon d={GLOBE} />Website
+            </a>
+          )}
+          {instagram && (
+            <a
+              className="pdxPlace__link"
+              href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon d={IG} />{instagram}
+            </a>
+          )}
         </div>
       )}
 
       {events.length > 0 && (
         <div className="pdxPlace__events">
           <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Pride Events</div>
-          {events.map((ev, i) => (
-            <div className="pdxPlace__event" key={i} style={{ "--_ec": DAY_COLOR[ev.day] || accent }}>
-              <div className="pdxPlace__eventDate">{ev.date}</div>
-              <div className="pdxPlace__eventTitle">{ev.title}</div>
-            </div>
-          ))}
+          {events.map((ev, i) => {
+            const row = (
+              <>
+                <div className="pdxPlace__eventDate">{ev.date}</div>
+                <div className="pdxPlace__eventTitle">{ev.title}</div>
+              </>
+            );
+            return ev.href ? (
+              <a
+                key={i}
+                className="pdxPlace__event pdxPlace__event--link"
+                href={ev.href}
+                style={{ "--_ec": DAY_COLOR[ev.day] || accent, textDecoration: "none", color: "inherit", display: "block" }}
+              >
+                {row}
+              </a>
+            ) : (
+              <div className="pdxPlace__event" key={i} style={{ "--_ec": DAY_COLOR[ev.day] || accent }}>
+                {row}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

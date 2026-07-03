@@ -4,29 +4,27 @@ import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { shareEventLink } from "@/lib/shareEvent";
+
 import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
-import EventTagsRow from "../components/EventTagsRow";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import ListingCard from "@/components/ds/adapters/ListingCard";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
-import EventAttendancePreview from "@/components/EventAttendancePreview";
-import EventWorkHereTag from "@/components/EventWorkHereTag";
+
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import { List, Grid, MapPin, Link2 } from "lucide-react";
+import { List, Grid, MapPin } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
-import { FilterChip, SearchInput } from "@/components/ds";
+import { Button, FilterChip, SearchInput } from "@/components/ds";
 import { dayAccentToken } from "@/lib/dsColors";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
@@ -85,20 +83,6 @@ function sortEvents(events: EventListing[], sortMode: SortMode): EventListing[] 
   }
 }
 
-function eventCardA11yProps(onClick: () => void) {
-  return {
-    role: "button" as const,
-    tabIndex: 0,
-    onClick,
-    onKeyDown: (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onClick();
-      }
-    },
-  };
-}
-
 function filterLiveEvents(
   events: EventListing[],
   activeDay: string,
@@ -125,192 +109,6 @@ function filterLiveEvents(
       }
       return true;
     });
-}
-
-function EventShareLink({ href, title }: { href: string; title: string }) {
-  const { toast } = useToast();
-  return (
-    <button
-      type="button"
-      title={`Share ${title}`}
-      aria-label={`Share ${title}`}
-      onClick={async (e) => {
-        e.stopPropagation();
-        try {
-          const result = await shareEventLink(href, title);
-          toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
-        } catch (err) {
-          if ((err as DOMException)?.name !== "AbortError") {
-            toast({ title: "Could not share link", variant: "destructive" });
-          }
-        }
-      }}
-      style={{
-        position: "absolute",
-        top: 8,
-        right: 8,
-        zIndex: 2,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: 28,
-        height: 28,
-        borderRadius: "50%",
-        background: "rgba(0,0,0,0.72)",
-        border: "1px solid #333",
-        color: "#aaa",
-        cursor: "pointer",
-        padding: 0,
-      }}
-    >
-      <Link2 size={14} />
-    </button>
-  );
-}
-
-function EventCard({ event, onClick, viewMode, revealDelay = 0, attendanceSummary, myTalent, selfUserId, shareHref }: {
-  event: Event;
-  onClick: () => void;
-  viewMode: "grid" | "list";
-  revealDelay?: number;
-  attendanceSummary?: AttendanceSummary | null;
-  myTalent?: UserEventTalentCard | null;
-  selfUserId?: number;
-  shareHref: string;
-}) {
-  const dayColor = DAY_COLORS[event.dayOfWeek as keyof typeof DAY_COLORS] || "#fff";
-  const time = event.dateStart
-    ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "";
-
-  if (viewMode === "list") {
-    return (
-      <ScrollReveal delay={revealDelay}>
-      <div
-        className="poster-card poster-card--glow"
-        {...eventCardA11yProps(onClick)}
-        data-testid={`event-card-${event.id}`}
-        style={{
-          display: "flex", gap: 0, alignItems: "stretch",
-          borderLeft: `4px solid ${dayColor}`,
-          cursor: "pointer",
-          "--card-day-color": dayColor,
-        } as React.CSSProperties}
-      >
-        {/* Flyer thumbnail */}
-        {event.posterImageUrl ? (
-          <div style={{
-            width: 108, minWidth: 108, flexShrink: 0,
-            background: "#111", overflow: "hidden",
-          }}>
-            <img
-              src={event.posterImageUrl}
-              alt={event.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-          </div>
-        ) : (
-          <div style={{
-            width: 108, minWidth: 108, flexShrink: 0,
-            background: "#111",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <div style={{ width: 42, height: 42, borderRadius: "50%", background: dayColor + "22", border: `1px solid ${dayColor}44` }} />
-          </div>
-        )}
-        {/* Info */}
-        <div style={{ flex: 1, padding: "15px 21px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0, position: "relative" }}>
-          <EventShareLink href={shareHref} title={event.title} />
-          <EventTagsRow event={event} size="sm" className="event-card-tags--list" />
-          <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 900,
-            fontSize: "clamp(1.35rem, 3vw, 1.575rem)",
-            color: "#fff", lineHeight: 1.1, marginBottom: 4,
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>{event.title}</div>
-          <div style={{ fontSize: "1.08rem", color: "#888" }}>{event.venueName}</div>
-          <div style={{ fontSize: "0.975rem", color: "var(--text-meta)", marginTop: 3 }}>{time} · {event.neighborhood}</div>
-          <EventWorkHereTag talent={myTalent} compact />
-          <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
-        </div>
-      </div>
-      </ScrollReveal>
-    );
-  }
-
-  // Grid view
-  return (
-    <ScrollReveal delay={revealDelay}>
-    <div
-      className="poster-card poster-card--glow"
-      {...eventCardA11yProps(onClick)}
-      data-testid={`event-card-${event.id}`}
-      style={{ aspectRatio: "2/3", display: "flex", flexDirection: "column", "--card-day-color": dayColor } as React.CSSProperties}
-    >
-      {/* Flyer image if available, else halftone bg */}
-      {event.posterImageUrl ? (
-        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-          <EventShareLink href={shareHref} title={event.title} />
-          <img
-            src={event.posterImageUrl}
-            alt={event.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-          {/* Overlay gradient for readability */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(to top, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.1) 100%)",
-          }} />
-          {/* Day stripe */}
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: dayColor }} />
-          {/* Info overlay */}
-          <div className="poster-card__info-overlay" style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 21 }}>
-            <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1.1rem, 2.1vw, 1.83rem)",
-              color: "#fff", lineHeight: 1.05, marginBottom: 6,
-            }}>{event.title}</div>
-            <div style={{ fontSize: "1.0rem", color: "#aaa" }}>{event.venueName}</div>
-            <div style={{ fontSize: "0.9rem", color: "var(--text-meta)", marginTop: 3 }}>{time}</div>
-            <EventWorkHereTag talent={myTalent} compact />
-            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
-          </div>
-        </div>
-      ) : (
-        <>
-          <div style={{ height: 5, background: dayColor, position: "relative" }}>
-            <EventShareLink href={shareHref} title={event.title} />
-          </div>
-          <EventTagsRow event={event} size="sm" max={4} className="event-card-tags--top" />
-          <div
-            className="halftone"
-            style={{
-              flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end",
-              padding: 21, background: "#0d0d0d", minHeight: 210, position: "relative",
-            }}
-          >
-            <div style={{
-              position: "absolute", top: 0, right: 0, width: 60, height: 60,
-              background: `radial-gradient(circle at top right, ${dayColor}22, transparent 70%)`,
-              pointerEvents: "none",
-            }} />
-            <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 900,
-              fontSize: "clamp(1.53rem, 2.1vw, 1.92rem)",
-              color: "#fff", lineHeight: 1.05, marginBottom: 9,
-            }}>
-              {event.title}
-            </div>
-            <div style={{ fontSize: "1.17rem", color: "#888" }}>{event.venueName}</div>
-            <div style={{ fontSize: "1.08rem", color: "var(--text-meta)", marginTop: 3 }}>{time} · {event.neighborhood}</div>
-            <EventWorkHereTag talent={myTalent} compact />
-            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
-          </div>
-        </>
-      )}
-    </div>
-    </ScrollReveal>
-  );
 }
 
 function absoluteShareImage(path?: string | null) {
@@ -605,13 +403,9 @@ export default function Events() {
             <p style={{ color: "#9d9a92", fontSize: "0.9rem", marginTop: 10, maxWidth: 420, marginInline: "auto" }}>
               {error instanceof Error ? error.message : "The events API is unavailable right now."}
             </p>
-            <button
-              onClick={() => refetch()}
-              className="btn-neon"
-              style={{ marginTop: 20 }}
-            >
+            <Button type="button" accent="lime" onClick={() => refetch()} style={{ marginTop: 20 }}>
               TRY AGAIN
-            </button>
+            </Button>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px", color: "#9d9a92" }}>
@@ -626,7 +420,7 @@ export default function Events() {
         ) : viewMode === "grid" ? (
           <div className="events-poster-grid">
             {filtered.map((e, i) => (
-              <EventCard
+              <ListingCard
                 key={listingKey(e)}
                 event={e}
                 onClick={() => openEvent(e)}
@@ -642,7 +436,7 @@ export default function Events() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.map((e, i) => (
-              <EventCard
+              <ListingCard
                 key={listingKey(e)}
                 event={e}
                 onClick={() => openEvent(e)}
@@ -663,7 +457,9 @@ export default function Events() {
             <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
               Submit it or claim an existing listing.
             </div>
-            <Link href="/submit" className="btn-neon solid">Get Started →</Link>
+            <Link href="/submit">
+              <Button as="span" variant="solid" accent="lime" arrow>Get Started</Button>
+            </Link>
           </div>
         </ScrollReveal>
       </div>

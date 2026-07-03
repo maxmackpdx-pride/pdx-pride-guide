@@ -1,13 +1,13 @@
 import { useState, useMemo, Suspense } from "react";
-import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Globe, Instagram, Clock, Phone, CalendarDays } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
+import { PlaceCard } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
@@ -44,8 +44,6 @@ type Business = {
   isNew: boolean;
   upcomingEvents?: DirectoryEventSummary[];
 };
-
-import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 
 const TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",
@@ -230,81 +228,37 @@ function formatDirectoryEventWhen(event: DirectoryEventSummary) {
   return `${dateLabel} · ${timeLabel}`;
 }
 
+const TYPE_TO_DS_CATEGORY: Record<string, string> = {
+  bar: "bars",
+  restaurant: "food",
+  cafe: "cafes",
+  venue: "venues",
+  service: "services",
+  shop: "shops",
+  hotel: "hotels",
+};
+
 function DirectoryCard({ biz }: { biz: Business }) {
-  const color = TYPE_COLORS[biz.type] || "#FF00CC";
   const upcomingEvents = biz.upcomingEvents ?? [];
+  const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   return (
-    <div className="directory-card" style={{ "--card-accent": color } as React.CSSProperties}>
-      <div className="directory-card__body">
-        {biz.isNew && (
-          <div className="directory-card__grand-opening">GRAND OPENING</div>
-        )}
-        <div className="directory-card__badges">
-          <span className="directory-card__type-badge" style={{ background: color, color: "#000" }}>
-            {TYPE_LABELS[biz.type] || biz.type}
-          </span>
-        </div>
-        <h3 className="directory-card__name display">{biz.name}</h3>
-        {(biz.address || biz.neighborhood) && (
-          <div className="directory-card__address">
-            <MapPin size={11} />
-            {biz.address ?? biz.neighborhood}
-          </div>
-        )}
-        {biz.hours && (
-          <div className="directory-card__hours">
-            <Clock size={11} /> {biz.hours}
-          </div>
-        )}
-        {biz.phone && (
-          <div className="directory-card__phone">
-            <Phone size={11} /> <a href={`tel:${biz.phone}`}>{biz.phone}</a>
-          </div>
-        )}
-        {biz.description && (
-          <p className="directory-card__desc">{biz.description}</p>
-        )}
-        {upcomingEvents.length > 0 && (
-          <div className="directory-card__events">
-            <div className="directory-card__events-label">
-              <CalendarDays size={11} />
-              <span>Upcoming Pride events</span>
-            </div>
-            <ul className="directory-card__events-list">
-              {upcomingEvents.map(event => {
-                const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || color;
-                return (
-                  <li key={event.listingInstanceKey || `${event.id}-${event.dateStart}`}>
-                    <Link
-                      href={eventPath(event.id, event.title, event.dayOfWeek)}
-                      className="directory-card__event-link"
-                      style={{ "--event-day-color": dayColor } as React.CSSProperties}
-                    >
-                      <span className="directory-card__event-when">{formatDirectoryEventWhen(event)}</span>
-                      <span className="directory-card__event-title">{event.title}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-        <div className="directory-card__links">
-          {biz.website && (
-            <a href={biz.website} target="_blank" rel="noopener noreferrer" className="directory-card__link">
-              <Globe size={13} /> Website
-            </a>
-          )}
-          {biz.instagram && (
-            <a
-              href={biz.instagram.startsWith("http") ? biz.instagram : `https://instagram.com/${biz.instagram.replace("@", "")}`}
-              target="_blank" rel="noopener noreferrer" className="directory-card__link"
-            >
-              <Instagram size={13} /> {biz.instagram.startsWith("@") ? biz.instagram : `@${biz.instagram}`}
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
+    <PlaceCard
+      name={biz.name}
+      category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+      categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+      address={address}
+      hours={biz.hours || undefined}
+      phone={biz.phone || undefined}
+      description={biz.description || undefined}
+      website={biz.website || undefined}
+      instagram={biz.instagram || undefined}
+      grandOpening={biz.isNew}
+      events={upcomingEvents.map(event => ({
+        day: event.dayOfWeek || undefined,
+        date: formatDirectoryEventWhen(event),
+        title: event.title,
+        href: eventPath(event.id, event.title, event.dayOfWeek),
+      }))}
+    />
   );
 }

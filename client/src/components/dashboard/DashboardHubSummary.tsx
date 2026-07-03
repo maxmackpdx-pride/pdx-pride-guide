@@ -1,4 +1,6 @@
 import { Link } from "wouter";
+import { StatPill } from "@/components/ds";
+import { dashVarToDsAccent } from "@/lib/dsColors";
 
 export interface HubSummaryCounts {
   unread: number;
@@ -88,14 +90,17 @@ export default function DashboardHubSummary({ counts }: { counts: HubSummaryCoun
     <section className="dash-hub-summary" aria-label="Hub summary">
       <div className="dash-hub-summary__chips">
         {chips.map(chip => (
-          <Link
-            key={chip.key}
-            href={chip.href}
-            className={`dash-hub-chip${chip.highlight ? " dash-hub-chip--highlight" : ""}`}
-            style={{ ["--chip-color" as string]: chip.color }}
-          >
-            <span className="dash-hub-chip__value">{chip.count}</span>
-            <span className="dash-hub-chip__label">{chip.label}</span>
+          <Link key={chip.key} href={chip.href} className="dash-hub-chip-link">
+            <StatPill
+              count={chip.count}
+              color={dashVarToDsAccent(chip.color)}
+              variant={chip.highlight ? "solid" : "outline"}
+              glow={chip.highlight}
+              dot={chip.highlight}
+              size="sm"
+            >
+              {chip.label}
+            </StatPill>
           </Link>
         ))}
       </div>

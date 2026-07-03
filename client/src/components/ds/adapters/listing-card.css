@@ -1,0 +1,45 @@
+.ds-listing-card {
+  position: relative;
+}
+
+.ds-listing-card--grid {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ds-listing-share {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(5, 5, 7, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ds-listing-card--list .ds-listing-share {
+  top: 12px;
+  right: 12px;
+}
+
+.ds-listing-card__extras {
+  padding: 6px 4px 0;
+}
+
+.ds-listing-card--list .ds-listing-card__extras {
+  padding: 4px 16px 8px;
+  margin-top: -4px;
+}
+
+.events-poster-grid .ds-listing-card--grid .pdxBoard {
+  flex: 1;
+}

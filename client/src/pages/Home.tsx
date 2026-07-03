@@ -17,28 +17,14 @@ import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { spottedHeroProps } from "@/lib/spottedHero";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { Button, Countdown } from "@/components/ds";
+
 const skylineImg = "/home-hero-desktop.jpg";
 
 function parsePacificEventTime(value?: string | null) {
   if (!value) return null;
   if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).getTime();
   return new Date(`${value}-07:00`).getTime();
-}
-
-function useCountdown(target: number | null) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const t = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(t);
-  }, []);
-  if (!target) return null;
-  const diff = target - now;
-  if (diff <= 0) return null;
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  return { days, hours, minutes, seconds };
 }
 
 export default function Home() {
@@ -65,7 +51,7 @@ export default function Home() {
       .sort((a, b) => a - b);
     return starts[0] || new Date(`${PRIDE_WEEK_START_DATE}T00:00:00-07:00`).getTime();
   }, [events]);
-  const countdown = useCountdown(firstEventTarget);
+  const showCountdown = firstEventTarget > Date.now();
   const tickerSource = useMemo(
     () => events.map(event => ({ id: event.id, title: event.title })).filter(item => item.title),
     [events],
@@ -117,8 +103,10 @@ export default function Home() {
               Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around, and please submit feedback at the bottom of the website if you run into any issue.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button type="button" onClick={dismissSoftLaunch} className="btn-neon solid">START EXPLORING</button>
-              <a href="#feedback" onClick={dismissSoftLaunch} className="btn-neon" style={{ color: "#00FFFF", borderColor: "#00FFFF", textDecoration: "none" }}>SEND FEEDBACK</a>
+              <Button type="button" variant="solid" accent="lime" onClick={dismissSoftLaunch}>START EXPLORING</Button>
+              <a href="#feedback" onClick={dismissSoftLaunch} style={{ textDecoration: "none" }}>
+                <Button as="span" accent="cyan">SEND FEEDBACK</Button>
+              </a>
             </div>
           </div>
         </div>
@@ -149,7 +137,7 @@ export default function Home() {
 
         <div className="home-hero-content">
           <div style={{ maxWidth: 820 }}>
-            <div className="home-hero-kicker">Portland Pride Week · July 13–19, 2026</div>
+            <div className="home-hero-kicker">Portland Pride Week · July 13 to 19, 2026</div>
 
             <h1 className="display home-hero-title">
               PORTLAND<br />
@@ -161,35 +149,23 @@ export default function Home() {
               This is your welcoming spot to discover what's happening, connect with the right people, keep our venues and creators thriving, grow your connections, and take care of each other when it matters most.
             </p>
 
-            {countdown && (
+            {showCountdown && (
               <>
-                <div className="home-countdown-grid" aria-label="Countdown to first event">
-                  {[
-                    ["DAYS", countdown.days],
-                    ["HRS", countdown.hours],
-                    ["MIN", countdown.minutes],
-                    ["SEC", countdown.seconds],
-                  ].map(([label, value]) => (
-                    <div className="home-countdown-box" key={label}>
-                      <div>{String(value).padStart(2, "0")}</div>
-                      <span>{label}</span>
-                    </div>
-                  ))}
-                </div>
+                <Countdown
+                  target={new Date(firstEventTarget).toISOString()}
+                  accent="lime"
+                  aria-label="Countdown to first event"
+                />
                 <div className="home-countdown-caption">UNTIL FIRST EVENT · PORTLAND TIME</div>
               </>
             )}
 
             <div className="home-hero-actions">
               <Link href="/events">
-                <button className="btn-neon home-hero-button">
-                  VIEW ALL EVENTS →
-                </button>
+                <Button as="span" accent="lime" arrow className="home-hero-button">VIEW ALL EVENTS</Button>
               </Link>
               <Link href="/pride-work">
-                <button className="btn-neon home-hero-button" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>
-                  PRIDE WERK →
-                </button>
+                <Button as="span" accent="pink" arrow className="home-hero-button">PRIDE WERK</Button>
               </Link>
             </div>
           </div>
@@ -245,8 +221,8 @@ export default function Home() {
             bgImage="/gift-with-pride-hero.jpg"
             actions={
               <>
-                <Link href="/gifting"><button type="button" className="btn-neon"><Gift size={16} /> Post a gift</button></Link>
-                <Link href="/gifting"><button type="button" className="btn-neon cyan"><Search size={16} /> Post an in search of</button></Link>
+                <Link href="/gifting"><Button type="button" accent="lime" leadingIcon={<Gift size={16} />}>Post a gift</Button></Link>
+                <Link href="/gifting"><Button type="button" accent="cyan" leadingIcon={<Search size={16} />}>Post an in search of</Button></Link>
               </>
             }
           />
@@ -268,8 +244,8 @@ export default function Home() {
             bgImage="/motifs/hero-gigs.jpg"
             actions={
               <>
-                <Link href="/pride-work"><button type="button" className="btn-neon cyan"><UserRound size={16} /> Post your availability</button></Link>
-                <Link href="/pride-work"><button type="button" className="btn-neon"><Briefcase size={16} /> Post a gig</button></Link>
+                <Link href="/pride-work"><Button type="button" accent="cyan" leadingIcon={<UserRound size={16} />}>Post your availability</Button></Link>
+                <Link href="/pride-work"><Button type="button" accent="lime" leadingIcon={<Briefcase size={16} />}>Post a gig</Button></Link>
               </>
             }
           />
@@ -287,9 +263,7 @@ export default function Home() {
               titleLine1Accent: undefined,
               actions: (
                 <Link href="/spotted">
-                  <button type="button" className="btn-neon" style={{ borderColor: "#FF00CC", color: "#FF00CC" }}>
-                    Go to Spotted! →
-                  </button>
+                  <Button type="button" accent="pink" arrow>Go to Spotted!</Button>
                 </Link>
               ),
             })}

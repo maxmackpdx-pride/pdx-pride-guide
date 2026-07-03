@@ -30,3 +30,15 @@ export function hexToDsAccent(hex: string): string {
   const normalized = hex.trim().toUpperCase();
   return HEX_TO_DS_ACCENT[normalized] ?? hex;
 }
+
+/** Map dashboard CSS vars (--dash-*) to DS StatPill color names. */
+export function dashVarToDsAccent(cssVar: string): string {
+  const v = cssVar.toLowerCase();
+  if (v.includes("magenta") || v.includes("pink")) return "pink";
+  if (v.includes("cyan")) return "cyan";
+  if (v.includes("lime") || v.includes("yellow")) return "lime";
+  if (v.includes("orange")) return "orange";
+  if (v.includes("purple") || v.includes("violet")) return "purple";
+  if (v.includes("green")) return "green";
+  return "lime";
+}

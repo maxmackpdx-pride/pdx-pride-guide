@@ -250,6 +250,11 @@
   gap: 10px;
 }
 
+.dash-hub-chip-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .dash-hub-chip {
   display: inline-flex;
   align-items: baseline;

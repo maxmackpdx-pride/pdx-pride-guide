@@ -8,6 +8,7 @@ import { listenForPushSubscriptionChanges } from "./lib/pushNotifications";
 import "./fonts.css";
 import "./index.css";
 import "@/components/ds/tokens/index.css";
+import "@/components/ds/adapters/listing-card.css";
 
 // Prevent the browser from restoring a previous scroll position on
 // reload / back-forward navigation so every page load starts at the top.
