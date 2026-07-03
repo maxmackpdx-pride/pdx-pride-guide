@@ -56,9 +56,20 @@ export function findSanctuaryHeadliner(events: EventListing[]): EventListing | n
   );
 }
 
+function uniqueByEventId(list: EventListing[]): EventListing[] {
+  const seen = new Set<number>();
+  const out: EventListing[] = [];
+  for (const item of list) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    out.push(item);
+  }
+  return out;
+}
+
 /** Four random Pride-week events; ~12.5% chance the Sanctuary headliner is included. */
 export function pickFourToTry(events: EventListing[], sanctuary: EventListing | null): EventListing[] {
-  const pool = shuffleArray(events.filter(isPrideListing));
+  const pool = shuffleArray(uniqueByEventId(events.filter(isPrideListing)));
   if (pool.length === 0) return [];
 
   if (sanctuary && Math.random() < 0.125) {
@@ -93,16 +104,29 @@ export function countEventsByHomeDay(events: EventListing[]): Record<HomeDayKey,
   return counts;
 }
 
+const PACIFIC_TZ = "America/Los_Angeles";
+
 export function formatHomeWhen(event: Event): string {
   const day = listingDay(event) as HomeDayKey;
   const meta = HOME_DAY_META[day];
   const datePart = meta?.date ?? "";
-  const time = event.dateStart
-    ? new Date(event.dateStart).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    : "";
+  const ms = parsePacificDateTime(event.dateStart);
+  const time =
+    ms != null
+      ? new Intl.DateTimeFormat("en-US", {
+          timeZone: PACIFIC_TZ,
+          hour: "numeric",
+          minute: "2-digit",
+        }).format(new Date(ms))
+      : "";
   const hood = event.neighborhood || "Portland";
   const dayShort = meta?.label ?? day;
   return [dayShort && datePart ? `${dayShort}, ${datePart}` : "", time, hood].filter(Boolean).join(" · ");
+}
+
+export function dayColorVar(day?: string | null): string {
+  if (!day) return HOME_DAY_META.SAT.color;
+  return HOME_DAY_META[day as HomeDayKey]?.color ?? HOME_DAY_META.SAT.color;
 }
 
 export function homeListingProps(event: Event) {
@@ -139,7 +163,7 @@ const DEFAULT_HOME_PINS: MapPin[] = [
 
 export function buildHomeMapPins(events: EventListing[]): MapPin[] {
   const withCoords = events.filter(
-    e => typeof e.lat === "number" && typeof e.lng === "number" && e.lat && e.lng,
+    e => typeof e.lat === "number" && typeof e.lng === "number" && Number.isFinite(e.lat) && Number.isFinite(e.lng),
   );
   if (withCoords.length < 4) return DEFAULT_HOME_PINS;
 

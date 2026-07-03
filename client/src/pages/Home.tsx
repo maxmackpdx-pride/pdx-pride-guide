@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Event, GiftingPost, GigPost, MissedConnection } from "@shared/schema";
@@ -11,6 +11,7 @@ import {
   attendancePhraseLabel,
 } from "@shared/attendancePhrases";
 import EventModal from "@/components/EventModal";
+import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
@@ -36,6 +37,7 @@ import {
   HOME_MARQUEE_FALLBACK,
   buildHomeMapPins,
   countEventsByHomeDay,
+  dayColorVar,
   eventsForHomeDay,
   findSanctuaryHeadliner,
   homeListingProps,
@@ -108,6 +110,26 @@ function writeSavedIds(ids: Set<number>) {
   window.localStorage.setItem(SAVED_KEY, JSON.stringify([...ids]));
 }
 
+function formatSpottedWhen(post: MissedConnection): string {
+  if (post.dayOfWeek) {
+    const meta = HOME_DAY_META[post.dayOfWeek as HomeDayKey];
+    return meta?.label ?? post.dayOfWeek;
+  }
+  if (!post.createdAt) return "";
+  const ms = Date.parse(post.createdAt);
+  if (!Number.isFinite(ms)) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(ms));
+}
+
+function isCardActionTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest(".pdxBoard__rsvp, .pdxRow__save"));
+}
+
 export default function Home() {
   usePageSeo(
     "PDX Pride Guide — Portland Pride 2026 Events",
@@ -115,11 +137,11 @@ export default function Home() {
   );
 
   const { user } = useAuth();
-  const [location] = useLocation();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [activeDay, setActiveDay] = useState<HomeDayKey>("SAT");
   const [savedIds, setSavedIds] = useState<Set<number>>(readSavedIds);
-  const [fourSeed, setFourSeed] = useState(0);
+  const [fourToTry, setFourToTry] = useState<EventListing[]>([]);
+  const [showAuth, setShowAuth] = useState(false);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
@@ -174,13 +196,15 @@ export default function Home() {
 
   const sanctuary = useMemo(() => findSanctuaryHeadliner(events), [events]);
 
-  const fourToTry = useMemo(() => {
-    void fourSeed;
-    return pickFourToTry(events, sanctuary);
-  }, [events, sanctuary, fourSeed]);
+  useEffect(() => {
+    if (events.length === 0) return;
+    setFourToTry(prev => (prev.length > 0 ? prev : pickFourToTry(events, sanctuary)));
+  }, [events, sanctuary]);
 
   const dayCounts = useMemo(() => countEventsByHomeDay(events), [events]);
-  const whatsOnVisible = isWhatsOnVisible(location);
+  const whatsOnVisible = isWhatsOnVisible(
+    typeof window !== "undefined" ? window.location.search : "",
+  );
   const dayEvents = useMemo(() => eventsForHomeDay(events, activeDay), [events, activeDay]);
   const mapPins = useMemo(() => buildHomeMapPins(events), [events]);
 
@@ -230,7 +254,10 @@ export default function Home() {
 
   const handleRsvp = useCallback(
     (eventId: number) => {
-      if (!user) return;
+      if (!user) {
+        setShowAuth(true);
+        return;
+      }
       if (myCheckInIds.has(eventId)) return;
       rsvpMutation.mutate(eventId);
     },
@@ -239,11 +266,15 @@ export default function Home() {
 
   const openEvent = useCallback((event: Event) => setSelectedEvent(event), []);
 
+  const dismissSoftLaunchOnEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") dismissSoftLaunch();
+  }, []);
+
   useEffect(() => {
-    if (!whatsOnVisible) return;
-    const firstWithEvents = HOME_DAY_ORDER.find(day => dayCounts[day] > 0);
-    if (firstWithEvents) setActiveDay(firstWithEvents);
-  }, [whatsOnVisible, dayCounts]);
+    if (!showSoftLaunch) return;
+    window.addEventListener("keydown", dismissSoftLaunchOnEscape);
+    return () => window.removeEventListener("keydown", dismissSoftLaunchOnEscape);
+  }, [showSoftLaunch, dismissSoftLaunchOnEscape]);
 
   const dayMeta = HOME_DAY_META[activeDay];
 
@@ -359,16 +390,16 @@ export default function Home() {
                 View All Events
               </Button>
             </Link>
-            <Link href="/events">
+            <a href="#home-map" style={{ textDecoration: "none" }}>
               <Button as="span" accent="cyan" arrow size="lg">
                 Open the Map
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
 
-      <Marquee color="rainbow" items={marqueeItems} speed={150} />
+      <Marquee color="rainbow" items={marqueeItems} />
 
       <div className="pg-block" style={{ paddingTop: 58 }}>
         <ScrollReveal>
@@ -380,11 +411,22 @@ export default function Home() {
               accent="pink"
               style={{ marginBottom: 0 }}
             />
-            <Button type="button" accent="cyan" size="sm" onClick={() => setFourSeed(s => s + 1)}>
+            <Button
+              type="button"
+              accent="cyan"
+              size="sm"
+              onClick={() => setFourToTry(pickFourToTry(events, sanctuary))}
+            >
               Reshuffle
             </Button>
           </div>
           <div className="pg-fourgrid">
+            {fourToTry.length === 0 && (
+              <p style={{ gridColumn: "1 / -1", color: "var(--text-lo)", margin: 0 }}>
+                Pride-week events are loading. Check back soon or browse the full{" "}
+                <Link href="/events">events list</Link>.
+              </p>
+            )}
             {fourToTry.map(event => {
               const props = homeListingProps(event);
               const going = goingCount(event.id);
@@ -393,14 +435,9 @@ export default function Home() {
                 <div
                   key={event.listingInstanceKey ?? event.id}
                   className="pg-home-card"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => openEvent(event)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      openEvent(event);
-                    }
+                  onClick={e => {
+                    if (isCardActionTarget(e.target)) return;
+                    openEvent(event);
                   }}
                 >
                   <PosterCard
@@ -413,11 +450,7 @@ export default function Home() {
                     admission={event.admission as AdmissionType | undefined}
                     age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
                     going={going > 0 ? going : undefined}
-                    onRsvp={
-                      user && !checkedIn
-                        ? () => handleRsvp(event.id)
-                        : undefined
-                    }
+                    onRsvp={!checkedIn ? () => handleRsvp(event.id) : undefined}
                     showLink={false}
                     style={{ height: "100%" }}
                   />
@@ -452,6 +485,7 @@ export default function Home() {
                       fill={selected}
                       accent={meta.accent}
                       count={dayCounts[day]}
+                      showDot
                       onToggle={() => setActiveDay(day)}
                     >
                       {meta.label} {prideDayChipDate(day)}
@@ -470,36 +504,37 @@ export default function Home() {
                   className="pg-spine__line"
                   style={{ background: `linear-gradient(to bottom, ${dayMeta.color}, transparent)` }}
                 />
+                {dayEvents.length === 0 && (
+                  <p style={{ color: "var(--text-lo)", margin: "0 0 16px 44px" }}>
+                    Nothing scheduled for {dayMeta.long} yet.
+                  </p>
+                )}
                 {dayEvents.map(event => {
                   const props = homeListingProps(event);
                   const going = goingCount(event.id);
+                  const eventDayColor = dayColorVar(event.dayOfWeek);
                   return (
                     <div key={event.listingInstanceKey ?? event.id} className="pg-spine__row">
                       <div style={{ position: "relative" }}>
                         <span
                           className="pg-spine__dot"
                           style={{
-                            background: dayMeta.color,
-                            boxShadow: `0 0 12px ${dayMeta.color}`,
+                            background: eventDayColor,
+                            boxShadow: `0 0 12px ${eventDayColor}`,
                           }}
                         />
                       </div>
                       <div
                         className="pg-home-card"
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => openEvent(event)}
-                        onKeyDown={e => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            openEvent(event);
-                          }
+                        onClick={e => {
+                          if (isCardActionTarget(e.target)) return;
+                          openEvent(event);
                         }}
                       >
                         <EventCard
                           title={event.title}
                           venue={event.venueName}
-                          when={props.when}
+                          when=""
                           day={props.day}
                           image={props.image}
                           types={props.types}
@@ -539,16 +574,22 @@ export default function Home() {
                 <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--pink), transparent)" }} />
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {spotted.slice(0, 3).map((post, i) => (
+                {spotted.slice(0, 3).map((post, i) => {
+                  const spottedWhen = formatSpottedWhen(post);
+                  return (
                   <Link key={post.id} href="/spotted" className="pg-note pg-note--spot" style={{ "--_av": NOTE_ACCENTS[i % NOTE_ACCENTS.length] }}>
                     <div className="pg-note__where">
                       <span className="d" aria-hidden="true" />
                       {post.venueHint || post.title}
+                      {spottedWhen && (
+                        <span style={{ color: "var(--text-faint)" }}> · {spottedWhen}</span>
+                      )}
                     </div>
                     <p className="pg-note__text">{post.body}</p>
                     <span className="pg-note__reply">Reply →</span>
                   </Link>
-                ))}
+                  );
+                })}
                 {spotted.length === 0 && (
                   <Link href="/spotted" className="pg-note" style={{ "--_av": "var(--pink)" }}>
                     <p className="pg-note__text">No spotted posts yet. Be the first to leave a note.</p>
@@ -623,14 +664,9 @@ export default function Home() {
             accent="cyan"
           />
           <div className="pg-places">
-            <MapPanel
-              pins={mapPins}
-              height={466}
-              expandable
-              onExpand={() => {
-                window.location.href = "/directory";
-              }}
-            />
+            <div id="home-map">
+              <MapPanel pins={mapPins} height={466} legend />
+            </div>
             <div className="pg-placescol">
               {featuredPlaces.map(biz => (
                 <PlaceCard
@@ -672,6 +708,8 @@ export default function Home() {
           onEventUpdated={updated => setSelectedEvent(updated)}
         />
       )}
+
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

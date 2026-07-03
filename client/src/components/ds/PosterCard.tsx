@@ -125,7 +125,7 @@ export function PosterCard({
               ? <span className="pdxBoard__going"><span className="dot" />{going} Going</span>
               : <span />}
             {onRsvp && <button type="button" className="pdxBoard__rsvp"
-              onClick={(e) => { e.preventDefault(); onRsvp(); }}>I'll be there</button>}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRsvp(); }}>I'll be there</button>}
           </div>
         )}
       </div>

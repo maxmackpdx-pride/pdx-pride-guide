@@ -414,3 +414,32 @@
 html.calm-mode .home-main-stage .pg-note--spot {
   animation: none;
 }
+
+.home-main-stage .pg-fourgrid .pdxBoard {
+  animation: pdxPulse var(--dur-pulse, 4s) ease-in-out infinite;
+}
+
+html.calm-mode .home-main-stage .pg-hero__img {
+  filter: grayscale(0.85) brightness(0.72);
+}
+
+html.calm-mode .home-main-stage .pg-hero h1 .rainbow {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  color: var(--text-hi);
+}
+
+html.calm-mode .home-main-stage .pg-fourgrid .pdxBoard {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-main-stage .pg-note--spot {
+    animation: none;
+  }
+
+  .home-main-stage .pg-fourgrid .pdxBoard {
+    animation: none;
+  }
+}

@@ -15,6 +15,7 @@ export function FeedbackButton() {
   return (
     <>
       <button
+        id="feedback"
         onClick={() => setOpen(true)}
         className="display"
         style={{
