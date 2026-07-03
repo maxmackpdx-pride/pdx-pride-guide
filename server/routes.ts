@@ -24,6 +24,12 @@ import {
   pacificDayOfWeek,
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
+import {
+  diffSubmissionMerge,
+  findSubmissionMatches,
+  submissionHasStrongDuplicate,
+} from "@shared/submissionMatch";
+import type { Event } from "@shared/schema";
 import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
@@ -122,11 +128,28 @@ function resolveUserByUsername(username: string) {
     || sqlite.prepare(`SELECT * FROM users WHERE LOWER(username) = LOWER(?)`).get(uname) as ReturnType<typeof storage.getUserByUsername>;
 }
 
+function submissionMatchPool(): Event[] {
+  return storage.getEvents({ status: "LIVE" });
+}
+
+function enrichSubmissionMatches(sub: { type: string; eventId?: number | null } & Record<string, unknown>) {
+  if (sub.type !== "NEW_EVENT" && sub.type !== "SUGGEST") {
+    return [];
+  }
+  const pool = submissionMatchPool();
+  const matches = findSubmissionMatches(sub as any, pool, { excludeEventId: sub.eventId });
+  return matches.map(match => ({
+    ...match,
+    event: pool.find(evt => evt.id === match.eventId) ?? null,
+  }));
+}
+
 function enrichSubmissionForAdmin(sub: any) {
   const user = storage.getUserByEmail(sub.submitterEmail);
   return {
     ...sub,
     submitterProfile: user ? adminUserSummary(user) : null,
+    potentialMatches: enrichSubmissionMatches(sub),
   };
 }
 
@@ -525,15 +548,29 @@ export function registerRoutes(httpServer: Server, app: Express) {
           : JSON.stringify(req.body.eventTypes || []),
       });
       const sub = storage.createSubmission(data);
+      const potentialMatches = type === "NEW_EVENT" || type === "SUGGEST"
+        ? enrichSubmissionMatches(sub)
+        : [];
+      const strongDuplicate = type === "NEW_EVENT"
+        ? submissionHasStrongDuplicate(potentialMatches)
+        : undefined;
 
-      // Approved promoters / admins bypass the review queue
-      if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser)) {
+      // Approved promoters / admins bypass the review queue unless a likely duplicate exists
+      if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser) && !strongDuplicate) {
         storage.autoApproveSubmission(sub.id, user.username);
         const created = storage.getEvents({ status: "LIVE" })
           .filter(evt => evt.submittedBy === user.email && evt.title === sub.title)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
         if (created) void fillEventMapCoordinates(created.id);
-        return res.json({ ...sub, autoApproved: true });
+        return res.json({ ...sub, autoApproved: true, potentialMatches });
+      }
+      if (type === "NEW_EVENT" && strongDuplicate) {
+        return res.json({
+          ...sub,
+          potentialMatches,
+          heldForReview: true,
+          heldReason: `Possible duplicate of "${strongDuplicate.title}"`,
+        });
       }
       if (type === "CLAIM" && (promoterStatus === "approved" || isAdminUser)) {
         storage.autoApproveClaim(sub.id, user.username);
@@ -543,7 +580,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       // NEW_EVENT from unapproved user → goes to queue + flags them for promoter review
       if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
         if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-        return res.json({ ...sub, pendingPromoterReview: true });
+        return res.json({ ...sub, pendingPromoterReview: true, potentialMatches });
       }
 
       // CLAIM from unapproved user → flag for promoter review
@@ -552,7 +589,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
 
       // SUGGEST goes straight to queue, no promoter status change
-      res.json(sub);
+      res.json({ ...sub, potentialMatches });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -1799,6 +1836,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { reason } = req.body;
     storage.rejectSubmission(Number(req.params.id), reason || "");
     res.json({ ok: true });
+  });
+
+  app.get("/api/admin/submissions/:id/merge-preview", requireAdmin, (req, res) => {
+    const sub = storage.getSubmission(Number(req.params.id));
+    if (!sub) return res.status(404).json({ error: "Submission not found" });
+    const eventId = Number(req.query.eventId);
+    const existing = Number.isFinite(eventId) ? storage.getEvent(eventId) : undefined;
+    if (!existing) return res.status(404).json({ error: "Event not found" });
+    res.json({
+      submissionId: sub.id,
+      eventId: existing.id,
+      fields: diffSubmissionMerge(existing, sub),
+    });
+  });
+
+  app.post("/api/admin/submissions/:id/merge", requireAdmin, async (req, res) => {
+    const { adminName, eventId } = req.body;
+    if (!adminName) return res.status(400).json({ error: "adminName required" });
+    const targetEventId = Number(eventId);
+    if (!Number.isFinite(targetEventId)) return res.status(400).json({ error: "eventId required" });
+
+    const sub = storage.getSubmission(Number(req.params.id));
+    if (!sub) return res.status(404).json({ error: "Submission not found" });
+    const dateErr = validateEventDates(sub.dateStart, sub.dateEnd);
+    if (dateErr) return res.status(400).json({ error: `Cannot merge: ${dateErr}` });
+
+    const result = storage.mergeSubmissionIntoEvent(Number(req.params.id), targetEventId, adminName);
+    if ("error" in result) return res.status(400).json({ error: result.error });
+
+    await fillEventMapCoordinates(result.event.id);
+    res.json(result);
   });
 
   app.get("/api/admin/talent-requests", requireAdmin, (req, res) => {

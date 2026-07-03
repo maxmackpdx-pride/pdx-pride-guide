@@ -25,6 +25,7 @@ import {
   type Business, type InsertBusiness,
 } from "@shared/schema";
 import crypto from "crypto";
+import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates } from "./venueCoordinates";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
@@ -2384,6 +2385,24 @@ function notifyGuideInbox(
   });
 }
 
+function notifySubmissionMerged(
+  sub: { id: number; title: string; submitterEmail: string },
+  eventTitle: string,
+) {
+  const recipient = storage.getUserByEmail(sub.submitterEmail);
+  if (!recipient) return;
+  notifyGuideInbox(
+    recipient.id,
+    `Merged: ${sub.title}`,
+    `Your submission was merged into the existing listing "${eventTitle}". You're attached as the host — open your dashboard to manage it and post updates.`,
+    {
+      contextType: "SUBMISSION",
+      contextId: sub.id,
+      contextLabel: eventTitle,
+    },
+  );
+}
+
 function notifySubmissionOutcome(
   sub: { id: number; title: string; type: string; submitterEmail: string },
   approved: boolean,
@@ -2491,6 +2510,7 @@ export interface IStorage {
   createSubmission(data: InsertSubmission): Submission;
   autoApproveClaim(id: number, claimedByUsername: string): void;
   approveSubmission(id: number, adminName: string): Submission | undefined;
+  mergeSubmissionIntoEvent(id: number, eventId: number, adminName: string): { event: Event; submission: Submission } | { error: string };
   rejectSubmission(id: number, reason: string): void;
   // Gigs
   getGigPosts(status?: string): GigPost[];
@@ -2871,6 +2891,59 @@ export const storage: IStorage = {
       notifySubmissionOutcome(sub, true);
     }
     return db.select().from(submissions).where(eq(submissions.id, id)).get();
+  },
+  mergeSubmissionIntoEvent(id, eventId, adminName) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub) return { error: "Submission not found" };
+    if (sub.status !== "PENDING") return { error: "Submission is not pending" };
+    if (sub.type !== "NEW_EVENT" && sub.type !== "SUGGEST") {
+      return { error: "Only new event submissions can be merged" };
+    }
+
+    const existing = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (!existing) return { error: "Event not found" };
+    if (existing.status !== "LIVE") return { error: "Only live events can receive a merge" };
+
+    const patch = buildSubmissionMergePatch(existing, sub);
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const coords = mergeMapCoordinates({
+      venueName: (patch.venueName as string | undefined) ?? existing.venueName,
+      address: (patch.address as string | undefined) ?? existing.address,
+      lat: existing.lat,
+      lng: existing.lng,
+    }, directoryRows);
+
+    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+    const claimedBy = existing.claimedBy || submitter?.username || null;
+
+    db.update(events).set({
+      ...patch,
+      lat: coords.lat,
+      lng: coords.lng,
+      isClaimable: false,
+      claimedBy,
+      submittedBy: existing.submittedBy || sub.submitterEmail,
+      adminNotes: existing.adminNotes,
+    } as any).where(eq(events.id, eventId)).run();
+
+    db.update(submissions).set({
+      status: "APPROVED",
+      approvals: JSON.stringify([adminName]),
+      adminNotes: `Merged into event #${eventId} (${existing.title}) by ${adminName}.`,
+      eventId,
+    }).where(eq(submissions.id, id)).run();
+
+    if (submitter) {
+      if (submitter.promoterStatus === "pending") {
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      }
+      storage.setPrimaryEventHost(eventId, submitter.id, null);
+    }
+
+    const updatedEvent = db.select().from(events).where(eq(events.id, eventId)).get()!;
+    const updatedSub = db.select().from(submissions).where(eq(submissions.id, id)).get()!;
+    notifySubmissionMerged(sub, updatedEvent.title);
+    return { event: updatedEvent, submission: updatedSub };
   },
   rejectSubmission(id, reason) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();

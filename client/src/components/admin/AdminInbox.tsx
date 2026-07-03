@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle, ChevronDown, Clock, XCircle } from "lucide-react";
 import AdminLoadError from "@/components/admin/AdminLoadError";
+import AdminSubmissionMerge from "@/components/admin/AdminSubmissionMerge";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 
 export type InboxKind =
@@ -102,6 +103,7 @@ export interface AdminInboxProps {
   modNotes: Record<number, string>;
   onModNoteChange: (id: number, value: string) => void;
   onApproveSubmission: (id: number) => void;
+  onMergeSubmission: (submissionId: number, eventId: number) => void;
   onRejectSubmission: (id: number, reason: string) => void;
   onApprovePromoter: (userId: number) => void;
   onDenyPromoter: (userId: number) => void;
@@ -341,6 +343,7 @@ function InboxCard({
   modNotes,
   onModNoteChange,
   onApproveSubmission,
+  onMergeSubmission,
   onRejectSubmission,
   onApprovePromoter,
   onDenyPromoter,
@@ -494,6 +497,15 @@ function InboxCard({
                   <img src={payload.posterImageUrl} alt="Event flyer" className="max-h-64 border border-white/10 object-contain" style={{ maxWidth: "100%" }} />
                   <p className="text-white/30 text-xs mt-1 break-all">{payload.posterImageUrl}</p>
                 </div>
+              )}
+
+              {(payload.type === "NEW_EVENT" || payload.type === "SUGGEST") && payload.potentialMatches?.length > 0 && (
+                <AdminSubmissionMerge
+                  submission={payload}
+                  matches={payload.potentialMatches}
+                  onMerge={eventId => onMergeSubmission(payload.id, eventId)}
+                  pending={actionPending}
+                />
               )}
 
               {item.pending && (

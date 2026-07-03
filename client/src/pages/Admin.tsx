@@ -427,6 +427,22 @@ export default function Admin() {
     },
   });
 
+  const mergeSubmissionMutation = useMutation({
+    mutationFn: ({ submissionId, eventId }: { submissionId: number; eventId: number }) =>
+      apiRequest("POST", `/api/admin/submissions/${submissionId}/merge`, { adminName, eventId }),
+    onSuccess: () => {
+      invalidateInboxQueries();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/unclaimed"] });
+      toast({ title: "Merged", description: "Submission merged into the existing event. Promoter attached as host." });
+    },
+    onError: (err: any) => {
+      toast({ title: "Error", description: err?.message || "Could not merge submission.", variant: "destructive" });
+    },
+  });
+
   const claimableMutation = useMutation({
     mutationFn: ({ id, isClaimable }: { id: number; isClaimable: boolean }) =>
       apiRequest("PATCH", `/api/admin/events/${id}/claimable`, { isClaimable }),
@@ -872,6 +888,7 @@ export default function Admin() {
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
   const inboxActionPending =
     approveMutation.isPending
+    || mergeSubmissionMutation.isPending
     || rejectMutation.isPending
     || resolveModerationMutation.isPending
     || dismissStaleTestsMutation.isPending
@@ -967,6 +984,7 @@ export default function Admin() {
             modNotes={modNote}
             onModNoteChange={(id, val) => setModNote(prev => ({ ...prev, [id]: val }))}
             onApproveSubmission={id => approveMutation.mutate({ id })}
+            onMergeSubmission={(submissionId, eventId) => mergeSubmissionMutation.mutate({ submissionId, eventId })}
             onRejectSubmission={(id, reason) => rejectMutation.mutate({ id, reason })}
             onApprovePromoter={id => approvePromoterMutation.mutate(id)}
             onDenyPromoter={id => denyPromoterMutation.mutate(id)}

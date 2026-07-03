@@ -55,7 +55,11 @@ export default function Submit() {
   const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [authDismissed, setAuthDismissed] = useState(false);
-  const [eventSubmitSuccess, setEventSubmitSuccess] = useState<{ title: string; desc: string } | null>(null);
+  const [eventSubmitSuccess, setEventSubmitSuccess] = useState<{
+    title: string;
+    desc: string;
+    potentialMatches?: Array<{ title: string; venueName: string; confidence: string }>;
+  } | null>(null);
   const [location] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
@@ -184,14 +188,19 @@ export default function Submit() {
     },
     onSuccess: (payload, vars) => {
       const autoApproved = !!payload.autoApproved;
+      const heldForReview = !!payload.heldForReview;
       const msgs: Record<string, { title: string; desc: string }> = {
         NEW_EVENT: {
-          title: "Event submitted!",
-          desc: autoApproved
-            ? "Your event is now live."
-            : isApproved
+          title: heldForReview ? "Submitted for admin review" : "Event submitted!",
+          desc: heldForReview
+            ? (payload.heldReason
+              ? `${payload.heldReason}. An admin will merge your updates with the existing listing or publish separately.`
+              : "We found a similar event already in the guide. An admin will review before publishing.")
+            : autoApproved
               ? "Your event is now live."
-              : "Your event and promoter application are in the admin queue.",
+              : isApproved
+                ? "Your event is now live."
+                : "Your event and promoter application are in the admin queue.",
         },
         SUGGEST: { title: "Tip received!", desc: "Admins will review and may add this event to the guide." },
         CLAIM: {
@@ -204,7 +213,17 @@ export default function Submit() {
       const m = msgs[vars.type] || msgs.NEW_EVENT;
       toast({ title: m.title, description: m.desc });
       if (vars.type === "NEW_EVENT") {
-        setEventSubmitSuccess({ title: m.title, desc: m.desc });
+        setEventSubmitSuccess({
+          title: m.title,
+          desc: m.desc,
+          potentialMatches: Array.isArray(payload.potentialMatches)
+            ? payload.potentialMatches.slice(0, 3).map((match: { title: string; venueName: string; confidence: string }) => ({
+              title: match.title,
+              venueName: match.venueName,
+              confidence: match.confidence,
+            }))
+            : undefined,
+        });
         return;
       }
       setEventForm(emptyEventForm());
@@ -408,9 +427,24 @@ export default function Submit() {
                 <div className="display" style={{ color: "var(--neon-yellow)", fontSize: "1.2rem", marginBottom: 8 }}>
                   {eventSubmitSuccess.title}
                 </div>
-                <p style={{ color: "#aaa", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: 24 }}>
+                <p style={{ color: "#aaa", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: eventSubmitSuccess.potentialMatches?.length ? 16 : 24 }}>
                   {eventSubmitSuccess.desc}
                 </p>
+                {eventSubmitSuccess.potentialMatches && eventSubmitSuccess.potentialMatches.length > 0 && (
+                  <div style={{ border: "1px solid #444", background: "#111", padding: 14, marginBottom: 24 }}>
+                    <p style={{ color: "var(--neon-orange)", fontFamily: "var(--font-display)", fontSize: "0.72rem", letterSpacing: "0.06em", margin: "0 0 8px" }}>
+                      SIMILAR EVENTS IN THE GUIDE
+                    </p>
+                    <ul style={{ margin: 0, paddingLeft: 18, color: "#aaa", fontSize: "0.85rem", lineHeight: 1.5 }}>
+                      {eventSubmitSuccess.potentialMatches.map(match => (
+                        <li key={`${match.title}-${match.venueName}`}>
+                          {match.title} @ {match.venueName}
+                          {match.confidence === "high" ? " (likely duplicate)" : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <button type="button" className="btn-neon solid" onClick={startAnotherEvent}
                     style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
