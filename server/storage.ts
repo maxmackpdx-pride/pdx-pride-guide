@@ -385,6 +385,21 @@ try { sqlite.exec(`ALTER TABLE messages ADD COLUMN deleted_by_to INTEGER NOT NUL
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN promoter_status TEXT NOT NULL DEFAULT 'none'`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN sub_admin INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN notification_prefs TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN pronouns TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN location TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN social_links TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_embeds TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_photos TEXT`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS follows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    follower_user_id INTEGER NOT NULL,
+    following_user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(follower_user_id, following_user_id)
+  )
+`); } catch(e) {}
+try { sqlite.exec(`CREATE INDEX IF NOT EXISTS follows_following_idx ON follows(following_user_id)`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS push_subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2750,10 +2765,17 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'promoterStatus' | 'subAdmin'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin'>>): void;
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
   getAllUsers(): User[];
+  // Member profiles + follows
+  getPublicProfile(username: string, viewerUserId?: number | null): any | undefined;
+  followUser(followerUserId: number, followingUserId: number): void;
+  unfollowUser(followerUserId: number, followingUserId: number): void;
+  getFollowerCount(userId: number): number;
+  isFollowing(followerUserId: number, followingUserId: number): boolean;
+  countEventsHostedByUser(userId: number): number;
   purgeQaTestUsers(): { deleted: number; usernames: string[] };
   countActiveMessages(): number;
   autoApproveSubmission(id: number, claimedByUsername: string): void;
@@ -2914,6 +2936,129 @@ export const storage: IStorage = {
   },
   getAllUsers() {
     return db.select().from(users).all();
+  },
+  // ─── Member profiles + follows ─────────────────────────────────────────────
+  followUser(followerUserId, followingUserId) {
+    sqlite.prepare(`
+      INSERT OR IGNORE INTO follows (follower_user_id, following_user_id, created_at)
+      VALUES (?, ?, ?)
+    `).run(followerUserId, followingUserId, new Date().toISOString());
+  },
+  unfollowUser(followerUserId, followingUserId) {
+    sqlite.prepare(`DELETE FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).run(followerUserId, followingUserId);
+  },
+  getFollowerCount(userId) {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE following_user_id = ?`).get(userId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
+  isFollowing(followerUserId, followingUserId) {
+    return !!sqlite.prepare(`SELECT 1 FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).get(followerUserId, followingUserId);
+  },
+  countEventsHostedByUser(userId) {
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count
+      FROM event_hosts eh
+      JOIN events e ON e.id = eh.event_id
+      WHERE eh.user_id = ? AND e.status = 'LIVE'
+    `).get(userId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
+  getPublicProfile(username, viewerUserId = null) {
+    const user = storage.getUserByUsername(username);
+    if (!user || user.status !== "active") return undefined;
+    const isOwner = viewerUserId != null && viewerUserId === user.id;
+
+    // Distinct LIVE talent role labels
+    const talentByEvent = storage.getEventTalentByUser(user.id);
+    const roles: string[] = [];
+    for (const entry of Object.values(talentByEvent)) {
+      if (entry.status !== "LIVE") continue;
+      for (const role of entry.roles) {
+        const label = EVENT_TALENT_ROLE_LABELS[role];
+        if (label && !roles.includes(label)) roles.push(label);
+      }
+    }
+
+    // LIVE events this user hosts (primary or co-host)
+    const hostedEvents = sqlite.prepare(`
+      SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.admission
+      FROM event_hosts eh
+      JOIN events e ON e.id = eh.event_id
+      WHERE eh.user_id = ? AND e.status = 'LIVE'
+      ORDER BY e.date_start ASC
+    `).all(user.id) as any[];
+    if (hostedEvents.length > 0 && !roles.includes("Party Host")) roles.push("Party Host");
+
+    // Publicly visible gig + gifting posts
+    const gigs = storage.getGigPostsByUser(user.id)
+      .filter(gig => gig.status === "LIVE")
+      .map(gig => ({
+        id: gig.id,
+        title: gig.title,
+        venueText: gig.location || null,
+        compensation: gig.compensation || null,
+        status: gig.status,
+        createdAt: gig.createdAt,
+        description: gig.description,
+      }));
+    const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "PENDING", "EXPIRED"]);
+    const gifting = storage.getGiftingPostsByUser(user.id)
+      .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)))
+      .map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        neighborhood: post.neighborhood,
+        createdAt: post.createdAt ?? post.created_at,
+        description: post.description,
+      }));
+
+    const checkIns = storage.getAttendancesByUser(user.id).length;
+
+    // PRIVACY: goingTo is ONLY visible to the profile owner themselves.
+    let goingTo: any[] | undefined;
+    if (isOwner) {
+      goingTo = sqlite.prepare(`
+        SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+               e.date_start AS dateStart, e.admission
+        FROM attendances a
+        JOIN events e ON e.id = a.event_id
+        WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
+        ORDER BY e.date_start ASC
+      `).all(user.id) as any[];
+    }
+
+    const socialLinksRaw = safeJson(user.socialLinks || "{}");
+    const activity: any = { hostedEvents, gigs, gifting };
+    if (goingTo) activity.goingTo = goingTo;
+
+    return {
+      username: user.username,
+      displayName: user.displayName,
+      pronouns: user.pronouns || null,
+      location: user.location || null,
+      bio: user.bio,
+      photoUrl: user.photoUrl,
+      avatarChoice: user.avatarChoice ?? 1,
+      avatarRing: user.avatarRing || "none",
+      avatarCrop: user.avatarCrop || null,
+      memberSince: user.createdAt,
+      verifiedHost: user.promoterStatus === "approved",
+      roles,
+      socialLinks: socialLinksRaw && typeof socialLinksRaw === "object" && !Array.isArray(socialLinksRaw) ? socialLinksRaw : {},
+      profileEmbeds: safeJson(user.profileEmbeds || "[]"),
+      profilePhotos: safeJson(user.profilePhotos || "[]"),
+      stats: {
+        events: hostedEvents.length,
+        gigs: gigs.length,
+        gifting: gifting.length,
+        checkIns,
+        followers: storage.getFollowerCount(user.id),
+      },
+      isOwner,
+      isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
+      activity,
+    };
   },
   countActiveMessages() {
     const row = sqlite.prepare(`

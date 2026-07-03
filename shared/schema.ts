@@ -189,6 +189,11 @@ export const users = sqliteTable("users", {
   avatarCrop: text("avatar_crop"),
   bio: text("bio"),
   photoUrl: text("photo_url"),
+  pronouns: text("pronouns"),
+  location: text("location"),
+  socialLinks: text("social_links"), // JSON object keyed by platform
+  profileEmbeds: text("profile_embeds"), // JSON array of {id,src,title}
+  profilePhotos: text("profile_photos"), // JSON array of {url,caption}
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
@@ -199,6 +204,15 @@ export const users = sqliteTable("users", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, status: true });
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Follows (member profile follower graph)
+export const follows = sqliteTable("follows", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  followerUserId: integer("follower_user_id").notNull(),
+  followingUserId: integer("following_user_id").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type Follow = typeof follows.$inferSelect;
 
 // Messages
 export const messages = sqliteTable("messages", {

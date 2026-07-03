@@ -222,6 +222,11 @@ function syncOwnerDisplayName(user: any) {
   return { ...user, displayName: OWNER_DISPLAY_NAME };
 }
 
+function safeJsonValue(raw: unknown, fallback: unknown) {
+  if (typeof raw !== "string" || !raw) return fallback;
+  try { return JSON.parse(raw); } catch { return fallback; }
+}
+
 function authUserResponse(req: any, user: any) {
   const isAdmin = markAdminSessionForUser(req, user);
   return {
@@ -230,10 +235,78 @@ function authUserResponse(req: any, user: any) {
     avatarRing: user.avatarRing || "none", avatarCrop: user.avatarCrop || null,
     bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
     promoterStatus: user.promoterStatus || "none",
+    pronouns: user.pronouns || null,
+    location: user.location || null,
+    socialLinks: safeJsonValue(user.socialLinks, {}),
+    profileEmbeds: safeJsonValue(user.profileEmbeds, []),
+    profilePhotos: safeJsonValue(user.profilePhotos, []),
+    memberSince: user.createdAt || "",
+    createdAt: user.createdAt || "",
     isAdmin,
     isSuperAdmin: isMainAdminUser(user),
     subAdmin: !!user.subAdmin,
   };
+}
+
+// ─── Member profile field validation ─────────────────────────────────────────
+const SOCIAL_LINK_KEYS = [
+  "instagram", "tiktok", "soundcloud", "spotify", "bluesky", "x",
+  "facebook", "website", "linktree", "venmo", "onlyfans", "fetlife",
+] as const;
+
+function sanitizeSocialLinks(input: unknown): string | null {
+  if (input === null) return null;
+  if (typeof input !== "object" || Array.isArray(input)) return null;
+  const clean: Record<string, string> = {};
+  for (const key of SOCIAL_LINK_KEYS) {
+    const value = (input as Record<string, unknown>)[key];
+    if (typeof value !== "string") continue;
+    const trimmed = value.replace(/[<>]/g, "").trim().slice(0, 120);
+    if (trimmed) clean[key] = trimmed;
+  }
+  return JSON.stringify(clean);
+}
+
+const SOUNDCLOUD_EMBED_HOSTS = new Set(["w.soundcloud.com", "soundcloud.com", "api.soundcloud.com"]);
+
+function isValidSoundcloudEmbedSrc(src: unknown): src is string {
+  if (typeof src !== "string") return false;
+  try {
+    const url = new URL(src);
+    return url.protocol === "https:" && SOUNDCLOUD_EMBED_HOSTS.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeProfileEmbeds(input: unknown): string | null {
+  if (input === null) return null;
+  if (!Array.isArray(input)) return null;
+  const clean = input
+    .filter((entry: any) => entry && typeof entry === "object" && isValidSoundcloudEmbedSrc(entry.src))
+    .slice(0, 12)
+    .map((entry: any) => ({
+      id: String(entry.id || `embed_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`).slice(0, 40),
+      src: String(entry.src),
+      title: String(entry.title || "").replace(/[<>]/g, "").trim().slice(0, 80),
+    }));
+  return JSON.stringify(clean);
+}
+
+function sanitizeProfilePhotos(input: unknown): string | null {
+  if (input === null) return null;
+  if (!Array.isArray(input)) return null;
+  const clean = input
+    .filter((entry: any) => {
+      const url = entry && typeof entry === "object" ? entry.url : null;
+      return typeof url === "string" && (url.startsWith("/uploads/") || url.startsWith("https://"));
+    })
+    .slice(0, 6)
+    .map((entry: any) => ({
+      url: String(entry.url),
+      caption: String(entry.caption || "").replace(/[<>]/g, "").trim().slice(0, 60),
+    }));
+  return JSON.stringify(clean);
 }
 
 function publicGiftingPost(post: any, viewerUserId?: number) {
@@ -1248,7 +1321,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
-    const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl } = req.body;
+    const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location, socialLinks, profileEmbeds, profilePhotos } = req.body;
     const patch: Record<string, unknown> = {};
     if (displayName !== undefined) patch.displayName = displayName;
     if (avatarChoice !== undefined) patch.avatarChoice = avatarChoice;
@@ -1256,9 +1329,52 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (avatarCrop !== undefined) patch.avatarCrop = avatarCrop || null;
     if (bio !== undefined) patch.bio = bio;
     if (photoUrl !== undefined) patch.photoUrl = photoUrl || null;
+    if (pronouns !== undefined) patch.pronouns = pronouns ? String(pronouns).replace(/[<>]/g, "").trim().slice(0, 40) : null;
+    if (location !== undefined) patch.location = location ? String(location).replace(/[<>]/g, "").trim().slice(0, 80) : null;
+    if (socialLinks !== undefined) patch.socialLinks = sanitizeSocialLinks(socialLinks);
+    if (profileEmbeds !== undefined) patch.profileEmbeds = sanitizeProfileEmbeds(profileEmbeds);
+    if (profilePhotos !== undefined) patch.profilePhotos = sanitizeProfilePhotos(profilePhotos);
     storage.updateUser(req.session.userId!, patch as any);
     const updated = storage.getUserById(req.session.userId!);
     res.json(authUserResponse(req, updated));
+  });
+
+  // ─── MEMBER PROFILES + FOLLOWS ───────────────────────────────────────────
+  // Public profile page — no auth required; viewer detected via session.
+  app.get("/api/users/:username", (req: any, res) => {
+    const username = String(req.params.username || "").trim().replace(/^@/, "");
+    const profile = storage.getPublicProfile(username, req.session?.userId ?? null);
+    if (!profile) return res.status(404).json({ error: "Not found" });
+    res.json(profile);
+  });
+
+  app.post("/api/users/:username/follow", requireAuth, (req, res) => {
+    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
+    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
+    if (target.id === req.session.userId) return res.status(400).json({ error: "You can't follow yourself" });
+    storage.followUser(req.session.userId!, target.id);
+    res.json({ followers: storage.getFollowerCount(target.id), isFollowing: true });
+  });
+
+  app.delete("/api/users/:username/follow", requireAuth, (req, res) => {
+    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
+    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
+    if (target.id === req.session.userId) return res.status(400).json({ error: "You can't follow yourself" });
+    storage.unfollowUser(req.session.userId!, target.id);
+    res.json({ followers: storage.getFollowerCount(target.id), isFollowing: false });
+  });
+
+  app.post("/api/users/:username/message", requireAuth, (req, res) => {
+    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
+    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
+    if (target.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+    const body = String(req.body?.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    const sender = storage.getUserById(req.session.userId!);
+    if (!sender) return res.status(401).json({ error: "Not authenticated" });
+    const subject = String(req.body?.subject || "").trim().slice(0, 120) || `Message from @${sender.username}`;
+    storage.sendMessage(sender.id, target.id, subject, body, { contextType: "THREAD" });
+    res.json({ ok: true });
   });
 
   // ─── MISSED CONNECTIONS ──────────────────────────────────────────────────

@@ -40,6 +40,7 @@ import Inbox from "./pages/Inbox";
 import MissedConnections from "./pages/MissedConnections";
 import Directory from "./pages/Directory";
 import DesignSystemSandbox from "./pages/DesignSystemSandbox";
+import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/not-found";
 
 export default function App() {
@@ -72,6 +73,7 @@ export default function App() {
                 <Route path="/spotted" component={MissedConnections} />
                 <Route path="/directory" component={Directory} />
                 <Route path="/design-preview" component={DesignSystemSandbox} />
+                <Route path="/u/:username" component={MemberProfile} />
                 <Route path="/missed-connections">
                   {() => <Redirect to="/spotted" />}
                 </Route>
