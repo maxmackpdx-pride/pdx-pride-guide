@@ -2734,6 +2734,7 @@ export interface IStorage {
   deactivatePushSubscriptionByEndpoint(userId: number, endpoint: string): void;
   touchPushSubscription(id: number): void;
   getActivePushSubscriptions(userId: number): Array<{ id: number; endpoint: string; p256dh: string; auth: string }>;
+  countActivePushSubscriptions(): number;
   markRead(messageId: number): void;
   markReadForUser(messageId: number, userId: number): boolean;
   getThread(threadId: string): Message[];
@@ -4164,6 +4165,10 @@ export const storage: IStorage = {
       FROM push_subscriptions
       WHERE user_id = ? AND active = 1
     `).all(userId) as Array<{ id: number; endpoint: string; p256dh: string; auth: string }>;
+  },
+  countActivePushSubscriptions() {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM push_subscriptions WHERE active = 1`).get() as { count: number };
+    return row?.count || 0;
   },
   markRead(messageId) {
     db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();

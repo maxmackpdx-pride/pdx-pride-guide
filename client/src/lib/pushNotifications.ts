@@ -43,6 +43,43 @@ export async function hasPushSubscription(): Promise<boolean> {
   }
 }
 
+/** Re-register the browser subscription with the server after login (idempotent). */
+export async function syncPushSubscriptionWithServer(): Promise<void> {
+  if (!canUseWebPush()) return;
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+
+  const config = await fetchPushConfig();
+  if (!config.configured || !config.publicKey) return;
+
+  const registration = await waitForServiceWorker();
+  if (!registration) return;
+
+  try {
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(config.publicKey),
+      });
+    }
+
+    const json = subscription.toJSON();
+    const res = await fetch("/api/push/subscribe", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        endpoint: json.endpoint,
+        keys: json.keys,
+        platform: isIosDevice() ? "ios" : "desktop",
+      }),
+    });
+    if (res.ok) emitPushStateChange();
+  } catch {
+    /* non-blocking — inbox still works */
+  }
+}
+
 export async function subscribeToPush(): Promise<"granted" | "denied" | "unsupported" | "install_required" | "not_configured"> {
   if (!canUseWebPush()) return "unsupported";
   if (shouldShowInstallBeforePush()) return "install_required";

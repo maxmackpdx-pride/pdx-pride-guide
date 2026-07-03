@@ -326,6 +326,38 @@ export default function Admin() {
     enabled: authenticated,
   });
 
+  const { data: pushStatus, refetch: refetchPushStatus } = useQuery<{
+    configured: boolean;
+    totalActiveSubscriptions: number;
+    myDeviceSubscriptions: number;
+  }>({
+    queryKey: ["/api/admin/push-status"],
+    queryFn: () => apiRequest("GET", "/api/admin/push-status").then(r => r.json()),
+    enabled: authenticated,
+    refetchInterval: 120_000,
+  });
+
+  const testPushMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/push/test", {}),
+    onSuccess: async (res) => {
+      const data = await res.json();
+      toast({ title: "Test push sent", description: `Delivered to ${data.sent} device(s).` });
+      refetchPushStatus();
+    },
+    onError: (err: unknown) => {
+      let description = parseApiError(err, "Push test failed.");
+      const message = err instanceof Error ? err.message : "";
+      const jsonMatch = message.match(/^\d{3}:\s*(\{[\s\S]*\})$/);
+      if (jsonMatch) {
+        try {
+          const body = JSON.parse(jsonMatch[1]) as { error?: string; hint?: string };
+          if (body.hint) description = `${body.error || description} ${body.hint}`;
+        } catch { /* ignore */ }
+      }
+      toast({ title: "Push test failed", description, variant: "destructive" });
+    },
+  });
+
   const { data: promoterRequests = [], isLoading: promotersLoading, isError: promotersError, refetch: refetchPromoters } = useQuery<PromoterRequest[]>({
     queryKey: ["/api/admin/promoter-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then(r => r.json()),
@@ -942,6 +974,52 @@ export default function Admin() {
             if (metricKey === "newUsersToday") setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
           }}
         />
+
+        {pushStatus && (
+          <div
+            style={{
+              marginBottom: 20,
+              padding: "14px 16px",
+              border: "1px solid #222",
+              background: "#080808",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div>
+              <div className="display" style={{ fontSize: "0.82rem", color: "#fff", marginBottom: 4 }}>
+                Push notifications
+              </div>
+              <p style={{ margin: 0, fontSize: "0.74rem", color: "#8c8980", lineHeight: 1.45 }}>
+                Server: {pushStatus.configured ? "VAPID configured" : "keys missing on Railway"}
+                {" · "}
+                {pushStatus.totalActiveSubscriptions} active device{pushStatus.totalActiveSubscriptions === 1 ? "" : "s"} site-wide
+                {" · "}
+                {pushStatus.myDeviceSubscriptions} on this account
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="dash-btn dash-btn-ghost"
+                onClick={() => refetchPushStatus()}
+              >
+                Refresh
+              </button>
+              <button
+                type="button"
+                className="dash-btn dash-btn-lime"
+                disabled={!pushStatus.configured || pushStatus.myDeviceSubscriptions === 0 || testPushMutation.isPending}
+                onClick={() => testPushMutation.mutate()}
+              >
+                {testPushMutation.isPending ? "Sending…" : "Send test push"}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="dash-admin-tabs">
           {([

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { syncPushSubscriptionWithServer } from "@/lib/pushNotifications";
 
 export interface AuthUser {
   id: number;
@@ -35,8 +36,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" });
-      if (res.ok) setUser(await res.json());
-      else setUser(null);
+      if (res.ok) {
+        setUser(await res.json());
+        void syncPushSubscriptionWithServer();
+      } else {
+        setUser(null);
+      }
     } catch { setUser(null); }
     setLoading(false);
   };

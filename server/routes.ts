@@ -460,7 +460,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Lightweight probe for Railway healthchecks — must not hit the DB.
   app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, ts: new Date().toISOString() });
+    res.json({
+      ok: true,
+      ts: new Date().toISOString(),
+      pushConfigured: isPushConfigured(),
+      pushSubscriptions: isPushConfigured() ? storage.countActivePushSubscriptions() : 0,
+    });
   });
 
   attendanceHub = initAttendanceWs(httpServer);
@@ -1557,10 +1562,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  app.get("/api/admin/push-status", requireAdmin, (req, res) => {
+    const userId = req.session.userId!;
+    res.json({
+      configured: isPushConfigured(),
+      totalActiveSubscriptions: storage.countActivePushSubscriptions(),
+      myDeviceSubscriptions: storage.getActivePushSubscriptions(userId).length,
+    });
+  });
+
   app.post("/api/push/test", requireAdmin, async (req, res) => {
+    if (!isPushConfigured()) return res.status(503).json({ error: "VAPID keys not configured on server" });
     const userId = req.session.userId!;
     const subs = storage.getActivePushSubscriptions(userId);
-    if (subs.length === 0) return res.status(400).json({ error: "No active push subscription for this admin account" });
+    if (subs.length === 0) {
+      return res.status(400).json({
+        error: "No active push subscription for this admin account",
+        hint: "Dashboard → Notifications → Enable push on this device",
+      });
+    }
     const payload = buildDeclarativePayload({
       title: "PDX Pride Guide test",
       body: "Push notifications are working.",
