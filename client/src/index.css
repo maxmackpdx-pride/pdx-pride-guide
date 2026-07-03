@@ -78,6 +78,15 @@
   --text-heading: #ffffff;
   --text-body: #e6e2d9;
   --text-body-muted: #c8c4bb;
+  --text-mid: #e6e3da;
+  --text-lo: #999999;
+  --text-faint: #666666;
+  --text-meta: var(--text-lo);
+  --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  --grad-flag: var(--rainbow-bar);
+  --grad-rainbow: linear-gradient(100deg,
+    var(--neon-cyan) 0%, var(--neon-green) 24%, var(--neon-yellow) 44%,
+    var(--neon-orange) 70%, var(--neon-magenta) 100%);
   --prose-spacing: 1.35rem;
 }
 

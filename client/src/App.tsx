@@ -60,7 +60,7 @@ export default function App() {
                 <Route path="/" component={Home} />
                 <Route path="/events/:id/:slug?" component={Events} />
                 <Route path="/events" component={Events} />
-                <Route path="/schedule" component={Schedule} />
+                <Route path="/schedule">{() => <Schedule />}</Route>
                 <Route path="/submit/claim/:eventId" component={Submit} />
                 <Route path="/submit" component={Submit} />
                 <Route path="/pride-work" component={PrideWork} />

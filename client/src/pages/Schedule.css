@@ -1,0 +1,50 @@
+/* Schedule page — keyframes, custom scrollbar, and hover/press
+   interactions that can't live in inline styles. Depends on the DS
+   tokens (fonts, colors, effects) being loaded globally. */
+
+.sch-scroll::-webkit-scrollbar { height: 14px; width: 14px; }
+.sch-scroll::-webkit-scrollbar-thumb { background: #2b2b2b; border-radius: 7px; border: 4px solid #0a0a0a; }
+.sch-scroll::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+.sch-scroll::-webkit-scrollbar-track { background: #0a0a0a; }
+.sch-scroll::-webkit-scrollbar-corner { background: #0a0a0a; }
+
+@keyframes schGlow {
+  0%, 100% { box-shadow: 0 0 16px rgba(255,0,204,.85), 0 0 34px rgba(255,0,204,.4); }
+  50% { box-shadow: 0 0 26px rgba(255,0,204,.95), 0 0 56px rgba(255,0,204,.5); }
+}
+@keyframes schIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes schPop {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes schPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
+
+.sch-block { animation: schIn .28s ease both; }
+.sch-block:hover { filter: brightness(1.16); z-index: 20 !important; }
+.sch-export { animation: schGlow 2.6s ease-in-out infinite; transition: transform .14s ease; }
+.sch-export:hover { transform: translateY(-2px); }
+.sch-export:active { transform: translateY(1px); }
+.sch-navlink:hover { color: #fff !important; }
+.sch-chip { transition: border-color .18s ease, color .18s ease, box-shadow .18s ease, background .18s ease; }
+.sch-chip:active { transform: scale(.97); }
+.sch-pop { animation: schPop .18s cubic-bezier(.2,.8,.2,1) both; }
+.sch-livedot { animation: schPulse 1.6s ease-in-out infinite; }
+
+/* Calm mode: flatten every glow/animation on the page (matches the DS
+   effects.css .calm rule; scoped here so the page is self-sufficient). */
+.sch-root.calm *,
+.sch-root.calm *::before,
+.sch-root.calm *::after {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-block, .sch-export, .sch-pop, .sch-livedot { animation: none !important; }
+}
