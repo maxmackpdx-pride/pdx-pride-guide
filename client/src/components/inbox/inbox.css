@@ -1,0 +1,81 @@
+/* Inbox shell — hover states + composer primitives */
+
+.inbox-shell-root {
+  --border-faint: var(--ink-border-faint);
+}
+
+.pxRow:hover {
+  background: var(--surface-card-hover) !important;
+}
+
+.pxIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.pxIconBtn:hover {
+  border-color: var(--hc, var(--cyan));
+  color: var(--hc, var(--cyan));
+}
+
+.pxClearBtn {
+  border: 0;
+  background: transparent;
+  color: var(--text-meta);
+  cursor: pointer;
+  display: flex;
+  padding: 3px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.pxClearBtn:hover {
+  color: var(--pink);
+}
+
+.pxQuick {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  color: var(--text-mid);
+  background: var(--ink-850);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.pxQuick:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.pxCalmBtn:hover {
+  border-color: var(--cyan) !important;
+  color: var(--cyan) !important;
+}
+
+.pxComposer:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.inbox-shell-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--text-lo);
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
