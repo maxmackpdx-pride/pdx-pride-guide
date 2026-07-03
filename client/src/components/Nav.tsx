@@ -9,37 +9,11 @@ import UserAvatar from "@/components/UserAvatar";
 import GlitchLogo from "@/components/GlitchLogo";
 import GlitchWord from "@/components/GlitchWord";
 import CalmModeToggle from "@/components/CalmModeToggle";
+import { PRIMARY_NAV } from "@/lib/siteNav";
 
 type NavItem = { href: string; label: string };
 
-type NavEntry =
-  | { type: "link"; href: string; label: string }
-  | { type: "dropdown"; id: string; label: string; items: NavItem[] };
-
-const navEntries: NavEntry[] = [
-  { type: "link", href: "/", label: "Home" },
-  { type: "link", href: "/events", label: "Events" },
-  {
-    type: "dropdown",
-    id: "community",
-    label: "Community",
-    items: [
-      { href: "/pride-work", label: "Pride Werk" },
-      { href: "/spotted", label: "Spotted!" },
-      { href: "/gifting", label: "Gifting" },
-    ],
-  },
-  {
-    type: "dropdown",
-    id: "guide",
-    label: "Guide",
-    items: [
-      { href: "/submit", label: "Promoters" },
-      { href: "/directory", label: "Buy US" },
-      { href: "/about", label: "About" },
-    ],
-  },
-];
+const navEntries = PRIMARY_NAV;
 
 function NavLink({
   href,
@@ -103,6 +77,9 @@ function NavDropdown({
         <ChevronDown size={16} className="site-nav-dropdown__chevron" aria-hidden="true" />
       </button>
       <div id={panelId} className="site-nav-dropdown__panel" role="menu">
+        <span className="site-nav-dropdown__section" aria-hidden="true">
+          {label}
+        </span>
         {items.map(item => (
           <Link
             key={item.href}

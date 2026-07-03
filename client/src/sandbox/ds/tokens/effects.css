@@ -1,0 +1,71 @@
+/* ============================================================
+   PDX Pride Guide, EFFECTS: shadows, glows, motion
+   Canonical signatures from repo tokens:
+     --brutal-shadow : 4px 4px 0 rgba(255,0,204,0.36)  (magenta offset)
+     --glow          : 0 0 14px color-mix(cyan 18%)      (soft neon)
+     Motion          : 0.15s snappy hovers, ~4s ambient pulse
+   ============================================================ */
+
+:root {
+  /* ---- BRUTALIST OFFSET (the signature) ------------------ */
+  /* Hard magenta drop, no blur. Grows on hover. */
+  --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
+  --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
+  --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
+  --brutal-shadow-lime: 4px 4px 0 rgba(204,255,0,0.30);
+
+  /* Generic hard offsets (zine sticker) */
+  --shadow-hard-sm: 3px 3px 0 var(--ink-1000);
+  --shadow-hard:    4px 4px 0 var(--ink-1000);
+  --shadow-hard-lg: 6px 6px 0 var(--ink-1000);
+
+  /* ---- SOFT DEPTH ---------------------------------------- */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
+  --shadow-md:  0 8px 24px -8px rgba(0,0,0,.7);
+  --shadow-lg:  0 14px 30px rgba(0,0,0,.42);
+
+  /* ---- NEON GLOWS (soft, pulse-able) --------------------- */
+  --glow:        0 0 14px color-mix(in srgb, var(--neon-cyan) 18%, transparent);
+  --glow-pink:   0 0 16px color-mix(in srgb, var(--neon-magenta) 26%, transparent);
+  --glow-cyan:   0 0 16px color-mix(in srgb, var(--neon-cyan) 26%, transparent);
+  --glow-lime:   0 0 16px color-mix(in srgb, var(--neon-yellow) 24%, transparent);
+  --glow-violet: 0 0 16px color-mix(in srgb, var(--neon-violet) 30%, transparent);
+
+  /* ---- MOTION -------------------------------------------- */
+  --ease-out:    cubic-bezier(.2,.8,.2,1);      /* @kind other */
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);  /* @kind other */
+  --ease-inout:  cubic-bezier(.65,0,.35,1);     /* @kind other */
+
+  --dur-fast:   150ms;   /* @kind other */ /* snappy hover */
+  --dur-base:   220ms;   /* @kind other */
+  --dur-slow:   360ms;   /* @kind other */
+  --dur-pulse:  4s;      /* @kind other */ /* ambient neon pulse */
+
+  --press-scale: 0.97;   /* @kind other */
+  --hover-lift:  -2px;   /* @kind other */
+}
+
+/* Ambient neon pulse, driven by a per-element --dc (day/accent color) */
+@keyframes pdxPulse {
+  0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--dc, var(--neon-cyan)) 18%, transparent); }
+  50%      { box-shadow: 0 0 24px color-mix(in srgb, var(--dc, var(--neon-cyan)) 32%, transparent); }
+}
+/* Slow magenta glow pulse (Spotted / missed-connections cards) */
+@keyframes pdxSpotPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,0,204,0.25); }
+  50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
+}
+
+/* Reduced motion + calm mode both silence glows/animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+:root[data-calm="true"] *,
+.calm * {
+  animation: none !important;
+  box-shadow: none !important;
+}

@@ -1,0 +1,153 @@
+/* ============================================================
+   PDX Pride Guide, COLOR SYSTEM
+   Canonical source: repo design-system/tokens/tokens.css
+   (mirror of client/src/index.css + shared/prideWeek.ts).
+   Near-black brutalist base + one-neon-per-element accents.
+   ============================================================ */
+
+:root {
+  /* ---- SURFACES (exact) ---------------------------------- */
+  --ink-1000: #050505;   /* deepest, ring shadows / full bleed */
+  --ink-900:  #0a0a0a;   /* app background (always near-black) */
+  --ink-850:  #111111;   /* inset chips / inputs */
+  --ink-800:  #0b0b0b;   /* card surface */
+  --ink-750:  #141414;   /* raised surface / hover */
+  --ink-border: #2b2b2b; /* default 2px card border */
+  --ink-border-faint: #1a1a1a;
+  --ink-border-strong: #333333;
+
+  /* ---- NEON PALETTE (exact hexes) ------------------------ */
+  --neon-yellow:  #CCFF00;  /* PRIMARY action (chartreuse) */
+  --neon-cyan:    #00FFFF;  /* accent pop, THU, links */
+  --neon-magenta: #FF00CC;  /* FRI, offset shadows + glows */
+  --neon-orange:  #FF6600;  /* SUN, warm pop */
+  --neon-violet:  #8800FF;  /* MON */
+  --neon-red:     #FF2400;  /* protest red / rose red */
+  --neon-green:   #00EE44;  /* general neon green */
+  --neon-blue:    #0044FF;  /* TUE */
+  --accent-pop:   var(--neon-cyan);
+
+  /* ---- LEGACY / SEMANTIC COLOR NAMES (used across kit) ----
+     Kept as aliases so components read naturally. Values are
+     the canonical neons above. */
+  --lime:    var(--neon-yellow);   /* PRIMARY action */
+  --lime-hot:#D8FF3D;
+  --pink:    var(--neon-magenta);
+  --pink-hot:#FF33D6;
+  --cyan:    var(--neon-cyan);
+  --green:   #39FF14;              /* SAT day green (brighter than neon-green) */
+  --orange:  var(--neon-orange);
+  --purple:  var(--neon-violet);
+  --blue:    var(--neon-blue);
+  --yellow:  #FFEE00;              /* WED day + highlighter (GRAND OPENING) */
+  --amber:   #FFB23D;              /* supporting warm (donation, shops) */
+  --red:     var(--neon-red);
+
+  /* ---- NEON, softened for tints -------------------------- */
+  --lime-soft:  #CCFF0022;
+  --pink-soft:  #FF00CC22;
+  --cyan-soft:  #00FFFF22;
+  --green-soft: #39FF1422;
+  --orange-soft:#FF660022;
+  --purple-soft:#8800FF22;
+
+  /* ---- TEXT (exact) -------------------------------------- */
+  --text-hi:      #ffffff;  /* headings */
+  --text-mid:     #e6e3da;  /* body (warm off-white) */
+  --text-lo:      #999999;  /* meta / captions */
+  --text-faint:   #666666;  /* labels / hints */
+  --text-disabled:#4a4a4a;
+  --text-inverse: #000000;  /* text on neon fills */
+
+  /* ---- PRIDE FLAG NODS ----------------------------------- */
+  --flag-red:    #E40303;
+  --flag-orange: #FF8C00;
+  --flag-yellow: #FFED00;
+  --flag-green:  #008026;
+  --flag-blue:   #004DFF;
+  --flag-violet: #750787;
+  --flag-trans-blue: #5BCEFA;
+  --flag-trans-pink: #F5A9B8;
+  --flag-white:      #FFFFFF;
+  --flag-brown:      #613915;
+  --flag-black:      #000000;
+
+  /* ---- SIGNATURE GRADIENTS ------------------------------- */
+  /* Rainbow bar (canonical): cyan > yellow > magenta > orange */
+  --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  --grad-flag: var(--rainbow-bar);
+  /* Hero wordmark sweep (cyan > green > yellow > orange > magenta) */
+  --grad-rainbow: linear-gradient(100deg,
+    var(--neon-cyan) 0%, var(--green) 24%, var(--neon-yellow) 44%,
+    var(--neon-orange) 70%, var(--neon-magenta) 100%);
+  --grad-nightglow: radial-gradient(120% 90% at 12% 0%, #1c0a30 0%, transparent 55%),
+                    radial-gradient(120% 90% at 100% 8%, #04262e 0%, transparent 55%),
+                    var(--ink-900);
+  --grad-hot:      linear-gradient(120deg, var(--neon-magenta) 0%, var(--neon-orange) 100%);
+  --grad-electric: linear-gradient(120deg, var(--neon-cyan) 0%, var(--neon-violet) 100%);
+  --grad-acid:     linear-gradient(115deg, var(--neon-cyan) 0%, var(--neon-yellow) 100%);
+
+  /* ============================================================
+     DAY COLOR SYSTEM (mirror of shared/prideWeek.ts).
+     Pride Week = Jul 13 to 19; the Thu to Sun weekend carries the
+     event program.
+       MON Jul 13  violet  #8800FF   (week opener)
+       TUE Jul 14  blue    #0044FF
+       WED Jul 15  yellow  #FFEE00
+       THU Jul 16  cyan    #00FFFF   (official Pride kickoff)
+       FRI Jul 17  magenta #FF00CC
+       SAT Jul 18  green   #39FF14
+       SUN Jul 19  orange  #FF6600   (parade day)
+     ============================================================ */
+  --day-mon:   #8800FF;
+  --day-tue:   #0044FF;
+  --day-wed:   #FFEE00;
+  --day-thu:   #00FFFF;
+  --day-fri:   #FF00CC;
+  --day-sat:   #39FF14;
+  --day-sun:   #FF6600;
+  /* lighter text-safe versions of the dark day colors */
+  --day-mon-text: #AA66FF;
+  --day-tue-text: #4488FF;
+
+  /* ============================================================
+     SEMANTIC ALIASES
+     ============================================================ */
+  --bg-app:        var(--ink-900);
+  --bg-stage:      var(--ink-1000);
+  --bg-band:       var(--ink-850);
+  --surface-card:  var(--ink-800);
+  --surface-card-hover: var(--ink-750);
+  --surface-inset: #111111;
+
+  --text-body:     var(--text-mid);
+  --text-heading:  var(--text-hi);
+  --text-meta:     var(--text-lo);
+
+  --border-default: var(--ink-border);
+  --border-strong:  var(--ink-border-strong);
+
+  --accent:           var(--neon-yellow);   /* PRIMARY action */
+  --accent-ink:       var(--text-inverse);
+  --accent-secondary: var(--neon-magenta);
+  --link:             var(--neon-cyan);
+
+  /* Admission badges */
+  --tag-free:       var(--neon-yellow);
+  --tag-free-ink:   var(--text-inverse);
+  --tag-ticketed:   var(--neon-cyan);
+  --tag-ticketed-ink: var(--text-inverse);
+  --tag-donation:   var(--amber);
+  --tag-donation-ink: var(--text-inverse);
+
+  /* Place categories (venue directory borders) */
+  --cat-bars:    var(--neon-magenta);
+  --cat-food:    var(--neon-orange);
+  --cat-cafes:   var(--neon-green);
+  --cat-venues:  var(--neon-cyan);
+  --cat-services:var(--neon-violet);
+  --cat-shops:   var(--amber);
+  --cat-hotels:  var(--neon-blue);
+
+  --focus-ring:     var(--neon-cyan);
+}

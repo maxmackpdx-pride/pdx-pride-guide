@@ -6,7 +6,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/DashboardDrawer";
@@ -211,15 +211,11 @@ export default function Dashboard() {
   if (!user) {
     return (
       <div className="zine-page dash-page board-page">
-        <PageHero
-          flipLightLeaks
-          kicker="YOUR HUB"
-          titleLine1="SIGN IN TO"
-          titleLine2="YOUR PROFILE"
-          accent="cyan"
+        <PageHeader
+          section="Account"
+          title="Your Hub"
+          titleAccent="cyan"
           lede="Free, community-run — log in to manage submissions, boards, and private threads."
-          bgImage="/motifs/hero-inbox.jpg"
-          bgPosition="center 35%"
         />
         <div className="dash-inner" style={{ minHeight: "40vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 48 }}>
           <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>You need to be logged in to view your dashboard.</p>
@@ -303,26 +299,20 @@ export default function Dashboard() {
 
   return (
     <div className="zine-page dash-page board-page">
-      <PageHero
-        flush
-        compact
-        kicker="YOUR HUB"
-        titleLine1="YOUR"
-        titleLine2="HUB"
-        accent="cyan"
+      <PageHeader
+        section="Account"
+        title="Your Hub"
+        titleAccent="cyan"
+        kicker={`@${user.username}`}
         lede="Community-run and free. Manage your submissions and claims, board posts, and inbox threads in one place."
         tagline={createElement(Fragment, null,
-          "@", user.username, " · ",
-          createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" }); } }, "profile"), " · ",
-          createElement("a", { href: "#inbox", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("inbox")?.scrollIntoView({ behavior: "smooth" }); } }, "inbox"), " · ",
-          createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, events: true })); document.getElementById("events")?.scrollIntoView({ behavior: "smooth" }); } }, "events"), " · ",
-          createElement("a", { href: "#gigs", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gigs: true })); document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" }); } }, "gigs"), " · ",
-          createElement("a", { href: "#gifting", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gifting: true })); document.getElementById("gifting")?.scrollIntoView({ behavior: "smooth" }); } }, "gifting"), " · ",
-          createElement("a", { href: "#spotted", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, spotted: true })); document.getElementById("spotted")?.scrollIntoView({ behavior: "smooth" }); } }, "spotted"),
+          createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" }); } }, "Profile"), " · ",
+          createElement("a", { href: "#inbox", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("inbox")?.scrollIntoView({ behavior: "smooth" }); } }, "Inbox"), " · ",
+          createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, events: true })); document.getElementById("events")?.scrollIntoView({ behavior: "smooth" }); } }, "Events"), " · ",
+          createElement("a", { href: "#gigs", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gigs: true })); document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" }); } }, "Gigs"), " · ",
+          createElement("a", { href: "#gifting", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gifting: true })); document.getElementById("gifting")?.scrollIntoView({ behavior: "smooth" }); } }, "Gifting"), " · ",
+          createElement("a", { href: "#spotted", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, spotted: true })); document.getElementById("spotted")?.scrollIntoView({ behavior: "smooth" }); } }, "Spotted"),
         )}
-        taglineAccent="cyan"
-        bgImage="/motifs/hero-inbox.jpg"
-        bgPosition="center 35%"
       />
       <div className="dash-inner">
         <PwaInstallBanner />
@@ -506,7 +496,7 @@ export default function Dashboard() {
             isEmpty={myGigs.length === 0}
             emptyText="No gig posts yet."
             pageHref="/pride-work"
-            cta={{ label: "Post on Pride Werk board →", href: "/pride-work" }}
+            cta={{ label: "Post on Gig Board →", href: "/pride-work" }}
           >
             {editingGig && (
               <DashboardGigEditForm

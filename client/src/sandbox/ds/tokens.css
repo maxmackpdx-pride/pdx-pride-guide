@@ -1,0 +1,11 @@
+/* Sandbox DS tokens — mirrors sandbox/design-system/source/tokens */
+@import "../../../../sandbox/design-system/source/tokens/colors.css";
+@import "../../../../sandbox/design-system/source/tokens/typography.css";
+@import "../../../../sandbox/design-system/source/tokens/layout.css";
+@import "../../../../sandbox/design-system/source/tokens/effects.css";
+@import "../../../../sandbox/design-system/source/tokens/fonts.css";
+
+:root {
+  --paper: #f0ede6;
+  --paper-ink: #000000;
+}

@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
@@ -165,22 +165,17 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page">
-      <PageHero
-        flush
-        flipLightLeaks
+      <PageHeader
+        section="Boards"
+        title="Gig Board"
+        titleAccent="rainbow"
         kicker="Pride season & beyond"
-        titleLine1="PRIDE"
-        titleLine1Accent="rainbow"
-        titleLine2="GIG BOARD"
-        accent="lime"
         lede="Two-way board for Pride season and beyond. Post your availability, post a gig, or browse both. Workers and hosts in one place."
         tagline="Need work? Need help? Both belong here."
-        taglineAccent="cyan"
-        bgImage="/motifs/hero-gigs.jpg"
         actions={
           <>
             <button type="button" className="btn-neon cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>
-              <UserRound size={16} /> Post your availability
+              <UserRound size={16} /> Post availability
             </button>
             <button type="button" className="btn-neon" data-testid="button-post-gig" onClick={() => openForm("POSTING_GIG")}>
               <Briefcase size={16} /> Post a gig

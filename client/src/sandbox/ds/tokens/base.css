@@ -1,0 +1,89 @@
+/* ============================================================
+   PDX Pride Guide, light base reset + shared primitives.
+   Kept minimal; tokens live in the other files.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-body);
+}
+
+/* Selection = magenta highlighter */
+::selection { background: var(--neon-magenta); color: #000; }
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Focus, cyan ring, never removed */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+img, svg { display: block; max-width: 100%; }
+
+h1, h2, h3, h4 { margin: 0; color: var(--text-heading); }
+p { margin: 0; }
+
+/* Custom scrollbar on dark */
+* { scrollbar-color: var(--ink-border-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--ink-border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bg-app);
+}
+
+/* ---- Shared brand primitives (usable in raw HTML) -------- */
+
+/* Rainbow rule / bar, the section divider (cyan > yellow > magenta > orange) */
+.pdx-rainbow-rule {
+  height: 3px;
+  border: 0;
+  background: var(--rainbow-bar);
+}
+
+/* Text stroked in rainbow (headline accent word) */
+.pdx-text-rainbow {
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Marker / kicker chip, the neon marker used for hero kickers
+   ("PORTLAND PRIDE WEEK 2026 · JULY 13 to 19"). Barlow Condensed 700,
+   with a brutalist cyan offset behind the acid-yellow fill. */
+.pdx-marker {
+  display: inline-block;
+  position: relative;
+  transform: rotate(-1deg);
+  background: var(--neon-yellow);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--chrome-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px 4px;
+  border-radius: 2px;
+  box-shadow: 4px 4px 0 -1px var(--neon-cyan);
+}
+.pdx-marker--pink   { background: var(--neon-magenta); color: #fff; box-shadow: 4px 4px 0 -1px var(--neon-cyan); }
+.pdx-marker--cyan   { background: var(--neon-cyan); color: #000; box-shadow: 4px 4px 0 -1px var(--neon-yellow); }
+.pdx-marker--rainbow{ background: var(--grad-rainbow); color: #000; box-shadow: none; }
+.pdx-marker--yellow { background: var(--yellow); color: #000; box-shadow: 4px 4px 0 -1px var(--neon-magenta); }
+
+/* Rainbow seam, the thin gradient line under the header and above the
+   footer. Full flag sweep. */
+.pdx-seam {
+  height: 3px;
+  border: 0;
+  background: var(--grad-flag);
+}

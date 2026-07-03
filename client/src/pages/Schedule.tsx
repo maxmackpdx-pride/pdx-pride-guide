@@ -11,6 +11,7 @@ import { PRIDE_WEEK_DAYS, PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
+import PageHeader from "@/components/PageHeader";
 import ScheduleEventCard from "@/components/ScheduleEventCard";
 import { exportScheduleToStories } from "@/lib/scheduleExport";
 import { Download } from "lucide-react";
@@ -192,8 +193,14 @@ export default function Schedule() {
 
   return (
     <div className="schedule-page">
+      <PageHeader
+        section="Events"
+        title="Schedule"
+        titleAccent="cyan"
+        kicker="Portland Pride Week 2026 · July 13–19"
+        lede="Side-by-side Pride Week calendar. Toggle your RSVPs or browse everything."
+      />
       <div className="schedule-header">
-        <h1 className="schedule-header__title">SCHEDULE</h1>
         <div className="schedule-header__controls">
           <div className="schedule-toggle" role="group" aria-label="Schedule filter">
             <button

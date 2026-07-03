@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import AuthModal from "@/components/AuthModal";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import UserAvatar from "@/components/UserAvatar";
@@ -285,12 +285,7 @@ export default function Inbox() {
   if (!user) {
     return (
       <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
-        <PageHero
-          titleLine1="INBOX"
-          titleLine1Accent="lime"
-          bgImage="/motifs/hero-inbox.jpg"
-          bgPosition="center 35%"
-        />
+        <PageHeader section="Account" title="Inbox" titleAccent="lime" />
         <div style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px 80px", textAlign: "center" }}>
           <p style={{ color: "#9d9a92", marginBottom: 24, lineHeight: 1.6 }}>
             Log in to read private threads from missed connections, Pride Werk, event hosts, and check-ins.
@@ -330,11 +325,11 @@ export default function Inbox() {
 
   return (
     <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
-      <PageHero
-        titleLine1="INBOX"
-        titleLine1Accent="lime"
-        bgImage="/motifs/hero-inbox.jpg"
-        bgPosition="center 35%"
+      <PageHeader
+        section="Account"
+        title="Inbox"
+        titleAccent="lime"
+        lede={`Private threads from missed connections, gig board, event hosts, and check-ins.${unreadCount > 0 ? ` · ${unreadCount} unread` : ""}`}
       />
       <ScrollReveal>
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "20px 24px 48px", position: "relative", zIndex: 1 }}>

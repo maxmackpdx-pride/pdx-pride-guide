@@ -1,0 +1,73 @@
+<!-- @dsCard group="Components" viewport="700x340" name="Buttons, Inputs & Filters" subtitle="Neon CTAs, icon buttons, search, filter chips" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body{ margin:0; background:var(--bg-app); padding:26px; }
+  .row{ display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:22px; }
+  .row:last-child{ margin-bottom:0; }
+  .lbl{ font-family:var(--font-body); font-weight:600; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+        color:var(--text-lo); width:100%; margin-bottom:-4px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Button, IconButton, SearchInput, FilterChip } = window.PDXPrideGuideDesignSystem_b20420;
+
+  function Demo(){
+    const [q,setQ] = React.useState("Darcelle");
+    const [free,setFree] = React.useState(true);
+    const [tick,setTick] = React.useState(true);
+    const [day,setDay] = React.useState("SAT");
+    React.useEffect(()=>{ window.lucide && window.lucide.createIcons(); });
+    return (
+      <div>
+        <div className="row">
+          <span className="lbl">Buttons, neon outline (signature), solid, gradient, ghost</span>
+          <Button accent="lime" arrow>View All Events</Button>
+          <Button accent="pink" arrow>Message Host</Button>
+          <Button accent="cyan">Add to Calendar</Button>
+          <Button variant="solid" accent="pink">Get Tickets</Button>
+          <Button variant="gradient" arrow>Submit Event</Button>
+          <Button variant="ghost" accent="cyan">Cancel</Button>
+          <Button accent="lime" live>Happening Now</Button>
+        </div>
+        <div className="row">
+          <span className="lbl">Sizes + icon buttons</span>
+          <Button accent="lime" size="sm">Small</Button>
+          <Button accent="lime" size="md">Medium</Button>
+          <Button accent="lime" size="lg">Large</Button>
+          <IconButton label="Share" variant="outline"><i data-lucide="share-2"></i></IconButton>
+          <IconButton label="Save" variant="solid"><i data-lucide="heart"></i></IconButton>
+          <IconButton label="Map" variant="ghost"><i data-lucide="map-pin"></i></IconButton>
+        </div>
+        <div className="row">
+          <span className="lbl">Filter chips, outline-selected + fill-selected</span>
+          <FilterChip selected accent="lime" count={52}>All</FilterChip>
+          <FilterChip selected={day==="THU"} onToggle={()=>setDay("THU")} accent="cyan">Thu</FilterChip>
+          <FilterChip selected={day==="SAT"} onToggle={()=>setDay("SAT")} accent="green">Sat</FilterChip>
+          <FilterChip fill selected={free} onToggle={()=>setFree(v=>!v)} accent="lime" count={18}>Free</FilterChip>
+          <FilterChip fill selected={tick} onToggle={()=>setTick(v=>!v)} accent="cyan" count={31}>Ticketed</FilterChip>
+        </div>
+        <div className="row">
+          <span className="lbl">Search</span>
+          <div style={{flex:1, minWidth:280}}>
+            <SearchInput value={q} onChange={e=>setQ(e.target.value)} onClear={()=>setQ("")} placeholder="Search events..." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo/>);
+</script>
+</body>
+</html>

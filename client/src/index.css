@@ -569,6 +569,10 @@ body::before {
   box-shadow: 6px 6px 0 rgba(255, 0, 204, 0.45), 0 16px 36px rgba(0, 0, 0, 0.75);
 }
 
+.site-nav-dropdown__section {
+  display: none;
+}
+
 .site-nav-dropdown__item {
   display: block;
   padding: 10px 14px;
@@ -1664,6 +1668,17 @@ h2.display,
     font-size: calc(1.76rem + 3px);
   }
 
+  .site-nav-dropdown__section {
+    display: block;
+    padding: 10px 6px 4px;
+    color: var(--neon-yellow);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
   .site-nav-dropdown__item {
     padding: 12px 6px 12px 14px;
     font-size: calc(1.28rem + 2px);
@@ -2330,6 +2345,132 @@ h2.display,
 }
 
 /* Board page heroes — Gigs, Gifting, About, Missed (home uses .home-hero) */
+/* ── Compact page chrome (nav-aligned titles) ─────────────────────────── */
+.page-header {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 55%),
+    #050505;
+  border-bottom: 2px solid #1a1a1a;
+  position: relative;
+}
+
+.page-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 3px;
+  background: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0, #ff8c00);
+  opacity: 0.75;
+}
+
+.page-header__inner {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 28px) clamp(20px, 3vw, 40px) clamp(22px, 3.2vw, 30px);
+}
+
+.page-header__crumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.page-header__crumb-home {
+  color: #7a7870;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+.page-header__crumb-home:hover {
+  color: var(--neon-cyan);
+}
+
+.page-header__crumb-sep {
+  color: #333;
+}
+
+.page-header__crumb-section {
+  color: var(--neon-yellow);
+}
+
+.page-header__kicker {
+  margin: 0 0 6px;
+  color: var(--text-meta);
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-header__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+}
+
+.page-header__title {
+  margin: 0;
+  font-family: var(--font-board-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 4.8vw, 3.35rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #f7f5ee;
+  -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.page-header__title-accent--lime { color: #ccff00; }
+.page-header__title-accent--cyan { color: #00ffff; }
+.page-header__title-accent--magenta { color: #ff00cc; }
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.page-header__lede {
+  margin: 12px 0 0;
+  max-width: 62ch;
+  color: #b8b5ac;
+  font-size: clamp(0.95rem, 1.6vw, 1.05rem);
+  line-height: 1.65;
+}
+
+.page-header__tagline {
+  margin: 10px 0 0;
+  color: var(--neon-magenta);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1023px) {
+  .page-header__row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .page-hero {
   position: relative;
   overflow: hidden;
@@ -9548,9 +9689,12 @@ html.calm-mode .schedule-now-line {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   margin-bottom: 24px;
+  padding: 0 clamp(20px, 3vw, 40px);
+  max-width: 1440px;
+  margin-inline: auto;
 }
 
 .schedule-header__title {

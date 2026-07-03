@@ -2,7 +2,7 @@ import { useState, useMemo, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin } from "lucide-react";
@@ -103,16 +103,12 @@ export default function Directory() {
 
   return (
     <div className="zine-page directory-page board-page">
-      <PageHero
-        flush
-        flipLightLeaks
+      <PageHeader
+        section="Portland"
+        title="Queer Directory"
+        titleAccent="magenta"
         kicker="Queer-owned · Queer-friendly · Community-rooted"
-        titleLine1="QUEER"
-        titleLine2="PORTLAND"
-        accent="magenta"
         lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
-        bgImage="/motifs/portland-sign.jpg"
-        bgPosition="center 55%"
       />
 
       {/* Map */}

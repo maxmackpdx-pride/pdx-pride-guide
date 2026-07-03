@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
-import PageHero, { type PageHeroAccent } from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
+import type { PageHeroAccent } from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
@@ -267,39 +268,34 @@ export default function Submit() {
     eventMutation.mutate({ type: "NEW_EVENT" });
   };
 
-  const heroCopy: Record<PageMode, { kicker: string; line1: string; line2: string; accent: PageHeroAccent; lede: string }> = {
+  const heroCopy: Record<PageMode, { kicker: string; title: string; accent: PageHeroAccent; lede: string }> = {
     landing: {
       kicker: "Portland Pride 2026 · Community submissions",
-      line1: "PROMOTERS &",
-      line2: "EVENTS",
+      title: "Submit",
       accent: "lime",
       lede: "Got an event? Want to be a verified promoter? Spotted something we're missing? Pick your path below.",
     },
     submit: {
       kicker: "New listing",
-      line1: "SUBMIT",
-      line2: "AN EVENT",
+      title: "Submit an Event",
       accent: "lime",
       lede: "Add your Pride Week event to the guide. Verified promoters go live immediately; new accounts enter the review queue.",
     },
     apply: {
       kicker: "Promoter verification",
-      line1: "APPLY AS",
-      line2: "PROMOTER",
+      title: "Apply as Promoter",
       accent: "cyan",
       lede: "Apply to post events that go live without admin review. Tell us who you are and what you run.",
     },
     suggest: {
       kicker: "Community tip",
-      line1: "SPOTTED",
-      line2: "AN EVENT",
+      title: "Suggest an Event",
       accent: "magenta",
       lede: "Saw a Pride event we're missing? Tip us off — no promoter account needed. Admins review every suggestion.",
     },
     claim: {
       kicker: "Host your listing",
-      line1: "CLAIM",
-      line2: "AN EVENT",
+      title: "Claim an Event",
       accent: "cyan",
       lede: "Already listed but unclaimed? Take ownership to manage your event and connect with the community.",
     },
@@ -313,17 +309,12 @@ export default function Submit() {
   return (
     <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={closeAuth} defaultTab="register" />}
-      <PageHero
-        flush
-        compact
-        flipLightLeaks
+      <PageHeader
+        section="Submit"
+        title={hero.title}
+        titleAccent={hero.accent}
         kicker={hero.kicker}
-        titleLine1={hero.line1}
-        titleLine2={hero.line2}
-        accent={hero.accent}
         lede={hero.lede}
-        bgImage="/motifs/portland-sign.jpg"
-        bgPosition="center 38%"
       />
 
       <div className="submit-page__body">

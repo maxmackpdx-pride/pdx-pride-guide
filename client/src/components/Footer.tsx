@@ -27,9 +27,12 @@ export default function Footer() {
               <div className="display" style={{ fontSize: "0.75rem", color: "var(--text-meta)", marginBottom: 12, letterSpacing: "0.1em" }}>NAVIGATE</div>
               {[
                 ["/events", "Events"],
-                ["/submit", "Promoters"],
-                ["/pride-work", "Pride Werk"],
+                ["/schedule", "Schedule"],
+                ["/pride-work", "Gig Board"],
                 ["/gifting", "Gifting"],
+                ["/spotted", "Spotted!"],
+                ["/directory", "Directory"],
+                ["/submit", "Submit"],
                 ["/about", "About"],
                 ["/legal", "Legal"],
               ].map(([href, label]) => (

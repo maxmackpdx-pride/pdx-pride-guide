@@ -11,7 +11,7 @@ import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
@@ -260,19 +260,15 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page">
-      <PageHero
-        flush
-        flipLightLeaks
+      <PageHeader
+        section="Events"
+        title="Events"
+        titleAccent="cyan"
         kicker="Portland Pride Week 2026 · July 13–19"
-        titleLine1="EVENTS"
-        titleLine2="GUIDE"
-        accent="cyan"
         lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond — all in one place."
-        bgImage="/motifs/portland-sign.jpg"
-        bgPosition="center 42%"
         actions={
           <Link href="/schedule" className="btn-neon" style={{ fontSize: "0.85rem", letterSpacing: "0.12em" }}>
-            VIEW AS SCHEDULE →
+            View schedule →
           </Link>
         }
       />
