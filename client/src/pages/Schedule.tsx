@@ -11,10 +11,11 @@
    ============================================================ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import {
   ADM,
   DAYS,
-  EVENTS,
   TYPE_LABEL,
   fmtClock,
   fmtHour,
@@ -24,10 +25,20 @@ import {
   type AdmKey,
   type EventType,
   type LaneInfo,
-  type PrideEvent,
 } from "@shared/prideWeek";
+import type { EventListing } from "@shared/multiDayEvents";
+import { eventPath } from "@shared/eventSlug";
+import {
+  DEFAULT_ATTENDANCE_PHRASE_KEY,
+  attendancePhraseLabel,
+} from "@shared/attendancePhrases";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { buildScheduleEvents, type ScheduleEvent } from "@/lib/scheduleEvents";
+import AuthModal from "@/components/AuthModal";
 import heroUrl from "@/assets/hero-collage.png";
 import "./Schedule.css";
 
@@ -57,19 +68,6 @@ interface SelRect {
 
 const S = (o: React.CSSProperties) => o; // literal-preserving style helper
 
-const RSVP_KEY = 'pdxSchedule.rsvps';
-
-function loadRsvps(): Set<number> {
-  let arr: number[] = [];
-  try {
-    const raw = localStorage.getItem(RSVP_KEY);
-    if (raw) arr = JSON.parse(raw) || [];
-  } catch {
-    /* ignore */
-  }
-  return new Set(arr);
-}
-
 /** minutes-past-midnight "now", pushed past 24h for the small-hours tail */
 function nowMinutes(): number {
   const d = new Date();
@@ -82,17 +80,19 @@ export default function Schedule({
   posterStyle = 'Color blocks',
   density = 'Comfortable',
 }: ScheduleProps) {
-  const [rsvps, setRsvps] = useState<Set<number>>(loadRsvps);
-  const [view, setViewState] = useState<View>(() => (loadRsvps().size > 0 ? 'mine' : 'all'));
+  const { user } = useAuth();
+  const [view, setViewState] = useState<View>('all');
+  const [viewBootstrapped, setViewBootstrapped] = useState(false);
   const [fAdm, setFAdm] = useState<FilterMap>({});
   const [fType, setFType] = useState<FilterMap>({});
   const [fAge, setFAge] = useState<FilterMap>({});
   const { calmMode: calm } = useTheme();
-  const [selId, setSelId] = useState<number | null>(null);
+  const [selKey, setSelKey] = useState<string | null>(null);
   const [selRect, setSelRect] = useState<SelRect | null>(null);
   const [now, setNow] = useState<number>(nowMinutes);
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState('');
+  const [showAuth, setShowAuth] = useState(false);
 
   const scrollElRef = useRef<HTMLDivElement | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,6 +101,65 @@ export default function Schedule({
     "Schedule — Portland Pride 2026 | PDX Pride Guide",
     "Your full Pride Week schedule, July 13–19, side by side.",
   );
+
+  useAttendanceSummariesLive();
+
+  const { data: listings = [] } = useQuery<EventListing[]>({
+    queryKey: ["/api/events"],
+    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count: number }>>({
+    queryKey: ["/api/events/attendance-summaries"],
+    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
+    refetchInterval: 120_000,
+  });
+
+  const { data: myCheckIns = [] } = useQuery<{ eventId: number }[]>({
+    queryKey: ["/api/events/mine/check-ins"],
+    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then(r => r.json()),
+    enabled: !!user,
+  });
+
+  const myEventIds = useMemo(
+    () => new Set(myCheckIns.map(c => c.eventId)),
+    [myCheckIns],
+  );
+
+  const scheduleEvents = useMemo(
+    () => buildScheduleEvents(listings, attendanceSummaries),
+    [listings, attendanceSummaries],
+  );
+
+  const rsvpMutation = useMutation({
+    mutationFn: (eventId: number) =>
+      apiRequest("POST", `/api/events/${eventId}/attendance`, {
+        message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+    },
+  });
+
+  const unrsvpMutation = useMutation({
+    mutationFn: (eventId: number) =>
+      apiRequest("DELETE", `/api/events/${eventId}/attendance`),
+    onSuccess: (_data, eventId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
+    },
+  });
+
+  useEffect(() => {
+    if (viewBootstrapped || !user) return;
+    if (myEventIds.size > 0) {
+      setViewState('mine');
+      setViewBootstrapped(true);
+    }
+  }, [user, myEventIds.size, viewBootstrapped]);
 
   /* ---- lifecycle -------------------------------------------------- */
 
@@ -112,7 +171,7 @@ export default function Schedule({
 
   // Escape closes the popover
   const closeEvent = useCallback(() => {
-    setSelId(null);
+    setSelKey(null);
     setSelRect(null);
   }, []);
   useEffect(() => {
@@ -146,23 +205,21 @@ export default function Schedule({
 
   const setView = useCallback((v: View) => {
     setViewState(v);
-    setSelId(null);
+    setSelKey(null);
     setSelRect(null);
   }, []);
 
-  const toggleRsvp = useCallback((id: number) => {
-    setRsvps((prev) => {
-      const rs = new Set(prev);
-      if (rs.has(id)) rs.delete(id);
-      else rs.add(id);
-      try {
-        localStorage.setItem(RSVP_KEY, JSON.stringify(Array.from(rs)));
-      } catch {
-        /* ignore */
-      }
-      return rs;
-    });
-  }, []);
+  const toggleRsvp = useCallback((eventId: number) => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    if (myEventIds.has(eventId)) {
+      unrsvpMutation.mutate(eventId);
+      return;
+    }
+    rsvpMutation.mutate(eventId);
+  }, [user, myEventIds, rsvpMutation, unrsvpMutation]);
 
   const toggleFilter = useCallback((group: 'fAdm' | 'fType' | 'fAge', key: string) => {
     const setter = group === 'fAdm' ? setFAdm : group === 'fType' ? setFType : setFAge;
@@ -175,8 +232,8 @@ export default function Schedule({
     setFAge({});
   }, []);
 
-  const openEvent = useCallback((id: number, rect: DOMRect) => {
-    setSelId(id);
+  const openEvent = useCallback((key: string, rect: DOMRect) => {
+    setSelKey(key);
     setSelRect({
       top: rect.top,
       left: rect.left,
@@ -194,7 +251,7 @@ export default function Schedule({
   }, []);
 
   const matchFilters = useCallback(
-    (e: PrideEvent) => {
+    (e: ScheduleEvent) => {
       const anyAdm = Object.keys(fAdm).some((k) => fAdm[k]);
       if (anyAdm && !fAdm[e.adm]) return false;
       const anyType = Object.keys(fType).some((k) => fType[k]);
@@ -210,8 +267,8 @@ export default function Schedule({
 
   const exportStories = useCallback(async () => {
     if (exporting) return;
-    const mine = EVENTS.filter((e) => rsvps.has(e.id));
-    const list = mine.length ? mine : EVENTS.filter((e) => e.feat);
+    const mine = scheduleEvents.filter((e) => myEventIds.has(e.id));
+    const list = mine.length ? mine : scheduleEvents.filter((e) => e.feat);
     const dayOrder: Record<string, number> = {};
     DAYS.forEach((d, i) => (dayOrder[d.key] = i));
     list.sort((a, b) => dayOrder[a.day] - dayOrder[b.day] || a.s - b.s);
@@ -302,7 +359,7 @@ export default function Schedule({
     } finally {
       setExporting(false);
     }
-  }, [exporting, rsvps, flashToast]);
+  }, [exporting, scheduleEvents, myEventIds, flashToast]);
 
   /* ---- derived layout constants ----------------------------------- */
 
@@ -325,11 +382,11 @@ export default function Schedule({
     'px)';
 
   const inView = useCallback(
-    (e: PrideEvent) => view === 'all' || rsvps.has(e.id),
-    [view, rsvps],
+    (e: ScheduleEvent) => view === 'all' || myEventIds.has(e.id),
+    [view, myEventIds],
   );
-  const pass = useCallback((e: PrideEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
-  const viewSet = useMemo(() => EVENTS.filter(inView), [inView]);
+  const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
+  const viewSet = useMemo(() => scheduleEvents.filter(inView), [scheduleEvents, inView]);
 
   /* ---- time axis labels ------------------------------------------- */
 
@@ -400,7 +457,7 @@ export default function Schedule({
     return DAYS.map((d) => {
       const dc = calm ? '#7d7d82' : d.color;
       const dt = calm ? '#c8c8cc' : d.text;
-      const list = EVENTS.filter((e) => e.day === d.key && pass(e));
+      const list = scheduleEvents.filter((e) => e.day === d.key && pass(e));
       const { res, maxCols } = layoutDay(list);
       const dayW = Math.max(BASE_DAY, maxCols * MIN_LANE);
       const blocks: BlockVM[] = list.map((e) => {
@@ -410,7 +467,7 @@ export default function Schedule({
         const width = laneW - 6;
         const top = ((e.s - START * 60) / 60) * HOUR_H;
         const height = Math.max(((e.e - e.s) / 60) * HOUR_H, MIN_H);
-        const rsvp = rsvps.has(e.id);
+        const rsvp = myEventIds.has(e.id);
         const live = now != null && e.s <= now && now < e.e;
         const twoLine = height >= 54;
         const showVenue = height >= 74 && width >= 116;
@@ -441,7 +498,7 @@ export default function Schedule({
         });
         return {
           id: e.id,
-          onClick: (ev) => openEvent(e.id, ev.currentTarget.getBoundingClientRect()),
+          onClick: (ev) => openEvent(e.scheduleKey, ev.currentTarget.getBoundingClientRect()),
           onQuick: (ev) => {
             ev.stopPropagation();
             toggleRsvp(e.id);
@@ -629,7 +686,8 @@ export default function Schedule({
     MIN_H,
     compact,
     mode,
-    rsvps,
+    scheduleEvents,
+    myEventIds,
     now,
     view,
     openEvent,
@@ -766,8 +824,8 @@ export default function Schedule({
 
   /* ---- toggle + counts -------------------------------------------- */
 
-  const totalVisible = EVENTS.filter(pass).length;
-  const myCount = rsvps.size;
+  const totalVisible = scheduleEvents.filter(pass).length;
+  const myCount = myEventIds.size;
   const segBtn = (active: boolean): React.CSSProperties =>
     S({
       fontFamily: 'var(--font-display)',
@@ -798,22 +856,28 @@ export default function Schedule({
   /* ---- empty banner ----------------------------------------------- */
 
   let emptyBanner: string | false = false;
-  if (view === 'mine' && myCount === 0)
+  if (view === 'mine' && !user)
     emptyBanner =
-      'Your schedule is empty. Switch to All Events and tap the heart on anything you want to catch. It saves right here in your browser.';
+      'Sign in and tap “I’ll be there” on events to build your schedule.';
+  else if (view === 'mine' && myCount === 0)
+    emptyBanner =
+      'Your schedule is empty. Switch to All Events and tap the heart on anything you want to catch.';
   else if (totalVisible === 0) emptyBanner = 'No events match those filters. Try clearing one.';
 
   /* ---- selected popover ------------------------------------------- */
 
   const selected = useMemo(() => {
-    if (selId == null) return null;
-    const e = EVENTS.find((x) => x.id === selId);
+    if (selKey == null) return null;
+    const e = scheduleEvents.find((x) => x.scheduleKey === selKey);
     if (!e) return null;
+    const listing = listings.find(
+      l => (l.listingInstanceKey ?? String(l.id)) === selKey,
+    );
     const d = DAYS.find((x) => x.key === e.day)!;
     const dc = calm ? '#7d7d82' : d.color;
     const dt = calm ? '#c8c8cc' : d.text;
     const adm = ADM[e.adm];
-    const rsvp = rsvps.has(e.id);
+    const rsvp = myEventIds.has(e.id);
     const POP_W = 344;
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
@@ -837,6 +901,11 @@ export default function Schedule({
       });
     return {
       id: e.id,
+      eventHref: eventPath(
+        e.id,
+        listing?.title ?? e.title,
+        listing?.dayOfWeek ?? e.day,
+      ),
       title: e.title,
       venue: e.venue,
       hood: e.hood,
@@ -916,7 +985,7 @@ export default function Schedule({
       }),
       dc,
     };
-  }, [selId, selRect, calm, rsvps]);
+  }, [selKey, selRect, calm, myEventIds, scheduleEvents, listings]);
 
   const scrollStyle = S({
     overflow: 'auto',
@@ -1448,8 +1517,8 @@ export default function Schedule({
                   <span style={{ color: selected.dt, fontWeight: 700 }}>{selected.going}</span> going
                 </span>
                 <div style={{ flex: 1 }} />
-                <a
-                  href="#"
+                <Link
+                  href={selected.eventHref}
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontWeight: 700,
@@ -1462,12 +1531,14 @@ export default function Schedule({
                   }}
                 >
                   Event page →
-                </a>
+                </Link>
               </div>
             </div>
           </div>
         </>
       )}
+
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {/* ---- Toast ---- */}
       {toast && (
