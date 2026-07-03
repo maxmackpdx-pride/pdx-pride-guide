@@ -15,6 +15,7 @@ import type { EventListing } from "@shared/multiDayEvents";
 import type { AdmissionType } from "@shared/admission";
 
 import EventModal from "@/components/EventModal";
+import GlitchWord from "@/components/GlitchWord";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
@@ -363,11 +364,8 @@ export default function Home() {
           </div>
           <h1>
             <span>Portland</span>
-            <span className="rainbow">
-              <span className="rainbow__outline" aria-hidden="true">
-                Pride
-              </span>
-              <span className="rainbow__fill">Pride</span>
+            <span className="home-hero-title-pride">
+              <GlitchWord text="Pride" />
             </span>
             <span>Guide</span>
           </h1>

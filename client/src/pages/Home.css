@@ -86,7 +86,7 @@
   margin: 0 0 4px;
 }
 
-.home-main-stage .pg-hero h1 > span:not(.rainbow) {
+.home-main-stage .pg-hero h1 > span:not(.home-hero-title-pride) {
   display: block;
   font-family: var(--font-display);
   font-weight: 800;
@@ -98,8 +98,7 @@
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
 }
 
-.home-main-stage .pg-hero h1 .rainbow {
-  position: relative;
+.home-main-stage .pg-hero h1 .home-hero-title-pride {
   display: block;
   font-family: var(--font-display);
   font-weight: 800;
@@ -107,31 +106,27 @@
   line-height: 0.84;
   letter-spacing: 0.01em;
   font-size: clamp(3.5rem, 11vw, 6.4rem);
-  padding-right: 0.06em;
-  isolation: isolate;
 }
 
-.home-main-stage .pg-hero h1 .rainbow__outline {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word {
   display: block;
-  color: transparent;
+}
+
+.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline,
+.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
+  display: block;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  line-height: inherit;
+}
+
+.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline {
   -webkit-text-stroke: 1px #000;
-  paint-order: stroke fill;
   text-shadow: 1px 1px 0 #000;
-  pointer-events: none;
 }
 
-.home-main-stage .pg-hero h1 .rainbow__fill {
-  position: relative;
-  z-index: 1;
-  display: block;
-  background: var(--grad-rainbow);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
   text-shadow: none;
 }
 
@@ -520,19 +515,6 @@ html.calm-mode .home-main-stage .pg-note--spot {
 
 html.calm-mode .home-main-stage .pg-hero__img {
   filter: grayscale(0.85) brightness(0.72);
-}
-
-html.calm-mode .home-main-stage .pg-hero h1 .rainbow__fill {
-  background: none;
-  -webkit-background-clip: unset;
-  background-clip: unset;
-  -webkit-text-fill-color: var(--text-hi);
-  color: var(--text-hi);
-}
-
-html.calm-mode .home-main-stage .pg-hero h1 .rainbow__outline {
-  -webkit-text-stroke: 1px #262626;
-  text-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
