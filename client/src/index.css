@@ -7049,7 +7049,7 @@ footer a:hover { color: #00FFFF !important; }
 .home-live-ticker {
   display: flex;
   align-items: stretch;
-  min-height: 53px;
+  min-height: 62px;
   overflow: hidden;
   border-block: 3px solid #000;
   box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.75);
@@ -7059,13 +7059,13 @@ footer a:hover { color: #00FFFF !important; }
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  padding: 0 22px 0 26px;
+  padding: 0 24px 0 28px;
   border-right: 3px solid #000;
   background: #000;
   color: var(--neon-yellow);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.78rem;
+  font-size: clamp(0.88rem, 1.8vw, 1.05rem);
   letter-spacing: 0.14em;
   text-decoration: none;
   text-transform: uppercase;
@@ -7078,12 +7078,20 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .home-live-ticker__marquee {
-  padding-block: 10px;
+  padding-block: 12px;
+}
+
+.home-live-ticker__marquee .pdxMarquee__item {
+  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  letter-spacing: 0.05em;
+  padding: 0 20px;
+  gap: 20px;
 }
 
 .home-live-ticker__marquee .pdxMarquee__star {
   color: #000;
   opacity: 0.65;
+  font-size: 1.1em;
 }
 
 html.calm-mode .home-live-ticker {
