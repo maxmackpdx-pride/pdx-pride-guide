@@ -1,7 +1,13 @@
+import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushNotifications";
+import {
+  hasPushSubscription,
+  PUSH_STATE_EVENT,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/pushNotifications";
 import { canUseWebPush } from "@/lib/pwa";
 import type { NotificationPrefs } from "@shared/pushCategories";
 
@@ -27,6 +33,25 @@ const LABELS: Record<keyof NotificationPrefs, { title: string; body: string }> =
 export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boolean }) {
   const { toast } = useToast();
   const supported = canUseWebPush();
+  const [pushActive, setPushActive] = useState<boolean | null>(null);
+
+  const refreshPushState = useCallback(async () => {
+    setPushActive(await hasPushSubscription());
+  }, []);
+
+  useEffect(() => {
+    void refreshPushState();
+    const onChange = () => void refreshPushState();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshPushState();
+    };
+    window.addEventListener(PUSH_STATE_EVENT, onChange);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener(PUSH_STATE_EVENT, onChange);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [refreshPushState]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["/api/users/me/notification-prefs"],
@@ -61,6 +86,7 @@ export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boole
     mutationFn: subscribeToPush,
     onSuccess: (result) => {
       if (result === "granted") {
+        void refreshPushState();
         toast({ title: "Notifications enabled" });
         return;
       }
@@ -86,12 +112,20 @@ export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boole
     onError: () => toast({ title: "Could not enable notifications", variant: "destructive" }),
   });
 
+  const disablePush = async () => {
+    await unsubscribeFromPush();
+    await refreshPushState();
+    toast({ title: "Push disabled on this device" });
+  };
+
   const toggle = (key: keyof NotificationPrefs) => {
     if (key === "admin" && !isAdmin) return;
     saveMutation.mutate({ [key]: !prefs[key] });
   };
 
   if (!supported) return null;
+
+  const showEnableAsk = pushActive === false;
 
   return (
     <section
@@ -107,46 +141,57 @@ export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boole
         Notifications
       </div>
       <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
-        Get alerts for inbox messages and host updates during Pride weekend. Preferences are saved to your account.
+        {pushActive
+          ? "Push is on for this device. Choose which alerts you want below."
+          : "Get alerts for inbox messages and host updates during Pride weekend. Preferences are saved to your account."}
       </p>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-        <button
-          type="button"
-          disabled={enablePushMutation.isPending}
-          onClick={() => enablePushMutation.mutate()}
-          style={{
-            background: "var(--neon-cyan)",
-            color: "#000",
-            border: "none",
-            padding: "8px 14px",
-            cursor: "pointer",
-            fontFamily: "var(--font-display)",
-            fontSize: "0.72rem",
-          }}
-        >
-          Enable push on this device
-        </button>
-        <button
-          type="button"
-          onClick={() => unsubscribeFromPush().then(() => toast({ title: "Push disabled on this device" }))}
-          style={{
-            background: "transparent",
-            color: "#8c8980",
-            border: "1px solid #333",
-            padding: "8px 12px",
-            cursor: "pointer",
-            fontSize: "0.72rem",
-          }}
-        >
-          Disable on this device
-        </button>
-        {!pushConfigured && (
-          <span style={{ fontSize: "0.72rem", color: "#FF8C00", alignSelf: "center" }}>
-            Server push keys pending (Railway)
-          </span>
-        )}
-      </div>
+      {showEnableAsk && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          <button
+            type="button"
+            disabled={enablePushMutation.isPending}
+            onClick={() => enablePushMutation.mutate()}
+            style={{
+              background: "var(--neon-cyan)",
+              color: "#000",
+              border: "none",
+              padding: "8px 14px",
+              cursor: "pointer",
+              fontFamily: "var(--font-display)",
+              fontSize: "0.72rem",
+            }}
+          >
+            Enable push on this device
+          </button>
+          {!pushConfigured && (
+            <span style={{ fontSize: "0.72rem", color: "#FF8C00", alignSelf: "center" }}>
+              Server push keys pending (Railway)
+            </span>
+          )}
+        </div>
+      )}
+
+      {pushActive && (
+        <p style={{ margin: "0 0 16px", fontSize: "0.75rem", color: "#6f736c" }}>
+          Push active on this device.{" "}
+          <button
+            type="button"
+            onClick={() => void disablePush()}
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              color: "#8c8980",
+              textDecoration: "underline",
+              cursor: "pointer",
+              font: "inherit",
+            }}
+          >
+            Turn off
+          </button>
+        </p>
+      )}
 
       {isLoading ? (
         <p style={{ fontSize: "0.75rem", color: "#6f736c" }}>Loading preferences…</p>

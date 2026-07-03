@@ -5,6 +5,7 @@ import {
   fetchPushConfig,
   hasPushSubscription,
   isPushPermissionPending,
+  PUSH_STATE_EVENT,
   shouldShowInstallBeforePush,
   subscribeToPush,
 } from "@/lib/pushNotifications";
@@ -54,9 +55,18 @@ export default function PushNotificationPrompt() {
       }, isStandalonePwa() ? 800 : 2200);
     })();
 
+    const hideIfSubscribed = () => {
+      void hasPushSubscription().then((active) => {
+        if (active) setVisible(false);
+      });
+    };
+
+    window.addEventListener(PUSH_STATE_EVENT, hideIfSubscribed);
+
     return () => {
       cancelled = true;
       if (showTimer) window.clearTimeout(showTimer);
+      window.removeEventListener(PUSH_STATE_EVENT, hideIfSubscribed);
     };
   }, [user]);
 

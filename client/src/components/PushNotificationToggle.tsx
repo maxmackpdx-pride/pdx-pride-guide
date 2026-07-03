@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   hasPushSubscription,
+  PUSH_STATE_EVENT,
   subscribeToPush,
   unsubscribeFromPush,
 } from "@/lib/pushNotifications";
@@ -29,6 +30,9 @@ export default function PushNotificationToggle() {
   useEffect(() => {
     setReady(false);
     void refresh();
+    const onChange = () => void refresh();
+    window.addEventListener(PUSH_STATE_EVENT, onChange);
+    return () => window.removeEventListener(PUSH_STATE_EVENT, onChange);
   }, [refresh]);
 
   if (!supported || !user) return null;

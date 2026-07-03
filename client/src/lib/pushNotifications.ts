@@ -23,6 +23,14 @@ export function isPushPermissionPending(): boolean {
   return typeof Notification !== "undefined" && Notification.permission === "default";
 }
 
+export const PUSH_STATE_EVENT = "pdx-push-state-change";
+
+export function emitPushStateChange(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(PUSH_STATE_EVENT));
+  }
+}
+
 export async function hasPushSubscription(): Promise<boolean> {
   if (!("serviceWorker" in navigator)) return false;
   try {
@@ -66,6 +74,7 @@ export async function subscribeToPush(): Promise<"granted" | "denied" | "unsuppo
     }),
   });
   if (!res.ok) return "unsupported";
+  emitPushStateChange();
   return "granted";
 }
 
@@ -80,6 +89,7 @@ export async function unsubscribeFromPush(): Promise<void> {
     body: JSON.stringify({ endpoint: subscription.endpoint }),
   });
   await subscription.unsubscribe();
+  emitPushStateChange();
 }
 
 export function listenForPushSubscriptionChanges(): void {
