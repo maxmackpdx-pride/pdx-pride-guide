@@ -7130,6 +7130,12 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
   text-shadow: none !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .home-live-ticker__marquee .pdxMarquee__track {
+    animation-play-state: paused;
+  }
+}
+
 .event-ticker-label {
   position: relative;
   z-index: 2;

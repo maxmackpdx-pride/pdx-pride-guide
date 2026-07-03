@@ -181,7 +181,7 @@ export default function Home() {
                 color="rainbow"
                 items={tickerSource.map(event => event.title)}
                 className="home-live-ticker__marquee pdxMarquee--band"
-                speed={80}
+                speed={150}
               />
             </section>
           </div>
