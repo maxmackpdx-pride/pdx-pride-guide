@@ -356,18 +356,22 @@
   grid-template-columns: 1.32fr 1fr;
   gap: 24px;
   margin-top: 26px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .home-main-stage #home-map {
-  min-height: 466px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border: 2px solid var(--border-default);
   border-radius: 6px;
   overflow: hidden;
 }
 
 .home-main-stage #home-map > div {
-  height: 466px;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
 }
 
 .home-main-stage .pg-placescol {
@@ -452,6 +456,10 @@ html.calm-mode .home-main-stage .scroll-reveal--visible {
 
   .home-main-stage .pg-places {
     grid-template-columns: 1fr;
+  }
+
+  .home-main-stage #home-map {
+    min-height: 320px;
   }
 
   .home-main-stage .pg-hero__stickers {

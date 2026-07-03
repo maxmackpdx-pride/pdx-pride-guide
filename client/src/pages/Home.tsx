@@ -27,7 +27,7 @@ import {
   PosterCard,
   SectionHeader,
 } from "@/components/ds";
-import heroCollageImg from "@/assets/hero-collage.png";
+import heroWallpaperImg from "@/assets/hero-wallpaper.jpg";
 import {
   HOME_COUNTDOWN_TARGET,
   HOME_DAY_META,
@@ -371,7 +371,7 @@ export default function Home() {
       )}
 
       <section className="pg-hero" aria-label="Portland Pride Guide hero">
-        <img className="pg-hero__img" src={heroCollageImg} alt="" />
+        <img className="pg-hero__img" src={heroWallpaperImg} alt="" />
         <div className="pg-hero__scrim" aria-hidden="true" />
         <div className="pg-hero__body">
           <div className="pg-hero__kicker">
@@ -414,7 +414,7 @@ export default function Home() {
           color="rainbow"
           items={marqueeItems.length > 0 ? marqueeItems : HOME_MARQUEE_FALLBACK.slice(0, 12)}
           className="home-live-ticker__marquee pdxMarquee--band"
-          speed={42}
+          speed={67}
           separator="★"
         />
       </div>
@@ -689,7 +689,7 @@ export default function Home() {
           <SectionHeader
             kicker="Queer Places"
             title="Where to Go"
-            subtitle="Bars, cafes, and venues run by and for the community — three picks reshuffled every visit."
+            subtitle="Bars, cafes, and venues run by and for the community. Three spots chosen at random — fresh picks every time you refresh."
             accent="cyan"
           />
           <div className="pg-places">
@@ -697,13 +697,13 @@ export default function Home() {
               <Suspense
                 fallback={
                   <div
-                    style={{ height: 466, background: "#0a0a0a" }}
+                    style={{ flex: 1, minHeight: 200, background: "#0a0a0a" }}
                     role="status"
                     aria-label="Loading directory map"
                   />
                 }
               >
-                <DirectoryMap businesses={mappedBusinesses} height={466} />
+                <DirectoryMap businesses={mappedBusinesses} height="100%" />
               </Suspense>
             </div>
             <div className="pg-placescol">
