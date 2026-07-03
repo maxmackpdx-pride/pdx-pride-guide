@@ -1,0 +1,416 @@
+/* Main Stage home (direction 1a) — page layout from pdxprideguidehome.html */
+
+.home-main-stage {
+  background: var(--ink-900);
+  overflow-x: clip;
+}
+
+.home-main-stage .pg-block {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 44px 40px 8px;
+}
+
+.home-main-stage .pg-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 684px;
+  background: var(--ink-1000);
+  display: flex;
+  align-items: flex-end;
+}
+
+.home-main-stage .pg-hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.home-main-stage .pg-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle at center, rgba(255, 0, 140, 0.1) 0 1.4px, transparent 1.6px) 0 0 / 9px 9px,
+    linear-gradient(to top, rgba(5, 5, 7, 0.97) 4%, rgba(5, 5, 7, 0.55) 46%, rgba(5, 5, 7, 0.28) 100%);
+}
+
+.home-main-stage .pg-hero__stickers {
+  position: absolute;
+  top: 64px;
+  right: 52px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: flex-end;
+}
+
+.home-main-stage .pg-hero__body {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 40px 60px;
+}
+
+.home-main-stage .pg-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.82rem;
+  color: var(--neon-cyan);
+}
+
+.home-main-stage .pg-hero__kicker .d {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.home-main-stage .pg-hero h1 {
+  margin: 0 0 4px;
+}
+
+.home-main-stage .pg-hero h1 span {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.84;
+  letter-spacing: 0.01em;
+  font-size: clamp(3.5rem, 11vw, 6.4rem);
+  color: #fff;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.home-main-stage .pg-hero h1 .rainbow {
+  background-image: linear-gradient(
+    95deg,
+    #00ffff 0%,
+    #39ff14 20%,
+    #ffee00 38%,
+    #ff6600 56%,
+    #ff00cc 78%,
+    #8800ff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  padding-right: 0.06em;
+}
+
+.home-main-stage .pg-hero__blurb {
+  max-width: 47ch;
+  margin: 22px 0 0;
+  font-size: 1.18rem;
+  line-height: 1.55;
+  color: var(--text-mid);
+}
+
+.home-main-stage .pg-hero__blurb strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.home-main-stage .pg-hero__cdlabel {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  color: var(--text-lo);
+}
+
+.home-main-stage .pg-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.home-main-stage .pg-hero__countdown {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.home-main-stage .pg-fourgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 26px -14px 0;
+}
+
+.home-main-stage .pg-fourhead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.home-main-stage .pg-fourhead .pdxSection {
+  flex: 1;
+  min-width: 300px;
+  margin-bottom: 0;
+}
+
+.home-main-stage .pg-daytitle {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+}
+
+.home-main-stage .pg-spine {
+  position: relative;
+  padding-left: 2px;
+}
+
+.home-main-stage .pg-spine__line {
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  opacity: 0.55;
+}
+
+.home-main-stage .pg-spine__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.home-main-stage .pg-spine__dot {
+  position: absolute;
+  left: 1px;
+  top: 24px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid var(--ink-900);
+}
+
+.home-main-stage .pg-board3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 26px;
+  align-items: start;
+}
+
+.home-main-stage .pg-colhd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.home-main-stage .pg-colhd__t {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1.15rem;
+}
+
+.home-main-stage .pg-colhd__rule {
+  flex: 1;
+  height: 2px;
+  opacity: 0.5;
+}
+
+.home-main-stage .pg-note {
+  background: var(--surface-card);
+  border: 2px solid var(--_av);
+  border-radius: 6px;
+  padding: 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 0 16px -6px var(--_av);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.16s var(--ease-out, ease), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-main-stage .pg-note:hover {
+  transform: translateY(-3px);
+}
+
+.home-main-stage .pg-note--spot {
+  animation: pdxSpotPulse 4s ease-in-out infinite;
+}
+
+.home-main-stage .pg-note__where {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  color: var(--_av);
+  line-height: 1.4;
+}
+
+.home-main-stage .pg-note__where .d {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--_av);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.home-main-stage .pg-note__text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-mid);
+}
+
+.home-main-stage .pg-note__reply {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.home-main-stage .pg-note__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.02rem;
+  color: #fff;
+  line-height: 1.05;
+}
+
+.home-main-stage .pg-note__meta {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+  color: var(--_av);
+}
+
+.home-main-stage .pg-places {
+  display: grid;
+  grid-template-columns: 1.32fr 1fr;
+  gap: 24px;
+  margin-top: 26px;
+  align-items: start;
+}
+
+.home-main-stage .pg-placescol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.home-main-stage .pg-seam-wrap {
+  padding: 44px 0 0;
+}
+
+.home-main-stage .pg-seam-wrap--sm {
+  padding: 36px 0 0;
+}
+
+.home-main-stage .pg-daychips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.home-main-stage .pg-dayhead {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 28px 0 20px;
+}
+
+.home-main-stage .pg-dayhead__sub {
+  color: var(--text-lo);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.home-main-stage .pg-home-card {
+  cursor: pointer;
+}
+
+.home-main-stage .scroll-reveal--visible {
+  animation: pgReveal 0.6s var(--ease-out) both;
+}
+
+@keyframes pgReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .home-main-stage .pg-fourgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-main-stage .pg-board3 {
+    grid-template-columns: 1fr;
+  }
+
+  .home-main-stage .pg-places {
+    grid-template-columns: 1fr;
+  }
+
+  .home-main-stage .pg-hero__stickers {
+    display: none;
+  }
+
+  .home-main-stage .pg-block {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .home-main-stage .pg-hero__body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-main-stage .scroll-reveal--visible {
+    animation: none;
+  }
+}
+
+html.calm-mode .home-main-stage .pg-note--spot {
+  animation: none;
+}

@@ -1,68 +1,254 @@
-import { useEffect, useMemo, useState, Suspense } from "react";
-import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import type { Event } from "@shared/schema";
-import { PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { Event, GiftingPost, GigPost, MissedConnection } from "@shared/schema";
+import type { EventListing } from "@shared/multiDayEvents";
+import type { AdmissionType } from "@shared/admission";
+
+import {
+  DEFAULT_ATTENDANCE_PHRASE_KEY,
+  attendancePhraseLabel,
+} from "@shared/attendancePhrases";
 import EventModal from "@/components/EventModal";
-import { Marquee } from "@/components/ds";
-import { lazyWithReload } from "@/lib/lazyWithReload";
-import { MapViewFallback } from "@/components/EventsMapFallback";
-
-const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
-import { Briefcase, Gift, Search, UserRound } from "lucide-react";
-import GlitchWord from "@/components/GlitchWord";
-import HeroVideoOverlay from "@/components/HeroVideoOverlay";
-import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
-import { spottedHeroProps } from "@/lib/spottedHero";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { Button, Countdown } from "@/components/ds";
+import { useAuth } from "@/context/AuthContext";
+import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+import {
+  Button,
+  Countdown,
+  Divider,
+  EventCard,
+  FilterChip,
+  MapPanel,
+  Marquee,
+  PlaceCard,
+  PosterCard,
+  SectionHeader,
+  StickerBadge,
+} from "@/components/ds";
+import heroCollageImg from "@/assets/hero-collage.png";
+import {
+  HOME_COUNTDOWN_TARGET,
+  HOME_DAY_META,
+  HOME_DAY_ORDER,
+  HOME_MARQUEE_FALLBACK,
+  buildHomeMapPins,
+  countEventsByHomeDay,
+  eventsForHomeDay,
+  findSanctuaryHeadliner,
+  homeListingProps,
+  isWhatsOnVisible,
+  pickFourToTry,
+  prideDayChipDate,
+  type HomeDayKey,
+} from "@/lib/homeEvents";
+import "./Home.css";
 
-const heroCollageImg = "/home-hero-collage-pride.jpg";
+const SAVED_KEY = "pdx-home-saved-event-ids";
 
-function parsePacificEventTime(value?: string | null) {
-  if (!value) return null;
-  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).getTime();
-  return new Date(`${value}-07:00`).getTime();
+const NOTE_ACCENTS = ["var(--pink)", "var(--cyan)", "var(--purple)", "var(--lime)", "var(--amber)"];
+
+const TYPE_LABELS: Record<string, string> = {
+  bar: "Bars & Clubs",
+  restaurant: "Restaurants",
+  cafe: "Cafes",
+  venue: "Venues",
+  service: "Services",
+  shop: "Shops",
+  hotel: "Hotels",
+};
+
+const TYPE_TO_DS_CATEGORY: Record<string, string> = {
+  bar: "bars",
+  restaurant: "food",
+  cafe: "cafes",
+  venue: "venues",
+  service: "services",
+  shop: "shops",
+  hotel: "hotels",
+};
+
+type DirectoryBusiness = {
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  address: string | null;
+  neighborhood: string | null;
+  website: string | null;
+  instagram: string | null;
+  hours: string | null;
+  phone: string | null;
+  isNew: boolean;
+};
+
+type GiftingFeedPost = GiftingPost & {
+  neighborhood: string;
+};
+
+type GigFeedPost = GigPost & {
+  location: string | null;
+  compensation: string | null;
+};
+
+function readSavedIds(): Set<number> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.map(Number).filter(Number.isFinite) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function writeSavedIds(ids: Set<number>) {
+  window.localStorage.setItem(SAVED_KEY, JSON.stringify([...ids]));
 }
 
 export default function Home() {
   usePageSeo(
     "PDX Pride Guide — Portland Pride 2026 Events",
-    "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 13–19 and year-round Pride listings.",
+    "A community-run guide to Portland Pride Week 2026. Find the parties, the parade, and your people, then dance til the sun comes up.",
   );
+
+  const { user } = useAuth();
+  const [location] = useLocation();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [mapExpanded, setMapExpanded] = useState(false);
+  const [activeDay, setActiveDay] = useState<HomeDayKey>("SAT");
+  const [savedIds, setSavedIds] = useState<Set<number>>(readSavedIds);
+  const [fourSeed, setFourSeed] = useState(0);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
   });
-  const { data: events = [] } = useQuery<Event[]>({
+
+  useAttendanceSummariesLive();
+
+  const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
   });
-  const firstEventTarget = useMemo(() => {
-    const starts = events
-      .map(event => parsePacificEventTime(event.dateStart))
-      .filter((time): time is number => typeof time === "number" && Number.isFinite(time))
-      .sort((a, b) => a - b);
-    return starts[0] || new Date(`${PRIDE_WEEK_START_DATE}T00:00:00-07:00`).getTime();
+
+  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count: number }>>({
+    queryKey: ["/api/events/attendance-summaries"],
+    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
+    refetchInterval: 120_000,
+  });
+
+  const { data: myCheckIns = [] } = useQuery<{ eventId: number }[]>({
+    queryKey: ["/api/events/mine/check-ins"],
+    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then(r => r.json()),
+    enabled: !!user,
+  });
+
+  const { data: spotted = [] } = useQuery<MissedConnection[]>({
+    queryKey: ["/api/missed-connections"],
+    queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const { data: gifting = [] } = useQuery<GiftingFeedPost[]>({
+    queryKey: ["/api/gifting"],
+    queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const { data: gigs = [] } = useQuery<GigFeedPost[]>({
+    queryKey: ["/api/gigs"],
+    queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const { data: businesses = [] } = useQuery<DirectoryBusiness[]>({
+    queryKey: ["/api/directory"],
+    queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const myCheckInIds = useMemo(() => new Set(myCheckIns.map(c => c.eventId)), [myCheckIns]);
+
+  const sanctuary = useMemo(() => findSanctuaryHeadliner(events), [events]);
+
+  const fourToTry = useMemo(() => {
+    void fourSeed;
+    return pickFourToTry(events, sanctuary);
+  }, [events, sanctuary, fourSeed]);
+
+  const dayCounts = useMemo(() => countEventsByHomeDay(events), [events]);
+  const whatsOnVisible = isWhatsOnVisible(location);
+  const dayEvents = useMemo(() => eventsForHomeDay(events, activeDay), [events, activeDay]);
+  const mapPins = useMemo(() => buildHomeMapPins(events), [events]);
+
+  const marqueeItems = useMemo(() => {
+    const titles = events.map(e => e.title).filter(Boolean);
+    return titles.length > 0 ? titles : HOME_MARQUEE_FALLBACK;
   }, [events]);
-  const showCountdown = firstEventTarget > Date.now();
-  const tickerSource = useMemo(
-    () => events.map(event => ({ id: event.id, title: event.title })).filter(item => item.title),
-    [events],
+
+  const featuredPlaces = useMemo(
+    () => [...businesses].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)).slice(0, 3),
+    [businesses],
   );
+
+  const rsvpMutation = useMutation({
+    mutationFn: (eventId: number) =>
+      apiRequest("POST", `/api/events/${eventId}/attendance`, {
+        message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+    },
+  });
+
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
     setShowSoftLaunch(false);
   };
 
+  const toggleSaved = useCallback((eventId: number) => {
+    setSavedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(eventId)) next.delete(eventId);
+      else next.add(eventId);
+      writeSavedIds(next);
+      return next;
+    });
+  }, []);
+
+  const goingCount = useCallback(
+    (eventId: number) =>
+      attendanceSummaries[eventId]?.count ??
+      attendanceSummaries[String(eventId)]?.count ??
+      0,
+    [attendanceSummaries],
+  );
+
+  const handleRsvp = useCallback(
+    (eventId: number) => {
+      if (!user) return;
+      if (myCheckInIds.has(eventId)) return;
+      rsvpMutation.mutate(eventId);
+    },
+    [user, myCheckInIds, rsvpMutation],
+  );
+
+  const openEvent = useCallback((event: Event) => setSelectedEvent(event), []);
+
+  useEffect(() => {
+    if (!whatsOnVisible) return;
+    const firstWithEvents = HOME_DAY_ORDER.find(day => dayCounts[day] > 0);
+    if (firstWithEvents) setActiveDay(firstWithEvents);
+  }, [whatsOnVisible, dayCounts]);
+
+  const dayMeta = HOME_DAY_META[activeDay];
+
   return (
-    <div className="zine-page home-page" style={{ background: "#000", minHeight: "100vh" }}>
+    <div className="zine-page home-page home-main-stage">
       {showSoftLaunch && (
         <div
           role="dialog"
@@ -79,200 +265,405 @@ export default function Home() {
             padding: 18,
           }}
         >
-          <div style={{
-            width: "min(560px, 100%)",
-            border: "3px solid var(--neon-yellow)",
-            background: "#050505",
-            boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(255,0,204,0.16)",
-            padding: 24,
-            position: "relative",
-          }}>
+          <div
+            style={{
+              width: "min(560px, 100%)",
+              border: "3px solid var(--neon-yellow)",
+              background: "#050505",
+              boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(255,0,204,0.16)",
+              padding: 24,
+              position: "relative",
+            }}
+          >
             <button
               type="button"
               aria-label="Close welcome"
               onClick={dismissSoftLaunch}
-              style={{ position: "absolute", top: 10, right: 10, background: "transparent", border: "1px solid #333", color: "#999", width: 30, height: 30, cursor: "pointer" }}
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                background: "transparent",
+                border: "1px solid #333",
+                color: "#999",
+                width: 30,
+                height: 30,
+                cursor: "pointer",
+              }}
             >
               X
             </button>
-            <div className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", marginBottom: 14 }}>SOFTIE LAUNCH</div>
-            <h2 id="soft-launch-title" className="display" style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}>
+            <div className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", marginBottom: 14 }}>
+              SOFTIE LAUNCH
+            </div>
+            <h2
+              id="soft-launch-title"
+              className="display"
+              style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}
+            >
               WELCOME
             </h2>
             <p style={{ color: "#bbb", fontSize: "1rem", lineHeight: 1.6, marginBottom: 18 }}>
-              Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around, and please submit feedback at the bottom of the website if you run into any issue.
+              Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around,
+              and please submit feedback at the bottom of the website if you run into any issue.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Button type="button" variant="solid" accent="lime" onClick={dismissSoftLaunch}>START EXPLORING</Button>
+              <Button type="button" variant="solid" accent="lime" onClick={dismissSoftLaunch}>
+                START EXPLORING
+              </Button>
               <a href="#feedback" onClick={dismissSoftLaunch} style={{ textDecoration: "none" }}>
-                <Button as="span" accent="cyan">SEND FEEDBACK</Button>
+                <Button as="span" accent="cyan">
+                  SEND FEEDBACK
+                </Button>
               </a>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section
-        className="zine-hero home-hero"
-        style={{ position: "relative", overflow: "hidden", isolation: "isolate", minHeight: 720, display: "flex", alignItems: "center" }}
-      >
-        <div
-          className="home-hero-bg-desktop"
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: `url(${heroCollageImg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "18% center",
-            backgroundRepeat: "no-repeat",
-            opacity: 0.9,
-          }}
-        />
-        <div className="home-hero-bg-mobile" aria-hidden="true" />
-        <HeroVideoOverlay preset="panel" flipLightLeaks={false} />
-        <div className="home-hero__panel-scrim" aria-hidden="true" />
-        <div className="home-hero__panel-grain" aria-hidden="true" />
+      <section className="pg-hero" aria-label="Portland Pride Guide hero">
+        <img className="pg-hero__img" src={heroCollageImg} alt="" />
+        <div className="pg-hero__scrim" aria-hidden="true" />
+        <div className="pg-hero__stickers" aria-hidden="true">
+          <StickerBadge color="rainbow" size="lg" rotate={-6}>
+            Rainbow Rave
+          </StickerBadge>
+          <StickerBadge color="cyan" size="md" rotate={4}>
+            Gay All Day
+          </StickerBadge>
+          <StickerBadge color="pink" size="md" rotate={-3}>
+            Made by the Scene
+          </StickerBadge>
+        </div>
+        <div className="pg-hero__body">
+          <div className="pg-hero__kicker">
+            <span className="d" aria-hidden="true" />
+            Portland Pride Week 2026 · July 13 to 19
+          </div>
+          <h1>
+            <span>Portland</span>
+            <span className="rainbow">Pride</span>
+            <span>Guide</span>
+          </h1>
+          <p className="pg-hero__blurb">
+            Three days, one city, every color. Find the parties, the parade, and your people, then{" "}
+            <strong>dance til the sun comes up.</strong>
+          </p>
+          <div className="pg-hero__countdown">
+            <span className="pg-hero__cdlabel">Doors to the weekend open in</span>
+            <Countdown target={HOME_COUNTDOWN_TARGET} accent="lime" aria-label="Countdown to Pride weekend" />
+          </div>
+          <div className="pg-hero__actions">
+            <Link href="/events">
+              <Button as="span" accent="lime" arrow size="lg">
+                View All Events
+              </Button>
+            </Link>
+            <Link href="/events">
+              <Button as="span" accent="cyan" arrow size="lg">
+                Open the Map
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
+      <Marquee color="rainbow" items={marqueeItems} speed={150} />
 
-        <div className="home-hero-content">
-          <div style={{ maxWidth: 820 }}>
-            <div className="home-hero-kicker">Portland Pride Week · July 13 to 19, 2026</div>
+      <div className="pg-block" style={{ paddingTop: 58 }}>
+        <ScrollReveal>
+          <div className="pg-fourhead">
+            <SectionHeader
+              kicker="Every Visit"
+              title="Four to Try"
+              subtitle="Not a fixed lineup. Four events pulled at random from across the week, reshuffled every time you land."
+              accent="pink"
+              style={{ marginBottom: 0 }}
+            />
+            <Button type="button" accent="cyan" size="sm" onClick={() => setFourSeed(s => s + 1)}>
+              Reshuffle
+            </Button>
+          </div>
+          <div className="pg-fourgrid">
+            {fourToTry.map(event => {
+              const props = homeListingProps(event);
+              const going = goingCount(event.id);
+              const checkedIn = myCheckInIds.has(event.id);
+              return (
+                <div
+                  key={event.listingInstanceKey ?? event.id}
+                  className="pg-home-card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openEvent(event)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openEvent(event);
+                    }
+                  }}
+                >
+                  <PosterCard
+                    title={event.title}
+                    venue={event.venueName}
+                    when={props.when}
+                    day={props.day}
+                    image={props.image}
+                    types={props.types}
+                    admission={event.admission as AdmissionType | undefined}
+                    age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
+                    going={going > 0 ? going : undefined}
+                    onRsvp={
+                      user && !checkedIn
+                        ? () => handleRsvp(event.id)
+                        : undefined
+                    }
+                    showLink={false}
+                    style={{ height: "100%" }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </ScrollReveal>
+      </div>
 
-            <h1 className="display home-hero-title">
-              PORTLAND<br />
-              <span className="home-hero-title-pride"><GlitchWord text="PRIDE" /></span><br />
-              GUIDE
-            </h1>
-
-            <p className="home-hero-subtitle">
-              This is your welcoming spot to discover what's happening, connect with the right people, keep our venues and creators thriving, grow your connections, and take care of each other when it matters most.
-            </p>
-
-            {showCountdown && (
-              <>
-                <Countdown
-                  target={new Date(firstEventTarget).toISOString()}
-                  accent="lime"
-                  aria-label="Countdown to first event"
+      {whatsOnVisible && (
+        <>
+          <div className="pg-seam-wrap">
+            <Divider seam />
+          </div>
+          <div className="pg-block">
+            <ScrollReveal>
+              <SectionHeader
+                kicker="By the Day"
+                title="What's On"
+                subtitle="Thursday to Sunday. Tap a day and watch the night unfold."
+                accent="cyan"
+              />
+              <div className="pg-daychips">
+                {HOME_DAY_ORDER.map(day => {
+                  const meta = HOME_DAY_META[day];
+                  const selected = activeDay === day;
+                  return (
+                    <FilterChip
+                      key={day}
+                      selected={selected}
+                      fill={selected}
+                      accent={meta.accent}
+                      count={dayCounts[day]}
+                      onToggle={() => setActiveDay(day)}
+                    >
+                      {meta.label} {prideDayChipDate(day)}
+                    </FilterChip>
+                  );
+                })}
+              </div>
+              <div className="pg-dayhead">
+                <span className="pg-daytitle" style={{ color: dayMeta.color }}>
+                  {dayMeta.long}
+                </span>
+                <span className="pg-dayhead__sub">The night, hour by hour.</span>
+              </div>
+              <div className="pg-spine">
+                <div
+                  className="pg-spine__line"
+                  style={{ background: `linear-gradient(to bottom, ${dayMeta.color}, transparent)` }}
                 />
-                <div className="home-countdown-caption">UNTIL FIRST EVENT · PORTLAND TIME</div>
-              </>
-            )}
+                {dayEvents.map(event => {
+                  const props = homeListingProps(event);
+                  const going = goingCount(event.id);
+                  return (
+                    <div key={event.listingInstanceKey ?? event.id} className="pg-spine__row">
+                      <div style={{ position: "relative" }}>
+                        <span
+                          className="pg-spine__dot"
+                          style={{
+                            background: dayMeta.color,
+                            boxShadow: `0 0 12px ${dayMeta.color}`,
+                          }}
+                        />
+                      </div>
+                      <div
+                        className="pg-home-card"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openEvent(event)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openEvent(event);
+                          }
+                        }}
+                      >
+                        <EventCard
+                          title={event.title}
+                          venue={event.venueName}
+                          when={props.when}
+                          day={props.day}
+                          image={props.image}
+                          types={props.types}
+                          admission={event.admission as AdmissionType | undefined}
+                          age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
+                          going={going > 0 ? going : undefined}
+                          saved={savedIds.has(event.id)}
+                          onSave={() => toggleSaved(event.id)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollReveal>
+          </div>
+        </>
+      )}
 
-            <div className="home-hero-actions">
-              <Link href="/events">
-                <Button as="span" accent="lime" arrow className="home-hero-button">VIEW ALL EVENTS</Button>
-              </Link>
-              <Link href="/pride-work">
-                <Button as="span" accent="pink" arrow className="home-hero-button">PRIDE WERK</Button>
+      <div className="pg-seam-wrap--sm">
+        <Divider seam />
+      </div>
+      <div className="pg-block">
+        <ScrollReveal>
+          <SectionHeader
+            kicker="The Community Board"
+            title="Find Your People"
+            subtitle="Missed connections, free stuff, and last-minute gigs, all week long."
+            accent="purple"
+          />
+          <div className="pg-board3">
+            <div>
+              <div className="pg-colhd">
+                <span className="pg-colhd__t" style={{ color: "var(--pink)" }}>
+                  Spotted
+                </span>
+                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--pink), transparent)" }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {spotted.slice(0, 3).map((post, i) => (
+                  <Link key={post.id} href="/spotted" className="pg-note pg-note--spot" style={{ "--_av": NOTE_ACCENTS[i % NOTE_ACCENTS.length] }}>
+                    <div className="pg-note__where">
+                      <span className="d" aria-hidden="true" />
+                      {post.venueHint || post.title}
+                    </div>
+                    <p className="pg-note__text">{post.body}</p>
+                    <span className="pg-note__reply">Reply →</span>
+                  </Link>
+                ))}
+                {spotted.length === 0 && (
+                  <Link href="/spotted" className="pg-note" style={{ "--_av": "var(--pink)" }}>
+                    <p className="pg-note__text">No spotted posts yet. Be the first to leave a note.</p>
+                    <span className="pg-note__reply">Go to Spotted →</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="pg-colhd">
+                <span className="pg-colhd__t" style={{ color: "var(--lime)" }}>
+                  Gifting
+                </span>
+                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--lime), transparent)" }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {gifting.slice(0, 3).map((post, i) => (
+                  <Link key={post.id} href="/gifting" className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 1) % NOTE_ACCENTS.length] }}>
+                    <div className="pg-note__title">{post.title}</div>
+                    <div className="pg-note__meta">
+                      {post.category} · {post.neighborhood}
+                    </div>
+                    <p className="pg-note__text">{post.description}</p>
+                  </Link>
+                ))}
+                {gifting.length === 0 && (
+                  <Link href="/gifting" className="pg-note" style={{ "--_av": "var(--lime)" }}>
+                    <p className="pg-note__text">The gift board is quiet. Post something queer homes need.</p>
+                    <span className="pg-note__reply">Post a gift →</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="pg-colhd">
+                <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>
+                  Gigs
+                </span>
+                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {gigs.slice(0, 3).map((post, i) => (
+                  <Link key={post.id} href="/pride-work" className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 2) % NOTE_ACCENTS.length] }}>
+                    <div className="pg-note__title">{post.title}</div>
+                    <div className="pg-note__meta">
+                      {[post.compensation, post.location].filter(Boolean).join(" · ") || "Pride season gig"}
+                    </div>
+                    <p className="pg-note__text">{post.description}</p>
+                  </Link>
+                ))}
+                {gigs.length === 0 && (
+                  <Link href="/pride-work" className="pg-note" style={{ "--_av": "var(--cyan)" }}>
+                    <p className="pg-note__text">No gigs posted yet. Workers and hosts both belong here.</p>
+                    <span className="pg-note__reply">Browse gigs →</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </div>
+
+      <div className="pg-seam-wrap--sm">
+        <Divider seam />
+      </div>
+      <div className="pg-block">
+        <ScrollReveal>
+          <SectionHeader
+            kicker="Queer Places"
+            title="Where to Go"
+            subtitle="Bars, cafes, and venues run by and for the community, mapped by day."
+            accent="cyan"
+          />
+          <div className="pg-places">
+            <MapPanel
+              pins={mapPins}
+              height={466}
+              expandable
+              onExpand={() => {
+                window.location.href = "/directory";
+              }}
+            />
+            <div className="pg-placescol">
+              {featuredPlaces.map(biz => (
+                <PlaceCard
+                  key={biz.id}
+                  name={biz.name}
+                  category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+                  categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+                  address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
+                  hours={biz.hours || undefined}
+                  phone={biz.phone || undefined}
+                  description={biz.description || undefined}
+                  website={biz.website || undefined}
+                  instagram={biz.instagram || undefined}
+                  grandOpening={biz.isNew}
+                />
+              ))}
+              {featuredPlaces.length === 0 && (
+                <PlaceCard
+                  name="Queer Portland"
+                  category="venues"
+                  categoryLabel="Directory"
+                  description="The community directory is being built. Check back for bars, cafes, and venues."
+                />
+              )}
+              <Link href="/directory" style={{ textDecoration: "none" }}>
+                <Button as="span" accent="cyan" arrow>
+                  Full directory
+                </Button>
               </Link>
             </div>
           </div>
-        </div>
-
-        {tickerSource.length > 0 && (
-          <div className="home-hero-ticker">
-            <section className="home-live-ticker" aria-label="Live event ticker">
-              <Link href="/events" className="home-live-ticker__label">
-                LIVE EVENTS
-              </Link>
-              <Marquee
-                color="rainbow"
-                items={tickerSource.map(event => event.title)}
-                className="home-live-ticker__marquee pdxMarquee--band"
-                speed={150}
-              />
-            </section>
-          </div>
-        )}
-      </section>
-
-      {tickerSource.length === 0 && (
-        <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
-      )}
-
-      <section className="home-map-preview" aria-label="Events map preview">
-        <Suspense fallback={<MapViewFallback variant="home" />}>
-          <MapView
-            events={events}
-            expanded={mapExpanded}
-            onExpand={() => setMapExpanded(true)}
-            onCollapse={() => setMapExpanded(false)}
-            onSelect={setSelectedEvent}
-            variant="home"
-          />
-        </Suspense>
-      </section>
-
-      <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
-
-      <section className="home-promo-stack">
-        <ScrollReveal>
-          <PageHero
-            className="home-promo-panel home-gifting-panel"
-            compact
-            flush
-            flipLightLeaks
-            kicker="Pride season only · Now through July 26"
-            titleLine1="GIFT WITH"
-            titleLine2="PRIDE"
-            accent="rainbow"
-            lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, kink gear, circuit looks, and whatever else needs a new home."
-            tagline="Give gay gifts. Queer homes. Keep it moving."
-            taglineAccent="magenta"
-            bgImage="/gift-with-pride-hero.jpg"
-            actions={
-              <>
-                <Link href="/gifting"><Button type="button" accent="lime" leadingIcon={<Gift size={16} />}>Post a gift</Button></Link>
-                <Link href="/gifting"><Button type="button" accent="cyan" leadingIcon={<Search size={16} />}>Post an in search of</Button></Link>
-              </>
-            }
-          />
         </ScrollReveal>
-        <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
-        <ScrollReveal delay={120}>
-          <PageHero
-            className="home-promo-panel home-gigs-panel"
-            compact
-            flush
-            kicker="Pride season & beyond"
-            titleLine1="PRIDE"
-            titleLine1Accent="rainbow"
-            titleLine2="GIG BOARD"
-            accent="lime"
-            lede="Two-way board for Pride season and beyond. Post your availability, post a gig, or browse both. Workers and hosts in one place."
-            tagline="Need work? Need help? Both belong here."
-            taglineAccent="cyan"
-            bgImage="/motifs/hero-gigs.jpg"
-            actions={
-              <>
-                <Link href="/pride-work"><Button type="button" accent="cyan" leadingIcon={<UserRound size={16} />}>Post your availability</Button></Link>
-                <Link href="/pride-work"><Button type="button" accent="lime" leadingIcon={<Briefcase size={16} />}>Post a gig</Button></Link>
-              </>
-            }
-          />
-        </ScrollReveal>
-        <div className="rainbow-bar rainbow-bar--bleed home-section-divider" aria-hidden="true" />
-        <ScrollReveal delay={180}>
-          <PageHero
-            {...spottedHeroProps({
-              className: "home-promo-panel home-spotted-panel",
-              compact: true,
-              flipLightLeaks: true,
-              titleLine1: "SPOTTED! THEM AT",
-              titleLine2: "PRIDE",
-              accent: "rainbow",
-              titleLine1Accent: undefined,
-              actions: (
-                <Link href="/spotted">
-                  <Button type="button" accent="pink" arrow>Go to Spotted!</Button>
-                </Link>
-              ),
-            })}
-          />
-        </ScrollReveal>
-      </section>
+      </div>
 
       {selectedEvent && (
         <EventModal
