@@ -413,10 +413,15 @@ export default function Admin() {
   });
 
   const assignHostMutation = useMutation({
-    mutationFn: ({ id, username }: { id: number; username: string }) =>
-      apiRequest("POST", `/api/admin/events/${id}/host`, { username }),
-    onSuccess: (_data, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+    mutationFn: async ({ id, username }: { id: number; username: string }) => {
+      const res = await apiRequest("POST", `/api/admin/events/${id}/host`, { username });
+      return res.json() as Promise<AdminEvent>;
+    },
+    onSuccess: (updated, vars) => {
+      queryClient.setQueryData<AdminEvent[]>(["/api/admin/events"], old =>
+        old?.map(ev => (ev.id === updated.id ? { ...ev, ...updated } : ev)),
+      );
+      void queryClient.refetchQueries({ queryKey: ["/api/admin/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setAssignHostByEvent(prev => {
         const next = { ...prev };
@@ -431,9 +436,15 @@ export default function Admin() {
   });
 
   const unassignHostMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/events/${id}/host`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/events/${id}/host`);
+      return res.json() as Promise<AdminEvent>;
+    },
+    onSuccess: (updated) => {
+      queryClient.setQueryData<AdminEvent[]>(["/api/admin/events"], old =>
+        old?.map(ev => (ev.id === updated.id ? { ...ev, ...updated } : ev)),
+      );
+      void queryClient.refetchQueries({ queryKey: ["/api/admin/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({ title: "Promoter removed", description: "Event is back in the claimable pool." });
     },
@@ -1125,12 +1136,12 @@ export default function Admin() {
                         </div>
                         <button
                           type="button"
-                          disabled={!assignDraft.trim() || assignHostMutation.isPending}
+                          disabled={!assignDraft.trim() || (assignHostMutation.isPending && assignHostMutation.variables?.id === ev.id)}
                           onClick={() => assignHostMutation.mutate({ id: ev.id, username: assignDraft })}
                           className="display text-xs px-4 py-2 border-2 disabled:opacity-50"
                           style={{ borderColor: "#00FFFF", color: "#00FFFF", background: "transparent" }}
                         >
-                          {assignHostMutation.isPending ? "ASSIGNING..." : "ASSIGN"}
+                          {assignHostMutation.isPending && assignHostMutation.variables?.id === ev.id ? "ASSIGNING..." : "ASSIGN"}
                         </button>
                       </div>
                     )}
@@ -1144,7 +1155,7 @@ export default function Admin() {
                         </span>
                         <button
                           type="button"
-                          disabled={unassignHostMutation.isPending}
+                          disabled={unassignHostMutation.isPending && unassignHostMutation.variables === ev.id}
                           onClick={() => {
                             if (window.confirm(`Remove @${ev.claimedBy} from "${ev.title}" and make it claimable again?`)) {
                               unassignHostMutation.mutate(ev.id);
@@ -1153,7 +1164,7 @@ export default function Admin() {
                           className="display text-[10px] px-2 py-1 border disabled:opacity-50"
                           style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}
                         >
-                          {unassignHostMutation.isPending ? "REMOVING..." : "UNASSIGN"}
+                          {unassignHostMutation.isPending && unassignHostMutation.variables === ev.id ? "REMOVING..." : "UNASSIGN"}
                         </button>
                       </div>
                     )}
@@ -1273,7 +1284,7 @@ export default function Admin() {
                                   @{ev.claimedByProfile?.username || ev.claimedBy}
                                   {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
                                 </span>
-                                <button type="button" disabled={unassignHostMutation.isPending}
+                                <button type="button" disabled={unassignHostMutation.isPending && unassignHostMutation.variables === ev.id}
                                   onClick={() => {
                                     if (window.confirm(`Remove @${ev.claimedBy} from "${ev.title}" and make it claimable again?`)) {
                                       unassignHostMutation.mutate(ev.id);
@@ -1281,7 +1292,7 @@ export default function Admin() {
                                   }}
                                   className="display text-xs px-3 py-1 border disabled:opacity-50"
                                   style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}>
-                                  {unassignHostMutation.isPending ? "REMOVING..." : "UNASSIGN"}
+                                  {unassignHostMutation.isPending && unassignHostMutation.variables === ev.id ? "REMOVING..." : "UNASSIGN"}
                                 </button>
                               </div>
                             ) : (

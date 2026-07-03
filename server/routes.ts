@@ -115,6 +115,13 @@ function lookupUserProfile(identifier: string | null | undefined) {
   return user ? adminUserSummary(user) : null;
 }
 
+function resolveUserByUsername(username: string) {
+  const uname = username.trim().replace(/^@/, "");
+  if (!uname) return undefined;
+  return storage.getUserByUsername(uname)
+    || sqlite.prepare(`SELECT * FROM users WHERE LOWER(username) = LOWER(?)`).get(uname) as ReturnType<typeof storage.getUserByUsername>;
+}
+
 function enrichSubmissionForAdmin(sub: any) {
   const user = storage.getUserByEmail(sub.submitterEmail);
   return {
@@ -1717,6 +1724,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     // Legacy env-var credential fallback (set ADMIN_USERNAME + ADMIN_PASSWORD in Railway if needed)
     if (ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       req.session.isAdmin = true;
+      const actorId = getAdminActorUserId(req);
+      if (actorId) req.session.userId = actorId;
       return res.json({ isAdmin: true, username: ADMIN_USERNAME });
     }
 
@@ -2019,25 +2028,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Assign a promoter as the event's primary host (same effect as an approved claim)
   app.post("/api/admin/events/:id/host", requireAdmin, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const username = String(req.body.username || "").trim().replace(/^@/, "");
-    if (!username) return res.status(400).json({ error: "username required" });
-    const user = storage.getUserByUsername(username);
-    if (!user) return res.status(404).json({ error: "No account found with that username" });
-    storage.setPrimaryEventHost(evt.id, user.id, req.session.userId ?? null);
-    if ((user.promoterStatus || "none") !== "approved") {
-      storage.setPromoterStatus(user.id, "approved");
+    try {
+      const evt = storage.getEvent(Number(req.params.id));
+      if (!evt) return res.status(404).json({ error: "Not found" });
+      const username = String(req.body.username || "").trim().replace(/^@/, "");
+      if (!username) return res.status(400).json({ error: "username required" });
+      const user = resolveUserByUsername(username);
+      if (!user) return res.status(404).json({ error: "No account found with that username" });
+      const actorId = getAdminActorUserId(req);
+      storage.setPrimaryEventHost(evt.id, user.id, actorId);
+      if ((user.promoterStatus || "none") !== "approved") {
+        storage.setPromoterStatus(user.id, "approved");
+      }
+      if (actorId) {
+        try {
+          storage.sendMessage(
+            actorId,
+            user.id,
+            `You now host: ${evt.title}`,
+            `An admin assigned you as the promoter for "${evt.title}". Open your dashboard to manage the event and post host updates.`,
+            { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
+          );
+        } catch (notifyErr) {
+          console.error("[admin] assign host notify failed:", notifyErr);
+        }
+      }
+      const fresh = storage.getEvent(evt.id);
+      res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
+    } catch (err) {
+      console.error("[admin] assign host failed:", err);
+      res.status(500).json({ error: "Could not assign promoter" });
     }
-    storage.sendMessage(
-      req.session.userId!,
-      user.id,
-      `You now host: ${evt.title}`,
-      `An admin assigned you as the promoter for "${evt.title}". Open your dashboard to manage the event and post host updates.`,
-      { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
-    );
-    const fresh = storage.getEvent(evt.id);
-    res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
   });
 
   // Remove all hosts and return the event to the unclaimed/claimable pool
