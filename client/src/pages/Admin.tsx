@@ -6,7 +6,7 @@ import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
@@ -133,7 +133,7 @@ interface AdminUser extends AdminUserProfile {
 }
 
 type AdminTab = "inbox" | "events" | "gigs" | "promoters" | "users" | "team";
-type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "missing_flyer" | "user_submitted" | "has_checkins";
+type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -166,7 +166,7 @@ export default function Admin() {
   const [modNote, setModNote] = useState<Record<number, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
-  const [assignHostName, setAssignHostName] = useState("");
+  const [assignHostByEvent, setAssignHostByEvent] = useState<Record<number, string>>({});
   const [editingGigId, setEditingGigId] = useState<number | null>(null);
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
   const [eventSearch, setEventSearch] = useState("");
@@ -289,7 +289,8 @@ export default function Admin() {
 
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } = useQuery<AdminEvent[]>({
     queryKey: ["/api/admin/events"],
-    enabled: authenticated && activeTab === "events",
+    queryFn: () => apiRequest("GET", "/api/admin/events").then(r => r.json()),
+    enabled: authenticated,
   });
 
   const { data: attendanceSummaries = {} } = useQuery<Record<string, { count: number }>>({
@@ -414,10 +415,14 @@ export default function Admin() {
   const assignHostMutation = useMutation({
     mutationFn: ({ id, username }: { id: number; username: string }) =>
       apiRequest("POST", `/api/admin/events/${id}/host`, { username }),
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      setAssignHostName("");
+      setAssignHostByEvent(prev => {
+        const next = { ...prev };
+        delete next[vars.id];
+        return next;
+      });
       toast({ title: "Promoter assigned", description: "They now host this event and were notified." });
     },
     onError: (err) => {
@@ -641,7 +646,10 @@ export default function Admin() {
   const startEdit = (ev: AdminEvent) => {
     setEditingId(ev.id);
     setEditForm({ ...ev });
-    setAssignHostName("");
+  };
+
+  const setAssignHostForEvent = (eventId: number, username: string) => {
+    setAssignHostByEvent(prev => ({ ...prev, [eventId]: username }));
   };
 
   const handleEditSave = (e: React.FormEvent) => {
@@ -825,16 +833,26 @@ export default function Admin() {
   const eventSearchQuery = eventSearch.trim().toLowerCase();
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
-  const filteredEvents = events.filter(ev => {
-    if (eventStatusFilter === "LIVE" && ev.status !== "LIVE") return false;
-    if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
-    if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
-    if (eventStatusFilter === "user_submitted" && ev.source !== "user_submitted") return false;
-    if (eventStatusFilter === "has_checkins" && !((attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count > 0)) return false;
-    if (!eventSearchQuery) return true;
-    const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""}`.toLowerCase();
-    return haystack.includes(eventSearchQuery);
-  });
+  const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
+  const filteredEvents = useMemo(() => {
+    const filtered = events.filter(ev => {
+      if (eventStatusFilter === "LIVE" && ev.status !== "LIVE") return false;
+      if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
+      if (eventStatusFilter === "unclaimed" && ev.claimedBy) return false;
+      if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
+      if (eventStatusFilter === "user_submitted" && ev.source !== "user_submitted") return false;
+      if (eventStatusFilter === "has_checkins" && !((attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count > 0)) return false;
+      if (!eventSearchQuery) return true;
+      const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""} ${ev.claimedBy || ""}`.toLowerCase();
+      return haystack.includes(eventSearchQuery);
+    });
+    return filtered.sort((a, b) => {
+      const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;
+      const dayB = DAY_SORT_ORDER[b.dayOfWeek ?? ""] ?? 99;
+      if (dayA !== dayB) return dayA - dayB;
+      return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    });
+  }, [events, eventStatusFilter, eventSearchQuery, attendanceSummaries]);
   const inboxActionPending =
     approveMutation.isPending
     || rejectMutation.isPending
@@ -895,7 +913,7 @@ export default function Admin() {
           {([
             { key: "inbox" as AdminTab, label: `Inbox${totalActionItems > 0 ? ` (${totalActionItems})` : ""}`, icon: <Inbox size={12} /> },
             { key: "users" as AdminTab, label: `All users (${userCount})`, icon: <UserCircle size={12} /> },
-            { key: "events" as AdminTab, label: "Manage events", icon: <Shield size={12} /> },
+            { key: "events" as AdminTab, label: `All events${events.length > 0 ? ` (${events.length})` : ""}`, icon: <Shield size={12} /> },
             { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
             { key: "promoters" as AdminTab, label: "Promoters", icon: <Users size={12} /> },
             { key: "team" as AdminTab, label: `Team (${teamAdmins.length})`, icon: <Users size={12} /> },
@@ -950,7 +968,7 @@ export default function Admin() {
         {activeTab === "events" && (
           <div>
             <p className="text-white/40 text-sm mb-4">
-              Edit any field on any event. Changes go live immediately.
+              {events.length} events total · assign unclaimed listings to promoters from each row · edit opens full fields.
             </p>
             <div className="flex flex-wrap gap-3 mb-4">
               <div className="relative flex-1 min-w-[220px] max-w-md">
@@ -967,7 +985,8 @@ export default function Admin() {
             </div>
             <div className="flex flex-wrap gap-2 mb-6">
               {([
-                { key: "all" as EventStatusFilter, label: "All" },
+                { key: "all" as EventStatusFilter, label: `All (${events.length})` },
+                { key: "unclaimed" as EventStatusFilter, label: `Unclaimed${unclaimedCount > 0 ? ` (${unclaimedCount})` : ""}` },
                 { key: "LIVE" as EventStatusFilter, label: "Live" },
                 { key: "HIDDEN" as EventStatusFilter, label: "Hidden" },
                 { key: "missing_flyer" as EventStatusFilter, label: `No flyer${missingFlyerCount > 0 ? ` (${missingFlyerCount})` : ""}` },
@@ -1000,10 +1019,12 @@ export default function Admin() {
               <p className="text-white/30 text-center py-12">No events match the current search and filters.</p>
             ) : (
               <div className="space-y-2">
-                {(eventSearchQuery || eventStatusFilter !== "all") && (
-                  <p className="text-white/35 text-xs mb-2">{filteredEvents.length} of {events.length} events</p>
-                )}
+                <p className="text-white/35 text-xs mb-2">
+                  Showing {filteredEvents.length} of {events.length} events
+                  {unclaimedCount > 0 ? ` · ${unclaimedCount} unclaimed` : ""}
+                </p>
                 {filteredEvents.map(ev => {
+                  const assignDraft = assignHostByEvent[ev.id] ?? "";
                   const posterSrc = eventPosterSrc(ev.posterImageUrl);
                   const checkInCount = (attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count ?? 0;
                   return (
@@ -1050,6 +1071,11 @@ export default function Admin() {
                             )}
                           </div>
                         )}
+                        {!ev.claimedBy && (
+                          <span className="sticker text-[10px] mt-2 inline-block" style={{ color: "#FF8C00", borderColor: "#FF8C00" }}>
+                            UNCLAIMED
+                          </span>
+                        )}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
@@ -1082,6 +1108,55 @@ export default function Admin() {
                         </button>
                       </div>
                     </div>
+
+                    {!ev.claimedBy && (
+                      <div
+                        className="border-t border-white/10 px-4 py-3 flex flex-wrap items-center gap-2"
+                        style={{ background: "rgba(255, 140, 0, 0.06)" }}
+                      >
+                        <span className="display text-[10px] text-white/45 shrink-0">ASSIGN PROMOTER</span>
+                        <div className="flex-1 min-w-[200px] max-w-sm">
+                          <UsernameAutocomplete
+                            value={assignDraft}
+                            onChange={val => setAssignHostForEvent(ev.id, val)}
+                            placeholder="@username"
+                            inputStyle={{ width: "100%", padding: "8px 12px", fontSize: 14, color: "#fff", background: "#000", border: "1px solid rgba(255,255,255,0.2)" }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          disabled={!assignDraft.trim() || assignHostMutation.isPending}
+                          onClick={() => assignHostMutation.mutate({ id: ev.id, username: assignDraft })}
+                          className="display text-xs px-4 py-2 border-2 disabled:opacity-50"
+                          style={{ borderColor: "#00FFFF", color: "#00FFFF", background: "transparent" }}
+                        >
+                          {assignHostMutation.isPending ? "ASSIGNING..." : "ASSIGN"}
+                        </button>
+                      </div>
+                    )}
+
+                    {ev.claimedBy && (
+                      <div className="border-t border-white/10 px-4 py-2 flex items-center gap-3 flex-wrap" style={{ background: "#0a0a0a" }}>
+                        <span className="text-white/35 text-[10px] uppercase tracking-wide">Host</span>
+                        <span className="text-sm" style={{ color: "#CCFF00" }}>
+                          @{ev.claimedByProfile?.username || ev.claimedBy}
+                          {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={unassignHostMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm(`Remove @${ev.claimedBy} from "${ev.title}" and make it claimable again?`)) {
+                              unassignHostMutation.mutate(ev.id);
+                            }
+                          }}
+                          className="display text-[10px] px-2 py-1 border disabled:opacity-50"
+                          style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}
+                        >
+                          {unassignHostMutation.isPending ? "REMOVING..." : "UNASSIGN"}
+                        </button>
+                      </div>
+                    )}
 
                     {/* Inline edit form */}
                     {editingId === ev.id && (
@@ -1210,25 +1285,9 @@ export default function Admin() {
                                 </button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <div className="flex-1 min-w-[220px]">
-                                  <UsernameAutocomplete
-                                    value={assignHostName}
-                                    onChange={setAssignHostName}
-                                    placeholder="@promoter to assign"
-                                    inputStyle={{ width: "100%", padding: "8px 12px", fontSize: 14, color: "#fff", background: "#000", border: "1px solid rgba(255,255,255,0.2)" }}
-                                  />
-                                </div>
-                                <button type="button" disabled={!assignHostName.trim() || assignHostMutation.isPending}
-                                  onClick={() => assignHostMutation.mutate({ id: ev.id, username: assignHostName })}
-                                  className="display text-xs px-4 py-2 border-2 disabled:opacity-50"
-                                  style={{ borderColor: "#00FFFF", color: "#00FFFF", background: "transparent" }}>
-                                  {assignHostMutation.isPending ? "ASSIGNING..." : "ASSIGN PROMOTER"}
-                                </button>
-                                <span className="text-white/35 text-xs w-full">
-                                  Unclaimed — assigning makes them the host, approves them as a promoter, and turns off claimable.
-                                </span>
-                              </div>
+                              <p className="text-white/35 text-xs">
+                                Use the assign row above this form — promoter becomes host, gets approved, and claimable turns off.
+                              </p>
                             )}
                           </div>
                         </div>
