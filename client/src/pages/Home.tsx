@@ -380,7 +380,12 @@ export default function Home() {
           </div>
           <h1>
             <span>Portland</span>
-            <span className="rainbow">Pride</span>
+            <span className="rainbow">
+              <span className="rainbow__outline" aria-hidden="true">
+                Pride
+              </span>
+              <span className="rainbow__fill">Pride</span>
+            </span>
             <span>Guide</span>
           </h1>
           <p className="pg-hero__blurb">
