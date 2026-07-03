@@ -1,7 +1,21 @@
 # PDX Pride Guide — Design System
 
-Sync-ready bundle for a claude.ai/design project. Source of truth for tokens is
-`client/src/index.css`; this folder is the curated, portable expression of it.
+Sync-ready bundle for a claude.ai/design project.
+
+**Source of truth chain:** `shared/prideWeek.ts` → `client/src/index.css` →
+`design-system/tokens/tokens.css` + `previews/*.html`.
+
+## Grok / agent push checklist
+
+Before every push to `master` that touches colors, Pride week, or global CSS:
+
+```bash
+npm run sync:design-system
+git add design-system/
+```
+
+Commit the synced folder in the **same PR/commit** as the app changes. If
+`sync:design-system` updates files, include those diffs — do not push drift.
 
 ## Contents
 - `tokens/tokens.css` — canonical tokens (colors, day colors, type, effects)
@@ -17,8 +31,9 @@ Sync-ready bundle for a claude.ai/design project. Source of truth for tokens is
   Body: Inter; body text `#e6e3da`, meta `#999`, faint `#666`.
 - One neon per element. Yellow `#CCFF00` = primary action; cyan `#00FFFF` =
   accent pop; magenta `#FF00CC` mostly lives in offset shadows and glows.
-- Day colors are semantic and consistent everywhere: THU cyan, FRI magenta,
-  SAT orange, SUN red.
+- Day colors are semantic Pride Week (Mon Jul 13 – Sun Jul 19): MON purple,
+  TUE blue, WED yellow, THU cyan, FRI magenta, SAT green, SUN orange.
+  See `shared/prideWeek.ts` and `npm run sync:design-system`.
 - Signature effects: rainbow bar divider; brutalist offset shadow
   `4px 4px 0 rgba(255,0,204,0.36)`; soft neon glow
   `0 0 14px color-mix(in srgb, <accent> 18%, transparent)` with a slow pulse.
