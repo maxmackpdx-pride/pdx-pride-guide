@@ -178,6 +178,8 @@ export default function Admin() {
   const [userSearchResults, setUserSearchResults] = useState<Array<AdminUserProfile & { id: number; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
   const [allUsersFilter, setAllUsersFilter] = useState("");
+  const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
+  const [fixUsernameValue, setFixUsernameValue] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -373,6 +375,27 @@ export default function Admin() {
     );
   }, [allUsers, allUsersFilter]);
 
+  const filteredEvents = useMemo(() => {
+    const eventSearchQuery = eventSearch.trim().toLowerCase();
+    const filtered = events.filter(ev => {
+      if (eventStatusFilter === "LIVE" && ev.status !== "LIVE") return false;
+      if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
+      if (eventStatusFilter === "unclaimed" && ev.claimedBy) return false;
+      if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
+      if (eventStatusFilter === "user_submitted" && ev.source !== "user_submitted") return false;
+      if (eventStatusFilter === "has_checkins" && !((attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count > 0)) return false;
+      if (!eventSearchQuery) return true;
+      const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""} ${ev.claimedBy || ""}`.toLowerCase();
+      return haystack.includes(eventSearchQuery);
+    });
+    return filtered.sort((a, b) => {
+      const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;
+      const dayB = DAY_SORT_ORDER[b.dayOfWeek ?? ""] ?? 99;
+      if (dayA !== dayB) return dayA - dayB;
+      return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    });
+  }, [events, eventStatusFilter, eventSearch, attendanceSummaries]);
+
   const approveMutation = useMutation({
     mutationFn: ({ id }: { id: number }) =>
       apiRequest("POST", `/api/admin/submissions/${id}/approve`, { adminName }),
@@ -418,9 +441,11 @@ export default function Admin() {
       return res.json() as Promise<AdminEvent>;
     },
     onSuccess: (updated, vars) => {
-      queryClient.setQueryData<AdminEvent[]>(["/api/admin/events"], old =>
-        old?.map(ev => (ev.id === updated.id ? { ...ev, ...updated } : ev)),
-      );
+      if (updated?.id) {
+        queryClient.setQueryData<AdminEvent[]>(["/api/admin/events"], old =>
+          old?.map(ev => (ev.id === updated.id ? { ...ev, ...updated } : ev)),
+        );
+      }
       void queryClient.refetchQueries({ queryKey: ["/api/admin/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setAssignHostByEvent(prev => {
@@ -602,8 +627,6 @@ export default function Admin() {
     onError: () => toast({ title: "Error", description: "Could not update status.", variant: "destructive" }),
   });
 
-  const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
-  const [fixUsernameValue, setFixUsernameValue] = useState("");
   const setUsernameMutation = useMutation({
     mutationFn: ({ userId, username }: { userId: number; username: string }) =>
       apiRequest("POST", `/api/admin/users/${userId}/set-username`, { username }),
@@ -841,29 +864,9 @@ export default function Admin() {
   };
 
   const userCount = adminMetrics?.users ?? allUsers.length;
-  const eventSearchQuery = eventSearch.trim().toLowerCase();
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
-  const filteredEvents = useMemo(() => {
-    const filtered = events.filter(ev => {
-      if (eventStatusFilter === "LIVE" && ev.status !== "LIVE") return false;
-      if (eventStatusFilter === "HIDDEN" && ev.status !== "HIDDEN") return false;
-      if (eventStatusFilter === "unclaimed" && ev.claimedBy) return false;
-      if (eventStatusFilter === "missing_flyer" && !isMissingEventFlyer(ev.posterImageUrl)) return false;
-      if (eventStatusFilter === "user_submitted" && ev.source !== "user_submitted") return false;
-      if (eventStatusFilter === "has_checkins" && !((attendanceSummaries[ev.id] ?? attendanceSummaries[String(ev.id)])?.count > 0)) return false;
-      if (!eventSearchQuery) return true;
-      const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""} ${ev.claimedBy || ""}`.toLowerCase();
-      return haystack.includes(eventSearchQuery);
-    });
-    return filtered.sort((a, b) => {
-      const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;
-      const dayB = DAY_SORT_ORDER[b.dayOfWeek ?? ""] ?? 99;
-      if (dayA !== dayB) return dayA - dayB;
-      return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-    });
-  }, [events, eventStatusFilter, eventSearchQuery, attendanceSummaries]);
   const inboxActionPending =
     approveMutation.isPending
     || rejectMutation.isPending
