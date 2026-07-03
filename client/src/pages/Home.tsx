@@ -1,20 +1,22 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Link } from "wouter";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import type { Event, GiftingPost, GigPost, MissedConnection } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
 import type { AdmissionType } from "@shared/admission";
 
-import {
-  DEFAULT_ATTENDANCE_PHRASE_KEY,
-  attendancePhraseLabel,
-} from "@shared/attendancePhrases";
 import EventModal from "@/components/EventModal";
-import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { useAuth } from "@/context/AuthContext";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import {
   Button,
@@ -24,7 +26,6 @@ import {
   FilterChip,
   Marquee,
   PlaceCard,
-  PosterCard,
   SectionHeader,
 } from "@/components/ds";
 import heroWallpaperImg from "@/assets/hero-wallpaper.jpg";
@@ -36,15 +37,14 @@ import {
   countEventsByHomeDay,
   dayColorVar,
   eventsForHomeDay,
-  findSanctuaryHeadliner,
   homeListingProps,
-  isWhatsOnVisible,
-  pickFourToTry,
   pickMarqueeItems,
   pickRandomBusinesses,
   prideDayChipDate,
   type HomeDayKey,
 } from "@/lib/homeEvents";
+
+type HomeSchedDay = HomeDayKey | "ALL";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
 
@@ -146,14 +146,13 @@ export default function Home() {
     "A community-run guide to Portland Pride Week 2026. Find the parties, the parade, and your people, then dance til the sun comes up.",
   );
 
-  const { user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [activeDay, setActiveDay] = useState<HomeDayKey>("SAT");
+  const [schedDay, setSchedDay] = useState<HomeSchedDay>("ALL");
+  const [schedAtEnd, setSchedAtEnd] = useState(false);
+  const schedScrollRef = useRef<HTMLDivElement>(null);
   const [savedIds, setSavedIds] = useState<Set<number>>(readSavedIds);
-  const [fourToTry, setFourToTry] = useState<EventListing[]>([]);
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
   const [featuredPlaces, setFeaturedPlaces] = useState<DirectoryBusiness[]>([]);
-  const [showAuth, setShowAuth] = useState(false);
   const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
@@ -172,12 +171,6 @@ export default function Home() {
     queryKey: ["/api/events/attendance-summaries"],
     queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
     refetchInterval: 120_000,
-  });
-
-  const { data: myCheckIns = [] } = useQuery<{ eventId: number }[]>({
-    queryKey: ["/api/events/mine/check-ins"],
-    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then(r => r.json()),
-    enabled: !!user,
   });
 
   const { data: spotted = [] } = useQuery<MissedConnection[]>({
@@ -204,15 +197,6 @@ export default function Home() {
     staleTime: 60_000,
   });
 
-  const myCheckInIds = useMemo(() => new Set(myCheckIns.map(c => c.eventId)), [myCheckIns]);
-
-  const sanctuary = useMemo(() => findSanctuaryHeadliner(events), [events]);
-
-  useEffect(() => {
-    if (events.length === 0) return;
-    setFourToTry(prev => (prev.length > 0 ? prev : pickFourToTry(events, sanctuary)));
-  }, [events, sanctuary]);
-
   useEffect(() => {
     if (events.length === 0) return;
     setMarqueeItems(prev =>
@@ -226,26 +210,39 @@ export default function Home() {
   }, [businesses]);
 
   const dayCounts = useMemo(() => countEventsByHomeDay(events), [events]);
-  const whatsOnVisible = isWhatsOnVisible(
-    typeof window !== "undefined" ? window.location.search : "",
+  const totalPrideCount = useMemo(
+    () => HOME_DAY_ORDER.reduce((sum, day) => sum + dayCounts[day], 0),
+    [dayCounts],
   );
-  const dayEvents = useMemo(() => eventsForHomeDay(events, activeDay), [events, activeDay]);
+  const schedDays = useMemo(
+    () => (schedDay === "ALL" ? [...HOME_DAY_ORDER] : [schedDay]),
+    [schedDay],
+  );
+
+  const updateSchedFade = useCallback(() => {
+    const sc = schedScrollRef.current;
+    if (!sc) return;
+    const atEnd =
+      sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4 ||
+      sc.scrollHeight <= sc.clientHeight;
+    setSchedAtEnd(atEnd);
+  }, []);
+
+  useEffect(() => {
+    const sc = schedScrollRef.current;
+    if (sc) sc.scrollTop = 0;
+    updateSchedFade();
+  }, [schedDay, events, updateSchedFade]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updateSchedFade);
+    return () => window.removeEventListener("resize", updateSchedFade);
+  }, [updateSchedFade]);
 
   const mappedBusinesses = useMemo(
     () => businesses.filter(b => b.lat != null && b.lng != null),
     [businesses],
   );
-
-  const rsvpMutation = useMutation({
-    mutationFn: (eventId: number) =>
-      apiRequest("POST", `/api/events/${eventId}/attendance`, {
-        message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
-    },
-  });
 
   const dismissSoftLaunch = () => {
     window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
@@ -270,18 +267,6 @@ export default function Home() {
     [attendanceSummaries],
   );
 
-  const handleRsvp = useCallback(
-    (eventId: number) => {
-      if (!user) {
-        setShowAuth(true);
-        return;
-      }
-      if (myCheckInIds.has(eventId)) return;
-      rsvpMutation.mutate(eventId);
-    },
-    [user, myCheckInIds, rsvpMutation],
-  );
-
   const openEvent = useCallback((event: Event) => setSelectedEvent(event), []);
 
   const dismissSoftLaunchOnEscape = useCallback((e: KeyboardEvent) => {
@@ -293,8 +278,6 @@ export default function Home() {
     window.addEventListener("keydown", dismissSoftLaunchOnEscape);
     return () => window.removeEventListener("keydown", dismissSoftLaunchOnEscape);
   }, [showSoftLaunch, dismissSoftLaunchOnEscape]);
-
-  const dayMeta = HOME_DAY_META[activeDay];
 
   return (
     <div className="home-main-stage">
@@ -426,156 +409,102 @@ export default function Home() {
 
       <div className="pg-block" style={{ paddingTop: 58 }}>
         <ScrollReveal>
-          <div className="pg-fourhead">
-            <SectionHeader
-              kicker="Every Visit"
-              title="Four to Try"
-              subtitle="Not a fixed lineup. Four events pulled at random from across the week, reshuffled every time you land."
-              accent="pink"
-              style={{ marginBottom: 0 }}
-            />
-            <Button
-              type="button"
+          <SectionHeader
+            kicker="All Week"
+            title="The Schedule"
+            subtitle="Every party, march, and after-hours, Thursday to Sunday. Scroll the whole week, or tap a day to jump."
+            accent="cyan"
+            style={{ marginBottom: 0 }}
+            action={
+              <Link href="/schedule">
+                <Button as="span" accent="cyan" size="sm" arrow>
+                  View all events
+                </Button>
+              </Link>
+            }
+          />
+          <div className="pg-schedchips">
+            <FilterChip
+              selected={schedDay === "ALL"}
+              fill={schedDay === "ALL"}
               accent="cyan"
-              size="sm"
-              onClick={() => setFourToTry(pickFourToTry(events, sanctuary))}
+              count={totalPrideCount}
+              onToggle={() => setSchedDay("ALL")}
             >
-              Reshuffle
-            </Button>
-          </div>
-          <div className="pg-fourgrid">
-            {fourToTry.length === 0 && (
-              <p style={{ gridColumn: "1 / -1", color: "var(--text-lo)", margin: 0 }}>
-                Pride-week events are loading. Check back soon or browse the full{" "}
-                <Link href="/events">events list</Link>.
-              </p>
-            )}
-            {fourToTry.map(event => {
-              const props = homeListingProps(event);
-              const going = goingCount(event.id);
-              const checkedIn = myCheckInIds.has(event.id);
+              All Week
+            </FilterChip>
+            {HOME_DAY_ORDER.map(day => {
+              const meta = HOME_DAY_META[day];
+              const selected = schedDay === day;
               return (
-                <div
-                  key={event.listingInstanceKey ?? event.id}
-                  className="pg-home-card"
-                  onClick={e => {
-                    if (isCardActionTarget(e.target)) return;
-                    openEvent(event);
-                  }}
+                <FilterChip
+                  key={day}
+                  selected={selected}
+                  fill={selected}
+                  accent={meta.accent}
+                  count={dayCounts[day]}
+                  showDot
+                  onToggle={() => setSchedDay(day)}
                 >
-                  <PosterCard
-                    title={event.title}
-                    venue={event.venueName}
-                    when={props.when}
-                    day={props.day}
-                    image={props.image}
-                    types={props.types}
-                    admission={event.admission as AdmissionType | undefined}
-                    age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
-                    going={going > 0 ? going : undefined}
-                    onRsvp={!checkedIn ? () => handleRsvp(event.id) : undefined}
-                    showLink={false}
-                    style={{ height: "100%" }}
-                  />
-                </div>
+                  {meta.label} {prideDayChipDate(day)}
+                </FilterChip>
               );
             })}
           </div>
+          <div className={`pg-schedwrap${schedAtEnd ? " is-end" : ""}`}>
+            <div className="pg-sched" ref={schedScrollRef} onScroll={updateSchedFade}>
+              {schedDays.map(day => {
+                const meta = HOME_DAY_META[day];
+                const dayEvents = eventsForHomeDay(events, day);
+                return (
+                  <div key={day} className="pg-schedgroup" data-group={day}>
+                    <div className="pg-sched__day" style={{ "--_dc": meta.color } as CSSProperties}>
+                      <span className="pg-sched__daynum">{meta.long}</span>
+                      <span className="pg-sched__daydate">{meta.date}</span>
+                      <span className="pg-sched__dayrule" />
+                      <span className="pg-sched__daycount">{dayEvents.length} events</span>
+                    </div>
+                    {dayEvents.length === 0 && (
+                      <p style={{ color: "var(--text-lo)", margin: 0 }}>
+                        Nothing scheduled for {meta.long} yet.
+                      </p>
+                    )}
+                    {dayEvents.map(event => {
+                      const props = homeListingProps(event);
+                      const going = goingCount(event.id);
+                      return (
+                        <div
+                          key={event.listingInstanceKey ?? event.id}
+                          className="pg-home-card"
+                          onClick={e => {
+                            if (isCardActionTarget(e.target)) return;
+                            openEvent(event);
+                          }}
+                        >
+                          <EventCard
+                            title={event.title}
+                            venue={event.venueName}
+                            when=""
+                            day={props.day}
+                            image={props.image}
+                            types={props.types}
+                            admission={event.admission as AdmissionType | undefined}
+                            age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
+                            going={going > 0 ? going : undefined}
+                            saved={savedIds.has(event.id)}
+                            onSave={() => toggleSaved(event.id)}
+                            style={{ "--_day": dayColorVar(event.dayOfWeek) } as CSSProperties}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </ScrollReveal>
       </div>
-
-      {whatsOnVisible && (
-        <>
-          <div className="pg-seam-wrap">
-            <Divider seam />
-          </div>
-          <div className="pg-block">
-            <ScrollReveal>
-              <SectionHeader
-                kicker="By the Day"
-                title="What's On"
-                subtitle="Thursday to Sunday. Tap a day and watch the night unfold."
-                accent="cyan"
-              />
-              <div className="pg-daychips">
-                {HOME_DAY_ORDER.map(day => {
-                  const meta = HOME_DAY_META[day];
-                  const selected = activeDay === day;
-                  return (
-                    <FilterChip
-                      key={day}
-                      selected={selected}
-                      fill={selected}
-                      accent={meta.accent}
-                      count={dayCounts[day]}
-                      showDot
-                      onToggle={() => setActiveDay(day)}
-                    >
-                      {meta.label} {prideDayChipDate(day)}
-                    </FilterChip>
-                  );
-                })}
-              </div>
-              <div className="pg-dayhead">
-                <span className="pg-daytitle" style={{ color: dayMeta.color }}>
-                  {dayMeta.long}
-                </span>
-                <span className="pg-dayhead__sub">The night, hour by hour.</span>
-              </div>
-              <div className="pg-spine">
-                <div
-                  className="pg-spine__line"
-                  style={{ background: `linear-gradient(to bottom, ${dayMeta.color}, transparent)` }}
-                />
-                {dayEvents.length === 0 && (
-                  <p style={{ color: "var(--text-lo)", margin: "0 0 16px 44px" }}>
-                    Nothing scheduled for {dayMeta.long} yet.
-                  </p>
-                )}
-                {dayEvents.map(event => {
-                  const props = homeListingProps(event);
-                  const going = goingCount(event.id);
-                  const eventDayColor = dayColorVar(event.dayOfWeek);
-                  return (
-                    <div key={event.listingInstanceKey ?? event.id} className="pg-spine__row">
-                      <div style={{ position: "relative" }}>
-                        <span
-                          className="pg-spine__dot"
-                          style={{
-                            background: eventDayColor,
-                            boxShadow: `0 0 12px ${eventDayColor}`,
-                          }}
-                        />
-                      </div>
-                      <div
-                        className="pg-home-card"
-                        onClick={e => {
-                          if (isCardActionTarget(e.target)) return;
-                          openEvent(event);
-                        }}
-                      >
-                        <EventCard
-                          title={event.title}
-                          venue={event.venueName}
-                          when=""
-                          day={props.day}
-                          image={props.image}
-                          types={props.types}
-                          admission={event.admission as AdmissionType | undefined}
-                          age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
-                          going={going > 0 ? going : undefined}
-                          saved={savedIds.has(event.id)}
-                          onSave={() => toggleSaved(event.id)}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollReveal>
-          </div>
-        </>
-      )}
 
       <div className="pg-seam-wrap--sm">
         <Divider seam />
@@ -753,7 +682,7 @@ export default function Home() {
         />
       )}
 
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+
     </div>
   );
 }

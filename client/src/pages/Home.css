@@ -171,66 +171,101 @@
   gap: 12px;
 }
 
-.home-main-stage .pg-fourgrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin: 26px -14px 0;
-}
-
-.home-main-stage .pg-fourhead {
+.home-main-stage .pg-schedchips {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
   flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
 }
 
-.home-main-stage .pg-fourhead .pdxSection {
-  flex: 1;
-  min-width: 300px;
-  margin-bottom: 0;
+.home-main-stage .pg-schedwrap {
+  position: relative;
+  margin-top: 20px;
 }
 
-.home-main-stage .pg-daytitle {
+.home-main-stage .pg-schedwrap::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  height: 52px;
+  pointer-events: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: linear-gradient(to top, var(--ink-1000) 12%, transparent);
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.home-main-stage .pg-schedwrap.is-end::after {
+  opacity: 0;
+}
+
+.home-main-stage .pg-sched {
+  max-height: 588px;
+  overflow-y: auto;
+  padding: 0 16px 20px;
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--ink-1000);
+  scroll-behavior: smooth;
+}
+
+.home-main-stage .pg-schedgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-main-stage .pg-schedgroup + .pg-schedgroup {
+  margin-top: 6px;
+}
+
+.home-main-stage .pg-sched__day {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 2px 11px;
+  background: linear-gradient(to bottom, var(--ink-1000) 68%, transparent);
+}
+
+.home-main-stage .pg-sched__daynum {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
-  font-size: 1.7rem;
+  font-size: 1.45rem;
+  line-height: 1;
   letter-spacing: 0.02em;
+  color: var(--_dc);
 }
 
-.home-main-stage .pg-spine {
-  position: relative;
-  padding-left: 2px;
+.home-main-stage .pg-sched__daydate {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--text-lo);
 }
 
-.home-main-stage .pg-spine__line {
-  position: absolute;
-  left: 11px;
-  top: 8px;
-  bottom: 8px;
-  width: 2px;
-  opacity: 0.55;
+.home-main-stage .pg-sched__dayrule {
+  flex: 1;
+  height: 2px;
+  border-radius: 999px;
+  opacity: 0.45;
+  background: linear-gradient(to right, var(--_dc), transparent);
 }
 
-.home-main-stage .pg-spine__row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 26px 1fr;
-  gap: 18px;
-  align-items: start;
-  margin-bottom: 14px;
-}
-
-.home-main-stage .pg-spine__dot {
-  position: absolute;
-  left: 1px;
-  top: 24px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 3px solid var(--ink-900);
+.home-main-stage .pg-sched__daycount {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--_dc);
+  border: 1px solid var(--_dc);
+  border-radius: 999px;
+  padding: 3px 10px 2px;
 }
 
 .home-main-stage .pg-board3 {
@@ -408,26 +443,6 @@
   padding: 36px 0 0;
 }
 
-.home-main-stage .pg-daychips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 22px;
-}
-
-.home-main-stage .pg-dayhead {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  margin: 28px 0 20px;
-}
-
-.home-main-stage .pg-dayhead__sub {
-  color: var(--text-lo);
-  font-size: 0.92rem;
-  white-space: nowrap;
-}
-
 .home-main-stage .pg-home-card {
   cursor: pointer;
 }
@@ -466,10 +481,6 @@ html.calm-mode .home-main-stage .scroll-reveal--visible {
 }
 
 @media (max-width: 900px) {
-  .home-main-stage .pg-fourgrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .home-main-stage .pg-board3 {
     grid-template-columns: 1fr;
   }
@@ -507,10 +518,6 @@ html.calm-mode .home-main-stage .pg-note--spot {
   animation: none;
 }
 
-.home-main-stage .pg-fourgrid .pdxBoard {
-  animation: pdxPulse var(--dur-pulse, 4s) ease-in-out infinite;
-}
-
 html.calm-mode .home-main-stage .pg-hero__img {
   filter: grayscale(0.85) brightness(0.72);
 }
@@ -528,16 +535,9 @@ html.calm-mode .home-main-stage .pg-hero h1 .rainbow__outline {
   text-shadow: none;
 }
 
-html.calm-mode .home-main-stage .pg-fourgrid .pdxBoard {
-  animation: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .home-main-stage .pg-note--spot {
     animation: none;
   }
 
-  .home-main-stage .pg-fourgrid .pdxBoard {
-    animation: none;
-  }
 }
