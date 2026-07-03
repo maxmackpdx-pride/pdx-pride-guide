@@ -1506,28 +1506,48 @@ h2.display,
 
 @media (max-width: 1023px) {
   :root {
-    --site-header-height: auto;
+    /* Header scrolls away on mobile — sticky filter bars pin to viewport top */
+    --site-header-height: 0px;
+  }
+
+  .site-header {
+    position: static;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   }
 
   .site-header-inner {
+    --site-logo-h: 40px;
+    --site-brand-gap: 8px;
     position: relative;
-    min-height: auto;
-    padding: 14px clamp(14px, 4vw, 20px);
+    min-height: 0;
+    padding: 8px 12px;
     flex-wrap: wrap;
     align-items: center;
-    gap: 14px;
+    gap: 8px;
   }
 
   .site-brand-wordmark {
-    --site-wordmark-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.21), 1.45rem);
+    --site-wordmark-size: 0.68rem;
+    line-height: 0.82;
+    gap: 0;
   }
 
   .site-header-controls {
     margin-left: auto;
+    gap: 6px;
   }
 
   .site-nav-toggle {
     display: inline-flex;
+    padding: 6px 10px;
+    gap: 6px;
+    font-size: 0.78rem;
+    box-shadow: 3px 3px 0 rgba(255, 0, 204, 0.4);
+  }
+
+  .site-nav-toggle svg {
+    width: 22px;
+    height: 22px;
   }
 
   .site-nav {
@@ -1605,7 +1625,17 @@ h2.display,
 
 @media (max-width: 640px) {
   .site-header-inner {
-    --site-logo-h: 114px;
+    --site-logo-h: 34px;
+    padding: 6px 10px;
+  }
+
+  .site-brand-wordmark {
+    --site-wordmark-size: 0.6rem;
+  }
+
+  /* Narrow phones: logo + PDX/PRIDE only — GUIDE drops to save height */
+  .site-brand-wordmark__line:last-child {
+    display: none;
   }
 }
 .btn-neon.cyan {
