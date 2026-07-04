@@ -6,7 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import PageHeader from "@/components/PageHeader";
+import PageHero from "@/components/PageHero";
+import { giftingHeroProps } from "@/lib/giftingHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
@@ -255,19 +256,16 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page">
-      <PageHeader
-        section="Boards"
-        title="Gifting"
-        titleAccent="rainbow"
-        kicker="Pride season only · Now through July 26"
-        lede="A queer Portland free board for Pride-season closet chaos, event supplies, outfit saves, furniture, gear, tickets, décor, and whatever else needs a new home."
-        tagline="Give gay gifts. Queer homes. Keep it moving."
-        actions={
-          <>
-            <button type="button" className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a gift</button>
-            <button type="button" className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an ISO</button>
-          </>
-        }
+      <PageHero
+        {...giftingHeroProps({
+          className: "gifting-page-hero page-hero--image-title",
+          actions: (
+            <>
+              <button type="button" className="btn-neon" onClick={() => openForm("GIFT")}><Gift size={16} /> Post a gift</button>
+              <button type="button" className="btn-neon cyan" onClick={() => openForm("ISO")}><Search size={16} /> Post an ISO</button>
+            </>
+          ),
+        })}
       />
 
       <BoardStatsBar stats={stats} />

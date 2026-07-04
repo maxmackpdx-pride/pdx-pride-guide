@@ -6366,26 +6366,26 @@ footer a:hover { color: #00FFFF !important; }
   border-radius: 12px;
 }
 
-/* Submit / Promoters page — compact flush hero (matches Events, Dashboard) */
-.submit-page .page-hero {
+/* Submit sub-flows keep compact PageHeader; landing collage uses board hero sizing */
+.submit-page .page-hero:not(.page-hero--image-title) {
   min-height: clamp(148px, 20vh, 210px);
 }
 
-.submit-page .page-hero__inner {
+.submit-page .page-hero:not(.page-hero--image-title) .page-hero__inner {
   padding: 20px 20px 16px;
   min-height: inherit;
 }
 
-.submit-page .page-hero__panel {
+.submit-page .page-hero:not(.page-hero--image-title) .page-hero__panel {
   padding: 12px 22px 14px;
 }
 
-.submit-page .page-hero__title {
+.submit-page .page-hero:not(.page-hero--image-title) .page-hero__title {
   font-size: clamp(2.4rem, 5.5vw, 4.25rem);
   margin: 0.25rem 0 0.15rem;
 }
 
-.submit-page .page-hero__lede {
+.submit-page .page-hero:not(.page-hero--image-title) .page-hero__lede {
   font-size: clamp(0.95rem, 1.8vw, 1.02rem);
   line-height: 1.6;
   max-width: 42rem;
@@ -8400,25 +8400,63 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
 }
 
 
-/* Gifting hero: calm the busy collage photo to match the quieter, grain-poster reference look */
-.gifting-page .page-hero__bg {
-  filter: saturate(0.9) contrast(0.97) brightness(0.92);
+/* Gifting, Gigs, Promoters collage heroes — scrim + legible text panel over busy art */
+.gifting-page .page-hero__bg,
+.gigs-page .page-hero__bg,
+.submit-page .page-hero__bg {
+  filter: saturate(1.02) contrast(1.04) brightness(0.94);
 }
-.gifting-page .page-hero__scrim {
-  background: var(--board-promo-scrim);
+.gifting-page .page-hero__scrim,
+.gigs-page .page-hero__scrim,
+.submit-page .page-hero__scrim {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.68) 30%, rgba(0, 0, 0, 0.42) 58%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.42) 38%, rgba(0, 0, 0, 0.1) 72%);
 }
-.gifting-page .page-hero__grain {
+.gifting-page .page-hero__grain,
+.gigs-page .page-hero__grain,
+.submit-page .page-hero__grain {
   opacity: var(--board-promo-grain-opacity);
 }
 
-.gigs-page .page-hero__bg {
-  filter: saturate(0.92) contrast(0.98) brightness(0.9);
+.gifting-page.page-hero--flush .page-hero__panel,
+.gigs-page.page-hero--flush .page-hero__panel,
+.submit-page.page-hero--flush .page-hero__panel {
+  padding: clamp(16px, 2.5vw, 28px) clamp(18px, 3vw, 32px);
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(6px);
 }
-.gigs-page .page-hero__scrim {
-  background: var(--board-promo-scrim);
+
+.gifting-page .page-hero--image-title .page-hero__title,
+.gigs-page .page-hero--image-title .page-hero__title,
+.submit-page .page-hero--image-title .page-hero__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-.gigs-page .page-hero__grain {
-  opacity: var(--board-promo-grain-opacity);
+
+.gifting-page .page-hero--image-title .page-hero__lede,
+.gifting-page .page-hero--image-title .page-hero__tagline,
+.gifting-page .page-hero--image-title .board-kicker,
+.gigs-page .page-hero--image-title .page-hero__lede,
+.gigs-page .page-hero--image-title .page-hero__tagline,
+.gigs-page .page-hero--image-title .board-kicker,
+.submit-page .page-hero--image-title .page-hero__lede,
+.submit-page .page-hero--image-title .page-hero__tagline,
+.submit-page .page-hero--image-title .board-kicker {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 18px rgba(0, 0, 0, 0.65);
 }
 
 /* Inbox: list + thread split layout */
@@ -9282,6 +9320,7 @@ html.calm-mode .diag {
 /* Hero chrome on board pages */
 html.calm-mode .gifting-page .page-hero__bg,
 html.calm-mode .gigs-page .page-hero__bg,
+html.calm-mode .submit-page .page-hero__bg,
 html.calm-mode .missed-page .page-hero__bg {
   opacity: var(--calm-hero-bg-opacity) !important;
   filter: grayscale(1) saturate(0) contrast(1.02) !important;
@@ -9289,6 +9328,7 @@ html.calm-mode .missed-page .page-hero__bg {
 
 html.calm-mode .gifting-page .page-hero__scrim,
 html.calm-mode .gigs-page .page-hero__scrim,
+html.calm-mode .submit-page .page-hero__scrim,
 html.calm-mode .missed-page .page-hero__scrim {
   background: var(--calm-hero-scrim), var(--calm-hero-scrim-vertical) !important;
 }

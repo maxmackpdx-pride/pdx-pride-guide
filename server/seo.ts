@@ -428,7 +428,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     description: pageDescription,
     url: pageUrl,
     image: pageImage,
-    imageAlt: liveEvent ? liveEvent.title : "PDX Pride Guide July 16-19 social preview graphic",
+    imageAlt: liveEvent ? liveEvent.title : "PDX Pride Week July 13-19 — Events, Gigs, Missed Connections",
     type: liveEvent ? "article" : "website",
   });
 

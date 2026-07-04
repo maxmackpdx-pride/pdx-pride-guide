@@ -9,7 +9,9 @@ import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
 import PageHeader from "@/components/PageHeader";
+import PageHero from "@/components/PageHero";
 import type { PageHeroAccent } from "@/components/PageHero";
+import { promotersHeroProps } from "@/lib/promotersHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
@@ -330,13 +332,19 @@ export default function Submit() {
   return (
     <div className="zine-page submit-page board-page">
       {showAuth && !user && <AuthModal onClose={closeAuth} defaultTab="register" />}
-      <PageHeader
-        section="Submit"
-        title={hero.title}
-        titleAccent={hero.accent}
-        kicker={hero.kicker}
-        lede={hero.lede}
-      />
+      {mode === "landing" ? (
+        <PageHero
+          {...promotersHeroProps({ className: "submit-page-hero page-hero--image-title" })}
+        />
+      ) : (
+        <PageHeader
+          section="Submit"
+          title={hero.title}
+          titleAccent={hero.accent}
+          kicker={hero.kicker}
+          lede={hero.lede}
+        />
+      )}
 
       <div className="submit-page__body">
 
