@@ -30,7 +30,7 @@
   </head>
   <body>
     <div id="root"></div>
-    <div id="boot-fallback" hidden style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#fff;font-family:sans-serif;text-align:center;padding:32px;">
+    <div id="boot-fallback" hidden style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#fff;font-family:sans-serif;text-align:center;padding:32px;">
       <div style="font-size:42px;margin-bottom:12px;">🏳️‍🌈</div>
       <h1 style="font-size:1.25rem;margin:0 0 8px;">Pride Guide is loading…</h1>
       <p style="opacity:0.65;max-width:320px;line-height:1.5;margin:0 0 20px;">If this screen stays blank, clear the cached app shell and try again.</p>
@@ -83,12 +83,19 @@
           true,
         );
 
+        function setBootFallback(show) {
+          var fallback = document.getElementById("boot-fallback");
+          if (!fallback) return;
+          // Inline display beats the hidden attribute, so drive display directly.
+          fallback.hidden = !show;
+          fallback.style.display = show ? "flex" : "none";
+        }
+
         function syncBootFallback() {
           var root = document.getElementById("root");
-          var fallback = document.getElementById("boot-fallback");
-          if (!root || !fallback) return;
-          // Hide as soon as React mounts; only show after a delay if the app never boots.
-          fallback.hidden = root.childElementCount > 0;
+          if (!root) return;
+          // Hide as soon as React mounts; never re-show once the app has booted.
+          if (root.childElementCount > 0) setBootFallback(false);
         }
 
         var root = document.getElementById("root");
@@ -101,7 +108,7 @@
           var rootEl = document.getElementById("root");
           var fallback = document.getElementById("boot-fallback");
           if (rootEl && !rootEl.childElementCount && fallback) {
-            fallback.hidden = false;
+            setBootFallback(true);
           }
         }, 6000);
 
