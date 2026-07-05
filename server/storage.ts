@@ -1733,6 +1733,226 @@ function removePrePrideWeekEvents() {
   `).run();
 }
 
+/** PDX PAH Barking Chain — July 2026 Happy Pahride newsletter (admin_seeded, claimable). */
+function seedPdxPahJuly2026Events() {
+  const now = new Date().toISOString();
+  const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+  const insert = (row: Record<string, unknown>) => {
+    if (exists.get(row.title)) return;
+    db.insert(events).values({ ...row, createdAt: now } as any).run();
+  };
+
+  insert({
+    title: "Bearly Awake: Morning Grounding & Meditation",
+    description:
+      "All-creature morning grounding, gentle movement, and meditation hour hosted by Alty Bear. Monthly on 3rd Wednesdays — this July session leads into Pride Weekend. Hosted by Portland Pets and Handlers (PDX PAH).",
+    venueName: "Q Center",
+    address: "4115 N Mississippi Ave, Portland, OR 97217",
+    neighborhood: "N Portland",
+    lat: 45.5652,
+    lng: -122.676,
+    dateStart: "2026-07-15T10:00:00",
+    dateEnd: "2026-07-15T11:00:00",
+    dayOfWeek: "WED",
+    ageRequirement: "ALL_AGES",
+    eventTypes: JSON.stringify(["SOCIAL", "COMMUNITY", "WELLNESS"]),
+    admission: "FREE",
+    ticketUrl: "https://www.instagram.com/pdxpahofficial/",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: "/posters/pdxpah-bearly-awake.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter.",
+  });
+
+  insert({
+    title: "PDXPAH Social & AWOO: The Petplayers Social",
+    description:
+      "Friday Pride kickoff social at Eagle Portland. Strut, catch up with the crew, and ask for a welcome pet if you need a hand breaking into the space. Dance party from 9pm with rotating DJs — show tails only. Contact @PorkyGrinds or @DaddyBandit1989 on Telegram to volunteer as a welcome pet.",
+    venueName: "Eagle Portland",
+    address: "835 N Lombard St, Portland, OR 97217",
+    neighborhood: "N Portland",
+    lat: 45.5803,
+    lng: -122.6856,
+    dateStart: "2026-07-17T19:00:00",
+    dateEnd: "2026-07-18T00:00:00",
+    dayOfWeek: "FRI",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["SOCIAL", "PARTY", "LEATHER", "KINK", "DANCE"]),
+    admission: "DOOR_FEE",
+    ticketUrl: "https://www.instagram.com/pdxpahofficial/",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: true,
+    nudityOk: false,
+    posterImageUrl: "/posters/pdxpah-eagle-july-schedule.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Eagle lists 7/17 as AWOO.",
+  });
+
+  insert({
+    title: "The Pahvillion — PDX PAH at Waterfront Pride Festival",
+    description:
+      "Hang with the puppies at Pride Weekend. PDX PAH hosts booths #7 and #8 at Tom McCall Waterfront Park with Portland Sisters of Perpetual Indulgence, Quirky Witches, Animal Expressants of a Different Breed, and elected officials. Snacks, drinks, headpats, and a cool-down from the heat. Henna and handcrafted dupatta sales from Amrapali Boutique on behalf of the Sisters.",
+    venueName: "Tom McCall Waterfront Park — PDX PAH Booths 7 & 8",
+    address: "98 SW Naito Pkwy, Portland, OR 97204",
+    neighborhood: "Downtown",
+    lat: 45.5201241,
+    lng: -122.6727,
+    dateStart: "2026-07-18T12:00:00",
+    dateEnd: "2026-07-19T18:00:00",
+    dayOfWeek: "SAT",
+    ageRequirement: "ALL_AGES",
+    eventTypes: JSON.stringify(["FESTIVAL", "COMMUNITY", "SOCIAL", "MULTI-DAY"]),
+    admission: "FREE",
+    ticketUrl: "https://www.instagram.com/pdxpahofficial/",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: "/posters/pdxpah-happy-wrath.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Booths open Sat–Sun festival hours.",
+  });
+
+  insert({
+    title: "Portland Pets and Handlers in the Pahrade",
+    description:
+      "Join the pack for PDX PAH's annual Pride parade march. Wear your best, your worst, or your most expressive self. A float is available for anyone who has difficulty walking the route. Group photo tradition at 10:15am — rally point posted in the Bark Box Telegram channel once confirmed.",
+    venueName: "Portland Pride Parade — PDX PAH contingent",
+    address: "North Park Blocks to Naito Pkwy, Portland, OR 97209",
+    neighborhood: "Downtown",
+    lat: 45.523011535188,
+    lng: -122.679071017042,
+    dateStart: "2026-07-19T10:00:00",
+    dateEnd: "2026-07-19T15:00:00",
+    dayOfWeek: "SUN",
+    ageRequirement: "ALL_AGES",
+    eventTypes: JSON.stringify(["MARCH", "PARADE", "COMMUNITY", "LEATHER", "FREE"]),
+    admission: "FREE",
+    ticketUrl: "https://t.me/pdxpahbarkbox",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: "/posters/pdxpah-happy-wrath.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Rally location via Bark Box.",
+  });
+
+  insert({
+    title: "Post Parade Pet Party: P4",
+    description:
+      "Post-parade pet party presented by Portland Pets and Handlers at CC Slaughters. Sunday night dance and social with DJ Ragnarock after the Pride parade.",
+    venueName: "CC Slaughters",
+    address: "219 NW Davis St, Portland, OR 97209",
+    neighborhood: "Old Town",
+    lat: 45.5236,
+    lng: -122.6737,
+    dateStart: "2026-07-19T17:00:00",
+    dateEnd: "2026-07-20T02:00:00",
+    dayOfWeek: "SUN",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["PARTY", "SOCIAL", "DANCE", "LEATHER", "KINK"]),
+    admission: "DOOR_FEE",
+    ticketUrl: "https://ccslaughterspdx.com",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: true,
+    nudityOk: false,
+    posterImageUrl: "/posters/pdxpah-post-parade-p4.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Feat. DJ Ragnarock.",
+  });
+
+  insert({
+    title: "Oregon State Leather Contest 2026",
+    description:
+      "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
+    venueName: "Oregon State Leather Contest",
+    address: "Portland, OR",
+    neighborhood: "Portland",
+    lat: null,
+    lng: null,
+    dateStart: "2026-08-07T19:00:00",
+    dateEnd: "2026-08-09T23:00:00",
+    dayOfWeek: "FRI",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.oslcontest.org",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: true,
+    nudityOk: false,
+    posterImageUrl: "/posters/oslc-leather-contest-2026.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Apps close Jul 19.",
+  });
+
+  insert({
+    title: "OSLC Info Session — So You Want to Be a Titleholder?",
+    description:
+      "Virtual info session for anyone curious about becoming an Oregon State Leather titleholder. July session via Google Meet — links on the OSLC calendar. Additional sessions run through July 19.",
+    venueName: "Virtual (Google Meet)",
+    address: null,
+    neighborhood: "Portland",
+    lat: null,
+    lng: null,
+    dateStart: "2026-07-15T19:00:00",
+    dateEnd: "2026-07-15T20:30:00",
+    dayOfWeek: "WED",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["EDUCATION", "LEATHER", "COMMUNITY"]),
+    admission: "FREE",
+    ticketUrl: "https://www.oslcontest.org/calendar",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: "/posters/oslc-titleholder-info-sessions.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Wed Jul 15 7pm session.",
+  });
+}
+
 function applyEventDataAuditFixes() {
   sqlite.prepare(`
     UPDATE events SET
@@ -2213,6 +2433,10 @@ function runBootMigrationsOnce() {
       WHERE LOWER(TRIM(venue_name)) LIKE '%sanctuary%'
     `).run();
     recordBootMigration("sanctuary_sex_positive_v1");
+  }
+  if (!hasBootMigration("seed_pdxpah_events_v1")) {
+    seedPdxPahJuly2026Events();
+    recordBootMigration("seed_pdxpah_events_v1");
   }
 }
 
