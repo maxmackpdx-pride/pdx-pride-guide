@@ -2983,6 +2983,8 @@ export interface IStorage {
   getSentMessages(userId: number): Message[];
   getUnreadCount(userId: number): number;
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
+  /** Drop a content-moderation alert into the site owner's guide inbox. */
+  notifyOwnerModeration(subject: string, body: string): void;
   getNotificationPrefs(userId: number): NotificationPrefs;
   setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin?: boolean): NotificationPrefs;
   upsertPushSubscription(userId: number, data: { endpoint: string; p256dh: string; auth: string; userAgent?: string | null; platform?: string | null }): unknown;
@@ -4441,6 +4443,11 @@ export const storage: IStorage = {
     } as any).returning().get();
     schedulePushForMessage(created);
     return created;
+  },
+  notifyOwnerModeration(subject, body) {
+    const owner = resolveSiteOwner();
+    if (!owner) return;
+    notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
   },
   getNotificationPrefs(userId: number): NotificationPrefs {
     const row = sqlite.prepare(`SELECT notification_prefs, sub_admin FROM users WHERE id = ?`).get(userId) as {

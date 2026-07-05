@@ -9,6 +9,7 @@ import { initAttendanceWs } from "./attendanceWs";
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
 import { z } from "zod";
+import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
   enrichEventForMap,
@@ -311,6 +312,44 @@ function sanitizeProfilePhotos(input: unknown): string | null {
   return JSON.stringify(clean);
 }
 
+// ─── Content moderation gate ──────────────────────────────────────────────────
+// Runs user-authored text through @shared/contentModeration.
+//   BLOCK  → sends a friendly 400 and returns true (caller must stop).
+//   REVIEW → content is accepted, but an alert lands in the site owner's inbox.
+// Sexual / kink / sex-work content is allowlisted inside the shared module and
+// never trips these gates — this only catches the house-rule exclusions
+// (scat, blood/gore, weapons, abuse, illegal content, off-platform links).
+function moderationGate(
+  res: any,
+  boardName: string,
+  fields: Record<string, string | null | undefined>,
+): boolean {
+  const result = moderateFields(fields);
+  if (result.verdict === "BLOCK") {
+    const category = result.reasons[0]?.category || "ABUSE";
+    res.status(400).json({ error: moderationMessage(category), moderation: result.reasons });
+    return true;
+  }
+  if (result.verdict === "REVIEW") {
+    const snippet = Object.values(fields)
+      .filter((v): v is string => typeof v === "string" && !!v.trim())
+      .join(" · ")
+      .slice(0, 200);
+    const reasonText = result.reasons
+      .map(r => `${r.category}${r.field ? ` (${r.field})` : ""}: "${r.match}"`)
+      .join("; ");
+    try {
+      storage.notifyOwnerModeration(
+        `Moderation review: ${boardName}`,
+        `Board: ${boardName}\nVerdict: REVIEW (content was accepted and is live)\nReasons: ${reasonText}\n\nSnippet:\n${snippet}`,
+      );
+    } catch (err) {
+      console.error("[moderation] failed to send owner review alert:", err);
+    }
+  }
+  return false;
+}
+
 function publicGiftingPost(post: any, viewerUserId?: number) {
   const userId = Number(post.userId ?? post.user_id);
   const selectedInterestId = Number(post.selectedInterestId ?? post.selected_interest_id ?? 0) || null;
@@ -591,6 +630,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const user = storage.getUserById(req.session.userId!);
       if (!user) return res.status(401).json({ error: "Not authenticated" });
+      if (moderationGate(res, "Event submission", {
+        title: req.body.title,
+        description: req.body.description,
+        venueName: req.body.venueName,
+        claimReason: req.body.claimReason,
+      })) return;
       const rawType = req.body.type;
       const type = rawType === "CLAIM" ? "CLAIM"
         : rawType === "SUGGEST" ? "SUGGEST"
@@ -730,6 +775,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!evt) return res.status(404).json({ error: "Not found" });
     const user = storage.getUserById(req.session.userId!);
     if (!user || !storage.isUserEventHost(evt.id, user.id)) return res.status(403).json({ error: "Not your event" });
+    if (moderationGate(res, "Event edit", {
+      title: req.body.title,
+      description: req.body.description,
+      venueName: req.body.venueName,
+    })) return;
     const allowed = [
       "title", "description", "venueName", "address", "neighborhood",
       "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
@@ -972,6 +1022,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/gigs", requireAuth, (req, res) => {
     try {
+      if (moderationGate(res, "Gig board", {
+        title: req.body.title,
+        name: req.body.name,
+        description: req.body.description,
+        skills: req.body.skills,
+        compensation: req.body.compensation,
+        location: req.body.location,
+      })) return;
       const data = insertGigPostSchema.parse(req.body);
       assertGigBoardAllowed(req.body, data);
       const userId = req.session.userId!;
@@ -988,6 +1046,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (gig.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
+    if (moderationGate(res, "Gig board message", { body })) return;
     const msg = storage.sendMessage(req.session.userId!, gig.userId, `Gig Board: ${gig.title}`, body, {
       contextType: "GIG",
       contextId: gig.id,
@@ -1014,6 +1073,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
         skills: req.body.skills ?? existing.skills,
         compensation: req.body.compensation ?? existing.compensation,
       });
+      if (moderationGate(res, "Gig board edit", {
+        title: req.body.title,
+        name: req.body.name,
+        description: req.body.description,
+        skills: req.body.skills,
+        compensation: req.body.compensation,
+        location: req.body.location,
+      })) return;
       storage.updateGigPost(id, userId, req.body);
       res.json({ ok: true });
     } catch (e: any) {
@@ -1048,6 +1115,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/gifting", requireAuth, (req, res) => {
     try {
       assertGiftingAllowed(req.body);
+      if (moderationGate(res, "Gifting board", {
+        title: req.body.title,
+        description: req.body.description,
+        pickupPreference: req.body.pickupPreference,
+      })) return;
       const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 2) : [];
       const postType = req.body.postType === "ISO" ? "ISO" : "GIFT";
       const data = insertGiftingPostSchema.parse({
@@ -1074,6 +1146,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if ((post.post_type || post.postType) !== "GIFT") return res.status(400).json({ error: "Use the In Search Of offer flow for In Search Of posts." });
       const note = String(req.body.note || "").trim();
       if (!note) return res.status(400).json({ error: "A short note is required." });
+      if (moderationGate(res, "Gifting interest note", { note })) return;
       const interest = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
         postId: post.id,
         userId: req.session.userId!,
@@ -1098,6 +1171,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if ((post.post_type || post.postType) !== "ISO") return res.status(400).json({ error: "Use the interest flow for Gift posts." });
       const note = String(req.body.note || "").trim();
       if (!note) return res.status(400).json({ error: "A short note is required." });
+      if (moderationGate(res, "Gifting offer note", { note })) return;
       const offer = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
         postId: post.id,
         userId: req.session.userId!,
@@ -1401,6 +1475,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
     const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location, socialLinks, profileEmbeds, profilePhotos } = req.body;
+    const moderated: Record<string, string | null | undefined> = {
+      displayName: typeof displayName === "string" ? displayName : undefined,
+      bio: typeof bio === "string" ? bio : undefined,
+      pronouns: typeof pronouns === "string" ? pronouns : undefined,
+      location: typeof location === "string" ? location : undefined,
+    };
+    if (socialLinks && typeof socialLinks === "object" && !Array.isArray(socialLinks)) {
+      for (const [key, value] of Object.entries(socialLinks as Record<string, unknown>)) {
+        // "website" is the one place a member's own off-platform site belongs —
+        // exempt from the link-host allowlist (sanitizeSocialLinks still applies).
+        if (key === "website") continue;
+        if (typeof value === "string") moderated[`socialLinks.${key}`] = value;
+      }
+    }
+    if (moderationGate(res, "Member profile", moderated)) return;
     const patch: Record<string, unknown> = {};
     if (displayName !== undefined) patch.displayName = displayName;
     if (avatarChoice !== undefined) patch.avatarChoice = avatarChoice;
@@ -1452,6 +1541,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const sender = storage.getUserById(req.session.userId!);
     if (!sender) return res.status(401).json({ error: "Not authenticated" });
     const subject = String(req.body?.subject || "").trim().slice(0, 120) || `Message from @${sender.username}`;
+    if (moderationGate(res, "Direct message", { subject, body })) return;
     storage.sendMessage(sender.id, target.id, subject, body, { contextType: "THREAD" });
     res.json({ ok: true });
   });
@@ -1497,6 +1587,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (hasEvent && !Number.isFinite(eventId)) {
         return res.status(400).json({ error: "Invalid event" });
       }
+
+      if (moderationGate(res, "Spotted / Missed Connections", {
+        title: req.body.title,
+        body: req.body.body,
+        eventLabel: req.body.eventLabel,
+        venueHint: req.body.venueHint,
+      })) return;
 
       let payload: Record<string, unknown>;
       let eventMeta: { title: string; venueName: string; dayOfWeek: string } | null = null;
@@ -1559,6 +1656,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (req.body[k] !== undefined) patch[k] = req.body[k];
     });
     if (patch.body && patch.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
+    if (moderationGate(res, "Spotted / Missed Connections edit", { title: patch.title, body: patch.body })) return;
     const updated = storage.updateMissedConnection(Number(req.params.id), req.session.userId!, patch);
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
@@ -1575,6 +1673,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (post.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
+    if (moderationGate(res, "Spotted / Missed Connections reply", { body })) return;
     const msg = storage.sendMessage(req.session.userId!, post.userId, `Missed Connection: ${post.title}`, body, {
       contextType: "MISSED_CONNECTION",
       contextId: post.id,
@@ -1694,6 +1793,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const toUserId = last.fromUserId === req.session.userId ? last.toUserId : last.fromUserId;
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
+    if (moderationGate(res, "Inbox thread reply", { body })) return;
     const msg = storage.sendMessage(req.session.userId!, toUserId, first.subject || "Reply", body, {
       threadId: req.params.threadId,
       contextType: first.contextType || "THREAD",
@@ -1884,6 +1984,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const body = String(req.body.body || "").trim().slice(0, 1000);
     if (!body) return res.status(400).json({ error: "body required" });
+    if (moderationGate(res, "Host update", { body })) return;
     const msg = storage.createHostMessage({ eventId: evt.id, userId: user.id, body });
     const notified = storage.notifyAttendeesOfHostUpdate(evt.id, user.id, evt.title, body);
     res.json({ ...msg, notified });
@@ -1923,6 +2024,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (host.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
+    if (moderationGate(res, "Message to event host", { body })) return;
     const msg = storage.sendMessage(req.session.userId!, host.id, `Event: ${evt.title}`, body, {
       contextType: "EVENT_HOST",
       contextId: evt.id,
