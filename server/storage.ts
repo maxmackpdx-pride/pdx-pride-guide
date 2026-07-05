@@ -8,6 +8,7 @@ import {
   missedConnectionClosesAt,
 } from "@shared/missedConnections";
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
+import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
@@ -284,6 +285,7 @@ function ensureGigPostsSchema() {
   if (!colNames.has("compensation")) addColumn(`ALTER TABLE gig_posts ADD COLUMN compensation TEXT`);
   if (!colNames.has("location")) addColumn(`ALTER TABLE gig_posts ADD COLUMN location TEXT`);
   if (!colNames.has("is_remote")) addColumn(`ALTER TABLE gig_posts ADD COLUMN is_remote INTEGER DEFAULT 0`);
+  if (!colNames.has("admin_notes")) addColumn(`ALTER TABLE gig_posts ADD COLUMN admin_notes TEXT`);
 
   const finalColumns = sqlite.prepare(`PRAGMA table_info(gig_posts)`).all() as Array<{ name: string }>;
   gigPostsLegacyCols = finalColumns.some(c => c.name === "type") && finalColumns.some(c => c.name === "role");
@@ -326,6 +328,7 @@ function mapGigPostRow(row: Record<string, unknown>): GigPost {
     location: (row.location as string | null) ?? null,
     isRemote: Boolean(row.is_remote),
     status: row.status as string,
+    adminNotes: (row.admin_notes as string | null) ?? null,
     createdAt: row.created_at as string,
     userId: (row.user_id as number | null) ?? null,
     imageUrl: (row.image_url as string | null) ?? null,
@@ -346,7 +349,7 @@ function insertGigPostCompat(payload: InsertGigPost & { status: string; createdA
       )
     `).run({
       postType: payload.postType,
-      role: legacyGigRole(payload.postType),
+      role: legacyGigRole(payload.postType || "POSTING_GIG"),
       title: payload.title,
       name: payload.name,
       contactEmail: payload.contactEmail,
@@ -474,6 +477,7 @@ function ensureMissedConnectionsSchema() {
     const names = new Set(cols.map(c => c.name));
     if (!names.has("event_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN event_id INTEGER`);
     if (!names.has("closes_at")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN closes_at TEXT`);
+    if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_notes TEXT`);
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS missed_connection_threads (
         thread_id TEXT PRIMARY KEY,
@@ -496,6 +500,17 @@ function ensureMissedConnectionsSchema() {
   }
 }
 ensureMissedConnectionsSchema();
+
+function ensureGiftingPostsSchema() {
+  try {
+    const cols = sqlite.prepare(`PRAGMA table_info(gifting_posts)`).all() as Array<{ name: string }>;
+    const names = new Set(cols.map(c => c.name));
+    if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE gifting_posts ADD COLUMN admin_notes TEXT`);
+  } catch (e) {
+    console.error("[gifting_posts] schema migration failed:", e);
+  }
+}
+ensureGiftingPostsSchema();
 
 const LEGACY_PASSWORD_SALT = "pdxpride_salt";
 const SCRYPT_HASH_PREFIX = "$scrypt$";
@@ -2750,6 +2765,19 @@ function notifySubmissionMerged(
   );
 }
 
+function notifyBoardReject(
+  toUserId: number,
+  boardLabel: string,
+  postTitle: string,
+  reasonCode: string,
+  note: string | undefined,
+  context: { contextType: string; contextId: number; contextLabel: string },
+) {
+  const reason = formatBoardRejectMessage(reasonCode, note);
+  const body = `Your ${boardLabel} post "${postTitle}" was sent back and is not on the board.\n\nReason: ${reason}\n\nYou can edit and resubmit when ready.`;
+  notifyGuideInbox(toUserId, `${boardLabel} post sent back`, body, context);
+}
+
 function notifySubmissionOutcome(
   sub: { id: number; title: string; type: string; submitterEmail: string },
   approved: boolean,
@@ -2867,6 +2895,10 @@ export interface IStorage {
   deleteGigPost(id: number, userId: number): void;
   adminUpdateGigStatus(id: number, status: string): void;
   adminUpdateGigPost(id: number, data: Partial<GigPost>): GigPost | undefined;
+  rejectGigPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  rejectGiftingPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  rejectMissedConnection(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  getAdminMissedConnections(): any[];
   ensureSiteAdminGigPost(): void;
   syncSiteOwnerPortfolio(): void;
   isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
@@ -3146,7 +3178,7 @@ export const storage: IStorage = {
         createdAt: gig.createdAt,
         description: gig.description,
       }));
-    const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "PENDING", "EXPIRED"]);
+    const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
     const gifting = storage.getGiftingPostsByUser(user.id)
       .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)))
       .map((post: any) => ({
@@ -3452,6 +3484,7 @@ export const storage: IStorage = {
       location: row.location,
       isRemote: Boolean(row.is_remote),
       status: row.status,
+      adminNotes: row.admin_notes ?? null,
       createdAt: row.created_at,
       userId: row.user_id,
       imageUrl: row.image_url,
@@ -3503,6 +3536,83 @@ export const storage: IStorage = {
   },
   adminUpdateGigStatus(id: number, status: string) {
     sqlite.prepare(`UPDATE gig_posts SET status = ? WHERE id = ?`).run(status, id);
+  },
+  rejectGigPost(id, reasonCode, note) {
+    ensureGigPostsSchema();
+    const row = sqlite.prepare(`SELECT id, title, user_id, status FROM gig_posts WHERE id = ?`).get(id) as
+      | { id: number; title: string; user_id: number | null; status: string }
+      | undefined;
+    if (!row) return { error: "Post not found" };
+    if (row.status === "REJECTED") return { error: "Already rejected" };
+    const adminNotes = formatBoardRejectMessage(reasonCode, note);
+    sqlite.prepare(`UPDATE gig_posts SET status = 'REJECTED', admin_notes = ? WHERE id = ?`).run(adminNotes, id);
+    if (row.user_id) {
+      notifyBoardReject(row.user_id, "Pride Werk", row.title, reasonCode, note, {
+        contextType: "GIG",
+        contextId: id,
+        contextLabel: row.title,
+      });
+    }
+    return { ok: true };
+  },
+  rejectGiftingPost(id, reasonCode, note) {
+    ensureGiftingPostsSchema();
+    const post = this.getGiftingPost(id);
+    if (!post) return { error: "Post not found" };
+    if (post.status === "REJECTED") return { error: "Already rejected" };
+    const adminNotes = formatBoardRejectMessage(reasonCode, note);
+    db.update(giftingPosts).set({ status: "REJECTED", adminNotes } as any).where(eq(giftingPosts.id, id)).run();
+    const userId = Number(post.user_id ?? post.userId);
+    if (userId) {
+      notifyBoardReject(userId, "Gifting", post.title, reasonCode, note, {
+        contextType: "GIFTING",
+        contextId: id,
+        contextLabel: post.title,
+      });
+    }
+    return { ok: true };
+  },
+  rejectMissedConnection(id, reasonCode, note) {
+    const row = db.select().from(missedConnections).where(eq(missedConnections.id, id)).get();
+    if (!row) return { error: "Post not found" };
+    if (row.status === "REJECTED") return { error: "Already rejected" };
+    const adminNotes = formatBoardRejectMessage(reasonCode, note);
+    db.update(missedConnections).set({ status: "REJECTED", adminNotes } as any).where(eq(missedConnections.id, id)).run();
+    notifyBoardReject(row.userId, "Spotted", row.title, reasonCode, note, {
+      contextType: "MISSED_CONNECTION",
+      contextId: id,
+      contextLabel: row.title,
+    });
+    return { ok: true };
+  },
+  getAdminMissedConnections() {
+    archiveExpiredMissedConnections();
+    return sqlite.prepare(`
+      SELECT
+        m.id,
+        m.title,
+        m.body,
+        m.day_of_week AS dayOfWeek,
+        m.venue_hint AS venueHint,
+        m.event_id AS eventId,
+        m.status,
+        m.admin_notes AS adminNotes,
+        m.created_at AS createdAt,
+        m.closes_at AS closesAt,
+        m.user_id AS userId,
+        u.username,
+        u.display_name AS displayName,
+        u.photo_url AS posterPhotoUrl,
+        u.avatar_choice AS avatarChoice,
+        u.avatar_ring AS posterAvatarRing,
+        e.title AS eventTitle,
+        e.venue_name AS eventVenue
+      FROM missed_connections m
+      JOIN users u ON u.id = m.user_id
+      LEFT JOIN events e ON e.id = m.event_id
+      WHERE m.status = 'ACTIVE'
+      ORDER BY m.created_at DESC
+    `).all();
   },
   adminUpdateGigPost(id, data) {
     const existing = sqlite.prepare(`SELECT id FROM gig_posts WHERE id = ?`).get(id);
@@ -4781,8 +4891,10 @@ export const storage: IStorage = {
       ORDER BY gr.created_at DESC
     `).all(...params);
   },
-  updateGiftingPostStatus(id, status) {
-    db.update(giftingPosts).set({ status } as any).where(eq(giftingPosts.id, id)).run();
+  updateGiftingPostStatus(id, status, adminNotes) {
+    const patch: Record<string, unknown> = { status };
+    if (adminNotes !== undefined) patch.adminNotes = adminNotes;
+    db.update(giftingPosts).set(patch as any).where(eq(giftingPosts.id, id)).run();
   },
   resolveGiftingReport(id, adminNotes) {
     db.update(giftingReports).set({ status: "RESOLVED", adminNotes: adminNotes || null } as any).where(eq(giftingReports.id, id)).run();

@@ -15,7 +15,8 @@ import {
 import ImageUploader from "@/components/ImageUploader";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
-import AdminInbox from "@/components/admin/AdminInbox";
+import AdminBoardReject from "@/components/admin/AdminBoardReject";
+import AdminInbox, { type BoardRejectTarget } from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
@@ -166,6 +167,8 @@ export default function Admin() {
   const [expandedInboxKey, setExpandedInboxKey] = useState<string | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
+  const [boardRejectReasons, setBoardRejectReasons] = useState<Record<string, string>>({});
+  const [boardRejectNotes, setBoardRejectNotes] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
   const [assignHostByEvent, setAssignHostByEvent] = useState<Record<number, string>>({});
@@ -240,6 +243,7 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
   }, [authenticated]);
 
   const purgeQaMutation = useMutation({
@@ -283,6 +287,11 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
   };
 
   const { data: submissions = [], isLoading: subLoading, isError: subError, refetch: refetchSubs } = useQuery<Submission[]>({
@@ -312,6 +321,12 @@ export default function Admin() {
 
   const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: refetchGigs } = useQuery<AdminGig[]>({
     queryKey: ["/api/admin/gigs"],
+    enabled: authenticated,
+  });
+
+  const { data: missedAdmin = [], isLoading: missedLoading, isError: missedError, refetch: refetchMissed } = useQuery<any[]>({
+    queryKey: ["/api/admin/missed-connections"],
+    queryFn: () => apiRequest("GET", "/api/admin/missed-connections").then(r => r.json()),
     enabled: authenticated,
   });
 
@@ -612,6 +627,18 @@ export default function Admin() {
     },
   });
 
+  const rejectBoardPostMutation = useMutation({
+    mutationFn: ({ board, id, reasonCode, note }: { board: BoardRejectTarget; id: number; reasonCode: string; note?: string }) =>
+      apiRequest("POST", `/api/admin/${board}/${id}/reject`, { reasonCode, note }),
+    onSuccess: () => {
+      invalidateInboxQueries();
+      toast({ title: "Sent back to poster", description: "They will see the reason in their inbox." });
+    },
+    onError: (err: unknown) => {
+      toast({ title: "Could not send back", description: parseApiError(err, "Reject failed."), variant: "destructive" });
+    },
+  });
+
   const approvePromoterMutation = useMutation({
     mutationFn: (userId: number) => apiRequest("POST", `/api/admin/promoter-requests/${userId}/approve`, {}),
     onSuccess: () => {
@@ -886,17 +913,20 @@ export default function Admin() {
   };
 
   const inboxLoading =
-    subLoading || modLoading || giftingLoading || feedbackLoading || promotersLoading || talentLoading;
+    subLoading || modLoading || giftingLoading || missedLoading || feedbackLoading || promotersLoading || talentLoading;
   const inboxError =
-    subError || modError || giftingError || feedbackError || promotersError || talentError;
+    subError || modError || giftingError || missedError || feedbackError || promotersError || talentError;
   const refetchInbox = () => {
     refetchSubs();
     refetchMod();
     refetchGifting();
+    refetchMissed();
     refetchFeedback();
     refetchPromoters();
     refetchTalent();
   };
+
+  const gigBoardRejectKey = (id: number) => `gig-${id}`;
 
   const refreshAdminData = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
@@ -1051,6 +1081,7 @@ export default function Admin() {
             modRequests={modRequests}
             giftingPosts={giftingAdmin.posts || []}
             giftingReports={giftingAdmin.reports || []}
+            missedConnections={missedAdmin}
             feedback={feedback}
             loading={inboxLoading}
             error={inboxError}
@@ -1073,7 +1104,12 @@ export default function Admin() {
             onGiftingStatus={(id, status) => updateGiftingStatusMutation.mutate({ id, status })}
             onResolveGiftingReport={id => resolveGiftingReportMutation.mutate({ id })}
             onResolveFeedback={id => resolveFeedbackMutation.mutate(id)}
-            actionPending={inboxActionPending}
+            boardRejectReasons={boardRejectReasons}
+            boardRejectNotes={boardRejectNotes}
+            onBoardRejectReasonChange={(key, code) => setBoardRejectReasons(prev => ({ ...prev, [key]: code }))}
+            onBoardRejectNoteChange={(key, note) => setBoardRejectNotes(prev => ({ ...prev, [key]: note }))}
+            onBoardReject={(board, id, reasonCode, note) => rejectBoardPostMutation.mutate({ board, id, reasonCode, note })}
+            actionPending={inboxActionPending || rejectBoardPostMutation.isPending}
           />
         )}
 
@@ -1500,6 +1536,25 @@ export default function Admin() {
                       </div>
                     </div>
 
+                    {gig.status !== "REJECTED" && gig.status !== "REMOVED" && (
+                      <div className="px-4 pb-4 border-t border-white/10 pt-4">
+                        <p className="text-white/65 text-sm whitespace-pre-wrap mb-3">{gig.description}</p>
+                        <AdminBoardReject
+                          reasonCode={boardRejectReasons[gigBoardRejectKey(gig.id)] || "OFF_TOPIC"}
+                          note={boardRejectNotes[gigBoardRejectKey(gig.id)] || ""}
+                          onReasonChange={code => setBoardRejectReasons(prev => ({ ...prev, [gigBoardRejectKey(gig.id)]: code }))}
+                          onNoteChange={note => setBoardRejectNotes(prev => ({ ...prev, [gigBoardRejectKey(gig.id)]: note }))}
+                          onReject={() => rejectBoardPostMutation.mutate({
+                            board: "gigs",
+                            id: gig.id,
+                            reasonCode: boardRejectReasons[gigBoardRejectKey(gig.id)] || "OFF_TOPIC",
+                            note: boardRejectNotes[gigBoardRejectKey(gig.id)] || "",
+                          })}
+                          pending={rejectBoardPostMutation.isPending}
+                        />
+                      </div>
+                    )}
+
                     {editingGigId === gig.id && (
                       <form onSubmit={handleGigEditSave} className="border-t border-white/10 p-5 space-y-4" style={{ background: "#0d0d0d" }}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1515,7 +1570,7 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">STATUS</label>
                             <select value={gigEditForm.status || "LIVE"} onChange={e => setGigEditForm(f => ({ ...f, status: e.target.value }))}
                               className={adminFieldClass}>
-                              {["LIVE", "PENDING", "REMOVED"].map(s => <option key={s} value={s}>{s}</option>)}
+                              {["LIVE", "PENDING", "REJECTED", "REMOVED"].map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                           </div>
                           <div className="md:col-span-2">

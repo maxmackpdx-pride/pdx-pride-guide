@@ -17,6 +17,7 @@ import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardActiveSection, { BoardFilterChip } from "@/components/BoardActiveSection";
 import { timeAgo } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { GIG_BOARD_RULES_SUMMARY, validateGigPostContent } from "@shared/boardModeration";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -84,6 +85,7 @@ export default function PrideWork() {
   const [showAuth, setShowAuth] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">("ALL");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [acceptRules, setAcceptRules] = useState(false);
 
   const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
     queryKey: ["/api/gigs"],
@@ -116,7 +118,7 @@ export default function PrideWork() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: GigFormData) => apiRequest("POST", "/api/gigs", data),
+    mutationFn: (data: GigFormData) => apiRequest("POST", "/api/gigs", { ...data, acceptRules: true }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
       toast({
@@ -126,12 +128,27 @@ export default function PrideWork() {
           : "Your gig is live. Let the replies roll in.",
       });
       form.reset();
+      setAcceptRules(false);
       setFormOpen(false);
     },
-    onError: () => {
-      toast({ title: "Error", description: "Could not submit post.", variant: "destructive" });
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : "Could not submit post.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     },
   });
+
+  const submitGig = (data: GigFormData) => {
+    if (!acceptRules) {
+      toast({ title: "Board rules", description: "Please agree to the Pride Werk rules before posting.", variant: "destructive" });
+      return;
+    }
+    const personalsErr = validateGigPostContent(data);
+    if (personalsErr) {
+      toast({ title: "Not a gig post", description: personalsErr, variant: "destructive" });
+      return;
+    }
+    mutation.mutate(data);
+  };
 
   const openForm = (postType: "POSTING_GIG" | "LOOKING_FOR_WORK") => {
     if (!user) {
@@ -230,7 +247,7 @@ export default function PrideWork() {
                 ? "Role, pay, and timing. Spell it out. Goes live right away. Keep it Pride-related, paid when possible, and community-safe."
                 : "Tell hosts what you do, when you are free, and what you are looking for. Goes live so organizers can find you on the board."}
             </p>
-            <form onSubmit={form.handleSubmit(d => mutation.mutate(d))} className="gifting-form-grid">
+            <form onSubmit={form.handleSubmit(submitGig)} className="gifting-form-grid">
               <label className="span">
                 Post type
                 <select
@@ -313,8 +330,16 @@ export default function PrideWork() {
                 {postType === "POSTING_GIG" ? "Remote / hybrid friendly" : "Open to remote or hybrid work"}
               </label>
 
+              <p className="span board-copy-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                {GIG_BOARD_RULES_SUMMARY}
+              </p>
+              <label className="span gifting-rules">
+                <input type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)} />
+                I agree — work and gigs only, PG-13, no personals.
+              </label>
+
               <div className="span">
-                <button type="submit" className="btn-neon solid" data-testid="button-submit-gig" disabled={mutation.isPending}>
+                <button type="submit" className="btn-neon solid" data-testid="button-submit-gig" disabled={mutation.isPending || !acceptRules}>
                   {mutation.isPending ? "Posting…" : "Post it →"}
                 </button>
               </div>

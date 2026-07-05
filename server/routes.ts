@@ -25,6 +25,7 @@ import {
   pacificDayOfWeek,
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
+import { BOARD_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
 import {
   diffSubmissionMerge,
   findSubmissionMatches,
@@ -359,6 +360,26 @@ const RESTRICTED_GIFTING_TERMS = [
   "alcohol", "needle", "needles", "poppers", "lube", "lubricant", "insertable",
   "underwear", "stolen", "counterfeit", "hazardous",
 ];
+
+function parseBoardRejectBody(body: any) {
+  const reasonCode = String(body.reasonCode || "").trim().toUpperCase();
+  const note = String(body.note || "").trim();
+  if (!BOARD_REJECT_REASONS.some(r => r.code === reasonCode)) {
+    throw new Error("Invalid reject reason");
+  }
+  return { reasonCode, note: note || undefined };
+}
+
+function assertGigBoardAllowed(body: any, fields: {
+  title?: string | null;
+  description?: string | null;
+  skills?: string | null;
+  compensation?: string | null;
+}) {
+  if (!body.acceptRules) throw new Error("You must agree to the Pride Werk board rules.");
+  const personalsErr = validateGigPostContent(fields);
+  if (personalsErr) throw new Error(personalsErr);
+}
 
 function assertGiftingAllowed(body: any) {
   if (Date.now() >= GIFTING_RUN_END && process.env.GIFTING_KEEP_OPEN !== "true") {
@@ -952,6 +973,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/gigs", requireAuth, (req, res) => {
     try {
       const data = insertGigPostSchema.parse(req.body);
+      assertGigBoardAllowed(req.body, data);
       const userId = req.session.userId!;
       const gig = storage.createGigPost({ ...data, userId } as any);
       res.json(gig);
@@ -984,6 +1006,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const id = Number(req.params.id);
     const userId = req.session.userId!;
     try {
+      const existing = storage.getGigPosts().find(g => g.id === id && g.userId === userId);
+      if (!existing) return res.status(404).json({ error: "Not found" });
+      assertGigBoardAllowed(req.body, {
+        title: req.body.title ?? existing.title,
+        description: req.body.description ?? existing.description,
+        skills: req.body.skills ?? existing.skills,
+        compensation: req.body.compensation ?? existing.compensation,
+      });
       storage.updateGigPost(id, userId, req.body);
       res.json({ ok: true });
     } catch (e: any) {
@@ -2351,6 +2381,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  app.post("/api/admin/gifting/:id/reject", requireAdmin, (req, res) => {
+    try {
+      const { reasonCode, note } = parseBoardRejectBody(req.body);
+      const result = storage.rejectGiftingPost(Number(req.params.id), reasonCode, note);
+      if (result.error) return res.status(400).json({ error: result.error });
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
   app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
     storage.resolveGiftingReport(Number(req.params.id), String(req.body.adminNotes || ""));
     res.json({ ok: true });
@@ -2373,9 +2414,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/gigs/:id/status", requireAdmin, (req, res) => {
     const status = String(req.body.status || "").trim().toUpperCase();
-    if (!["LIVE", "PENDING", "REMOVED"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+    if (!["LIVE", "PENDING", "REJECTED", "REMOVED"].includes(status)) return res.status(400).json({ error: "Invalid status" });
     storage.adminUpdateGigStatus(Number(req.params.id), status);
     res.json({ ok: true });
+  });
+
+  app.post("/api/admin/gigs/:id/reject", requireAdmin, (req, res) => {
+    try {
+      const { reasonCode, note } = parseBoardRejectBody(req.body);
+      const result = storage.rejectGigPost(Number(req.params.id), reasonCode, note);
+      if (result.error) return res.status(400).json({ error: result.error });
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/admin/missed-connections", requireAdmin, (_req, res) => {
+    res.json(storage.getAdminMissedConnections());
+  });
+
+  app.post("/api/admin/missed-connections/:id/reject", requireAdmin, (req, res) => {
+    try {
+      const { reasonCode, note } = parseBoardRejectBody(req.body);
+      const result = storage.rejectMissedConnection(Number(req.params.id), reasonCode, note);
+      if (result.error) return res.status(400).json({ error: result.error });
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   app.put("/api/admin/gigs/:id", requireAdmin, (req, res) => {
@@ -2391,7 +2458,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (patch.postType && !["POSTING_GIG", "LOOKING_FOR_WORK"].includes(String(patch.postType))) {
       return res.status(400).json({ error: "Invalid post type" });
     }
-    if (patch.status && !["LIVE", "PENDING", "REMOVED"].includes(String(patch.status).toUpperCase())) {
+    if (patch.status && !["LIVE", "PENDING", "REJECTED", "REMOVED"].includes(String(patch.status).toUpperCase())) {
       return res.status(400).json({ error: "Invalid status" });
     }
     if (patch.status) patch.status = String(patch.status).toUpperCase();

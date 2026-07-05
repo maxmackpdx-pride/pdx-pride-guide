@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { CheckCircle, ChevronDown, Clock, XCircle } from "lucide-react";
+import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminSubmissionMerge from "@/components/admin/AdminSubmissionMerge";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
@@ -11,7 +12,10 @@ export type InboxKind =
   | "moderation"
   | "gifting_post"
   | "gifting_report"
+  | "missed_connection"
   | "feedback";
+
+export type BoardRejectTarget = "gigs" | "gifting" | "missed-connections";
 
 export type InboxKindFilter = InboxKind | "all";
 
@@ -43,9 +47,9 @@ function inboxUserProfile(kind: InboxKind, payload: any): AdminUserProfile | nul
     };
   }
   if (kind === "moderation" && payload.requesterProfile) return payload.requesterProfile;
-  if (kind === "gifting_post" && payload.username) {
+  if ((kind === "gifting_post" || kind === "missed_connection") && payload.username) {
     return {
-      id: payload.userId,
+      id: payload.userId ?? payload.user_id,
       username: payload.username,
       displayName: payload.displayName,
       photoUrl: payload.posterPhotoUrl,
@@ -63,6 +67,7 @@ const KIND_META: Record<InboxKind, { label: string; color: string }> = {
   moderation: { label: "Moderation", color: "#FF6600" },
   gifting_post: { label: "Gifting", color: "#B451FF" },
   gifting_report: { label: "Gifting report", color: "#FF2400" },
+  missed_connection: { label: "Spotted", color: "#FF1FA0" },
   feedback: { label: "Feedback", color: "#750787" },
 };
 
@@ -74,6 +79,7 @@ const KIND_FILTERS: { key: InboxKindFilter; label: string }[] = [
   { key: "moderation", label: "Moderation" },
   { key: "gifting_post", label: "Gifting" },
   { key: "gifting_report", label: "Reports" },
+  { key: "missed_connection", label: "Spotted" },
   { key: "feedback", label: "Feedback" },
 ];
 
@@ -92,6 +98,7 @@ export interface AdminInboxProps {
   modRequests: any[];
   giftingPosts: any[];
   giftingReports: any[];
+  missedConnections: any[];
   feedback: any[];
   loading: boolean;
   error: boolean;
@@ -114,7 +121,16 @@ export interface AdminInboxProps {
   onGiftingStatus: (id: number, status: string) => void;
   onResolveGiftingReport: (id: number) => void;
   onResolveFeedback: (id: number) => void;
+  boardRejectReasons: Record<string, string>;
+  boardRejectNotes: Record<string, string>;
+  onBoardRejectReasonChange: (key: string, code: string) => void;
+  onBoardRejectNoteChange: (key: string, note: string) => void;
+  onBoardReject: (board: BoardRejectTarget, id: number, reasonCode: string, note: string) => void;
   actionPending?: boolean;
+}
+
+function boardRejectKey(kind: InboxKind, id: number) {
+  return `${kind}-${id}`;
 }
 
 function buildInboxItems(props: AdminInboxProps): InboxItem[] {
@@ -198,6 +214,21 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
     });
   }
 
+  for (const post of props.missedConnections) {
+    items.push({
+      key: `missed_connection-${post.id}`,
+      kind: "missed_connection",
+      id: post.id,
+      createdAt: post.createdAt || post.created_at,
+      title: post.title,
+      subtitle: post.eventTitle ? `${post.eventTitle}${post.venueHint ? ` · ${post.venueHint}` : ""}` : (post.venueHint || "Around town"),
+      status: post.status,
+      pending: post.status === "ACTIVE",
+      payload: post,
+      profile: inboxUserProfile("missed_connection", post),
+    });
+  }
+
   for (const report of props.giftingReports) {
     const pending = String(report.status).toUpperCase() === "PENDING";
     items.push({
@@ -243,6 +274,7 @@ export default function AdminInbox(props: AdminInboxProps) {
     props.modRequests,
     props.giftingPosts,
     props.giftingReports,
+    props.missedConnections,
     props.feedback,
   ]);
 
@@ -271,7 +303,7 @@ export default function AdminInbox(props: AdminInboxProps) {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <p className="text-white/40 text-sm m-0">
-          {pendingCount} pending across submissions, promoters, talent, moderation, gifting, and feedback.
+          {pendingCount} pending across submissions, promoters, talent, moderation, gifting, Spotted, and feedback.
         </p>
         <button
           type="button"
@@ -353,6 +385,11 @@ function InboxCard({
   onGiftingStatus,
   onResolveGiftingReport,
   onResolveFeedback,
+  boardRejectReasons,
+  boardRejectNotes,
+  onBoardRejectReasonChange,
+  onBoardRejectNoteChange,
+  onBoardReject,
   actionPending,
 }: {
   item: InboxItem;
@@ -584,21 +621,53 @@ function InboxCard({
             </>
           )}
 
-          {item.kind === "gifting_post" && item.pending && (
+          {item.kind === "gifting_post" && !["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"].includes(payload.status) && (
             <>
               {item.profile && <AdminUserIdentity profile={item.profile} size={40} />}
-              <p className="text-white/65 text-sm">{payload.description}</p>
-              <div className="flex gap-2 flex-wrap">
-                <button type="button" className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => onGiftingStatus(payload.id, payload.postType === "ISO" ? "LOOKING" : "OPEN")}>
-                  APPROVE
-                </button>
-                <button type="button" className="sticker" style={{ color: "#FF6600", borderColor: "#FF6600" }} onClick={() => onGiftingStatus(payload.id, "HIDDEN")}>
-                  HIDE
-                </button>
-                <button type="button" className="sticker" style={{ color: "#FF2400", borderColor: "#FF2400" }} onClick={() => onGiftingStatus(payload.id, "REMOVED")}>
-                  REMOVE
-                </button>
-              </div>
+              <p className="text-white/65 text-sm whitespace-pre-wrap">{payload.description}</p>
+              {payload.status === "PENDING" && (
+                <div className="flex gap-2 flex-wrap">
+                  <button type="button" className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => onGiftingStatus(payload.id, payload.postType === "ISO" ? "LOOKING" : "OPEN")}>
+                    APPROVE
+                  </button>
+                </div>
+              )}
+              <AdminBoardReject
+                reasonCode={boardRejectReasons[boardRejectKey(item.kind, payload.id)] || "OFF_TOPIC"}
+                note={boardRejectNotes[boardRejectKey(item.kind, payload.id)] || ""}
+                onReasonChange={code => onBoardRejectReasonChange(boardRejectKey(item.kind, payload.id), code)}
+                onNoteChange={note => onBoardRejectNoteChange(boardRejectKey(item.kind, payload.id), note)}
+                onReject={() => onBoardReject(
+                  "gifting",
+                  payload.id,
+                  boardRejectReasons[boardRejectKey(item.kind, payload.id)] || "OFF_TOPIC",
+                  boardRejectNotes[boardRejectKey(item.kind, payload.id)] || "",
+                )}
+                pending={actionPending}
+              />
+            </>
+          )}
+
+          {item.kind === "missed_connection" && payload.status === "ACTIVE" && (
+            <>
+              {item.profile && <AdminUserIdentity profile={item.profile} size={40} />}
+              <p className="text-white/65 text-sm whitespace-pre-wrap">{payload.body}</p>
+              {payload.eventTitle && (
+                <p className="text-white/40 text-xs">Event: {payload.eventTitle}{payload.eventVenue ? ` · ${payload.eventVenue}` : ""}</p>
+              )}
+              <AdminBoardReject
+                reasonCode={boardRejectReasons[boardRejectKey(item.kind, payload.id)] || "OFF_TOPIC"}
+                note={boardRejectNotes[boardRejectKey(item.kind, payload.id)] || ""}
+                onReasonChange={code => onBoardRejectReasonChange(boardRejectKey(item.kind, payload.id), code)}
+                onNoteChange={note => onBoardRejectNoteChange(boardRejectKey(item.kind, payload.id), note)}
+                onReject={() => onBoardReject(
+                  "missed-connections",
+                  payload.id,
+                  boardRejectReasons[boardRejectKey(item.kind, payload.id)] || "OFF_TOPIC",
+                  boardRejectNotes[boardRejectKey(item.kind, payload.id)] || "",
+                )}
+                pending={actionPending}
+              />
             </>
           )}
 

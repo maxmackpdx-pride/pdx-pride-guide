@@ -102,6 +102,7 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
       "POST /api/missed-connections",
       "PUT /api/missed-connections/:id",
       "DELETE /api/missed-connections/:id",
+      "POST /api/admin/missed-connections/:id/reject",
     ],
   },
   {

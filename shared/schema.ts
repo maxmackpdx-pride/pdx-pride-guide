@@ -90,6 +90,7 @@ export const gigPosts = sqliteTable("gig_posts", {
   location: text("location"),
   isRemote: integer("is_remote", { mode: "boolean" }).default(false),
   status: text("status").notNull().default("PENDING"),
+  adminNotes: text("admin_notes"),
   createdAt: text("created_at").notNull().default(""),
   userId: integer("user_id"),
   imageUrl: text("image_url"),
@@ -242,7 +243,8 @@ export const missedConnections = sqliteTable("missed_connections", {
   dayOfWeek: text("day_of_week"),
   venueHint: text("venue_hint"),
   closesAt: text("closes_at"),
-  status: text("status").notNull().default("ACTIVE"), // ACTIVE | ARCHIVED | DELETED
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE | REJECTED | ARCHIVED | DELETED
+  adminNotes: text("admin_notes"),
   createdAt: text("created_at").notNull().default(""),
 });
 
@@ -276,6 +278,7 @@ export const giftingPosts = sqliteTable("gifting_posts", {
   renewCount: integer("renew_count").notNull().default(0),
   expiresAt: text("expires_at").notNull(),
   reportCount: integer("report_count").notNull().default(0),
+  adminNotes: text("admin_notes"),
   createdAt: text("created_at").notNull().default(""),
 });
 
