@@ -37,6 +37,7 @@ type Business = {
   neighborhood: string | null;
   website: string | null;
   instagram: string | null;
+  donateUrl: string | null;
   hours: string | null;
   phone: string | null;
   queerOwned: boolean;
@@ -56,6 +57,7 @@ const TYPE_LABELS: Record<string, string> = {
   service: "Services",
   shop: "Shops",
   hotel: "Hotels",
+  nonprofit: "Nonprofits",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -66,6 +68,7 @@ const TYPE_COLORS: Record<string, string> = {
   service: "#A855F7",
   shop: "#FFD700",
   hotel: "#FF1FA0",
+  nonprofit: "#FFFFFF",
 };
 
 const NEIGHBORHOODS = [
@@ -384,6 +387,8 @@ function DirectoryCard({ biz }: { biz: Business }) {
     <PlaceCard
       name={biz.name}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+      className={biz.type === "nonprofit" ? "pdxPlace--rainbow" : ""}
+      donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}
       hours={biz.hours || undefined}

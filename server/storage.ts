@@ -2332,6 +2332,10 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_businesses_directory_v7");
   }
+  try {
+    const bcols = new Set(sqlite.prepare(`PRAGMA table_info(businesses)`).all().map((c: any) => c.name));
+    if (!bcols.has("donate_url")) sqlite.exec(`ALTER TABLE businesses ADD COLUMN donate_url TEXT`);
+  } catch (e) { console.error("[businesses] donate_url migration failed:", e); }
   if (!hasBootMigration("seed_businesses_directory_v8")) {
     const now = new Date().toISOString();
     db.insert(businesses).values({
@@ -2354,6 +2358,23 @@ function runBootMigrationsOnce() {
       createdAt: now,
     } as any).run();
     recordBootMigration("seed_businesses_directory_v8");
+  }
+    if (!hasBootMigration("seed_nonprofits_directory_v9")) {
+    const now = new Date().toISOString();
+    const orgs = [
+      { name: "Cascade AIDS Project (CAP) & Our House", type: "nonprofit", description: "The Northwest's leading HIV services org since 1983 — prevention, testing, supportive housing, and LGBTQ+ health care, plus Our House residential care for people living with HIV.", website: "https://www.capnw.org/", donateUrl: "https://www.capnw.org/donate", neighborhood: "Old Town" },
+      { name: "Pride Northwest", type: "nonprofit", description: "The organizers of Portland Pride. Year-round programs celebrating and supporting the LGBTQ2SIA+ community, including Trans Unity and Pride Days of Service.", website: "https://www.pridenw.org/", donateUrl: "https://www.pridenw.org/donate" },
+      { name: "Basic Rights Oregon", type: "nonprofit", description: "Oregon's statewide LGBTQ2SIA+ advocacy organization — political, legal, and grassroots work to ensure all Oregonians experience equality.", website: "https://www.basicrights.org/", donateUrl: "https://www.basicrights.org/donate" },
+      { name: "New Avenues for Youth / SMYRC", type: "nonprofit", description: "SMYRC, a program of New Avenues for Youth, has served LGBTQIA2S+ youth ages 13–24 since 1998 — a drop-in space with food, clothing, gender-affirming garments, counseling, and community events.", website: "https://newavenues.org/smyrc/", donateUrl: "https://newavenues.org/donate/give-lgbtqia2s/", address: "1220 SW Columbia St", neighborhood: "Downtown" },
+      { name: "Outside In", type: "nonprofit", description: "Health care and social services for young people experiencing homelessness since 1968 — including the QueerZone drop-in, an LGBTQ-affirming clinic with gender-affirming care, meals, showers, and housing help.", website: "https://outsidein.org/", donateUrl: "https://outsidein.org/about-us/donate-now/", address: "1132 SW 13th Ave", neighborhood: "Downtown" },
+      { name: "The Marie Equi Center", type: "nonprofit", description: "Trauma-informed, culturally affirming health and social services for trans, queer, intersex, and gender-diverse communities — peer support, harm reduction, and housing advocacy from their Brooklyn service center.", website: "https://www.marieequi.center/", donateUrl: "https://www.marieequi.center/donate", neighborhood: "SE Portland" },
+      { name: "WERQ Together", type: "nonprofit", description: "Trans-led org providing relocation assistance, emergency shelter, peer support, and economic justice for two-spirit, trans, non-binary, and gender non-conforming people in Oregon.", website: "https://werqt.org/", donateUrl: "https://werqt.org/donate" },
+      { name: "Portland Gay Men's Chorus", type: "nonprofit", description: "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980 — concerts, community performances, and queer joy in four-part harmony.", website: "https://www.pdxgmc.org/", donateUrl: "https://www.pdxgmc.org/support/donate/", imageUrl: "https://www.pdxgmc.org/wp-content/uploads/2017/04/PGMC-Logo.png" },
+    ];
+    for (const o of orgs) {
+      db.insert(businesses).values({ queerOwned: true, queerFriendly: true, active: true, isNew: false, createdAt: now, ...o } as any).run();
+    }
+    recordBootMigration("seed_nonprofits_directory_v9");
   }
   if (!hasBootMigration("sync_event_map_coordinates_v1")) {
     const directoryRows = db.select().from(businesses).all().filter(b => b.active);

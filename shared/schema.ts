@@ -112,6 +112,7 @@ export const businesses = sqliteTable("businesses", {
   neighborhood: text("neighborhood"),
   website: text("website"),
   instagram: text("instagram"),
+  donateUrl: text("donate_url"),
   queerOwned: integer("queer_owned", { mode: "boolean" }).notNull().default(false),
   queerFriendly: integer("queer_friendly", { mode: "boolean" }).notNull().default(true),
   imageUrl: text("image_url"),

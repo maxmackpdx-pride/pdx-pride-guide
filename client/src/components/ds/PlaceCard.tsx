@@ -66,6 +66,7 @@ const CAL = <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4
 export function PlaceCard({
   name,
   category = "bars",
+  donateUrl,
   categoryLabel,
   address,
   hours,
@@ -93,8 +94,13 @@ export function PlaceCard({
 
       {description && <p className="pdxPlace__desc">{description}</p>}
 
-      {(website || instagram) && (
+      {(website || instagram || donateUrl) && (
         <div className="pdxPlace__links">
+          {donateUrl && (
+            <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer">
+              <Icon d={GLOBE} />Donate
+            </a>
+          )}
           {website && (
             <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer">
               <Icon d={GLOBE} />Website

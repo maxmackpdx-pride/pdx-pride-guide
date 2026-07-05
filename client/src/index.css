@@ -11849,3 +11849,28 @@ html.calm-mode .submit-card:hover {
     transform: none;
   }
 }
+
+/* ═══ NONPROFIT RAINBOW TILES (directory) ═══ */
+.pdxPlace--rainbow {
+  border: 2px solid transparent !important;
+  background:
+    linear-gradient(var(--surface-card, #0b0b0b), var(--surface-card, #0b0b0b)) padding-box,
+    linear-gradient(135deg, #FF2400, #FF6600, #FFEE00, #39FF14, #00FFFF, #0044FF, #8800FF, #FF00CC) border-box !important;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.12), 0 0 26px -8px #FF00CC66, 0 0 26px -8px #00FFFF66;
+  animation: mp-rainbow-pulse 5s ease-in-out infinite;
+}
+@keyframes mp-rainbow-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(255,255,255,0.12), 0 0 26px -8px #FF00CC66, 0 0 26px -8px #00FFFF66; }
+  50% { box-shadow: 0 0 26px rgba(255,255,255,0.2), 0 0 34px -8px #FF00CC99, 0 0 34px -8px #39FF1466; }
+}
+.pdxPlace__link--donate {
+  color: #CCFF00 !important;
+  border-color: #CCFF00 !important;
+  font-weight: 900;
+}
+html.calm-mode .pdxPlace--rainbow {
+  animation: none;
+  box-shadow: none;
+  background: var(--surface-card, #0b0b0b) !important;
+  border: 2px solid #666 !important;
+}

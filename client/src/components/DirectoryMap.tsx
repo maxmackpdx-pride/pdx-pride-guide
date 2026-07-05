@@ -26,6 +26,7 @@ const TYPE_COLORS: Record<string, string> = {
   service: "#A855F7",
   shop: "#FFD700",
   hotel: "#FF1FA0",
+  nonprofit: "#FFFFFF",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -38,6 +39,12 @@ const TYPE_LABELS: Record<string, string> = {
   hotel: "Hotels",
 };
 
+function buildRainbowPin() {
+  return divIcon({
+    html: `<div style="width:20px;height:20px;border-radius:50%;background:conic-gradient(#FF2400,#FF6600,#FFEE00,#39FF14,#00FFFF,#0044FF,#8800FF,#FF00CC,#FF2400);box-shadow:0 0 10px rgba(255,255,255,0.7),0 2px 6px rgba(0,0,0,0.8);border:2px solid #000;"></div>`,
+    iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -14], className: "",
+  });
+}
 function buildPin(color: string) {
   return divIcon({
     className: "",
@@ -216,11 +223,12 @@ export default function DirectoryMap({
         />
         {mapped.map(biz => {
           const accent = TYPE_COLORS[biz.type] || "#FF00CC";
+          const rainbow = biz.type === "nonprofit";
           return (
             <Marker
               key={biz.id}
               position={[biz.lat!, biz.lng!]}
-              icon={buildPin(accent)}
+              icon={rainbow ? buildRainbowPin() : buildPin(accent)}
             >
               <Popup className="pdx-dir-popup" maxWidth={280}>
                 <DirectoryPopup biz={biz} accent={accent} />
