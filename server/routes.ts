@@ -2536,6 +2536,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getAdminMissedConnections());
   });
 
+  app.post("/api/admin/missed-connections/:id/approve", requireAdmin, (req, res) => {
+    const result = storage.approveMissedConnection(Number(req.params.id));
+    if (result.error) return res.status(404).json({ error: result.error });
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/admin/missed-connections/:id", requireAdmin, (req, res) => {
+    const result = storage.removeMissedConnectionAdmin(Number(req.params.id));
+    if (result.error) return res.status(404).json({ error: result.error });
+    res.json({ ok: true });
+  });
+
   app.post("/api/admin/missed-connections/:id/reject", requireAdmin, (req, res) => {
     try {
       const { reasonCode, note } = parseBoardRejectBody(req.body);

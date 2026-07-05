@@ -639,6 +639,28 @@ export default function Admin() {
     },
   });
 
+  const approveSpottedMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/missed-connections/${id}/approve`, {}),
+    onSuccess: () => {
+      invalidateInboxQueries();
+      toast({ title: "Approved", description: "Post stays live and is cleared from the queue." });
+    },
+    onError: (err: unknown) => {
+      toast({ title: "Could not approve", description: parseApiError(err, "Approve failed."), variant: "destructive" });
+    },
+  });
+
+  const removeSpottedMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/missed-connections/${id}`),
+    onSuccess: () => {
+      invalidateInboxQueries();
+      toast({ title: "Post removed", description: "It is gone from the public board." });
+    },
+    onError: (err: unknown) => {
+      toast({ title: "Could not remove", description: parseApiError(err, "Remove failed."), variant: "destructive" });
+    },
+  });
+
   const approvePromoterMutation = useMutation({
     mutationFn: (userId: number) => apiRequest("POST", `/api/admin/promoter-requests/${userId}/approve`, {}),
     onSuccess: () => {
@@ -1109,6 +1131,8 @@ export default function Admin() {
             onBoardRejectReasonChange={(key, code) => setBoardRejectReasons(prev => ({ ...prev, [key]: code }))}
             onBoardRejectNoteChange={(key, note) => setBoardRejectNotes(prev => ({ ...prev, [key]: note }))}
             onBoardReject={(board, id, reasonCode, note) => rejectBoardPostMutation.mutate({ board, id, reasonCode, note })}
+            onApproveSpotted={(id) => approveSpottedMutation.mutate(id)}
+            onRemoveSpotted={(id) => removeSpottedMutation.mutate(id)}
             actionPending={inboxActionPending || rejectBoardPostMutation.isPending}
           />
         )}

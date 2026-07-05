@@ -478,6 +478,7 @@ function ensureMissedConnectionsSchema() {
     if (!names.has("event_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN event_id INTEGER`);
     if (!names.has("closes_at")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN closes_at TEXT`);
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_notes TEXT`);
+    if (!names.has("admin_reviewed")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_reviewed INTEGER DEFAULT 0`);
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS missed_connection_threads (
         thread_id TEXT PRIMARY KEY,
@@ -2899,6 +2900,8 @@ export interface IStorage {
   rejectGiftingPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   rejectMissedConnection(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   getAdminMissedConnections(): any[];
+  approveMissedConnection(id: number): { ok?: boolean; error?: string };
+  removeMissedConnectionAdmin(id: number): { ok?: boolean; error?: string };
   ensureSiteAdminGigPost(): void;
   syncSiteOwnerPortfolio(): void;
   isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
@@ -3587,6 +3590,18 @@ export const storage: IStorage = {
     });
     return { ok: true };
   },
+  approveMissedConnection(id) {
+    const row = sqlite.prepare(`SELECT id FROM missed_connections WHERE id = ?`).get(id);
+    if (!row) return { error: "Not found" };
+    sqlite.prepare(`UPDATE missed_connections SET admin_reviewed = 1 WHERE id = ?`).run(id);
+    return { ok: true };
+  },
+  removeMissedConnectionAdmin(id) {
+    const row = sqlite.prepare(`SELECT id FROM missed_connections WHERE id = ?`).get(id);
+    if (!row) return { error: "Not found" };
+    sqlite.prepare(`UPDATE missed_connections SET status = 'DELETED' WHERE id = ?`).run(id);
+    return { ok: true };
+  },
   getAdminMissedConnections() {
     archiveExpiredMissedConnections();
     return sqlite.prepare(`
@@ -3599,6 +3614,7 @@ export const storage: IStorage = {
         m.event_id AS eventId,
         m.status,
         m.admin_notes AS adminNotes,
+        m.admin_reviewed AS adminReviewed,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
         m.user_id AS userId,

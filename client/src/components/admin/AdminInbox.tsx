@@ -112,6 +112,8 @@ export interface AdminInboxProps {
   onApproveSubmission: (id: number) => void;
   onMergeSubmission: (submissionId: number, eventId: number) => void;
   onRejectSubmission: (id: number, reason: string) => void;
+  onApproveSpotted: (id: number) => void;
+  onRemoveSpotted: (id: number) => void;
   onApprovePromoter: (userId: number) => void;
   onDenyPromoter: (userId: number) => void;
   onApproveTalent: (talentId: number) => void;
@@ -223,7 +225,7 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       title: post.title,
       subtitle: post.eventTitle ? `${post.eventTitle}${post.venueHint ? ` · ${post.venueHint}` : ""}` : (post.venueHint || "Around town"),
       status: post.status,
-      pending: post.status === "ACTIVE",
+      pending: post.status === "ACTIVE" && !post.adminReviewed,
       payload: post,
       profile: inboxUserProfile("missed_connection", post),
     });
@@ -377,6 +379,8 @@ function InboxCard({
   onApproveSubmission,
   onMergeSubmission,
   onRejectSubmission,
+  onApproveSpotted,
+  onRemoveSpotted,
   onApprovePromoter,
   onDenyPromoter,
   onApproveTalent,
@@ -632,6 +636,20 @@ function InboxCard({
                   </button>
                 </div>
               )}
+              <button
+                onClick={() => { if (window.confirm("Remove this post from the board entirely?")) onRemoveSpotted(payload.id); }}
+                className="display text-xs px-4 py-2 border self-start"
+                style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}
+              >
+                REMOVE POST
+              </button>
+              <button
+                onClick={() => onApproveSpotted(payload.id)}
+                className="display text-xs px-4 py-2 border-2 self-start"
+                style={{ borderColor: "#CCFF00", color: "#000", background: "#CCFF00", fontWeight: 900 }}
+              >
+                APPROVE — THIS IS FINE
+              </button>
               <AdminBoardReject
                 reasonCode={boardRejectReasons[boardRejectKey(item.kind, payload.id)] || "OFF_TOPIC"}
                 note={boardRejectNotes[boardRejectKey(item.kind, payload.id)] || ""}

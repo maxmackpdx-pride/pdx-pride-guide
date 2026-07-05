@@ -160,6 +160,9 @@ interface Rule {
 
 // SCAT — waste play is the one kink the house rules exclude. (11 patterns)
 const SCAT_BLOCK: RegExp[] = [
+  // common alternate spellings — "skat"/"skatt"/"scatt" (leet-folding handles sk@t)
+  /\bsk[a@]tt?\s*(?:play|kink|scene|session|fetish)?\b/i,
+  /\bscatt\b/i,
   /\bscat\b/,
   /\bscat ?play\b/,
   /\bcoproph(?:ilia|ile|agia|iliac)s?\b/,
