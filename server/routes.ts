@@ -8,6 +8,7 @@ import { assertProductionPersistence, assertProductionSecrets, getPersistenceAud
 import { initAttendanceWs } from "./attendanceWs";
 import { BetterSqliteSessionStore } from "./sessionStore";
 import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
+import { z } from "zod";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
   enrichEventForMap,
@@ -846,6 +847,49 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     const liveEvents = storage.getEvents({ status: "LIVE" });
     res.json(attachUpcomingEventsToBusinesses(businesses, liveEvents));
+  });
+
+  const memberBusinessSchema = z.object({
+    name: z.string().trim().min(2).max(120),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]),
+    description: z.string().trim().min(10).max(2000),
+    address: z.string().trim().max(200).optional().nullable(),
+    neighborhood: z.string().trim().max(80).optional().nullable(),
+    website: z.string().trim().max(300).optional().nullable(),
+    instagram: z.string().trim().max(80).optional().nullable(),
+    hours: z.string().trim().max(200).optional().nullable(),
+    phone: z.string().trim().max(40).optional().nullable(),
+    queerOwned: z.boolean().optional().default(false),
+    queerFriendly: z.boolean().optional().default(true),
+  });
+
+  app.post("/api/directory", requireAuth, async (req, res) => {
+    try {
+      const data = memberBusinessSchema.parse(req.body);
+      const withCoords = await fillFieldsMapCoordinates({
+        venueName: data.name,
+        address: data.address ?? undefined,
+      });
+      const biz = storage.createBusiness({
+        ...data,
+        address: data.address ?? null,
+        neighborhood: data.neighborhood ?? null,
+        website: data.website ?? null,
+        instagram: data.instagram ?? null,
+        hours: data.hours ?? null,
+        phone: data.phone ?? null,
+        lat: withCoords.lat ?? null,
+        lng: withCoords.lng ?? null,
+        active: true,
+        queerOwned: !!data.queerOwned,
+        queerFriendly: data.queerFriendly !== false,
+        isNew: false,
+        imageUrl: null,
+      });
+      res.status(201).json(biz);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Invalid directory listing" });
+    }
   });
 
   app.post("/api/admin/directory", requireAdmin, async (req, res) => {

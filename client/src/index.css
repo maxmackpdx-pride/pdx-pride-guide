@@ -10085,6 +10085,21 @@ html.calm-mode .schedule-now-line {
 }
 
 /* ── Business Directory ─────────────────────────────────────────────────── */
+.directory-form-panel {
+  max-width: 760px;
+  margin: 0 auto 24px;
+}
+
+.directory-form-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.directory-map--fill {
+  flex: 1 1 auto;
+}
+
 .directory-grid {
   columns: 3;
   column-gap: 18px;

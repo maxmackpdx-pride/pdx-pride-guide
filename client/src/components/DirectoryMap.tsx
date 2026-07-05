@@ -190,9 +190,19 @@ export default function DirectoryMap({
 }) {
   const mapped = businesses.filter(b => b.lat != null && b.lng != null);
   const heightStyle = typeof height === "number" ? `${height}px` : height;
+  const fillParent = height === "100%";
 
   return (
-    <div style={{ height: heightStyle, width: "100%", position: "relative" }}>
+    <div
+      className={fillParent ? "directory-map directory-map--fill" : "directory-map"}
+      style={{
+        height: heightStyle,
+        minHeight: fillParent ? heightStyle : undefined,
+        width: "100%",
+        position: "relative",
+        flex: fillParent ? "1 1 auto" : undefined,
+      }}
+    >
       <style>{POPUP_STYLES}</style>
       <MapContainer
         center={[45.5231, -122.6765]}

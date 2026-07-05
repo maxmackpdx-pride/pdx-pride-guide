@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -108,10 +108,6 @@ export default function Home() {
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
   const [featuredPlaces, setFeaturedPlaces] = useState<DirectoryBusiness[]>([]);
-  const [showSoftLaunch, setShowSoftLaunch] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("softLaunchWelcomeDismissed") !== "true";
-  });
 
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -161,95 +157,8 @@ export default function Home() {
     [businesses],
   );
 
-  const dismissSoftLaunch = () => {
-    window.localStorage.setItem("softLaunchWelcomeDismissed", "true");
-    setShowSoftLaunch(false);
-  };
-
-  const dismissSoftLaunchOnEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") dismissSoftLaunch();
-  }, []);
-
-  useEffect(() => {
-    if (!showSoftLaunch) return;
-    window.addEventListener("keydown", dismissSoftLaunchOnEscape);
-    return () => window.removeEventListener("keydown", dismissSoftLaunchOnEscape);
-  }, [showSoftLaunch, dismissSoftLaunchOnEscape]);
-
   return (
     <div className="home-main-stage">
-      {showSoftLaunch && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="soft-launch-title"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 2000,
-            background: "rgba(0,0,0,0.72)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 18,
-          }}
-        >
-          <div
-            style={{
-              width: "min(560px, 100%)",
-              border: "3px solid var(--neon-yellow)",
-              background: "#050505",
-              boxShadow: "0 0 36px rgba(204,255,0,0.24), 0 0 60px rgba(255,0,204,0.16)",
-              padding: 24,
-              position: "relative",
-            }}
-          >
-            <button
-              type="button"
-              aria-label="Close welcome"
-              onClick={dismissSoftLaunch}
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                background: "transparent",
-                border: "1px solid #333",
-                color: "#999",
-                width: 30,
-                height: 30,
-                cursor: "pointer",
-              }}
-            >
-              X
-            </button>
-            <div className="sticker" style={{ color: "#FF00CC", borderColor: "#FF00CC", marginBottom: 14 }}>
-              SOFTIE LAUNCH
-            </div>
-            <h2
-              id="soft-launch-title"
-              className="display"
-              style={{ color: "#fff", fontSize: "clamp(2rem, 8vw, 4rem)", lineHeight: 0.95, marginBottom: 14 }}
-            >
-              WELCOME
-            </h2>
-            <p style={{ color: "#bbb", fontSize: "1rem", lineHeight: 1.6, marginBottom: 18 }}>
-              Welcome to the softie launch. A couple more days working out the bugs and we will be ready. Play around,
-              and please submit feedback at the bottom of the website if you run into any issue.
-            </p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Button type="button" variant="solid" accent="lime" onClick={dismissSoftLaunch}>
-                START EXPLORING
-              </Button>
-              <a href="#feedback" onClick={dismissSoftLaunch} style={{ textDecoration: "none" }}>
-                <Button as="span" accent="cyan">
-                  SEND FEEDBACK
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
       <section className="pg-hero" aria-label="Portland Pride Guide hero">
         <img className="pg-hero__img" src={heroWallpaperImg} alt="" />
         <div className="pg-hero__scrim" aria-hidden="true" />
@@ -301,12 +210,12 @@ export default function Home() {
         />
       </div>
 
-      <div className="pg-block" style={{ paddingTop: 58 }}>
+      <div className="pg-block pg-block--schedule" style={{ paddingTop: 36 }}>
         <ScrollReveal>
           <SectionHeader
             kicker="All Week"
             title="The Schedule"
-            subtitle="The whole week, side by side — same view as the full schedule. Scroll horizontally through the days, vertically through the hours."
+            subtitle="The whole week at a glance — seven days side by side, hours stacked tight. Scroll sideways for packed days; tap any block for details."
             accent="cyan"
             style={{ marginBottom: 0 }}
             action={
@@ -481,11 +390,18 @@ export default function Home() {
                   description="The community directory is being built. Check back for bars, cafes, and venues."
                 />
               )}
-              <Link href="/directory" style={{ textDecoration: "none" }}>
-                <Button as="span" accent="cyan" arrow>
-                  Full directory
-                </Button>
-              </Link>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                <Link href="/directory" style={{ textDecoration: "none" }}>
+                  <Button as="span" accent="cyan" arrow>
+                    Full directory
+                  </Button>
+                </Link>
+                <Link href="/directory?add=1" style={{ textDecoration: "none" }}>
+                  <Button as="span" accent="magenta">
+                    Add your business
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </ScrollReveal>

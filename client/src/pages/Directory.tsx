@@ -1,11 +1,14 @@
-import { useState, useMemo, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useState, useMemo, Suspense, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import PageHeader from "@/components/PageHeader";
+import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin } from "lucide-react";
+import { MapPin, Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { PlaceCard } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
@@ -70,12 +73,33 @@ const NEIGHBORHOODS = [
   "Belmont", "Division", "Mississippi", "Alberta Arts District",
 ];
 
+const FORM_NEIGHBORHOODS = NEIGHBORHOODS.filter(n => n !== "ALL");
+
+const blankDirectoryForm = () => ({
+  name: "",
+  type: "bar",
+  description: "",
+  address: "",
+  neighborhood: "SE",
+  website: "",
+  instagram: "",
+  hours: "",
+  phone: "",
+  queerOwned: false,
+  queerFriendly: true,
+});
+
 export default function Directory() {
   usePageSeo(
     "Queer Portland Directory — PDX Pride Guide",
     "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   );
 
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [showAuth, setShowAuth] = useState(false);
+  const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
+  const [form, setForm] = useState(blankDirectoryForm);
   const [activeType, setActiveType] = useState("ALL");
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
 
@@ -101,15 +125,131 @@ export default function Directory() {
     return NEIGHBORHOODS.filter(n => n === "ALL" || seen.has(n));
   }, [businesses]);
 
+  const createMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/directory", form),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      toast({ title: "Added to directory", description: "Your place is live on the map and listings." });
+      setForm(blankDirectoryForm());
+      setFormOpen(false);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not add place", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const openAddForm = () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    setFormOpen(true);
+    window.setTimeout(() => document.getElementById("directory-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
+  };
+
+  useEffect(() => {
+    if (!formOpen) return;
+    window.setTimeout(() => document.getElementById("directory-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+  }, [formOpen]);
+
+  const submitDirectoryForm = () => {
+    if (!form.name.trim()) {
+      toast({ title: "Add a name", variant: "destructive" });
+      return;
+    }
+    if (!form.description.trim()) {
+      toast({ title: "Add a description", variant: "destructive" });
+      return;
+    }
+    createMutation.mutate();
+  };
+
   return (
     <div className="zine-page directory-page board-page">
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <PageHeader
         section="Portland"
         title="Queer Directory"
         titleAccent="magenta"
         kicker="Queer-owned · Queer-friendly · Community-rooted"
         lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
+        actions={
+          <button type="button" className="btn-neon magenta" onClick={openAddForm}>
+            <Plus size={16} /> Add a place
+          </button>
+        }
       />
+
+      {formOpen && (
+        <ScrollReveal>
+          <section id="directory-form" className="gifting-form-panel directory-form-panel">
+            <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
+              <X size={18} />
+            </button>
+            <h2 className="display section-heading">Add to the directory</h2>
+            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. Goes live immediately — keep it accurate and community-rooted.</p>
+            <div className="gifting-form-grid">
+              <label className="span">
+                Place name *
+                <input className="board-text-field" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={120} />
+              </label>
+              <label>
+                Type *
+                <select className="board-text-field" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                  {Object.entries(TYPE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Neighborhood
+                <select className="board-text-field" value={form.neighborhood} onChange={e => setForm(f => ({ ...f, neighborhood: e.target.value }))}>
+                  {FORM_NEIGHBORHOODS.map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="span">
+                Description *
+                <textarea className="board-text-field" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={4} maxLength={2000} />
+              </label>
+              <label className="span">
+                Address
+                <input className="board-text-field" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Street address helps us pin it on the map" />
+              </label>
+              <label>
+                Hours
+                <input className="board-text-field" value={form.hours} onChange={e => setForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. Mon–Sat 4pm–2am" />
+              </label>
+              <label>
+                Phone
+                <input className="board-text-field" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+              </label>
+              <label>
+                Website
+                <input className="board-text-field" value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} type="url" placeholder="https://..." />
+              </label>
+              <label>
+                Instagram
+                <input className="board-text-field" value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} placeholder="@handle" />
+              </label>
+              <label className="span directory-form-checks">
+                <label className="gifting-rules">
+                  <input type="checkbox" checked={form.queerOwned} onChange={e => setForm(f => ({ ...f, queerOwned: e.target.checked }))} />
+                  Queer-owned
+                </label>
+                <label className="gifting-rules">
+                  <input type="checkbox" checked={form.queerFriendly} onChange={e => setForm(f => ({ ...f, queerFriendly: e.target.checked }))} />
+                  Queer-friendly
+                </label>
+              </label>
+            </div>
+            <button type="button" className="btn-neon solid" disabled={createMutation.isPending} onClick={submitDirectoryForm}>
+              {createMutation.isPending ? "Adding…" : "Add to directory →"}
+            </button>
+          </section>
+        </ScrollReveal>
+      )}
 
       {/* Map */}
       {!isLoading && (
@@ -188,9 +328,12 @@ export default function Directory() {
             <p className="display section-heading">Nothing here yet</p>
             <p className="board-copy-sm">
               {businesses.length === 0
-                ? "The directory is being built — check back soon."
+                ? "The directory is being built — add your queer-owned or queer-friendly spot."
                 : "No places match your filters."}
             </p>
+            <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
+              <Plus size={16} /> Add a business
+            </button>
           </div>
         ) : (
           <div className="directory-grid">

@@ -184,15 +184,15 @@ export default function Schedule({
     return () => window.removeEventListener('keydown', onKey);
   }, [closeEvent]);
 
-  // open on the evening + weekend once mounted (the packed part of the grid)
+  // Open on Friday afternoon — the packed part of the grid (3pm, FRI column).
   useEffect(() => {
     const id = setTimeout(() => {
       const el = scrollElRef.current;
       if (!el) return;
       const compact = density === 'Compact';
-      const HH = compact ? 58 : 74;
-      const BASE = compact ? 230 : 290;
-      el.scrollTop = Math.max(0, (13 - 11) * HH - 8);
+      const HH = embed ? 42 : compact ? 58 : 74;
+      const BASE = embed ? 156 : compact ? 230 : 290;
+      el.scrollTop = Math.max(0, (15 - 11) * HH - 8);
       el.scrollLeft = Math.round(3.15 * BASE);
     }, 80);
     return () => clearTimeout(id);
@@ -366,14 +366,14 @@ export default function Schedule({
   /* ---- derived layout constants ----------------------------------- */
 
   const compact = density === 'Compact';
-  const HOUR_H = compact ? 58 : 74;
-  const MIN_LANE = compact ? 124 : 152;
-  const BASE_DAY = compact ? 230 : 290;
-  const MIN_H = compact ? 36 : 44;
+  const HOUR_H = embed ? 42 : compact ? 58 : 74;
+  const MIN_LANE = embed ? 104 : compact ? 124 : 152;
+  const BASE_DAY = embed ? 156 : compact ? 230 : 290;
+  const MIN_H = embed ? 24 : compact ? 36 : 44;
   const START = 11;
   const END = 27;
-  const HEADER_H = 56;
-  const AXIS_W = 62;
+  const HEADER_H = embed ? 34 : 56;
+  const AXIS_W = embed ? 44 : 62;
   const TOTAL_H = (END - START) * HOUR_H;
   const hourBg =
     'repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent ' +
@@ -397,10 +397,10 @@ export default function Schedule({
         label: fmtHour(i),
         style: S({
           position: 'absolute',
-          right: '8px',
-          top: (i - START) * HOUR_H + 4 + 'px',
+          right: embed ? '4px' : '8px',
+          top: (i - START) * HOUR_H + (embed ? 2 : 4) + 'px',
           fontFamily: 'var(--font-body)',
-          fontSize: '10.5px',
+          fontSize: embed ? '9px' : '10.5px',
           fontWeight: 600,
           color: 'rgba(230,227,218,.4)',
           whiteSpace: 'nowrap',
@@ -409,7 +409,7 @@ export default function Schedule({
       });
     }
     return arr;
-  }, [HOUR_H]);
+  }, [HOUR_H, embed]);
 
   /* ---- days (headers + packed blocks) ----------------------------- */
 
@@ -464,9 +464,9 @@ export default function Schedule({
         const height = Math.max(((e.e - e.s) / 60) * HOUR_H, MIN_H);
         const rsvp = myEventIds.has(e.id);
         const live = now != null && e.s <= now && now < e.e;
-        const twoLine = height >= 54;
-        const showVenue = height >= 74 && width >= 116;
-        const showQuick = height >= 56 && width >= 100;
+        const twoLine = height >= (embed ? 40 : 54);
+        const showVenue = height >= (embed ? 56 : 74) && width >= (embed ? 96 : 116);
+        const showQuick = !embed && height >= 56 && width >= 100;
         const style = S({
           position: 'absolute',
           top: top + 'px',
@@ -495,7 +495,7 @@ export default function Schedule({
             toggleRsvp(e.id);
           },
           style,
-          time: height >= 54 ? fmtClock(e.s) + ' – ' + fmtClock(e.e) : fmtClock(e.s),
+          time: height >= (embed ? 40 : 54) ? fmtClock(e.s) + ' – ' + fmtClock(e.e) : fmtClock(e.s),
           title: e.title,
           venue: e.venue,
           showVenue,
@@ -513,7 +513,7 @@ export default function Schedule({
           }),
           timeStyle: S({
             fontFamily: 'var(--font-body)',
-            fontSize: (compact ? 10 : 11) + 'px',
+            fontSize: (embed ? 9 : compact ? 10 : 11) + 'px',
             fontWeight: 600,
             color: dt,
             whiteSpace: 'nowrap',
@@ -526,7 +526,7 @@ export default function Schedule({
             textTransform: 'uppercase',
             lineHeight: 1.02,
             color: '#fff',
-            fontSize: (compact ? 12.5 : 14.5) + 'px',
+            fontSize: (embed ? 11 : compact ? 12.5 : 14.5) + 'px',
             letterSpacing: '.01em',
             display: '-webkit-box',
             WebkitLineClamp: twoLine ? 2 : 1,
@@ -538,7 +538,7 @@ export default function Schedule({
           }),
           venueStyle: S({
             fontFamily: 'var(--font-body)',
-            fontSize: (compact ? 10 : 11) + 'px',
+            fontSize: (embed ? 9 : compact ? 10 : 11) + 'px',
             color: 'rgba(230,227,218,.6)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -589,7 +589,7 @@ export default function Schedule({
           contentStyle: S({
             position: 'relative',
             zIndex: 2,
-            padding: compact ? '4px 7px' : '6px 9px',
+            padding: embed ? '3px 5px' : compact ? '4px 7px' : '6px 9px',
             flex: 1,
             minHeight: 0,
             display: 'flex',
@@ -603,11 +603,11 @@ export default function Schedule({
         top: 0,
         zIndex: 5,
         background: '#0a0a0a',
-        padding: '9px 10px 9px',
-        borderBottom: '3px solid ' + dc,
+        padding: embed ? '5px 8px 5px' : '9px 10px 9px',
+        borderBottom: embed ? '2px solid ' + dc : '3px solid ' + dc,
         display: 'flex',
         flexDirection: 'column',
-        gap: '3px',
+        gap: embed ? '2px' : '3px',
         boxShadow: calm ? 'none' : '0 3px 12px -7px ' + hexA(dc, 0.9),
       });
       const cnt = list.length;
@@ -625,7 +625,7 @@ export default function Schedule({
         nameStyle: S({
           fontFamily: 'var(--font-display)',
           fontWeight: 900,
-          fontSize: '17px',
+          fontSize: embed ? '13px' : '17px',
           letterSpacing: '.04em',
           color: dt,
           lineHeight: 1,
@@ -633,7 +633,7 @@ export default function Schedule({
         }),
         dateStyle: S({
           fontFamily: 'var(--font-body)',
-          fontSize: '10.5px',
+          fontSize: embed ? '9px' : '10.5px',
           fontWeight: 600,
           color: 'rgba(230,227,218,.48)',
           letterSpacing: '.02em',
@@ -641,7 +641,7 @@ export default function Schedule({
         countStyle: S({
           fontFamily: 'var(--font-display)',
           fontWeight: 700,
-          fontSize: '10.5px',
+          fontSize: embed ? '8.5px' : '10.5px',
           letterSpacing: '.09em',
           color: cnt ? dt : 'rgba(255,255,255,.26)',
           textTransform: 'uppercase',
@@ -658,6 +658,7 @@ export default function Schedule({
     HOUR_H,
     MIN_H,
     compact,
+    embed,
     scheduleEvents,
     myEventIds,
     now,
@@ -968,10 +969,11 @@ export default function Schedule({
 
   const scrollStyle = S({
     overflow: 'auto',
-    maxHeight:
-      (embed ? 'min(72vh, ' : 'min(80vh, ') + (TOTAL_H + HEADER_H + 4) + 'px)',
-    border: '2px solid #2b2b2b',
-    borderRadius: '8px',
+    maxHeight: embed
+      ? TOTAL_H + HEADER_H + 4 + 'px'
+      : 'min(80vh, ' + (TOTAL_H + HEADER_H + 4) + 'px)',
+    border: embed ? '1px solid #2b2b2b' : '2px solid #2b2b2b',
+    borderRadius: embed ? '6px' : '8px',
     background: '#0a0a0a',
     position: 'relative',
   });
@@ -982,7 +984,11 @@ export default function Schedule({
 
   return (
     <div
-      className={calm ? 'sch-root calm' : 'sch-root'}
+      className={[
+        'sch-root',
+        embed ? 'sch-root--embed' : '',
+        calm ? 'calm' : '',
+      ].filter(Boolean).join(' ')}
       style={{
         minHeight: embed ? undefined : '100vh',
         background: embed ? 'transparent' : '#0a0a0a',
