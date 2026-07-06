@@ -13,6 +13,7 @@ export type NavEntry =
 /** Primary nav — labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/events", label: "Events" },
+  { type: "link", href: "/directory", label: "Directory" },
   {
     type: "dropdown",
     id: "boards",
@@ -28,7 +29,6 @@ export const PRIMARY_NAV: NavEntry[] = [
     id: "portland",
     label: "Portland",
     items: [
-      { href: "/directory", label: "Directory" },
       { href: "/schedule", label: "Schedule" },
       { href: "/about", label: "About" },
     ],
@@ -48,7 +48,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/pride-work": { section: "Boards", title: "Gig Board" },
   "/gifting": { section: "Boards", title: "Gifting" },
   "/spotted": { section: "Boards", title: "Spotted!" },
-  "/directory": { section: "Portland", title: "Queer Directory" },
+  "/directory": { section: "Directory", title: "Queer Directory" },
   "/about": { section: "Portland", title: "About" },
   "/submit": { section: "Submit", title: "Submit an Event" },
   "/dashboard": { section: "Account", title: "Your Hub" },

@@ -15,6 +15,10 @@ type NavItem = { href: string; label: string };
 
 const navEntries = PRIMARY_NAV;
 
+function navLinkActive(location: string, href: string) {
+  return location === href || location.startsWith(`${href}?`) || location.startsWith(`${href}/`);
+}
+
 function NavLink({
   href,
   label,
@@ -218,7 +222,7 @@ export default function Nav() {
                       key={entry.href}
                       href={entry.href}
                       label={entry.label}
-                      active={location === entry.href}
+                      active={navLinkActive(location, entry.href)}
                       onClick={closeMenu}
                     />
                   );
