@@ -79,6 +79,11 @@ export function pickRandomBusinesses<T>(businesses: T[], count = 3): T[] {
   return shuffleArray(businesses).slice(0, count);
 }
 
+/** Random directory entries of a given type (e.g. nonprofit). */
+export function pickRandomByType<T extends { type: string }>(entries: T[], type: string, count = 3): T[] {
+  return shuffleArray(entries.filter(entry => entry.type === type)).slice(0, count);
+}
+
 /** Four random Pride-week events; ~12.5% chance the Sanctuary headliner is included. */
 export function pickFourToTry(events: EventListing[], sanctuary: EventListing | null): EventListing[] {
   const pool = shuffleArray(uniqueByEventId(events.filter(isPrideListing)));

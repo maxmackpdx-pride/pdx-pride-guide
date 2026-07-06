@@ -47,6 +47,7 @@ const TYPE_LABELS: Record<string, string> = {
   service: "Services",
   shop: "Shops",
   hotel: "Hotels",
+  nonprofit: "Nonprofits",
 };
 
 const TYPE_TO_DS_CATEGORY: Record<string, string> = {
@@ -57,6 +58,7 @@ const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   service: "services",
   shop: "shops",
   hotel: "hotels",
+  nonprofit: "services",
 };
 
 type DirectoryBusiness = {
@@ -68,6 +70,7 @@ type DirectoryBusiness = {
   neighborhood: string | null;
   website: string | null;
   instagram: string | null;
+  donateUrl: string | null;
   hours: string | null;
   phone: string | null;
   isNew: boolean;
@@ -108,6 +111,7 @@ export default function Home() {
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
   const [featuredPlaces, setFeaturedPlaces] = useState<DirectoryBusiness[]>([]);
+  const [featuredNonprofits, setFeaturedNonprofits] = useState<DirectoryBusiness[]>([]);
 
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -147,10 +151,24 @@ export default function Home() {
     );
   }, [events]);
 
+  const commercialPlaces = useMemo(
+    () => businesses.filter(b => b.type !== "nonprofit"),
+    [businesses],
+  );
+  const nonprofits = useMemo(
+    () => businesses.filter(b => b.type === "nonprofit"),
+    [businesses],
+  );
+
   useEffect(() => {
-    if (businesses.length === 0) return;
-    setFeaturedPlaces(prev => (prev.length > 0 ? prev : pickRandomBusinesses(businesses, 3)));
-  }, [businesses]);
+    if (commercialPlaces.length === 0) return;
+    setFeaturedPlaces(prev => (prev.length > 0 ? prev : pickRandomBusinesses(commercialPlaces, 3)));
+  }, [commercialPlaces]);
+
+  useEffect(() => {
+    if (nonprofits.length === 0) return;
+    setFeaturedNonprofits(prev => (prev.length > 0 ? prev : pickRandomBusinesses(nonprofits, 3)));
+  }, [nonprofits]);
 
   const mappedBusinesses = useMemo(
     () => businesses.filter(b => b.lat != null && b.lng != null),
@@ -349,7 +367,7 @@ export default function Home() {
           <SectionHeader
             kicker="Queer Places"
             title="Where to Go"
-            subtitle="Bars, cafes, and venues run by and for the community. Three spots chosen at random — fresh picks every time you refresh."
+            subtitle="Bars, cafes, venues, and LGBTQ+ nonprofits — three of each, chosen at random every time you refresh."
             accent="cyan"
           />
           <div className="pg-places">
@@ -367,29 +385,80 @@ export default function Home() {
               </Suspense>
             </div>
             <div className="pg-placescol">
-              {featuredPlaces.map(biz => (
-                <PlaceCard
-                  key={biz.id}
-                  name={biz.name}
-                  category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-                  categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-                  address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
-                  hours={biz.hours || undefined}
-                  phone={biz.phone || undefined}
-                  description={biz.description || undefined}
-                  website={biz.website || undefined}
-                  instagram={biz.instagram || undefined}
-                  grandOpening={biz.isNew}
-                />
-              ))}
-              {featuredPlaces.length === 0 && (
-                <PlaceCard
-                  name="Queer Portland"
-                  category="venues"
-                  categoryLabel="Directory"
-                  description="The community directory is being built. Check back for bars, cafes, and venues."
-                />
-              )}
+              <div className="pg-placescol-split">
+                <div className="pg-placescol-half">
+                  <div className="pg-colhd">
+                    <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>
+                      Spots
+                    </span>
+                    <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
+                  </div>
+                  <div className="pg-placescol-cards">
+                    {featuredPlaces.map(biz => (
+                      <PlaceCard
+                        key={biz.id}
+                        name={biz.name}
+                        category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+                        categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+                        address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
+                        hours={biz.hours || undefined}
+                        phone={biz.phone || undefined}
+                        description={biz.description || undefined}
+                        website={biz.website || undefined}
+                        instagram={biz.instagram || undefined}
+                        grandOpening={biz.isNew}
+                      />
+                    ))}
+                    {featuredPlaces.length === 0 && (
+                      <PlaceCard
+                        name="Queer Portland"
+                        category="venues"
+                        categoryLabel="Directory"
+                        description="The community directory is being built. Check back for bars, cafes, and venues."
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="pg-placescol-half">
+                  <div className="pg-colhd">
+                    <span className="pg-colhd__t" style={{ color: "#fff" }}>
+                      Nonprofits
+                    </span>
+                    <span
+                      className="pg-colhd__rule"
+                      style={{ background: "linear-gradient(to right, #FF00CC, #00FFFF, transparent)" }}
+                    />
+                  </div>
+                  <div className="pg-placescol-cards">
+                    {featuredNonprofits.map(biz => (
+                      <PlaceCard
+                        key={biz.id}
+                        name={biz.name}
+                        category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+                        categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+                        className="pdxPlace--rainbow"
+                        donateUrl={biz.donateUrl || undefined}
+                        address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
+                        hours={biz.hours || undefined}
+                        phone={biz.phone || undefined}
+                        description={biz.description || undefined}
+                        website={biz.website || undefined}
+                        instagram={biz.instagram || undefined}
+                        grandOpening={biz.isNew}
+                      />
+                    ))}
+                    {featuredNonprofits.length === 0 && (
+                      <PlaceCard
+                        name="Support queer Portland"
+                        category="services"
+                        categoryLabel="Nonprofits"
+                        className="pdxPlace--rainbow"
+                        description="LGBTQ+ nonprofits are being added to the directory. Check back soon."
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                 <Link href="/directory" style={{ textDecoration: "none" }}>
                   <Button as="span" accent="cyan" arrow>
