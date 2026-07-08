@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { EventListing } from "@shared/multiDayEvents";
-import { fmtClock } from "@shared/prideWeek";
+import { DAYS, fmtClock } from "@shared/prideWeek";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import {
   buildScheduleEvents,
@@ -128,7 +128,9 @@ export default function EventsNowPanel({ events, attendanceSummaries, onSelect }
         ) : (
           <p className="enp-quiet">
             Nothing on this minute.
-            {nextUp ? ` Next up: ${nextUp.title} at ${fmtClock(nextUp.s)}.` : " Check back during Pride Week."}
+            {nextUp
+              ? ` Next up: ${nextUp.title}, ${DAYS.find(d => d.key === nextUp.day)?.short ?? nextUp.day} at ${fmtClock(nextUp.s)}.`
+              : " Check back during Pride Week."}
           </p>
         )}
       </div>
