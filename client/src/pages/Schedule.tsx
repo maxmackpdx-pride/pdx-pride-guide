@@ -11,11 +11,12 @@
    ============================================================ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
   ADM,
   DAYS,
+  PRIDE_WEEK_DAY_OPTIONS,
   TYPE_LABEL,
   fmtClock,
   fmtHour,
@@ -27,16 +28,14 @@ import {
 } from "@shared/prideWeek";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
-import {
-  DEFAULT_ATTENDANCE_PHRASE_KEY,
-  attendancePhraseLabel,
-} from "@shared/attendancePhrases";
+import { pacificTodayDate } from "@shared/missedConnections";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { buildScheduleEvents, type ScheduleEvent } from "@/lib/scheduleEvents";
+import { apiRequest } from "@/lib/queryClient";
+import { useEventRsvp } from "@/hooks/useEventRsvp";
+import { buildScheduleEvents, isLiveNow, type ScheduleEvent } from "@/lib/scheduleEvents";
 import AuthModal from "@/components/AuthModal";
 import heroUrl from "@/assets/hero-collage.png";
 import "./Schedule.css";
@@ -51,8 +50,6 @@ export interface ScheduleProps {
   posterStyle?: PosterStyle;
   /** default "Comfortable" */
   density?: Density;
-  /** Home embed: horizontal week grid only (no hero, toolbar, or filters). */
-  embed?: boolean;
 }
 
 type View = 'mine' | 'all';
@@ -69,17 +66,32 @@ interface SelRect {
 
 const S = (o: React.CSSProperties) => o; // literal-preserving style helper
 
-/** minutes-past-midnight "now", pushed past 24h for the small-hours tail */
-function nowMinutes(): number {
-  const d = new Date();
-  let t = d.getHours() * 60 + d.getMinutes();
-  if (d.getHours() < 4) t += 1440;
+/** Pacific minutes-past-midnight "now", pushed past 24h for the small-hours tail */
+function nowMinutes(nowMs = Date.now()): number {
+  const parts: Record<string, string> = {};
+  for (const part of new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date(nowMs))) {
+    if (part.type !== 'literal') parts[part.type] = part.value;
+  }
+  const hour = Number(parts.hour === '24' ? '0' : parts.hour);
+  let t = hour * 60 + Number(parts.minute);
+  if (hour < 4) t += 1440;
   return t;
+}
+
+/** Grid column the NOW line belongs to; small hours count as the prior night. */
+function nowDayKey(nowMs: number): string | null {
+  const hour = Math.floor((nowMinutes(nowMs) % 1440) / 60);
+  const columnDate = pacificTodayDate(hour < 4 ? nowMs - 4 * 3_600_000 : nowMs);
+  return PRIDE_WEEK_DAY_OPTIONS.find((d) => d.date === columnDate)?.value ?? null;
 }
 
 export default function Schedule({
   density = 'Comfortable',
-  embed = false,
 }: ScheduleProps) {
   const { user } = useAuth();
   const [view, setViewState] = useState<View>('all');
@@ -90,10 +102,11 @@ export default function Schedule({
   const { calmMode: calm } = useTheme();
   const [selKey, setSelKey] = useState<string | null>(null);
   const [selRect, setSelRect] = useState<SelRect | null>(null);
-  const [now, setNow] = useState<number>(nowMinutes);
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  const now = nowMinutes(nowMs);
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState('');
-  const [showAuth, setShowAuth] = useState(false);
+  const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
 
   const scrollElRef = useRef<HTMLDivElement | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,7 +114,6 @@ export default function Schedule({
   usePageSeo(
     "Schedule — Portland Pride 2026 | PDX Pride Guide",
     "Your full Pride Week schedule, July 13–19, side by side.",
-    { skip: embed },
   );
 
   useAttendanceSummariesLive();
@@ -118,42 +130,10 @@ export default function Schedule({
     refetchInterval: 120_000,
   });
 
-  const { data: myCheckIns = [] } = useQuery<{ eventId: number }[]>({
-    queryKey: ["/api/events/mine/check-ins"],
-    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then(r => r.json()),
-    enabled: !!user,
-  });
-
-  const myEventIds = useMemo(
-    () => new Set(myCheckIns.map(c => c.eventId)),
-    [myCheckIns],
-  );
-
   const scheduleEvents = useMemo(
     () => buildScheduleEvents(listings, attendanceSummaries),
     [listings, attendanceSummaries],
   );
-
-  const rsvpMutation = useMutation({
-    mutationFn: (eventId: number) =>
-      apiRequest("POST", `/api/events/${eventId}/attendance`, {
-        message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
-    },
-  });
-
-  const unrsvpMutation = useMutation({
-    mutationFn: (eventId: number) =>
-      apiRequest("DELETE", `/api/events/${eventId}/attendance`),
-    onSuccess: (_data, eventId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
-    },
-  });
 
   useEffect(() => {
     if (viewBootstrapped || !user) return;
@@ -167,7 +147,7 @@ export default function Schedule({
 
   // tick the NOW line every minute
   useEffect(() => {
-    const t = setInterval(() => setNow(nowMinutes()), 60000);
+    const t = setInterval(() => setNowMs(Date.now()), 60000);
     return () => clearInterval(t);
   }, []);
 
@@ -190,8 +170,8 @@ export default function Schedule({
       const el = scrollElRef.current;
       if (!el) return;
       const compact = density === 'Compact';
-      const HH = embed ? 42 : compact ? 58 : 74;
-      const BASE = embed ? 156 : compact ? 230 : 290;
+      const HH = compact ? 58 : 74;
+      const BASE = compact ? 230 : 290;
       el.scrollTop = Math.max(0, (15 - 11) * HH - 8);
       el.scrollLeft = Math.round(3.15 * BASE);
     }, 80);
@@ -210,18 +190,6 @@ export default function Schedule({
     setSelKey(null);
     setSelRect(null);
   }, []);
-
-  const toggleRsvp = useCallback((eventId: number) => {
-    if (!user) {
-      setShowAuth(true);
-      return;
-    }
-    if (myEventIds.has(eventId)) {
-      unrsvpMutation.mutate(eventId);
-      return;
-    }
-    rsvpMutation.mutate(eventId);
-  }, [user, myEventIds, rsvpMutation, unrsvpMutation]);
 
   const toggleFilter = useCallback((group: 'fAdm' | 'fType' | 'fAge', key: string) => {
     const setter = group === 'fAdm' ? setFAdm : group === 'fType' ? setFType : setFAge;
@@ -366,14 +334,14 @@ export default function Schedule({
   /* ---- derived layout constants ----------------------------------- */
 
   const compact = density === 'Compact';
-  const HOUR_H = embed ? 42 : compact ? 58 : 74;
-  const MIN_LANE = embed ? 104 : compact ? 124 : 152;
-  const BASE_DAY = embed ? 156 : compact ? 230 : 290;
-  const MIN_H = embed ? 24 : compact ? 36 : 44;
+  const HOUR_H = compact ? 58 : 74;
+  const MIN_LANE = compact ? 124 : 152;
+  const BASE_DAY = compact ? 230 : 290;
+  const MIN_H = compact ? 36 : 44;
   const START = 11;
   const END = 27;
-  const HEADER_H = embed ? 34 : 56;
-  const AXIS_W = embed ? 44 : 62;
+  const HEADER_H = 56;
+  const AXIS_W = 62;
   const TOTAL_H = (END - START) * HOUR_H;
   const hourBg =
     'repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent ' +
@@ -381,8 +349,8 @@ export default function Schedule({
     'px)';
 
   const inView = useCallback(
-    (e: ScheduleEvent) => embed || view === 'all' || myEventIds.has(e.id),
-    [embed, view, myEventIds],
+    (e: ScheduleEvent) => view === 'all' || myEventIds.has(e.id),
+    [view, myEventIds],
   );
   const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
   const viewSet = useMemo(() => scheduleEvents.filter(inView), [scheduleEvents, inView]);
@@ -397,10 +365,10 @@ export default function Schedule({
         label: fmtHour(i),
         style: S({
           position: 'absolute',
-          right: embed ? '4px' : '8px',
-          top: (i - START) * HOUR_H + (embed ? 2 : 4) + 'px',
+          right: '8px',
+          top: (i - START) * HOUR_H + 4 + 'px',
           fontFamily: 'var(--font-body)',
-          fontSize: embed ? '9px' : '10.5px',
+          fontSize: '10.5px',
           fontWeight: 600,
           color: 'rgba(230,227,218,.4)',
           whiteSpace: 'nowrap',
@@ -409,7 +377,7 @@ export default function Schedule({
       });
     }
     return arr;
-  }, [HOUR_H, embed]);
+  }, [HOUR_H]);
 
   /* ---- days (headers + packed blocks) ----------------------------- */
 
@@ -463,10 +431,10 @@ export default function Schedule({
         const top = ((e.s - START * 60) / 60) * HOUR_H;
         const height = Math.max(((e.e - e.s) / 60) * HOUR_H, MIN_H);
         const rsvp = myEventIds.has(e.id);
-        const live = now != null && e.s <= now && now < e.e;
-        const twoLine = height >= (embed ? 40 : 54);
-        const showVenue = height >= (embed ? 56 : 74) && width >= (embed ? 96 : 116);
-        const showQuick = !embed && height >= 56 && width >= 100;
+        const live = isLiveNow(e, nowMs);
+        const twoLine = height >= 54;
+        const showVenue = height >= 74 && width >= 116;
+        const showQuick = height >= 42 && width >= 90;
         const style = S({
           position: 'absolute',
           top: top + 'px',
@@ -495,7 +463,7 @@ export default function Schedule({
             toggleRsvp(e.id);
           },
           style,
-          time: height >= (embed ? 40 : 54) ? fmtClock(e.s) + ' – ' + fmtClock(e.e) : fmtClock(e.s),
+          time: height >= 54 ? fmtClock(e.s) + ' – ' + fmtClock(e.e) : fmtClock(e.s),
           title: e.title,
           venue: e.venue,
           showVenue,
@@ -507,13 +475,13 @@ export default function Schedule({
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, rgba(11,11,14,0.78) 100%)',
+              'linear-gradient(to top, rgba(11,11,14,0.95) 0%, rgba(11,11,14,0.5) 46%, rgba(11,11,14,0.03) 100%)',
             pointerEvents: 'none',
             zIndex: 1,
           }),
           timeStyle: S({
             fontFamily: 'var(--font-body)',
-            fontSize: (embed ? 9 : compact ? 10 : 11) + 'px',
+            fontSize: (compact ? 10 : 11) + 'px',
             fontWeight: 600,
             color: dt,
             whiteSpace: 'nowrap',
@@ -526,7 +494,7 @@ export default function Schedule({
             textTransform: 'uppercase',
             lineHeight: 1.02,
             color: '#fff',
-            fontSize: (embed ? 11 : compact ? 12.5 : 14.5) + 'px',
+            fontSize: (compact ? 12.5 : 14.5) + 'px',
             letterSpacing: '.01em',
             display: '-webkit-box',
             WebkitLineClamp: twoLine ? 2 : 1,
@@ -538,7 +506,7 @@ export default function Schedule({
           }),
           venueStyle: S({
             fontFamily: 'var(--font-body)',
-            fontSize: (embed ? 9 : compact ? 10 : 11) + 'px',
+            fontSize: (compact ? 10 : 11) + 'px',
             color: 'rgba(230,227,218,.6)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -589,11 +557,12 @@ export default function Schedule({
           contentStyle: S({
             position: 'relative',
             zIndex: 2,
-            padding: embed ? '3px 5px' : compact ? '4px 7px' : '6px 9px',
+            padding: compact ? '4px 7px' : '6px 9px',
             flex: 1,
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
+            justifyContent: 'flex-end',
             gap: '1px',
           }),
         };
@@ -603,11 +572,11 @@ export default function Schedule({
         top: 0,
         zIndex: 5,
         background: '#0a0a0a',
-        padding: embed ? '5px 8px 5px' : '9px 10px 9px',
-        borderBottom: embed ? '2px solid ' + dc : '3px solid ' + dc,
+        padding: '9px 10px 9px',
+        borderBottom: '3px solid ' + dc,
         display: 'flex',
         flexDirection: 'column',
-        gap: embed ? '2px' : '3px',
+        gap: '3px',
         boxShadow: calm ? 'none' : '0 3px 12px -7px ' + hexA(dc, 0.9),
       });
       const cnt = list.length;
@@ -625,7 +594,7 @@ export default function Schedule({
         nameStyle: S({
           fontFamily: 'var(--font-display)',
           fontWeight: 900,
-          fontSize: embed ? '13px' : '17px',
+          fontSize: '17px',
           letterSpacing: '.04em',
           color: dt,
           lineHeight: 1,
@@ -633,7 +602,7 @@ export default function Schedule({
         }),
         dateStyle: S({
           fontFamily: 'var(--font-body)',
-          fontSize: embed ? '9px' : '10.5px',
+          fontSize: '10.5px',
           fontWeight: 600,
           color: 'rgba(230,227,218,.48)',
           letterSpacing: '.02em',
@@ -641,7 +610,7 @@ export default function Schedule({
         countStyle: S({
           fontFamily: 'var(--font-display)',
           fontWeight: 700,
-          fontSize: embed ? '8.5px' : '10.5px',
+          fontSize: '10.5px',
           letterSpacing: '.09em',
           color: cnt ? dt : 'rgba(255,255,255,.26)',
           textTransform: 'uppercase',
@@ -658,10 +627,9 @@ export default function Schedule({
     HOUR_H,
     MIN_H,
     compact,
-    embed,
     scheduleEvents,
     myEventIds,
-    now,
+    nowMs,
     view,
     openEvent,
     toggleRsvp,
@@ -669,7 +637,9 @@ export default function Schedule({
 
   /* ---- now line --------------------------------------------------- */
 
-  const nowShown = now != null && now >= START * 60 && now <= END * 60;
+  // Today's column only; null outside Pride Week (Jul 13 to 19).
+  const nowDay = nowDayKey(nowMs);
+  const nowShown = nowDay != null && now >= START * 60 && now <= END * 60;
   const nowTop = nowShown ? ((now - START * 60) / 60) * HOUR_H : 0;
   const nowLineStyle = S({
     position: 'absolute',
@@ -969,11 +939,9 @@ export default function Schedule({
 
   const scrollStyle = S({
     overflow: 'auto',
-    maxHeight: embed
-      ? TOTAL_H + HEADER_H + 4 + 'px'
-      : 'min(80vh, ' + (TOTAL_H + HEADER_H + 4) + 'px)',
-    border: embed ? '1px solid #2b2b2b' : '2px solid #2b2b2b',
-    borderRadius: embed ? '6px' : '8px',
+    maxHeight: 'min(80vh, ' + (TOTAL_H + HEADER_H + 4) + 'px)',
+    border: '2px solid #2b2b2b',
+    borderRadius: '8px',
     background: '#0a0a0a',
     position: 'relative',
   });
@@ -986,18 +954,15 @@ export default function Schedule({
     <div
       className={[
         'sch-root',
-        embed ? 'sch-root--embed' : '',
         calm ? 'calm' : '',
       ].filter(Boolean).join(' ')}
       style={{
-        minHeight: embed ? undefined : '100vh',
-        background: embed ? 'transparent' : '#0a0a0a',
+        minHeight: '100vh',
+        background: '#0a0a0a',
         color: 'var(--text-mid)',
         fontFamily: 'var(--font-body)',
       }}
     >
-      {!embed && (
-      <>
       {/* ---- Hero ---- */}
       <section style={{ position: 'relative', overflow: 'hidden', background: '#0a0a0a' }}>
         <div
@@ -1208,11 +1173,9 @@ export default function Schedule({
           </div>
         </div>
       </div>
-      </>
-      )}
 
       {/* ---- Empty banner ---- */}
-      {!embed && emptyBanner && (
+      {emptyBanner && (
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px,4vw,40px)' }}>
           <div
             style={{
@@ -1234,9 +1197,9 @@ export default function Schedule({
       {/* ---- Grid ---- */}
       <div
         style={{
-          maxWidth: embed ? '100%' : '1400px',
+          maxWidth: '1400px',
           margin: '0 auto',
-          padding: embed ? '0' : '18px clamp(16px,4vw,40px) 40px',
+          padding: '18px clamp(16px,4vw,40px) 40px',
         }}
       >
         <div className="sch-scroll" ref={scrollElRef} style={scrollStyle}>
@@ -1285,7 +1248,7 @@ export default function Schedule({
                   <div style={day.countStyle}>{day.countLabel}</div>
                 </div>
                 <div style={{ position: 'relative', height: TOTAL_H + 'px', backgroundImage: hourBg }}>
-                  {nowShown && <div style={nowLineStyle} />}
+                  {nowShown && day.key === nowDay && <div style={nowLineStyle} />}
                   {day.blocks.map((b) => (
                     <div key={b.id} className="sch-block" onClick={b.onClick} style={b.style}>
                       <div style={b.overlayStyle} aria-hidden />
