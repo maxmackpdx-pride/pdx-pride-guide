@@ -763,12 +763,12 @@ function seedData() {
     },
     {
       title: "Lumbertwink Plaid Patio Pride",
-      description: "Pride Sunday afternoon patio party at Jackie's. Plaid-themed. DJs Not That Jennifer & Orographic. Sexy lumber go-gos, photo booth by Matty Hoffman. Discounted entry for plaid. 2 patios, 2 bars, air-conditioned indoors, VIP area. $18.69 (Plaid) / $29.45 (Non-Plaid).",
+      description: "Pride Sunday patio party at Jackie's, 4–9pm (shifted from 3–8 for the World Cup). Plaid-themed. DJs Not That Jennifer & Orographic. Sexy lumber go-gos, photo booth by Matty Hoffman. Discounted entry for plaid. 2 patios, 2 bars, air-conditioned indoors, VIP area. $18.69 (Plaid) / $29.45 (Non-Plaid).",
       venueName: "Jackie's",
       address: "930 SE Sandy Blvd, Portland, OR 97214",
       neighborhood: "SE Portland",
       lat: 45.5192, lng: -122.6478,
-      dateStart: "2026-07-19T15:00:00", dateEnd: "2026-07-19T21:00:00",
+      dateStart: "2026-07-19T16:00:00", dateEnd: "2026-07-19T21:00:00",
       dayOfWeek: "SUN",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["PARTY", "OUTDOOR", "T-DANCE"]),
@@ -1682,7 +1682,9 @@ function applyVerifiedEventOverrides() {
     description: "5th Annual Sports Bra Pride Block Party. Live DJ sets, weightlifting competition, dance performances, games, food carts, cocktails, shave ice, and kid-friendly activities. Ticket range reported at $0-$39.",
   });
   runTitle("Lumbertwink Plaid Patio Pride", {
-    description: "Lumbertwink Plaid Patio Pride at Jackie's. DJs Not That Jennifer and Orographic, sexy lumber go-gos, photo booth by Matty Hoffman. $18.69 plaid / $29.45 non-plaid.",
+    description: "Lumbertwink Plaid Patio Pride at Jackie's, 4–9pm (shifted from 3–8 for the World Cup). DJs Not That Jennifer and Orographic, sexy lumber go-gos, photo booth by Matty Hoffman. $18.69 plaid / $29.45 non-plaid.",
+    dateStart: "2026-07-19T16:00:00",
+    dateEnd: "2026-07-19T21:00:00",
   });
   runTitle("NE Portland Pride & LGBTQ+ Resource Fair", {
     description: "Free NE Portland Pride & LGBTQ+ Resource Fair hosted by Take Two and Javier Puga-Phillips on NE 30th Ave between Killingsworth and Emerson.",
@@ -2474,6 +2476,18 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_pdxpah_events_v1")) {
     seedPdxPahJuly2026Events();
     recordBootMigration("seed_pdxpah_events_v1");
+  }
+  if (!hasBootMigration("lumbertwink_world_cup_time_v1")) {
+    // 3–8pm → 4–9pm for World Cup (confirmed Jul 2026)
+    sqlite.prepare(`
+      UPDATE events SET
+        date_start = '2026-07-19T16:00:00',
+        date_end = '2026-07-19T21:00:00',
+        description = 'Lumbertwink Plaid Patio Pride at Jackie''s, 4–9pm (shifted from 3–8 for the World Cup). DJs Not That Jennifer and Orographic, sexy lumber go-gos, photo booth by Matty Hoffman. $18.69 plaid / $29.45 non-plaid.',
+        admin_notes = COALESCE(admin_notes, 'Time shifted 3–8 → 4–9 for World Cup')
+      WHERE title = 'Lumbertwink Plaid Patio Pride'
+    `).run();
+    recordBootMigration("lumbertwink_world_cup_time_v1");
   }
 }
 
