@@ -25,7 +25,7 @@ import {
   pickRandomBusinesses,
   type HomeDayKey,
 } from "@/lib/homeEvents";
-import Schedule from "@/pages/Schedule";
+import HomeSchedule from "@/components/HomeSchedule";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
 
@@ -231,9 +231,9 @@ export default function Home() {
       <div className="pg-block pg-block--schedule" style={{ paddingTop: 36 }}>
         <ScrollReveal>
           <SectionHeader
-            kicker="All Week"
+            kicker="Live & Up Next"
             title="The Schedule"
-            subtitle="The whole week at a glance — seven days side by side, hours stacked tight. Scroll sideways for packed days; tap any block for details."
+            subtitle="The next ten events across the week, scrolling by. Hover to pause and tap in. Everything else is broken out night by night below."
             accent="cyan"
             style={{ marginBottom: 0 }}
             action={
@@ -245,7 +245,7 @@ export default function Home() {
             }
           />
           <div className="pg-home-schedule">
-            <Schedule embed />
+            <HomeSchedule />
           </div>
         </ScrollReveal>
       </div>

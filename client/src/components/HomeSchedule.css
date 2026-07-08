@@ -1,0 +1,165 @@
+.home-schedule {
+  background: #0a0a0a;
+  border: 2px solid #2b2b2b;
+  border-radius: 12px;
+  padding: 17px 26px 26px;
+  overflow: hidden;
+}
+
+.home-schedule__rail-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.home-schedule__live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: #ff00cc;
+  box-shadow: 0 0 9px #ff00cc;
+  animation: hsPulse 1.5s ease-in-out infinite;
+}
+
+.home-schedule__marquee {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 12px 0 18px;
+  scrollbar-width: thin;
+  scrollbar-color: #2b2b2b transparent;
+}
+
+.home-schedule__marquee::-webkit-scrollbar {
+  height: 9px;
+}
+
+.home-schedule__marquee::-webkit-scrollbar-thumb {
+  background: #2b2b2b;
+  border-radius: 5px;
+}
+
+.home-schedule__track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+}
+
+/* Auto mode: infinite right-to-left band, edges faded, hover to pause. */
+.home-schedule__marquee--auto {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+}
+
+.home-schedule__marquee--auto .home-schedule__track {
+  animation: hsMarquee 45s linear infinite;
+}
+
+.home-schedule__marquee--auto:hover .home-schedule__track,
+.home-schedule__marquee--auto:focus-within .home-schedule__track {
+  animation-play-state: paused;
+}
+
+.home-schedule__seam {
+  height: 2px;
+  background: linear-gradient(to right, #00ffff, #ccff00 34%, #ff00cc 67%, #ff6600);
+  opacity: 0.45;
+}
+
+.home-schedule__days {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 12px;
+}
+
+.home-schedule__chip {
+  transition: filter 0.15s ease;
+}
+
+.home-schedule__chip:hover {
+  filter: brightness(1.14);
+}
+
+.home-schedule__chip-heart {
+  transition: transform 0.15s ease;
+}
+
+.home-schedule__chip-heart:hover {
+  transform: scale(1.12);
+}
+
+@keyframes hsMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes hsPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+
+@media (max-width: 980px) {
+  .home-schedule__days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .home-schedule {
+    padding: 14px 14px 20px;
+  }
+
+  .home-schedule__days {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Calm mode: no motion, no glow; the band becomes a manual swipe rail. */
+[data-calm] .home-schedule__live-dot {
+  background: #c8c8cc;
+  box-shadow: none;
+  animation: none;
+}
+
+[data-calm] .home-schedule__marquee--auto {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+[data-calm] .home-schedule__marquee--auto .home-schedule__track {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-schedule__live-dot {
+    animation: none;
+  }
+
+  .home-schedule__marquee--auto {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .home-schedule__marquee--auto .home-schedule__track {
+    animation: none;
+  }
+
+  .home-schedule__chip,
+  .home-schedule__chip-heart {
+    transition: none;
+  }
+}

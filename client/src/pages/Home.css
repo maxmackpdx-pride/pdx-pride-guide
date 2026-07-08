@@ -174,19 +174,6 @@
   margin-top: 14px;
 }
 
-.home-main-stage .pg-home-schedule .sch-root--embed .sch-scroll {
-  max-height: none;
-}
-
-.home-main-stage .pg-home-schedule .sch-root--embed .sch-scroll::-webkit-scrollbar {
-  height: 10px;
-  width: 10px;
-}
-
-.home-main-stage .pg-home-schedule .sch-root--embed .sch-scroll::-webkit-scrollbar-thumb {
-  border-width: 3px;
-}
-
 .home-main-stage .pg-board3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
