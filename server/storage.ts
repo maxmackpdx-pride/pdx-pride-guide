@@ -1971,6 +1971,198 @@ function seedPdxPahJuly2026Events() {
   });
 }
 
+/** Missing Pride Week 2026 listings sourced from WW / PDX Pipeline (see missing-pride-events.json). */
+function seedMissingWweekPrideEvents2026() {
+  const now = new Date().toISOString();
+  const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+  const insert = (row: Record<string, unknown>) => {
+    if (exists.get(row.title as string)) return;
+    db.insert(events).values({ ...row, createdAt: now } as any).run();
+  };
+
+  insert({
+    title: "Forest Pub: Drag as a Doorway to the Forest",
+    description:
+      "World Forestry Center and McMenamins present a Pride Week kickoff blending drag performance with nature-focused storytelling, featuring Efemmera Gendera and Thespis D. Light of Drag Me Outside.",
+    venueName: "McMenamins Mission Theater",
+    address: "1624 NW Glisan St, Portland, OR 97209",
+    neighborhood: "Northwest District",
+    lat: 45.5262294,
+    lng: -122.6881319,
+    dateStart: "2026-07-13T19:00:00",
+    dateEnd: "2026-07-13T20:30:00",
+    dayOfWeek: "MON",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["DRAG", "PERFORMANCE", "COMMUNITY"]),
+    admission: "TICKETED",
+    ticketUrl: "https://worldforestry.org/event/forest-pub-july-2026/",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: "https://www.pdxpipeline.com/wp-content/uploads/2026/06/forestpub-drag-1.jpg",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From WW/PDX Pipeline missing-events pass. Source id forest-pub-drag-2026-07-13.",
+  });
+
+  insert({
+    title: "Betty's Pride Weekend Party (feat. Uffie)",
+    description:
+      "Quarterly queer dance party Betty's throws its Pride weekend edition headlined by singer-songwriter and rapper Uffie.",
+    venueName: "White Owl Social Club",
+    address: "1305 SE 8th Ave, Portland, OR 97214",
+    neighborhood: "Central Eastside",
+    lat: 45.5134484,
+    lng: -122.6579941,
+    dateStart: "2026-07-17T20:00:00",
+    dateEnd: "2026-07-18T02:00:00",
+    dayOfWeek: "FRI",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["PARTY", "DJ", "LIVE-MUSIC"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.instagram.com/betty_pdx",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: null,
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From WW missing-events pass. End time estimated (source had no end). Source id bettys-pride-uffie-2026-07-17.",
+  });
+
+  insert({
+    title: "Poison Waters' Pride Drag Brunch",
+    description:
+      "Portland drag treasure Poison Waters hosts a Pride brunch in the Ritz-Carlton grand ballroom with a cast including Alexis Mateo, Angel Darko, Jay Colby and Kharisma. Plated entree, brunch spread and two cocktails included.",
+    venueName: "The Ritz-Carlton, Portland",
+    address: "900 SW Washington St, Portland, OR 97205",
+    neighborhood: "Downtown",
+    lat: 45.5207884,
+    lng: -122.6811143,
+    dateStart: "2026-07-18T12:00:00",
+    dateEnd: "2026-07-18T15:00:00",
+    dayOfWeek: "SAT",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["DRAG", "BRUNCH", "PERFORMANCE"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.poisonwaters.com/calendar.aspx",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: null,
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From WW missing-events pass. End time estimated (source had no end). Source id poison-waters-pride-brunch-2026-07-18.",
+  });
+
+  insert({
+    title: "Purple Rain — Queer Pop-Up Strip Club",
+    description:
+      "Queer pop-up strip club Purple Rain turns Buckman queer bar Peacock PDX (former Crush Bar) into an all-gender pole-dancing palace for Pride weekend.",
+    venueName: "Peacock PDX",
+    address: "1400 SE Morrison St, Portland, OR 97214",
+    neighborhood: "Buckman",
+    lat: 45.5170824,
+    lng: -122.6514493,
+    dateStart: "2026-07-18T21:00:00",
+    dateEnd: "2026-07-19T02:00:00",
+    dayOfWeek: "SAT",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["PARTY", "PERFORMANCE", "BURLESQUE"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.instagram.com/the_gay_barn",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: true,
+    nudityOk: true,
+    posterImageUrl: null,
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From WW missing-events pass. End time estimated (source had no end). Source id purple-rain-peacock-2026-07-18.",
+  });
+
+  insert({
+    title: "Jay Colby's Drag Brunch at Bar Cala",
+    description:
+      "Weekly favorite drag brunch where top drag talent entertain diners over Bar Cala's Mexican brunch menu in the Alberta neighborhood; runs Pride Sundays.",
+    venueName: "Bar Cala",
+    address: "2703 NE Alberta St, Portland, OR 97211",
+    neighborhood: "Alberta Arts District",
+    lat: 45.5592402,
+    lng: -122.6376982,
+    dateStart: "2026-07-19T11:00:00",
+    dateEnd: "2026-07-19T14:00:00",
+    dayOfWeek: "SUN",
+    ageRequirement: "ALL_AGES",
+    eventTypes: JSON.stringify(["DRAG", "BRUNCH", "PERFORMANCE"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.instagram.com/brunchportland",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl: null,
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From WW missing-events pass. Source listed 13+; mapped to ALL_AGES. End estimated. Source id jay-colby-drag-brunch-bar-cala-2026-07-19.",
+  });
+
+  insert({
+    title: 'TWIRL: A PDX Queer Disco (Pride "Fruity" edition)',
+    description:
+      "Queer daytime disco Twirl's Pride edition — OG Disco, Nu Disco, House, Funk & Boogie — relocated for Pride weekend to inner Southeast as a landing pad across the river from the downtown festival.",
+    venueName: "Redd on Salmon",
+    address: "831 SE Salmon St, Portland, OR 97214",
+    neighborhood: "Central Eastside",
+    lat: 45.5144461,
+    lng: -122.657341,
+    dateStart: "2026-07-19T15:00:00",
+    dateEnd: "2026-07-19T22:00:00",
+    dayOfWeek: "SUN",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["PARTY", "DJ", "OUTDOOR"]),
+    admission: "TICKETED",
+    ticketUrl: "https://queersocialclub.com/events-portland/32y5kydsacaknwdl3nd6dflyztxjrw-6t2gf-hcs8f",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    posterImageUrl:
+      "https://images.squarespace-cdn.com/content/v1/62155dfcfc6583248de4ebac/1782530156718-02KF8GP96UHJWV5TI606/27574864_534294933619413_4115096810127622144_n.jpg",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes:
+      'From WW/Queer Social Club missing-events pass. Distinct from hidden 2025 "Twirl! PDX Queer Disco — Pride Edition (HOLD)". Source id twirl-pdx-queer-disco-2026-07-19.',
+  });
+}
+
 function applyEventDataAuditFixes() {
   sqlite.prepare(`
     UPDATE events SET
@@ -2488,6 +2680,10 @@ function runBootMigrationsOnce() {
       WHERE title = 'Lumbertwink Plaid Patio Pride'
     `).run();
     recordBootMigration("lumbertwink_world_cup_time_v1");
+  }
+  if (!hasBootMigration("seed_missing_wweek_pride_events_v1")) {
+    seedMissingWweekPrideEvents2026();
+    recordBootMigration("seed_missing_wweek_pride_events_v1");
   }
 }
 
