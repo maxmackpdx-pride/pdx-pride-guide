@@ -11874,3 +11874,16 @@ html.calm-mode .pdxPlace--rainbow {
   background: var(--surface-card, #0b0b0b) !important;
   border: 2px solid #666 !important;
 }
+
+/* ═══ PAGE HEADER LIVE COUNT (big number before the title) ═══ */
+.page-header__count {
+  color: #CCFF00;
+  margin-right: 0.18em;
+  text-shadow: 0 0 18px rgba(204, 255, 0, 0.55);
+  animation: ph-count-pulse 3.2s ease-in-out infinite;
+}
+@keyframes ph-count-pulse {
+  0%, 100% { text-shadow: 0 0 18px rgba(204, 255, 0, 0.55); }
+  50% { text-shadow: 0 0 30px rgba(204, 255, 0, 0.9); }
+}
+html.calm-mode .page-header__count { animation: none; text-shadow: none; }

@@ -6,6 +6,7 @@ import type { PageHeroAccent } from "@/components/PageHero";
 export type PageHeaderProps = {
   section: string;
   title: string;
+  titlePrefix?: ReactNode;
   titleAccent?: PageHeroAccent;
   kicker?: string;
   lede?: string;
@@ -17,6 +18,7 @@ export type PageHeaderProps = {
 export default function PageHeader({
   section,
   title,
+  titlePrefix,
   titleAccent,
   kicker,
   lede,
@@ -43,6 +45,7 @@ export default function PageHeader({
 
         <div className="page-header__row">
           <h1 className="page-header__title">
+            {titlePrefix != null && <span className="page-header__count">{titlePrefix}</span>}
             {titleAccent === "rainbow" ? (
               <span className="page-header__title-accent page-header__title-accent--rainbow">
                 <GlitchWord text={title} />

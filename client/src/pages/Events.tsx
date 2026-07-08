@@ -263,6 +263,7 @@ export default function Events() {
       <PageHeader
         section="Events"
         title="Events"
+        titlePrefix={events.length > 0 ? events.length : undefined}
         titleAccent="cyan"
         kicker="Portland Pride Week 2026 · July 13–19"
         lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond — all in one place."
