@@ -1,7 +1,7 @@
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import type { EventListing } from "@shared/multiDayEvents";
-import { PRIDE_WEEK_DAYS, type AdmKey, type DayKey, type EventType, type PrideEvent } from "@shared/prideWeek";
+import { DAY_SORT_ORDER, PRIDE_WEEK_DAYS, type AdmKey, type DayKey, type EventType, type PrideEvent } from "@shared/prideWeek";
 
 const GRID_START = 11 * 60;
 const GRID_END = 27 * 60;
@@ -27,6 +27,10 @@ export type ScheduleEvent = PrideEvent & {
   scheduleKey: string;
   /** Resolved flyer URL for grid blocks and popover header. */
   posterUrl: string;
+  /** Absolute start, epoch ms (Pacific wall time parsed to an instant). */
+  startMs: number;
+  /** Absolute end, epoch ms; mirrors the minute fallbacks when end is missing/inverted. */
+  endMs: number;
 };
 
 function pacificClockMinutes(value: string): number | null {
@@ -109,6 +113,11 @@ export function eventListingToScheduleEvent(
   const clampedEnd = Math.min(endMin, GRID_END);
   if (clampedEnd <= clampedStart) return null;
 
+  const startMs = parsePacificDateTime(event.dateStart);
+  if (startMs == null) return null;
+  let endMs = parsePacificDateTime(event.dateEnd);
+  if (endMs == null || endMs <= startMs) endMs = startMs + (endMin - startMin) * 60_000;
+
   return {
     id: event.id,
     scheduleKey: event.listingInstanceKey ?? String(event.id),
@@ -125,6 +134,8 @@ export function eventListingToScheduleEvent(
     blurb: event.description,
     feat: isHeadliner(event, going),
     posterUrl: resolveEventPosterUrl(event.id, event.posterImageUrl),
+    startMs,
+    endMs,
   };
 }
 
@@ -142,4 +153,45 @@ export function buildScheduleEvents(
     if (mapped) out.push(mapped);
   }
   return out;
+}
+
+/** True while the event is actually on (absolute time, day-aware). */
+export function isLiveNow(e: ScheduleEvent, nowMs: number): boolean {
+  return e.startMs <= nowMs && nowMs < e.endMs;
+}
+
+/** Next events you can still catch (live or later), soonest first. */
+export function upcomingScheduleEvents(
+  list: ScheduleEvent[],
+  nowMs: number,
+  limit = 10,
+): ScheduleEvent[] {
+  return list
+    .filter(e => e.endMs > nowMs)
+    .sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs)
+    .slice(0, limit);
+}
+
+/** Events on right now, ending soonest first. */
+export function liveScheduleEvents(list: ScheduleEvent[], nowMs: number): ScheduleEvent[] {
+  return list.filter(e => isLiveNow(e, nowMs)).sort((a, b) => a.endMs - b.endMs);
+}
+
+/** Events that have not started yet, soonest first. */
+export function startingSoonScheduleEvents(
+  list: ScheduleEvent[],
+  nowMs: number,
+  limit = 10,
+): ScheduleEvent[] {
+  return list
+    .filter(e => e.startMs > nowMs)
+    .sort((a, b) => a.startMs - b.startMs)
+    .slice(0, limit);
+}
+
+/** Headliners across the week, in calendar order. */
+export function featuredScheduleEvents(list: ScheduleEvent[]): ScheduleEvent[] {
+  return list
+    .filter(e => e.feat)
+    .sort((a, b) => (DAY_SORT_ORDER[a.day] ?? 0) - (DAY_SORT_ORDER[b.day] ?? 0) || a.s - b.s);
 }

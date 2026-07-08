@@ -1,0 +1,32 @@
+.flyer-rail-card {
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.flyer-rail-card:hover {
+  filter: brightness(1.09);
+  transform: translateY(-3px);
+}
+
+.flyer-rail-card__heart {
+  transition: transform 0.15s ease;
+}
+
+.flyer-rail-card__heart:hover {
+  transform: scale(1.12);
+}
+
+[data-calm] .flyer-rail-card:hover {
+  filter: brightness(1.06);
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flyer-rail-card,
+  .flyer-rail-card__heart {
+    transition: none;
+  }
+
+  .flyer-rail-card:hover {
+    transform: none;
+  }
+}
