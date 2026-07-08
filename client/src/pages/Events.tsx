@@ -25,6 +25,7 @@ import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { List, Grid, MapPin } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
+import EventsNowPanel from "@/components/EventsNowPanel";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 import { dayAccentToken } from "@/lib/dsColors";
 
@@ -273,15 +274,24 @@ export default function Events() {
         }
       />
 
-      <Suspense fallback={<MapViewFallback variant="events" />}>
-        <MapView
-          events={filtered}
-          expanded={mapExpanded}
-          onExpand={() => setMapExpanded(true)}
-          onCollapse={() => setMapExpanded(false)}
+      {/* Plain row wrapper: the expanded map is position:fixed, so no
+          transform/filter may ever land on this element or its ancestors. */}
+      <div className="events-map-row">
+        <EventsNowPanel
+          events={events}
+          attendanceSummaries={attendanceSummaries}
           onSelect={openEvent}
         />
-      </Suspense>
+        <Suspense fallback={<MapViewFallback variant="events" />}>
+          <MapView
+            events={filtered}
+            expanded={mapExpanded}
+            onExpand={() => setMapExpanded(true)}
+            onCollapse={() => setMapExpanded(false)}
+            onSelect={openEvent}
+          />
+        </Suspense>
+      </div>
 
       {/* Filters + View Toggle */}
       <div className="zine-filter-bar" style={{

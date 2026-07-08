@@ -1,0 +1,117 @@
+.events-now-panel {
+  background: #0a0a0a;
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.enp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.enp-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.enp-live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: #ff00cc;
+  box-shadow: 0 0 9px #ff00cc;
+  animation: enpPulse 1.5s ease-in-out infinite;
+}
+
+.enp-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: #2b2b2b transparent;
+}
+
+.enp-rail::-webkit-scrollbar {
+  height: 9px;
+}
+
+.enp-rail::-webkit-scrollbar-thumb {
+  background: #2b2b2b;
+  border-radius: 5px;
+}
+
+.enp-quiet {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-meta, #999);
+}
+
+@keyframes enpPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+
+/* Beside the map at >=900px: same height as .events-map-panel, scroll inside. */
+.events-map-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.events-map-row .events-now-panel {
+  order: 2;
+  border-bottom: 2px solid #1a1a1a;
+}
+
+@media (min-width: 900px) {
+  .events-map-row {
+    display: grid;
+    grid-template-columns: minmax(320px, 380px) 1fr;
+    align-items: stretch;
+  }
+
+  .events-map-row .events-now-panel {
+    order: 0;
+    height: clamp(360px, 48vh, 560px);
+    overflow-y: auto;
+    border-bottom: none;
+    border-right: 2px solid #1a1a1a;
+    scrollbar-width: thin;
+    scrollbar-color: #2b2b2b transparent;
+  }
+
+  .events-map-row .events-now-panel::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  .events-map-row .events-now-panel::-webkit-scrollbar-thumb {
+    background: #2b2b2b;
+    border-radius: 5px;
+  }
+}
+
+[data-calm] .enp-live-dot {
+  background: #c8c8cc;
+  box-shadow: none;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enp-live-dot {
+    animation: none;
+  }
+}
