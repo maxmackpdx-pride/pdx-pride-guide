@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,11 +16,9 @@ import {
   SectionHeader,
 } from "@/components/ds";
 import {
-  HOME_DAY_META,
   HOME_MARQUEE_FALLBACK,
   pickMarqueeItems,
   pickRandomBusinesses,
-  type HomeDayKey,
 } from "@/lib/homeEvents";
 import {
   directoryFallbackLogo,
@@ -33,12 +31,17 @@ import "./Home.css";
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
 const COMMUNITY_LINKS = {
-  spotted: { href: "/spotted", label: "Spotted", color: "var(--pink)" },
-  gifting: { href: "/gifting", label: "Gifting", color: "var(--lime)" },
-  gigs: { href: "/pride-work", label: "Gigs", color: "var(--cyan)" },
+  spotted: { href: "/spotted", label: "Spotted" },
+  gifting: { href: "/gifting", label: "Gifting" },
+  gigs: { href: "/pride-work", label: "Gigs" },
 } as const;
 
-const NOTE_ACCENTS = ["var(--pink)", "var(--cyan)", "var(--purple)", "var(--lime)", "var(--amber)"];
+/** Static design placeholders when a board feed has not loaded any rows yet. */
+const BOARD_COUNT_FALLBACK = {
+  spotted: 128,
+  gifting: 64,
+  gigs: 37,
+} as const;
 
 const TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",
@@ -88,22 +91,6 @@ type GigFeedPost = GigPost & {
   location: string | null;
   compensation: string | null;
 };
-
-function formatSpottedWhen(post: MissedConnection): string {
-  if (post.dayOfWeek) {
-    const meta = HOME_DAY_META[post.dayOfWeek as HomeDayKey];
-    return meta?.label ?? post.dayOfWeek;
-  }
-  if (!post.createdAt) return "";
-  const ms = Date.parse(post.createdAt);
-  if (!Number.isFinite(ms)) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Los_Angeles",
-    weekday: "short",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(ms));
-}
 
 export default function Home() {
   usePageSeo(
@@ -168,6 +155,10 @@ export default function Home() {
     [businesses],
   );
 
+  const spottedCount = spotted.length > 0 ? spotted.length : BOARD_COUNT_FALLBACK.spotted;
+  const giftingCount = gifting.length > 0 ? gifting.length : BOARD_COUNT_FALLBACK.gifting;
+  const gigsCount = gigs.length > 0 ? gigs.length : BOARD_COUNT_FALLBACK.gigs;
+
   return (
     <div className="home-main-stage">
       <HomeHero eventCount={events.length} />
@@ -207,114 +198,131 @@ export default function Home() {
         </ScrollReveal>
       </div>
 
-      <div className="pg-seam-wrap--sm">
-        <Divider seam />
-      </div>
-      <div className="pg-block">
-        <ScrollReveal>
-          <SectionHeader
-            kicker="The Community Board"
-            title="Find Your People"
-            subtitle="Somebody is looking for you. Somebody is giving away a couch. Somebody needs a bartender by Friday. It's all right here."
-            accent="purple"
-          />
-          <div className="pg-board3">
-            <div>
-              <Link href={COMMUNITY_LINKS.spotted.href} className="pg-colhd pg-colhd--link">
-                <span className="pg-colhd__t" style={{ color: COMMUNITY_LINKS.spotted.color }}>
-                  {COMMUNITY_LINKS.spotted.label}
-                </span>
-                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--pink), transparent)" }} />
-              </Link>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {spotted.slice(0, 3).map((post, i) => {
-                  const spottedWhen = formatSpottedWhen(post);
-                  return (
-                  <Link key={post.id} href={COMMUNITY_LINKS.spotted.href} className="pg-note pg-note--spot" style={{ ["--_av" as string]: NOTE_ACCENTS[i % NOTE_ACCENTS.length] } as CSSProperties}>
-                    <div className="pg-note__where">
-                      <span className="d" aria-hidden="true" />
-                      {post.venueHint || post.title}
-                      {spottedWhen && (
-                        <span style={{ color: "var(--text-faint)" }}> · {spottedWhen}</span>
-                      )}
-                    </div>
-                    <p className="pg-note__text">{post.body}</p>
-                    <span className="pg-note__reply">View on Spotted →</span>
-                  </Link>
-                  );
-                })}
-                {spotted.length === 0 && (
-                  <Link href={COMMUNITY_LINKS.spotted.href} className="pg-note" style={{ ["--_av" as string]: "var(--pink)" } as CSSProperties}>
-                    <p className="pg-note__text">No spotted posts yet. Be the first to leave a note.</p>
-                    <span className="pg-note__reply">Go to Spotted →</span>
-                  </Link>
-                )}
-              </div>
-              <Link href={COMMUNITY_LINKS.spotted.href} className="pg-board-more" style={{ color: COMMUNITY_LINKS.spotted.color }}>
-                All Spotted posts →
-              </Link>
+      {/* Find Your People: community board tiles (isolated section) */}
+      <section className="home-boards" aria-label="Community boards">
+        <div className="home-boards__seam" aria-hidden="true" />
+        <div className="home-boards__halftone" aria-hidden="true" />
+        <div className="home-boards__tints" aria-hidden="true" />
+
+        <div className="home-boards__inner">
+          <div className="home-boards__running">
+            <div className="home-boards__kicker">
+              <span className="home-boards__dot" aria-hidden="true" />
+              The Community Boards
             </div>
-            <div>
-              <Link href={COMMUNITY_LINKS.gifting.href} className="pg-colhd pg-colhd--link">
-                <span className="pg-colhd__t" style={{ color: COMMUNITY_LINKS.gifting.color }}>
-                  {COMMUNITY_LINKS.gifting.label}
-                </span>
-                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--lime), transparent)" }} />
-              </Link>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {gifting.slice(0, 3).map((post, i) => (
-                  <Link key={post.id} href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ ["--_av" as string]: NOTE_ACCENTS[(i + 1) % NOTE_ACCENTS.length] } as CSSProperties}>
-                    <div className="pg-note__title">{post.title}</div>
-                    <div className="pg-note__meta">
-                      {post.category} · {post.neighborhood}
-                    </div>
-                    <p className="pg-note__text">{post.description}</p>
-                    <span className="pg-note__reply">View on Gifting →</span>
-                  </Link>
-                ))}
-                {gifting.length === 0 && (
-                  <Link href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ ["--_av" as string]: "var(--lime)" } as CSSProperties}>
-                    <p className="pg-note__text">The gift board is quiet. Post something queer homes need.</p>
-                    <span className="pg-note__reply">Post a gift →</span>
-                  </Link>
-                )}
-              </div>
-              <Link href={COMMUNITY_LINKS.gifting.href} className="pg-board-more" style={{ color: COMMUNITY_LINKS.gifting.color }}>
-                All Gifting posts →
-              </Link>
-            </div>
-            <div>
-              <Link href={COMMUNITY_LINKS.gigs.href} className="pg-colhd pg-colhd--link">
-                <span className="pg-colhd__t" style={{ color: COMMUNITY_LINKS.gigs.color }}>
-                  {COMMUNITY_LINKS.gigs.label}
-                </span>
-                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
-              </Link>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {gigs.slice(0, 3).map((post, i) => (
-                  <Link key={post.id} href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ ["--_av" as string]: NOTE_ACCENTS[(i + 2) % NOTE_ACCENTS.length] } as CSSProperties}>
-                    <div className="pg-note__title">{post.title}</div>
-                    <div className="pg-note__meta">
-                      {[post.compensation, post.location].filter(Boolean).join(" · ") || "Pride season gig"}
-                    </div>
-                    <p className="pg-note__text">{post.description}</p>
-                    <span className="pg-note__reply">View on Gigs →</span>
-                  </Link>
-                ))}
-                {gigs.length === 0 && (
-                  <Link href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ ["--_av" as string]: "var(--cyan)" } as CSSProperties}>
-                    <p className="pg-note__text">No gigs posted yet. Workers and hosts both belong here.</p>
-                    <span className="pg-note__reply">Browse gigs →</span>
-                  </Link>
-                )}
-              </div>
-              <Link href={COMMUNITY_LINKS.gigs.href} className="pg-board-more" style={{ color: COMMUNITY_LINKS.gigs.color }}>
-                All Gigs →
-              </Link>
-            </div>
+            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
+              All Boards →
+            </Link>
           </div>
-        </ScrollReveal>
-      </div>
+
+          <div className="home-boards__header">
+            <h2 className="home-boards__title">
+              <span className="home-boards__title-plain">Find Your </span>
+              <span className="home-boards__title-grad">People</span>
+            </h2>
+            <p className="home-boards__sub">
+              Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
+            </p>
+          </div>
+
+          <div className="home-boards__grid">
+            <Link
+              href={COMMUNITY_LINKS.spotted.href}
+              className="home-boards__card home-boards__card--spotted"
+              data-testid="home-board-spotted"
+            >
+              <img
+                className="home-boards__img"
+                src="/boards/board-spotted.png"
+                alt=""
+                width={800}
+                height={800}
+                decoding="async"
+                loading="lazy"
+              />
+              <div className="home-boards__scrim" aria-hidden="true" />
+              <span className="home-boards__chip">{spottedCount} this week</span>
+              <div className="home-boards__body">
+                <div className="home-boards__name-row">
+                  <span className="home-boards__name-dot" aria-hidden="true" />
+                  <h3 className="home-boards__name">Spotted</h3>
+                </div>
+                <p className="home-boards__desc">
+                  Missed connections and &quot;saw you at the bar&quot; notes. Shoot your shot.
+                </p>
+                <span className="home-boards__cta">Browse Spotted →</span>
+              </div>
+            </Link>
+
+            <Link
+              href={COMMUNITY_LINKS.gifting.href}
+              className="home-boards__card home-boards__card--gifting"
+              data-testid="home-board-gifting"
+            >
+              <img
+                className="home-boards__img"
+                src="/boards/board-gifting.png"
+                alt=""
+                width={800}
+                height={800}
+                decoding="async"
+                loading="lazy"
+              />
+              <div className="home-boards__scrim" aria-hidden="true" />
+              <span className="home-boards__chip">{giftingCount} up for grabs</span>
+              <div className="home-boards__body">
+                <div className="home-boards__name-row">
+                  <span className="home-boards__name-dot" aria-hidden="true" />
+                  <h3 className="home-boards__name">Gifting</h3>
+                </div>
+                <p className="home-boards__desc">
+                  Free gear and hand-me-downs looking for a new home. Take what you need.
+                </p>
+                <span className="home-boards__cta">Browse Gifting →</span>
+              </div>
+            </Link>
+
+            <Link
+              href={COMMUNITY_LINKS.gigs.href}
+              className="home-boards__card home-boards__card--gigs"
+              data-testid="home-board-gigs"
+            >
+              <img
+                className="home-boards__img"
+                src="/boards/board-gigs.png"
+                alt=""
+                width={800}
+                height={800}
+                decoding="async"
+                loading="lazy"
+              />
+              <div className="home-boards__scrim" aria-hidden="true" />
+              <span className="home-boards__chip">{gigsCount} open</span>
+              <div className="home-boards__body">
+                <div className="home-boards__name-row">
+                  <span className="home-boards__name-dot" aria-hidden="true" />
+                  <h3 className="home-boards__name">Gigs</h3>
+                </div>
+                <p className="home-boards__desc">
+                  Performers, DJs, and helping hands for hire. Book the talent.
+                </p>
+                <span className="home-boards__cta">Browse Gigs →</span>
+              </div>
+            </Link>
+          </div>
+
+          <div className="home-boards__foot">
+            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__post-link">
+              <Button as="span" variant="solid" accent="lime" size="lg" arrow>
+                Post to a Board
+              </Button>
+            </Link>
+            <span className="home-boards__foot-note">
+              Free to post. Be kind. Take care of each other.
+            </span>
+          </div>
+        </div>
+      </section>
 
       <div className="pg-seam-wrap--sm">
         <Divider seam />
