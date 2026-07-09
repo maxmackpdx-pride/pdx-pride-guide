@@ -6360,6 +6360,45 @@ footer a:hover { color: #00FFFF !important; }
   color: #fff;
 }
 
+/* Sold-out badge — prominent red label on cards + modal */
+.event-sold-out-badge {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 4px 10px;
+  font-family: var(--font-display, Impact, "Arial Black", sans-serif);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #e10600;
+  border: 2px solid #ff2a20;
+  box-shadow: 0 0 12px rgba(225, 6, 0, 0.55);
+  line-height: 1.1;
+}
+.event-sold-out-badge--poster {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  margin: 0;
+  font-size: 0.78rem;
+  padding: 5px 8px;
+}
+.event-sold-out-badge--modal {
+  display: block;
+  width: fit-content;
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  padding: 6px 14px;
+}
+.event-board-card__poster {
+  position: relative;
+}
+.event-board-card--sold-out .event-board-card__title {
+  opacity: 0.92;
+}
+
 .event-board-card__venue {
   margin: 0;
   font-size: 0.78rem;

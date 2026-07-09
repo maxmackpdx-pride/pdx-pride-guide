@@ -338,7 +338,12 @@ function EventModalInner({
         </button>
 
         <div className="event-modal__body">
-          <h2 className="display event-modal__title">{event.title}</h2>
+          {/\bsold\s*out\b/i.test(`${event.title} ${event.description || ""}`) && (
+            <div className="event-sold-out-badge event-sold-out-badge--modal" role="status">SOLD OUT</div>
+          )}
+          <h2 className="display event-modal__title">
+            {event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title}
+          </h2>
 
           {editing && eventForm ? (
             <DashboardEventEditForm
