@@ -90,16 +90,19 @@ export default function AdminMetricsPanel({
       </div>
       <div className="dash-admin-metrics">
         {METRICS.map(metric => {
+          const raw = data[metric.key];
+          const count = typeof raw === "number" ? raw : Number(raw) || 0;
           const clickable = !!metric.tab && !!onMetricClick
-            && (metric.alwaysClickable || (data[metric.key] ?? 0) > 0);
+            && (metric.alwaysClickable || count > 0);
           return (
             <StatCard
               key={metric.key}
               size="sm"
-              value={data[metric.key] ?? 0}
+              value={count}
               label={metric.label}
               color={metricColor(metric.color)}
-              action={clickable ? "View" : false}
+              action={clickable ? "View" : undefined}
+              href={undefined}
               onClick={clickable ? () => onMetricClick!(metric.tab!, metric.key) : undefined}
               className={clickable ? "dash-metric-card-clickable" : ""}
             />

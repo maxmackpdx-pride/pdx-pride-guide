@@ -37,13 +37,13 @@ export function SectionHeader({
   kicker,
   title,
   subtitle,
-  action,
+  action = null,
   accent = "pink",
   align = "left",
   size = "md",
   className = "",
   ...rest
-}) {
+}: any) {
   const cls = ["pdxSection", align === "center" ? "pdxSection--center" : "",
     size === "sm" ? "pdxSection--sm" : "", className].filter(Boolean).join(" ");
   return (

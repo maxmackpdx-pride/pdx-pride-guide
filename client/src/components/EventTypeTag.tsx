@@ -28,7 +28,7 @@ export default function EventTypeTag({
 }: EventTypeTagProps) {
   const colors = isEventTypeFilterLabel(label)
     ? EVENT_TYPE_TAG_COLORS[label]
-    : { color: "var(--text-meta)" };
+    : { color: "var(--text-meta)", borderColor: "var(--text-meta)" };
 
   if (interactive) {
     const activeStyle = active

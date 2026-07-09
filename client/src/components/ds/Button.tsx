@@ -82,6 +82,7 @@ const ACCENTS = {
 
 /**
  * Button, the canonical neon CTA with the brutalist offset shadow.
+ * @param {any} props
  */
 export function Button({
   children,
@@ -97,7 +98,7 @@ export function Button({
   className = "",
   style = {},
   ...rest
-}) {
+}: any) {
   const Tag = as;
   const a = ACCENTS[accent] || ACCENTS.lime;
   const cls = ["pdxBtn", `pdxBtn--${variant}`, `pdxBtn--${size}`,

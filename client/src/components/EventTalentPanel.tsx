@@ -116,14 +116,10 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
       if (!res.ok) throw new Error(payload.error || "Could not submit request");
       return payload;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
-        title: data.isHostSelf ? "Added to lineup!" : "Request sent",
-        description: data.isHostSelf
-          ? "You're live on the lineup."
-          : data.needsAdmin
-          ? "Unclaimed event — admins will review your lineup request."
-          : "The event host will review your request in their inbox.",
+        title: "You're on the lineup!",
+        description: "Your role is live on this event. No admin approval needed.",
       });
       invalidate();
     },
@@ -277,7 +273,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             I WORKED THIS EVENT
           </div>
           <p style={{ fontSize: "0.78rem", color: "#888", marginBottom: 10, lineHeight: 1.45 }}>
-            Pick your role below — Drag, DJ, Bartender, MC, Go-Go, Performer, or Other. {isClaimable ? "Admins" : "The host"} approve before you appear on the public lineup.
+            Pick your role below — Drag, DJ, Bartender, MC, Go-Go, Performer, or Other. Your tag goes live right away (no admin approval).
           </p>
           <div className="event-talent-role-grid">
             {EVENT_TALENT_ROLES.map(role => (
@@ -294,9 +290,9 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             disabled={selfMutation.isPending || !selfRole || (selfRole ? roleTaken(selfRole) : false)}
             onClick={() => selfRole && selfMutation.mutate(selfRole)}>
             {selfMutation.isPending
-              ? "SENDING..."
+              ? "ADDING..."
               : selfRole
-                ? `REQUEST ${EVENT_TALENT_ROLE_LABELS[selfRole].toUpperCase()} TAG →`
+                ? `ADD ${EVENT_TALENT_ROLE_LABELS[selfRole].toUpperCase()} TAG →`
                 : "PICK YOUR ROLE ↑"}
           </button>
           {pendingRoles.length > 0 && (

@@ -88,9 +88,10 @@ self.addEventListener("push", (event) => {
       body,
       icon,
       tag,
+      // Safari/Chromium support renotify; DOM lib typings lag behind.
       renotify: true,
       data: { url },
-    });
+    } as NotificationOptions);
   };
 
   event.waitUntil(show());

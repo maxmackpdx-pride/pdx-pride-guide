@@ -371,7 +371,7 @@ export default function Events() {
             <SearchInput
               placeholder="Search events..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               onClear={() => setSearchQuery("")}
               data-testid="event-search"
               size="sm"

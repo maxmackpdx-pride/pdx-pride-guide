@@ -393,7 +393,7 @@ function EventModalInner({
               showExtras={false}
               editingEvent={event}
               eventForm={eventForm}
-              setEventForm={setEventForm}
+              setEventForm={(fn) => setEventForm((prev) => (prev ? fn(prev) : prev))}
               hostUpdate={editHostUpdate}
               setHostUpdate={setEditHostUpdate}
               onCancel={() => { setEditing(false); setEventForm(null); }}

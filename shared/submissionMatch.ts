@@ -81,10 +81,10 @@ function tokenOverlapScore(a: string, b: string): number {
   const tb = titleTokens(b);
   if (ta.size === 0 || tb.size === 0) return 0;
   let shared = 0;
-  for (const token of ta) {
+  for (const token of Array.from(ta)) {
     if (tb.has(token)) shared += 1;
   }
-  const union = new Set([...ta, ...tb]).size;
+  const union = new Set([...Array.from(ta), ...Array.from(tb)]).size;
   return union === 0 ? 0 : shared / union;
 }
 
@@ -200,7 +200,7 @@ function parseEventTypes(raw: string | null | undefined): string[] {
 }
 
 function mergeEventTypes(existing: string | null | undefined, submission: string | null | undefined): string {
-  const merged = [...new Set([...parseEventTypes(existing), ...parseEventTypes(submission)])];
+  const merged = Array.from(new Set([...parseEventTypes(existing), ...parseEventTypes(submission)]));
   return JSON.stringify(merged);
 }
 
@@ -249,8 +249,9 @@ export function buildSubmissionMergePatch(
 
   for (const key of stringFields) {
     const next = submission[key];
-    if (hasSubmissionValue(next)) {
-      patch[key] = next as Event[typeof key];
+    if (hasSubmissionValue(next) && next != null) {
+      // Submission columns are nullable; Event fields treat empty as undefined.
+      (patch as Record<string, unknown>)[key] = next;
     }
   }
 

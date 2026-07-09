@@ -24,7 +24,7 @@ function loadArchived(): Set<string> {
 
 function saveArchived(ids: Set<string>) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ARCHIVE_KEY, JSON.stringify([...ids]));
+  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(Array.from(ids)));
 }
 
 function threadIdOf(row: ApiMessageRow): string {

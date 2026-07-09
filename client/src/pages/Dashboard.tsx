@@ -1,4 +1,4 @@
-import { useState, createElement, Fragment } from "react";
+import { useState, createElement, Fragment, type MouseEvent } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -333,12 +333,12 @@ export default function Dashboard() {
         kicker={`@${user.username}`}
         lede="Community-run and free. Manage your submissions and claims, board posts, and inbox threads in one place."
         tagline={createElement(Fragment, null,
-          createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" }); } }, "Profile"), " · ",
-          createElement("a", { href: "#inbox", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); document.getElementById("inbox")?.scrollIntoView({ behavior: "smooth" }); } }, "Inbox"), " · ",
-          createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, events: true })); document.getElementById("events")?.scrollIntoView({ behavior: "smooth" }); } }, "Events"), " · ",
-          createElement("a", { href: "#gigs", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gigs: true })); document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" }); } }, "Gigs"), " · ",
-          createElement("a", { href: "#gifting", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gifting: true })); document.getElementById("gifting")?.scrollIntoView({ behavior: "smooth" }); } }, "Gifting"), " · ",
-          createElement("a", { href: "#spotted", className: "dash-tagline-link", onClick: (e) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, spotted: true })); document.getElementById("spotted")?.scrollIntoView({ behavior: "smooth" }); } }, "Spotted"),
+          createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" }); } }, "Profile"), " · ",
+          createElement("a", { href: "#inbox", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); document.getElementById("inbox")?.scrollIntoView({ behavior: "smooth" }); } }, "Inbox"), " · ",
+          createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, events: true })); document.getElementById("events")?.scrollIntoView({ behavior: "smooth" }); } }, "Events"), " · ",
+          createElement("a", { href: "#gigs", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gigs: true })); document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" }); } }, "Gigs"), " · ",
+          createElement("a", { href: "#gifting", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gifting: true })); document.getElementById("gifting")?.scrollIntoView({ behavior: "smooth" }); } }, "Gifting"), " · ",
+          createElement("a", { href: "#spotted", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, spotted: true })); document.getElementById("spotted")?.scrollIntoView({ behavior: "smooth" }); } }, "Spotted"),
         )}
       />
       <div className="dash-inner">
@@ -474,7 +474,7 @@ export default function Dashboard() {
               <DashboardEventEditForm
                 editingEvent={editingEvent}
                 eventForm={eventForm}
-                setEventForm={setEventForm}
+                setEventForm={(fn) => setEventForm((prev: any) => (prev ? fn(prev) : prev))}
                 hostUpdate={hostUpdate}
                 setHostUpdate={setHostUpdate}
                 onCancel={() => { setEditingEvent(null); setEventForm(null); }}

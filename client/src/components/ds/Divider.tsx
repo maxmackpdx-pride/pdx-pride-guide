@@ -37,14 +37,14 @@ const COLORS = { lime:"var(--lime)", pink:"var(--pink)", cyan:"var(--cyan)", gre
 export function Divider({
   variant = "rainbow",   // rainbow | glow | faint
   color = "lime",
-  label,
-  glyph,
+  label = null,
+  glyph = null,
   seam = false,
   thin = false,
   className = "",
   style = {},
   ...rest
-}) {
+}: any) {
   if (seam) {
     return <hr className={`pdxSeam ${thin ? "pdxSeam--thin" : ""} ${className}`} style={style} {...rest} />;
   }

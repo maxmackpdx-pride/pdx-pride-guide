@@ -59,7 +59,7 @@ export default function EventTagsRow({
           CLAIM PENDING
         </span>
       )}
-      {showClaim && !hasPendingClaim && event.isClaimable && (
+      {showClaim && !hasPendingClaim && event.isClaimable && !event.claimedBy && (
         <span
           className={`event-card-meta-tag event-card-meta-tag--claim${onClaimClick ? " event-card-meta-tag--clickable" : ""}`}
           style={claimTagStyle("var(--neon-cyan)")}

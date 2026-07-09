@@ -35,7 +35,7 @@ export function initAttendanceWs(httpServer: Server): AttendanceWsHub {
     });
 
     ws.on("close", () => {
-      for (const eventId of subscriptions) {
+      for (const eventId of Array.from(subscriptions)) {
         rooms.get(eventId)?.delete(ws);
       }
       if (summary) summaryClients.delete(ws);
@@ -47,11 +47,11 @@ export function initAttendanceWs(httpServer: Server): AttendanceWsHub {
       const payload = JSON.stringify({ type: "attendance:updated", eventId });
       const room = rooms.get(eventId);
       if (room) {
-        for (const client of room) {
+        for (const client of Array.from(room)) {
           if (client.readyState === WebSocket.OPEN) client.send(payload);
         }
       }
-      for (const client of summaryClients) {
+      for (const client of Array.from(summaryClients)) {
         if (client.readyState === WebSocket.OPEN) client.send(payload);
       }
     },

@@ -177,8 +177,9 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       createdAt: req.createdAt,
       title: req.displayName || req.username,
       subtitle: `${req.role} · ${req.eventTitle}`,
-      status: "PENDING",
-      pending: true,
+      status: req.status || "LIVE",
+      // Talent self-tags go live without admin approval.
+      pending: false,
       payload: req,
       profile: inboxUserProfile("talent", req),
     });
@@ -201,7 +202,8 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
   }
 
   for (const post of props.giftingPosts) {
-    const pending = post.status === "PENDING" || (post.reportCount > 0 && post.status !== "PENDING");
+    // Gifting posts go live without admin approval. Only flagged reports need eyes.
+    const needsEyes = Number(post.reportCount || 0) > 0;
     items.push({
       key: `gifting_post-${post.id}`,
       kind: "gifting_post",
@@ -210,7 +212,7 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       title: post.title,
       subtitle: `${post.postType} · ${post.status}${post.reportCount ? ` · ${post.reportCount} report(s)` : ""}`,
       status: post.status,
-      pending: post.status === "PENDING" || post.reportCount > 0,
+      pending: needsEyes,
       payload: post,
       profile: inboxUserProfile("gifting_post", post),
     });
@@ -225,7 +227,8 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
       title: post.title,
       subtitle: post.eventTitle ? `${post.eventTitle}${post.venueHint ? ` · ${post.venueHint}` : ""}` : (post.venueHint || "Around town"),
       status: post.status,
-      pending: post.status === "ACTIVE" && !post.adminReviewed,
+      // Spotted is public on post — no admin approval queue. Still listable under Spotted filter for take-downs.
+      pending: false,
       payload: post,
       profile: inboxUserProfile("missed_connection", post),
     });
@@ -282,8 +285,18 @@ export default function AdminInbox(props: AdminInboxProps) {
 
   const pendingCount = allItems.filter(item => item.pending).length;
   const filteredItems = allItems.filter(item => {
-    if (!showResolved && !item.pending) return false;
     if (kindFilter !== "all" && item.kind !== kindFilter) return false;
+    if (!showResolved && !item.pending) {
+      // Spotted never needs approval; only show under the Spotted filter for moderation.
+      if (
+        kindFilter === "missed_connection"
+        && item.kind === "missed_connection"
+        && String(item.payload?.status || "").toUpperCase() === "ACTIVE"
+      ) {
+        return true;
+      }
+      return false;
+    }
     return true;
   });
 
@@ -305,7 +318,7 @@ export default function AdminInbox(props: AdminInboxProps) {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <p className="text-white/40 text-sm m-0">
-          {pendingCount} pending across submissions, promoters, talent, moderation, gifting, Spotted, and feedback.
+          {pendingCount} pending across submissions, promoters, moderation, gifting reports, and feedback.
         </p>
         <button
           type="button"
@@ -629,27 +642,11 @@ function InboxCard({
             <>
               {item.profile && <AdminUserIdentity profile={item.profile} size={40} />}
               <p className="text-white/65 text-sm whitespace-pre-wrap">{payload.description}</p>
-              {payload.status === "PENDING" && (
-                <div className="flex gap-2 flex-wrap">
-                  <button type="button" className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => onGiftingStatus(payload.id, payload.postType === "ISO" ? "LOOKING" : "OPEN")}>
-                    APPROVE
-                  </button>
-                </div>
+              {Number(payload.reportCount || 0) > 0 && (
+                <p className="text-white/40 text-xs uppercase tracking-wide">
+                  {payload.reportCount} report(s) — review or remove if needed
+                </p>
               )}
-              <button
-                onClick={() => { if (window.confirm("Remove this post from the board entirely?")) onRemoveSpotted(payload.id); }}
-                className="display text-xs px-4 py-2 border self-start"
-                style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}
-              >
-                REMOVE POST
-              </button>
-              <button
-                onClick={() => onApproveSpotted(payload.id)}
-                className="display text-xs px-4 py-2 border-2 self-start"
-                style={{ borderColor: "#CCFF00", color: "#000", background: "#CCFF00", fontWeight: 900 }}
-              >
-                APPROVE — THIS IS FINE
-              </button>
               <AdminBoardReject
                 reasonCode={boardRejectReasons[boardRejectKey(item.kind, payload.id)] || "OFF_TOPIC"}
                 note={boardRejectNotes[boardRejectKey(item.kind, payload.id)] || ""}
@@ -669,6 +666,7 @@ function InboxCard({
           {item.kind === "missed_connection" && payload.status === "ACTIVE" && (
             <>
               {item.profile && <AdminUserIdentity profile={item.profile} size={40} />}
+              <p className="text-white/40 text-xs uppercase tracking-wide">Live on Spotted (no approval required)</p>
               <p className="text-white/65 text-sm whitespace-pre-wrap">{payload.body}</p>
               {payload.eventTitle && (
                 <p className="text-white/40 text-xs">Event: {payload.eventTitle}{payload.eventVenue ? ` · ${payload.eventVenue}` : ""}</p>

@@ -459,14 +459,14 @@ export default function MissedConnectionsBubbleBoard({
             const phys = physicsRef.current[post.id];
             const staticP = staticPos(post.id);
             const size = phys?.size ?? staticP.size;
-            const style: React.CSSProperties = prefersReducedMotion
+            const style = (prefersReducedMotion
               ? { left: `${staticP.left}%`, top: `${staticP.top}%`, width: size, height: size, "--bubble-color": color }
               : {
                   transform: `translate(${phys?.x ?? 100}px, ${phys?.y ?? 100}px)`,
                   width: size,
                   height: size,
                   "--bubble-color": color,
-                };
+                }) as unknown as React.CSSProperties;
 
             return (
               <div

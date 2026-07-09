@@ -55,7 +55,7 @@ export function SearchInput({
   size = "md",
   id,
   ...rest
-}) {
+}: any) {
   const hasValue = value != null && value !== "";
   return (
     <div className="pdxField">

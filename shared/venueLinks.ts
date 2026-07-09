@@ -37,7 +37,6 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   "jackie s": "https://www.jackiespdx.com/",
   "bullard tavern": "https://www.bullardtavern.com/",
   "happylucky now serving": "https://www.happyluckynowserving.com/",
-  "happylucky now serving": "https://www.happyluckynowserving.com/",
   "formerly opaline": "https://www.instagram.com/infernopdx/",
   "bar cala": "https://www.barcala.com/",
   "mcmenamins mission theater": "https://www.mcmenamins.com/mission-theater",
@@ -109,7 +108,7 @@ export function resolveVenueWebsite(
   if (index?.has(key)) return index.get(key) || null;
   if (VENUE_WEBSITE_FALLBACKS[key]) return VENUE_WEBSITE_FALLBACKS[key];
   // Fuzzy contains match
-  const pool = index ? [...index.entries()] : Object.entries(VENUE_WEBSITE_FALLBACKS);
+  const pool = index ? Array.from(index.entries()) : Object.entries(VENUE_WEBSITE_FALLBACKS);
   for (const [k, url] of pool) {
     if (!k) continue;
     if (key.includes(k) || k.includes(key)) return url;

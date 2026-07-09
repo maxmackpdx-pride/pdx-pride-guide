@@ -1,24 +1,21 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { GiftingPost, GigPost, MissedConnection } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
 
-import GlitchWord from "@/components/GlitchWord";
 import ScrollReveal from "@/components/ScrollReveal";
+import HomeHero from "@/components/HomeHero";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import {
   Button,
-  Countdown,
   Divider,
   Marquee,
   PlaceCard,
   SectionHeader,
 } from "@/components/ds";
-import heroWallpaperImg from "@/assets/hero-wallpaper.jpg";
 import {
-  earliestPrideWeekStartTarget,
   HOME_DAY_META,
   HOME_MARQUEE_FALLBACK,
   pickMarqueeItems,
@@ -125,12 +122,6 @@ export default function Home() {
     refetchOnMount: "always",
   });
 
-  /** Live target: earliest event start on Jul 13 (Pride Week day 1). */
-  const prideWeekCountdownTarget = useMemo(
-    () => earliestPrideWeekStartTarget(events),
-    [events],
-  );
-
   const { data: spotted = [] } = useQuery<MissedConnection[]>({
     queryKey: ["/api/missed-connections"],
     queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()),
@@ -179,61 +170,7 @@ export default function Home() {
 
   return (
     <div className="home-main-stage">
-      <section className="pg-hero" aria-label="Portland Pride Guide hero">
-        <img className="pg-hero__img" src={heroWallpaperImg} alt="" />
-        <div className="pg-hero__scrim" aria-hidden="true" />
-        <div className="pg-hero__body">
-          <div className="pg-hero__kicker">
-            <span className="d" aria-hidden="true" />
-            Portland Pride Week 2026 · July 13 to 19
-          </div>
-          <h1>
-            <span>Portland</span>
-            <span className="home-hero-title-pride">
-              <GlitchWord text="Pride" />
-            </span>
-            <span>Guide</span>
-          </h1>
-          {events.length > 0 && (
-            <div
-              className="pg-hero__event-count"
-              aria-label={`${events.length} events listed`}
-            >
-              <span className="pg-hero__event-count-num" data-testid="home-events-count">
-                {events.length}
-              </span>
-              <span className="pg-hero__event-count-label">
-                {events.length === 1 ? "Event" : "Events"}
-              </span>
-            </div>
-          )}
-          <p className="pg-hero__blurb">
-            Seven days. One city. Every color in the box. Find the parade, find the afterparty, find the people you were looking for.{" "}
-            <strong>Sleep in August.</strong>
-          </p>
-          <div className="pg-hero__countdown">
-            <span className="pg-hero__cdlabel">Pride Week starts at</span>
-            <Countdown
-              target={prideWeekCountdownTarget}
-              accent="lime"
-              aria-label="Countdown to Pride Week start"
-              doneLabel="Pride Week is on!"
-            />
-          </div>
-          <div className="pg-hero__actions">
-            <Link href="/events">
-              <Button as="span" accent="lime" arrow size="lg">
-                View All Events
-              </Button>
-            </Link>
-            <a href="#home-map" style={{ textDecoration: "none" }}>
-              <Button as="span" accent="cyan" arrow size="lg">
-                Open the Map
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
+      <HomeHero eventCount={events.length} />
 
       <div className="home-live-ticker" aria-label="Live event ticker">
         <Link href="/events" className="home-live-ticker__label">
@@ -293,7 +230,7 @@ export default function Home() {
                 {spotted.slice(0, 3).map((post, i) => {
                   const spottedWhen = formatSpottedWhen(post);
                   return (
-                  <Link key={post.id} href={COMMUNITY_LINKS.spotted.href} className="pg-note pg-note--spot" style={{ "--_av": NOTE_ACCENTS[i % NOTE_ACCENTS.length] }}>
+                  <Link key={post.id} href={COMMUNITY_LINKS.spotted.href} className="pg-note pg-note--spot" style={{ ["--_av" as string]: NOTE_ACCENTS[i % NOTE_ACCENTS.length] } as CSSProperties}>
                     <div className="pg-note__where">
                       <span className="d" aria-hidden="true" />
                       {post.venueHint || post.title}
@@ -307,7 +244,7 @@ export default function Home() {
                   );
                 })}
                 {spotted.length === 0 && (
-                  <Link href={COMMUNITY_LINKS.spotted.href} className="pg-note" style={{ "--_av": "var(--pink)" }}>
+                  <Link href={COMMUNITY_LINKS.spotted.href} className="pg-note" style={{ ["--_av" as string]: "var(--pink)" } as CSSProperties}>
                     <p className="pg-note__text">No spotted posts yet. Be the first to leave a note.</p>
                     <span className="pg-note__reply">Go to Spotted →</span>
                   </Link>
@@ -326,7 +263,7 @@ export default function Home() {
               </Link>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {gifting.slice(0, 3).map((post, i) => (
-                  <Link key={post.id} href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 1) % NOTE_ACCENTS.length] }}>
+                  <Link key={post.id} href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ ["--_av" as string]: NOTE_ACCENTS[(i + 1) % NOTE_ACCENTS.length] } as CSSProperties}>
                     <div className="pg-note__title">{post.title}</div>
                     <div className="pg-note__meta">
                       {post.category} · {post.neighborhood}
@@ -336,7 +273,7 @@ export default function Home() {
                   </Link>
                 ))}
                 {gifting.length === 0 && (
-                  <Link href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ "--_av": "var(--lime)" }}>
+                  <Link href={COMMUNITY_LINKS.gifting.href} className="pg-note" style={{ ["--_av" as string]: "var(--lime)" } as CSSProperties}>
                     <p className="pg-note__text">The gift board is quiet. Post something queer homes need.</p>
                     <span className="pg-note__reply">Post a gift →</span>
                   </Link>
@@ -355,7 +292,7 @@ export default function Home() {
               </Link>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {gigs.slice(0, 3).map((post, i) => (
-                  <Link key={post.id} href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ "--_av": NOTE_ACCENTS[(i + 2) % NOTE_ACCENTS.length] }}>
+                  <Link key={post.id} href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ ["--_av" as string]: NOTE_ACCENTS[(i + 2) % NOTE_ACCENTS.length] } as CSSProperties}>
                     <div className="pg-note__title">{post.title}</div>
                     <div className="pg-note__meta">
                       {[post.compensation, post.location].filter(Boolean).join(" · ") || "Pride season gig"}
@@ -365,7 +302,7 @@ export default function Home() {
                   </Link>
                 ))}
                 {gigs.length === 0 && (
-                  <Link href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ "--_av": "var(--cyan)" }}>
+                  <Link href={COMMUNITY_LINKS.gigs.href} className="pg-note" style={{ ["--_av" as string]: "var(--cyan)" } as CSSProperties}>
                     <p className="pg-note__text">No gigs posted yet. Workers and hosts both belong here.</p>
                     <span className="pg-note__reply">Browse gigs →</span>
                   </Link>

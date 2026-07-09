@@ -56,11 +56,21 @@ a.pdxRow:hover{ transform:translateY(-1px); text-decoration:none; background:var
 .pdxRow__save:hover{ color:var(--neon-magenta); }
 .pdxRow__save:active{ transform:scale(.85); }
 .pdxRow__save[aria-pressed="true"]{ color:var(--neon-magenta); }
+.pdxRow__claim{
+  font-family:var(--font-display); font-weight:700; font-size:.58rem;
+  letter-spacing:.09em; text-transform:uppercase; line-height:1.3;
+  padding:4px 9px 3px; color:#000; border:2px solid var(--neon-yellow);
+  box-shadow:3px 3px 0 var(--neon-yellow); background:var(--neon-cyan,#19E3FF);
+  cursor:pointer; white-space:nowrap;
+}
+.pdxRow__claim:hover{ filter:brightness(1.06); }
+.pdxRow__claim--pending{ background:var(--neon-magenta,#FF00CC); cursor:default; }
+.pdxRow__claim--pending:hover{ filter:none; }
 
 @media (max-width:560px){
   .pdxRow{ grid-template-columns:64px 1fr; }
   .pdxRow__thumb{ width:64px; height:78px; }
-  .pdxRow__aside{ grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:space-between; }
+  .pdxRow__aside{ grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; }
 }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-row-css")) {
@@ -79,14 +89,16 @@ const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 export function EventCard({
   title, venue, when, day = "FRI", image,
   types = [], admission, age, going,
+  claimable = false, claimPending = false, onClaimClick,
   saved, onSave, href,
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
-}) {
+}: any) {
   const Tag = href ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
+  const showClaim = claimPending || claimable;
   return (
     <Tag className={`pdxRow ${className}`} href={href} style={{ "--_day": base, ...style }} {...rest}>
       <div className="pdxRow__thumb">
@@ -124,6 +136,20 @@ export function EventCard({
           </button>
         )}
         {going != null && <span className="pdxRow__going"><span className="dot" />{going} Going</span>}
+        {showClaim && (
+          claimPending ? (
+            <span className="pdxRow__claim pdxRow__claim--pending" data-testid="tag-claim-pending">CLAIM PENDING</span>
+          ) : (
+            <button
+              type="button"
+              className="pdxRow__claim"
+              data-testid="tag-claim-event"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClaimClick?.(); }}
+            >
+              CLAIM THIS EVENT →
+            </button>
+          )
+        )}
       </div>
     </Tag>
   );

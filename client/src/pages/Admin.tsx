@@ -13,11 +13,12 @@ import {
   ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, UserCircle, Search, RefreshCw,
 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
-import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import AdminInbox, { type BoardRejectTarget } from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
+import AdminShell, { type AdminView } from "@/components/admin/AdminShell";
+import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
@@ -135,8 +136,10 @@ interface AdminUser extends AdminUserProfile {
   isOwner: boolean;
 }
 
-type AdminTab = "inbox" | "events" | "gigs" | "promoters" | "users" | "team";
+type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
+
+const ADMIN_VIEWS: AdminTab[] = ["overview", "inbox", "events", "gigs", "promoters", "users", "team"];
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -163,7 +166,8 @@ export default function Admin() {
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
-  const [activeTab, setActiveTab] = useState<AdminTab>("inbox");
+  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [moreOpen, setMoreOpen] = useState(false);
   const [expandedInboxKey, setExpandedInboxKey] = useState<string | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
@@ -226,8 +230,7 @@ export default function Admin() {
   useEffect(() => {
     if (!authenticated) return;
     const tab = new URLSearchParams(window.location.search).get("tab");
-    const allowed: AdminTab[] = ["inbox", "events", "gigs", "promoters", "users", "team"];
-    if (tab && allowed.includes(tab as AdminTab)) {
+    if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) {
       setActiveTab(tab as AdminTab);
     }
   }, [authenticated]);
@@ -418,8 +421,8 @@ export default function Admin() {
     const q = allUsersFilter.trim().toLowerCase();
     if (!q) return allUsers;
     return allUsers.filter(u =>
-      u.username.toLowerCase().includes(q)
-      || u.email.toLowerCase().includes(q)
+      (u.username || "").toLowerCase().includes(q)
+      || (u.email || "").toLowerCase().includes(q)
       || (u.displayName || "").toLowerCase().includes(q)
     );
   }, [allUsers, allUsersFilter]);
@@ -891,42 +894,44 @@ export default function Admin() {
 
   const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
   const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
-  const pendingGifting = (giftingAdmin.posts || []).filter((p: any) => p.status === "PENDING");
+  // Talent / gigs / gifting posts go live without admin approval.
+  // Only gifting *reports* (and flagged posts with reportCount) need eyes.
+  const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
   const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
   const pendingPromoters = promoterRequests;
-  const pendingTalent = talentRequests;
   const totalActionItems =
     pendingSubs.length
     + pendingMod.length
     + pendingPromoters.length
-    + pendingTalent.length
-    + pendingGifting.length
+    + pendingGiftingFlagged.length
     + pendingGiftingReports.length
     + openFeedback.length;
 
   const renderPromoterControls = (u: Pick<AdminUser, "id" | "promoterStatus" | "subAdmin" | "isOwner">) => {
     if (u.isOwner) return null;
+    if (u.id == null) return null;
     if (!u.promoterStatus || u.promoterStatus === "none") return null;
+    const userId = u.id;
     return (
       <div className="flex gap-2 flex-wrap">
         {u.promoterStatus !== "approved" && (
-          <Button type="button" size="sm" accent="lime" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}>
+          <Button type="button" size="sm" accent="lime" onClick={() => setPromoterStatusMutation.mutate({ userId, status: "approved" })}>
             APPROVE
           </Button>
         )}
         {u.promoterStatus !== "pending" && (
-          <Button type="button" size="sm" accent="cyan" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}>
+          <Button type="button" size="sm" accent="cyan" onClick={() => setPromoterStatusMutation.mutate({ userId, status: "pending" })}>
             SET PENDING
           </Button>
         )}
         {u.promoterStatus !== "none" && (
-          <Button type="button" size="sm" variant="ghost" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}>
+          <Button type="button" size="sm" variant="ghost" onClick={() => setPromoterStatusMutation.mutate({ userId, status: "none" })}>
             RESET
           </Button>
         )}
         {isSuperAdmin && (
-          <Button type="button" size="sm" accent="pink" onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}>
+          <Button type="button" size="sm" accent="pink" onClick={() => setSubAdminMutation.mutate({ userId, grant: !u.subAdmin })}>
             {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
           </Button>
         )}
@@ -961,6 +966,7 @@ export default function Admin() {
 
   const setAdminTab = (tab: AdminTab) => {
     setActiveTab(tab);
+    setMoreOpen(false);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.replaceState({}, "", url.toString());
@@ -970,6 +976,68 @@ export default function Admin() {
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
+  const approvedPromoterCount = allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner).length;
+
+  const overviewAttention = useMemo(() => {
+    const items: AttentionItem[] = [];
+    for (const s of pendingSubs.slice(0, 6)) {
+      items.push({
+        key: `submission-${s.id}`,
+        title: s.title || "Untitled submission",
+        subtitle: `${s.type} · ${s.submitterName || s.submitterEmail}`,
+        kindLabel: s.type === "CLAIM" ? "Claim" : s.type === "PROMOTER_APPLICATION" ? "Promoter" : "Submission",
+        color: "#FF1FA0",
+      });
+    }
+    for (const p of pendingPromoters.slice(0, 4)) {
+      items.push({
+        key: `promoter-${p.id}`,
+        title: p.displayName || p.username || p.email || "Promoter request",
+        subtitle: p.eventTitle ? `Claiming ${p.eventTitle}` : "Promoter application",
+        kindLabel: "Promoter",
+        color: "#FF00CC",
+      });
+    }
+    for (const m of pendingMod.slice(0, 4)) {
+      items.push({
+        key: `moderation-${m.id}`,
+        title: m.eventTitle || `Moderation ${m.type}`,
+        subtitle: `${m.type} · ${m.requesterName || m.requesterEmail}`,
+        kindLabel: "Moderation",
+        color: "#FF8C00",
+      });
+    }
+    for (const g of pendingGiftingFlagged.slice(0, 3)) {
+      items.push({
+        key: `gifting_post-${g.id}`,
+        title: g.title || "Gifting post",
+        subtitle: `${g.reportCount || 0} report(s)`,
+        kindLabel: "Gifting report",
+        color: "#AA66FF",
+      });
+    }
+    for (const f of openFeedback.slice(0, 3)) {
+      items.push({
+        key: `feedback-${f.id}`,
+        title: f.category || "Feedback",
+        subtitle: String(f.message || "Open feedback").slice(0, 80),
+        kindLabel: "Feedback",
+        color: "#4488FF",
+      });
+    }
+    return items.slice(0, 8);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, openFeedback]);
+
+  const overviewKindPills = useMemo(() => {
+    const pills: KindPill[] = [];
+    if (pendingSubs.length) pills.push({ key: "submissions", label: "Submissions", count: pendingSubs.length, color: "#FF1FA0" });
+    if (pendingPromoters.length) pills.push({ key: "promoters", label: "Promoters", count: pendingPromoters.length, color: "#FF00CC" });
+    if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
+    if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
+    if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
+    if (openFeedback.length) pills.push({ key: "feedback", label: "Feedback", count: openFeedback.length, color: "#4488FF" });
+    return pills;
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, openFeedback]);
   const inboxActionPending =
     approveMutation.isPending
     || mergeSubmissionMutation.isPending
@@ -986,113 +1054,54 @@ export default function Admin() {
 
   return (
     <div className="dash-page">
-      <div className="dash-inner" style={{ maxWidth: 1100 }}>
-        <header className="dash-admin-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Shield size={22} style={{ color: "#C8FA3C" }} />
-            <div>
-              <h1 className="dash-admin-title dash-anton">Admin dashboard</h1>
-              <p className="dash-subtitle">Signed in as {adminName}</p>
-            </div>
-          </div>
-          <div className="dash-actions">
-            {totalActionItems > 0 && (
-              <span className="dash-chip" style={{ color: "#FF1FA0" }}>{totalActionItems} action items</span>
-            )}
-            <button
-              type="button"
-              className="dash-btn dash-btn-ghost"
-              onClick={refreshAdminData}
-            >
-              <RefreshCw size={12} style={{ marginRight: 6 }} />
-              Refresh all
-            </button>
-            <button
-              type="button"
-              className="dash-btn dash-btn-ghost"
-              onClick={async () => { await logout(); navigate("/"); }}
-            >
-              Log out
-            </button>
-          </div>
-        </header>
-
-        <AdminMetricsPanel
-          enabled={authenticated}
-          onMetricClick={(tab, metricKey) => {
-            setAdminTab(tab as AdminTab);
-            if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
-            if (metricKey === "attendances") setEventStatusFilter("has_checkins");
-            if (metricKey === "newUsersToday") setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
-          }}
-        />
-
-        {pushStatus && (
-          <div
-            style={{
-              marginBottom: 20,
-              padding: "14px 16px",
-              border: "1px solid #222",
-              background: "#080808",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
+      <AdminShell
+        view={activeTab}
+        onNavigate={setAdminTab}
+        adminName={adminName}
+        isSuperAdmin={isSuperAdmin}
+        pendingCount={totalActionItems}
+        navCounts={{
+          team: teamAdmins.length,
+          events: events.length,
+          users: userCount,
+          gigs: gigs.length,
+          promoters: approvedPromoterCount || pendingPromoters.length || undefined,
+        }}
+        pushStatus={pushStatus}
+        onRefreshAll={refreshAdminData}
+        onLogout={async () => { await logout(); navigate("/"); }}
+        onSendTestPush={() => testPushMutation.mutate()}
+        testPushPending={testPushMutation.isPending}
+        moreOpen={moreOpen}
+        onMoreOpenChange={setMoreOpen}
+      >
+        {/* ── OVERVIEW ── */}
+        {activeTab === "overview" && (
+          <AdminOverview
+            pendingCount={totalActionItems}
+            attentionItems={overviewAttention}
+            kindPills={overviewKindPills}
+            metricsEnabled={authenticated}
+            onOpenInbox={() => setAdminTab("inbox")}
+            onReviewItem={(key) => {
+              setExpandedInboxKey(key);
+              setAdminTab("inbox");
             }}
-          >
-            <div>
-              <div className="display" style={{ fontSize: "0.82rem", color: "#fff", marginBottom: 4 }}>
-                Push notifications
-              </div>
-              <p style={{ margin: 0, fontSize: "0.74rem", color: "#8c8980", lineHeight: 1.45 }}>
-                Server: {pushStatus.configured ? "VAPID configured" : "keys missing on Railway"}
-                {" · "}
-                {pushStatus.totalActiveSubscriptions} active device{pushStatus.totalActiveSubscriptions === 1 ? "" : "s"} site-wide
-                {" · "}
-                {pushStatus.myDeviceSubscriptions} on this account
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                className="dash-btn dash-btn-ghost"
-                onClick={() => refetchPushStatus()}
-              >
-                Refresh
-              </button>
-              <button
-                type="button"
-                className="dash-btn dash-btn-lime"
-                disabled={!pushStatus.configured || pushStatus.myDeviceSubscriptions === 0 || testPushMutation.isPending}
-                onClick={() => testPushMutation.mutate()}
-              >
-                {testPushMutation.isPending ? "Sending…" : "Send test push"}
-              </button>
-            </div>
-          </div>
+            onMetricClick={(tab, metricKey) => {
+              const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "inbox") as AdminTab;
+              setAdminTab(next);
+              if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
+              if (metricKey === "attendances") setEventStatusFilter("has_checkins");
+              if (metricKey === "newUsersToday") {
+                setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+              }
+            }}
+            pushStatus={pushStatus}
+            onRefreshPush={() => refetchPushStatus()}
+            onSendTestPush={() => testPushMutation.mutate()}
+            testPushPending={testPushMutation.isPending}
+          />
         )}
-
-        <div className="dash-admin-tabs">
-          {([
-            { key: "inbox" as AdminTab, label: `Inbox${totalActionItems > 0 ? ` (${totalActionItems})` : ""}`, icon: <Inbox size={12} /> },
-            { key: "users" as AdminTab, label: `All users (${userCount})`, icon: <UserCircle size={12} /> },
-            { key: "events" as AdminTab, label: `All events${events.length > 0 ? ` (${events.length})` : ""}`, icon: <Shield size={12} /> },
-            { key: "gigs" as AdminTab, label: `Pride Werk (${gigs.length})`, icon: <Briefcase size={12} /> },
-            { key: "promoters" as AdminTab, label: "Promoters", icon: <Users size={12} /> },
-            { key: "team" as AdminTab, label: `Team (${teamAdmins.length})`, icon: <Users size={12} /> },
-          ]).map(tab => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setAdminTab(tab.key)}
-              className={`dash-admin-tab ${activeTab === tab.key ? "active" : ""}`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
 
         {/* ── INBOX ── */}
         {activeTab === "inbox" && (
@@ -1717,7 +1726,12 @@ export default function Admin() {
                           </button>
                         )}
                         {isSuperAdmin && (
-                          <button onClick={() => { setFixUsernameTarget({ id: u.id, current: u.username }); setFixUsernameValue(u.username); }}
+                          <button onClick={() => {
+                              if (u.id == null) return;
+                              const current = u.username || "";
+                              setFixUsernameTarget({ id: u.id, current });
+                              setFixUsernameValue(current);
+                            }}
                             className="display text-xs px-3 py-1 border border-white/20 text-white/40">
                             FIX USERNAME
                           </button>
@@ -1938,7 +1952,7 @@ export default function Admin() {
           </div>
         )}
 
-      </div>
+      </AdminShell>
     </div>
   );
 }

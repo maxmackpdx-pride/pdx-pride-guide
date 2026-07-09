@@ -47,7 +47,7 @@ export function StatCard({
   onClick,
   className = "",
   ...rest
-}) {
+}: any) {
   const Tag = href ? "a" : onClick ? "button" : "div";
   const cls = ["pdxStatCard", size === "sm" ? "pdxStatCard--sm" : "", className].filter(Boolean).join(" ");
   return (

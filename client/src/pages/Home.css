@@ -14,243 +14,287 @@
   padding: 44px 40px 8px;
 }
 
-.home-main-stage .pg-hero {
+/* ── Home hero masthead (rebuilt from Homepage Panel standalone) ── */
+
+.home-hero {
   position: relative;
   overflow: hidden;
-  min-height: 684px;
-  background: var(--ink-1000);
-  display: flex;
-  align-items: flex-end;
+  width: 100%;
+  min-height: 780px;
+  background: #050505;
 }
 
-.home-main-stage .pg-hero__img {
+.home-hero__bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 60% center;
+  display: block;
   z-index: 0;
 }
 
-.home-main-stage .pg-hero__scrim {
+.home-hero__scrim {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   z-index: 1;
-  background:
-    radial-gradient(circle at center, rgba(255, 0, 140, 0.1) 0 1.4px, transparent 1.6px) 0 0 / 9px 9px,
-    linear-gradient(to top, rgba(5, 5, 7, 0.97) 4%, rgba(5, 5, 7, 0.55) 46%, rgba(5, 5, 7, 0.28) 100%);
 }
 
-.home-main-stage .pg-hero__stickers {
+.home-hero__scrim--angle {
+  background: linear-gradient(
+    105deg,
+    rgba(5, 5, 8, 0.95) 0%,
+    rgba(5, 5, 8, 0.82) 32%,
+    rgba(5, 5, 8, 0.34) 58%,
+    transparent 86%
+  );
+}
+
+.home-hero__scrim--bottom {
+  background: linear-gradient(to top, rgba(5, 5, 8, 0.80), rgba(5, 5, 8, 0.15) 42%, transparent 66%);
+}
+
+.home-hero__scrim--top {
+  background: linear-gradient(to bottom, rgba(5, 5, 8, 0.62), transparent 20%);
+}
+
+.home-hero__halftone {
   position: absolute;
-  top: 64px;
-  right: 52px;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  align-items: flex-end;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.24) 1px, transparent 1.4px);
+  background-size: 4px 4px;
 }
 
-.home-main-stage .pg-hero__body {
-  position: relative;
+.home-hero__seam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
   z-index: 4;
-  width: 100%;
-  max-width: 1120px;
+  pointer-events: none;
+  background: var(--grad-flag, linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982));
+}
+
+.home-hero__inner {
+  position: relative;
+  z-index: 5;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 40px 60px;
+  padding: 36px 46px 52px;
 }
 
-.home-main-stage .pg-hero__kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 22px;
-  font-family: var(--font-display);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 1.64rem; /* 2× previous 0.82rem */
-  color: var(--neon-cyan);
-}
-
-.home-main-stage .pg-hero__kicker .d {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--neon-cyan);
-  box-shadow: 0 0 10px var(--neon-cyan);
-}
-
-.home-main-stage .pg-hero h1 {
-  margin: 0 0 4px;
-}
-
-.home-main-stage .pg-hero h1 > span:not(.home-hero-title-pride) {
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.84;
-  letter-spacing: 0.01em;
-  font-size: clamp(3.5rem, 11vw, 6.4rem);
-  color: #fff;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
-}
-
-/*
-  Hero PRIDE rainbow — root cause of past failures:
-  Chrome breaks -webkit-background-clip:text when ANY ancestor has filter.
-  Putting drop-shadow on .home-hero-title-pride made the fill fully transparent;
-  only the lime drop-shadow silhouette showed (looked solid green neon).
-  Fix: no filter on ancestors; black ink + neon glow live on the outline layer;
-  gradient fill forced with hex stops so vars/cascade can't blank it.
-*/
-.home-main-stage .pg-hero h1 .home-hero-title-pride {
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.84;
-  letter-spacing: 0.01em;
-  font-size: clamp(3.5rem, 11vw, 6.4rem);
-  filter: none; /* critical — do not put filter above clipped text */
-}
-
-.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word {
-  display: block;
-  /* isolation can also fight clip-text compositing at hero scale */
-  isolation: auto;
-}
-
-.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline,
-.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
-  display: block;
-  font-family: inherit;
-  font-weight: inherit;
-  font-size: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  line-height: inherit;
-}
-
-/* Black ink outline + neon glow (was parent filter) */
-.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline {
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 2.5px #000;
-  text-shadow:
-    3px 3px 0 #000,
-    2px 2px 0 #000,
-    0 0 22px rgba(204, 255, 0, 0.55),
-    0 0 36px rgba(0, 255, 255, 0.35),
-    0 0 48px rgba(255, 0, 204, 0.22);
-}
-
-/* Explicit rainbow fill — same neon stops as nav GlitchWord */
-.home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
-  background-image: linear-gradient(
-    90deg,
-    #00ffff 0%,
-    #ccff00 33%,
-    #ff00cc 66%,
-    #ff6600 100%
-  ) !important;
-  background-color: transparent !important;
-  background-size: 100% 100%;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
-  text-shadow: none !important;
-  filter: none !important;
-  /* Keep gradient continuous across the word */
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-
-/* Event count under Guide — no box, 2× size, white + black outline + neon glow */
-.home-main-stage .pg-hero__event-count {
-  margin-top: 14px;
+.home-hero__running {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.home-main-stage .pg-hero__event-count-num {
+.home-hero__kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neon-cyan, #00ffff);
+}
+
+.home-hero__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--neon-cyan, #00ffff);
+  box-shadow: 0 0 10px var(--neon-cyan, #00ffff);
+  animation: homeHeroBlink 1.8s ease-in-out infinite;
+}
+
+.home-hero__date {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.home-hero__col {
+  max-width: 600px;
+  margin-top: 34px;
+}
+
+.home-hero__title {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(4.5rem, 10vw, 7rem);
-  line-height: 0.88;
-  letter-spacing: 0.02em;
-  font-variant-numeric: tabular-nums;
-  color: #fff;
-  -webkit-text-fill-color: #fff;
-  /* Black sticker outline + soft white/cyan neon glow */
-  text-shadow:
-    3px 4px 0 #000,
-    4px 3px 0 #000,
-    -2px -2px 0 #000,
-    2px -2px 0 #000,
-    -2px 3px 0 #000,
-    0 0 18px rgba(255, 255, 255, 0.55),
-    0 0 36px rgba(0, 255, 255, 0.35),
-    0 0 52px rgba(204, 255, 0, 0.22);
-}
-
-.home-main-stage .pg-hero__event-count-label {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 1.4rem; /* 2× previous 0.7rem */
-  font-weight: 700;
-  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #fff;
-  margin-left: 0.12em;
+  line-height: 0.84;
+  letter-spacing: 0.005em;
+  font-size: clamp(64px, 9vw, 98px);
 }
 
-html.calm-mode .home-main-stage .pg-hero h1 .home-hero-title-pride {
+.home-hero__word {
+  display: block;
+  color: #fff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
   filter: none;
 }
 
-html.calm-mode .home-main-stage .pg-hero__event-count-num {
-  text-shadow: 2px 2px 0 #000;
+.home-hero__word--pride {
+  font-size: 0.77em;
+  background: var(--grad-rainbow, linear-gradient(90deg, #00ffff, #39ff14, #ccff00, #ff6600, #ff00cc));
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  animation: homeHeroShimmer 9s linear infinite;
 }
 
-.home-main-stage .pg-hero__blurb {
-  max-width: 47ch;
-  margin: 22px 0 0;
-  font-size: 1.18rem;
-  line-height: 1.55;
-  color: var(--text-mid);
+.home-hero__tagline {
+  margin: 20px 0 0;
+  max-width: 400px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-mid, #c8c5bc);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
 }
 
-.home-main-stage .pg-hero__blurb strong {
-  color: #fff;
-  font-weight: 700;
-}
-
-.home-main-stage .pg-hero__cdlabel {
-  font-family: var(--font-display);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 1.6rem; /* 2× previous 0.8rem */
-  color: #fff;
-}
-
-.home-main-stage .pg-hero__actions {
+.home-hero__stat {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 32px;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: 24px;
 }
 
-.home-main-stage .pg-hero__countdown {
-  margin-top: 30px;
+.home-hero__stat-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(64px, 10vw, 96px);
+  line-height: 0.78;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.65);
+}
+
+.home-hero__stat-meta {
+  padding-bottom: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+  padding-left: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
+}
+
+.home-hero__stat-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon-yellow, #ccff00);
+}
+
+.home-hero__stat-sub {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.home-hero__rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 24px 0;
+  max-width: 440px;
+}
+
+.home-hero__countdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-hero__cd-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 13px;
+  text-shadow: 0 2px 10px #000;
+}
+
+.home-hero__cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.home-hero__cta a {
+  text-decoration: none;
+}
+
+@keyframes homeHeroBlink {
+  50% { opacity: 0.28; }
+}
+
+@keyframes homeHeroShimmer {
+  to { background-position: 200% center; }
+}
+
+html.calm-mode .home-hero__word--pride {
+  animation: none;
+  background-size: 100% auto;
+}
+
+html.calm-mode .home-hero__dot {
+  animation: none;
+}
+
+html.calm-mode .home-hero__bg {
+  filter: grayscale(0.85) brightness(0.72);
+}
+
+@media (max-width: 900px) {
+  .home-hero {
+    min-height: min(88vh, 720px);
+  }
+
+  .home-hero__inner {
+    padding: 22px 20px 40px;
+  }
+
+  .home-hero__date {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .home-hero__title {
+    font-size: clamp(48px, 14vw, 72px);
+  }
+
+  .home-hero__stat-num {
+    font-size: clamp(52px, 16vw, 72px);
+  }
 }
 
 .home-main-stage .pg-block--schedule {
@@ -528,19 +572,11 @@ html.calm-mode .home-main-stage .scroll-reveal--visible {
     min-height: 320px;
   }
 
-  .home-main-stage .pg-hero__stickers {
-    display: none;
-  }
-
   .home-main-stage .pg-block {
     padding-left: 20px;
     padding-right: 20px;
   }
 
-  .home-main-stage .pg-hero__body {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -553,13 +589,13 @@ html.calm-mode .home-main-stage .pg-note--spot {
   animation: none;
 }
 
-html.calm-mode .home-main-stage .pg-hero__img {
-  filter: grayscale(0.85) brightness(0.72);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .home-main-stage .pg-note--spot {
     animation: none;
   }
 
+  .home-hero__dot,
+  .home-hero__word--pride {
+    animation: none !important;
+  }
 }

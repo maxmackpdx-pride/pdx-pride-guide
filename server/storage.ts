@@ -287,6 +287,13 @@ function ensureGigPostsSchema() {
   if (!colNames.has("is_remote")) addColumn(`ALTER TABLE gig_posts ADD COLUMN is_remote INTEGER DEFAULT 0`);
   if (!colNames.has("admin_notes")) addColumn(`ALTER TABLE gig_posts ADD COLUMN admin_notes TEXT`);
 
+  // Gigs post live without admin approval — promote any legacy PENDING rows.
+  try {
+    sqlite.exec(`UPDATE gig_posts SET status = 'LIVE' WHERE UPPER(status) = 'PENDING'`);
+  } catch {
+    /* ignore */
+  }
+
   const finalColumns = sqlite.prepare(`PRAGMA table_info(gig_posts)`).all() as Array<{ name: string }>;
   gigPostsLegacyCols = finalColumns.some(c => c.name === "type") && finalColumns.some(c => c.name === "role");
 }
@@ -465,6 +472,8 @@ function ensureEventTalentSchema() {
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS event_talent_event_idx ON event_talent(event_id)`);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS event_talent_status_idx ON event_talent(status)`);
+    // Talent self-tags go live without approval — clear legacy queue.
+    sqlite.exec(`UPDATE event_talent SET status = 'LIVE' WHERE status = 'PENDING'`);
   } catch (e) {
     console.error("[event_talent] schema migration failed:", e);
   }
@@ -479,6 +488,12 @@ function ensureMissedConnectionsSchema() {
     if (!names.has("closes_at")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN closes_at TEXT`);
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_notes TEXT`);
     if (!names.has("admin_reviewed")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_reviewed INTEGER DEFAULT 0`);
+    // Spotted is public without approval — mark existing live posts reviewed so nothing sits in a fake queue.
+    try {
+      sqlite.exec(`UPDATE missed_connections SET admin_reviewed = 1 WHERE status = 'ACTIVE' AND (admin_reviewed IS NULL OR admin_reviewed = 0)`);
+    } catch {
+      /* ignore if column race on first boot */
+    }
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS missed_connection_threads (
         thread_id TEXT PRIMARY KEY,
@@ -507,6 +522,9 @@ function ensureGiftingPostsSchema() {
     const cols = sqlite.prepare(`PRAGMA table_info(gifting_posts)`).all() as Array<{ name: string }>;
     const names = new Set(cols.map(c => c.name));
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE gifting_posts ADD COLUMN admin_notes TEXT`);
+    // Gifting posts go live without admin approval — promote legacy PENDING rows.
+    sqlite.exec(`UPDATE gifting_posts SET status = 'LOOKING' WHERE UPPER(status) = 'PENDING' AND UPPER(post_type) = 'ISO'`);
+    sqlite.exec(`UPDATE gifting_posts SET status = 'OPEN' WHERE UPPER(status) = 'PENDING'`);
   } catch (e) {
     console.error("[gifting_posts] schema migration failed:", e);
   }
@@ -2601,7 +2619,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_businesses_directory_v5");
   }
   if (!hasBootMigration("seed_businesses_directory_v6")) {
-    const updates: Array<{ name: string; lat?: number; lng?: number; hours?: string; phone?: string }> = [
+    const updates: Array<{ name: string; lat?: number; lng?: number; hours?: string; phone?: string; instagram?: string }> = [
       { name: "CC Slaughters",        lat: 45.5236, lng: -122.6737, hours: "Mon–Sun 2pm–2:30am", phone: "(503) 248-9135" },
       { name: "Darcelle XV Showplace",lat: 45.5238, lng: -122.6743, hours: "Tue 6–9pm, Fri 7–10pm, Sat 7pm–12am, Sun 11:30am–2:30pm", phone: "(503) 222-5338" },
       { name: "Stag PDX",             lat: 45.5240, lng: -122.6755, hours: "Mon–Fri 7pm–2:30am, Sat 4pm–2:30am, Sun 7pm–2:30am", phone: "(503) 894-9679" },
@@ -2636,6 +2654,7 @@ function runBootMigrationsOnce() {
       if (u.lat !== undefined) parts.push(`lat = ${u.lat}`, `lng = ${u.lng}`);
       if (u.hours) parts.push(`hours = '${u.hours.replace(/'/g, "''")}'`);
       if (u.phone) parts.push(`phone = '${u.phone}'`);
+      if (u.instagram) parts.push(`instagram = '${u.instagram.replace(/'/g, "''")}'`);
       if (parts.length) {
         sqlite.prepare(`UPDATE businesses SET ${parts.join(", ")} WHERE name = ?`).run(u.name);
       }
@@ -3626,9 +3645,9 @@ function isPrimarySiteOwner(user: { id?: number | null } | null | undefined): bo
 
 function ownerIdentitySets(candidates: SiteOwnerRow[]) {
   return {
-    userIds: [...new Set(candidates.map(c => c.id))],
-    emails: [...new Set(candidates.map(c => c.email.trim().toLowerCase()).filter(Boolean))],
-    usernames: [...new Set(candidates.map(c => c.username.trim().toLowerCase()).filter(Boolean))],
+    userIds: Array.from(new Set(candidates.map(c => c.id))),
+    emails: Array.from(new Set(candidates.map(c => c.email.trim().toLowerCase()).filter(Boolean))),
+    usernames: Array.from(new Set(candidates.map(c => c.username.trim().toLowerCase()).filter(Boolean))),
   };
 }
 
@@ -3938,6 +3957,9 @@ export interface IStorage {
     username: string;
     email: string;
     displayName: string | null;
+    photoUrl: string | null;
+    avatarChoice: number;
+    avatarRing: string;
     source: "env" | "granted";
     protected: boolean;
     grantedAt: string;
@@ -4719,14 +4741,12 @@ export const storage: IStorage = {
     return runDismissStaleTestModerationRequests();
   },
   getAdminPendingCount() {
-    const giftingPending = this.getGiftingPosts({ includeInactive: true })
-      .filter((post: any) => post.status === "PENDING").length;
+    // Talent, gigs, and gifting posts do not need admin approval.
+    // Gifting *reports* and event submissions / promoters / mod / feedback still do.
     return (
       this.getSubmissions("PENDING").length
       + this.getModerationRequests("PENDING").length
       + this.getPendingPromoterRequests().length
-      + this.getPendingTalentForUnclaimedEvents().length
-      + giftingPending
       + this.getGiftingReports("PENDING").length
       + this.getFeedbackReports("OPEN").length
     );
@@ -4748,6 +4768,9 @@ export const storage: IStorage = {
       username: string;
       email: string;
       displayName: string | null;
+      photoUrl: string | null;
+      avatarChoice: number;
+      avatarRing: string;
       source: "env" | "granted";
       protected: boolean;
       grantedAt: string;
@@ -5327,9 +5350,15 @@ export const storage: IStorage = {
       SELECT id, status FROM event_talent WHERE event_id = ? AND user_id = ? AND role = ?
     `).get(eventId, userId, role) as { id: number; status: string } | undefined;
     if (existing?.status === "LIVE") return { error: "You're already on the lineup for this role" };
-    if (existing?.status === "PENDING") return { error: "Your request is already pending approval" };
+    if (existing?.status === "PENDING") {
+      // Legacy pending rows: promote to live (no admin/host approval queue).
+      sqlite.prepare(`UPDATE event_talent SET status = 'LIVE' WHERE id = ?`).run(existing.id);
+      const talent = storage.getEventTalent(eventId, { includePending: true }).find((t: any) => t.id === existing.id);
+      return { talent, needsAdmin: false, isHostSelf: storage.isUserEventHost(eventId, userId) };
+    }
     const isHost = storage.isUserEventHost(eventId, userId);
-    const status = isHost ? "LIVE" : "PENDING";
+    // Lineup self-tags go live immediately — no admin (or host) approval required.
+    const status = "LIVE";
     const created = db.insert(eventTalent).values({
       eventId,
       userId,
@@ -5340,22 +5369,22 @@ export const storage: IStorage = {
     } as any).returning().get();
     if (!isHost) {
       const roleLabel = EVENT_TALENT_ROLE_LABELS[role];
-      const body = `${user.displayName || user.username} (@${user.username}) requested to be listed as ${roleLabel} for "${evt.title}". Approve to add them to the public lineup.`;
+      const body = `${user.displayName || user.username} (@${user.username}) listed themselves as ${roleLabel} on "${evt.title}".`;
       const approverIds = storage.getEventTalentApproverUserIds(eventId);
       if (approverIds.length > 0) {
         for (const approverId of approverIds) {
           storage.sendMessage(
             userId,
             approverId,
-            `Talent request: ${roleLabel}`,
+            `Lineup update: ${roleLabel}`,
             body,
-            { contextType: "EVENT_TALENT_REQUEST", contextId: created.id, contextLabel: evt.title },
+            { contextType: "EVENT_TALENT", contextId: eventId, contextLabel: evt.title },
           );
         }
       }
     }
     const talent = storage.getEventTalent(eventId, { includePending: true }).find((t: any) => t.id === created.id);
-    return { talent, needsAdmin: storage.eventNeedsAdminTalentApproval(eventId), isHostSelf: isHost };
+    return { talent, needsAdmin: false, isHostSelf: isHost };
   },
   approveEventTalent(talentId, approverUserId, opts) {
     ensureEventTalentSchema();
@@ -5405,27 +5434,13 @@ export const storage: IStorage = {
   },
   getPendingTalentForUnclaimedEvents() {
     ensureEventTalentSchema();
-    return sqlite.prepare(`
-      SELECT
-        et.id,
-        et.event_id AS eventId,
-        et.user_id AS userId,
-        et.role,
-        et.status,
-        et.created_at AS createdAt,
-        e.title AS eventTitle,
-        e.is_claimable AS isClaimable,
-        u.username,
-        u.display_name AS displayName,
-        u.photo_url AS photoUrl,
-        u.avatar_choice AS avatarChoice,
-        u.avatar_ring AS avatarRing
-      FROM event_talent et
-      JOIN events e ON e.id = et.event_id
-      JOIN users u ON u.id = et.user_id
-      WHERE et.status = 'PENDING' AND e.status = 'LIVE' AND e.is_claimable = 1
-      ORDER BY et.created_at DESC
-    `).all() as any[];
+    // Talent no longer requires admin approval — promote any legacy pending rows, then return none.
+    try {
+      sqlite.exec(`UPDATE event_talent SET status = 'LIVE' WHERE status = 'PENDING'`);
+    } catch {
+      /* ignore */
+    }
+    return [] as any[];
   },
   // Messages
   getInbox(userId) {
@@ -5597,7 +5612,7 @@ export const storage: IStorage = {
   },
   getPostableEventsForMissedConnections(requireToday = false) {
     const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
-    return live.filter(evt => isMissedConnectionPostable(evt.dateStart, { requireToday }).ok);
+    return live.filter(evt => isMissedConnectionPostable(evt.dateStart, evt.dateEnd, { requireToday }).ok);
   },
   getLinkableEventsForMissedConnections() {
     const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
@@ -5611,7 +5626,7 @@ export const storage: IStorage = {
         dayOfWeek: evt.dayOfWeek,
         dateStart: evt.dateStart,
         dateEnd: evt.dateEnd,
-        postable: isMissedConnectionPostable(evt.dateStart).ok,
+        postable: isMissedConnectionPostable(evt.dateStart, evt.dateEnd).ok,
         timing: getEventTiming(evt.dateStart, evt.dateEnd),
       }))
       .sort((a, b) => {
@@ -5695,11 +5710,20 @@ export const storage: IStorage = {
   },
   createMissedConnection(data) {
     const createdAt = new Date().toISOString();
-    return db.insert(missedConnections).values({
+    // Spotted posts go live immediately — no admin approval queue.
+    const row = db.insert(missedConnections).values({
       ...data,
       status: "ACTIVE",
       createdAt,
     } as any).returning().get();
+    if (row?.id) {
+      try {
+        sqlite.prepare(`UPDATE missed_connections SET admin_reviewed = 1 WHERE id = ?`).run(row.id);
+      } catch {
+        /* column may not exist on very old DBs until ensureMissedConnectionsSchema runs */
+      }
+    }
+    return row;
   },
   createMissedConnectionThread(threadId, missedConnectionId, posterUserId, replierUserId) {
     sqlite.prepare(`
@@ -5849,10 +5873,14 @@ export const storage: IStorage = {
   },
   createGiftingPost(data, status) {
     const postType = data.postType === "ISO" ? "ISO" : "GIFT";
+    // Gifting goes live immediately — never create as PENDING for admin review.
+    const liveStatus = status === "PENDING" || !status
+      ? (postType === "ISO" ? "LOOKING" : "OPEN")
+      : status;
     return db.insert(giftingPosts).values({
       ...data,
       postType,
-      status: status || (postType === "ISO" ? "LOOKING" : "OPEN"),
+      status: liveStatus,
       photoUrls: data.photoUrls || "[]",
       expiresAt: giftingExpiry(postType),
       createdAt: new Date().toISOString(),

@@ -76,7 +76,6 @@ export default function EventBoardCard({
           <AttendanceCluster
             eventId={event.id}
             embedded
-            variant="card"
             liveSocket={false}
           />
         </div>

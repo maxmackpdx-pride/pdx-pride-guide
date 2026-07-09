@@ -72,7 +72,7 @@ export function Badge({
   category,
   className = "",
   ...rest
-}) {
+}: any) {
   let c = color, label = children, v = variant;
   if (admission && ADMISSION[admission]) { c = ADMISSION[admission].color; if (label == null) label = ADMISSION[admission].label; }
   if (day && DAY[day]) { c = DAY[day]; if (label == null) label = day; if (variant === "solid") v = "paper"; }

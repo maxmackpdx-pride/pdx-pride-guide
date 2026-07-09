@@ -1,10 +1,14 @@
+import { useState } from "react";
 import type React from "react";
+import { useLocation } from "wouter";
 import type { AdmissionType } from "@shared/admission";
 import type { Event } from "@shared/schema";
 import { EventCard as DsEventRow, PosterCard } from "@/components/ds";
 import ScrollReveal from "@/components/ScrollReveal";
+import AuthModal from "@/components/AuthModal";
 import EventAttendancePreview from "@/components/EventAttendancePreview";
 import EventWorkHereTag from "@/components/EventWorkHereTag";
+import { useAuth } from "@/context/AuthContext";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import {
@@ -24,6 +28,7 @@ type EventWithVenue = Event & {
   ticketUrl?: string | null;
   address?: string | null;
   isPrivate?: boolean | null;
+  hasPendingClaim?: boolean;
 };
 
 function eventCardA11yProps(onClick: () => void) {
@@ -86,16 +91,45 @@ export default function ListingCard({
   selfUserId,
   shareHref,
 }: Props) {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+  const [showAuth, setShowAuth] = useState(false);
+
   const day = listingDay(event);
   const when = formatListingWhen(event);
   const types = listingTypeTags(event);
   const image = listingPosterUrl(event);
-  const claimable = Boolean(event.isClaimable && !event.claimedBy);
+  const claimPending = Boolean(event.hasPendingClaim);
+  // Public API strips claimedBy; isClaimable is the public signal for unclaimed listings.
+  const claimable = Boolean(event.isClaimable && !event.claimedBy && !claimPending);
   const showAttendance = attendanceSummary && attendanceSummary.count > 0;
   const venueHref = event.venueWebsite || resolveVenueWebsite(event.venueName) || undefined;
   const ticketHref = event.ticketUrl?.trim() || undefined;
   const ticketLabel = admissionEventLinkLabel(event.admission || "");
   const address = !event.isPrivate && event.address ? event.address : undefined;
+
+  const handleClaim = () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    setLocation(`/submit/claim/${event.id}`);
+  };
+
+  const claimProps = {
+    claimable,
+    claimPending,
+    onClaimClick: claimable ? handleClaim : undefined,
+  };
+
+  const extras = (
+    <div className="ds-listing-card__extras" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+      <EventWorkHereTag talent={myTalent} compact />
+      {!showAttendance && (
+        <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
+      )}
+    </div>
+  );
 
   if (viewMode === "list") {
     return (
@@ -121,13 +155,10 @@ export default function ListingCard({
             age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
             going={showAttendance ? attendanceSummary!.count : undefined}
             style={{ cursor: "pointer" }}
+            {...claimProps}
           />
-          <div className="ds-listing-card__extras" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-            <EventWorkHereTag talent={myTalent} compact />
-            {!showAttendance && (
-              <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
-            )}
-          </div>
+          {extras}
+          {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
         </div>
       </ScrollReveal>
     );
@@ -154,17 +185,13 @@ export default function ListingCard({
           types={types}
           admission={event.admission as AdmissionType | undefined}
           age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
-          claimable={claimable}
           going={showAttendance ? attendanceSummary!.count : undefined}
           showLink={false}
           style={{ cursor: "pointer", height: "100%" }}
+          {...claimProps}
         />
-        <div className="ds-listing-card__extras" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-          <EventWorkHereTag talent={myTalent} compact />
-          {!showAttendance && (
-            <EventAttendancePreview summary={attendanceSummary} compact selfUserId={selfUserId} />
-          )}
-        </div>
+        {extras}
+        {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       </div>
     </ScrollReveal>
   );

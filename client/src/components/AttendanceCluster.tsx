@@ -43,7 +43,18 @@ interface ExtraPerson {
   roleColor?: string;
 }
 
-export default function AttendanceCluster({ eventId, embedded = false, extraPeople = [] }: { eventId: number; embedded?: boolean; extraPeople?: ExtraPerson[] }) {
+export default function AttendanceCluster({
+  eventId,
+  embedded = false,
+  extraPeople = [],
+  liveSocket = true,
+}: {
+  eventId: number;
+  embedded?: boolean;
+  extraPeople?: ExtraPerson[];
+  /** Open attendance websocket for live updates (disable on dense board cards). */
+  liveSocket?: boolean;
+}) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedPhraseKey, setSelectedPhraseKey] = useState<AttendancePhraseKey>(DEFAULT_ATTENDANCE_PHRASE_KEY);
@@ -60,7 +71,7 @@ export default function AttendanceCluster({ eventId, embedded = false, extraPeop
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  useAttendanceLive(eventId);
+  useAttendanceLive(eventId, liveSocket);
 
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],

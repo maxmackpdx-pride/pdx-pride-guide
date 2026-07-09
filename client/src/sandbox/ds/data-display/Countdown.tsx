@@ -54,9 +54,9 @@ export function Countdown({
   const isRainbow = accent === "rainbow";
   const accentVar = isRainbow ? undefined : (ACCENTS[accent] || accent);
   const accentClass = isRainbow ? "pdxCountdown--rainbow" : "";
-  const cssStyle: CssVarStyle = isRainbow
+  const cssStyle = (isRainbow
     ? { ...style }
-    : { "--_c": accentVar as string, ...style };
+    : { "--_c": accentVar as string, ...style }) as unknown as CssVarStyle;
 
   if (t.done) {
     return (
