@@ -2185,50 +2185,31 @@ function seedCheckingPortlandEventsJuly2026() {
     submittedBy: null,
   };
 
-  insert({
-    ...base,
-    title: "Scandals PDX Pride Karaoke",
-    description:
-      "Annual Pride week karaoke kickoff for bar regulars and newcomers. Low-key sing-along, queer anthems encouraged.",
-    venueName: "Scandals PDX",
-    address: "1125 SW Stark St, Portland, OR 97205",
-    neighborhood: "Downtown",
-    lat: 45.5226065,
-    lng: -122.6827651,
-    dateStart: "2026-07-16T21:00:00",
-    dateEnd: "2026-07-17T01:00:00",
-    dayOfWeek: "THU",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["NIGHTLIFE", "SOCIAL"]),
-    admission: "FREE",
-    ticketUrl: "https://www.instagram.com/scandalspdx",
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json",
-  });
+  // Scandals karaoke: DO NOT seed live — downtown Scandals closed; Alberta Scandals East
+  // not verified for this Pride karaoke listing.
 
   insert({
     ...base,
-    title: "CC Slaughters GLOW: Trans-Uhh-Licious",
+    title: "Trans-UHH-Licious",
     description:
-      "Trans-centered Pride kickoff party. Performances by Roxy Wood, Kylie Mooncakes, Flawless Shade. For trans community + allies.",
+      "Weekly residency dedicated to the trans community at CC Slaughters — local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.",
     venueName: "CC Slaughters",
     address: "219 NW Davis St, Portland, OR 97209",
-    neighborhood: "Downtown",
+    neighborhood: "Old Town",
     lat: 45.5246801,
     lng: -122.6729454,
     dateStart: "2026-07-16T21:00:00",
     dateEnd: "2026-07-17T02:00:00",
     dayOfWeek: "THU",
     ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DANCE", "DRAG", "TRANS", "NIGHTLIFE"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.ccslaughters.com/events",
+    eventTypes: JSON.stringify(["DRAG", "TRANS", "PERFORMANCE", "NIGHTLIFE"]),
+    admission: "FREE",
+    ticketUrl: "https://ccslaughterspdx.com/",
     isSexPositive: false,
     nudityOk: false,
     posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json. Flyer URL omitted (placeholder CDN).",
+    status: "LIVE",
+    adminNotes: "Verified via ccslaughterspdx.com weeklys + Queer Social Club. FREE weekly residency (not a ticketed special).",
   });
 
   insert({
@@ -2302,25 +2283,26 @@ function seedCheckingPortlandEventsJuly2026() {
 
   insert({
     ...base,
-    title: "Lavender Rain Afterparty",
+    title: "Lavender Rain Queer Strip Club Pop-Up (Pride)",
     description:
-      "Official afterparty for Peacock PDX Pride Block Party. House/techno DJs, queer dance floor. Separate ticket from daytime block party.",
+      "Lavender Rain queer pop-up strip club at Peacock PDX for Pride weekend. All-gender pole and stage performances. Distinct from Purple Rain — same venue weekend energy, separate brand. 21+.",
     venueName: "Peacock PDX",
     address: "1400 SE Morrison St, Portland, OR 97214",
     neighborhood: "SE Portland",
     lat: 45.5170824,
     lng: -122.6514493,
-    dateStart: "2026-07-18T22:00:00",
-    dateEnd: "2026-07-19T02:00:00",
+    dateStart: "2026-07-18T21:00:00",
+    dateEnd: "2026-07-19T01:00:00",
     dayOfWeek: "SAT",
     ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DANCE", "NIGHTLIFE"]),
+    eventTypes: JSON.stringify(["PERFORMANCE", "PARTY", "BURLESQUE"]),
     admission: "TICKETED",
-    ticketUrl: "https://www.instagram.com/peacockpdx",
-    isSexPositive: false,
-    nudityOk: false,
+    ticketUrl: "https://queersocialclub.com/events-portland/lavender-rain-queer-strip-club-pop-up-4",
+    isSexPositive: true,
+    nudityOk: true,
     posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json",
+    status: "LIVE",
+    adminNotes: "Verified Queer Social Club listing (not the generic afterparty framing from the check JSON).",
   });
 
   insert({
@@ -2964,7 +2946,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_checking_portland_events_july_2026_v1");
   }
   if (!hasBootMigration("hide_unverified_checking_portland_events_v1")) {
-    // Scandals downtown closed (moved NE Alberta); rest of that batch not verified — hide all.
+    // Scandals downtown closed; unverified GLOW/specials stay hidden.
     const titles = [
       "Scandals PDX Pride Karaoke",
       "CC Slaughters GLOW: Trans-Uhh-Licious",
@@ -2985,6 +2967,53 @@ function runBootMigrationsOnce() {
     `);
     for (const title of titles) hide.run(title);
     recordBootMigration("hide_unverified_checking_portland_events_v1");
+  }
+  if (!hasBootMigration("verify_checking_portland_events_v2")) {
+    // Restore only source-verified listings from that batch; rest stay HIDDEN.
+    sqlite.prepare(`
+      UPDATE events SET
+        title = 'Trans-UHH-Licious',
+        description = 'Weekly residency dedicated to the trans community at CC Slaughters — local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.',
+        venue_name = 'CC Slaughters',
+        address = '219 NW Davis St, Portland, OR 97209',
+        neighborhood = 'Old Town',
+        date_start = '2026-07-16T21:00:00',
+        date_end = '2026-07-17T02:00:00',
+        day_of_week = 'THU',
+        age_requirement = '21_PLUS',
+        admission = 'FREE',
+        ticket_url = 'https://ccslaughterspdx.com/',
+        event_types = '["DRAG","TRANS","PERFORMANCE","NIGHTLIFE"]',
+        is_sex_positive = 0,
+        nudity_ok = 0,
+        status = 'LIVE',
+        admin_notes = 'Verified via ccslaughterspdx.com weeklys + Queer Social Club. FREE weekly residency (not a ticketed special).'
+      WHERE title IN ('Trans-UHH-Licious', 'CC Slaughters GLOW: Trans-Uhh-Licious')
+    `).run();
+    sqlite.prepare(`
+      UPDATE events SET
+        title = 'Lavender Rain Queer Strip Club Pop-Up (Pride)',
+        description = 'Lavender Rain queer pop-up strip club at Peacock PDX for Pride weekend. All-gender pole and stage performances. Distinct from Purple Rain — same venue weekend energy, separate brand. 21+.',
+        venue_name = 'Peacock PDX',
+        address = '1400 SE Morrison St, Portland, OR 97214',
+        neighborhood = 'SE Portland',
+        date_start = '2026-07-18T21:00:00',
+        date_end = '2026-07-19T01:00:00',
+        day_of_week = 'SAT',
+        age_requirement = '21_PLUS',
+        admission = 'TICKETED',
+        ticket_url = 'https://queersocialclub.com/events-portland/lavender-rain-queer-strip-club-pop-up-4',
+        event_types = '["PERFORMANCE","PARTY","BURLESQUE"]',
+        is_sex_positive = 1,
+        nudity_ok = 1,
+        status = 'LIVE',
+        admin_notes = 'Verified Queer Social Club listing (not the generic afterparty framing from the check JSON).'
+      WHERE title IN (
+        'Lavender Rain Queer Strip Club Pop-Up (Pride)',
+        'Lavender Rain Afterparty'
+      )
+    `).run();
+    recordBootMigration("verify_checking_portland_events_v2");
   }
 }
 
