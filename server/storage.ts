@@ -2163,7 +2163,7 @@ function seedMissingWweekPrideEvents2026() {
   });
 }
 
-/** Batch from Checking-Portland-events-July-2026.json (form-shaped export). */
+/** Verified-only events from the Checking-Portland pass (unverified rows deleted). */
 function seedCheckingPortlandEventsJuly2026() {
   const now = new Date().toISOString();
   const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
@@ -2172,21 +2172,16 @@ function seedCheckingPortlandEventsJuly2026() {
     db.insert(events).values({ ...row, createdAt: now } as any).run();
   };
 
-  // Source JSON was unverified (wrong Scandals location, placeholder flyers/URLs).
-  // Keep rows for review but do NOT show publicly until confirmed.
   const base = {
     isPublic: true,
     isPrivate: false,
     isHouseParty: false,
-    status: "HIDDEN",
+    status: "LIVE",
     source: "admin_seeded",
     isClaimable: true,
     claimedBy: null,
     submittedBy: null,
   };
-
-  // Scandals karaoke: DO NOT seed live — downtown Scandals closed; Alberta Scandals East
-  // not verified for this Pride karaoke listing.
 
   insert({
     ...base,
@@ -2208,77 +2203,7 @@ function seedCheckingPortlandEventsJuly2026() {
     isSexPositive: false,
     nudityOk: false,
     posterImageUrl: null,
-    status: "LIVE",
-    adminNotes: "Verified via ccslaughterspdx.com weeklys + Queer Social Club. FREE weekly residency (not a ticketed special).",
-  });
-
-  insert({
-    ...base,
-    title: "CC Slaughters GLOW: RuPaul's Drag Race Viewing + Bolivia Carmichaels",
-    description:
-      "Live viewing party for new Drag Race episode followed by DJ set from Bolivia Carmichaels. Dance floor opens after viewing.",
-    venueName: "CC Slaughters",
-    address: "219 NW Davis St, Portland, OR 97209",
-    neighborhood: "Downtown",
-    lat: 45.5246801,
-    lng: -122.6729454,
-    dateStart: "2026-07-17T20:00:00",
-    dateEnd: "2026-07-18T02:00:00",
-    dayOfWeek: "FRI",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DANCE", "DRAG", "SOCIAL", "NIGHTLIFE"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.ccslaughters.com/events",
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json",
-  });
-
-  insert({
-    ...base,
-    title: "CC Slaughters GLOW: Birdcage Matinee",
-    description:
-      "Daytime drag show matinee before Waterfront Festival. Camp, comedy, and classic drag. All-gender cast.",
-    venueName: "CC Slaughters",
-    address: "219 NW Davis St, Portland, OR 97209",
-    neighborhood: "Downtown",
-    lat: 45.5246801,
-    lng: -122.6729454,
-    dateStart: "2026-07-18T15:00:00",
-    dateEnd: "2026-07-18T18:00:00",
-    dayOfWeek: "SAT",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DRAG", "PERFORMANCE", "BRUNCH"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.ccslaughters.com/events",
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json",
-  });
-
-  insert({
-    ...base,
-    title: "Red Cap Garage Pride BBQ",
-    description:
-      "Annual Pride BBQ for leather/bear/gear community. Grilled food, patio hangout, gear encouraged but not required.",
-    venueName: "Red Cap Garage",
-    address: "1035 SE Main St, Portland, OR 97214",
-    neighborhood: "SE Portland",
-    lat: 45.513726,
-    lng: -122.6552906,
-    dateStart: "2026-07-18T14:00:00",
-    dateEnd: "2026-07-18T18:00:00",
-    dayOfWeek: "SAT",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["SOCIAL", "KINK", "LEATHER"]),
-    admission: "FREE",
-    ticketUrl: "https://www.facebook.com/PortlandLeatherAlliance",
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json",
+    adminNotes: "Verified via ccslaughterspdx.com weeklys. FREE weekly residency (not a ticketed special).",
   });
 
   insert({
@@ -2302,104 +2227,46 @@ function seedCheckingPortlandEventsJuly2026() {
     nudityOk: true,
     posterImageUrl:
       "https://forbiddentickets.com/media/pages/events/the-gay-barn/96a1607597/a0f76a30e9-1779389095/lavender-rain-july.png",
-    status: "LIVE",
     adminNotes:
-      "Verified Forbidden Tickets + Gay Barn flyer (2026-07-18 9pm–1am). WW listed this as Purple Rain — same venue/night; Lavender Rain is the ticket name.",
+      "Verified Forbidden Tickets + Gay Barn flyer (2026-07-18 9pm–1am).",
   });
+}
 
-  insert({
-    ...base,
-    title: "QTBIPOC Pride Picnic",
-    description:
-      "Community potluck and healing space centering Queer/Trans Black, Indigenous, People of Color. Food, music, resources. Allies welcome to support.",
-    venueName: "Laurelhurst Park",
-    address: "SE 39th Ave & Stark St, Portland, OR 97214",
-    neighborhood: "SE Portland",
-    lat: 45.5215,
-    lng: -122.6245,
-    dateStart: "2026-07-18T13:00:00",
-    dateEnd: "2026-07-18T16:00:00",
-    dayOfWeek: "SAT",
-    ageRequirement: "ALL_AGES",
-    eventTypes: JSON.stringify(["SOCIAL", "QTBIPOC", "COMMUNITY", "OUTDOOR"]),
-    admission: "FREE",
-    ticketUrl: "https://www.instagram.com/browngirlrise",
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json. Family-friendly.",
-  });
-
-  insert({
-    ...base,
-    title: "CC Slaughters GLOW: Parade Day Viewing + Bloody Mary Bar",
-    description:
-      "Rooftop patio parade viewing party with drag hosts, bloody mary bar, and brunch bites. Prime spot to watch Pride Parade go by.",
-    venueName: "CC Slaughters",
-    address: "219 NW Davis St, Portland, OR 97209",
-    neighborhood: "Downtown",
-    lat: 45.5246801,
-    lng: -122.6729454,
-    dateStart: "2026-07-19T10:00:00",
-    dateEnd: "2026-07-19T15:00:00",
-    dayOfWeek: "SUN",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DRAG", "SOCIAL", "BRUNCH", "NIGHTLIFE"]),
-    admission: "FREE",
-    ticketUrl: null,
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes: "From Checking-Portland-events-July-2026.json",
-  });
-
-  insert({
-    ...base,
-    title: "Gaylabration Pool Party",
-    description:
-      "Official pool party for Gaylabration/RADIANCE weekend. DJs, gogos, pool floats. Hotel location announced to ticket holders only.",
-    venueName: "TBA - East Portland Hotel",
-    address: null,
-    neighborhood: "Other",
-    lat: null,
-    lng: null,
-    dateStart: "2026-07-19T12:00:00",
-    dateEnd: "2026-07-19T18:00:00",
-    dayOfWeek: "SUN",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DANCE", "NIGHTLIFE", "PARTY"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.eventbrite.com/e/gaylabration-pool-party-2026-tickets-1234567890123",
-    isSexPositive: true,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes:
-      "From Checking-Portland-events-July-2026.json. Location TBA to ticket holders. Ticket URL may be placeholder — verify.",
-  });
-
-  insert({
-    ...base,
-    title: "Pride Tea Dance: Silver Foxes",
-    description:
-      "45+ focused tea dance celebrating queer elders. Disco, house, classic dance hits. Community space for older LGBTQ+ folks and admirers.",
-    venueName: "The Eagle",
-    address: "314 SW 11th Ave, Portland, OR 97205",
-    neighborhood: "Downtown",
-    lat: 45.5227603,
-    lng: -122.6819916,
-    dateStart: "2026-07-19T16:00:00",
-    dateEnd: "2026-07-19T20:00:00",
-    dayOfWeek: "SUN",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["DANCE", "SOCIAL", "NIGHTLIFE"]),
-    admission: "DOOR_FEE",
-    ticketUrl: "https://www.instagram.com/eagleportland",
-    isSexPositive: false,
-    nudityOk: false,
-    posterImageUrl: null,
-    adminNotes:
-      "From Checking-Portland-events-July-2026.json. Address is downtown SW 11th (not N Lombard Eagle).",
-  });
+/** Hard-delete unverified Checking-Portland batch rows (and Purple Rain duplicate). */
+function deleteUnverifiedCheckingPortlandEvents() {
+  const titles = [
+    "Scandals PDX Pride Karaoke",
+    "CC Slaughters GLOW: Trans-Uhh-Licious",
+    "CC Slaughters GLOW: RuPaul's Drag Race Viewing + Bolivia Carmichaels",
+    "CC Slaughters GLOW: Birdcage Matinee",
+    "Red Cap Garage Pride BBQ",
+    "Lavender Rain Afterparty",
+    "QTBIPOC Pride Picnic",
+    "CC Slaughters GLOW: Parade Day Viewing + Bloody Mary Bar",
+    "Gaylabration Pool Party",
+    "Pride Tea Dance: Silver Foxes",
+    "Purple Rain — Queer Pop-Up Strip Club",
+  ];
+  const placeholders = titles.map(() => "?").join(",");
+  const idRows = sqlite
+    .prepare(`SELECT id FROM events WHERE title IN (${placeholders})`)
+    .all(...titles) as Array<{ id: number }>;
+  const ids = idRows.map((r) => r.id);
+  if (!ids.length) return;
+  const idPh = ids.map(() => "?").join(",");
+  sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
+  try {
+    sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* table may not exist in older DBs */ }
+  try {
+    sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* ignore */ }
+  try {
+    sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* ignore */ }
+  sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
 }
 
 function applyEventDataAuditFixes() {
@@ -2946,6 +2813,10 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_checking_portland_events_july_2026_v1")) {
     seedCheckingPortlandEventsJuly2026();
     recordBootMigration("seed_checking_portland_events_july_2026_v1");
+  }
+  if (!hasBootMigration("delete_unverified_checking_portland_events_v1")) {
+    deleteUnverifiedCheckingPortlandEvents();
+    recordBootMigration("delete_unverified_checking_portland_events_v1");
   }
   if (!hasBootMigration("hide_unverified_checking_portland_events_v1")) {
     // Scandals downtown closed; unverified GLOW/specials stay hidden.
