@@ -2172,11 +2172,13 @@ function seedCheckingPortlandEventsJuly2026() {
     db.insert(events).values({ ...row, createdAt: now } as any).run();
   };
 
+  // Source JSON was unverified (wrong Scandals location, placeholder flyers/URLs).
+  // Keep rows for review but do NOT show publicly until confirmed.
   const base = {
     isPublic: true,
     isPrivate: false,
     isHouseParty: false,
-    status: "LIVE",
+    status: "HIDDEN",
     source: "admin_seeded",
     isClaimable: true,
     claimedBy: null,
@@ -2960,6 +2962,29 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_checking_portland_events_july_2026_v1")) {
     seedCheckingPortlandEventsJuly2026();
     recordBootMigration("seed_checking_portland_events_july_2026_v1");
+  }
+  if (!hasBootMigration("hide_unverified_checking_portland_events_v1")) {
+    // Scandals downtown closed (moved NE Alberta); rest of that batch not verified — hide all.
+    const titles = [
+      "Scandals PDX Pride Karaoke",
+      "CC Slaughters GLOW: Trans-Uhh-Licious",
+      "CC Slaughters GLOW: RuPaul's Drag Race Viewing + Bolivia Carmichaels",
+      "CC Slaughters GLOW: Birdcage Matinee",
+      "Red Cap Garage Pride BBQ",
+      "Lavender Rain Afterparty",
+      "QTBIPOC Pride Picnic",
+      "CC Slaughters GLOW: Parade Day Viewing + Bloody Mary Bar",
+      "Gaylabration Pool Party",
+      "Pride Tea Dance: Silver Foxes",
+    ];
+    const hide = sqlite.prepare(`
+      UPDATE events SET
+        status = 'HIDDEN',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Hidden: Checking-Portland-events-July-2026 batch unverified (Scandals address wrong; do not show until confirmed).'
+      WHERE title = ?
+    `);
+    for (const title of titles) hide.run(title);
+    recordBootMigration("hide_unverified_checking_portland_events_v1");
   }
 }
 
