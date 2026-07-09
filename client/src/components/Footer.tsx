@@ -10,18 +10,8 @@ export default function Footer() {
     <footer style={{ background: "#000" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between", marginBottom: 32 }}>
-          <div>
-            <img
-              src={logoWordmark}
-              alt="PDX Pride Guide 2026"
-              className="footer-brand-lockup footer-brand-lockup--intro"
-              width={1504}
-              height={688}
-              decoding="async"
-            />
-            <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 280, lineHeight: 1.6, marginTop: 10 }}>
-              Built by one person in Portland. No committee, no corporate parent, no notes.
-            </div>
+          <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 280, lineHeight: 1.6 }}>
+            Built by one person in Portland. No committee, no corporate parent, no notes.
           </div>
           <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
             <div>
