@@ -58,6 +58,16 @@ export function FilterChip({
   showDot = false,
   className = "",
   ...rest
+}: {
+  children?: React.ReactNode;
+  selected?: boolean;
+  onToggle?: () => void;
+  accent?: string;
+  fill?: boolean;
+  count?: number | string | null;
+  showDot?: boolean;
+  className?: string;
+  [key: string]: unknown;
 }) {
   const cls = ["pdxChip", fill ? "pdxChip--fill" : "", className].filter(Boolean).join(" ");
   return (

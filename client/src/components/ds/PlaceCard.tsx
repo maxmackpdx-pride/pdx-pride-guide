@@ -1,45 +1,74 @@
 // @ts-nocheck
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "./Badge";
 
-/* PlaceCard = the venue/place directory card. Neon border in the category
-   color, category badge, optional GRAND OPENING flag, address / hours / phone
-   with icons, description, website + instagram links, and an optional
-   "Upcoming Pride Events" sublist. */
+/* PlaceCard = directory card from Queer Directory redesign mockup:
+   neon glow frame, logo media well, badges, meta rows, links, upcoming events. */
 const CSS = `
 .pdxPlace{
-  display:flex; flex-direction:column; gap:12px;
-  padding:var(--pad-card);
-  background:var(--ink-1000);
-  border:2px solid var(--_c,var(--pink)); border-radius:var(--radius-md);
-  box-shadow:0 0 24px -14px var(--_c,var(--pink));
+  position:relative; display:inline-block; width:100%; break-inside:avoid;
+  margin:0 0 22px; border-radius:9px; cursor:default;
+  animation:pgDirCardIn .55s var(--ease-out,ease) both;
 }
-.pdxPlace__opening{ align-self:flex-start; margin-bottom:2px; }
-.pdxPlace__cat{ align-self:flex-start; }
+.pdxPlace__glow{
+  position:absolute; inset:-2px; border-radius:11px; pointer-events:none; z-index:0;
+  box-shadow:0 0 24px -2px color-mix(in srgb, var(--_c,var(--pink)) calc(var(--dir-gm,60) * 1%), transparent),
+             0 0 62px -14px color-mix(in srgb, var(--_c,var(--pink)) calc(var(--dir-gm,60) * .7%), transparent);
+}
+.pdxPlace__body{
+  position:relative; z-index:1; border-radius:9px;
+  background:linear-gradient(#0b0b0d,#0b0b0d) padding-box, var(--_edge,linear-gradient(var(--_c,var(--pink)),var(--_c,var(--pink)))) border-box;
+  border:2px solid transparent; padding:16px; display:flex; flex-direction:column; gap:12px;
+  transition:filter .16s ease, box-shadow .16s ease;
+}
+.pdxPlace--clickable{ cursor:pointer; }
+.pdxPlace--clickable:hover{ transform:translateY(-6px); }
+.pdxPlace--clickable:hover .pdxPlace__body{
+  filter:brightness(1.08) saturate(1.08);
+  box-shadow:0 20px 44px -20px rgba(0,0,0,.85);
+}
+.pdxPlace__media{
+  position:relative; height:132px; border-radius:6px; overflow:hidden;
+  background:radial-gradient(125% 120% at 50% 12%, color-mix(in srgb, var(--_c,var(--pink)) 13%, #050506), #050506 72%);
+  border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 34%, transparent);
+  display:grid; place-items:center; padding:14px;
+}
+.pdxPlace__mediaScan{
+  position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
+}
+.pdxPlace__logo{
+  position:relative; max-width:100%; max-height:100%; object-fit:contain;
+  filter:drop-shadow(0 0 9px color-mix(in srgb, var(--_c,var(--pink)) 45%, transparent));
+}
+.pdxPlace__logo--fallback{ max-width:62%; max-height:78%;
+  filter:drop-shadow(0 0 12px color-mix(in srgb, var(--_c,var(--pink)) 55%, transparent)); }
+.pdxPlace__badges{ display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+.pdxPlace__opening{ }
 .pdxPlace__name{ font-family:var(--font-display); font-weight:900; text-transform:uppercase;
-  font-size:1.375rem; line-height:1.02; letter-spacing:.01em; color:var(--text-hi); }
+  font-size:1.4rem; line-height:1.02; letter-spacing:.01em; color:#fff; }
 .pdxPlace__rows{ display:flex; flex-direction:column; gap:5px; }
 .pdxPlace__row{ display:flex; align-items:flex-start; gap:8px;
-  font-family:var(--font-body); font-size:var(--body-sm); color:var(--text-lo); }
-.pdxPlace__row svg{ width:14px; height:14px; margin-top:2px; flex:none; opacity:.85; }
-.pdxPlace__desc{ font-family:var(--font-body); font-size:var(--body-sm); line-height:1.5; color:var(--text-mid); }
-.pdxPlace__links{ display:flex; flex-wrap:wrap; gap:16px; margin-top:2px; }
+  font-family:var(--font-body); font-size:.86rem; color:var(--text-lo); }
+.pdxPlace__row svg{ width:14px; height:14px; margin-top:2px; flex:none; opacity:.9;
+  stroke:var(--_c,var(--pink)); }
+.pdxPlace__desc{ margin:0; font-family:var(--font-body); font-size:.9rem; line-height:1.5; color:var(--text-mid); }
+.pdxPlace__links{ display:flex; flex-wrap:wrap; gap:14px; margin-top:2px; }
 .pdxPlace__link{ display:inline-flex; align-items:center; gap:6px;
-  font-family:var(--font-body); font-weight:var(--fw-bold); font-size:var(--body-sm);
+  font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.86rem;
   color:var(--_c,var(--pink)); text-decoration:none; }
 .pdxPlace__link:hover{ text-decoration:underline; text-underline-offset:3px; }
 .pdxPlace__link svg{ width:15px; height:15px; }
-.pdxPlace__events{ margin-top:2px; padding-top:14px; border-top:1px solid var(--border-default); }
-.pdxPlace__eventsHead{ display:flex; align-items:center; gap:8px; margin-bottom:10px;
-  font-family:var(--font-display); font-weight:700; font-size:.8125rem; letter-spacing:.06em;
+.pdxPlace__events{ margin-top:2px; padding-top:12px; border-top:1px solid #242424; }
+.pdxPlace__eventsHead{ display:flex; align-items:center; gap:8px; margin-bottom:9px;
+  font-family:var(--font-display); font-weight:700; font-size:.78rem; letter-spacing:.06em;
   text-transform:uppercase; color:var(--text-mid); }
 .pdxPlace__eventsHead svg{ width:14px; height:14px; }
-.pdxPlace__event{ padding:8px 0 8px 12px; border-left:3px solid var(--_ec,var(--cyan)); }
-.pdxPlace__eventDate{ font-family:var(--font-body); font-weight:var(--fw-bold); font-size:var(--body-sm);
+.pdxPlace__event{ padding:7px 0 7px 12px; border-left:3px solid var(--_ec,var(--cyan)); }
+.pdxPlace__eventDate{ font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.84rem;
   color:var(--_ec,var(--cyan)); }
-.pdxPlace__eventTitle{ font-family:var(--font-body); font-size:var(--body-sm); color:var(--text-hi); }
-.pdxPlace--clickable{ cursor:pointer; transition:transform .16s ease, box-shadow .2s ease; }
-.pdxPlace--clickable:hover{ transform:translateY(-3px); }
+.pdxPlace__eventTitle{ font-family:var(--font-body); font-size:.84rem; color:#fff; }
+@keyframes pgDirCardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-place-css")) {
   const s = document.createElement("style");
@@ -52,7 +81,8 @@ const CAT_COLOR = {
   bars:"var(--pink)", food:"var(--orange)", cafes:"var(--green)", venues:"var(--cyan)",
   services:"var(--purple)", shops:"var(--amber)", hotels:"var(--blue)",
 };
-const DAY_COLOR = { THU:"var(--cyan)", FRI:"var(--pink)", SAT:"var(--green)", SUN:"var(--orange)" };
+const RAINBOW_EDGE = "linear-gradient(120deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC)";
+const DAY_COLOR = { MON:"var(--day-mon,var(--pink))", TUE:"var(--day-tue,var(--orange))", WED:"var(--day-wed,var(--yellow))", THU:"var(--cyan)", FRI:"var(--pink)", SAT:"var(--green)", SUN:"var(--orange)" };
 
 function Icon({ d }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
@@ -63,6 +93,8 @@ const PHONE = <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.
 const GLOBE = <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></>;
 const IG = <><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></>;
 const CAL = <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></>;
+
+/** @typedef {{ day?: string, date?: string, title?: string, href?: string }} PlaceEvent */
 
 /** PlaceCard, the venue / place directory card. */
 export function PlaceCard({
@@ -77,79 +109,150 @@ export function PlaceCard({
   website,
   instagram,
   grandOpening = false,
-  events = [],
+  events = /** @type {PlaceEvent[]} */ ([]),
+  logoUrl,
+  fallbackLogoUrl,
+  isNonprofit = false,
   className = "",
+  style,
   ...rest
+}: {
+  name: string;
+  category?: string;
+  donateUrl?: string;
+  categoryLabel?: string;
+  address?: string;
+  hours?: string;
+  phone?: string;
+  description?: string;
+  website?: string;
+  instagram?: string;
+  grandOpening?: boolean;
+  events?: Array<{ day?: string; date?: string; title?: string; href?: string }>;
+  logoUrl?: string;
+  fallbackLogoUrl?: string;
+  isNonprofit?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  [key: string]: unknown;
 }) {
-  const accent = CAT_COLOR[category] || "var(--pink)";
+  const accent = isNonprofit ? "var(--cyan)" : (CAT_COLOR[category] || "var(--pink)");
+  const edge = isNonprofit ? RAINBOW_EDGE : `linear-gradient(${accent},${accent})`;
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = logoUrl && !logoFailed;
+  const showFallback = !showLogo && fallbackLogoUrl;
+
   return (
-    <div className={`pdxPlace ${className}`} style={{ "--_c": accent }} {...rest}>
-      {grandOpening && <span className="pdxPlace__opening"><Badge color="yellow" glow size="sm">Grand Opening</Badge></span>}
-      <span className="pdxPlace__cat"><Badge category={category} size="sm">{categoryLabel}</Badge></span>
-      <div className="pdxPlace__name">{name}</div>
-
-      <div className="pdxPlace__rows">
-        {address && <div className="pdxPlace__row"><Icon d={PIN} />{address}</div>}
-        {hours && <div className="pdxPlace__row"><Icon d={CLOCK} />{hours}</div>}
-        {phone && <div className="pdxPlace__row"><Icon d={PHONE} />{phone}</div>}
-      </div>
-
-      {description && <p className="pdxPlace__desc">{description}</p>}
-
-      {(website || instagram || donateUrl) && (
-        <div className="pdxPlace__links">
-          {donateUrl && (
-            <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-              <Icon d={GLOBE} />Donate
-            </a>
+    <article
+      className={`pdxPlace ${className}`}
+      style={{ "--_c": accent, "--_edge": edge, ...(style || {}) }}
+      {...rest}
+    >
+      <div className="pdxPlace__glow" aria-hidden="true" />
+      <div className="pdxPlace__body">
+        <div className="pdxPlace__media">
+          <div className="pdxPlace__mediaScan" aria-hidden="true" />
+          {showLogo && (
+            <img
+              className="pdxPlace__logo"
+              src={logoUrl}
+              alt={`${name} logo`}
+              loading="lazy"
+              onError={() => setLogoFailed(true)}
+            />
           )}
-          {website && (
-            <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-              <Icon d={GLOBE} />Website
-            </a>
+          {showFallback && (
+            <img
+              className="pdxPlace__logo pdxPlace__logo--fallback"
+              src={fallbackLogoUrl}
+              alt={categoryLabel || category}
+              loading="lazy"
+            />
           )}
-          {instagram && (
-            <a
-              className="pdxPlace__link"
-              href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
+        </div>
+
+        <div className="pdxPlace__badges">
+          {grandOpening && (
+            <span className="pdxPlace__opening">
+              <Badge color="yellow" glow size="sm">Grand Opening</Badge>
+            </span>
+          )}
+          <span className="pdxPlace__cat">
+            <Badge
+              category={isNonprofit ? undefined : category}
+              color={isNonprofit ? "paper" : undefined}
+              size="sm"
             >
-              <Icon d={IG} />{instagram}
-            </a>
-          )}
+              {categoryLabel}
+            </Badge>
+          </span>
         </div>
-      )}
 
-      {events.length > 0 && (
-        <div className="pdxPlace__events">
-          <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Pride Events</div>
-          {events.map((ev, i) => {
-            const row = (
-              <>
-                <div className="pdxPlace__eventDate">{ev.date}</div>
-                <div className="pdxPlace__eventTitle">{ev.title}</div>
-              </>
-            );
-            return ev.href ? (
-              <a
-                key={i}
-                className="pdxPlace__event pdxPlace__event--link"
-                href={ev.href}
-                onClick={e => e.stopPropagation()}
-                style={{ "--_ec": DAY_COLOR[ev.day] || accent, textDecoration: "none", color: "inherit", display: "block" }}
-              >
-                {row}
-              </a>
-            ) : (
-              <div className="pdxPlace__event" key={i} style={{ "--_ec": DAY_COLOR[ev.day] || accent }}>
-                {row}
-              </div>
-            );
-          })}
+        <div className="pdxPlace__name">{name}</div>
+
+        <div className="pdxPlace__rows">
+          {address && <div className="pdxPlace__row"><Icon d={PIN} />{address}</div>}
+          {hours && <div className="pdxPlace__row"><Icon d={CLOCK} />{hours}</div>}
+          {phone && <div className="pdxPlace__row"><Icon d={PHONE} />{phone}</div>}
         </div>
-      )}
-    </div>
+
+        {description && <p className="pdxPlace__desc">{description}</p>}
+
+        {(website || instagram || donateUrl) && (
+          <div className="pdxPlace__links">
+            {donateUrl && (
+              <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                <Icon d={GLOBE} />Donate
+              </a>
+            )}
+            {website && (
+              <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                <Icon d={GLOBE} />Website
+              </a>
+            )}
+            {instagram && (
+              <a
+                className="pdxPlace__link"
+                href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+              >
+                <Icon d={IG} />{instagram}
+              </a>
+            )}
+          </div>
+        )}
+
+        {events.length > 0 && (
+          <div className="pdxPlace__events">
+            <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Pride Events</div>
+            {events.map((ev, i) => {
+              const row = (
+                <>
+                  <div className="pdxPlace__eventDate">{ev.date}</div>
+                  <div className="pdxPlace__eventTitle">{ev.title}</div>
+                </>
+              );
+              return ev.href ? (
+                <a
+                  key={i}
+                  className="pdxPlace__event pdxPlace__event--link"
+                  href={ev.href}
+                  onClick={e => e.stopPropagation()}
+                  style={{ "--_ec": DAY_COLOR[ev.day] || accent, textDecoration: "none", color: "inherit", display: "block" }}
+                >
+                  {row}
+                </a>
+              ) : (
+                <div className="pdxPlace__event" key={i} style={{ "--_ec": DAY_COLOR[ev.day] || accent }}>
+                  {row}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </article>
   );
 }

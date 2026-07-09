@@ -16,6 +16,10 @@ import { parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { dayAccentToken } from "@/lib/dsColors";
+import {
+  directoryFallbackLogo,
+  resolveDirectoryLogo,
+} from "@/lib/directoryLogos";
 import PlaceModal from "@/components/PlaceModal";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
@@ -407,17 +411,24 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   service: "services",
   shop: "shops",
   hotel: "hotels",
+  nonprofit: "services",
 };
 
 function DirectoryCard({ biz, onClick }: { biz: Business; onClick?: () => void }) {
   const upcomingEvents = biz.upcomingEvents ?? [];
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
+  const isNonprofit = biz.type === "nonprofit";
+  const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
+  const fallbackLogoUrl = directoryFallbackLogo(biz.type);
   return (
     <PlaceCard
       name={biz.name}
       onClick={onClick}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className={`pdxPlace--clickable ${biz.type === "nonprofit" ? "pdxPlace--rainbow" : ""}`}
+      className="pdxPlace--clickable"
+      isNonprofit={isNonprofit}
+      logoUrl={logoUrl}
+      fallbackLogoUrl={fallbackLogoUrl}
       donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}

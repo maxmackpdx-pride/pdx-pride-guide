@@ -12,6 +12,10 @@ import {
   formatDirectoryEventWhen,
   type Business,
 } from "@/pages/Directory";
+import {
+  directoryFallbackLogo,
+  resolveDirectoryLogo,
+} from "@/lib/directoryLogos";
 
 type EditableFields = {
   description: string;
@@ -149,6 +153,23 @@ export default function PlaceModal({
   const upcomingEvents = place.upcomingEvents ?? [];
   const canEditVenue = Boolean(place.canEditVenue);
   const displayed = { ...toEditableFields(place), ...savedOverrides };
+  const isNonprofit = place.type === "nonprofit";
+  const accent = isNonprofit
+    ? "var(--cyan)"
+    : ({
+        bars: "var(--pink)",
+        food: "var(--orange)",
+        cafes: "var(--green)",
+        venues: "var(--cyan)",
+        services: "var(--purple)",
+        shops: "var(--amber)",
+        hotels: "var(--blue)",
+      } as Record<string, string>)[category] || "var(--pink)";
+  const edge = isNonprofit
+    ? "linear-gradient(120deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC)"
+    : `linear-gradient(${accent},${accent})`;
+  const logoUrl = resolveDirectoryLogo(place.name, place.imageUrl);
+  const fallbackLogoUrl = directoryFallbackLogo(place.type);
 
   const startEditing = () => {
     setForm(displayed);
@@ -191,10 +212,10 @@ export default function PlaceModal({
           maxHeight: "88vh",
           display: "flex",
           flexDirection: "column",
-          background: "#0b0b0e",
-          border: "2px solid var(--pink)",
           borderRadius: 12,
-          boxShadow: "0 24px 60px -12px rgba(0,0,0,.85), 0 0 30px -6px var(--pink)",
+          background: "linear-gradient(#0b0b0e,#0b0b0e) padding-box, " + edge + " border-box",
+          border: "2px solid transparent",
+          boxShadow: `0 30px 70px -18px rgba(0,0,0,.9), 0 0 42px -6px color-mix(in srgb, ${accent} 55%, transparent)`,
           overflow: "hidden",
         }}
       >
@@ -206,9 +227,9 @@ export default function PlaceModal({
             position: "absolute",
             top: 12,
             right: 12,
-            zIndex: 2,
-            width: 32,
-            height: 32,
+            zIndex: 4,
+            width: 34,
+            height: 34,
             borderRadius: "50%",
             border: "none",
             background: "rgba(0,0,0,.55)",
@@ -224,16 +245,83 @@ export default function PlaceModal({
           ✕
         </button>
 
-        <div style={{ padding: "26px 24px 24px", overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
-          {place.isNew && (
-            <div style={{ marginBottom: 10 }}>
+        <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div
+            style={{
+              position: "relative",
+              height: 172,
+              display: "grid",
+              placeItems: "center",
+              padding: 22,
+              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 17%, #060608), #060608 72%)`,
+              borderBottom: `1px solid color-mix(in srgb, ${accent} 26%, transparent)`,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px)",
+                opacity: 0.5,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                height: 3,
+                background: "var(--grad-flag, linear-gradient(90deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC))",
+              }}
+            />
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={`${place.name} logo`}
+                loading="lazy"
+                style={{
+                  position: "relative",
+                  maxWidth: "78%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  filter: `drop-shadow(0 0 14px color-mix(in srgb, ${accent} 50%, transparent))`,
+                }}
+              />
+            ) : (
+              <img
+                src={fallbackLogoUrl}
+                alt={categoryLabel}
+                loading="lazy"
+                style={{
+                  position: "relative",
+                  maxWidth: "40%",
+                  maxHeight: "82%",
+                  objectFit: "contain",
+                  filter: `drop-shadow(0 0 16px color-mix(in srgb, ${accent} 55%, transparent))`,
+                }}
+              />
+            )}
+          </div>
+
+          <div style={{ padding: "22px 24px 26px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
+            {place.isNew && (
               <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
                 Grand Opening
               </Badge>
-            </div>
-          )}
-          <div style={{ marginBottom: 10 }}>
-            <Badge category={category} size="md" admission={undefined} day={undefined}>
+            )}
+            <Badge
+              category={isNonprofit ? undefined : category}
+              color={isNonprofit ? "paper" : undefined}
+              size="md"
+              admission={undefined}
+              day={undefined}
+            >
               {categoryLabel}
             </Badge>
           </div>
@@ -422,7 +510,7 @@ export default function PlaceModal({
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {upcomingEvents.map((ev) => {
-                  const accent = (ev.dayOfWeek && DAY_COLOR[ev.dayOfWeek]) || "var(--cyan)";
+                  const dayAccent = (ev.dayOfWeek && DAY_COLOR[ev.dayOfWeek]) || "var(--cyan)";
                   return (
                     <Link
                       key={ev.listingInstanceKey ?? ev.id}
@@ -430,13 +518,13 @@ export default function PlaceModal({
                       onClick={onClose}
                       style={{
                         padding: "8px 0 8px 12px",
-                        borderLeft: `3px solid ${accent}`,
+                        borderLeft: `3px solid ${dayAccent}`,
                         textDecoration: "none",
                         color: "inherit",
                         display: "block",
                       }}
                     >
-                      <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: accent }}>
+                      <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: dayAccent }}>
                         {formatDirectoryEventWhen(ev)}
                       </div>
                       <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff" }}>
@@ -448,6 +536,7 @@ export default function PlaceModal({
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
@@ -469,6 +558,6 @@ const linkStyle: React.CSSProperties = {
   fontFamily: "var(--font-body)",
   fontWeight: 700,
   fontSize: "0.9rem",
-  color: "var(--pink)",
+  color: "var(--_c, var(--pink))",
   textDecoration: "none",
 };
