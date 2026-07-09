@@ -11,6 +11,8 @@ export interface RailCardProps {
   onOpen: (listing: EventListing) => void;
   /** "full" = 230x300 poster card (headliner/rail use); "compact" = small thumb+text chip row. */
   variant?: "full" | "compact";
+  /** When true (variant "full" only), stretches to 100% width/300h for a CSS grid cell instead of a fixed-width rail card. */
+  fill?: boolean;
 }
 
 /**
@@ -28,6 +30,7 @@ export default function RailCard({
   onToggleRsvp,
   onOpen,
   variant = "full",
+  fill = false,
 }: RailCardProps) {
   const dc = DAY_COLORS[event.day] || "#00FFFF";
   const dt = DAY_TEXT_COLORS[event.day] || dc;
@@ -128,9 +131,9 @@ export default function RailCard({
       onClick={() => onOpen(listing)}
       style={{
         position: "relative",
-        flex: "none",
-        width: 230,
-        height: 298,
+        flex: fill ? undefined : "none",
+        width: fill ? "100%" : 230,
+        height: fill ? 300 : 298,
         borderRadius: 9,
         overflow: "hidden",
         cursor: "pointer",
