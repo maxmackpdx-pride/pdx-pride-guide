@@ -222,7 +222,11 @@ export default function About() {
                 <span className="dot" aria-hidden="true" />
                 Open to work
               </span>
-              <p>And yes, I am still looking for work. If you know somebody, you know where to find me.</p>
+              <p>
+                And yes, I&apos;m still looking for work. I&apos;m a brand builder, sales leader, and
+                momentum-maker. I know how to connect people, move product, and build something people
+                actually care about. If you know somebody, you know where to find me.
+              </p>
             </div>
             <Link href="/resume">
               <Button as="span" variant="neon" accent="cyan" size="md">

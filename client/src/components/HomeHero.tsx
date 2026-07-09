@@ -26,7 +26,7 @@ export default function HomeHero({ eventCount }: Props) {
       <img
         className="home-hero__bg"
         src={heroCollageImg}
-        alt="Portland Pride collage: Mt. Hood, neon skyline, roses, and queer slogan stickers"
+        alt="Neon Portland skyline over the river with Mt. Hood and glowing roses"
       />
       <div className="home-hero__scrim home-hero__scrim--angle" aria-hidden="true" />
       <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden="true" />
