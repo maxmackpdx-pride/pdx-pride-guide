@@ -143,7 +143,8 @@
   text-transform: uppercase;
   line-height: 0.84;
   letter-spacing: 0.005em;
-  font-size: clamp(64px, 9vw, 98px);
+  /* 30% larger than prior clamp(64px, 9vw, 98px) */
+  font-size: clamp(83px, 11.7vw, 127px);
 }
 
 .home-hero__word {
@@ -184,7 +185,8 @@
 .home-hero__stat-num {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(64px, 10vw, 96px);
+  /* 5% smaller than prior clamp(64px, 10vw, 96px) */
+  font-size: clamp(61px, 9.5vw, 91px);
   line-height: 0.78;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
@@ -289,11 +291,13 @@ html.calm-mode .home-hero__bg {
   }
 
   .home-hero__title {
-    font-size: clamp(48px, 14vw, 72px);
+    /* 30% larger than prior clamp(48px, 14vw, 72px) */
+    font-size: clamp(62px, 18.2vw, 94px);
   }
 
   .home-hero__stat-num {
-    font-size: clamp(52px, 16vw, 72px);
+    /* 5% smaller than prior clamp(52px, 16vw, 72px) */
+    font-size: clamp(49px, 15.2vw, 68px);
   }
 }
 
