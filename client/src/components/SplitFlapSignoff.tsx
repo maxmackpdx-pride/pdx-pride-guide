@@ -66,10 +66,12 @@ export default function SplitFlapSignoff({
   const [cells, setCells] = useState(() => padCells(messages[0], maxLen));
   const [colorIdx, setColorIdx] = useState(0);
   const [inView, setInView] = useState(false);
-  const [still, setStill] = useState(true);
+  const [still, setStill] = useState(() => prefersStillMotion());
   const rootRef = useRef<HTMLDivElement>(null);
   const cellRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const timers = useRef<number[]>([]);
+  const indexRef = useRef(0);
+  const colorRef = useRef(0);
 
   const clearTimers = () => {
     timers.current.forEach(id => window.clearTimeout(id));
@@ -99,6 +101,7 @@ export default function SplitFlapSignoff({
       setStill(true);
       setCells(padCells(nextMsg, maxLen));
       setColorIdx(nextColor);
+      colorRef.current = nextColor;
       return;
     }
     setStill(false);
@@ -115,10 +118,12 @@ export default function SplitFlapSignoff({
             copy[i] = ch;
             return copy;
           });
-          if (i === 0) setColorIdx(nextColor);
+          if (i === 0) {
+            setColorIdx(nextColor);
+            colorRef.current = nextColor;
+          }
           node.style.transition = "none";
           node.style.transform = "rotateX(90deg)";
-          // force reflow
           void node.offsetHeight;
           node.style.transition = "transform .12s ease-out";
           node.style.transform = "rotateX(0)";
@@ -135,20 +140,19 @@ export default function SplitFlapSignoff({
       setStill(true);
       return;
     }
-    // First cycle on scroll-in
-    flipTo(messages[index], colorIdx);
+    flipTo(messages[indexRef.current], colorRef.current);
     const interval = window.setInterval(() => {
-      setIndex(prev => {
-        const next = (prev + 1) % messages.length;
-        flipTo(messages[next], (colorIdx + 1 + next) % NEON_CYCLE.length);
-        return next;
-      });
+      const next = (indexRef.current + 1) % messages.length;
+      const nextColor = (colorRef.current + 1) % NEON_CYCLE.length;
+      indexRef.current = next;
+      setIndex(next);
+      flipTo(messages[next], nextColor);
     }, ADVANCE_MS);
     return () => {
       window.clearInterval(interval);
       clearTimers();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- advance only when in view
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, messages, maxLen]);
 
   const message = messages[index] || messages[0];

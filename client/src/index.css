@@ -4232,6 +4232,7 @@ h2.display,
   border: none;
   background: #111;
   box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.85);
+  transition: transform 0.2s var(--ease-out, ease);
 }
 
 .user-avatar[data-ring="none"] .user-avatar__inner {
@@ -4264,6 +4265,56 @@ h2.display,
   font-size: calc(var(--avatar-size) * 0.18);
   line-height: 1;
   filter: drop-shadow(0 0 4px rgba(180, 190, 210, 0.8));
+}
+
+/* Ring shimmer: light-only highlight (screen blend). Never recolors the ring. */
+.user-avatar__shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 32deg,
+    rgba(255, 255, 255, 0.92) 56deg,
+    transparent 82deg 360deg
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-width, 4px) - 1px),
+    #000 calc(100% - var(--ring-width, 4px) + 0px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-width, 4px) - 1px),
+    #000 calc(100% - var(--ring-width, 4px) + 0px)
+  );
+  animation: pdxaShimmer 5s linear infinite;
+}
+
+.user-avatar__shimmer--chain {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 42deg,
+    rgba(228, 234, 246, 0.98) 54deg,
+    transparent 64deg 360deg
+  );
+  animation-duration: 3.6s;
+}
+
+.user-avatar--shimmer:hover .user-avatar__shimmer {
+  animation-duration: 1.9s;
+  filter: brightness(1.7);
+}
+
+.user-avatar--shimmer:hover .user-avatar__shimmer--chain {
+  animation-duration: 1.4s;
+}
+
+.user-avatar--shimmer:hover .user-avatar__inner {
+  transform: scale(1.06);
 }
 
 .user-avatar[data-ring="rainbow"]::before { background: conic-gradient(#E40303, #FF8C00, #FFED00, #008026, #24408E, #732982, #E40303); }
