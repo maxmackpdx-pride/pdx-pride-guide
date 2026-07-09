@@ -785,12 +785,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getEventTalentByUser(req.session.userId!));
   });
 
-  // Owner edits a claimed event (all fields, goes back to pending review)
+  // Host (or admin) edits an event from the card / hub editor
   app.put("/api/events/:id/edit", requireAuth, async (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
     const user = storage.getUserById(req.session.userId!);
-    if (!user || !storage.isUserEventHost(evt.id, user.id)) return res.status(403).json({ error: "Not your event" });
+    const isAdmin = sessionIsAdmin(req);
+    if (!user || (!isAdmin && !storage.isUserEventHost(evt.id, user.id))) {
+      return res.status(403).json({ error: "Not your event" });
+    }
     if (moderationGate(res, "Event edit", {
       title: req.body.title,
       description: req.body.description,
@@ -802,6 +805,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       "ticketUrl", "posterImageUrl", "eventTypes",
       "isPublic", "isHouseParty", "isSexPositive", "nudityOk",
     ];
+    // Admins may also set status (e.g. HIDDEN) via the full admin PUT; hosts cannot.
     const patch: any = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
     if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
@@ -2464,6 +2468,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const fresh = storage.getEvent(Number(req.params.id));
     res.json(fresh ? enrichEventForMap(fresh) : fresh);
+  });
+
+  // Soft-delete: hide from public listings. Restorable via Admin → Events (status LIVE).
+  app.delete("/api/admin/events/:id", requireAdmin, (req, res) => {
+    const id = Number(req.params.id);
+    const evt = storage.getEvent(id);
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    if (evt.status === "HIDDEN") {
+      return res.json({ ok: true, id, status: "HIDDEN", alreadyHidden: true });
+    }
+    storage.updateEventStatus(id, "HIDDEN");
+    res.json({ ok: true, id, status: "HIDDEN" });
   });
 
   app.patch("/api/admin/events/:id/claimable", requireAdmin, (req, res) => {

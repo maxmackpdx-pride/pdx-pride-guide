@@ -147,7 +147,8 @@ export default function Dashboard() {
 
   const eventEditMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const res = await fetch(`/api/events/${id}/edit`, {
+      const path = isAdmin ? `/api/admin/events/${id}` : `/api/events/${id}/edit`;
+      const res = await fetch(path, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -159,10 +160,37 @@ export default function Dashboard() {
     onSuccess: () => {
       toast({ title: "Event updated!", description: "Your changes have been saved." });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setEditingEvent(null);
       setEventForm(null);
     },
     onError: () => toast({ title: "Error", description: "Could not save event.", variant: "destructive" }),
+  });
+
+  const eventDeleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/admin/events/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Delete failed");
+      return payload;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Event deleted",
+        description: "Hidden from the public site. Restore anytime in Admin → Events.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      setEditingEvent(null);
+      setEventForm(null);
+    },
+    onError: (err: Error) =>
+      toast({ title: "Could not delete event", description: err.message, variant: "destructive" }),
   });
 
   const giftingActionMutation = useMutation({
@@ -452,8 +480,17 @@ export default function Dashboard() {
                 onCancel={() => { setEditingEvent(null); setEventForm(null); }}
                 onSave={saveEventEdit}
                 onPostUpdate={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
+                onDelete={isAdmin ? () => {
+                  if (!editingEvent) return;
+                  const ok = window.confirm(
+                    `Delete “${editingEvent.title}”?\n\nThis hides it from the public site (status → HIDDEN). You can restore it from Admin → Events.`,
+                  );
+                  if (!ok) return;
+                  eventDeleteMutation.mutate(editingEvent.id);
+                } : undefined}
                 saving={eventEditMutation.isPending}
                 posting={hostUpdateMutation.isPending}
+                deleting={eventDeleteMutation.isPending}
               />
             )}
             {submittedEvents.map((evt: any) => (

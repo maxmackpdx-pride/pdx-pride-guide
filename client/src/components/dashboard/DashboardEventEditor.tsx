@@ -22,8 +22,10 @@ export function DashboardEventEditForm({
   onCancel,
   onSave,
   onPostUpdate,
+  onDelete,
   saving,
   posting,
+  deleting = false,
   showExtras = true,
   embedded = false,
 }: {
@@ -35,8 +37,11 @@ export function DashboardEventEditForm({
   onCancel: () => void;
   onSave: () => void;
   onPostUpdate: () => void;
+  /** Admin-only: soft-delete (hide) the event from public listings. */
+  onDelete?: () => void;
   saving: boolean;
   posting: boolean;
+  deleting?: boolean;
   showExtras?: boolean;
   embedded?: boolean;
 }) {
@@ -263,15 +268,42 @@ export function DashboardEventEditForm({
             {posting ? "Posting..." : "Post update →"}
           </button>
         </div>}
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={saving}
-          className={embedded ? "btn-neon solid event-modal__action-btn" : "dash-btn dash-btn-lime active"}
-          style={embedded ? undefined : { alignSelf: "flex-start" }}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+            alignItems: "center",
+            marginTop: 4,
+            ...(embedded ? {} : { alignSelf: "flex-start" }),
+          }}
         >
-          {saving ? "Saving..." : embedded ? "Save changes" : "Save event →"}
-        </button>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving || deleting}
+            className={embedded ? "btn-neon solid event-modal__action-btn" : "dash-btn dash-btn-lime active"}
+          >
+            {saving ? "Saving..." : embedded ? "Save changes" : "Save event →"}
+          </button>
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={saving || deleting}
+              data-testid="button-delete-event"
+              className={embedded ? "event-modal__btn-ghost" : "dash-btn dash-btn-ghost"}
+              style={{ color: "#FF2400", borderColor: "rgba(255,36,0,0.45)" }}
+            >
+              {deleting ? "Deleting..." : "Delete event"}
+            </button>
+          )}
+        </div>
+        {onDelete && (
+          <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-meta)", lineHeight: 1.4 }}>
+            Delete hides this event from the public site. You can restore it from Admin → Events (set status to LIVE).
+          </p>
+        )}
       </div>
     </div>
   );

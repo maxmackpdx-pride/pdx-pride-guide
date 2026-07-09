@@ -218,7 +218,11 @@ function EventModalInner({
 
   const editEventMutation = useMutation({
     mutationFn: async (data: EventEditFormState) => {
-      const res = await fetch(`/api/events/${event.id}/edit`, {
+      // Admins use the admin endpoint (full field access); hosts use the host edit route.
+      const path = user?.isAdmin
+        ? `/api/admin/events/${event.id}`
+        : `/api/events/${event.id}/edit`;
+      const res = await fetch(path, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -232,12 +236,40 @@ function EventModalInner({
       toast({ title: "Event updated", description: "Your changes have been saved." });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       onEventUpdated?.(updated);
       setEditing(false);
       setEventForm(null);
     },
     onError: (err: Error) => {
       toast({ title: "Could not save event", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const deleteEventMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/admin/events/${event.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Delete failed");
+      return payload as { ok: boolean; id: number; status: string };
+    },
+    onSuccess: () => {
+      toast({
+        title: "Event deleted",
+        description: "Hidden from the public site. Restore anytime in Admin → Events.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      setEditing(false);
+      setEventForm(null);
+      onClose();
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not delete event", description: err.message, variant: "destructive" });
     },
   });
 
@@ -248,6 +280,15 @@ function EventModalInner({
     }
     setEventForm(eventToEditForm(event));
     setEditing(true);
+  };
+
+  const handleAdminDelete = () => {
+    if (!user?.isAdmin) return;
+    const ok = window.confirm(
+      `Delete “${event.title}”?\n\nThis hides it from the public site (status → HIDDEN). You can restore it from Admin → Events.`,
+    );
+    if (!ok) return;
+    deleteEventMutation.mutate();
   };
 
   const addCoHostMutation = useMutation({
@@ -358,8 +399,10 @@ function EventModalInner({
               onCancel={() => { setEditing(false); setEventForm(null); }}
               onSave={() => editEventMutation.mutate(eventForm)}
               onPostUpdate={() => undefined}
+              onDelete={user?.isAdmin ? handleAdminDelete : undefined}
               saving={editEventMutation.isPending}
               posting={false}
+              deleting={deleteEventMutation.isPending}
             />
           ) : (
           <>
