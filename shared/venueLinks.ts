@@ -57,6 +57,18 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   "scandals east": "https://scandalspdx.com/",
   "camp bar pdx": "https://campbarpdx.com/",
   "camp": "https://campbarpdx.com/",
+  "the ritz carlton portland": "https://www.ritzcarlton.com/en/hotels/pdxrz-the-ritz-carlton-portland/",
+  "ritz carlton portland": "https://www.ritzcarlton.com/en/hotels/pdxrz-the-ritz-carlton-portland/",
+  "trek bicycle portland slabtown": "https://www.trekbikes.com/us/en_US/retail/portland_slabtown/",
+  "gents in lents": "https://www.gentsinlents.com/",
+  "meetrack": "https://www.meetrack.com/",
+  "maker s market at waterfront festival": "https://portlandpride.org/2026-portland-pride-official-events",
+  "portland pride parade": "https://portlandpride.org/pride-parade-1",
+  "portland pride parade pdx pah contingent": "https://www.instagram.com/pdxpahofficial/",
+  "downtown portland": "https://portlandpride.org/",
+  "ne 30th ave": "https://portlandpride.org/",
+  "gay blvd": "https://www.eventbrite.com/e/divapalooza-pdx-pride-2026-tickets-1991334196186",
+  "virtual google meet": "https://www.oslcontest.org/calendar",
 };
 
 export type VenueWebsiteSource = {
