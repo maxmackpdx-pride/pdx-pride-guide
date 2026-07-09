@@ -24,15 +24,8 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/spotted", label: "Spotted!" },
     ],
   },
-  {
-    type: "dropdown",
-    id: "portland",
-    label: "Portland",
-    items: [
-      { href: "/schedule", label: "Schedule" },
-      { href: "/about", label: "About" },
-    ],
-  },
+  { type: "link", href: "/schedule", label: "Schedule" },
+  { type: "link", href: "/about", label: "About" },
   { type: "link", href: "/submit", label: "Submit" },
 ];
 
@@ -49,7 +42,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/gifting": { section: "Boards", title: "Gifting" },
   "/spotted": { section: "Boards", title: "Spotted!" },
   "/directory": { section: "Directory", title: "Queer Directory" },
-  "/about": { section: "Portland", title: "About" },
+  "/about": { section: "About", title: "About" },
   "/submit": { section: "Submit", title: "Submit an Event" },
   "/dashboard": { section: "Account", title: "Your Hub" },
   "/inbox": { section: "Account", title: "Inbox" },
