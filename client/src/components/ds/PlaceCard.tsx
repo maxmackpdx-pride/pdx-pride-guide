@@ -38,6 +38,8 @@ const CSS = `
 .pdxPlace__eventDate{ font-family:var(--font-body); font-weight:var(--fw-bold); font-size:var(--body-sm);
   color:var(--_ec,var(--cyan)); }
 .pdxPlace__eventTitle{ font-family:var(--font-body); font-size:var(--body-sm); color:var(--text-hi); }
+.pdxPlace--clickable{ cursor:pointer; transition:transform .16s ease, box-shadow .2s ease; }
+.pdxPlace--clickable:hover{ transform:translateY(-3px); }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-place-css")) {
   const s = document.createElement("style");
@@ -97,12 +99,12 @@ export function PlaceCard({
       {(website || instagram || donateUrl) && (
         <div className="pdxPlace__links">
           {donateUrl && (
-            <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer">
+            <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
               <Icon d={GLOBE} />Donate
             </a>
           )}
           {website && (
-            <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer">
+            <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
               <Icon d={GLOBE} />Website
             </a>
           )}
@@ -112,6 +114,7 @@ export function PlaceCard({
               href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
             >
               <Icon d={IG} />{instagram}
             </a>
@@ -134,6 +137,7 @@ export function PlaceCard({
                 key={i}
                 className="pdxPlace__event pdxPlace__event--link"
                 href={ev.href}
+                onClick={e => e.stopPropagation()}
                 style={{ "--_ec": DAY_COLOR[ev.day] || accent, textDecoration: "none", color: "inherit", display: "block" }}
               >
                 {row}

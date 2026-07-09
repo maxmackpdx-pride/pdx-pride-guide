@@ -358,24 +358,20 @@
   gap: 16px;
 }
 
-.home-main-stage .pg-placescol-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
+/* Where-to-Go split into SPOTS / NONPROFITS columns (mirrors .pg-board3's
+   header + view-more pattern) — additive modifier, does not change the
+   base .pg-places / .pg-placescol rules above used elsewhere. */
+.home-main-stage .pg-places--dual {
+  grid-template-columns: 1.15fr 0.85fr 0.85fr;
 }
 
-.home-main-stage .pg-placescol-half {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-
-.home-main-stage .pg-placescol-cards {
+.home-main-stage .pg-placescroll {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .home-main-stage .pg-seam-wrap {
@@ -432,8 +428,12 @@ html.calm-mode .home-main-stage .scroll-reveal--visible {
     grid-template-columns: 1fr;
   }
 
-  .home-main-stage .pg-placescol-split {
+  .home-main-stage .pg-places--dual {
     grid-template-columns: 1fr;
+  }
+
+  .home-main-stage .pg-placescroll {
+    max-height: 420px;
   }
 
   .home-main-stage #home-map {

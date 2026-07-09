@@ -854,17 +854,58 @@ export default function Schedule({
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
     const POP_W = Math.min(344, vw - 20);
-    const r = selRect || ({} as Partial<SelRect>);
-    let left = (r.right != null ? r.right : vw / 2) + 12;
-    if (left + POP_W > vw - 10) left = (r.left != null ? r.left : vw / 2) - POP_W - 12;
-    if (left < 10) left = Math.max(10, (vw - POP_W) / 2);
-    let top = r.top != null ? r.top : vh / 2 - 180;
-    top = Math.max(64, Math.min(top, vh - 420));
-    // Cap the panel to the viewport — long event descriptions scroll inside
-    // the popover instead of growing it into a several-thousand-pixel-tall
-    // fixed layer (which iOS Safari can't composite: the panel background
-    // drops out and raw text bleeds over the page underneath).
-    const maxH = Math.max(320, vh - top - 14);
+    let popStyle: React.CSSProperties;
+    if (embed) {
+      // Home embed: the anchor math above assumes the block's on-screen
+      // rect is stable, but ScrollReveal's reveal transform (and the
+      // embed's own horizontal scroll container) can put the click point
+      // anywhere — including off the edge of a narrow viewport. Skip the
+      // anchor math entirely and center the popover in a fixed overlay,
+      // same idiom as AuthModal / MissedConnectionsPanel.
+      const maxH = Math.min(vh - 40, 640);
+      popStyle = S({
+        position: 'relative',
+        width: POP_W + 'px',
+        maxHeight: maxH + 'px',
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 120,
+        background: '#0b0b0e',
+        border: '2px solid ' + hexA(dc, 0.6),
+        borderRadius: '12px',
+        overflow: 'hidden',
+        boxShadow:
+          '0 24px 60px -12px rgba(0,0,0,.8)' + (calm ? '' : ', 0 0 30px -6px ' + hexA(dc, 0.5)),
+      });
+    } else {
+      const r = selRect || ({} as Partial<SelRect>);
+      let left = (r.right != null ? r.right : vw / 2) + 12;
+      if (left + POP_W > vw - 10) left = (r.left != null ? r.left : vw / 2) - POP_W - 12;
+      if (left < 10) left = Math.max(10, (vw - POP_W) / 2);
+      let top = r.top != null ? r.top : vh / 2 - 180;
+      top = Math.max(64, Math.min(top, vh - 420));
+      // Cap the panel to the viewport — long event descriptions scroll inside
+      // the popover instead of growing it into a several-thousand-pixel-tall
+      // fixed layer (which iOS Safari can't composite: the panel background
+      // drops out and raw text bleeds over the page underneath).
+      const maxH = Math.max(320, vh - top - 14);
+      popStyle = S({
+        position: 'fixed',
+        top: top + 'px',
+        left: left + 'px',
+        width: POP_W + 'px',
+        maxHeight: maxH + 'px',
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 120,
+        background: '#0b0b0e',
+        border: '2px solid ' + hexA(dc, 0.6),
+        borderRadius: '12px',
+        overflow: 'hidden',
+        boxShadow:
+          '0 24px 60px -12px rgba(0,0,0,.8)' + (calm ? '' : ', 0 0 30px -6px ' + hexA(dc, 0.5)),
+      });
+    }
     const badge = (bg: string): React.CSSProperties =>
       S({
         fontFamily: 'var(--font-display)',
@@ -894,22 +935,7 @@ export default function Schedule({
       dayDate: d.date,
       admLabel: adm.label,
       timeRange: fmtClock(e.s) + ' – ' + fmtClock(e.e),
-      popStyle: S({
-        position: 'fixed',
-        top: top + 'px',
-        left: left + 'px',
-        width: POP_W + 'px',
-        maxHeight: maxH + 'px',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 120,
-        background: '#0b0b0e',
-        border: '2px solid ' + hexA(dc, 0.6),
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow:
-          '0 24px 60px -12px rgba(0,0,0,.8)' + (calm ? '' : ', 0 0 30px -6px ' + hexA(dc, 0.5)),
-      }),
+      popStyle,
       posterStyle: S({
         position: 'relative',
         flex: 'none',
@@ -974,7 +1000,7 @@ export default function Schedule({
       }),
       dc,
     };
-  }, [selKey, selRect, calm, myEventIds, scheduleEvents, listings]);
+  }, [selKey, selRect, calm, myEventIds, scheduleEvents, listings, embed]);
 
   const scrollStyle = S({
     overflow: 'auto',
@@ -986,6 +1012,161 @@ export default function Schedule({
     background: '#0a0a0a',
     position: 'relative',
   });
+
+  /* ---- Detail popover panel (shared markup, positioning branches on
+     `embed` via `selected.popStyle` computed above) ------------------ */
+  const popPanel = selected && (
+    <div
+      className="sch-pop"
+      style={selected.popStyle}
+      onClick={embed ? (ev) => ev.stopPropagation() : undefined}
+    >
+      <div style={selected.posterStyle}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(180deg,rgba(11,11,14,.15),rgba(11,11,14,.9))',
+          }}
+        />
+        <div style={{ position: 'absolute', left: '16px', right: '52px', bottom: '12px' }}>
+          <div style={{ display: 'flex', gap: '7px', marginBottom: '7px' }}>
+            <span style={selected.dayBadgeStyle}>
+              {selected.dayShort} · {selected.dayDate}
+            </span>
+            <span style={selected.admBadgeStyle}>{selected.admLabel}</span>
+          </div>
+          <div
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              lineHeight: 1,
+              color: '#fff',
+              fontSize: '26px',
+              textShadow: '0 2px 10px rgba(0,0,0,.6)',
+            }}
+          >
+            {selected.title}
+          </div>
+        </div>
+        <button
+          onClick={closeEvent}
+          style={{
+            position: 'absolute',
+            top: '11px',
+            right: '11px',
+            width: '30px',
+            height: '30px',
+            borderRadius: '50%',
+            border: 'none',
+            background: 'rgba(0,0,0,.55)',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '16px',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          ✕
+        </button>
+      </div>
+      <div style={{ padding: '15px 17px 17px', minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 700,
+            fontSize: '15px',
+            letterSpacing: '.03em',
+            textTransform: 'uppercase',
+            color: selected.dt,
+          }}
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <polyline points="12 7 12 12 15 14" />
+          </svg>
+          {selected.timeRange}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginTop: '8px',
+            color: 'var(--text-mid)',
+            fontSize: '14px',
+          }}
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="rgba(230,227,218,.55)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ flex: 'none' }}
+          >
+            <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span>
+            <span style={{ color: '#fff', fontWeight: 600 }}>{selected.venue}</span> · {selected.hood}
+          </span>
+        </div>
+        <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.55, color: 'var(--text-mid)' }}>
+          {selected.blurb}
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '13px' }}>
+          {selected.tags.map((tg, i) => (
+            <span key={i} style={tg.style}>
+              {tg.label}
+            </span>
+          ))}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+          <button onClick={() => toggleRsvp(selected.id)} style={selected.rsvpBtnStyle}>
+            {selected.rsvpLabel}
+          </button>
+          <span style={{ fontSize: '12.5px', color: 'var(--text-meta)', fontFamily: 'var(--font-body)' }}>
+            <span style={{ color: selected.dt, fontWeight: 700 }}>{selected.going}</span> going
+          </span>
+          <div style={{ flex: 1 }} />
+          <Link
+            href={selected.eventHref}
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '12.5px',
+              letterSpacing: '.05em',
+              textTransform: 'uppercase',
+              color: 'var(--text-lo)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Event page →
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 
   /* ================================================================ */
   /* Render                                                            */
@@ -1328,9 +1509,15 @@ export default function Schedule({
         </div>
       </div>
 
-      {/* ---- Detail popover ---- */}
+      {/* ---- Detail popover ----
+          Home embed: fixed-overlay flex-center wrapper (same idiom as
+          AuthModal / MissedConnectionsPanel) — the panel is centered
+          and click-outside-to-close happens on the overlay itself.
+          Full /schedule page: unchanged anchored positioning, overlay is
+          just a click-catching backdrop behind the absolutely-positioned
+          panel. */}
       {selected && (
-        <>
+        embed ? (
           <div
             onClick={closeEvent}
             style={{
@@ -1339,155 +1526,30 @@ export default function Schedule({
               zIndex: 110,
               background: 'rgba(4,4,6,.55)',
               backdropFilter: 'blur(1.5px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+              boxSizing: 'border-box',
             }}
-          />
-          <div className="sch-pop" style={selected.popStyle}>
-            <div style={selected.posterStyle}>
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(180deg,rgba(11,11,14,.15),rgba(11,11,14,.9))',
-                }}
-              />
-              <div style={{ position: 'absolute', left: '16px', right: '52px', bottom: '12px' }}>
-                <div style={{ display: 'flex', gap: '7px', marginBottom: '7px' }}>
-                  <span style={selected.dayBadgeStyle}>
-                    {selected.dayShort} · {selected.dayDate}
-                  </span>
-                  <span style={selected.admBadgeStyle}>{selected.admLabel}</span>
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    lineHeight: 1,
-                    color: '#fff',
-                    fontSize: '26px',
-                    textShadow: '0 2px 10px rgba(0,0,0,.6)',
-                  }}
-                >
-                  {selected.title}
-                </div>
-              </div>
-              <button
-                onClick={closeEvent}
-                style={{
-                  position: 'absolute',
-                  top: '11px',
-                  right: '11px',
-                  width: '30px',
-                  height: '30px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: 'rgba(0,0,0,.55)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div style={{ padding: '15px 17px 17px', minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 700,
-                  fontSize: '15px',
-                  letterSpacing: '.03em',
-                  textTransform: 'uppercase',
-                  color: selected.dt,
-                }}
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <polyline points="12 7 12 12 15 14" />
-                </svg>
-                {selected.timeRange}
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginTop: '8px',
-                  color: 'var(--text-mid)',
-                  fontSize: '14px',
-                }}
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="rgba(230,227,218,.55)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ flex: 'none' }}
-                >
-                  <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span>
-                  <span style={{ color: '#fff', fontWeight: 600 }}>{selected.venue}</span> · {selected.hood}
-                </span>
-              </div>
-              <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.55, color: 'var(--text-mid)' }}>
-                {selected.blurb}
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '13px' }}>
-                {selected.tags.map((tg, i) => (
-                  <span key={i} style={tg.style}>
-                    {tg.label}
-                  </span>
-                ))}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-                <button onClick={() => toggleRsvp(selected.id)} style={selected.rsvpBtnStyle}>
-                  {selected.rsvpLabel}
-                </button>
-                <span style={{ fontSize: '12.5px', color: 'var(--text-meta)', fontFamily: 'var(--font-body)' }}>
-                  <span style={{ color: selected.dt, fontWeight: 700 }}>{selected.going}</span> going
-                </span>
-                <div style={{ flex: 1 }} />
-                <Link
-                  href={selected.eventHref}
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                    letterSpacing: '.05em',
-                    textTransform: 'uppercase',
-                    color: 'var(--text-lo)',
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Event page →
-                </Link>
-              </div>
-            </div>
+          >
+            {popPanel}
           </div>
-        </>
+        ) : (
+          <>
+            <div
+              onClick={closeEvent}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 110,
+                background: 'rgba(4,4,6,.55)',
+                backdropFilter: 'blur(1.5px)',
+              }}
+            />
+            {popPanel}
+          </>
+        )
       )}
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

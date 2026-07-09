@@ -27,7 +27,7 @@ import {
 } from "@shared/schema";
 import crypto from "crypto";
 import { buildSubmissionMergePatch } from "@shared/submissionMatch";
-import { mergeMapCoordinates } from "./venueCoordinates";
+import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 
@@ -3554,6 +3554,7 @@ export interface IStorage {
   createBusiness(data: InsertBusiness): Business;
   updateBusiness(id: number, data: Partial<InsertBusiness>): Business | undefined;
   toggleBusinessActive(id: number, active: boolean): void;
+  getUserLinkedBusinesses(userId: number): { id: number; name: string; type: string; address: string | null }[];
 }
 
 export const storage: IStorage = {
@@ -3740,6 +3741,7 @@ export const storage: IStorage = {
       isOwner,
       isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
       activity,
+      linkedVenues: storage.getUserLinkedBusinesses(user.id),
     };
   },
   countActiveMessages() {
@@ -5460,6 +5462,38 @@ export const storage: IStorage = {
   },
   toggleBusinessActive(id, active) {
     db.update(businesses).set({ active }).where(eq(businesses.id, id)).run();
+  },
+  getUserLinkedBusinesses(userId) {
+    ensureEventHostsSchema();
+    const user = db.select().from(users).where(eq(users.id, userId)).get();
+    if (!user) return [];
+
+    // All events this user is linked to: an event_hosts row, OR events.claimed_by = username,
+    // OR events.submitted_by IN (email, username). Mirrors isUserEventHost's OR-logic, but
+    // as a "give me all my events" query instead of a per-event check.
+    const linkedEvents = sqlite.prepare(`
+      SELECT DISTINCT e.id, e.venue_name AS venueName, e.address AS address, e.lat AS lat, e.lng AS lng
+      FROM events e
+      WHERE e.id IN (SELECT event_id FROM event_hosts WHERE user_id = ?)
+         OR (e.claimed_by IS NOT NULL AND e.claimed_by = ?)
+         OR (e.submitted_by IS NOT NULL AND (e.submitted_by = ? OR e.submitted_by = ?))
+    `).all(userId, user.username, user.email, user.username) as Array<{
+      id: number; venueName: string; address: string | null; lat: number | null; lng: number | null;
+    }>;
+    if (linkedEvents.length === 0) return [];
+
+    const allBusinesses = storage.getBusinesses();
+    const matched = new Map<number, { id: number; name: string; type: string; address: string | null }>();
+    for (const evt of linkedEvents) {
+      if (!evt.venueName) continue;
+      for (const biz of allBusinesses) {
+        if (matched.has(biz.id)) continue;
+        if (eventMatchesBusiness(evt, biz)) {
+          matched.set(biz.id, { id: biz.id, name: biz.name, type: biz.type, address: biz.address ?? null });
+        }
+      }
+    }
+    return Array.from(matched.values());
   },
 };
 

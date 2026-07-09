@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState, useMemo, Suspense, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -10,16 +11,16 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin, Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
-import { PlaceCard } from "@/components/ds";
+import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
-import { FilterChip } from "@/components/ds";
 import { dayAccentToken } from "@/lib/dsColors";
+import PlaceModal from "@/components/PlaceModal";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
-type DirectoryEventSummary = {
+export type DirectoryEventSummary = {
   id: number;
   title: string;
   dateStart: string;
@@ -28,7 +29,7 @@ type DirectoryEventSummary = {
   listingInstanceKey?: string;
 };
 
-type Business = {
+export type Business = {
   id: number;
   name: string;
   type: string;
@@ -47,9 +48,10 @@ type Business = {
   lng: number | null;
   isNew: boolean;
   upcomingEvents?: DirectoryEventSummary[];
+  canEditVenue?: boolean;
 };
 
-const TYPE_LABELS: Record<string, string> = {
+export const TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",
   restaurant: "Restaurants",
   cafe: "Cafes",
@@ -103,8 +105,13 @@ export default function Directory() {
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
   const [form, setForm] = useState(blankDirectoryForm);
-  const [activeType, setActiveType] = useState("ALL");
+  const [activeType, setActiveType] = useState(() => {
+    const t = new URLSearchParams(window.location.search).get("type");
+    return t && t in TYPE_LABELS ? t : "ALL";
+  });
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
 
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
@@ -114,14 +121,19 @@ export default function Directory() {
   });
 
   const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return businesses
       .filter(b => {
         if (activeType !== "ALL" && b.type !== activeType) return false;
         if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
+        if (q) {
+          const haystack = `${b.name} ${b.description || ""}`.toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
         return true;
       })
       .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-  }, [businesses, activeType, activeNeighborhood]);
+  }, [businesses, activeType, activeNeighborhood, searchQuery]);
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(businesses.map(b => b.neighborhood).filter(Boolean));
@@ -289,6 +301,19 @@ export default function Directory() {
               </FilterChip>
             );
           })}
+          <div style={{ flex: 1, minWidth: 12 }} />
+          <div className="events-filter-search">
+            <SearchInput
+              id="directory-search"
+              label={undefined}
+              placeholder="Search the directory..."
+              value={searchQuery}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery("")}
+              data-testid="directory-search"
+              size="sm"
+            />
+          </div>
         </div>
 
         <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
@@ -342,17 +367,21 @@ export default function Directory() {
           <div className="directory-grid">
             {filtered.map((biz, i) => (
               <ScrollReveal key={biz.id} delay={Math.min(i * 40, 300)}>
-                <DirectoryCard biz={biz} />
+                <DirectoryCard biz={biz} onClick={() => setSelectedPlace(biz)} />
               </ScrollReveal>
             ))}
           </div>
         )}
       </div>
+
+      {selectedPlace && (
+        <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} />
+      )}
     </div>
   );
 }
 
-function formatDirectoryEventWhen(event: DirectoryEventSummary) {
+export function formatDirectoryEventWhen(event: DirectoryEventSummary) {
   const startMs = parsePacificDateTime(event.dateStart);
   if (startMs == null) return event.dayOfWeek || "Upcoming";
   const start = new Date(startMs);
@@ -370,7 +399,7 @@ function formatDirectoryEventWhen(event: DirectoryEventSummary) {
   return `${dateLabel} · ${timeLabel}`;
 }
 
-const TYPE_TO_DS_CATEGORY: Record<string, string> = {
+export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   bar: "bars",
   restaurant: "food",
   cafe: "cafes",
@@ -380,14 +409,15 @@ const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   hotel: "hotels",
 };
 
-function DirectoryCard({ biz }: { biz: Business }) {
+function DirectoryCard({ biz, onClick }: { biz: Business; onClick?: () => void }) {
   const upcomingEvents = biz.upcomingEvents ?? [];
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   return (
     <PlaceCard
       name={biz.name}
+      onClick={onClick}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className={biz.type === "nonprofit" ? "pdxPlace--rainbow" : ""}
+      className={`pdxPlace--clickable ${biz.type === "nonprofit" ? "pdxPlace--rainbow" : ""}`}
       donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}

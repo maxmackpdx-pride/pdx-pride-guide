@@ -110,7 +110,7 @@ export default function Home() {
   );
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
-  const [featuredPlaces, setFeaturedPlaces] = useState<DirectoryBusiness[]>([]);
+  const [featuredSpots, setFeaturedSpots] = useState<DirectoryBusiness[]>([]);
   const [featuredNonprofits, setFeaturedNonprofits] = useState<DirectoryBusiness[]>([]);
 
   const { data: events = [] } = useQuery<EventListing[]>({
@@ -151,24 +151,15 @@ export default function Home() {
     );
   }, [events]);
 
-  const commercialPlaces = useMemo(
-    () => businesses.filter(b => b.type !== "nonprofit"),
-    [businesses],
-  );
-  const nonprofits = useMemo(
-    () => businesses.filter(b => b.type === "nonprofit"),
-    [businesses],
-  );
-
   useEffect(() => {
-    if (commercialPlaces.length === 0) return;
-    setFeaturedPlaces(prev => (prev.length > 0 ? prev : pickRandomBusinesses(commercialPlaces, 3)));
-  }, [commercialPlaces]);
-
-  useEffect(() => {
-    if (nonprofits.length === 0) return;
-    setFeaturedNonprofits(prev => (prev.length > 0 ? prev : pickRandomBusinesses(nonprofits, 3)));
-  }, [nonprofits]);
+    if (businesses.length === 0) return;
+    setFeaturedSpots(prev =>
+      prev.length > 0 ? prev : pickRandomBusinesses(businesses.filter(b => b.type !== "nonprofit"), 10),
+    );
+    setFeaturedNonprofits(prev =>
+      prev.length > 0 ? prev : pickRandomBusinesses(businesses.filter(b => b.type === "nonprofit"), 10),
+    );
+  }, [businesses]);
 
   const mappedBusinesses = useMemo(
     () => businesses.filter(b => b.lat != null && b.lng != null),
@@ -367,10 +358,10 @@ export default function Home() {
           <SectionHeader
             kicker="Queer Places"
             title="Where to Go"
-            subtitle="Bars, cafes, venues, and LGBTQ+ nonprofits — three of each, chosen at random every time you refresh."
+            subtitle="Bars, cafes, venues, and the nonprofits doing the work — all run by and for the community. Fresh random picks every time you refresh."
             accent="cyan"
           />
-          <div className="pg-places">
+          <div className="pg-places pg-places--dual">
             <div id="home-map">
               <Suspense
                 fallback={
@@ -385,93 +376,88 @@ export default function Home() {
               </Suspense>
             </div>
             <div className="pg-placescol">
-              <div className="pg-placescol-split">
-                <div className="pg-placescol-half">
-                  <div className="pg-colhd">
-                    <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>
-                      Spots
-                    </span>
-                    <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
-                  </div>
-                  <div className="pg-placescol-cards">
-                    {featuredPlaces.map(biz => (
-                      <PlaceCard
-                        key={biz.id}
-                        name={biz.name}
-                        category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-                        categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-                        address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
-                        hours={biz.hours || undefined}
-                        phone={biz.phone || undefined}
-                        description={biz.description || undefined}
-                        website={biz.website || undefined}
-                        instagram={biz.instagram || undefined}
-                        grandOpening={biz.isNew}
-                      />
-                    ))}
-                    {featuredPlaces.length === 0 && (
-                      <PlaceCard
-                        name="Queer Portland"
-                        category="venues"
-                        categoryLabel="Directory"
-                        description="The community directory is being built. Check back for bars, cafes, and venues."
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="pg-placescol-half">
-                  <div className="pg-colhd">
-                    <span className="pg-colhd__t" style={{ color: "#fff" }}>
-                      Nonprofits
-                    </span>
-                    <span
-                      className="pg-colhd__rule"
-                      style={{ background: "linear-gradient(to right, #FF00CC, #00FFFF, transparent)" }}
-                    />
-                  </div>
-                  <div className="pg-placescol-cards">
-                    {featuredNonprofits.map(biz => (
-                      <PlaceCard
-                        key={biz.id}
-                        name={biz.name}
-                        category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-                        categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-                        className="pdxPlace--rainbow"
-                        donateUrl={biz.donateUrl || undefined}
-                        address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
-                        hours={biz.hours || undefined}
-                        phone={biz.phone || undefined}
-                        description={biz.description || undefined}
-                        website={biz.website || undefined}
-                        instagram={biz.instagram || undefined}
-                        grandOpening={biz.isNew}
-                      />
-                    ))}
-                    {featuredNonprofits.length === 0 && (
-                      <PlaceCard
-                        name="Support queer Portland"
-                        category="services"
-                        categoryLabel="Nonprofits"
-                        className="pdxPlace--rainbow"
-                        description="LGBTQ+ nonprofits are being added to the directory. Check back soon."
-                      />
-                    )}
-                  </div>
-                </div>
+              <div className="pg-colhd">
+                <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>Spots</span>
+                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                <Link href="/directory" style={{ textDecoration: "none" }}>
-                  <Button as="span" accent="cyan" arrow>
-                    Full directory
-                  </Button>
-                </Link>
-                <Link href="/directory?add=1" style={{ textDecoration: "none" }}>
-                  <Button as="span" accent="magenta">
-                    Add your business
-                  </Button>
-                </Link>
+              <div className="pg-placescroll">
+                {featuredSpots.map(biz => (
+                  <PlaceCard
+                    key={biz.id}
+                    name={biz.name}
+                    category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+                    donateUrl={biz.donateUrl || undefined}
+                    categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+                    address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
+                    hours={biz.hours || undefined}
+                    phone={biz.phone || undefined}
+                    description={biz.description || undefined}
+                    website={biz.website || undefined}
+                    instagram={biz.instagram || undefined}
+                    grandOpening={biz.isNew}
+                  />
+                ))}
+                {featuredSpots.length === 0 && (
+                  <PlaceCard
+                    name="Queer Portland"
+                    category="venues"
+                    donateUrl={undefined}
+                    categoryLabel="Directory"
+                    description="The community directory is being built. Check back for bars, cafes, and venues."
+                  />
+                )}
               </div>
+              <Link href="/directory" className="pg-board-more" style={{ color: "var(--cyan)" }}>
+                View more spots →
+              </Link>
             </div>
+            <div className="pg-placescol">
+              <div className="pg-colhd">
+                <span className="pg-colhd__t" style={{ color: "var(--purple)" }}>Nonprofits</span>
+                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--purple), transparent)" }} />
+              </div>
+              <div className="pg-placescroll">
+                {featuredNonprofits.map(biz => (
+                  <PlaceCard
+                    key={biz.id}
+                    name={biz.name}
+                    className="pdxPlace--rainbow"
+                    category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+                    categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+                    address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
+                    hours={biz.hours || undefined}
+                    phone={biz.phone || undefined}
+                    description={biz.description || undefined}
+                    website={biz.website || undefined}
+                    instagram={biz.instagram || undefined}
+                    grandOpening={biz.isNew}
+                  />
+                ))}
+                {featuredNonprofits.length === 0 && (
+                  <PlaceCard
+                    name="Community Nonprofits"
+                    category="venues"
+                    categoryLabel="Directory"
+                    description="Nonprofit listings are being added. Check back for organizations doing the work."
+                  />
+                )}
+              </div>
+              <Link href="/directory?type=nonprofit" className="pg-board-more" style={{ color: "var(--purple)" }}>
+                View more nonprofits →
+              </Link>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 24 }}>
+            <Link href="/directory" style={{ textDecoration: "none" }}>
+              <Button as="span" accent="cyan" arrow>
+                Full directory
+              </Button>
+            </Link>
+            <Link href="/directory?add=1" style={{ textDecoration: "none" }}>
+              <Button as="span" accent="magenta">
+                Add your business
+              </Button>
+            </Link>
           </div>
         </ScrollReveal>
       </div>

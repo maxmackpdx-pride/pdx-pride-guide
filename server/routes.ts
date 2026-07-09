@@ -933,7 +933,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
       queerOwned: queerOwned === "true" ? true : undefined,
     });
     const liveEvents = storage.getEvents({ status: "LIVE" });
-    res.json(attachUpcomingEventsToBusinesses(businesses, liveEvents));
+    const withEvents = attachUpcomingEventsToBusinesses(businesses, liveEvents);
+    // Flag which listings the logged-in user can self-service edit (hosted/claimed/
+    // submitted an event there) — drives the "Edit venue info" button client-side;
+    // the PATCH endpoint below re-checks this server-side regardless.
+    const linkedIds = req.session?.userId
+      ? new Set(storage.getUserLinkedBusinesses(req.session.userId).map(b => b.id))
+      : null;
+    res.json(withEvents.map(biz => ({ ...biz, canEditVenue: linkedIds?.has(biz.id) ?? false })));
   });
 
   const memberBusinessSchema = z.object({
@@ -977,6 +984,51 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Invalid directory listing" });
     }
+  });
+
+  // Promoter self-service venue edit: only description/hours/phone/website/instagram/donateUrl,
+  // only if the requester has hosted, claimed, or submitted an event matching this business.
+  // Name/address/type/lat/lng are never accepted here (would let a linked promoter hijack or
+  // relocate a shared directory listing) — edits go live immediately, no moderation queue.
+  const businessEditSchema = z.object({
+    description: z.string().trim().min(10).max(2000).optional(),
+    hours: z.string().trim().max(200).optional().nullable(),
+    phone: z.string().trim().max(40).optional().nullable(),
+    website: z.string().trim().max(300).optional().nullable(),
+    instagram: z.string().trim().max(80).optional().nullable(),
+    donateUrl: z.string().trim().max(300).optional().nullable(),
+  });
+
+  app.patch("/api/directory/:id", requireAuth, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const existing = storage.getBusiness(id);
+    if (!existing) return res.status(404).json({ error: "Not found" });
+
+    const linkedVenues = storage.getUserLinkedBusinesses(req.session.userId!);
+    if (!linkedVenues.some(biz => biz.id === id)) {
+      return res.status(403).json({ error: "You can only edit venues you've hosted, claimed, or submitted an event at." });
+    }
+
+    let parsed: z.infer<typeof businessEditSchema>;
+    try {
+      parsed = businessEditSchema.parse(req.body ?? {});
+    } catch (e: any) {
+      return res.status(400).json({ error: e.message || "Invalid venue info" });
+    }
+
+    // Only the six allowed fields are ever applied — anything else in req.body (name, address,
+    // type, lat, lng, ...) is silently dropped by the zod parse above (unknown keys stripped).
+    const patch: Record<string, string | null> = {};
+    if (parsed.description !== undefined) patch.description = parsed.description.replace(/[<>]/g, "");
+    if (parsed.hours !== undefined) patch.hours = parsed.hours ? parsed.hours.replace(/[<>]/g, "") : null;
+    if (parsed.phone !== undefined) patch.phone = parsed.phone ? parsed.phone.replace(/[<>]/g, "") : null;
+    if (parsed.website !== undefined) patch.website = parsed.website ? parsed.website.replace(/[<>]/g, "") : null;
+    if (parsed.instagram !== undefined) patch.instagram = parsed.instagram ? parsed.instagram.replace(/[<>]/g, "") : null;
+    if (parsed.donateUrl !== undefined) patch.donateUrl = parsed.donateUrl ? parsed.donateUrl.replace(/[<>]/g, "") : null;
+
+    const updated = storage.updateBusiness(id, patch);
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
   });
 
   app.post("/api/admin/directory", requireAdmin, async (req, res) => {

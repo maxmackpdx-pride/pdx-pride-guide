@@ -44,6 +44,12 @@ type ProfileGifting = {
   createdAt?: string | null;
   description?: string | null;
 };
+type ProfileVenue = {
+  id: number;
+  name: string;
+  type?: string | null;
+  address?: string | null;
+};
 
 type MemberProfileData = {
   username: string;
@@ -69,6 +75,7 @@ type MemberProfileData = {
     gifting?: ProfileGifting[];
     goingTo?: ProfileEvent[];
   };
+  linkedVenues?: ProfileVenue[];
 };
 
 /* ── Role badge colors (talent chips + lime Party Host) ────────────────── */
@@ -444,6 +451,7 @@ export default function MemberProfile() {
   const goingTo = activity.goingTo ?? [];
   const gigs = activity.gigs ?? [];
   const gifting = activity.gifting ?? [];
+  const linkedVenues = data.linkedVenues ?? [];
   const featuredEmbed = embeds[0];
   const restEmbeds = embeds.slice(1);
   const coverMarker = `${data.location ? `${data.location} · ` : ""}PDX Pride Guide member`;
@@ -907,6 +915,30 @@ export default function MemberProfile() {
                 <div className="mp-empty"><p>Nothing on the gifting board right now.</p></div>
               )}
             </section>
+
+            {/* Venues — only shown when the member is linked to at least one directory listing */}
+            {linkedVenues.length > 0 && (
+              <section>
+                <div className="mp-section-label" style={{ color: "var(--neon-green)" }}>
+                  Venues · {linkedVenues.length}
+                </div>
+                <div className="mp-event-rows">
+                  {linkedVenues.map(venue => (
+                    <Link
+                      key={venue.id}
+                      href="/directory"
+                      className="mp-event-row"
+                      style={{ borderLeftColor: "var(--neon-green)" }}
+                    >
+                      <span className="mp-event-row__main">
+                        <span className="display mp-event-row__title">{venue.name}</span>
+                        {venue.address && <span className="mp-event-row__meta">{venue.address}</span>}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </div>
