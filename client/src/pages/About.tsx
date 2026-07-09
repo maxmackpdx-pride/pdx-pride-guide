@@ -1,245 +1,429 @@
 import { Link } from "wouter";
-import PageHero from "@/components/PageHero";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import ScrollReveal from "@/components/ScrollReveal";
-import { Heart, Shield, Zap, Users, CheckCircle, ExternalLink, Calendar, MapPin } from "lucide-react";
+import type { EventListing } from "@shared/multiDayEvents";
+import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
+const IG_URL = "https://www.instagram.com/tucker_pdmax";
+const LINKEDIN_URL = "https://www.linkedin.com/in/tuckercasey/";
+const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
 
-const MISSION = [
-  {
-    icon: <Zap size={18} />,
-    tone: "cyan",
-    title: "Find events fast",
-    text: "Monday through Sunday, all of it, in one place. Map it. Filter it. Put on pants. Go.",
-  },
-  {
-    icon: <Users size={18} />,
-    tone: "lime",
-    title: "Support local spaces",
-    text: "Bars, venues, orgs, collectives. Every listing here sends actual bodies through actual doors, which is how these places stay open.",
-  },
-  {
-    icon: <Heart size={18} />,
-    tone: "magenta",
-    title: "Connect people",
-    text: "The gig board, the submit form, the claimable events. Built so people can find each other, not so we can find out about you.",
-  },
-  {
-    icon: <Shield size={18} />,
-    tone: "orange",
-    title: "Stay independent",
-    text: "No investors. No feed deciding what you see. Sponsors are welcome to help. Nobody gets to steer.",
-  },
+const LIVE_NOW = [
+  "RSVPs, once you are logged in",
+  "Spotted, gigs, gifting, and talent tags",
+  "New events and claims from approved promoters",
 ] as const;
 
-const HOW_IT_WORKS = [
-  [
-    "Submit your event",
-    "Create a free account, fill out the Promoters form, and it enters the review queue. Accounts keep listings accountable — no anonymous spam.",
-  ],
-  [
-    "Admin review",
-    "Events, claims, edits, and gig posts go through review before going live. No spam, no favoritism.",
-  ],
-  [
-    "Claim a listing",
-    "Some events are seeded and marked claimable. If you're the organizer, submit a claim and take ownership.",
-  ],
+const NEEDS_ADMIN = [
+  "New events, claims, and suggestions from anyone not approved yet",
+  "Promoter applications, moderation, and take-down requests",
+  "Gifting reports and site feedback",
 ] as const;
 
 const VALUES = [
-  "Free to browse. No paywall, no popup begging for your email, no selling anybody out.",
-  "Local businesses can sponsor if they actually belong here. That's the whole bar.",
-  "Want to post an event or a gig? Make a free account. It's how spam stays out and names stay attached.",
-  "Your data is not for sale. Not now, not later, not for a nice offer.",
-  "Pride is a protest. Sex-positive and nude events get listed and tagged honestly, no side-eye.",
-  "One person builds this and keeps it running. Good people help. It's still not a committee.",
+  { title: "Free to browse.", text: "No paywall, no popup begging for your email." },
+  { title: "The top spot is not for sale.", text: "Sponsors welcome if they fit the values. That is the whole bar." },
+  { title: "Post with a free account.", text: "That is how spam stays out and names stay on." },
+  { title: "Your data is not for sale.", text: "Not now, not later, not for a nice offer." },
+  { title: "We moderate the clearly over the line stuff.", text: "The rest of the community runs free." },
+  { title: "One person builds this.", text: "Good people help. It is still not a committee." },
+] as const;
+
+const SPONSOR_CHECKS = [
+  "Queer owned or genuinely queer loving.",
+  "Treats its people right. Pays them right.",
+  "Does not need us to scrub anything clean first.",
 ] as const;
 
 const FAQ = [
   {
     q: "When is Portland Pride 2026?",
-    a: "July 13 through 19, Monday to Sunday. Festivals, parties, marches, and the quiet stuff too. All seven days are in here.",
+    a: "July 13 to 19, Monday to Sunday. Festivals, parties, marches, and the quiet stuff too. All seven days are in here.",
   },
   {
-    q: "Where do I find PDX Pride events?",
-    a: "The Events page. Every live listing on a map and a board. Filter by day, by type, by neighborhood, then open anything for times, venue, and tickets.",
+    q: "Where do I find events?",
+    a: "The Events page. Every live listing on a map and a board. Filter by day, type, or neighborhood, then open anything for times, venue, and tickets.",
   },
   {
     q: "How is this different from other Pride apps?",
-    a: "It's free, it's run by a person, and it's built for this city. No corporate feed. No paying to rank higher. Promoters post their events and the community shows up.",
+    a: "It is free, run by a person, and built for this city. No corporate feed. No paying to rank higher. Promoters post their events and the community shows up.",
   },
   {
     q: "How do I list my event?",
-    a: "Make an account, then submit a new event or claim one that's already listed. Head to the Promoters page. Once you're verified, you skip the line.",
+    a: "Make an account, then submit a new event or claim one that is already listed. Head to Submit. Once you are a verified promoter, you skip the line.",
+  },
+  {
+    q: "Can my business sponsor?",
+    a: "If you fit the values on this page, yes. You still cannot buy the top spot. Ever. Pitch via Contact or message Tucker.",
   },
 ] as const;
 
 export default function About() {
   usePageSeo(
     "About PDX Pride Guide — Portland Pride 2026",
-    "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+    "Built by one person in Portland. Free Pride week directory with zero interest in being a sanitized corporate pamphlet.",
   );
 
+  const { data: events = [] } = useQuery<EventListing[]>({
+    queryKey: ["/api/events"],
+    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const eventCount = events.length;
+
   return (
-    <div className="zine-page about-page board-page">
-      <PageHero
-        flush
-        flipLightLeaks
-        kicker="About this guide"
-        titleLine1="BUILT FOR"
-        titleLine2="THE COMMUNITY"
-        accent="lime"
-        lede="A free Pride week directory, built by one guy in Portland, filled in by everybody else. Local businesses can pitch in. Nobody can buy the top spot."
-        bgImage="/motifs/hero-about.png"
-        bgPosition="56% center"
-        actions={
-          <>
-            <Link href="/events"><Button as="span" variant="solid">Browse events</Button></Link>
-            <Link href="/submit"><Button as="span" accent="cyan">Submit or claim</Button></Link>
-          </>
-        }
-      />
-
-      <div className="about-quick-facts">
-        <div className="about-quick-facts__inner">
-          <span className="about-quick-fact"><Calendar size={14} /> July 13–19, 2026</span>
-          <span className="about-quick-fact"><MapPin size={14} /> Portland, OR</span>
-          <span className="about-quick-fact">Free to browse</span>
-          <span className="about-quick-fact">Community-run</span>
-        </div>
-      </div>
-
-      <ScrollReveal>
-        <section className="about-mission board-how diag">
-          <span className="board-sticker board-sticker--lime">Why this exists</span>
-          <h2 className="display section-heading">THE MISSION</h2>
-          <p className="board-copy">
-            One place for the whole week. Nobody's algorithm, nobody's ad budget. Just real events in real rooms with real people in them.
-          </p>
-          <div className="about-mission-grid">
-            {MISSION.map(item => (
-              <article key={item.title} className={`about-mission-card about-mission-card--${item.tone}`}>
-                <div className="about-mission-card__icon" aria-hidden="true">{item.icon}</div>
-                <h3 className="display panel-heading">{item.title}</h3>
-                <p>{item.text}</p>
-              </article>
-            ))}
-          </div>
-          <div className="about-footer-line">Free. Independent. Built for PDX.</div>
-        </section>
-      </ScrollReveal>
-
-      <ScrollReveal delay={80}>
-        <section id="how-it-works" className="about-how board-how board-how--inline diag">
-          <span className="board-sticker board-sticker--cyan">How it works</span>
-          <h2 className="display section-heading">FROM SUBMISSION TO LIVE</h2>
-          <p className="board-copy">Every listing on the guide goes through the same review path — whether it's brand new or a claim on an existing event.</p>
-          <div className="board-steps">
-            {HOW_IT_WORKS.map(([title, text], i) => (
-              <article className="board-step" key={title}>
-                <span className="board-step__num" aria-hidden="true">{i + 1}</span>
-                <h3 className="display panel-heading">{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-          <div className="about-footer-line">Account required · Admin review · No pay-to-rank</div>
-        </section>
-      </ScrollReveal>
-
-      <ScrollReveal delay={140}>
-        <section className="about-values zine-content">
-          <span className="board-sticker board-sticker--magenta">Transparency</span>
-          <h2 className="display section-heading">VALUES &amp; RULES</h2>
-          <div className="about-values-panel">
-            <div className="motif values-motif-badge" style={{ backgroundImage: 'url("/motifs/go-piss-girl.jpg")' }} aria-hidden="true" />
-            <ul className="about-values-list">
-              {VALUES.map(item => (
-                <li key={item}>
-                  <CheckCircle size={16} className="about-values-list__icon" aria-hidden="true" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      </ScrollReveal>
-
-      <ScrollReveal delay={200}>
-        <section className="about-creator zine-content">
-          <div className="about-creator-panel">
-            <div className="about-creator-panel__overlay" aria-hidden="true" />
-            <div className="about-creator-panel__content">
-              <span className="board-sticker board-sticker--lime">About the creator</span>
-              <h2 className="display section-heading">
-                MADE BY <span className="about-creator-panel__accent">TUCKER MAX</span>
-              </h2>
-              <p className="board-copy about-creator-panel__copy">
-                Hi. I'm Tucker Max. I host and run Yes Coach, and a pile of other nights around town, and I also built this entire website myself, from the first line of code to the thing you're reading right now. Portland deserved a guide that isn't owned by a corporation, buried by an algorithm, or sorted by whoever wrote the biggest check. So I made one.
-              </p>
-              <p className="board-copy about-creator-panel__copy">
-                This year got rough. A lot of you helped, donated, and checked in on me, and that's the only reason year three exists. It's also why the site is finally custom-built instead of duct-taped together.
-              </p>
-              <p className="about-creator-panel__meta">Meta sucks. We deserve better. Free to use, independently run, built to last.</p>
-              <p className="board-copy about-creator-panel__copy">
-                And yes, I'm still looking for work. If you know somebody, you know where to find me.
-              </p>
-              <a
-                href="https://www.instagram.com/tucker_pdmax"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="about-creator-panel__link"
-              >
-                @tucker_pdmax on Instagram
+    <div className="about-v2">
+      {/* HERO */}
+      <section className="about-v2-hero">
+        <div className="about-v2-hero__scrim" aria-hidden="true" />
+        <div className="about-v2-hero__inner">
+          <div>
+            <div className="about-v2-hero__kicker">About · Portland Pride 2026</div>
+            <h1 className="about-v2-hero__h1">
+              <span className="about-v2-hero__stat" data-testid="about-events-count">
+                {eventCount} events.
+              </span>
+              <span className="about-v2-hero__lede">
+                And approximately zero interest in being a sanitized corporate Pride pamphlet.
+              </span>
+            </h1>
+            <div className="about-v2-hero__actions">
+              <a href={IG_URL} target="_blank" rel="noopener noreferrer">
+                <Button as="span" variant="solid" accent="lime" size="lg">
+                  Follow Tucker
+                </Button>
               </a>
+              <Link href="/events">
+                <Button as="span" variant="neon" accent="cyan" size="lg">
+                  Browse the {eventCount || "list"}
+                </Button>
+              </Link>
             </div>
           </div>
-        </section>
-      </ScrollReveal>
+          <div className="about-v2-hero__portrait">
+            <div className="about-v2-hero__portrait-frame">
+              <img
+                src="/about/tucker-portrait.jpg"
+                alt="Tucker Max"
+                width={760}
+                height={950}
+                decoding="async"
+              />
+            </div>
+            <span className="about-v2-hero__sticker">Looking for work</span>
+          </div>
+        </div>
+      </section>
 
-      <ScrollReveal delay={260}>
-        <section className="about-faq zine-content">
-          <span className="board-sticker board-sticker--lime">FAQ</span>
-          <h2 className="display section-heading">PORTLAND PRIDE 2026</h2>
-          <div className="about-faq-list">
+      {/* STAT BAND */}
+      <section className="about-v2-stats" aria-label="Guide stats">
+        <div className="about-v2-stats__grid">
+          <div className="about-v2-stats__cell">
+            <div className="about-v2-stats__num about-v2-stats__num--lime">{eventCount}</div>
+            <div className="about-v2-stats__label">Events, and counting</div>
+          </div>
+          <div className="about-v2-stats__cell">
+            <div className="about-v2-stats__num about-v2-stats__num--cyan">7</div>
+            <div className="about-v2-stats__label">Days, one guide</div>
+          </div>
+          <div className="about-v2-stats__cell">
+            <div className="about-v2-stats__num about-v2-stats__num--pink">$0</div>
+            <div className="about-v2-stats__label">To browse. Always.</div>
+          </div>
+          <div className="about-v2-stats__cell">
+            <div className="about-v2-stats__num about-v2-stats__num--amber">1</div>
+            <div className="about-v2-stats__label">Person building it</div>
+          </div>
+        </div>
+      </section>
+
+      {/* MANIFESTO */}
+      <section className="about-v2-manifesto">
+        <div className="about-v2__inner">
+          <div className="about-v2__kicker">What this actually is</div>
+          <div className="about-v2-manifesto__copy">
+            <p>
+              Pride week has not even started yet, and this thing already has parties, community events,
+              weird little gems, places to eat, places to shop, gigs, gifting, missed connections, and
+              other necessary homosexual infrastructure.
+            </p>
+            <p>
+              The family friendly newspaper roundup is cute. The local moms&apos; Pride list has its place.
+              But this is for the people who want the whole city, not just the parts a corporation can
+              clean up and sell back to us.
+            </p>
+          </div>
+          <div className="about-v2-manifesto__shout">
+            <p>
+              Fuck Meta.
+              <br /><br />
+              Fuck censoring our community.
+              <br />
+              Fuck pretending queer culture only counts once it has been scrubbed clean for public approval.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* MADE BY TUCKER */}
+      <section className="about-v2-creator">
+        <div className="about-v2__inner">
+          <div className="about-v2-creator__grid">
+            <div className="about-v2-creator__photo">
+              <div className="about-v2-creator__photo-frame">
+                <img
+                  src="/about/tucker-portrait.jpg"
+                  alt="Tucker Max"
+                  width={640}
+                  height={800}
+                  decoding="async"
+                />
+              </div>
+              <span className="about-v2-creator__hire">Hire me</span>
+            </div>
+            <div className="about-v2-creator__body">
+              <div className="about-v2__kicker">Who&apos;s behind it</div>
+              <h2 className="about-v2__title">
+                Made by <span className="hl">Tucker Max</span>
+              </h2>
+              <p>
+                I host Yes Coach and STANK, I run LockerRoom at The Eagle, and I host the Digg&apos;n For Bones
+                podcast. I also built this entire site myself. No corporation, no algorithm, no whoever wrote
+                the biggest check. Just me, and the people who show up.
+              </p>
+              <p>
+                This year got rough. A lot of you donated and checked in on me, and that is the only reason
+                year three exists.
+              </p>
+              <p className="about-v2-creator__thanks">
+                From the bottom of my heart thank you. You showed up for me and I hope this is a way I can
+                show up for you.
+              </p>
+              <div className="about-v2-creator__actions">
+                <a href={IG_URL} target="_blank" rel="noopener noreferrer">
+                  <Button as="span" variant="solid" accent="lime" size="md">
+                    Follow @tucker_pdmax
+                  </Button>
+                </a>
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+                  <Button as="span" variant="neon" accent="cyan" size="md">
+                    Connect on LinkedIn
+                  </Button>
+                </a>
+                <Link href="/contact">
+                  <Button as="span" variant="neon" accent="pink" size="md">
+                    Message me
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="about-v2-creator__work">
+            <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+              <span className="about-v2-creator__work-badge">
+                <span className="dot" aria-hidden="true" />
+                Open to work
+              </span>
+              <p>And yes, I am still looking for work. If you know somebody, you know where to find me.</p>
+            </div>
+            <Link href="/contact">
+              <Button as="span" variant="neon" accent="cyan" size="md">
+                Get in touch
+              </Button>
+            </Link>
+          </div>
+
+          <a
+            className="about-v2-project"
+            href={DIGGN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src="/about/diggn-for-bones.jpg" alt="" width={120} height={120} />
+            <div>
+              <div className="about-v2-project__meta">Podcast · Season 3</div>
+              <h3 className="about-v2-project__title">Digg&apos;n For Bones</h3>
+              <p className="about-v2-project__desc">Hosted by Tucker Max · new episodes out now on Spotify</p>
+            </div>
+            <span className="about-v2-project__go">Listen →</span>
+          </a>
+        </div>
+      </section>
+
+      {/* KEEP ALIVE */}
+      <section className="about-v2-donate">
+        <div className="about-v2-donate__row">
+          <div>
+            <h2>Keep this guide alive</h2>
+            <p>
+              Servers and domains cost money. Time costs the most. If this pointed you toward one good night,
+              chip in and it stays free for the next person.
+            </p>
+          </div>
+          <div className="about-v2-donate__cta">
+            <a href={VENMO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-donate">
+              <Button as="span" variant="solid" accent="lime" size="lg">
+                Buy me a coffee
+              </Button>
+            </a>
+            <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* INFRASTRUCTURE */}
+      <section className="about-v2-infra">
+        <div className="about-v2__inner">
+          <div className="about-v2__kicker">Necessary homosexual infrastructure</div>
+          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
+            The whole city, <span className="hl">not the sanitized bits</span>
+          </h2>
+          <div className="about-v2-infra__grid">
+            <Link href="/pride-work" className="about-v2-infra__card about-v2-infra__card--cyan">
+              <h3>Gigs</h3>
+              <p>Offer a trade, need work, or want to lend your talents? Check gigs.</p>
+            </Link>
+            <Link href="/gifting" className="about-v2-infra__card about-v2-infra__card--amber">
+              <h3>Gifting</h3>
+              <p>Need something for Pride week, or have old Pride stuff collecting dust? Check gifting.</p>
+            </Link>
+            <Link href="/spotted" className="about-v2-infra__card about-v2-infra__card--pink">
+              <h3>Missed connections</h3>
+              <p>Trying to find someone during Pride week? Missed connections exists for a reason.</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="about-v2-how" id="how-it-works">
+        <div className="about-v2__inner">
+          <div className="about-v2__kicker">How it works</div>
+          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
+            Public by <span className="hl">default</span>
+          </h2>
+          <p className="about-v2__sub">
+            Most of the guide goes live the second you post it. Admins only step in for the stuff that
+            actually needs a human.
+          </p>
+          <div className="about-v2-how__grid">
+            <div className="about-v2-how__panel about-v2-how__panel--live">
+              <h3>Goes live instantly</h3>
+              <ul>
+                {LIVE_NOW.map(item => (
+                  <li key={item}>
+                    <span className="mark" aria-hidden="true">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="about-v2-how__panel about-v2-how__panel--gate">
+              <h3>Needs an admin</h3>
+              <ul>
+                {NEEDS_ADMIN.map(item => (
+                  <li key={item}>
+                    <span className="mark" aria-hidden="true">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p className="about-v2-how__foot">Account required to post · No pay to rank · Ever</p>
+        </div>
+      </section>
+
+      {/* VALUES */}
+      <section className="about-v2-values">
+        <div className="about-v2__inner">
+          <div className="about-v2__kicker">Transparency</div>
+          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>
+            Values &amp; the <span className="hl">rules</span>
+          </h2>
+          <div className="about-v2-values__grid">
+            {VALUES.map(item => (
+              <div key={item.title} className="about-v2-values__item">
+                <span className="mark" aria-hidden="true">✓</span>
+                <span>
+                  <strong>{item.title}</strong> {item.text}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SPONSORS */}
+      <section className="about-v2-sponsors">
+        <div className="about-v2__inner">
+          <div className="about-v2-sponsors__grid">
+            <div className="about-v2-sponsors__copy">
+              <div className="about-v2__kicker">Sponsors</div>
+              <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>
+                Looking for sponsors who <span className="hl">fit the values</span>
+              </h2>
+              <p>
+                I am looking for sponsors, not landlords. If your business actually belongs in this scene
+                and shares what is on this page, you can help keep the whole thing free. You still cannot
+                buy the top spot. Ever.
+              </p>
+              <p>
+                And it does not stop on July 19. After Pride week this becomes a{" "}
+                <strong style={{ color: "#fff" }}>year round resource</strong> for the scene, so your
+                support keeps working long after the parade.
+              </p>
+              <Link href="/contact">
+                <Button as="span" variant="solid" accent="lime" size="md">
+                  Pitch a sponsorship
+                </Button>
+              </Link>
+            </div>
+            <div className="about-v2-sponsors__checks">
+              {SPONSOR_CHECKS.map(item => (
+                <div key={item} className="about-v2-sponsors__check">
+                  <span className="mark" aria-hidden="true">✓</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="about-v2-faq">
+        <div className="about-v2__inner">
+          <div className="about-v2__kicker">FAQ</div>
+          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
+            Good questions
+          </h2>
+          <div className="about-v2-faq__list">
             {FAQ.map(item => (
-              <details key={item.q} className="about-faq-item">
-                <summary className="display panel-heading">{item.q}</summary>
-                <p className="board-copy-sm">{item.a}</p>
+              <details key={item.q} className="about-v2-faq__item">
+                <summary>
+                  {item.q}
+                  <span className="ico" aria-hidden="true">+</span>
+                </summary>
+                <div className="answer">{item.a}</div>
               </details>
             ))}
           </div>
-        </section>
-      </ScrollReveal>
+        </div>
+      </section>
 
-      <ScrollReveal delay={320}>
-        <section className="about-donate zine-content">
-          <div className="zine-callout about-donate-callout">
-            <Heart size={26} className="about-donate-callout__icon" aria-hidden="true" />
-            <h2 className="display section-heading">KEEP THIS GUIDE ALIVE</h2>
-            <p className="board-copy about-donate-callout__copy">
-              Servers cost money. Domains cost money. Time costs the most. If this thing pointed you toward one good night, throw a coffee at it and it stays free for the next person.
-            </p>
-            <Button
-              as="a"
-              href={VENMO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="link-donate"
-              variant="solid"
-              className="about-donate-callout__btn"
-              trailingIcon={<ExternalLink size={15} />}
-            >
-              Buy me a coffee
-            </Button>
-            <p className="about-donate-callout__note">@tucker_pdmax on Venmo</p>
-            <p className="about-donate-callout__ps">P.S. Tucker is looking for work.</p>
-          </div>
-        </section>
-      </ScrollReveal>
+      {/* CLOSE */}
+      <section className="about-v2-close">
+        <div className="about-v2-close__row">
+          <span>Pride is a protest. Take care of each other.</span>
+          <span>prideguidepdx.com</span>
+        </div>
+      </section>
     </div>
   );
 }

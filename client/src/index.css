@@ -8759,6 +8759,84 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
   gap: 12px;
 }
 
+/* Buy me a coffee — lime plate + purple brutalist offset */
+.footer-coffee {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 8px auto 28px;
+  padding: 20px 16px 8px;
+  border-top: 1px solid #161616;
+  text-align: center;
+}
+
+.footer-coffee__note {
+  margin: 0;
+  color: var(--text-meta, #8c8980);
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  line-height: 1.45;
+}
+
+.footer-coffee__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: min(320px, 88vw);
+  padding: 16px 28px 14px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1rem, 3.2vw, 1.2rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #000;
+  background: var(--neon-yellow, #ccff00);
+  border: none;
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 0 #6b1f7a;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.footer-coffee__btn:hover {
+  text-decoration: none;
+  color: #000;
+  filter: brightness(1.06);
+  transform: translate(-1px, -1px);
+  box-shadow: 8px 8px 0 0 #6b1f7a;
+}
+
+.footer-coffee__btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0 0 #6b1f7a;
+}
+
+.footer-coffee__btn:focus-visible {
+  outline: 2px solid var(--neon-cyan, #00ffff);
+  outline-offset: 4px;
+}
+
+.footer-coffee__handle {
+  margin: 0;
+  color: var(--text-faint, #666);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+html.calm-mode .footer-coffee__btn {
+  box-shadow: 4px 4px 0 0 #444;
+}
+
+html.calm-mode .footer-coffee__btn:hover {
+  box-shadow: 5px 5px 0 0 #444;
+  filter: none;
+}
+
 /* ═══════════════════════════════════════════════════════════
    PUSH NOTIFICATION TOGGLE (footer)
    ═══════════════════════════════════════════════════════════ */

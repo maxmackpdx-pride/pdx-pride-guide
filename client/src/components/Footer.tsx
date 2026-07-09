@@ -77,19 +77,19 @@ export default function Footer() {
           <PushNotificationToggle />
           <CalmModeToggle />
         </div>
-        {/* Subtle donation line — footer only */}
-        <div style={{ textAlign: "center", marginBottom: 20, padding: "12px 0", borderTop: "1px solid #111", borderBottom: "1px solid #111" }}>
-          <span style={{ color: "var(--text-meta)", fontSize: "0.8rem", fontFamily: "var(--font-body)" }}>
-            Free forever, but not free to run.{" "}
-            <a
-              href="https://venmo.com/tucker_pdmax"
-              target="_blank"
-              rel="noopener"
-              style={{ color: "var(--neon-magenta)", textDecoration: "none", fontFamily: "var(--font-display)", fontSize: "0.78rem", letterSpacing: "0.04em" }}
-            >
-              Venmo @tucker_pdmax
-            </a>
-          </span>
+        <div className="footer-coffee">
+          <p className="footer-coffee__note">Free forever, but not free to run.</p>
+          <a
+            href="https://venmo.com/tucker_pdmax"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-coffee__btn"
+            data-testid="footer-buy-coffee"
+            aria-label="Buy me a coffee on Venmo @tucker_pdmax"
+          >
+            BUY ME A COFFEE
+          </a>
+          <p className="footer-coffee__handle">Venmo @tucker_pdmax</p>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
           <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>
