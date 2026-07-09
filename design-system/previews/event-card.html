@@ -1,41 +1,79 @@
 <!-- @dsCard group="Cards" -->
 <!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=Inter:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400&display=swap" rel="stylesheet">
 <style>
-body { margin:0; background:#0a0a0a; color:#fff; font-family:'Inter',sans-serif; padding:28px; display:flex; gap:20px; flex-wrap:wrap; }
+body { margin:0; background:#0a0a0a; color:#fff; font-family:'Inter',sans-serif; padding:28px; display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+.col-label { width:100%; font-size:10px; color:#666; text-transform:uppercase; letter-spacing:0.1em; margin:0 0 -12px; }
+/* Board / PosterCard */
 .poster-card {
   width:230px; background:linear-gradient(160deg,rgba(255,255,255,0.045),transparent 30%),#0b0b0b;
-  border:2px solid #2b2b2b; box-shadow:0 0 0 1px #050505, 0 14px 30px rgba(0,0,0,0.42);
-  cursor:pointer; overflow:hidden; position:relative;
+  border:2px solid #2b2b2b; border-radius:4px; cursor:pointer; overflow:hidden; position:relative;
   transition:all .35s cubic-bezier(0.2,0.8,0.2,1);
+  box-shadow:0 0 14px color-mix(in srgb, var(--dc, #00FFFF) 18%, transparent);
+  animation:pulse 4s ease-in-out infinite;
 }
-.glow { box-shadow:0 0 14px color-mix(in srgb, var(--dc, #00FFFF) 18%, transparent); animation:pulse 4s ease-in-out infinite; }
-.glow:hover { box-shadow:0 0 28px color-mix(in srgb, var(--dc, #00FFFF) 40%, transparent); transform:translateY(-2px); }
+.poster-card:hover { box-shadow:0 0 28px color-mix(in srgb, var(--dc, #00FFFF) 40%, transparent); transform:translateY(-2px); border-color:color-mix(in srgb,var(--dc) 40%,#2b2b2b); }
 @keyframes pulse { 0%,100%{box-shadow:0 0 14px color-mix(in srgb, var(--dc) 18%, transparent)} 50%{box-shadow:0 0 24px color-mix(in srgb, var(--dc) 32%, transparent)} }
-.flyer { height:190px; background:linear-gradient(135deg,#131313,#1d1d1d); display:flex; align-items:center; justify-content:center; color:#333; font-size:11px; }
-.body { padding:14px 16px; border-left:4px solid var(--dc); }
-.title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:21px; text-transform:uppercase; line-height:1.05; margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.flyer { height:280px; background:linear-gradient(135deg,#131313,#1d1d1d); display:flex; align-items:center; justify-content:center; color:#444; font-size:11px; position:relative; }
+.stripe { position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--dc); }
+.meta { padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px; }
+.tags { display:flex; flex-wrap:wrap; gap:6px; }
+.day-tag { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:10px; letter-spacing:0.08em; background:#fff; color:#000; padding:3px 8px; text-transform:uppercase; }
+.type-tag { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:10px; letter-spacing:0.08em; border:1px solid #555; color:#ccc; padding:2px 7px; text-transform:uppercase; }
+.meta-tag { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:10px; letter-spacing:0.08em; border:1px solid var(--dc); color:var(--dc); padding:2px 7px; text-transform:uppercase; }
+.title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:21px; text-transform:uppercase; line-height:1.05; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .venue { font-size:13px; color:#888; }
-.when { font-size:12px; color:#999; margin-top:3px; }
-.tag { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:0.08em; border:1px solid var(--dc); color:var(--dc); padding:2px 7px; margin-bottom:8px; }
+.when { font-size:12px; color:#999; }
+.details { font-size:12px; color:var(--dc); margin-top:2px; }
+/* List / EventCard */
+.list-card {
+  width:min(100%,420px); display:grid; grid-template-columns:72px 1fr; gap:14px; align-items:center;
+  background:#0b0b0b; border:2px solid #2b2b2b; border-left:4px solid var(--dc); border-radius:4px;
+  padding:12px 14px; cursor:pointer; transition:transform .2s, box-shadow .2s;
+}
+.list-card:hover { transform:translateY(-2px); box-shadow:0 0 20px color-mix(in srgb, var(--dc) 28%, transparent); }
+.thumb { width:72px; height:96px; background:linear-gradient(135deg,#131313,#1d1d1d); display:flex; align-items:center; justify-content:center; color:#444; font-size:10px; }
 </style></head><body>
-<div class="poster-card glow" style="--dc:#FF00CC">
-  <div class="flyer">flyer 2:3</div>
-  <div class="body">
-    <span class="tag">Ticketed · 21+</span>
+<div class="col-label">PosterCard — board grid (day glow + bottom stripe)</div>
+<div class="poster-card" style="--dc:#FF00CC">
+  <div class="flyer">flyer 2:3<span class="stripe"></span></div>
+  <div class="meta">
+    <div class="tags">
+      <span class="day-tag">FRI</span>
+      <span class="type-tag">Drag</span>
+      <span class="meta-tag">Ticketed · 21+</span>
+    </div>
     <h3 class="title">Horse Meat Disco</h3>
     <div class="venue">Crystal Ballroom</div>
     <div class="when">Fri, Jul 17 · 09:00 PM · Pearl District</div>
+    <div class="details">Event details →</div>
   </div>
 </div>
-<div class="poster-card glow" style="--dc:#00FFFF">
-  <div class="flyer">flyer 2:3</div>
-  <div class="body">
-    <span class="tag">Free · All ages</span>
+<div class="poster-card" style="--dc:#00FFFF">
+  <div class="flyer">flyer 2:3<span class="stripe"></span></div>
+  <div class="meta">
+    <div class="tags">
+      <span class="day-tag">THU</span>
+      <span class="meta-tag">Free · All ages</span>
+    </div>
     <h3 class="title">Sad Girl Summer</h3>
     <div class="venue">Black Water</div>
     <div class="when">Thu, Jul 16 · 07:00 PM · NE Portland</div>
+    <div class="details">Event details →</div>
+  </div>
+</div>
+<div class="col-label" style="margin-top:8px">EventCard — list row (4px left day border)</div>
+<div class="list-card" style="--dc:#39FF14">
+  <div class="thumb">2:3</div>
+  <div>
+    <div class="tags" style="margin-bottom:6px">
+      <span class="day-tag">SAT</span>
+      <span class="type-tag">Parade</span>
+    </div>
+    <h3 class="title" style="font-size:18px">Portland Pride Parade</h3>
+    <div class="venue">Downtown</div>
+    <div class="when">Sat, Jul 18 · 11:00 AM</div>
   </div>
 </div>
 </body></html>

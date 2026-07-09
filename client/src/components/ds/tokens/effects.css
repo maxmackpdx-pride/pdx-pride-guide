@@ -43,6 +43,12 @@
 
   --press-scale: 0.97;   /* @kind other */
   --hover-lift:  -2px;   /* @kind other */
+
+  /* Card glow policy (listings / Spotted / board):
+     Normal = glow on hover only (or slow idle pulse where product specifies).
+     Calm   = no glow, no pulse; hover may still lift without shadow. */
+  --card-glow-idle: 0 0 14px color-mix(in srgb, var(--dc, var(--neon-cyan)) 18%, transparent);
+  --card-glow-hot:  0 0 28px color-mix(in srgb, var(--dc, var(--neon-cyan)) 40%, transparent);
 }
 
 /* Ambient neon pulse, driven by a per-element --dc (day/accent color) */

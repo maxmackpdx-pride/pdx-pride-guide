@@ -18,11 +18,24 @@ Commit the synced folder in the **same PR/commit** as the app changes. If
 `sync:design-system` updates files, include those diffs — do not push drift.
 
 ## Contents
-- `tokens/tokens.css` — canonical tokens (colors, day colors, type, effects)
+- `tokens/tokens.css` — canonical tokens (surfaces, neons, day colors, type,
+  spacing, effects, directory categories, schedule accents)
+- `EVENTS_GUIDE.md` — events/schedule system + DS component mapping
+- `AVATARS_GUIDE.md` — avatar system (not in React DS)
 - `previews/*.html` — self-contained preview cards; first line carries the
   `@dsCard group="…"` marker the Design System pane indexes on:
-  - `colors.html` (Colors), `typography.html` (Type), `buttons.html` (Buttons),
-    `event-card.html` (Cards), `chips-effects.html` (Effects)
+  - `colors.html` (Colors)
+  - `typography.html` (Type)
+  - `buttons.html` (Buttons)
+  - `event-card.html` (Cards — PosterCard + EventCard)
+  - `place-card.html` (Cards — PlaceCard / directory)
+  - `chips-effects.html` (Effects — rainbow, day chips, glow, filters)
+  - `events-page-layout.html` / `schedule-grid.html` (Layout)
+  - `avatars.html` (Avatars)
+
+Modular production tokens (richer, multi-file) live in
+`client/src/components/ds/tokens/`. Keep them aligned via
+`npm run sync:design-system`.
 
 ## Design rules
 - Background is always near-black `#0a0a0a`; content sits on `#0b0b0b` cards

@@ -109,6 +109,20 @@
   /* lighter text-safe versions of the dark day colors */
   --day-mon-text: #AA66FF;
   --day-tue-text: #4488FF;
+  /* Multi-day pin / legend pie (MON→SUN order) */
+  --day-multi: linear-gradient(
+    90deg,
+    var(--day-mon),
+    var(--day-tue),
+    var(--day-wed),
+    var(--day-thu),
+    var(--day-fri),
+    var(--day-sat),
+    var(--day-sun)
+  );
+  /* Reserved — map RSVP pulse + primary CTA only. Never a day color. */
+  --rsvp: var(--neon-yellow);
+  --day-unknown: #ffffff;
 
   /* ============================================================
      SEMANTIC ALIASES

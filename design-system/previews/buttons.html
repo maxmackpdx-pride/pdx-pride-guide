@@ -5,6 +5,7 @@
 <style>
 body { margin:0; background:#0a0a0a; color:#fff; font-family:'Inter',sans-serif; padding:28px; display:flex; flex-direction:column; gap:22px; align-items:flex-start; }
 .lbl { font-size:10px; color:#666; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:-14px; }
+.row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
 .btn-neon {
   display:inline-flex; align-items:center; gap:6px;
   font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.85rem;
@@ -14,19 +15,31 @@ body { margin:0; background:#0a0a0a; color:#fff; font-family:'Inter',sans-serif;
   transition:background .15s,color .15s,transform .15s,box-shadow .15s;
 }
 .btn-neon:hover { background:#CCFF00; color:#000; transform:translate(-1px,-1px); box-shadow:6px 6px 0 rgba(255,0,204,0.5); }
+.btn-neon:active { transform:translate(3px,3px); box-shadow:1px 1px 0 rgba(255,0,204,0.36); }
 .btn-neon.solid { background:#CCFF00; color:#000; }
 .btn-neon.cyan { border-color:#00FFFF; color:#00FFFF; box-shadow:4px 4px 0 rgba(204,255,0,0.3); }
-.btn-neon.cyan:hover { background:#00FFFF; color:#000; }
+.btn-neon.cyan:hover { background:#00FFFF; color:#000; box-shadow:6px 6px 0 rgba(204,255,0,0.45); }
+.btn-neon.pink { border-color:#FF00CC; color:#FF00CC; box-shadow:4px 4px 0 rgba(0,255,255,0.3); }
+.btn-neon.pink:hover { background:#FF00CC; color:#000; }
+.btn-neon.orange { border-color:#FF6600; color:#FF6600; box-shadow:4px 4px 0 rgba(255,0,204,0.32); }
+.btn-neon.orange:hover { background:#FF6600; color:#000; }
 .btn-pill { background:#C8FA3C; color:#000; border:none; border-radius:6px; padding:10px 24px; font-weight:700; font-size:14px; font-family:'Inter',sans-serif; cursor:pointer; }
 .btn-ghost { background:none; border:1px solid #333; color:#999; border-radius:999px; padding:8px 18px; font-size:12px; cursor:pointer; }
 .btn-ghost:hover { border-color:#CCFF00; color:#CCFF00; }
+.note { font-size:11px; color:#666; max-width:48ch; line-height:1.45; margin:0; }
 </style></head><body>
-<div class="lbl">Primary — btn-neon (brutalist offset shadow)</div>
-<button class="btn-neon">VIEW AS SCHEDULE →</button>
-<div class="lbl">Solid variant</div>
-<button class="btn-neon solid">I'll be there →</button>
-<div class="lbl">Cyan accent variant</div>
-<button class="btn-neon cyan">EVENT DETAILS →</button>
+<p class="note">DS <code>Button</code> — Barlow Condensed 700, sharp corners, brutalist offset shadow. Hover lifts up-left; click presses into the shadow.</p>
+<div class="lbl">Primary neon (lime / yellow)</div>
+<div class="row">
+  <button class="btn-neon">View as schedule →</button>
+  <button class="btn-neon solid">I'll be there →</button>
+</div>
+<div class="lbl">Accent variants</div>
+<div class="row">
+  <button class="btn-neon cyan">Event details →</button>
+  <button class="btn-neon pink">Message me</button>
+  <button class="btn-neon orange">Report a problem</button>
+</div>
 <div class="lbl">Soft pill — system dialogs (error boundary, confirms)</div>
 <button class="btn-pill">Reload page</button>
 <div class="lbl">Ghost — tertiary actions</div>

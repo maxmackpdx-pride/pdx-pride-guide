@@ -204,11 +204,43 @@ talent/lineup rows → RSVP "I'll be there" (acid yellow `#CCFF00`) → attendan
 avatars → share/calendar actions. Unclaimed events show a CLAIMABLE tag that
 links to the claim flow.
 
+## Design system components (production mapping)
+
+Portable samples: `previews/event-card.html`, `events-page-layout.html`,
+`schedule-grid.html`. React: `client/src/components/ds/`.
+
+| UI surface | DS component | Notes |
+|---|---|---|
+| Events **grid** card | `PosterCard` (`.pdxBoard`) | 2:3 flyer, bottom day stripe, ambient day glow, white day pill + outline tags |
+| Events **list** row | `EventCard` (`.pdxRow`) | Thumbnail + meta; **4px left border** in day color |
+| Events listing bridge | `adapters/ListingCard` | Maps API event → PosterCard / EventCard; keeps share / attendance / talent |
+| Day / type filters | `FilterChip` | Active day fill = day base color; MON/TUE use light text on dark fill |
+| Search | `SearchInput` | Filter bar search |
+| Map legend | `MapLegend` | Day swatches + multi-day pie demo |
+| Primary CTAs | `Button` accent `lime` | RSVP / "I'll be there" — acid yellow only |
+| Directory venues | `PlaceCard` | Category neon edge (`--cat-*`), not day colors |
+
+### Glow policy (cards)
+
+- **Normal:** soft day-color glow; hover lifts ~2px and brightens glow (`--card-glow-idle` → `--card-glow-hot`). Some boards use slow ~4s pulse (`pdxPulse`).
+- **Calm / reduced-motion:** no glow, no pulse; day accents flatten to `#888` where calm rules apply. Hover may still lift without neon shadow.
+
+### Tokens used on events
+
+- Day fills: `--day-mon` … `--day-sun` (from `shared/prideWeek.ts`)
+- Day text-safe: `--day-mon-text`, `--day-tue-text` (pills/tags on near-black)
+- Multi-day pin: `--day-multi`
+- RSVP / primary: `--rsvp` / `--neon-yellow` (`#CCFF00`) — **never** a day
+- Unknown day: `--day-unknown` / white
+- Schedule card accents: `--schedule-accent-1` … `5` (not day tokens)
+
 ## Do / don't for design work
 
 - ✅ One neon per element; day colors are data, not decoration.
 - ✅ Near-black backgrounds, hard borders, minimal radius, uppercase condensed display type.
 - ✅ Use `var(--day-*)` tokens, never raw hexes, so calm mode still works.
+- ✅ Board grid = `PosterCard`; list = `EventCard`; wire through `ListingCard` when possible.
 - ❌ Don't use `#CCFF00` for a day, and don't recolor RSVP anything else.
 - ❌ Don't give schedule cards day colors (see nuance above).
 - ❌ Don't invent an 8th day: the week is exactly MON Jul 13 → SUN Jul 19.
+- ❌ Don't idle-glow everything in calm mode — calm is a product requirement.
