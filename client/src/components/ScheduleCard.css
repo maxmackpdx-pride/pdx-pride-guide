@@ -1,0 +1,78 @@
+.sc-card {
+  background: #0a0a0a;
+  border: 2px solid #2b2b2b;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
+}
+
+.sc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 26px 30px 0;
+}
+
+.sc-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--neon-magenta, #ff00cc);
+  text-transform: uppercase;
+}
+
+.sc-kicker-bar {
+  width: 26px;
+  height: 2px;
+  background: var(--neon-magenta, #ff00cc);
+  display: inline-block;
+}
+
+.sc-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 54px;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  color: #fff;
+  margin: 11px 0 0;
+  text-transform: uppercase;
+}
+
+.sc-desc {
+  max-width: 66ch;
+  margin: 13px 30px 18px;
+  color: #b9b6ae;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sc-seam {
+  height: 3px;
+  background: var(--grad-flag, linear-gradient(to right, #00ffff, #ccff00 34%, #ff00cc 67%, #ff6600));
+}
+
+.sc-body {
+  padding: 18px;
+}
+
+@media (max-width: 640px) {
+  .sc-head {
+    padding: 20px 18px 0;
+  }
+  .sc-title {
+    font-size: 38px;
+  }
+  .sc-desc {
+    margin: 11px 18px 16px;
+  }
+  .sc-body {
+    padding: 10px;
+  }
+}

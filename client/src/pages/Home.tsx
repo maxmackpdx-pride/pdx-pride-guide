@@ -25,7 +25,7 @@ import {
   pickRandomBusinesses,
   type HomeDayKey,
 } from "@/lib/homeEvents";
-import Schedule from "@/pages/Schedule";
+import HomeSchedule from "@/components/HomeSchedule";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
 
@@ -236,7 +236,7 @@ export default function Home() {
             }
           />
           <div className="pg-home-schedule">
-            <Schedule embed />
+            <HomeSchedule />
           </div>
         </ScrollReveal>
       </div>

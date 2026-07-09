@@ -1911,6 +1911,70 @@ h2.display,
 }
 
 /* Events page — compact title hero, roomier map */
+.events-map-row {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 16px;
+  padding: 16px 20px 0;
+}
+
+.events-map-row__map {
+  flex: none;
+}
+
+.events-map-row__panel {
+  flex: none;
+  height: 320px;
+}
+
+@media (min-width: 900px) {
+  .events-map-row {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 20px clamp(16px, 4vw, 40px) 0;
+  }
+
+  .events-map-row__panel {
+    height: clamp(360px, 48vh, 560px);
+    width: min(360px, 32vw);
+  }
+
+  .events-map-row__map {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .events-map-row__map .events-map-panel {
+    height: 100%;
+  }
+}
+
+.events-tab-bar {
+  display: flex;
+  gap: 2px;
+  padding: 16px clamp(16px, 4vw, 40px) 0;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.events-tab {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 18px 12px;
+  cursor: pointer;
+}
+
+.events-tab.active {
+  color: #fff;
+  border-bottom-color: var(--neon-magenta, #ff00cc);
+}
+
 .events-page .page-hero {
   min-height: clamp(148px, 20vh, 210px);
 }
