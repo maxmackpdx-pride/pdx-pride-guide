@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import { DAYS, DAY_SORT_ORDER } from "@shared/prideWeek";
+import { DAYS, type DayKey } from "@shared/prideWeek";
 import { buildScheduleEvents } from "@/lib/scheduleEvents";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import RailCard from "@/components/RailCard";
@@ -12,9 +12,9 @@ import AuthModal from "@/components/AuthModal";
 import "./HomeSchedule.css";
 
 /**
- * Home page "1B" — headliner rail + Night-by-Night day stacks.
- * Ported from the design mock's `1b` variant (The Schedule.dc.html).
- * Replaces the old `<Schedule embed />` grid on Home.tsx.
+ * Home page "1D" — day-tabbed big-flyer grid. Ported from the design
+ * mock's `1d` variant (The Schedule.dc.html): pick a day, see its flyers
+ * full-size. Replaces the old `<Schedule embed />` grid on Home.tsx.
  */
 export default function HomeSchedule() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -43,21 +43,21 @@ export default function HomeSchedule() {
     return m;
   }, [listings]);
 
-  const headliners = useMemo(
-    () =>
-      scheduleEvents
-        .filter(e => e.feat)
-        .sort((a, b) => (DAY_SORT_ORDER[a.day] ?? 99) - (DAY_SORT_ORDER[b.day] ?? 99) || a.s - b.s),
+  const daysWithCounts = useMemo(
+    () => DAYS.map(d => ({ ...d, count: scheduleEvents.filter(e => e.day === d.key).length })),
     [scheduleEvents],
   );
 
-  const byDay = useMemo(
-    () =>
-      DAYS.map(d => ({
-        ...d,
-        items: scheduleEvents.filter(e => e.day === d.key).sort((a, b) => a.s - b.s),
-      })).filter(d => d.items.length > 0),
-    [scheduleEvents],
+  const [activeDay, setActiveDay] = useState<DayKey>(() => {
+    const firstWithEvents = daysWithCounts.find(d => d.count > 0);
+    return firstWithEvents?.key ?? DAYS[0].key;
+  });
+
+  const activeDayDef = daysWithCounts.find(d => d.key === activeDay) ?? daysWithCounts[0];
+
+  const dayEvents = useMemo(
+    () => scheduleEvents.filter(e => e.day === activeDay).sort((a, b) => a.s - b.s),
+    [scheduleEvents, activeDay],
   );
 
   const openEvent = (listing: EventListing) => setSelectedEvent(listing);
@@ -67,13 +67,44 @@ export default function HomeSchedule() {
     <div className="hsch-card">
       <div className="hsch-seam" />
 
-      {headliners.length > 0 && (
-        <div className="hsch-section">
-          <div className="hsch-section-label" style={{ color: "var(--neon-yellow)" }}>
-            The Headliners
+      <div className="hsch-section">
+        <div className="hsch-tabs">
+          {daysWithCounts.map(d => {
+            const active = d.key === activeDay;
+            return (
+              <button
+                key={d.key}
+                type="button"
+                className="hsch-tab"
+                onClick={() => setActiveDay(d.key)}
+                style={{
+                  borderColor: active ? d.color : "#2b2b2b",
+                  background: active ? d.color : "transparent",
+                  color: active ? "#000" : "#c9c9c9",
+                  boxShadow: active ? `0 0 16px -5px ${d.color}` : "none",
+                }}
+              >
+                <span>{d.short}</span>
+                <span className="hsch-tab-date" style={{ color: active ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.4)" }}>
+                  {d.date}
+                </span>
+                <span className="hsch-tab-count" style={{ color: active ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.35)" }}>
+                  {d.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {activeDayDef && (
+          <div className="hsch-day-head" style={{ color: activeDayDef.text }}>
+            {activeDayDef.label} · {activeDayDef.date} · {dayEvents.length} {dayEvents.length === 1 ? "event" : "events"}
           </div>
-          <div className="hsch-rail">
-            {headliners.map(e => {
+        )}
+
+        {dayEvents.length > 0 ? (
+          <div className="hsch-tab-grid">
+            {dayEvents.map(e => {
               const listing = listingById.get(e.id);
               if (!listing) return null;
               return (
@@ -84,47 +115,14 @@ export default function HomeSchedule() {
                   rsvped={myEventIds.has(e.id)}
                   onToggleRsvp={toggleRsvp}
                   onOpen={openEvent}
+                  fill
                 />
               );
             })}
           </div>
-        </div>
-      )}
-
-      <div className="hsch-seam hsch-seam--thin" />
-
-      <div className="hsch-section">
-        <div className="hsch-section-label" style={{ color: "var(--neon-cyan)" }}>
-          Night by Night
-        </div>
-        <div className="hsch-byday-grid">
-          {byDay.map(d => (
-            <div key={d.key}>
-              <div className="hsch-day-hdr" style={{ borderBottomColor: `${d.color}80` }}>
-                <span className="hsch-day-name" style={{ color: d.text }}>{d.short}</span>
-                <span className="hsch-day-date">{d.date}</span>
-                <span className="hsch-day-count" style={{ color: d.text }}>{d.items.length}</span>
-              </div>
-              <div className="hsch-day-list">
-                {d.items.map(e => {
-                  const listing = listingById.get(e.id);
-                  if (!listing) return null;
-                  return (
-                    <RailCard
-                      key={e.scheduleKey}
-                      event={e}
-                      listing={listing}
-                      rsvped={myEventIds.has(e.id)}
-                      onToggleRsvp={toggleRsvp}
-                      onOpen={openEvent}
-                      variant="compact"
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
+        ) : (
+          <div className="hsch-quiet">Nothing on this day yet — check back soon.</div>
+        )}
       </div>
 
       {selectedEvent && (
