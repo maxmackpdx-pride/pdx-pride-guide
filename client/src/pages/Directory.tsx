@@ -369,10 +369,8 @@ export default function Directory() {
           </div>
         ) : (
           <div className="directory-grid">
-            {filtered.map((biz, i) => (
-              <ScrollReveal key={biz.id} delay={Math.min(i * 40, 300)}>
-                <DirectoryCard biz={biz} onClick={() => setSelectedPlace(biz)} />
-              </ScrollReveal>
+            {filtered.map(biz => (
+              <DirectoryCard key={biz.id} biz={biz} onClick={() => setSelectedPlace(biz)} />
             ))}
           </div>
         )}

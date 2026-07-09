@@ -10301,15 +10301,33 @@ html.calm-mode .schedule-now-line {
   flex: 1 1 auto;
 }
 
-/* Queer Directory redesign — masonry columns match mockup */
+/* Queer Directory — stable CSS grid (not multi-column).
+   Multi-column masonry + entrance animations reflowed on logo load/scroll,
+   which made cards vanish and reappear while scrolling. */
 .directory-grid {
-  columns: 4;
-  column-gap: 22px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
 }
 
-@media (max-width: 1100px) { .directory-grid { columns: 3; } }
-@media (max-width: 900px) { .directory-grid { columns: 2; } }
-@media (max-width: 560px) { .directory-grid { columns: 1; } }
+.directory-grid .pdxPlace {
+  margin: 0;
+  /* Kill entrance animation so paint never starts at opacity:0 on reflow */
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 1100px) {
+  .directory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .directory-grid { grid-template-columns: 1fr; }
+}
 
 .directory-page {
   --dir-gm: 60;
