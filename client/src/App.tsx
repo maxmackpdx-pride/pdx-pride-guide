@@ -36,6 +36,7 @@ import About from "./pages/About";
 import Legal from "./pages/Legal";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
+import NotificationSettings from "./pages/NotificationSettings";
 import Inbox from "./pages/Inbox";
 import MissedConnections from "./pages/MissedConnections";
 import Directory from "./pages/Directory";
@@ -69,6 +70,7 @@ export default function App() {
                 <Route path="/legal" component={Legal} />
                 <Route path="/admin" component={Admin} />
                 <Route path="/dashboard" component={Dashboard} />
+                <Route path="/settings/notifications" component={NotificationSettings} />
                 <Route path="/inbox" component={Inbox} />
                 <Route path="/spotted" component={MissedConnections} />
                 <Route path="/directory" component={Directory} />

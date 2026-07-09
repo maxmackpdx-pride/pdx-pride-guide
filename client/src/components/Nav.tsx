@@ -245,12 +245,29 @@ export default function Nav() {
 
             {user && (
               <div className="site-auth">
+                <NavLink
+                  href="/dashboard"
+                  label="Hub"
+                  active={hubActive}
+                  showNotify={unreadCount > 0}
+                  notifyLabel={
+                    unreadCount > 0
+                      ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
+                      : undefined
+                  }
+                  onClick={closeMenu}
+                />
                 {isAdmin && (
                   <NavLink
                     href="/admin"
-                    label="ADMIN"
-                    active={location === "/admin"}
+                    label="Admin"
+                    active={location === "/admin" || location.startsWith("/admin/")}
                     showNotify={adminPendingCount > 0}
+                    notifyLabel={
+                      adminPendingCount > 0
+                        ? `Admin, ${adminPendingCount} pending item${adminPendingCount === 1 ? "" : "s"}`
+                        : undefined
+                    }
                     onClick={closeMenu}
                   />
                 )}
@@ -292,26 +309,26 @@ export default function Nav() {
                         <span className="site-profile-menu__identity-hint">View public profile</span>
                       </Link>
                       <Link
-                        href="/dashboard"
-                        role="menuitem"
-                        className={`site-profile-menu__item${hubActive ? " active" : ""}`}
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setMenuOpen(false);
-                        }}
-                      >
-                        Hub{unreadCount > 0 ? ` (${unreadCount})` : ""}
-                      </Link>
-                      <Link
                         href="/inbox"
                         role="menuitem"
-                        className="site-profile-menu__item"
+                        className={`site-profile-menu__item${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
                         onClick={() => {
                           setProfileOpen(false);
                           setMenuOpen(false);
                         }}
                       >
-                        Full inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
+                        Inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
+                      </Link>
+                      <Link
+                        href="/settings/notifications"
+                        role="menuitem"
+                        className={`site-profile-menu__item${location === "/settings/notifications" || location.startsWith("/settings/notifications?") ? " active" : ""}`}
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Notification settings
                       </Link>
                       <button
                         type="button"
@@ -335,8 +352,8 @@ export default function Nav() {
               <div className="site-auth">
                 <NavLink
                   href="/admin"
-                  label="ADMIN"
-                  active={location === "/admin"}
+                  label="Admin"
+                  active={location === "/admin" || location.startsWith("/admin/")}
                   showNotify={adminPendingCount > 0}
                   onClick={closeMenu}
                 />

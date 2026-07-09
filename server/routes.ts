@@ -1819,7 +1819,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (subs.length === 0) {
       return res.status(400).json({
         error: "No active push subscription for this admin account",
-        hint: "Dashboard → Notifications → Enable push on this device",
+        hint: "Avatar menu → Notification settings → Enable push on this device",
       });
     }
     const payload = buildDeclarativePayload({

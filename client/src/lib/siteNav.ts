@@ -45,6 +45,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/about": { section: "About", title: "About" },
   "/submit": { section: "Submit", title: "Submit an Event" },
   "/dashboard": { section: "Account", title: "Your Hub" },
+  "/settings/notifications": { section: "Account", title: "Notification settings" },
   "/inbox": { section: "Account", title: "Inbox" },
 };
 
