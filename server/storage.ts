@@ -3021,6 +3021,46 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("verify_checking_portland_events_v2");
   }
+  if (!hasBootMigration("seed_fridays_are_a_drag_pride_2026_v1")) {
+    const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1").get(
+      "Fridays Are A DRAG — Pride Weekend",
+    );
+    if (!exists) {
+      const now = new Date().toISOString();
+      db.insert(events).values({
+        title: "Fridays Are A DRAG — Pride Weekend",
+        description:
+          "Portland Pride Weekend edition of Fridays Are A DRAG at Badlands. Drag showtime 9:30pm with hot gogos, then Friday night dance party with Haute Toddy. Cast: Jay Colby, Mija (LA), Glenn Coco (Seattle), April Rition (Dallas), Seven (PDX), Harlow (PDX). No cover before 9pm. 21+.",
+        venueName: "Badlands",
+        address: "110 NW Broadway, Portland, OR 97209",
+        neighborhood: "Old Town",
+        lat: 45.5239294,
+        lng: -122.677178,
+        dateStart: "2026-07-17T21:30:00",
+        dateEnd: "2026-07-18T02:00:00",
+        dayOfWeek: "FRI",
+        ageRequirement: "21_PLUS",
+        eventTypes: JSON.stringify(["DRAG", "PERFORMANCE", "NIGHTLIFE", "PARTY"]),
+        admission: "DOOR_FEE",
+        ticketUrl: "https://www.instagram.com/p/DZ_oQ3jPygT/",
+        isPublic: true,
+        isPrivate: false,
+        isHouseParty: false,
+        isSexPositive: false,
+        nudityOk: false,
+        posterImageUrl: null,
+        status: "LIVE",
+        source: "admin_seeded",
+        isClaimable: true,
+        claimedBy: null,
+        submittedBy: null,
+        adminNotes:
+          "Verified Jay Colby IG post DZ_oQ3jPygT + Badlands (110 NW Broadway). Pride weekend Fri Jul 17 2026.",
+        createdAt: now,
+      } as any).run();
+    }
+    recordBootMigration("seed_fridays_are_a_drag_pride_2026_v1");
+  }
   if (!hasBootMigration("lavender_rain_forbidden_tickets_v3")) {
     sqlite.prepare(`
       UPDATE events SET
