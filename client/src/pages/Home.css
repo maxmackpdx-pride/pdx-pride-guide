@@ -565,7 +565,21 @@ html.calm-mode .home-main-stage .scroll-reveal--visible {
   }
 
   .home-main-stage .pg-placescroll {
-    max-height: 420px;
+    max-height: none;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 14px;
+    padding-right: 0;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-main-stage .pg-placescroll > * {
+    flex: 0 0 auto;
+    width: 240px;
+    scroll-snap-align: start;
   }
 
   .home-main-stage #home-map {
