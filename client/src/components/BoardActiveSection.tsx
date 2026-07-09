@@ -5,11 +5,12 @@ const STICKER_DS_COLOR = {
   lime: "lime",
   cyan: "cyan",
   magenta: "pink",
+  purple: "purple",
 } as const;
 
 type BoardActiveSectionProps = {
   sticker: string;
-  stickerTone?: "lime" | "cyan" | "magenta";
+  stickerTone?: "lime" | "cyan" | "magenta" | "purple";
   /** `sticker` = rotated badge (legacy). `mono` = design-makeover kicker. */
   stickerStyle?: "sticker" | "mono";
   title: string;
@@ -25,6 +26,7 @@ const TONE_CLASS: Record<NonNullable<BoardActiveSectionProps["stickerTone"]>, st
   lime: "board-active-feed__kicker--lime",
   cyan: "board-active-feed__kicker--cyan",
   magenta: "board-active-feed__kicker--magenta",
+  purple: "board-active-feed__kicker--purple",
 };
 
 export default function BoardActiveSection({

@@ -8,13 +8,16 @@ import MissedConnectionsHero from "@/components/MissedConnectionsHero";
 import MissedConnectionsPanel, { type MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardHowItWorks from "@/components/BoardHowItWorks";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
+import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 
-const HOW_IT_WORKS: Array<[string, string]> = [
-  ["Pick a spot", "Link a live or past Pride event, write your own spot, or choose Around town."],
-  ["Write it", "Short, kind, specific — you stay anonymous."],
-  ["Wait", "Someone who was there can reply privately."],
-  ["Reveal", "Choose to show your profile in inbox when you're both ready."],
+const HOW_IT_WORKS = [
+  { title: "Pick a spot", body: "Link a Pride event, name your own spot, or choose around town.", color: "#ff1fa0" },
+  { title: "Write it", body: "Short, kind, specific. You stay anonymous.", color: "#19e3ff" },
+  { title: "Wait", body: "Someone who was there can reply privately.", color: "#ff8c00" },
+  { title: "Reveal", body: "Show your profile in the inbox when you are both ready.", color: "#ff1fa0" },
 ];
 
 export default function MissedConnections() {
@@ -38,9 +41,9 @@ export default function MissedConnections() {
   });
 
   const stats = useMemo(() => [
-    { num: allPosts.length, label: "Spotted live", color: "#FF1FA0" },
-    { num: allPosts.filter(p => p.eventId != null).length, label: "At events", color: "#19E3FF" },
-    { num: allPosts.filter(p => p.eventId == null).length, label: "Around town", color: "#FF8C00" },
+    { num: allPosts.length, label: "Spotted, live now", color: "#ff1fa0" },
+    { num: allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },
+    { num: allPosts.filter(p => p.eventId == null).length, label: "Around town", color: "#ff8c00" },
   ], [allPosts]);
 
   const { data: myPosts = [] } = useQuery<MissedConnectionPost[]>({
@@ -90,62 +93,79 @@ export default function MissedConnections() {
     setEditForm({ title: post.title || "", body: post.body || "" });
   };
 
+  const openPost = () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    const toggle = document.getElementById("spotted-compose-toggle") as HTMLButtonElement | null;
+    toggle?.click();
+    window.setTimeout(() => {
+      document.getElementById("spotted-compose")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 40);
+  };
+
   return (
-    <div className="zine-page missed-page board-page min-h-screen">
-      <MissedConnectionsHero />
-      <BoardStatsBar stats={stats} liveLabel="Anonymous board · replies stay private" />
+    <div className="zine-page missed-page board-page board-page--makeover min-h-screen">
+      <MissedConnectionsHero onPost={openPost} />
+      <BoardStatsBar stats={stats} variant="band" showLive={false} />
+
+      <ScrollReveal delay={40}>
+        <BoardHowItWorks
+          className="missed-how"
+          kickerTone="cyan"
+          title={<>Private by <span style={{ color: "#ff1fa0" }}>default</span></>}
+          lede="Spotted is our missed connections board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
+          steps={HOW_IT_WORKS}
+          footerLine="Stay kind · stay anonymous · reveal when ready"
+        />
+      </ScrollReveal>
 
       {!user && (
-        <div className="board-active-feed" style={{ paddingTop: 0 }}>
-          <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 24px" }}>
+        <div className="board-active-feed" style={{ paddingTop: 0, paddingBottom: 0, background: "transparent" }}>
+          <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 8px" }}>
             <p className="board-copy-sm" style={{ marginInline: "auto" }}>
               Browse Spotted posts without an account. Log in to post or reply — threads stay anonymous until you both reveal in inbox.
             </p>
-            <button className="btn-neon solid" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>Log in / Join</button>
+            <Button variant="solid" accent="magenta" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>
+              Log in / Join
+            </Button>
           </div>
         </div>
       )}
 
-      <MissedConnectionsPanel mode="board" boardLayout onRequireAuth={() => setShowAuth(true)} />
-
-      <ScrollReveal delay={60}>
-        <section id="how-it-works" className="missed-how board-how board-how--inline diag">
-          <div>
-            <span className="board-sticker board-sticker--magenta">How it works</span>
-            <h2 className="display section-heading">PRIVATE BY DEFAULT</h2>
-            <p className="board-copy">Spotted is our missed connections board. Post who you saw tied to an event or around town. Replies never show on the board — they open a private inbox thread.</p>
-          </div>
-          <div className="board-steps">
-            {HOW_IT_WORKS.map(([title, text], i) => (
-              <article className="board-step" key={title}>
-                <span className="board-step__num" aria-hidden="true">{i + 1}</span>
-                <h3 className="display panel-heading">{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-          <div className="missed-footer-line">Stay kind. Stay anonymous. Reveal when ready.</div>
-        </section>
-      </ScrollReveal>
+      <div id="feed">
+        <MissedConnectionsPanel
+          mode="board"
+          boardLayout
+          makeover
+          onRequireAuth={() => setShowAuth(true)}
+          onRequestCompose={() => openPost()}
+        />
+      </div>
 
       {myPosts.filter(p => p.status === "ACTIVE").length > 0 && (
         <ScrollReveal delay={80}>
           <section className="board-active-feed" style={{ paddingTop: 0 }}>
             <div className="board-active-feed__inner">
               <div className="board-active-feed__head">
-                <span className="board-sticker board-sticker--magenta">Your posts</span>
-                <h2 className="display section-heading board-active-feed__title">YOUR ACTIVE POSTS</h2>
+                <div className="board-active-feed__kicker board-active-feed__kicker--magenta">Your posts</div>
+                <h2 className="display section-heading board-active-feed__title">Your active posts</h2>
               </div>
               <div className="board-listing-grid" style={{ gridTemplateColumns: "1fr" }}>
                 {myPosts.filter(p => p.status === "ACTIVE").map(post => (
-                  <div key={post.id} className="board-listing-card" style={{ "--listing-accent": "#FF1FA0", cursor: "default" } as React.CSSProperties}>
-                    <div className="board-listing-card__main">
+                  <div
+                    key={post.id}
+                    className="board-listing-card board-listing-card--makeover"
+                    style={{ "--listing-accent": "#ff1fa0", cursor: "default", padding: 16 } as React.CSSProperties}
+                  >
+                    <div className="board-listing-card__main" style={{ padding: 0 }}>
                       <h4 className="board-listing-card__title">{post.title}</h4>
                       <p style={{ margin: "8px 0 0", color: "#9d9a92", fontSize: "0.85rem" }}>
                         {post.eventTitle || post.venueHint || "Around town"} · anonymous to everyone else
                       </p>
                     </div>
-                    <div className="board-listing-card__expand" style={{ borderTop: "none", paddingTop: 0, marginTop: 12 }}>
+                    <div className="board-listing-card__expand" style={{ borderTop: "none", paddingTop: 0, marginTop: 12, marginLeft: 0, marginRight: 0 }}>
                       <div className="gifting-actions">
                         <button onClick={() => startEdit(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "6px 12px" }}>Edit</button>
                         <button onClick={() => deleteMutation.mutate(post.id)} className="btn-neon magenta" style={{ fontSize: "0.78rem", padding: "6px 12px" }}>Delete</button>
@@ -158,6 +178,11 @@ export default function MissedConnections() {
           </section>
         </ScrollReveal>
       )}
+
+      <BoardCloseSeam
+        line="Shoot your shot. Stay kind. Take care of each other."
+        url="prideguidepdx.com/spotted"
+      />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 

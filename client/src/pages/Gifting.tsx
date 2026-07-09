@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import { Gift, HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import BoardRunningHead from "@/components/BoardRunningHead";
+import BoardHero from "@/components/BoardHero";
+import BoardHowItWorks from "@/components/BoardHowItWorks";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
@@ -303,70 +306,35 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page board-page--makeover">
-      {/* Running head — community boards strip */}
-      <div className="board-running">
-        <div className="board-running__inner">
-          <div className="board-running__live">
-            <span className="board-running__dot" aria-hidden="true" />
-            The Community Boards
-          </div>
-          <nav className="board-running__nav" aria-label="Community boards">
-            <Link href="/spotted" className="board-running__link">Spotted</Link>
-            <span className="board-running__link is-active" aria-current="page">Gifting</span>
-            <Link href="/pride-work" className="board-running__link">Gigs</Link>
-          </nav>
-        </div>
-      </div>
-
-      {/* Hero */}
-      <header className="board-hero board-hero--gifting">
-        <div className="board-hero__inner">
-          <p className="board-hero__kicker">Free board · Pride season 2026</p>
-          <h1 className="board-hero__title">
-            Gift with <span className="board-hero__title-accent">Pride</span>
-          </h1>
-          <p className="board-hero__lede">
-            A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need.
-          </p>
-          <div className="board-hero__actions">
+      <BoardRunningHead active="gifting" />
+      <BoardHero
+        accent="lime"
+        kicker="Free board · Pride season 2026"
+        title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
+        lede="A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
+        actions={
+          <>
             <Button variant="solid" accent="lime" size="lg" arrow onClick={() => openForm("GIFT")}>
               Post a gift
             </Button>
             <Button variant="neon" accent="cyan" size="lg" onClick={() => openForm("ISO")}>
               Post an ISO
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
       <ScrollReveal>
-        <section id="how-it-works" className="gifting-how board-how board-how--inline board-how--makeover diag">
-          <div>
-            <div className="board-section-kicker board-section-kicker--cyan">How it works</div>
-            <h2 className="display section-heading board-how__title">
-              How Gift with <span className="board-how__title-accent">Pride</span> works
-            </h2>
-            <p className="board-copy">
-              Give what you can. Ask for what you need. Keep it local, free, and kind. First-time posts are held for a quick admin review.
-            </p>
-          </div>
-          <div className="board-steps board-steps--makeover">
-            {HOW_IT_WORKS.map((step, i) => (
-              <article className="board-step board-step--makeover" key={step.title}>
-                <span className="board-step__num" style={{ color: step.color }} aria-hidden="true">
-                  {i + 1}
-                </span>
-                <h3 className="display panel-heading">{step.title}</h3>
-                <p>{step.body}</p>
-              </article>
-            ))}
-          </div>
-          <div className="gifting-footer-line">
-            Keep it free · keep it kind · keep it moving · now through July 26
-          </div>
-        </section>
+        <BoardHowItWorks
+          className="gifting-how"
+          kickerTone="cyan"
+          title={<>How Gift with <span className="board-how__title-accent">Pride</span> works</>}
+          lede="Give what you can. Ask for what you need. Keep it local, free, and kind. First-time posts are held for a quick admin review."
+          steps={HOW_IT_WORKS}
+          footerLine="Keep it free · keep it kind · keep it moving · now through July 26"
+        />
       </ScrollReveal>
 
       {formOpen && (
@@ -722,14 +690,10 @@ export default function Gifting() {
         )}
       </BoardActiveSection>
 
-      {/* Close seam */}
-      <div className="board-close-seam" aria-hidden="true" />
-      <footer className="board-close">
-        <div className="board-close__inner">
-          <span className="board-close__line">Pride is a protest. Take care of each other.</span>
-          <span className="board-close__url">prideguidepdx.com/gifting</span>
-        </div>
-      </footer>
+      <BoardCloseSeam
+        line="Pride is a protest. Take care of each other."
+        url="prideguidepdx.com/gifting"
+      />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>

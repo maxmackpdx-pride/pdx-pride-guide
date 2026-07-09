@@ -27,6 +27,8 @@ type Props = {
   linkableEvents: LinkableMissedConnectionEvent[];
   canInteract?: boolean;
   onRequireAuth?: () => boolean;
+  makeover?: boolean;
+  onRequestCompose?: () => void;
 };
 
 export default function SpottedCardGrid({
@@ -37,6 +39,8 @@ export default function SpottedCardGrid({
   linkableEvents,
   canInteract = true,
   onRequireAuth,
+  makeover = false,
+  onRequestCompose,
 }: Props) {
   const { toast } = useToast();
 
@@ -177,13 +181,14 @@ export default function SpottedCardGrid({
       <button
         type="button"
         className="spotted-compose-toggle"
+        id="spotted-compose-toggle"
         onClick={() => {
           if (!canInteract) { onRequireAuth?.(); return; }
           setComposeOpen(o => !o);
         }}
         aria-expanded={composeOpen}
       >
-        {composeOpen ? "✕ CANCEL" : "＋ SAW SOMEONE? WRITE A NOTE"}
+        {composeOpen ? "✕ Cancel" : makeover ? "＋ Post a spotted" : "＋ Saw someone? Write a note"}
       </button>
 
       {composeOpen && (
@@ -270,9 +275,13 @@ export default function SpottedCardGrid({
           <button type="button" className="btn-neon" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</button>
         </div>
       ) : filteredPosts.length === 0 ? (
-        <div className="board-empty board-empty--prototype">
-          <p className="display section-heading">Nothing here yet</p>
-          <p className="board-copy-sm">Be the first — tie it to an event, write your own spot, or post around town.</p>
+        <div className={`board-empty ${makeover ? "board-empty--makeover" : "board-empty--prototype"}`}>
+          <p className="display section-heading">{makeover ? "No sightings yet" : "Nothing here yet"}</p>
+          <p className="board-copy-sm">
+            {makeover
+              ? "Loosen the filter, or be the one to break the ice. Someone out there is hoping you post first."
+              : "Be the first — tie it to an event, write your own spot, or post around town."}
+          </p>
         </div>
       ) : (
         <div className="spotted-card-grid">

@@ -45,13 +45,18 @@ export default function MissedConnectionsPanel({
   eventId,
   compact = false,
   boardLayout = false,
+  makeover = false,
   onRequireAuth,
+  onRequestCompose,
 }: {
   mode: "board" | "event";
   eventId?: number;
   compact?: boolean;
   boardLayout?: boolean;
+  /** Board makeover chrome (mono kicker, result counts, empty copy). */
+  makeover?: boolean;
   onRequireAuth?: () => void;
+  onRequestCompose?: () => void;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -267,13 +272,25 @@ export default function MissedConnectionsPanel({
 
   if (boardLayout && mode === "board") {
     return (
-      <div className="board-active-feed diag">
+      <div className={`board-active-feed diag${makeover ? " board-active-feed--makeover" : ""}`}>
         <div className="board-active-feed__inner">
           <div className="board-active-feed__head">
-            <span className="board-sticker board-sticker--magenta">Active board</span>
-            <h2 className="display section-heading board-active-feed__title">SPOTTED!</h2>
+            {makeover ? (
+              <div className="board-active-feed__head-row">
+                <div>
+                  <div className="board-active-feed__kicker board-active-feed__kicker--magenta">Active board</div>
+                  <h2 className="display section-heading board-active-feed__title">Who got spotted</h2>
+                </div>
+                <span className="board-active-feed__count">{posts.length} showing</span>
+              </div>
+            ) : (
+              <>
+                <span className="board-sticker board-sticker--magenta">Active board</span>
+                <h2 className="display section-heading board-active-feed__title">SPOTTED!</h2>
+              </>
+            )}
           </div>
-          <div className="board-active-feed__body">
+          <div className="board-active-feed__body" id="spotted-compose">
             <SpottedCardGrid
               posts={posts}
               isLoading={isLoading}
@@ -282,6 +299,8 @@ export default function MissedConnectionsPanel({
               linkableEvents={linkableEvents}
               canInteract={!!user}
               onRequireAuth={requireAuth}
+              makeover={makeover}
+              onRequestCompose={onRequestCompose}
             />
           </div>
         </div>

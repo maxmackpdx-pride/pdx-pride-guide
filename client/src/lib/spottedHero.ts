@@ -1,11 +1,11 @@
 import type { PageHeroProps } from "@/components/PageHero";
 
 export const spottedHeroContent = {
-  kicker: "Missed connections · Pride weekend",
-  titleLine1: "SPOTTED!",
+  kicker: "Anonymous board · Pride season 2026",
+  titleLine1: "Spotted someone?",
   titleLine1Accent: "magenta",
-  lede: "The missed connections board for Pride weekend. Post who you spotted, where you saw them, and what you remember. Replies never show on the board — they open a private inbox thread.",
-  tagline: "Not sure what missed connections are? Grab your nearest daddy.",
+  lede: "Missed connections from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread.",
+  tagline: "Stay kind · stay anonymous · reveal when ready",
   taglineAccent: "magenta",
   bgImage: "/motifs/hero-spotted-bigfoot.jpg",
   bgPosition: "center 42%",
