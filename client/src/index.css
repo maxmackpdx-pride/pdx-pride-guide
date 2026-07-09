@@ -12302,3 +12302,550 @@ html.calm-mode .pdxPlace--rainbow {
   50% { text-shadow: 0 0 30px rgba(204, 255, 0, 0.9); }
 }
 html.calm-mode .page-header__count { animation: none; text-shadow: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Board makeover — Gifting (from Page makeovers for three boards)
+   Shared chrome: running head, hero, stats band, steps, cards, close seam
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.board-page--makeover {
+  background: #06060a;
+  color: #c8c5bc;
+}
+
+/* Running head */
+.board-running {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 26px clamp(20px, 4vw, 44px) 0;
+}
+
+.board-running__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.board-running__live {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ccff00;
+}
+
+.board-running__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccff00;
+  box-shadow: 0 0 10px #ccff00;
+  animation: board-live-blink 1.8s ease-in-out infinite;
+}
+
+.board-running__nav {
+  display: flex;
+  gap: 20px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.board-running__link {
+  color: #8c8980;
+  text-decoration: none;
+  transition: color 0.12s ease;
+}
+
+.board-running__link:hover {
+  color: #ccff00;
+}
+
+.board-running__link.is-active {
+  color: #ccff00;
+}
+
+/* Hero */
+.board-hero {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(34px, 5vw, 60px) clamp(20px, 4vw, 44px) clamp(28px, 4vw, 40px);
+}
+
+.board-hero__inner {
+  max-width: 900px;
+}
+
+.board-hero__kicker {
+  margin: 0 0 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ccff00;
+}
+
+.board-hero__title {
+  margin: 0;
+  font-family: var(--font-board-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  color: #fff;
+  font-size: clamp(3rem, 7.5vw, 5.4rem);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.board-hero__title-accent {
+  color: #ccff00;
+  text-shadow: 0 0 34px rgba(204, 255, 0, 0.4);
+}
+
+.board-hero__lede {
+  margin: 18px 0 0;
+  max-width: 540px;
+  font-size: clamp(1rem, 1.7vw, 1.15rem);
+  line-height: 1.55;
+  color: #c8c5bc;
+}
+
+.board-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+/* Stats band (3-col full bleed) */
+.board-stats-band {
+  background: #050505;
+  border-top: 2px solid #1c1c22;
+  border-bottom: 2px solid #1c1c22;
+}
+
+.board-stats-band__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.board-stats-band__item {
+  padding: clamp(20px, 3vw, 30px) clamp(16px, 3vw, 30px);
+}
+
+.board-stats-band__item--rule {
+  border-right: 2px solid #1c1c22;
+}
+
+.board-stats-band__num {
+  display: block;
+  font-family: var(--font-board-display);
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  line-height: 0.82;
+  font-variant-numeric: tabular-nums;
+}
+
+.board-stats-band__label {
+  display: block;
+  margin-top: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8c8980;
+}
+
+@media (max-width: 640px) {
+  .board-stats-band__inner {
+    grid-template-columns: 1fr;
+  }
+  .board-stats-band__item--rule {
+    border-right: none;
+    border-bottom: 2px solid #1c1c22;
+  }
+}
+
+/* Section kickers */
+.board-section-kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.board-section-kicker--lime { color: #ccff00; }
+.board-section-kicker--cyan { color: #19e3ff; }
+.board-section-kicker--magenta { color: #ff1fa0; }
+
+/* How it works makeover */
+.board-how--makeover {
+  background: #070708;
+  border-bottom: 1px solid #1c1c22;
+  padding: clamp(40px, 5vw, 60px) clamp(20px, 4vw, 44px);
+  max-width: none;
+}
+
+.board-how--makeover > div:first-child,
+.board-how--makeover .board-steps,
+.board-how--makeover .gifting-footer-line {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.board-how__title {
+  margin: 0 0 8px !important;
+  font-size: clamp(1.8rem, 4vw, 2.75rem) !important;
+  line-height: 0.95 !important;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.board-how__title-accent {
+  color: #ccff00;
+}
+
+.board-how--makeover .board-copy {
+  max-width: 620px;
+  margin: 0 0 30px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #c8c5bc;
+}
+
+.gifting-page .board-how--makeover .board-steps--makeover,
+.board-steps--makeover {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)) !important;
+  gap: 12px !important;
+  margin-top: 0;
+}
+
+.gifting-page .board-how--makeover .board-step--makeover,
+.board-step--makeover {
+  display: block !important;
+  background: #0c0c0f !important;
+  border: 2px solid #1c1c22 !important;
+  border-radius: 6px !important;
+  border-left: 2px solid #1c1c22 !important;
+  border-bottom: 2px solid #1c1c22 !important;
+  padding: 18px 17px 20px !important;
+  box-shadow: none !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+.gifting-page .board-how--makeover .board-step--makeover .board-step__num,
+.board-step--makeover .board-step__num {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  font-family: var(--font-board-display);
+  font-weight: 900;
+  font-size: 1.9rem !important;
+  line-height: 1;
+  background: transparent !important;
+  border: none !important;
+  color: #ccff00;
+  text-shadow: none;
+}
+
+.gifting-page .board-how--makeover .board-step--makeover h3,
+.gifting-page .board-how--makeover .board-step--makeover .panel-heading,
+.board-step--makeover h3,
+.board-step--makeover .panel-heading {
+  display: block;
+  min-width: 0 !important;
+  margin: 6px 0 5px !important;
+  font-size: 1.08rem !important;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.gifting-page .board-how--makeover .board-step--makeover p,
+.board-step--makeover p {
+  margin: 0 !important;
+  font-size: 0.86rem !important;
+  line-height: 1.5;
+  color: #8c8980 !important;
+}
+
+.board-how--makeover .gifting-footer-line {
+  margin-top: 22px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase;
+  color: #6a675f !important;
+}
+
+/* Form makeover */
+.gifting-form-panel--makeover {
+  max-width: 1180px;
+  margin: 0 auto;
+  border: 2px solid #ccff00;
+  border-radius: 10px;
+  box-shadow: 0 0 30px -14px #ccff00;
+  background: #0c0c0f;
+  padding: clamp(22px, 3vw, 32px);
+}
+
+/* Active feed head */
+.board-active-feed__head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.board-active-feed__kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.board-active-feed__kicker--lime { color: #ccff00; }
+.board-active-feed__kicker--cyan { color: #19e3ff; }
+.board-active-feed__kicker--magenta { color: #ff1fa0; }
+
+.board-active-feed__title {
+  margin: 0 !important;
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem) !important;
+  line-height: 0.95 !important;
+}
+
+.board-active-feed__count {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8c8980;
+  padding-bottom: 4px;
+}
+
+/* Listing cards — design density */
+.board-listing-grid--makeover {
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.board-listing-card--makeover {
+  padding: 0;
+  border: 2px solid #1c1c22;
+  border-left: 4px solid var(--listing-accent, #ccff00);
+  border-radius: 7px;
+  background: #0c0c0f;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.board-listing-card--makeover:hover,
+.board-listing-card--makeover.is-expanded {
+  border-color: var(--listing-accent, #ccff00);
+  box-shadow: 0 0 26px -8px var(--listing-accent, #ccff00);
+  transform: translateY(-2px);
+}
+
+.board-listing-card--makeover .board-listing-card__row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+
+.board-listing-card--makeover .board-listing-card__thumb {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  border-radius: 0;
+  align-self: stretch;
+}
+
+.board-listing-card--makeover .board-listing-card__thumb-fallback {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.board-listing-card__ghost {
+  position: absolute;
+  top: -14px;
+  right: -6px;
+  font-family: var(--font-board-display);
+  font-weight: 900;
+  font-size: 92px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.24);
+  pointer-events: none;
+  user-select: none;
+}
+
+.board-listing-card__grab-badge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #000;
+  background: #ff8c00;
+  padding: 3px 6px;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.board-listing-card--makeover .board-listing-card__main {
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.board-listing-card__kind--text {
+  background: transparent !important;
+  color: var(--listing-accent, #ccff00) !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+}
+
+.board-listing-card--makeover .board-listing-card__title {
+  margin: 6px 0 0;
+  font-size: 1.16rem;
+  font-weight: 800;
+  line-height: 1.04;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.board-listing-card--makeover .board-listing-card__footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: none;
+}
+
+.board-listing-card--makeover .board-listing-card__status {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: #8c8980;
+}
+
+.board-listing-card--makeover .board-listing-card__cta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.board-listing-card--makeover .board-listing-card__expand {
+  margin: 0 15px 15px;
+  grid-column: 1 / -1;
+}
+
+/* Empty state */
+.board-empty--makeover {
+  text-align: center;
+  padding: clamp(40px, 7vw, 72px) 20px;
+  border: 2px dashed #28282f;
+  border-radius: 10px;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(204, 255, 0, 0.05), transparent 60%);
+}
+
+.board-empty__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+/* Close seam */
+.board-close-seam {
+  height: 3px;
+  background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982);
+}
+
+.board-close {
+  background: #050505;
+}
+
+.board-close__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 26px clamp(20px, 4vw, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.board-close__line {
+  font-family: var(--font-board-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1rem;
+  color: #c8c5bc;
+}
+
+.board-close__url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6a675f;
+}
+
+/* Gifting page background for makeover */
+.gifting-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(204, 255, 0, 0.06), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(25, 227, 255, 0.05), transparent 24rem),
+    #06060a;
+}
+
+.gifting-page.board-page--makeover .board-active-feed {
+  background: #06060a;
+}
+
+@media (max-width: 720px) {
+  .board-listing-grid--makeover {
+    grid-template-columns: 1fr;
+  }
+
+  .board-listing-card--makeover .board-listing-card__row {
+    grid-template-columns: 80px 1fr;
+  }
+
+  .board-listing-card__ghost {
+    font-size: 72px;
+  }
+}

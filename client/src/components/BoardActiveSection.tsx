@@ -10,17 +10,29 @@ const STICKER_DS_COLOR = {
 type BoardActiveSectionProps = {
   sticker: string;
   stickerTone?: "lime" | "cyan" | "magenta";
+  /** `sticker` = rotated badge (legacy). `mono` = design-makeover kicker. */
+  stickerStyle?: "sticker" | "mono";
   title: string;
+  /** e.g. "6 showing" — mono meta on the right of the head. */
+  resultCount?: ReactNode;
   filters?: ReactNode;
   filterRow2?: ReactNode;
   children: ReactNode;
   className?: string;
 };
 
+const TONE_CLASS: Record<NonNullable<BoardActiveSectionProps["stickerTone"]>, string> = {
+  lime: "board-active-feed__kicker--lime",
+  cyan: "board-active-feed__kicker--cyan",
+  magenta: "board-active-feed__kicker--magenta",
+};
+
 export default function BoardActiveSection({
   sticker,
   stickerTone = "lime",
+  stickerStyle = "sticker",
   title,
+  resultCount,
   filters,
   filterRow2,
   children,
@@ -30,14 +42,21 @@ export default function BoardActiveSection({
     <section className={`board-active-feed diag ${className}`.trim()}>
       <div className="board-active-feed__inner">
         <div className="board-active-feed__head">
-          <StickerBadge
-            color={STICKER_DS_COLOR[stickerTone]}
-            size="sm"
-            rotate={-3}
-          >
-            {sticker}
-          </StickerBadge>
-          <h2 className="display section-heading board-active-feed__title">{title}</h2>
+          <div className="board-active-feed__head-row">
+            <div>
+              {stickerStyle === "mono" ? (
+                <div className={`board-active-feed__kicker ${TONE_CLASS[stickerTone]}`}>{sticker}</div>
+              ) : (
+                <StickerBadge color={STICKER_DS_COLOR[stickerTone]} size="sm" rotate={-3}>
+                  {sticker}
+                </StickerBadge>
+              )}
+              <h2 className="display section-heading board-active-feed__title">{title}</h2>
+            </div>
+            {resultCount != null && (
+              <span className="board-active-feed__count">{resultCount}</span>
+            )}
+          </div>
         </div>
         <div className="board-active-feed__controls">
           {filters && <div className="board-filter-row">{filters}</div>}
@@ -54,14 +73,16 @@ export function BoardFilterChip({
   onClick,
   children,
   accent = "lime",
+  count,
 }: {
   active: boolean;
   onClick: () => void;
   children: ReactNode;
   accent?: string;
+  count?: number | string | null;
 }) {
   return (
-    <FilterChip selected={active} onToggle={onClick} fill={active} accent={accent}>
+    <FilterChip selected={active} onToggle={onClick} fill={active} accent={accent} count={count}>
       {children}
     </FilterChip>
   );
