@@ -13,9 +13,18 @@ import {
   listingPosterUrl,
   listingTypeTags,
 } from "@/lib/dsEvent";
+import { admissionEventLinkLabel } from "@shared/admission";
+import { resolveVenueWebsite } from "@shared/venueLinks";
 import { Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shareEventLink } from "@/lib/shareEvent";
+
+type EventWithVenue = Event & {
+  venueWebsite?: string | null;
+  ticketUrl?: string | null;
+  address?: string | null;
+  isPrivate?: boolean | null;
+};
 
 function eventCardA11yProps(onClick: () => void) {
   return {
@@ -57,7 +66,7 @@ function EventShareLink({ href, title }: { href: string; title: string }) {
 }
 
 type Props = {
-  event: Event;
+  event: EventWithVenue;
   onClick: () => void;
   viewMode: "grid" | "list";
   revealDelay?: number;
@@ -83,6 +92,10 @@ export default function ListingCard({
   const image = listingPosterUrl(event);
   const claimable = Boolean(event.isClaimable && !event.claimedBy);
   const showAttendance = attendanceSummary && attendanceSummary.count > 0;
+  const venueHref = event.venueWebsite || resolveVenueWebsite(event.venueName) || undefined;
+  const ticketHref = event.ticketUrl?.trim() || undefined;
+  const ticketLabel = admissionEventLinkLabel(event.admission || "");
+  const address = !event.isPrivate && event.address ? event.address : undefined;
 
   if (viewMode === "list") {
     return (
@@ -96,6 +109,10 @@ export default function ListingCard({
           <DsEventRow
             title={event.title}
             venue={event.venueName}
+            venueHref={venueHref}
+            address={address}
+            ticketHref={ticketHref}
+            ticketLabel={ticketLabel}
             when={when}
             day={day}
             image={image}
@@ -127,6 +144,10 @@ export default function ListingCard({
         <PosterCard
           title={event.title}
           venue={event.venueName}
+          venueHref={venueHref}
+          address={address}
+          ticketHref={ticketHref}
+          ticketLabel={ticketLabel}
           when={when}
           day={day}
           image={image}

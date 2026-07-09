@@ -37,6 +37,13 @@ a.pdxRow:hover{ transform:translateY(-1px); text-decoration:none; background:var
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pdxRow__when{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); }
 .pdxRow__when b{ color:#888; font-weight:var(--fw-semibold); }
+.pdxRow__venue a{ color:var(--neon-cyan,#19E3FF); font-weight:600; text-decoration:none; }
+.pdxRow__venue a:hover{ text-decoration:underline; color:#7af0ff; }
+.pdxRow__address{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); }
+.pdxRow__ticket{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.68rem;
+  letter-spacing:.08em; text-transform:uppercase; color:#000; background:var(--neon-lime,#39FF14);
+  border-radius:2px; padding:4px 9px 3px; text-decoration:none; display:inline-flex; width:fit-content; margin-top:2px; }
+.pdxRow__ticket:hover{ filter:brightness(1.08); text-decoration:none; color:#000; }
 
 .pdxRow__aside{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
 .pdxRow__going{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-display);
@@ -73,12 +80,13 @@ export function EventCard({
   title, venue, when, day = "FRI", image,
   types = [], admission, age, going,
   saved, onSave, href,
+  venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
 }) {
   const Tag = href ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
-  const whenLine = when || [venue].filter(Boolean).join("");
+  const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   return (
     <Tag className={`pdxRow ${className}`} href={href} style={{ "--_day": base, ...style }} {...rest}>
       <div className="pdxRow__thumb">
@@ -91,7 +99,20 @@ export function EventCard({
           {metaBits && <span className="pdxRowTag pdxRowTag--meta">{metaBits}</span>}
         </div>
         <h3 className="pdxRow__title">{title}</h3>
-        <div className="pdxRow__when">{venue && <b>{venue}</b>}{venue && when ? " · " : ""}{when}</div>
+        {venue && (
+          <div className="pdxRow__venue">
+            {venueHref
+              ? <a href={venueHref} target="_blank" rel="noopener noreferrer" onClick={stop}>{venue} ↗</a>
+              : <b>{venue}</b>}
+          </div>
+        )}
+        {address && <div className="pdxRow__address">{address}</div>}
+        {ticketHref && (
+          <a className="pdxRow__ticket" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
+            {ticketLabel} →
+          </a>
+        )}
+        {when && <div className="pdxRow__when">{when}</div>}
       </div>
       <div className="pdxRow__aside">
         {onSave && (

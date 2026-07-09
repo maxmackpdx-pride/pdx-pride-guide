@@ -11,6 +11,7 @@ import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSch
 import { z } from "zod";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { buildVenueWebsiteIndex, resolveVenueWebsite } from "@shared/venueLinks";
 import {
   enrichEventForMap,
   fillEventMapCoordinates,
@@ -84,13 +85,26 @@ const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey,tucke
   .filter(Boolean);
 const OWNER_DISPLAY_NAME = process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX";
 
-function publicEvent(evt: any, pendingClaimIds: Set<number> = new Set()) {
+function publicEvent(
+  evt: any,
+  pendingClaimIds: Set<number> = new Set(),
+  venueWebsites?: Map<string, string> | null,
+) {
   const { adminNotes, submittedBy, claimedBy, ...safe } = enrichEventForMap(evt);
+  const venueWebsite =
+    (evt as any).venueWebsite
+    || resolveVenueWebsite(evt.venueName, venueWebsites)
+    || null;
   return {
     ...safe,
     posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
     hasPendingClaim: pendingClaimIds.has(evt.id),
+    venueWebsite,
   };
+}
+
+function venueWebsiteIndex() {
+  return buildVenueWebsiteIndex(storage.getBusinesses() as any);
 }
 
 function publicUser(user: any) {
@@ -599,15 +613,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       evts = evts.filter(evt => evt.dayOfWeek === day);
     }
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
-    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds)));
+    const websites = venueWebsiteIndex();
+    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
   });
 
   app.get("/api/events/unclaimed", (req, res) => {
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
+    const websites = venueWebsiteIndex();
     const evts = storage.getEvents({ status: "LIVE" }).filter(evt =>
       evt.isClaimable && !evt.claimedBy && !pendingClaimIds.has(evt.id)
     );
-    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds)));
+    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
   });
 
   app.get("/api/events/attendance-summaries", (_req, res) => {
@@ -622,7 +638,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
     // Always return a sliced listing so the detail shape matches the list shape.
     const listing = (day ? expanded.find(e => e.dayOfWeek === day) : undefined) || expanded[0] || evt;
-    res.json(publicEvent(listing, pendingClaimIds));
+    res.json(publicEvent(listing, pendingClaimIds, venueWebsiteIndex()));
   });
 
   // ─── SUBMISSIONS ─────────────────────────────────────────────────────────

@@ -47,7 +47,15 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 .pdxBoard__title{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;
   font-size:var(--title-md); line-height:1.05; color:var(--text-hi); margin:2px 0 0; }
 .pdxBoard__venue{ font-family:var(--font-body); font-size:var(--body-sm); color:#888; }
+.pdxBoard__venue--link{ color:var(--neon-cyan,#19E3FF); text-decoration:none; font-weight:600; }
+.pdxBoard__venue--link:hover{ text-decoration:underline; color:#7af0ff; }
+.pdxBoard__address{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); line-height:1.35; }
 .pdxBoard__when{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); }
+.pdxBoard__ticket{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
+  letter-spacing:.08em; text-transform:uppercase; color:#000; background:var(--neon-lime,#39FF14);
+  border-radius:2px; padding:5px 10px 4px; text-decoration:none; display:inline-flex; width:fit-content;
+  margin-top:2px; }
+.pdxBoard__ticket:hover{ filter:brightness(1.08); text-decoration:none; color:#000; }
 .pdxBoard__link{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.8rem;
   letter-spacing:.05em; text-transform:uppercase; color:var(--_dayt,var(--_day)); margin-top:2px;
   display:inline-flex; align-items:center; gap:5px; }
@@ -85,12 +93,14 @@ export function PosterCard({
   title, venue, when, day = "FRI", image,
   types = [], admission, age, claimable = false,
   going, onRsvp, href, showLink = true,
+  venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
 }) {
   const Tag = href ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const dayt = DAY_TEXT[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
+  const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   return (
     <Tag className={`pdxBoard ${className}`} href={href}
       style={{ "--_day": base, "--_dayt": dayt, ...style }} {...rest}>
@@ -115,7 +125,15 @@ export function PosterCard({
           {claimable && <span className="pdxTag pdxTag--claim">Claimable</span>}
         </div>
         <h3 className="pdxBoard__title">{title}</h3>
-        {venue && <div className="pdxBoard__venue">{venue}</div>}
+        {venue && (venueHref
+          ? <a className="pdxBoard__venue pdxBoard__venue--link" href={venueHref} target="_blank" rel="noopener noreferrer" onClick={stop}>{venue} ↗</a>
+          : <div className="pdxBoard__venue">{venue}</div>)}
+        {address && <div className="pdxBoard__address">{address}</div>}
+        {ticketHref && (
+          <a className="pdxBoard__ticket" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
+            {ticketLabel} →
+          </a>
+        )}
         {when && <div className="pdxBoard__when">{when}</div>}
         <span className="pdxBoard__link">Event details &rarr;</span>
 

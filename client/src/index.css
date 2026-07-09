@@ -6677,6 +6677,16 @@ footer a:hover { color: #00FFFF !important; }
   color: var(--neon-yellow);
 }
 
+.event-modal__venue-link {
+  color: var(--neon-cyan, #19e3ff);
+  text-decoration: none;
+}
+
+.event-modal__venue-link:hover {
+  text-decoration: underline;
+  color: #7af0ff;
+}
+
 .event-modal__address-wrap {
   position: relative;
   margin-top: 10px;

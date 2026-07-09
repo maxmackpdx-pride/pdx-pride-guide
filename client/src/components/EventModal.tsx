@@ -28,6 +28,7 @@ import {
   type EventEditFormState,
 } from "@/lib/eventEditForm";
 import { admissionEventLinkLabel } from "@shared/admission";
+import { resolveVenueWebsite } from "@shared/venueLinks";
 import { getEventTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
 
@@ -367,7 +368,26 @@ function EventModalInner({
               {startTime} – {endTime}
             </div>
             <div className="event-modal__venue">
-              {event.venueName}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
+              {(() => {
+                const venueHref =
+                  (event as any).venueWebsite
+                  || resolveVenueWebsite(event.venueName)
+                  || null;
+                const label = `${event.venueName || "Venue"}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
+                return venueHref ? (
+                  <a
+                    href={venueHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="event-modal__venue-link"
+                    data-testid="link-venue-website"
+                  >
+                    {label} ↗
+                  </a>
+                ) : (
+                  label
+                );
+              })()}
             </div>
             {!event.isPrivate && (event.address || event.venueName) && (
               <div className="event-modal__address-wrap">
