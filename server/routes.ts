@@ -616,19 +616,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
   });
 
-  // Public "Message me" form on the About page — no login required, always lands
-  // in the site owner's inbox (see storage.sendPortfolioContactMessage).
+  // Public "Message me" / sponsorship pitch form on the About page — no login
+  // required, always lands in the site owner's inbox (see storage.sendPortfolioContactMessage).
   app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
     const honeypot = String(req.body?.company || "").trim();
     if (honeypot) return res.json({ ok: true }); // bot filled the hidden field — silently drop
 
+    const kindRaw = String(req.body?.kind || "message").trim().toLowerCase();
+    const kind = kindRaw === "sponsor" ? "sponsor" as const : "message" as const;
     const name = String(req.body?.name || "").trim().slice(0, 120);
     const email = String(req.body?.email || "").trim().slice(0, 200);
     const phone = String(req.body?.phone || "").trim().slice(0, 40);
     const message = String(req.body?.message || "").trim().slice(0, 4000);
+    const businessName = String(req.body?.businessName || "").trim().slice(0, 160);
+    const lengthNeeded = String(req.body?.lengthNeeded || "").trim().slice(0, 120);
 
     if (!name || !email || !message) {
       return res.status(400).json({ error: "Name, email, and message are required." });
+    }
+    if (kind === "sponsor" && (!businessName || !lengthNeeded)) {
+      return res.status(400).json({ error: "Business name and length of time needed are required." });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "Enter a valid email address." });
@@ -638,7 +645,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const attachmentUrls = files.map((file: any) => `/uploads/${file.filename}`);
 
     const delivered = storage.sendPortfolioContactMessage({
-      name, email, phone: phone || undefined, message, attachmentUrls,
+      kind,
+      name,
+      email,
+      phone: phone || undefined,
+      message,
+      businessName: businessName || undefined,
+      lengthNeeded: lengthNeeded || undefined,
+      attachmentUrls,
     });
     if (!delivered) return res.status(500).json({ error: "Could not deliver the message right now." });
     res.json({ ok: true });

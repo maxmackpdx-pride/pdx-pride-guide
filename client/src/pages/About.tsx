@@ -80,7 +80,7 @@ export default function About() {
   });
 
   const eventCount = events.length;
-  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactModal, setContactModal] = useState<"message" | "sponsor" | null>(null);
 
   return (
     <div className="about-v2">
@@ -214,7 +214,7 @@ export default function About() {
                   variant="neon"
                   accent="pink"
                   size="md"
-                  onClick={() => setShowContactModal(true)}
+                  onClick={() => setContactModal("message")}
                 >
                   Message me
                 </Button>
@@ -387,11 +387,15 @@ export default function About() {
                 <strong style={{ color: "#fff" }}>year round resource</strong> for the scene, so your
                 support keeps working long after the parade.
               </p>
-              <Link href="/contact">
-                <Button as="span" variant="solid" accent="lime" size="md">
-                  Pitch a sponsorship
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                variant="solid"
+                accent="lime"
+                size="md"
+                onClick={() => setContactModal("sponsor")}
+              >
+                Pitch a sponsorship
+              </Button>
             </div>
             <div className="about-v2-sponsors__checks">
               {SPONSOR_CHECKS.map(item => (
@@ -434,8 +438,11 @@ export default function About() {
         </div>
       </section>
 
-      {showContactModal && (
-        <PortfolioContactModal onClose={() => setShowContactModal(false)} />
+      {contactModal && (
+        <PortfolioContactModal
+          variant={contactModal}
+          onClose={() => setContactModal(null)}
+        />
       )}
     </div>
   );

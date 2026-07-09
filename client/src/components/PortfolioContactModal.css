@@ -96,6 +96,16 @@
   border-color: var(--pink, #ff00cc);
 }
 
+.pcm-panel--sponsor {
+  border-color: rgba(204, 255, 0, 0.45);
+  box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(204, 255, 0, 0.35);
+}
+
+.pcm-panel--sponsor .pcm-field input:focus,
+.pcm-panel--sponsor .pcm-field textarea:focus {
+  border-color: var(--lime, #ccff00);
+}
+
 .pcm-field input[type="file"] {
   color: var(--text-mid, #b9b6ae);
   font-size: 0.8rem;

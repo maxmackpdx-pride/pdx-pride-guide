@@ -4026,8 +4026,17 @@ export interface IStorage {
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
   /** Drop a content-moderation alert into the site owner's guide inbox. */
   notifyOwnerModeration(subject: string, body: string): void;
-  /** Public "Message me" form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
-  sendPortfolioContactMessage(input: { name: string; email: string; phone?: string; message: string; attachmentUrls?: string[] }): boolean;
+  /** Public "Message me" / sponsorship pitch form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
+  sendPortfolioContactMessage(input: {
+    kind?: "message" | "sponsor";
+    name: string;
+    email: string;
+    phone?: string;
+    message: string;
+    businessName?: string;
+    lengthNeeded?: string;
+    attachmentUrls?: string[];
+  }): boolean;
   getNotificationPrefs(userId: number): NotificationPrefs;
   setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin?: boolean): NotificationPrefs;
   upsertPushSubscription(userId: number, data: { endpoint: string; p256dh: string; auth: string; userAgent?: string | null; platform?: string | null }): unknown;
@@ -5500,22 +5509,29 @@ export const storage: IStorage = {
     if (!owner) return;
     notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
   },
-  sendPortfolioContactMessage({ name, email, phone, message, attachmentUrls }) {
+  sendPortfolioContactMessage({ kind = "message", name, email, phone, message, businessName, lengthNeeded, attachmentUrls }) {
     // Pinned directly to the tucker_pdmax account (not the shared resolveSiteOwner()
     // pool other features use) so this can never fan out to other admins, even if
     // more admins are granted later.
     const tucker = storage.getUserByUsername(SITE_ADMIN_GIG_OWNER_USERNAME);
     if (!tucker) return false;
+    const isSponsor = kind === "sponsor";
     const lines = [
+      isSponsor ? "Type: Sponsorship pitch" : "Type: Portfolio / contact message",
       `From: ${name} <${email}>`,
       phone ? `Phone: ${phone}` : null,
+      isSponsor && businessName ? `Business: ${businessName}` : null,
+      isSponsor && lengthNeeded ? `Length of time needed: ${lengthNeeded}` : null,
       attachmentUrls && attachmentUrls.length ? `Attachments: ${attachmentUrls.join(", ")}` : null,
       "",
       message,
     ].filter((line): line is string => line != null);
-    storage.sendMessage(tucker.id, tucker.id, `Portfolio message from ${name}`, lines.join("\n"), {
-      contextType: "CONTACT_FORM",
-      contextLabel: name,
+    const subject = isSponsor
+      ? `Sponsorship pitch: ${businessName || name}`
+      : `Portfolio message from ${name}`;
+    storage.sendMessage(tucker.id, tucker.id, subject, lines.join("\n"), {
+      contextType: isSponsor ? "SPONSOR_PITCH" : "CONTACT_FORM",
+      contextLabel: isSponsor ? (businessName || name) : name,
     });
     return true;
   },
