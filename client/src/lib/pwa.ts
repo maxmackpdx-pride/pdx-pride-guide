@@ -87,7 +87,18 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
 export async function waitForServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!("serviceWorker" in navigator)) return null;
-  const existing = await navigator.serviceWorker.getRegistration("/");
-  if (existing) return existing;
-  return registerServiceWorker();
+  try {
+    // Prefer ready so pushManager.subscribe has an active worker (required by Push API).
+    const ready = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+    ]);
+    if (ready) return ready;
+
+    const existing = await navigator.serviceWorker.getRegistration("/");
+    if (existing?.active) return existing;
+    return registerServiceWorker();
+  } catch {
+    return registerServiceWorker();
+  }
 }

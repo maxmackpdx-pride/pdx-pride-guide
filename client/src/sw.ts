@@ -34,48 +34,66 @@ self.addEventListener("message", (event) => {
   }
 });
 
-// Phase 2+ extends these handlers for Web Push.
+// Web Push — always show a user-visible notification (Safari revokes silent pushes).
+// Handles Declarative Web Push (web_push: 8030) and legacy title/body payloads.
 self.addEventListener("push", (event) => {
-  if (!event.data) return;
-  try {
-    const payload = event.data.json() as {
-      web_push?: number;
-      notification?: {
-        title?: string;
-        body?: string;
-        navigate?: string;
-        icon?: string;
-      };
-      title?: string;
-      body?: string;
-      url?: string;
-      icon?: string;
-    };
+  const show = async () => {
+    let title = "PDX Pride Guide";
+    let body: string | undefined;
+    let url = "/";
+    let icon = "/icons/icon-192.png";
+    let tag = "pdx-pride-guide";
 
-    if (payload.web_push === 8030 && payload.notification?.title) {
-      const n = payload.notification;
-      event.waitUntil(
-        self.registration.showNotification(n.title!, {
-          body: n.body,
-          icon: n.icon || "/icons/icon-192.png",
-          data: { url: n.navigate || "/" },
-        }),
-      );
-      return;
+    if (event.data) {
+      try {
+        const payload = event.data.json() as {
+          web_push?: number;
+          notification?: {
+            title?: string;
+            body?: string;
+            navigate?: string;
+            icon?: string;
+            tag?: string;
+          };
+          title?: string;
+          body?: string;
+          url?: string;
+          icon?: string;
+        };
+
+        if (payload.web_push === 8030 && payload.notification?.title) {
+          const n = payload.notification;
+          title = n.title!;
+          body = n.body;
+          url = n.navigate || "/";
+          icon = n.icon || icon;
+          tag = n.tag || tag;
+        } else {
+          title = payload.title || payload.notification?.title || title;
+          body = payload.body || payload.notification?.body;
+          url = payload.url || payload.notification?.navigate || "/";
+          icon = payload.icon || payload.notification?.icon || icon;
+        }
+      } catch {
+        try {
+          const text = event.data.text();
+          if (text) body = text.slice(0, 180);
+        } catch {
+          /* ignore */
+        }
+      }
     }
 
-    const title = payload.title || payload.notification?.title;
-    if (!title) return;
-    event.waitUntil(
-      self.registration.showNotification(title, {
-        body: payload.body || payload.notification?.body,
-        icon: payload.icon || "/icons/icon-192.png",
-        data: { url: payload.url || payload.notification?.navigate || "/" },
-      }),
-    );
-  } catch {
-    /* ignore malformed push payloads */
-  }
+    await self.registration.showNotification(title, {
+      body,
+      icon,
+      tag,
+      renotify: true,
+      data: { url },
+    });
+  };
+
+  event.waitUntil(show());
 });
 
 self.addEventListener("notificationclick", (event) => {

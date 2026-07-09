@@ -27,17 +27,19 @@ export function buildPushPayloadForMessage(message: Message, unreadCount: number
     if (ctx === "SUBMISSION" || ctx === "EVENT_CLAIM" || ctx === "PROMOTER") {
       return buildDeclarativePayload({
         title,
-        body: message.body,
+        body: message.body || undefined,
         navigate: ctx === "PROMOTER" ? "/submit" : "/dashboard",
         badge: unreadCount,
+        tag: `msg-${message.id || "new"}`,
       });
     }
   }
 
   return buildDeclarativePayload({
     title,
-    body: message.body,
+    body: message.body || undefined,
     navigate,
     badge: unreadCount,
+    tag: `msg-${message.id || "new"}`,
   });
 }

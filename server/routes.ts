@@ -1823,18 +1823,40 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (subs.length === 0) {
       return res.status(400).json({
         error: "No active push subscription for this admin account",
-        hint: "Avatar menu → Notification settings → Enable push on this device",
+        hint: "Avatar menu → Notification settings → Enable push on this device. On iPhone, open the Home Screen app first.",
       });
     }
     const payload = buildDeclarativePayload({
       title: "PDX Pride Guide test",
-      body: "Push notifications are working.",
+      body: "Push notifications are working. If you see this, delivery is fixed.",
       navigate: "/dashboard",
+      tag: `pdx-test-${Date.now()}`,
     });
-    const results = await Promise.all(subs.map((sub) => sendPushToSubscription(sub, payload)));
+    const results = await Promise.all(subs.map(async (sub) => {
+      const result = await sendPushToSubscription(sub, payload);
+      if (result.ok) storage.touchPushSubscription(sub.id);
+      else if (result.gone) storage.deactivatePushSubscription(sub.id);
+      const host = (() => {
+        try { return new URL(sub.endpoint).host; } catch { return "unknown"; }
+      })();
+      return {
+        id: sub.id,
+        host,
+        ok: result.ok,
+        statusCode: result.statusCode,
+        error: "error" in result ? result.error : undefined,
+      };
+    }));
     const sent = results.filter((r) => r.ok).length;
-    if (sent === 0) return res.status(502).json({ error: "Push send failed", results });
-    res.json({ ok: true, sent });
+    console.log(`[push] admin test user=${userId} sent=${sent}/${subs.length}`, JSON.stringify(results));
+    if (sent === 0) return res.status(502).json({ error: "Push send failed for all devices", results });
+    res.json({
+      ok: true,
+      sent,
+      total: subs.length,
+      results,
+      hint: "On Mac: check Notification Center (and System Settings → Notifications → Safari). On iPhone: open the Home Screen Pride Guide app; Settings → Notifications → Pride Guide must allow alerts.",
+    });
   });
 
   // ─── MESSAGES ────────────────────────────────────────────────────────────

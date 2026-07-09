@@ -20,13 +20,19 @@ function withinRateLimit(userId: number): boolean {
 }
 
 export async function dispatchPushForMessage(message: Message): Promise<void> {
-  if (!message?.toUserId || message.fromUserId === message.toUserId) return;
-  if (!isPushConfigured()) return;
+  if (!message?.toUserId || message.fromUserId === message.toUserId) {
+    console.log(`[push] skip self-message or missing recipient id=${message?.id}`);
+    return;
+  }
+  if (!isPushConfigured()) {
+    console.log("[push] skip — VAPID not configured");
+    return;
+  }
 
   const category = pushCategoryForContext(message.contextType);
   const prefs = storage.getNotificationPrefs(message.toUserId);
   if (!prefs[category]) {
-    console.info(`[push] skip user=${message.toUserId} category=${category} disabled`);
+    console.log(`[push] skip user=${message.toUserId} category=${category} disabled`);
     return;
   }
   if (!withinRateLimit(message.toUserId)) {
@@ -38,9 +44,13 @@ export async function dispatchPushForMessage(message: Message): Promise<void> {
   const payload = buildPushPayloadForMessage(message, unreadCount);
   const subs = storage.getActivePushSubscriptions(message.toUserId);
   if (subs.length === 0) {
-    console.info(`[push] skip user=${message.toUserId} no active subscriptions`);
+    console.log(`[push] skip user=${message.toUserId} no active subscriptions`);
     return;
   }
+
+  console.log(
+    `[push] dispatch user=${message.toUserId} devices=${subs.length} ctx=${message.contextType || "THREAD"} title=${JSON.stringify(payload.notification.title)}`,
+  );
 
   let sent = 0;
   await Promise.all(subs.map(async (sub) => {
@@ -48,14 +58,15 @@ export async function dispatchPushForMessage(message: Message): Promise<void> {
     if (result.ok) {
       storage.touchPushSubscription(sub.id);
       sent += 1;
+      console.log(`[push] ok user=${message.toUserId} sub=${sub.id} status=${result.statusCode ?? 201}`);
       return;
     }
-    console.warn(`[push] send failed user=${message.toUserId} sub=${sub.id} status=${result.statusCode ?? "unknown"}`);
+    console.warn(
+      `[push] send failed user=${message.toUserId} sub=${sub.id} status=${result.statusCode ?? "unknown"} err=${result.error || "n/a"}`,
+    );
     if (result.gone) storage.deactivatePushSubscription(sub.id);
   }));
-  if (sent > 0) {
-    console.info(`[push] sent user=${message.toUserId} devices=${sent}/${subs.length} ctx=${message.contextType || "THREAD"}`);
-  }
+  console.log(`[push] done user=${message.toUserId} sent=${sent}/${subs.length} ctx=${message.contextType || "THREAD"}`);
 }
 
 export function schedulePushForMessage(message: Message): void {

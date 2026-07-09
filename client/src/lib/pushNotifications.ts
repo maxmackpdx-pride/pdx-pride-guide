@@ -1,12 +1,13 @@
 import { canUseWebPush, isIosDevice, isStandalonePwa, waitForServiceWorker } from "@/lib/pwa";
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+/** Decode VAPID public key for PushManager.subscribe (Safari is picky about ArrayBuffer). */
+function urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = atob(base64);
   const output = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
-  return output;
+  return output.buffer.slice(output.byteOffset, output.byteOffset + output.byteLength);
 }
 
 export async function fetchPushConfig(): Promise<{ configured: boolean; publicKey: string | null }> {
@@ -59,11 +60,13 @@ export async function syncPushSubscriptionWithServer(): Promise<void> {
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(config.publicKey),
+        applicationServerKey: urlBase64ToArrayBuffer(config.publicKey),
       });
     }
 
     const json = subscription.toJSON();
+    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
+
     const res = await fetch("/api/push/subscribe", {
       method: "POST",
       credentials: "include",
@@ -91,15 +94,32 @@ export async function subscribeToPush(): Promise<"granted" | "denied" | "unsuppo
   if (permission !== "granted") return "denied";
 
   const registration = await waitForServiceWorker();
-  if (!registration) return "unsupported";
+  if (!registration?.active && !registration?.pushManager) return "unsupported";
 
-  const existing = await registration.pushManager.getSubscription();
-  const subscription = existing || await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(config.publicKey),
-  });
+  // Ensure active worker before subscribe (Push API InvalidStateError otherwise).
+  if (!registration.active) {
+    try {
+      await navigator.serviceWorker.ready;
+    } catch {
+      return "unsupported";
+    }
+  }
+
+  let subscription: PushSubscription | null = null;
+  try {
+    const existing = await registration.pushManager.getSubscription();
+    subscription = existing || await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToArrayBuffer(config.publicKey),
+    });
+  } catch (err) {
+    console.warn("[push] subscribe failed", err);
+    return "unsupported";
+  }
 
   const json = subscription.toJSON();
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return "unsupported";
+
   const res = await fetch("/api/push/subscribe", {
     method: "POST",
     credentials: "include",
