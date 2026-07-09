@@ -42,6 +42,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/spotted": { section: "Boards", title: "Spotted!" },
   "/directory": { section: "Directory", title: "Queer Directory" },
   "/about": { section: "About", title: "About" },
+  "/resume": { section: "About", title: "Resume" },
   "/contact": { section: "About", title: "Contact" },
   "/sponsors": { section: "About", title: "Sponsors" },
   "/access": { section: "About", title: "Access & Safety" },

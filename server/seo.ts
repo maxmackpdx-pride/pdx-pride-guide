@@ -185,7 +185,7 @@ Sitemap: ${SITE_URL}/sitemap.xml
 }
 
 export function buildSitemapXml(events: SeoEvent[]) {
-  const staticPaths = ["/", "/events", "/gifting", "/pride-work", "/spotted", "/about", "/legal", "/submit"];
+  const staticPaths = ["/", "/events", "/gifting", "/pride-work", "/spotted", "/about", "/resume", "/legal", "/submit"];
   const staticUrls = staticPaths
     .map(path => `  <url><loc>${SITE_URL}${path === "/" ? "/" : path}</loc><changefreq>daily</changefreq><priority>${path === "/" ? "1.0" : "0.8"}</priority></url>`)
     .join("\n");
@@ -219,6 +219,10 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/about": {
     title: "About PDX Pride Guide — Portland Pride 2026",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+  },
+  "/resume": {
+    title: "Tucker Max Resume | PDX Pride Guide",
+    description: "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
   },
   "/contact": {
     title: "Contact — PDX Pride Guide",

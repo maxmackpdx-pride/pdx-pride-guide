@@ -1,0 +1,615 @@
+/* Tucker Max resume page — web design with neon tape accents */
+
+.resume-page {
+  background: #0a0a0a;
+  color: var(--text-mid, #e6e3da);
+  font-family: var(--font-body);
+  min-height: 100%;
+  overflow-x: clip;
+}
+
+.resume-seam {
+  height: 4px;
+  background: var(
+    --grad-rainbow,
+    linear-gradient(90deg, #00ffff, #ccff00, #ff00cc, #ff6600)
+  );
+}
+
+.resume-seam--block {
+  margin: 38px 0;
+  opacity: 0.85;
+  border-radius: 2px;
+}
+
+.resume-kicker {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--neon-cyan, #00ffff);
+  margin-bottom: 8px;
+}
+
+.resume-kicker--lime {
+  color: var(--neon-yellow, #ccff00);
+}
+.resume-kicker--cyan {
+  color: var(--neon-cyan, #00ffff);
+}
+.resume-kicker--orange {
+  color: var(--neon-orange, #ff6600);
+}
+.resume-kicker--violet {
+  color: var(--neon-violet, #8800ff);
+}
+.resume-kicker--green {
+  color: var(--neon-green, #00ee44);
+}
+
+.resume-h2 {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.resume-h2--close {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+/* ── Hero ── */
+
+.resume-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 12% 0%, #1c0a30 0, transparent 55%),
+    radial-gradient(120% 90% at 100% 8%, #04262e 0, transparent 55%),
+    #0a0a0a;
+  border-bottom: 2px solid #2b2b2b;
+}
+
+.resume-hero__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 58px) clamp(20px, 4vw, 40px);
+  display: grid;
+  grid-template-columns: 1.55fr 0.85fr;
+  gap: 34px;
+  align-items: center;
+}
+
+.resume-hero__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(3.2rem, 9vw, 6rem);
+  line-height: 0.88;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.resume-hero__lede {
+  margin: 18px 0 0;
+  max-width: 48ch;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text-mid, #e6e3da);
+}
+
+.resume-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.resume-open-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  padding: 7px 13px 6px;
+  border-radius: 999px;
+  border: 2px solid var(--neon-green, #39ff14);
+  color: var(--neon-green, #39ff14);
+  white-space: nowrap;
+}
+
+.resume-open-badge__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-green, #39ff14);
+  box-shadow: 0 0 10px var(--neon-green, #39ff14);
+  animation: resumeBlink 1.8s ease-in-out infinite;
+}
+
+.resume-hero__mark {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 160px;
+}
+
+.resume-tm {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(5rem, 14vw, 8.5rem);
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 2px #333;
+  text-align: center;
+  user-select: none;
+}
+
+.resume-hire-sticker {
+  position: absolute;
+  right: 8%;
+  bottom: 18%;
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.98;
+  padding: 9px 15px 7px;
+  border-radius: 4px;
+  background: var(--neon-yellow, #ccff00);
+  color: #000;
+  border: 3px solid #050505;
+  box-shadow: 4px 4px 0 #050505;
+  transform: rotate(-4deg);
+}
+
+/* ── Marquee ── */
+
+.resume-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(
+    --grad-rainbow,
+    linear-gradient(90deg, #00ffff, #ccff00, #ff00cc, #ff6600)
+  );
+  border-block: 3px solid #050505;
+  padding-block: 9px;
+}
+
+.resume-marquee__track {
+  display: inline-flex;
+  align-items: center;
+  animation: resumeMq 32s linear infinite;
+}
+
+.resume-marquee:hover .resume-marquee__track {
+  animation-play-state: paused;
+}
+
+.resume-marquee__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  color: #000;
+}
+
+.resume-marquee__star {
+  opacity: 0.75;
+}
+
+/* ── Main ── */
+
+.resume-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 48px) clamp(20px, 4vw, 40px) 20px;
+}
+
+.resume-wins__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.resume-stat {
+  --_c: var(--neon-yellow, #ccff00);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 18px 18px 16px;
+  background: #050505;
+  border: 2px solid var(--_c);
+  border-radius: 10px;
+  box-shadow: 0 0 22px -12px var(--_c);
+}
+
+.resume-stat--lime {
+  --_c: var(--neon-yellow, #ccff00);
+}
+.resume-stat--cyan {
+  --_c: var(--neon-cyan, #00ffff);
+}
+.resume-stat--magenta {
+  --_c: var(--neon-magenta, #ff00cc);
+}
+.resume-stat--orange {
+  --_c: var(--neon-orange, #ff6600);
+}
+.resume-stat--green {
+  --_c: var(--neon-green, #39ff14);
+}
+.resume-stat--violet {
+  --_c: var(--neon-violet, #8800ff);
+}
+
+.resume-stat__num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2.7rem;
+  line-height: 0.82;
+  color: var(--_c);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--_c) 45%, transparent);
+}
+
+.resume-stat__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-lo, #999);
+  line-height: 1.12;
+}
+
+/* ── Neon tape ── */
+
+.resume-tape {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: #111;
+  background: var(--neon-yellow, #ccff00);
+  padding: 3px 12px 4px;
+  transform: rotate(-1.6deg);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  position: relative;
+}
+
+.resume-tape::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    104deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0) 44%,
+    rgba(0, 0, 0, 0.07)
+  );
+  pointer-events: none;
+}
+
+.resume-tape--inline {
+  font-size: 0.82em;
+  padding: 1px 7px 2px;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+/* Site neon palette for every employer tape */
+.resume-tape--lime {
+  background: var(--neon-yellow, #ccff00);
+  color: #111;
+  transform: rotate(-1.4deg);
+}
+.resume-tape--cyan {
+  background: var(--neon-cyan, #00ffff);
+  color: #111;
+  transform: rotate(1.2deg);
+}
+.resume-tape--magenta {
+  background: var(--neon-magenta, #ff00cc);
+  color: #fff;
+  transform: rotate(-0.9deg);
+}
+.resume-tape--red {
+  background: var(--neon-red, #ff2400);
+  color: #fff;
+  transform: rotate(1.1deg);
+}
+.resume-tape--blue {
+  background: var(--neon-blue, #0044ff);
+  color: #fff;
+  transform: rotate(-1.2deg);
+}
+.resume-tape--violet {
+  background: var(--neon-violet, #8800ff);
+  color: #fff;
+  transform: rotate(0.8deg);
+}
+.resume-tape--green {
+  background: var(--neon-green, #39ff14);
+  color: #101015;
+  transform: rotate(-0.7deg);
+}
+.resume-tape--orange {
+  background: var(--neon-orange, #ff6600);
+  color: #101015;
+  transform: rotate(1deg);
+}
+
+/* ── Experience cards ── */
+
+.resume-xp__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resume-xp__card {
+  --_g: var(--neon-cyan, #00ffff);
+  background: #0b0b0b;
+  border: 2px solid #2b2b2b;
+  border-radius: 8px;
+  padding: 16px 18px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.resume-xp__card--lime {
+  --_g: var(--neon-yellow, #ccff00);
+}
+.resume-xp__card--cyan {
+  --_g: var(--neon-cyan, #00ffff);
+}
+.resume-xp__card--magenta {
+  --_g: var(--neon-magenta, #ff00cc);
+}
+.resume-xp__card--red {
+  --_g: var(--neon-red, #ff2400);
+}
+.resume-xp__card--blue {
+  --_g: var(--neon-blue, #0044ff);
+}
+
+.resume-xp__card:hover {
+  border-color: #3a3a3a;
+  box-shadow: 0 0 26px -12px var(--_g);
+}
+
+.resume-xp__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.resume-xp__dates {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-lo, #999);
+}
+
+.resume-xp__role {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-mid, #e6e3da);
+  margin-bottom: 10px;
+}
+
+.resume-xp__bullets {
+  margin: 0;
+  padding: 0 0 0 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.resume-xp__bullets li {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-mid, #e6e3da);
+}
+
+.resume-xp__bullets li::marker {
+  color: var(--_g);
+}
+
+/* ── Earlier ── */
+
+.resume-earlier__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.resume-earlier__row {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-mid, #e6e3da);
+}
+
+.resume-earlier__row strong {
+  color: #fff;
+}
+
+.resume-earlier__dates {
+  color: var(--text-lo, #999);
+}
+
+/* ── Education + skills ── */
+
+.resume-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+}
+
+.resume-edu {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-mid, #e6e3da);
+}
+
+.resume-edu strong {
+  display: block;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.resume-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.resume-chips--tools {
+  margin-bottom: 0;
+}
+
+.resume-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  padding: 5px 10px 4px;
+  border-radius: 3px;
+  border: 2px solid var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #ccff00);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.resume-chip--lime {
+  border-color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #ccff00);
+}
+
+.resume-chip--cyan {
+  border-color: var(--neon-cyan, #00ffff);
+  color: var(--neon-cyan, #00ffff);
+}
+
+/* ── Close ── */
+
+.resume-close {
+  background:
+    radial-gradient(120% 120% at 50% 0%, #1c0a30 0, transparent 60%),
+    #0a0a0a;
+  border-top: 2px solid #2b2b2b;
+  margin-top: 20px;
+}
+
+.resume-close__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: clamp(30px, 5vw, 52px) clamp(20px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.resume-close__note {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  color: var(--text-lo, #999);
+}
+
+.resume-close__note a {
+  color: var(--neon-cyan, #00ffff);
+  text-decoration: none;
+}
+
+.resume-close__note a:hover {
+  color: var(--neon-yellow, #ccff00);
+  text-decoration: underline;
+}
+
+.resume-close__star {
+  color: var(--neon-magenta, #ff00cc);
+  margin: 0 10px;
+}
+
+@keyframes resumeMq {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes resumeBlink {
+  50% {
+    opacity: 0.28;
+  }
+}
+
+@media (max-width: 720px) {
+  .resume-hero__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-hero__mark {
+    min-height: 120px;
+    order: -1;
+  }
+
+  .resume-wins__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .resume-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-marquee__track,
+  .resume-open-badge__dot {
+    animation: none !important;
+  }
+}
+
+html.calm-mode .resume-marquee__track,
+html.calm-mode .resume-open-badge__dot {
+  animation: none !important;
+}
+
+html.calm-mode .resume-stat {
+  box-shadow: none;
+}

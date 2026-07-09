@@ -33,6 +33,7 @@ import Submit from "./pages/Submit";
 import PrideWork from "./pages/PrideWork";
 import Gifting from "./pages/Gifting";
 import About from "./pages/About";
+import Resume from "./pages/Resume";
 import Legal from "./pages/Legal";
 import Contact from "./pages/Contact";
 import Sponsors from "./pages/Sponsors";
@@ -70,6 +71,7 @@ export default function App() {
                 <Route path="/pride-work" component={PrideWork} />
                 <Route path="/gifting" component={Gifting} />
                 <Route path="/about" component={About} />
+                <Route path="/resume" component={Resume} />
                 <Route path="/contact" component={Contact} />
                 <Route path="/sponsors" component={Sponsors} />
                 <Route path="/access" component={AccessSafety} />

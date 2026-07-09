@@ -11,7 +11,6 @@ import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
-const LINKEDIN_URL = "https://www.linkedin.com/in/tuckercasey/";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
 const STANK_EVENT_ID = 13;
 const STANK_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
@@ -204,11 +203,11 @@ export default function About() {
                     Follow @tucker_pdmax
                   </Button>
                 </a>
-                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+                <Link href="/resume">
                   <Button as="span" variant="neon" accent="cyan" size="md">
-                    Connect on LinkedIn
+                    View resume
                   </Button>
-                </a>
+                </Link>
                 <Button
                   type="button"
                   variant="neon"
