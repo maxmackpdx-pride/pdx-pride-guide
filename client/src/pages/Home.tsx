@@ -18,7 +18,7 @@ import {
 } from "@/components/ds";
 import heroWallpaperImg from "@/assets/hero-wallpaper.jpg";
 import {
-  HOME_COUNTDOWN_TARGET,
+  earliestPrideWeekStartTarget,
   HOME_DAY_META,
   HOME_MARQUEE_FALLBACK,
   pickMarqueeItems,
@@ -125,6 +125,12 @@ export default function Home() {
     refetchOnMount: "always",
   });
 
+  /** Live target: earliest event start on Jul 13 (Pride Week day 1). */
+  const prideWeekCountdownTarget = useMemo(
+    () => earliestPrideWeekStartTarget(events),
+    [events],
+  );
+
   const { data: spotted = [] } = useQuery<MissedConnection[]>({
     queryKey: ["/api/missed-connections"],
     queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()),
@@ -206,8 +212,13 @@ export default function Home() {
             <strong>Sleep in August.</strong>
           </p>
           <div className="pg-hero__countdown">
-            <span className="pg-hero__cdlabel">Doors to the weekend open in</span>
-            <Countdown target={HOME_COUNTDOWN_TARGET} accent="lime" aria-label="Countdown to Pride weekend" />
+            <span className="pg-hero__cdlabel">Pride Week starts at</span>
+            <Countdown
+              target={prideWeekCountdownTarget}
+              accent="lime"
+              aria-label="Countdown to Pride Week start"
+              doneLabel="Pride Week is on!"
+            />
           </div>
           <div className="pg-hero__actions">
             <Link href="/events">

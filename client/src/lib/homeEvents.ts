@@ -1,10 +1,42 @@
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import { PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
-import { parsePacificDateTime } from "@shared/missedConnections";
+import { PRIDE_WEEK_DAY_OPTIONS, PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
+import { pacificCalendarDate, parsePacificDateTime } from "@shared/missedConnections";
 import { formatListingWhen, listingDay, listingPosterUrl, listingTypeTags } from "@/lib/dsEvent";
 
-export const HOME_COUNTDOWN_TARGET = "2026-07-16T19:00:00-07:00";
+/** Fallback if no Jul 13 listings are loaded yet (midnight PDT Pride Week open). */
+export const HOME_COUNTDOWN_TARGET = `${PRIDE_WEEK_START_DATE}T00:00:00-07:00`;
+
+/** Make a stored dateStart safe for `new Date()` / Countdown (force Pacific offset). */
+export function toCountdownTarget(dateStart: string): string {
+  const raw = dateStart.trim();
+  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return `${raw}:00-07:00`;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(raw)) return `${raw}-07:00`;
+  return `${raw}-07:00`;
+}
+
+/**
+ * Countdown target = start time of the earliest event on Pride Week day 1 (Jul 13).
+ * Recomputes from live listings so the home clock stays synced as the schedule changes.
+ */
+export function earliestPrideWeekStartTarget(events: EventListing[]): string {
+  let earliestMs: number | null = null;
+  let earliestRaw: string | null = null;
+
+  for (const event of events) {
+    if (pacificCalendarDate(event.dateStart) !== PRIDE_WEEK_START_DATE) continue;
+    const ms = parsePacificDateTime(event.dateStart);
+    if (ms == null) continue;
+    if (earliestMs == null || ms < earliestMs) {
+      earliestMs = ms;
+      earliestRaw = event.dateStart;
+    }
+  }
+
+  if (earliestRaw) return toCountdownTarget(earliestRaw);
+  return HOME_COUNTDOWN_TARGET;
+}
 
 export const HOME_DAY_ORDER = ["THU", "FRI", "SAT", "SUN"] as const;
 export type HomeDayKey = (typeof HOME_DAY_ORDER)[number];
