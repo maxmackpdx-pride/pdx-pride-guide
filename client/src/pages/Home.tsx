@@ -25,6 +25,10 @@ import {
   pickRandomBusinesses,
   type HomeDayKey,
 } from "@/lib/homeEvents";
+import {
+  directoryFallbackLogo,
+  resolveDirectoryLogo,
+} from "@/lib/directoryLogos";
 import HomeSchedule from "@/components/HomeSchedule";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
@@ -73,6 +77,7 @@ type DirectoryBusiness = {
   donateUrl: string | null;
   hours: string | null;
   phone: string | null;
+  imageUrl: string | null;
   isNew: boolean;
   lat: number | null;
   lng: number | null;
@@ -395,20 +400,7 @@ export default function Home() {
               </div>
               <div className="pg-placescroll">
                 {featuredSpots.map(biz => (
-                  <PlaceCard
-                    key={biz.id}
-                    name={biz.name}
-                    category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-                    donateUrl={biz.donateUrl || undefined}
-                    categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-                    address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
-                    hours={biz.hours || undefined}
-                    phone={biz.phone || undefined}
-                    description={biz.description || undefined}
-                    website={biz.website || undefined}
-                    instagram={biz.instagram || undefined}
-                    grandOpening={biz.isNew}
-                  />
+                  <HomePlaceCard key={biz.id} biz={biz} />
                 ))}
                 {featuredSpots.length === 0 && (
                   <PlaceCard
@@ -431,20 +423,7 @@ export default function Home() {
               </div>
               <div className="pg-placescroll">
                 {featuredNonprofits.map(biz => (
-                  <PlaceCard
-                    key={biz.id}
-                    name={biz.name}
-                    className="pdxPlace--rainbow"
-                    category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-                    categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-                    address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
-                    hours={biz.hours || undefined}
-                    phone={biz.phone || undefined}
-                    description={biz.description || undefined}
-                    website={biz.website || undefined}
-                    instagram={biz.instagram || undefined}
-                    grandOpening={biz.isNew}
-                  />
+                  <HomePlaceCard key={biz.id} biz={biz} />
                 ))}
                 {featuredNonprofits.length === 0 && (
                   <PlaceCard
@@ -476,5 +455,31 @@ export default function Home() {
       </div>
 
     </div>
+  );
+}
+
+/** Same logo resolution as Directory cards (neon pack + DB imageUrl + type fallback). */
+function HomePlaceCard({ biz }: { biz: DirectoryBusiness }) {
+  const isNonprofit = biz.type === "nonprofit";
+  const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
+  const fallbackLogoUrl = directoryFallbackLogo(biz.type);
+  return (
+    <PlaceCard
+      name={biz.name}
+      category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
+      className={isNonprofit ? "pdxPlace--rainbow" : undefined}
+      isNonprofit={isNonprofit}
+      logoUrl={logoUrl}
+      fallbackLogoUrl={fallbackLogoUrl}
+      donateUrl={biz.donateUrl || undefined}
+      categoryLabel={TYPE_LABELS[biz.type] || biz.type}
+      address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
+      hours={biz.hours || undefined}
+      phone={biz.phone || undefined}
+      description={biz.description || undefined}
+      website={biz.website || undefined}
+      instagram={biz.instagram || undefined}
+      grandOpening={biz.isNew}
+    />
   );
 }
