@@ -34,6 +34,9 @@ import PrideWork from "./pages/PrideWork";
 import Gifting from "./pages/Gifting";
 import About from "./pages/About";
 import Legal from "./pages/Legal";
+import Contact from "./pages/Contact";
+import Sponsors from "./pages/Sponsors";
+import AccessSafety from "./pages/AccessSafety";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
 import NotificationSettings from "./pages/NotificationSettings";
@@ -67,6 +70,9 @@ export default function App() {
                 <Route path="/pride-work" component={PrideWork} />
                 <Route path="/gifting" component={Gifting} />
                 <Route path="/about" component={About} />
+                <Route path="/contact" component={Contact} />
+                <Route path="/sponsors" component={Sponsors} />
+                <Route path="/access" component={AccessSafety} />
                 <Route path="/legal" component={Legal} />
                 <Route path="/admin" component={Admin} />
                 <Route path="/dashboard" component={Dashboard} />

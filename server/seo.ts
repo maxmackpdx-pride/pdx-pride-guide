@@ -144,7 +144,7 @@ export function buildLlmsTxt(events: SeoEvent[]) {
   const lines = [
     "# PDX Pride Guide",
     "",
-    "> Portland's community-run Pride event directory for 2026.",
+    "> Portland's Pride calendar, kept by the people who actually go.",
     "",
     `- Website: ${SITE_URL}`,
     `- Events page: ${SITE_URL}/events`,
@@ -210,15 +210,27 @@ export function buildCanonicalUrl(requestPath: string) {
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
     title: "PDX Pride Guide — Portland Pride 2026 Events",
-    description: "Find Portland Pride 2026 events, support queer spaces, and build community in PDX. July 13–19 and year-round Pride listings.",
+    description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/events": {
     title: "Portland Pride 2026 Events — PDX Pride Guide",
-    description: "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
+    description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/about": {
     title: "About PDX Pride Guide — Portland Pride 2026",
-    description: "Community-run Portland Pride 2026 event directory for PDX. Built for queer Portland by submissions and local support.",
+    description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+  },
+  "/contact": {
+    title: "Contact — PDX Pride Guide",
+    description: "One inbox, one guy. Reach PDX Pride Guide about listings, privacy, or help.",
+  },
+  "/sponsors": {
+    title: "Sponsors — PDX Pride Guide",
+    description: "Local businesses can help keep PDX Pride Guide free. Sponsorship is support, not pay-to-rank.",
+  },
+  "/access": {
+    title: "Access & Safety — PDX Pride Guide",
+    description: "What PDX Pride Guide listings cover, what we can't promise, and how to take care of each other during Pride week.",
   },
   "/legal": {
     title: "Legal — PDX Pride Guide",

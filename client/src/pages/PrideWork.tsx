@@ -380,11 +380,17 @@ export default function PrideWork() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">Nothing here yet</p>
+            <p className="display section-heading">
+              {gigs.length === 0
+                ? (filter === "POSTING_GIG" ? "No gigs up yet" : filter === "LOOKING_FOR_WORK" ? "Nobody's on deck" : "Nobody's on deck")
+                : "Nothing matches"}
+            </p>
             <p className="board-copy-sm">
               {gigs.length === 0
-                ? "No posts yet. Post your availability or post a gig to get the board started."
-                : "No posts match this filter. Try all posts or switch between talent and gigs."}
+                ? (filter === "POSTING_GIG"
+                    ? "Every show needs hands. Door, load-in, cleanup, the person who knows where the extension cords went. Post it, paid or volunteer, and be honest about which."
+                    : "You bartend. You run sound. You take a good photo at 1am in bad light. Say so. Right now the board says nobody in this city can do anything, which is a lie.")
+                : "Loosen the filter or check back later."}
             </p>
             {gigs.length === 0 ? (
               <div className="gifting-actions" style={{ justifyContent: "center", marginTop: 20 }}>

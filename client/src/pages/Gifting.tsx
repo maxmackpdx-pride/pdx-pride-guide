@@ -363,11 +363,13 @@ export default function Gifting() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">Nothing here yet</p>
+            <p className="display section-heading">
+              {posts.length === 0 ? "The shelf is empty" : "Nothing here right now"}
+            </p>
             <p className="board-copy-sm">
               {posts.length === 0
-                ? "No posts match this filter right now. Be the first — post a gift or an in search of."
-                : "No posts match this filter right now. Try widening the search."}
+                ? "Somebody out there has a working printer, four folding chairs, and a lamp they've never liked. Put it up. Somebody else needs a lamp."
+                : "Free stuff goes fast. Try a wider search, or post what you're hunting for and let it find you."}
             </p>
             {posts.length === 0 ? (
               <button className="btn-neon" style={{ marginTop: 20 }} onClick={() => openForm("GIFT")}>Post a gift</button>

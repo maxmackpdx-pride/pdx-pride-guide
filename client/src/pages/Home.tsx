@@ -111,7 +111,7 @@ function formatSpottedWhen(post: MissedConnection): string {
 export default function Home() {
   usePageSeo(
     "PDX Pride Guide — Portland Pride 2026 Events",
-    "A community-run guide to Portland Pride Week 2026. Find the parties, the parade, and your people, then dance til the sun comes up.",
+    "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   );
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
@@ -202,8 +202,8 @@ export default function Home() {
             </div>
           )}
           <p className="pg-hero__blurb">
-            Three days, one city, every color. Find the parties, the parade, and your people, then{" "}
-            <strong>dance til the sun comes up.</strong>
+            Seven days. One city. Every color in the box. Find the parade, find the afterparty, find the people you were looking for.{" "}
+            <strong>Sleep in August.</strong>
           </p>
           <div className="pg-hero__countdown">
             <span className="pg-hero__cdlabel">Doors to the weekend open in</span>
@@ -242,7 +242,7 @@ export default function Home() {
           <SectionHeader
             kicker="All Week"
             title="The Schedule"
-            subtitle="The whole week at a glance — seven days side by side, hours stacked tight. Scroll sideways for packed days; tap any block for details."
+            subtitle="Seven days, side by side, stacked hour by hour. Saturday is a wall of color. Scroll sideways, tap anything that looks like trouble."
             accent="cyan"
             style={{ marginBottom: 0 }}
             action={
@@ -267,7 +267,7 @@ export default function Home() {
           <SectionHeader
             kicker="The Community Board"
             title="Find Your People"
-            subtitle="Missed connections, free stuff, and last-minute gigs, all week long."
+            subtitle="Somebody is looking for you. Somebody is giving away a couch. Somebody needs a bartender by Friday. It's all right here."
             accent="purple"
           />
           <div className="pg-board3">
@@ -376,7 +376,7 @@ export default function Home() {
           <SectionHeader
             kicker="Queer Places"
             title="Where to Go"
-            subtitle="Bars, cafes, venues, and the nonprofits doing the work — all run by and for the community. Fresh random picks every time you refresh."
+            subtitle="The bars, the cafes, the venues, the nonprofits keeping people housed and fed. All of it run by and for the community. Hit refresh for a whole new set of picks."
             accent="cyan"
           />
           <div className="pg-places pg-places--dual">

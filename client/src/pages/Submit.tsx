@@ -294,7 +294,7 @@ export default function Submit() {
       kicker: "Portland Pride 2026 · Community submissions",
       title: "Submit",
       accent: "lime",
-      lede: "Got an event? Want to be a verified promoter? Spotted something we're missing? Pick your path below.",
+      lede: "Throwing something? Want the verified badge? Notice we missed one? Pick a door below.",
     },
     submit: {
       kicker: "New listing",
@@ -312,7 +312,7 @@ export default function Submit() {
       kicker: "Community tip",
       title: "Suggest an Event",
       accent: "magenta",
-      lede: "Saw a Pride event we're missing? Tip us off — no promoter account needed. Admins review every suggestion.",
+      lede: "Saw something we missed? Tell us. We read every tip. Good ones go up as unclaimed listings.",
     },
     claim: {
       kicker: "Host your listing",
@@ -379,7 +379,7 @@ export default function Submit() {
               <div className="submit-banner submit-banner--yellow submit-banner--stacked">
                 <div>
                   <div className="submit-banner__title">Account required</div>
-                  <p className="submit-banner__body">Create a free account or log in to submit, apply, or suggest. It takes a minute.</p>
+                  <p className="submit-banner__body">Free account, sixty seconds, then you can submit, apply, or tip us off.</p>
                   <button type="button" className="btn-neon solid submit-banner__cta" onClick={() => openAuth()}>Log in / Join →</button>
                 </div>
               </div>
@@ -396,7 +396,7 @@ export default function Submit() {
                 <span className="submit-card__body">
                   {isApproved
                     ? "You're a verified promoter. Your event goes live the moment you submit."
-                    : "Fill out a short promoter application, then add your event. Both go to admin review and go live together once approved."}
+                    : "Short application first, then your event. Both land in review together and go live together."}
                 </span>
               </span>
               <span className="submit-card__arrow">→</span>
@@ -413,7 +413,7 @@ export default function Submit() {
                     <span className="submit-card__title">Apply as promoter</span>
                     <span className="submit-card__tag">Verification</span>
                   </span>
-                  <span className="submit-card__body">Not ready to post an event yet? Get verified now. Once approved, future events go live immediately.</span>
+                  <span className="submit-card__body">Nothing to post yet? Get verified anyway. After that, everything you post goes up the second you hit submit.</span>
                 </span>
                 <span className="submit-card__arrow">→</span>
               </button>
@@ -429,7 +429,7 @@ export default function Submit() {
                   <span className="submit-card__title">Spotted an event</span>
                   <span className="submit-card__tag submit-card__tag--ghost">No promoter status needed</span>
                 </span>
-                <span className="submit-card__body">Saw a Pride event we're missing? Tip us off. Admins review all tips, approved ones go live as unclaimed listings.</span>
+                <span className="submit-card__body">Saw something we missed? Tell us. We read every tip. Good ones go up as unclaimed listings.</span>
               </span>
               <span className="submit-card__arrow">→</span>
             </button>
@@ -444,7 +444,7 @@ export default function Submit() {
                   <span className="submit-card__title">Claim an existing event</span>
                   <span className="submit-card__tag">Host access</span>
                 </span>
-                <span className="submit-card__body">See your event already listed but unclaimed? Claim it for host access and request promoter verification.</span>
+                <span className="submit-card__body">Your event, already on the site, nobody's name on it? Claim it, take the keys, ask for verification while you're at it.</span>
               </span>
               <span className="submit-card__arrow">→</span>
             </button>
@@ -460,21 +460,21 @@ export default function Submit() {
                 <div className="submit-benefit submit-benefit--cyan">
                   <span className="submit-benefit__icon"><BoltIcon size={26} /></span>
                   <div className="submit-benefit__title">Go live instantly</div>
-                  <p className="submit-benefit__body">Skip the review queue. Every event you post publishes the moment you hit submit.</p>
+                  <p className="submit-benefit__body">No queue, no waiting. Hit submit and it's on the site.</p>
                 </div>
                 <div className="submit-benefit submit-benefit--magenta">
                   <span className="submit-benefit__icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="m3 11 15-6v14L3 13z" /><path d="M3 11v3h3" /><path d="M8 20v-6" /></svg>
                   </span>
                   <div className="submit-benefit__title">Host tools</div>
-                  <p className="submit-benefit__body">Claim your listings, add co-hosts and talent, and pin host broadcasts on your event page.</p>
+                  <p className="submit-benefit__body">Claim your listings, add your co-hosts and talent, pin a broadcast to the top of your event page.</p>
                 </div>
                 <div className="submit-benefit submit-benefit--yellow">
                   <span className="submit-benefit__icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="M14 9h4M14 13h4M6 16c.8-1.4 4.2-1.4 5 0" /></svg>
                   </span>
                   <div className="submit-benefit__title">A promoter profile</div>
-                  <p className="submit-benefit__body">Your own public page at prideguidepdx.com/u/you, with every event and link in one spot.</p>
+                  <p className="submit-benefit__body">Your own page at prideguidepdx.com/u/you. Every event, every link, one address.</p>
                 </div>
               </div>
             </div>

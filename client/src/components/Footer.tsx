@@ -19,7 +19,7 @@ export default function Footer() {
               PDX <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span> GUIDE
             </div>
             <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 260, lineHeight: 1.6 }}>
-              Independently built directory for Portland Pride Week 2026.
+              Built by one person in Portland. No committee, no corporate parent, no notes.
             </div>
           </div>
           <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
@@ -34,6 +34,9 @@ export default function Footer() {
                 ["/directory", "Directory"],
                 ["/submit", "Submit"],
                 ["/about", "About"],
+                ["/sponsors", "Sponsors"],
+                ["/access", "Access & Safety"],
+                ["/contact", "Contact"],
                 ["/legal", "Legal"],
               ].map(([href, label]) => (
                 <div key={href} style={{ marginBottom: 8 }}>
@@ -48,7 +51,8 @@ export default function Footer() {
                 ["/submit", "Claim an Event"],
                 ["/pride-work", "Post a Gig"],
                 ["/gifting", "Post a Gift / In Search Of"],
-                ["/about", "Contact"],
+                ["/sponsors", "Sponsor the Guide"],
+                ["/contact", "Contact"],
               ].map(([href, label]) => (
                 <div key={label} style={{ marginBottom: 8 }}>
                   <Link href={href} style={{ color: "#888", fontSize: "0.82rem", textDecoration: "none" }}>{label}</Link>
@@ -75,20 +79,20 @@ export default function Footer() {
         {/* Subtle donation line — footer only */}
         <div style={{ textAlign: "center", marginBottom: 20, padding: "12px 0", borderTop: "1px solid #111", borderBottom: "1px solid #111" }}>
           <span style={{ color: "var(--text-meta)", fontSize: "0.8rem", fontFamily: "var(--font-body)" }}>
-            This guide is free. Keep it that way.{" "}
+            Free forever, but not free to run.{" "}
             <a
               href="https://venmo.com/tucker_pdmax"
               target="_blank"
               rel="noopener"
               style={{ color: "var(--neon-magenta)", textDecoration: "none", fontFamily: "var(--font-display)", fontSize: "0.78rem", letterSpacing: "0.04em" }}
             >
-              → Venmo @tucker_pdmax
+              Venmo @tucker_pdmax
             </a>
           </span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
           <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>
-            Portland, Oregon · Made by Tucker · Independently run
+            Portland, Oregon. Made by Tucker. Answering to nobody.
           </div>
           <div style={{ color: "var(--text-faint)", fontSize: "0.75rem", display: "flex", gap: 12, flexWrap: "wrap" }}>
             <span>© 2026 PDX Pride Guide · Free to Browse · Independently Run</span>

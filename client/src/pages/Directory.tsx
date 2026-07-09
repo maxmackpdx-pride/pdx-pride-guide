@@ -357,14 +357,14 @@ export default function Directory() {
           <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
         ) : filtered.length === 0 ? (
           <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">Nothing here yet</p>
+            <p className="display section-heading">Nothing matches</p>
             <p className="board-copy-sm">
               {businesses.length === 0
-                ? "The directory is being built — add your queer-owned or queer-friendly spot."
-                : "No places match your filters."}
+                ? "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."
+                : "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."}
             </p>
             <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
-              <Plus size={16} /> Add a business
+              <Plus size={16} /> Add your business
             </button>
           </div>
         ) : (

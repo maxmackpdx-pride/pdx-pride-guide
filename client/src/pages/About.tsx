@@ -12,25 +12,25 @@ const MISSION = [
     icon: <Zap size={18} />,
     tone: "cyan",
     title: "Find events fast",
-    text: "Everything happening Mon–Sun in one place. Map it, filter it, show up.",
+    text: "Monday through Sunday, all of it, in one place. Map it. Filter it. Put on pants. Go.",
   },
   {
     icon: <Users size={18} />,
     tone: "lime",
     title: "Support local spaces",
-    text: "Bars, venues, orgs, and collectives — every listing drives foot traffic to the places that host us.",
+    text: "Bars, venues, orgs, collectives. Every listing here sends actual bodies through actual doors, which is how these places stay open.",
   },
   {
     icon: <Heart size={18} />,
     tone: "magenta",
     title: "Connect people",
-    text: "The gig board, submit form, and claimable events help people find each other — not extract data.",
+    text: "The gig board, the submit form, the claimable events. Built so people can find each other, not so we can find out about you.",
   },
   {
     icon: <Shield size={18} />,
     tone: "orange",
     title: "Stay independent",
-    text: "No VC money. No algorithmic feed. Local sponsor support is welcome; control of the guide is not for sale.",
+    text: "No investors. No feed deciding what you see. Sponsors are welcome to help. Nobody gets to steer.",
   },
 ] as const;
 
@@ -50,37 +50,37 @@ const HOW_IT_WORKS = [
 ] as const;
 
 const VALUES = [
-  "Free to browse. No paywalls, no junk ads, no selling user data.",
-  "Open to sponsors from local businesses that align with this guide and the community it serves.",
-  "Submitting an event or posting a gig requires a free account — so spam stays out and listings stay accountable.",
-  "No personal data sold or shared. Ever.",
-  "Pride is a protest. Sex-positive and nude events are listed here and tagged accurately — not judgmentally.",
-  "Built and maintained by Tucker. Review tools and outside eyes help, but this is not a committee project.",
+  "Free to browse. No paywall, no popup begging for your email, no selling anybody out.",
+  "Local businesses can sponsor if they actually belong here. That's the whole bar.",
+  "Want to post an event or a gig? Make a free account. It's how spam stays out and names stay attached.",
+  "Your data is not for sale. Not now, not later, not for a nice offer.",
+  "Pride is a protest. Sex-positive and nude events get listed and tagged honestly, no side-eye.",
+  "One person builds this and keeps it running. Good people help. It's still not a committee.",
 ] as const;
 
 const FAQ = [
   {
     q: "When is Portland Pride 2026?",
-    a: "Portland Pride Week 2026 is July 13–19 (Monday through Sunday). PDX Pride Guide lists festivals, parties, marches, and community events across the full week.",
+    a: "July 13 through 19, Monday to Sunday. Festivals, parties, marches, and the quiet stuff too. All seven days are in here.",
   },
   {
     q: "Where do I find PDX Pride events?",
-    a: "Use the Events page to browse every live listing on a map and board — filter by day (Mon–Sun), type, and neighborhood, or open any event for times, venue, and tickets.",
+    a: "The Events page. Every live listing on a map and a board. Filter by day, by type, by neighborhood, then open anything for times, venue, and tickets.",
   },
   {
     q: "How is this different from other Pride apps?",
-    a: "PDX Pride Guide is free, community-run, and built for Portland — no corporate feed, no pay-to-rank listings. Promoters submit or claim events; the community shows up.",
+    a: "It's free, it's run by a person, and it's built for this city. No corporate feed. No paying to rank higher. Promoters post their events and the community shows up.",
   },
   {
     q: "How do I list my event?",
-    a: "Create an account and submit a new event or claim an existing listing from the Promoters page. Verified promoters can publish directly after review.",
+    a: "Make an account, then submit a new event or claim one that's already listed. Head to the Promoters page. Once you're verified, you skip the line.",
   },
 ] as const;
 
 export default function About() {
   usePageSeo(
     "About PDX Pride Guide — Portland Pride 2026",
-    "Community-run Portland Pride 2026 event directory for PDX. Built by submissions and local support.",
+    "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   );
 
   return (
@@ -92,7 +92,7 @@ export default function About() {
         titleLine1="BUILT FOR"
         titleLine2="THE COMMUNITY"
         accent="lime"
-        lede="A free, independently built event directory for Portland Pride Week 2026. Made by Tucker, shaped by submissions, and open to support from local businesses that fit the mission."
+        lede="A free Pride week directory, built by one guy in Portland, filled in by everybody else. Local businesses can pitch in. Nobody can buy the top spot."
         bgImage="/motifs/hero-about.png"
         bgPosition="56% center"
         actions={
@@ -117,7 +117,7 @@ export default function About() {
           <span className="board-sticker board-sticker--lime">Why this exists</span>
           <h2 className="display section-heading">THE MISSION</h2>
           <p className="board-copy">
-            One place for Pride week — independent, accountable, and built to send people to real events in real venues.
+            One place for the whole week. Nobody's algorithm, nobody's ad budget. Just real events in real rooms with real people in them.
           </p>
           <div className="about-mission-grid">
             {MISSION.map(item => (
@@ -178,12 +178,15 @@ export default function About() {
                 MADE BY <span className="about-creator-panel__accent">TUCKER MAX</span>
               </h2>
               <p className="board-copy about-creator-panel__copy">
-                I'm Tucker Max, host and creator of <em>Yes Coach</em>. I built this guide because Portland deserves something that isn't controlled by a corporation, buried by algorithms, or shaped by whoever pays the most.
+                Hi. I'm Tucker Max. I host and run Yes Coach, and a pile of other nights around town, and I also built this entire website myself, from the first line of code to the thing you're reading right now. Portland deserved a guide that isn't owned by a corporation, buried by an algorithm, or sorted by whoever wrote the biggest check. So I made one.
               </p>
               <p className="board-copy about-creator-panel__copy">
-                Thank you to everyone who helped and donated when I fell on extremely hard times this year. Your support helped make a third year possible — and for the first time, a fully custom site built just for this community.
+                This year got rough. A lot of you helped, donated, and checked in on me, and that's the only reason year three exists. It's also why the site is finally custom-built instead of duct-taped together.
               </p>
               <p className="about-creator-panel__meta">Meta sucks. We deserve better. Free to use, independently run, built to last.</p>
+              <p className="board-copy about-creator-panel__copy">
+                And yes, I'm still looking for work. If you know somebody, you know where to find me.
+              </p>
               <a
                 href="https://www.instagram.com/tucker_pdmax"
                 target="_blank"
@@ -218,7 +221,7 @@ export default function About() {
             <Heart size={26} className="about-donate-callout__icon" aria-hidden="true" />
             <h2 className="display section-heading">KEEP THIS GUIDE ALIVE</h2>
             <p className="board-copy about-donate-callout__copy">
-              Hosting, domain, and time add up. If the guide helped you find something good this weekend, buying me a coffee keeps it free for everyone.
+              Servers cost money. Domains cost money. Time costs the most. If this thing pointed you toward one good night, throw a coffee at it and it stays free for the next person.
             </p>
             <Button
               as="a"

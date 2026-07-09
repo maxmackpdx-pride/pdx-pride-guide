@@ -224,8 +224,8 @@ export default function MissedConnectionsPanel({
   ) : posts.length === 0 ? (
     boardLayout && mode === "board" ? (
       <div className="board-empty board-empty--prototype">
-        <p className="display section-heading">Nothing here yet</p>
-        <p className="board-copy-sm">No active missed connections yet. Be the first to post a note from today's events.</p>
+        <p className="display section-heading">Nobody's said anything yet</p>
+        <p className="board-copy-sm">You made eye contact on the MAX and did nothing about it. Same. Post the note. Worst case, nothing happens, which is exactly what's happening now.</p>
       </div>
     ) : (
       <div style={{ color: "#9d9a92", padding: compact ? "12px 0" : "32px 0" }}>

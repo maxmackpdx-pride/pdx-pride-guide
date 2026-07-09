@@ -21,9 +21,13 @@ export default function CalmModeToggle({
       aria-label={
         calmMode
           ? "Switch to neon mode"
-          : "Switch to calm mode — high contrast, easier to read"
+          : "Switch to calm mode. Turns down the color and the motion. Same guide, quieter."
       }
-      title={calmMode ? "Neon mode" : "Calm mode"}
+      title={
+        calmMode
+          ? "Neon mode"
+          : "Turns down the color and the motion. Same guide, quieter."
+      }
     >
       <span className="calm-mode-toggle__track" aria-hidden="true">
         <span className="calm-mode-toggle__thumb" />

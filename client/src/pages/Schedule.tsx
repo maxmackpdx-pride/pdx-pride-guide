@@ -834,8 +834,8 @@ export default function Schedule({
       'Sign in and tap “I’ll be there” on events to build your schedule.';
   else if (view === 'mine' && myCount === 0)
     emptyBanner =
-      'Your schedule is empty. Switch to All Events and tap the heart on anything you want to catch.';
-  else if (totalVisible === 0) emptyBanner = 'No events match those filters. Try clearing one.';
+      'Your week is wide open. Tap the heart on anything and it lands here. Build the whole week, or just get through Saturday.';
+  else if (totalVisible === 0) emptyBanner = 'Nothing found. Check the spelling, or drop a word.';
 
   /* ---- selected popover ------------------------------------------- */
 
@@ -1272,8 +1272,7 @@ export default function Schedule({
               lineHeight: 1.5,
             }}
           >
-            The whole week, side by side. Flip to just your RSVPs, filter by vibe, and build your nights. Pride is a
-            protest. Take care of each other.
+            The whole week, laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other.
           </p>
         </div>
         <div style={{ height: '3px', background: 'var(--grad-flag)', position: 'relative', zIndex: 1 }} />
