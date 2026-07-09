@@ -448,6 +448,20 @@ html.calm-mode .home-main-stage .pg-hero__event-count-num {
   padding-right: 4px;
 }
 
+/* Narrow dual columns need a bit more logo room than the full Directory grid */
+.home-main-stage .pg-placescroll .pdxPlace__media {
+  height: 180px;
+  padding: 22px 20px;
+}
+
+.home-main-stage .pg-placescroll .pdxPlace__logo {
+  max-height: 136px;
+}
+
+.home-main-stage .pg-placescroll .pdxPlace__logo--fallback {
+  max-height: 104px;
+}
+
 .home-main-stage .pg-seam-wrap {
   padding: 44px 0 0;
 }

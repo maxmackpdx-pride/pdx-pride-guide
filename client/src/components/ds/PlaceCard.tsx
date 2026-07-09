@@ -28,20 +28,26 @@ const CSS = `
   box-shadow:0 20px 44px -20px rgba(0,0,0,.85);
 }
 .pdxPlace__media{
-  position:relative; height:132px; border-radius:6px; overflow:hidden;
+  /* Taller well + real inset so crop-filled neon logos (tight alpha) don't
+     clip their glow edges. Flex + explicit max-height beats % height vs padding. */
+  position:relative; height:168px; border-radius:6px; overflow:hidden;
+  box-sizing:border-box;
   background:radial-gradient(125% 120% at 50% 12%, color-mix(in srgb, var(--_c,var(--pink)) 13%, #050506), #050506 72%);
   border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 34%, transparent);
-  display:grid; place-items:center; padding:14px;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px 22px;
 }
 .pdxPlace__mediaScan{
   position:absolute; inset:0; pointer-events:none; opacity:.5;
   background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
 }
 .pdxPlace__logo{
-  position:relative; max-width:100%; max-height:100%; object-fit:contain;
-  filter:drop-shadow(0 0 9px color-mix(in srgb, var(--_c,var(--pink)) 45%, transparent));
+  position:relative; z-index:1;
+  max-width:100%; max-height:128px; width:auto; height:auto;
+  object-fit:contain; object-position:center;
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--_c,var(--pink)) 42%, transparent));
 }
-.pdxPlace__logo--fallback{ max-width:62%; max-height:78%;
+.pdxPlace__logo--fallback{ max-width:58%; max-height:96px;
   filter:drop-shadow(0 0 12px color-mix(in srgb, var(--_c,var(--pink)) 55%, transparent)); }
 .pdxPlace__badges{ display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
 .pdxPlace__opening{ }
