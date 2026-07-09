@@ -1,5 +1,7 @@
 // @ts-nocheck
 import React from "react";
+import LiveWave from "@/components/LiveWave";
+import CountUpValue from "@/components/CountUpValue";
 
 /* StatPill = the little count pills: "1 EVENTS", "3 ACTION ITEMS",
    "52 EVENTS", "1 TOTAL", "1 POSTS", "LIVE". Rounded pill, accent-colored
@@ -12,7 +14,7 @@ const CSS = `
   letter-spacing:.05em; text-transform:uppercase; white-space:nowrap;
   border:2px solid var(--_c,var(--lime)); background:transparent; color:var(--text-lo);
 }
-.pdxStatPill__num{ color:var(--_c,var(--lime)); }
+.pdxStatPill__num{ color:var(--_c,var(--lime)); font-variant-numeric:tabular-nums; }
 .pdxStatPill__icon{ display:inline-flex; color:var(--_c,var(--lime)); }
 .pdxStatPill__icon svg{ width:14px; height:14px; }
 .pdxStatPill__dot{ width:8px; height:8px; border-radius:var(--radius-pill); background:var(--_c,var(--lime)); }
@@ -47,6 +49,10 @@ export function StatPill({
   glow = false,
   dot = false,
   icon = null,
+  /** Opt-in LiveWave equalizer beside the live dot (default off). */
+  liveWave = false,
+  /** Opt-in count-up animation (default off). */
+  animateCount = false,
   className = "",
   ...rest
 }) {
@@ -55,8 +61,13 @@ export function StatPill({
   return (
     <span className={cls} style={{ "--_c": COLORS[color] || color }} {...rest}>
       {dot && <span className="pdxStatPill__dot" />}
+      {liveWave && <LiveWave />}
       {icon && <span className="pdxStatPill__icon">{icon}</span>}
-      {count != null && <span className="pdxStatPill__num">{count}</span>}
+      {count != null && (
+        <span className="pdxStatPill__num">
+          {animateCount ? <CountUpValue value={Number(count) || 0} /> : count}
+        </span>
+      )}
       {children}
     </span>
   );
