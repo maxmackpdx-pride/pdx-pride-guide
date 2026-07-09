@@ -15,6 +15,9 @@ import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
+import Schedule from "@/pages/Schedule";
+import ScheduleCard from "@/components/ScheduleCard";
+import EventsNowPanel from "@/components/EventsNowPanel";
 
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -146,6 +149,17 @@ export default function Events() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortMode, setSortMode] = useState<SortMode>("start_time");
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [activeTab, setActiveTabState] = useState<"board" | "schedule">(() =>
+    readSearchParam("tab").toLowerCase() === "schedule" ? "schedule" : "board",
+  );
+  const setActiveTab = useCallback((tab: "board" | "schedule") => {
+    setActiveTabState(tab);
+    const params = new URLSearchParams(window.location.search);
+    if (tab === "schedule") params.set("tab", "schedule");
+    else params.delete("tab");
+    const qs = params.toString();
+    setLocation(qs ? `/events?${qs}` : "/events");
+  }, [setLocation]);
   const openEvent = useCallback((event: EventListing) => {
     setSelectedEvent(event);
     setLocation(eventPath(event.id, event.title, event.dayOfWeek));
@@ -274,16 +288,51 @@ export default function Events() {
         }
       />
 
-      <Suspense fallback={<MapViewFallback variant="events" />}>
-        <MapView
-          events={filtered}
-          expanded={mapExpanded}
-          onExpand={() => setMapExpanded(true)}
-          onCollapse={() => setMapExpanded(false)}
-          onSelect={openEvent}
-        />
-      </Suspense>
+      <div className="events-map-row">
+        <div className="events-map-row__panel">
+          <EventsNowPanel />
+        </div>
+        <div className="events-map-row__map">
+          <Suspense fallback={<MapViewFallback variant="events" />}>
+            <MapView
+              events={filtered}
+              expanded={mapExpanded}
+              onExpand={() => setMapExpanded(true)}
+              onCollapse={() => setMapExpanded(false)}
+              onSelect={openEvent}
+            />
+          </Suspense>
+        </div>
+      </div>
 
+      {/* Board | Schedule tabs */}
+      <div className="events-tab-bar">
+        <button
+          type="button"
+          className={`events-tab${activeTab === "board" ? " active" : ""}`}
+          onClick={() => setActiveTab("board")}
+          data-testid="events-tab-board"
+        >
+          The Board
+        </button>
+        <button
+          type="button"
+          className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
+          onClick={() => setActiveTab("schedule")}
+          data-testid="events-tab-schedule"
+        >
+          The Schedule
+        </button>
+      </div>
+
+      {activeTab === "schedule" ? (
+        <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px 40px" }}>
+          <ScheduleCard>
+            <Schedule embed />
+          </ScheduleCard>
+        </div>
+      ) : (
+      <>
       {/* Filters + View Toggle */}
       <div className="zine-filter-bar" style={{
         background: "#000", borderBottom: "1px solid #1a1a1a",
@@ -463,6 +512,8 @@ export default function Events() {
           </div>
         </ScrollReveal>
       </div>
+      </>
+      )}
 
       {selectedEvent && (
         <EventModal
