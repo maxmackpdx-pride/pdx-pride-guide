@@ -24,9 +24,8 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/spotted", label: "Spotted!" },
     ],
   },
-  { type: "link", href: "/schedule", label: "Schedule" },
   { type: "link", href: "/about", label: "About" },
-  { type: "link", href: "/submit", label: "Submit" },
+  { type: "link", href: "/submit", label: "Promoters" },
 ];
 
 export type PageHeaderMeta = {
