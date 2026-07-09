@@ -18,7 +18,7 @@ type Business = {
   lng: number | null;
 };
 
-const TYPE_COLORS: Record<string, string> = {
+export const MAP_TYPE_COLORS: Record<string, string> = {
   bar: "#FF00CC",
   restaurant: "#FF6600",
   cafe: "#39FF14",
@@ -29,7 +29,7 @@ const TYPE_COLORS: Record<string, string> = {
   nonprofit: "#FFFFFF",
 };
 
-const TYPE_LABELS: Record<string, string> = {
+export const MAP_TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",
   restaurant: "Restaurants",
   cafe: "Cafes",
@@ -37,7 +37,23 @@ const TYPE_LABELS: Record<string, string> = {
   service: "Services",
   shop: "Shops",
   hotel: "Hotels",
+  nonprofit: "Nonprofits",
 };
+
+/** Legend order for the directory map key. */
+export const MAP_KEY_TYPES = [
+  "bar",
+  "restaurant",
+  "cafe",
+  "venue",
+  "service",
+  "shop",
+  "hotel",
+  "nonprofit",
+] as const;
+
+const TYPE_COLORS = MAP_TYPE_COLORS;
+const TYPE_LABELS = MAP_TYPE_LABELS;
 
 function buildRainbowPin() {
   return divIcon({
@@ -188,55 +204,95 @@ const POPUP_STYLES = `
   .pdx-dir-popup .leaflet-popup-close-button:hover { color: #fff !important; }
 `;
 
+/** Color key for map pins — sits under the map on Directory. */
+export function DirectoryMapKey({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`directory-map-key ${className}`.trim()}
+      role="group"
+      aria-label="Map key"
+    >
+      <div className="directory-map-key__title">Map key</div>
+      <ul className="directory-map-key__list">
+        {MAP_KEY_TYPES.map(type => {
+          const isNonprofit = type === "nonprofit";
+          const color = MAP_TYPE_COLORS[type];
+          const label = MAP_TYPE_LABELS[type];
+          return (
+            <li key={type} className="directory-map-key__item">
+              <span
+                className={
+                  isNonprofit
+                    ? "directory-map-key__swatch directory-map-key__swatch--rainbow"
+                    : "directory-map-key__swatch"
+                }
+                style={isNonprofit ? undefined : { background: color, boxShadow: `0 0 8px ${color}99` }}
+                aria-hidden="true"
+              />
+              <span className="directory-map-key__label">{label}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function DirectoryMap({
   businesses,
   height = 380,
+  showKey = false,
 }: {
   businesses: Business[];
   height?: number | string;
+  /** When true, render the pin color key under the map (Directory page). */
+  showKey?: boolean;
 }) {
   const mapped = businesses.filter(b => b.lat != null && b.lng != null);
   const heightStyle = typeof height === "number" ? `${height}px` : height;
   const fillParent = height === "100%";
 
   return (
-    <div
-      className={fillParent ? "directory-map directory-map--fill" : "directory-map"}
-      style={{
-        height: heightStyle,
-        minHeight: fillParent ? heightStyle : undefined,
-        width: "100%",
-        position: "relative",
-        flex: fillParent ? "1 1 auto" : undefined,
-      }}
-    >
-      <style>{POPUP_STYLES}</style>
-      <MapContainer
-        center={[45.5231, -122.6765]}
-        zoom={13}
-        style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
-        scrollWheelZoom={false}
+    <div className={showKey ? "directory-map-wrap" : undefined}>
+      <div
+        className={fillParent ? "directory-map directory-map--fill" : "directory-map"}
+        style={{
+          height: heightStyle,
+          minHeight: fillParent ? heightStyle : undefined,
+          width: "100%",
+          position: "relative",
+          flex: fillParent ? "1 1 auto" : undefined,
+        }}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-        />
-        {mapped.map(biz => {
-          const accent = TYPE_COLORS[biz.type] || "#FF00CC";
-          const rainbow = biz.type === "nonprofit";
-          return (
-            <Marker
-              key={biz.id}
-              position={[biz.lat!, biz.lng!]}
-              icon={rainbow ? buildRainbowPin() : buildPin(accent)}
-            >
-              <Popup className="pdx-dir-popup" maxWidth={280}>
-                <DirectoryPopup biz={biz} accent={accent} />
-              </Popup>
-            </Marker>
-          );
-        })}
-      </MapContainer>
+        <style>{POPUP_STYLES}</style>
+        <MapContainer
+          center={[45.5231, -122.6765]}
+          zoom={13}
+          style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+          scrollWheelZoom={false}
+        >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+          />
+          {mapped.map(biz => {
+            const accent = TYPE_COLORS[biz.type] || "#FF00CC";
+            const rainbow = biz.type === "nonprofit";
+            return (
+              <Marker
+                key={biz.id}
+                position={[biz.lat!, biz.lng!]}
+                icon={rainbow ? buildRainbowPin() : buildPin(accent)}
+              >
+                <Popup className="pdx-dir-popup" maxWidth={280}>
+                  <DirectoryPopup biz={biz} accent={accent} />
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
+      </div>
+      {showKey && <DirectoryMapKey />}
     </div>
   );
 }

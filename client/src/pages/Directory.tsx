@@ -270,10 +270,10 @@ export default function Directory() {
         </ScrollReveal>
       )}
 
-      {/* Map */}
+      {/* Map + pin color key */}
       {!isLoading && (
         <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
-          <DirectoryMap businesses={filtered} />
+          <DirectoryMap businesses={filtered} showKey />
         </Suspense>
       )}
 
