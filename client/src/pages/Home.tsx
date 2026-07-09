@@ -185,17 +185,15 @@ export default function Home() {
           </h1>
           {events.length > 0 && (
             <div
-              className="pg-hero__event-count pdxCountdown pdxCountdown--md pdxCountdown--rainbow"
+              className="pg-hero__event-count"
               aria-label={`${events.length} events listed`}
             >
-              <div className="pdxCountdown__unit">
-                <span className="pdxCountdown__num" data-testid="home-events-count">
-                  {events.length}
-                </span>
-                <span className="pdxCountdown__label">
-                  {events.length === 1 ? "Event" : "Events"}
-                </span>
-              </div>
+              <span className="pg-hero__event-count-num" data-testid="home-events-count">
+                {events.length}
+              </span>
+              <span className="pg-hero__event-count-label">
+                {events.length === 1 ? "Event" : "Events"}
+              </span>
             </div>
           )}
           <p className="pg-hero__blurb">
@@ -204,7 +202,7 @@ export default function Home() {
           </p>
           <div className="pg-hero__countdown">
             <span className="pg-hero__cdlabel">Doors to the weekend open in</span>
-            <Countdown target={HOME_COUNTDOWN_TARGET} accent="rainbow" aria-label="Countdown to Pride weekend" />
+            <Countdown target={HOME_COUNTDOWN_TARGET} accent="lime" aria-label="Countdown to Pride weekend" />
           </div>
           <div className="pg-hero__actions">
             <Link href="/events">

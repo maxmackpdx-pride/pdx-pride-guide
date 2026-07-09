@@ -326,8 +326,14 @@ body::before {
 .glitch-word__gradient {
   position: relative;
   z-index: 1;
-  /* Same sweep as marquee --grad-rainbow (cyan → green → yellow → orange → magenta) */
-  background: var(--grad-rainbow);
+  /* Nav PRIDE neon rainbow: cyan → lime → magenta → orange */
+  background: linear-gradient(
+    90deg,
+    var(--neon-cyan),
+    var(--neon-yellow),
+    var(--neon-magenta),
+    var(--neon-orange)
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1925,7 +1931,8 @@ h2.display,
 
 .events-map-row__panel {
   flex: none;
-  height: 320px;
+  /* Dual Happening Now / Up Next marquees need enough vertical room */
+  height: 440px;
 }
 
 @media (min-width: 900px) {
@@ -1936,8 +1943,8 @@ h2.display,
   }
 
   .events-map-row__panel {
-    height: clamp(360px, 48vh, 560px);
-    width: min(360px, 32vw);
+    height: clamp(440px, 52vh, 600px);
+    width: min(400px, 34vw);
   }
 
   .events-map-row__map {

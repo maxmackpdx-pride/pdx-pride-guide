@@ -98,6 +98,7 @@
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
 }
 
+/* Match nav PRIDE: GlitchWord rainbow fill + black ink + neon glow */
 .home-main-stage .pg-hero h1 .home-hero-title-pride {
   display: block;
   font-family: var(--font-display);
@@ -106,6 +107,11 @@
   line-height: 0.84;
   letter-spacing: 0.01em;
   font-size: clamp(3.5rem, 11vw, 6.4rem);
+  /* Same neon stack as .site-brand-wordmark__line--accent */
+  filter:
+    drop-shadow(2px 2px 0 #000)
+    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
+    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
 }
 
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word {
@@ -121,74 +127,63 @@
   line-height: inherit;
 }
 
+/* Slightly stronger outline at hero scale so black ink reads like nav */
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline {
-  -webkit-text-stroke: 1px #000;
-  text-shadow: 1px 1px 0 #000;
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 2px 2px 0 #000, 3px 3px 0 #000;
 }
 
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
-  /* Match live ticker marquee band (--grad-rainbow) */
-  background: var(--grad-rainbow);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  /* Inherit nav rainbow neon (set on .glitch-word__gradient) — do not override */
   text-shadow: none;
 }
 
-/* Event count under Guide — same unit boxes as Countdown, rainbow fill */
+/* Event count under Guide — no box, 2× size, white + black outline + neon glow */
 .home-main-stage .pg-hero__event-count {
-  margin-top: 18px;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
 }
 
-.home-main-stage .pg-hero__event-count .pdxCountdown__num {
-  background: var(--grad-rainbow);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  /* Keep sticker outline via filter (text-shadow can't sit on clipped text) */
-  text-shadow: none;
-  filter:
-    drop-shadow(2px 3px 0 #000)
-    drop-shadow(3px 2px 0 #000)
-    drop-shadow(-1px -1px 0 #000)
-    drop-shadow(1px -1px 0 #000);
-}
-
-html.calm-mode .home-main-stage .pg-hero__event-count .pdxCountdown__num {
-  background: none;
-  -webkit-background-clip: border-box;
-  background-clip: border-box;
-  -webkit-text-fill-color: #fff;
+.home-main-stage .pg-hero__event-count-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(4.5rem, 10vw, 7rem);
+  line-height: 0.88;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
   color: #fff;
+  -webkit-text-fill-color: #fff;
+  /* Black sticker outline + soft white/cyan neon glow */
+  text-shadow:
+    3px 4px 0 #000,
+    4px 3px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 3px 0 #000,
+    0 0 18px rgba(255, 255, 255, 0.55),
+    0 0 36px rgba(0, 255, 255, 0.35),
+    0 0 52px rgba(204, 255, 0, 0.22);
+}
+
+.home-main-stage .pg-hero__event-count-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-left: 0.12em;
+}
+
+html.calm-mode .home-main-stage .pg-hero h1 .home-hero-title-pride {
   filter: none;
 }
 
-/* Time countdown rainbow accent (matches marquee + event count) */
-.home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__num,
-.home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__done {
-  background: var(--grad-rainbow);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  text-shadow: none;
-  filter:
-    drop-shadow(2px 3px 0 #000)
-    drop-shadow(3px 2px 0 #000)
-    drop-shadow(-1px -1px 0 #000)
-    drop-shadow(1px -1px 0 #000);
-}
-
-html.calm-mode .home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__num,
-html.calm-mode .home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__done {
-  background: none;
-  -webkit-background-clip: border-box;
-  background-clip: border-box;
-  -webkit-text-fill-color: #fff;
-  color: #fff;
-  filter: none;
+html.calm-mode .home-main-stage .pg-hero__event-count-num {
+  text-shadow: 2px 2px 0 #000;
 }
 
 .home-main-stage .pg-hero__blurb {
