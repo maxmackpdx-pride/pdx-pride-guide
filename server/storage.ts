@@ -2725,6 +2725,30 @@ function runBootMigrationsOnce() {
     } as any).run();
     recordBootMigration("seed_underu4men_v10");
   }
+  if (!hasBootMigration("seed_meetrack_directory_v11")) {
+    const now = new Date().toISOString();
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = ? LIMIT 1`)
+      .get("The Meet Rack at Darkroom") as { id: number } | undefined;
+    if (!exists) {
+      db.insert(businesses).values({
+        name: "The Meet Rack at Darkroom",
+        type: "venue",
+        description:
+          "Portland's private event club for men, hosted at Darkroom. Regular in-person events at the intersection of community, social life, kink, body positivity, and mutual respect. Details and calendar at meetrack.org.",
+        address: null,
+        neighborhood: "Portland",
+        website: "https://meetrack.org",
+        instagram: null,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+        active: true,
+        createdAt: now,
+      } as any).run();
+    }
+    recordBootMigration("seed_meetrack_directory_v11");
+  }
   if (!hasBootMigration("sync_event_map_coordinates_v1")) {
     const directoryRows = db.select().from(businesses).all().filter(b => b.active);
     const missing = sqlite.prepare(`
