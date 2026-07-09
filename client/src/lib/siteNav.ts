@@ -12,6 +12,7 @@ export type NavEntry =
 
 /** Primary nav — labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
+  { type: "link", href: "/about", label: "About" },
   { type: "link", href: "/events", label: "Events" },
   { type: "link", href: "/directory", label: "Directory" },
   {
@@ -24,7 +25,6 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/spotted", label: "Spotted!" },
     ],
   },
-  { type: "link", href: "/about", label: "About" },
   { type: "link", href: "/submit", label: "Promoters" },
 ];
 
