@@ -170,11 +170,11 @@
 
 .home-main-stage .pg-hero__event-count-label {
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.7rem;
+  font-size: 1.4rem; /* 2× previous 0.7rem */
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-lo);
+  color: #fff;
   margin-left: 0.12em;
 }
 
@@ -204,8 +204,8 @@ html.calm-mode .home-main-stage .pg-hero__event-count-num {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.8rem;
-  color: var(--text-lo);
+  font-size: 1.6rem; /* 2× previous 0.8rem */
+  color: #fff;
 }
 
 .home-main-stage .pg-hero__actions {
