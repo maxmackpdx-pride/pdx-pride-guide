@@ -2985,6 +2985,314 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("lavender_rain_forbidden_tickets_v3");
   }
+  if (!hasBootMigration("badlands_pride_week_calendar_2026_v1")) {
+    // Official Badlands calendar feed: https://www.badlandsportland.com/calendar
+    // Source: badlands-events.badlandsportland.workers.dev/api/calendar?from=2026-07-13&to=2026-07-19
+    const venue = {
+      venueName: "Badlands",
+      address: "110 NW Broadway, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5239294,
+      lng: -122.677178,
+    };
+    const now = new Date().toISOString();
+    const dowFromLocal = (dateStart: string) =>
+      ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][new Date(`${dateStart.slice(0, 10)}T12:00:00`).getDay()];
+    const upsert = (row: {
+      title: string;
+      description: string;
+      dateStart: string;
+      dateEnd: string;
+      eventTypes: string[];
+      admission: string;
+      ticketUrl: string;
+      posterImageUrl: string;
+      ageRequirement?: string;
+    }) => {
+      const existing = sqlite
+        .prepare("SELECT id FROM events WHERE title = ? AND date_start = ? LIMIT 1")
+        .get(row.title, row.dateStart) as { id: number } | undefined;
+      if (existing) {
+        sqlite
+          .prepare(
+            `UPDATE events SET
+              description = ?,
+              ticket_url = ?,
+              poster_image_url = ?,
+              date_end = ?,
+              admission = ?,
+              age_requirement = ?,
+              event_types = ?,
+              venue_name = ?,
+              address = ?,
+              neighborhood = ?,
+              lat = ?,
+              lng = ?,
+              status = 'LIVE',
+              admin_notes = COALESCE(admin_notes || ' | ', '') || 'Synced from badlandsportland.com/calendar Pride week 2026-07-13..19'
+            WHERE id = ?`,
+          )
+          .run(
+            row.description,
+            row.ticketUrl,
+            row.posterImageUrl,
+            row.dateEnd,
+            row.admission,
+            row.ageRequirement || "21_PLUS",
+            JSON.stringify(row.eventTypes),
+            venue.venueName,
+            venue.address,
+            venue.neighborhood,
+            venue.lat,
+            venue.lng,
+            existing.id,
+          );
+        return;
+      }
+      // Match known alternate title for Fridays Are A DRAG
+      if (row.title.includes("Fridays Are A DRAG") || row.title.includes("Fridays Are A Drag")) {
+        const fri = sqlite
+          .prepare(
+            "SELECT id FROM events WHERE title LIKE 'Fridays Are A DRAG%' AND date_start LIKE '2026-07-17%' LIMIT 1",
+          )
+          .get() as { id: number } | undefined;
+        if (fri) {
+          sqlite
+            .prepare(
+              `UPDATE events SET
+                title = ?, description = ?, ticket_url = ?, poster_image_url = ?,
+                date_start = ?, date_end = ?, admission = ?, status = 'LIVE',
+                venue_name = ?, address = ?,
+                admin_notes = COALESCE(admin_notes || ' | ', '') || 'Synced from badlandsportland.com/calendar'
+              WHERE id = ?`,
+            )
+            .run(
+              row.title,
+              row.description,
+              row.ticketUrl,
+              row.posterImageUrl,
+              row.dateStart,
+              row.dateEnd,
+              row.admission,
+              venue.venueName,
+              venue.address,
+              fri.id,
+            );
+          return;
+        }
+      }
+      if (row.title.startsWith("Y2GAY")) {
+        const y2 = sqlite
+          .prepare("SELECT id FROM events WHERE title LIKE 'Y2GAY%' AND date_start LIKE '2026-07-16%' LIMIT 1")
+          .get() as { id: number } | undefined;
+        if (y2) {
+          sqlite
+            .prepare(
+              `UPDATE events SET
+                title = ?, description = ?, ticket_url = ?, poster_image_url = ?,
+                date_start = ?, date_end = ?, admission = ?, status = 'LIVE',
+                venue_name = ?, address = ?,
+                admin_notes = COALESCE(admin_notes || ' | ', '') || 'Synced from badlandsportland.com/calendar'
+              WHERE id = ?`,
+            )
+            .run(
+              row.title,
+              row.description,
+              row.ticketUrl,
+              row.posterImageUrl,
+              row.dateStart,
+              row.dateEnd,
+              row.admission,
+              venue.venueName,
+              venue.address,
+              y2.id,
+            );
+          return;
+        }
+      }
+      db.insert(events)
+        .values({
+          title: row.title,
+          description: row.description,
+          ...venue,
+          dateStart: row.dateStart,
+          dateEnd: row.dateEnd,
+          dayOfWeek: dowFromLocal(row.dateStart),
+          ageRequirement: row.ageRequirement || "21_PLUS",
+          eventTypes: JSON.stringify(row.eventTypes),
+          admission: row.admission,
+          ticketUrl: row.ticketUrl,
+          isPublic: true,
+          isPrivate: false,
+          isHouseParty: false,
+          isSexPositive: false,
+          nudityOk: false,
+          posterImageUrl: row.posterImageUrl,
+          status: "LIVE",
+          source: "admin_seeded",
+          isClaimable: true,
+          claimedBy: null,
+          submittedBy: null,
+          adminNotes: "Seeded from official Badlands calendar API (Pride week Jul 13–19 2026).",
+          createdAt: now,
+        } as any)
+        .run();
+    };
+
+    const cal = "https://www.badlandsportland.com/calendar";
+
+    const rows: Array<Parameters<typeof upsert>[0]> = [
+      {
+        title: "Musical Mondays at Badlands",
+        description:
+          "Musical Mondays at Badlands — songs from stage and screen on Broadway St, hosted by Quesa D'Mondays and Dieter Davis. 9pm–2am. 21+.",
+        dateStart: "2026-07-13T21:00:00",
+        dateEnd: "2026-07-14T02:00:00",
+        eventTypes: ["DRAG", "PERFORMANCE", "MUSIC"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-musical-mondays.png",
+      },
+      {
+        title: "Fresh Paint at Badlands",
+        description:
+          "An open-call drag show where anything can (and often does) happen. Hosted by Rio Diehl Volt — Portland entertainers get their wings. 10pm–2am. 21+.",
+        dateStart: "2026-07-13T22:00:00",
+        dateEnd: "2026-07-14T02:00:00",
+        eventTypes: ["DRAG", "PERFORMANCE", "OPEN_MIC"],
+        admission: "DOOR_FEE",
+        ticketUrl: "https://instagram.com/freshpaintportland",
+        posterImageUrl: "/posters/badlands-fresh-paint.jpg",
+      },
+      {
+        title: "Karaoke at Badlands — Tuesday",
+        description: "Karaoke at Badlands. 9pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-14T21:00:00",
+        dateEnd: "2026-07-15T02:00:00",
+        eventTypes: ["KARAOKE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-karaoke.jpg",
+      },
+      {
+        title: "Request Night at Badlands",
+        description: "Request Night at Badlands. 10pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-14T22:00:00",
+        dateEnd: "2026-07-15T02:00:00",
+        eventTypes: ["DANCE", "NIGHTLIFE", "PARTY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-request-night.jpg",
+      },
+      {
+        title: "Karaoke at Badlands — Wednesday",
+        description: "Karaoke at Badlands. 9:30pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-15T21:30:00",
+        dateEnd: "2026-07-16T02:00:00",
+        eventTypes: ["KARAOKE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-karaoke.jpg",
+      },
+      {
+        title: "Woman Crush Wednesdays PRIDE",
+        description:
+          "Woman Crush Wednesdays PRIDE at Badlands — a night for the girlies in all of us. Harlow Quinzel hosts a femmetastic drag show; 55x DJs the afterparty for the girls, gays, and theys. 10pm–2am. 21+.",
+        dateStart: "2026-07-15T22:00:00",
+        dateEnd: "2026-07-16T02:00:00",
+        eventTypes: ["DRAG", "DANCE", "PARTY", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-wcw-pride.jpg",
+      },
+      {
+        title: "Trivia at Badlands",
+        description: "Trivia at Badlands. 7pm–9pm. Official Badlands calendar listing for Pride week. 21+.",
+        dateStart: "2026-07-16T19:00:00",
+        dateEnd: "2026-07-16T21:00:00",
+        eventTypes: ["TRIVIA", "COMMUNITY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-trivia.jpg",
+      },
+      {
+        title: "Y2GAY Pride Edition",
+        description:
+          "Y2GAY Pride Edition at Badlands — Y2K nostalgia meets Pride. Official Badlands calendar listing. 10pm–2am. 21+.",
+        dateStart: "2026-07-16T22:00:00",
+        dateEnd: "2026-07-17T02:00:00",
+        eventTypes: ["PARTY", "DANCE", "DRAG", "PRIDE"],
+        admission: "TICKETED",
+        ticketUrl: "https://ma.to/event/y2gay-pride-edition-16-july-2026",
+        posterImageUrl: "/posters/badlands-y2gay-pride.jpg",
+      },
+      {
+        title: "Thirsty Thursdays at Badlands",
+        description: "Thirsty Thursdays at Badlands. 10pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-16T22:00:00",
+        dateEnd: "2026-07-17T02:00:00",
+        eventTypes: ["PARTY", "DANCE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-thirsty-thursdays.jpg",
+      },
+      {
+        title: "RuPaul's Drag Race All-Stars 11 + Untucked",
+        description:
+          "Watch party: RuPaul's Drag Race All-Stars 11 + Untucked at Badlands. 7:30pm–9:30pm. Official Badlands calendar listing. 21+.",
+        dateStart: "2026-07-17T19:30:00",
+        dateEnd: "2026-07-17T21:30:00",
+        eventTypes: ["WATCH_PARTY", "DRAG", "COMMUNITY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-rupauls-all-stars.jpg",
+      },
+      {
+        title: "Fridays Are A DRAG — Pride Weekend",
+        description:
+          "Fridays Are A Drag PRIDE with Jay Colby at Badlands (official calendar). Showcase of Portland drag excellence into the Friday dance party with hot gogos and Haute Toddy. Showtime 9:30pm. 21+.",
+        dateStart: "2026-07-17T21:30:00",
+        dateEnd: "2026-07-18T02:15:00",
+        eventTypes: ["DRAG", "PERFORMANCE", "NIGHTLIFE", "PARTY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-fridays-are-a-drag-pride.jpg",
+      },
+      {
+        title: "PRIDE Saturday Dance Party at Badlands",
+        description:
+          "PRIDE Saturday Dance Party at Badlands with Jules Liesl and DJ Cisco. 9pm–2:15am. Official Badlands calendar listing. 21+.",
+        dateStart: "2026-07-18T21:00:00",
+        dateEnd: "2026-07-19T02:15:00",
+        eventTypes: ["PARTY", "DANCE", "PRIDE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-pride-saturday-dance.jpg",
+      },
+      {
+        title: "Industry Night at Badlands",
+        description: "Industry Night at Badlands. 8:30pm–2am. Official Badlands calendar listing for Pride week. 21+.",
+        dateStart: "2026-07-19T20:30:00",
+        dateEnd: "2026-07-20T02:00:00",
+        eventTypes: ["PARTY", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-industry-night.jpg",
+      },
+      {
+        title: "Noche Kaliente at Badlands",
+        description: "Noche Kaliente at Badlands. 10pm–2am. Official Badlands calendar listing for Pride week. 21+.",
+        dateStart: "2026-07-19T22:00:00",
+        dateEnd: "2026-07-20T02:00:00",
+        eventTypes: ["PARTY", "DANCE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-noche-kaliente.jpg",
+      },
+    ];
+    for (const row of rows) upsert(row);
+    recordBootMigration("badlands_pride_week_calendar_2026_v1");
+  }
 }
 
 function parseEnvAdminLists() {
