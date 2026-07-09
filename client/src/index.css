@@ -326,7 +326,8 @@ body::before {
 .glitch-word__gradient {
   position: relative;
   z-index: 1;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  /* Same sweep as marquee --grad-rainbow (cyan → green → yellow → orange → magenta) */
+  background: var(--grad-rainbow);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

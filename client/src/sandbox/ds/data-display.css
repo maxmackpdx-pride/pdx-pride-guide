@@ -89,6 +89,21 @@
   letter-spacing: 0.02em;
   text-shadow: 0 0 22px color-mix(in srgb, var(--_c, var(--lime)) 60%, transparent);
 }
+/* Rainbow numbers — same sweep as marquee --grad-rainbow */
+.pdxCountdown--rainbow .pdxCountdown__num,
+.pdxCountdown--rainbow .pdxCountdown__done {
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(2px 3px 0 #000)
+    drop-shadow(3px 2px 0 #000)
+    drop-shadow(-1px -1px 0 #000)
+    drop-shadow(1px -1px 0 #000);
+}
 
 /* ---- EventCard (list row) --------------------------------- */
 .pdxRow {

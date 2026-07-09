@@ -127,7 +127,68 @@
 }
 
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
+  /* Match live ticker marquee band (--grad-rainbow) */
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
   text-shadow: none;
+}
+
+/* Event count under Guide — same unit boxes as Countdown, rainbow fill */
+.home-main-stage .pg-hero__event-count {
+  margin-top: 18px;
+}
+
+.home-main-stage .pg-hero__event-count .pdxCountdown__num {
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* Keep sticker outline via filter (text-shadow can't sit on clipped text) */
+  text-shadow: none;
+  filter:
+    drop-shadow(2px 3px 0 #000)
+    drop-shadow(3px 2px 0 #000)
+    drop-shadow(-1px -1px 0 #000)
+    drop-shadow(1px -1px 0 #000);
+}
+
+html.calm-mode .home-main-stage .pg-hero__event-count .pdxCountdown__num {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  filter: none;
+}
+
+/* Time countdown rainbow accent (matches marquee + event count) */
+.home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__num,
+.home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__done {
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(2px 3px 0 #000)
+    drop-shadow(3px 2px 0 #000)
+    drop-shadow(-1px -1px 0 #000)
+    drop-shadow(1px -1px 0 #000);
+}
+
+html.calm-mode .home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__num,
+html.calm-mode .home-main-stage .pg-hero__countdown .pdxCountdown--rainbow .pdxCountdown__done {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  filter: none;
 }
 
 .home-main-stage .pg-hero__blurb {

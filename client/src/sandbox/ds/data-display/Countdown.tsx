@@ -31,7 +31,7 @@ function diff(target: string): CountdownState {
 export interface CountdownProps extends DivProps {
   target?: string;
   size?: "sm" | "md";
-  accent?: "lime" | "pink" | "cyan" | "purple" | "amber" | string;
+  accent?: "lime" | "pink" | "cyan" | "purple" | "amber" | "rainbow" | string;
   doneLabel?: string;
 }
 
@@ -51,12 +51,16 @@ export function Countdown({
     return () => clearInterval(id);
   }, [target]);
 
-  const accentVar = ACCENTS[accent] || accent;
-  const cssStyle: CssVarStyle = { "--_c": accentVar, ...style };
+  const isRainbow = accent === "rainbow";
+  const accentVar = isRainbow ? undefined : (ACCENTS[accent] || accent);
+  const accentClass = isRainbow ? "pdxCountdown--rainbow" : "";
+  const cssStyle: CssVarStyle = isRainbow
+    ? { ...style }
+    : { "--_c": accentVar as string, ...style };
 
   if (t.done) {
     return (
-      <div className={`pdxCountdown ${className}`} style={cssStyle} {...rest}>
+      <div className={`pdxCountdown ${accentClass} ${className}`.trim()} style={cssStyle} {...rest}>
         <span className="pdxCountdown__done">{doneLabel}</span>
       </div>
     );
@@ -72,7 +76,7 @@ export function Countdown({
 
   return (
     <div
-      className={`pdxCountdown pdxCountdown--${size} ${className}`}
+      className={`pdxCountdown pdxCountdown--${size} ${accentClass} ${className}`.trim()}
       role="timer"
       aria-live="off"
       style={cssStyle}

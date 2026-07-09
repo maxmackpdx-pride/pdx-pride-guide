@@ -183,13 +183,28 @@ export default function Home() {
             </span>
             <span>Guide</span>
           </h1>
+          {events.length > 0 && (
+            <div
+              className="pg-hero__event-count pdxCountdown pdxCountdown--md pdxCountdown--rainbow"
+              aria-label={`${events.length} events listed`}
+            >
+              <div className="pdxCountdown__unit">
+                <span className="pdxCountdown__num" data-testid="home-events-count">
+                  {events.length}
+                </span>
+                <span className="pdxCountdown__label">
+                  {events.length === 1 ? "Event" : "Events"}
+                </span>
+              </div>
+            </div>
+          )}
           <p className="pg-hero__blurb">
             Three days, one city, every color. Find the parties, the parade, and your people, then{" "}
             <strong>dance til the sun comes up.</strong>
           </p>
           <div className="pg-hero__countdown">
             <span className="pg-hero__cdlabel">Doors to the weekend open in</span>
-            <Countdown target={HOME_COUNTDOWN_TARGET} accent="lime" aria-label="Countdown to Pride weekend" />
+            <Countdown target={HOME_COUNTDOWN_TARGET} accent="rainbow" aria-label="Countdown to Pride weekend" />
           </div>
           <div className="pg-hero__actions">
             <Link href="/events">

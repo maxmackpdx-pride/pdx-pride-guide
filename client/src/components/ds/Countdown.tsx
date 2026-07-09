@@ -29,6 +29,16 @@ const CSS = `
   font-size:clamp(1.5rem,4vw,2.5rem); letter-spacing:.02em;
   text-shadow:0 0 22px color-mix(in srgb, var(--_c,var(--lime)) 60%, transparent);
 }
+.pdxCountdown--rainbow .pdxCountdown__num,
+.pdxCountdown--rainbow .pdxCountdown__done{
+  background:var(--grad-rainbow);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  text-shadow:none;
+  filter:
+    drop-shadow(2px 3px 0 #000) drop-shadow(3px 2px 0 #000)
+    drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000);
+}
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-countdown-css")) {
   const s = document.createElement("style");
@@ -51,7 +61,7 @@ function diff(target) {
   };
 }
 
-/** Countdown, ticking boxes to a target date (Pride weekend). Lime glow. */
+/** Countdown, ticking boxes to a target date (Pride weekend). Supports solid accents + rainbow. */
 export function Countdown({
   target = "2026-07-16T19:00:00",
   size = "md",
@@ -67,11 +77,17 @@ export function Countdown({
     return () => clearInterval(id);
   }, [target]);
 
-  const accentVar = ACCENTS[accent] || accent;
+  const isRainbow = accent === "rainbow";
+  const accentVar = isRainbow ? undefined : (ACCENTS[accent] || accent);
+  const accentClass = isRainbow ? "pdxCountdown--rainbow" : "";
 
   if (t.done) {
     return (
-      <div className={`pdxCountdown ${className}`} style={{ "--_c": accentVar, ...style }} {...rest}>
+      <div
+        className={`pdxCountdown ${accentClass} ${className}`.trim()}
+        style={isRainbow ? style : { "--_c": accentVar, ...style }}
+        {...rest}
+      >
         <span className="pdxCountdown__done">{doneLabel}</span>
       </div>
     );
@@ -84,8 +100,13 @@ export function Countdown({
   ];
 
   return (
-    <div className={`pdxCountdown pdxCountdown--${size} ${className}`}
-      role="timer" aria-live="off" style={{ "--_c": accentVar, ...style }} {...rest}>
+    <div
+      className={`pdxCountdown pdxCountdown--${size} ${accentClass} ${className}`.trim()}
+      role="timer"
+      aria-live="off"
+      style={isRainbow ? style : { "--_c": accentVar, ...style }}
+      {...rest}
+    >
       {units.map((u, i) => (
         <div className="pdxCountdown__unit" key={u.l}>
           <span className="pdxCountdown__num">{i === 0 ? u.n : pad(u.n)}</span>
