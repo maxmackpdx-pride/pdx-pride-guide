@@ -19,6 +19,8 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   friendshipkitchen: "Friendship_Kitchen",
   goldgritbarberco: "Gold_Grit_Barber_Co",
   happyluckyno1: "Happylucky_No_1",
+  hawkspdx: "Hawks_PDX",
+  hawks: "Hawks_PDX",
   holocene: "Holocene",
   honeyedwords: "Honeyed_Words",
   jackies: "Jackies",

@@ -3654,6 +3654,67 @@ function runBootMigrationsOnce() {
 
     recordBootMigration("seed_hawks_pride_week_2026_v1");
   }
+  // Hawks PDX directory listing + neon logo path (venue cyan pack).
+  if (!hasBootMigration("seed_hawks_directory_v12")) {
+    const now = new Date().toISOString();
+    const logo = "/directory-logos/Hawks_PDX.png";
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = ? OR name = ? LIMIT 1`)
+      .get("Hawks PDX", "Hawks") as { id: number } | undefined;
+    if (!exists) {
+      db.insert(businesses)
+        .values({
+          name: "Hawks PDX",
+          type: "venue",
+          description:
+            "Portland's LGBTQ+ community spa and social space in SE — hot tub, sauna, lockers, themed nights (Jock Mondays, OMEN Wednesdays, Sapphic Takeover, Gender Glow Fridays, Bi Sundays & Nude Yoga), and body-positive, sex-positive hospitality.",
+          address: "335 SE 99th Ave, Portland, OR 97216",
+          neighborhood: "SE Portland",
+          website: "https://hawkspdx.com/",
+          instagram: "@hawkspdx",
+          queerOwned: true,
+          queerFriendly: true,
+          imageUrl: logo,
+          lat: 45.520175147981,
+          lng: -122.562357520572,
+          isNew: true,
+          active: true,
+          hours: "Mon–Thu 10am–2am, Fri 10am–6am, Sat 10am–6am, Sun 10am–4am",
+          phone: "(503) 946-8659",
+          createdAt: now,
+        } as any)
+        .run();
+    } else {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+            type = 'venue',
+            description = COALESCE(NULLIF(description, ''), ?),
+            address = COALESCE(NULLIF(address, ''), ?),
+            neighborhood = COALESCE(NULLIF(neighborhood, ''), 'SE Portland'),
+            website = COALESCE(NULLIF(website, ''), 'https://hawkspdx.com/'),
+            instagram = COALESCE(NULLIF(instagram, ''), '@hawkspdx'),
+            image_url = ?,
+            lat = COALESCE(lat, ?),
+            lng = COALESCE(lng, ?),
+            phone = COALESCE(NULLIF(phone, ''), '(503) 946-8659'),
+            hours = COALESCE(NULLIF(hours, ''), ?),
+            active = 1,
+            queer_friendly = 1
+          WHERE id = ?`,
+        )
+        .run(
+          "Portland's LGBTQ+ community spa and social space in SE — hot tub, sauna, lockers, themed nights, and body-positive hospitality.",
+          "335 SE 99th Ave, Portland, OR 97216",
+          logo,
+          45.520175147981,
+          -122.562357520572,
+          "Mon–Thu 10am–2am, Fri 10am–6am, Sat 10am–6am, Sun 10am–4am",
+          exists.id,
+        );
+    }
+    recordBootMigration("seed_hawks_directory_v12");
+  }
 }
 
 function parseEnvAdminLists() {
