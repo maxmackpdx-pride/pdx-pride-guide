@@ -6669,87 +6669,48 @@ footer a:hover { color: #00FFFF !important; }
   z-index: 1;
 }
 
-.submit-form__steps {
+.submit-mini-steps {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 32px;
-  padding: 14px 16px;
-  border: 1px solid #1a1a1a;
-  background: #080808;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-.submit-form__step {
+.submit-mini-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #444;
-  padding: 6px 10px;
-  border: 1px solid transparent;
-  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  color: #57544c;
 }
 
-.submit-form__step.active {
-  color: var(--neon-yellow);
-  border-color: var(--neon-yellow);
-  box-shadow: 0 0 12px rgba(204, 255, 0, 0.2);
-}
-
-.submit-form__step.done {
-  color: var(--neon-cyan);
-}
-
-.submit-form__step-arrow {
-  color: #333;
-  font-size: 0.75rem;
-  user-select: none;
-}
-
-.submit-form__field input,
-.submit-form__field select,
-.submit-form__field textarea {
-  width: 100%;
-  background: #0a0a0a;
-  border: 1px solid #2a2a2a;
+.submit-mini-step.is-active {
   color: #fff;
-  padding: 10px 12px;
-  font-size: 0.88rem;
-  font-family: var(--font-body);
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.submit-form__field input:focus,
-.submit-form__field select:focus,
-.submit-form__field textarea:focus {
-  border-color: var(--neon-yellow);
-  box-shadow: 0 0 0 1px var(--neon-yellow), 0 0 14px rgba(204, 255, 0, 0.25);
+.submit-mini-step.is-done {
+  color: #8c8980;
 }
 
-.submit-form__field--cyan input:focus,
-.submit-form__field--cyan select:focus,
-.submit-form__field--cyan textarea:focus {
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 0 1px var(--neon-cyan), 0 0 14px rgba(0, 255, 255, 0.25);
+.submit-mini-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 0.68rem;
 }
 
-.submit-form__field--magenta input:focus,
-.submit-form__field--magenta select:focus,
-.submit-form__field--magenta textarea:focus {
-  border-color: var(--neon-magenta);
-  box-shadow: 0 0 0 1px var(--neon-magenta), 0 0 14px rgba(255, 0, 204, 0.25);
-}
-
-.submit-form__field--orange input:focus,
-.submit-form__field--orange select:focus,
-.submit-form__field--orange textarea:focus {
-  border-color: var(--neon-orange);
-  box-shadow: 0 0 0 1px var(--neon-orange), 0 0 14px rgba(255, 102, 0, 0.25);
+.submit-mini-step-arrow {
+  color: #57544c;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
 }
 
 /* Events submit callout — branded banner matching placeholder stock art */
@@ -12057,236 +12018,6 @@ html.calm-mode .mp-social-card:hover {
   margin-top: 14px;
 }
 
-/* ── Path cards ── */
-.submit-card {
-  --card-accent: var(--neon-yellow);
-  --card-shadow: rgba(255, 0, 204, 0.26);
-  --card-shadow-hover: rgba(255, 0, 204, 0.42);
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  text-align: left;
-  width: 100%;
-  background: #0d0d0d;
-  border: 2px solid var(--card-accent);
-  border-radius: 4px;
-  padding: 20px;
-  cursor: pointer;
-  color: inherit;
-  box-shadow: 4px 4px 0 var(--card-shadow);
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-}
-
-.submit-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0 var(--card-shadow-hover);
-}
-
-.submit-card--cyan {
-  --card-accent: var(--neon-cyan);
-  --card-shadow: rgba(204, 255, 0, 0.2);
-  --card-shadow-hover: rgba(204, 255, 0, 0.34);
-}
-
-.submit-card--orange {
-  --card-accent: var(--neon-orange);
-  --card-shadow: rgba(255, 0, 204, 0.2);
-  --card-shadow-hover: rgba(255, 0, 204, 0.34);
-}
-
-.submit-card--neutral {
-  --card-accent: #3a3a3a;
-  background: #0b0b0b;
-  box-shadow: none;
-}
-
-.submit-card--neutral:hover {
-  border-color: #666;
-  box-shadow: none;
-}
-
-.submit-card__icon {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border: 2px solid var(--card-accent);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--card-accent);
-}
-
-.submit-card--neutral .submit-card__icon {
-  border-color: #555;
-  color: #999;
-}
-
-.submit-card__main {
-  flex: 1;
-  min-width: 0;
-}
-
-.submit-card__head {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 7px;
-}
-
-.submit-card__title {
-  font-family: var(--font-display);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-size: 1.08rem;
-  line-height: 1;
-  color: var(--card-accent);
-}
-
-.submit-card--neutral .submit-card__title {
-  font-size: 1.02rem;
-  color: #d8d5cd;
-}
-
-.submit-card__tag {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #000;
-  background: var(--card-accent);
-  padding: 3px 7px;
-  border-radius: 2px;
-}
-
-.submit-card--neutral .submit-card__tag {
-  color: #bbb;
-  background: #2a2a2a;
-}
-
-.submit-card__tag--ghost {
-  color: var(--card-accent);
-  background: transparent;
-  padding: 0;
-  opacity: 0.75;
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-}
-
-.submit-card__body {
-  display: block;
-  color: #a8a5a0;
-  font-size: 0.86rem;
-  line-height: 1.55;
-}
-
-.submit-card--neutral .submit-card__body {
-  color: #8f8c87;
-}
-
-.submit-card__arrow {
-  flex: none;
-  align-self: center;
-  color: var(--card-accent);
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-}
-
-/* ── What verified promoters get ── */
-.submit-benefits {
-  margin-top: 22px;
-}
-
-.submit-benefits > .rainbow-bar {
-  opacity: 0.7;
-  margin-bottom: 20px;
-}
-
-.submit-benefits__head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-
-.submit-benefits__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(1.5rem, 3.4vw, 2rem);
-  line-height: 0.95;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: #f4f1ea;
-}
-
-.submit-benefits__sticker {
-  display: inline-block;
-  transform: rotate(-3deg);
-  background: var(--neon-yellow);
-  color: #000;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border: 2px solid #000;
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
-}
-
-.submit-benefits__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
-}
-
-.submit-benefit {
-  --dc: var(--neon-cyan);
-  background: #0b0b0b;
-  border: 2px solid var(--dc);
-  border-radius: 4px;
-  padding: 18px;
-  box-shadow: 0 0 16px color-mix(in srgb, var(--dc) 13%, transparent);
-  animation: submit-benefit-pulse 4s ease-in-out infinite;
-}
-
-.submit-benefit--cyan { --dc: var(--neon-cyan); }
-.submit-benefit--magenta { --dc: var(--neon-magenta); }
-.submit-benefit--yellow { --dc: var(--neon-yellow); }
-
-.submit-benefit__icon {
-  display: inline-flex;
-  color: var(--dc);
-  margin-bottom: 11px;
-}
-
-.submit-benefit__title {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: #fff;
-  margin-bottom: 6px;
-}
-
-.submit-benefit__body {
-  margin: 0;
-  color: #9d9a92;
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-@keyframes submit-benefit-pulse {
-  0%, 100% { box-shadow: 0 0 15px color-mix(in srgb, var(--dc) 15%, transparent); }
-  50% { box-shadow: 0 0 26px color-mix(in srgb, var(--dc) 30%, transparent); }
-}
-
 /* ── Inline note panels (step intro, no-account, already-applied) ── */
 .submit-note {
   --note-accent: var(--neon-yellow);
@@ -12425,24 +12156,17 @@ html.calm-mode .mp-social-card:hover {
   box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.3);
 }
 
-/* Calm mode + reduced motion: kill the ambient neon pulse and card lift */
-html.calm-mode .submit-benefit {
-  animation: none;
+/* Calm mode + reduced motion: kill the ambient card lift */
+html.calm-mode .submit-mode-step:hover {
+  transform: none;
   box-shadow: none;
 }
 
-html.calm-mode .submit-card:hover {
-  transform: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .submit-benefit {
-    animation: none;
+  .submit-mode-step {
+    transition: none;
   }
-  .submit-card {
-    transition: border-color 0.15s;
-  }
-  .submit-card:hover {
+  .submit-mode-step:hover {
     transform: none;
   }
 }
@@ -13256,134 +12980,24 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   gap: 18px;
 }
 
-.submit-paths {
-  display: grid;
-  gap: 14px;
+.submit-mode-steps {
+  margin-bottom: 4px;
 }
 
-.submit-card--makeover {
-  position: relative;
-  overflow: hidden;
-  background: #0c0c0f;
-  border: 2px solid #1c1c22;
-  border-radius: 7px;
-  padding: 18px 18px 18px 22px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
-  box-shadow: none;
+.submit-mode-step {
+  cursor: pointer;
 }
 
-.submit-card--makeover:hover {
-  border-color: var(--card-accent, #ccff00);
-  box-shadow: 0 0 26px -8px var(--card-accent, #ccff00);
+.submit-mode-step:hover,
+.submit-mode-step:focus-visible {
+  border-color: var(--card-accent, #ccff00) !important;
+  box-shadow: 0 0 22px -10px var(--card-accent, #ccff00);
   transform: translateY(-2px);
 }
 
-.submit-card__rail {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--card-accent, #ccff00);
-}
-
-.submit-card--makeover .submit-card__icon {
-  border-color: var(--card-accent, #ccff00);
-  color: var(--card-accent, #ccff00);
-  background: color-mix(in srgb, var(--card-accent, #ccff00) 10%, transparent);
-  box-shadow: none;
-}
-
-.submit-card--makeover .submit-card__title {
-  font-size: 1.12rem;
-  letter-spacing: 0.02em;
-}
-
-.submit-card--makeover .submit-card__tag {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--card-accent, #ccff00) 18%, transparent);
-  color: var(--card-accent, #ccff00);
-  border: 1px solid color-mix(in srgb, var(--card-accent, #ccff00) 45%, transparent);
-}
-
-.submit-card--makeover .submit-card__tag--ghost {
-  background: transparent;
-  color: #8c8980;
-  border-color: #28282f;
-}
-
-.submit-benefits--makeover {
-  margin-top: 8px;
-}
-
-.submit-benefits--makeover .submit-benefits__head {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.submit-benefits--makeover .submit-benefit {
-  background: #0c0c0f;
-  border: 2px solid #1c1c22;
-  border-left: 4px solid var(--dc);
-  border-radius: 6px;
-  box-shadow: none;
-  animation: none;
-}
-
-.submit-benefits--makeover .submit-benefit:hover {
-  border-color: var(--dc);
-  box-shadow: 0 0 22px -10px var(--dc);
-}
-
-.submit-page .submit-how.board-how--makeover {
+.submit-page .submit-how.board-how--makeover,
+.submit-page .submit-benefits-how.board-how--makeover {
   margin: 12px 0 8px;
   border-radius: 0;
   background: #070708;
-}
-
-.submit-panel--makeover {
-  position: relative;
-  background: #0c0c0f;
-  border: 2px solid #ccff00;
-  border-radius: 10px;
-  padding: clamp(22px, 3vw, 32px);
-  box-shadow: 0 0 30px -14px #ccff00;
-  margin-top: 8px;
-}
-
-.submit-panel--cyan {
-  border-color: #19e3ff;
-  box-shadow: 0 0 30px -14px #19e3ff;
-}
-
-.submit-panel--magenta {
-  border-color: #ff1fa0;
-  box-shadow: 0 0 30px -14px #ff1fa0;
-}
-
-.submit-page.board-page--makeover .submit-form__field input,
-.submit-page.board-page--makeover .submit-form__field textarea,
-.submit-page.board-page--makeover .submit-form__field select {
-  background: #050507;
-  border: 1.5px solid #24242c;
-  border-radius: 5px;
-  color: #f4eee1;
-}
-
-.submit-page.board-page--makeover .submit-form__field input:focus,
-.submit-page.board-page--makeover .submit-form__field textarea:focus,
-.submit-page.board-page--makeover .submit-form__field select:focus {
-  border-color: #ccff00;
-  box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.16);
-  outline: none;
-}
-
-html.calm-mode .submit-card--makeover:hover {
-  transform: none;
-  box-shadow: none;
 }

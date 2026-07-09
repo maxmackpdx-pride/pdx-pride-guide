@@ -12,6 +12,8 @@ interface Props {
   label?: string;
   accept?: string;
   hint?: string;
+  className?: string;
+  buttonClassName?: string;
 }
 
 export default function ImageUploader({
@@ -22,6 +24,8 @@ export default function ImageUploader({
   label = "Upload Image",
   accept = DEFAULT_ACCEPT,
   hint = FORMAT_HINT,
+  className = "",
+  buttonClassName = "",
 }: Props) {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,7 +58,7 @@ export default function ImageUploader({
   };
 
   return (
-    <div>
+    <div className={className}>
       <input
         ref={inputRef}
         type="file"
@@ -65,6 +69,7 @@ export default function ImageUploader({
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <button
           type="button"
+          className={buttonClassName}
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
           style={{

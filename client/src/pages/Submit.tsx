@@ -12,6 +12,8 @@ import PageHeader from "@/components/PageHeader";
 import type { PageHeroAccent } from "@/components/PageHero";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
+import BoardStatsBar from "@/components/BoardStatsBar";
+import { BoardFilterChip } from "@/components/BoardActiveSection";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
@@ -25,9 +27,7 @@ const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
 
 const SUBMIT_RETURN_KEY = "pdx-submit-return";
 
-const labelStyle = { display: "block", fontSize: "0.72rem", fontFamily: "var(--font-display)", color: "var(--text-meta)", marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" as const, fontWeight: 700 };
 const sectionHeadStyle: React.CSSProperties = { fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.05rem", letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--neon-yellow)", marginBottom: 14, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
-const backBtnStyle: React.CSSProperties = { background: "none", border: "none", color: "var(--text-meta)", cursor: "pointer", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.78rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 20, padding: 0 };
 
 type PageMode = "landing" | "submit" | "apply" | "suggest" | "claim";
 type SubmitStep = "promoter_app" | "event_details";
@@ -38,10 +38,7 @@ type SubmitReturnState = {
   submitStep: SubmitStep;
 };
 
-/* ── Inline line-glyph icons (stroke set matches the brand icon system) ── */
-const BoltIcon = ({ size = 22 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 9-12h-7z" /></svg>
-);
+/* ── Inline line-glyph icon stroke set (matches the brand icon system) ── */
 const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
 const emptyEventForm = () => ({
@@ -90,8 +87,13 @@ export default function Submit() {
   const { data: unclaimedEvents = [], isError: unclaimedError, refetch: refetchUnclaimed } = useQuery<Event[]>({
     queryKey: ["/api/events/unclaimed"],
     queryFn: () => apiRequest("GET", "/api/events/unclaimed").then(r => r.json()),
-    enabled: mode === "claim",
   });
+
+  const { data: allEvents = [] } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+  });
+  const venueCount = new Set(allEvents.map(ev => ev.venueName)).size;
 
   const openAuth = () => {
     setAuthDismissed(false);
@@ -325,7 +327,6 @@ export default function Submit() {
   };
   const hero = heroCopy[mode];
 
-  const fieldClass = "submit-form__field";
   const ticketRequired = admissionRequiresTicketUrl(eventForm.admission);
   const admissionHint = ADMISSION_OPTIONS.find(o => o.value === eventForm.admission)?.hint;
 
@@ -371,6 +372,18 @@ export default function Submit() {
         />
       )}
 
+      {mode === "landing" && (
+        <BoardStatsBar
+          variant="band"
+          showLive={false}
+          stats={[
+            { num: allEvents.length, label: "Live in the guide", color: "#ccff00" },
+            { num: unclaimedEvents.length, label: "Unclaimed, open to grab", color: "#19e3ff" },
+            { num: venueCount, label: "Venues repping Pride", color: "#ff1fa0" },
+          ]}
+        />
+      )}
+
       <div className="submit-page__body">
 
         {/* ── LANDING ── */}
@@ -412,70 +425,48 @@ export default function Submit() {
               </div>
             )}
 
-            <div className="submit-paths" role="list">
-              {/* Card 1: Submit New Event */}
-              <button type="button" className="submit-card submit-card--makeover" onClick={() => goMode("submit")} role="listitem">
-                <span className="submit-card__rail" aria-hidden="true" />
-                <span className="submit-card__icon"><BoltIcon /></span>
-                <span className="submit-card__main">
-                  <span className="submit-card__head">
-                    <span className="submit-card__title">{isApproved ? "Submit new event" : "Submit an event + become a promoter"}</span>
-                    <span className="submit-card__tag">{isApproved ? "Goes live instantly" : "2 steps · first-time review"}</span>
+            <div className="board-steps board-steps--makeover submit-mode-steps" role="list">
+              {/* Step 1: Submit New Event */}
+              <button type="button" className="board-step board-step--makeover submit-mode-step" onClick={() => goMode("submit")} role="listitem">
+                <span className="board-step__num" style={{ color: "#ccff00" }} aria-hidden="true">1</span>
+                <h3 className="display panel-heading">{isApproved ? "Submit new event" : "Submit an event + become a promoter"}</h3>
+                <p>
+                  <span style={{ color: "#ccff00", fontWeight: 700 }}>
+                    {isApproved ? "Goes live instantly. " : "2 steps, first-time review. "}
                   </span>
-                  <span className="submit-card__body">
-                    {isApproved
-                      ? "You are a verified promoter. Your event goes live the moment you submit."
-                      : "Short promoter application, then your event. Both go to admin review and go live together once approved."}
-                  </span>
-                </span>
-                <span className="submit-card__arrow" aria-hidden="true">→</span>
+                  {isApproved
+                    ? "You are a verified promoter. Your event goes live the moment you submit."
+                    : "Short promoter application, then your event. Both go to admin review and go live together once approved."}
+                </p>
               </button>
 
               {!isApproved && (
-                <button type="button" className="submit-card submit-card--makeover submit-card--cyan" onClick={() => goMode("apply")} role="listitem">
-                  <span className="submit-card__rail" aria-hidden="true" />
-                  <span className="submit-card__icon">
-                    <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V5z" /><path d="m9 12 2 2 4-4" /></svg>
-                  </span>
-                  <span className="submit-card__main">
-                    <span className="submit-card__head">
-                      <span className="submit-card__title">Apply as promoter</span>
-                      <span className="submit-card__tag">Verification</span>
-                    </span>
-                    <span className="submit-card__body">Not ready to post yet? Get verified now. Once approved, future events go live immediately.</span>
-                  </span>
-                  <span className="submit-card__arrow" aria-hidden="true">→</span>
+                <button type="button" className="board-step board-step--makeover submit-mode-step" style={{ ["--card-accent" as string]: "#19e3ff" }} onClick={() => goMode("apply")} role="listitem">
+                  <span className="board-step__num" style={{ color: "#19e3ff" }} aria-hidden="true">2</span>
+                  <h3 className="display panel-heading">Apply as promoter</h3>
+                  <p>
+                    <span style={{ color: "#19e3ff", fontWeight: 700 }}>Verification. </span>
+                    Not ready to post yet? Get verified now. Once approved, future events go live immediately.
+                  </p>
                 </button>
               )}
 
-              <button type="button" className="submit-card submit-card--makeover submit-card--orange" onClick={() => goMode("suggest")} role="listitem">
-                <span className="submit-card__rail" aria-hidden="true" />
-                <span className="submit-card__icon">
-                  <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-                </span>
-                <span className="submit-card__main">
-                  <span className="submit-card__head">
-                    <span className="submit-card__title">Spotted an event</span>
-                    <span className="submit-card__tag submit-card__tag--ghost">No promoter status needed</span>
-                  </span>
-                  <span className="submit-card__body">Saw a Pride event we are missing? Tip us off. Admins review all tips. Approved ones go live as unclaimed listings.</span>
-                </span>
-                <span className="submit-card__arrow" aria-hidden="true">→</span>
+              <button type="button" className="board-step board-step--makeover submit-mode-step" style={{ ["--card-accent" as string]: "#ff1fa0" }} onClick={() => goMode("suggest")} role="listitem">
+                <span className="board-step__num" style={{ color: "#ff1fa0" }} aria-hidden="true">{isApproved ? 2 : 3}</span>
+                <h3 className="display panel-heading">Spotted an event</h3>
+                <p>
+                  <span style={{ color: "#ff1fa0", fontWeight: 700 }}>No promoter status needed. </span>
+                  Saw a Pride event we are missing? Tip us off. Admins review all tips. Approved ones go live as unclaimed listings.
+                </p>
               </button>
 
-              <button type="button" className="submit-card submit-card--makeover submit-card--neutral" onClick={() => goMode("claim")} role="listitem">
-                <span className="submit-card__rail" aria-hidden="true" />
-                <span className="submit-card__icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M4 22V4" /><path d="M4 4h13l-2.5 4L17 12H4" /></svg>
-                </span>
-                <span className="submit-card__main">
-                  <span className="submit-card__head">
-                    <span className="submit-card__title">Claim an existing event</span>
-                    <span className="submit-card__tag">Host access</span>
-                  </span>
-                  <span className="submit-card__body">See your event already listed but unclaimed? Claim it for host access and request promoter verification.</span>
-                </span>
-                <span className="submit-card__arrow" aria-hidden="true">→</span>
+              <button type="button" className="board-step board-step--makeover submit-mode-step" style={{ ["--card-accent" as string]: "#8c8980" }} onClick={() => goMode("claim")} role="listitem">
+                <span className="board-step__num" style={{ color: "#8c8980" }} aria-hidden="true">{isApproved ? 3 : 4}</span>
+                <h3 className="display panel-heading">Claim an existing event</h3>
+                <p>
+                  <span style={{ color: "#c8c5bc", fontWeight: 700 }}>Host access. </span>
+                  See your event already listed but unclaimed? Claim it for host access and request promoter verification.
+                </p>
               </button>
             </div>
 
@@ -491,81 +482,73 @@ export default function Submit() {
             </ScrollReveal>
 
             {/* What verified promoters get */}
-            <div className="submit-benefits submit-benefits--makeover">
-              <div className="submit-benefits__head">
-                <div className="board-section-kicker board-section-kicker--lime">Level up</div>
-                <h2 className="submit-benefits__title">What verified promoters get</h2>
-              </div>
-              <div className="submit-benefits__grid">
-                <div className="submit-benefit submit-benefit--cyan">
-                  <span className="submit-benefit__icon"><BoltIcon size={26} /></span>
-                  <div className="submit-benefit__title">Go live instantly</div>
-                  <p className="submit-benefit__body">Skip the review queue. Every event you post publishes the moment you hit submit.</p>
-                </div>
-                <div className="submit-benefit submit-benefit--magenta">
-                  <span className="submit-benefit__icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="m3 11 15-6v14L3 13z" /><path d="M3 11v3h3" /><path d="M8 20v-6" /></svg>
-                  </span>
-                  <div className="submit-benefit__title">Host tools</div>
-                  <p className="submit-benefit__body">Claim your listings, add co-hosts and talent, and pin host broadcasts on your event page.</p>
-                </div>
-                <div className="submit-benefit submit-benefit--yellow">
-                  <span className="submit-benefit__icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="M14 9h4M14 13h4M6 16c.8-1.4 4.2-1.4 5 0" /></svg>
-                  </span>
-                  <div className="submit-benefit__title">A promoter profile</div>
-                  <p className="submit-benefit__body">Your own public page at prideguidepdx.com/u/you, with every event and link in one spot.</p>
-                </div>
-              </div>
-            </div>
+            <ScrollReveal>
+              <BoardHowItWorks
+                className="submit-benefits-how"
+                kicker="Level up"
+                kickerTone="lime"
+                title="What verified promoters get"
+                lede="The perks that kick in once you're approved."
+                steps={[
+                  { title: "Go live instantly", body: "Skip the review queue. Every event you post publishes the moment you hit submit.", color: "#19e3ff" },
+                  { title: "Host tools", body: "Claim your listings, add co-hosts and talent, and pin host broadcasts on your event page.", color: "#ff1fa0" },
+                  { title: "A promoter profile", body: "Your own public page at prideguidepdx.com/u/you, with every event and link in one spot.", color: "#ccff00" },
+                ]}
+              />
+            </ScrollReveal>
           </div>
         )}
 
         {/* ── Stepper (non-approved submit flow) ── */}
         {showStepper && (
-          <div className="submit-form__steps">
-            <span className={`submit-form__step ${submitStep === "promoter_app" ? "active" : "done"}`}>1 · Promoter</span>
-            <span className="submit-form__step-arrow" aria-hidden="true">→</span>
-            <span className={`submit-form__step ${submitStep === "event_details" ? "active" : ""}`}>2 · Event</span>
+          <div className="submit-mini-steps">
+            <span className={`submit-mini-step${submitStep === "promoter_app" ? " is-active" : " is-done"}`}>
+              <span className="submit-mini-step__num" aria-hidden="true">1</span> Promoter
+            </span>
+            <span className="submit-mini-step-arrow" aria-hidden="true">→</span>
+            <span className={`submit-mini-step${submitStep === "event_details" ? " is-active" : ""}`}>
+              <span className="submit-mini-step__num" aria-hidden="true">2</span> Event
+            </span>
           </div>
         )}
 
         {/* ── SUBMIT: Step 1 — Promoter Application (non-approved only) ── */}
         {mode === "submit" && !isApproved && submitStep === "promoter_app" && (
-          <div className="submit-panel submit-panel--makeover">
-            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
-            <div className="submit-note">
-              <div className="submit-note__title">Step 1 of 2 · Promoter application</div>
-              <p className="submit-note__body">
-                {promoterStatus === "pending"
-                  ? "Your promoter application is already in the admin queue. You can still submit your event below — both will be reviewed together."
-                  : "Tell us a bit about yourself as a promoter. Once approved, future events you submit go live immediately without review."}
-              </p>
-            </div>
-            <form onSubmit={e => { e.preventDefault(); setSubmitStep("event_details"); }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div className={fieldClass}>
-                <label style={labelStyle}>Organization / Event Name (optional)</label>
-                <input value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
+          <section className="gifting-form-panel gifting-form-panel--makeover">
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back</button>
+            <div className="board-section-kicker board-section-kicker--lime">Step 1 of 2</div>
+            <h2 className="display section-heading">Promoter application</h2>
+            <p className="board-copy-sm">
+              {promoterStatus === "pending"
+                ? "Your promoter application is already in the admin queue. You can still submit your event below — both will be reviewed together."
+                : "Tell us a bit about yourself as a promoter. Once approved, future events you submit go live immediately without review."}
+            </p>
+            <form onSubmit={e => { e.preventDefault(); setSubmitStep("event_details"); }}>
+              <div className="gifting-form-grid">
+                <label className="span">
+                  Organization / Event Name (optional)
+                  <input className="board-text-field" value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
+                </label>
+                <label className="span">
+                  Website, Instagram, or portfolio link
+                  <input className="board-text-field" value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
+                </label>
+                <label className="span">
+                  Tell us about you as a promoter *
+                  <textarea className="board-text-field" value={promoterForm.appReason} onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))} rows={5} required
+                    placeholder="What events do you run or have you run? Your connection to PDX Pride? Any links to your work." style={{ resize: "vertical" }} />
+                </label>
               </div>
-              <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Website, Instagram, or portfolio link</label>
-                <input value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
-              </div>
-              <div className={`${fieldClass} submit-form__field--magenta`}>
-                <label style={labelStyle}>Tell us about you as a promoter *</label>
-                <textarea value={promoterForm.appReason} onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))} rows={5} required
-                  placeholder="What events do you run or have you run? Your connection to PDX Pride? Any links to your work." style={{ resize: "vertical" }} />
-              </div>
-              <button type="submit" className="btn-neon solid" style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                Next, add your event →
-              </button>
+              <Button type="submit" variant="solid" accent="lime" size="lg" arrow block>
+                Next, add your event
+              </Button>
             </form>
-          </div>
+          </section>
         )}
 
         {/* ── SUBMIT: Event Details (approved users skip straight here) ── */}
         {mode === "submit" && (isApproved || submitStep === "event_details") && (
-          <div className="submit-panel submit-panel--makeover">
+          <section className="gifting-form-panel gifting-form-panel--makeover">
             {eventSubmitSuccess ? (
               <div className="submit-success">
                 <div className="submit-success__title">{eventSubmitSuccess.title}</div>
@@ -599,87 +582,85 @@ export default function Submit() {
               </div>
             ) : (
             <>
-            <button type="button" style={backBtnStyle} onClick={() => isApproved ? backToLanding() : setSubmitStep("promoter_app")}>
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={() => isApproved ? backToLanding() : setSubmitStep("promoter_app")}>
               ← {isApproved ? "Back" : "Back to promoter application"}
             </button>
             <form onSubmit={e => { e.preventDefault(); handleSubmitWithEvent(); }} style={{ display: "flex", flexDirection: "column", gap: 22 }}>
               <ScrollReveal>
               <div style={sectionHeadStyle}>Event details</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <div className={fieldClass}>
-                  <label style={labelStyle}>Event title *</label>
-                  <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="Horse Meat Disco" />
-                </div>
-                <div className={`${fieldClass} submit-form__field--magenta`}>
-                  <label style={labelStyle}>Description *</label>
-                  <textarea value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} required rows={4} placeholder="What's the vibe? Who's it for?" style={{ resize: "vertical" }} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div className={fieldClass}>
-                    <label style={labelStyle}>Venue name *</label>
-                    <input value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} required placeholder="Crystal Ballroom" />
+              <div className="gifting-form-grid">
+                <label className="span">
+                  Event title *
+                  <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="Horse Meat Disco" />
+                </label>
+                <label className="span">
+                  Description *
+                  <textarea className="board-text-field" value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} required rows={4} placeholder="What's the vibe? Who's it for?" style={{ resize: "vertical" }} />
+                </label>
+                <label>
+                  Venue name *
+                  <input className="board-text-field" value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} required placeholder="Crystal Ballroom" />
+                </label>
+                <label>
+                  Neighborhood
+                  <select className="board-text-field" value={eventForm.neighborhood} onChange={e => setEventForm(f => ({ ...f, neighborhood: e.target.value }))}>
+                    {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </label>
+                <label className="span">
+                  Venue address *
+                  <input className="board-text-field" value={eventForm.address} onChange={e => setEventForm(f => ({ ...f, address: e.target.value }))}
+                    required={!eventForm.isHouseParty} placeholder={eventForm.isHouseParty ? "Optional for house parties" : "Street address"} />
+                </label>
+                <label>
+                  Day of week
+                  <select className="board-text-field" value={eventForm.dayOfWeek} onChange={e => {
+                    const day = e.target.value;
+                    setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
+                  }}>
+                    {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                      <option key={d.value} value={d.value}>{d.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Age requirement
+                  <select className="board-text-field" value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
+                    <option value="ALL_AGES">All Ages</option>
+                    <option value="18_PLUS">18+</option>
+                    <option value="21_PLUS">21+</option>
+                  </select>
+                </label>
+                <label>
+                  Start *
+                  <input className="board-text-field" type="datetime-local" value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} required />
+                </label>
+                <label>
+                  End *
+                  <input className="board-text-field" type="datetime-local" value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} required />
+                </label>
+                <label>
+                  Admission
+                  <select className="board-text-field" value={eventForm.admission} onChange={e => setEventForm(f => ({ ...f, admission: e.target.value }))}>
+                    {ADMISSION_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Ticket / RSVP link{ticketRequired ? " *" : ""}
+                  <input className="board-text-field" value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required={ticketRequired} />
+                  <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4, textTransform: "none", letterSpacing: "normal" }}>
+                    {ticketRequired
+                      ? "Required for ticketed events."
+                      : admissionHint || "Optional — add a link if you have one."}
                   </div>
-                  <div className={`${fieldClass} submit-form__field--cyan`}>
-                    <label style={labelStyle}>Neighborhood</label>
-                    <select value={eventForm.neighborhood} onChange={e => setEventForm(f => ({ ...f, neighborhood: e.target.value }))}>
-                      {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                  </div>
-                  <div className={fieldClass} style={{ gridColumn: "1/-1" }}>
-                    <label style={labelStyle}>Venue address *</label>
-                    <input value={eventForm.address} onChange={e => setEventForm(f => ({ ...f, address: e.target.value }))}
-                      required={!eventForm.isHouseParty} placeholder={eventForm.isHouseParty ? "Optional for house parties" : "Street address"} />
-                  </div>
-                  <div className={`${fieldClass} submit-form__field--orange`}>
-                    <label style={labelStyle}>Day of week</label>
-                    <select value={eventForm.dayOfWeek} onChange={e => {
-                      const day = e.target.value;
-                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
-                    }}>
-                      {PRIDE_WEEK_DAY_OPTIONS.map(d => (
-                        <option key={d.value} value={d.value}>{d.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={fieldClass}>
-                    <label style={labelStyle}>Age requirement</label>
-                    <select value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
-                      <option value="ALL_AGES">All Ages</option>
-                      <option value="18_PLUS">18+</option>
-                      <option value="21_PLUS">21+</option>
-                    </select>
-                  </div>
-                  <div className={fieldClass}>
-                    <label style={labelStyle}>Start *</label>
-                    <input type="datetime-local" value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} required />
-                  </div>
-                  <div className={fieldClass}>
-                    <label style={labelStyle}>End *</label>
-                    <input type="datetime-local" value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} required />
-                  </div>
-                  <div className={fieldClass}>
-                    <label style={labelStyle}>Admission</label>
-                    <select value={eventForm.admission} onChange={e => setEventForm(f => ({ ...f, admission: e.target.value }))}>
-                      {ADMISSION_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={`${fieldClass} submit-form__field--cyan`}>
-                    <label style={labelStyle}>Ticket / RSVP link{ticketRequired ? " *" : ""}</label>
-                    <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://eventbrite.com/..." required={ticketRequired} />
-                    <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
-                      {ticketRequired
-                        ? "Required for ticketed events."
-                        : admissionHint || "Optional — add a link if you have one."}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label style={labelStyle}>Event flyer / poster (optional)</label>
+                </label>
+                <label className="span">
+                  Event flyer / poster (optional)
                   <ImageUploader endpoint="/api/upload/poster" fieldName="poster" currentUrl={eventForm.posterImageUrl}
                     onUploaded={url => setEventForm(f => ({ ...f, posterImageUrl: url }))} label="Upload flyer" />
-                </div>
+                </label>
               </div>
               </ScrollReveal>
 
@@ -687,7 +668,9 @@ export default function Submit() {
               <div style={sectionHeadStyle}>Event types</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {EVENT_TYPES.map(t => (
-                  <button key={t} type="button" onClick={() => toggleType(t)} className={`filter-tag ${eventForm.selectedTypes.includes(t) ? "active" : ""}`}>{t}</button>
+                  <BoardFilterChip key={t} active={eventForm.selectedTypes.includes(t)} onClick={() => toggleType(t)} accent="lime">
+                    {t}
+                  </BoardFilterChip>
                 ))}
               </div>
               </ScrollReveal>
@@ -719,15 +702,14 @@ export default function Submit() {
                   ? "You're verified. Your event goes live immediately after submitting."
                   : "Both your promoter application and this event go to the admin queue, approved together."}
               </p>
-              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid"
-                style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }} data-testid="submit-button">
-                {eventMutation.isPending ? "Submitting..." : isApproved ? "Submit Event →" : "Submit Event + Promoter Application →"}
-              </button>
+              <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="lime" size="lg" arrow block data-testid="submit-button">
+                {eventMutation.isPending ? "Submitting..." : isApproved ? "Submit Event" : "Submit Event + Promoter Application"}
+              </Button>
               </ScrollReveal>
             </form>
             </>
             )}
-          </div>
+          </section>
         )}
 
         {/* ── APPLY AS PROMOTER ── */}
@@ -738,49 +720,45 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
           </div>
         ) : (
-          <div className="submit-panel submit-panel--makeover submit-panel--cyan">
-            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
+          <section className="gifting-form-panel gifting-form-panel--makeover">
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back</button>
+            <div className="board-section-kicker board-section-kicker--cyan">Promoter verification</div>
+            <h2 className="display section-heading">Promoter application</h2>
             {promoterStatus === "pending" && (
-              <div className="submit-note submit-note--cyan">
-                <div className="submit-note__title">Application already submitted</div>
-                <p className="submit-note__body">Your promoter application is in the admin queue. You'll be notified when it's reviewed.</p>
-              </div>
+              <p className="board-copy-sm">Your promoter application is in the admin queue. You'll be notified when it's reviewed.</p>
             )}
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } applyMutation.mutate(); }}
-              style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div style={{ ...sectionHeadStyle, color: "var(--neon-cyan)" }}>Promoter application</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <div className={fieldClass}>
-                  <label style={labelStyle}>Your name</label>
-                  <input value={user?.displayName || user?.username || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.6 }} />
-                </div>
-                <div className={fieldClass}>
-                  <label style={labelStyle}>Email</label>
-                  <input value={user?.email || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.6 }} />
-                </div>
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } applyMutation.mutate(); }}>
+              <div className="gifting-form-grid">
+                <label>
+                  Your name
+                  <input className="board-text-field" value={user?.displayName || user?.username || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.6 }} />
+                </label>
+                <label>
+                  Email
+                  <input className="board-text-field" value={user?.email || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.6 }} />
+                </label>
+                <label className="span">
+                  Organization / Event Name (optional)
+                  <input className="board-text-field" value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
+                </label>
+                <label className="span">
+                  Website, Instagram, or portfolio link
+                  <input className="board-text-field" value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
+                </label>
+                <label className="span">
+                  Tell us about you as a promoter *
+                  <textarea className="board-text-field" value={promoterForm.appReason} onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))} rows={6} required
+                    placeholder="What events do you run or have you run? Your connection to PDX Pride? Any links, social pages, or proof of your work." style={{ resize: "vertical" }} />
+                </label>
               </div>
-              <div className={fieldClass}>
-                <label style={labelStyle}>Organization / Event Name (optional)</label>
-                <input value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
-              </div>
-              <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Website, Instagram, or portfolio link</label>
-                <input value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
-              </div>
-              <div className={`${fieldClass} submit-form__field--magenta`}>
-                <label style={labelStyle}>Tell us about you as a promoter *</label>
-                <textarea value={promoterForm.appReason} onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))} rows={6} required
-                  placeholder="What events do you run or have you run? Your connection to PDX Pride? Any links, social pages, or proof of your work." style={{ resize: "vertical" }} />
-              </div>
-              <button type="submit" disabled={applyMutation.isPending} className="btn-neon solid solid-cyan"
-                style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                {applyMutation.isPending ? "Submitting..." : "Submit promoter application →"}
-              </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center" }}>
+              <Button type="submit" disabled={applyMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block>
+                {applyMutation.isPending ? "Submitting..." : "Submit promoter application"}
+              </Button>
+              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 14 }}>
                 Admins will review your application. You'll get a message when approved.
               </p>
             </form>
-          </div>
+          </section>
         ))}
 
         {/* ── SUGGEST AN EVENT ── */}
@@ -791,51 +769,50 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
           </div>
         ) : (
-          <div className="submit-panel submit-panel--makeover submit-panel--magenta">
-            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
-            <div className="submit-note submit-note--orange">
-              <div className="submit-note__title">No promoter account needed</div>
-              <p className="submit-note__body">Tip us off, admins review all suggestions. If approved, the event goes live as an unclaimed listing anyone can claim.</p>
-            </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}
-              style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div className={`${fieldClass} submit-form__field--orange`}>
-                <label style={labelStyle}>Event name *</label>
-                <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Queer Dance Night at Wonder Ballroom" />
+          <section className="gifting-form-panel gifting-form-panel--makeover">
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back</button>
+            <div className="board-section-kicker board-section-kicker--magenta">Community tip</div>
+            <h2 className="display section-heading">Suggest an event</h2>
+            <p className="board-copy-sm">Tip us off, admins review all suggestions. If approved, the event goes live as an unclaimed listing anyone can claim.</p>
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}>
+              <div className="gifting-form-grid">
+                <label className="span">
+                  Event name *
+                  <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Queer Dance Night at Wonder Ballroom" />
+                </label>
+                <label>
+                  Venue / location (if known)
+                  <input className="board-text-field" value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood" />
+                </label>
+                <label>
+                  Day
+                  <select className="board-text-field" value={eventForm.dayOfWeek} onChange={e => {
+                    const day = e.target.value;
+                    setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
+                  }}>
+                    {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                      <option key={d.value} value={d.value}>{d.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="span">
+                  Ticket / info link (if you have it)
+                  <input className="board-text-field" value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://..." />
+                </label>
+                <label className="span">
+                  Where did you spot this?
+                  <textarea className="board-text-field" value={promoterForm.suggestNote} onChange={e => setPromoterForm(f => ({ ...f, suggestNote: e.target.value }))} rows={3}
+                    placeholder="Instagram, flyer, word of mouth, any context helps." style={{ resize: "vertical" }} />
+                </label>
               </div>
-              <div className={fieldClass}>
-                <label style={labelStyle}>Venue / location (if known)</label>
-                <input value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood" />
-              </div>
-              <div className={`${fieldClass} submit-form__field--orange`}>
-                <label style={labelStyle}>Day</label>
-                <select value={eventForm.dayOfWeek} onChange={e => {
-                  const day = e.target.value;
-                  setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
-                }}>
-                  {PRIDE_WEEK_DAY_OPTIONS.map(d => (
-                    <option key={d.value} value={d.value}>{d.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Ticket / info link (if you have it)</label>
-                <input value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://..." />
-              </div>
-              <div className={fieldClass}>
-                <label style={labelStyle}>Where did you spot this?</label>
-                <textarea value={promoterForm.suggestNote} onChange={e => setPromoterForm(f => ({ ...f, suggestNote: e.target.value }))} rows={3}
-                  placeholder="Instagram, flyer, word of mouth, any context helps." style={{ resize: "vertical" }} />
-              </div>
-              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid solid-magenta"
-                style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }}>
-                {eventMutation.isPending ? "Sending..." : "Send tip →"}
-              </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center" }}>
+              <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="pink" size="lg" arrow block>
+                {eventMutation.isPending ? "Sending..." : "Send tip"}
+              </Button>
+              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 14 }}>
                 Tips go to admins only, not publicly posted.
               </p>
             </form>
-          </div>
+          </section>
         ))}
 
         {/* ── CLAIM EXISTING EVENT ── */}
@@ -848,47 +825,48 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
           </div>
         ) : (
-          <div className="submit-panel submit-panel--makeover submit-panel--cyan">
-            <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}
-              style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ ...sectionHeadStyle, color: "var(--neon-cyan)" }}>Claim details</div>
-              <p style={{ color: "#8f8c87", fontSize: "0.84rem", lineHeight: 1.55, margin: 0 }}>
-                {isApproved
-                  ? "As a verified promoter, your claim goes live immediately, no admin review."
-                  : "Claiming also requests verified promoter status so you can post new listings after approval."}
-              </p>
-              <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>Event to claim *</label>
-                <select value={promoterForm.claimEventId} onChange={e => setPromoterForm(f => ({ ...f, claimEventId: e.target.value }))} required data-testid="select-claim-event">
-                  <option value="">Select an unclaimed event...</option>
-                  {unclaimedEvents.map(ev => (
-                    <option key={ev.id} value={ev.id}>{ev.title} · {ev.venueName} · {ev.dayOfWeek || "TBD"}</option>
-                  ))}
-                </select>
-                {unclaimedError ? (
-                  <div style={{ fontSize: "0.76rem", color: "#FF6600", marginTop: 6 }}>
-                    Could not load unclaimed events.{" "}
-                    <button type="button" onClick={() => refetchUnclaimed()} style={{ background: "none", border: "none", color: "var(--neon-yellow)", cursor: "pointer", padding: 0, fontFamily: "var(--font-display)", fontSize: "0.76rem" }}>Retry</button>
-                  </div>
-                ) : unclaimedEvents.length === 0 && (
-                  <div style={{ fontSize: "0.76rem", color: "var(--text-meta)", marginTop: 6 }}>No unclaimed events are available right now.</div>
-                )}
+          <section className="gifting-form-panel gifting-form-panel--makeover">
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back</button>
+            <div className="board-section-kicker board-section-kicker--cyan">Host your listing</div>
+            <h2 className="display section-heading">Claim details</h2>
+            <p className="board-copy-sm">
+              {isApproved
+                ? "As a verified promoter, your claim goes live immediately, no admin review."
+                : "Claiming also requests verified promoter status so you can post new listings after approval."}
+            </p>
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}>
+              <div className="gifting-form-grid">
+                <label className="span">
+                  Event to claim *
+                  <select className="board-text-field" value={promoterForm.claimEventId} onChange={e => setPromoterForm(f => ({ ...f, claimEventId: e.target.value }))} required data-testid="select-claim-event">
+                    <option value="">Select an unclaimed event...</option>
+                    {unclaimedEvents.map(ev => (
+                      <option key={ev.id} value={ev.id}>{ev.title} · {ev.venueName} · {ev.dayOfWeek || "TBD"}</option>
+                    ))}
+                  </select>
+                  {unclaimedError ? (
+                    <div style={{ fontSize: "0.76rem", color: "#FF6600", marginTop: 6, textTransform: "none", letterSpacing: "normal" }}>
+                      Could not load unclaimed events.{" "}
+                      <button type="button" onClick={() => refetchUnclaimed()} style={{ background: "none", border: "none", color: "var(--neon-yellow)", cursor: "pointer", padding: 0, fontFamily: "var(--font-display)", fontSize: "0.76rem" }}>Retry</button>
+                    </div>
+                  ) : unclaimedEvents.length === 0 && (
+                    <div style={{ fontSize: "0.76rem", color: "var(--text-meta)", marginTop: 6, textTransform: "none", letterSpacing: "normal" }}>No unclaimed events are available right now.</div>
+                  )}
+                </label>
+                <label className="span">
+                  How are you connected to this event? *
+                  <textarea className="board-text-field" value={promoterForm.claimReason} onChange={e => setPromoterForm(f => ({ ...f, claimReason: e.target.value }))} rows={4} required
+                    placeholder="Tell us your organizer role and include a website, ticketing dashboard, social link, or other proof." style={{ resize: "vertical" }} />
+                </label>
               </div>
-              <div className={`${fieldClass} submit-form__field--cyan`}>
-                <label style={labelStyle}>How are you connected to this event? *</label>
-                <textarea value={promoterForm.claimReason} onChange={e => setPromoterForm(f => ({ ...f, claimReason: e.target.value }))} rows={4} required
-                  placeholder="Tell us your organizer role and include a website, ticketing dashboard, social link, or other proof." style={{ resize: "vertical" }} />
-              </div>
-              <button type="submit" disabled={eventMutation.isPending} className="btn-neon solid solid-cyan"
-                style={{ fontSize: "1rem", padding: "14px 0", justifyContent: "center", width: "100%" }} data-testid="submit-button">
-                {eventMutation.isPending ? "Submitting..." : isApproved ? "Claim This Event →" : "Submit Claim + Promoter Request →"}
-              </button>
-              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center" }}>
+              <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block data-testid="submit-button">
+                {eventMutation.isPending ? "Submitting..." : isApproved ? "Claim This Event" : "Submit Claim + Promoter Request"}
+              </Button>
+              <p style={{ color: "var(--text-faint)", fontSize: "0.75rem", textAlign: "center", marginTop: 14 }}>
                 {isApproved ? "Your claim goes live immediately." : "All claims are reviewed before going live."}
               </p>
             </form>
-          </div>
+          </section>
         ))}
 
       </div>
