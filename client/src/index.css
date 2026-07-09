@@ -178,6 +178,22 @@ body::before {
   opacity: 0.8;
 }
 
+/* Real seam element under header (Seam Charge). Hides pseudo when present. */
+.site-header--real-seam::after {
+  display: none;
+}
+
+.site-header-rainbow-seam.pdxSeam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--site-rainbow-bar-height-thick));
+  height: var(--site-rainbow-bar-height-thick);
+  opacity: 0.8;
+  background: var(--site-rainbow-bar);
+  z-index: 1;
+}
+
 .rainbow-bar {
   height: var(--site-rainbow-bar-height);
   width: 100%;

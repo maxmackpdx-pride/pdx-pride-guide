@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Menu, X } from "lucide-react";
 import logoWordmark from "@assets/logo-wordmark.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
+import { Divider } from "@/components/ds";
 import { PRIMARY_NAV } from "@/lib/siteNav";
 
 type NavItem = { href: string; label: string };
@@ -105,13 +106,18 @@ export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [routeLoading, setRouteLoading] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const navScrollRef = useRef<HTMLDivElement>(null);
+  const fetching = useIsFetching();
 
   useEffect(() => {
     setMenuOpen(false);
     setProfileOpen(false);
     setOpenDropdown(null);
+    setRouteLoading(true);
+    const t = window.setTimeout(() => setRouteLoading(false), 700);
+    return () => window.clearTimeout(t);
   }, [location]);
 
   useEffect(() => {
@@ -192,9 +198,11 @@ export default function Nav() {
   const profilePath = user ? `/u/${encodeURIComponent(user.username)}` : "";
   const profileActive = Boolean(user && (location === profilePath || location.startsWith(`${profilePath}/`)));
 
+  const seamLoading = routeLoading || fetching > 0;
+
   return (
     <>
-      <header className="site-header">
+      <header className="site-header site-header--real-seam">
         <div className="site-header-inner">
           <Link href="/" className="site-brand" aria-label="PDX Pride Guide home">
             <img
@@ -382,6 +390,13 @@ export default function Nav() {
             </button>
           </div>
         </div>
+        {/* Real rainbow seam under header (replaces ::after). loading enables Seam Charge. */}
+        <Divider
+          seam
+          thin
+          loading={seamLoading}
+          className="site-header-rainbow-seam"
+        />
       </header>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
