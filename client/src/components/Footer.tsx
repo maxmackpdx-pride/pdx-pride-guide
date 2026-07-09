@@ -4,53 +4,74 @@ import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
 import PushNotificationToggle from "./PushNotificationToggle";
 
+type FooterLink = [href: string, label: string];
+
+const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
+  {
+    id: "explore",
+    title: "Explore",
+    links: [
+      ["/events", "Events"],
+      ["/schedule", "Schedule"],
+      ["/directory", "Directory"],
+      ["/spotted", "Spotted!"],
+      ["/pride-work", "Gig Board"],
+      ["/gifting", "Gifting"],
+    ],
+  },
+  {
+    id: "participate",
+    title: "Participate",
+    links: [
+      ["/submit", "Submit an Event"],
+      ["/submit", "Claim an Event"],
+      ["/pride-work", "Post a Gig"],
+      ["/gifting", "Post a Gift / In Search Of"],
+      ["/sponsors", "Sponsor the Guide"],
+    ],
+  },
+  {
+    id: "guide",
+    title: "Guide",
+    links: [
+      ["/about", "About"],
+      ["/sponsors", "Sponsors"],
+      ["/access", "Access & Safety"],
+      ["/contact", "Contact"],
+      ["/legal", "Legal"],
+    ],
+  },
+];
 
 export default function Footer() {
   return (
     <footer style={{ background: "#000" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between", marginBottom: 32 }}>
-          <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 280, lineHeight: 1.6 }}>
+        <div className="footer-top">
+          <div className="footer-tagline">
             Built by one person in Portland. No committee, no corporate parent, no notes.
           </div>
-          <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
-            <div>
-              <div className="display" style={{ fontSize: "0.75rem", color: "var(--text-meta)", marginBottom: 12, letterSpacing: "0.1em" }}>NAVIGATE</div>
-              {[
-                ["/events", "Events"],
-                ["/schedule", "Schedule"],
-                ["/pride-work", "Gig Board"],
-                ["/gifting", "Gifting"],
-                ["/spotted", "Spotted!"],
-                ["/directory", "Directory"],
-                ["/submit", "Submit"],
-                ["/about", "About"],
-                ["/sponsors", "Sponsors"],
-                ["/access", "Access & Safety"],
-                ["/contact", "Contact"],
-                ["/legal", "Legal"],
-              ].map(([href, label]) => (
-                <div key={href} style={{ marginBottom: 8 }}>
-                  <Link href={href} style={{ color: "#888", fontSize: "0.82rem", textDecoration: "none" }}>{label}</Link>
-                </div>
-              ))}
-            </div>
-            <div>
-              <div className="display" style={{ fontSize: "0.75rem", color: "var(--text-meta)", marginBottom: 12, letterSpacing: "0.1em" }}>PARTICIPATE</div>
-              {[
-                ["/submit", "Submit an Event"],
-                ["/submit", "Claim an Event"],
-                ["/pride-work", "Post a Gig"],
-                ["/gifting", "Post a Gift / In Search Of"],
-                ["/sponsors", "Sponsor the Guide"],
-                ["/contact", "Contact"],
-              ].map(([href, label]) => (
-                <div key={label} style={{ marginBottom: 8 }}>
-                  <Link href={href} style={{ color: "#888", fontSize: "0.82rem", textDecoration: "none" }}>{label}</Link>
-                </div>
-              ))}
-            </div>
-          </div>
+          <nav className="footer-folders" aria-label="Footer">
+            {FOOTER_FOLDERS.map((folder) => (
+              <details key={folder.id} className="footer-folder">
+                <summary className="footer-folder__summary">
+                  <span className="footer-folder__title display">{folder.title}</span>
+                  <span className="footer-folder__chevron" aria-hidden="true">
+                    ▾
+                  </span>
+                </summary>
+                <ul className="footer-folder__list">
+                  {folder.links.map(([href, label]) => (
+                    <li key={`${folder.id}-${label}`}>
+                      <Link href={href} className="footer-folder__link">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </nav>
         </div>
         <div className="footer-brand" aria-label="PDX Pride Guide">
           <img

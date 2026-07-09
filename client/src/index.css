@@ -8747,6 +8747,121 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
 
 
 /* ═══════════════════════════════════════════════════════════
+   FOOTER FOLDERS (collapsed link groups)
+   ═══════════════════════════════════════════════════════════ */
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 40px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.footer-tagline {
+  color: var(--text-meta);
+  font-size: 0.82rem;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+.footer-folders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  align-items: flex-start;
+  min-width: min(100%, 320px);
+  flex: 1 1 280px;
+  justify-content: flex-end;
+}
+
+.footer-folder {
+  min-width: 140px;
+  flex: 0 1 160px;
+}
+
+.footer-folder__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.footer-folder__summary::-webkit-details-marker {
+  display: none;
+}
+
+.footer-folder__summary::marker {
+  content: "";
+}
+
+.footer-folder__title {
+  font-size: 0.75rem;
+  color: var(--text-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.footer-folder__chevron {
+  color: var(--text-faint, #666);
+  font-size: 0.7rem;
+  line-height: 1;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.footer-folder[open] .footer-folder__chevron {
+  transform: rotate(180deg);
+  color: var(--neon-cyan, #00ffff);
+}
+
+.footer-folder__summary:hover .footer-folder__title,
+.footer-folder__summary:hover .footer-folder__chevron {
+  color: var(--neon-cyan, #00ffff);
+}
+
+.footer-folder__summary:focus-visible {
+  outline: 2px solid var(--neon-cyan, #00ffff);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.footer-folder__list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.footer-folder__list li {
+  margin-bottom: 8px;
+}
+
+.footer-folder__link {
+  color: #888;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.footer-folder__link:hover {
+  color: #00ffff;
+}
+
+html.calm-mode .footer-folder__summary {
+  border-bottom-color: #ddd;
+}
+
+html.calm-mode .footer-folder[open] .footer-folder__chevron,
+html.calm-mode .footer-folder__summary:hover .footer-folder__title,
+html.calm-mode .footer-folder__summary:hover .footer-folder__chevron {
+  color: var(--text-primary, #111);
+}
+
+/* ═══════════════════════════════════════════════════════════
    FOOTER CONTROLS (feedback + toggles)
    ═══════════════════════════════════════════════════════════ */
 
