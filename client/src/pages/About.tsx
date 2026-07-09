@@ -185,9 +185,10 @@ export default function About() {
                 Made by <span className="hl">Tucker Max</span>
               </h2>
               <p>
-                I host Yes Coach and STANK, I run LockerRoom at The Eagle, and I host the Digg&apos;n For Bones
-                podcast. I also built this entire site myself. No corporation, no algorithm, no whoever wrote
-                the biggest check. Just me, and the people who show up.
+                I run Yes Coach, I host LockerRoom at The Eagle, and I produced the Digg&apos;n For Bones
+                podcast. I also built this entire site myself because I&apos;m tired of being tied down to
+                their platforms. No corporation, no algorithm, no whoever wrote the biggest check. Just me,
+                and the people who show up.
               </p>
               <p>
                 This year got rough. A lot of you donated and checked in on me, and that is the only reason
@@ -255,7 +256,7 @@ export default function About() {
             <div>
               <div className="about-v2-project__meta">Podcast · Season 3</div>
               <h3 className="about-v2-project__title">Digg&apos;n For Bones</h3>
-              <p className="about-v2-project__desc">Hosted by Tucker Max · new episodes out now on Spotify</p>
+              <p className="about-v2-project__desc">Produced by Tucker Max · new episodes out now on Spotify</p>
             </div>
             <span className="about-v2-project__go">Listen →</span>
           </a>
