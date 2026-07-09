@@ -4026,6 +4026,8 @@ export interface IStorage {
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
   /** Drop a content-moderation alert into the site owner's guide inbox. */
   notifyOwnerModeration(subject: string, body: string): void;
+  /** Public "Message me" form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
+  sendPortfolioContactMessage(input: { name: string; email: string; phone?: string; message: string; attachmentUrls?: string[] }): boolean;
   getNotificationPrefs(userId: number): NotificationPrefs;
   setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin?: boolean): NotificationPrefs;
   upsertPushSubscription(userId: number, data: { endpoint: string; p256dh: string; auth: string; userAgent?: string | null; platform?: string | null }): unknown;
@@ -5497,6 +5499,22 @@ export const storage: IStorage = {
     const owner = resolveSiteOwner();
     if (!owner) return;
     notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
+  },
+  sendPortfolioContactMessage({ name, email, phone, message, attachmentUrls }) {
+    const owner = resolveSiteOwner();
+    if (!owner) return false;
+    const lines = [
+      `From: ${name} <${email}>`,
+      phone ? `Phone: ${phone}` : null,
+      attachmentUrls && attachmentUrls.length ? `Attachments: ${attachmentUrls.join(", ")}` : null,
+      "",
+      message,
+    ].filter((line): line is string => line != null);
+    notifyGuideInbox(owner.id, `Portfolio message from ${name}`, lines.join("\n"), {
+      contextType: "CONTACT_FORM",
+      contextLabel: name,
+    });
+    return true;
   },
   getNotificationPrefs(userId: number): NotificationPrefs {
     const row = sqlite.prepare(`SELECT notification_prefs, sub_admin FROM users WHERE id = ?`).get(userId) as {

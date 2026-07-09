@@ -62,6 +62,23 @@ const upload = multer({
   },
 });
 
+// Contact-form attachments (public, unauthenticated) — images or PDFs, small cap.
+const contactUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+      const rawExt = path.extname(file.originalname).toLowerCase();
+      const ext = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"].includes(rawExt) ? rawExt : ".bin";
+      cb(null, `contact-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 8 * 1024 * 1024, files: 3 },
+  fileFilter: (_req, file, cb) => {
+    const ok = /^image\/(jpeg|jpg|png|gif|webp)$/.test(file.mimetype) || file.mimetype === "application/pdf";
+    cb(null, ok);
+  },
+});
+
 // Extend express-session to include our custom fields
 declare module "express-session" {
   interface SessionData {
@@ -597,6 +614,34 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const files = Array.isArray(req.files) ? req.files : [];
     if (!files.length) return res.status(400).json({ error: "Upload 1 or 2 image files (jpg/png/gif/webp, max 8MB each)" });
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
+  });
+
+  // Public "Message me" form on the About page — no login required, always lands
+  // in the site owner's inbox (see storage.sendPortfolioContactMessage).
+  app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
+    const honeypot = String(req.body?.company || "").trim();
+    if (honeypot) return res.json({ ok: true }); // bot filled the hidden field — silently drop
+
+    const name = String(req.body?.name || "").trim().slice(0, 120);
+    const email = String(req.body?.email || "").trim().slice(0, 200);
+    const phone = String(req.body?.phone || "").trim().slice(0, 40);
+    const message = String(req.body?.message || "").trim().slice(0, 4000);
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "Name, email, and message are required." });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Enter a valid email address." });
+    }
+
+    const files = Array.isArray(req.files) ? req.files : [];
+    const attachmentUrls = files.map((file: any) => `/uploads/${file.filename}`);
+
+    const delivered = storage.sendPortfolioContactMessage({
+      name, email, phone: phone || undefined, message, attachmentUrls,
+    });
+    if (!delivered) return res.status(500).json({ error: "Could not deliver the message right now." });
+    res.json({ ok: true });
   });
 
   // Serve uploaded files statically

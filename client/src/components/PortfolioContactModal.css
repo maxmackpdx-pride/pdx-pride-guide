@@ -1,0 +1,145 @@
+.pcm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(4, 4, 6, 0.72);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pcm-panel {
+  position: relative;
+  width: min(460px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: #0b0b0e;
+  border: 2px solid rgba(255, 0, 204, 0.5);
+  border-radius: 14px;
+  padding: 28px 24px 26px;
+  box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(255, 0, 204, 0.4);
+}
+
+.pcm-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pcm-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pcm-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.7rem;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 6px;
+}
+
+.pcm-sub {
+  color: var(--text-mid, #b9b6ae);
+  font-size: 0.85rem;
+  margin: 0 0 20px;
+}
+
+.pcm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-mid, #b9b6ae);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pcm-field input[type="text"],
+.pcm-field input[type="email"],
+.pcm-field input[type="tel"],
+.pcm-field textarea {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #fff;
+  background: #151518;
+  border: 1.5px solid #2b2b2b;
+  border-radius: 8px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.pcm-field input:focus,
+.pcm-field textarea:focus {
+  outline: none;
+  border-color: var(--pink, #ff00cc);
+}
+
+.pcm-field input[type="file"] {
+  color: var(--text-mid, #b9b6ae);
+  font-size: 0.8rem;
+}
+
+.pcm-files {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.75rem;
+  color: var(--cyan, #00ffff);
+  text-transform: none;
+}
+
+.pcm-honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pcm-error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin: 0 0 14px;
+}
+
+.pcm-sent {
+  text-align: center;
+  padding: 20px 0 4px;
+}
+
+.pcm-sent h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  color: var(--lime, #ccff00);
+  margin: 0 0 10px;
+}
+
+.pcm-sent p {
+  color: var(--text-mid, #b9b6ae);
+  margin: 0 0 22px;
+}

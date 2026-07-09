@@ -67,7 +67,7 @@
   margin: 0 auto;
   padding: 88px 40px 76px;
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1fr;
   gap: 40px;
   align-items: center;
 }
@@ -111,45 +111,6 @@
   flex-wrap: wrap;
   gap: 13px;
   margin-top: 32px;
-}
-
-.about-v2-hero__portrait {
-  position: relative;
-  justify-self: end;
-  width: min(100%, 380px);
-}
-
-.about-v2-hero__portrait-frame {
-  border: 2px solid var(--aw-border);
-  border-radius: 6px;
-  overflow: hidden;
-  background: #050505;
-  box-shadow: 0 0 40px -12px rgba(204, 255, 0, 0.25);
-}
-
-.about-v2-hero__portrait-frame img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: center top;
-  display: block;
-}
-
-.about-v2-hero__sticker {
-  position: absolute;
-  top: -14px;
-  left: -12px;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #000;
-  background: var(--lime, #ccff00);
-  padding: 8px 12px 6px;
-  transform: rotate(-7deg);
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45);
 }
 
 /* ── Stat band ── */
@@ -796,14 +757,8 @@
   }
 
   .about-v2-hero__inner {
-    grid-template-columns: 1fr;
     padding-top: 56px;
     padding-bottom: 48px;
-  }
-
-  .about-v2-hero__portrait {
-    justify-self: start;
-    max-width: 280px;
   }
 
   .about-v2-stats__grid {

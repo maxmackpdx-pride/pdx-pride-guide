@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { EventListing } from "@shared/multiDayEvents";
+import PortfolioContactModal from "@/components/PortfolioContactModal";
 import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
@@ -74,6 +76,7 @@ export default function About() {
   });
 
   const eventCount = events.length;
+  const [showContactModal, setShowContactModal] = useState(false);
 
   return (
     <div className="about-v2">
@@ -103,18 +106,6 @@ export default function About() {
                 </Button>
               </Link>
             </div>
-          </div>
-          <div className="about-v2-hero__portrait">
-            <div className="about-v2-hero__portrait-frame">
-              <img
-                src="/about/tucker-portrait.jpg"
-                alt="Tucker Max"
-                width={760}
-                height={950}
-                decoding="async"
-              />
-            </div>
-            <span className="about-v2-hero__sticker">Looking for work</span>
           </div>
         </div>
       </section>
@@ -214,11 +205,15 @@ export default function About() {
                     Connect on LinkedIn
                   </Button>
                 </a>
-                <Link href="/contact">
-                  <Button as="span" variant="neon" accent="pink" size="md">
-                    Message me
-                  </Button>
-                </Link>
+                <Button
+                  type="button"
+                  variant="neon"
+                  accent="pink"
+                  size="md"
+                  onClick={() => setShowContactModal(true)}
+                >
+                  Message me
+                </Button>
               </div>
             </div>
           </div>
@@ -424,6 +419,10 @@ export default function About() {
           <span>prideguidepdx.com</span>
         </div>
       </section>
+
+      {showContactModal && (
+        <PortfolioContactModal onClose={() => setShowContactModal(false)} />
+      )}
     </div>
   );
 }
