@@ -474,6 +474,7 @@ html.calm-mode .home-hero__bg {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0; /* allow horizontal rail to scroll inside grid */
 }
 
 /* Where-to-Go split into SPOTS / NONPROFITS columns (mirrors .pg-board3's
@@ -488,8 +489,21 @@ html.calm-mode .home-hero__bg {
   flex-direction: column;
   gap: 16px;
   max-height: 640px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   padding-right: 4px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Cards must not flex-shrink inside the rail or overflow never engages */
+.home-main-stage .pg-placescroll > .pdxPlace {
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 /* Narrow dual columns need a bit more logo room than the full Directory grid */
@@ -564,21 +578,35 @@ html.calm-mode .home-main-stage .scroll-reveal--visible {
     grid-template-columns: 1fr;
   }
 
+  /*
+   Mobile: horizontal card rail for Spots + Nonprofits.
+   min-width:0 / max-width:100% on the scroller is required so the grid cell
+   does not expand to the full card strip (which made overflow-x never engage
+   under home-main-stage overflow-x:clip).
+  */
   .home-main-stage .pg-placescroll {
-    max-height: none;
     flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 14px;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
-    gap: 14px;
-    padding-right: 0;
-    padding-bottom: 6px;
+    padding: 2px 2px 14px;
     scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
-  .home-main-stage .pg-placescroll > * {
-    flex: 0 0 auto;
-    width: 240px;
+  .home-main-stage .pg-placescroll > .pdxPlace {
+    flex: 0 0 min(78vw, 300px);
+    width: min(78vw, 300px);
+    max-width: min(78vw, 300px);
     scroll-snap-align: start;
   }
 
