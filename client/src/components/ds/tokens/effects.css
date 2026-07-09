@@ -127,3 +127,14 @@ html.calm-mode .pdxRow {
   --_day: #888;
   --_dayt: #888;
 }
+
+/* Additive motion add-ons (pdxa* prefix — do not collide with pdx* keys) */
+@keyframes pdxaSeamFill  { 0%{transform:scaleX(0)} 68%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
+@keyframes pdxaSeamGlint { 0%{transform:translateX(-165%)} 60%{transform:translateX(150%)} 100%{transform:translateX(150%)} }
+@keyframes pdxaSeamFlash { 0%,64%{opacity:0} 74%{opacity:.5} 88%{opacity:0} 100%{opacity:0} }
+@keyframes pdxaShimmer   { to { transform: rotate(360deg) } }
+@keyframes pdxaEq        { 0%,100%{transform:scaleY(.22)} 50%{transform:scaleY(1)} }
+@keyframes pdxaSpark     { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity:0 } }
+@keyframes pdxaNumPop    { 0%{transform:translateY(0) scale(1)} 42%{transform:translateY(-2px) scale(1.14)} 100%{transform:translateY(0) scale(1)} }
+@keyframes pdxaFloatUp   { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-28px)} }
+

@@ -38,6 +38,7 @@ import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { buildScheduleEvents, type ScheduleEvent } from "@/lib/scheduleEvents";
 import AuthModal from "@/components/AuthModal";
+import { spawnRsvpSparks } from "@/components/RsvpSparks";
 import heroUrl from "@/assets/hero-collage.png";
 import "./Schedule.css";
 
@@ -1141,7 +1142,13 @@ export default function Schedule({
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-          <button onClick={() => toggleRsvp(selected.id)} style={selected.rsvpBtnStyle}>
+          <button
+            onClick={(e) => {
+              if (!selected.rsvp) spawnRsvpSparks(e.currentTarget);
+              toggleRsvp(selected.id);
+            }}
+            style={{ ...selected.rsvpBtnStyle, position: "relative", overflow: "visible" }}
+          >
             {selected.rsvpLabel}
           </button>
           <span style={{ fontSize: '12.5px', color: 'var(--text-meta)', fontFamily: 'var(--font-body)' }}>

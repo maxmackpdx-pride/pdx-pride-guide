@@ -3,6 +3,7 @@ import logoWordmark from "@assets/logo-wordmark.png";
 import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
 import PushNotificationToggle from "./PushNotificationToggle";
+import SplitFlapSignoff from "./SplitFlapSignoff";
 
 type FooterLink = [href: string, label: string];
 
@@ -101,6 +102,9 @@ export default function Footer() {
             BUY ME A COFFEE
           </a>
           <p className="footer-coffee__handle">Venmo @tucker_pdmax</p>
+        </div>
+        <div style={{ margin: "28px 0 20px" }}>
+          <SplitFlapSignoff />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
           <div style={{ color: "var(--text-faint)", fontSize: "0.75rem" }}>

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React from "react";
+import LiveWave from "@/components/LiveWave";
 
 /* EventCard, the canonical list-view row (source: EVENTS_GUIDE.md).
    Same data as the board card as a horizontal row: flyer thumbnail left, text
@@ -92,6 +93,8 @@ export function EventCard({
   claimable = false, claimPending = false, onClaimClick,
   saved, onSave, href,
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
+  /** Opt-in LiveWave beside the going pill (default off). */
+  liveWave = false,
   className = "", style = {}, ...rest
 }: any) {
   const Tag = href ? "a" : "div";
@@ -135,7 +138,13 @@ export function EventCard({
               <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
         )}
-        {going != null && <span className="pdxRow__going"><span className="dot" />{going} Going</span>}
+        {going != null && (
+          <span className="pdxRow__going">
+            <span className="dot" />
+            {going} Going
+            {liveWave ? <LiveWave /> : null}
+          </span>
+        )}
         {showClaim && (
           claimPending ? (
             <span className="pdxRow__claim pdxRow__claim--pending" data-testid="tag-claim-pending">CLAIM PENDING</span>

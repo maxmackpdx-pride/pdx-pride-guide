@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React from "react";
+import CountUpValue from "@/components/CountUpValue";
 
 /* StatCard = the admin dashboard tile: big accent number, uppercase label,
    optional "VIEW ->" action. Neon border in the accent color, rounded. */
@@ -16,7 +17,7 @@ const CSS = `
 a.pdxStatCard:hover{ transform:translateY(var(--hover-lift));
   box-shadow:0 0 26px -6px var(--_c,var(--lime)); text-decoration:none; }
 .pdxStatCard__num{ font-family:var(--font-display); font-weight:900; font-size:2.75rem;
-  line-height:.85; color:var(--_c,var(--lime));
+  line-height:.85; color:var(--_c,var(--lime)); font-variant-numeric:tabular-nums;
   text-shadow:0 0 20px color-mix(in srgb, var(--_c,var(--lime)) 45%, transparent); }
 .pdxStatCard__label{ font-family:var(--font-display); font-weight:700; font-size:.9375rem;
   letter-spacing:.04em; text-transform:uppercase; color:var(--text-lo); line-height:1.08; flex:1; }
@@ -45,15 +46,22 @@ export function StatCard({
   size = "md",
   href,
   onClick,
+  /** Opt-in count-up (default off preserves prior behavior). */
+  animateCount = false,
   className = "",
   ...rest
 }: any) {
   const Tag = href ? "a" : onClick ? "button" : "div";
   const cls = ["pdxStatCard", size === "sm" ? "pdxStatCard--sm" : "", className].filter(Boolean).join(" ");
+  const num = typeof value === "number" ? value : Number(value);
   return (
     <Tag className={cls} href={href} onClick={onClick}
       style={{ "--_c": COLORS[color] || color, textAlign: "left", cursor: (href || onClick) ? "pointer" : "default" }} {...rest}>
-      <span className="pdxStatCard__num">{value}</span>
+      <span className="pdxStatCard__num">
+        {animateCount && Number.isFinite(num)
+          ? <CountUpValue value={num} />
+          : value}
+      </span>
       <span className="pdxStatCard__label">{label}</span>
       {action && <span className="pdxStatCard__action">{action} <span aria-hidden="true">&rarr;</span></span>}
     </Tag>
