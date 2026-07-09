@@ -1,6 +1,8 @@
 import type { EventListing } from "@shared/multiDayEvents";
 import { DAY_COLORS, DAY_TEXT_COLORS, fmtClock, hexA } from "@shared/prideWeek";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
+import { spawnRsvpSparks } from "@/components/RsvpSparks";
+import LiveWave from "@/components/LiveWave";
 
 export interface RailCardProps {
   event: ScheduleEvent;
@@ -47,6 +49,7 @@ export default function RailCard({
       type="button"
       onClick={(e) => {
         e.stopPropagation();
+        if (!rsvped) spawnRsvpSparks(e.currentTarget);
         onToggleRsvp(event.id);
       }}
       aria-label={rsvped ? "Remove from my schedule" : "Add to my schedule"}
@@ -71,6 +74,7 @@ export default function RailCard({
         flex: variant === "compact" ? "none" : undefined,
         alignSelf: variant === "compact" ? "center" : undefined,
         boxShadow: rsvped ? `0 0 12px -2px ${hexA(dc, 0.85)}` : "none",
+        overflow: "visible",
       }}
     >
       {rsvped ? "♥" : "♡"}
@@ -172,6 +176,9 @@ export default function RailCard({
             top: 9,
             left: 9,
             zIndex: 4,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
             fontFamily: "var(--font-display)",
             fontWeight: 800,
             fontSize: 10,
@@ -185,6 +192,7 @@ export default function RailCard({
           }}
         >
           ● LIVE NOW
+          <LiveWave />
         </div>
       )}
       {showFeatBadge && (

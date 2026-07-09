@@ -105,6 +105,7 @@ export default function AdminMetricsPanel({
               href={undefined}
               onClick={clickable ? () => onMetricClick!(metric.tab!, metric.key) : undefined}
               className={clickable ? "dash-metric-card-clickable" : ""}
+              animateCount
             />
           );
         })}

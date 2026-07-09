@@ -5,6 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import AttendanceVibeModal from "./AttendanceVibeModal";
 import UserAvatar from "@/components/UserAvatar";
+import { spawnRsvpSparks } from "@/components/RsvpSparks";
+import LiveWave from "@/components/LiveWave";
 import { useAttendanceLive } from "@/hooks/useAttendanceLive";
 import {
   ATTENDANCE_PHRASES,
@@ -107,12 +109,14 @@ export default function AttendanceCluster({
   });
 
 
-  const submitVibe = () => {
-    mutation.mutate({ message: attendancePhraseLabel(selectedPhraseKey) });
-  };
-
   const myAttendance = attendees.find(a => a.userId === user?.id);
   const myPhrase = myAttendance ? resolveAttendancePhrase(myAttendance.message) : null;
+
+  const submitVibe = (btnEl?: HTMLElement | null) => {
+    const wasGoing = Boolean(myAttendance);
+    if (!wasGoing && btnEl) spawnRsvpSparks(btnEl);
+    mutation.mutate({ message: attendancePhraseLabel(selectedPhraseKey) });
+  };
 
   useEffect(() => {
     if (!showForm || !myAttendance) return;
@@ -192,6 +196,7 @@ export default function AttendanceCluster({
           <span className={`attendance-going-pill${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`}>
             <span className="attendance-going-pill__dot" aria-hidden="true" />
             {attendees.length} GOING
+            <LiveWave />
           </span>
         </div>
       </div>

@@ -97,6 +97,8 @@ export default function DashboardHubSummary({ counts }: { counts: HubSummaryCoun
               variant={chip.highlight ? "solid" : "outline"}
               glow={chip.highlight}
               dot={chip.highlight}
+              liveWave={chip.highlight}
+              animateCount
               size="sm"
             >
               {chip.label}
