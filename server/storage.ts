@@ -3489,6 +3489,171 @@ function runBootMigrationsOnce() {
 
     recordBootMigration("seed_fetlife_pride_week_gaps_2026_v1");
   }
+  // Hawks PDX Pride week (Jul 13–19 2026) — weekly programming from hawkspdx.com/hawks-events.
+  // Replaces HIDDEN weekend placeholders with real LIVE listings + official flyers.
+  if (!hasBootMigration("seed_hawks_pride_week_2026_v1")) {
+    const now = new Date().toISOString();
+    const venue = {
+      venueName: "Hawks PDX",
+      address: "335 SE 99th Ave, Portland, OR 97216",
+      neighborhood: "SE Portland",
+      lat: 45.520175147981,
+      lng: -122.562357520572,
+    };
+    const insertIfMissing = (row: {
+      title: string;
+      description: string;
+      dateStart: string;
+      dateEnd: string;
+      dayOfWeek: string;
+      ageRequirement: string;
+      eventTypes: string[];
+      admission: string;
+      ticketUrl: string;
+      isSexPositive: boolean;
+      nudityOk: boolean;
+      posterImageUrl: string | null;
+      adminNotes: string;
+    }) => {
+      const exists = sqlite
+        .prepare("SELECT id FROM events WHERE title = ? AND date_start LIKE ? LIMIT 1")
+        .get(row.title, `${row.dateStart.slice(0, 10)}%`);
+      if (exists) return;
+      db.insert(events)
+        .values({
+          title: row.title,
+          description: row.description,
+          ...venue,
+          dateStart: row.dateStart,
+          dateEnd: row.dateEnd,
+          dayOfWeek: row.dayOfWeek,
+          ageRequirement: row.ageRequirement,
+          eventTypes: JSON.stringify(row.eventTypes),
+          admission: row.admission,
+          ticketUrl: row.ticketUrl,
+          isPublic: true,
+          isPrivate: false,
+          isHouseParty: false,
+          isSexPositive: row.isSexPositive,
+          nudityOk: row.nudityOk,
+          posterImageUrl: row.posterImageUrl,
+          status: "LIVE",
+          source: "admin_seeded",
+          isClaimable: true,
+          claimedBy: null,
+          submittedBy: null,
+          adminNotes: row.adminNotes,
+          createdAt: now,
+        } as any)
+        .run();
+    };
+
+    // Keep old TBD weekend placeholders off public listings
+    sqlite
+      .prepare(
+        `UPDATE events SET status = 'HIDDEN',
+          admin_notes = COALESCE(admin_notes || ' | ', '') || 'Superseded by seed_hawks_pride_week_2026_v1 real weekly listings'
+        WHERE title = 'Hawks PDX Pride Weekend Placeholder'`,
+      )
+      .run();
+
+    insertIfMissing({
+      title: "Jock Mondays! at Hawks",
+      description:
+        "Step into your jock and step into community. Mondays at Hawks are all about sporty vibes, playful energy, and showing up just as you are. Wear a jockstrap and get $5 off your visit (not valid with Happy Hour locker pricing). Open til 2AM. Sex-positive spa — body-positive, nudity-friendly space.",
+      dateStart: "2026-07-13T10:00:00",
+      dateEnd: "2026-07-14T02:00:00",
+      dayOfWeek: "MON",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "NIGHTLIFE", "SEX_POSITIVE", "NUDITY_OK"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/jockmonday-94yem-3nfnt-55wgd-2mxrd-exng5-x9g72-h4stw-6e4tn-nlpws-w8a7t-zl7sz-hfxg9-9tc75-zxwdd-gk2hg-j3nfk-gltr7-r3b8m",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-jock-mondays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Jock Mondays Pride week 2026-07-13. Locker/door fee; jock $5 off. Open til 2AM.",
+    });
+
+    insertIfMissing({
+      title: "OMEN Wednesdays! (M4M) at Hawks",
+      description:
+        "Wednesdays at Hawks feature OMEN Nights for men and men-identifying guests, plus Sexy Senior Social from 10 AM–4 PM for members 65+. Discounts available for both events. Sex-positive spa with lockers, hot tub, and play-friendly community vibes.",
+      dateStart: "2026-07-15T15:00:00",
+      dateEnd: "2026-07-16T08:00:00",
+      dayOfWeek: "WED",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "NIGHTLIFE", "SEX_POSITIVE", "NUDITY_OK", "M4M"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/omenwednesday-acby8-5j7ts-bt222-p4cb7-zjfpt-84c7m-sbpkd-xh42n-d5dnl-4prxn-lhkla-wzp4y-4hy57-twrmm-ryr56-w2pry-yfrej-92btf-zk2yn-rhh3x-zzbn2-82l88-jjzls-d45b2-a6pal-4fe9f-eb5be-jhd9w",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-omen-wednesdays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events OMEN Wednesdays (M4M) 2026-07-15. Sexy Senior Social 10am–4pm for 65+ members; OMEN evening for men / men-identifying.",
+    });
+
+    insertIfMissing({
+      title: "Sapphic Takeover Thursday! Women's Day at Hawks",
+      description:
+        "A dedicated Sapphic-centered day at Hawks for women, trans, nonbinary, and gender-expansive folks across the Sapphic spectrum — spa, hot tub, connect, touch, be sensual, be playful. Spearheaded with PNW Poly Sapphics. Space shifts to all-women's day from 10am; PNW Poly Sapphic group concentrates around 6:30pm, but you're welcome anytime day and night. Sex-positive, body-positive.",
+      dateStart: "2026-07-16T10:00:00",
+      dateEnd: "2026-07-17T08:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "SEX_POSITIVE", "NUDITY_OK", "WELLNESS", "COMMUNITY"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-f38rl",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-sapphic-takeover.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Sapphic Takeover Thursday 2026-07-16. PNW Poly Sapphics ~6:30pm concentration; all-day welcome from 10am.",
+    });
+
+    insertIfMissing({
+      title: "Gender Glow Fridays with Karaoke at Hawks",
+      description:
+        "Friday Mixxxers are all-gender nights celebrating the full LGBTQIA2S+ spectrum — blacklight, glow sticks, draw on each other with glow pens, plus karaoke. Whether you're queer or questioning, come connect, explore, and celebrate community in a welcoming, body-positive, sex-positive spa space.",
+      dateStart: "2026-07-17T10:00:00",
+      dateEnd: "2026-07-18T08:00:00",
+      dayOfWeek: "FRI",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "KARAOKE", "NIGHTLIFE", "SEX_POSITIVE", "NUDITY_OK", "ALL-GENDER"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/mixxxerfriday-xzaex-t7b7g-g5t6k-ty2nj-x5h7k-ekayd-3dfyx-x9rgm-rjk6s-3bxmn-c6a76-jjdbj-zayn9-pxy6j-8ydy6-frjak-kyyj3-7pttm-xwy2j-nwfx8-wk92m-d4z26",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-gender-glow-fridays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Gender Glow Fridays + Karaoke 2026-07-17. Blacklight / glow sticks / glow pens; all-gender Mixxxer Friday.",
+    });
+
+    insertIfMissing({
+      title: "Bi Sundays & Nude Yoga at Hawks",
+      description:
+        "Sundays at Hawks are all-gender and body-positive — friendly vibes through the day, a restorative 4 PM Nude Yoga class in the courtyard, then Bi Night as the evening heats up. Come unwind, reconnect, and enjoy a little post-weekend aftercare. Sex-positive spa; nudity OK.",
+      dateStart: "2026-07-19T10:00:00",
+      dateEnd: "2026-07-20T08:00:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "WELLNESS", "SEX_POSITIVE", "NUDITY_OK", "ALL-GENDER", "BI"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/bisundays-acby8-5j7ts-bt222-5es84-nxbk5-mg3wy-zk6mg-p8dpd-whn6d-et6tn-g85je-d2xhj-ekefc",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-bi-sundays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Bi Sundays & Nude Yoga 2026-07-19. Nude yoga 4pm courtyard; Bi Night evening.",
+    });
+
+    recordBootMigration("seed_hawks_pride_week_2026_v1");
+  }
 }
 
 function parseEnvAdminLists() {

@@ -53,6 +53,8 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   "stag pdx": "https://www.stagportland.com/",
   "silverado": "https://www.silveradopdx.com/",
   "peacock pdx": "https://peacockpdx.com/",
+  "hawks pdx": "https://hawkspdx.com/",
+  hawks: "https://hawkspdx.com/",
   "scandals east": "https://scandalspdx.com/",
   "camp bar pdx": "https://campbarpdx.com/",
   "camp": "https://campbarpdx.com/",
