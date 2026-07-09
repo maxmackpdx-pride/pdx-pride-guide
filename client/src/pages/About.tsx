@@ -172,12 +172,12 @@ export default function About() {
                 <img
                   src="/about/tucker-portrait.jpg"
                   alt="Tucker Max"
-                  width={640}
-                  height={800}
+                  width={864}
+                  height={1152}
                   decoding="async"
                 />
               </div>
-              <span className="about-v2-creator__hire">Hire me</span>
+              <span className="about-v2-creator__hire">Looking for full time employment</span>
             </div>
             <div className="about-v2-creator__body">
               <div className="about-v2__kicker">Who&apos;s behind it</div>
@@ -203,11 +203,6 @@ export default function About() {
                     Follow @tucker_pdmax
                   </Button>
                 </a>
-                <Link href="/resume">
-                  <Button as="span" variant="neon" accent="cyan" size="md">
-                    View resume
-                  </Button>
-                </Link>
                 <Button
                   type="button"
                   variant="neon"
@@ -229,9 +224,9 @@ export default function About() {
               </span>
               <p>And yes, I am still looking for work. If you know somebody, you know where to find me.</p>
             </div>
-            <Link href="/contact">
+            <Link href="/resume">
               <Button as="span" variant="neon" accent="cyan" size="md">
-                Get in touch
+                View resume
               </Button>
             </Link>
           </div>

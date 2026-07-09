@@ -230,18 +230,23 @@
 
 .about-v2-creator__hire {
   position: absolute;
-  bottom: -14px;
-  right: -12px;
+  top: -14px;
+  left: 50%;
+  z-index: 2;
+  max-width: calc(100% - 16px);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: clamp(0.68rem, 1.6vw, 0.82rem);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  text-align: center;
+  line-height: 1.15;
   color: #000;
   background: var(--lime, #ccff00);
-  padding: 8px 12px 6px;
-  transform: rotate(-7deg);
+  padding: 9px 14px 7px;
+  transform: translateX(-50%) rotate(-3deg);
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45);
+  white-space: normal;
 }
 
 .about-v2-creator .about-v2__kicker {
