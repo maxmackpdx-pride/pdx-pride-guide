@@ -2044,6 +2044,48 @@ h2.display,
   padding-top: 10px;
 }
 
+/* Small screens: compact the events-map legend so it doesn't cover the map */
+@media (max-width: 700px) {
+  .events-map-panel .map-legend {
+    bottom: 12px;
+    right: 10px;
+    max-width: 150px;
+    padding: 7px 10px;
+    border-width: 1.5px;
+  }
+
+  .events-map-panel .map-legend-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 10px;
+  }
+
+  .events-map-panel .map-legend-item {
+    gap: 5px;
+  }
+
+  .events-map-panel .map-legend-swatch {
+    width: 10px;
+    height: 10px;
+  }
+
+  .events-map-panel .map-legend-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .events-map-panel .map-legend-item--multi {
+    grid-column: 1 / -1;
+    margin-top: 3px;
+    padding-top: 4px;
+  }
+
+  .events-map-panel .map-legend-item--multi svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
 /* Events poster grid — ~1.5× larger tiles */
 .events-page .events-poster-grid {
   gap: 15px;
@@ -7249,7 +7291,14 @@ footer a:hover { color: #00FFFF !important; }
   overflow-x: clip;
 }
 
-.app-shell > main,
+.app-shell > main {
+  position: relative;
+  /* Above the footer: main is a stacking context, so fixed overlays inside it
+     (event modal, schedule popover) would otherwise paint underneath the
+     footer no matter how high their own z-index is. */
+  z-index: 2;
+}
+
 .app-shell > footer {
   position: relative;
   z-index: 1;

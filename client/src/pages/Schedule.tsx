@@ -851,15 +851,20 @@ export default function Schedule({
     const dt = calm ? '#c8c8cc' : d.text;
     const adm = ADM[e.adm];
     const rsvp = myEventIds.has(e.id);
-    const POP_W = 344;
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const POP_W = Math.min(344, vw - 20);
     const r = selRect || ({} as Partial<SelRect>);
     let left = (r.right != null ? r.right : vw / 2) + 12;
     if (left + POP_W > vw - 10) left = (r.left != null ? r.left : vw / 2) - POP_W - 12;
     if (left < 10) left = Math.max(10, (vw - POP_W) / 2);
     let top = r.top != null ? r.top : vh / 2 - 180;
     top = Math.max(64, Math.min(top, vh - 420));
+    // Cap the panel to the viewport — long event descriptions scroll inside
+    // the popover instead of growing it into a several-thousand-pixel-tall
+    // fixed layer (which iOS Safari can't composite: the panel background
+    // drops out and raw text bleeds over the page underneath).
+    const maxH = Math.max(320, vh - top - 14);
     const badge = (bg: string): React.CSSProperties =>
       S({
         fontFamily: 'var(--font-display)',
@@ -894,6 +899,9 @@ export default function Schedule({
         top: top + 'px',
         left: left + 'px',
         width: POP_W + 'px',
+        maxHeight: maxH + 'px',
+        display: 'flex',
+        flexDirection: 'column',
         zIndex: 120,
         background: '#0b0b0e',
         border: '2px solid ' + hexA(dc, 0.6),
@@ -904,6 +912,7 @@ export default function Schedule({
       }),
       posterStyle: S({
         position: 'relative',
+        flex: 'none',
         height: '128px',
         backgroundColor: '#0b0b0e',
         backgroundImage: 'url(' + e.posterUrl + ')',
@@ -1103,6 +1112,13 @@ export default function Schedule({
       >
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px clamp(16px,4vw,40px)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '13px', flexWrap: 'wrap' }}>
+            <Link
+              href="/events"
+              className="btn-neon"
+              style={{ fontSize: '0.8rem', letterSpacing: '0.12em', flex: 'none' }}
+            >
+              ← Back to events
+            </Link>
             <div
               style={{
                 display: 'inline-flex',
@@ -1378,7 +1394,7 @@ export default function Schedule({
                 ✕
               </button>
             </div>
-            <div style={{ padding: '15px 17px 17px' }}>
+            <div style={{ padding: '15px 17px 17px', minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <div
                 style={{
                   display: 'flex',
