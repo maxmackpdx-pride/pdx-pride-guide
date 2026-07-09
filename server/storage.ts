@@ -3317,6 +3317,159 @@ function runBootMigrationsOnce() {
     for (const row of rows) upsert(row);
     recordBootMigration("badlands_pride_week_calendar_2026_v1");
   }
+  // FetLife Pride Week gap fill (Jul 13–19 2026): venue munches + STFU + PLA booth.
+  // Scrubbed from FetLife via logged-in Chrome; STFU cross-checked with The Den / Eventim.
+  if (!hasBootMigration("seed_fetlife_pride_week_gaps_2026_v1")) {
+    const now = new Date().toISOString();
+    const insertIfMissing = (row: {
+      title: string;
+      description: string;
+      venueName: string;
+      address: string;
+      neighborhood: string;
+      lat: number | null;
+      lng: number | null;
+      dateStart: string;
+      dateEnd: string;
+      dayOfWeek: string;
+      ageRequirement: string;
+      eventTypes: string[];
+      admission: string;
+      ticketUrl: string;
+      isSexPositive: boolean;
+      nudityOk: boolean;
+      posterImageUrl: string | null;
+      adminNotes: string;
+    }) => {
+      const exists = sqlite
+        .prepare("SELECT id FROM events WHERE title = ? AND date_start LIKE ? LIMIT 1")
+        .get(row.title, `${row.dateStart.slice(0, 10)}%`);
+      if (exists) return;
+      db.insert(events).values({
+        title: row.title,
+        description: row.description,
+        venueName: row.venueName,
+        address: row.address,
+        neighborhood: row.neighborhood,
+        lat: row.lat,
+        lng: row.lng,
+        dateStart: row.dateStart,
+        dateEnd: row.dateEnd,
+        dayOfWeek: row.dayOfWeek,
+        ageRequirement: row.ageRequirement,
+        eventTypes: JSON.stringify(row.eventTypes),
+        admission: row.admission,
+        ticketUrl: row.ticketUrl,
+        isPublic: true,
+        isPrivate: false,
+        isHouseParty: false,
+        isSexPositive: row.isSexPositive,
+        nudityOk: row.nudityOk,
+        posterImageUrl: row.posterImageUrl,
+        status: "LIVE",
+        source: "admin_seeded",
+        isClaimable: true,
+        claimedBy: null,
+        submittedBy: null,
+        adminNotes: row.adminNotes,
+        createdAt: now,
+      } as any).run();
+    };
+
+    insertIfMissing({
+      title: "Eastsiders Munch",
+      description:
+        "Laid-back kink community munch for folks on the far east side of the PDX metro. Good food and conversation at Spinella's Off the Wall in Gresham — they usually aren't busy Tuesday evenings, so the group tends to take over. Ask for the Eastsiders table if you're not sure which group is ours. Vanilla dress code: no obvious collars, leashes, or fetishwear (day collars / discrete gear OK). ~6:30–8:30pm or until close.",
+      venueName: "Spinella's Off the Wall",
+      address: "436 N Main Ave, Gresham, OR 97030",
+      neighborhood: "Gresham",
+      lat: 45.4992,
+      lng: -122.4305,
+      dateStart: "2026-07-14T18:30:00",
+      dateEnd: "2026-07-14T20:30:00",
+      dayOfWeek: "TUE",
+      ageRequirement: "ALL_AGES",
+      eventTypes: ["SOCIAL", "KINK"],
+      admission: "FREE",
+      ticketUrl: "https://fetlife.com/events/2026/07/14/eastsiders-munch-sfuqa8",
+      isSexPositive: false,
+      nudityOk: false,
+      posterImageUrl: null,
+      adminNotes:
+        "FetLife Eastsiders Munch (miss_spunky). Venue https://www.spinellasoffthewall.com/ · 436 N Main Ave Gresham. Vanilla dress code at restaurant.",
+    });
+
+    insertIfMissing({
+      title: "PDX Nerd Munch",
+      description:
+        "Kinky nerds unite — weekly board-game munch at Lucky Labrador Beer Hall on NW Quimby. Meet around 5:30 for food and drinks, games from ~6:00, official end 8:00pm (people often stay until Lucky Lab closes ~9:30, or head to Sanctuary for Game Bang). Look for the pile of board games on a long table. Food available for purchase. Streetwear / Portland vanilla dress. Free entry.",
+      venueName: "Lucky Labrador Beer Hall (NW Quimby)",
+      address: "1945 NW Quimby St, Portland, OR 97209",
+      neighborhood: "NW Portland",
+      lat: 45.5345,
+      lng: -122.6902,
+      dateStart: "2026-07-15T17:30:00",
+      dateEnd: "2026-07-15T20:00:00",
+      dayOfWeek: "WED",
+      ageRequirement: "ALL_AGES",
+      eventTypes: ["SOCIAL", "KINK"],
+      admission: "FREE",
+      ticketUrl: "https://fetlife.com/events/2026/07/15/pdx-nerd-munch-y0ozd3",
+      isSexPositive: false,
+      nudityOk: false,
+      posterImageUrl: null,
+      adminNotes:
+        "FetLife PDX Nerd Munch (Chantilly-Lace). Lucky Lab 1945 NW Quimby. FetLife group https://fetlife.com/groups/233694.",
+    });
+
+    insertIfMissing({
+      title: "STFU at The Den!",
+      description:
+        "Pride Week edition of STFU — the infamous FemDom BDSM play party (formerly 50 Shades of STFU), hosted by Mistress Viola. Pop-up takeover of The Den (SE Industrial): play stations, equipment, multi-domme foot worship/massage, hard point for suspension, vendors, full bar, snacks, security + dungeon monitors. Explicitly Pride Week–framed and LGBTQIA+/queer inclusive for femme/them dommes and submissives who love femdom. 21+ · ADA accessible · sliding-scale tickets $15–45 · dress code enforced (subs/men: no plain street clothes). Consent-forward house rules; no phones in club.",
+      venueName: "The Den PDX",
+      address: "116 SE Yamhill St, Portland, OR 97214",
+      neighborhood: "SE Industrial",
+      lat: 45.5157,
+      lng: -122.6635,
+      dateStart: "2026-07-16T20:00:00",
+      dateEnd: "2026-07-17T01:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: ["KINK", "SEX_POSITIVE", "NIGHTLIFE", "PARTY", "SOCIAL"],
+      admission: "TICKETED",
+      ticketUrl: "https://wl.eventim.us/event/stfu/693171?afflky=TheDenPDX",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/stfu-the-den-pride-2026.jpg",
+      adminNotes:
+        "FetLife https://fetlife.com/events/2026/07/16/stfu-at-the-den-hjhyfx + The Den https://www.thedenpdx.com/events/stfu (Thu Jul 16 8pm–1am). Flyer from The Den Squarespace.",
+    });
+
+    insertIfMissing({
+      title: "PLA @ Portland Pride Waterfront Festival (Saturday)",
+      description:
+        "Portland Leather Alliance hosts a community presence at the official Portland Pride Waterfront Festival. Meet PLA, learn about kink education, classes, workshops, and membership — consent-forward, KECC-aligned educators. Festival is donation-based ($10 suggested by Pride Northwest; no one turned away). Free to visit the PLA booth/space during Saturday festival hours. More PLA events: forbiddentickets.com/events/portland-leather-alliance · portlandleather.org.",
+      venueName: "Tom McCall Waterfront Park",
+      address: "Naito Pkwy, Portland, OR 97204",
+      neighborhood: "Waterfront",
+      lat: 45.5126,
+      lng: -122.675,
+      dateStart: "2026-07-18T12:00:00",
+      dateEnd: "2026-07-18T20:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: ["SOCIAL", "EDUCATION", "KINK", "FAIR"],
+      admission: "FREE",
+      ticketUrl: "https://fetlife.com/events/2026/07/18/pla-portland-pride-waterfront-festival-saturday-ts12wf",
+      isSexPositive: false,
+      nudityOk: false,
+      posterImageUrl: "/posters/portland-pride-waterfront.png",
+      adminNotes:
+        "FetLife PLA listing (The-PLA). Distinct from general Waterfront Festival listing — leather/kink education org presence. education@portlandleather.org.",
+    });
+
+    recordBootMigration("seed_fetlife_pride_week_gaps_2026_v1");
+  }
 }
 
 function parseEnvAdminLists() {
