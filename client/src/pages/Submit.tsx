@@ -9,10 +9,12 @@ import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
 import PageHeader from "@/components/PageHeader";
-import PageHero from "@/components/PageHero";
 import type { PageHeroAccent } from "@/components/PageHero";
-import { promotersHeroProps } from "@/lib/promotersHero";
+import BoardHero from "@/components/BoardHero";
+import BoardHowItWorks from "@/components/BoardHowItWorks";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
+import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
@@ -58,8 +60,8 @@ const emptyPromoterForm = () => ({
 
 export default function Submit() {
   usePageSeo(
-    "Submit an Event — PDX Pride Guide | Portland Pride 2026",
-    "Add your Portland Pride 2026 event to the free PDX Pride community directory. Submit or claim listings for Pride Week.",
+    "Promoters — Submit & Claim Events | PDX Pride Guide",
+    "Submit Pride Week events, apply as a verified promoter, claim listings, or tip the guide about something we missed.",
   );
   const { toast } = useToast();
   const { user, loading } = useAuth();
@@ -292,15 +294,15 @@ export default function Submit() {
   const heroCopy: Record<PageMode, { kicker: string; title: string; accent: PageHeroAccent; lede: string }> = {
     landing: {
       kicker: "Portland Pride 2026 · Community submissions",
-      title: "Submit",
+      title: "Promoters",
       accent: "lime",
-      lede: "Throwing something? Want the verified badge? Notice we missed one? Pick a door below.",
+      lede: "Got an event? Want to be a verified promoter? Spotted something we are missing? Pick your path below.",
     },
     submit: {
       kicker: "New listing",
       title: "Submit an Event",
       accent: "lime",
-      lede: "Add your Pride Week event to the guide. Verified promoters go live immediately; new accounts enter the review queue.",
+      lede: "Add your Pride Week event to the guide. Verified promoters go live immediately. New accounts enter the review queue.",
     },
     apply: {
       kicker: "Promoter verification",
@@ -312,7 +314,7 @@ export default function Submit() {
       kicker: "Community tip",
       title: "Suggest an Event",
       accent: "magenta",
-      lede: "Saw something we missed? Tell us. We read every tip. Good ones go up as unclaimed listings.",
+      lede: "Saw a Pride event we are missing? Tip us off. No promoter account needed. Admins review every suggestion.",
     },
     claim: {
       kicker: "Host your listing",
@@ -329,16 +331,39 @@ export default function Submit() {
 
   const showStepper = !isApproved && mode === "submit" && submitStep && !eventSubmitSuccess;
 
+  const HOW_IT_WORKS = [
+    { title: "Pick a path", body: "Submit, apply, tip, or claim. Four doors, one hub.", color: "#ccff00" },
+    { title: "Tell us who you are", body: "Log in free. Verified promoters skip the queue later.", color: "#19e3ff" },
+    { title: "Send it in", body: "Events and tips go to review. Verified posts go live now.", color: "#ff1fa0" },
+    { title: "Own the listing", body: "Hosts, talent, broadcasts, and your public profile.", color: "#ff8c00" },
+  ];
+
   return (
-    <div className="zine-page submit-page board-page">
+    <div className="zine-page submit-page board-page board-page--makeover">
       {showAuth && !user && <AuthModal onClose={closeAuth} defaultTab="register" />}
+
       {mode === "landing" ? (
-        <PageHero
-          {...promotersHeroProps({ className: "submit-page-hero page-hero--image-title" })}
+        <BoardHero
+          accent="lime"
+          kicker={hero.kicker}
+          title={<>Promoter <span className="board-hero__title-accent">hub</span></>}
+          lede={hero.lede}
+          actions={
+            <>
+              <Button variant="solid" accent="lime" size="lg" arrow onClick={() => goMode("submit")}>
+                {isApproved ? "Submit an event" : "Submit + apply"}
+              </Button>
+              {!isApproved && (
+                <Button variant="neon" accent="cyan" size="lg" onClick={() => goMode("apply")}>
+                  Apply as promoter
+                </Button>
+              )}
+            </>
+          }
         />
       ) : (
         <PageHeader
-          section="Submit"
+          section="Promoters"
           title={hero.title}
           titleAccent={hero.accent}
           kicker={hero.kicker}
@@ -350,7 +375,7 @@ export default function Submit() {
 
         {/* ── LANDING ── */}
         {mode === "landing" && (
-          <div className="submit-stack">
+          <div className="submit-stack submit-stack--makeover">
 
             {/* Status banners */}
             {isApproved && (
@@ -360,7 +385,7 @@ export default function Submit() {
                 </span>
                 <div>
                   <div className="submit-banner__title">Verified promoter</div>
-                  <p className="submit-banner__body">You're verified. New events you submit go live immediately, no review queue.</p>
+                  <p className="submit-banner__body">You are verified. New events you submit go live immediately, no review queue.</p>
                 </div>
               </div>
             )}
@@ -371,7 +396,7 @@ export default function Submit() {
                 </span>
                 <div>
                   <div className="submit-banner__title">Application pending</div>
-                  <p className="submit-banner__body">Your promoter application is in the admin queue. You'll get a message when it's reviewed.</p>
+                  <p className="submit-banner__body">Your promoter application is in the admin queue. You will get a message when it is reviewed.</p>
                 </div>
               </div>
             )}
@@ -379,102 +404,117 @@ export default function Submit() {
               <div className="submit-banner submit-banner--yellow submit-banner--stacked">
                 <div>
                   <div className="submit-banner__title">Account required</div>
-                  <p className="submit-banner__body">Free account, sixty seconds, then you can submit, apply, or tip us off.</p>
-                  <button type="button" className="btn-neon solid submit-banner__cta" onClick={() => openAuth()}>Log in / Join →</button>
+                  <p className="submit-banner__body">Create a free account or log in to submit, apply, or suggest. It takes a minute.</p>
+                  <Button variant="solid" accent="lime" className="submit-banner__cta" onClick={() => openAuth()}>
+                    Log in / Join
+                  </Button>
                 </div>
               </div>
             )}
 
-            {/* Card 1: Submit New Event (+ become a promoter) */}
-            <button type="button" className="submit-card" onClick={() => goMode("submit")}>
-              <span className="submit-card__icon"><BoltIcon /></span>
-              <span className="submit-card__main">
-                <span className="submit-card__head">
-                  <span className="submit-card__title">{isApproved ? "Submit new event" : "Submit an event + become a promoter"}</span>
-                  <span className="submit-card__tag">{isApproved ? "Goes live instantly" : "2 steps · first-time review"}</span>
+            <div className="submit-paths" role="list">
+              {/* Card 1: Submit New Event */}
+              <button type="button" className="submit-card submit-card--makeover" onClick={() => goMode("submit")} role="listitem">
+                <span className="submit-card__rail" aria-hidden="true" />
+                <span className="submit-card__icon"><BoltIcon /></span>
+                <span className="submit-card__main">
+                  <span className="submit-card__head">
+                    <span className="submit-card__title">{isApproved ? "Submit new event" : "Submit an event + become a promoter"}</span>
+                    <span className="submit-card__tag">{isApproved ? "Goes live instantly" : "2 steps · first-time review"}</span>
+                  </span>
+                  <span className="submit-card__body">
+                    {isApproved
+                      ? "You are a verified promoter. Your event goes live the moment you submit."
+                      : "Short promoter application, then your event. Both go to admin review and go live together once approved."}
+                  </span>
                 </span>
-                <span className="submit-card__body">
-                  {isApproved
-                    ? "You're a verified promoter. Your event goes live the moment you submit."
-                    : "Short application first, then your event. Both land in review together and go live together."}
-                </span>
-              </span>
-              <span className="submit-card__arrow">→</span>
-            </button>
+                <span className="submit-card__arrow" aria-hidden="true">→</span>
+              </button>
 
-            {/* Card 2: Apply as Promoter (only when not approved) */}
-            {!isApproved && (
-              <button type="button" className="submit-card submit-card--cyan" onClick={() => goMode("apply")}>
+              {!isApproved && (
+                <button type="button" className="submit-card submit-card--makeover submit-card--cyan" onClick={() => goMode("apply")} role="listitem">
+                  <span className="submit-card__rail" aria-hidden="true" />
+                  <span className="submit-card__icon">
+                    <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V5z" /><path d="m9 12 2 2 4-4" /></svg>
+                  </span>
+                  <span className="submit-card__main">
+                    <span className="submit-card__head">
+                      <span className="submit-card__title">Apply as promoter</span>
+                      <span className="submit-card__tag">Verification</span>
+                    </span>
+                    <span className="submit-card__body">Not ready to post yet? Get verified now. Once approved, future events go live immediately.</span>
+                  </span>
+                  <span className="submit-card__arrow" aria-hidden="true">→</span>
+                </button>
+              )}
+
+              <button type="button" className="submit-card submit-card--makeover submit-card--orange" onClick={() => goMode("suggest")} role="listitem">
+                <span className="submit-card__rail" aria-hidden="true" />
                 <span className="submit-card__icon">
-                  <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V5z" /><path d="m9 12 2 2 4-4" /></svg>
+                  <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
                 </span>
                 <span className="submit-card__main">
                   <span className="submit-card__head">
-                    <span className="submit-card__title">Apply as promoter</span>
-                    <span className="submit-card__tag">Verification</span>
+                    <span className="submit-card__title">Spotted an event</span>
+                    <span className="submit-card__tag submit-card__tag--ghost">No promoter status needed</span>
                   </span>
-                  <span className="submit-card__body">Nothing to post yet? Get verified anyway. After that, everything you post goes up the second you hit submit.</span>
+                  <span className="submit-card__body">Saw a Pride event we are missing? Tip us off. Admins review all tips. Approved ones go live as unclaimed listings.</span>
                 </span>
-                <span className="submit-card__arrow">→</span>
+                <span className="submit-card__arrow" aria-hidden="true">→</span>
               </button>
-            )}
 
-            {/* Card 3: Spotted / Suggest an Event */}
-            <button type="button" className="submit-card submit-card--orange" onClick={() => goMode("suggest")}>
-              <span className="submit-card__icon">
-                <svg width="21" height="21" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-              </span>
-              <span className="submit-card__main">
-                <span className="submit-card__head">
-                  <span className="submit-card__title">Spotted an event</span>
-                  <span className="submit-card__tag submit-card__tag--ghost">No promoter status needed</span>
+              <button type="button" className="submit-card submit-card--makeover submit-card--neutral" onClick={() => goMode("claim")} role="listitem">
+                <span className="submit-card__rail" aria-hidden="true" />
+                <span className="submit-card__icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M4 22V4" /><path d="M4 4h13l-2.5 4L17 12H4" /></svg>
                 </span>
-                <span className="submit-card__body">Saw something we missed? Tell us. We read every tip. Good ones go up as unclaimed listings.</span>
-              </span>
-              <span className="submit-card__arrow">→</span>
-            </button>
+                <span className="submit-card__main">
+                  <span className="submit-card__head">
+                    <span className="submit-card__title">Claim an existing event</span>
+                    <span className="submit-card__tag">Host access</span>
+                  </span>
+                  <span className="submit-card__body">See your event already listed but unclaimed? Claim it for host access and request promoter verification.</span>
+                </span>
+                <span className="submit-card__arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
 
-            {/* Card 4: Claim an Existing Event */}
-            <button type="button" className="submit-card submit-card--neutral" onClick={() => goMode("claim")}>
-              <span className="submit-card__icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="M4 22V4" /><path d="M4 4h13l-2.5 4L17 12H4" /></svg>
-              </span>
-              <span className="submit-card__main">
-                <span className="submit-card__head">
-                  <span className="submit-card__title">Claim an existing event</span>
-                  <span className="submit-card__tag">Host access</span>
-                </span>
-                <span className="submit-card__body">Your event, already on the site, nobody's name on it? Claim it, take the keys, ask for verification while you're at it.</span>
-              </span>
-              <span className="submit-card__arrow">→</span>
-            </button>
+            <ScrollReveal>
+              <BoardHowItWorks
+                className="submit-how"
+                kickerTone="cyan"
+                title={<>How the promoter <span className="board-how__title-accent">hub</span> works</>}
+                lede="One place to get events on the map, get verified, tip the team, or claim a listing that is already up."
+                steps={HOW_IT_WORKS}
+                footerLine="Free forever · community run · no corporate gate"
+              />
+            </ScrollReveal>
 
             {/* What verified promoters get */}
-            <div className="submit-benefits">
-              <div className="rainbow-bar rainbow-bar--thick" aria-hidden="true" />
+            <div className="submit-benefits submit-benefits--makeover">
               <div className="submit-benefits__head">
+                <div className="board-section-kicker board-section-kicker--lime">Level up</div>
                 <h2 className="submit-benefits__title">What verified promoters get</h2>
-                <span className="submit-benefits__sticker">Level up</span>
               </div>
               <div className="submit-benefits__grid">
                 <div className="submit-benefit submit-benefit--cyan">
                   <span className="submit-benefit__icon"><BoltIcon size={26} /></span>
                   <div className="submit-benefit__title">Go live instantly</div>
-                  <p className="submit-benefit__body">No queue, no waiting. Hit submit and it's on the site.</p>
+                  <p className="submit-benefit__body">Skip the review queue. Every event you post publishes the moment you hit submit.</p>
                 </div>
                 <div className="submit-benefit submit-benefit--magenta">
                   <span className="submit-benefit__icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><path d="m3 11 15-6v14L3 13z" /><path d="M3 11v3h3" /><path d="M8 20v-6" /></svg>
                   </span>
                   <div className="submit-benefit__title">Host tools</div>
-                  <p className="submit-benefit__body">Claim your listings, add your co-hosts and talent, pin a broadcast to the top of your event page.</p>
+                  <p className="submit-benefit__body">Claim your listings, add co-hosts and talent, and pin host broadcasts on your event page.</p>
                 </div>
                 <div className="submit-benefit submit-benefit--yellow">
                   <span className="submit-benefit__icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" {...stroke} aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="M14 9h4M14 13h4M6 16c.8-1.4 4.2-1.4 5 0" /></svg>
                   </span>
                   <div className="submit-benefit__title">A promoter profile</div>
-                  <p className="submit-benefit__body">Your own page at prideguidepdx.com/u/you. Every event, every link, one address.</p>
+                  <p className="submit-benefit__body">Your own public page at prideguidepdx.com/u/you, with every event and link in one spot.</p>
                 </div>
               </div>
             </div>
@@ -492,7 +532,7 @@ export default function Submit() {
 
         {/* ── SUBMIT: Step 1 — Promoter Application (non-approved only) ── */}
         {mode === "submit" && !isApproved && submitStep === "promoter_app" && (
-          <div>
+          <div className="submit-panel submit-panel--makeover">
             <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
             <div className="submit-note">
               <div className="submit-note__title">Step 1 of 2 · Promoter application</div>
@@ -525,7 +565,7 @@ export default function Submit() {
 
         {/* ── SUBMIT: Event Details (approved users skip straight here) ── */}
         {mode === "submit" && (isApproved || submitStep === "event_details") && (
-          <div>
+          <div className="submit-panel submit-panel--makeover">
             {eventSubmitSuccess ? (
               <div className="submit-success">
                 <div className="submit-success__title">{eventSubmitSuccess.title}</div>
@@ -694,11 +734,11 @@ export default function Submit() {
         {mode === "apply" && (flowSuccess === "apply" ? (
           <div className="submit-success submit-success--cyan">
             <div className="submit-success__title">Application submitted!</div>
-            <p className="submit-success__body">Admins will review your promoter request and be in touch. You'll get a message when you're approved.</p>
+            <p className="submit-success__body">Admins will review your promoter request and be in touch. You will get a message when you are approved.</p>
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
           </div>
         ) : (
-          <div>
+          <div className="submit-panel submit-panel--makeover submit-panel--cyan">
             <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
             {promoterStatus === "pending" && (
               <div className="submit-note submit-note--cyan">
@@ -751,7 +791,7 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
           </div>
         ) : (
-          <div>
+          <div className="submit-panel submit-panel--makeover submit-panel--magenta">
             <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
             <div className="submit-note submit-note--orange">
               <div className="submit-note__title">No promoter account needed</div>
@@ -803,12 +843,12 @@ export default function Submit() {
           <div className="submit-success submit-success--cyan">
             <div className="submit-success__title">{isApproved ? "Event claimed!" : "Claim submitted!"}</div>
             <p className="submit-success__body">
-              {isApproved ? "You're now the host of this event, it's live on your profile." : "Your claim is pending admin review."}
+              {isApproved ? "You are now the host of this event. It is live on your profile." : "Your claim is pending admin review."}
             </p>
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to promoters hub</button>
           </div>
         ) : (
-          <div>
+          <div className="submit-panel submit-panel--makeover submit-panel--cyan">
             <button type="button" style={backBtnStyle} onClick={backToLanding}>← Back</button>
             <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}
               style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -852,6 +892,13 @@ export default function Submit() {
         ))}
 
       </div>
+
+      {mode === "landing" && (
+        <BoardCloseSeam
+          line="Submit it. Claim it. Keep Portland queer."
+          url="prideguidepdx.com/submit"
+        />
+      )}
     </div>
   );
 }
