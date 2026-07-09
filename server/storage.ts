@@ -2823,6 +2823,25 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_nonprofits_directory_v9");
   }
+    if (!hasBootMigration("seed_underu4men_v10")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "underU4men",
+      type: "shop",
+      description: "Men's underwear, swimwear, gymwear, and apothecary boutique — a longtime queer Portland staple, now at its new downtown home on SW Morrison.",
+      address: "1013 SW Morrison St",
+      neighborhood: "Downtown",
+      website: "https://shop.underu4men.com",
+      phone: "(503) 274-2555",
+      hours: "Mon–Sat 10am–7pm, Sun 11am–6pm",
+      queerOwned: true,
+      queerFriendly: true,
+      active: true,
+      isNew: true,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_underu4men_v10");
+  }
   if (!hasBootMigration("sync_event_map_coordinates_v1")) {
     const directoryRows = db.select().from(businesses).all().filter(b => b.active);
     const missing = sqlite.prepare(`
