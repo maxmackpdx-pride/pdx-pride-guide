@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { EventListing } from "@shared/multiDayEvents";
+import { eventPath } from "@shared/eventSlug";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
 import "./About.css";
 
@@ -12,6 +13,9 @@ const VENMO_URL = "https://venmo.com/tucker_pdmax";
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const LINKEDIN_URL = "https://www.linkedin.com/in/tuckercasey/";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
+const STANK_EVENT_ID = 13;
+const STANK_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
+const STANK_EVENT_HREF = eventPath(STANK_EVENT_ID, STANK_EVENT_TITLE, "SAT");
 
 const LIVE_NOW = [
   "RSVPs, once you are logged in",
@@ -232,6 +236,16 @@ export default function About() {
               </Button>
             </Link>
           </div>
+
+          <Link href={STANK_EVENT_HREF} className="about-v2-project">
+            <img src="/posters/stank-yes-coach.jpg" alt="" width={120} height={120} />
+            <div>
+              <div className="about-v2-project__meta">Yes Coach · Stank</div>
+              <h3 className="about-v2-project__title">Stank: Yes Coach!</h3>
+              <p className="about-v2-project__desc">Hosted by Tucker Max · Sat, Sanctuary Club · Pride Week 2026</p>
+            </div>
+            <span className="about-v2-project__go">See event →</span>
+          </Link>
 
           <a
             className="about-v2-project"
