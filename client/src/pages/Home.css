@@ -70,13 +70,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.82rem;
+  font-size: 1.64rem; /* 2× previous 0.82rem */
   color: var(--neon-cyan);
 }
 
 .home-main-stage .pg-hero__kicker .d {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--neon-cyan);
   box-shadow: 0 0 10px var(--neon-cyan);
@@ -98,7 +98,14 @@
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
 }
 
-/* Match nav PRIDE: GlitchWord rainbow fill + black ink + neon glow */
+/*
+  Hero PRIDE rainbow — root cause of past failures:
+  Chrome breaks -webkit-background-clip:text when ANY ancestor has filter.
+  Putting drop-shadow on .home-hero-title-pride made the fill fully transparent;
+  only the lime drop-shadow silhouette showed (looked solid green neon).
+  Fix: no filter on ancestors; black ink + neon glow live on the outline layer;
+  gradient fill forced with hex stops so vars/cascade can't blank it.
+*/
 .home-main-stage .pg-hero h1 .home-hero-title-pride {
   display: block;
   font-family: var(--font-display);
@@ -107,35 +114,59 @@
   line-height: 0.84;
   letter-spacing: 0.01em;
   font-size: clamp(3.5rem, 11vw, 6.4rem);
-  /* Same neon stack as .site-brand-wordmark__line--accent */
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
-    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+  filter: none; /* critical — do not put filter above clipped text */
 }
 
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word {
   display: block;
+  /* isolation can also fight clip-text compositing at hero scale */
+  isolation: auto;
 }
 
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline,
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
   display: block;
-  font: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
   line-height: inherit;
 }
 
-/* Slightly stronger outline at hero scale so black ink reads like nav */
+/* Black ink outline + neon glow (was parent filter) */
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__outline {
-  -webkit-text-stroke: 2px #000;
-  text-shadow: 2px 2px 0 #000, 3px 3px 0 #000;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2.5px #000;
+  text-shadow:
+    3px 3px 0 #000,
+    2px 2px 0 #000,
+    0 0 22px rgba(204, 255, 0, 0.55),
+    0 0 36px rgba(0, 255, 255, 0.35),
+    0 0 48px rgba(255, 0, 204, 0.22);
 }
 
+/* Explicit rainbow fill — same neon stops as nav GlitchWord */
 .home-main-stage .pg-hero h1 .home-hero-title-pride .glitch-word__gradient {
-  /* Inherit nav rainbow neon (set on .glitch-word__gradient) — do not override */
-  text-shadow: none;
+  background-image: linear-gradient(
+    90deg,
+    #00ffff 0%,
+    #ccff00 33%,
+    #ff00cc 66%,
+    #ff6600 100%
+  ) !important;
+  background-color: transparent !important;
+  background-size: 100% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  filter: none !important;
+  /* Keep gradient continuous across the word */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 /* Event count under Guide — no box, 2× size, white + black outline + neon glow */

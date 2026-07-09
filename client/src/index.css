@@ -292,18 +292,21 @@ body::before {
   white-space: nowrap;
 }
 
+/*
+  Neon glow for PRIDE wordmark.
+  IMPORTANT: never put filter on this ancestor of .glitch-word__gradient —
+  Chrome breaks background-clip:text under filter, leaving only a solid neon
+  silhouette. Glow lives on the outline layer instead.
+*/
 .site-brand-wordmark__line--accent {
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
-    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+  filter: none;
 }
 
 /* Slow chunky glitch — nav + hero PRIDE */
 .glitch-word {
   position: relative;
   display: inline-block;
-  isolation: isolate;
+  /* avoid isolation:isolate — can break large-scale background-clip:text */
 }
 
 .glitch-word--rainbow .glitch-word__gradient {
@@ -317,27 +320,35 @@ body::before {
   z-index: 0;
   display: block;
   color: transparent;
+  -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 1.5px #000;
   paint-order: stroke fill;
-  text-shadow: 2px 2px 0 #000;
+  /* black ink + neon glow (replaces parent filter drop-shadows) */
+  text-shadow:
+    2px 2px 0 #000,
+    0 0 18px rgba(204, 255, 0, 0.5),
+    0 0 28px rgba(0, 255, 255, 0.35);
   pointer-events: none;
 }
 
 .glitch-word__gradient {
   position: relative;
   z-index: 1;
-  /* Nav PRIDE neon rainbow: cyan → lime → magenta → orange */
-  background: linear-gradient(
+  /* Neon rainbow: cyan → lime → magenta → orange (hex so vars can't blank) */
+  background-image: linear-gradient(
     90deg,
-    var(--neon-cyan),
-    var(--neon-yellow),
-    var(--neon-magenta),
-    var(--neon-orange)
+    #00ffff 0%,
+    #ccff00 33%,
+    #ff00cc 66%,
+    #ff6600 100%
   );
+  background-color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+  text-shadow: none;
+  filter: none;
 }
 
 .glitch-word::before,
@@ -1163,18 +1174,14 @@ h2.display,
   }
 }
 
-/* Rainbow gradient text — Chrome needs -webkit-text-fill-color; avoid stroke/paint-order/filter on clipped text */
+/* Rainbow gradient text — no filter on this wrapper (breaks clip-text in Chrome) */
 .home-hero-title-pride {
   display: inline-block;
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
-    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+  filter: none;
 }
 
-.display .glitch-word--rainbow,
-.display .glitch-word__gradient,
-.display .glitch-word__outline {
+/* Only strip shadows on the clipped gradient fill — outline keeps black ink + neon glow */
+.display .glitch-word__gradient {
   text-shadow: none;
 }
 
@@ -2812,10 +2819,8 @@ h2.display,
 .page-hero__panel .page-hero__accent--rainbow,
 .page-hero__accent--rainbow {
   display: inline-block;
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
-    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+  /* no filter — breaks background-clip:text on GlitchWord fill in Chrome */
+  filter: none;
 }
 
 .page-hero__lede {
@@ -7468,10 +7473,8 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .footer-brand-wordmark__line--accent {
-  filter:
-    drop-shadow(2px 2px 0 #000)
-    drop-shadow(0 0 24px rgba(204, 255, 0, 0.4))
-    drop-shadow(0 0 14px rgba(0, 255, 255, 0.25));
+  /* no filter — breaks background-clip:text on GlitchWord fill in Chrome */
+  filter: none;
 }
 
 
