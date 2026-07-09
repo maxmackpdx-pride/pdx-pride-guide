@@ -805,6 +805,83 @@ export default function Admin() {
     editGigMutation.mutate({ id: editingGigId, data: gigEditForm });
   };
 
+  const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
+  const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
+  // Talent / gigs / gifting posts go live without admin approval.
+  // Only gifting *reports* (and flagged posts with reportCount) need eyes.
+  const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
+  const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
+  const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
+  const pendingPromoters = promoterRequests;
+  const totalActionItems =
+    pendingSubs.length
+    + pendingMod.length
+    + pendingPromoters.length
+    + pendingGiftingFlagged.length
+    + pendingGiftingReports.length
+    + openFeedback.length;
+
+  const overviewAttention = useMemo(() => {
+    const items: AttentionItem[] = [];
+    for (const s of pendingSubs.slice(0, 6)) {
+      items.push({
+        key: `submission-${s.id}`,
+        title: s.title || "Untitled submission",
+        subtitle: `${s.type} · ${s.submitterName || s.submitterEmail}`,
+        kindLabel: s.type === "CLAIM" ? "Claim" : s.type === "PROMOTER_APPLICATION" ? "Promoter" : "Submission",
+        color: "#FF1FA0",
+      });
+    }
+    for (const p of pendingPromoters.slice(0, 4)) {
+      items.push({
+        key: `promoter-${p.id}`,
+        title: p.displayName || p.username || p.email || "Promoter request",
+        subtitle: p.eventTitle ? `Claiming ${p.eventTitle}` : "Promoter application",
+        kindLabel: "Promoter",
+        color: "#FF00CC",
+      });
+    }
+    for (const m of pendingMod.slice(0, 4)) {
+      items.push({
+        key: `moderation-${m.id}`,
+        title: m.eventTitle || `Moderation ${m.type}`,
+        subtitle: `${m.type} · ${m.requesterName || m.requesterEmail}`,
+        kindLabel: "Moderation",
+        color: "#FF8C00",
+      });
+    }
+    for (const g of pendingGiftingFlagged.slice(0, 3)) {
+      items.push({
+        key: `gifting_post-${g.id}`,
+        title: g.title || "Gifting post",
+        subtitle: `${g.reportCount || 0} report(s)`,
+        kindLabel: "Gifting report",
+        color: "#AA66FF",
+      });
+    }
+    for (const f of openFeedback.slice(0, 3)) {
+      items.push({
+        key: `feedback-${f.id}`,
+        title: f.category || "Feedback",
+        subtitle: String(f.message || "Open feedback").slice(0, 80),
+        kindLabel: "Feedback",
+        color: "#4488FF",
+      });
+    }
+    return items.slice(0, 8);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, openFeedback]);
+
+  const overviewKindPills = useMemo(() => {
+    const pills: KindPill[] = [];
+    if (pendingSubs.length) pills.push({ key: "submissions", label: "Submissions", count: pendingSubs.length, color: "#FF1FA0" });
+    if (pendingPromoters.length) pills.push({ key: "promoters", label: "Promoters", count: pendingPromoters.length, color: "#FF00CC" });
+    if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
+    if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
+    if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
+    if (openFeedback.length) pills.push({ key: "feedback", label: "Feedback", count: openFeedback.length, color: "#4488FF" });
+    return pills;
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, openFeedback]);
+
   if (authLoading || !sessionReady) {
     return (
       <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
@@ -892,22 +969,6 @@ export default function Admin() {
     );
   }
 
-  const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
-  const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
-  // Talent / gigs / gifting posts go live without admin approval.
-  // Only gifting *reports* (and flagged posts with reportCount) need eyes.
-  const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
-  const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
-  const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
-  const pendingPromoters = promoterRequests;
-  const totalActionItems =
-    pendingSubs.length
-    + pendingMod.length
-    + pendingPromoters.length
-    + pendingGiftingFlagged.length
-    + pendingGiftingReports.length
-    + openFeedback.length;
-
   const renderPromoterControls = (u: Pick<AdminUser, "id" | "promoterStatus" | "subAdmin" | "isOwner">) => {
     if (u.isOwner) return null;
     if (u.id == null) return null;
@@ -978,66 +1039,6 @@ export default function Admin() {
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
   const approvedPromoterCount = allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner).length;
 
-  const overviewAttention = useMemo(() => {
-    const items: AttentionItem[] = [];
-    for (const s of pendingSubs.slice(0, 6)) {
-      items.push({
-        key: `submission-${s.id}`,
-        title: s.title || "Untitled submission",
-        subtitle: `${s.type} · ${s.submitterName || s.submitterEmail}`,
-        kindLabel: s.type === "CLAIM" ? "Claim" : s.type === "PROMOTER_APPLICATION" ? "Promoter" : "Submission",
-        color: "#FF1FA0",
-      });
-    }
-    for (const p of pendingPromoters.slice(0, 4)) {
-      items.push({
-        key: `promoter-${p.id}`,
-        title: p.displayName || p.username || p.email || "Promoter request",
-        subtitle: p.eventTitle ? `Claiming ${p.eventTitle}` : "Promoter application",
-        kindLabel: "Promoter",
-        color: "#FF00CC",
-      });
-    }
-    for (const m of pendingMod.slice(0, 4)) {
-      items.push({
-        key: `moderation-${m.id}`,
-        title: m.eventTitle || `Moderation ${m.type}`,
-        subtitle: `${m.type} · ${m.requesterName || m.requesterEmail}`,
-        kindLabel: "Moderation",
-        color: "#FF8C00",
-      });
-    }
-    for (const g of pendingGiftingFlagged.slice(0, 3)) {
-      items.push({
-        key: `gifting_post-${g.id}`,
-        title: g.title || "Gifting post",
-        subtitle: `${g.reportCount || 0} report(s)`,
-        kindLabel: "Gifting report",
-        color: "#AA66FF",
-      });
-    }
-    for (const f of openFeedback.slice(0, 3)) {
-      items.push({
-        key: `feedback-${f.id}`,
-        title: f.category || "Feedback",
-        subtitle: String(f.message || "Open feedback").slice(0, 80),
-        kindLabel: "Feedback",
-        color: "#4488FF",
-      });
-    }
-    return items.slice(0, 8);
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, openFeedback]);
-
-  const overviewKindPills = useMemo(() => {
-    const pills: KindPill[] = [];
-    if (pendingSubs.length) pills.push({ key: "submissions", label: "Submissions", count: pendingSubs.length, color: "#FF1FA0" });
-    if (pendingPromoters.length) pills.push({ key: "promoters", label: "Promoters", count: pendingPromoters.length, color: "#FF00CC" });
-    if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
-    if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
-    if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
-    if (openFeedback.length) pills.push({ key: "feedback", label: "Feedback", count: openFeedback.length, color: "#4488FF" });
-    return pills;
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, openFeedback]);
   const inboxActionPending =
     approveMutation.isPending
     || mergeSubmissionMutation.isPending
