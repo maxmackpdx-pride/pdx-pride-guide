@@ -37,8 +37,8 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 
 .pdxBoard__meta{ padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
 .pdxBoard__tags{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
-.pdxTag{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.65rem;
-  letter-spacing:.08em; text-transform:uppercase; padding:3px 8px 2px; border-radius:2px; line-height:1.1; }
+.pdxTag{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.6rem;
+  letter-spacing:.08em; text-transform:uppercase; padding:0 6px; border-radius:2px; line-height:1.05; }
 .pdxTag--day{ background:#fff; color:#000; }
 .pdxTag--type{ border:1px solid var(--border-strong); color:var(--text-lo); }
 .pdxTag--meta{ border:1px solid var(--border-strong); color:var(--text-mid); }
@@ -59,6 +59,21 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 .pdxBoard__link{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.8rem;
   letter-spacing:.05em; text-transform:uppercase; color:var(--_dayt,var(--_day)); margin-top:2px;
   display:inline-flex; align-items:center; gap:5px; }
+
+/* Bottom claim CTA — sticker style (matches EventTagsRow claim tags) */
+.pdxBoard__claim{ margin-top:auto; padding-top:10px; display:flex; }
+.pdxBoard__claim-tag{
+  font-family:var(--font-display); font-weight:700; font-size:.62rem;
+  letter-spacing:.09em; text-transform:uppercase; line-height:1.3;
+  padding:5px 10px 4px; color:#000; border:2px solid var(--neon-yellow);
+  box-shadow:3px 3px 0 var(--neon-yellow); background:var(--neon-cyan,#19E3FF);
+  border-radius:0; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+}
+.pdxBoard__claim-tag:hover{ filter:brightness(1.06); }
+.pdxBoard__claim-tag--pending{
+  background:var(--neon-magenta,#FF00CC); cursor:default; box-shadow:3px 3px 0 var(--neon-yellow);
+}
+.pdxBoard__claim-tag--pending:hover{ filter:none; }
 
 .pdxBoard__foot{ display:flex; align-items:center; justify-content:space-between; gap:10px;
   margin-top:auto; padding-top:10px; border-top:1px solid var(--border-faint); }
@@ -92,15 +107,18 @@ const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 export function PosterCard({
   title, venue, when, day = "FRI", image,
   types = [], admission, age, claimable = false,
+  claimPending = false,
+  onClaimClick,
   going, onRsvp, href, showLink = true,
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
-}) {
+}: any) {
   const Tag = href ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const dayt = DAY_TEXT[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
+  const showClaim = claimPending || claimable;
   return (
     <Tag className={`pdxBoard ${className}`} href={href}
       style={{ "--_day": base, "--_dayt": dayt, ...style }} {...rest}>
@@ -122,7 +140,6 @@ export function PosterCard({
           <span className="pdxTag pdxTag--day">{day}</span>
           {types.map((t, i) => <span className="pdxTag pdxTag--type" key={i}>{t}</span>)}
           {metaBits && <span className="pdxTag pdxTag--meta">{metaBits}</span>}
-          {claimable && <span className="pdxTag pdxTag--claim">Claimable</span>}
         </div>
         <h3 className="pdxBoard__title">{title}</h3>
         {venue && (venueHref
@@ -144,6 +161,29 @@ export function PosterCard({
               : <span />}
             {onRsvp && <button type="button" className="pdxBoard__rsvp"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRsvp(); }}>I'll be there</button>}
+          </div>
+        )}
+
+        {showClaim && (
+          <div className="pdxBoard__claim">
+            {claimPending ? (
+              <span className="pdxBoard__claim-tag pdxBoard__claim-tag--pending" data-testid="tag-claim-pending">
+                CLAIM PENDING
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="pdxBoard__claim-tag"
+                data-testid="tag-claim-event"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClaimClick?.();
+                }}
+              >
+                CLAIM THIS EVENT →
+              </button>
+            )}
           </div>
         )}
       </div>
