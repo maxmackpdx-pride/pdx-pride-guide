@@ -5501,8 +5501,11 @@ export const storage: IStorage = {
     notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
   },
   sendPortfolioContactMessage({ name, email, phone, message, attachmentUrls }) {
-    const owner = resolveSiteOwner();
-    if (!owner) return false;
+    // Pinned directly to the tucker_pdmax account (not the shared resolveSiteOwner()
+    // pool other features use) so this can never fan out to other admins, even if
+    // more admins are granted later.
+    const tucker = storage.getUserByUsername(SITE_ADMIN_GIG_OWNER_USERNAME);
+    if (!tucker) return false;
     const lines = [
       `From: ${name} <${email}>`,
       phone ? `Phone: ${phone}` : null,
@@ -5510,7 +5513,7 @@ export const storage: IStorage = {
       "",
       message,
     ].filter((line): line is string => line != null);
-    notifyGuideInbox(owner.id, `Portfolio message from ${name}`, lines.join("\n"), {
+    storage.sendMessage(tucker.id, tucker.id, `Portfolio message from ${name}`, lines.join("\n"), {
       contextType: "CONTACT_FORM",
       contextLabel: name,
     });
