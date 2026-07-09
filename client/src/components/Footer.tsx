@@ -1,13 +1,11 @@
 import { Link } from "wouter";
 import logoWordmark from "@assets/logo-wordmark.png";
-import { useAuth } from "@/context/AuthContext";
 import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
 import PushNotificationToggle from "./PushNotificationToggle";
 
 
 export default function Footer() {
-  const { user } = useAuth();
   return (
     <footer style={{ background: "#000" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
