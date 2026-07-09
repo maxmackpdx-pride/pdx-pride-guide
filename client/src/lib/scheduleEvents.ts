@@ -27,6 +27,9 @@ export type ScheduleEvent = PrideEvent & {
   scheduleKey: string;
   /** Resolved flyer URL for grid blocks and popover header. */
   posterUrl: string;
+  /** Absolute start/end (ms) for live / up-next selectors. */
+  startMs: number;
+  endMs: number;
 };
 
 function pacificClockMinutes(value: string): number | null {
@@ -109,6 +112,13 @@ export function eventListingToScheduleEvent(
   const clampedEnd = Math.min(endMin, GRID_END);
   if (clampedEnd <= clampedStart) return null;
 
+  const startMs = parsePacificDateTime(event.dateStart);
+  if (startMs == null) return null;
+  let endMs = parsePacificDateTime(event.dateEnd);
+  if (endMs == null || endMs <= startMs) {
+    endMs = startMs + (endMin - startMin) * 60_000;
+  }
+
   return {
     id: event.id,
     scheduleKey: event.listingInstanceKey ?? String(event.id),
@@ -125,6 +135,8 @@ export function eventListingToScheduleEvent(
     blurb: event.description,
     feat: isHeadliner(event, going),
     posterUrl: resolveEventPosterUrl(event.id, event.posterImageUrl),
+    startMs,
+    endMs,
   };
 }
 
@@ -142,4 +154,26 @@ export function buildScheduleEvents(
     if (mapped) out.push(mapped);
   }
   return out;
+}
+
+/** True while the event is actually on (absolute start/end, day-aware). */
+export function isLiveNow(e: ScheduleEvent, nowMs: number): boolean {
+  return e.startMs <= nowMs && nowMs < e.endMs;
+}
+
+/** All events currently within their start–end window, ending soonest first. */
+export function liveScheduleEvents(list: ScheduleEvent[], nowMs: number): ScheduleEvent[] {
+  return list.filter(e => isLiveNow(e, nowMs)).sort((a, b) => a.endMs - b.endMs || a.startMs - b.startMs);
+}
+
+/** Next events that have not started yet, soonest first. */
+export function upcomingScheduleEvents(
+  list: ScheduleEvent[],
+  nowMs: number,
+  limit = 10,
+): ScheduleEvent[] {
+  return list
+    .filter(e => e.startMs > nowMs)
+    .sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs)
+    .slice(0, limit);
 }

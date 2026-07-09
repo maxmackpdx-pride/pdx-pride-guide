@@ -13,14 +13,14 @@ export interface RailCardProps {
   variant?: "full" | "compact";
   /** When true (variant "full" only), stretches to 100% width/300h for a CSS grid cell instead of a fixed-width rail card. */
   fill?: boolean;
+  /** Smaller full-poster card for dual-row marquees next to the map. */
+  size?: "md" | "sm";
 }
 
 /**
  * Shared full-bleed poster card used by the Home headliner rail and the
- * Events page "On Now / Starting Soon / Big This Weekend" rails. Visual
- * spec ported from the design mock's `railCardVM`/`chipVM` (The
- * Schedule.dc.html), day-color left border + bottom scrim, ★ HEADLINER
- * badge, live-now badge, RSVP heart.
+ * Events page Happening Now / Up Next marquees. Day-color left border +
+ * bottom scrim, ★ HEADLINER badge, live-now badge, RSVP heart.
  */
 export default function RailCard({
   event,
@@ -31,10 +31,16 @@ export default function RailCard({
   onOpen,
   variant = "full",
   fill = false,
+  size = "md",
 }: RailCardProps) {
   const dc = DAY_COLORS[event.day] || "#00FFFF";
   const dt = DAY_TEXT_COLORS[event.day] || dc;
   const showFeatBadge = !!event.feat && !live;
+  const sm = size === "sm";
+  const cardW = fill ? "100%" : sm ? 148 : 230;
+  const cardH = fill ? 300 : sm ? 192 : 298;
+  const titleSize = sm ? 14 : 17;
+  const pad = sm ? "10px 11px 11px" : "14px 15px 15px";
 
   const heart = (
     <button
@@ -132,16 +138,16 @@ export default function RailCard({
       style={{
         position: "relative",
         flex: fill ? undefined : "none",
-        width: fill ? "100%" : 230,
-        height: fill ? 300 : 298,
-        borderRadius: 9,
+        width: cardW,
+        height: cardH,
+        borderRadius: sm ? 8 : 9,
         overflow: "hidden",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
         border: `1px solid ${hexA(dc, rsvped ? 0.85 : 0.28)}`,
-        borderLeft: `4px solid ${dc}`,
+        borderLeft: `${sm ? 3 : 4}px solid ${dc}`,
         backgroundColor: "#0b0b0e",
         backgroundImage: `url(${event.posterUrl})`,
         backgroundSize: "cover",
@@ -203,18 +209,18 @@ export default function RailCard({
         </div>
       )}
       {heart}
-      <div style={{ position: "relative", zIndex: 2, padding: "14px 15px 15px" }}>
-        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 7, flexWrap: "wrap" }}>
+      <div style={{ position: "relative", zIndex: 2, padding: pad }}>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: sm ? 5 : 7, flexWrap: "wrap" }}>
           {!live && (
             <span
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 800,
-                fontSize: 10,
+                fontSize: sm ? 9 : 10,
                 letterSpacing: ".06em",
                 color: "#000",
                 background: dc,
-                padding: "3px 7px 2px",
+                padding: sm ? "2px 6px 1px" : "3px 7px 2px",
                 borderRadius: 3,
                 textTransform: "uppercase",
                 whiteSpace: "nowrap",
@@ -223,26 +229,28 @@ export default function RailCard({
               {event.day} · {fmtClock(event.s)}
             </span>
           )}
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontWeight: 700,
-              fontSize: 10.5,
-              color: "#fff",
-              background: "rgba(0,0,0,.5)",
-              padding: "3px 7px",
-              borderRadius: 999,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {fmtClock(event.s)}
-          </span>
+          {!sm && (
+            <span
+              style={{
+                fontFamily: "var(--font-body)",
+                fontWeight: 700,
+                fontSize: 10.5,
+                color: "#fff",
+                background: "rgba(0,0,0,.5)",
+                padding: "3px 7px",
+                borderRadius: 999,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {fmtClock(event.s)}
+            </span>
+          )}
         </div>
         <div
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 800,
-            fontSize: 17,
+            fontSize: titleSize,
             lineHeight: 1.04,
             color: "#fff",
             textTransform: "uppercase",
@@ -259,7 +267,7 @@ export default function RailCard({
         <div
           style={{
             fontFamily: "var(--font-body)",
-            fontSize: 11.5,
+            fontSize: sm ? 10.5 : 11.5,
             color: "rgba(230,227,218,.75)",
             marginTop: 3,
             whiteSpace: "nowrap",
@@ -269,9 +277,11 @@ export default function RailCard({
         >
           {event.venue}
         </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 10.5, fontWeight: 600, color: "rgba(255,255,255,.6)", marginTop: 6 }}>
-          ♥ {event.going} going
-        </div>
+        {!sm && (
+          <div style={{ fontFamily: "var(--font-body)", fontSize: 10.5, fontWeight: 600, color: "rgba(255,255,255,.6)", marginTop: 6 }}>
+            ♥ {event.going} going
+          </div>
+        )}
       </div>
     </div>
   );

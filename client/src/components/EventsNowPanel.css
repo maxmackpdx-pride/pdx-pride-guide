@@ -9,76 +9,53 @@
   box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
 }
 
-.enp-head {
-  padding: 18px 20px 0;
-  flex: none;
-}
-
-.enp-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  color: var(--neon-magenta, #ff00cc);
-  text-transform: uppercase;
-}
-
-.enp-kicker-bar {
-  width: 22px;
-  height: 2px;
-  background: var(--neon-magenta, #ff00cc);
-  display: inline-block;
-}
-
-.enp-title {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 32px;
-  line-height: 0.95;
-  letter-spacing: 0.01em;
-  color: #fff;
-  margin: 9px 0 14px;
-  text-transform: uppercase;
-}
-
-.enp-seam {
-  height: 3px;
-  flex: none;
-  background: var(--grad-flag, linear-gradient(to right, #00ffff, #ccff00 34%, #ff00cc 67%, #ff6600));
-}
-
 .enp-body {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
+  padding: 12px 0 12px;
 }
 
-.enp-section-hdr {
+.enp-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.enp-row-hdr {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-bottom: 11px;
+  gap: 8px;
+  padding: 0 14px;
+  flex: none;
 }
 
-.enp-section-title {
+.enp-row-title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1;
   color: #fff;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.enp-row-count {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(230, 227, 218, 0.45);
+  margin-left: auto;
 }
 
 .enp-livedot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--neon-magenta, #ff00cc);
   box-shadow: 0 0 8px var(--neon-magenta, #ff00cc);
@@ -91,32 +68,91 @@
   50% { opacity: 0.32; }
 }
 
-.enp-rail {
-  display: flex;
-  gap: 12px;
+/* Scrollable fallback when too few cards to marquee */
+.enp-marquee {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   overflow-x: auto;
-  padding-bottom: 6px;
+  overflow-y: hidden;
+  padding: 2px 0 4px;
   scrollbar-width: thin;
   scrollbar-color: #2b2b2b transparent;
+  display: flex;
+  align-items: center;
 }
 
-.enp-rail::-webkit-scrollbar {
-  height: 8px;
+.enp-marquee::-webkit-scrollbar {
+  height: 6px;
 }
 
-.enp-rail::-webkit-scrollbar-thumb {
+.enp-marquee::-webkit-scrollbar-thumb {
   background: #2b2b2b;
-  border-radius: 5px;
+  border-radius: 4px;
+}
+
+.enp-track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  padding: 0 14px;
+  align-items: stretch;
+}
+
+/* Infinite right-to-left band; edge fade; hover / focus pauses */
+.enp-marquee--auto {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+
+.enp-marquee--auto .enp-track {
+  animation: enpMarquee 40s linear infinite;
+  will-change: transform;
+}
+
+.enp-marquee--auto:hover .enp-track,
+.enp-marquee--auto:focus-within .enp-track {
+  animation-play-state: paused;
+}
+
+@keyframes enpMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 .enp-quiet {
   font-family: var(--font-body);
-  font-size: 13px;
-  color: rgba(230, 227, 218, 0.55);
+  font-size: 12.5px;
+  color: rgba(230, 227, 218, 0.5);
+  padding: 8px 14px 4px;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .enp-livedot {
     animation: none;
   }
+
+  .enp-marquee--auto .enp-track {
+    animation: none;
+  }
+
+  .enp-marquee--auto {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+html.calm-mode .enp-marquee--auto .enp-track {
+  animation: none;
+}
+
+html.calm-mode .enp-marquee--auto {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
 }

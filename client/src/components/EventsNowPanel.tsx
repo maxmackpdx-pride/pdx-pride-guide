@@ -1,53 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import { DAY_SORT_ORDER, PRIDE_WEEK_END_DATE, PRIDE_WEEK_START_DATE, type DayKey } from "@shared/prideWeek";
-import { pacificDayOfWeek } from "@shared/missedConnections";
-import { buildScheduleEvents, type ScheduleEvent } from "@/lib/scheduleEvents";
+import {
+  buildScheduleEvents,
+  liveScheduleEvents,
+  upcomingScheduleEvents,
+  type ScheduleEvent,
+} from "@/lib/scheduleEvents";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
+import { useTheme } from "@/context/ThemeContext";
 import RailCard from "@/components/RailCard";
 import EventModal from "@/components/EventModal";
 import AuthModal from "@/components/AuthModal";
 import "./EventsNowPanel.css";
 
-const PACIFIC_TZ = "America/Los_Angeles";
-
-/** Real "now" within Pride Week Pacific time, or null if today is outside the week. */
-function nowInPrideWeek(): { day: DayKey; minutes: number } | null {
-  const now = new Date();
-  const dateStr = new Intl.DateTimeFormat("en-CA", { timeZone: PACIFIC_TZ }).format(now);
-  if (dateStr < PRIDE_WEEK_START_DATE || dateStr > PRIDE_WEEK_END_DATE) return null;
-  const parts: Record<string, string> = {};
-  for (const part of new Intl.DateTimeFormat("en-US", {
-    timeZone: PACIFIC_TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(now)) {
-    if (part.type !== "literal") parts[part.type] = part.value;
-  }
-  const hour = Number(parts.hour === "24" ? "0" : parts.hour);
-  const minute = Number(parts.minute);
-  let minutes = hour * 60 + minute;
-  if (hour < 4) minutes += 1440;
-  return { day: pacificDayOfWeek(now.getTime()) as DayKey, minutes };
-}
-
 /**
- * Events page "1C" — On Now / Starting Soon / Big This Weekend rails,
- * placed left of the map at the map's height. Ported from the design
- * mock's `1c` variant (The Schedule.dc.html), with real current-time
- * "on now" logic instead of the mock's hardcoded demo clock.
+ * Events page panel beside the map: two right-to-left marquees —
+ * Happening Now (anything currently between start and end) and
+ * Up Next (next 10 not-yet-started events).
  */
 export default function EventsNowPanel() {
+  const { calmMode } = useTheme();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
-  const [clock, setClock] = useState(() => nowInPrideWeek());
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    const t = setInterval(() => setClock(nowInPrideWeek()), 60_000);
+    const t = setInterval(() => setNowMs(Date.now()), 30_000);
     return () => clearInterval(t);
   }, []);
 
@@ -74,92 +55,58 @@ export default function EventsNowPanel() {
     return m;
   }, [listings]);
 
-  const onNow: ScheduleEvent[] = useMemo(() => {
-    if (!clock) return [];
-    return scheduleEvents
-      .filter(e => e.day === clock.day && e.s <= clock.minutes && clock.minutes < e.e)
-      .sort((a, b) => a.e - b.e);
-  }, [scheduleEvents, clock]);
+  const happeningNow = useMemo(
+    () => liveScheduleEvents(scheduleEvents, nowMs),
+    [scheduleEvents, nowMs],
+  );
 
-  const soon: ScheduleEvent[] = useMemo(() => {
-    if (!clock) return [];
-    return scheduleEvents
-      .filter(e => e.day === clock.day && e.s > clock.minutes)
-      .sort((a, b) => a.s - b.s)
-      .slice(0, 8);
-  }, [scheduleEvents, clock]);
-
-  const weekend: ScheduleEvent[] = useMemo(
-    () =>
-      scheduleEvents
-        .filter(e => e.feat)
-        .sort((a, b) => (DAY_SORT_ORDER[a.day] ?? 99) - (DAY_SORT_ORDER[b.day] ?? 99) || a.s - b.s),
-    [scheduleEvents],
+  const upNext = useMemo(
+    () => upcomingScheduleEvents(scheduleEvents, nowMs, 10),
+    [scheduleEvents, nowMs],
   );
 
   const openEvent = (listing: EventListing) => setSelectedEvent(listing);
   const closeEvent = () => setSelectedEvent(null);
 
-  const rail = (events: ScheduleEvent[], live: boolean) =>
-    events.map(e => {
+  const cards = (events: ScheduleEvent[], live: boolean, keyPrefix: string) =>
+    events.flatMap((e, i) => {
       const listing = listingById.get(e.id);
-      if (!listing) return null;
-      return (
+      if (!listing) return [];
+      return [
         <RailCard
-          key={e.scheduleKey}
+          key={`${keyPrefix}-${e.scheduleKey}-${i}`}
           event={e}
           listing={listing}
           rsvped={myEventIds.has(e.id)}
           live={live}
+          size="sm"
           onToggleRsvp={toggleRsvp}
           onOpen={openEvent}
-        />
-      );
+        />,
+      ];
     });
-
-  const nothingLiveToday = clock == null || (onNow.length === 0 && soon.length === 0);
 
   return (
     <div className="enp-panel">
-      <div className="enp-head">
-        <div className="enp-kicker">
-          <span className="enp-kicker-bar" />
-          Right Now
-        </div>
-        <h2 className="enp-title">The Schedule</h2>
-      </div>
-      <div className="enp-seam" />
       <div className="enp-body">
-        {onNow.length > 0 && (
-          <div className="enp-section">
-            <div className="enp-section-hdr">
-              <span className="enp-livedot" />
-              <span className="enp-section-title">On Now</span>
-            </div>
-            <div className="enp-rail">{rail(onNow, true)}</div>
-          </div>
-        )}
-        {soon.length > 0 && (
-          <div className="enp-section">
-            <div className="enp-section-hdr">
-              <span className="enp-section-title" style={{ color: "var(--neon-cyan)" }}>Starting Soon</span>
-            </div>
-            <div className="enp-rail">{rail(soon, false)}</div>
-          </div>
-        )}
-        {nothingLiveToday && (
-          <div className="enp-quiet">
-            {clock == null ? "Pride Week hasn't started yet — here's what's coming up." : "Nothing on right this minute — here's what's coming up."}
-          </div>
-        )}
-        {weekend.length > 0 && (
-          <div className="enp-section">
-            <div className="enp-section-hdr">
-              <span className="enp-section-title" style={{ color: "var(--neon-yellow)" }}>Big This Weekend</span>
-            </div>
-            <div className="enp-rail">{rail(weekend, false)}</div>
-          </div>
-        )}
+        <MarqueeRow
+          title="Happening Now"
+          live
+          empty="Nothing live right now"
+          count={happeningNow.length}
+          animate={!calmMode && happeningNow.length >= 3}
+          cardsA={cards(happeningNow, true, "now-a")}
+          cardsB={cards(happeningNow, true, "now-b")}
+        />
+
+        <MarqueeRow
+          title="Up Next"
+          empty="No upcoming events"
+          count={upNext.length}
+          animate={!calmMode && upNext.length >= 3}
+          cardsA={cards(upNext, false, "next-a")}
+          cardsB={cards(upNext, false, "next-b")}
+        />
       </div>
 
       {selectedEvent && (
@@ -171,5 +118,51 @@ export default function EventsNowPanel() {
       )}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
+  );
+}
+
+function MarqueeRow({
+  title,
+  live,
+  empty,
+  count,
+  animate,
+  cardsA,
+  cardsB,
+}: {
+  title: string;
+  live?: boolean;
+  empty: string;
+  count: number;
+  animate: boolean;
+  cardsA: ReactNode[];
+  cardsB: ReactNode[];
+}) {
+  return (
+    <section className="enp-row">
+      <div className="enp-row-hdr">
+        {live && <span className="enp-livedot" aria-hidden />}
+        <h3
+          className="enp-row-title"
+          style={live ? { color: "var(--neon-magenta, #ff00cc)" } : undefined}
+        >
+          {title}
+        </h3>
+        {count > 0 && <span className="enp-row-count">{count}</span>}
+      </div>
+      {count === 0 ? (
+        <div className="enp-quiet">{empty}</div>
+      ) : (
+        <div
+          className={`enp-marquee${animate ? " enp-marquee--auto" : ""}`}
+          aria-label={`${title}: ${count} event${count === 1 ? "" : "s"}`}
+        >
+          <div className="enp-track">
+            {cardsA}
+            {animate ? cardsB : null}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
