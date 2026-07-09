@@ -1,11 +1,9 @@
 import { Link } from "wouter";
-import logoPath from "@assets/logo.png";
+import logoWordmark from "@assets/logo-wordmark.png";
 import { useAuth } from "@/context/AuthContext";
 import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
 import PushNotificationToggle from "./PushNotificationToggle";
-import GlitchLogo from "@/components/GlitchLogo";
-import GlitchWord from "@/components/GlitchWord";
 
 
 export default function Footer() {
@@ -15,10 +13,15 @@ export default function Footer() {
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between", marginBottom: 32 }}>
           <div>
-            <div className="display" style={{ fontSize: "1.4rem", marginBottom: 8 }}>
-              PDX <span style={{ color: "var(--neon-yellow)" }}>PRIDE</span> GUIDE
-            </div>
-            <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 260, lineHeight: 1.6 }}>
+            <img
+              src={logoWordmark}
+              alt="PDX Pride Guide 2026"
+              className="footer-brand-lockup footer-brand-lockup--intro"
+              width={1504}
+              height={688}
+              decoding="async"
+            />
+            <div style={{ color: "var(--text-meta)", fontSize: "0.82rem", maxWidth: 280, lineHeight: 1.6, marginTop: 10 }}>
               Built by one person in Portland. No committee, no corporate parent, no notes.
             </div>
           </div>
@@ -62,14 +65,14 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-brand" aria-label="PDX Pride Guide">
-          <GlitchLogo src={logoPath} alt="" />
-          <span className="display footer-brand-wordmark">
-            <span className="footer-brand-wordmark__line">PDX</span>
-            <span className="footer-brand-wordmark__line footer-brand-wordmark__line--accent">
-              <GlitchWord text="PRIDE" />
-            </span>
-            <span className="footer-brand-wordmark__line">GUIDE</span>
-          </span>
+          <img
+            src={logoWordmark}
+            alt="PDX Pride Guide 2026"
+            className="footer-brand-lockup"
+            width={1504}
+            height={688}
+            decoding="async"
+          />
         </div>
         <div className="footer-controls">
           <FeedbackButton />

@@ -202,12 +202,13 @@ body::before {
 }
 
 .site-header-inner {
-  --site-logo-h: clamp(102px, 21vw, 132px);
-  --site-nav-size: clamp(1.3rem, calc(var(--site-logo-h) * 0.118 + 3px), 1.95rem);
-  --site-nav-pad-x: clamp(10px, calc(var(--site-logo-h) * 0.11), 20px);
-  --site-nav-pad-y: clamp(12px, calc(var(--site-logo-h) * 0.1), 16px);
-  --site-nav-gap: clamp(4px, calc(var(--site-logo-h) * 0.05), 10px);
-  --site-brand-gap: clamp(14px, calc(var(--site-logo-h) * 0.12), 22px);
+  /* Full lockup is landscape (~2.2:1) — height drives width */
+  --site-logo-h: clamp(52px, 7.5vw, 72px);
+  --site-nav-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.2), 1.35rem);
+  --site-nav-pad-x: clamp(8px, calc(var(--site-logo-h) * 0.14), 16px);
+  --site-nav-pad-y: clamp(8px, calc(var(--site-logo-h) * 0.12), 14px);
+  --site-nav-gap: clamp(4px, calc(var(--site-logo-h) * 0.08), 10px);
+  --site-brand-gap: 0;
   --site-wordmark-size: clamp(1.35rem, calc(var(--site-logo-h) * 0.24), 1.9rem);
   width: 100%;
   max-width: 1440px;
@@ -223,9 +224,20 @@ body::before {
 .site-brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--site-brand-gap);
-  flex: 0 0 auto;
+  gap: 0;
+  flex: 0 1 auto;
+  min-width: 0;
   text-decoration: none;
+}
+
+/* Combined compass + PDX PRIDE GUIDE lockup (nav) */
+.site-brand-lockup {
+  display: block;
+  height: var(--site-logo-h);
+  width: auto;
+  max-width: min(420px, 52vw);
+  object-fit: contain;
+  object-position: left center;
 }
 
 .glitch-logo {
@@ -1611,14 +1623,18 @@ h2.display,
   }
 
   .site-header-inner {
-    --site-logo-h: 40px;
-    --site-brand-gap: 8px;
+    --site-logo-h: 44px;
+    --site-brand-gap: 0;
     position: relative;
     min-height: 0;
     padding: 8px 12px;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+  }
+
+  .site-brand-lockup {
+    max-width: min(280px, 62vw);
   }
 
   .site-brand-wordmark {
@@ -1762,12 +1778,15 @@ h2.display,
 
 @media (max-width: 640px) {
   .site-header-inner {
-    --site-logo-h: 34px;
+    --site-logo-h: 40px;
     padding: 6px 10px;
   }
 
+  .site-brand-lockup {
+    max-width: min(240px, 68vw);
+  }
+
   .site-brand-wordmark {
-    /* Slightly tighter so PDX / PRIDE / GUIDE all fit beside the logo */
     --site-wordmark-size: 0.58rem;
     line-height: 0.8;
   }
@@ -7472,6 +7491,22 @@ footer a:hover { color: #00FFFF !important; }
     drop-shadow(0 0 12px rgba(0, 255, 255, 0.32))
     drop-shadow(0 0 20px rgba(204, 255, 0, 0.2));
   animation: floatY 6s ease-in-out infinite;
+}
+
+/* Full wordmark lockup — footer intro + bottom brand */
+.footer-brand-lockup {
+  display: block;
+  height: clamp(72px, 14vw, 112px);
+  width: auto;
+  max-width: min(520px, 92vw);
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.footer-brand-lockup--intro {
+  height: clamp(56px, 12vw, 80px);
+  max-width: min(340px, 100%);
+  margin: 0;
 }
 
 .footer-brand {

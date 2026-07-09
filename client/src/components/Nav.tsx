@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Menu, X } from "lucide-react";
-import logoPath from "@assets/logo.png";
+import logoWordmark from "@assets/logo-wordmark.png";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
-import GlitchLogo from "@/components/GlitchLogo";
-import GlitchWord from "@/components/GlitchWord";
 import CalmModeToggle from "@/components/CalmModeToggle";
 import { PRIMARY_NAV } from "@/lib/siteNav";
 
@@ -199,14 +197,14 @@ export default function Nav() {
       <header className="site-header">
         <div className="site-header-inner">
           <Link href="/" className="site-brand" aria-label="PDX Pride Guide home">
-            <GlitchLogo src={logoPath} alt="" />
-            <span className="display site-brand-wordmark">
-              <span className="site-brand-wordmark__line">PDX</span>
-              <span className="site-brand-wordmark__line site-brand-wordmark__line--accent">
-                <GlitchWord text="PRIDE" />
-              </span>
-              <span className="site-brand-wordmark__line">GUIDE</span>
-            </span>
+            <img
+              src={logoWordmark}
+              alt="PDX Pride Guide 2026"
+              className="site-brand-lockup"
+              width={1504}
+              height={688}
+              decoding="async"
+            />
           </Link>
 
           <nav
