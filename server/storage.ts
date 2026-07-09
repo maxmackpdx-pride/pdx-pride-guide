@@ -2283,9 +2283,9 @@ function seedCheckingPortlandEventsJuly2026() {
 
   insert({
     ...base,
-    title: "Lavender Rain Queer Strip Club Pop-Up (Pride)",
+    title: "Lavender Rain: Pride Edition (Queer Strip Club Pop-Up)",
     description:
-      "Lavender Rain queer pop-up strip club at Peacock PDX for Pride weekend. All-gender pole and stage performances. Distinct from Purple Rain — same venue weekend energy, separate brand. 21+.",
+      "The Gay Barn's queer strip club pop-up at Peacock PDX for Pride Weekend. Sliding-scale tickets $17–$28 (door tickets also available). For dykes, lesbians, and dyke-adjacent queers 21+; respectful allies welcome. POC discount codes via TheGayBarn@proton.me.",
     venueName: "Peacock PDX",
     address: "1400 SE Morrison St, Portland, OR 97214",
     neighborhood: "SE Portland",
@@ -2297,12 +2297,14 @@ function seedCheckingPortlandEventsJuly2026() {
     ageRequirement: "21_PLUS",
     eventTypes: JSON.stringify(["PERFORMANCE", "PARTY", "BURLESQUE"]),
     admission: "TICKETED",
-    ticketUrl: "https://queersocialclub.com/events-portland/lavender-rain-queer-strip-club-pop-up-4",
+    ticketUrl: "https://forbiddentickets.com/events/the-gay-barn/2026-07-18-lavender-rain-pride-edition",
     isSexPositive: true,
     nudityOk: true,
-    posterImageUrl: null,
+    posterImageUrl:
+      "https://forbiddentickets.com/media/pages/events/the-gay-barn/96a1607597/a0f76a30e9-1779389095/lavender-rain-july.png",
     status: "LIVE",
-    adminNotes: "Verified Queer Social Club listing (not the generic afterparty framing from the check JSON).",
+    adminNotes:
+      "Verified Forbidden Tickets + Gay Barn flyer (2026-07-18 9pm–1am). WW listed this as Purple Rain — same venue/night; Lavender Rain is the ticket name.",
   });
 
   insert({
@@ -2992,8 +2994,8 @@ function runBootMigrationsOnce() {
     `).run();
     sqlite.prepare(`
       UPDATE events SET
-        title = 'Lavender Rain Queer Strip Club Pop-Up (Pride)',
-        description = 'Lavender Rain queer pop-up strip club at Peacock PDX for Pride weekend. All-gender pole and stage performances. Distinct from Purple Rain — same venue weekend energy, separate brand. 21+.',
+        title = 'Lavender Rain: Pride Edition (Queer Strip Club Pop-Up)',
+        description = 'The Gay Barn''s queer strip club pop-up at Peacock PDX for Pride Weekend. Sliding-scale tickets $17–$28 (door tickets also available). For dykes, lesbians, and dyke-adjacent queers 21+; respectful allies welcome. POC discount codes via TheGayBarn@proton.me.',
         venue_name = 'Peacock PDX',
         address = '1400 SE Morrison St, Portland, OR 97214',
         neighborhood = 'SE Portland',
@@ -3002,18 +3004,45 @@ function runBootMigrationsOnce() {
         day_of_week = 'SAT',
         age_requirement = '21_PLUS',
         admission = 'TICKETED',
-        ticket_url = 'https://queersocialclub.com/events-portland/lavender-rain-queer-strip-club-pop-up-4',
+        ticket_url = 'https://forbiddentickets.com/events/the-gay-barn/2026-07-18-lavender-rain-pride-edition',
+        poster_image_url = 'https://forbiddentickets.com/media/pages/events/the-gay-barn/96a1607597/a0f76a30e9-1779389095/lavender-rain-july.png',
         event_types = '["PERFORMANCE","PARTY","BURLESQUE"]',
         is_sex_positive = 1,
         nudity_ok = 1,
         status = 'LIVE',
-        admin_notes = 'Verified Queer Social Club listing (not the generic afterparty framing from the check JSON).'
-      WHERE title IN (
-        'Lavender Rain Queer Strip Club Pop-Up (Pride)',
-        'Lavender Rain Afterparty'
-      )
+        admin_notes = 'Verified Forbidden Tickets + Gay Barn flyer. WW misnamed as Purple Rain.'
+      WHERE title LIKE 'Lavender Rain%'
+    `).run();
+    sqlite.prepare(`
+      UPDATE events SET
+        status = 'HIDDEN',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Hidden as duplicate of Lavender Rain Pride Edition (Gay Barn / Peacock Jul 18) — WW used Purple Rain name.'
+      WHERE title LIKE 'Purple Rain%'
     `).run();
     recordBootMigration("verify_checking_portland_events_v2");
+  }
+  if (!hasBootMigration("lavender_rain_forbidden_tickets_v3")) {
+    sqlite.prepare(`
+      UPDATE events SET
+        title = 'Lavender Rain: Pride Edition (Queer Strip Club Pop-Up)',
+        description = 'The Gay Barn''s queer strip club pop-up at Peacock PDX for Pride Weekend. Sliding-scale tickets $17–$28 (door tickets also available). For dykes, lesbians, and dyke-adjacent queers 21+; respectful allies welcome. POC discount codes via TheGayBarn@proton.me.',
+        date_start = '2026-07-18T21:00:00',
+        date_end = '2026-07-19T01:00:00',
+        admission = 'TICKETED',
+        ticket_url = 'https://forbiddentickets.com/events/the-gay-barn/2026-07-18-lavender-rain-pride-edition',
+        poster_image_url = 'https://forbiddentickets.com/media/pages/events/the-gay-barn/96a1607597/a0f76a30e9-1779389095/lavender-rain-july.png',
+        is_sex_positive = 1,
+        nudity_ok = 1,
+        status = 'LIVE',
+        admin_notes = 'Verified Forbidden Tickets (The Gay Barn) 2026-07-18 9pm–1am. Flyer hosted on Forbidden Tickets CDN.'
+      WHERE title LIKE 'Lavender Rain%'
+    `).run();
+    sqlite.prepare(`
+      UPDATE events SET status = 'HIDDEN',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Superseded by Lavender Rain Pride Edition ticket listing.'
+      WHERE title LIKE 'Purple Rain%'
+    `).run();
+    recordBootMigration("lavender_rain_forbidden_tickets_v3");
   }
 }
 
