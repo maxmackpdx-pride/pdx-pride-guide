@@ -133,6 +133,16 @@ export default function NudeBeachesMap({ tab, height }: Props) {
             : {}),
         }}
       >
+        <div className="nude-beaches-map__chip" aria-hidden="true">
+          <span
+            className="nude-beaches-map__chip-dot"
+            style={{ background: location.pinColor, boxShadow: `0 0 10px ${location.pinColor}` }}
+          />
+          <span>
+            <span className="nude-beaches-map__chip-title">{location.label}</span>
+            <span className="nude-beaches-map__chip-sub">{location.subtitle}</span>
+          </span>
+        </div>
         <style>{POPUP_STYLES}</style>
         <MapContainer
           key={tab}

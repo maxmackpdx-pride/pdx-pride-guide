@@ -6,10 +6,11 @@ import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 type Props = {
   activeTab: NudeBeachTab;
   snapshot?: NudeBeachesSnapshot | null;
+  statsKey?: string;
   tabs: ReactNode;
 };
 
-export default function NudeBeachesHero({ activeTab, snapshot, tabs }: Props) {
+export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }: Props) {
   const isRooster = activeTab === "rooster-rock";
 
   const stats = isRooster
@@ -76,7 +77,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, tabs }: Props) {
         />
         {tabs}
       </div>
-      <BoardStatsBar stats={stats} variant="band" showLive={false} />
+      <BoardStatsBar key={statsKey ?? activeTab} stats={stats} variant="band" showLive={false} />
     </>
   );
 }

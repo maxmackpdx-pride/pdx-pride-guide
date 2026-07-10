@@ -46,8 +46,63 @@
   margin-right: auto;
 }
 
-.nude-refresh-bar__meta strong {
+.nude-refresh-bar__meta strong,
+.nude-refresh-bar__time {
   color: #d8d4cb;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@keyframes nbSpin {
+  to { transform: rotate(360deg); }
+}
+
+.nude-refresh-bar__spin {
+  animation: nbSpin 0.8s linear infinite;
+}
+
+.nude-beaches-map-row--enter {
+  animation: board-hero-in 0.5s 0.16s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.nude-beaches-map-row__actions--enter {
+  animation: board-hero-in 0.5s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.board-active-feed__kicker--live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-active-feed__eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 11px;
+}
+
+.board-active-feed__eq-bar {
+  width: 3px;
+  height: 11px;
+  background: currentColor;
+  transform-origin: bottom;
+  animation: pdxEqBounce 0.9s ease-in-out infinite;
+}
+
+.board-active-feed__eq-bar--2 {
+  animation-duration: 1.15s;
+  animation-delay: -0.3s;
+}
+
+.board-active-feed__eq-bar--3 {
+  animation-duration: 0.75s;
+  animation-delay: -0.15s;
+}
+
+@keyframes pdxEqBounce {
+  0%, 100% { transform: scaleY(0.22); }
+  50% { transform: scaleY(1); }
 }
 
 .nude-refresh-bar__stale {
@@ -626,4 +681,56 @@ html.calm-mode .board-close-seam {
 .nude-beaches-page--sauvie .nude-map-btn:hover {
   border-color: var(--neon-green, #00EE44);
   color: var(--neon-green, #00EE44);
+}
+
+.nude-beaches-map__chip {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(5, 5, 7, 0.78);
+  border: 1px solid #24242c;
+  border-radius: 6px;
+  padding: 9px 13px;
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.nude-beaches-map__chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  animation: board-live-blink 1.8s ease-in-out infinite;
+}
+
+.nude-beaches-map__chip-title {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.nude-beaches-map__chip-sub {
+  display: block;
+  margin-top: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+html.calm-mode .nude-beaches-map-row--enter,
+html.calm-mode .nude-beaches-map-row__actions--enter,
+html.calm-mode .board-active-feed__eq-bar,
+html.calm-mode .nude-refresh-bar__spin,
+html.calm-mode .nude-beaches-map__chip-dot {
+  animation: none;
 }

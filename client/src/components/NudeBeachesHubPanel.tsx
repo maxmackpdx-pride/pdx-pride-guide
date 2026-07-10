@@ -62,6 +62,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         className={`nb-hub__section nb-hub__level${
           worth === false ? " nb-hub__level--bad" : worth ? " nb-hub__level--good" : ""
         }`}
+        style={{ ["--dc" as string]: worth === false ? "#ff8c00" : worth ? "#39ff14" : "#19e3ff" }}
       >
         <div className="nb-hub__level-head">
           <div className="nb-hub__kicker">River level</div>
@@ -104,12 +105,24 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   );
 }
 
+function swimStatusClass(status?: string | null) {
+  if (status === "pass") return "pass";
+  if (status === "fail") return "fail";
+  if (status === "warning") return "warning";
+  return "unknown";
+}
+
 function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
+  const swimClass = swimStatusClass(live.swimStatus);
+
   return (
     <div className="nb-hub nb-hub--sauvie">
-      <section className="nb-hub__section">
+      <section className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass}`}>
         <div className="nb-hub__kicker">Water quality</div>
-        <div className="nb-hub__level-value" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}>
+        <div
+          className={`nb-hub__level-value nb-hub__swim-value--${swimClass}`}
+          style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}
+        >
           {live.swimStatusLabel || "—"}
         </div>
         <p className="nb-hub__summary">

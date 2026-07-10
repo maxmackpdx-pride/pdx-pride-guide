@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -217,15 +217,41 @@ export default function NudeBeaches() {
 
   const snapshot = data?.data;
   const isRooster = activeTab === "rooster-rock";
+  const beachAccent = isRooster ? "orange" : "green";
 
   return (
     <div
       className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
+      <div className="board-running">
+        <div className="board-running__inner">
+          <div className="board-running__live">
+            <span className="board-running__dot" aria-hidden="true" />
+            <span>Live · beach conditions</span>
+          </div>
+          <nav className="board-running__nav" aria-label="Utility pages">
+            <Link href="/events" className="board-running__link">
+              Events
+            </Link>
+            <Link href="/directory" className="board-running__link">
+              Directory
+            </Link>
+            <span className="board-running__link is-active" aria-current="page">
+              Nude Beaches
+            </span>
+            <Link href="/spotted" className="board-running__link">
+              Boards
+            </Link>
+          </nav>
+        </div>
+      </div>
+
       <header className="nude-beaches-header">
         <NudeBeachesHero
+          key={activeTab}
           activeTab={activeTab}
           snapshot={snapshot}
+          statsKey={`${activeTab}-${snapshot?.fetchedAt ?? "pending"}`}
           tabs={
             <nav className="events-tab-bar nude-beaches-tab-bar" aria-label="Beach location">
               {NUDE_BEACH_TABS.map(tab => (
@@ -246,7 +272,7 @@ export default function NudeBeaches() {
       <div className="nude-refresh-bar">
         <p className="nude-refresh-bar__meta">
           {isRooster ? "Rooster Rock" : "Sauvie Island"} · updated{" "}
-          <strong>{formatFetchedAt(snapshot?.fetchedAt)}</strong>
+          <strong className="nude-refresh-bar__time">{formatFetchedAt(snapshot?.fetchedAt)}</strong>
           {data?.stale && <span className="nude-refresh-bar__stale">· refreshing in background</span>}
         </p>
         <Button
@@ -256,20 +282,25 @@ export default function NudeBeaches() {
           disabled={refreshMutation.isPending}
           onClick={() => refreshMutation.mutate()}
         >
-          <RefreshCw size={14} style={{ marginRight: 6, verticalAlign: -2 }} aria-hidden />
+          <RefreshCw
+            size={14}
+            className={refreshMutation.isPending ? "nude-refresh-bar__spin" : undefined}
+            style={{ marginRight: 6, verticalAlign: -2 }}
+            aria-hidden
+          />
           {refreshMutation.isPending ? "Refreshing…" : "Refresh"}
         </Button>
       </div>
 
-      <div className="events-map-row nude-beaches-map-row">
+      <div key={activeTab} className="events-map-row nude-beaches-map-row nude-beaches-map-row--enter">
         <div className="events-map-row__panel">
           <NudeBeachesHubPanel tab={activeTab} snapshot={snapshot} />
         </div>
         <div className="events-map-row__map">
-          <NudeBeachesMap key={activeTab} tab={activeTab} />
+          <NudeBeachesMap tab={activeTab} />
         </div>
       </div>
-      <div className="nude-beaches-map-row__actions">
+      <div key={`${activeTab}-actions`} className="nude-beaches-map-row__actions nude-beaches-map-row__actions--enter">
         {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
           <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
             {map.label}
@@ -283,7 +314,12 @@ export default function NudeBeaches() {
         <div className="board-active-feed__inner">
           <ScrollReveal delay={30}>
             <div className="board-active-feed__head">
-              <div className={`board-active-feed__kicker ${isRooster ? "board-active-feed__kicker--cyan" : "board-active-feed__kicker--orange"}`}>
+              <div className={`board-active-feed__kicker board-active-feed__kicker--live board-active-feed__kicker--${beachAccent}`}>
+                <span className="board-active-feed__eq" aria-hidden="true">
+                  <span className="board-active-feed__eq-bar" />
+                  <span className="board-active-feed__eq-bar board-active-feed__eq-bar--2" />
+                  <span className="board-active-feed__eq-bar board-active-feed__eq-bar--3" />
+                </span>
                 Live now
               </div>
               <div className="board-active-feed__head-row">
