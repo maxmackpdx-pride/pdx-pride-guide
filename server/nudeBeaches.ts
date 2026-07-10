@@ -352,14 +352,14 @@ async function fetchParkingNote(): Promise<string | null> {
     const html = await fetchText(SAUVIE_ISLAND_PARKING_URL);
     const soldOut = /sold\s*out/i.test(html);
     const available = /available/i.test(html);
-    if (soldOut) return "At least one permit date appears sold out on the ODFW portal — verify before you drive out.";
-    if (available) return "Permit inventory appears open on the ODFW portal — confirm your date before you go.";
+    if (soldOut) return "At least one permit date appears sold out on SauvieIslandParking.com — verify before you drive out.";
+    if (available) return "Permit inventory appears open on SauvieIslandParking.com — confirm your date before you go.";
     if (html.length < 800) {
-      return "Permit portal loads dynamically — open the ODFW link to check live sold-out dates.";
+      return "Permit portal loads dynamically — open SauvieIslandParking.com to check live sold-out dates.";
     }
-    return "Buy and check permit availability on the official ODFW portal for weekends and holidays through Labor Day.";
+    return "Buy and check permit availability at SauvieIslandParking.com for weekends and holidays through Labor Day.";
   } catch {
-    return "Could not reach the ODFW permit portal — use the parking link to check sold-out dates before you go.";
+    return "Could not reach Sauvie Island Parking — use the permit link to check sold-out dates before you go.";
   }
 }
 
@@ -438,7 +438,7 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
     weatherSummary: null,
     airTempF: null,
     wind: null,
-    source: "Swim Guide + NWS + ODFW parking portal",
+    source: "Swim Guide + NWS + Sauvie Island Parking",
   };
   try {
     const [swim, parking, weather] = await Promise.all([

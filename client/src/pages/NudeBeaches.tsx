@@ -18,6 +18,8 @@ import {
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_RESOURCES,
   SAUVIE_ISLAND_RULES,
+  SAUVIE_ISLAND_SWIM_GUIDE_URL,
+  SAUVIE_ISLAND_WINDFINDER_URL,
   type NudeBeachTab,
   type NudeBeachesSnapshot,
   type ResourceLink,
@@ -243,7 +245,7 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
             {live.swimSummary || "Bi-weekly Collins Beach samples — verify before you swim."}
             {live.lastSampleAt ? ` Latest: ${live.lastSampleAt}.` : ""}
           </p>
-          <a className="nude-live-card__link" href="https://www.theswimguide.org/beach/1792" target="_blank" rel="noopener noreferrer">
+          <a className="nude-live-card__link" href={SAUVIE_ISLAND_SWIM_GUIDE_URL} target="_blank" rel="noopener noreferrer">
             Swim Guide →
           </a>
         </article>
@@ -253,10 +255,10 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
           <div className="nude-live-card__value">Check live</div>
           <p className="nude-live-card__detail">
             {live.parkingNote ||
-              "Weekends and holidays through Labor Day require a permit. Sold-out dates update on the official portal only."}
+              "Mandatory on summer weekends and select dates through Labor Day. Sold-out dates update only on SauvieIslandParking.com."}
           </p>
           <a className="nude-live-card__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
-            Buy parking permit (ODFW) →
+            Sauvie Island Parking →
           </a>
         </article>
 
@@ -271,7 +273,7 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
           </p>
           <a
             className="nude-live-card__link"
-            href="https://www.windfinder.com/forecast/reeder_beach"
+            href={SAUVIE_ISLAND_WINDFINDER_URL}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -289,9 +291,9 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
             Access via the Sauvie Island bridge; permit-controlled parking on busy days.
           </p>
           <ul>
-            <li>Buy parking permits on the official ODFW portal before weekends and holidays.</li>
-            <li>SICA beaches page consolidates island-wide alerts (roads, bridge, access).</li>
-            <li>Windfinder at Reeder Beach is the best live read for wind and tide patterns nearby.</li>
+            <li>Check SauvieIslandParking.com first for weekends and holidays — permits are limited and dates sell out.</li>
+            <li>Swim Guide posts bi-weekly Collins Beach samples; verify before you swim.</li>
+            <li>SICA consolidates island-wide alerts; Windfinder at Reeder Beach covers live wind and tides nearby.</li>
           </ul>
         </div>
       </section>

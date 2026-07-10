@@ -48,7 +48,7 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
         },
         {
           num: "Permits",
-          label: "check portal",
+          label: "SauvieIslandParking.com",
           color: "#19e3ff",
         },
         {
@@ -77,7 +77,7 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
         lede={
           isRooster
             ? "River level, air and water temps, forecast, directions, and day-use parking pass info — nothing else."
-            : "Swim Guide samples, parking permits, island weather, and the links you need before a Collins Beach trip."
+            : "Swim Guide water quality, Sauvie Island Parking permits, island weather, and the links Collins Beach travelers use."
         }
       />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
