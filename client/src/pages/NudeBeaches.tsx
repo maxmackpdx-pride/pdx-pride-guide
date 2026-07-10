@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -223,29 +223,6 @@ export default function NudeBeaches() {
     <div
       className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
-      <div className="board-running">
-        <div className="board-running__inner">
-          <div className="board-running__live">
-            <span className="board-running__dot" aria-hidden="true" />
-            <span>Live · beach conditions</span>
-          </div>
-          <nav className="board-running__nav" aria-label="Utility pages">
-            <Link href="/events" className="board-running__link">
-              Events
-            </Link>
-            <Link href="/directory" className="board-running__link">
-              Directory
-            </Link>
-            <span className="board-running__link is-active" aria-current="page">
-              Nude Beaches
-            </span>
-            <Link href="/spotted" className="board-running__link">
-              Boards
-            </Link>
-          </nav>
-        </div>
-      </div>
-
       <header className="nude-beaches-header">
         <NudeBeachesHero
           key={activeTab}
