@@ -115,6 +115,37 @@
   margin-bottom: 12px;
 }
 
+.rb-panel__intro {
+  margin-bottom: 16px;
+}
+
+.rb-panel__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ff1fa0;
+}
+
+.rb-carpool-start {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.rb-carpool-start__prompt {
+  margin: 0 0 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
 .rb-compose {
   border: 1px solid #24242c;
   background: #0d0d10;
@@ -233,6 +264,23 @@
 .rb-type-toggle button.active {
   color: #fff;
   border-color: #666;
+}
+
+.rb-type-toggle--start button {
+  min-height: 52px;
+  font-size: 13px;
+}
+
+.river-brats--orange .rb-type-toggle--start button:hover,
+.river-brats--orange .rb-type-toggle--start button.active {
+  border-color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #ff6600);
+}
+
+.river-brats--green .rb-type-toggle--start button:hover,
+.river-brats--green .rb-type-toggle--start button.active {
+  border-color: var(--neon-green, #00ee44);
+  color: var(--neon-green, #00ee44);
 }
 
 .rb-feed {
@@ -607,6 +655,10 @@ html.calm-mode .rb-dm-panel {
   font-family: var(--font-display);
   font-size: 1.1rem;
   color: #fff;
+}
+
+.rb-panel--spotted .rb-panel__intro .rb-panel__lede {
+  margin-bottom: 0;
 }
 
 .rb-panel--spotted .spotted-card-grid {
