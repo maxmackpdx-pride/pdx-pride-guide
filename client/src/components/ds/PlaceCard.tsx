@@ -1,6 +1,9 @@
 // @ts-nocheck
 import React, { useState } from "react";
 import { Badge } from "./Badge";
+import { Share2 } from "lucide-react";
+import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
+import { shareBusinessCard } from "@/lib/shareBusinessImage";
 
 /* PlaceCard = directory card from Queer Directory redesign mockup:
    neon glow frame, logo media well, badges, meta rows, links, upcoming events. */
@@ -74,6 +77,24 @@ const CSS = `
 .pdxPlace__eventDate{ font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.84rem;
   color:var(--_ec,var(--cyan)); }
 .pdxPlace__eventTitle{ font-family:var(--font-body); font-size:.84rem; color:#fff; }
+.pdxPlace__promoters{ margin-top:2px; padding-top:12px; border-top:1px solid #242424;
+  font-family:var(--font-body); font-size:.82rem; color:var(--text-lo); }
+.pdxPlace__promotersLabel{ font-family:var(--font-display); font-weight:700; font-size:.72rem;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--text-mid); margin-bottom:6px; }
+.pdxPlace__promoterChips{ display:flex; flex-wrap:wrap; gap:6px; }
+.pdxPlace__promoterChip{ padding:3px 9px; border-radius:99px; font-size:.78rem;
+  border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 45%, transparent); color:var(--_c,var(--pink)); }
+.pdxPlace__row a{ color:inherit; text-decoration:none; }
+.pdxPlace__row a:hover{ text-decoration:underline; text-underline-offset:2px; }
+.pdxPlace__share{
+  position:absolute; top:10px; right:10px; z-index:2;
+  display:flex; align-items:center; gap:5px;
+  padding:6px 11px; border-radius:999px; cursor:pointer;
+  background:rgba(0,0,0,.55); border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 60%, transparent);
+  color:var(--_c,var(--pink)); font-family:var(--font-display); font-weight:700;
+  font-size:.68rem; letter-spacing:.04em; text-transform:uppercase;
+}
+.pdxPlace__share:disabled{ opacity:.6; cursor:default; }
 @keyframes pgDirCardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-place-css")) {
@@ -119,6 +140,9 @@ export function PlaceCard({
   logoUrl,
   fallbackLogoUrl,
   isNonprofit = false,
+  lat,
+  lng,
+  promoters = [],
   className = "",
   style,
   ...rest
@@ -138,6 +162,9 @@ export function PlaceCard({
   logoUrl?: string;
   fallbackLogoUrl?: string;
   isNonprofit?: boolean;
+  lat?: number | null;
+  lng?: number | null;
+  promoters?: Array<{ id: number; username: string; displayName?: string | null }>;
   className?: string;
   style?: React.CSSProperties;
   [key: string]: unknown;
@@ -145,8 +172,24 @@ export function PlaceCard({
   const accent = isNonprofit ? "var(--cyan)" : (CAT_COLOR[category] || "var(--pink)");
   const edge = isNonprofit ? RAINBOW_EDGE : `linear-gradient(${accent},${accent})`;
   const [logoFailed, setLogoFailed] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const showLogo = logoUrl && !logoFailed;
   const showFallback = !showLogo && fallbackLogoUrl;
+
+  const handleShare = async (e) => {
+    e.stopPropagation();
+    setSharing(true);
+    try {
+      await shareBusinessCard({
+        name, categoryLabel: categoryLabel || category, accentColor: isNonprofit ? "venues" : category,
+        description, address, hours, phone, logoUrl: logoUrl || fallbackLogoUrl,
+      });
+    } catch (err) {
+      if (err?.name !== "AbortError") console.error(err);
+    } finally {
+      setSharing(false);
+    }
+  };
 
   return (
     <article
@@ -156,6 +199,9 @@ export function PlaceCard({
     >
       <div className="pdxPlace__glow" aria-hidden="true" />
       <div className="pdxPlace__body">
+        <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
+          <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
+        </button>
         <div className="pdxPlace__media">
           <div className="pdxPlace__mediaScan" aria-hidden="true" />
           {showLogo && (
@@ -197,9 +243,21 @@ export function PlaceCard({
         <div className="pdxPlace__name">{name}</div>
 
         <div className="pdxPlace__rows">
-          {address && <div className="pdxPlace__row"><Icon d={PIN} />{address}</div>}
+          {address && (
+            <div className="pdxPlace__row">
+              <Icon d={PIN} />
+              <a href={placeGoogleMapsUrl({ address, name, lat, lng })} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                {address}
+              </a>
+            </div>
+          )}
           {hours && <div className="pdxPlace__row"><Icon d={CLOCK} />{hours}</div>}
-          {phone && <div className="pdxPlace__row"><Icon d={PHONE} />{phone}</div>}
+          {phone && (
+            <div className="pdxPlace__row">
+              <Icon d={PHONE} />
+              <a href={telHref(phone)} onClick={e => e.stopPropagation()}>{phone}</a>
+            </div>
+          )}
         </div>
 
         {description && <p className="pdxPlace__desc">{description}</p>}
@@ -256,6 +314,17 @@ export function PlaceCard({
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {promoters.length > 0 && (
+          <div className="pdxPlace__promoters">
+            <div className="pdxPlace__promotersLabel">Promoters</div>
+            <div className="pdxPlace__promoterChips">
+              {promoters.map(p => (
+                <span className="pdxPlace__promoterChip" key={p.id}>@{p.username}</span>
+              ))}
+            </div>
           </div>
         )}
       </div>

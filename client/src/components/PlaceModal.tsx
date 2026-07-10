@@ -4,7 +4,9 @@ import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ds";
+import { Share2 } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import {
   TYPE_LABELS,
@@ -16,6 +18,8 @@ import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
+import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
+import { shareBusinessCard } from "@/lib/shareBusinessImage";
 
 type EditableFields = {
   description: string;
@@ -24,6 +28,15 @@ type EditableFields = {
   website: string;
   instagram: string;
   donateUrl: string;
+};
+
+type OwnerEditableFields = EditableFields & {
+  name: string;
+  address: string;
+  type: string;
+  neighborhood: string;
+  queerOwned: boolean;
+  queerFriendly: boolean;
 };
 
 function toEditableFields(place: Business): EditableFields {
@@ -37,11 +50,23 @@ function toEditableFields(place: Business): EditableFields {
   };
 }
 
+function toOwnerEditableFields(place: Business): OwnerEditableFields {
+  return {
+    ...toEditableFields(place),
+    name: place.name || "",
+    address: place.address || "",
+    type: place.type || "bar",
+    neighborhood: place.neighborhood || "",
+    queerOwned: place.queerOwned,
+    queerFriendly: place.queerFriendly,
+  };
+}
+
 /* Detail modal for a directory business — same fixed-overlay flex-center
    idiom as the Schedule embed popover / AuthModal / MissedConnectionsPanel:
    click the overlay to close, stopPropagation on the panel. Roomier version
    of PlaceCard's content (name, category, address/hours/phone, description,
-   links, upcoming Pride events). */
+   links, upcoming Pride events / missed connections / gigs tabs). */
 
 const DAY_COLOR: Record<string, string> = {
   THU: "var(--cyan)",
@@ -105,33 +130,37 @@ const CAL = (
 const BLANK_FIELDS: EditableFields = {
   description: "", hours: "", phone: "", website: "", instagram: "", donateUrl: "",
 };
+const BLANK_OWNER_FIELDS: OwnerEditableFields = {
+  ...BLANK_FIELDS, name: "", address: "", type: "bar", neighborhood: "", queerOwned: false, queerFriendly: true,
+};
+
+type ModalTab = "events" | "missed" | "gigs";
 
 export default function PlaceModal({
   place,
   onClose,
+  onRequireAuth,
 }: {
   place: Business | null;
   onClose: () => void;
+  onRequireAuth: () => void;
 }) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditableFields>(BLANK_FIELDS);
-  const [savedOverrides, setSavedOverrides] = useState<Partial<EditableFields> | null>(null);
+  const [ownerForm, setOwnerForm] = useState<OwnerEditableFields>(BLANK_OWNER_FIELDS);
+  const [savedOverrides, setSavedOverrides] = useState<Partial<Business> | null>(null);
+  const [tab, setTab] = useState<ModalTab>("events");
+  const [sharing, setSharing] = useState(false);
 
   const saveMutation = useMutation({
-    mutationFn: (fields: EditableFields) => {
+    mutationFn: (fields: EditableFields | OwnerEditableFields) => {
       if (!place) throw new Error("No venue selected");
       return apiRequest("PATCH", `/api/directory/${place.id}`, fields).then(r => r.json());
     },
     onSuccess: (updated: Partial<Business>) => {
-      setSavedOverrides({
-        description: updated.description ?? "",
-        hours: updated.hours ?? "",
-        phone: updated.phone ?? "",
-        website: updated.website ?? "",
-        instagram: updated.instagram ?? "",
-        donateUrl: updated.donateUrl ?? "",
-      });
+      setSavedOverrides(updated);
       setEditing(false);
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
       toast({ title: "Venue updated", description: "Changes are live on the directory." });
@@ -145,14 +174,41 @@ export default function PlaceModal({
     },
   });
 
+  const claimMutation = useMutation({
+    mutationFn: (claimReason: string) => {
+      if (!place) throw new Error("No venue selected");
+      return apiRequest("POST", `/api/directory/${place.id}/claim`, { claimReason }).then(r => r.json());
+    },
+    onSuccess: (result: { autoApproved?: boolean }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      toast({
+        title: result?.autoApproved ? "You're the owner!" : "Claim submitted",
+        description: result?.autoApproved
+          ? "This venue is now linked to your account."
+          : "Sent to the site admin for approval.",
+      });
+    },
+    onError: (err: unknown) => {
+      toast({
+        title: "Could not submit claim",
+        description: err instanceof Error ? err.message : "Something went wrong — try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (!place) return null;
 
   const category = TYPE_TO_DS_CATEGORY[place.type] || "venues";
   const categoryLabel = TYPE_LABELS[place.type] || place.type;
   const address = [place.address, place.neighborhood].filter(Boolean).join(" · ") || undefined;
   const upcomingEvents = place.upcomingEvents ?? [];
+  const spotted = place.spotted ?? [];
+  const gigs = place.gigs ?? [];
+  const promoters = place.promoters ?? [];
   const canEditVenue = Boolean(place.canEditVenue);
-  const displayed = { ...toEditableFields(place), ...savedOverrides };
+  const isOwner = Boolean(place.isOwner);
+  const displayed: Business = { ...place, ...(savedOverrides || {}) };
   const isNonprofit = place.type === "nonprofit";
   const accent = isNonprofit
     ? "var(--cyan)"
@@ -172,11 +228,58 @@ export default function PlaceModal({
   const fallbackLogoUrl = directoryFallbackLogo(place.type);
 
   const startEditing = () => {
-    setForm(displayed);
+    if (isOwner) {
+      setOwnerForm(toOwnerEditableFields(displayed));
+    } else {
+      setForm(toEditableFields(displayed));
+    }
     setEditing(true);
   };
   const cancelEditing = () => setEditing(false);
-  const saveEdits = () => saveMutation.mutate(form);
+  const saveEdits = () => saveMutation.mutate(isOwner ? ownerForm : form);
+
+  const requestClaim = () => {
+    if (!user) {
+      onRequireAuth();
+      return;
+    }
+    const reason = window.prompt(
+      "Tell us about your connection to this business (e.g. \"I own/manage this venue\"):",
+      "",
+    );
+    if (reason == null) return;
+    if (!reason.trim()) {
+      toast({ title: "Add a short reason", variant: "destructive" });
+      return;
+    }
+    claimMutation.mutate(reason.trim());
+  };
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const result = await shareBusinessCard({
+        name: place.name,
+        categoryLabel,
+        accentColor: isNonprofit ? "venues" : category,
+        description: displayed.description,
+        address: place.address,
+        neighborhood: place.neighborhood,
+        hours: displayed.hours,
+        phone: displayed.phone,
+        logoUrl: logoUrl || fallbackLogoUrl,
+      });
+      if (result === "copied") toast({ title: "Image copied", description: "Card image copied to your clipboard and downloaded." });
+      else if (result === "downloaded") toast({ title: "Image downloaded", description: "Share it on your socials." });
+    } catch (err) {
+      if ((err as DOMException)?.name !== "AbortError") {
+        toast({ title: "Could not create share image", variant: "destructive" });
+      }
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const fieldStyle: React.CSSProperties = {
     width: "100%", background: "#141416", color: "#fff", border: "1px solid #333",
     borderRadius: 6, padding: "8px 10px", fontFamily: "var(--font-body)", fontSize: "0.9rem",
@@ -186,6 +289,12 @@ export default function PlaceModal({
     fontFamily: "var(--font-display)", fontSize: "0.7rem", letterSpacing: "0.06em",
     textTransform: "uppercase", color: "var(--text-lo)",
   };
+
+  const tabs: Array<{ key: ModalTab; label: string; count: number }> = [
+    { key: "events", label: "Events", count: upcomingEvents.length },
+    { key: "missed", label: "Missed Connections", count: spotted.length },
+    { key: "gigs", label: "Gigs", count: gigs.length },
+  ];
 
   return (
     <div
@@ -243,6 +352,36 @@ export default function PlaceModal({
           }}
         >
           ✕
+        </button>
+
+        <button
+          type="button"
+          onClick={handleShare}
+          disabled={sharing}
+          aria-label="Share this venue"
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 54,
+            zIndex: 4,
+            height: 34,
+            padding: "0 12px",
+            borderRadius: 999,
+            border: `1px solid ${accent}`,
+            background: "rgba(0,0,0,.55)",
+            color: accent,
+            fontSize: 12,
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            cursor: sharing ? "default" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            opacity: sharing ? 0.6 : 1,
+          }}
+        >
+          <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
         </button>
 
         <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -340,39 +479,107 @@ export default function PlaceModal({
           </h2>
 
           {address && (
-            <div style={{ ...rowStyle, marginBottom: 14 }}>
-              <Icon d={PIN} />
-              {address}
+            <div style={{ ...rowStyle, marginBottom: 6, flexWrap: "wrap", gap: 10 }}>
+              <span style={{ display: "inline-flex", alignItems: "flex-start", gap: 8 }}>
+                <Icon d={PIN} />
+                {address}
+              </span>
+              <span style={{ display: "inline-flex", gap: 12 }}>
+                <a href={placeGoogleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
+                  Google Maps
+                </a>
+                <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
+                  Apple Maps
+                </a>
+              </span>
+            </div>
+          )}
+
+          {promoters.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+              {promoters.map(p => (
+                <span
+                  key={p.id}
+                  style={{
+                    padding: "3px 10px", borderRadius: 999, fontSize: "0.78rem",
+                    border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, color: accent,
+                  }}
+                >
+                  @{p.username}
+                </span>
+              ))}
             </div>
           )}
 
           {editing ? (
             <div style={{ marginBottom: 16 }}>
+              {isOwner && (
+                <>
+                  <label style={labelStyle}>
+                    Name
+                    <input style={fieldStyle} value={ownerForm.name} onChange={e => setOwnerForm(f => ({ ...f, name: e.target.value }))} />
+                  </label>
+                  <label style={labelStyle}>
+                    Address
+                    <input style={fieldStyle} value={ownerForm.address} onChange={e => setOwnerForm(f => ({ ...f, address: e.target.value }))} />
+                  </label>
+                  <label style={labelStyle}>
+                    Neighborhood
+                    <input style={fieldStyle} value={ownerForm.neighborhood} onChange={e => setOwnerForm(f => ({ ...f, neighborhood: e.target.value }))} />
+                  </label>
+                  <label style={labelStyle}>
+                    Type
+                    <select
+                      style={fieldStyle}
+                      value={ownerForm.type}
+                      onChange={e => setOwnerForm(f => ({ ...f, type: e.target.value }))}
+                    >
+                      {Object.entries(TYPE_LABELS).filter(([k]) => k !== "nonprofit").map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <input type="checkbox" checked={ownerForm.queerOwned} onChange={e => setOwnerForm(f => ({ ...f, queerOwned: e.target.checked }))} />
+                    Queer-owned
+                  </label>
+                  <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <input type="checkbox" checked={ownerForm.queerFriendly} onChange={e => setOwnerForm(f => ({ ...f, queerFriendly: e.target.checked }))} />
+                    Queer-friendly
+                  </label>
+                </>
+              )}
               <label style={labelStyle}>
                 Description
                 <textarea
                   style={{ ...fieldStyle, resize: "vertical" }}
                   rows={4}
                   maxLength={2000}
-                  value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  value={isOwner ? ownerForm.description : form.description}
+                  onChange={e => isOwner
+                    ? setOwnerForm(f => ({ ...f, description: e.target.value }))
+                    : setForm(f => ({ ...f, description: e.target.value }))}
                 />
               </label>
               <label style={labelStyle}>
                 Hours
                 <input
                   style={fieldStyle}
-                  value={form.hours}
+                  value={isOwner ? ownerForm.hours : form.hours}
                   placeholder="e.g. Mon–Sat 4pm–2am"
-                  onChange={e => setForm(f => ({ ...f, hours: e.target.value }))}
+                  onChange={e => isOwner
+                    ? setOwnerForm(f => ({ ...f, hours: e.target.value }))
+                    : setForm(f => ({ ...f, hours: e.target.value }))}
                 />
               </label>
               <label style={labelStyle}>
                 Phone
                 <input
                   style={fieldStyle}
-                  value={form.phone}
-                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                  value={isOwner ? ownerForm.phone : form.phone}
+                  onChange={e => isOwner
+                    ? setOwnerForm(f => ({ ...f, phone: e.target.value }))
+                    : setForm(f => ({ ...f, phone: e.target.value }))}
                 />
               </label>
               <label style={labelStyle}>
@@ -381,8 +588,10 @@ export default function PlaceModal({
                   style={fieldStyle}
                   type="url"
                   placeholder="https://..."
-                  value={form.website}
-                  onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
+                  value={isOwner ? ownerForm.website : form.website}
+                  onChange={e => isOwner
+                    ? setOwnerForm(f => ({ ...f, website: e.target.value }))
+                    : setForm(f => ({ ...f, website: e.target.value }))}
                 />
               </label>
               <label style={labelStyle}>
@@ -390,8 +599,10 @@ export default function PlaceModal({
                 <input
                   style={fieldStyle}
                   placeholder="@handle"
-                  value={form.instagram}
-                  onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))}
+                  value={isOwner ? ownerForm.instagram : form.instagram}
+                  onChange={e => isOwner
+                    ? setOwnerForm(f => ({ ...f, instagram: e.target.value }))
+                    : setForm(f => ({ ...f, instagram: e.target.value }))}
                 />
               </label>
               <label style={labelStyle}>
@@ -400,10 +611,17 @@ export default function PlaceModal({
                   style={{ ...fieldStyle, marginBottom: 4 }}
                   type="url"
                   placeholder="https://..."
-                  value={form.donateUrl}
-                  onChange={e => setForm(f => ({ ...f, donateUrl: e.target.value }))}
+                  value={isOwner ? ownerForm.donateUrl : form.donateUrl}
+                  onChange={e => isOwner
+                    ? setOwnerForm(f => ({ ...f, donateUrl: e.target.value }))
+                    : setForm(f => ({ ...f, donateUrl: e.target.value }))}
                 />
               </label>
+              {isOwner && (
+                <p style={{ fontSize: "0.78rem", color: "var(--text-lo)", marginBottom: 12 }}>
+                  Logo changes go through the Hub's venue section — they're sent to the site admin for conversion before going live.
+                </p>
+              )}
               <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
                 <button
                   type="button"
@@ -430,7 +648,9 @@ export default function PlaceModal({
                 {displayed.phone && (
                   <div style={rowStyle}>
                     <Icon d={PHONE} />
-                    {displayed.phone}
+                    <a href={telHref(displayed.phone)} style={{ color: "inherit", textDecoration: "none" }}>
+                      {displayed.phone}
+                    </a>
                   </div>
                 )}
               </div>
@@ -481,61 +701,129 @@ export default function PlaceModal({
                 </div>
               )}
 
-              {canEditVenue && (
-                <button type="button" className="btn-neon" style={{ marginBottom: 16 }} onClick={startEditing}>
-                  Edit venue info
-                </button>
-              )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
+                {canEditVenue && (
+                  <button type="button" className="btn-neon" onClick={startEditing}>
+                    Edit venue info
+                  </button>
+                )}
+                {!place.ownerId && (
+                  <button
+                    type="button"
+                    onClick={requestClaim}
+                    disabled={claimMutation.isPending}
+                    style={{
+                      background: "none", border: "none", color: accent, cursor: "pointer",
+                      fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", padding: 0,
+                    }}
+                  >
+                    ↗ {claimMutation.isPending ? "Submitting…" : "Claim this business"}
+                  </button>
+                )}
+              </div>
             </>
           )}
 
-          {upcomingEvents.length > 0 && (
-            <div style={{ marginTop: 6, paddingTop: 16, borderTop: "1px solid #292929" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 10,
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: "0.8125rem",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "var(--text-mid)",
-                }}
-              >
-                <Icon d={CAL} />
-                Upcoming Pride Events
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {upcomingEvents.map((ev) => {
-                  const dayAccent = (ev.dayOfWeek && DAY_COLOR[ev.dayOfWeek]) || "var(--cyan)";
-                  return (
-                    <Link
-                      key={ev.listingInstanceKey ?? ev.id}
-                      href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
-                      onClick={onClose}
-                      style={{
-                        padding: "8px 0 8px 12px",
-                        borderLeft: `3px solid ${dayAccent}`,
-                        textDecoration: "none",
-                        color: "inherit",
-                        display: "block",
-                      }}
-                    >
-                      <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: dayAccent }}>
-                        {formatDirectoryEventWhen(ev)}
+          <div style={{ marginTop: 6, paddingTop: 16, borderTop: "1px solid #292929" }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+              {tabs.map(t => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  style={{
+                    padding: "7px 13px",
+                    borderRadius: 999,
+                    border: `1px solid ${tab === t.key ? accent : "#333"}`,
+                    background: tab === t.key ? `color-mix(in srgb, ${accent} 16%, transparent)` : "transparent",
+                    color: tab === t.key ? accent : "var(--text-lo)",
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 700,
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                  }}
+                >
+                  {t.label}{t.count > 0 ? ` (${t.count})` : ""}
+                </button>
+              ))}
+            </div>
+
+            {tab === "events" && (
+              upcomingEvents.length === 0 ? (
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No upcoming Pride events matched to this venue yet.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {upcomingEvents.map((ev) => {
+                    const dayAccent = (ev.dayOfWeek && DAY_COLOR[ev.dayOfWeek]) || "var(--cyan)";
+                    return (
+                      <Link
+                        key={ev.listingInstanceKey ?? ev.id}
+                        href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
+                        onClick={onClose}
+                        style={{
+                          padding: "8px 0 8px 12px",
+                          borderLeft: `3px solid ${dayAccent}`,
+                          textDecoration: "none",
+                          color: "inherit",
+                          display: "block",
+                        }}
+                      >
+                        <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: dayAccent }}>
+                          {formatDirectoryEventWhen(ev)}
+                        </div>
+                        <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff" }}>
+                          {ev.title}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )
+            )}
+
+            {tab === "missed" && (
+              spotted.length === 0 ? (
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No missed connections posted at this venue yet.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {spotted.map(mc => (
+                    <div key={mc.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
+                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff", marginBottom: 2 }}>
+                        {mc.body}
+                      </div>
+                    </div>
+                  ))}
+                  <Link href="/spotted" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
+                    View Missed Connections board →
+                  </Link>
+                </div>
+              )
+            )}
+
+            {tab === "gigs" && (
+              gigs.length === 0 ? (
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No gig postings at this venue yet.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {gigs.map(g => (
+                    <div key={g.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
+                      <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: accent }}>
+                        {g.postType === "LOOKING_FOR_WORK" ? "Available" : "Gig"}
                       </div>
                       <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff" }}>
-                        {ev.title}
+                        {g.title}
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                    </div>
+                  ))}
+                  <Link href="/pride-work" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
+                    View the Gig Board →
+                  </Link>
+                </div>
+              )
+            )}
+          </div>
           </div>
         </div>
       </div>

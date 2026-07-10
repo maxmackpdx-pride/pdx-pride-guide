@@ -12,6 +12,7 @@ import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
+  businessClaims, businessSubmissions, businessBlocks, businessLogoRequests,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
   type GigPost, type InsertGigPost,
@@ -24,6 +25,7 @@ import {
   type FeedbackReport, type InsertFeedbackReport,
   type HostMessage, type InsertHostMessage,
   type Business, type InsertBusiness,
+  type BusinessClaim, type BusinessSubmission, type BusinessBlock, type BusinessLogoRequest,
 } from "@shared/schema";
 import crypto from "crypto";
 import { buildSubmissionMergePatch } from "@shared/submissionMatch";
@@ -255,10 +257,11 @@ sqlite.exec(`
   );
 `);
 
-// Add is_new, hours, phone columns to businesses if not present
+// Add is_new, hours, phone, owner_id columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN hours TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN phone TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN owner_id INTEGER`); } catch {}
 
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
 let gigPostsLegacyCols = false;
@@ -341,6 +344,7 @@ function mapGigPostRow(row: Record<string, unknown>): GigPost {
     imageUrl: (row.image_url as string | null) ?? null,
     gigDate: (row.gig_date as string | null) ?? null,
     gigTime: (row.gig_time as string | null) ?? null,
+    businessId: (row.business_id as number | null) ?? null,
   };
 }
 
@@ -349,10 +353,10 @@ function insertGigPostCompat(payload: InsertGigPost & { status: string; createdA
     const result = sqlite.prepare(`
       INSERT INTO gig_posts (
         type, role, post_type, title, name, contact_email, description,
-        skills, compensation, location, is_remote, status, created_at, user_id
+        skills, compensation, location, is_remote, status, created_at, user_id, business_id
       ) VALUES (
         @postType, @role, @postType, @title, @name, @contactEmail, @description,
-        @skills, @compensation, @location, @isRemote, @status, @createdAt, @userId
+        @skills, @compensation, @location, @isRemote, @status, @createdAt, @userId, @businessId
       )
     `).run({
       postType: payload.postType,
@@ -368,6 +372,7 @@ function insertGigPostCompat(payload: InsertGigPost & { status: string; createdA
       status: payload.status,
       createdAt: payload.createdAt,
       userId: payload.userId ?? null,
+      businessId: payload.businessId ?? null,
     });
     const row = sqlite.prepare(`SELECT * FROM gig_posts WHERE id = ?`).get(result.lastInsertRowid) as Record<string, unknown>;
     return mapGigPostRow(row);
@@ -379,6 +384,7 @@ try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN user_id INTEGER`); } catch(e
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN image_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_date TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN business_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN google_id TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_ring TEXT DEFAULT 'none'`); } catch(e) {}
@@ -455,6 +461,93 @@ function ensureEventHostsSchema() {
   }
 }
 ensureEventHostsSchema();
+
+function ensureBusinessClaimsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS business_claims (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        business_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        claim_reason TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'PENDING',
+        admin_notes TEXT,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS business_claims_business_idx ON business_claims(business_id)`);
+  } catch (e) {
+    console.error("[business_claims] schema migration failed:", e);
+  }
+}
+ensureBusinessClaimsSchema();
+
+function ensureBusinessSubmissionsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS business_submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL DEFAULT 'bar',
+        description TEXT NOT NULL,
+        address TEXT,
+        neighborhood TEXT,
+        hours TEXT,
+        phone TEXT,
+        website TEXT,
+        instagram TEXT,
+        logo_image_url TEXT,
+        status TEXT NOT NULL DEFAULT 'PENDING',
+        admin_notes TEXT,
+        created_business_id INTEGER,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+  } catch (e) {
+    console.error("[business_submissions] schema migration failed:", e);
+  }
+}
+ensureBusinessSubmissionsSchema();
+
+function ensureBusinessBlocksSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS business_blocks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        business_id INTEGER NOT NULL,
+        blocked_user_id INTEGER NOT NULL,
+        created_by_user_id INTEGER,
+        created_at TEXT NOT NULL DEFAULT '',
+        UNIQUE(business_id, blocked_user_id)
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS business_blocks_business_idx ON business_blocks(business_id)`);
+  } catch (e) {
+    console.error("[business_blocks] schema migration failed:", e);
+  }
+}
+ensureBusinessBlocksSchema();
+
+function ensureBusinessLogoRequestsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS business_logo_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        business_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        image_url TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'PENDING',
+        admin_notes TEXT,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS business_logo_requests_business_idx ON business_logo_requests(business_id)`);
+  } catch (e) {
+    console.error("[business_logo_requests] schema migration failed:", e);
+  }
+}
+ensureBusinessLogoRequestsSchema();
 
 function ensureEventTalentSchema() {
   try {
@@ -4329,6 +4422,26 @@ export interface IStorage {
   updateBusiness(id: number, data: Partial<InsertBusiness>): Business | undefined;
   toggleBusinessActive(id: number, active: boolean): void;
   getUserLinkedBusinesses(userId: number): { id: number; name: string; type: string; address: string | null }[];
+  // Business ownership: claims, new-business submissions, blocklist, logo requests
+  getUserOwnedBusinesses(userId: number): Business[];
+  createBusinessClaim(businessId: number, userId: number, claimReason: string): { claim?: BusinessClaim; error?: string };
+  getPendingBusinessClaims(): any[];
+  approveBusinessClaim(id: number, adminName: string): { ok?: boolean; error?: string };
+  rejectBusinessClaim(id: number, reason?: string): void;
+  createBusinessSubmission(userId: number, data: Omit<InsertBusiness, "active" | "isNew" | "queerOwned" | "queerFriendly"> & { logoImageUrl?: string | null }): BusinessSubmission;
+  getPendingBusinessSubmissions(): BusinessSubmission[];
+  approveBusinessSubmission(id: number, adminName: string, overrideImageUrl?: string): { business?: Business; error?: string };
+  rejectBusinessSubmission(id: number, reason?: string): void;
+  getPromotersForBusiness(businessId: number): { id: number; username: string; displayName: string | null }[];
+  blockPromoterFromBusiness(businessId: number, blockedUserId: number, createdByUserId: number): { ok?: boolean; error?: string };
+  unblockPromoterFromBusiness(businessId: number, blockedUserId: number): void;
+  isPromoterBlockedFromBusiness(businessId: number, userId: number): boolean;
+  getBlockedBusinessMatch(userId: number, venueLike: { venueName: string; address?: string | null; lat?: number | null; lng?: number | null }): Business | null;
+  getBusinessBlocks(businessId: number): any[];
+  createBusinessLogoRequest(businessId: number, userId: number, imageUrl: string): BusinessLogoRequest;
+  getPendingBusinessLogoRequests(): any[];
+  approveBusinessLogoRequest(id: number, overrideImageUrl?: string): { ok?: boolean; error?: string };
+  rejectBusinessLogoRequest(id: number, reason?: string): void;
 }
 
 export const storage: IStorage = {
@@ -4772,6 +4885,7 @@ export const storage: IStorage = {
       imageUrl: row.image_url,
       gigDate: row.gig_date,
       gigTime: row.gig_time,
+      businessId: row.business_id ?? null,
       username: row.username,
       displayName: row.displayName,
       posterPhotoUrl: row.posterPhotoUrl,
@@ -4986,6 +5100,9 @@ export const storage: IStorage = {
       + this.getPendingPromoterRequests().length
       + this.getGiftingReports("PENDING").length
       + this.getFeedbackReports("OPEN").length
+      + this.getPendingBusinessClaims().length
+      + this.getPendingBusinessSubmissions().length
+      + this.getPendingBusinessLogoRequests().length
     );
   },
   hasSiteAdminGrant(userId) {
@@ -6300,6 +6417,249 @@ export const storage: IStorage = {
       }
     }
     return Array.from(matched.values());
+  },
+  getUserOwnedBusinesses(userId) {
+    return db.select().from(businesses).where(eq(businesses.ownerId, userId)).all().filter(b => b.active);
+  },
+  createBusinessClaim(businessId, userId, claimReason) {
+    ensureBusinessClaimsSchema();
+    const business = storage.getBusiness(businessId);
+    if (!business) return { error: "Business not found" };
+    if (business.ownerId) return { error: "This venue already has an owner." };
+    const existingPending = db.select().from(businessClaims)
+      .where(eq(businessClaims.businessId, businessId)).all()
+      .find(c => c.userId === userId && c.status === "PENDING");
+    if (existingPending) return { error: "You already have a pending claim on this venue." };
+    const claim = db.insert(businessClaims).values({
+      businessId, userId, claimReason, status: "PENDING", createdAt: new Date().toISOString(),
+    }).returning().get();
+    return { claim };
+  },
+  getPendingBusinessClaims() {
+    const rows = db.select().from(businessClaims).where(eq(businessClaims.status, "PENDING")).all();
+    return rows.map(claim => {
+      const business = storage.getBusiness(claim.businessId);
+      const user = db.select().from(users).where(eq(users.id, claim.userId)).get();
+      return {
+        ...claim,
+        businessName: business?.name ?? "Unknown venue",
+        username: user?.username ?? null,
+        displayName: user?.displayName ?? null,
+        email: user?.email ?? null,
+      };
+    });
+  },
+  approveBusinessClaim(id, adminName) {
+    const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
+    if (!claim) return { error: "Claim not found" };
+    if (claim.status !== "PENDING") return { error: "Claim already resolved" };
+    db.update(businesses).set({ ownerId: claim.userId }).where(eq(businesses.id, claim.businessId)).run();
+    db.update(businessClaims).set({
+      status: "APPROVED",
+      adminNotes: `Approved by ${adminName}`,
+    }).where(eq(businessClaims.id, id)).run();
+    notifyGuideInbox(
+      claim.userId,
+      "Venue claim approved",
+      "You're now the owner of your venue. Manage it from your Hub.",
+      { contextType: "GUIDE_UPDATE" },
+    );
+    return { ok: true };
+  },
+  rejectBusinessClaim(id, reason) {
+    db.update(businessClaims).set({
+      status: "REJECTED",
+      adminNotes: reason ?? null,
+    }).where(eq(businessClaims.id, id)).run();
+    const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
+    if (claim) {
+      notifyGuideInbox(
+        claim.userId,
+        "Venue claim update",
+        "Your venue claim wasn't approved. Reach out via Contact if you think this was a mistake.",
+        { contextType: "GUIDE_UPDATE" },
+      );
+    }
+  },
+  createBusinessSubmission(userId, data) {
+    ensureBusinessSubmissionsSchema();
+    return db.insert(businessSubmissions).values({
+      userId,
+      name: data.name,
+      type: data.type || "bar",
+      description: data.description,
+      address: data.address ?? null,
+      neighborhood: data.neighborhood ?? null,
+      hours: data.hours ?? null,
+      phone: data.phone ?? null,
+      website: data.website ?? null,
+      instagram: data.instagram ?? null,
+      logoImageUrl: data.logoImageUrl ?? null,
+      status: "PENDING",
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  },
+  getPendingBusinessSubmissions() {
+    return db.select().from(businessSubmissions).where(eq(businessSubmissions.status, "PENDING")).all();
+  },
+  approveBusinessSubmission(id, adminName, overrideImageUrl) {
+    const sub = db.select().from(businessSubmissions).where(eq(businessSubmissions.id, id)).get();
+    if (!sub) return { error: "Submission not found" };
+    if (sub.status !== "PENDING") return { error: "Submission already resolved" };
+    const business = db.insert(businesses).values({
+      name: sub.name,
+      type: sub.type,
+      description: sub.description,
+      address: sub.address,
+      neighborhood: sub.neighborhood,
+      hours: sub.hours,
+      phone: sub.phone,
+      website: sub.website,
+      instagram: sub.instagram,
+      imageUrl: overrideImageUrl ?? null,
+      queerOwned: false,
+      queerFriendly: true,
+      active: true,
+      isNew: true,
+      ownerId: sub.userId,
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+    db.update(businessSubmissions).set({
+      status: "APPROVED",
+      adminNotes: `Approved by ${adminName}`,
+      createdBusinessId: business.id,
+    }).where(eq(businessSubmissions.id, id)).run();
+    notifyGuideInbox(
+      sub.userId,
+      "New venue approved",
+      `${sub.name} is now live in the directory, and you're its owner.`,
+      { contextType: "GUIDE_UPDATE" },
+    );
+    return { business };
+  },
+  rejectBusinessSubmission(id, reason) {
+    db.update(businessSubmissions).set({
+      status: "REJECTED",
+      adminNotes: reason ?? null,
+    }).where(eq(businessSubmissions.id, id)).run();
+    const sub = db.select().from(businessSubmissions).where(eq(businessSubmissions.id, id)).get();
+    if (sub) {
+      notifyGuideInbox(
+        sub.userId,
+        "New venue submission update",
+        "Your new-business submission wasn't approved. Reach out via Contact for details.",
+        { contextType: "GUIDE_UPDATE" },
+      );
+    }
+  },
+  getPromotersForBusiness(businessId) {
+    const business = storage.getBusiness(businessId);
+    if (!business) return [];
+    const liveEvents = storage.getEvents({ status: "LIVE" });
+    const userIds = new Set<number>();
+    const results: { id: number; username: string; displayName: string | null }[] = [];
+    for (const evt of liveEvents) {
+      if (!eventMatchesBusiness(evt, business)) continue;
+      const candidates: string[] = [];
+      if (evt.claimedBy) candidates.push(evt.claimedBy);
+      if (evt.submittedBy) candidates.push(evt.submittedBy);
+      const hostRows = sqlite.prepare(`SELECT user_id AS userId FROM event_hosts WHERE event_id = ?`).all(evt.id) as { userId: number }[];
+      for (const host of hostRows) {
+        if (userIds.has(host.userId)) continue;
+        const u = db.select().from(users).where(eq(users.id, host.userId)).get();
+        if (u) { userIds.add(u.id); results.push({ id: u.id, username: u.username, displayName: u.displayName ?? null }); }
+      }
+      for (const identifier of candidates) {
+        const u = db.select().from(users).where(eq(users.username, identifier)).get()
+          ?? db.select().from(users).where(eq(users.email, identifier)).get();
+        if (u && !userIds.has(u.id)) { userIds.add(u.id); results.push({ id: u.id, username: u.username, displayName: u.displayName ?? null }); }
+      }
+    }
+    return results;
+  },
+  blockPromoterFromBusiness(businessId, blockedUserId, createdByUserId) {
+    ensureBusinessBlocksSchema();
+    const business = storage.getBusiness(businessId);
+    if (!business) return { error: "Business not found" };
+    try {
+      sqlite.prepare(`
+        INSERT INTO business_blocks (business_id, blocked_user_id, created_by_user_id, created_at)
+        VALUES (?, ?, ?, ?)
+      `).run(businessId, blockedUserId, createdByUserId, new Date().toISOString());
+    } catch {
+      return { error: "This promoter is already blocked." };
+    }
+    // Flag the blocked user's existing events at this venue for admin review.
+    const blockedUser = db.select().from(users).where(eq(users.id, blockedUserId)).get();
+    if (blockedUser) {
+      const liveEvents = storage.getEvents({ status: "LIVE" });
+      for (const evt of liveEvents) {
+        if (!eventMatchesBusiness(evt, business)) continue;
+        const isHost = storage.isUserEventHost(evt.id, blockedUserId)
+          || evt.claimedBy === blockedUser.username
+          || evt.submittedBy === blockedUser.email
+          || evt.submittedBy === blockedUser.username;
+        if (!isHost) continue;
+        storage.createModerationRequest({
+          type: "FLAGGED_BY_OWNER",
+          eventId: evt.id,
+          eventTitle: evt.title,
+          requesterName: "Venue owner",
+          requesterEmail: "",
+          proof: `Venue owner blocked @${blockedUser.username} from ${business.name} — this existing listing needs review.`,
+        } as any);
+      }
+    }
+    return { ok: true };
+  },
+  unblockPromoterFromBusiness(businessId, blockedUserId) {
+    sqlite.prepare(`DELETE FROM business_blocks WHERE business_id = ? AND blocked_user_id = ?`).run(businessId, blockedUserId);
+  },
+  isPromoterBlockedFromBusiness(businessId, userId) {
+    return !!sqlite.prepare(`SELECT 1 FROM business_blocks WHERE business_id = ? AND blocked_user_id = ?`).get(businessId, userId);
+  },
+  getBlockedBusinessMatch(userId, venueLike) {
+    const blockedBusinessIds = (sqlite.prepare(`SELECT business_id AS businessId FROM business_blocks WHERE blocked_user_id = ?`).all(userId) as Array<{ businessId: number }>).map(r => r.businessId);
+    if (blockedBusinessIds.length === 0) return null;
+    for (const businessId of blockedBusinessIds) {
+      const business = storage.getBusiness(businessId);
+      if (business && eventMatchesBusiness(venueLike, business)) return business;
+    }
+    return null;
+  },
+  getBusinessBlocks(businessId) {
+    const rows = sqlite.prepare(`SELECT * FROM business_blocks WHERE business_id = ?`).all(businessId) as Array<{ blocked_user_id: number; created_at: string }>;
+    return rows.map(row => {
+      const u = db.select().from(users).where(eq(users.id, row.blocked_user_id)).get();
+      return { userId: row.blocked_user_id, username: u?.username ?? null, displayName: u?.displayName ?? null, createdAt: row.created_at };
+    });
+  },
+  createBusinessLogoRequest(businessId, userId, imageUrl) {
+    ensureBusinessLogoRequestsSchema();
+    return db.insert(businessLogoRequests).values({
+      businessId, userId, imageUrl, status: "PENDING", createdAt: new Date().toISOString(),
+    }).returning().get();
+  },
+  getPendingBusinessLogoRequests() {
+    const rows = db.select().from(businessLogoRequests).where(eq(businessLogoRequests.status, "PENDING")).all();
+    return rows.map(req => {
+      const business = storage.getBusiness(req.businessId);
+      return { ...req, businessName: business?.name ?? "Unknown venue" };
+    });
+  },
+  approveBusinessLogoRequest(id, overrideImageUrl) {
+    const req = db.select().from(businessLogoRequests).where(eq(businessLogoRequests.id, id)).get();
+    if (!req) return { error: "Request not found" };
+    if (req.status !== "PENDING") return { error: "Request already resolved" };
+    db.update(businesses).set({ imageUrl: overrideImageUrl ?? req.imageUrl }).where(eq(businesses.id, req.businessId)).run();
+    db.update(businessLogoRequests).set({ status: "APPROVED" }).where(eq(businessLogoRequests.id, id)).run();
+    notifyGuideInbox(req.userId, "Logo updated", "Your venue's new logo is live in the directory.", { contextType: "GUIDE_UPDATE" });
+    return { ok: true };
+  },
+  rejectBusinessLogoRequest(id, reason) {
+    db.update(businessLogoRequests).set({ status: "REJECTED", adminNotes: reason ?? null }).where(eq(businessLogoRequests.id, id)).run();
+    const req = db.select().from(businessLogoRequests).where(eq(businessLogoRequests.id, id)).get();
+    if (req) notifyGuideInbox(req.userId, "Logo update", "Your submitted logo wasn't used. Reach out via Contact for details.", { contextType: "GUIDE_UPDATE" });
   },
 };
 

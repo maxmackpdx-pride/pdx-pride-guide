@@ -18,7 +18,7 @@ import {
   fillFieldsMapCoordinates,
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
-import { attachUpcomingEventsToBusinesses } from "./directoryEvents";
+import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -755,6 +755,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
         }
       }
       const source = type === "CLAIM" && claimEvent ? claimEvent : req.body;
+      if (type === "NEW_EVENT" || type === "CLAIM") {
+        const blockedBusiness = storage.getBlockedBusinessMatch(user.id, {
+          venueName: source.venueName || "",
+          address: source.address ?? null,
+          lat: source.lat ?? null,
+          lng: source.lng ?? null,
+        });
+        if (blockedBusiness) {
+          return res.status(403).json({ error: `${blockedBusiness.name} has blocked you from posting events at their venue.` });
+        }
+      }
       const data = insertSubmissionSchema.parse({
         ...source,
         type,
@@ -997,13 +1008,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     const liveEvents = storage.getEvents({ status: "LIVE" });
     const withEvents = attachUpcomingEventsToBusinesses(businesses, liveEvents);
+    const withPromoters = attachPromotersToBusinesses(withEvents, id => storage.getPromotersForBusiness(id));
+    const missedConnections = storage.getMissedConnections("ACTIVE");
+    const gigs = storage.getGigPosts("LIVE");
+    const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
     // Flag which listings the logged-in user can self-service edit (hosted/claimed/
     // submitted an event there) — drives the "Edit venue info" button client-side;
     // the PATCH endpoint below re-checks this server-side regardless.
     const linkedIds = req.session?.userId
       ? new Set(storage.getUserLinkedBusinesses(req.session.userId).map(b => b.id))
       : null;
-    res.json(withEvents.map(biz => ({ ...biz, canEditVenue: linkedIds?.has(biz.id) ?? false })));
+    const userId = req.session?.userId;
+    res.json(withTabs.map(biz => {
+      const isOwner = userId != null && biz.ownerId === userId;
+      return { ...biz, isOwner, canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false) };
+    }));
   });
 
   const memberBusinessSchema = z.object({
@@ -1062,10 +1081,48 @@ export function registerRoutes(httpServer: Server, app: Express) {
     donateUrl: z.string().trim().max(300).optional().nullable(),
   });
 
+  // Business owners (real ownerId, see claim flow below) get a wider self-service field set.
+  // lat/lng always stay geocoded, and imageUrl is never accepted here — logo changes route
+  // through the logo-request queue for Tucker's manual conversion (see /api/upload/business-logo).
+  const businessOwnerEditSchema = z.object({
+    name: z.string().trim().min(2).max(120).optional(),
+    address: z.string().trim().max(200).optional().nullable(),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]).optional(),
+    neighborhood: z.string().trim().max(80).optional().nullable(),
+    queerOwned: z.boolean().optional(),
+    queerFriendly: z.boolean().optional(),
+    description: z.string().trim().min(10).max(2000).optional(),
+    hours: z.string().trim().max(200).optional().nullable(),
+    phone: z.string().trim().max(40).optional().nullable(),
+    website: z.string().trim().max(300).optional().nullable(),
+    instagram: z.string().trim().max(80).optional().nullable(),
+    donateUrl: z.string().trim().max(300).optional().nullable(),
+  });
+
   app.patch("/api/directory/:id", requireAuth, (req, res) => {
     const id = parseInt(req.params.id, 10);
     const existing = storage.getBusiness(id);
     if (!existing) return res.status(404).json({ error: "Not found" });
+
+    const strip = (v: string | null | undefined) => (v == null ? v ?? null : v.replace(/[<>]/g, ""));
+
+    if (existing.ownerId && req.session.userId === existing.ownerId) {
+      let parsed: z.infer<typeof businessOwnerEditSchema>;
+      try {
+        parsed = businessOwnerEditSchema.parse(req.body ?? {});
+      } catch (e: any) {
+        return res.status(400).json({ error: e.message || "Invalid venue info" });
+      }
+      const patch: Record<string, unknown> = {};
+      for (const key of ["name", "address", "type", "neighborhood", "description", "hours", "phone", "website", "instagram", "donateUrl"] as const) {
+        if (parsed[key] !== undefined) patch[key] = typeof parsed[key] === "string" ? strip(parsed[key] as string) : parsed[key];
+      }
+      if (parsed.queerOwned !== undefined) patch.queerOwned = parsed.queerOwned;
+      if (parsed.queerFriendly !== undefined) patch.queerFriendly = parsed.queerFriendly;
+      const updated = storage.updateBusiness(id, patch as any);
+      if (!updated) return res.status(404).json({ error: "Not found" });
+      return res.json(updated);
+    }
 
     const linkedVenues = storage.getUserLinkedBusinesses(req.session.userId!);
     if (!linkedVenues.some(biz => biz.id === id)) {
@@ -1092,6 +1149,98 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const updated = storage.updateBusiness(id, patch);
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
+  });
+
+  // ── Business ownership: claim an existing venue ──────────────────────────
+  app.post("/api/directory/:id/claim", requireAuth, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const claimReason = String(req.body?.claimReason || "").trim();
+    if (!claimReason || claimReason.length < 10) {
+      return res.status(400).json({ error: "Tell us how you're connected to this venue (10+ characters)." });
+    }
+    const result = storage.createBusinessClaim(id, req.session.userId!, claimReason);
+    if ("error" in result) return res.status(400).json({ error: result.error });
+    const user = storage.getUserById(req.session.userId!);
+    const eligible = user?.promoterStatus === "approved" || isMainAdminUser(user);
+    if (eligible && result.claim) {
+      const approval = storage.approveBusinessClaim(result.claim.id, user?.username || "system");
+      return res.json({ ok: true, autoApproved: true, ...approval });
+    }
+    res.json({ ok: true, autoApproved: false, claim: result.claim });
+  });
+
+  app.get("/api/directory/mine/owned", requireAuth, (req, res) => {
+    res.json(storage.getUserOwnedBusinesses(req.session.userId!));
+  });
+
+  // ── New-business submission (gig-flow "this address isn't in the system" branch) ──
+  const businessSubmissionSchema = z.object({
+    name: z.string().trim().min(2).max(120),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]).default("bar"),
+    description: z.string().trim().min(10).max(2000),
+    address: z.string().trim().max(200).optional().nullable(),
+    neighborhood: z.string().trim().max(80).optional().nullable(),
+    hours: z.string().trim().max(200).optional().nullable(),
+    phone: z.string().trim().max(40).optional().nullable(),
+    website: z.string().trim().max(300).optional().nullable(),
+    instagram: z.string().trim().max(80).optional().nullable(),
+    logoImageUrl: z.string().trim().max(300).optional().nullable(),
+  });
+
+  app.post("/api/directory/new-submission", requireAuth, (req, res) => {
+    try {
+      const data = businessSubmissionSchema.parse(req.body ?? {});
+      const sub = storage.createBusinessSubmission(req.session.userId!, data);
+      res.status(201).json(sub);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Invalid business submission" });
+    }
+  });
+
+  // ── Venue owner: promoters at this venue + blocklist ─────────────────────
+  function requireBusinessOwner(req: any, res: any, id: number) {
+    const business = storage.getBusiness(id);
+    if (!business) { res.status(404).json({ error: "Not found" }); return null; }
+    if (business.ownerId !== req.session.userId) { res.status(403).json({ error: "You don't own this venue." }); return null; }
+    return business;
+  }
+
+  app.get("/api/directory/:id/promoters", requireAuth, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!requireBusinessOwner(req, res, id)) return;
+    res.json(storage.getPromotersForBusiness(id));
+  });
+
+  app.post("/api/directory/:id/block", requireAuth, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!requireBusinessOwner(req, res, id)) return;
+    const userId = Number(req.body?.userId);
+    if (!userId) return res.status(400).json({ error: "userId required" });
+    const result = storage.blockPromoterFromBusiness(id, userId, req.session.userId!);
+    if ("error" in result) return res.status(400).json({ error: result.error });
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/directory/:id/block/:userId", requireAuth, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!requireBusinessOwner(req, res, id)) return;
+    storage.unblockPromoterFromBusiness(id, Number(req.params.userId));
+    res.json({ ok: true });
+  });
+
+  // ── Venue owner: logo change request (candidate held for Tucker's manual conversion) ──
+  app.post("/api/upload/business-logo", requireAuth, upload.single("logo"), (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
+    res.json({ url: `/uploads/${req.file.filename}` });
+  });
+
+  app.post("/api/directory/:id/logo-request", requireAuth, (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!requireBusinessOwner(req, res, id)) return;
+    const imageUrl = String(req.body?.imageUrl || "").trim();
+    if (!imageUrl) return res.status(400).json({ error: "imageUrl required" });
+    const created = storage.createBusinessLogoRequest(id, req.session.userId!, imageUrl);
+    res.status(201).json(created);
   });
 
   app.post("/api/admin/directory", requireAdmin, async (req, res) => {
@@ -1164,6 +1313,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const data = insertGigPostSchema.parse(req.body);
       assertGigBoardAllowed(req.body, data);
       const userId = req.session.userId!;
+      if (data.businessId != null) {
+        const user = storage.getUserById(userId);
+        const eligible = user?.promoterStatus === "approved" || isMainAdminUser(user) || storage.getUserOwnedBusinesses(userId).length > 0;
+        if (!eligible) return res.status(403).json({ error: "Only approved promoters and venue owners can link a gig to a directory venue." });
+        const business = storage.getBusiness(data.businessId);
+        if (!business || !business.active) return res.status(400).json({ error: "That venue is not available to link." });
+      }
       const gig = storage.createGigPost({ ...data, userId } as any);
       res.json(gig);
     } catch (e: any) {
@@ -2382,6 +2538,56 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user) return res.status(404).json({ error: "User not found" });
     storage.setPromoterStatus(userId, "rejected");
     res.json({ ok: true, promoterStatus: "rejected" });
+  });
+
+  // ── Admin: venue claims + new-business submissions + logo requests ──────
+  app.get("/api/admin/business-claims", requireAdmin, (req, res) => {
+    res.json(storage.getPendingBusinessClaims());
+  });
+
+  app.post("/api/admin/business-claims/:id/approve", requireAdmin, (req, res) => {
+    const adminName = String(req.body?.adminName || "Admin");
+    const result = storage.approveBusinessClaim(Number(req.params.id), adminName);
+    if ("error" in result) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.post("/api/admin/business-claims/:id/deny", requireAdmin, (req, res) => {
+    storage.rejectBusinessClaim(Number(req.params.id), req.body?.reason);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/business-submissions", requireAdmin, (req, res) => {
+    res.json(storage.getPendingBusinessSubmissions());
+  });
+
+  app.post("/api/admin/business-submissions/:id/approve", requireAdmin, (req, res) => {
+    const adminName = String(req.body?.adminName || "Admin");
+    const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
+    const result = storage.approveBusinessSubmission(Number(req.params.id), adminName, overrideImageUrl);
+    if ("error" in result) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.post("/api/admin/business-submissions/:id/deny", requireAdmin, (req, res) => {
+    storage.rejectBusinessSubmission(Number(req.params.id), req.body?.reason);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/business-logo-requests", requireAdmin, (req, res) => {
+    res.json(storage.getPendingBusinessLogoRequests());
+  });
+
+  app.post("/api/admin/business-logo-requests/:id/approve", requireAdmin, (req, res) => {
+    const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
+    const result = storage.approveBusinessLogoRequest(Number(req.params.id), overrideImageUrl);
+    if ("error" in result) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.post("/api/admin/business-logo-requests/:id/deny", requireAdmin, (req, res) => {
+    storage.rejectBusinessLogoRequest(Number(req.params.id), req.body?.reason);
+    res.json({ ok: true });
   });
 
   app.get("/api/admin/users", requireAdmin, (req, res) => {

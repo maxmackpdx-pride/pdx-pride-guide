@@ -78,7 +78,7 @@ interface AdminEvent {
 
 interface ModerationRequest {
   id: number;
-  type: "CLAIM" | "REMOVE";
+  type: "CLAIM" | "REMOVE" | "FLAGGED_BY_OWNER";
   eventId: number;
   eventTitle?: string;
   proof: string;
@@ -139,7 +139,7 @@ interface AdminUser extends AdminUserProfile {
 type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "inbox", "events", "gigs", "promoters", "users", "team"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "inbox", "events", "gigs", "promoters", "venue-claims", "users", "team"];
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -391,6 +391,24 @@ export default function Admin() {
   const { data: teamAdmins = [], isLoading: teamLoading, isError: teamError, refetch: refetchTeam } = useQuery<SiteAdminMember[]>({
     queryKey: ["/api/admin/team"],
     queryFn: () => apiRequest("GET", "/api/admin/team").then(r => r.json()),
+    enabled: authenticated,
+  });
+
+  const { data: businessClaims = [], isLoading: businessClaimsLoading, isError: businessClaimsError, refetch: refetchBusinessClaims } = useQuery<any[]>({
+    queryKey: ["/api/admin/business-claims"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-claims").then(r => r.json()),
+    enabled: authenticated,
+  });
+
+  const { data: businessSubmissions = [], isLoading: businessSubmissionsLoading, isError: businessSubmissionsError, refetch: refetchBusinessSubmissions } = useQuery<any[]>({
+    queryKey: ["/api/admin/business-submissions"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-submissions").then(r => r.json()),
+    enabled: authenticated,
+  });
+
+  const { data: businessLogoRequests = [], isLoading: businessLogoRequestsLoading, isError: businessLogoRequestsError, refetch: refetchBusinessLogoRequests } = useQuery<any[]>({
+    queryKey: ["/api/admin/business-logo-requests"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then(r => r.json()),
     enabled: authenticated,
   });
 
@@ -753,6 +771,39 @@ export default function Admin() {
     onError: () => toast({ title: "Error", description: "Could not update sub-admin status.", variant: "destructive" }),
   });
 
+  const businessClaimMutation = useMutation({
+    mutationFn: ({ id, action }: { id: number; action: "approve" | "deny" }) =>
+      apiRequest("POST", `/api/admin/business-claims/${id}/${action}`, { adminName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/business-claims"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+      toast({ title: "Venue claim updated" });
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const businessSubmissionMutation = useMutation({
+    mutationFn: ({ id, action }: { id: number; action: "approve" | "deny" }) =>
+      apiRequest("POST", `/api/admin/business-submissions/${id}/${action}`, { adminName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/business-submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      toast({ title: "New venue submission updated" });
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const businessLogoRequestMutation = useMutation({
+    mutationFn: ({ id, action }: { id: number; action: "approve" | "deny" }) =>
+      apiRequest("POST", `/api/admin/business-logo-requests/${id}/${action}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/business-logo-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      toast({ title: "Logo request updated" });
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
   async function handleUserSearch() {
     if (!userSearchQ.trim()) return;
     setUserSearching(true);
@@ -1023,7 +1074,12 @@ export default function Admin() {
     refetchEvents();
     refetchGigs();
     refetchTeam();
+    refetchBusinessClaims();
+    refetchBusinessSubmissions();
+    refetchBusinessLogoRequests();
   };
+
+  const venueClaimsPendingCount = businessClaims.length + businessSubmissions.length + businessLogoRequests.length;
 
   const setAdminTab = (tab: AdminTab) => {
     setActiveTab(tab);
@@ -1067,6 +1123,7 @@ export default function Admin() {
           users: userCount,
           gigs: gigs.length,
           promoters: approvedPromoterCount || pendingPromoters.length || undefined,
+          "venue-claims": venueClaimsPendingCount || undefined,
         }}
         pushStatus={pushStatus}
         onRefreshAll={refreshAdminData}
@@ -1756,6 +1813,118 @@ export default function Admin() {
                           <button onClick={() => setFixUsernameTarget(null)} className="display text-xs px-2 py-1 text-white/40">CANCEL</button>
                         </div>
                       )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "venue-claims" && (
+          <div className="space-y-8">
+            <div>
+              <p className="display text-sm mb-3" style={{ color: "#19E3FF" }}>VENUE CLAIMS ({businessClaims.length})</p>
+              {businessClaimsError ? (
+                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load venue claims.</p>
+              ) : businessClaimsLoading ? (
+                <p className="text-white/30 text-xs">Loading…</p>
+              ) : businessClaims.length === 0 ? (
+                <p className="text-white/30 text-xs">No pending venue claims.</p>
+              ) : (
+                <div className="space-y-2">
+                  {businessClaims.map((claim: any) => (
+                    <div key={claim.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white text-sm font-semibold">{claim.businessName}</p>
+                        <p className="text-white/50 text-xs mt-1">@{claim.username || claim.email} — {claim.claimReason}</p>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          onClick={() => businessClaimMutation.mutate({ id: claim.id, action: "approve" })}
+                          disabled={businessClaimMutation.isPending}
+                          className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                        >APPROVE</button>
+                        <button
+                          onClick={() => businessClaimMutation.mutate({ id: claim.id, action: "deny" })}
+                          disabled={businessClaimMutation.isPending}
+                          className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                        >DENY</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="display text-sm mb-3" style={{ color: "#FF6600" }}>NEW VENUE SUBMISSIONS ({businessSubmissions.length})</p>
+              {businessSubmissionsError ? (
+                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load new venue submissions.</p>
+              ) : businessSubmissionsLoading ? (
+                <p className="text-white/30 text-xs">Loading…</p>
+              ) : businessSubmissions.length === 0 ? (
+                <p className="text-white/30 text-xs">No pending new-venue submissions.</p>
+              ) : (
+                <div className="space-y-2">
+                  {businessSubmissions.map((sub: any) => (
+                    <div key={sub.id} className="p-4 border border-white/10" style={{ background: "#0d0d0d" }}>
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white text-sm font-semibold">{sub.name} <span className="text-white/40 font-normal">· {sub.type}</span></p>
+                          <p className="text-white/50 text-xs mt-1">{sub.address || "No address given"} {sub.neighborhood ? `· ${sub.neighborhood}` : ""}</p>
+                          <p className="text-white/50 text-xs mt-1">{sub.description}</p>
+                          {sub.logoImageUrl && (
+                            <img src={sub.logoImageUrl} alt="Candidate logo" style={{ height: 48, marginTop: 8, borderRadius: 4, border: "1px solid #333" }} />
+                          )}
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            onClick={() => businessSubmissionMutation.mutate({ id: sub.id, action: "approve" })}
+                            disabled={businessSubmissionMutation.isPending}
+                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                          >APPROVE</button>
+                          <button
+                            onClick={() => businessSubmissionMutation.mutate({ id: sub.id, action: "deny" })}
+                            disabled={businessSubmissionMutation.isPending}
+                            className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                          >DENY</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="display text-sm mb-3" style={{ color: "#FF00CC" }}>LOGO REQUESTS ({businessLogoRequests.length})</p>
+              {businessLogoRequestsError ? (
+                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load logo requests.</p>
+              ) : businessLogoRequestsLoading ? (
+                <p className="text-white/30 text-xs">Loading…</p>
+              ) : businessLogoRequests.length === 0 ? (
+                <p className="text-white/30 text-xs">No pending logo requests.</p>
+              ) : (
+                <div className="space-y-2">
+                  {businessLogoRequests.map((req: any) => (
+                    <div key={req.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
+                      <div className="min-w-0 flex-1 flex items-center gap-3">
+                        <img src={req.imageUrl} alt="Candidate logo" style={{ height: 56, width: 56, objectFit: "contain", borderRadius: 4, border: "1px solid #333", background: "#000" }} />
+                        <p className="text-white text-sm font-semibold">{req.businessName}</p>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          onClick={() => businessLogoRequestMutation.mutate({ id: req.id, action: "approve" })}
+                          disabled={businessLogoRequestMutation.isPending}
+                          className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                        >APPROVE AS-IS</button>
+                        <button
+                          onClick={() => businessLogoRequestMutation.mutate({ id: req.id, action: "deny" })}
+                          disabled={businessLogoRequestMutation.isPending}
+                          className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                        >DENY</button>
+                      </div>
                     </div>
                   ))}
                 </div>

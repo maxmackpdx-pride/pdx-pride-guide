@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Link } from "wouter";
 import { Briefcase, X } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -18,9 +19,11 @@ import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
 import { Button } from "@/components/ds";
+import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { GIG_BOARD_RULES_SUMMARY, validateGigPostContent } from "@shared/boardModeration";
+import type { Business } from "@/pages/Directory";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -32,7 +35,26 @@ const gigSchema = z.object({
   compensation: z.string().optional(),
   location: z.string().optional(),
   isRemote: z.boolean().optional(),
+  businessId: z.number().nullable().optional(),
 });
+
+const newBusinessSubmissionSchema = z.object({
+  name: z.string().trim().min(2, "Name required"),
+  type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]),
+  description: z.string().trim().min(10, "Description must be at least 10 characters"),
+  address: z.string().trim().max(200).optional(),
+  neighborhood: z.string().trim().max(80).optional(),
+  hours: z.string().trim().max(200).optional(),
+  phone: z.string().trim().max(40).optional(),
+  website: z.string().trim().max(300).optional(),
+  instagram: z.string().trim().max(80).optional(),
+  logoImageUrl: z.string().trim().max(300).optional(),
+});
+
+const DIACRITIC_MARKS = new RegExp(`[${String.fromCharCode(0x0300)}-${String.fromCharCode(0x036f)}]`, "g");
+function normalizeVenueQuery(v: string): string {
+  return v.toLowerCase().normalize("NFKD").replace(DIACRITIC_MARKS, "").replace(/[^a-z0-9]+/g, " ").trim();
+}
 
 type GigFormData = z.infer<typeof gigSchema>;
 
@@ -102,6 +124,13 @@ export default function PrideWork() {
   const [sort, setSort] = useState("RECENT");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [acceptRules, setAcceptRules] = useState(false);
+  const [venueQuery, setVenueQuery] = useState("");
+  const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
+  const [venueBranch, setVenueBranch] = useState<"idle" | "private" | "newBusiness">("idle");
+  const [newBusinessForm, setNewBusinessForm] = useState({
+    name: "", type: "bar", description: "", address: "", neighborhood: "",
+    hours: "", phone: "", website: "", instagram: "", logoImageUrl: "",
+  });
 
   const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
     queryKey: ["/api/gigs"],
@@ -110,6 +139,40 @@ export default function PrideWork() {
       if (!r.ok) throw new Error(`${r.status}: ${(await r.text()) || r.statusText}`);
       return r.json();
     },
+  });
+
+  const { data: ownedBusinesses = [] } = useQuery<Business[]>({
+    queryKey: ["/api/directory/mine/owned"],
+    queryFn: () => apiRequest("GET", "/api/directory/mine/owned").then(r => r.json()),
+    enabled: !!user,
+  });
+
+  const isEligiblePoster = !!user && (user.promoterStatus === "approved" || !!user.isAdmin || ownedBusinesses.length > 0);
+
+  const { data: directoryBusinesses = [] } = useQuery<Business[]>({
+    queryKey: ["/api/directory"],
+    queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
+    enabled: isEligiblePoster,
+    staleTime: 60_000,
+  });
+
+  const venueMatches = useMemo(() => {
+    const q = normalizeVenueQuery(venueQuery);
+    if (q.length < 3) return [];
+    return directoryBusinesses
+      .filter(b => normalizeVenueQuery(b.name).includes(q) || (b.address && normalizeVenueQuery(b.address).includes(q)))
+      .slice(0, 5);
+  }, [directoryBusinesses, venueQuery]);
+
+  const newBusinessMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/directory/new-submission", newBusinessForm),
+    onSuccess: () => {
+      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed — your gig will keep using the plain location for now." });
+      setNewBusinessForm({ name: "", type: "bar", description: "", address: "", neighborhood: "", hours: "", phone: "", website: "", instagram: "", logoImageUrl: "" });
+      setVenueBranch("idle");
+      setVenueQuery("");
+    },
+    onError: (err: Error) => toast({ title: "Could not submit", description: err.message, variant: "destructive" }),
   });
 
   const stats = useMemo(() => [
@@ -136,6 +199,7 @@ export default function PrideWork() {
       compensation: "",
       location: "",
       isRemote: false,
+      businessId: null,
     },
   });
 
@@ -152,6 +216,9 @@ export default function PrideWork() {
       form.reset();
       setAcceptRules(false);
       setFormOpen(false);
+      setLinkedBusiness(null);
+      setVenueBranch("idle");
+      setVenueQuery("");
     },
     onError: (err: unknown) => {
       const message = err instanceof Error ? err.message : "Could not submit post.";
@@ -169,7 +236,7 @@ export default function PrideWork() {
       toast({ title: "Not a gig post", description: personalsErr, variant: "destructive" });
       return;
     }
-    mutation.mutate(data);
+    mutation.mutate({ ...data, businessId: isEligiblePoster ? (linkedBusiness?.id ?? null) : null });
   };
 
   const openForm = (postType: "POSTING_GIG" | "LOOKING_FOR_WORK") => {
@@ -376,6 +443,107 @@ export default function PrideWork() {
                   {...form.register("location")}
                 />
               </label>
+
+              {postType === "POSTING_GIG" && isEligiblePoster && (
+                <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
+                  <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
+                    Link this gig to a directory venue (optional) — it'll show up on that venue's Gigs tab.
+                  </p>
+                  {linkedBusiness ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ padding: "4px 12px", borderRadius: 999, border: `1px solid ${formAccent}`, color: formAccent, fontSize: "0.82rem" }}>
+                        Linked: {linkedBusiness.name}
+                      </span>
+                      <button type="button" className="board-mini-btn" onClick={() => setLinkedBusiness(null)}>
+                        Unlink
+                      </button>
+                    </div>
+                  ) : venueBranch === "private" ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span className="board-copy-sm">This gig will keep a plain-text location, not linked to the directory.</span>
+                      <button type="button" className="board-mini-btn" onClick={() => { setVenueBranch("idle"); setVenueQuery(""); }}>
+                        Search again
+                      </button>
+                    </div>
+                  ) : venueBranch === "newBusiness" ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <input className="board-text-field" placeholder="Business name *" value={newBusinessForm.name} onChange={e => setNewBusinessForm(f => ({ ...f, name: e.target.value }))} />
+                      <select className="board-text-field" value={newBusinessForm.type} onChange={e => setNewBusinessForm(f => ({ ...f, type: e.target.value }))}>
+                        <option value="bar">Bar & Club</option>
+                        <option value="restaurant">Restaurant</option>
+                        <option value="cafe">Cafe</option>
+                        <option value="venue">Venue</option>
+                        <option value="service">Service</option>
+                        <option value="shop">Shop</option>
+                        <option value="hotel">Hotel</option>
+                      </select>
+                      <textarea className="board-text-field" rows={3} placeholder="Description *" value={newBusinessForm.description} onChange={e => setNewBusinessForm(f => ({ ...f, description: e.target.value }))} />
+                      <input className="board-text-field" placeholder="Address" value={newBusinessForm.address} onChange={e => setNewBusinessForm(f => ({ ...f, address: e.target.value }))} />
+                      <input className="board-text-field" placeholder="Neighborhood" value={newBusinessForm.neighborhood} onChange={e => setNewBusinessForm(f => ({ ...f, neighborhood: e.target.value }))} />
+                      <input className="board-text-field" placeholder="Hours" value={newBusinessForm.hours} onChange={e => setNewBusinessForm(f => ({ ...f, hours: e.target.value }))} />
+                      <input className="board-text-field" placeholder="Phone" value={newBusinessForm.phone} onChange={e => setNewBusinessForm(f => ({ ...f, phone: e.target.value }))} />
+                      <input className="board-text-field" placeholder="Website" value={newBusinessForm.website} onChange={e => setNewBusinessForm(f => ({ ...f, website: e.target.value }))} />
+                      <input className="board-text-field" placeholder="Instagram" value={newBusinessForm.instagram} onChange={e => setNewBusinessForm(f => ({ ...f, instagram: e.target.value }))} />
+                      <ImageUploader
+                        endpoint="/api/upload/business-logo"
+                        fieldName="logo"
+                        onUploaded={url => setNewBusinessForm(f => ({ ...f, logoImageUrl: url }))}
+                        label="Upload logo"
+                      />
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          type="button"
+                          className="board-mini-btn"
+                          disabled={newBusinessMutation.isPending || !newBusinessForm.name.trim() || !newBusinessForm.description.trim()}
+                          onClick={() => newBusinessMutation.mutate()}
+                        >
+                          {newBusinessMutation.isPending ? "Submitting…" : "Submit for admin approval"}
+                        </button>
+                        <button type="button" className="board-mini-btn" onClick={() => setVenueBranch("idle")}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        className="board-text-field"
+                        placeholder="Search venue name or address…"
+                        value={venueQuery}
+                        onChange={e => setVenueQuery(e.target.value)}
+                      />
+                      {venueMatches.length > 0 && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
+                          {venueMatches.map(b => (
+                            <button
+                              key={b.id}
+                              type="button"
+                              className="board-mini-btn"
+                              style={{ textAlign: "left" }}
+                              onClick={() => setLinkedBusiness({ id: b.id, name: b.name })}
+                            >
+                              {b.name}{b.address ? ` — ${b.address}` : ""}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {venueQuery.trim().length >= 3 && venueMatches.length === 0 && (
+                        <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                          <span className="board-copy-sm">No match in the directory.</span>
+                          <button type="button" className="board-mini-btn" onClick={() => setVenueBranch("private")}>
+                            Private address, don't share
+                          </button>
+                          <button
+                            type="button"
+                            className="board-mini-btn"
+                            onClick={() => { setNewBusinessForm(f => ({ ...f, name: venueQuery })); setVenueBranch("newBusiness"); }}
+                          >
+                            This is a business — add it →
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
               <label className="span gigs-form-check">
                 <input type="checkbox" {...form.register("isRemote")} />

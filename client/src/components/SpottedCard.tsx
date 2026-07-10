@@ -1,5 +1,7 @@
-import { MapPin } from "lucide-react";
+import { MapPin, Share2 } from "lucide-react";
 import type { MissedConnectionPost } from "./MissedConnectionsPanel";
+import { shareMissedConnectionStory } from "@/lib/shareMissedConnection";
+import { useToast } from "@/hooks/use-toast";
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF00CC", "#39FF14", "#A855F7", "#FF6600"];
 
@@ -29,6 +31,19 @@ export default function SpottedCard({
 }) {
   const location = post.eventTitle || post.eventVenue || post.venueHint || "Around Town";
   const isClosed = post.status === "CLOSED" || post.status === "ARCHIVED";
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    try {
+      const result = await shareMissedConnectionStory({ id: post.id, body: post.body, location, accentColor });
+      if (result === "copied") toast({ title: "Image copied", description: "Story image copied to your clipboard and downloaded." });
+      else if (result === "downloaded") toast({ title: "Image downloaded", description: "Post it to your Instagram Story." });
+    } catch (err) {
+      if ((err as DOMException)?.name !== "AbortError") {
+        toast({ title: "Could not create share image", variant: "destructive" });
+      }
+    }
+  };
 
   return (
     <article
@@ -51,16 +66,26 @@ export default function SpottedCard({
         </span>
       </div>
 
-      {!post.isMine && !isClosed && (
+      <div className="spotted-card__actions">
+        {!post.isMine && !isClosed && (
+          <button
+            type="button"
+            className="spotted-card__msg-btn"
+            onClick={onReply}
+            aria-label={`Message about: ${post.title || post.body.slice(0, 40)}`}
+          >
+            MESSAGE →
+          </button>
+        )}
         <button
           type="button"
-          className="spotted-card__msg-btn"
-          onClick={onReply}
-          aria-label={`Message about: ${post.title || post.body.slice(0, 40)}`}
+          className="spotted-card__share-btn"
+          onClick={handleShare}
+          aria-label="Share as Instagram Story image"
         >
-          MESSAGE →
+          <Share2 size={12} strokeWidth={2.5} /> SHARE
         </button>
-      )}
+      </div>
     </article>
   );
 }

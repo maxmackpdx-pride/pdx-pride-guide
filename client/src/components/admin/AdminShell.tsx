@@ -8,6 +8,7 @@ import {
   LogOut,
   MoreHorizontal,
   RefreshCw,
+  Store,
   Users,
   UserCircle,
 } from "lucide-react";
@@ -21,6 +22,7 @@ export type AdminView =
   | "users"
   | "gigs"
   | "promoters"
+  | "venue-claims"
   | "team";
 
 export type AdminNavItem = {
@@ -43,6 +45,7 @@ const VIEW_TITLES: Record<AdminView, string> = {
   users: "All users",
   gigs: "Pride Werk",
   promoters: "Promoters",
+  "venue-claims": "Venue claims",
   team: "My team",
 };
 
@@ -53,6 +56,7 @@ const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
   users: { label: "The community", color: "var(--cyan, #19e3ff)" },
   gigs: { label: "The gig board", color: "var(--amber, #ffb020)" },
   promoters: { label: "The scene makers", color: "var(--pink, #ff1fa0)" },
+  "venue-claims": { label: "The directory", color: "var(--cyan, #19e3ff)" },
   team: { label: "Keyholders", color: "var(--lime, #c8fa3c)" },
 };
 
@@ -63,6 +67,7 @@ const VIEW_LEDES: Record<AdminView, string> = {
   users: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",
   gigs: "Live Pride Werk posts. Take down spam, keep the board useful for workers and hosts.",
   promoters: "Pending applications and approved hosts who can claim and edit events.",
+  "venue-claims": "Business-owner claims on existing venues, new-business submissions, and logo change requests.",
   team: "Site admins can open this panel while logged into their own account. Grant it to people you trust with the queues.",
 };
 
@@ -73,6 +78,7 @@ const ICONS: Record<AdminView | "more", ReactNode> = {
   users: <UserCircle size={15} strokeWidth={2.2} />,
   gigs: <Briefcase size={15} strokeWidth={2.2} />,
   promoters: <Users size={15} strokeWidth={2.2} />,
+  "venue-claims": <Store size={15} strokeWidth={2.2} />,
   team: <Users size={15} strokeWidth={2.2} />,
   more: <MoreHorizontal size={15} strokeWidth={2.2} />,
 };
@@ -118,6 +124,7 @@ export default function AdminShell({
     { key: "users", label: "All users", count: navCounts.users },
     { key: "gigs", label: "Pride Werk", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
+    { key: "venue-claims", label: "Venue claims", count: navCounts["venue-claims"] },
   ];
 
   const mobilePrimary: Array<{ key: AdminView | "more"; label: string; alert?: number }> = [
@@ -132,10 +139,11 @@ export default function AdminShell({
     { key: "users", label: "All users", count: navCounts.users },
     { key: "gigs", label: "Pride Werk", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
+    { key: "venue-claims", label: "Venue claims", count: navCounts["venue-claims"] },
     { key: "team", label: "My team", count: navCounts.team },
   ];
 
-  const moreViews: AdminView[] = ["users", "gigs", "promoters"];
+  const moreViews: AdminView[] = ["users", "gigs", "promoters", "venue-claims"];
   const kicker = VIEW_KICKERS[view];
   const pushOk = !!pushStatus?.configured;
 

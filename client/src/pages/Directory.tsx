@@ -51,9 +51,18 @@ export type Business = {
   lat: number | null;
   lng: number | null;
   isNew: boolean;
+  ownerId?: number | null;
+  isOwner?: boolean;
   upcomingEvents?: DirectoryEventSummary[];
   canEditVenue?: boolean;
+  promoters?: DirectoryPromoter[];
+  spotted?: DirectorySpotted[];
+  gigs?: DirectoryGig[];
 };
+
+export type DirectoryPromoter = { id: number; username: string; displayName: string | null };
+export type DirectorySpotted = { id: number; title: string; body: string; createdAt: string };
+export type DirectoryGig = { id: number; title: string; postType: string; createdAt: string };
 
 export const TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",
@@ -377,7 +386,7 @@ export default function Directory() {
       </div>
 
       {selectedPlace && (
-        <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} />
+        <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} onRequireAuth={() => setShowAuth(true)} />
       )}
     </div>
   );
@@ -430,12 +439,15 @@ function DirectoryCard({ biz, onClick }: { biz: Business; onClick?: () => void }
       donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}
+      lat={biz.lat}
+      lng={biz.lng}
       hours={biz.hours || undefined}
       phone={biz.phone || undefined}
       description={biz.description || undefined}
       website={biz.website || undefined}
       instagram={biz.instagram || undefined}
       grandOpening={biz.isNew}
+      promoters={biz.promoters}
       events={upcomingEvents.map(event => ({
         day: event.dayOfWeek || undefined,
         date: formatDirectoryEventWhen(event),

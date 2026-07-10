@@ -96,6 +96,7 @@ export const gigPosts = sqliteTable("gig_posts", {
   imageUrl: text("image_url"),
   gigDate: text("gig_date"),
   gigTime: text("gig_time"),
+  businessId: integer("business_id"),
 });
 
 export const insertGigPostSchema = createInsertSchema(gigPosts).omit({ id: true, createdAt: true, status: true });
@@ -122,6 +123,7 @@ export const businesses = sqliteTable("businesses", {
   isNew: integer("is_new", { mode: "boolean" }).notNull().default(false),
   hours: text("hours"),
   phone: text("phone"),
+  ownerId: integer("owner_id"),
   createdAt: text("created_at").notNull().default(""),
 });
 
@@ -161,6 +163,61 @@ export const moderationRequests = sqliteTable("moderation_requests", {
 export const insertModerationRequestSchema = createInsertSchema(moderationRequests).omit({ id: true, createdAt: true, status: true, adminNotes: true });
 export type InsertModerationRequest = z.infer<typeof insertModerationRequestSchema>;
 export type ModerationRequest = typeof moderationRequests.$inferSelect;
+
+// Business ownership claims (existing venue) — mirrors the event CLAIM flow in `submissions`
+export const businessClaims = sqliteTable("business_claims", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  businessId: integer("business_id").notNull(),
+  userId: integer("user_id").notNull(),
+  claimReason: text("claim_reason").notNull(),
+  status: text("status").notNull().default("PENDING"), // PENDING | APPROVED | REJECTED
+  adminNotes: text("admin_notes"),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type BusinessClaim = typeof businessClaims.$inferSelect;
+
+// New-business submissions (address doesn't match any existing directory venue)
+export const businessSubmissions = sqliteTable("business_submissions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull().default("bar"),
+  description: text("description").notNull(),
+  address: text("address"),
+  neighborhood: text("neighborhood"),
+  hours: text("hours"),
+  phone: text("phone"),
+  website: text("website"),
+  instagram: text("instagram"),
+  logoImageUrl: text("logo_image_url"), // candidate upload, held for admin conversion
+  status: text("status").notNull().default("PENDING"), // PENDING | APPROVED | REJECTED
+  adminNotes: text("admin_notes"),
+  createdBusinessId: integer("created_business_id"), // set once approved
+  createdAt: text("created_at").notNull().default(""),
+});
+export type BusinessSubmission = typeof businessSubmissions.$inferSelect;
+
+// Per-venue promoter blocklist
+export const businessBlocks = sqliteTable("business_blocks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  businessId: integer("business_id").notNull(),
+  blockedUserId: integer("blocked_user_id").notNull(),
+  createdByUserId: integer("created_by_user_id"),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type BusinessBlock = typeof businessBlocks.$inferSelect;
+
+// Owner-submitted logo candidates, held for Tucker's manual conversion before going live
+export const businessLogoRequests = sqliteTable("business_logo_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  businessId: integer("business_id").notNull(),
+  userId: integer("user_id").notNull(),
+  imageUrl: text("image_url").notNull(), // candidate upload
+  status: text("status").notNull().default("PENDING"), // PENDING | APPROVED | REJECTED
+  adminNotes: text("admin_notes"),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type BusinessLogoRequest = typeof businessLogoRequests.$inferSelect;
 
 // Attendance (Hey I'll Be There)
 export const attendances = sqliteTable("attendances", {

@@ -80,3 +80,54 @@ export function attachUpcomingEventsToBusinesses(
     upcomingEvents: getUpcomingEventsForBusiness(business, listings, businesses),
   }));
 }
+
+export type DirectoryPromoterSummary = { id: number; username: string; displayName: string | null };
+
+export function attachPromotersToBusinesses<T extends Business>(
+  businesses: T[],
+  getPromotersForBusiness: (businessId: number) => DirectoryPromoterSummary[],
+): Array<T & { promoters: DirectoryPromoterSummary[] }> {
+  return businesses.map(business => ({
+    ...business,
+    promoters: getPromotersForBusiness(business.id),
+  }));
+}
+
+export type DirectorySpottedSummary = {
+  id: number;
+  title: string;
+  body: string;
+  createdAt: string;
+};
+
+export type DirectoryGigSummary = {
+  id: number;
+  title: string;
+  postType: string;
+  createdAt: string;
+};
+
+/** Best-effort fuzzy match: no FK exists on missed_connections, so match the linked
+ * event's venue (if any) or the free-text venueHint against the business name/address. */
+function venueTextMatchesBusiness(venueText: string | null | undefined, business: Business): boolean {
+  if (!venueText) return false;
+  return eventMatchesBusiness({ venueName: venueText, address: null, lat: null, lng: null }, {
+    name: business.name, address: business.address, lat: business.lat, lng: business.lng,
+  });
+}
+
+export function attachSpottedAndGigsToBusinesses<T extends Business>(
+  businesses: T[],
+  missedConnections: Array<{ id: number; title: string; body: string; createdAt: string; eventVenue?: string | null; venueHint?: string | null }>,
+  gigs: Array<{ id: number; title: string; postType: string; createdAt: string; location?: string | null; businessId?: number | null }>,
+): Array<T & { spotted: DirectorySpottedSummary[]; gigs: DirectoryGigSummary[] }> {
+  return businesses.map(business => {
+    const spotted = missedConnections
+      .filter(mc => venueTextMatchesBusiness(mc.eventVenue || mc.venueHint, business))
+      .map(mc => ({ id: mc.id, title: mc.title, body: mc.body, createdAt: mc.createdAt }));
+    const gigPosts = gigs
+      .filter(g => (g.businessId != null ? g.businessId === business.id : venueTextMatchesBusiness(g.location, business)))
+      .map(g => ({ id: g.id, title: g.title, postType: g.postType, createdAt: g.createdAt }));
+    return { ...business, spotted, gigs: gigPosts };
+  });
+}

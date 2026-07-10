@@ -73,12 +73,19 @@ export default function Submit() {
   const [location] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
-  const initialMode: PageMode = (claimPathEventId || params.get("mode") === "claim") ? "claim" : "landing";
+  const initialMode: PageMode = (claimPathEventId || params.get("mode") === "claim")
+    ? "claim"
+    : params.get("mode") === "apply" ? "apply" : "landing";
+  const venueForApply = params.get("venue") || "";
 
   const [mode, setMode] = useState<PageMode>(initialMode);
   const [submitStep, setSubmitStep] = useState<SubmitStep>("promoter_app");
   const [eventForm, setEventForm] = useState(emptyEventForm());
-  const [promoterForm, setPromoterForm] = useState({ ...emptyPromoterForm(), claimEventId: claimPathEventId });
+  const [promoterForm, setPromoterForm] = useState({
+    ...emptyPromoterForm(),
+    claimEventId: claimPathEventId,
+    appReason: venueForApply ? `I want to promote/manage events at ${venueForApply}. ` : "",
+  });
   const [submitterOrg, setSubmitterOrg] = useState("");
 
   const promoterStatus = user?.promoterStatus || "none";

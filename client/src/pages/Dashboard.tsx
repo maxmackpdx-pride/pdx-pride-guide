@@ -15,6 +15,7 @@ import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
 import DashboardHubSummary from "@/components/dashboard/DashboardHubSummary";
 import DashboardAdminTeaser from "@/components/dashboard/DashboardAdminTeaser";
+import DashboardVenueSection from "@/components/dashboard/DashboardVenueSection";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
 import { editFormToApiPayload, eventToEditForm } from "@/lib/eventEditForm";
@@ -458,6 +459,8 @@ export default function Dashboard() {
 
         <ScrollReveal delay={120}>
         <div className="dash-drawers">
+          <DashboardVenueSection open={!!openSections.venues} onToggle={() => toggleSection("venues")} />
+
           <DashboardDrawer
             title="My events"
             id="events"
