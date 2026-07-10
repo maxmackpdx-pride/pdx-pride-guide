@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { EventCard, PosterCard, SectionHeader } from "@/components/ds";
+import { EventCard, PosterCard } from "@/components/ds";
+import ProfileSectionHeader from "./ProfileSectionHeader";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
@@ -8,7 +9,7 @@ import { eventPath } from "@shared/eventSlug";
 import { formatListingWhen, listingDay, listingPosterUrl, listingTypeTags } from "@/lib/dsEvent";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { Event } from "@shared/schema";
-import { fmtEventWhen } from "./profileHelpers";
+import { fmtEventWhen, promoterSectionKicker } from "./profileHelpers";
 import type { ProfileEvent, PublicProfileData } from "./types";
 
 type Filter = "upcoming" | "past";
@@ -100,6 +101,7 @@ export default function EventsTab({ data }: Props) {
         going={goingCount}
         onRsvp={withRsvp ? () => toggleRsvp(e.id) : undefined}
         href={eventPath(e.id, e.title)}
+        showLink={!withRsvp}
       />
     );
   };
@@ -128,8 +130,12 @@ export default function EventsTab({ data }: Props) {
     const list = memFilter === "upcoming" ? going.upcoming : going.past;
     return (
       <section className="pp-events">
-        <SectionHeader kicker="On the calendar" title="Events" />
-        {renderToggle(memFilter, setMemFilter)}
+        <ProfileSectionHeader
+          kicker="On the calendar"
+          title="Events"
+          kickerColor="var(--neon-cyan)"
+          action={renderToggle(memFilter, setMemFilter)}
+        />
         <div className="pp-event-rows">
           {list.length > 0 ? list.map(e => mapRow(e)) : (
             <p className="pp-empty-copy">No {memFilter} events yet.</p>
@@ -141,11 +147,17 @@ export default function EventsTab({ data }: Props) {
 
   const hostList = hostFilter === "upcoming" ? hosting.upcoming : pastSlice(hosting.past);
 
+  const sectionKicker = promoterSectionKicker(data);
+
   return (
     <div className="pp-events">
       <section>
-        <SectionHeader kicker="Their parties" title="Hosting" />
-        {renderToggle(hostFilter, setHostFilter)}
+        <ProfileSectionHeader
+          kicker={sectionKicker}
+          title="Hosting"
+          kickerColor="var(--profile-acc-t)"
+          action={renderToggle(hostFilter, setHostFilter)}
+        />
         {hostFilter === "upcoming" ? (
           <div className="pp-poster-grid">
             {hostList.length > 0 ? hostList.map(e => mapPoster(e, true)) : (
@@ -158,7 +170,7 @@ export default function EventsTab({ data }: Props) {
               {hostList.map(e => mapRow(e, e.admission === "TICKETED" ? "Sold out" : undefined))}
             </div>
             {hosting.past.length > 2 && (
-              <button type="button" className="pp-expand display" onClick={() => setPastExpanded(v => !v)}>
+              <button type="button" className="pp-expand-btn display" onClick={() => setPastExpanded(v => !v)}>
                 {pastExpanded ? "Show less" : `Show all ${hosting.past.length} past shows`}
               </button>
             )}
@@ -168,7 +180,11 @@ export default function EventsTab({ data }: Props) {
 
       {going.upcoming.length > 0 && (
         <section className="pp-events__going">
-          <SectionHeader kicker="Out and about" title="Going to" />
+          <ProfileSectionHeader
+            kicker="Out on the town"
+            title="Going to"
+            kickerColor="var(--neon-cyan)"
+          />
           <div className="pp-event-rows">
             {going.upcoming.map(e => mapRow(e))}
           </div>

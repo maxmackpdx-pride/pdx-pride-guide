@@ -74,8 +74,19 @@ export function profileCssVars(accent: string): React.CSSProperties {
   } as React.CSSProperties;
 }
 
-export function promoterTagline(data: PublicProfileData): string {
-  const bits = [data.location, data.memberSince ? `since ${new Date(data.memberSince).getFullYear()}` : null]
-    .filter(Boolean);
-  return bits.length ? bits.join(", ") : "Portland";
+export function promoterHeroLine(data: PublicProfileData): { lead: string; accent: string } {
+  const bits = data.talents?.length
+    ? data.talents.slice(0, 4)
+    : (data.roles?.length ? data.roles.slice(0, 4) : ["Portland nightlife"]);
+  const lead = `${bits.join(". ")}.`;
+  const sinceYear = data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
+    ? new Date(data.memberSince).getFullYear()
+    : null;
+  const accentParts = [data.location || "Portland", sinceYear ? `since ${sinceYear}` : null].filter(Boolean);
+  return { lead, accent: accentParts.join(", ") };
+}
+
+export function promoterSectionKicker(data: PublicProfileData): string {
+  const name = (data.displayName || data.username).trim().split(/\s+/)[0] || data.username;
+  return `${name} presents`;
 }

@@ -22,13 +22,16 @@ export default function ProfileStatStrip({ data }: Props) {
   return (
     <div className="pp-stats">
       <div className="pp-stats__item">
-        <span className="display pp-stats__num">{followers.toLocaleString("en-US")}</span>
+        <span className="display pp-stats__num pp-stats__num--accent">{followers.toLocaleString("en-US")}</span>
         <span className="display pp-stats__label">Followers</span>
       </div>
       {roleStats.map(s => (
-        <div key={s.label} className="pp-stats__item">
-          <span className="display pp-stats__num">{s.num}</span>
-          <span className="display pp-stats__label">{s.label}</span>
+        <div key={s.label} className="pp-stats__group">
+          <span className="pp-stats__divider" aria-hidden="true" />
+          <div className="pp-stats__item">
+            <span className="display pp-stats__num">{s.num}</span>
+            <span className="display pp-stats__label">{s.label}</span>
+          </div>
         </div>
       ))}
     </div>

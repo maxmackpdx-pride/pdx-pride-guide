@@ -2,7 +2,7 @@ import { useRef } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
-import { promoterTagline } from "./profileHelpers";
+import { promoterHeroLine } from "./profileHelpers";
 import type { PublicProfileData } from "./types";
 
 type Props = {
@@ -35,6 +35,7 @@ export default function ProfileHero({
   const shareRef = useRef<HTMLDivElement>(null);
   const isPromoter = !!data.isPromoter;
   const displayName = data.displayName || data.username;
+  const promoLine = promoterHeroLine(data);
   const venues = data.affiliatedVenues?.length ? data.affiliatedVenues : (data.linkedVenues || []);
   const memberYear = data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
     ? new Date(data.memberSince).getFullYear()
@@ -76,7 +77,7 @@ export default function ProfileHero({
             <h1 className="display pp-hero__name">{displayName}</h1>
             {isPromoter ? (
               <p className="display pp-hero__tagline">
-                {data.bio ? data.bio.slice(0, 80) : "Portland nightlife"} <span className="pp-hero__tagline-acc">{promoterTagline(data)}</span>
+                {promoLine.lead} <span className="pp-hero__tagline-acc">{promoLine.accent}</span>
               </p>
             ) : (
               <p className="pp-hero__location">

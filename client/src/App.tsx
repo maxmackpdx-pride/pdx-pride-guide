@@ -54,17 +54,22 @@ function isHubPath(path: string) {
   return bare === "/dashboard" || bare === "/admin" || bare === "/inbox";
 }
 
+function isProfilePath(path: string) {
+  return path.split("?")[0].startsWith("/u/");
+}
+
 function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
+  const profile = isProfilePath(location);
 
   return (
     <div
-      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}`}
+      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
       style={{ background: "#0a0a0a" }}
     >
       <FilmGrainOverlay />
-      <Nav />
+      {!profile && <Nav />}
       <main className="flex-1">
         <RouteBoundary>
           <Switch>
@@ -97,8 +102,8 @@ function AppLayout() {
           </Switch>
         </RouteBoundary>
       </main>
-      <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
-      <Footer />
+      {!profile && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
+      {!profile && <Footer />}
     </div>
   );
 }
