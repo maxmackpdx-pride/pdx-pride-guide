@@ -12,7 +12,7 @@ import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin, Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
-import { parsePacificDateTime } from "@shared/missedConnections";
+import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { dayAccentToken } from "@/lib/dsColors";
@@ -51,6 +51,7 @@ export type Business = {
   lat: number | null;
   lng: number | null;
   isNew: boolean;
+  createdAt?: string;
   ownerId?: number | null;
   isOwner?: boolean;
   upcomingEvents?: DirectoryEventSummary[];
@@ -153,11 +154,20 @@ export default function Directory() {
     return NEIGHBORHOODS.filter(n => n === "ALL" || seen.has(n));
   }, [businesses]);
 
-  const heroStats = useMemo(() => [
-    { num: businesses.length, label: "Places listed", color: "#ff1fa0" },
-    { num: businesses.filter(b => b.queerOwned).length, label: "Queer-owned", color: "#ccff00" },
-    { num: businesses.filter(b => b.isNew).length, label: "New this season", color: "#19e3ff" },
-  ], [businesses]);
+  const heroStats = useMemo(() => {
+    const thisMonth = pacificTodayDate().slice(0, 7);
+    const grandOpeningsThisMonth = businesses.filter(b => {
+      if (!b.isNew) return false;
+      const createdMonth = b.createdAt ? pacificCalendarDate(b.createdAt)?.slice(0, 7) : null;
+      return !createdMonth || createdMonth === thisMonth;
+    }).length;
+    const hostingPrideEvents = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
+    return [
+      { num: businesses.length, label: "Total places", color: "#ff1fa0" },
+      { num: grandOpeningsThisMonth, label: "Total grand openings this month", color: "#ccff00" },
+      { num: hostingPrideEvents, label: "Total hosting Pride events", color: "#19e3ff" },
+    ];
+  }, [businesses]);
 
   const createMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory", form),
