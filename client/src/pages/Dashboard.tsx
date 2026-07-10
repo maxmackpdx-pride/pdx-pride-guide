@@ -297,6 +297,54 @@ export default function Dashboard() {
     onError: () => toast({ title: "Error", description: "Could not update gig post.", variant: "destructive" }),
   });
 
+  useEffect(() => {
+    if (!pendingEditEventId || !user) return;
+    if (myEventsQuery.isLoading) return;
+    const evt = myEvents.find((e) => String(e.id) === pendingEditEventId);
+    if (!evt) {
+      setPendingEditEventId(null);
+      return;
+    }
+    setMemberView("posts");
+    setOpenSections((prev) => ({ ...prev, events: true }));
+    setEditingEvent(evt);
+    setHostUpdate("");
+    setEventForm(eventToEditForm(evt));
+    setPendingEditEventId(null);
+  }, [pendingEditEventId, user, myEvents, myEventsQuery.isLoading]);
+
+  useEffect(() => {
+    if (!pendingEditGigId || !user) return;
+    if (myGigsQuery.isLoading) return;
+    const gig = myGigs.find((g) => String(g.id) === pendingEditGigId);
+    if (!gig) {
+      setPendingEditGigId(null);
+      return;
+    }
+    setMemberView("posts");
+    setOpenSections((prev) => ({ ...prev, gigs: true }));
+    setEditingGig(gig);
+    setGigForm({
+      title: gig.title || "",
+      description: gig.description || "",
+      skills: gig.skills || "",
+      compensation: gig.compensation || "",
+      location: gig.location || "",
+    });
+    setPendingEditGigId(null);
+  }, [pendingEditGigId, user, myGigs, myGigsQuery.isLoading]);
+
+  useEffect(() => {
+    if (!pendingSection || !user) return;
+    setMemberView("posts");
+    setOpenSections((prev) => ({ ...prev, [pendingSection]: true }));
+    const sectionId = pendingSection;
+    setPendingSection(null);
+    requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [pendingSection, user]);
+
   if (loading) {
     return (
       <div className="zine-page dash-page board-page">
@@ -397,54 +445,6 @@ export default function Dashboard() {
     if (!editingEvent || !eventForm) return;
     eventEditMutation.mutate({ id: editingEvent.id, data: editFormToApiPayload(eventForm) });
   };
-
-  useEffect(() => {
-    if (!pendingEditEventId || !user) return;
-    if (myEventsQuery.isLoading) return;
-    const evt = myEvents.find((e) => String(e.id) === pendingEditEventId);
-    if (!evt) {
-      setPendingEditEventId(null);
-      return;
-    }
-    setMemberView("posts");
-    setOpenSections((prev) => ({ ...prev, events: true }));
-    setEditingEvent(evt);
-    setHostUpdate("");
-    setEventForm(eventToEditForm(evt));
-    setPendingEditEventId(null);
-  }, [pendingEditEventId, user, myEvents, myEventsQuery.isLoading]);
-
-  useEffect(() => {
-    if (!pendingEditGigId || !user) return;
-    if (myGigsQuery.isLoading) return;
-    const gig = myGigs.find((g) => String(g.id) === pendingEditGigId);
-    if (!gig) {
-      setPendingEditGigId(null);
-      return;
-    }
-    setMemberView("posts");
-    setOpenSections((prev) => ({ ...prev, gigs: true }));
-    setEditingGig(gig);
-    setGigForm({
-      title: gig.title || "",
-      description: gig.description || "",
-      skills: gig.skills || "",
-      compensation: gig.compensation || "",
-      location: gig.location || "",
-    });
-    setPendingEditGigId(null);
-  }, [pendingEditGigId, user, myGigs, myGigsQuery.isLoading]);
-
-  useEffect(() => {
-    if (!pendingSection || !user) return;
-    setMemberView("posts");
-    setOpenSections((prev) => ({ ...prev, [pendingSection]: true }));
-    const sectionId = pendingSection;
-    setPendingSection(null);
-    requestAnimationFrame(() => {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [pendingSection, user]);
 
   const eventCount = submittedEvents.length + myEvents.length;
   const postsCount = eventCount + myGigs.length + myMissed.length + myGifting.length + myCheckIns.length;
