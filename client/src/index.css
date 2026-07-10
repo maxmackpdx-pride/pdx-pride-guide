@@ -1806,7 +1806,294 @@ h2.display,
     --site-wordmark-size: 0.58rem;
     line-height: 0.8;
   }
+
+  /* Mobile Bottom Navigation */
+  .site-mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+    background: var(--surface-card, #1a1a1a);
+    border-top: 1px solid var(--border-primary, #333);
+    z-index: 50;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  main {
+    padding-bottom: 80px;
+  }
+
+  /* Left section: Home + Hub */
+  .site-mobile-nav__tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 0.7rem;
+    color: var(--text-secondary, #999);
+    text-decoration: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    padding: 4px 0 0;
+  }
+
+  .site-mobile-nav__tab svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .site-mobile-nav__tab.active,
+  .site-mobile-nav__tab:active {
+    color: var(--neon-magenta);
+  }
+
+  .site-mobile-nav__hub-wrapper {
+    flex: 1;
+    position: relative;
+  }
+
+  .site-mobile-nav__hub-toggle {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Hub expanded menu (drawer/slide-in) */
+  .site-mobile-nav__hub-expanded {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface-card, #1a1a1a);
+    border: 1px solid var(--border-primary, #333);
+    border-bottom: none;
+    max-height: 60vh;
+    overflow-y: auto;
+    animation: slideUp 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .site-mobile-nav__hub-item {
+    padding: 16px 12px;
+    font-size: 1.1rem;
+    color: var(--text-primary, #fff);
+    text-decoration: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    border-left: 3px solid transparent;
+  }
+
+  .site-mobile-nav__hub-item:hover,
+  .site-mobile-nav__hub-item.active {
+    border-left-color: var(--neon-magenta);
+    color: var(--neon-magenta);
+  }
+
+  .site-mobile-nav__hub-item--sub {
+    padding-left: 24px;
+    font-size: 1rem;
+  }
+
+  .site-mobile-nav__hub-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-mobile-nav__hub-group-label {
+    padding: 12px 12px 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--neon-yellow);
+  }
+
+  .site-mobile-nav__hub-user-section {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border-primary, #333);
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  /* Right section: Inbox */
+  .site-mobile-nav__inbox {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 1px solid var(--border-primary, #333);
+    padding: 4px 8px 0;
+    position: relative;
+  }
+
+  /* Tab switcher (Personal / Admin / Owner) */
+  .site-mobile-nav__tabs {
+    display: flex;
+    gap: 2px;
+    font-size: 0.65rem;
+    flex-wrap: nowrap;
+  }
+
+  .site-mobile-nav__tab-switch {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 2px;
+    background: none;
+    border: 1px solid var(--border-primary, #333);
+    color: var(--text-secondary, #999);
+    cursor: pointer;
+    border-radius: 2px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-mobile-nav__tab-switch:hover {
+    border-color: var(--neon-magenta);
+  }
+
+  .site-mobile-nav__tab-switch.active {
+    background: var(--neon-magenta);
+    color: #000;
+    border-color: var(--neon-magenta);
+    font-weight: 600;
+  }
+
+  /* Avatar scroll area */
+  .site-mobile-nav__avatars {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .site-mobile-nav__avatars::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .site-mobile-nav__avatars::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .site-mobile-nav__avatars::-webkit-scrollbar-thumb {
+    background: var(--border-primary, #333);
+    border-radius: 2px;
+  }
+
+  .site-mobile-nav__avatar-link {
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: start;
+  }
+
+  .site-mobile-nav__avatar-link .user-avatar {
+    --avatar-size: 32px;
+  }
+
+  .site-mobile-nav__unread-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    background: var(--neon-magenta);
+    border-radius: 50%;
+    border: 2px solid var(--surface-card, #1a1a1a);
+  }
+
+  .site-mobile-nav__empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-secondary, #999);
+    font-size: 0.8rem;
+  }
+
+  .site-mobile-nav__empty svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.5;
+  }
+
+  /* Inbox footer link */
+  .site-mobile-nav__inbox-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px 0 0;
+    font-size: 0.7rem;
+    color: var(--text-secondary, #999);
+    text-decoration: none;
+    cursor: pointer;
+    border-top: 1px solid var(--border-primary, #333);
+  }
+
+  .site-mobile-nav__inbox-link.active {
+    color: var(--neon-magenta);
+  }
+
+  .site-mobile-nav__count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: var(--neon-magenta);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.6rem;
+    border-radius: 8px;
+  }
 }
+
+@media (min-width: 641px) {
+  .site-mobile-nav {
+    display: none;
+  }
+}
+
+/* Hide Inbox from profile menu on mobile (shown in bottom nav instead) */
+@media (max-width: 640px) {
+  .site-profile-menu__item--inbox {
+    display: none;
+  }
+}
+
 .btn-neon.cyan {
   border-color: var(--neon-cyan);
   color: var(--neon-cyan);
