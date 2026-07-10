@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { ChevronLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -105,6 +106,14 @@ export default function Inbox() {
         else if (view === "home") setLocation("/dashboard");
       }}
     >
+      <button
+        type="button"
+        className="hub-back-btn"
+        onClick={() => setLocation("/dashboard")}
+      >
+        <ChevronLeft size={15} strokeWidth={2.4} aria-hidden />
+        Back to hub
+      </button>
       <div
         className="inbox-page"
         style={{

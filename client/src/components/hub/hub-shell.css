@@ -741,6 +741,29 @@
   }
 }
 
+.hub-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 16px;
+  padding: 8px 15px;
+  border: 1px solid var(--border-strong, #2a2a2a);
+  background: transparent;
+  color: var(--text-lo, #9a9a9a);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.hub-back-btn:hover {
+  border-color: var(--cyan, #00ffff);
+  color: var(--cyan, #00ffff);
+}
+
 /* Phone: hide sidebar, show mobile chrome (Hub-print @640px) */
 @media (max-width: 640px) {
   .hub-shell__frame {
