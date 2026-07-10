@@ -6,6 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
 import NudeBeachesHero from "@/components/NudeBeachesHero";
+import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import BoardLoadingState from "@/components/BoardLoadingState";
@@ -20,7 +21,6 @@ import {
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_RESOURCES,
   SAUVIE_ISLAND_RULES,
-  SAUVIE_ISLAND_SWIM_GUIDE_URL,
   SAUVIE_ISLAND_WINDFINDER_URL,
   type NudeBeachTab,
   type NudeBeachesSnapshot,
@@ -56,22 +56,6 @@ function formatFetchedAt(iso?: string) {
   }
 }
 
-function statusClass(status?: string | null) {
-  if (status === "pass" || status === "good") return "nude-live-card--good";
-  if (status === "fail" || status === "bad") return "nude-live-card--bad";
-  if (status === "warning" || status === "warn") return "nude-live-card--warn";
-  return "nude-live-card--neutral";
-}
-
-function formatShortTime(iso?: string | null) {
-  if (!iso) return null;
-  try {
-    return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-  } catch {
-    return null;
-  }
-}
-
 function ResourceList({ links }: { links: ResourceLink[] }) {
   return (
     <div className="nude-resource-list">
@@ -91,102 +75,9 @@ function ResourceList({ links }: { links: ResourceLink[] }) {
   );
 }
 
-function trendLabel(trend?: string | null) {
-  if (trend === "rising") return "Rising";
-  if (trend === "falling") return "Falling";
-  if (trend === "steady") return "Steady";
-  return null;
-}
-
-function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
-  const live = data.roosterRock;
-  const worth = live.worthCrossing;
-  const lowTime = formatShortTime(live.todayLowAt);
-  const highTime = formatShortTime(live.todayHighAt);
-  const trend = trendLabel(live.levelTrend);
-
+function RoosterRockPanel() {
   return (
     <div className="nude-tab-panel">
-      <section className={`nude-rooster-status ${statusClass(worth === false ? "bad" : worth ? "good" : "neutral")}`}>
-        <div className="nude-rooster-status__head">
-          <div>
-            <div className="nude-live-card__label">Right now · USGS 14128870</div>
-            <div className="nude-rooster-status__level">
-              {live.riverLevelFt != null ? live.riverLevelFt.toFixed(2) : "—"}
-              <span className="nude-rooster-status__unit">ft</span>
-            </div>
-          </div>
-          {live.crossingBand ? (
-            <span className="nude-rooster-status__badge">{live.crossingBand}</span>
-          ) : null}
-        </div>
-        <p className="nude-rooster-status__verdict">
-          {live.depthEstimate || live.crossingAdvice || "Gage below Bonneville Dam — estimate for the Sand Island crossing."}
-        </p>
-        <p className="nude-rooster-status__meta">
-          {trend ? <span>{trend} over the last hour</span> : null}
-          {trend && live.riverLevelAt ? <span aria-hidden="true"> · </span> : null}
-          {live.riverLevelAt ? (
-            <span>
-              Updated{" "}
-              {new Date(live.riverLevelAt).toLocaleTimeString(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </span>
-          ) : null}
-        </p>
-        {live.crossingWindowNote ? (
-          <p className="nude-rooster-status__advice">{live.crossingWindowNote}</p>
-        ) : null}
-        <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
-          Charts &amp; level history →
-        </a>
-      </section>
-
-      <div className="nude-metric-grid" aria-label="Current park conditions">
-        <article className="nude-metric-tile">
-          <div className="nude-metric-tile__label">Today&apos;s low</div>
-          <div className="nude-metric-tile__value">
-            {live.todayLowFt != null ? `${live.todayLowFt.toFixed(2)} ft` : "—"}
-          </div>
-          <p className="nude-metric-tile__detail">{lowTime ? `at ${lowTime}` : "Best crossing window"}</p>
-        </article>
-        <article className="nude-metric-tile">
-          <div className="nude-metric-tile__label">Today&apos;s high</div>
-          <div className="nude-metric-tile__value">
-            {live.todayHighFt != null ? `${live.todayHighFt.toFixed(2)} ft` : "—"}
-          </div>
-          <p className="nude-metric-tile__detail">{highTime ? `at ${highTime}` : "Daily peak"}</p>
-        </article>
-        <article className="nude-metric-tile">
-          <div className="nude-metric-tile__label">Air temp</div>
-          <div className="nude-metric-tile__value">
-            {live.airTempF != null ? `${live.airTempF}°F` : "—"}
-          </div>
-          <p className="nude-metric-tile__detail">{live.weatherSummary || "NWS forecast"}</p>
-        </article>
-        <article className="nude-metric-tile">
-          <div className="nude-metric-tile__label">Wind</div>
-          <div className="nude-metric-tile__value">{live.wind || "—"}</div>
-          <p className="nude-metric-tile__detail">At the park</p>
-        </article>
-        <article className="nude-metric-tile">
-          <div className="nude-metric-tile__label">Water temp</div>
-          <div className="nude-metric-tile__value">
-            {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
-          </div>
-          <p className="nude-metric-tile__detail">{live.waterTempSite || "Columbia River"}</p>
-        </article>
-        <article className="nude-metric-tile">
-          <div className="nude-metric-tile__label">Air quality</div>
-          <div className="nude-metric-tile__value">{live.airQuality?.split(" · ")[0] || "—"}</div>
-          <p className="nude-metric-tile__detail">
-            {live.airQuality?.includes("·") ? live.airQuality.split(" · ").slice(1).join(" · ") : "Open-Meteo near Rooster Rock"}
-          </p>
-        </article>
-      </div>
-
       <section className="nude-panel">
         <div className="nude-panel__kicker nude-panel__kicker--lime">Parking &amp; pass</div>
         <h3 className="nude-panel__title">Day-use fees</h3>
@@ -217,56 +108,9 @@ function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
   );
 }
 
-function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
-  const live = data.sauvieIsland;
-
+function SauvieIslandPanel() {
   return (
     <div className="nude-tab-panel">
-      <div className="nude-live-strip">
-        <article className={`nude-live-card ${statusClass(live.swimStatus)}`}>
-          <div className="nude-live-card__label">Water quality · Swim Guide</div>
-          <div className="nude-live-card__value">{live.swimStatusLabel || "—"}</div>
-          <p className="nude-live-card__detail">
-            {live.swimSummary || "Bi-weekly Collins Beach samples — verify before you swim."}
-            {live.lastSampleAt ? ` Latest: ${live.lastSampleAt}.` : ""}
-          </p>
-          <a className="nude-live-card__link" href={SAUVIE_ISLAND_SWIM_GUIDE_URL} target="_blank" rel="noopener noreferrer">
-            Swim Guide →
-          </a>
-        </article>
-
-        <article className="nude-live-card nude-live-card--warn">
-          <div className="nude-live-card__label">Parking permits</div>
-          <div className="nude-live-card__value">Check live</div>
-          <p className="nude-live-card__detail">
-            {live.parkingNote ||
-              "Mandatory on summer weekends and select dates through Labor Day. Sold-out dates update only on SauvieIslandParking.com."}
-          </p>
-          <a className="nude-live-card__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
-            Sauvie Island Parking →
-          </a>
-        </article>
-
-        <article className="nude-live-card nude-live-card--neutral">
-          <div className="nude-live-card__label">Island weather · NWS</div>
-          <div className="nude-live-card__value">
-            {live.airTempF != null ? `${live.airTempF}°F` : "—"}
-          </div>
-          <p className="nude-live-card__detail">
-            {live.weatherSummary || "Forecast unavailable."}
-            {live.wind ? ` Wind ${live.wind}.` : ""}
-          </p>
-          <a
-            className="nude-live-card__link"
-            href={SAUVIE_ISLAND_WINDFINDER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Windfinder →
-          </a>
-        </article>
-      </div>
-
       <section className="nude-panel">
         <div className="nude-panel__kicker nude-panel__kicker--cyan">Getting there</div>
         <h3 className="nude-panel__title">Collins Beach</h3>
@@ -280,6 +124,11 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
             <li>Swim Guide posts bi-weekly Collins Beach samples; verify before you swim.</li>
             <li>SICA consolidates island-wide alerts; Windfinder at Reeder Beach covers live wind and tides nearby.</li>
           </ul>
+          <div className="nude-map-actions" style={{ marginTop: 14 }}>
+            <a className="nude-map-btn" href={SAUVIE_ISLAND_WINDFINDER_URL} target="_blank" rel="noopener noreferrer">
+              Windfinder at Reeder Beach
+            </a>
+          </div>
         </div>
       </section>
 
@@ -370,21 +219,6 @@ export default function NudeBeaches() {
 
   return (
     <div className="zine-page nude-beaches-page board-page board-page--makeover events-page">
-      <ScrollReveal>
-        <div className="events-tab-bar" style={{ paddingTop: 18 }}>
-          {NUDE_BEACH_TABS.map(tab => (
-            <button
-              key={tab.key}
-              type="button"
-              className={`events-tab${activeTab === tab.key ? " active" : ""}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </ScrollReveal>
-
       <NudeBeachesHero activeTab={activeTab} snapshot={snapshot} />
 
       <div className="nude-refresh-bar">
@@ -406,15 +240,35 @@ export default function NudeBeaches() {
       </div>
 
       <ScrollReveal delay={20}>
-        <div className="nude-beaches-map-row">
-          <NudeBeachesMap key={activeTab} tab={activeTab} />
-          <div className="nude-beaches-map-row__actions">
-            {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
-              <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
-                {map.label}
-              </a>
-            ))}
+        <div className="events-map-row nude-beaches-map-row">
+          <div className="events-map-row__panel">
+            <NudeBeachesHubPanel tab={activeTab} snapshot={snapshot} />
           </div>
+          <div className="events-map-row__map">
+            <NudeBeachesMap key={activeTab} tab={activeTab} height="100%" />
+          </div>
+        </div>
+        <div className="nude-beaches-map-row__actions">
+          {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
+            <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
+              {map.label}
+            </a>
+          ))}
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal delay={30}>
+        <div className="events-tab-bar nude-beaches-tab-bar">
+          {NUDE_BEACH_TABS.map(tab => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`events-tab${activeTab === tab.key ? " active" : ""}`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </ScrollReveal>
 
@@ -451,9 +305,9 @@ export default function NudeBeaches() {
                 </div>
               ) : snapshot ? (
                 isRooster ? (
-                  <RoosterRockPanel data={snapshot} />
+                  <RoosterRockPanel />
                 ) : (
-                  <SauvieIslandPanel data={snapshot} />
+                  <SauvieIslandPanel />
                 )
               ) : null}
             </div>

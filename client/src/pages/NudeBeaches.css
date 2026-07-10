@@ -366,17 +366,27 @@
   display: none !important;
 }
 
-/* Full-bleed map row — matches Directory map placement */
-.nude-beaches-map-row {
-  width: 100%;
-  background: #000;
-  border-bottom: 1px solid #1a1a1a;
+/* Map + hub row — board-standard layout (matches Events) */
+.nude-beaches-page .nude-beaches-map-row .events-map-row__panel .nb-hub {
+  height: 100%;
+  min-height: 0;
+}
+
+.nude-beaches-page .nude-beaches-map-row .events-map-row__map .directory-map-wrap,
+.nude-beaches-page .nude-beaches-map-row .events-map-row__map .directory-map,
+.nude-beaches-page .nude-beaches-map-row .events-map-row__map .nude-beaches-map {
+  height: 100%;
 }
 
 .nude-beaches-page .nude-beaches-map {
   border: none;
   border-radius: 0;
   overflow: hidden;
+}
+
+/* Tab switcher — right-aligned like Events board tabs */
+.nude-beaches-tab-bar {
+  justify-content: flex-end;
 }
 
 .nude-beaches-map-row__actions {

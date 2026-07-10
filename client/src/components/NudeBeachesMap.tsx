@@ -99,7 +99,7 @@ function MapResizer({ tab }: { tab: NudeBeachTab }) {
 
 type Props = {
   tab: NudeBeachTab;
-  height?: number;
+  height?: number | string;
 };
 
 export default function NudeBeachesMap({ tab, height = 380 }: Props) {

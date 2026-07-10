@@ -13,31 +13,22 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
   const stats = isRooster
     ? [
         {
-          num: snapshot?.roosterRock.riverLevelFt != null
-            ? Number(snapshot.roosterRock.riverLevelFt.toFixed(1))
-            : "—",
-          label: snapshot?.roosterRock.crossingBand || "ft · Columbia gage",
-          color:
-            snapshot?.roosterRock.worthCrossing === false
-              ? "#ff8c00"
-              : snapshot?.roosterRock.riverLevelFt != null && snapshot.roosterRock.riverLevelFt < 15
-                ? "#19e3ff"
-                : snapshot?.roosterRock.riverLevelFt != null
-                  ? "#ffb347"
-                  : "#19e3ff",
-        },
-        {
-          num:
-            snapshot?.roosterRock.todayLowFt != null
-              ? Number(snapshot.roosterRock.todayLowFt.toFixed(1))
-              : "—",
-          label: "ft · today's low",
-          color: "#39ff14",
-        },
-        {
           num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "—",
           label: "air temp",
           color: "#ff00cc",
+        },
+        {
+          num:
+            snapshot?.roosterRock.waterTempF != null
+              ? `${Math.round(snapshot.roosterRock.waterTempF)}°`
+              : "—",
+          label: "water temp",
+          color: "#19e3ff",
+        },
+        {
+          num: snapshot?.roosterRock.wind?.split(" ")[0] || "—",
+          label: snapshot?.roosterRock.wind?.includes("mph") ? "wind · mph" : "wind",
+          color: "#39ff14",
         },
       ]
     : [
