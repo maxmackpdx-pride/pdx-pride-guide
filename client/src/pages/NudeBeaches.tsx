@@ -87,70 +87,99 @@ function ResourceList({ links }: { links: ResourceLink[] }) {
   );
 }
 
+function trendLabel(trend?: string | null) {
+  if (trend === "rising") return "Rising";
+  if (trend === "falling") return "Falling";
+  if (trend === "steady") return "Steady";
+  return null;
+}
+
 function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
   const live = data.roosterRock;
   const worth = live.worthCrossing;
   const lowTime = formatShortTime(live.todayLowAt);
   const highTime = formatShortTime(live.todayHighAt);
+  const trend = trendLabel(live.levelTrend);
 
   return (
     <div className="nude-tab-panel">
-      <div className="nude-live-strip">
-        <article className={`nude-live-card ${statusClass(worth === false ? "bad" : worth ? "good" : "neutral")}`}>
-          <div className="nude-live-card__label">River level · USGS 14128870</div>
-          <div className="nude-live-card__value">
-            {live.riverLevelFt != null ? `${live.riverLevelFt.toFixed(2)} ft` : "—"}
-            {live.crossingBand ? (
-              <span className="nude-live-card__subvalue"> · {live.crossingBand}</span>
-            ) : null}
+      <section className={`nude-rooster-status ${statusClass(worth === false ? "bad" : worth ? "good" : "neutral")}`}>
+        <div className="nude-rooster-status__head">
+          <div>
+            <div className="nude-live-card__label">Right now · USGS 14128870</div>
+            <div className="nude-rooster-status__level">
+              {live.riverLevelFt != null ? live.riverLevelFt.toFixed(2) : "—"}
+              <span className="nude-rooster-status__unit">ft</span>
+            </div>
           </div>
-          <p className="nude-live-card__detail">
-            {live.crossingWindowNote || live.crossingAdvice || "Gage below Bonneville Dam — relative guide for the Sand Island crossing."}
-            {live.todayLowFt != null && live.todayHighFt != null && !live.crossingWindowNote ? (
-              <>
-                {" "}
-                Today: {live.todayLowFt.toFixed(2)} ft{lowTime ? ` (${lowTime})` : ""} – {live.todayHighFt.toFixed(2)} ft
-                {highTime ? ` (${highTime})` : ""}.
-              </>
-            ) : null}
-          </p>
-          <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
-            Charts &amp; level history →
-          </a>
-        </article>
+          {live.crossingBand ? (
+            <span className="nude-rooster-status__badge">{live.crossingBand}</span>
+          ) : null}
+        </div>
+        <p className="nude-rooster-status__verdict">
+          {live.depthEstimate || live.crossingAdvice || "Gage below Bonneville Dam — estimate for the Sand Island crossing."}
+        </p>
+        <p className="nude-rooster-status__meta">
+          {trend ? <span>{trend} over the last hour</span> : null}
+          {trend && live.riverLevelAt ? <span aria-hidden="true"> · </span> : null}
+          {live.riverLevelAt ? (
+            <span>
+              Updated{" "}
+              {new Date(live.riverLevelAt).toLocaleTimeString(undefined, {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </span>
+          ) : null}
+        </p>
+        {live.crossingWindowNote ? (
+          <p className="nude-rooster-status__advice">{live.crossingWindowNote}</p>
+        ) : null}
+        <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
+          Charts &amp; level history →
+        </a>
+      </section>
 
-        <article className="nude-live-card nude-live-card--neutral">
-          <div className="nude-live-card__label">Air · NWS</div>
-          <div className="nude-live-card__value">
+      <div className="nude-metric-grid" aria-label="Current park conditions">
+        <article className="nude-metric-tile">
+          <div className="nude-metric-tile__label">Today&apos;s low</div>
+          <div className="nude-metric-tile__value">
+            {live.todayLowFt != null ? `${live.todayLowFt.toFixed(2)} ft` : "—"}
+          </div>
+          <p className="nude-metric-tile__detail">{lowTime ? `at ${lowTime}` : "Best crossing window"}</p>
+        </article>
+        <article className="nude-metric-tile">
+          <div className="nude-metric-tile__label">Today&apos;s high</div>
+          <div className="nude-metric-tile__value">
+            {live.todayHighFt != null ? `${live.todayHighFt.toFixed(2)} ft` : "—"}
+          </div>
+          <p className="nude-metric-tile__detail">{highTime ? `at ${highTime}` : "Daily peak"}</p>
+        </article>
+        <article className="nude-metric-tile">
+          <div className="nude-metric-tile__label">Air temp</div>
+          <div className="nude-metric-tile__value">
             {live.airTempF != null ? `${live.airTempF}°F` : "—"}
           </div>
-          <p className="nude-live-card__detail">
-            {live.weatherSummary || "Forecast unavailable."}
-            {live.airQuality ? ` Air quality: ${live.airQuality}.` : ""}
-            {live.wind ? ` Wind ${live.wind}.` : ""}
-          </p>
-          <a
-            className="nude-live-card__link"
-            href="https://forecast.weather.gov/MapClick.php?lat=45.5446&lon=-122.2342"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            NWS forecast →
-          </a>
+          <p className="nude-metric-tile__detail">{live.weatherSummary || "NWS forecast"}</p>
         </article>
-
-        <article className="nude-live-card nude-live-card--neutral">
-          <div className="nude-live-card__label">Water temp · Columbia</div>
-          <div className="nude-live-card__value">
+        <article className="nude-metric-tile">
+          <div className="nude-metric-tile__label">Wind</div>
+          <div className="nude-metric-tile__value">{live.wind || "—"}</div>
+          <p className="nude-metric-tile__detail">At the park</p>
+        </article>
+        <article className="nude-metric-tile">
+          <div className="nude-metric-tile__label">Water temp</div>
+          <div className="nude-metric-tile__value">
             {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
           </div>
-          <p className="nude-live-card__detail">
-            {live.waterTempSite ? `${live.waterTempSite}. ` : ""}
-            {live.waterClarity ? `Clarity estimate: ${live.waterClarity}.` : "Columbia water is cold year-round."}
+          <p className="nude-metric-tile__detail">{live.waterTempSite || "Columbia River"}</p>
+        </article>
+        <article className="nude-metric-tile">
+          <div className="nude-metric-tile__label">Air quality</div>
+          <div className="nude-metric-tile__value">{live.airQuality?.split(" · ")[0] || "—"}</div>
+          <p className="nude-metric-tile__detail">
+            {live.airQuality?.includes("·") ? live.airQuality.split(" · ").slice(1).join(" · ") : "PurpleAir near Corbett"}
           </p>
-          <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
-            Live water read →
-          </a>
         </article>
       </div>
 

@@ -17,6 +17,8 @@ export type ResourceLink = {
   priority?: "primary";
 };
 
+export type RiverLevelTrend = "rising" | "falling" | "steady";
+
 export type RoosterRockLive = {
   riverLevelFt: number | null;
   riverLevelAt: string | null;
@@ -25,6 +27,8 @@ export type RoosterRockLive = {
   todayHighFt: number | null;
   todayHighAt: string | null;
   crossingWindowNote: string | null;
+  levelTrend: RiverLevelTrend | null;
+  depthEstimate: string | null;
   crossingBand: string | null;
   crossingAdvice: string | null;
   worthCrossing: boolean | null;
@@ -58,10 +62,31 @@ export const ROOSTER_ROCK_MAPS = [
     href: "https://maps.apple.com/?daddr=Rooster+Rock+State+Park,+Corbett,+OR&dirflg=d",
   },
   {
+    label: "Crossing map",
+    href: "https://roosterrockcrossing.com/#map",
+  },
+  {
     label: "OpenStreetMap",
     href: "https://www.openstreetmap.org/?mlat=45.5446&mlon=-122.2342#map=15/45.5446/-122.2342",
   },
 ] as const;
+
+export function depthAtCrossing(gageFt: number): number {
+  if (gageFt <= 11) return 0;
+  if (gageFt <= 13) return ((gageFt - 11) / 2) * 2;
+  if (gageFt <= 15) return 2 + ((gageFt - 13) / 2) * 3;
+  return 5 + (gageFt - 15);
+}
+
+export function depthEstimateFromGage(gageFt: number): string {
+  const depth = depthAtCrossing(gageFt);
+  if (depth <= 0.05) return "Dry — walk across";
+  if (depth < 1.5) return "Ankle to shin deep";
+  if (depth < 2.5) return "Knee deep";
+  if (depth < 4) return "Waist deep";
+  if (depth < 5.5) return "Chest deep";
+  return "Over your head";
+}
 
 export type SauvieIslandLive = {
   swimStatus: SwimGuideStatus | null;

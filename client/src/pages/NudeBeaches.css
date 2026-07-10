@@ -40,6 +40,128 @@
   }
 }
 
+.nude-rooster-status {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.nude-rooster-status.nude-live-card--good { border-top: 3px solid #39ff14; }
+.nude-rooster-status.nude-live-card--warn { border-top: 3px solid #ffb347; }
+.nude-rooster-status.nude-live-card--bad { border-top: 3px solid #ff4d4d; }
+.nude-rooster-status.nude-live-card--neutral { border-top: 3px solid #19e3ff; }
+
+.nude-rooster-status__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.nude-rooster-status__level {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.nude-rooster-status__unit {
+  font-size: 0.42em;
+  color: #8a8a8a;
+  margin-left: 4px;
+}
+
+.nude-rooster-status__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #333;
+  background: #121218;
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nude-rooster-status__verdict {
+  margin: 12px 0 0;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.nude-rooster-status__meta {
+  margin: 8px 0 0;
+  color: #8a8a8a;
+  font-size: 12px;
+}
+
+.nude-rooster-status__advice {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(25, 227, 255, 0.08);
+  border: 1px solid rgba(25, 227, 255, 0.18);
+  color: #d8d4cb;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.nude-metric-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+@media (min-width: 900px) {
+  .nude-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nude-metric-tile {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-height: 108px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nude-metric-tile__label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.nude-metric-tile__value {
+  margin-top: 8px;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.nude-metric-tile__detail {
+  margin-top: auto;
+  padding-top: 8px;
+  color: #9a9a9a;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .nude-panel {
   margin-top: 28px;
   padding-top: 24px;

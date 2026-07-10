@@ -27,9 +27,12 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
                   : "#19e3ff",
         },
         {
-          num: snapshot?.roosterRock.waterTempF != null ? `${Math.round(snapshot.roosterRock.waterTempF)}°` : "—",
-          label: "water temp",
-          color: "#19e3ff",
+          num:
+            snapshot?.roosterRock.todayLowFt != null
+              ? Number(snapshot.roosterRock.todayLowFt.toFixed(1))
+              : "—",
+          label: "ft · today's low",
+          color: "#39ff14",
         },
         {
           num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "—",

@@ -1,8 +1,10 @@
 import { sqlite } from "./storage";
 import {
   crossingBandFromLevel,
+  depthEstimateFromGage,
   SAUVIE_ISLAND_PARKING_URL,
   type NudeBeachesSnapshot,
+  type RiverLevelTrend,
   type RoosterRockLive,
   type SauvieIslandLive,
   type SwimGuideStatus,
@@ -81,6 +83,7 @@ type UsgsRiverSnapshot = {
   todayHighFt: number | null;
   todayHighAt: string | null;
   crossingWindowNote: string | null;
+  levelTrend: RiverLevelTrend | null;
 };
 
 function crossingWindowNoteFromSeries(
@@ -125,6 +128,25 @@ function crossingWindowNoteFromSeries(
   return `Today the level has ranged ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
 }
 
+function levelTrendFromSeries(
+  series: Array<{ ft: number; at: string }>,
+  latest: { ft: number; at: string },
+): RiverLevelTrend | null {
+  if (series.length < 2) return null;
+  const target = new Date(latest.at).getTime() - 3_600_000;
+  let past = series[0];
+  for (let i = series.length - 1; i >= 0; i--) {
+    if (new Date(series[i].at).getTime() <= target) {
+      past = series[i];
+      break;
+    }
+  }
+  const delta = latest.ft - past.ft;
+  if (delta < -0.1) return "falling";
+  if (delta > 0.1) return "rising";
+  return "steady";
+}
+
 async function fetchUsgsRiverLevel(): Promise<UsgsRiverSnapshot | null> {
   const data = await fetchJson<{
     value: {
@@ -164,6 +186,7 @@ async function fetchUsgsRiverLevel(): Promise<UsgsRiverSnapshot | null> {
     todayHighFt: hi.ft,
     todayHighAt: hi.at,
     crossingWindowNote: crossingWindowNoteFromSeries(series, latest),
+    levelTrend: levelTrendFromSeries(series, latest),
   };
 }
 
@@ -292,6 +315,8 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     todayHighFt: null,
     todayHighAt: null,
     crossingWindowNote: null,
+    levelTrend: null,
+    depthEstimate: null,
     crossingBand: null,
     crossingAdvice: null,
     worthCrossing: null,
@@ -320,6 +345,8 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
       base.todayHighFt = river.todayHighFt;
       base.todayHighAt = river.todayHighAt;
       base.crossingWindowNote = river.crossingWindowNote;
+      base.levelTrend = river.levelTrend;
+      base.depthEstimate = depthEstimateFromGage(river.ft);
       base.crossingBand = band.band;
       base.crossingAdvice = band.advice;
       base.worthCrossing = band.worthCrossing;
