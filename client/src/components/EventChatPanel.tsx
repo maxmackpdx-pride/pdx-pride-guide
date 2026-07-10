@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
-import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
+import AdultContentGate from "@/components/AdultContentGate";
 
 type ChatMessage = {
   id: number;
@@ -17,10 +17,22 @@ type ChatMessage = {
   avatarRing?: string | null;
 };
 
+type PinnedMessage = {
+  id: number;
+  body: string;
+  createdAt?: string;
+  username?: string;
+  displayName?: string | null;
+};
+
 type ChatPayload = {
   messages: ChatMessage[];
   expiresAt: string | null;
   chatOpen: boolean;
+  opensAt?: string | null;
+  windowState?: "BEFORE" | "OPEN" | "CLOSED";
+  isHost?: boolean;
+  pinned?: PinnedMessage | null;
 };
 
 function formatCountdown(expiresAt: string | null): string | null {
@@ -34,6 +46,13 @@ function formatCountdown(expiresAt: string | null): string | null {
   return `${mins}m left`;
 }
 
+function formatOpensAt(opensAt: string | null | undefined): string | null {
+  if (!opensAt) return null;
+  const d = new Date(opensAt);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
+}
+
 type Props = {
   eventId: number;
   onClose: () => void;
@@ -41,6 +60,8 @@ type Props = {
 
 export default function EventChatPanel({ eventId, onClose }: Props) {
   const [body, setBody] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const [showAnnounce, setShowAnnounce] = useState(false);
   const [tick, setTick] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +74,10 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
   const messages = data?.messages ?? [];
   const expiresAt = data?.expiresAt ?? null;
   const chatOpen = data?.chatOpen ?? false;
+  const windowState = data?.windowState ?? (chatOpen ? "OPEN" : "CLOSED");
+  const opensAtLabel = formatOpensAt(data?.opensAt);
+  const isHost = Boolean(data?.isHost);
+  const pinned = data?.pinned ?? null;
   const countdown = useMemo(() => formatCountdown(expiresAt), [expiresAt, tick]);
 
   useEffect(() => {
@@ -75,6 +100,25 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
     },
   });
 
+  const announceMutation = useMutation({
+    mutationFn: (text: string) =>
+      apiRequest("POST", `/api/events/${eventId}/host-messages`, { body: text }),
+    onSuccess: () => {
+      setAnnouncement("");
+      setShowAnnounce(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "chat"] });
+    },
+  });
+
+  const metaLine =
+    windowState === "BEFORE"
+      ? opensAtLabel
+        ? `Chat opens ${opensAtLabel} (6h before doors)`
+        : "Chat opens 6 hours before doors"
+      : windowState === "OPEN"
+        ? countdown ?? "Open now"
+        : "Chat closed";
+
   return (
     <div className="event-chat-backdrop" data-testid="event-chat-backdrop" onClick={onClose}>
       <div
@@ -88,23 +132,73 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
         <header className="event-chat-panel__head">
           <div>
             <h3 className="display event-chat-panel__title">Event chat</h3>
-            <p className="event-chat-panel__meta">
-              {chatOpen
-                ? `Open for ${ATTENDANCE_CHAT_HOURS} hours · ${countdown ?? "active"}`
-                : countdown ?? "Chat closed"}
-            </p>
+            <p className="event-chat-panel__meta">{metaLine}</p>
           </div>
           <button type="button" className="event-chat-panel__close" onClick={onClose} aria-label="Close">
             ×
           </button>
         </header>
 
+        <AdultContentGate onDecline={onClose}>
+        {pinned && (
+          <div className="event-chat-panel__pin" data-testid="event-chat-pin">
+            <span className="event-chat-panel__pin-label">Pinned · host</span>
+            <p className="event-chat-panel__pin-body">{pinned.body}</p>
+          </div>
+        )}
+
+        {isHost && (
+          <div className="event-chat-panel__announce">
+            {showAnnounce ? (
+              <div className="event-chat-panel__announce-composer">
+                <input
+                  value={announcement}
+                  onChange={e => setAnnouncement(e.target.value)}
+                  placeholder="Announcement — pinned + messaged to everyone going"
+                  maxLength={1000}
+                />
+                <button
+                  type="button"
+                  className="display event-chat-panel__send"
+                  disabled={!announcement.trim() || announceMutation.isPending}
+                  onClick={() => announceMutation.mutate(announcement.trim())}
+                >
+                  Pin
+                </button>
+                <button
+                  type="button"
+                  className="event-chat-panel__announce-cancel"
+                  onClick={() => setShowAnnounce(false)}
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="event-chat-panel__announce-open"
+                onClick={() => setShowAnnounce(true)}
+              >
+                + Post announcement
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="event-chat-panel__messages" ref={listRef}>
           {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
-          {!isLoading && messages.length === 0 && (
+          {!isLoading && messages.length === 0 && windowState === "BEFORE" && (
             <p className="event-chat-panel__empty">
-              You're checked in. Say hi — others going can see this for the next {ATTENDANCE_CHAT_HOURS} hours.
+              You're on the list. The room opens 6 hours before doors — check back then.
             </p>
+          )}
+          {!isLoading && messages.length === 0 && windowState === "OPEN" && (
+            <p className="event-chat-panel__empty">
+              You're checked in. Say hi — everyone going can see this until 4 hours after the event ends.
+            </p>
+          )}
+          {!isLoading && messages.length === 0 && windowState === "CLOSED" && (
+            <p className="event-chat-panel__empty">This chat has closed.</p>
           )}
           {messages.map(msg => (
             <div
@@ -137,7 +231,13 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
           <input
             value={body}
             onChange={e => setBody(e.target.value)}
-            placeholder={chatOpen ? "Say something to the room…" : "Chat closed"}
+            placeholder={
+              chatOpen
+                ? "Say something to the room…"
+                : windowState === "BEFORE"
+                  ? "Chat hasn't opened yet"
+                  : "Chat closed"
+            }
             disabled={!chatOpen || postMutation.isPending}
             maxLength={500}
             data-testid="event-chat-input"
@@ -152,6 +252,7 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
             Send
           </button>
         </footer>
+        </AdultContentGate>
       </div>
     </div>
   );

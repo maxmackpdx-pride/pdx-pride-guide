@@ -306,7 +306,15 @@ export default function InboxOverlay({ open, onClose }: { open: boolean; onClose
         {/* body */}
         <div className="inbox-overlay__scroll" style={{ flex: 1, overflowY: "auto", padding: "14px 16px 12px", minHeight: 0 }}>
           {inboxActive && account === "personal" && (
-            <PersonalView folder={folder} filter={filter} query={query} showTags tintUnread onOpenThread={openThread} />
+            <PersonalView
+              folder={folder}
+              filter={filter}
+              query={query}
+              showTags
+              tintUnread
+              onOpenThread={openThread}
+              onNavigate={navigateFromSheet}
+            />
           )}
           {inboxActive && account === "admin" && <QueueView mode="admin" />}
           {inboxActive && account === "owner" && <QueueView mode="owner" />}

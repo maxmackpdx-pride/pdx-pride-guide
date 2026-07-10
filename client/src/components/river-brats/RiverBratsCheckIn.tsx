@@ -1,8 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
-import { beachVenueLabel, formatRiverBratsHour, pacificTodayDate } from "@shared/riverBrats";
+import {
+  RIVER_BRATS_HOUR_END,
+  RIVER_BRATS_HOUR_START,
+  beachVenueLabel,
+  formatRiverBratsHour,
+  pacificCurrentHour,
+  pacificTodayDate,
+} from "@shared/riverBrats";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
@@ -27,11 +34,17 @@ type CheckinRow = {
   isAnonymous?: boolean;
   masked?: boolean;
   isMine?: boolean;
+  presence?: "PLANNED" | "HERE";
+  gpsVerifiedAt?: string | null;
 };
 
 type Props = {
   beachId: NudeBeachTab;
   accent: "cyan" | "orange" | "green";
+  /** From ?verify=1 deep link (arrival push) — auto-run the GPS confirm once. */
+  autoVerify?: boolean;
+  /** From ?chat=1 deep link — auto-open the beach chat once checked in. */
+  autoOpenChat?: boolean;
 };
 
 function buttonAccentProps(accent: Props["accent"]) {
@@ -45,7 +58,7 @@ function buttonAccentProps(accent: Props["accent"]) {
   return { accent: "cyan" as const, style: undefined };
 }
 
-export default function RiverBratsCheckIn({ beachId, accent }: Props) {
+export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpenChat }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -56,6 +69,9 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
   const [showChat, setShowChat] = useState(false);
   const [messageTarget, setMessageTarget] = useState<CheckinRow | null>(null);
   const [messageBody, setMessageBody] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const autoVerifyRan = useRef(false);
+  const autoChatRan = useRef(false);
   const today = pacificTodayDate();
   const beachLabel = beachVenueLabel(beachId);
   const btnAccent = buttonAccentProps(accent);
@@ -77,14 +93,14 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
   }, [mine?.id, mine?.arrival_hour, mine?.note, mine?.isAnonymous]);
 
   const saveMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (override?: { arrivalHour?: number }) =>
       fetch("/api/river-brats/checkins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           beachId,
-          arrivalHour: hour,
+          arrivalHour: override?.arrivalHour ?? hour,
           note: note.trim() || undefined,
           date: today,
           isAnonymous: visibility === "anonymous",
@@ -97,10 +113,75 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
       setShowChat(true);
-      toast({ title: "Checked in", description: "Beach chat is open until midnight." });
+      toast({ title: "Checked in", description: "Beach chat is open until 10pm." });
     },
     onError: (err: Error) => toast({ title: "Could not check in", description: err.message, variant: "destructive" }),
   });
+
+  // "I am here" — grab the device location once, confirm presence server-side.
+  // Coordinates go straight to the verify endpoint and are never stored.
+  const runGpsVerify = () => {
+    if (!navigator.geolocation) {
+      toast({ title: "No location on this device", description: "You're still listed with your arrival time." });
+      return;
+    }
+    setVerifying(true);
+    navigator.geolocation.getCurrentPosition(
+      async position => {
+        try {
+          const r = await fetch("/api/river-brats/checkins/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              beachId,
+              date: today,
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            }),
+          });
+          const data = await r.json().catch(() => ({}));
+          if (r.ok && data.ok) {
+            queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
+            setShowChat(true);
+            toast({ title: "You're here", description: "Verified on the beach — say hi in chat." });
+          } else if (data.error === "TOO_FAR") {
+            toast({
+              title: "Not quite there yet",
+              description: `You look about ${data.distanceM >= 1000 ? `${(data.distanceM / 1000).toFixed(1)}km` : `${data.distanceM}m`} from the beach. Try again when you arrive.`,
+              variant: "destructive",
+            });
+          } else {
+            toast({ title: "Couldn't verify", description: data.error || "Try again in a minute.", variant: "destructive" });
+          }
+        } finally {
+          setVerifying(false);
+        }
+      },
+      () => {
+        setVerifying(false);
+        toast({
+          title: "Couldn't get your location",
+          description: "No worries — you're still listed as planned.",
+        });
+      },
+      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 30_000 },
+    );
+  };
+
+  const imHere = async () => {
+    if (!requireAuth()) return;
+    if (!mine) {
+      // Not checked in yet: check in for right now, then verify.
+      const nowHour = Math.min(RIVER_BRATS_HOUR_END, Math.max(RIVER_BRATS_HOUR_START, pacificCurrentHour()));
+      try {
+        await saveMutation.mutateAsync({ arrivalHour: nowHour });
+      } catch {
+        return;
+      }
+    }
+    runGpsVerify();
+  };
 
   const withdrawMutation = useMutation({
     mutationFn: (id: number) =>
@@ -144,11 +225,50 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
     return false;
   };
 
+  const iAmHere = mine?.presence === "HERE";
+  const arrivalDue =
+    !!mine && !iAmHere && pacificCurrentHour() >= mine.arrival_hour;
+
+  // ?verify=1 deep link (arrival push): run the GPS confirm once when the
+  // viewer's check-in is known.
+  useEffect(() => {
+    if (!autoVerify || autoVerifyRan.current || isLoading || !user) return;
+    autoVerifyRan.current = true;
+    if (mine && !iAmHere) runGpsVerify();
+  }, [autoVerify, isLoading, user, mine?.id, iAmHere]);
+
+  // ?chat=1 deep link (Inbox GROUP row): open the beach chat once.
+  useEffect(() => {
+    if (!autoOpenChat || autoChatRan.current || isLoading) return;
+    if (mine) {
+      autoChatRan.current = true;
+      setShowChat(true);
+    }
+  }, [autoOpenChat, isLoading, mine?.id]);
+
   return (
     <div className="rb-panel">
       <p className="rb-panel__lede">
         <strong>{rows.length}</strong> heading out today · pick when you expect to arrive (7am–9pm).
       </p>
+
+      {arrivalDue && (
+        <div className={`rb-arrival-banner rb-arrival-banner--${accent}`} role="status">
+          <span className="rb-arrival-banner__copy">
+            You planned {formatRiverBratsHour(mine!.arrival_hour)} — are you at {beachLabel}?
+          </span>
+          <Button
+            variant="solid"
+            accent={btnAccent.accent}
+            style={btnAccent.style}
+            size="sm"
+            disabled={verifying}
+            onClick={imHere}
+          >
+            {verifying ? "Checking…" : "I'm here"}
+          </Button>
+        </div>
+      )}
 
       <div className="rb-compose">
         <div className="rb-compose__label">I'll be there around</div>
@@ -194,10 +314,21 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
                 style={btnAccent.style}
                 size="sm"
                 disabled={hour == null || saveMutation.isPending}
-                onClick={() => requireAuth() && saveMutation.mutate()}
+                onClick={() => requireAuth() && saveMutation.mutate(undefined)}
               >
                 Update check-in
               </Button>
+              {!iAmHere && (
+                <Button
+                  variant="outline"
+                  accent="cyan"
+                  size="sm"
+                  disabled={verifying}
+                  onClick={imHere}
+                >
+                  {verifying ? "Checking…" : "I'm here"}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 accent="cyan"
@@ -217,16 +348,27 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
               </Button>
             </>
           ) : (
-            <Button
-              variant="solid"
-              accent={btnAccent.accent}
-              style={btnAccent.style}
-              size="sm"
-              disabled={hour == null || saveMutation.isPending}
-              onClick={() => requireAuth() && saveMutation.mutate()}
-            >
-              Check in for today
-            </Button>
+            <>
+              <Button
+                variant="solid"
+                accent={btnAccent.accent}
+                style={btnAccent.style}
+                size="sm"
+                disabled={hour == null || saveMutation.isPending}
+                onClick={() => requireAuth() && saveMutation.mutate(undefined)}
+              >
+                Check in for today
+              </Button>
+              <Button
+                variant="outline"
+                accent="cyan"
+                size="sm"
+                disabled={verifying || saveMutation.isPending}
+                onClick={imHere}
+              >
+                {verifying ? "Checking…" : "I'm here now"}
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -267,7 +409,16 @@ export default function RiverBratsCheckIn({ beachId, accent }: Props) {
                     {row.masked ? "Anonymous" : row.displayName || `@${row.username}`}
                   </div>
                   <div className="rb-card__meta">
-                    <span className={`rb-chip rb-chip--${accent}`}>{formatRiverBratsHour(row.arrival_hour)}</span>
+                    {row.presence === "HERE" ? (
+                      <span
+                        className="rb-chip rb-chip--here"
+                        title={row.gpsVerifiedAt ? `Verified ${new Date(row.gpsVerifiedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : undefined}
+                      >
+                        Here
+                      </span>
+                    ) : (
+                      <span className={`rb-chip rb-chip--${accent}`}>{formatRiverBratsHour(row.arrival_hour)}</span>
+                    )}
                     {row.note ? <span className="rb-card__note">{row.note}</span> : null}
                     {canMessage ? <span className="rb-card__dm-hint">Tap to message →</span> : null}
                   </div>

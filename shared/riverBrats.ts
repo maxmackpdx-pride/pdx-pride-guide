@@ -51,6 +51,17 @@ export function riverBratsArrivalPromptIso(dateStr: string, hour: number): strin
   return new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00-07:00`).toISOString();
 }
 
+/** Current hour of day (0–23) in Pacific time. */
+export function pacificCurrentHour(now = Date.now()): number {
+  return Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: PACIFIC_TZ,
+      hour: "numeric",
+      hour12: false,
+    }).format(new Date(now)),
+  ) % 24;
+}
+
 export function beachVenueLabel(beachId: NudeBeachTab): string {
   return beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach · Sauvie Island";
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -135,6 +135,20 @@ export default function AttendanceCluster({
     setSelectedPhraseKey(resolveAttendancePhrase(myAttendance.message).key);
     setVisibility(myAttendance.isAnonymous ? "anonymous" : "visible");
   }, [showForm, myAttendance]);
+
+  // ?chat=1 deep link (Inbox GROUP row / group-chat push): auto-open the
+  // event chat once for the modal instance, then strip the param.
+  const autoChatRan = useRef(false);
+  useEffect(() => {
+    if (!embedded || autoChatRan.current || !myAttendance) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("chat") !== "1") return;
+    autoChatRan.current = true;
+    setShowChat(true);
+    params.delete("chat");
+    const qs = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}`);
+  }, [embedded, myAttendance]);
 
   const phrasePicker = (
     <div className="attendance-phrase-list">

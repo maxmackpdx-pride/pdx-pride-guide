@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
+import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_CHAT_CLOSES_AT } from "@shared/riverBrats";
 
@@ -101,11 +102,12 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
           </button>
         </header>
 
+        <AdultContentGate onDecline={onClose}>
         <div className="event-chat-panel__messages" ref={listRef}>
           {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
           {!isLoading && messages.length === 0 && (
             <p className="event-chat-panel__empty">
-              You're checked in. Say hi — others heading out today can see this until midnight.
+              You're checked in. Say hi — others heading out today can see this until 10pm.
             </p>
           )}
           {messages.map(msg => (
@@ -152,6 +154,7 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
             Send
           </button>
         </footer>
+        </AdultContentGate>
       </div>
     </div>
   );

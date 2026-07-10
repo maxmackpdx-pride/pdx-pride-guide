@@ -17,6 +17,24 @@ export default function RiverBratsShell({ beachId }: Props) {
   const [shore, setShoreState] = useState<RiverBratsShoreTab>(() =>
     readRiverBratsShore(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("shore") : null),
   );
+  // Deep links: ?verify=1 (arrival push → GPS confirm) and ?chat=1 (Inbox
+  // GROUP row → open beach chat). Captured once, then stripped from the URL.
+  const [autoVerify] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("verify") === "1",
+  );
+  const [autoOpenChat] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("chat") === "1",
+  );
+
+  useEffect(() => {
+    if (!autoVerify && !autoOpenChat) return;
+    const params = new URLSearchParams(window.location.search);
+    params.delete("verify");
+    params.delete("chat");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `/nude-beaches?${qs}` : "/nude-beaches");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setShore = useCallback(
     (tab: RiverBratsShoreTab) => {
@@ -64,7 +82,9 @@ export default function RiverBratsShell({ beachId }: Props) {
       </nav>
 
       <div className="river-brats__body">
-        {shore === "checkin" && <RiverBratsCheckIn beachId={beachId} accent={accent} />}
+        {shore === "checkin" && (
+          <RiverBratsCheckIn beachId={beachId} accent={accent} autoVerify={autoVerify} autoOpenChat={autoOpenChat} />
+        )}
         {shore === "carpool" && <RiverBratsCarpool beachId={beachId} accent={accent} />}
         {shore === "spotted" && <RiverBratsSpotted beachId={beachId} />}
       </div>

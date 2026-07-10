@@ -232,6 +232,44 @@
   color: var(--neon-green, #00EE44);
 }
 
+/* GPS-verified presence: filled lime chip, reads as "on the beach now". */
+.rb-chip--here {
+  border-color: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #ccff00);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(204, 255, 0, 0.35);
+}
+
+/* "You planned 4pm — are you here?" nudge above the compose card. */
+.rb-arrival-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background: #0c0c0f;
+  border: 1px solid #2b2b2b;
+  border-left: 3px solid var(--neon-yellow, #ccff00);
+  border-radius: 10px;
+}
+
+.rb-arrival-banner--orange {
+  border-left-color: var(--neon-orange, #ff6600);
+}
+
+.rb-arrival-banner--green {
+  border-left-color: var(--neon-green, #00EE44);
+}
+
+.rb-arrival-banner__copy {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #d6d6dc;
+}
+
 .rb-card__note {
   margin: 8px 0 0;
   font-size: 13px;
