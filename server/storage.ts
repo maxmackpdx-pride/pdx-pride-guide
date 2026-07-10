@@ -1186,7 +1186,7 @@ function seedData() {
       address: "SW 3rd Ave & SW Morrison St, Portland, OR 97204",
       neighborhood: "Downtown",
       lat: 45.520091, lng: -122.677007,
-      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-20T20:00:00",
+      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-19T20:00:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["BAR", "OFFICIAL", "OUTDOOR", "MULTI-DAY"]),
@@ -1280,23 +1280,6 @@ function seedData() {
       isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
       posterImageUrl: "/posters/boyeurism-pride-spectacular.jpg", status: "LIVE", source: "admin_seeded", isClaimable: true,
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
-    },
-    {
-      title: "Twirl! PDX Queer Disco — Pride Edition (HOLD)",
-      description: "PDX Queer Disco Pride Edition at Green Anchors in St. Johns, an outdoor eco-park under the St. Johns Bridge. Disco, funk, and house sounds. Special guest performances. Food and craft vendors, outdoor space with Willamette River views.",
-      venueName: "Green Anchors",
-      address: "8940 N Bradford St, Portland, OR 97203",
-      neighborhood: "St. Johns",
-      lat: 45.5882, lng: -122.7478,
-      dateStart: "2026-07-20T15:00:00", dateEnd: "2026-07-20T22:30:00",
-      dayOfWeek: "MON",
-      ageRequirement: "21_PLUS",
-      eventTypes: JSON.stringify(["PARTY", "DANCE", "OUTDOOR"]),
-      admission: "TICKETED",
-      ticketUrl: "https://events.humanitix.com/twirl-pdx-queer-disco-pride-edition",
-      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "HIDDEN", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: "Hold: 2025 Humanitix link, no 2026 source confirmed", createdAt: now,
     },
     {
       title: "Chai & Roses Pride Party",
@@ -1863,7 +1846,7 @@ function applyVerifiedEventOverrides() {
     lat: 45.520416,
     lng: -122.678127,
     dateStart: "2026-07-17T17:00:00",
-    dateEnd: "2026-07-20T20:00:00",
+    dateEnd: "2026-07-19T20:00:00",
     dayOfWeek: "FRI",
     description: "Official PrideNW outdoor beer garden open across Pride weekend at 431 SW Harvey Milk St. Community drinks and Pride energy just outside the main festival footprint.",
   });
@@ -2221,36 +2204,6 @@ function seedPdxPahJuly2026Events() {
   });
 
   insert({
-    title: "Oregon State Leather Contest 2026",
-    description:
-      "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
-    venueName: "Oregon State Leather Contest",
-    address: "Portland, OR",
-    neighborhood: "Portland",
-    lat: null,
-    lng: null,
-    dateStart: "2026-08-07T19:00:00",
-    dateEnd: "2026-08-09T23:00:00",
-    dayOfWeek: "FRI",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.oslcontest.org",
-    isPublic: true,
-    isPrivate: false,
-    isHouseParty: false,
-    isSexPositive: true,
-    nudityOk: false,
-    posterImageUrl: "/posters/oslc-leather-contest-2026.png",
-    status: "LIVE",
-    source: "admin_seeded",
-    isClaimable: true,
-    claimedBy: null,
-    submittedBy: null,
-    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Apps close Jul 19.",
-  });
-
-  insert({
     title: "OSLC Info Session — So You Want to Be a Titleholder?",
     description:
       "Virtual info session for anyone curious about becoming an Oregon State Leather titleholder. July session via Google Meet, links on the OSLC calendar. Additional sessions run through July 19.",
@@ -2542,6 +2495,46 @@ function seedCheckingPortlandEventsJuly2026() {
   });
 }
 
+/** Hard-delete events and dependent rows (attendance, hosts, messages, etc.). */
+function hardDeleteEventIds(ids: number[]) {
+  if (!ids.length) return;
+  const idPh = ids.map(() => "?").join(",");
+  sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
+  try {
+    sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* table may not exist in older DBs */ }
+  try {
+    sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* ignore */ }
+  try {
+    sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* ignore */ }
+  sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
+}
+
+/** Remove listings after Pride Sunday (Jul 19) — hard-delete Jul 20+ starts; cap multi-day spans. */
+function prunePostPrideWeekEvents() {
+  const postRows = sqlite
+    .prepare(`SELECT id FROM events WHERE date_start >= '2026-07-20'`)
+    .all() as Array<{ id: number }>;
+  hardDeleteEventIds(postRows.map((r) => r.id));
+
+  const spanRows = sqlite
+    .prepare(`
+      SELECT id, date_end FROM events
+      WHERE date_start < '2026-07-20'
+        AND date_end >= '2026-07-20T12:00:00'
+    `)
+    .all() as Array<{ id: number; date_end: string }>;
+
+  for (const row of spanRows) {
+    const endClock = row.date_end.includes("T") ? row.date_end.split("T")[1] : "23:59:59";
+    sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run(`2026-07-19T${endClock}`, row.id);
+  }
+}
+
 /** Hard-delete unverified Checking-Portland batch rows (and Purple Rain duplicate). */
 function deleteUnverifiedCheckingPortlandEvents() {
   const titles = [
@@ -2561,22 +2554,7 @@ function deleteUnverifiedCheckingPortlandEvents() {
   const idRows = sqlite
     .prepare(`SELECT id FROM events WHERE title IN (${placeholders})`)
     .all(...titles) as Array<{ id: number }>;
-  const ids = idRows.map((r) => r.id);
-  if (!ids.length) return;
-  const idPh = ids.map(() => "?").join(",");
-  sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
-  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id IN (${idPh})`).run(...ids);
-  sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
-  try {
-    sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* table may not exist in older DBs */ }
-  try {
-    sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* ignore */ }
-  try {
-    sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* ignore */ }
-  sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
+  hardDeleteEventIds(idRows.map((r) => r.id));
 }
 
 function applyEventDataAuditFixes() {
@@ -3976,6 +3954,10 @@ function runBootMigrationsOnce() {
         );
     }
     recordBootMigration("seed_hawks_directory_v12");
+  }
+  if (!hasBootMigration("prune_post_pride_week_v1")) {
+    prunePostPrideWeekEvents();
+    recordBootMigration("prune_post_pride_week_v1");
   }
 }
 
