@@ -67,8 +67,8 @@ export default function MobileBottomNav() {
     enabled: !!user && activeTab === "personal",
   });
 
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
-  const isOwner = user?.username === "tuckerhelms" || user?.role === "super_admin";
+  const isAdmin = user?.isAdmin || user?.isSuperAdmin;
+  const isOwner = user?.username === "tuckerhelms" || user?.isSuperAdmin;
   const inboxActive = location === "/inbox" || location.startsWith("/inbox?");
   const profilePath = user ? `/u/${encodeURIComponent(user.username)}` : "";
 
