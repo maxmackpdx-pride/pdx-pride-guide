@@ -48,6 +48,60 @@ import DesignSystemSandbox from "./pages/DesignSystemSandbox";
 import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/not-found";
 
+function isHubPath(path: string) {
+  const bare = path.split("?")[0];
+  return bare === "/dashboard" || bare === "/admin" || bare === "/inbox";
+}
+
+function AppLayout() {
+  const [location] = useLocation();
+  const hub = isHubPath(location);
+
+  return (
+    <div
+      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}`}
+      style={{ background: "#0a0a0a" }}
+    >
+      <FilmGrainOverlay />
+      <Nav />
+      <main className="flex-1">
+        <RouteBoundary>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/events/:id/:slug?" component={Events} />
+            <Route path="/events" component={Events} />
+            <Route path="/schedule">{() => <Schedule />}</Route>
+            <Route path="/submit/claim/:eventId" component={Submit} />
+            <Route path="/submit" component={Submit} />
+            <Route path="/pride-work" component={PrideWork} />
+            <Route path="/gifting" component={Gifting} />
+            <Route path="/about" component={About} />
+            <Route path="/resume" component={Resume} />
+            <Route path="/contact" component={Contact} />
+            <Route path="/sponsors" component={Sponsors} />
+            <Route path="/access" component={AccessSafety} />
+            <Route path="/legal" component={Legal} />
+            <Route path="/admin" component={Admin} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/settings/notifications" component={NotificationSettings} />
+            <Route path="/inbox" component={Inbox} />
+            <Route path="/spotted" component={MissedConnections} />
+            <Route path="/directory" component={Directory} />
+            <Route path="/design-preview" component={DesignSystemSandbox} />
+            <Route path="/u/:username" component={MemberProfile} />
+            <Route path="/missed-connections">
+              {() => <Redirect to="/spotted" />}
+            </Route>
+            <Route component={NotFound} />
+          </Switch>
+        </RouteBoundary>
+      </main>
+      <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
+      <Footer />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -56,44 +110,7 @@ export default function App() {
         <PushNotificationPrompt />
         <Router>
           <ScrollToTop />
-          <div className="min-h-screen flex flex-col app-shell" style={{ background: "#0a0a0a" }}>
-            <FilmGrainOverlay />
-            <Nav />
-            <main className="flex-1">
-              <RouteBoundary>
-              <Switch>
-                <Route path="/" component={Home} />
-                <Route path="/events/:id/:slug?" component={Events} />
-                <Route path="/events" component={Events} />
-                <Route path="/schedule">{() => <Schedule />}</Route>
-                <Route path="/submit/claim/:eventId" component={Submit} />
-                <Route path="/submit" component={Submit} />
-                <Route path="/pride-work" component={PrideWork} />
-                <Route path="/gifting" component={Gifting} />
-                <Route path="/about" component={About} />
-                <Route path="/resume" component={Resume} />
-                <Route path="/contact" component={Contact} />
-                <Route path="/sponsors" component={Sponsors} />
-                <Route path="/access" component={AccessSafety} />
-                <Route path="/legal" component={Legal} />
-                <Route path="/admin" component={Admin} />
-                <Route path="/dashboard" component={Dashboard} />
-                <Route path="/settings/notifications" component={NotificationSettings} />
-                <Route path="/inbox" component={Inbox} />
-                <Route path="/spotted" component={MissedConnections} />
-                <Route path="/directory" component={Directory} />
-                <Route path="/design-preview" component={DesignSystemSandbox} />
-                <Route path="/u/:username" component={MemberProfile} />
-                <Route path="/missed-connections">
-                  {() => <Redirect to="/spotted" />}
-                </Route>
-                <Route component={NotFound} />
-              </Switch>
-              </RouteBoundary>
-            </main>
-            <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
-            <Footer />
-          </div>
+          <AppLayout />
           <Toaster />
         </Router>
       </AuthProvider>

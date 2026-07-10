@@ -17,13 +17,15 @@ import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import AdminInbox, { type BoardRejectTarget } from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
-import AdminShell, { type AdminView } from "@/components/admin/AdminShell";
+import { type AdminView } from "@/components/admin/AdminShell";
+import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
 import "@/components/dashboard/dashboard.css";
+import "@/components/admin/admin-panel.css";
 
 interface Submission {
   id: number;
@@ -169,7 +171,6 @@ export default function Admin() {
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
-  const [moreOpen, setMoreOpen] = useState(false);
   const [expandedInboxKey, setExpandedInboxKey] = useState<string | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
@@ -1087,7 +1088,6 @@ export default function Admin() {
 
   const setAdminTab = (tab: AdminTab) => {
     setActiveTab(tab);
-    setMoreOpen(false);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.replaceState({}, "", url.toString());
@@ -1121,30 +1121,57 @@ export default function Admin() {
     || resolveGiftingReportMutation.isPending
     || resolveFeedbackMutation.isPending;
 
+  const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
+  const pushOk = !!pushStatus?.configured;
+
   return (
     <div className="dash-page">
-      <AdminShell
-        view={activeTab}
-        onNavigate={setAdminTab}
-        adminName={adminName}
+      <HubShell
+        mode="admin"
+        adminView={activeTab as AdminViewKey}
+        onAdminNavigate={(view) => setAdminTab(view as AdminTab)}
+        isAdminUser
         isSuperAdmin={isSuperAdmin}
+        userName={adminName}
+        userHandle={user?.username}
+        photoUrl={user?.photoUrl}
+        avatarChoice={user?.avatarChoice}
+        avatarRing={user?.avatarRing}
         pendingCount={totalActionItems}
-        navCounts={{
-          team: teamAdmins.length,
-          events: events.length,
-          users: userCount,
-          gigs: gigs.length,
-          promoters: approvedPromoterCount || pendingPromoters.length || undefined,
-          "venue-claims": venueClaimsPendingCount || undefined,
-        }}
-        pushStatus={pushStatus}
-        onRefreshAll={refreshAdminData}
+        kicker={viewMeta.kicker}
+        kickerColor={viewMeta.kickerColor}
+        title={viewMeta.title}
+        lede={viewMeta.lede}
         onLogout={async () => { await logout(); navigate("/"); }}
-        onSendTestPush={() => testPushMutation.mutate()}
-        testPushPending={testPushMutation.isPending}
-        moreOpen={moreOpen}
-        onMoreOpenChange={setMoreOpen}
+        topRight={(
+          <button type="button" className="hub-ghost-btn" onClick={refreshAdminData}>
+            <RefreshCw size={12} aria-hidden />
+            Refresh all
+          </button>
+        )}
+        sideExtra={(
+          <>
+            <div className="hub-push-status">
+              <span className={`dot${pushOk ? "" : " is-bad"}`} />
+              {pushOk ? "Push server healthy" : "Push not configured"}
+            </div>
+            <div className="hub-push-meta">
+              {pushStatus
+                ? `${pushStatus.totalActiveSubscriptions} device${pushStatus.totalActiveSubscriptions === 1 ? "" : "s"} site-wide, ${pushStatus.myDeviceSubscriptions} on this account`
+                : "Status loading…"}
+            </div>
+            <button
+              type="button"
+              className="hub-ghost-btn"
+              disabled={!pushOk || !pushStatus?.myDeviceSubscriptions || testPushMutation.isPending}
+              onClick={() => testPushMutation.mutate()}
+            >
+              {testPushMutation.isPending ? "Sending…" : "Send test push"}
+            </button>
+          </>
+        )}
       >
+        <div className="admin-panel-body">
         {/* ── OVERVIEW ── */}
         {activeTab === "overview" && (
           <AdminOverview
@@ -2305,7 +2332,8 @@ export default function Admin() {
           </div>
         )}
 
-      </AdminShell>
+        </div>
+      </HubShell>
     </div>
   );
 }

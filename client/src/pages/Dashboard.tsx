@@ -9,12 +9,12 @@ import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHeader from "@/components/PageHeader";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
+import HubShell, { type MemberView } from "@/components/hub/HubShell";
 import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/DashboardDrawer";
 import DashboardInboxPreview from "@/components/dashboard/DashboardInboxPreview";
 import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
 import DashboardHubSummary from "@/components/dashboard/DashboardHubSummary";
-import DashboardAdminTeaser from "@/components/dashboard/DashboardAdminTeaser";
 import DashboardVenueSection from "@/components/dashboard/DashboardVenueSection";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
@@ -26,6 +26,7 @@ export default function Dashboard() {
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
+  const [memberView, setMemberView] = useState<MemberView>("home");
   const [editMode, setEditMode] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -84,7 +85,7 @@ export default function Dashboard() {
   const myGifting = myGiftingQuery.data ?? [];
   const myCheckIns = myCheckInsQuery.data ?? [];
 
-  const { data: adminSession } = useQuery<{ isAdmin?: boolean } | null>({
+  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean } | null>({
     queryKey: ["/api/admin/me"],
     queryFn: async () => {
       const r = await fetch("/api/admin/me", { credentials: "include" });
@@ -101,6 +102,7 @@ export default function Dashboard() {
   });
 
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
+  const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
   const pendingSubmissions = submittedEvents.filter((evt: any) => evt.status === "PENDING").length;
   const unreadCount = unread.count || 0;
 
@@ -320,6 +322,7 @@ export default function Dashboard() {
   };
 
   const eventCount = submittedEvents.length + myEvents.length;
+  const postsCount = eventCount + myGigs.length + myMissed.length + myGifting.length + myCheckIns.length;
   const CYAN = "#19E3FF";
   const LIME = "#C8FA3C";
   const MAGENTA = "#FF1FA0";
@@ -332,24 +335,46 @@ export default function Dashboard() {
   const profileName = (user.displayName || user.username || "").toUpperCase();
 
   const scrollToSection = (key: string) => {
+    setMemberView("posts");
     setOpenSections(prev => ({ ...prev, [key]: true }));
     requestAnimationFrame(() => {
       document.getElementById(key)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
 
+  const onMemberNavigate = (view: MemberView) => {
+    if (view === "inbox") return;
+    setMemberView(view);
+  };
+
   return (
     <div className="zine-page dash-page board-page">
-      <header className="dash-hub-topbar">
-        <div className="dash-hub-topbar__inner">
-          <p className="dash-hub-kicker">YOUR HUB</p>
-          <h1 className="dash-hub-title">HEY, {firstName}</h1>
-          <p className="dash-hub-lede">
-            Your events, messages, and posts in one place. Community run and free.
-          </p>
-        </div>
-      </header>
-      <div className="dash-inner">
+      <HubShell
+        mode="member"
+        memberView={memberView}
+        onMemberNavigate={onMemberNavigate}
+        isAdminUser={isAdmin}
+        isSuperAdmin={isSuperAdmin}
+        userName={user.displayName || user.username || "Member"}
+        userHandle={user.username}
+        photoUrl={user.photoUrl}
+        avatarChoice={user.avatarChoice}
+        avatarRing={user.avatarRing}
+        unreadCount={unreadCount}
+        postsCount={postsCount}
+        kicker={memberView === "posts" ? "Your boards" : "Your hub"}
+        kickerColor="var(--cyan, #00ffff)"
+        title={memberView === "posts" ? "My posts" : `Hey, ${firstName}`}
+        lede={
+          memberView === "posts"
+            ? "Events, gigs, Spotted, gifting, and check-ins you own."
+            : "Your events, messages, and posts in one place. Community run and free."
+        }
+        onLogout={() => logout()}
+      >
+      <div className="dash-inner" style={{ maxWidth: "none", padding: 0 }}>
+        {memberView === "home" && (
+          <>
         <PwaInstallBanner />
         <section id="profile" className="dash-profile-card" aria-label="Your profile">
           <div className="dash-profile-card__id">
@@ -377,9 +402,6 @@ export default function Dashboard() {
                   onClick={() => setEditMode(!editMode)}
                 >
                   {editMode ? "CANCEL" : "EDIT PROFILE"}
-                </button>
-                <button type="button" className="dash-btn dash-btn-ghost dash-btn-ghost-pill" onClick={() => logout()}>
-                  Sign out
                 </button>
               </div>
             </div>
@@ -441,8 +463,6 @@ export default function Dashboard() {
         />
         </ScrollReveal>
 
-        <DashboardAdminTeaser enabled={isAdmin} />
-
         <ScrollReveal delay={30}>
         <div className={`dash-top-grid${unreadCount > 0 ? " dash-top-grid--inbox-priority" : ""}`}>
           <DashboardInboxPreview enabled={!!user} />
@@ -467,8 +487,11 @@ export default function Dashboard() {
           )}
         </section>
         </ScrollReveal>
+          </>
+        )}
 
-        <ScrollReveal delay={120}>
+        {memberView === "posts" && (
+        <ScrollReveal>
         <div className="dash-drawers">
           <DashboardVenueSection open={!!openSections.venues} onToggle={() => toggleSection("venues")} />
 
@@ -694,7 +717,9 @@ export default function Dashboard() {
           </DashboardDrawer>
         </div>
         </ScrollReveal>
+        )}
       </div>
+      </HubShell>
     </div>
   );
 }
