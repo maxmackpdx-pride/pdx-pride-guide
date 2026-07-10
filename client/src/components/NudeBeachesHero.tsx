@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import BoardHero from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
@@ -5,9 +6,10 @@ import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 type Props = {
   activeTab: NudeBeachTab;
   snapshot?: NudeBeachesSnapshot | null;
+  tabs: ReactNode;
 };
 
-export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
+export default function NudeBeachesHero({ activeTab, snapshot, tabs }: Props) {
   const isRooster = activeTab === "rooster-rock";
 
   const stats = isRooster
@@ -51,26 +53,29 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
 
   return (
     <>
-      <BoardHero
-        accent={isRooster ? "cyan" : "magenta"}
-        kicker={isRooster ? "Columbia River · Corbett" : "Sauvie Island · Collins Beach"}
-        title={
-          isRooster ? (
-            <>
-              Rooster <span className="board-hero__title-accent">Rock</span>
-            </>
-          ) : (
-            <>
-              Sauvie <span className="board-hero__title-accent">Island</span>
-            </>
-          )
-        }
-        lede={
-          isRooster
-            ? "River level, air and water temps, forecast, directions, and day-use parking pass info — nothing else."
-            : "Swim Guide water quality, Sauvie Island Parking permits, island weather, and the links Collins Beach travelers use."
-        }
-      />
+      <div className="nude-beaches-hero-row">
+        <BoardHero
+          accent={isRooster ? "cyan" : "magenta"}
+          kicker={isRooster ? "Columbia River · Corbett" : "Sauvie Island · Collins Beach"}
+          title={
+            isRooster ? (
+              <>
+                Rooster <span className="board-hero__title-accent">Rock</span>
+              </>
+            ) : (
+              <>
+                Sauvie <span className="board-hero__title-accent">Island</span>
+              </>
+            )
+          }
+          lede={
+            isRooster
+              ? "River level, air and water temps, forecast, directions, and day-use parking pass info — nothing else."
+              : "Swim Guide water quality, Sauvie Island Parking permits, island weather, and the links Collins Beach travelers use."
+          }
+        />
+        {tabs}
+      </div>
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
     </>
   );
