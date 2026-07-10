@@ -1,6 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { C, MONO, DISPLAY, sectionTitle, barTrack, hbars } from "./sheet";
 
+type Traffic = {
+  source: "first_party" | "google_analytics";
+  gaTrackingEnabled: boolean;
+  gaReportingEnabled: boolean;
+  activeNow: number;
+  pageViews7d: number;
+  pageViewsPrev7d: number;
+  uniqueVisitors7d: number;
+  sessions7d: number;
+  avgSessionSeconds7d: number;
+  bounceRate7d: number;
+  pagesPerSession7d: number;
+  pageViewsTrend14d: number[];
+  topPages: Array<{ path: string; views: number }>;
+  sources: Array<{ label: string; pct: number }>;
+  devices: Array<{ label: string; pct: number }>;
+  newReturning: Array<{ label: string; pct: number }>;
+};
+
 type Metrics = {
   users: number;
   newUsersToday: number;
@@ -14,7 +33,19 @@ type Metrics = {
   giftingPosts: number;
   missedConnections: number;
   openFeedback: number;
+  traffic?: Traffic;
 };
+
+function fmtSession(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}m ${s}s`;
+}
+function fmtDelta(cur: number, prev: number): string {
+  if (!prev) return cur > 0 ? "new" : "—";
+  const pct = Math.round(((cur - prev) / prev) * 100);
+  return `${pct >= 0 ? "+" : ""}${pct}% vs last week`;
+}
 
 function Tile({ value, label }: { value: number | string; label: string }) {
   return (
@@ -85,6 +116,7 @@ export default function StatsView() {
     );
   }
 
+  const tr = m.traffic;
   const claimed = Math.max(0, m.liveEvents - m.userSubmittedEvents);
   const unclaimed = m.userSubmittedEvents;
   const total = claimed + unclaimed;
@@ -132,14 +164,16 @@ export default function StatsView() {
         SITE PULSE
       </div>
       <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${C.green}`, borderRadius: 16, background: C.card, padding: 16, marginBottom: 8 }}>
-        <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: C.meta }}>ACTIVE SESSIONS</div>
+        <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: C.meta }}>LIVE RIGHT NOW</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginTop: 8 }}>
           <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 56, lineHeight: 0.85, color: C.heading, fontVariantNumeric: "tabular-nums" }}>
-            {m.activeSessions}
+            {tr?.activeNow ?? m.activeSessions}
           </span>
-          <span style={{ fontSize: 14, color: C.body, lineHeight: 1.3 }}>active sessions right now</span>
+          <span style={{ fontSize: 14, color: C.body, lineHeight: 1.3 }}>visitors in the last 5 min</span>
         </div>
-        <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: ".08em", color: C.faint, marginTop: 10 }}>First-party (session store)</div>
+        <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: ".08em", color: C.faint, marginTop: 10 }}>
+          {tr?.source === "google_analytics" ? "Google Analytics" : "First-party (GA API fallback)"}
+        </div>
       </div>
 
       {/* THIS WEEK — real totals (no fabricated deltas) */}
@@ -209,14 +243,106 @@ export default function StatsView() {
         {unclaimed} live listings still open for promoters to claim.
       </p>
 
-      {/* GA-DERIVED SECTIONS — honest placeholder (no analytics source wired yet) */}
-      <div style={sectionTitle}>TRAFFIC &amp; AUDIENCE</div>
-      <div style={{ border: `1px dashed ${C.border3}`, borderRadius: 16, background: C.card, padding: "20px 16px", textAlign: "center" }}>
-        <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: C.meta, marginBottom: 8 }}>NOT CONNECTED</div>
-        <p style={{ margin: 0, fontSize: 12.5, color: C.muted, lineHeight: 1.5, maxWidth: 300, marginInline: "auto" }}>
-          Traffic, top pages, sources, devices, and member-growth charts populate once Google Analytics is connected.
-        </p>
-      </div>
+      {/* TRAFFIC & AUDIENCE — first-party analytics (or GA if reporting is wired) */}
+      {tr && (
+        <>
+          <div style={sectionTitle}>TRAFFIC &amp; AUDIENCE</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "0 2px 10px" }}>
+            {[
+              [`GA TRACKING ${tr.gaTrackingEnabled ? "ON" : "OFF"}`, tr.gaTrackingEnabled ? C.green : C.faint],
+              [`GA REPORTING ${tr.gaReportingEnabled ? "ON" : "OFF"}`, tr.gaReportingEnabled ? C.green : C.faint],
+              [`SOURCE: ${tr.source === "google_analytics" ? "GOOGLE ANALYTICS" : "FIRST-PARTY"}`, C.cyan],
+            ].map(([label, color]) => (
+              <span
+                key={label as string}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 8.5,
+                  letterSpacing: ".08em",
+                  fontWeight: 600,
+                  color: color as string,
+                  border: `1px solid ${color}55`,
+                  background: `${color}14`,
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                }}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {([
+              ["PAGE VIEWS", String(tr.pageViews7d)],
+              ["UNIQUE VISITORS", String(tr.uniqueVisitors7d)],
+              ["SESSIONS", String(tr.sessions7d)],
+              ["AVG. SESSION", fmtSession(tr.avgSessionSeconds7d)],
+              ["BOUNCE RATE", `${tr.bounceRate7d}%`],
+              ["PAGES / SESSION", tr.pagesPerSession7d.toFixed(1)],
+            ] as Array<[string, string]>).map(([label, value]) => (
+              <div key={label} style={{ border: `1px solid ${C.border}`, borderRadius: 14, background: C.card, padding: 14 }}>
+                <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: ".09em", color: C.meta }}>{label}</span>
+                <div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 30, lineHeight: 0.9, color: C.heading, marginTop: 8, fontVariantNumeric: "tabular-nums" }}>
+                  {value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* PAGE VIEWS 14 DAYS */}
+          <div style={{ border: `1px solid ${C.border}`, borderRadius: 16, background: C.card, padding: 15, marginTop: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: C.meta }}>PAGE VIEWS · 14 DAYS</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 8.5, letterSpacing: ".09em", color: C.green }}>
+                <span style={{ width: 5, height: 5, borderRadius: 999, background: C.green }} />
+                {fmtDelta(tr.pageViews7d, tr.pageViewsPrev7d)}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 62 }}>
+              {(() => {
+                const max = Math.max(...tr.pageViewsTrend14d, 1);
+                return tr.pageViewsTrend14d.map((v, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: `${Math.round((v / max) * 100)}%`,
+                      minHeight: 3,
+                      borderRadius: "3px 3px 0 0",
+                      background: `linear-gradient(180deg, ${C.cyan}, ${C.cyan}88)`,
+                    }}
+                  />
+                ));
+              })()}
+            </div>
+          </div>
+
+          {tr.topPages.length > 0 && (
+            <>
+              <div style={sectionTitle}>TOP PAGES</div>
+              <HBars rows={hbars(tr.topPages.map((p) => [p.path, p.views] as [string, number]), C.cyan)} />
+            </>
+          )}
+          {tr.sources.length > 0 && (
+            <>
+              <div style={sectionTitle}>WHERE THEY COME FROM</div>
+              <HBars rows={hbars(tr.sources.map((s) => [s.label, s.pct] as [string, number]), C.magenta, "%")} />
+            </>
+          )}
+          {tr.devices.length > 0 && (
+            <>
+              <div style={sectionTitle}>DEVICES</div>
+              <HBars rows={hbars(tr.devices.map((d) => [d.label, d.pct] as [string, number]), C.orange, "%")} />
+            </>
+          )}
+          {tr.newReturning.length > 0 && (
+            <>
+              <div style={sectionTitle}>NEW VS RETURNING</div>
+              <HBars rows={hbars(tr.newReturning.map((n) => [n.label, n.pct] as [string, number]), C.limeSoft, "%")} />
+            </>
+          )}
+        </>
+      )}
     </>
   );
 }
