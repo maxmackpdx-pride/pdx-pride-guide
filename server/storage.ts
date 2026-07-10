@@ -422,6 +422,16 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN location TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN social_links TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_embeds TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_photos TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN accent_color TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_banner TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN talents TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN stand_for TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN marquee TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_media TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN business_place_id INTEGER`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN pup TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN packmate_ids TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN handler_ids TEXT`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS follows (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -4316,7 +4326,7 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'accentColor' | 'profileBanner' | 'talents' | 'standFor' | 'marquee' | 'profileMedia' | 'businessPlaceId' | 'pup' | 'packmateIds' | 'handlerIds' | 'promoterStatus' | 'subAdmin'>>): void;
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
   getAllUsers(): User[];
@@ -4586,6 +4596,15 @@ export const storage: IStorage = {
     const user = storage.getUserByUsername(username);
     if (!user || user.status !== "active") return undefined;
     const isOwner = viewerUserId != null && viewerUserId === user.id;
+    const now = Date.now();
+
+    const parseJson = (raw: string | null | undefined, fallback: unknown) => {
+      try {
+        return JSON.parse(raw || "") ?? fallback;
+      } catch {
+        return fallback;
+      }
+    };
 
     // Distinct LIVE talent role labels
     const talentByEvent = storage.getEventTalentByUser(user.id);
@@ -4599,57 +4618,169 @@ export const storage: IStorage = {
     }
 
     // LIVE events this user hosts (primary or co-host)
-    const hostedEvents = sqlite.prepare(`
+    const hostedRaw = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.admission
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
+             e.ticket_url AS ticketUrl, e.poster_image_url AS posterImageUrl,
+             e.event_types AS eventTypes,
+             (SELECT COUNT(*) FROM attendances a WHERE a.event_id = e.id AND a.is_active = 1) AS goingCount
       FROM event_hosts eh
       JOIN events e ON e.id = eh.event_id
       WHERE eh.user_id = ? AND e.status = 'LIVE'
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
-    if (hostedEvents.length > 0 && !roles.includes("Party Host")) roles.push("Party Host");
+    if (hostedRaw.length > 0 && !roles.includes("Party Host")) roles.push("Party Host");
 
-    // Publicly visible gig + gifting posts
+    const mapEvent = (e: any) => ({
+      id: e.id,
+      title: e.title,
+      venueName: e.venueName || null,
+      dayOfWeek: e.dayOfWeek || null,
+      dateStart: e.dateStart || null,
+      dateEnd: e.dateEnd || null,
+      admission: e.admission || null,
+      ticketUrl: e.ticketUrl || null,
+      posterImageUrl: e.posterImageUrl || null,
+      eventTypes: (() => {
+        try {
+          const t = JSON.parse(e.eventTypes || "[]");
+          return Array.isArray(t) ? t : [];
+        } catch {
+          return [];
+        }
+      })(),
+      goingCount: Number(e.goingCount) || 0,
+    });
+
+    const hostedEvents = hostedRaw.map(mapEvent);
+    const hostingUpcoming = hostedEvents.filter(e => {
+      const t = e.dateStart ? new Date(e.dateStart).getTime() : NaN;
+      return !Number.isFinite(t) || t >= now - 3 * 3600_000;
+    });
+    const hostingPast = hostedEvents.filter(e => {
+      const t = e.dateStart ? new Date(e.dateStart).getTime() : NaN;
+      return Number.isFinite(t) && t < now - 3 * 3600_000;
+    }).reverse();
+
+    // Public going / attended (event cards only; no private RSVP messages)
+    const attendanceEvents = sqlite.prepare(`
+      SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
+             e.ticket_url AS ticketUrl, e.poster_image_url AS posterImageUrl,
+             e.event_types AS eventTypes,
+             (SELECT COUNT(*) FROM attendances a2 WHERE a2.event_id = e.id AND a2.is_active = 1) AS goingCount
+      FROM attendances a
+      JOIN events e ON e.id = a.event_id
+      WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
+      ORDER BY e.date_start ASC
+    `).all(user.id) as any[];
+    const goingMapped = attendanceEvents.map(mapEvent);
+    const goingTo = goingMapped.filter(e => {
+      const t = e.dateStart ? new Date(e.dateStart).getTime() : NaN;
+      return !Number.isFinite(t) || t >= now - 3 * 3600_000;
+    });
+    const attendedPast = goingMapped.filter(e => {
+      const t = e.dateStart ? new Date(e.dateStart).getTime() : NaN;
+      return Number.isFinite(t) && t < now - 3 * 3600_000;
+    }).reverse();
+
+    // Publicly visible gig + gifting + spotted board posts
     const gigs = storage.getGigPostsByUser(user.id)
       .filter(gig => gig.status === "LIVE")
       .map(gig => ({
         id: gig.id,
+        board: "gigs" as const,
         title: gig.title,
-        venueText: gig.location || null,
-        compensation: gig.compensation || null,
-        status: gig.status,
-        createdAt: gig.createdAt,
-        description: gig.description,
+        body: gig.description || "",
+        location: gig.location || null,
+        when: gig.createdAt || null,
+        href: "/pride-work",
       }));
     const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
     const gifting = storage.getGiftingPostsByUser(user.id)
       .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)))
       .map((post: any) => ({
         id: post.id,
+        board: "gifting" as const,
         title: post.title,
-        neighborhood: post.neighborhood,
-        createdAt: post.createdAt ?? post.created_at,
-        description: post.description,
+        body: post.description || "",
+        location: post.neighborhood || null,
+        when: post.createdAt ?? post.created_at ?? null,
+        href: "/gifting",
       }));
+    const spotted = storage.getMissedConnectionsByUser(user.id)
+      .filter((mc: any) => String(mc.status) === "ACTIVE")
+      .map((mc: any) => ({
+        id: mc.id,
+        board: "spotted" as const,
+        title: mc.title,
+        body: mc.body || "",
+        location: mc.venueHint || mc.dayOfWeek || null,
+        when: mc.createdAt || null,
+        href: "/spotted",
+      }));
+    const boardPosts = [...spotted, ...gifting, ...gigs]
+      .sort((a, b) => String(b.when || "").localeCompare(String(a.when || "")))
+      .slice(0, 40);
 
     const checkIns = storage.getAttendancesByUser(user.id).length;
 
-    // PRIVACY: goingTo is ONLY visible to the profile owner themselves.
-    let goingTo: any[] | undefined;
-    if (isOwner) {
-      goingTo = sqlite.prepare(`
-        SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-               e.date_start AS dateStart, e.admission
-        FROM attendances a
-        JOIN events e ON e.id = a.event_id
-        WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
-        ORDER BY e.date_start ASC
-      `).all(user.id) as any[];
-    }
+    const socialLinksRaw = parseJson(user.socialLinks || "{}", {});
+    const socialLinks =
+      socialLinksRaw && typeof socialLinksRaw === "object" && !Array.isArray(socialLinksRaw)
+        ? socialLinksRaw
+        : {};
 
-    const socialLinksRaw = safeJson(user.socialLinks || "{}");
-    const activity: any = { hostedEvents, gigs, gifting };
-    if (goingTo) activity.goingTo = goingTo;
+    const talentsRaw = parseJson((user as any).talents || "[]", []);
+    const standForRaw = parseJson((user as any).standFor || "[]", []);
+    const marqueeRaw = parseJson((user as any).marquee || "null", null);
+    const mediaRaw = parseJson((user as any).profileMedia || "null", null);
+    const pupRaw = parseJson((user as any).pup || "null", null);
+    const packmateIds = (() => {
+      const a = parseJson((user as any).packmateIds || "[]", []);
+      return Array.isArray(a) ? a.map(Number).filter(n => Number.isFinite(n) && n > 0) : [];
+    })();
+    const handlerIds = (() => {
+      const a = parseJson((user as any).handlerIds || "[]", []);
+      return Array.isArray(a) ? a.map(Number).filter(n => Number.isFinite(n) && n > 0) : [];
+    })();
+
+    const resolvePack = (ids: number[]) =>
+      ids.slice(0, 24).map(id => {
+        const u = storage.getUserById(id);
+        if (!u || u.status !== "active") return null;
+        return {
+          id: u.id,
+          username: u.username,
+          displayName: u.displayName,
+          photoUrl: u.photoUrl,
+          avatarChoice: u.avatarChoice ?? 1,
+          avatarRing: u.avatarRing || "none",
+        };
+      }).filter(Boolean);
+
+    const linkedVenues = storage.getUserLinkedBusinesses(user.id);
+    const ownedBusinesses = storage.getUserOwnedBusinesses(user.id).map((b: any) => ({
+      id: b.id,
+      name: b.name,
+      type: b.type,
+      address: b.address ?? null,
+      neighborhood: b.neighborhood ?? null,
+      logoUrl: b.imageUrl ?? b.image_url ?? null,
+    }));
+    const businessPlaceId = (user as any).businessPlaceId ?? null;
+    let businessPlace =
+      ownedBusinesses.find((b: any) => b.id === businessPlaceId) ||
+      ownedBusinesses[0] ||
+      linkedVenues[0] ||
+      null;
+
+    const accentColor = (user as any).accentColor || null;
+    const profileBanner = (user as any).profileBanner || null;
+    const memberSince = user.createdAt;
+    const estYear = memberSince ? new Date(memberSince).getFullYear() : null;
+
+    const verifiedHost = user.promoterStatus === "approved" || hostingUpcoming.length + hostingPast.length > 0;
 
     return {
       username: user.username,
@@ -4661,23 +4792,60 @@ export const storage: IStorage = {
       avatarChoice: user.avatarChoice ?? 1,
       avatarRing: user.avatarRing || "none",
       avatarCrop: user.avatarCrop || null,
-      memberSince: user.createdAt,
-      verifiedHost: user.promoterStatus === "approved",
+      memberSince,
+      verifiedHost,
+      isPromoter: user.promoterStatus === "approved",
       roles,
-      socialLinks: socialLinksRaw && typeof socialLinksRaw === "object" && !Array.isArray(socialLinksRaw) ? socialLinksRaw : {},
-      profileEmbeds: safeJson(user.profileEmbeds || "[]"),
-      profilePhotos: safeJson(user.profilePhotos || "[]"),
+      socialLinks,
+      profileEmbeds: parseJson(user.profileEmbeds || "[]", []),
+      profilePhotos: parseJson(user.profilePhotos || "[]", []),
+      accentColor,
+      profileBanner,
+      talents: Array.isArray(talentsRaw) ? talentsRaw.filter((t: unknown) => typeof t === "string") : [],
+      standFor: Array.isArray(standForRaw) ? standForRaw.filter((t: unknown) => typeof t === "string") : [],
+      marquee: marqueeRaw && typeof marqueeRaw === "object" ? marqueeRaw : null,
+      profileMedia: mediaRaw && typeof mediaRaw === "object" ? mediaRaw : null,
+      businessPlace,
+      linkedVenues,
+      pup: pupRaw && typeof pupRaw === "object" ? pupRaw : null,
+      packmates: resolvePack(packmateIds),
+      handlers: resolvePack(handlerIds),
       stats: {
         events: hostedEvents.length,
+        hosting: hostingUpcoming.length,
+        shows: hostingPast.length,
+        estYear,
         gigs: gigs.length,
         gifting: gifting.length,
+        going: goingTo.length,
         checkIns,
         followers: storage.getFollowerCount(user.id),
       },
       isOwner,
       isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
-      activity,
-      linkedVenues: storage.getUserLinkedBusinesses(user.id),
+      activity: {
+        hostedEvents,
+        hostingUpcoming,
+        hostingPast,
+        goingTo,
+        attendedPast,
+        gigs: gigs.map(g => ({
+          id: g.id,
+          title: g.title,
+          venueText: g.location,
+          status: "LIVE",
+          createdAt: g.when,
+          description: g.body,
+        })),
+        gifting: gifting.map(g => ({
+          id: g.id,
+          title: g.title,
+          neighborhood: g.location,
+          createdAt: g.when,
+          description: g.body,
+        })),
+      },
+      boardPosts,
     };
   },
   countActiveMessages() {

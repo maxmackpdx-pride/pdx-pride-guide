@@ -253,6 +253,16 @@ export const users = sqliteTable("users", {
   socialLinks: text("social_links"), // JSON object keyed by platform
   profileEmbeds: text("profile_embeds"), // JSON array of {id,src,title}
   profilePhotos: text("profile_photos"), // JSON array of {url,caption}
+  accentColor: text("accent_color"),
+  profileBanner: text("profile_banner"),
+  talents: text("talents"), // JSON string[]
+  standFor: text("stand_for"), // JSON string[]
+  marquee: text("marquee"), // JSON {items,speed,color}
+  profileMedia: text("profile_media"), // JSON featured + tracks
+  businessPlaceId: integer("business_place_id"),
+  pup: text("pup"), // JSON {name,hood,role,lookingFor} or null
+  packmateIds: text("packmate_ids"), // JSON number[]
+  handlerIds: text("handler_ids"), // JSON number[]
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected

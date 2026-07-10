@@ -34,6 +34,16 @@ import {
   submissionHasStrongDuplicate,
 } from "@shared/submissionMatch";
 import type { Event } from "@shared/schema";
+import {
+  normalizeProfileAccent,
+  isAllowedProfileAccent,
+  parseStringArray,
+  parseMarquee,
+  parseProfileMedia,
+  parsePup,
+  parseIdArray,
+  DEFAULT_PROFILE_BANNER,
+} from "@shared/profileAccents";
 import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
@@ -1762,7 +1772,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
-    const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location, socialLinks, profileEmbeds, profilePhotos } = req.body;
+    const {
+      displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
+      socialLinks, profileEmbeds, profilePhotos,
+      accentColor, profileBanner, talents, standFor, marquee, profileMedia,
+      businessPlaceId, pup, packmateIds, handlerIds,
+    } = req.body;
     const moderated: Record<string, string | null | undefined> = {
       displayName: typeof displayName === "string" ? displayName : undefined,
       bio: typeof bio === "string" ? bio : undefined,
@@ -1773,7 +1788,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       for (const [key, value] of Object.entries(socialLinks as Record<string, unknown>)) {
         // "website" is the one place a member's own off-platform site belongs —
         // exempt from the link-host allowlist (sanitizeSocialLinks still applies).
-        if (key === "website") continue;
+        if (key === "website" || key === "bookingEmail") continue;
         if (typeof value === "string") moderated[`socialLinks.${key}`] = value;
       }
     }
@@ -1790,6 +1805,54 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (socialLinks !== undefined) patch.socialLinks = sanitizeSocialLinks(socialLinks);
     if (profileEmbeds !== undefined) patch.profileEmbeds = sanitizeProfileEmbeds(profileEmbeds);
     if (profilePhotos !== undefined) patch.profilePhotos = sanitizeProfilePhotos(profilePhotos);
+    if (accentColor !== undefined) {
+      if (accentColor === null || accentColor === "") patch.accentColor = null;
+      else if (isAllowedProfileAccent(accentColor)) patch.accentColor = normalizeProfileAccent(accentColor);
+      else return res.status(400).json({ error: "Invalid profile accent" });
+    }
+    if (profileBanner !== undefined) {
+      if (profileBanner === null || profileBanner === "") patch.profileBanner = null;
+      else {
+        const b = String(profileBanner).trim().slice(0, 200);
+        if (!b.startsWith("/sandbox-ds/banners/") && b !== DEFAULT_PROFILE_BANNER) {
+          return res.status(400).json({ error: "Invalid profile banner" });
+        }
+        patch.profileBanner = b;
+      }
+    }
+    if (talents !== undefined) patch.talents = JSON.stringify(parseStringArray(talents, 24));
+    if (standFor !== undefined) patch.standFor = JSON.stringify(parseStringArray(standFor, 16));
+    if (marquee !== undefined) {
+      if (marquee === null) patch.marquee = null;
+      else {
+        const m = parseMarquee(marquee);
+        patch.marquee = m ? JSON.stringify(m) : null;
+      }
+    }
+    if (profileMedia !== undefined) {
+      if (profileMedia === null) patch.profileMedia = null;
+      else {
+        const m = parseProfileMedia(profileMedia);
+        patch.profileMedia = m ? JSON.stringify(m) : null;
+      }
+    }
+    if (businessPlaceId !== undefined) {
+      if (businessPlaceId === null || businessPlaceId === "") patch.businessPlaceId = null;
+      else {
+        const n = Number(businessPlaceId);
+        if (!Number.isFinite(n) || n <= 0) return res.status(400).json({ error: "Invalid business place" });
+        patch.businessPlaceId = Math.floor(n);
+      }
+    }
+    if (pup !== undefined) {
+      if (pup === null) patch.pup = null;
+      else {
+        const p = parsePup(pup);
+        patch.pup = p ? JSON.stringify(p) : null;
+      }
+    }
+    if (packmateIds !== undefined) patch.packmateIds = JSON.stringify(parseIdArray(packmateIds, 24));
+    if (handlerIds !== undefined) patch.handlerIds = JSON.stringify(parseIdArray(handlerIds, 12));
     storage.updateUser(req.session.userId!, patch as any);
     const updated = storage.getUserById(req.session.userId!);
     res.json(authUserResponse(req, updated));
