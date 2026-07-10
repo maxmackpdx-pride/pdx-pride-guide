@@ -395,6 +395,20 @@
   height: 100%;
 }
 
+/* Mobile: map column has no stretched row height — give explicit size (100% was collapsing to 0) */
+@media (max-width: 899px) {
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map {
+    width: 100%;
+    height: clamp(380px, 48vh, 520px);
+    min-height: 320px;
+  }
+
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__panel {
+    height: auto;
+    min-height: 0;
+  }
+}
+
 .nude-beaches-page .nude-beaches-map {
   border: none;
   border-radius: 0;

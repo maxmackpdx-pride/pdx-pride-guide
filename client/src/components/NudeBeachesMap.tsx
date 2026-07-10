@@ -87,12 +87,20 @@ function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: stri
 function MapResizer({ tab }: { tab: NudeBeachTab }) {
   const map = useMap();
   useEffect(() => {
-    const timers = [
-      setTimeout(() => map.invalidateSize(), 50),
-      setTimeout(() => map.invalidateSize(), 250),
-      setTimeout(() => map.invalidateSize(), 800),
-    ];
-    return () => timers.forEach(clearTimeout);
+    const invalidate = () => map.invalidateSize();
+    const timers = [50, 250, 800, 1500].map(ms => setTimeout(invalidate, ms));
+
+    const container = map.getContainer()?.parentElement;
+    let observer: ResizeObserver | undefined;
+    if (container && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(invalidate);
+      observer.observe(container);
+    }
+
+    return () => {
+      timers.forEach(clearTimeout);
+      observer?.disconnect();
+    };
   }, [map, tab]);
   return null;
 }
