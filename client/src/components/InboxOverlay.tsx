@@ -13,6 +13,13 @@ import StatsView from "@/components/inbox/panel/StatsView";
 type View = "inbox" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
 
+type InboxOverlayProps = {
+  open: boolean;
+  onClose: () => void;
+  initialView?: View;
+  initialAccount?: Account;
+};
+
 const ACCOUNTS: Array<[Account, string, string]> = [
   ["personal", "Personal", C.limeSoft],
   ["admin", "Admin", C.magenta],
@@ -27,7 +34,7 @@ const FILTERS: Array<[string, string, string]> = [
   ["checkins", "Check-ins", C.green],
 ];
 
-export default function InboxOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function InboxOverlay({ open, onClose, initialView, initialAccount }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [view, setView] = useState<View>("inbox");
@@ -72,14 +79,22 @@ export default function InboxOverlay({ open, onClose }: { open: boolean; onClose
   }, [filterOpen]);
 
   useEffect(() => {
-    if (open) return;
-    setView("inbox");
-    setAccount("personal");
+    if (!open) {
+      setView("inbox");
+      setAccount("personal");
+      setFolder("inbox");
+      setFilter("all");
+      setFilterOpen(false);
+      setQuery("");
+      return;
+    }
+    setView(initialView ?? "inbox");
+    setAccount(initialAccount ?? "personal");
     setFolder("inbox");
     setFilter("all");
     setFilterOpen(false);
     setQuery("");
-  }, [open]);
+  }, [open, initialView, initialAccount]);
 
   if (!open || !user) return null;
 

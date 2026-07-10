@@ -10,18 +10,17 @@ import { DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
-  ToggleLeft, ToggleRight, Pencil, X, Inbox, Briefcase, Users, UserCircle, Search, RefreshCw,
+  ToggleLeft, ToggleRight, Pencil, X, Briefcase, Users, UserCircle, Search, RefreshCw,
 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
-import AdminInbox, { type BoardRejectTarget, type InboxKindFilter } from "@/components/admin/AdminInbox";
+import { type BoardRejectTarget, type OwnerDeskItem } from "@/components/admin/admin-queue-types";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { type AdminView } from "@/components/admin/AdminShell";
 import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
-import AdminOwnerDesk, { type OwnerDeskItem } from "@/components/admin/AdminOwnerDesk";
-import AdminStatsView from "@/components/admin/AdminStatsView";
+import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
@@ -144,7 +143,15 @@ interface AdminUser extends AdminUserProfile {
 type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "stats", "inbox", "owner", "events", "gigs", "promoters", "venue-claims", "users", "team"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "events", "gigs", "promoters", "venue-claims", "users", "team"];
+
+function inboxSheetOptsFromLegacyTab(rawTab: string | null): InboxSheetOpenOpts | null {
+  if (!rawTab) return null;
+  if (rawTab === "queue" || rawTab === "inbox") return { view: "inbox", account: "admin" };
+  if (rawTab === "analytics" || rawTab === "stats") return { view: "stats" };
+  if (rawTab === "owner") return { view: "inbox", account: "owner" };
+  return null;
+}
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -158,14 +165,6 @@ interface SiteAdminMember extends AdminUserProfile {
 const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
-
-const OVERVIEW_PILL_TO_INBOX_KIND: Record<string, InboxKindFilter> = {
-  submissions: "submission",
-  promoters: "promoter",
-  moderation: "moderation",
-  reports: "gifting_report",
-  gifting: "gifting_post",
-};
 
 function adminTabFromQuery(
   search: string,
@@ -185,6 +184,7 @@ export default function Admin() {
   usePageSeo("Admin | PDX Pride Guide", "Site administration panel.");
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
+  const { openSheet } = useInboxSheet();
   const [, navigate] = useLocation();
   const [authenticated, setAuthenticated] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
@@ -195,9 +195,7 @@ export default function Admin() {
   const [adminName, setAdminName] = useState("Admin1");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [moreOpen, setMoreOpen] = useState(false);
-  const [expandedInboxKey, setExpandedInboxKey] = useState<string | null>(null);
-  const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
-  const [modNote, setModNote] = useState<Record<number, string>>({});
+
   const [boardRejectReasons, setBoardRejectReasons] = useState<Record<string, string>>({});
   const [boardRejectNotes, setBoardRejectNotes] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -218,7 +216,7 @@ export default function Admin() {
   const [allUsersFilter, setAllUsersFilter] = useState("");
   const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
   const [fixUsernameValue, setFixUsernameValue] = useState("");
-  const [inboxKindFilter, setInboxKindFilter] = useState<InboxKindFilter>("all");
+
 
   useEffect(() => {
     if (authLoading) return;
@@ -263,15 +261,31 @@ export default function Admin() {
 
   const syncAdminTabFromUrl = useCallback(() => {
     const rawTab = new URLSearchParams(window.location.search).get("tab");
+    if (rawTab === "owner" && !isPrimaryOwner) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "overview");
+      window.history.replaceState({}, "", url.toString());
+      setActiveTab("overview");
+      return;
+    }
+    const sheetOpts = inboxSheetOptsFromLegacyTab(rawTab);
+    if (sheetOpts) {
+      setActiveTab("overview");
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "overview");
+      window.history.replaceState({}, "", url.toString());
+      openSheet(sheetOpts);
+      return;
+    }
     const tab = adminTabFromQuery(window.location.search, isPrimaryOwner, canManageTeam);
     if (!tab) return;
     setActiveTab(tab);
-    if ((rawTab === "owner" && !isPrimaryOwner) || (rawTab === "team" && !canManageTeam)) {
+    if (rawTab === "team" && !canManageTeam) {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", "overview");
       window.history.replaceState({}, "", url.toString());
     }
-  }, [isPrimaryOwner, canManageTeam]);
+  }, [isPrimaryOwner, canManageTeam, openSheet]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -565,9 +579,8 @@ export default function Admin() {
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       apiRequest("POST", `/api/admin/submissions/${id}/reject`, { adminName, reason }),
-    onSuccess: (_, { id }) => {
+    onSuccess: () => {
       invalidateInboxQueries();
-      setRejectReasons(prev => ({ ...prev, [id]: "" }));
       toast({ title: "Rejected", description: "Submission rejected." });
     },
     onError: () => {
@@ -1191,12 +1204,15 @@ export default function Admin() {
   };
 
   const setAdminTab = (tab: AdminTab) => {
-    const resolved = tab === "owner" && !isPrimaryOwner ? "overview" : tab;
-    setActiveTab(resolved);
+    setActiveTab(tab);
     setMoreOpen(false);
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", resolved);
+    url.searchParams.set("tab", tab);
     window.history.replaceState({}, "", url.toString());
+  };
+
+  const openAdminSheet = (opts: InboxSheetOpenOpts) => {
+    openSheet(opts);
   };
 
   const openInboxFromOverview = (filterHint?: string) => {
@@ -1204,12 +1220,39 @@ export default function Admin() {
       setAdminTab("venue-claims");
       return;
     }
-    if (filterHint && OVERVIEW_PILL_TO_INBOX_KIND[filterHint]) {
-      setInboxKindFilter(OVERVIEW_PILL_TO_INBOX_KIND[filterHint]);
-    } else {
-      setInboxKindFilter("all");
+    openAdminSheet({ view: "inbox", account: "admin" });
+  };
+
+  const openStatsFromOverview = () => {
+    openAdminSheet({ view: "stats" });
+  };
+
+  const handleOverviewMetricClick = (tab: string, metricKey: string) => {
+    if (metricKey === "userSubmittedEvents") {
+      setEventStatusFilter("user_submitted");
+      setAdminTab("events");
+      return;
     }
-    setAdminTab("inbox");
+    if (metricKey === "attendances") {
+      setEventStatusFilter("has_checkins");
+      setAdminTab("events");
+      return;
+    }
+    if (metricKey === "newUsersToday") {
+      setAdminTab("users");
+      setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+      return;
+    }
+    if (tab === "stats" || tab === "analytics") {
+      openStatsFromOverview();
+      return;
+    }
+    if (tab === "inbox" || tab === "queue") {
+      openAdminSheet({ view: "inbox", account: "admin" });
+      return;
+    }
+    const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "overview") as AdminTab;
+    setAdminTab(next);
   };
 
   const userCount = allUsers.length;
@@ -1217,20 +1260,6 @@ export default function Admin() {
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
   const approvedPromoterCount = approvedPromoters.length;
-
-  const inboxActionPending =
-    approveMutation.isPending
-    || mergeSubmissionMutation.isPending
-    || rejectMutation.isPending
-    || resolveModerationMutation.isPending
-    || dismissStaleTestsMutation.isPending
-    || approvePromoterMutation.isPending
-    || denyPromoterMutation.isPending
-    || approveTalentMutation.isPending
-    || denyTalentMutation.isPending
-    || updateGiftingStatusMutation.isPending
-    || resolveGiftingReportMutation.isPending
-    || resolveOwnerDeskMutation.isPending;
 
   const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
   const pushOk = !!pushStatus?.configured;
@@ -1306,135 +1335,20 @@ export default function Admin() {
             isPrimaryOwner={isPrimaryOwner}
             ownerCount={ownerCount}
             onOpenInbox={openInboxFromOverview}
-            onOpenOwner={() => setAdminTab("owner")}
+            onOpenOwner={() => openAdminSheet({ view: "inbox", account: "owner" })}
             onReviewItem={(key) => {
               if (key.startsWith("business-")) {
                 setAdminTab("venue-claims");
                 return;
               }
-              setExpandedInboxKey(key);
-              setInboxKindFilter("all");
-              setAdminTab("inbox");
+              openAdminSheet({ view: "inbox", account: "admin" });
             }}
-            onMetricClick={(tab, metricKey) => {
-              if (metricKey === "userSubmittedEvents") {
-                setEventStatusFilter("user_submitted");
-                setAdminTab("events");
-                return;
-              }
-              if (metricKey === "attendances") {
-                setEventStatusFilter("has_checkins");
-                setAdminTab("events");
-                return;
-              }
-              if (metricKey === "newUsersToday") {
-                setAdminTab("users");
-                setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
-                return;
-              }
-              const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "stats") as AdminTab;
-              setAdminTab(next);
-            }}
+            onMetricClick={handleOverviewMetricClick}
             pushStatus={pushStatus}
             onRefreshPush={() => refetchPushStatus()}
             onSendTestPush={() => testPushMutation.mutate()}
             testPushPending={testPushMutation.isPending}
           />
-        )}
-
-        {/* ── STATS (site pulse metrics) ── */}
-        {activeTab === "stats" && (
-          <div className="admin-stats-view">
-            <AdminStatsView
-              enabled={authenticated}
-              onMetricClick={(tab: string, metricKey: string) => {
-                if (metricKey === "userSubmittedEvents") {
-                  setEventStatusFilter("user_submitted");
-                  setAdminTab("events");
-                  return;
-                }
-                if (metricKey === "attendances") {
-                  setEventStatusFilter("has_checkins");
-                  setAdminTab("events");
-                  return;
-                }
-                if (metricKey === "newUsersToday") {
-                  setAdminTab("users");
-                  setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
-                  return;
-                }
-                const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "stats") as AdminTab;
-                setAdminTab(next);
-              }}
-            />
-          </div>
-        )}
-
-        {/* ── INBOX / REVIEW QUEUE ── */}
-        {activeTab === "inbox" && (
-          <>
-          <AdminInbox
-            submissions={submissions}
-            promoterRequests={promoterRequests}
-            talentRequests={talentRequests}
-            modRequests={modRequests}
-            giftingPosts={giftingAdmin.posts || []}
-            giftingReports={giftingAdmin.reports || []}
-            missedConnections={missedAdmin}
-            initialKindFilter={inboxKindFilter}
-            loading={inboxLoading}
-            error={inboxError}
-            onRetry={refetchInbox}
-            expandedKey={expandedInboxKey}
-            onToggleExpand={setExpandedInboxKey}
-            rejectReasons={rejectReasons}
-            onRejectReasonChange={(id, val) => setRejectReasons(prev => ({ ...prev, [id]: val }))}
-            modNotes={modNote}
-            onModNoteChange={(id, val) => setModNote(prev => ({ ...prev, [id]: val }))}
-            onApproveSubmission={id => approveMutation.mutate({ id })}
-            onMergeSubmission={(submissionId, eventId) => mergeSubmissionMutation.mutate({ submissionId, eventId })}
-            onRejectSubmission={(id, reason) => rejectMutation.mutate({ id, reason })}
-            onApprovePromoter={id => approvePromoterMutation.mutate(id)}
-            onDenyPromoter={id => denyPromoterMutation.mutate(id)}
-            onApproveTalent={id => approveTalentMutation.mutate(id)}
-            onDenyTalent={id => denyTalentMutation.mutate(id)}
-            onResolveModeration={(id, action, note) => resolveModerationMutation.mutate({ id, action, note })}
-            onDismissStaleTests={() => dismissStaleTestsMutation.mutate()}
-            onGiftingStatus={(id, status) => updateGiftingStatusMutation.mutate({ id, status })}
-            onResolveGiftingReport={id => resolveGiftingReportMutation.mutate({ id })}
-            boardRejectReasons={boardRejectReasons}
-            boardRejectNotes={boardRejectNotes}
-            onBoardRejectReasonChange={(key, code) => setBoardRejectReasons(prev => ({ ...prev, [key]: code }))}
-            onBoardRejectNoteChange={(key, note) => setBoardRejectNotes(prev => ({ ...prev, [key]: note }))}
-            onBoardReject={(board, id, reasonCode, note) => rejectBoardPostMutation.mutate({ board, id, reasonCode, note })}
-            onApproveSpotted={(id) => approveSpottedMutation.mutate(id)}
-            onRemoveSpotted={(id) => removeSpottedMutation.mutate(id)}
-            actionPending={inboxActionPending || rejectBoardPostMutation.isPending}
-          />
-          {riverBratsReports.filter((r: any) => r.status === "PENDING").length > 0 && (
-            <div className="mt-8 border border-white/10 rounded-lg p-4">
-              <h3 className="text-white font-display font-bold text-sm uppercase tracking-wider mb-3">River Brats reports</h3>
-              <ul className="space-y-3">
-                {riverBratsReports.filter((r: any) => r.status === "PENDING").map((r: any) => (
-                  <li key={r.id} className="text-sm text-white/80 flex flex-wrap items-center justify-between gap-3">
-                    <span>
-                      <strong className="text-white">{r.target_type}</strong> #{r.target_id} · {r.reason}
-                      {r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-xs uppercase tracking-wide text-[#C8FA3C] hover:underline"
-                      disabled={resolveRiverBratsReportMutation.isPending}
-                      onClick={() => resolveRiverBratsReportMutation.mutate({ id: r.id })}
-                    >
-                      Resolve
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          </>
         )}
 
         {/* ── MANAGE EVENTS ── */}
@@ -2395,17 +2309,6 @@ export default function Admin() {
               </div>
             )}
           </div>
-        )}
-
-        {activeTab === "owner" && isPrimaryOwner && (
-          <AdminOwnerDesk
-            items={ownerDesk}
-            loading={ownerDeskLoading}
-            error={ownerDeskError}
-            onRetry={() => refetchOwnerDesk()}
-            onResolve={(id, source) => resolveOwnerDeskMutation.mutate({ id, source })}
-            resolvePending={resolveOwnerDeskMutation.isPending}
-          />
         )}
 
         {activeTab === "team" && canManageTeam && (

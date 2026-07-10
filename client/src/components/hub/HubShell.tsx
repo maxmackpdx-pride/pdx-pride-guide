@@ -1,20 +1,17 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  BarChart3,
   Bell,
   Briefcase,
   CalendarDays,
   ChevronLeft,
   Home,
   Inbox,
-  KeyRound,
   Layers,
   LayoutDashboard,
   LogOut,
   MoreHorizontal,
   Shield,
-  ShoppingCart,
   Store,
   Users,
   UserCircle,
@@ -29,9 +26,6 @@ export type HubMode = "member" | "admin";
 export type MemberView = "home" | "inbox" | "posts";
 export type AdminViewKey =
   | "overview"
-  | "stats"
-  | "inbox"
-  | "owner"
   | "events"
   | "users"
   | "gigs"
@@ -48,24 +42,6 @@ export const ADMIN_VIEW_META: Record<
     kicker: "Control room",
     kickerColor: "var(--lime, #ccff00)",
     lede: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
-  },
-  stats: {
-    title: "Stats",
-    kicker: "The numbers",
-    kickerColor: "var(--cyan, #00ffff)",
-    lede: "First-party traffic tracking plus database counts: page views, sources, signups, RSVPs, listings, and queue depth.",
-  },
-  inbox: {
-    title: "Review queue",
-    kicker: "Shared queue",
-    kickerColor: "var(--pink, #ff00cc)",
-    lede: "One queue the whole admin team works together. Not a mailbox, a shared to-do list.",
-  },
-  owner: {
-    title: "Owner desk",
-    kicker: "Owner only",
-    kickerColor: "var(--purple, #8800ff)",
-    lede: "Only you, the owner, see these. Keyholder grants, escalations, and account-level calls the team can't make.",
   },
   events: {
     title: "All events",
@@ -147,9 +123,6 @@ const ADMIN_PRIMARY_NAV: Array<{
   ownerOnly?: boolean;
 }> = [
   { key: "overview", label: "Overview", icon: LayoutDashboard, accent: "lime" },
-  { key: "stats", label: "Stats", icon: BarChart3, accent: "cyan" },
-  { key: "inbox", label: "Review queue", icon: ShoppingCart, accent: "pink" },
-  { key: "owner", label: "Owner desk", icon: KeyRound, accent: "purple", ownerOnly: true },
 ];
 
 const ADMIN_MORE_NAV: Array<{
@@ -241,7 +214,7 @@ export default function HubShell({
     <button
       type="button"
       className="hub-notify-btn"
-      onClick={() => goAdmin("inbox")}
+      onClick={() => openSheet({ view: "inbox", account: "admin" })}
       aria-label={`Notifications${alertTotal > 0 ? `, ${alertTotal} pending` : ""}`}
     >
       <Bell size={mode === "admin" ? 21 : 17} strokeWidth={2.2} aria-hidden />
@@ -316,16 +289,9 @@ export default function HubShell({
             <>
               <div className="hub-side__kicker">Admin</div>
               <nav className="hub-side__nav">
-                {ADMIN_PRIMARY_NAV.filter(item => !item.ownerOnly || isPrimaryOwner).map(item => {
+                {ADMIN_PRIMARY_NAV.map(item => {
                   const Icon = item.icon;
                   const active = adminView === item.key;
-                  const alert =
-                    item.key === "inbox" && pendingCount > 0
-                      ? pendingCount
-                      : item.key === "owner" && ownerCount > 0
-                        ? ownerCount
-                        : undefined;
-                  const alertClass = item.key === "owner" ? "hub-side__pill--purple" : "hub-side__pill--pink";
                   return (
                     <button
                       key={item.key}
@@ -335,9 +301,6 @@ export default function HubShell({
                     >
                       <Icon size={18} strokeWidth={2.2} aria-hidden />
                       <span className="label">{item.label}</span>
-                      {alert != null && (
-                        <span className={`hub-side__pill ${alertClass}`}>{alert}</span>
-                      )}
                     </button>
                   );
                 })}
@@ -516,36 +479,12 @@ export default function HubShell({
             </button>
             <button
               type="button"
-              className={`hub-mobile-tab${adminView === "stats" ? " is-active is-cyan" : ""}`}
-              onClick={() => goAdmin("stats")}
+              className={`hub-mobile-tab${adminView === "events" ? " is-active is-orange" : ""}`}
+              onClick={() => goAdmin("events")}
             >
-              <BarChart3 size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>Stats</span>
+              <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Events</span>
             </button>
-            <button
-              type="button"
-              className={`hub-mobile-tab${adminView === "inbox" ? " is-active is-pink" : ""}`}
-              onClick={() => goAdmin("inbox")}
-            >
-              <span className="hub-mobile-tab__icon-wrap">
-                <ShoppingCart size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-                {pendingCount > 0 && <i className="is-blink">{pendingCount}</i>}
-              </span>
-              <span>Queue</span>
-            </button>
-            {isPrimaryOwner && (
-              <button
-                type="button"
-                className={`hub-mobile-tab${adminView === "owner" ? " is-active is-purple" : ""}`}
-                onClick={() => goAdmin("owner")}
-              >
-                <span className="hub-mobile-tab__icon-wrap">
-                  <KeyRound size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-                  {ownerCount > 0 && <i className="is-purple">{ownerCount}</i>}
-                </span>
-                <span>Owner</span>
-              </button>
-            )}
             <button
               type="button"
               className={`hub-mobile-tab${moreOpen || moreViews.includes(adminView) ? " is-active is-more" : ""}`}

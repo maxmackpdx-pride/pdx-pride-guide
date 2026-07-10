@@ -3,9 +3,15 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import InboxOverlay from "@/components/InboxOverlay";
 
+export type InboxSheetOpenOpts = {
+  view?: "inbox" | "posts" | "stats";
+  account?: "personal" | "admin" | "owner";
+};
+
 type InboxSheetContextValue = {
   open: boolean;
-  openSheet: () => void;
+  openOpts: InboxSheetOpenOpts | null;
+  openSheet: (opts?: InboxSheetOpenOpts) => void;
   closeSheet: () => void;
   toggleSheet: () => void;
 };
@@ -19,19 +25,33 @@ function isInboxRoute(location: string) {
 export function InboxSheetProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [location] = useLocation();
+  const pathname = location.split("?")[0] || location;
   const [open, setOpen] = useState(false);
+  const [openOpts, setOpenOpts] = useState<InboxSheetOpenOpts | null>(null);
 
   useEffect(() => {
     setOpen(false);
-  }, [location]);
+    setOpenOpts(null);
+  }, [pathname]);
 
-  const openSheet = useCallback(() => setOpen(true), []);
-  const closeSheet = useCallback(() => setOpen(false), []);
-  const toggleSheet = useCallback(() => setOpen((v) => !v), []);
+  const openSheet = useCallback((opts?: InboxSheetOpenOpts) => {
+    setOpenOpts(opts ?? null);
+    setOpen(true);
+  }, []);
+  const closeSheet = useCallback(() => {
+    setOpen(false);
+    setOpenOpts(null);
+  }, []);
+  const toggleSheet = useCallback(() => {
+    setOpen((v) => {
+      if (v) setOpenOpts(null);
+      return !v;
+    });
+  }, []);
 
   const value = useMemo(
-    () => ({ open, openSheet, closeSheet, toggleSheet }),
-    [open, openSheet, closeSheet, toggleSheet],
+    () => ({ open, openOpts, openSheet, closeSheet, toggleSheet }),
+    [open, openOpts, openSheet, closeSheet, toggleSheet],
   );
 
   const showOverlay = Boolean(user) && !isInboxRoute(location);
@@ -41,7 +61,12 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
       {children}
       {showOverlay && (
         <div className="inbox-sheet-host" aria-hidden={!open}>
-          <InboxOverlay open={open} onClose={closeSheet} />
+          <InboxOverlay
+            open={open}
+            onClose={closeSheet}
+            initialView={openOpts?.view}
+            initialAccount={openOpts?.account}
+          />
         </div>
       )}
     </InboxSheetContext.Provider>
