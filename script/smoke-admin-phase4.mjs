@@ -94,23 +94,30 @@ try {
 
   await page.goto(`${BASE}/admin?tab=stats`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
+  await page.waitForResponse((r) => r.url().includes("/api/admin/metrics") && r.ok(), { timeout: 15000 }).catch(() => {});
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   const legacyStats = page.url().includes("tab=overview");
   const statsSheet = await page.locator(".inbox-overlay").isVisible().catch(() => false);
   const statsHeading = statsSheet
     ? await page.locator(".inbox-overlay").getByText("STATS", { exact: true }).isVisible().catch(() => false)
     : false;
-  const memberGrowth = statsSheet
-    ? await page.locator(".inbox-overlay").getByText(/MEMBER GROWTH/i).isVisible().catch(() => false)
-    : false;
-  record("Legacy ?tab=stats → overview + stats sheet", legacyStats && statsSheet && statsHeading, `url=${page.url()} stats=${statsHeading} memberGrowth=${memberGrowth}`);
+  let memberGrowth = false;
+  if (statsSheet) {
+    await page.locator(".inbox-overlay").evaluate((el) => {
+      const scroller = el.querySelector(".inbox-overlay__scroll") || el;
+      scroller.scrollTop = scroller.scrollHeight;
+    }).catch(() => {});
+    await page.waitForTimeout(200);
+    memberGrowth = await page.locator(".inbox-overlay").getByText(/MEMBER GROWTH/i).isVisible().catch(() => false);
+  }
+  record("Legacy ?tab=stats → overview + stats sheet", legacyStats && statsSheet && statsHeading && memberGrowth, `url=${page.url()} stats=${statsHeading} memberGrowth=${memberGrowth}`);
 
   await page.keyboard.press("Escape");
   await page.waitForTimeout(300);
 
   await page.goto(`${BASE}/admin?tab=overview`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
-  await page.getByLabel(/Notifications/i).click({ force: true, timeout: 10000 });
+  await page.locator(".hub-main__notify-desktop .hub-notify-btn").click({ force: true, timeout: 10000 });
   const bellSheet = await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 }).then(() => true).catch(() => false);
   record("Notify bell opens admin queue sheet", bellSheet, `sheetVisible=${bellSheet}`);
 
