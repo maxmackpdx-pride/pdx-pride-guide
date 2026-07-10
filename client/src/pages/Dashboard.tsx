@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -7,27 +7,35 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHeader from "@/components/PageHeader";
-import ScrollReveal from "@/components/ScrollReveal";
-import UserAvatar from "@/components/UserAvatar";
 import HubShell, { type MemberView } from "@/components/hub/HubShell";
+import MemberHubHome from "@/components/hub/MemberHubHome";
 import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/DashboardDrawer";
-import DashboardInboxPreview from "@/components/dashboard/DashboardInboxPreview";
-import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
-import DashboardHubSummary from "@/components/dashboard/DashboardHubSummary";
 import DashboardVenueSection from "@/components/dashboard/DashboardVenueSection";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
 import { editFormToApiPayload, eventToEditForm } from "@/lib/eventEditForm";
 import "@/components/dashboard/dashboard.css";
+import "@/components/hub/hub-home.css";
 
 export default function Dashboard() {
   usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, gigs, messages, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
-  const [memberView, setMemberView] = useState<MemberView>("home");
+  const [memberView, setMemberView] = useState<MemberView>(() => {
+    if (typeof window === "undefined") return "home";
+    const v = new URLSearchParams(window.location.search).get("view");
+    return v === "posts" ? "posts" : "home";
+  });
   const [editMode, setEditMode] = useState(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (memberView === "posts") url.searchParams.set("view", "posts");
+    else url.searchParams.delete("view");
+    window.history.replaceState({}, "", url.toString());
+  }, [memberView]);
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [avatarChoice, setAvatarChoice] = useState(user?.avatarChoice || 1);
@@ -103,7 +111,6 @@ export default function Dashboard() {
 
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
-  const pendingSubmissions = submittedEvents.filter((evt: any) => evt.status === "PENDING").length;
   const unreadCount = unread.count || 0;
 
   const dashboardQueryErrors = [
@@ -332,7 +339,6 @@ export default function Dashboard() {
     .trim()
     .split(/[\s_]+/)[0]
     .toUpperCase();
-  const profileName = (user.displayName || user.username || "").toUpperCase();
 
   const scrollToSection = (key: string) => {
     setMemberView("posts");
@@ -347,8 +353,50 @@ export default function Dashboard() {
     setMemberView(view);
   };
 
+  const errorBanner =
+    dashboardQueryErrors.length > 0 ? (
+      <div
+        role="alert"
+        style={{
+          marginBottom: 18,
+          padding: "14px 16px",
+          border: "1px solid var(--dash-orange)",
+          background: "rgba(255,140,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+          borderRadius: 12,
+        }}
+      >
+        <p className="dash-mono" style={{ margin: 0, fontSize: 10.5, color: "#fff", textTransform: "none", letterSpacing: "0.04em" }}>
+          Some hub sections could not load ({dashboardQueryErrors.join(", ")}).
+        </p>
+        <button type="button" className="dash-btn dash-btn-lime" onClick={retryDashboard}>
+          Retry
+        </button>
+      </div>
+    ) : null;
+
+  const profileEditor = editMode ? (
+    <DashboardProfileEditor
+      user={user}
+      displayName={displayName}
+      setDisplayName={setDisplayName}
+      bio={bio}
+      setBio={setBio}
+      avatarChoice={avatarChoice}
+      setAvatarChoice={setAvatarChoice}
+      saving={saving}
+      saveMsg={saveMsg}
+      onSave={handleSave}
+      onRefresh={refreshUser}
+    />
+  ) : null;
+
   return (
-    <div className="zine-page dash-page board-page">
+    <div className="dash-page hub-nested">
       <HubShell
         mode="member"
         memberView={memberView}
@@ -362,137 +410,41 @@ export default function Dashboard() {
         avatarRing={user.avatarRing}
         unreadCount={unreadCount}
         postsCount={postsCount}
-        kicker={memberView === "posts" ? "Your boards" : "Your hub"}
-        kickerColor="var(--cyan, #00ffff)"
+        kicker={memberView === "posts" ? "Your stuff" : "Your hub"}
+        kickerColor={memberView === "posts" ? "var(--green, #39ff14)" : "var(--cyan, #00ffff)"}
         title={memberView === "posts" ? "My posts" : `Hey, ${firstName}`}
         lede={
           memberView === "posts"
-            ? "Events, gigs, Spotted, gifting, and check-ins you own."
+            ? "Everything you've submitted, claimed, or posted to the boards."
             : "Your events, messages, and posts in one place. Community run and free."
         }
         onLogout={() => logout()}
       >
-      <div className="dash-inner" style={{ maxWidth: "none", padding: 0 }}>
-        {memberView === "home" && (
-          <>
         <PwaInstallBanner />
-        <section id="profile" className="dash-profile-card" aria-label="Your profile">
-          <div className="dash-profile-card__id">
-            <div className="dash-avatar-ring">
-              <UserAvatar
-                photoUrl={user.photoUrl}
-                avatarChoice={user.avatarChoice}
-                avatarRing={user.avatarRing}
-                displayName={user.displayName}
-                username={user.username}
-                size={72}
-              />
-            </div>
-            <div className="dash-profile-card__copy">
-              <h2 className="dash-profile-card__name">{profileName}</h2>
-              <p className="dash-profile-card__meta">
-                @{user.username}
-                {user.email ? ` · ${user.email}` : ""}
-              </p>
-              {user.bio && <p className="dash-profile-card__bio">{user.bio}</p>}
-              <div className="dash-actions">
-                <button
-                  type="button"
-                  className={`dash-btn dash-btn-lime-solid ${editMode ? "active" : ""}`}
-                  onClick={() => setEditMode(!editMode)}
-                >
-                  {editMode ? "CANCEL" : "EDIT PROFILE"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {dashboardQueryErrors.length > 0 && (
-          <div
-            role="alert"
-            style={{
-              marginBottom: 20,
-              padding: "14px 16px",
-              border: "1px solid var(--dash-orange)",
-              background: "rgba(255,140,0,0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            <p className="dash-mono" style={{ margin: 0, fontSize: 10.5, color: "#fff", textTransform: "none", letterSpacing: "0.04em" }}>
-              Some dashboard sections could not load ({dashboardQueryErrors.join(", ")}).
-            </p>
-            <button type="button" className="dash-btn dash-btn-lime" onClick={retryDashboard}>
-              Retry
-            </button>
-          </div>
-        )}
-
-        {editMode && (
-          <DashboardProfileEditor
+        {memberView === "home" && (
+          <MemberHubHome
             user={user}
-            displayName={displayName}
-            setDisplayName={setDisplayName}
-            bio={bio}
-            setBio={setBio}
-            avatarChoice={avatarChoice}
-            setAvatarChoice={setAvatarChoice}
-            saving={saving}
-            saveMsg={saveMsg}
-            onSave={handleSave}
-            onRefresh={refreshUser}
+            counts={{
+              eventCount,
+              gigCount: myGigs.length,
+              giftingCount: myGifting.length,
+              spottedCount: myMissed.length,
+              checkInCount: myCheckIns.length,
+            }}
+            isAdmin={isAdmin}
+            isSuperAdmin={isSuperAdmin}
+            editMode={editMode}
+            onEditProfile={() => setEditMode(!editMode)}
+            onLogout={() => logout()}
+            onSelectSection={scrollToSection}
+            profileEditor={profileEditor}
+            errorBanner={errorBanner}
           />
         )}
 
-        <ScrollReveal>
-        <DashboardHubSummary
-          counts={{
-            unread: unreadCount,
-            pendingSubmissions,
-            gigCount: myGigs.length,
-            giftingCount: myGifting.length,
-            spottedCount: myMissed.length,
-            checkInCount: myCheckIns.length,
-            eventCount,
-          }}
-          onSelectSection={scrollToSection}
-        />
-        </ScrollReveal>
-
-        <ScrollReveal delay={30}>
-        <div className={`dash-top-grid${unreadCount > 0 ? " dash-top-grid--inbox-priority" : ""}`}>
-          <DashboardInboxPreview enabled={!!user} />
-          <DashboardWidgets />
-        </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={60}>
-        <section className="dash-connections">
-          <div>
-            <h2 className="dash-anton dash-connections__title">ACCOUNT CONNECTIONS</h2>
-            <p className="dash-connections__status" style={{ color: user.googleLinked ? LIME : "var(--dash-muted)" }}>
-              Google is {user.googleLinked ? "linked to this profile." : "not linked yet."}
-            </p>
-          </div>
-          {user.googleLinked ? (
-            <span className="dash-chip" style={{ color: LIME }}>GOOGLE LINKED</span>
-          ) : (
-            <a href="/api/auth/google?link=1" className="dash-pill-btn" style={{ color: "#fff", borderColor: "#fff" }}>
-              LINK GOOGLE →
-            </a>
-          )}
-        </section>
-        </ScrollReveal>
-          </>
-        )}
-
         {memberView === "posts" && (
-        <ScrollReveal>
         <div className="dash-drawers">
+          {errorBanner}
           <DashboardVenueSection open={!!openSections.venues} onToggle={() => toggleSection("venues")} />
 
           <DashboardDrawer
@@ -716,9 +668,7 @@ export default function Dashboard() {
             ))}
           </DashboardDrawer>
         </div>
-        </ScrollReveal>
         )}
-      </div>
       </HubShell>
     </div>
   );

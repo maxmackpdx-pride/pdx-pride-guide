@@ -158,24 +158,36 @@
   color: #ddd;
 }
 
-.hub-side__nav-btn.is-active {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-}
-
+/* Member active: solid neon fill (Hub.pdf) */
 .hub-side__nav-btn.is-active.is-cyan {
-  box-shadow: inset 3px 0 0 var(--hub-cyan);
-  color: var(--hub-cyan);
+  background: var(--hub-cyan);
+  color: #000;
+  box-shadow: none;
 }
 
 .hub-side__nav-btn.is-active.is-green {
-  box-shadow: inset 3px 0 0 var(--hub-green);
-  color: var(--hub-green);
+  background: var(--hub-green);
+  color: #000;
+  box-shadow: none;
 }
 
+/* Admin active: inset accent bar (design admin screens) */
 .hub-side__nav-btn.is-active.is-lime {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
   box-shadow: inset 3px 0 0 var(--hub-lime);
-  color: var(--hub-lime);
+}
+
+.hub-side__nav-btn.is-active.is-cyan .hub-side__pill--pink,
+.hub-side__nav-btn.is-active.is-green .hub-side__pill--pink {
+  background: #000;
+  color: var(--hub-pink);
+}
+
+.hub-side__nav-btn.is-active.is-cyan .hub-side__pill--outline,
+.hub-side__nav-btn.is-active.is-green .hub-side__pill--outline {
+  border-color: rgba(0, 0, 0, 0.35);
+  color: #000;
 }
 
 .hub-side__pill {
@@ -341,9 +353,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
-  letter-spacing: 0.18em;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   margin-bottom: 12px;
 }
@@ -358,19 +371,26 @@
   margin: 0;
   font-family: var(--font-display), sans-serif;
   font-weight: 900;
-  font-size: clamp(2.1rem, 5vw, 3.2rem);
-  line-height: 0.95;
+  font-size: clamp(2.6rem, 6.5vw, 4rem);
+  line-height: 0.92;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: #fff;
 }
 
 .hub-main__lede {
-  margin: 12px 0 0;
-  max-width: 52ch;
-  font-size: 1.05rem;
+  margin: 14px 0 0;
+  max-width: 48ch;
+  font-size: clamp(0.98rem, 1.6vw, 1.12rem);
   line-height: 1.55;
-  color: #999;
+  color: #b8b5ac;
+}
+
+.hub-main__kicker {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
 }
 
 .hub-main__body {
