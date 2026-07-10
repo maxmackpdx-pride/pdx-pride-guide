@@ -2027,7 +2027,7 @@ h2.display,
 
 /* Desktop: bottom-right panel, ~30% of viewport, no dimming backdrop. */
 @media (min-width: 641px) {
-  .floating-inbox .inbox-overlay {
+  .inbox-sheet-host .inbox-overlay {
     right: 24px;
     /* Anchor between the site header and the bottom so the sheet's heading
        switcher is never clipped under the header. */
@@ -2039,14 +2039,14 @@ h2.display,
     max-width: 600px;
   }
 
-  .floating-inbox .inbox-overlay__backdrop {
+  .inbox-sheet-host .inbox-overlay__backdrop {
     display: none;
   }
 }
 
 /* Mobile: bottom sheet floating above the bottom nav, near full width. */
 @media (max-width: 640px) {
-  .site-mobile-nav .inbox-overlay {
+  .inbox-sheet-host .inbox-overlay {
     left: 8px;
     right: 8px;
     bottom: calc(64px + env(safe-area-inset-bottom, 12px));
