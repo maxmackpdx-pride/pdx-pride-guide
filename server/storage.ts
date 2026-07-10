@@ -1186,7 +1186,7 @@ function seedData() {
       address: "SW 3rd Ave & SW Morrison St, Portland, OR 97204",
       neighborhood: "Downtown",
       lat: 45.520091, lng: -122.677007,
-      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-19T20:00:00",
+      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-20T20:00:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["BAR", "OFFICIAL", "OUTDOOR", "MULTI-DAY"]),
@@ -2232,6 +2232,36 @@ function seedPdxPahJuly2026Events() {
     submittedBy: null,
     adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Wed Jul 15 7pm session.",
   });
+
+  insert({
+    title: "Oregon State Leather Contest 2026",
+    description:
+      "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
+    venueName: "Oregon State Leather Contest",
+    address: "Portland, OR",
+    neighborhood: "Portland",
+    lat: null,
+    lng: null,
+    dateStart: "2026-08-07T19:00:00",
+    dateEnd: "2026-08-09T23:00:00",
+    dayOfWeek: "FRI",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.oslcontest.org",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: true,
+    nudityOk: false,
+    posterImageUrl: "/posters/oslc-leather-contest-2026.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Apps close Jul 19.",
+  });
 }
 
 /** Missing Pride Week 2026 listings sourced from WW / PDX Pipeline (see missing-pride-events.json). */
@@ -2514,24 +2544,87 @@ function hardDeleteEventIds(ids: number[]) {
   sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
 }
 
-/** Remove listings after Pride Sunday (Jul 19) — hard-delete Jul 20+ starts; cap multi-day spans. */
+/** Pride-week listings that legitimately run into Mon Jul 20 or later — never prune these. */
+const POST_PRIDE_PRUNE_ALLOWLIST = new Set([
+  "Midtown Beer Garden Pride",
+  "Oregon State Leather Contest 2026",
+]);
+
+/** Remove stray post-Pride listings — never hard-delete allowlisted community events. */
 function prunePostPrideWeekEvents() {
   const postRows = sqlite
-    .prepare(`SELECT id FROM events WHERE date_start >= '2026-07-20'`)
-    .all() as Array<{ id: number }>;
+    .prepare(`
+      SELECT id, title FROM events
+      WHERE date_start >= '2026-07-20'
+        AND title NOT IN (${[...POST_PRIDE_PRUNE_ALLOWLIST].map(() => "?").join(",")})
+    `)
+    .all(...POST_PRIDE_PRUNE_ALLOWLIST) as Array<{ id: number; title: string }>;
   hardDeleteEventIds(postRows.map((r) => r.id));
 
+  const spanAllow = [...POST_PRIDE_PRUNE_ALLOWLIST];
   const spanRows = sqlite
     .prepare(`
       SELECT id, date_end FROM events
       WHERE date_start < '2026-07-20'
         AND date_end >= '2026-07-20T12:00:00'
+        AND title NOT IN (${spanAllow.map(() => "?").join(",")})
     `)
-    .all() as Array<{ id: number; date_end: string }>;
+    .all(...spanAllow) as Array<{ id: number; date_end: string }>;
 
   for (const row of spanRows) {
     const endClock = row.date_end.includes("T") ? row.date_end.split("T")[1] : "23:59:59";
     sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run(`2026-07-19T${endClock}`, row.id);
+  }
+}
+
+/** Undo accidental deletions from the first prune_post_pride_week_v1 boot pass. */
+function restorePrunedPrideEvents() {
+  const now = new Date().toISOString();
+
+  sqlite.prepare(`
+    UPDATE events SET
+      date_end = '2026-07-20T20:00:00',
+      admin_notes = COALESCE(admin_notes || ' | ', '') || 'Restored Mon Jul 20 hours after post-prune rollback'
+    WHERE title = 'Midtown Beer Garden Pride'
+      AND date_end < '2026-07-20T12:00:00'
+  `).run();
+
+  const leatherExists = sqlite
+    .prepare("SELECT id FROM events WHERE title = 'Oregon State Leather Contest 2026' LIMIT 1")
+    .get() as { id: number } | undefined;
+  if (!leatherExists) {
+    db.insert(events)
+      .values({
+        title: "Oregon State Leather Contest 2026",
+        description:
+          "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
+        venueName: "Oregon State Leather Contest",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        lat: null,
+        lng: null,
+        dateStart: "2026-08-07T19:00:00",
+        dateEnd: "2026-08-09T23:00:00",
+        dayOfWeek: "FRI",
+        ageRequirement: "21_PLUS",
+        eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
+        admission: "TICKETED",
+        ticketUrl: "https://www.oslcontest.org",
+        isPublic: true,
+        isPrivate: false,
+        isHouseParty: false,
+        isSexPositive: true,
+        nudityOk: false,
+        posterImageUrl: "/posters/oslc-leather-contest-2026.png",
+        status: "LIVE",
+        source: "admin_seeded",
+        isClaimable: true,
+        claimedBy: null,
+        submittedBy: null,
+        adminNotes: "Restored after post-prune rollback. From PDX PAH Barking Chain July 2026 newsletter.",
+        createdAt: now,
+      } as any)
+      .run();
   }
 }
 
@@ -3958,6 +4051,10 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("prune_post_pride_week_v1")) {
     prunePostPrideWeekEvents();
     recordBootMigration("prune_post_pride_week_v1");
+  }
+  if (!hasBootMigration("restore_pruned_pride_events_v1")) {
+    restorePrunedPrideEvents();
+    recordBootMigration("restore_pruned_pride_events_v1");
   }
 }
 
