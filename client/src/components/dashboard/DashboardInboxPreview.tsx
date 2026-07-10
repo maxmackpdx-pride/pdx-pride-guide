@@ -38,15 +38,15 @@ export default function DashboardInboxPreview({ enabled }: { enabled: boolean })
     >
       <div className="dash-inbox-head">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <h2 className="dash-inbox-title dash-anton">Inbox</h2>
+          <h2 className="dash-inbox-title dash-anton">INBOX</h2>
           {hasUnread && (
             <span className="dash-badge-pulse">
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#0a0a0a" }} />
-              {unread.count} unread
+              {unread.count} UNREAD
             </span>
           )}
         </div>
-        <Link href="/inbox" className="dash-pill-btn">Open inbox →</Link>
+        <Link href="/inbox" className="dash-pill-btn">OPEN INBOX →</Link>
       </div>
       <div>
         {isLoading ? (
