@@ -27,7 +27,6 @@ import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
-import HomeSchedule from "@/components/HomeSchedule";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
 
@@ -147,28 +146,6 @@ export default function Home() {
           speed={67}
           separator="★"
         />
-      </div>
-
-      <div className="pg-block pg-block--schedule" style={{ paddingTop: 36 }}>
-        <ScrollReveal>
-          <SectionHeader
-            kicker="All Week"
-            title="The Schedule"
-            subtitle="Seven days, side by side, stacked hour by hour. Saturday is a wall of color. Scroll sideways, tap anything that looks like trouble."
-            accent="cyan"
-            style={{ marginBottom: 0 }}
-            action={
-              <Link href="/schedule">
-                <Button as="span" accent="cyan" size="sm" arrow>
-                  View all events
-                </Button>
-              </Link>
-            }
-          />
-          <div className="pg-home-schedule">
-            <HomeSchedule />
-          </div>
-        </ScrollReveal>
       </div>
 
       {/* Find Your People: community board tiles (isolated section) */}

@@ -308,14 +308,6 @@ html.calm-mode .home-hero__bg {
   }
 }
 
-.home-main-stage .pg-block--schedule {
-  padding-bottom: 0;
-}
-
-.home-main-stage .pg-home-schedule {
-  margin-top: 14px;
-}
-
 .home-main-stage .pg-board3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
