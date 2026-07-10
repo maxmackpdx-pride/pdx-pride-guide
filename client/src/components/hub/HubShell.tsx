@@ -51,7 +51,7 @@ export const ADMIN_VIEW_META: Record<
     title: "Stats",
     kicker: "The numbers",
     kickerColor: "var(--cyan, #00ffff)",
-    lede: "Database counts only — no page-view analytics yet. Site pulse, signups, RSVPs, listings, and queue depth.",
+    lede: "First-party traffic tracking plus database counts: page views, sources, signups, RSVPs, listings, and queue depth.",
   },
   inbox: {
     title: "Review queue",
