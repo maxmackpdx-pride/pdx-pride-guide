@@ -3055,18 +3055,20 @@ h2.display,
   font-size: 0.9375rem;
 }
 
-.gifting-page .board-how--inline .board-steps,
-.gigs-page .board-how--inline .board-steps,
-.missed-page .board-how--inline .board-steps,
-.about-page .board-how--inline .board-steps {
+/* Paper sticker steps — only when NOT using the dark makeover skin.
+   Makeover boards force dark cards; black text there is unreadable. */
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-steps,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-steps,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-steps,
+.about-page .board-how--inline:not(.board-how--makeover) .board-steps {
   gap: 8px 14px;
   margin-top: 12px;
 }
 
-.gifting-page .board-how--inline .board-step,
-.gigs-page .board-how--inline .board-step,
-.missed-page .board-how--inline .board-step,
-.about-page .board-how--inline .board-step {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step {
   gap: 10px;
   padding: 8px 10px;
   min-height: 0;
@@ -3078,42 +3080,42 @@ h2.display,
   transform: none;
 }
 
-.gifting-page .board-how--inline .board-step:nth-child(even),
-.gigs-page .board-how--inline .board-step:nth-child(even),
-.missed-page .board-how--inline .board-step:nth-child(even),
-.about-page .board-how--inline .board-step:nth-child(even) {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even),
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even),
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even),
+.about-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even) {
   box-shadow: 3px 3px 0 rgba(255, 31, 160, 0.55);
   transform: none;
 }
 
-.gifting-page .board-how--inline .board-step h3,
-.gifting-page .board-how--inline .board-step .panel-heading,
-.gigs-page .board-how--inline .board-step h3,
-.gigs-page .board-how--inline .board-step .panel-heading,
-.missed-page .board-how--inline .board-step h3,
-.missed-page .board-how--inline .board-step .panel-heading,
-.about-page .board-how--inline .board-step h3,
-.about-page .board-how--inline .board-step .panel-heading {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step h3,
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step .panel-heading,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step h3,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step .panel-heading,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step h3,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step .panel-heading,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step h3,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step .panel-heading {
   min-width: 96px;
   font-size: 19.5px;
   font-weight: 800;
   color: #060606;
 }
 
-.gifting-page .board-how--inline .board-step p,
-.gigs-page .board-how--inline .board-step p,
-.missed-page .board-how--inline .board-step p,
-.about-page .board-how--inline .board-step p {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step p,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step p,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step p,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step p {
   font-size: 18px;
   font-weight: 700;
   color: #060606;
   line-height: 1.4;
 }
 
-.gifting-page .board-how--inline .board-step__num,
-.gigs-page .board-how--inline .board-step__num,
-.missed-page .board-how--inline .board-step__num,
-.about-page .board-how--inline .board-step__num {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step__num,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step__num,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step__num,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step__num {
   position: static;
   display: flex;
   align-items: center;
@@ -3127,20 +3129,56 @@ h2.display,
   text-shadow: none;
 }
 
-.gifting-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
-.gigs-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
-.missed-page .board-how--inline .board-step:nth-child(odd) .board-step__num,
-.about-page .board-how--inline .board-step:nth-child(odd) .board-step__num {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num {
   background: #19e3ff;
   color: #0a0a0a;
 }
 
-.gifting-page .board-how--inline .board-step:nth-child(even) .board-step__num,
-.gigs-page .board-how--inline .board-step:nth-child(even) .board-step__num,
-.missed-page .board-how--inline .board-step:nth-child(even) .board-step__num,
-.about-page .board-how--inline .board-step:nth-child(even) .board-step__num {
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even) .board-step__num,
+.gigs-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even) .board-step__num,
+.missed-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even) .board-step__num,
+.about-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(even) .board-step__num {
   background: #ff1fa0;
   color: #0a0a0a;
+}
+
+/* Dark makeover boards (Gigs / Gifting / Spotted): force light text on dark cards */
+.gigs-page .board-how--makeover .board-step--makeover,
+.gifting-page .board-how--makeover .board-step--makeover,
+.missed-page .board-how--makeover .board-step--makeover {
+  background: #0c0c0f !important;
+  color: #e8e4da !important;
+  border-color: #1c1c22 !important;
+  box-shadow: none !important;
+}
+
+.gigs-page .board-how--makeover .board-step--makeover h3,
+.gigs-page .board-how--makeover .board-step--makeover .panel-heading,
+.gifting-page .board-how--makeover .board-step--makeover h3,
+.gifting-page .board-how--makeover .board-step--makeover .panel-heading,
+.missed-page .board-how--makeover .board-step--makeover h3,
+.missed-page .board-how--makeover .board-step--makeover .panel-heading {
+  color: #fff !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+.gigs-page .board-how--makeover .board-step--makeover p,
+.gifting-page .board-how--makeover .board-step--makeover p,
+.missed-page .board-how--makeover .board-step--makeover p {
+  color: #c8c5bc !important;
+  font-weight: 500 !important;
+}
+
+.gigs-page .board-how--makeover .board-step--makeover .board-step__num,
+.gifting-page .board-how--makeover .board-step--makeover .board-step__num,
+.missed-page .board-how--makeover .board-step--makeover .board-step__num {
+  background: transparent !important;
+  color: #ccff00 !important;
+  -webkit-text-stroke: 0 !important;
 }
 
 .gifting-page .gifting-how .gifting-footer-line,
