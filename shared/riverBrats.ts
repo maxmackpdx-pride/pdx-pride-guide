@@ -39,6 +39,18 @@ export function pacificMidnightIso(dateStr: string): string {
   return new Date(t + 1).toISOString();
 }
 
+/** Beach group chat closes at 10pm Pacific on its calendar date. */
+export const RIVER_BRATS_CHAT_CLOSE_HOUR = 22;
+
+export function riverBratsChatClosesAtIso(dateStr: string): string {
+  return new Date(`${dateStr}T22:00:00-07:00`).toISOString();
+}
+
+/** ISO fire time for an arrival-hour prompt on a given calendar date. */
+export function riverBratsArrivalPromptIso(dateStr: string, hour: number): string {
+  return new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00-07:00`).toISOString();
+}
+
 export function beachVenueLabel(beachId: NudeBeachTab): string {
   return beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach · Sauvie Island";
 }
@@ -82,5 +94,5 @@ export function isValidBeachId(id: unknown): id is NudeBeachTab {
   return id === "rooster-rock" || id === "sauvie-island";
 }
 
-/** Beach check-in unlocks the day-room chat until Pacific midnight. */
-export const RIVER_BRATS_CHAT_CLOSES_AT = "midnight Pacific";
+/** Beach check-in unlocks the day-room chat until 10pm Pacific. */
+export const RIVER_BRATS_CHAT_CLOSES_AT = "10pm Pacific";

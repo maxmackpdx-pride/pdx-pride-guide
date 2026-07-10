@@ -448,7 +448,24 @@ export const beachCheckins = sqliteTable("beach_checkins", {
   isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   reportCount: integer("report_count").notNull().default(0),
+  // 'PLANNED' | 'HERE' — GPS-verified presence; raw coordinates never stored.
+  presence: text("presence").notNull().default("PLANNED"),
+  gpsVerifiedAt: text("gps_verified_at"),
   expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+// One-shot timed nudges ("you said 4pm — are you here?"). Fired by the
+// server-side prompt scheduler; PENDING → SENT | CANCELLED | SKIPPED.
+export const scheduledPrompts = sqliteTable("scheduled_prompts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  kind: text("kind").notNull(),
+  fireAt: text("fire_at").notNull(),
+  beachId: text("beach_id"),
+  calendarDate: text("calendar_date"),
+  checkinId: integer("checkin_id"),
+  status: text("status").notNull().default("PENDING"),
   createdAt: text("created_at").notNull().default(""),
 });
 

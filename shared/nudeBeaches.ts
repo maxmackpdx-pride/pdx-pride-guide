@@ -80,6 +80,14 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
   },
 };
 
+/** GPS presence anchors. Radius is generous — both beaches are 1–2km
+ *  shorelines and the anchor sits mid-beach. Client coordinates are checked
+ *  against these on the server and immediately discarded, never stored. */
+export const BEACH_VERIFY_POINTS: Record<NudeBeachTab, { lat: number; lng: number; radiusM: number }> = {
+  "rooster-rock": { lat: 45.5446, lng: -122.2342, radiusM: 2000 },
+  "sauvie-island": { lat: 45.793, lng: -122.789, radiusM: 2000 },
+};
+
 export const ROOSTER_ROCK_MAPS = [
   {
     label: "Google Maps directions",

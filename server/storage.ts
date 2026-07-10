@@ -721,6 +721,25 @@ function ensureRiverBratsSchema() {
       ON beach_checkins(user_id, beach_id, calendar_date)
     `);
     try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN is_anonymous INTEGER NOT NULL DEFAULT 0`); } catch (e) {}
+    // GPS presence: 'PLANNED' (picked an arrival hour) → 'HERE' (location-verified
+    // on the beach). Raw coordinates are never persisted — only this state flag
+    // and the verification timestamp.
+    try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN presence TEXT NOT NULL DEFAULT 'PLANNED'`); } catch (e) {}
+    try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN gps_verified_at TEXT`); } catch (e) {}
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS scheduled_prompts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        kind TEXT NOT NULL,
+        fire_at TEXT NOT NULL,
+        beach_id TEXT,
+        calendar_date TEXT,
+        checkin_id INTEGER,
+        status TEXT NOT NULL DEFAULT 'PENDING',
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS scheduled_prompts_due_idx ON scheduled_prompts(status, fire_at)`);
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS beach_chat_messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
