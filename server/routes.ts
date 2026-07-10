@@ -22,6 +22,7 @@ import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSp
 import { recordPageView } from "./analytics";
 import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
 import { readGaMeasurementId } from "./gaSnippet";
+import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -234,6 +235,14 @@ function enrichEventForAdmin(evt: any) {
     submittedByProfile: lookupUserProfile(evt.submittedBy),
     claimedByProfile: lookupUserProfile(evt.claimedBy),
   };
+}
+
+/** Admin catalog rows: expanded LIVE listings (matches public /api/events) + raw HIDDEN records. */
+function getAdminEventCatalog() {
+  const all = storage.getEvents({});
+  const hidden = all.filter(evt => evt.status === "HIDDEN");
+  const live = all.filter(evt => evt.status === "LIVE");
+  return [...expandMultiDayEvents(live), ...hidden];
 }
 
 function isMainAdminUser(user: any) {
@@ -821,6 +830,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/events/attendance-summaries", (_req, res) => {
     res.json(storage.getAttendanceSummaries());
+  });
+
+  app.get("/api/nude-beaches", async (_req, res) => {
+    try {
+      const result = await getNudeBeachesSnapshot();
+      res.json(result);
+    } catch (err) {
+      console.error("GET /api/nude-beaches failed:", err);
+      res.status(502).json({ error: "Could not load beach conditions" });
+    }
+  });
+
+  app.post("/api/nude-beaches/refresh", async (_req, res) => {
+    try {
+      const result = await forceRefreshNudeBeachesSnapshot();
+      res.json({
+        data: result.data,
+        stale: false,
+        fromCache: false,
+        rateLimited: !!result.rateLimited,
+      });
+    } catch (err) {
+      console.error("POST /api/nude-beaches/refresh failed:", err);
+      res.status(502).json({ error: "Could not refresh beach conditions" });
+    }
   });
 
   app.get("/api/events/:id", (req, res) => {
@@ -2860,8 +2894,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/events", requireAdmin, (req, res) => {
-    const evts = storage.getEvents({});
-    res.json(evts.map(enrichEventForAdmin));
+    res.json(getAdminEventCatalog().map(enrichEventForAdmin));
   });
 
   app.get("/api/admin/persistence", requireAdmin, (_req, res) => {

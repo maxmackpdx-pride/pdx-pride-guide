@@ -1,0 +1,199 @@
+.nude-beaches-page .nude-refresh-bar {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px clamp(20px, 4vw, 44px) 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nude-refresh-bar__meta {
+  font-size: 12px;
+  color: #8a8a8a;
+  letter-spacing: 0.04em;
+}
+
+.nude-refresh-bar__meta strong {
+  color: #d8d4cb;
+}
+
+.nude-refresh-bar__stale {
+  color: #ffb347;
+  margin-left: 8px;
+}
+
+.nude-beach-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .nude-beach-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .nude-beach-grid--wide {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nude-live-card {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  padding: 18px 20px;
+  border-radius: 12px;
+}
+
+.nude-live-card--good {
+  border-left: 4px solid #39ff14;
+}
+
+.nude-live-card--warn {
+  border-left: 4px solid #ffb347;
+}
+
+.nude-live-card--bad {
+  border-left: 4px solid #ff4d4d;
+}
+
+.nude-live-card--neutral {
+  border-left: 4px solid #19e3ff;
+}
+
+.nude-live-card__label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  margin-bottom: 8px;
+}
+
+.nude-live-card__value {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.nude-live-card__detail {
+  margin-top: 8px;
+  color: #b8b4ab;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.nude-live-card__link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #19e3ff;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.nude-live-card__link:hover {
+  text-decoration: underline;
+}
+
+.nude-section-copy {
+  color: #b8b4ab;
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 72ch;
+}
+
+.nude-checklist {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nude-checklist li {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  padding: 14px 16px;
+  border-radius: 10px;
+}
+
+.nude-checklist strong {
+  display: block;
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.nude-resource-list {
+  display: grid;
+  gap: 12px;
+}
+
+.nude-resource-link {
+  display: block;
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  padding: 16px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.nude-resource-link:hover {
+  border-color: #19e3ff;
+}
+
+.nude-resource-link--primary {
+  border-left: 4px solid #ff00cc;
+}
+
+.nude-resource-link__title {
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.nude-resource-link__desc {
+  margin-top: 6px;
+  color: #9a9a9a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.nude-rules {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: #b8b4ab;
+}
+
+.nude-logistics-block h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-display), sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.nude-logistics-block p,
+.nude-logistics-block li {
+  color: #b8b4ab;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.nude-logistics-block ul {
+  margin: 0;
+  padding-left: 18px;
+}

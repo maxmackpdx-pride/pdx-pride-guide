@@ -45,6 +45,7 @@ import NotificationSettings from "./pages/NotificationSettings";
 import Inbox from "./pages/Inbox";
 import MissedConnections from "./pages/MissedConnections";
 import Directory from "./pages/Directory";
+import NudeBeaches from "./pages/NudeBeaches";
 import DesignSystemSandbox from "./pages/DesignSystemSandbox";
 import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/not-found";
@@ -93,6 +94,7 @@ function AppLayout() {
             <Route path="/inbox" component={Inbox} />
             <Route path="/spotted" component={MissedConnections} />
             <Route path="/directory" component={Directory} />
+            <Route path="/nude-beaches" component={NudeBeaches} />
             <Route path="/design-preview" component={DesignSystemSandbox} />
             <Route path="/u/:username" component={MemberProfile} />
             <Route path="/missed-connections">

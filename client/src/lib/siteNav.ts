@@ -15,6 +15,7 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/about", label: "About" },
   { type: "link", href: "/events", label: "Events" },
   { type: "link", href: "/directory", label: "Directory" },
+  { type: "link", href: "/nude-beaches", label: "Nude Beaches" },
   {
     type: "dropdown",
     id: "boards",
@@ -41,6 +42,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/gifting": { section: "Boards", title: "Gifting" },
   "/spotted": { section: "Boards", title: "Spotted!" },
   "/directory": { section: "Directory", title: "Queer Directory" },
+  "/nude-beaches": { section: "Explore", title: "Nude Beaches" },
   "/about": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
   "/contact": { section: "About", title: "Contact" },
