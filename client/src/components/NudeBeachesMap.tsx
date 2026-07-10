@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -87,8 +87,8 @@ function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: stri
 function MapResizer({ tab }: { tab: NudeBeachTab }) {
   const map = useMap();
   useEffect(() => {
-    const invalidate = () => map.invalidateSize();
-    const timers = [50, 250, 800, 1500].map(ms => setTimeout(invalidate, ms));
+    const invalidate = () => map.invalidateSize({ animate: false });
+    const timers = [0, 50, 250, 800, 1500, 2500].map(ms => setTimeout(invalidate, ms));
 
     const container = map.getContainer()?.parentElement;
     let observer: ResizeObserver | undefined;
@@ -97,9 +97,14 @@ function MapResizer({ tab }: { tab: NudeBeachTab }) {
       observer.observe(container);
     }
 
+    window.addEventListener("resize", invalidate);
+    window.addEventListener("orientationchange", invalidate);
+
     return () => {
       timers.forEach(clearTimeout);
       observer?.disconnect();
+      window.removeEventListener("resize", invalidate);
+      window.removeEventListener("orientationchange", invalidate);
     };
   }, [map, tab]);
   return null;
@@ -110,56 +115,50 @@ type Props = {
   height?: number | string;
 };
 
-export default function NudeBeachesMap({ tab, height = 380 }: Props) {
+export default function NudeBeachesMap({ tab, height }: Props) {
   const location = BEACH_MAP_LOCATIONS[tab];
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 80);
-    return () => {
-      clearTimeout(timer);
-      setMounted(false);
-    };
-  }, [tab]);
+  const fillParent = height === "100%";
+  const heightStyle =
+    height == null ? undefined : typeof height === "number" ? `${height}px` : height;
 
   return (
     <div className="directory-map-wrap nude-beaches-map">
-      <div className="directory-map" style={{ height, width: "100%", position: "relative" }}>
+      <div
+        className={`directory-map nude-beaches-map__canvas${fillParent ? " directory-map--fill" : ""}`}
+        style={{
+          width: "100%",
+          position: "relative",
+          ...(heightStyle
+            ? { height: heightStyle, minHeight: fillParent ? heightStyle : undefined }
+            : {}),
+        }}
+      >
         <style>{POPUP_STYLES}</style>
-        {mounted ? (
-          <MapContainer
-            key={tab}
-            center={[location.lat, location.lng]}
-            zoom={location.zoom}
-            style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
-            scrollWheelZoom={false}
-            zoomControl
-          >
-            <TileLayer
-              url={DARK_TILE}
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-              maxZoom={19}
-              subdomains="abcd"
-            />
-            <MapResizer tab={tab} />
-            <Marker position={[location.lat, location.lng]} icon={buildPin(location.pinColor)}>
-              <Popup className="pdx-beach-popup" maxWidth={280}>
-                <BeachPopup
-                  label={location.label}
-                  subtitle={location.subtitle}
-                  accent={location.pinColor}
-                />
-              </Popup>
-            </Marker>
-          </MapContainer>
-        ) : (
-          <div
-            style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
-            aria-hidden
-            role="status"
-            aria-label="Loading map"
+        <MapContainer
+          key={tab}
+          center={[location.lat, location.lng]}
+          zoom={location.zoom}
+          style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+          scrollWheelZoom={false}
+          zoomControl
+        >
+          <TileLayer
+            url={DARK_TILE}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+            maxZoom={19}
+            subdomains="abcd"
           />
-        )}
+          <MapResizer tab={tab} />
+          <Marker position={[location.lat, location.lng]} icon={buildPin(location.pinColor)}>
+            <Popup className="pdx-beach-popup" maxWidth={280}>
+              <BeachPopup
+                label={location.label}
+                subtitle={location.subtitle}
+                accent={location.pinColor}
+              />
+            </Popup>
+          </Marker>
+        </MapContainer>
       </div>
     </div>
   );

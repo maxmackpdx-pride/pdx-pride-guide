@@ -389,30 +389,49 @@
   min-height: 0;
 }
 
-.nude-beaches-page .nude-beaches-map-row .events-map-row__map .directory-map-wrap,
-.nude-beaches-page .nude-beaches-map-row .events-map-row__map .directory-map,
-.nude-beaches-page .nude-beaches-map-row .events-map-row__map .nude-beaches-map {
-  height: 100%;
+.nude-beaches-page .nude-beaches-map {
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
 }
 
-/* Mobile: map column has no stretched row height — give explicit size (100% was collapsing to 0) */
+/* Explicit map height — avoid height:100% chain that collapses on mobile stack layout */
+.nude-beaches-page .nude-beaches-map__canvas {
+  height: clamp(380px, 48vh, 520px);
+  min-height: 320px;
+}
+
+.nude-beaches-page .nude-beaches-map__canvas .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+@media (min-width: 900px) {
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map .directory-map-wrap,
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map .nude-beaches-map {
+    height: 100%;
+  }
+
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map .nude-beaches-map__canvas {
+    height: 100%;
+    min-height: clamp(440px, 52vh, 600px);
+  }
+}
+
 @media (max-width: 899px) {
+  .nude-beaches-page .nude-beaches-map-row {
+    flex-direction: column;
+  }
+
   .nude-beaches-page .nude-beaches-map-row .events-map-row__map {
     width: 100%;
-    height: clamp(380px, 48vh, 520px);
-    min-height: 320px;
+    order: -1;
   }
 
   .nude-beaches-page .nude-beaches-map-row .events-map-row__panel {
     height: auto;
     min-height: 0;
   }
-}
-
-.nude-beaches-page .nude-beaches-map {
-  border: none;
-  border-radius: 0;
-  overflow: hidden;
 }
 
 /* Header shell — tabs pinned top-right over hero */

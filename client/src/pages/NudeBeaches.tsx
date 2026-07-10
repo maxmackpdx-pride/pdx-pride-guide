@@ -253,23 +253,21 @@ export default function NudeBeaches() {
         </Button>
       </div>
 
-      <ScrollReveal delay={20}>
-        <div className="events-map-row nude-beaches-map-row">
-          <div className="events-map-row__panel">
-            <NudeBeachesHubPanel tab={activeTab} snapshot={snapshot} />
-          </div>
-          <div className="events-map-row__map">
-            <NudeBeachesMap key={activeTab} tab={activeTab} height="100%" />
-          </div>
+      <div className="events-map-row nude-beaches-map-row">
+        <div className="events-map-row__panel">
+          <NudeBeachesHubPanel tab={activeTab} snapshot={snapshot} />
         </div>
-        <div className="nude-beaches-map-row__actions">
-          {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
-            <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
-              {map.label}
-            </a>
-          ))}
+        <div className="events-map-row__map">
+          <NudeBeachesMap key={activeTab} tab={activeTab} />
         </div>
-      </ScrollReveal>
+      </div>
+      <div className="nude-beaches-map-row__actions">
+        {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
+          <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
+            {map.label}
+          </a>
+        ))}
+      </div>
 
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">
