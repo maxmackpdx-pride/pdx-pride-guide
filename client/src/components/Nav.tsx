@@ -4,6 +4,7 @@ import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Menu, X } from "lucide-react";
 import logoWordmark from "@assets/logo-wordmark.png";
 import { useAuth } from "@/context/AuthContext";
+import { useInboxSheet } from "@/context/InboxSheetContext";
 import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
@@ -102,6 +103,7 @@ function NavDropdown({
 export default function Nav() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -306,17 +308,18 @@ export default function Nav() {
                         <span className="site-profile-menu__username">@{user.username}</span>
                         <span className="site-profile-menu__identity-hint">View public profile</span>
                       </Link>
-                      <Link
-                        href="/inbox"
+                      <button
+                        type="button"
                         role="menuitem"
                         className={`site-profile-menu__item site-profile-menu__item--inbox${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
                         onClick={() => {
                           setProfileOpen(false);
                           setMenuOpen(false);
+                          openSheet();
                         }}
                       >
                         Inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
-                      </Link>
+                      </button>
                       <Link
                         href="/settings/notifications"
                         role="menuitem"

@@ -71,6 +71,16 @@ export default function InboxOverlay({ open, onClose }: { open: boolean; onClose
     return () => document.removeEventListener("mousedown", onDown);
   }, [filterOpen]);
 
+  useEffect(() => {
+    if (open) return;
+    setView("inbox");
+    setAccount("personal");
+    setFolder("inbox");
+    setFilter("all");
+    setFilterOpen(false);
+    setQuery("");
+  }, [open]);
+
   if (!open || !user) return null;
 
   const inboxActive = view === "inbox";

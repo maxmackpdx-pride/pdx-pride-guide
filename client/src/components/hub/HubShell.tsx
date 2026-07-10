@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import UserAvatar from "@/components/UserAvatar";
+import { useInboxSheet } from "@/context/InboxSheetContext";
 import "./hub-shell.css";
 
 export type HubMode = "member" | "admin";
@@ -206,6 +207,9 @@ export default function HubShell({
   children,
 }: Props) {
   const [location] = useLocation();
+  const { open: sheetOpen, openSheet } = useInboxSheet();
+  const onInboxPage = location === "/inbox" || location.startsWith("/inbox?");
+  const inboxNavActive = sheetOpen || onInboxPage || memberView === "inbox";
   const adminTabHref = `/admin?tab=${encodeURIComponent(adminView)}`;
   const alertTotal = pendingCount + (isPrimaryOwner ? ownerCount : 0);
   const moreViews = MORE_VIEWS.filter(v => v !== "team" || canManageTeam);
@@ -285,14 +289,18 @@ export default function HubShell({
                   <Home size={18} strokeWidth={2.2} aria-hidden />
                   <span className="label">Home</span>
                 </button>
-                <Link
-                  href="/inbox"
-                  className={`hub-side__nav-btn${navBtnClass(location.startsWith("/inbox") || memberView === "inbox", "cyan")}`}
+                <button
+                  type="button"
+                  className={`hub-side__nav-btn${navBtnClass(inboxNavActive, "cyan")}`}
+                  onClick={() => {
+                    if (onInboxPage) return;
+                    openSheet();
+                  }}
                 >
                   <Inbox size={18} strokeWidth={2.2} aria-hidden />
                   <span className="label">Inbox</span>
                   {unreadCount > 0 && <span className="hub-side__pill hub-side__pill--pink">{unreadCount}</span>}
-                </Link>
+                </button>
                 <button
                   type="button"
                   className={`hub-side__nav-btn${navBtnClass(memberView === "posts", "green")}`}
@@ -464,16 +472,20 @@ export default function HubShell({
               <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
               <span>Home</span>
             </button>
-            <Link
-              href="/inbox"
-              className={`hub-mobile-tab${location.startsWith("/inbox") ? " is-active is-cyan" : ""}`}
+            <button
+              type="button"
+              className={`hub-mobile-tab${inboxNavActive ? " is-active is-cyan" : ""}`}
+              onClick={() => {
+                if (onInboxPage) return;
+                openSheet();
+              }}
             >
               <span className="hub-mobile-tab__icon-wrap">
                 <Inbox size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
                 {unreadCount > 0 && <i>{unreadCount}</i>}
               </span>
               <span>Inbox</span>
-            </Link>
+            </button>
             <button
               type="button"
               className={`hub-mobile-tab${memberView === "posts" ? " is-active is-green" : ""}`}
