@@ -3,7 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { C, MONO, DISPLAY } from "./sheet";
 
-type PostItem = { title: string; meta: string; actions: string[] };
+type PostAction = { label: string; href?: string };
+
+type PostItem = {
+  key: string;
+  title: string;
+  meta: string;
+  actions: PostAction[];
+};
 
 function useMine<T>(url: string, map: (rows: T[]) => PostItem[]) {
   const { data = [] } = useQuery<T[]>({
@@ -12,6 +19,24 @@ function useMine<T>(url: string, map: (rows: T[]) => PostItem[]) {
   });
   return map(data);
 }
+
+const actionBadgeStyle = (color: string, clickable: boolean) => ({
+  padding: "7px 13px",
+  borderRadius: 999,
+  border: `1.5px solid ${color}`,
+  color,
+  fontFamily: MONO,
+  fontSize: 9.5,
+  letterSpacing: ".07em",
+  fontWeight: 700,
+  whiteSpace: "nowrap" as const,
+  ...(clickable
+    ? {
+        background: "transparent",
+        cursor: "pointer",
+      }
+    : {}),
+});
 
 function Section({
   title,
@@ -22,6 +47,7 @@ function Section({
   open,
   onToggle,
   onHub,
+  onNavigate,
 }: {
   title: string;
   color: string;
@@ -31,6 +57,7 @@ function Section({
   open: boolean;
   onToggle: () => void;
   onHub?: () => void;
+  onNavigate?: (href: string) => void;
 }) {
   return (
     <div
@@ -139,8 +166,8 @@ function Section({
               )}
             </div>
           ) : (
-            items.map((it, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0" }}>
+            items.map((it) => (
+              <div key={it.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0" }}>
                 <span
                   style={{
                     width: 3,
@@ -167,24 +194,26 @@ function Section({
                   <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>{it.meta}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, flex: "none" }}>
-                  {it.actions.map((a) => (
-                    <span
-                      key={a}
-                      style={{
-                        padding: "7px 13px",
-                        borderRadius: 999,
-                        border: `1.5px solid ${color}`,
-                        color,
-                        fontFamily: MONO,
-                        fontSize: 9.5,
-                        letterSpacing: ".07em",
-                        fontWeight: 700,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {a}
-                    </span>
-                  ))}
+                  {it.actions.map((a) => {
+                    const clickable = Boolean(a.href && onNavigate);
+                    if (clickable) {
+                      return (
+                        <button
+                          key={a.label}
+                          type="button"
+                          onClick={() => onNavigate!(a.href!)}
+                          style={actionBadgeStyle(color, true)}
+                        >
+                          {a.label}
+                        </button>
+                      );
+                    }
+                    return (
+                      <span key={a.label} style={actionBadgeStyle(color, false)}>
+                        {a.label}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             ))
@@ -195,51 +224,60 @@ function Section({
   );
 }
 
-export default function PostsView() {
+export default function PostsView({ onNavigate }: { onNavigate?: (href: string) => void }) {
   const [open, setOpen] = useState<Record<string, boolean>>({ events: true });
   const toggle = (id: string) => setOpen((p) => ({ ...p, [id]: !p[id] }));
 
   const gigs = useMine<any>("/api/gigs/mine", (rows) =>
     rows.map((g) => ({
+      key: `gig-${g.id}`,
       title: g.title || "Gig post",
       meta: `Gig Board · ${g.replyCount ?? g.replies ?? 0} replies`,
-      actions: ["EDIT"],
+      actions: [{ label: "EDIT", href: `/dashboard?view=posts&editGig=${g.id}` }],
     })),
   );
   const gifting = useMine<any>("/api/gifting/mine", (rows) =>
     rows.map((g) => ({
+      key: `gifting-${g.id}`,
       title: g.title || "Gifting post",
       meta: `Gifting · ${g.status || "Live"}`,
-      actions: ["EDIT"],
+      actions: [{ label: "EDIT", href: "/gifting" }],
     })),
   );
   const spotted = useMine<any>("/api/missed-connections/mine", (rows) =>
     rows.map((s) => ({
+      key: `spotted-${s.id}`,
       title: s.title || s.body?.slice(0, 40) || "Spotted post",
       meta: s.status === "ACTIVE" ? "Spotted! · Live" : "Spotted! · Pending review",
-      actions: ["EDIT"],
+      actions: [{ label: "EDIT", href: "/spotted" }],
     })),
   );
   const claimed = useMine<any>("/api/events/mine/claimed", (rows) =>
     rows.map((e) => ({
+      key: `claimed-${e.id}`,
       title: e.title || "Event",
       meta: `${e.dayOfWeek || ""}${e.venueName ? " · " + e.venueName : ""}`.trim() || "Claimed",
-      actions: ["CLAIMED", "EDIT"],
+      actions: [
+        { label: "CLAIMED" },
+        { label: "EDIT", href: `/dashboard?view=posts&editEvent=${e.id}` },
+      ],
     })),
   );
   const submitted = useMine<any>("/api/events/mine/submitted", (rows) =>
     rows.map((s) => ({
+      key: `submitted-${s.id}`,
       title: s.title || "Event submission",
       meta: s.status ? `Submitted · ${s.status}` : "Submitted",
-      actions: ["EDIT"],
+      actions: [{ label: "EDIT", href: "/dashboard?view=posts&section=events" }],
     })),
   );
   const events = [...claimed, ...submitted];
   const checkins = useMine<any>("/api/events/mine/check-ins", (rows) =>
     rows.map((a) => ({
+      key: `checkin-${a.id}`,
       title: a.eventTitle || a.title || "Check-in",
       meta: `${a.status || "Going"}${a.dayOfWeek ? " · " + a.dayOfWeek : ""}`,
-      actions: ["VIEW"],
+      actions: [{ label: "VIEW", href: "/dashboard?view=posts&section=checkins" }],
     })),
   );
 
@@ -256,6 +294,7 @@ export default function PostsView() {
           items={events}
           open={!!open.events}
           onToggle={() => toggle("events")}
+          onNavigate={onNavigate}
         />
         <Section
           title="GIG POSTS"
@@ -264,6 +303,7 @@ export default function PostsView() {
           items={gigs}
           open={!!open.gigs}
           onToggle={() => toggle("gigs")}
+          onNavigate={onNavigate}
         />
         <Section
           title="SPOTTED"
@@ -272,6 +312,7 @@ export default function PostsView() {
           items={spotted}
           open={!!open.spotted}
           onToggle={() => toggle("spotted")}
+          onNavigate={onNavigate}
         />
         <Section
           title="GIFTING"
@@ -280,6 +321,7 @@ export default function PostsView() {
           items={gifting}
           open={!!open.gifting}
           onToggle={() => toggle("gifting")}
+          onNavigate={onNavigate}
         />
         <Section
           title="CHECK-INS"
@@ -288,6 +330,7 @@ export default function PostsView() {
           items={checkins}
           open={!!open.checkins}
           onToggle={() => toggle("checkins")}
+          onNavigate={onNavigate}
         />
       </div>
     </>
