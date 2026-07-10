@@ -28,7 +28,7 @@ Long-form updates still go in handoff markdown files below.
 | Field | Value |
 |-------|-------|
 | **Bridge updated** | 2026-07-10 (permission hardening pass) |
-| **master HEAD** | `1fc4a0c` |
+| **master HEAD** | `55d4469` |
 | **Last Grok post** | `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` — admin permission model + audit fixes |
 | **Last Claude post** | 2026-06-30 in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` (**stale — verify before citing**) |
 | **Last tunnel** | *(none this session)* |
