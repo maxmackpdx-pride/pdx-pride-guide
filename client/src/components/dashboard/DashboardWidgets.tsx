@@ -50,7 +50,7 @@ export default function DashboardWidgets() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
-                  Pride Week · Jul 13–19
+                  PRIDE WEEK · JUL 13 TO 19
                 </div>
                 {(weatherError || weather.isEstimate) && (
                   <span
@@ -111,7 +111,7 @@ export default function DashboardWidgets() {
       {showPrideWidgets && (
       <section className="dash-countdown">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Week</div>
+          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>PRIDE WEEK</div>
           <span
             className={`dash-mono${live ? " dash-live-badge" : ""}`}
             style={{
@@ -122,11 +122,11 @@ export default function DashboardWidgets() {
               borderRadius: 999,
             }}
           >
-            {live ? "Live" : "Soon"}
+            {live ? "● LIVE" : "SOON"}
           </span>
         </div>
         <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 4 }}>
-          Jul 13 – 19 · Portland
+          JUL 13 TO 19 · PORTLAND
         </div>
         {countdown ? (
           <div className="dash-countdown-grid">

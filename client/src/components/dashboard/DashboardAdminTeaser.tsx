@@ -12,19 +12,22 @@ export default function DashboardAdminTeaser({ enabled }: { enabled: boolean }) 
     refetchInterval: 90_000,
   });
 
+  if (!enabled) return null;
+
   const count = pending.count || 0;
-  if (!enabled || count === 0) return null;
 
   return (
-    <section className="dash-admin-teaser" aria-label="Admin queue">
-      <div>
-        <p className="dash-mono dash-admin-teaser__kicker">Site admin</p>
+    <section className="dash-admin-teaser" aria-label="Admin access">
+      <div className="dash-admin-teaser__body">
+        <p className="dash-admin-teaser__kicker">YOU HOLD THE KEYS</p>
         <p className="dash-admin-teaser__copy">
-          <span className="dash-admin-teaser__count">{count}</span> item{count === 1 ? "" : "s"} waiting in the review queue.
+          <span className="dash-admin-teaser__count">{count}</span>
+          {" "}
+          in the shared review queue
         </p>
       </div>
-      <Link href="/admin?tab=queue" className="dash-pill-btn dash-admin-teaser__cta">
-        Open admin →
+      <Link href="/admin?tab=overview" className="dash-btn dash-btn-admin-cta">
+        OPEN ADMIN →
       </Link>
     </section>
   );

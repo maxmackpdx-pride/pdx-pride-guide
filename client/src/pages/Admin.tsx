@@ -19,6 +19,7 @@ import AdminInbox, { type BoardRejectTarget } from "@/components/admin/AdminInbo
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import AdminShell, { type AdminView } from "@/components/admin/AdminShell";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
+import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
@@ -140,7 +141,7 @@ interface AdminUser extends AdminUserProfile {
 type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "inbox", "events", "gigs", "promoters", "venue-claims", "users", "team"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "stats", "inbox", "events", "gigs", "promoters", "venue-claims", "users", "team"];
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -230,7 +231,9 @@ export default function Admin() {
 
   useEffect(() => {
     if (!authenticated) return;
-    const tab = new URLSearchParams(window.location.search).get("tab");
+    let tab = new URLSearchParams(window.location.search).get("tab");
+    // Alias design "queue" tab to review inbox
+    if (tab === "queue") tab = "inbox";
     if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) {
       setActiveTab(tab as AdminTab);
     }
@@ -1148,20 +1151,33 @@ export default function Admin() {
             pendingCount={totalActionItems}
             attentionItems={overviewAttention}
             kindPills={overviewKindPills}
-            metricsEnabled={authenticated}
+            showMetrics={false}
+            isSuperAdmin={isSuperAdmin}
+            ownerCount={0}
             onOpenInbox={() => setAdminTab("inbox")}
+            onOpenOwner={() => setAdminTab("team")}
             onReviewItem={(key) => {
               setExpandedInboxKey(key);
               setAdminTab("inbox");
             }}
             onMetricClick={(tab, metricKey) => {
-              const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "inbox") as AdminTab;
-              setAdminTab(next);
-              if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
-              if (metricKey === "attendances") setEventStatusFilter("has_checkins");
-              if (metricKey === "newUsersToday") {
-                setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+              if (metricKey === "userSubmittedEvents") {
+                setEventStatusFilter("user_submitted");
+                setAdminTab("events");
+                return;
               }
+              if (metricKey === "attendances") {
+                setEventStatusFilter("has_checkins");
+                setAdminTab("events");
+                return;
+              }
+              if (metricKey === "newUsersToday") {
+                setAdminTab("users");
+                setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+                return;
+              }
+              const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "stats") as AdminTab;
+              setAdminTab(next);
             }}
             pushStatus={pushStatus}
             onRefreshPush={() => refetchPushStatus()}
@@ -1170,7 +1186,35 @@ export default function Admin() {
           />
         )}
 
-        {/* ── INBOX ── */}
+        {/* ── STATS (site pulse metrics) ── */}
+        {activeTab === "stats" && (
+          <div className="admin-stats-view">
+            <AdminMetricsPanel
+              enabled={authenticated}
+              onMetricClick={(tab: string, metricKey: string) => {
+                if (metricKey === "userSubmittedEvents") {
+                  setEventStatusFilter("user_submitted");
+                  setAdminTab("events");
+                  return;
+                }
+                if (metricKey === "attendances") {
+                  setEventStatusFilter("has_checkins");
+                  setAdminTab("events");
+                  return;
+                }
+                if (metricKey === "newUsersToday") {
+                  setAdminTab("users");
+                  setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+                  return;
+                }
+                const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "stats") as AdminTab;
+                setAdminTab(next);
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── INBOX / REVIEW QUEUE ── */}
         {activeTab === "inbox" && (
           <AdminInbox
             submissions={submissions}

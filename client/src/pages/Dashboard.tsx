@@ -1,4 +1,4 @@
-import { useState, createElement, Fragment, type MouseEvent } from "react";
+import { useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -22,7 +22,7 @@ import { editFormToApiPayload, eventToEditForm } from "@/lib/eventEditForm";
 import "@/components/dashboard/dashboard.css";
 
 export default function Dashboard() {
-  usePageSeo("My Dashboard — PDX Pride Guide", "Your PDX Pride Guide hub — events, gigs, messages, and more.");
+  usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, gigs, messages, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
@@ -243,7 +243,7 @@ export default function Dashboard() {
           section="Account"
           title="Your Hub"
           titleAccent="cyan"
-          lede="Free, community-run — log in to manage submissions, boards, and private threads."
+          lede="Free, community-run. Log in to manage submissions, boards, and private threads."
         />
         <div className="dash-inner" style={{ minHeight: "40vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 48 }}>
           <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>You need to be logged in to view your dashboard.</p>
@@ -325,27 +325,34 @@ export default function Dashboard() {
   const MAGENTA = "#FF1FA0";
   const ORANGE = "#FF8C00";
 
+  const firstName = (user.displayName || user.username || "friend")
+    .trim()
+    .split(/[\s_]+/)[0]
+    .toUpperCase();
+  const profileName = (user.displayName || user.username || "").toUpperCase();
+
+  const scrollToSection = (key: string) => {
+    setOpenSections(prev => ({ ...prev, [key]: true }));
+    requestAnimationFrame(() => {
+      document.getElementById(key)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
   return (
     <div className="zine-page dash-page board-page">
-      <PageHeader
-        section="Account"
-        title="Your Hub"
-        titleAccent="cyan"
-        kicker={`@${user.username}`}
-        lede="Community-run and free. Manage your submissions and claims, board posts, and inbox threads in one place."
-        tagline={createElement(Fragment, null,
-          createElement("a", { href: "#profile", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" }); } }, "Profile"), " · ",
-          createElement("a", { href: "#inbox", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); document.getElementById("inbox")?.scrollIntoView({ behavior: "smooth" }); } }, "Inbox"), " · ",
-          createElement("a", { href: "#events", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, events: true })); document.getElementById("events")?.scrollIntoView({ behavior: "smooth" }); } }, "Events"), " · ",
-          createElement("a", { href: "#gigs", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gigs: true })); document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" }); } }, "Gigs"), " · ",
-          createElement("a", { href: "#gifting", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, gifting: true })); document.getElementById("gifting")?.scrollIntoView({ behavior: "smooth" }); } }, "Gifting"), " · ",
-          createElement("a", { href: "#spotted", className: "dash-tagline-link", onClick: (e: MouseEvent) => { e.preventDefault(); setOpenSections((prev) => ({ ...prev, spotted: true })); document.getElementById("spotted")?.scrollIntoView({ behavior: "smooth" }); } }, "Spotted"),
-        )}
-      />
+      <header className="dash-hub-topbar">
+        <div className="dash-hub-topbar__inner">
+          <p className="dash-hub-kicker">YOUR HUB</p>
+          <h1 className="dash-hub-title">HEY, {firstName}</h1>
+          <p className="dash-hub-lede">
+            Your events, messages, and posts in one place. Community run and free.
+          </p>
+        </div>
+      </header>
       <div className="dash-inner">
         <PwaInstallBanner />
-        <header id="profile" className="dash-profile-header">
-          <div className="dash-profile-identity">
+        <section id="profile" className="dash-profile-card" aria-label="Your profile">
+          <div className="dash-profile-card__id">
             <div className="dash-avatar-ring">
               <UserAvatar
                 photoUrl={user.photoUrl}
@@ -353,28 +360,31 @@ export default function Dashboard() {
                 avatarRing={user.avatarRing}
                 displayName={user.displayName}
                 username={user.username}
-                size={80}
+                size={72}
               />
             </div>
-            <div>
-              <h2 className="dash-title dash-anton">{user.displayName || user.username}</h2>
-              <p className="dash-subtitle">@{user.username} · {user.email}</p>
-              {user.bio && <p style={{ color: "#cbc8c0", maxWidth: 520, marginTop: 8, lineHeight: 1.5, fontSize: 14 }}>{user.bio}</p>}
+            <div className="dash-profile-card__copy">
+              <h2 className="dash-profile-card__name">{profileName}</h2>
+              <p className="dash-profile-card__meta">
+                @{user.username}
+                {user.email ? ` · ${user.email}` : ""}
+              </p>
+              {user.bio && <p className="dash-profile-card__bio">{user.bio}</p>}
+              <div className="dash-actions">
+                <button
+                  type="button"
+                  className={`dash-btn dash-btn-lime-solid ${editMode ? "active" : ""}`}
+                  onClick={() => setEditMode(!editMode)}
+                >
+                  {editMode ? "CANCEL" : "EDIT PROFILE"}
+                </button>
+                <button type="button" className="dash-btn dash-btn-ghost dash-btn-ghost-pill" onClick={() => logout()}>
+                  Sign out
+                </button>
+              </div>
             </div>
           </div>
-          <div className="dash-actions">
-            <button
-              type="button"
-              className={`dash-btn dash-btn-lime ${editMode ? "active" : ""}`}
-              onClick={() => setEditMode(!editMode)}
-            >
-              {editMode ? "Cancel" : "Edit profile"}
-            </button>
-            <button type="button" className="dash-btn dash-btn-ghost" onClick={() => logout()}>
-              Sign out
-            </button>
-          </div>
-        </header>
+        </section>
 
         {dashboardQueryErrors.length > 0 && (
           <div
@@ -427,6 +437,7 @@ export default function Dashboard() {
             checkInCount: myCheckIns.length,
             eventCount,
           }}
+          onSelectSection={scrollToSection}
         />
         </ScrollReveal>
 
@@ -442,16 +453,16 @@ export default function Dashboard() {
         <ScrollReveal delay={60}>
         <section className="dash-connections">
           <div>
-            <h2 className="dash-anton" style={{ fontSize: 18, color: "#fff", marginBottom: 4 }}>Account connections</h2>
-            <p style={{ fontSize: 13, color: user.googleLinked ? LIME : "var(--dash-muted)" }}>
+            <h2 className="dash-anton dash-connections__title">ACCOUNT CONNECTIONS</h2>
+            <p className="dash-connections__status" style={{ color: user.googleLinked ? LIME : "var(--dash-muted)" }}>
               Google is {user.googleLinked ? "linked to this profile." : "not linked yet."}
             </p>
           </div>
           {user.googleLinked ? (
-            <span className="dash-chip" style={{ color: LIME }}>Google linked</span>
+            <span className="dash-chip" style={{ color: LIME }}>GOOGLE LINKED</span>
           ) : (
             <a href="/api/auth/google?link=1" className="dash-pill-btn" style={{ color: "#fff", borderColor: "#fff" }}>
-              Link Google →
+              LINK GOOGLE →
             </a>
           )}
         </section>
