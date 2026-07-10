@@ -134,6 +134,13 @@ export default function Directory() {
     refetchOnMount: "always",
   });
 
+  useEffect(() => {
+    const placeId = Number(new URLSearchParams(window.location.search).get("place"));
+    if (!placeId || !businesses.length) return;
+    const match = businesses.find(b => b.id === placeId);
+    if (match) setSelectedPlace(match);
+  }, [businesses]);
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return businesses

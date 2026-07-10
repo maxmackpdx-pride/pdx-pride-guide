@@ -1069,7 +1069,6 @@ export default function Admin() {
     refetchMod();
     refetchGifting();
     refetchMissed();
-    refetchFeedback();
     refetchPromoters();
     refetchTalent();
   };

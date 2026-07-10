@@ -32,6 +32,11 @@ import {
 import { isEventTalentRole } from "@shared/eventTalent";
 import { BOARD_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
 import {
+  isValidMarqueeColor,
+  isValidProfileAccent,
+  isValidProfileBanner,
+} from "@shared/profileConstants";
+import {
   diffSubmissionMerge,
   findSubmissionMatches,
   submissionHasStrongDuplicate,
@@ -288,7 +293,7 @@ function authUserResponse(req: any, user: any) {
 // ─── Member profile field validation ─────────────────────────────────────────
 const SOCIAL_LINK_KEYS = [
   "instagram", "tiktok", "soundcloud", "spotify", "bluesky", "x",
-  "facebook", "website", "linktree", "venmo", "onlyfans", "fetlife",
+  "facebook", "website", "linktree", "venmo", "onlyfans", "fetlife", "bookingEmail",
 ] as const;
 
 function sanitizeSocialLinks(input: unknown): string | null {
@@ -344,6 +349,102 @@ function sanitizeProfilePhotos(input: unknown): string | null {
       caption: String(entry.caption || "").replace(/[<>]/g, "").trim().slice(0, 60),
     }));
   return JSON.stringify(clean);
+}
+
+function sanitizeStringArray(input: unknown, max = 24): string | null {
+  if (input === null) return null;
+  if (!Array.isArray(input)) return null;
+  const clean = input
+    .map(v => String(v || "").replace(/[<>]/g, "").trim().slice(0, 80))
+    .filter(Boolean)
+    .slice(0, max);
+  return JSON.stringify(clean);
+}
+
+function sanitizeIdArray(input: unknown, max = 12): string | null {
+  if (input === null) return null;
+  if (!Array.isArray(input)) return null;
+  const clean = input
+    .map(v => Number(v))
+    .filter(n => Number.isInteger(n) && n > 0)
+    .slice(0, max);
+  return JSON.stringify(clean);
+}
+
+function sanitizeMarquee(input: unknown): string | null {
+  if (input === null) return null;
+  if (typeof input !== "object" || Array.isArray(input)) return null;
+  const raw = input as Record<string, unknown>;
+  const items = Array.isArray(raw.items)
+    ? raw.items.map(x => String(x || "").replace(/[<>]/g, "").trim()).filter(Boolean).slice(0, 12)
+    : [];
+  const speed = typeof raw.speed === "number" ? Math.min(60, Math.max(8, raw.speed)) : 26;
+  const color = isValidMarqueeColor(raw.color) ? raw.color : "rainbow";
+  return JSON.stringify({ items, speed, color });
+}
+
+function sanitizeProfileMedia(input: unknown): string | null {
+  if (input === null) return null;
+  if (typeof input !== "object" || Array.isArray(input)) return null;
+  const raw = input as Record<string, unknown>;
+  const platformLinks = Array.isArray(raw.platformLinks)
+    ? raw.platformLinks
+      .filter((p: any) => p && typeof p === "object")
+      .slice(0, 6)
+      .map((p: any) => ({
+        label: String(p.label || "").slice(0, 24),
+        dot: String(p.dot || "var(--neon-cyan)").slice(0, 40),
+        href: typeof p.href === "string" && /^https?:\/\//i.test(p.href) ? p.href : null,
+      }))
+      .filter((p: any) => p.label && p.href)
+    : [];
+  const items = Array.isArray(raw.items)
+    ? raw.items
+      .filter((it: any) => it && typeof it === "object")
+      .slice(0, 24)
+      .map((it: any, i: number) => ({
+        id: String(it.id || `track_${i}`).slice(0, 40),
+        label: String(it.label || "").slice(0, 24),
+        title: String(it.title || "").replace(/[<>]/g, "").trim().slice(0, 80),
+        meta: String(it.meta || "").slice(0, 60),
+        audioUrl: typeof it.audioUrl === "string" && /^https?:\/\//i.test(it.audioUrl) ? it.audioUrl : null,
+        embedSrc: typeof it.embedSrc === "string" && /^https?:\/\//i.test(it.embedSrc) ? it.embedSrc : null,
+        latest: !!it.latest,
+      }))
+      .filter((it: any) => it.title)
+    : [];
+  return JSON.stringify({
+    kicker: String(raw.kicker || "").slice(0, 40),
+    tag: String(raw.tag || "").slice(0, 24),
+    meta: String(raw.meta || "").slice(0, 60),
+    title: String(raw.title || "").replace(/[<>]/g, "").trim().slice(0, 80),
+    coverText: String(raw.coverText || "").slice(0, 20),
+    blurb: String(raw.blurb || "").replace(/[<>]/g, "").trim().slice(0, 280),
+    platformLinks,
+    items,
+  });
+}
+
+function sanitizePup(input: unknown): string | null {
+  if (input === null) return null;
+  if (typeof input !== "object" || Array.isArray(input)) return null;
+  const raw = input as Record<string, unknown>;
+  return JSON.stringify({
+    enabled: !!raw.enabled,
+    name: String(raw.name || "").replace(/[<>]/g, "").trim().slice(0, 40),
+    hood: String(raw.hood || "").replace(/[<>]/g, "").trim().slice(0, 60),
+    role: String(raw.role || "").replace(/[<>]/g, "").trim().slice(0, 40),
+    lookingFor: String(raw.lookingFor || "").replace(/[<>]/g, "").trim().slice(0, 120),
+  });
+}
+
+function sanitizeUserIdRefs(input: unknown, max = 12): number[] | null {
+  if (input === null) return [];
+  if (!Array.isArray(input)) return null;
+  return input
+    .map(v => Number(v))
+    .filter(n => Number.isInteger(n) && n > 0)
+    .slice(0, max);
 }
 
 // ─── Content moderation gate ──────────────────────────────────────────────────
@@ -1792,18 +1893,34 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
-    const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location, socialLinks, profileEmbeds, profilePhotos } = req.body;
+    const {
+      displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
+      socialLinks, profileEmbeds, profilePhotos, accentColor, profileBanner, talents, standFor,
+      affiliatedVenueIds, businessPlaceId, marquee, profileMedia, pup, packmates, handlers,
+    } = req.body;
     const moderated: Record<string, string | null | undefined> = {
       displayName: typeof displayName === "string" ? displayName : undefined,
       bio: typeof bio === "string" ? bio : undefined,
       pronouns: typeof pronouns === "string" ? pronouns : undefined,
       location: typeof location === "string" ? location : undefined,
     };
+    if (profileMedia && typeof profileMedia === "object" && !Array.isArray(profileMedia)) {
+      const pm = profileMedia as Record<string, unknown>;
+      if (typeof pm.title === "string") moderated["media.title"] = pm.title;
+      if (typeof pm.blurb === "string") moderated["media.blurb"] = pm.blurb;
+    }
+    if (marquee && typeof marquee === "object" && !Array.isArray(marquee)) {
+      const mq = marquee as Record<string, unknown>;
+      if (Array.isArray(mq.items)) moderated["marquee.items"] = mq.items.map(String).join(", ");
+    }
+    if (pup && typeof pup === "object" && !Array.isArray(pup)) {
+      const p = pup as Record<string, unknown>;
+      if (typeof p.name === "string") moderated["pup.name"] = p.name;
+      if (typeof p.lookingFor === "string") moderated["pup.lookingFor"] = p.lookingFor;
+    }
     if (socialLinks && typeof socialLinks === "object" && !Array.isArray(socialLinks)) {
       for (const [key, value] of Object.entries(socialLinks as Record<string, unknown>)) {
-        // "website" is the one place a member's own off-platform site belongs —
-        // exempt from the link-host allowlist (sanitizeSocialLinks still applies).
-        if (key === "website") continue;
+        if (key === "website" || key === "bookingEmail") continue;
         if (typeof value === "string") moderated[`socialLinks.${key}`] = value;
       }
     }
@@ -1820,8 +1937,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (socialLinks !== undefined) patch.socialLinks = sanitizeSocialLinks(socialLinks);
     if (profileEmbeds !== undefined) patch.profileEmbeds = sanitizeProfileEmbeds(profileEmbeds);
     if (profilePhotos !== undefined) patch.profilePhotos = sanitizeProfilePhotos(profilePhotos);
+    if (accentColor !== undefined) {
+      patch.accentColor = accentColor && isValidProfileAccent(accentColor) ? accentColor.toUpperCase() : null;
+    }
+    if (profileBanner !== undefined) {
+      patch.profileBanner = isValidProfileBanner(profileBanner) ? (profileBanner || null) : null;
+    }
+    if (talents !== undefined) patch.talents = sanitizeStringArray(talents);
+    if (standFor !== undefined) patch.standFor = sanitizeStringArray(standFor);
+    if (affiliatedVenueIds !== undefined) patch.affiliatedVenueIds = sanitizeIdArray(affiliatedVenueIds);
+    if (businessPlaceId !== undefined) {
+      const id = Number(businessPlaceId);
+      patch.businessPlaceId = Number.isInteger(id) && id > 0 ? id : null;
+    }
+    if (marquee !== undefined) patch.marquee = sanitizeMarquee(marquee);
+    if (profileMedia !== undefined) patch.profileMedia = sanitizeProfileMedia(profileMedia);
+    if (pup !== undefined) patch.pup = sanitizePup(pup);
     storage.updateUser(req.session.userId!, patch as any);
-    const updated = storage.getUserById(req.session.userId!);
+    const userId = req.session.userId!;
+    if (packmates !== undefined) {
+      const ids = sanitizeUserIdRefs(packmates);
+      if (ids === null) return res.status(400).json({ error: "packmates must be an array of user ids" });
+      storage.setProfilePackmates(userId, ids);
+    }
+    if (handlers !== undefined) {
+      const ids = sanitizeUserIdRefs(handlers);
+      if (ids === null) return res.status(400).json({ error: "handlers must be an array of user ids" });
+      storage.setProfileHandlers(userId, ids);
+    }
+    const updated = storage.getUserById(userId);
     res.json(authUserResponse(req, updated));
   });
 

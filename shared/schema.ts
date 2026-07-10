@@ -253,6 +253,15 @@ export const users = sqliteTable("users", {
   socialLinks: text("social_links"), // JSON object keyed by platform
   profileEmbeds: text("profile_embeds"), // JSON array of {id,src,title}
   profilePhotos: text("profile_photos"), // JSON array of {url,caption}
+  accentColor: text("accent_color"),
+  profileBanner: text("profile_banner"),
+  talents: text("talents"), // JSON string[]
+  standFor: text("stand_for"), // JSON string[]
+  affiliatedVenueIds: text("affiliated_venue_ids"), // JSON number[]
+  businessPlaceId: integer("business_place_id"),
+  marquee: text("marquee"), // JSON {items,speed,color}
+  profileMedia: text("profile_media"), // JSON featured media + track list
+  pup: text("pup"), // JSON {enabled,name,hood,role,lookingFor}
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
@@ -272,6 +281,21 @@ export const follows = sqliteTable("follows", {
   createdAt: text("created_at").notNull().default(""),
 });
 export type Follow = typeof follows.$inferSelect;
+
+// Profile pack / handler relationships (member pup community)
+export const profilePackmates = sqliteTable("profile_packmates", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  packmateUserId: integer("packmate_user_id").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const profileHandlers = sqliteTable("profile_handlers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  handlerUserId: integer("handler_user_id").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
 
 // Messages
 export const messages = sqliteTable("messages", {

@@ -37,6 +37,11 @@
   --neon-green: #00EE44;
   --neon-blue: #0044FF;
 
+  /* Community board identity colors */
+  --board-spotted: var(--neon-magenta);
+  --board-gifting: var(--neon-yellow);
+  --board-gigs: var(--neon-violet);
+
   /* Day colors — mirror of shared/prideWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
   --day-mon: #8800FF;
   --day-tue: #0044FF;
