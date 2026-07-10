@@ -8936,31 +8936,12 @@ html.calm-mode .board-detail-backdrop {
 
 .site-footer {
   position: relative;
-  isolation: isolate;
-  background: #000;
-  overflow: hidden;
-}
-
-.site-footer__wallpaper {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  /* Black field + faint motif wallpaper (keeps footer grounded in black) */
-  background-color: #000;
-  background-image:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.94) 50%, #000 100%),
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20, 20, 24, 0.9), transparent 70%),
-    url("/motifs/footer-banner-lgbtqia.png");
-  background-size: auto, auto, cover;
-  background-position: center, center, center;
-  background-repeat: no-repeat;
-  filter: grayscale(0.55) brightness(0.28) contrast(1.08);
+  background: #06060a;
+  border-top: 1px solid #1c1c22;
 }
 
 .site-footer__inner {
   position: relative;
-  z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
   padding: 28px 20px 18px;
@@ -9183,11 +9164,6 @@ html.calm-mode .board-detail-backdrop {
   border: none;
   border-radius: 6px;
   box-shadow: 4px 4px 0 0 #6b1f7a;
-}
-
-html.calm-mode .site-footer__wallpaper {
-  filter: grayscale(1) brightness(0.55);
-  opacity: 0.45;
 }
 
 html.calm-mode .site-footer__coffee-btn,
@@ -12530,6 +12506,10 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   color: #c8c5bc;
 }
 
+.board-page--makeover .board-active-feed {
+  background: transparent;
+}
+
 /* Running head */
 .board-running {
   max-width: 1180px;
@@ -13062,7 +13042,7 @@ html.calm-mode .board-detail-modal {
 }
 
 .board-close {
-  background: #050505;
+  background: transparent;
 }
 
 .board-close__inner {

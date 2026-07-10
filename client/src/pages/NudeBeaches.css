@@ -1,5 +1,22 @@
 /* Nude Beaches — tab-scoped wireframe (live strip → logistics → checklist → links) */
 
+.nude-beaches-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 10% 6%, rgba(25, 227, 255, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(255, 31, 160, 0.06), transparent 24rem),
+    #06060a;
+}
+
+.nude-beaches-page .events-board-feed.board-active-feed {
+  background: transparent;
+  padding-top: clamp(20px, 3vw, 28px);
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+
+.nude-beaches-page .events-board-feed .board-active-feed__inner {
+  padding-inline: clamp(20px, 4vw, 44px);
+}
+
 .nude-beaches-page .nude-refresh-bar {
   max-width: 1180px;
   margin: 0 auto;

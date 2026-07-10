@@ -48,7 +48,6 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
 export default function Footer() {
   return (
     <footer className="site-footer">
-      <div className="site-footer__wallpaper" aria-hidden="true" />
       <div className="site-footer__inner">
         {/* Spread grid: brand | nav columns | support */}
         <div className="site-footer__grid">
