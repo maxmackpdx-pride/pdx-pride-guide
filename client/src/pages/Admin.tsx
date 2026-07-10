@@ -20,7 +20,7 @@ import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/Adm
 import { type AdminView } from "@/components/admin/AdminShell";
 import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
-import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
+import AdminStatsView from "@/components/admin/AdminStatsView";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
@@ -1230,7 +1230,7 @@ export default function Admin() {
         {/* ── STATS (site pulse metrics) ── */}
         {activeTab === "stats" && (
           <div className="admin-stats-view">
-            <AdminMetricsPanel
+            <AdminStatsView
               enabled={authenticated}
               onMetricClick={(tab: string, metricKey: string) => {
                 if (metricKey === "userSubmittedEvents") {

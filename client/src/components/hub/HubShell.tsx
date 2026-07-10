@@ -51,7 +51,7 @@ export const ADMIN_VIEW_META: Record<
     title: "Stats",
     kicker: "The numbers",
     kickerColor: "var(--cyan, #00ffff)",
-    lede: "Everything in one place: site pulse, visitors, sources, and what people open.",
+    lede: "Everything in one place: site pulse, visitors, sources, and what people open. Sample numbers for this preview.",
   },
   inbox: {
     title: "Review queue",
