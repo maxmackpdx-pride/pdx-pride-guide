@@ -40,7 +40,10 @@ import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
-import { pacificMidnightIso, pacificTodayDate } from "@shared/riverBrats";
+import { pacificMidnightIso, pacificTodayDate, riverBratsChatClosesAtIso, riverBratsArrivalPromptIso, beachVenueLabel } from "@shared/riverBrats";
+import { getEventChatWindow, CHAT_RETENTION_DAYS } from "@shared/eventChatWindow";
+import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
+import { haversineMeters } from "@shared/geo";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 
@@ -4593,7 +4596,15 @@ export interface IStorage {
   getAttendancesByUser(userId: number): any[];
   upsertAttendance(eventId: number, user: User, message: string, isAnonymous?: boolean): Attendance;
   removeAttendance(eventId: number, userId: number): void;
-  getEventChatMessages(eventId: number, viewerUserId: number): { messages: any[]; expiresAt: string | null; chatOpen: boolean };
+  getEventChatMessages(eventId: number, viewerUserId: number): {
+    messages: any[];
+    expiresAt: string | null;
+    chatOpen: boolean;
+    opensAt: string | null;
+    windowState: "BEFORE" | "OPEN" | "CLOSED";
+    isHost: boolean;
+    pinned: any | null;
+  };
   postEventChatMessage(eventId: number, userId: number, body: string): any;
   // Users
   getUserById(id: number): User | undefined;
@@ -4690,6 +4701,16 @@ export interface IStorage {
   getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string): BeachCheckin | undefined;
   upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }): BeachCheckin;
   deleteBeachCheckin(id: number, userId: number): boolean;
+  verifyBeachPresence(userId: number, beachId: string, calendarDate: string, lat: number, lng: number):
+    | { ok: true; presence: "HERE"; gpsVerifiedAt: string }
+    | { ok: false; error: "NO_CHECKIN" }
+    | { ok: false; error: "TOO_FAR"; distanceM: number };
+  scheduleBeachArrivalPrompt(checkin: BeachCheckin): void;
+  cancelBeachArrivalPrompts(userId: number, beachId: string, calendarDate: string): void;
+  markPromptSkipped(promptId: number): void;
+  claimDuePrompts(nowIso: string, limit?: number): any[];
+  purgeExpiredChatMessages(now?: number): void;
+  getMyGroupChats(userId: number): any[];
   getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number): { messages: any[]; expiresAt: string | null; chatOpen: boolean };
   postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string): any;
   expireBeachCarpoolPosts(): void;
@@ -5835,7 +5856,11 @@ export const storage: IStorage = {
   upsertAttendance(eventId, user, message, isAnonymous = false) {
     const handle = user.displayName || user.username;
     const createdAt = new Date().toISOString();
-    const expiresAt = attendanceChatExpiresAt();
+    // Align attendance (and thus roster + chat membership) with the event
+    // chat window when the event has parsable dates; legacy +8h otherwise.
+    const evt = storage.getEvent(eventId);
+    const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
+    const expiresAt = win ? new Date(win.closesAt).toISOString() : attendanceChatExpiresAt();
     const existing = sqlite.prepare(`SELECT * FROM attendances WHERE event_id = ? AND user_id = ?`).get(eventId, user.id) as Attendance | undefined;
     const values = {
       eventId,
@@ -5856,8 +5881,30 @@ export const storage: IStorage = {
     return db.insert(attendances).values(values as any).returning().get();
   },
   getEventChatMessages(eventId, viewerUserId) {
+    const evt = storage.getEvent(eventId);
+    const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
+    const isHost = storage.isUserEventHost(eventId, viewerUserId);
     const mine = getActiveAttendanceForUser(eventId, viewerUserId);
-    if (!mine) return { messages: [], expiresAt: null, chatOpen: false };
+    const member = Boolean(mine) || isHost;
+    const opensAt = win ? new Date(win.opensAt).toISOString() : null;
+    const closesAt = win ? new Date(win.closesAt).toISOString() : (mine?.expiresAt ?? null);
+    const windowState = win
+      ? win.state
+      : mine?.expiresAt && mine.expiresAt > new Date().toISOString()
+        ? "OPEN"
+        : "CLOSED";
+    // Lazy scoped retention purge: once this room is past close + retention,
+    // clear it on read even if the hourly sweep hasn't run.
+    if (win && win.state === "CLOSED" && Date.now() > win.closesAt + CHAT_RETENTION_DAYS * 86_400_000) {
+      sqlite.prepare(`DELETE FROM event_chat_messages WHERE event_id = ?`).run(eventId);
+    }
+    const pinned = storage.getHostMessages(eventId, 1)[0] ?? null;
+    if (!member) {
+      return { messages: [], expiresAt: closesAt, chatOpen: false, opensAt, windowState, isHost: false, pinned: null };
+    }
+    if (windowState !== "OPEN") {
+      return { messages: [], expiresAt: closesAt, chatOpen: false, opensAt, windowState, isHost, pinned };
+    }
     const rows = sqlite.prepare(`
       SELECT m.id, m.event_id AS eventId, m.user_id AS userId, m.body, m.is_anonymous AS isAnonymous,
              m.created_at AS createdAt, u.username, u.display_name AS displayName,
@@ -5904,22 +5951,35 @@ export const storage: IStorage = {
     });
     return {
       messages,
-      expiresAt: mine.expiresAt ?? null,
-      chatOpen: Boolean(mine.expiresAt && mine.expiresAt > new Date().toISOString()),
+      expiresAt: closesAt,
+      chatOpen: true,
+      opensAt,
+      windowState,
+      isHost,
+      pinned,
     };
   },
   postEventChatMessage(eventId, userId, body) {
+    const evt = storage.getEvent(eventId);
+    const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
+    const isHost = storage.isUserEventHost(eventId, userId);
     const mine = getActiveAttendanceForUser(eventId, userId);
-    if (!mine) throw new Error("Active check-in required");
-    if (mine.expiresAt && mine.expiresAt <= new Date().toISOString()) {
+    if (!mine && !isHost) throw new Error("Active check-in required");
+    if (win) {
+      if (win.state === "BEFORE") throw new Error("Event chat opens 6 hours before doors");
+      if (win.state === "CLOSED") throw new Error("Event chat has closed");
+    } else if (!mine || (mine.expiresAt && mine.expiresAt <= new Date().toISOString())) {
       throw new Error("Event chat has closed");
     }
+    // Hosts can post without an attendance row; identity comes from their account.
+    const hostUser = !mine ? storage.getUserById(userId) : null;
+    const isAnonymous = Boolean(mine?.isAnonymous);
     const createdAt = new Date().toISOString();
     const row = db.insert(eventChatMessages).values({
       eventId,
       userId,
       body,
-      isAnonymous: Boolean(mine.isAnonymous),
+      isAnonymous,
       createdAt,
     } as any).returning().get();
     return {
@@ -5930,8 +5990,10 @@ export const storage: IStorage = {
       isAnonymous: Boolean(row.isAnonymous),
       createdAt: row.createdAt,
       isMine: true,
-      displayName: mine.isAnonymous ? "Anonymous" : (mine.handle || "You"),
-      username: mine.isAnonymous ? "anonymous" : undefined,
+      displayName: isAnonymous
+        ? "Anonymous"
+        : (mine?.handle || hostUser?.displayName || hostUser?.username || "You"),
+      username: isAnonymous ? "anonymous" : undefined,
     };
   },
   removeAttendance(eventId, userId) {
@@ -7610,6 +7672,7 @@ export const storage: IStorage = {
       SELECT c.id, c.user_id AS userId, c.beach_id AS beachId, c.arrival_hour AS arrival_hour,
              c.note, c.calendar_date AS calendarDate, c.is_anonymous AS isAnonymous,
              c.is_active AS isActive, c.expires_at AS expiresAt, c.created_at AS createdAt,
+             c.presence, c.gps_verified_at AS gpsVerifiedAt,
              u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice, u.photo_url AS photoUrl
       FROM beach_checkins c
       JOIN users u ON u.id = c.user_id
@@ -7654,38 +7717,181 @@ export const storage: IStorage = {
   },
   upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }) {
     const createdAt = new Date().toISOString();
-    const expiresAt = pacificMidnightIso(data.calendarDate);
+    // Beach group chat closes at 10pm Pacific on the check-in date.
+    const expiresAt = riverBratsChatClosesAtIso(data.calendarDate);
     const isAnonymous = Boolean(data.isAnonymous);
     const existing = sqlite.prepare(`
       SELECT id FROM beach_checkins WHERE user_id = ? AND beach_id = ? AND calendar_date = ?
     `).get(data.userId, data.beachId, data.calendarDate) as { id: number } | undefined;
+    let saved: BeachCheckin;
     if (existing) {
+      // Re-picking an hour must not revoke GPS-verified presence, so
+      // presence/gps_verified_at are deliberately absent from this SET.
       sqlite.prepare(`
         UPDATE beach_checkins
         SET arrival_hour = ?, note = ?, is_anonymous = ?, is_active = 1, expires_at = ?, created_at = ?
         WHERE id = ?
       `).run(data.arrivalHour, data.note || null, isAnonymous ? 1 : 0, expiresAt, createdAt, existing.id);
-      return db.select().from(beachCheckins).where(eq(beachCheckins.id, existing.id)).get()!;
+      saved = db.select().from(beachCheckins).where(eq(beachCheckins.id, existing.id)).get()!;
+    } else {
+      saved = db.insert(beachCheckins).values({
+        ...data,
+        isAnonymous,
+        isActive: true,
+        reportCount: 0,
+        expiresAt,
+        createdAt,
+      } as any).returning().get();
     }
-    return db.insert(beachCheckins).values({
-      ...data,
-      isAnonymous,
-      isActive: true,
-      reportCount: 0,
-      expiresAt,
-      createdAt,
-    } as any).returning().get();
+    storage.scheduleBeachArrivalPrompt(saved);
+    return saved;
   },
   deleteBeachCheckin(id: number, userId: number) {
     const row = db.select().from(beachCheckins).where(eq(beachCheckins.id, id)).get();
     if (!row || row.userId !== userId) return false;
     db.update(beachCheckins).set({ isActive: false } as any).where(eq(beachCheckins.id, id)).run();
+    storage.cancelBeachArrivalPrompts(userId, row.beachId, row.calendarDate);
     return true;
+  },
+  verifyBeachPresence(userId: number, beachId: string, calendarDate: string, lat: number, lng: number) {
+    // Coordinates are compared against the beach anchor and discarded —
+    // never written to the database or logs.
+    const mine = storage.getBeachCheckinByUser(beachId, userId, calendarDate);
+    if (!mine) return { ok: false as const, error: "NO_CHECKIN" as const };
+    const anchor = BEACH_VERIFY_POINTS[beachId as keyof typeof BEACH_VERIFY_POINTS];
+    if (!anchor) return { ok: false as const, error: "NO_CHECKIN" as const };
+    const distanceM = haversineMeters({ lat, lng }, anchor);
+    if (distanceM > anchor.radiusM) {
+      // Round so even the error response reveals nothing precise.
+      return { ok: false as const, error: "TOO_FAR" as const, distanceM: Math.max(100, Math.round(distanceM / 100) * 100) };
+    }
+    const verifiedAt = new Date().toISOString();
+    sqlite.prepare(`UPDATE beach_checkins SET presence = 'HERE', gps_verified_at = ? WHERE id = ?`).run(verifiedAt, mine.id);
+    storage.cancelBeachArrivalPrompts(userId, beachId, calendarDate);
+    return { ok: true as const, presence: "HERE" as const, gpsVerifiedAt: verifiedAt };
+  },
+  scheduleBeachArrivalPrompt(checkin: BeachCheckin) {
+    const nowIso = new Date().toISOString();
+    sqlite.prepare(`
+      UPDATE scheduled_prompts SET status = 'CANCELLED'
+      WHERE user_id = ? AND kind = 'BEACH_ARRIVAL' AND beach_id = ? AND calendar_date = ? AND status = 'PENDING'
+    `).run(checkin.userId, checkin.beachId, checkin.calendarDate);
+    if ((checkin as any).presence === "HERE") return;
+    const fireAt = riverBratsArrivalPromptIso(checkin.calendarDate, checkin.arrivalHour);
+    if (fireAt <= nowIso) return; // arriving now/past — no prompt needed
+    sqlite.prepare(`
+      INSERT INTO scheduled_prompts (user_id, kind, fire_at, beach_id, calendar_date, checkin_id, status, created_at)
+      VALUES (?, 'BEACH_ARRIVAL', ?, ?, ?, ?, 'PENDING', ?)
+    `).run(checkin.userId, fireAt, checkin.beachId, checkin.calendarDate, checkin.id, nowIso);
+  },
+  cancelBeachArrivalPrompts(userId: number, beachId: string, calendarDate: string) {
+    sqlite.prepare(`
+      UPDATE scheduled_prompts SET status = 'CANCELLED'
+      WHERE user_id = ? AND kind = 'BEACH_ARRIVAL' AND beach_id = ? AND calendar_date = ? AND status = 'PENDING'
+    `).run(userId, beachId, calendarDate);
+  },
+  markPromptSkipped(promptId: number) {
+    sqlite.prepare(`UPDATE scheduled_prompts SET status = 'SKIPPED' WHERE id = ?`).run(promptId);
+  },
+  claimDuePrompts(nowIso: string, limit = 25) {
+    // Single-process sqlite: select-then-mark inside one transaction is race-free.
+    const claim = sqlite.transaction((iso: string) => {
+      const due = sqlite.prepare(`
+        SELECT * FROM scheduled_prompts
+        WHERE status = 'PENDING' AND fire_at <= ?
+        ORDER BY fire_at ASC
+        LIMIT ?
+      `).all(iso, limit) as any[];
+      if (due.length) {
+        const mark = sqlite.prepare(`UPDATE scheduled_prompts SET status = 'SENT' WHERE id = ?`);
+        for (const row of due) mark.run(row.id);
+      }
+      return due;
+    });
+    return claim(nowIso);
+  },
+  purgeExpiredChatMessages(now = Date.now()) {
+    // Hard-delete group chat content CHAT_RETENTION_DAYS after the chat closes.
+    const retentionMs = CHAT_RETENTION_DAYS * 86_400_000;
+    // Beach rooms close at 10pm on calendar_date, so any date strictly older
+    // than the cutoff date is past close + retention.
+    const beachCutoff = pacificTodayDate(now - retentionMs);
+    sqlite.prepare(`DELETE FROM beach_chat_messages WHERE calendar_date < ?`).run(beachCutoff);
+    // Event rooms: window math lives in JS (Pacific-local text dates).
+    const eventIds = sqlite.prepare(`SELECT DISTINCT event_id AS eventId FROM event_chat_messages`).all() as Array<{ eventId: number }>;
+    for (const { eventId } of eventIds) {
+      const evt = storage.getEvent(eventId);
+      const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
+      const closesAt = win ? win.closesAt : null;
+      if (!evt || (closesAt != null && now > closesAt + retentionMs)) {
+        sqlite.prepare(`DELETE FROM event_chat_messages WHERE event_id = ?`).run(eventId);
+      }
+    }
+    // Hygiene: drop settled prompt rows after 30 days.
+    const promptCutoff = new Date(now - 30 * 86_400_000).toISOString();
+    sqlite.prepare(`DELETE FROM scheduled_prompts WHERE status != 'PENDING' AND created_at < ?`).run(promptCutoff);
+  },
+  getMyGroupChats(userId: number) {
+    const now = Date.now();
+    const nowIso = new Date(now).toISOString();
+    const out: any[] = [];
+    // Event rooms: active attendance, window not closed.
+    const attRows = sqlite.prepare(`
+      SELECT a.event_id AS eventId FROM attendances a
+      WHERE a.user_id = ? AND a.is_active = 1
+    `).all(userId) as Array<{ eventId: number }>;
+    const hostRows = sqlite.prepare(`
+      SELECT event_id AS eventId FROM event_hosts WHERE user_id = ?
+    `).all(userId) as Array<{ eventId: number }>;
+    const seen = new Set<number>();
+    for (const { eventId } of [...attRows, ...hostRows]) {
+      if (seen.has(eventId)) continue;
+      seen.add(eventId);
+      const evt = storage.getEvent(eventId);
+      if (!evt || evt.status !== "LIVE") continue;
+      const win = getEventChatWindow(evt.dateStart, evt.dateEnd, now);
+      if (!win || win.state === "CLOSED") continue;
+      out.push({
+        kind: "EVENT",
+        id: eventId,
+        title: evt.title,
+        state: win.state,
+        opensAt: new Date(win.opensAt).toISOString(),
+        closesAt: new Date(win.closesAt).toISOString(),
+        href: `/events/${eventId}?chat=1`,
+      });
+    }
+    // Beach room: today's active check-in, pre-10pm.
+    const today = pacificTodayDate(now);
+    const beachRows = sqlite.prepare(`
+      SELECT beach_id AS beachId FROM beach_checkins
+      WHERE user_id = ? AND calendar_date = ? AND is_active = 1
+    `).all(userId, today) as Array<{ beachId: string }>;
+    for (const { beachId } of beachRows) {
+      const closesAt = riverBratsChatClosesAtIso(today);
+      if (closesAt <= nowIso) continue;
+      out.push({
+        kind: "BEACH",
+        id: beachId,
+        title: beachVenueLabel(beachId as any),
+        state: "OPEN",
+        opensAt: null,
+        closesAt,
+        href: `/nude-beaches?tab=${beachId}&chat=1`,
+      });
+    }
+    out.sort((a, b) => String(a.closesAt).localeCompare(String(b.closesAt)));
+    return out;
   },
   getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number) {
     storage.expireRiverBratsCheckins();
+    // Close is computed from the calendar date (10pm Pacific) rather than the
+    // stored expires_at, so pre-deploy rows stamped with midnight still gate
+    // correctly with zero migration.
+    const closesAt = riverBratsChatClosesAtIso(calendarDate);
+    const chatOpen = closesAt > new Date().toISOString();
     const mine = storage.getBeachCheckinByUser(beachId, viewerUserId, calendarDate);
-    if (!mine) return { messages: [], expiresAt: null, chatOpen: false };
+    if (!mine) return { messages: [], expiresAt: closesAt, chatOpen: false };
     const rows = sqlite.prepare(`
       SELECT m.id, m.beach_id AS beachId, m.calendar_date AS calendarDate, m.user_id AS userId,
              m.body, m.is_anonymous AS isAnonymous, m.created_at AS createdAt,
@@ -7729,15 +7935,15 @@ export const storage: IStorage = {
     });
     return {
       messages,
-      expiresAt: mine.expiresAt ?? null,
-      chatOpen: Boolean(mine.expiresAt && mine.expiresAt > new Date().toISOString()),
+      expiresAt: closesAt,
+      chatOpen,
     };
   },
   postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string) {
     const mine = storage.getBeachCheckinByUser(beachId, userId, calendarDate);
     if (!mine) throw new Error("Active check-in required");
-    if (mine.expiresAt && mine.expiresAt <= new Date().toISOString()) {
-      throw new Error("Beach chat has closed");
+    if (riverBratsChatClosesAtIso(calendarDate) <= new Date().toISOString()) {
+      throw new Error("Beach chat closed at 10pm");
     }
     const createdAt = new Date().toISOString();
     const row = sqlite.prepare(`

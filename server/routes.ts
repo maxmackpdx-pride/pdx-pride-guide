@@ -6,6 +6,7 @@ import { prideDayFromDate } from "@shared/prideWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
+import { startPromptScheduler } from "./scheduler";
 import { BetterSqliteSessionStore } from "./sessionStore";
 import {
   insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
@@ -2267,6 +2268,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  // GPS presence confirm ("I am here"). Coordinates are compared to the beach
+  // anchor server-side and discarded — never persisted or logged.
+  app.post("/api/river-brats/checkins/verify", requireAuth, (req, res) => {
+    const beachId = String(req.body.beachId || "");
+    const date = String(req.body.date || pacificTodayDate());
+    const lat = Number(req.body.lat);
+    const lng = Number(req.body.lng);
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return res.status(400).json({ error: "Location unavailable" });
+    }
+    const result = storage.verifyBeachPresence(req.session.userId!, beachId, date, lat, lng);
+    if (!result.ok && result.error === "NO_CHECKIN") {
+      return res.status(403).json({ error: "Check in first" });
+    }
+    if (!result.ok) {
+      return res.status(400).json({ error: "TOO_FAR", distanceM: result.distanceM });
+    }
+    res.json(result);
+  });
+
   app.get("/api/river-brats/checkins/chat", requireAuth, (req: any, res) => {
     const beachId = String(req.query.beach || "");
     const date = String(req.query.date || pacificTodayDate());
@@ -2529,6 +2551,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ─── MESSAGES ────────────────────────────────────────────────────────────
   app.get("/api/messages/unread-count", requireAuth, (req, res) => {
     res.json({ count: storage.getUnreadCount(req.session.userId!) });
+  });
+
+  // Group chats the viewer belongs to (event rooms via check-in/hosting, plus
+  // today's beach room) — powers the Inbox sheet GROUP rows.
+  app.get("/api/chats/mine", requireAuth, (req, res) => {
+    res.json(storage.getMyGroupChats(req.session.userId!));
   });
 
   app.get("/api/messages/inbox", requireAuth, (req, res) => {
@@ -3473,4 +3501,5 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   scheduleMapCoordinateBackfill();
+  startPromptScheduler();
 }
