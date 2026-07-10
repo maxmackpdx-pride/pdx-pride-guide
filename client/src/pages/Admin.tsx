@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -15,14 +15,18 @@ import {
 import ImageUploader from "@/components/ImageUploader";
 import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
-import AdminInbox, { type BoardRejectTarget } from "@/components/admin/AdminInbox";
+import AdminInbox, { type BoardRejectTarget, type InboxKindFilter } from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
-import AdminShell, { type AdminView } from "@/components/admin/AdminShell";
+import { type AdminView } from "@/components/admin/AdminShell";
+import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
+import AdminOwnerDesk, { type OwnerDeskItem } from "@/components/admin/AdminOwnerDesk";
+import AdminStatsView from "@/components/admin/AdminStatsView";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
 import { Button, Badge } from "@/components/ds";
 import "@/components/dashboard/dashboard.css";
+import "@/components/admin/admin-panel.css";
 
 interface Submission {
   id: number;
@@ -140,7 +144,7 @@ interface AdminUser extends AdminUserProfile {
 type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "inbox", "events", "gigs", "promoters", "venue-claims", "users", "team"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "stats", "inbox", "owner", "events", "gigs", "promoters", "venue-claims", "users", "team"];
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -155,8 +159,30 @@ const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
 
+const OVERVIEW_PILL_TO_INBOX_KIND: Record<string, InboxKindFilter> = {
+  submissions: "submission",
+  promoters: "promoter",
+  moderation: "moderation",
+  reports: "gifting_report",
+  gifting: "gifting_post",
+};
+
+function adminTabFromQuery(
+  search: string,
+  canAccessOwner: boolean,
+  canManageTeam: boolean,
+): AdminTab | null {
+  let tab = new URLSearchParams(search).get("tab");
+  if (tab === "queue") tab = "inbox";
+  if (tab === "analytics") tab = "stats";
+  if (tab === "owner" && !canAccessOwner) tab = "overview";
+  if (tab === "team" && !canManageTeam) tab = "overview";
+  if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) return tab as AdminTab;
+  return null;
+}
+
 export default function Admin() {
-  usePageSeo("Admin — PDX Pride Guide", "Site administration panel.");
+  usePageSeo("Admin | PDX Pride Guide", "Site administration panel.");
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
@@ -184,12 +210,15 @@ export default function Admin() {
   const [teamIdentifier, setTeamIdentifier] = useState("");
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isPrimaryOwner, setIsPrimaryOwner] = useState(false);
+  const [canManageTeam, setCanManageTeam] = useState(false);
   const [userSearchQ, setUserSearchQ] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<Array<AdminUserProfile & { id: number; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
   const [allUsersFilter, setAllUsersFilter] = useState("");
   const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
   const [fixUsernameValue, setFixUsernameValue] = useState("");
+  const [inboxKindFilter, setInboxKindFilter] = useState<InboxKindFilter>("all");
 
   useEffect(() => {
     if (authLoading) return;
@@ -202,6 +231,8 @@ export default function Admin() {
           setAuthenticated(true);
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
+          if (user.isPrimaryOwner) setIsPrimaryOwner(true);
+          if (user.canManageTeam || user.isSuperAdmin) setCanManageTeam(true);
         }
         if (!cancelled) setSessionReady(true);
         return;
@@ -214,6 +245,8 @@ export default function Admin() {
           setAuthenticated(true);
           if (data.username) setAdminName(data.username);
           if (data.isSuperAdmin) setIsSuperAdmin(true);
+          if (data.isPrimaryOwner) setIsPrimaryOwner(true);
+          if (data.canManageTeam || data.isSuperAdmin) setCanManageTeam(true);
         }
       } catch {
         // fall through to legacy login gate
@@ -228,13 +261,29 @@ export default function Admin() {
     };
   }, [authLoading, user]);
 
+  const syncAdminTabFromUrl = useCallback(() => {
+    const rawTab = new URLSearchParams(window.location.search).get("tab");
+    const tab = adminTabFromQuery(window.location.search, isPrimaryOwner, canManageTeam);
+    if (!tab) return;
+    setActiveTab(tab);
+    if ((rawTab === "owner" && !isPrimaryOwner) || (rawTab === "team" && !canManageTeam)) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "overview");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [isPrimaryOwner, canManageTeam]);
+
   useEffect(() => {
     if (!authenticated) return;
-    const tab = new URLSearchParams(window.location.search).get("tab");
-    if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) {
-      setActiveTab(tab as AdminTab);
-    }
-  }, [authenticated]);
+    syncAdminTabFromUrl();
+  }, [authenticated, syncAdminTabFromUrl]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    const onPopState = () => syncAdminTabFromUrl();
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [authenticated, syncAdminTabFromUrl]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -244,11 +293,13 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+    if (isPrimaryOwner) {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+    }
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
-  }, [authenticated]);
+  }, [authenticated, isPrimaryOwner]);
 
   const purgeQaMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/admin/users/purge-qa", {}),
@@ -276,8 +327,20 @@ export default function Admin() {
     try {
       const res = await apiRequest("POST", "/api/admin/login", { username, password });
       const data = await res.json();
-      setAuthenticated(true);
       if (data?.username) setAdminName(data.username);
+      try {
+        const meRes = await fetch("/api/admin/me", { credentials: "include" });
+        const me = meRes.ok ? await meRes.json() : null;
+        if (me?.username) setAdminName(me.username);
+        if (me?.isSuperAdmin) setIsSuperAdmin(true);
+        if (me?.isPrimaryOwner) setIsPrimaryOwner(true);
+        if (me?.canManageTeam || me?.isSuperAdmin) setCanManageTeam(true);
+      } catch {
+        if (data?.isSuperAdmin) setIsSuperAdmin(true);
+        if (data?.isPrimaryOwner) setIsPrimaryOwner(true);
+        if (data?.canManageTeam || data?.isSuperAdmin) setCanManageTeam(true);
+      }
+      setAuthenticated(true);
       setPasswordError(false);
     } catch {
       setPasswordError(true);
@@ -290,12 +353,15 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+    if (isPrimaryOwner) {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+    }
     queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
     queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
   };
 
   const { data: submissions = [], isLoading: subLoading, isError: subError, refetch: refetchSubs } = useQuery<Submission[]>({
@@ -339,11 +405,32 @@ export default function Admin() {
     enabled: authenticated,
   });
 
-  const { data: feedback = [], isLoading: feedbackLoading, isError: feedbackError, refetch: refetchFeedback } = useQuery<any[]>({
-    queryKey: ["/api/admin/feedback", "all"],
-    queryFn: () => apiRequest("GET", "/api/admin/feedback?all=true").then(r => r.json()),
+  const { data: riverBratsReports = [], refetch: refetchRiverBratsReports } = useQuery<any[]>({
+    queryKey: ["/api/admin/river-brats/reports"],
+    queryFn: () => apiRequest("GET", "/api/admin/river-brats/reports").then(r => r.json()),
     enabled: authenticated,
   });
+
+  const { data: ownerDesk = [], isLoading: ownerDeskLoading, isError: ownerDeskError, refetch: refetchOwnerDesk } = useQuery<OwnerDeskItem[]>({
+    queryKey: ["/api/admin/owner-desk"],
+    queryFn: () => apiRequest("GET", "/api/admin/owner-desk").then(r => r.json()),
+    enabled: authenticated && isPrimaryOwner,
+    refetchInterval: 90_000,
+  });
+
+  const ownerDeskCount = ownerDesk.filter(i => i.status === "OPEN").length;
+
+  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
+    queryKey: ["/api/admin/pending-count"],
+    queryFn: () =>
+      fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
+        r.ok ? r.json() : { count: 0, ownerCount: 0 },
+      ),
+    enabled: authenticated,
+    refetchInterval: 90_000,
+  });
+  const pendingCount = pendingAdmin.count || 0;
+  const ownerCount = isPrimaryOwner ? (pendingAdmin.ownerCount ?? ownerDeskCount) : 0;
 
   const { data: pushStatus, refetch: refetchPushStatus } = useQuery<{
     configured: boolean;
@@ -392,7 +479,7 @@ export default function Admin() {
   const { data: teamAdmins = [], isLoading: teamLoading, isError: teamError, refetch: refetchTeam } = useQuery<SiteAdminMember[]>({
     queryKey: ["/api/admin/team"],
     queryFn: () => apiRequest("GET", "/api/admin/team").then(r => r.json()),
-    enabled: authenticated,
+    enabled: authenticated && canManageTeam,
   });
 
   const { data: businessClaims = [], isLoading: businessClaimsLoading, isError: businessClaimsError, refetch: refetchBusinessClaims } = useQuery<any[]>({
@@ -411,14 +498,6 @@ export default function Admin() {
     queryKey: ["/api/admin/business-logo-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then(r => r.json()),
     enabled: authenticated,
-  });
-
-  const { data: adminMetrics } = useQuery<{ users: number }>({
-    queryKey: ["/api/admin/metrics"],
-    queryFn: () => apiRequest("GET", "/api/admin/metrics").then(r => r.json()),
-    enabled: authenticated,
-    staleTime: 0,
-    refetchOnMount: "always",
   });
 
   const { data: newUsersToday = [] } = useQuery<{ id: number; username: string; displayName: string | null; email: string; createdAt: string; photoUrl: string | null }[]>({
@@ -641,11 +720,22 @@ export default function Admin() {
     },
   });
 
-  const resolveFeedbackMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("POST", `/api/admin/feedback/${id}/resolve`, {}),
+  const resolveRiverBratsReportMutation = useMutation({
+    mutationFn: ({ id, adminNotes }: { id: number; adminNotes?: string }) =>
+      apiRequest("POST", `/api/admin/river-brats/reports/${id}/resolve`, { adminNotes }),
     onSuccess: () => {
-      invalidateInboxQueries();
-      toast({ title: "Feedback resolved" });
+      refetchRiverBratsReports();
+      toast({ title: "River Brats report resolved" });
+    },
+  });
+
+  const resolveOwnerDeskMutation = useMutation({
+    mutationFn: ({ id, source }: { id: number; source: "desk" | "feedback" }) =>
+      apiRequest("POST", `/api/admin/owner-desk/${id}/resolve`, { source }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
+      toast({ title: "Owner item resolved" });
     },
   });
 
@@ -863,15 +953,8 @@ export default function Admin() {
   // Only gifting *reports* (and flagged posts with reportCount) need eyes.
   const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
-  const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
   const pendingPromoters = promoterRequests;
-  const totalActionItems =
-    pendingSubs.length
-    + pendingMod.length
-    + pendingPromoters.length
-    + pendingGiftingFlagged.length
-    + pendingGiftingReports.length
-    + openFeedback.length;
+  const venueClaimsPendingCount = businessClaims.length + businessSubmissions.length + businessLogoRequests.length;
 
   const overviewAttention = useMemo(() => {
     const items: AttentionItem[] = [];
@@ -911,17 +994,35 @@ export default function Admin() {
         color: "#AA66FF",
       });
     }
-    for (const f of openFeedback.slice(0, 3)) {
+    for (const claim of businessClaims.slice(0, 3)) {
       items.push({
-        key: `feedback-${f.id}`,
-        title: f.category || "Feedback",
-        subtitle: String(f.message || "Open feedback").slice(0, 80),
-        kindLabel: "Feedback",
-        color: "#4488FF",
+        key: `business-claim-${claim.id}`,
+        title: claim.businessName || "Venue claim",
+        subtitle: `@${claim.username || claim.email || "unknown"}: ${claim.claimReason || "Claim request"}`,
+        kindLabel: "Venue claim",
+        color: "#19E3FF",
+      });
+    }
+    for (const sub of businessSubmissions.slice(0, 2)) {
+      items.push({
+        key: `business-submission-${sub.id}`,
+        title: sub.name || "New venue",
+        subtitle: `${sub.type || "Business"} · ${sub.neighborhood || sub.address || "No location"}`,
+        kindLabel: "New venue",
+        color: "#FF6600",
+      });
+    }
+    for (const req of businessLogoRequests.slice(0, 2)) {
+      items.push({
+        key: `business-logo-${req.id}`,
+        title: req.businessName || "Logo change",
+        subtitle: "Pending logo approval",
+        kindLabel: "Logo request",
+        color: "#FF00CC",
       });
     }
     return items.slice(0, 8);
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, openFeedback]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, businessClaims, businessSubmissions, businessLogoRequests]);
 
   const overviewKindPills = useMemo(() => {
     const pills: KindPill[] = [];
@@ -930,9 +1031,18 @@ export default function Admin() {
     if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
     if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
     if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
-    if (openFeedback.length) pills.push({ key: "feedback", label: "Feedback", count: openFeedback.length, color: "#4488FF" });
+    if (venueClaimsPendingCount) pills.push({ key: "venue-claims", label: "Venue claims", count: venueClaimsPendingCount, color: "#19E3FF" });
     return pills;
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, openFeedback]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, venueClaimsPendingCount]);
+
+  const approvedPromoters = useMemo(
+    () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
+    [allUsers],
+  );
+  const pendingPromoterUsers = useMemo(
+    () => allUsers.filter(u => u.promoterStatus === "pending"),
+    [allUsers],
+  );
 
   if (authLoading || !sessionReady) {
     return (
@@ -986,7 +1096,7 @@ export default function Admin() {
                 style={{ width: "100%", padding: "10px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 14 }}
                 placeholder="Tucker"
               />
-              <p className="dash-mono" style={{ fontSize: 9, color: "var(--dash-muted)", marginTop: 6 }}>Shown on approvals — not your login username</p>
+              <p className="dash-mono" style={{ fontSize: 9, color: "var(--dash-muted)", marginTop: 6 }}>Shown on approvals, not your login username</p>
             </div>
             <div>
               <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Password</label>
@@ -1053,15 +1163,14 @@ export default function Admin() {
   };
 
   const inboxLoading =
-    subLoading || modLoading || giftingLoading || missedLoading || feedbackLoading || promotersLoading || talentLoading;
+    subLoading || modLoading || giftingLoading || missedLoading || promotersLoading || talentLoading;
   const inboxError =
-    subError || modError || giftingError || missedError || feedbackError || promotersError || talentError;
+    subError || modError || giftingError || missedError || promotersError || talentError;
   const refetchInbox = () => {
     refetchSubs();
     refetchMod();
     refetchGifting();
     refetchMissed();
-    refetchFeedback();
     refetchPromoters();
     refetchTalent();
   };
@@ -1070,6 +1179,7 @@ export default function Admin() {
 
   const refreshAdminData = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
     refetchInbox();
     refetchUsers();
     refetchEvents();
@@ -1080,28 +1190,32 @@ export default function Admin() {
     refetchBusinessLogoRequests();
   };
 
-  const venueClaimsPendingCount = businessClaims.length + businessSubmissions.length + businessLogoRequests.length;
-
   const setAdminTab = (tab: AdminTab) => {
-    setActiveTab(tab);
+    const resolved = tab === "owner" && !isPrimaryOwner ? "overview" : tab;
+    setActiveTab(resolved);
     setMoreOpen(false);
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", tab);
+    url.searchParams.set("tab", resolved);
     window.history.replaceState({}, "", url.toString());
   };
 
-  const userCount = adminMetrics?.users ?? allUsers.length;
+  const openInboxFromOverview = (filterHint?: string) => {
+    if (filterHint === "venue-claims") {
+      setAdminTab("venue-claims");
+      return;
+    }
+    if (filterHint && OVERVIEW_PILL_TO_INBOX_KIND[filterHint]) {
+      setInboxKindFilter(OVERVIEW_PILL_TO_INBOX_KIND[filterHint]);
+    } else {
+      setInboxKindFilter("all");
+    }
+    setAdminTab("inbox");
+  };
+
+  const userCount = allUsers.length;
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
-  const approvedPromoters = useMemo(
-    () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
-    [allUsers],
-  );
-  const pendingPromoterUsers = useMemo(
-    () => allUsers.filter(u => u.promoterStatus === "pending"),
-    [allUsers],
-  );
   const approvedPromoterCount = approvedPromoters.length;
 
   const inboxActionPending =
@@ -1116,16 +1230,28 @@ export default function Admin() {
     || denyTalentMutation.isPending
     || updateGiftingStatusMutation.isPending
     || resolveGiftingReportMutation.isPending
-    || resolveFeedbackMutation.isPending;
+    || resolveOwnerDeskMutation.isPending;
+
+  const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
+  const pushOk = !!pushStatus?.configured;
 
   return (
     <div className="dash-page">
-      <AdminShell
-        view={activeTab}
-        onNavigate={setAdminTab}
-        adminName={adminName}
+      <HubShell
+        mode="admin"
+        adminView={activeTab as AdminViewKey}
+        onAdminNavigate={(view) => setAdminTab(view as AdminTab)}
+        isAdminUser
         isSuperAdmin={isSuperAdmin}
-        pendingCount={totalActionItems}
+        isPrimaryOwner={isPrimaryOwner}
+        canManageTeam={canManageTeam}
+        userName={adminName}
+        userHandle={user?.username}
+        photoUrl={user?.photoUrl}
+        avatarChoice={user?.avatarChoice}
+        avatarRing={user?.avatarRing}
+        pendingCount={pendingCount}
+        ownerCount={ownerCount}
         navCounts={{
           team: teamAdmins.length,
           events: events.length,
@@ -1134,34 +1260,80 @@ export default function Admin() {
           promoters: approvedPromoterCount || pendingPromoters.length || undefined,
           "venue-claims": venueClaimsPendingCount || undefined,
         }}
-        pushStatus={pushStatus}
-        onRefreshAll={refreshAdminData}
-        onLogout={async () => { await logout(); navigate("/"); }}
-        onSendTestPush={() => testPushMutation.mutate()}
-        testPushPending={testPushMutation.isPending}
         moreOpen={moreOpen}
         onMoreOpenChange={setMoreOpen}
+        kicker={viewMeta.kicker}
+        kickerColor={viewMeta.kickerColor}
+        title={viewMeta.title}
+        lede={viewMeta.lede}
+        onLogout={async () => { await logout(); navigate("/"); }}
+        topRight={(
+          <button type="button" className="hub-ghost-btn" onClick={refreshAdminData}>
+            <RefreshCw size={12} aria-hidden />
+            Refresh all
+          </button>
+        )}
+        sideExtra={(
+          <>
+            <div className="hub-push-status">
+              <span className={`dot${pushOk ? "" : " is-bad"}`} />
+              {pushOk ? "Push server healthy" : "Push not configured"}
+            </div>
+            <div className="hub-push-meta">
+              {pushStatus
+                ? `${pushStatus.totalActiveSubscriptions} device${pushStatus.totalActiveSubscriptions === 1 ? "" : "s"} site-wide, ${pushStatus.myDeviceSubscriptions} on this account`
+                : "Status loading…"}
+            </div>
+            <button
+              type="button"
+              className="hub-ghost-btn"
+              disabled={!pushOk || !pushStatus?.myDeviceSubscriptions || testPushMutation.isPending}
+              onClick={() => testPushMutation.mutate()}
+            >
+              {testPushMutation.isPending ? "Sending…" : "Send test push"}
+            </button>
+          </>
+        )}
       >
+        <div className="admin-panel-body">
         {/* ── OVERVIEW ── */}
         {activeTab === "overview" && (
           <AdminOverview
-            pendingCount={totalActionItems}
+            pendingCount={pendingCount}
             attentionItems={overviewAttention}
             kindPills={overviewKindPills}
-            metricsEnabled={authenticated}
-            onOpenInbox={() => setAdminTab("inbox")}
+            showMetrics={false}
+            isPrimaryOwner={isPrimaryOwner}
+            ownerCount={ownerCount}
+            onOpenInbox={openInboxFromOverview}
+            onOpenOwner={() => setAdminTab("owner")}
             onReviewItem={(key) => {
+              if (key.startsWith("business-")) {
+                setAdminTab("venue-claims");
+                return;
+              }
               setExpandedInboxKey(key);
+              setInboxKindFilter("all");
               setAdminTab("inbox");
             }}
             onMetricClick={(tab, metricKey) => {
-              const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "inbox") as AdminTab;
-              setAdminTab(next);
-              if (metricKey === "userSubmittedEvents") setEventStatusFilter("user_submitted");
-              if (metricKey === "attendances") setEventStatusFilter("has_checkins");
-              if (metricKey === "newUsersToday") {
-                setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+              if (metricKey === "userSubmittedEvents") {
+                setEventStatusFilter("user_submitted");
+                setAdminTab("events");
+                return;
               }
+              if (metricKey === "attendances") {
+                setEventStatusFilter("has_checkins");
+                setAdminTab("events");
+                return;
+              }
+              if (metricKey === "newUsersToday") {
+                setAdminTab("users");
+                setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+                return;
+              }
+              const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "stats") as AdminTab;
+              setAdminTab(next);
             }}
             pushStatus={pushStatus}
             onRefreshPush={() => refetchPushStatus()}
@@ -1170,8 +1342,37 @@ export default function Admin() {
           />
         )}
 
-        {/* ── INBOX ── */}
+        {/* ── STATS (site pulse metrics) ── */}
+        {activeTab === "stats" && (
+          <div className="admin-stats-view">
+            <AdminStatsView
+              enabled={authenticated}
+              onMetricClick={(tab: string, metricKey: string) => {
+                if (metricKey === "userSubmittedEvents") {
+                  setEventStatusFilter("user_submitted");
+                  setAdminTab("events");
+                  return;
+                }
+                if (metricKey === "attendances") {
+                  setEventStatusFilter("has_checkins");
+                  setAdminTab("events");
+                  return;
+                }
+                if (metricKey === "newUsersToday") {
+                  setAdminTab("users");
+                  setTimeout(() => document.getElementById("new-users-today")?.scrollIntoView({ behavior: "smooth" }), 100);
+                  return;
+                }
+                const next = (ADMIN_VIEWS.includes(tab as AdminTab) ? tab : "stats") as AdminTab;
+                setAdminTab(next);
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── INBOX / REVIEW QUEUE ── */}
         {activeTab === "inbox" && (
+          <>
           <AdminInbox
             submissions={submissions}
             promoterRequests={promoterRequests}
@@ -1180,7 +1381,7 @@ export default function Admin() {
             giftingPosts={giftingAdmin.posts || []}
             giftingReports={giftingAdmin.reports || []}
             missedConnections={missedAdmin}
-            feedback={feedback}
+            initialKindFilter={inboxKindFilter}
             loading={inboxLoading}
             error={inboxError}
             onRetry={refetchInbox}
@@ -1201,7 +1402,6 @@ export default function Admin() {
             onDismissStaleTests={() => dismissStaleTestsMutation.mutate()}
             onGiftingStatus={(id, status) => updateGiftingStatusMutation.mutate({ id, status })}
             onResolveGiftingReport={id => resolveGiftingReportMutation.mutate({ id })}
-            onResolveFeedback={id => resolveFeedbackMutation.mutate(id)}
             boardRejectReasons={boardRejectReasons}
             boardRejectNotes={boardRejectNotes}
             onBoardRejectReasonChange={(key, code) => setBoardRejectReasons(prev => ({ ...prev, [key]: code }))}
@@ -1211,6 +1411,30 @@ export default function Admin() {
             onRemoveSpotted={(id) => removeSpottedMutation.mutate(id)}
             actionPending={inboxActionPending || rejectBoardPostMutation.isPending}
           />
+          {riverBratsReports.filter((r: any) => r.status === "PENDING").length > 0 && (
+            <div className="mt-8 border border-white/10 rounded-lg p-4">
+              <h3 className="text-white font-display font-bold text-sm uppercase tracking-wider mb-3">River Brats reports</h3>
+              <ul className="space-y-3">
+                {riverBratsReports.filter((r: any) => r.status === "PENDING").map((r: any) => (
+                  <li key={r.id} className="text-sm text-white/80 flex flex-wrap items-center justify-between gap-3">
+                    <span>
+                      <strong className="text-white">{r.target_type}</strong> #{r.target_id} · {r.reason}
+                      {r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-xs uppercase tracking-wide text-[#C8FA3C] hover:underline"
+                      disabled={resolveRiverBratsReportMutation.isPending}
+                      onClick={() => resolveRiverBratsReportMutation.mutate({ id: r.id })}
+                    >
+                      Resolve
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          </>
         )}
 
         {/* ── MANAGE EVENTS ── */}
@@ -1540,7 +1764,7 @@ export default function Admin() {
                               </div>
                             ) : (
                               <p className="text-white/35 text-xs">
-                                Use the assign row above this form — promoter becomes host, gets approved, and claimable turns off.
+                                Use the assign row above this form: promoter becomes host, gets approved, and claimable turns off.
                               </p>
                             )}
                           </div>
@@ -1570,7 +1794,7 @@ export default function Admin() {
         {activeTab === "gigs" && (
           <div>
             <p className="text-white/40 text-sm mb-6">
-              Edit gig board posts — including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
+              Edit gig board posts, including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
             </p>
             {gigsError ? (
               <AdminLoadError label="gig posts" onRetry={() => refetchGigs()} />
@@ -1691,7 +1915,7 @@ export default function Admin() {
                           <div>
                             <label className="display text-xs text-white/40 block mb-1">COMPENSATION</label>
                             <input value={gigEditForm.compensation || ""} onChange={e => setGigEditForm(f => ({ ...f, compensation: e.target.value }))}
-                              placeholder="e.g. Volunteer — community help" className={adminFieldClass} />
+                              placeholder="e.g. Volunteer: community help" className={adminFieldClass} />
                           </div>
                           <div>
                             <label className="display text-xs text-white/40 block mb-1">LOCATION</label>
@@ -1976,7 +2200,7 @@ export default function Admin() {
                     <div key={claim.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
                       <div className="min-w-0 flex-1">
                         <p className="text-white text-sm font-semibold">{claim.businessName}</p>
-                        <p className="text-white/50 text-xs mt-1">@{claim.username || claim.email} — {claim.claimReason}</p>
+                        <p className="text-white/50 text-xs mt-1">@{claim.username || claim.email}: {claim.claimReason}</p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         <button
@@ -2077,7 +2301,7 @@ export default function Admin() {
             {newUsersToday.length > 0 && (
               <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #C8FA3C33", background: "#0a0f00" }}>
                 <p className="display text-sm" style={{ color: "#C8FA3C", marginBottom: 12 }}>
-                  🌱 NEW TODAY — {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
+                  🌱 NEW TODAY: {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {newUsersToday.map(u => (
@@ -2173,7 +2397,18 @@ export default function Admin() {
           </div>
         )}
 
-        {activeTab === "team" && (
+        {activeTab === "owner" && isPrimaryOwner && (
+          <AdminOwnerDesk
+            items={ownerDesk}
+            loading={ownerDeskLoading}
+            error={ownerDeskError}
+            onRetry={() => refetchOwnerDesk()}
+            onResolve={(id, source) => resolveOwnerDeskMutation.mutate({ id, source })}
+            resolvePending={resolveOwnerDeskMutation.isPending}
+          />
+        )}
+
+        {activeTab === "team" && canManageTeam && (
           <div className="space-y-8">
             <div>
               <p className="text-white/40 text-sm mb-4">
@@ -2261,7 +2496,8 @@ export default function Admin() {
           </div>
         )}
 
-      </AdminShell>
+        </div>
+      </HubShell>
     </div>
   );
 }

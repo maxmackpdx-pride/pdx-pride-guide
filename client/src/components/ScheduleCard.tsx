@@ -23,7 +23,7 @@ export default function ScheduleCard({
   title = "The Schedule",
   description = "The whole weekend on one clock. Every event placed by start time, the magenta line is now.",
   actionHref = "/schedule",
-  actionLabel = "View all events",
+  actionLabel = "Full schedule",
 }: ScheduleCardProps) {
   return (
     <div className="sc-card">
@@ -44,7 +44,7 @@ export default function ScheduleCard({
         )}
       </div>
       {description && <p className="sc-desc">{description}</p>}
-      <div className="sc-seam" />
+      <div className="sc-seam pdx-rainbow-rule" />
       <div className="sc-body">{children}</div>
     </div>
   );

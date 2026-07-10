@@ -42,11 +42,29 @@ p { margin: 0; }
 
 /* ---- Shared brand primitives (usable in raw HTML) -------- */
 
-/* Rainbow rule / bar, the section divider (cyan > yellow > magenta > orange) */
-.pdx-rainbow-rule {
+/* Rainbow rule / bar, the section divider (cyan > yellow > magenta > orange).
+   Animated: colors flow left to right, a white glint sweeps across, a soft
+   rainbow glow pulses. Silenced + flattened to a static bar by calm mode and
+   reduced-motion (see effects.css). */
+.pdx-rainbow-rule,
+.pdx-seam {
+  position: relative;
   height: 3px;
   border: 0;
-  background: var(--rainbow-bar);
+  overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
+}
+.pdx-rainbow-rule::after,
+.pdx-seam::after {
+  content: "";
+  position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
+  transform: translateX(-165%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen; pointer-events: none;
+  animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
 }
 
 /* Text stroked in rainbow (headline accent word) */
@@ -79,11 +97,3 @@ p { margin: 0; }
 .pdx-marker--cyan   { background: var(--neon-cyan); color: #000; box-shadow: 4px 4px 0 -1px var(--neon-yellow); }
 .pdx-marker--rainbow{ background: var(--grad-rainbow); color: #000; box-shadow: none; }
 .pdx-marker--yellow { background: var(--yellow); color: #000; box-shadow: 4px 4px 0 -1px var(--neon-magenta); }
-
-/* Rainbow seam, the thin gradient line under the header and above the
-   footer. Full flag sweep. */
-.pdx-seam {
-  height: 3px;
-  border: 0;
-  background: var(--grad-flag);
-}

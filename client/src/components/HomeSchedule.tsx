@@ -68,7 +68,7 @@ export default function HomeSchedule() {
 
   return (
     <div className="hsch-card">
-      <div className="hsch-seam" />
+      <div className="hsch-seam pdx-rainbow-rule" />
 
       <div className="hsch-section">
         <div className="hsch-tabs">

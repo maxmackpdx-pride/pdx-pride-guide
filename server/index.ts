@@ -47,6 +47,14 @@ const contactLimiter = rateLimit({
   message: { error: "Too many messages sent. Try again in a few minutes." },
 });
 app.use("/api/contact/message", contactLimiter);
+const analyticsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 400,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many analytics events." },
+});
+app.use("/api/analytics/pageview", analyticsLimiter);
 // Admin JSON routes rely on requireAdmin session checks; avoid a separate strict
 // cap — the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
 app.use("/api", limiter);
@@ -130,17 +138,37 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
-  const listenOpts: { port: number; host: string; reusePort?: boolean } = {
-    port,
-    host: "0.0.0.0",
+  // PORT env wins. In local dev on macOS, 5000 is often taken by AirPlay Receiver.
+  const devDefaultPort = platform() === "darwin" ? "5050" : "5000";
+  let listenPort = parseInt(process.env.PORT || devDefaultPort, 10);
+  const maxPort = listenPort + 8;
+
+  const tryListen = () => {
+    const listenOpts: { port: number; host: string; reusePort?: boolean } = {
+      port: listenPort,
+      host: "0.0.0.0",
+    };
+    if (platform() === "linux") listenOpts.reusePort = true;
+
+    httpServer.once("error", (err: NodeJS.ErrnoException) => {
+      if (
+        err.code === "EADDRINUSE"
+        && process.env.NODE_ENV === "development"
+        && !process.env.PORT
+        && listenPort < maxPort
+      ) {
+        listenPort += 1;
+        log(`port ${listenPort - 1} in use, trying ${listenPort}…`);
+        tryListen();
+        return;
+      }
+      throw err;
+    });
+
+    httpServer.listen(listenOpts, () => {
+      log(`serving on port ${listenPort}`);
+    });
   };
-  if (platform() === "linux") listenOpts.reusePort = true;
-  httpServer.listen(listenOpts, () => {
-    log(`serving on port ${port}`);
-  });
+
+  tryListen();
 })();

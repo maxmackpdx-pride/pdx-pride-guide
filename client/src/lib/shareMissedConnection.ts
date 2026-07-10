@@ -88,5 +88,5 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
 export async function shareMissedConnectionStory(post: ShareMissedConnection) {
   const canvas = await buildMissedConnectionCanvas(post);
   const filename = `missed-connection-${post.id}.png`;
-  return shareOrDownloadPng(canvas, filename, "Missed Connections — PDX Pride Guide");
+  return shareOrDownloadPng(canvas, filename, "Missed Connections | PDX Pride Guide");
 }

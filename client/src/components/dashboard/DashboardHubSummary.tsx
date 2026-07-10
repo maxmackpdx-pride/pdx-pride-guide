@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { type MouseEvent } from "react";
 import { StatPill } from "@/components/ds";
 import { dashVarToDsAccent } from "@/lib/dsColors";
 
@@ -16,94 +16,96 @@ type SummaryChip = {
   key: string;
   label: string;
   count: number;
-  href: string;
+  section: string;
   color: string;
-  highlight?: boolean;
 };
 
-export default function DashboardHubSummary({ counts }: { counts: HubSummaryCounts }) {
+export default function DashboardHubSummary({
+  counts,
+  onSelectSection,
+}: {
+  counts: HubSummaryCounts;
+  onSelectSection?: (section: string) => void;
+}) {
   const chips: SummaryChip[] = [
     {
-      key: "unread",
-      label: "unread",
-      count: counts.unread,
-      href: "/inbox",
-      color: "var(--dash-magenta)",
-      highlight: counts.unread > 0,
-    },
-    {
-      key: "pending",
-      label: "pending",
-      count: counts.pendingSubmissions,
-      href: "#events",
-      color: "var(--dash-magenta)",
-      highlight: counts.pendingSubmissions > 0,
-    },
-    {
       key: "events",
-      label: "events",
+      label: "Events",
       count: counts.eventCount,
-      href: "#events",
+      section: "events",
       color: "var(--dash-cyan)",
     },
     {
       key: "gigs",
-      label: "gigs",
+      label: "Gigs",
       count: counts.gigCount,
-      href: "#gigs",
+      section: "gigs",
       color: "var(--dash-orange)",
     },
     {
       key: "gifting",
-      label: "gifting",
+      label: "Gifting",
       count: counts.giftingCount,
-      href: "#gifting",
-      color: "var(--dash-cyan)",
+      section: "gifting",
+      color: "var(--dash-lime)",
     },
     {
       key: "spotted",
-      label: "spotted",
+      label: "Spotted",
       count: counts.spottedCount,
-      href: "#spotted",
+      section: "spotted",
       color: "var(--dash-magenta)",
     },
     {
       key: "checkins",
-      label: "check-ins",
+      label: "Check-ins",
       count: counts.checkInCount,
-      href: "#checkins",
+      section: "checkins",
       color: "var(--dash-lime)",
     },
-  ].filter(chip => chip.highlight || chip.count > 0);
+  ];
 
-  if (chips.length === 0) {
-    return (
-      <section className="dash-hub-summary dash-hub-summary--empty" aria-label="Hub summary">
-        <p className="dash-hub-summary__lede">
-          Nothing on your boards yet — submit an event, post on Pride Werk, or reply on Spotted to get started.
-        </p>
-      </section>
-    );
-  }
+  const handleChipClick = (e: MouseEvent, section: string) => {
+    e.preventDefault();
+    if (onSelectSection) {
+      onSelectSection(section);
+      return;
+    }
+    document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const total =
+    counts.eventCount +
+    counts.gigCount +
+    counts.giftingCount +
+    counts.spottedCount +
+    counts.checkInCount;
 
   return (
     <section className="dash-hub-summary" aria-label="Hub summary">
+      {total === 0 && (
+        <p className="dash-hub-summary__lede">
+          Nothing on your boards yet. Submit an event, post on Pride Werk, or reply on Spotted to get started.
+        </p>
+      )}
       <div className="dash-hub-summary__chips">
         {chips.map(chip => (
-          <Link key={chip.key} href={chip.href} className="dash-hub-chip-link">
+          <a
+            key={chip.key}
+            href={`#${chip.section}`}
+            className="dash-hub-chip-link"
+            onClick={e => handleChipClick(e, chip.section)}
+          >
             <StatPill
               count={chip.count}
               color={dashVarToDsAccent(chip.color)}
-              variant={chip.highlight ? "solid" : "outline"}
-              glow={chip.highlight}
-              dot={chip.highlight}
-              liveWave={chip.highlight}
+              variant="outline"
               animateCount
-              size="sm"
+              size="md"
             >
               {chip.label}
             </StatPill>
-          </Link>
+          </a>
         ))}
       </div>
     </section>

@@ -69,3 +69,25 @@
   animation: none !important;
   box-shadow: none !important;
 }
+
+/* ANIMATED RAINBOW DIVIDER — flowing + glowing seam */
+@keyframes pdxSeamGlint { 0% { transform: translateX(-165%); } 60% { transform: translateX(150%); } 100% { transform: translateX(150%); } }
+@keyframes pdxSeamFlow { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+@keyframes pdxSeamGlow { 0%,100% { box-shadow: 0 0 6px rgba(0,255,255,.28); } 50% { box-shadow: 0 0 18px rgba(255,0,204,.5); } }
+
+/* Calm mode: rainbow dividers stay visible but static (no flow, glint, glow) */
+:root[data-calm="true"] .pdx-seam,
+:root[data-calm="true"] .pdx-rainbow-rule,
+:root[data-calm="true"] .pdxSeam,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line,
+:root[data-calm="true"] .pdxMap__seam {
+  background: var(--rainbow-bar);
+  background-size: auto;
+}
+:root[data-calm="true"] .pdx-seam::after,
+:root[data-calm="true"] .pdx-rainbow-rule::after,
+:root[data-calm="true"] .pdxSeam::after,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after,
+:root[data-calm="true"] .pdxMap__seam::after {
+  display: none;
+}

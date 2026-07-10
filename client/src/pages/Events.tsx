@@ -11,29 +11,30 @@ import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
-import PageHeader from "@/components/PageHeader";
+import EventsHero from "@/components/EventsHero";
 import ScrollReveal from "@/components/ScrollReveal";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
-import EventsNowPanel from "@/components/EventsNowPanel";
-
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import { List, Grid, MapPin } from "lucide-react";
+import { List, Grid } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
+import CountUpValue from "@/components/CountUpValue";
 import { dayAccentToken } from "@/lib/dsColors";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
 import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import "./Events.css";
 
 const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
 /** MON/TUE fills are too dark for black pill text — flip to white. */
@@ -133,6 +134,35 @@ function readSearchParam(key: string) {
   return new URLSearchParams(window.location.search).get(key)?.trim() || "";
 }
 
+function EventsTabBar({
+  activeTab,
+  onSelect,
+}: {
+  activeTab: "board" | "schedule";
+  onSelect: (tab: "board" | "schedule") => void;
+}) {
+  return (
+    <nav className="events-tab-bar events-page-tab-bar" aria-label="Events view">
+      <button
+        type="button"
+        className={`events-tab${activeTab === "board" ? " active" : ""}`}
+        onClick={() => onSelect("board")}
+        data-testid="events-tab-board"
+      >
+        The Board
+      </button>
+      <button
+        type="button"
+        className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
+        onClick={() => onSelect("schedule")}
+        data-testid="events-tab-schedule"
+      >
+        The Schedule
+      </button>
+    </nav>
+  );
+}
+
 export default function Events() {
   const { user } = useAuth();
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
@@ -212,8 +242,8 @@ export default function Events() {
   const shareEvent = selectedEvent || routeEvent || null;
   usePageSeo(
     shareEvent
-      ? `${shareEvent.title} — Portland Pride 2026 | PDX Pride Guide`
-      : "Portland Pride 2026 Events — PDX Pride Guide",
+      ? `${shareEvent.title} | Portland Pride 2026 | PDX Pride Guide`
+      : "Portland Pride 2026 Events | PDX Pride Guide",
     shareEvent
       ? truncateSeo(
           `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,
@@ -257,216 +287,217 @@ export default function Events() {
     [events, activeDay, activeFilters, searchQuery, sortMode],
   );
 
+  const heroStats = useMemo(() => {
+    const parseTags = (raw: string) => {
+      try {
+        const parsed = JSON.parse(raw || "[]");
+        return Array.isArray(parsed) ? parsed.map((t: unknown) => String(t)) : [];
+      } catch {
+        return [];
+      }
+    };
+    const isDanceParty = (e: EventListing) =>
+      parseTags(e.eventTypes).some(tag => tag.trim().toUpperCase().replace(/[\s-]+/g, "_").includes("DANCE"));
+    const unclaimedIds = new Set(
+      events.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
+    );
+    return [
+      { num: events.length, label: "Total events", color: "#19e3ff" },
+      { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
+      { num: events.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
+    ];
+  }, [events]);
+
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0;
-
-  const eventsCountLabel = useMemo(() => {
-    const total = events.length;
-    const visible = filtered.length;
-    if (hasActiveFilters && visible !== total) {
-      return `${visible} of ${total} events`;
-    }
-    return `${total} event${total === 1 ? "" : "s"}`;
-  }, [events.length, filtered.length, hasActiveFilters]);
 
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
   return (
-    <div className="zine-page events-page board-page">
-      <PageHeader
-        section="Events"
-        title="Events"
-        titlePrefix={events.length > 0 ? events.length : undefined}
-        titleAccent="cyan"
-        kicker="Portland Pride Week 2026 · July 13–19"
-        lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond — all in one place."
-        actions={
-          <Link href="/schedule" className="btn-neon" style={{ fontSize: "0.85rem", letterSpacing: "0.12em" }}>
-            View schedule →
-          </Link>
-        }
-      />
+    <div className="zine-page events-page board-page board-page--makeover">
+      <EventsHero eventCount={events.length} stats={heroStats} />
 
-      <div className="events-map-row">
-        <div className="events-map-row__panel">
-          <EventsNowPanel />
+      <ScrollReveal>
+        <div className="events-map-row events-map-row--solo">
+          <div className="events-map-row__map">
+            <Suspense fallback={<MapViewFallback variant="events" />}>
+              <MapView
+                events={filtered}
+                expanded={mapExpanded}
+                onExpand={() => setMapExpanded(true)}
+                onCollapse={() => setMapExpanded(false)}
+                onSelect={openEvent}
+              />
+            </Suspense>
+          </div>
         </div>
-        <div className="events-map-row__map">
-          <Suspense fallback={<MapViewFallback variant="events" />}>
-            <MapView
-              events={filtered}
-              expanded={mapExpanded}
-              onExpand={() => setMapExpanded(true)}
-              onCollapse={() => setMapExpanded(false)}
-              onSelect={openEvent}
-            />
-          </Suspense>
-        </div>
-      </div>
+      </ScrollReveal>
 
-      {/* Board | Schedule tabs */}
-      <div className="events-tab-bar">
-        <button
-          type="button"
-          className={`events-tab${activeTab === "board" ? " active" : ""}`}
-          onClick={() => setActiveTab("board")}
-          data-testid="events-tab-board"
-        >
-          The Board
-        </button>
-        <button
-          type="button"
-          className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
-          onClick={() => setActiveTab("schedule")}
-          data-testid="events-tab-schedule"
-        >
-          The Schedule
-        </button>
-      </div>
+      <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
 
       {activeTab === "schedule" ? (
-        <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px 40px" }}>
-          <ScheduleCard>
-            <Schedule embed />
-          </ScheduleCard>
-        </div>
-      ) : (
-      <>
-      {/* Filters + View Toggle */}
-      <div className="zine-filter-bar" style={{
-        background: "var(--ink-1000)", borderBottom: "1px solid var(--ink-border-faint)",
-        position: "sticky", top: "var(--site-header-height)", zIndex: 50,
-      }}>
-        <div className="events-filter-row">
-          {DAYS.map(d => {
-            const selected = activeDay === d;
-            return (
-              <FilterChip
-                key={d}
-                selected={selected}
-                fill={selected}
-                accent={dayAccentToken(d)}
-                onToggle={() => setActiveDay(d)}
-                data-testid={`filter-day-${d}`}
-                style={selected && DARK_FILL_DAYS.has(d) ? { color: "var(--text-hi)" } : undefined}
-              >
-                {d}
-              </FilterChip>
-            );
-          })}
-          <div className="events-filter-divider" />
-          {EVENT_TYPE_FILTERS.map(f => (
-            <EventTypeTag
-              key={f}
-              label={f}
-              interactive
-              active={activeFilters.includes(f)}
-              onClick={() => toggleFilter(f)}
-              testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
-            />
-          ))}
-          {/* Search bar */}
-          <div className="events-filter-search">
-            <SearchInput
-              placeholder="Search events..."
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onClear={() => setSearchQuery("")}
-              data-testid="event-search"
-              size="sm"
-            />
-          </div>
-          {/* Spacer */}
-          <div style={{ flex: 1 }} />
-          {/* View toggle — grid / list only (map is always shown above) */}
-          <div className="events-view-toggle">
-            <button
-              data-testid="toggle-grid-view"
-              onClick={() => setViewMode("grid")}
-              className={`events-view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
-              title="Grid view"
-            >
-              <Grid size={26} />
-            </button>
-            <button
-              data-testid="toggle-list-view"
-              onClick={() => setViewMode("list")}
-              className={`events-view-toggle__btn${viewMode === "list" ? " active" : ""}`}
-              title="List view"
-            >
-              <List size={26} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Events listing */}
-      <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
-        <ScrollReveal>
-          <div className="events-count-row">
-            <div className="events-count-banner">
-              <MapPin size={13} />
-              <span data-testid="events-count">
-                {isLoading ? "Loading events…" : eventsCountLabel}
-              </span>
-              {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
-            </div>
-            <div className="events-count-actions">
-              {!isLoading && filtered.length > 0 && (
-                <label className="events-sort">
-                  <span className="events-sort__label">Sort</span>
-                  <div className="board-select-wrap">
-                    <select
-                      className="board-select events-sort__select"
-                      value={sortMode}
-                      onChange={e => setSortMode(e.target.value as SortMode)}
-                      data-testid="events-sort"
-                      aria-label="Sort events"
-                    >
-                      {SORT_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                    <span className="board-select-caret">▼</span>
-                  </div>
-                </label>
-              )}
-              {(activeFilters.length > 0 || searchQuery.trim()) && (
-                <button
-                  onClick={() => { setActiveFilters([]); setSearchQuery(""); }}
-                  style={{ background: "none", border: "none", color: "var(--text-meta)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
-                >
-                  CLEAR FILTERS ×
-                </button>
-              )}
-            </div>
+        <ScrollReveal delay={50}>
+          <div className="events-page__body events-page__body--schedule">
+            <ScheduleCard>
+              <Schedule embed />
+            </ScheduleCard>
           </div>
         </ScrollReveal>
+      ) : (
+      <section className="events-board-feed board-active-feed diag">
+        <div className="board-active-feed__inner">
+          <ScrollReveal delay={40}>
+            <div className="events-board-feed__sticky">
+              <div className="board-active-feed__head">
+                <div className="board-active-feed__kicker board-active-feed__kicker--cyan">The board</div>
+                <div className="board-active-feed__head-row">
+                  <h2 className="display section-heading board-active-feed__title">Live listings</h2>
+                  <span className="board-active-feed__count" data-testid="events-count">
+                    {isLoading ? (
+                      "Loading…"
+                    ) : hasActiveFilters && filtered.length !== events.length ? (
+                      <>
+                        <CountUpValue value={filtered.length} /> of{" "}
+                        <CountUpValue
+                          key={events.length > 0 ? "total-ready" : "total-pending"}
+                          value={events.length}
+                        />{" "}
+                        showing
+                      </>
+                    ) : (
+                      <>
+                        <CountUpValue
+                          key={events.length > 0 ? "total-ready" : "total-pending"}
+                          value={events.length}
+                        />{" "}
+                        event{events.length === 1 ? "" : "s"}
+                      </>
+                    )}
+                    {activeDay !== "ALL" ? ` · ${activeDay}` : ""}
+                  </span>
+                </div>
+              </div>
+              <div className="board-active-feed__controls">
+                <div className="board-filter-row events-filter-row">
+                  {DAYS.map(d => {
+                    const selected = activeDay === d;
+                    return (
+                      <FilterChip
+                        key={d}
+                        selected={selected}
+                        fill={selected}
+                        accent={dayAccentToken(d)}
+                        onToggle={() => setActiveDay(d)}
+                        data-testid={`filter-day-${d}`}
+                        style={selected && DARK_FILL_DAYS.has(d) ? { color: "var(--text-hi)" } : undefined}
+                      >
+                        {d}
+                      </FilterChip>
+                    );
+                  })}
+                  <div className="events-filter-divider" />
+                  {EVENT_TYPE_FILTERS.map(f => (
+                    <EventTypeTag
+                      key={f}
+                      label={f}
+                      interactive
+                      active={activeFilters.includes(f)}
+                      onClick={() => toggleFilter(f)}
+                      testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
+                    />
+                  ))}
+                  <div className="events-filter-search">
+                    <SearchInput
+                      placeholder="Search events..."
+                      value={searchQuery}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                      onClear={() => setSearchQuery("")}
+                      data-testid="event-search"
+                      size="sm"
+                    />
+                  </div>
+                  <div className="events-filter-spacer" />
+                  {!isLoading && filtered.length > 0 && (
+                    <label className="events-sort">
+                      <span className="events-sort__label">Sort</span>
+                      <div className="board-select-wrap">
+                        <select
+                          className="board-select events-sort__select"
+                          value={sortMode}
+                          onChange={e => setSortMode(e.target.value as SortMode)}
+                          data-testid="events-sort"
+                          aria-label="Sort events"
+                        >
+                          {SORT_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        <span className="board-select-caret">▼</span>
+                      </div>
+                    </label>
+                  )}
+                  <div className="events-view-toggle">
+                    <button
+                      data-testid="toggle-grid-view"
+                      onClick={() => setViewMode("grid")}
+                      className={`events-view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
+                      title="Grid view"
+                    >
+                      <Grid size={22} />
+                    </button>
+                    <button
+                      data-testid="toggle-list-view"
+                      onClick={() => setViewMode("list")}
+                      className={`events-view-toggle__btn${viewMode === "list" ? " active" : ""}`}
+                      title="List view"
+                    >
+                      <List size={22} />
+                    </button>
+                  </div>
+                </div>
+                {(activeFilters.length > 0 || searchQuery.trim()) && (
+                  <button
+                    type="button"
+                    className="events-clear-filters"
+                    onClick={() => { setActiveFilters([]); setSearchQuery(""); }}
+                  >
+                    Clear filters ×
+                  </button>
+                )}
+              </div>
+            </div>
+          </ScrollReveal>
 
+          <div className="board-active-feed__body">
         {isLoading ? (
           <BoardLoadingState label="Loading events" />
         ) : isError ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", border: "2px dashed var(--neon-orange)", background: "rgba(8,8,8,0.72)" }}>
-            <p className="display" style={{ fontSize: "1.4rem", color: "var(--text-hi)" }}>COULD NOT LOAD EVENTS</p>
-            <p style={{ color: "#9d9a92", fontSize: "0.9rem", marginTop: 10, maxWidth: 420, marginInline: "auto" }}>
+          <div className="board-empty board-empty--prototype">
+            <p className="display section-heading">Could not load events</p>
+            <p className="board-copy-sm">
               {error instanceof Error ? error.message : "The events API is unavailable right now."}
             </p>
-            <Button type="button" accent="lime" onClick={() => refetch()} style={{ marginTop: 20 }}>
-              TRY AGAIN
+            <Button type="button" variant="solid" accent="lime" onClick={() => refetch()} style={{ marginTop: 16 }}>
+              Try again
             </Button>
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", color: "#9d9a92" }}>
-            <p className="display" style={{ fontSize: "1.4rem" }}>NO EVENTS MATCH</p>
-            <button
+          <div className="board-empty board-empty--prototype">
+            <p className="display section-heading">Nothing matches</p>
+            <p className="board-copy-sm">Try a broader day or filter. Search by venue, neighborhood, or title.</p>
+            <Button
+              type="button"
+              variant="neon"
+              accent="cyan"
               onClick={() => { setActiveDay("ALL"); setActiveFilters([]); setSearchQuery(""); }}
-              style={{ marginTop: 12, background: "none", border: "1px solid var(--ink-border-strong)", color: "var(--text-lo)", padding: "8px 18px", cursor: "pointer", fontSize: "0.8rem" }}
+              style={{ marginTop: 16 }}
             >
-              Clear Filters
-            </button>
+              Clear filters
+            </Button>
           </div>
         ) : viewMode === "grid" ? (
+          <ScrollReveal delay={50}>
           <div className="events-poster-grid">
             {filtered.map((e, i) => (
               <ListingCard
@@ -482,7 +513,9 @@ export default function Events() {
               />
             ))}
           </div>
+          </ScrollReveal>
         ) : (
+          <ScrollReveal delay={50}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.map((e, i) => (
               <ListingCard
@@ -498,21 +531,22 @@ export default function Events() {
               />
             ))}
           </div>
+          </ScrollReveal>
         )}
 
         <ScrollReveal delay={60}>
-          <div className="zine-callout events-submit-callout" style={{ marginTop: 60, textAlign: "center", padding: "36px 20px" }}>
-            <div className="display" style={{ fontSize: "1.3rem", marginBottom: 6 }}>NOT SEEING YOUR EVENT?</div>
-            <div style={{ color: "var(--text-meta)", marginBottom: 20, fontSize: "0.85rem" }}>
-              Submit it or claim an existing listing.
-            </div>
+          <div className="events-submit-panel board-path-card board-path-card--host">
+            <div className="board-path-card__label">Promoters</div>
+            <h3>Not seeing your event?</h3>
+            <p>Submit a new listing or claim one that is already in the guide.</p>
             <Link href="/submit">
-              <Button as="span" variant="solid" accent="lime" arrow>Get Started</Button>
+              <Button as="span" variant="solid" accent="lime" arrow>Get started</Button>
             </Link>
           </div>
         </ScrollReveal>
-      </div>
-      </>
+          </div>
+        </div>
+      </section>
       )}
 
       {selectedEvent && (
@@ -522,6 +556,11 @@ export default function Events() {
           onEventUpdated={updated => setSelectedEvent(updated)}
         />
       )}
+
+      <BoardCloseSeam
+        line="Find the party. Show up for your people."
+        url="prideguidepdx.com/events"
+      />
     </div>
   );
 }

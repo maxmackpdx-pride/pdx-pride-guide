@@ -62,6 +62,27 @@
   50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
 }
 
+/* Entrance reveal: fade + short rise (.sch-block / schIn) */
+@keyframes pdxReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Hero entrance: fade + 10px rise, slower than pdxReveal (profile hero/stat strip) */
+@keyframes pdxHeroIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Popover / panel entrance: fade + rise + slight scale (.sch-pop) */
+@keyframes pdxPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Live status blink (going dots, board running head) */
+@keyframes pdxBlink { 50% { opacity: 0.35; } }
+
 /* Reduced motion + calm mode both silence glows/animations */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -128,13 +149,83 @@ html.calm-mode .pdxRow {
   --_dayt: #888;
 }
 
-/* Additive motion add-ons (pdxa* prefix — do not collide with pdx* keys) */
+/* Additive motion add-ons (pdxa* = in-app aliases; pdx* = DS canonical names) */
+@keyframes pdxSeamFill  { 0%{transform:scaleX(0)} 68%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
+@keyframes pdxSeamGlint { 0%{transform:translateX(-165%)} 60%{transform:translateX(150%)} 100%{transform:translateX(150%)} }
+@keyframes pdxSeamFlash { 0%,64%{opacity:0} 74%{opacity:.5} 88%{opacity:0} 100%{opacity:0} }
+@keyframes pdxEqBounce  { 0%,100%{transform:scaleY(.22)} 50%{transform:scaleY(1)} }
+@keyframes pdxNumPop    { 0%{transform:translateY(0) scale(1)} 42%{transform:translateY(-2px) scale(1.14)} 100%{transform:translateY(0) scale(1)} }
+@keyframes pdxFloatUp   { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-28px)} }
+@keyframes pdxSparkFly  { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity:0 } }
+@keyframes pdxRingShimmer { to { transform: rotate(360deg); } }
+
 @keyframes pdxaSeamFill  { 0%{transform:scaleX(0)} 68%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
 @keyframes pdxaSeamGlint { 0%{transform:translateX(-165%)} 60%{transform:translateX(150%)} 100%{transform:translateX(150%)} }
 @keyframes pdxaSeamFlash { 0%,64%{opacity:0} 74%{opacity:.5} 88%{opacity:0} 100%{opacity:0} }
-@keyframes pdxaShimmer   { to { transform: rotate(360deg) } }
+@keyframes pdxaShimmer   { to { transform: rotate(360deg); } }
 @keyframes pdxaEq        { 0%,100%{transform:scaleY(.22)} 50%{transform:scaleY(1)} }
 @keyframes pdxaSpark     { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity:0 } }
 @keyframes pdxaNumPop    { 0%{transform:translateY(0) scale(1)} 42%{transform:translateY(-2px) scale(1.14)} 100%{transform:translateY(0) scale(1)} }
 @keyframes pdxaFloatUp   { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-28px)} }
+
+/* ANIMATED RAINBOW DIVIDER — flowing + glowing seam shared by
+   .pdx-seam, .pdx-rainbow-rule, .pdxSeam and .pdxDivider--rainbow's line.
+   Colors flow L→R; soft glow pulses; traveling highlight uses pdxSeamGlint. */
+@keyframes pdxSeamGlint { 0% { transform: translateX(-165%); } 60% { transform: translateX(150%); } 100% { transform: translateX(150%); } }
+@keyframes pdxSeamFlow { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+@keyframes pdxSeamGlow { 0%,100% { box-shadow: 0 0 6px rgba(0,255,255,.28); } 50% { box-shadow: 0 0 18px rgba(255,0,204,.5); } }
+
+/* Calm mode: rainbow dividers stay visible but static (no flow, glint, glow) */
+:root[data-calm="true"] .pdx-seam,
+:root[data-calm="true"] .pdx-rainbow-rule,
+:root[data-calm="true"] .pdxSeam,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line,
+:root[data-calm="true"] .pdxMap__seam,
+:root[data-calm="true"] .rainbow-bar,
+html.calm-mode .pdx-seam,
+html.calm-mode .pdx-rainbow-rule,
+html.calm-mode .pdxSeam,
+html.calm-mode .pdxDivider--rainbow .pdxDivider__line,
+html.calm-mode .pdxMap__seam,
+html.calm-mode .rainbow-bar {
+  background: var(--rainbow-bar);
+  background-size: auto;
+}
+:root[data-calm="true"] .pdx-seam::after,
+:root[data-calm="true"] .pdx-rainbow-rule::after,
+:root[data-calm="true"] .pdxSeam::after,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after,
+:root[data-calm="true"] .pdxMap__seam::after,
+:root[data-calm="true"] .rainbow-bar::after,
+html.calm-mode .pdx-seam::after,
+html.calm-mode .pdx-rainbow-rule::after,
+html.calm-mode .pdxSeam::after,
+html.calm-mode .pdxDivider--rainbow .pdxDivider__line::after,
+html.calm-mode .pdxMap__seam::after,
+html.calm-mode .rainbow-bar::after {
+  display: none;
+}
+
+/* Reduced-motion: same static rainbow (hide frozen glint mid-sweep) */
+@media (prefers-reduced-motion: reduce) {
+  .pdx-seam,
+  .pdx-rainbow-rule,
+  .pdxSeam,
+  .pdxDivider--rainbow .pdxDivider__line,
+  .pdxMap__seam,
+  .rainbow-bar {
+    background: var(--rainbow-bar);
+    background-size: auto;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+  .pdx-seam::after,
+  .pdx-rainbow-rule::after,
+  .pdxSeam::after,
+  .pdxDivider--rainbow .pdxDivider__line::after,
+  .pdxMap__seam::after,
+  .rainbow-bar::after {
+    display: none;
+  }
+}
 

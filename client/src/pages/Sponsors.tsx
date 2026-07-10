@@ -6,7 +6,7 @@ const CONTACT_EMAIL = "hello.tuckercasey@gmail.com";
 
 export default function Sponsors() {
   usePageSeo(
-    "Sponsors — PDX Pride Guide",
+    "Sponsors | PDX Pride Guide",
     "Local businesses can help keep PDX Pride Guide free. Sponsorship is support, not pay-to-rank.",
   );
 

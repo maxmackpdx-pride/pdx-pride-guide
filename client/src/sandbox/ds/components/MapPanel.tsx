@@ -20,7 +20,13 @@ const CSS = `
 .pdxMap::before{ content:""; position:absolute; top:-10%; bottom:-10%; left:52%; width:90px;
   background:linear-gradient(180deg, rgba(40,60,90,.35), rgba(20,30,50,.28));
   transform:rotate(12deg); filter:blur(2px); }
-.pdxMap__seam{ position:absolute; left:0; right:0; height:3px; background:var(--grad-flag); z-index:4; }
+.pdxMap__seam{ position:absolute; left:0; right:0; height:3px; z-index:4; overflow:hidden;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-yellow),var(--neon-magenta),var(--neon-orange),var(--neon-cyan));
+  background-size:200% 100%;
+  animation:pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite; }
+.pdxMap__seam::after{ content:""; position:absolute; top:-1px; bottom:-1px; left:0; width:24%;
+  transform:translateX(-165%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);
+  mix-blend-mode:screen; pointer-events:none; animation:pdxSeamGlint 3.4s var(--ease-inout, ease-in-out) infinite; }
 .pdxMap__seam--top{ top:0; } .pdxMap__seam--bottom{ bottom:0; }
 
 .pdxMap__pins{ position:absolute; inset:0; z-index:2; }

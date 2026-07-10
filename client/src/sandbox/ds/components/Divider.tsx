@@ -7,13 +7,27 @@ import React from "react";
 const CSS = `
 .pdxDivider{ display:flex; align-items:center; gap:14px; width:100%; border:0; margin:0; }
 .pdxDivider__line{ flex:1; height:3px; border-radius:var(--radius-pill); }
-.pdxDivider--rainbow .pdxDivider__line{ background:var(--grad-flag); }
+.pdxDivider--rainbow .pdxDivider__line,
+.pdxSeam{
+  position:relative; overflow:hidden;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-yellow),var(--neon-magenta),var(--neon-orange),var(--neon-cyan));
+  background-size:200% 100%;
+  animation:pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite;
+}
+.pdxDivider--rainbow .pdxDivider__line::after,
+.pdxSeam::after{
+  content:""; position:absolute; top:-1px; bottom:-1px; left:0; width:24%;
+  transform:translateX(-165%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);
+  mix-blend-mode:screen; pointer-events:none;
+  animation:pdxSeamGlint 3.4s var(--ease-inout, ease-in-out) infinite;
+}
 .pdxDivider--glow .pdxDivider__line{ background:var(--_c,var(--lime));
   box-shadow:0 0 14px -2px var(--_c,var(--lime)); }
 .pdxDivider--faint .pdxDivider__line{ height:1px; background:var(--border-default); }
 
 /* full-bleed seam (no label), sits flush under sticky headers */
-.pdxSeam{ height:3px; width:100%; border:0; margin:0; background:var(--grad-flag); }
+.pdxSeam{ height:3px; width:100%; border:0; margin:0; }
 .pdxSeam--thin{ height:2px; }
 
 .pdxDivider__label{ font-family:var(--font-display); font-weight:700; font-size:var(--chrome-sm);

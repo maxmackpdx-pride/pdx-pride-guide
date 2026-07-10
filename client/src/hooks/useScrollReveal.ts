@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { prefersStillMotion } from "@/lib/motion";
 
 export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(delay = 0) {
   const ref = useRef<T>(null);
@@ -10,8 +11,7 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(delay = 
 
     const reveal = () => setVisible(true);
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
+    if (prefersStillMotion()) {
       reveal();
       return;
     }

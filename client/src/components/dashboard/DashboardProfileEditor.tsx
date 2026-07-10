@@ -1,6 +1,8 @@
 import { useState } from "react";
 import AvatarEditor from "@/components/AvatarEditor";
+import { useToast } from "@/hooks/use-toast";
 import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
+import { formatUsernameChangeDate, usernameChangeEligibility } from "@shared/username";
 
 const labelStyle: React.CSSProperties = {
   display: "block", fontFamily: "var(--font-display)", fontWeight: 900,
@@ -45,6 +47,8 @@ function parseSocialLinks(raw: unknown): Record<string, string> {
 
 export default function DashboardProfileEditor({
   user,
+  username,
+  setUsername,
   displayName,
   setDisplayName,
   bio,
@@ -57,6 +61,8 @@ export default function DashboardProfileEditor({
   onRefresh,
 }: {
   user: any;
+  username: string;
+  setUsername: (v: string) => void;
   displayName: string;
   setDisplayName: (v: string) => void;
   bio: string;
@@ -72,6 +78,8 @@ export default function DashboardProfileEditor({
   const [location, setLocation] = useState<string>(user?.location || "");
   const [links, setLinks] = useState<Record<string, string>>(() => parseSocialLinks(user?.socialLinks));
   const [savingExtras, setSavingExtras] = useState(false);
+  const { toast } = useToast();
+  const { canChange: canChangeUsername, nextChangeAt } = usernameChangeEligibility(user?.usernameChangedAt);
 
   const setLink = (key: string, value: string) =>
     setLinks(prev => ({ ...prev, [key]: value }));
@@ -85,18 +93,25 @@ export default function DashboardProfileEditor({
         const value = (links[field.key] || "").trim();
         if (value) socialLinks[field.key] = value.slice(0, 120);
       }
-      await fetch("/api/users/me", {
+      const res = await fetch("/api/users/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          username: username.trim(),
           pronouns: pronouns.trim().slice(0, 40),
           location: location.trim().slice(0, 80),
           socialLinks,
         }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast({ title: err.error || "Could not save profile", variant: "destructive" });
+        return;
+      }
     } catch {
-      // onSave still runs so the base fields save; profile page shows what stuck.
+      toast({ title: "Could not save profile", variant: "destructive" });
+      return;
     } finally {
       setSavingExtras(false);
     }
@@ -128,6 +143,25 @@ export default function DashboardProfileEditor({
         username={user.username}
         onSaved={() => void onRefresh()}
       />
+      <label style={labelStyle}>Username</label>
+      <input
+        style={{
+          ...inputStyle,
+          ...(canChangeUsername ? {} : { color: "var(--text-lo)", cursor: "not-allowed" }),
+        }}
+        value={username}
+        onChange={e => setUsername(e.target.value.replace(/^@/, "").toLowerCase())}
+        readOnly={!canChangeUsername}
+        aria-readonly={!canChangeUsername}
+        maxLength={32}
+        placeholder="your_handle"
+        autoComplete="username"
+      />
+      <p style={{ margin: "6px 0 0", fontSize: "0.78rem", color: "var(--text-lo)", lineHeight: 1.4 }}>
+        {canChangeUsername
+          ? "Your @handle powers your profile link and login. You can change it once every 6 months."
+          : `You can change your username again on ${formatUsernameChangeDate(nextChangeAt)}.`}
+      </p>
       <label style={labelStyle}>Display name</label>
       <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={40} />
       <label style={labelStyle}>Bio <span style={{ color: "var(--text-meta)", fontWeight: 400 }}>({bio.length}/160)</span></label>
@@ -160,7 +194,7 @@ export default function DashboardProfileEditor({
       <label style={labelStyle}>
         Social links{" "}
         <span style={{ color: "var(--text-meta)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>
-          — shown on your public profile at /u/{user?.username}
+         , shown on your public profile at /u/{username || user?.username}
         </span>
       </label>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>

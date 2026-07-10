@@ -1,16 +1,19 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "./BoardLoadingState";
+import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "./BoardActiveSection";
 import ScrollReveal from "./ScrollReveal";
-import SpottedCard, { spottedAccent } from "./SpottedCard";
+import SpottedCard, { spottedKind, spottedPlace } from "./SpottedCard";
+import { Button } from "@/components/ds";
 import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./MissedConnectionsPanel";
 
 const AROUND_TOWN_KEY = "around" as const;
 const CUSTOM_SPOT_KEY = "custom" as const;
-const GENERAL_SPOT_COLOR = "#FF8C00";
 type SpotMode = typeof AROUND_TOWN_KEY | typeof CUSTOM_SPOT_KEY | "event";
+type BoardFilter = "ALL" | "EVENT" | "TOWN" | "ROOSTER" | "SAUVIE";
 
 function deriveTitle(title: string, body: string): string {
   const trimmed = title.trim();
@@ -29,6 +32,8 @@ type Props = {
   onRequireAuth?: () => boolean;
   makeover?: boolean;
   onRequestCompose?: () => void;
+  composeOpen?: boolean;
+  onComposeOpenChange?: (open: boolean) => void;
 };
 
 export default function SpottedCardGrid({
@@ -41,10 +46,14 @@ export default function SpottedCardGrid({
   onRequireAuth,
   makeover = false,
   onRequestCompose,
+  composeOpen: composeOpenProp,
+  onComposeOpenChange,
 }: Props) {
   const { toast } = useToast();
 
-  const [activeEventFilter, setActiveEventFilter] = useState<number | typeof AROUND_TOWN_KEY | null>(null);
+  const [filter, setFilter] = useState<BoardFilter>("ALL");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("RECENT");
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
   const [replyBody, setReplyBody] = useState("");
 
@@ -55,7 +64,13 @@ export default function SpottedCardGrid({
   const [draftVenueHint, setDraftVenueHint] = useState("");
   const [draftCustomEventName, setDraftCustomEventName] = useState("");
   const [draftCustomLocation, setDraftCustomLocation] = useState("");
-  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeOpenLocal, setComposeOpenLocal] = useState(false);
+  const composeOpen = composeOpenProp ?? composeOpenLocal;
+  const setComposeOpen = (open: boolean) => {
+    onComposeOpenChange?.(open);
+    if (composeOpenProp === undefined) setComposeOpenLocal(open);
+  };
+  const [acceptRules, setAcceptRules] = useState(false);
 
   const groupedEvents = useMemo(() => ({
     live: linkableEvents.filter(e => e.timing === "live"),
@@ -63,41 +78,40 @@ export default function SpottedCardGrid({
     past: linkableEvents.filter(e => e.timing === "past"),
   }), [linkableEvents]);
 
-  const eventMeta = useMemo(() => {
-    const map = new Map<number | typeof AROUND_TOWN_KEY, { name: string; color: string; count: number }>();
-    for (const post of posts) {
-      if (post.eventId == null) {
-        const g = map.get(AROUND_TOWN_KEY) ?? { name: "Around town", color: GENERAL_SPOT_COLOR, count: 0 };
-        g.count += 1;
-        map.set(AROUND_TOWN_KEY, g);
-        continue;
-      }
-      const existing = map.get(post.eventId);
-      const name = post.eventTitle || existing?.name || `Event #${post.eventId}`;
-      const color = spottedAccent(post.eventId);
-      if (existing) { existing.count += 1; }
-      else { map.set(post.eventId, { name, color, count: 1 }); }
+  const filterCounts = useMemo(() => ({
+    ALL: posts.length,
+    EVENT: posts.filter(p => p.eventId != null).length,
+    TOWN: posts.filter(p => p.eventId == null && !p.beachId).length,
+    ROOSTER: posts.filter(p => p.beachId === "rooster-rock").length,
+    SAUVIE: posts.filter(p => p.beachId === "sauvie-island").length,
+  }), [posts]);
+
+  const filteredPosts = useMemo(() => {
+    let rows = posts.slice();
+    if (filter === "EVENT") rows = rows.filter(p => p.eventId != null);
+    else if (filter === "TOWN") rows = rows.filter(p => p.eventId == null && !p.beachId);
+    else if (filter === "ROOSTER") rows = rows.filter(p => p.beachId === "rooster-rock");
+    else if (filter === "SAUVIE") rows = rows.filter(p => p.beachId === "sauvie-island");
+    const q = search.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter(p =>
+        [p.title, p.body, spottedPlace(p)].filter(Boolean).some(v => String(v).toLowerCase().includes(q)),
+      );
     }
-    return map;
-  }, [posts]);
-
-  const filterChips = useMemo(
-    () => Array.from(eventMeta.entries()).filter(([, v]) => v.count > 0),
-    [eventMeta],
-  );
-
-  const postMatchesFilter = (post: MissedConnectionPost) => {
-    if (activeEventFilter == null) return true;
-    if (activeEventFilter === AROUND_TOWN_KEY) return post.eventId == null;
-    return post.eventId === activeEventFilter;
-  };
+    rows.sort((a, b) => {
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      return sort === "CLOSING" ? ta - tb : tb - ta;
+    });
+    return rows;
+  }, [posts, filter, search, sort]);
 
   const canSubmit = useMemo(() => {
-    if (!draftBody.trim()) return false;
+    if (!draftBody.trim() || !acceptRules) return false;
     if (spotMode === "event") return !!draftEventId;
     if (spotMode === CUSTOM_SPOT_KEY) return !!draftCustomEventName.trim() || !!draftCustomLocation.trim();
     return true;
-  }, [draftBody, spotMode, draftEventId, draftCustomEventName, draftCustomLocation]);
+  }, [draftBody, acceptRules, spotMode, draftEventId, draftCustomEventName, draftCustomLocation]);
 
   const resetDraftSpotFields = (mode: SpotMode) => {
     setSpotMode(mode);
@@ -114,8 +128,10 @@ export default function SpottedCardGrid({
         scope: "board",
       };
       if (spotMode === "event") payload.eventId = Number(draftEventId);
-      else if (spotMode === CUSTOM_SPOT_KEY) { payload.eventLabel = draftCustomEventName.trim(); payload.venueHint = draftCustomLocation.trim(); }
-      else payload.venueHint = draftVenueHint.trim() || "Around town";
+      else if (spotMode === CUSTOM_SPOT_KEY) {
+        payload.eventLabel = draftCustomEventName.trim();
+        payload.venueHint = draftCustomLocation.trim();
+      } else payload.venueHint = draftVenueHint.trim() || "Around town";
       return fetch("/api/missed-connections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -131,10 +147,11 @@ export default function SpottedCardGrid({
       setDraftTitle(""); setDraftBody(""); setDraftVenueHint("");
       setDraftCustomEventName(""); setDraftCustomLocation(""); setDraftEventId("");
       setSpotMode(AROUND_TOWN_KEY);
+      setAcceptRules(false);
       setComposeOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-      toast({ title: "Posted", description: "Your note is live — you stay anonymous until you both reveal in inbox." });
+      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
     },
     onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
   });
@@ -154,9 +171,9 @@ export default function SpottedCardGrid({
     onSuccess: () => {
       setReplyingTo(null); setReplyBody("");
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-      toast({ title: "Message sent", description: "Thread is private. Reveal yourself in inbox when you're ready." });
+      toast({ title: "Private reply sent", description: "Thread is private. Reveal yourself in inbox when you're ready." });
     },
-    onError: () => toast({ title: "Could not send message", variant: "destructive" }),
+    onError: () => toast({ title: "Could not send reply", variant: "destructive" }),
   });
 
   const renderEventOptions = (items: LinkableMissedConnectionEvent[], label: string) => {
@@ -173,167 +190,285 @@ export default function SpottedCardGrid({
     );
   };
 
-  const filteredPosts = posts.filter(postMatchesFilter);
+  const clearFilters = () => {
+    setFilter("ALL");
+    setSearch("");
+    setSort("RECENT");
+  };
 
-  return (
-    <div className="spotted-board">
-      {/* Compose toggle */}
-      <button
-        type="button"
-        className="spotted-compose-toggle"
-        id="spotted-compose-toggle"
-        onClick={() => {
-          if (!canInteract) { onRequireAuth?.(); return; }
-          setComposeOpen(o => !o);
-        }}
-        aria-expanded={composeOpen}
-      >
-        {composeOpen ? "✕ Cancel" : makeover ? "＋ Post a spotted" : "＋ Saw someone? Write a note"}
-      </button>
+  const handleReply = (post: MissedConnectionPost) => {
+    if (!canInteract) {
+      onRequireAuth?.();
+      return;
+    }
+    setReplyingTo(post);
+  };
 
-      {composeOpen && (
-        <div className="spotted-compose-panel">
-          <input
+  const composeFields = (
+    <>
+      <div className="gifting-form-grid">
+        <label>
+          Where did you see them
+          <select
             className="board-text-field"
-            value={draftTitle}
-            onChange={e => setDraftTitle(e.target.value.slice(0, 80))}
-            placeholder="Title (optional)"
-            maxLength={80}
-          />
-          <textarea
-            className="board-text-field spotted-compose-panel__textarea"
-            value={draftBody}
-            onChange={e => setDraftBody(e.target.value.slice(0, 500))}
-            placeholder="You handed me a flag near the bridge and I have thought about it ever since…"
-            rows={4}
-          />
-          <div className="spotted-compose-panel__charcount">{draftBody.length}/500</div>
-
-          <div className="spotted-compose-panel__label">WHERE WAS IT?</div>
-          <div className="mc-draft-chips">
-            <button type="button" className={`mc-draft-chip${spotMode === AROUND_TOWN_KEY ? " is-active" : ""}`} style={{ "--chip-color": GENERAL_SPOT_COLOR } as React.CSSProperties} onClick={() => resetDraftSpotFields(AROUND_TOWN_KEY)}>
-              <span className="mc-draft-chip__dot" aria-hidden="true" /><span>Around town</span>
-            </button>
-            <button type="button" className={`mc-draft-chip${spotMode === "event" ? " is-active" : ""}`} style={{ "--chip-color": "#19E3FF" } as React.CSSProperties} onClick={() => resetDraftSpotFields("event")}>
-              <span className="mc-draft-chip__dot" aria-hidden="true" /><span>Link event</span>
-            </button>
-            <button type="button" className={`mc-draft-chip${spotMode === CUSTOM_SPOT_KEY ? " is-active" : ""}`} style={{ "--chip-color": "#FF1FA0" } as React.CSSProperties} onClick={() => resetDraftSpotFields(CUSTOM_SPOT_KEY)}>
-              <span className="mc-draft-chip__dot" aria-hidden="true" /><span>Write your own</span>
-            </button>
-          </div>
-
-          {spotMode === AROUND_TOWN_KEY && (
-            <input className="board-text-field" value={draftVenueHint} onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))} placeholder="Optional — e.g. Waterfront Park, Hawthorne…" maxLength={80} />
-          )}
-          {spotMode === "event" && (
-            <select className="board-select" value={draftEventId} onChange={e => setDraftEventId(e.target.value)}>
+            value={spotMode === "event" ? "EVENT" : spotMode === AROUND_TOWN_KEY ? "TOWN" : "TOWN"}
+            onChange={e => resetDraftSpotFields(e.target.value === "EVENT" ? "event" : AROUND_TOWN_KEY)}
+          >
+            <option value="EVENT">At a Pride event</option>
+            <option value="TOWN">Around town</option>
+          </select>
+        </label>
+        {spotMode === "event" ? (
+          <label>
+            Which event
+            <select className="board-text-field" value={draftEventId} onChange={e => setDraftEventId(e.target.value)}>
               <option value="">Select a Pride event…</option>
               {renderEventOptions(groupedEvents.live, "Live / in posting window")}
               {renderEventOptions(groupedEvents.upcoming, "Upcoming")}
               {renderEventOptions(groupedEvents.past, "Past events")}
             </select>
-          )}
-          {spotMode === CUSTOM_SPOT_KEY && (
-            <>
-              <input className="board-text-field" value={draftCustomEventName} onChange={e => setDraftCustomEventName(e.target.value.slice(0, 80))} placeholder="Event or moment name — e.g. Afterparty, Backyard pregame…" maxLength={80} />
-              <input className="board-text-field" style={{ marginTop: 8 }} value={draftCustomLocation} onChange={e => setDraftCustomLocation(e.target.value.slice(0, 80))} placeholder="Where — bar, park, cross streets…" maxLength={80} />
-            </>
-          )}
+          </label>
+        ) : (
+          <label>
+            Where around town (optional)
+            <input
+              className="board-text-field"
+              value={draftVenueHint}
+              onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
+              placeholder="e.g. Powell's queer lit aisle, the MAX Blue Line"
+              maxLength={80}
+            />
+          </label>
+        )}
+        <label className="span">
+          Title
+          <input
+            className="board-text-field"
+            value={draftTitle}
+            onChange={e => setDraftTitle(e.target.value.slice(0, 80))}
+            placeholder="e.g. Mesh top, killer moves by the left speaker"
+            maxLength={80}
+          />
+        </label>
+        <label className="span">
+          Your message
+          <textarea
+            className="board-text-field"
+            value={draftBody}
+            onChange={e => setDraftBody(e.target.value.slice(0, 500))}
+            placeholder="What happened, what you'd say if you had the nerve. Specific and kind."
+            rows={4}
+            maxLength={500}
+          />
+          <span className="board-copy-sm" style={{ marginTop: 6, display: "block", color: "#6a675f" }}>
+            {500 - draftBody.length} left
+          </span>
+        </label>
+      </div>
+      <label className="gifting-rules" style={{ marginTop: 16 }}>
+        <input type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)} />
+        I agree: kind, specific, PG-13, no full names or outing. I understand I stay anonymous until I choose to reveal.
+      </label>
+      <Button
+        variant="solid"
+        accent="magenta"
+        size="lg"
+        arrow
+        style={{ marginTop: 16 }}
+        disabled={!canSubmit || createMutation.isPending}
+        onClick={() => createMutation.mutate()}
+      >
+        {createMutation.isPending ? "Posting…" : "Post it"}
+      </Button>
+    </>
+  );
 
-          <button
-            type="button"
-            className="btn-neon solid"
-            style={{ marginTop: 14 }}
-            disabled={!canSubmit || createMutation.isPending}
-            onClick={() => createMutation.mutate()}
-          >
-            {createMutation.isPending ? "POSTING…" : "POST ANONYMOUSLY →"}
-          </button>
-        </div>
+  const composePanel = composeOpen && !makeover && (
+    <div className="spotted-compose-panel">{composeFields}</div>
+  );
+
+  const composeSection = makeover && composeOpen && (
+    <ScrollReveal>
+      <section id="spotted-form" className="gifting-form-panel gifting-form-panel--makeover" style={{ borderColor: "#ff1fa0", boxShadow: "0 0 30px -14px #ff1fa0" }}>
+        <button type="button" className="gifting-close" onClick={() => setComposeOpen(false)} aria-label="Close form">
+          <X size={18} />
+        </button>
+        <div className="board-section-kicker board-section-kicker--magenta">New spotted</div>
+        <h2 className="display section-heading">Post a missed connection</h2>
+        <p className="board-copy-sm">
+          Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.
+        </p>
+        {composeFields}
+      </section>
+    </ScrollReveal>
+  );
+
+  const feedBody = (
+    <>
+      {!makeover && (
+        <button
+          type="button"
+          className="spotted-compose-toggle"
+          id="spotted-compose-toggle"
+          onClick={() => {
+            if (!canInteract) { onRequireAuth?.(); return; }
+            setComposeOpen(!composeOpen);
+          }}
+          aria-expanded={composeOpen}
+        >
+          {composeOpen ? "✕ Cancel" : "＋ Saw someone? Write a note"}
+        </button>
       )}
 
-      {/* Event filter chips */}
-      {filterChips.length > 0 && (
-        <div className="mc-filters" role="toolbar" aria-label="Filter by location">
-          <button type="button" className={`mc-filters__chip${activeEventFilter == null ? " is-active" : ""}`} onClick={() => setActiveEventFilter(null)}>All</button>
-          {filterChips.map(([eventId, meta]) => (
-            <button key={eventId} type="button" className={`mc-filters__chip${activeEventFilter === eventId ? " is-active" : ""}`} style={{ "--chip-color": meta.color } as React.CSSProperties} onClick={() => setActiveEventFilter(activeEventFilter === eventId ? null : eventId)}>
-              <span className="mc-filters__chip-dot" aria-hidden="true" />
-              <span>{meta.name}</span>
-              <span className="mc-filters__chip-count">{meta.count}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      {composePanel}
 
-      {/* Card grid */}
       {isLoading ? (
         <BoardLoadingState label="Loading spotted notes" />
       ) : isError ? (
-        <div className="board-empty board-empty--prototype">
+        <div className="board-empty board-empty--makeover">
           <p className="display section-heading">Could not load</p>
-          <button type="button" className="btn-neon" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</button>
+          <Button variant="neon" accent="cyan" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</Button>
         </div>
       ) : filteredPosts.length === 0 ? (
-        <div className={`board-empty ${makeover ? "board-empty--makeover" : "board-empty--prototype"}`}>
+        <div className={`board-empty ${makeover ? "board-empty--makeover board-empty--spotted" : "board-empty--prototype"}`}>
+          {makeover && <div className="board-empty--spotted__quote" aria-hidden="true">&rdquo;</div>}
           <p className="display section-heading">{makeover ? "No sightings yet" : "Nothing here yet"}</p>
           <p className="board-copy-sm">
             {makeover
               ? "Loosen the filter, or be the one to break the ice. Someone out there is hoping you post first."
-              : "Be the first — tie it to an event, write your own spot, or post around town."}
+              : "Be the first. Tie it to an event, write your own spot, or post around town."}
           </p>
+          {makeover && (
+            <div className="board-empty__actions">
+              <Button variant="solid" accent="magenta" onClick={() => onRequestCompose?.()}>
+                Post a spotted
+              </Button>
+              <Button variant="neon" accent="cyan" onClick={clearFilters}>Clear filters</Button>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="spotted-card-grid">
+        <div className={makeover ? "board-spotted-grid" : "spotted-card-grid"}>
           {filteredPosts.map((post, i) => (
             <ScrollReveal key={post.id} delay={Math.min(i * 60, 360)}>
               <SpottedCard
                 post={post}
-                accentColor={spottedAccent(post.id)}
+                accentColor={spottedKind(post).color}
                 animDelay={i * 400}
-                onReply={() => setReplyingTo(post)}
+                makeover={makeover}
+                onReply={() => handleReply(post)}
               />
             </ScrollReveal>
           ))}
         </div>
       )}
+    </>
+  );
 
-      {/* Reply modal */}
-      {replyingTo && (
-        <div
-          onClick={() => setReplyingTo(null)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 24, borderRadius: 14 }}
-          >
-            <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE MESSAGE</h3>
-            <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
-              "{replyingTo.title || replyingTo.body.slice(0, 60)}" — your message stays anonymous in inbox until you both choose to reveal.
-            </p>
-            <textarea
-              style={{ width: "100%", padding: "10px 12px", border: "1px solid #333", fontSize: "0.9rem", background: "#000", color: "#fff", fontFamily: "var(--font-body)", boxSizing: "border-box", minHeight: 120, resize: "vertical" }}
-              value={replyBody}
-              onChange={e => setReplyBody(e.target.value)}
-              placeholder="Write your message…"
-            />
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              <button
-                type="button"
-                onClick={() => replyMutation.mutate()}
-                disabled={!replyBody.trim() || replyMutation.isPending}
-                style={{ background: "#FF00CC", color: "#000", border: "none", padding: "10px 18px", cursor: "pointer", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.82rem", opacity: !replyBody.trim() || replyMutation.isPending ? 0.55 : 1, borderRadius: 6 }}
-              >
-                {replyMutation.isPending ? "SENDING…" : "SEND →"}
-              </button>
-              <button type="button" onClick={() => setReplyingTo(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "10px 12px", cursor: "pointer", borderRadius: 6 }}>
-                Cancel
-              </button>
-            </div>
-          </div>
+  const replyModal = replyingTo && (
+    <div className="board-detail-backdrop" onClick={() => setReplyingTo(null)}>
+      <div
+        className="board-detail-modal board-detail-modal--spotted"
+        onClick={e => e.stopPropagation()}
+        style={{ "--listing-accent": "#ff1fa0" } as React.CSSProperties}
+      >
+        <button type="button" className="gifting-close" onClick={() => setReplyingTo(null)} aria-label="Close">
+          <X size={18} />
+        </button>
+        <span className="board-detail-modal__quote" aria-hidden="true">&rdquo;</span>
+        <div className="board-detail-modal__tags">
+          <span className="board-detail-modal__kind" style={{ color: spottedKind(replyingTo).color }}>
+            {spottedKind(replyingTo).label}
+          </span>
         </div>
-      )}
+        <h3 className="display section-heading" style={{ marginTop: 12 }}>
+          {replyingTo.title || replyingTo.body.slice(0, 80)}
+        </h3>
+        <p className="board-copy-sm" style={{ marginTop: 12, lineHeight: 1.62, whiteSpace: "pre-line" }}>
+          {replyingTo.body}
+        </p>
+        <div className="board-section-kicker board-section-kicker--magenta" style={{ marginTop: 14, fontSize: 11 }}>
+          {spottedPlace(replyingTo)} · Anonymous
+        </div>
+        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #1c1c22" }}>
+          <textarea
+            className="board-text-field"
+            value={replyBody}
+            onChange={e => setReplyBody(e.target.value)}
+            rows={3}
+            placeholder="Was this you, or were you there? Reply privately. Kind and specific goes far."
+          />
+          <Button
+            variant="solid"
+            accent="magenta"
+            size="lg"
+            arrow
+            block
+            style={{ marginTop: 12 }}
+            disabled={!replyBody.trim() || replyMutation.isPending}
+            onClick={() => replyMutation.mutate()}
+          >
+            {replyMutation.isPending ? "Sending…" : "Send private reply"}
+          </Button>
+          <p className="board-copy-sm" style={{ marginTop: 12, color: "#6a675f", fontSize: "0.72rem" }}>
+            Replies open a private, anonymous inbox thread. Reveal your profile only when you are both ready.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (makeover) {
+    return (
+      <div className="spotted-board spotted-board--makeover" id="spotted-compose">
+        {composeSection}
+        <BoardActiveSection
+          className="diag"
+          sticker="Active board"
+          stickerTone="magenta"
+          stickerStyle="mono"
+          title="Who got spotted"
+          resultCount={`${filteredPosts.length} showing`}
+          filters={
+            <>
+              <BoardFilterChip active={filter === "ALL"} onClick={() => setFilter("ALL")} accent="pink" count={filterCounts.ALL}>
+                All
+              </BoardFilterChip>
+              <BoardFilterChip active={filter === "EVENT"} onClick={() => setFilter("EVENT")} accent="cyan" count={filterCounts.EVENT}>
+                At events
+              </BoardFilterChip>
+              <BoardFilterChip active={filter === "TOWN"} onClick={() => setFilter("TOWN")} accent="orange" count={filterCounts.TOWN}>
+                Around town
+              </BoardFilterChip>
+              <BoardFilterChip active={filter === "ROOSTER"} onClick={() => setFilter("ROOSTER")} accent="cyan" count={filterCounts.ROOSTER}>
+                Rooster
+              </BoardFilterChip>
+              <BoardFilterChip active={filter === "SAUVIE"} onClick={() => setFilter("SAUVIE")} accent="orange" count={filterCounts.SAUVIE}>
+                Sauvie
+              </BoardFilterChip>
+            </>
+          }
+          filterRow2={
+            <>
+              <BoardTextField value={search} onChange={setSearch} placeholder="Search spots, events, details" />
+              <BoardSelectField value={sort} onChange={setSort}>
+                <option value="RECENT">Most recent</option>
+                <option value="CLOSING">Closing soon</option>
+              </BoardSelectField>
+            </>
+          }
+        >
+          {feedBody}
+        </BoardActiveSection>
+        {replyModal}
+      </div>
+    );
+  }
+
+  return (
+    <div className="spotted-board">
+      {feedBody}
+      {replyModal}
     </div>
   );
 }

@@ -57,7 +57,7 @@ const emptyPromoterForm = () => ({
 
 export default function Submit() {
   usePageSeo(
-    "Promoters — Submit & Claim Events | PDX Pride Guide",
+    "Promoters: Submit & Claim Events | PDX Pride Guide",
     "Submit Pride Week events, apply as a verified promoter, claim listings, or tip the guide about something we missed.",
   );
   const { toast } = useToast();
@@ -239,7 +239,7 @@ export default function Submit() {
         CLAIM: {
           title: autoApproved ? "Event claimed!" : "Claim submitted!",
           desc: autoApproved
-            ? "You're now the host of this event — it's live on your profile."
+            ? "You're now the host of this event. It's live on your profile."
             : "Your claim is pending admin review.",
         },
       };
@@ -527,7 +527,7 @@ export default function Submit() {
             <h2 className="display section-heading">Promoter application</h2>
             <p className="board-copy-sm">
               {promoterStatus === "pending"
-                ? "Your promoter application is already in the admin queue. You can still submit your event below — both will be reviewed together."
+                ? "Your promoter application is already in the admin queue. You can still submit your event below. Both will be reviewed together."
                 : "Tell us a bit about yourself as a promoter. Once approved, future events you submit go live immediately without review."}
             </p>
             <form onSubmit={e => { e.preventDefault(); setSubmitStep("event_details"); }}>
@@ -660,7 +660,7 @@ export default function Submit() {
                   <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4, textTransform: "none", letterSpacing: "normal" }}>
                     {ticketRequired
                       ? "Required for ticketed events."
-                      : admissionHint || "Optional — add a link if you have one."}
+                      : admissionHint || "Optional: add a link if you have one."}
                   </div>
                 </label>
                 <label className="span">

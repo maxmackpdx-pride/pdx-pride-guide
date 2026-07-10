@@ -1,8 +1,9 @@
+import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
+import PortfolioContactModal from "@/components/PortfolioContactModal";
+import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
-
-const CONTACT_EMAIL = "hello.tuckercasey@gmail.com";
 
 const TOPICS = [
   {
@@ -15,7 +16,7 @@ const TOPICS = [
   },
   {
     title: "Privacy or your account",
-    body: "Email me and say what you want removed. It gets removed.",
+    body: "Send a message and say what you want removed. It gets removed.",
   },
   {
     title: "You built something and want to help",
@@ -24,9 +25,11 @@ const TOPICS = [
 ] as const;
 
 export default function Contact() {
+  const [contactOpen, setContactOpen] = useState(false);
+
   usePageSeo(
-    "Contact — PDX Pride Guide",
-    "One inbox, one guy. Reach PDX Pride Guide about listings, privacy, or help.",
+    "Contact | PDX Pride Guide",
+    "Reach PDX Pride Guide about listings, privacy, or help. Messages go to the site owner inbox.",
   );
 
   return (
@@ -51,18 +54,20 @@ export default function Contact() {
           </div>
 
           <div style={{ marginTop: 36, display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-start" }}>
-            <a className="btn-neon cyan" href={`mailto:${CONTACT_EMAIL}`}>
-              Email me
-            </a>
-            <p className="board-copy-sm" style={{ margin: 0 }}>
-              <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--cyan)" }}>{CONTACT_EMAIL}</a>
+            <Button type="button" variant="neon" accent="pink" size="md" onClick={() => setContactOpen(true)}>
+              Message me
+            </Button>
+            <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
+              Goes to my Owner Desk on the guide, not a personal email or the shared admin queue.
             </p>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
-              Or hit the feedback button at the bottom of any page.
+              Or hit the feedback button at the bottom of any page to report a bug.
             </p>
           </div>
         </ScrollReveal>
       </div>
+
+      {contactOpen && <PortfolioContactModal onClose={() => setContactOpen(false)} />}
     </div>
   );
 }

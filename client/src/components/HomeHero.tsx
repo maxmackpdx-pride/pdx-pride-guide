@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Button, Countdown } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
+import CountUpValue from "@/components/CountUpValue";
+import GlitchWord from "@/components/GlitchWord";
 import { useAuth } from "@/context/AuthContext";
 import heroCollageImg from "@/assets/hero-collage.png";
 
@@ -32,7 +34,7 @@ export default function HomeHero({ eventCount }: Props) {
       <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden="true" />
       <div className="home-hero__scrim home-hero__scrim--top" aria-hidden="true" />
       <div className="home-hero__halftone" aria-hidden="true" />
-      <div className="home-hero__seam" aria-hidden="true" />
+      <div className="home-hero__seam pdx-rainbow-rule" aria-hidden="true" />
 
       <div className="home-hero__inner">
         {/* running head */}
@@ -48,7 +50,9 @@ export default function HomeHero({ eventCount }: Props) {
         <div className="home-hero__col">
           <h1 className="home-hero__title">
             <span className="home-hero__word">Portland</span>
-            <span className="home-hero__word home-hero__word--pride">Pride</span>
+            <span className="home-hero__word home-hero__word--pride">
+              <GlitchWord text="Pride" />
+            </span>
             <span className="home-hero__word">Guide</span>
           </h1>
 
@@ -61,7 +65,10 @@ export default function HomeHero({ eventCount }: Props) {
             aria-label={`${eventCount} events across seven days`}
           >
             <span className="home-hero__stat-num" data-testid="home-events-count">
-              {eventCount}
+              <CountUpValue
+                key={eventCount > 0 ? "events-ready" : "events-pending"}
+                value={eventCount}
+              />
             </span>
             <div className="home-hero__stat-meta">
               <span className="home-hero__stat-label">Events</span>

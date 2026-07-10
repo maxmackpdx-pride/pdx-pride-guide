@@ -5,7 +5,8 @@ import { NEON_CYCLE, prefersStillMotion } from "@/lib/motion";
 export const SPLIT_FLAP_MESSAGES = [
   "PRIDE IS A PROTEST",
   "TAKE CARE OF EACH OTHER",
-  "MADE BY THE SCENE",
+  "GO PISS GIRL",
+  "FUCK META, YOUR ASS IS PRETTY",
   "KEEP PORTLAND WEIRD",
 ] as const;
 

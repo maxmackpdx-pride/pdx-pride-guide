@@ -7,7 +7,11 @@ import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, ge
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
 import { BetterSqliteSessionStore } from "./sessionStore";
-import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
+import {
+  insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
+  insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema,
+  insertBeachCheckinSchema, insertBeachCarpoolPostSchema, insertRiverBratsReportSchema,
+} from "@shared/schema";
 import { z } from "zod";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -19,6 +23,10 @@ import {
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
 import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
+import { recordPageView } from "./analytics";
+import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
+import { readGaMeasurementId } from "./gaSnippet";
+import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
 import { isProfileAccentColor, isProfileBanner } from "@shared/profileTheme";
 import {
   formatCustomSpottedVenue,
@@ -29,12 +37,19 @@ import {
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
 import { BOARD_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
+
 import {
   diffSubmissionMerge,
   findSubmissionMatches,
   submissionHasStrongDuplicate,
 } from "@shared/submissionMatch";
 import type { Event } from "@shared/schema";
+import {
+  beachVenueLabel,
+  isValidBeachId,
+  isValidRiverBratsHour,
+  pacificTodayDate,
+} from "@shared/riverBrats";
 import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
@@ -229,6 +244,14 @@ function enrichEventForAdmin(evt: any) {
   };
 }
 
+/** Admin catalog rows: expanded LIVE listings (matches public /api/events) + raw HIDDEN records. */
+function getAdminEventCatalog() {
+  const all = storage.getEvents({});
+  const hidden = all.filter(evt => evt.status === "HIDDEN");
+  const live = all.filter(evt => evt.status === "LIVE");
+  return [...expandMultiDayEvents(live), ...hidden];
+}
+
 function isMainAdminUser(user: any) {
   if (!user) return false;
   const email = String(user.email || "").trim().toLowerCase();
@@ -279,7 +302,10 @@ function authUserResponse(req: any, user: any) {
     createdAt: user.createdAt || "",
     isAdmin,
     isSuperAdmin: isMainAdminUser(user),
+    isPrimaryOwner: storage.isPrimarySiteOwner(user),
+    canManageTeam: isMainAdminUser(user),
     subAdmin: !!user.subAdmin,
+    usernameChangedAt: user.usernameChangedAt || null,
   };
 }
 
@@ -664,8 +690,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
   });
 
-  // Public "Message me" / sponsorship pitch form on the About page — no login
-  // required, always lands in the site owner's inbox (see storage.sendPortfolioContactMessage).
+  // Public "Message me" / sponsorship pitch form — no login required, lands in Owner Desk only.
   app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
     const honeypot = String(req.body?.company || "").trim();
     if (honeypot) return res.json({ ok: true }); // bot filled the hidden field — silently drop
@@ -692,6 +717,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const files = Array.isArray(req.files) ? req.files : [];
     const attachmentUrls = files.map((file: any) => `/uploads/${file.filename}`);
 
+    const pageUrl = String(req.body?.pageUrl || req.get("referer") || "/about").slice(0, 500);
     const delivered = storage.sendPortfolioContactMessage({
       kind,
       name,
@@ -701,6 +727,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       businessName: businessName || undefined,
       lengthNeeded: lengthNeeded || undefined,
       attachmentUrls,
+      pageUrl,
     });
     if (!delivered) return res.status(500).json({ error: "Could not deliver the message right now." });
     res.json({ ok: true });
@@ -710,6 +737,33 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.use("/uploads", (req: any, res: any, next: any) => {
     const express = require("express");
     express.static(UPLOADS_DIR)(req, res, next);
+  });
+
+  // ─── ANALYTICS ──────────────────────────────────────────────────────────
+  app.post("/api/analytics/pageview", (req, res) => {
+    const schema = z.object({
+      path: z.string().trim().min(1).max(240),
+      visitorId: z.string().trim().min(8).max(80),
+      sessionId: z.string().trim().min(8).max(80),
+      referrer: z.string().trim().max(500).optional().nullable(),
+      deviceType: z.enum(["mobile", "desktop", "tablet"]).optional().nullable(),
+      userId: z.number().int().positive().optional().nullable(),
+    });
+    try {
+      const data = schema.parse(req.body);
+      const ok = recordPageView(sqlite, {
+        path: data.path,
+        visitorId: data.visitorId,
+        sessionId: data.sessionId,
+        referrer: data.referrer,
+        deviceType: data.deviceType,
+        userId: data.userId ?? req.session?.userId ?? null,
+      });
+      if (!ok) return res.status(204).end();
+      res.json({ ok: true });
+    } catch {
+      res.status(400).json({ error: "Invalid analytics payload" });
+    }
   });
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
@@ -735,6 +789,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/events/attendance-summaries", (_req, res) => {
     res.json(storage.getAttendanceSummaries());
+  });
+
+  app.get("/api/nude-beaches", async (_req, res) => {
+    try {
+      const result = await getNudeBeachesSnapshot();
+      res.json(result);
+    } catch (err) {
+      console.error("GET /api/nude-beaches failed:", err);
+      res.status(502).json({ error: "Could not load beach conditions" });
+    }
+  });
+
+  app.post("/api/nude-beaches/refresh", async (_req, res) => {
+    try {
+      const result = await forceRefreshNudeBeachesSnapshot();
+      res.json({
+        data: result.data,
+        stale: false,
+        fromCache: false,
+        rateLimited: !!result.rateLimited,
+      });
+    } catch (err) {
+      console.error("POST /api/nude-beaches/refresh failed:", err);
+      res.status(502).json({ error: "Could not refresh beach conditions" });
+    }
   });
 
   app.get("/api/events/:id", (req, res) => {
@@ -772,7 +851,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         const now = new Date().toISOString();
         const data = insertSubmissionSchema.parse({
           type: "PROMOTER_APPLICATION",
-          title: `Promoter Application — ${user.displayName || user.username}`,
+          title: `Promoter Application: ${user.displayName || user.username}`,
           description: String(req.body.claimReason || req.body.description || "").trim() || "No details provided",
           venueName: "N/A",
           dateStart: now,
@@ -1010,8 +1089,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const message = String(req.body.message || "").trim();
       if (!message) return res.status(400).json({ error: "message required" });
+      const isAnonymous = Boolean(req.body.isAnonymous);
       const eventId = Number(req.params.id);
-      const att = storage.upsertAttendance(eventId, user, message);
+      const att = storage.upsertAttendance(eventId, user, message, isAnonymous);
       notifyAttendanceUpdate(eventId);
       res.json(att);
     } catch (e: any) {
@@ -1024,6 +1104,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     storage.removeAttendance(eventId, req.session.userId!);
     notifyAttendanceUpdate(eventId);
     res.json({ ok: true });
+  });
+
+  app.get("/api/events/:id/chat", requireAuth, (req, res) => {
+    const eventId = Number(req.params.id);
+    const payload = storage.getEventChatMessages(eventId, req.session.userId!);
+    res.json(payload);
+  });
+
+  app.post("/api/events/:id/chat", requireAuth, (req, res) => {
+    try {
+      const eventId = Number(req.params.id);
+      const body = String(req.body.body || "").trim();
+      if (!body) return res.status(400).json({ error: "body required" });
+      if (body.length > 500) return res.status(400).json({ error: "Message too long" });
+      const msg = storage.postEventChatMessage(eventId, req.session.userId!, body);
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   app.post("/api/events/:eventId/attendance/:attendanceId/message", requireAuth, (req, res) => {
@@ -1810,7 +1909,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
     const {
-      displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
+      username, displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
       socialLinks, profileEmbeds, profilePhotos, talents, standFor, affiliatedVenueIds, marquee, accentColor, banner, pup,
     } = req.body;
     const moderated: Record<string, string | null | undefined> = {
@@ -1818,16 +1917,29 @@ export function registerRoutes(httpServer: Server, app: Express) {
       bio: typeof bio === "string" ? bio : undefined,
       pronouns: typeof pronouns === "string" ? pronouns : undefined,
       location: typeof location === "string" ? location : undefined,
+      username: typeof username === "string" ? username : undefined,
     };
+    if (marquee && typeof marquee === "object" && !Array.isArray(marquee)) {
+      const mq = marquee as Record<string, unknown>;
+      if (Array.isArray(mq.items)) moderated["marquee.items"] = mq.items.map(String).join(", ");
+    }
+    if (pup && typeof pup === "object" && !Array.isArray(pup)) {
+      const p = pup as Record<string, unknown>;
+      if (typeof p.name === "string") moderated["pup.name"] = p.name;
+      if (typeof p.lookingFor === "string") moderated["pup.lookingFor"] = p.lookingFor;
+    }
     if (socialLinks && typeof socialLinks === "object" && !Array.isArray(socialLinks)) {
       for (const [key, value] of Object.entries(socialLinks as Record<string, unknown>)) {
-        // "website" is the one place a member's own off-platform site belongs —
-        // exempt from the link-host allowlist (sanitizeSocialLinks still applies).
+        // "website" is the one place a member's own off-platform site belongs.
         if (key === "website") continue;
         if (typeof value === "string") moderated[`socialLinks.${key}`] = value;
       }
     }
     if (moderationGate(res, "Member profile", moderated)) return;
+    if (username !== undefined) {
+      const result = storage.changeUsername(req.session.userId!, username);
+      if ("error" in result) return res.status(400).json({ error: result.error });
+    }
     if (accentColor !== undefined && accentColor !== null && !isProfileAccentColor(accentColor)) {
       return res.status(400).json({ error: "Invalid accent color" });
     }
@@ -1974,6 +2086,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/missed-connections", (req: any, res) => {
+    const beach = String(req.query.beach || "").trim();
+    if (beach && isValidBeachId(beach)) {
+      return res.json(storage.getMissedConnectionsByBeach(beach, req.session?.userId));
+    }
     res.json(storage.getMissedConnections("ACTIVE", req.session?.userId));
   });
 
@@ -1990,11 +2106,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/missed-connections", requireAuth, (req, res) => {
     try {
       const rawEventId = req.body.eventId;
+      const rawBeachId = req.body.beachId;
       const hasEvent = rawEventId !== undefined && rawEventId !== null && rawEventId !== "";
+      const hasBeach = rawBeachId !== undefined && rawBeachId !== null && rawBeachId !== "";
       const eventId = hasEvent ? Number(rawEventId) : null;
+      const beachId = hasBeach ? String(rawBeachId) : null;
 
+      if (hasEvent && hasBeach) {
+        return res.status(400).json({ error: "Link to an event or a beach, not both" });
+      }
       if (hasEvent && !Number.isFinite(eventId)) {
         return res.status(400).json({ error: "Invalid event" });
+      }
+      if (hasBeach && !isValidBeachId(beachId)) {
+        return res.status(400).json({ error: "Invalid beach" });
       }
 
       if (moderationGate(res, "Spotted / Missed Connections", {
@@ -2010,7 +2135,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const scope = String(req.body.scope || "");
       const boardScope = scope === "board";
 
-      if (eventId != null) {
+      if (beachId) {
+        payload = {
+          ...req.body,
+          userId: req.session.userId!,
+          eventId: null,
+          beachId,
+          dayOfWeek: pacificDayOfWeek(),
+          venueHint: beachVenueLabel(beachId as "rooster-rock" | "sauvie-island"),
+          closesAt: generalSpottedClosesAt(),
+        };
+      } else if (eventId != null) {
         const evt = storage.getEvent(eventId);
         if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
 
@@ -2090,6 +2225,201 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     storage.createMissedConnectionThread(msg.threadId, post.id, post.userId, req.session.userId!);
     res.json(msg);
+  });
+
+  // ─── RIVER BRATS (Nude Beaches social) ───────────────────────────────────
+  app.get("/api/river-brats/checkins", (req: any, res) => {
+    const beachId = String(req.query.beach || "");
+    const date = String(req.query.date || pacificTodayDate());
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    res.json(storage.getBeachCheckins(beachId, date, req.session?.userId));
+  });
+
+  app.post("/api/river-brats/checkins", requireAuth, (req, res) => {
+    try {
+      const beachId = String(req.body.beachId || "");
+      const arrivalHour = Number(req.body.arrivalHour);
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (!isValidRiverBratsHour(arrivalHour)) return res.status(400).json({ error: "Pick a time between 7am and 9pm" });
+      const note = String(req.body.note || "").trim().slice(0, 80) || null;
+      if (moderationGate(res, "River Brats check-in", { note: note || "" })) return;
+      const calendarDate = String(req.body.date || pacificTodayDate());
+      const isAnonymous = Boolean(req.body.isAnonymous);
+      const row = storage.upsertBeachCheckin({
+        ...insertBeachCheckinSchema.parse({
+          userId: req.session.userId!,
+          beachId,
+          arrivalHour,
+          note,
+          calendarDate,
+        }),
+        isAnonymous,
+      });
+      res.json(row);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/river-brats/checkins/:id", requireAuth, (req, res) => {
+    const ok = storage.deleteBeachCheckin(Number(req.params.id), req.session.userId!);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  app.get("/api/river-brats/checkins/chat", requireAuth, (req: any, res) => {
+    const beachId = String(req.query.beach || "");
+    const date = String(req.query.date || pacificTodayDate());
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    const payload = storage.getBeachChatMessages(beachId, date, req.session.userId!);
+    res.json(payload);
+  });
+
+  app.post("/api/river-brats/checkins/chat", requireAuth, (req, res) => {
+    try {
+      const beachId = String(req.body.beachId || "");
+      const date = String(req.body.date || pacificTodayDate());
+      const body = String(req.body.body || "").trim();
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (!body) return res.status(400).json({ error: "body required" });
+      if (body.length > 500) return res.status(400).json({ error: "Message too long" });
+      if (moderationGate(res, "River Brats beach chat", { body })) return;
+      const msg = storage.postBeachChatMessage(beachId, date, req.session.userId!, body);
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/river-brats/checkins/:id/message", requireAuth, (req, res) => {
+    try {
+      const checkinId = Number(req.params.id);
+      const beachId = String(req.body.beachId || "");
+      const date = String(req.body.date || pacificTodayDate());
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (!storage.getBeachCheckinByUser(beachId, req.session.userId!, date)) {
+        return res.status(403).json({ error: "Check-in required to message others" });
+      }
+      const rows = storage.getBeachCheckins(beachId, date, req.session.userId!);
+      const target = rows.find((r: any) => r.id === checkinId);
+      if (!target?.userId || target.masked) return res.status(404).json({ error: "Check-in not found" });
+      if (target.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+      const body = String(req.body.body || "").trim();
+      if (!body) return res.status(400).json({ error: "body required" });
+      if (moderationGate(res, "River Brats DM", { body })) return;
+      const msg = storage.sendMessage(
+        req.session.userId!,
+        Number(target.userId),
+        `River Brats: ${beachVenueLabel(beachId)}`,
+        body,
+        { contextType: "RIVER_BRATS_CHECKIN", contextId: checkinId, contextLabel: beachVenueLabel(beachId) },
+      );
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/river-brats/carpool", (req: any, res) => {
+    const beachId = String(req.query.beach || "");
+    const tripDate = String(req.query.date || pacificTodayDate());
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    res.json(storage.getBeachCarpoolPosts(beachId, tripDate, req.session?.userId));
+  });
+
+  app.post("/api/river-brats/carpool", requireAuth, (req, res) => {
+    try {
+      const beachId = String(req.body.beachId || "");
+      const postType = String(req.body.postType || "");
+      const leaveHour = Number(req.body.leaveHour);
+      const departureArea = String(req.body.departureArea || "").trim();
+      const note = String(req.body.note || "").trim();
+      const tripDate = String(req.body.tripDate || pacificTodayDate());
+      const seats = req.body.seats != null ? Number(req.body.seats) : null;
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (postType !== "OFFERING_RIDE" && postType !== "NEED_RIDE") return res.status(400).json({ error: "Invalid post type" });
+      if (!isValidRiverBratsHour(leaveHour)) return res.status(400).json({ error: "Leave time required (7am–9pm)" });
+      if (!departureArea) return res.status(400).json({ error: "Departure area required" });
+      if (!note || note.length < 8) return res.status(400).json({ error: "Add a short note (min 8 characters)" });
+      if (postType === "OFFERING_RIDE" && (!seats || seats < 1 || seats > 4)) {
+        return res.status(400).json({ error: "Seats required (1–4) when offering a ride" });
+      }
+      if (moderationGate(res, "River Brats carpool", { note, departureArea })) return;
+      const row = storage.createBeachCarpoolPost(insertBeachCarpoolPostSchema.parse({
+        userId: req.session.userId!,
+        beachId,
+        postType,
+        departureArea,
+        tripDate,
+        leaveHour,
+        seats: postType === "OFFERING_RIDE" ? seats : null,
+        note,
+      }));
+      res.json({ ...row, isMine: true, requestCount: 0 });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/river-brats/carpool/:id", requireAuth, (req, res) => {
+    const ok = storage.deleteBeachCarpoolPost(Number(req.params.id), req.session.userId!);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  app.post("/api/river-brats/carpool/:id/request", requireAuth, (req, res) => {
+    try {
+      const note = String(req.body.note || "").trim();
+      if (!note) return res.status(400).json({ error: "note required" });
+      if (moderationGate(res, "River Brats carpool request", { note })) return;
+      const row = storage.requestBeachCarpool(Number(req.params.id), req.session.userId!, note);
+      res.json(row);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/river-brats/carpool/:id/requests", requireAuth, (req, res) => {
+    try {
+      res.json(storage.getBeachCarpoolRequests(Number(req.params.id), req.session.userId!));
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/river-brats/carpool/:id/select/:requestId", requireAuth, (req, res) => {
+    try {
+      const msg = storage.selectBeachCarpoolRequest(
+        Number(req.params.id),
+        Number(req.params.requestId),
+        req.session.userId!,
+      );
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/river-brats/report", requireAuth, (req, res) => {
+    try {
+      const reason = String(req.body.reason || "").trim();
+      const targetType = String(req.body.targetType || "");
+      const targetId = Number(req.body.targetId);
+      if (!reason) return res.status(400).json({ error: "reason required" });
+      if (!["CHECKIN", "CARPOOL", "MISSED_CONNECTION"].includes(targetType)) {
+        return res.status(400).json({ error: "Invalid target" });
+      }
+      storage.reportRiverBrats(insertRiverBratsReportSchema.parse({
+        targetType,
+        targetId,
+        reporterUserId: req.session.userId!,
+        reason,
+        note: req.body.note ? String(req.body.note).trim() : null,
+      }));
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   // ─── PUSH NOTIFICATIONS ─────────────────────────────────────────────────
@@ -2498,15 +2828,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (userByHandle && verifyPassword(password, userByHandle.passwordHash) && isMainAdminUser(userByHandle)) {
       req.session.isAdmin = true;
       req.session.userId = userByHandle.id;
-      return res.json({ isAdmin: true, username: userByHandle.username });
+      return res.json({
+        isAdmin: true,
+        username: userByHandle.username,
+        isSuperAdmin: isMainAdminUser(userByHandle),
+        isPrimaryOwner: storage.isPrimarySiteOwner(userByHandle),
+      });
     }
 
     // Legacy env-var credential fallback (set ADMIN_USERNAME + ADMIN_PASSWORD in Railway if needed)
     if (ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       req.session.isAdmin = true;
       const actorId = getAdminActorUserId(req);
+      const actor = actorId ? storage.getUserById(actorId) : null;
       if (actorId) req.session.userId = actorId;
-      return res.json({ isAdmin: true, username: ADMIN_USERNAME });
+      return res.json({
+        isAdmin: true,
+        username: ADMIN_USERNAME,
+        isSuperAdmin: true,
+        isPrimaryOwner: actor ? storage.isPrimarySiteOwner(actor) : false,
+      });
     }
 
     return res.status(401).json({ error: "Invalid credentials" });
@@ -2526,23 +2867,29 @@ export function registerRoutes(httpServer: Server, app: Express) {
       username: resolved?.displayName || resolved?.username || ADMIN_USERNAME,
       email: resolved?.email || null,
       isSuperAdmin: !!mainUser,
-      canManageTeam: true,
+      isPrimaryOwner: resolved ? storage.isPrimarySiteOwner(resolved) : false,
+      canManageTeam: !!mainUser,
     });
   });
 
-  app.get("/api/admin/team", requireAdmin, (_req, res) => {
+  app.get("/api/admin/team", requireAdmin, (req, res) => {
+    const caller = getSessionAdminUser(req);
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
     res.json(storage.listSiteAdmins());
   });
 
   app.post("/api/admin/team", requireAdmin, (req, res) => {
-    const actor = getSessionAdminUser(req);
+    const caller = getSessionAdminUser(req);
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
     const { identifier, note } = req.body || {};
-    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), actor?.id ?? null, note);
+    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), caller?.id ?? null, note);
     if (result.error) return res.status(400).json({ error: result.error });
     res.json(result.admin);
   });
 
   app.delete("/api/admin/team/:userId", requireAdmin, (req, res) => {
+    const caller = getSessionAdminUser(req);
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
     const result = storage.revokeSiteAdmin(Number(req.params.userId));
     if (result.error) return res.status(400).json({ error: result.error });
     res.json({ ok: true });
@@ -2788,41 +3135,49 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/events", requireAdmin, (req, res) => {
-    const evts = storage.getEvents({});
-    res.json(evts.map(enrichEventForAdmin));
+    res.json(getAdminEventCatalog().map(enrichEventForAdmin));
   });
 
   app.get("/api/admin/persistence", requireAdmin, (_req, res) => {
     res.json(getPersistenceAudit(getTableCounts()));
   });
 
-  app.get("/api/admin/pending-count", requireAdmin, (_req, res) => {
-    res.json({ count: storage.getAdminPendingCount() });
+  app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
+    res.json({ count: storage.getAdminPendingCount(), ownerCount });
   });
 
-  app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
-    const counts = getTableCounts();
-    const pendingSubmissions = storage.getSubmissions("PENDING").length;
-    const liveEvents = storage.getEvents({ status: "LIVE" }).length;
-    const userSubmittedEvents = storage.countEventsBySource("user_submitted", "LIVE");
-    const openFeedback = storage.getFeedbackReports("OPEN").length;
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-    const newUsersToday = (sqlite.prepare(`SELECT COUNT(*) AS count FROM users WHERE created_at >= ?`).get(todayStart.toISOString()) as { count: number })?.count ?? 0;
-    res.json({
-      users: counts.users ?? 0,
-      newUsersToday,
-      activeSessions: counts.express_sessions ?? 0,
-      liveEvents,
-      userSubmittedEvents,
-      messages: storage.countActiveMessages(),
-      attendances: counts.attendances ?? 0,
-      pendingSubmissions,
-      gigPosts: storage.getGigPosts("LIVE").length,
-      giftingPosts: storage.getGiftingPosts().length,
-      missedConnections: storage.getMissedConnections("ACTIVE").length,
-      openFeedback,
-      generatedAt: new Date().toISOString(),
-    });
+  app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
+    try {
+      const metrics = storage.getAdminMetrics();
+      const gaTrackingEnabled = !!readGaMeasurementId();
+      const gaReportingEnabled = isGoogleAnalyticsAdminConfigured();
+
+      if (gaReportingEnabled) {
+        const gaTraffic = await getGoogleAnalyticsTrafficMetrics();
+        if (gaTraffic) {
+          metrics.traffic = gaTraffic;
+        } else {
+          metrics.traffic = {
+            ...metrics.traffic,
+            gaTrackingEnabled,
+            gaReportingEnabled,
+          };
+        }
+      } else {
+        metrics.traffic = {
+          ...metrics.traffic,
+          gaTrackingEnabled,
+          gaReportingEnabled: false,
+        };
+      }
+
+      res.json(metrics);
+    } catch (err) {
+      console.error("[admin/metrics]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : "Failed to load admin metrics" });
+    }
   });
 
   app.get("/api/admin/users/new-today", requireAdmin, (_req, res) => {
@@ -2842,11 +3197,38 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {
-    res.json(req.query.all === "true" ? storage.getFeedbackReports() : storage.getFeedbackReports("OPEN"));
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
   });
 
   app.post("/api/admin/feedback/:id/resolve", requireAdmin, (req, res) => {
-    storage.resolveFeedbackReport(Number(req.params.id));
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    const source = String(req.body?.source || "desk") === "feedback" ? "feedback" as const : "desk" as const;
+    storage.resolveOwnerDeskItem(Number(req.params.id), source);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/owner-desk", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    res.json(storage.getOwnerDeskItems());
+  });
+
+  app.post("/api/admin/owner-desk/:id/resolve", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    const source = String(req.body?.source || "desk") === "feedback" ? "feedback" as const : "desk" as const;
+    storage.resolveOwnerDeskItem(Number(req.params.id), source);
     res.json({ ok: true });
   });
 
@@ -2989,6 +3371,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
     storage.resolveGiftingReport(Number(req.params.id), String(req.body.adminNotes || ""));
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/river-brats/reports", requireAdmin, (_req, res) => {
+    res.json(storage.getRiverBratsReports());
+  });
+
+  app.post("/api/admin/river-brats/reports/:id/resolve", requireAdmin, (req, res) => {
+    storage.resolveRiverBratsReport(Number(req.params.id), String(req.body.adminNotes || ""));
     res.json({ ok: true });
   });
 

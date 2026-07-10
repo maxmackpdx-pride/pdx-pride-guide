@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import BoardRunningHead from "@/components/BoardRunningHead";
+import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -111,7 +111,7 @@ function thumbGradient(isLooking: boolean) {
 
 export default function PrideWork() {
   usePageSeo(
-    "Pride Work — Jobs & Gigs — PDX Pride Guide",
+    "Pride Work: Jobs & Gigs | PDX Pride Guide",
     "Find queer-friendly gigs and workers for Portland Pride 2026. Post or browse Pride Work listings in PDX.",
   );
   const { toast } = useToast();
@@ -167,7 +167,7 @@ export default function PrideWork() {
   const newBusinessMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory/new-submission", newBusinessForm),
     onSuccess: () => {
-      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed — your gig will keep using the plain location for now." });
+      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed. Your gig will keep using the plain location for now." });
       setNewBusinessForm({ name: "", type: "bar", description: "", address: "", neighborhood: "", hours: "", phone: "", website: "", instagram: "", logoImageUrl: "" });
       setVenueBranch("idle");
       setVenueQuery("");
@@ -282,12 +282,8 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page board-page--makeover">
-      <BoardRunningHead active="gigs" />
-      <BoardHero
-        accent="purple"
-        kicker="Two-way work board · Pride season and beyond"
-        title={<>The Gig <span className="board-hero__title-accent">Board</span></>}
-        lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
+      <CommunityBoardHeroRow
+        active="gigs"
         actions={
           <>
             <Button variant="neon" accent="cyan" size="lg" onClick={() => openForm("LOOKING_FOR_WORK")}>
@@ -298,7 +294,14 @@ export default function PrideWork() {
             </Button>
           </>
         }
-      />
+      >
+        <BoardHero
+          accent="purple"
+          kicker="Two-way work board · Pride season and beyond"
+          title={<>The Gig <span className="board-hero__title-accent">Board</span></>}
+          lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
+        />
+      </CommunityBoardHeroRow>
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
@@ -447,7 +450,7 @@ export default function PrideWork() {
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
                   <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
-                    Link this gig to a directory venue (optional) — it'll show up on that venue's Gigs tab.
+                    Link this gig to a directory venue (optional). It'll show up on that venue's Gigs tab.
                   </p>
                   {linkedBusiness ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -520,7 +523,7 @@ export default function PrideWork() {
                               style={{ textAlign: "left" }}
                               onClick={() => setLinkedBusiness({ id: b.id, name: b.name })}
                             >
-                              {b.name}{b.address ? ` — ${b.address}` : ""}
+                              {b.name}{b.address ? `, ${b.address}` : ""}
                             </button>
                           ))}
                         </div>
@@ -536,7 +539,7 @@ export default function PrideWork() {
                             className="board-mini-btn"
                             onClick={() => { setNewBusinessForm(f => ({ ...f, name: venueQuery })); setVenueBranch("newBusiness"); }}
                           >
-                            This is a business — add it →
+                            This is a business. Add it →
                           </button>
                         </div>
                       )}
@@ -587,8 +590,8 @@ export default function PrideWork() {
           <>
             {([
               { key: "ALL" as const, label: "All", accent: "purple" },
-              { key: "LOOKING_FOR_WORK" as const, label: "Talent", accent: "cyan" },
-              { key: "POSTING_GIG" as const, label: "Gigs", accent: "purple" },
+              { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
+              { key: "POSTING_GIG" as const, label: "Gigs open", accent: "purple" },
             ]).map(f => (
               <BoardFilterChip
                 key={f.key}
@@ -665,7 +668,7 @@ export default function PrideWork() {
       </BoardActiveSection>
 
       <BoardCloseSeam
-        line="Paid. Respected. Valued. Take care of each other."
+        line="Pay your people. Take care of each other."
         url="prideguidepdx.com/gigs"
       />
 

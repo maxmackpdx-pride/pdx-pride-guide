@@ -18,6 +18,7 @@ export type MissedConnectionPost = {
   dayOfWeek?: string | null;
   venueHint?: string | null;
   eventId?: number | null;
+  beachId?: string | null;
   eventTitle?: string | null;
   eventVenue?: string | null;
   eventDay?: string | null;
@@ -43,20 +44,26 @@ const inputStyle: React.CSSProperties = {
 export default function MissedConnectionsPanel({
   mode,
   eventId,
+  beachId,
   compact = false,
   boardLayout = false,
   makeover = false,
   onRequireAuth,
   onRequestCompose,
+  composeOpen,
+  onComposeOpenChange,
 }: {
-  mode: "board" | "event";
+  mode: "board" | "event" | "beach";
   eventId?: number;
+  beachId?: string;
   compact?: boolean;
   boardLayout?: boolean;
   /** Board makeover chrome (mono kicker, result counts, empty copy). */
   makeover?: boolean;
   onRequireAuth?: () => void;
   onRequestCompose?: () => void;
+  composeOpen?: boolean;
+  onComposeOpenChange?: (open: boolean) => void;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -73,14 +80,18 @@ export default function MissedConnectionsPanel({
   const [replyBody, setReplyBody] = useState("");
   const postsQueryKey = mode === "event" && eventId
     ? ["/api/events", eventId, "missed-connections"]
-    : ["/api/missed-connections"];
+    : mode === "beach" && beachId
+      ? ["/api/missed-connections", "beach", beachId]
+      : ["/api/missed-connections"];
 
   const { data: posts = [], isLoading, isError, refetch } = useQuery<MissedConnectionPost[]>({
     queryKey: postsQueryKey,
     queryFn: async () => {
       const url = mode === "event" && eventId
         ? `/api/events/${eventId}/missed-connections`
-        : "/api/missed-connections";
+        : mode === "beach" && beachId
+          ? `/api/missed-connections?beach=${beachId}`
+          : "/api/missed-connections";
       const r = await fetch(url, { credentials: "include" });
       if (!r.ok) throw new Error("Could not load missed connections");
       return r.json();
@@ -127,7 +138,8 @@ export default function MissedConnectionsPanel({
       body: JSON.stringify({
         title: deriveTitle(form.title, form.body),
         body: form.body,
-        eventId: mode === "event" ? eventId : (form.eventId ? Number(form.eventId) : undefined),
+        eventId: mode === "beach" ? undefined : mode === "event" ? eventId : (form.eventId ? Number(form.eventId) : undefined),
+        beachId: mode === "beach" ? beachId : undefined,
         scope: mode === "board" || (mode === "event" && !canPostToEventStrict) ? "board" : undefined,
         ...(form.eventLabel ? { eventLabel: form.eventLabel } : {}),
         ...(form.venueHint ? { venueHint: form.venueHint } : {}),
@@ -141,8 +153,9 @@ export default function MissedConnectionsPanel({
       setForm(f => ({ ...f, title: "", body: "" }));
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       if (eventId) queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "missed-connections"] });
+      if (beachId) queryClient.invalidateQueries({ queryKey: ["/api/missed-connections", "beach", beachId] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-      toast({ title: "Posted", description: "Your note is live — you stay anonymous until you both reveal in inbox." });
+      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
     },
     onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
   });
@@ -174,7 +187,7 @@ export default function MissedConnectionsPanel({
     return false;
   };
 
-  if (!user && !boardLayout) {
+  if (!user && !boardLayout && mode !== "beach") {
     return (
       <div style={{ textAlign: "center", padding: compact ? "16px 0" : "24px 0" }}>
         <p style={{ color: "#aaa", lineHeight: 1.6, marginBottom: 14 }}>
@@ -257,7 +270,7 @@ export default function MissedConnectionsPanel({
       <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 22 }}>
         <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE REPLY</h3>
         <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
-          {replyingTo.title} — your reply stays anonymous in inbox until you both choose to reveal.
+          {replyingTo.title}. Your reply stays anonymous in inbox until you both choose to reveal.
         </p>
         <textarea style={{ ...inputStyle, minHeight: 120, resize: "vertical" }} value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="Write your reply..." />
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
@@ -272,39 +285,19 @@ export default function MissedConnectionsPanel({
 
   if (boardLayout && mode === "board") {
     return (
-      <div className={`board-active-feed diag${makeover ? " board-active-feed--makeover" : ""}`}>
-        <div className="board-active-feed__inner">
-          <div className="board-active-feed__head">
-            {makeover ? (
-              <div className="board-active-feed__head-row">
-                <div>
-                  <div className="board-active-feed__kicker board-active-feed__kicker--magenta">Active board</div>
-                  <h2 className="display section-heading board-active-feed__title">Who got spotted</h2>
-                </div>
-                <span className="board-active-feed__count">{posts.length} showing</span>
-              </div>
-            ) : (
-              <>
-                <span className="board-sticker board-sticker--magenta">Active board</span>
-                <h2 className="display section-heading board-active-feed__title">SPOTTED!</h2>
-              </>
-            )}
-          </div>
-          <div className="board-active-feed__body" id="spotted-compose">
-            <SpottedCardGrid
-              posts={posts}
-              isLoading={isLoading}
-              isError={isError}
-              refetch={refetch}
-              linkableEvents={linkableEvents}
-              canInteract={!!user}
-              onRequireAuth={requireAuth}
-              makeover={makeover}
-              onRequestCompose={onRequestCompose}
-            />
-          </div>
-        </div>
-      </div>
+      <SpottedCardGrid
+        posts={posts}
+        isLoading={isLoading}
+        isError={isError}
+        refetch={refetch}
+        linkableEvents={linkableEvents}
+        canInteract={!!user}
+        onRequireAuth={requireAuth}
+        makeover={makeover}
+        onRequestCompose={onRequestCompose}
+        composeOpen={composeOpen}
+        onComposeOpenChange={onComposeOpenChange}
+      />
     );
   }
 
@@ -312,11 +305,13 @@ export default function MissedConnectionsPanel({
     <div>
       {composeForm}
 
-      {mode === "event" && (
+      {(mode === "event" || mode === "beach") && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
           <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>POST TO SPOTTED!</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
-            Missed connections for this event · anonymous on the board until you both reveal in inbox.
+            {mode === "beach"
+              ? "Beach missed connections · also show on the main Spotted board · anonymous until you both reveal."
+              : "Missed connections for this event · anonymous on the board until you both reveal in inbox."}
           </p>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />
           <textarea

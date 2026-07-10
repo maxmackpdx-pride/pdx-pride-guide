@@ -21,7 +21,7 @@ export default function AdminBoardReject({
 }: Props) {
   return (
     <div className={compact ? "flex flex-col gap-2" : "flex flex-col gap-2 border border-white/10 bg-black/30 p-3"}>
-      <label className="display text-[10px] text-white/40 tracking-wide">SEND BACK — REASON</label>
+      <label className="display text-[10px] text-white/40 tracking-wide">SEND BACK: REASON</label>
       <select
         value={reasonCode}
         onChange={e => onReasonChange(e.target.value)}

@@ -228,9 +228,21 @@ export const attendances = sqliteTable("attendances", {
   message: text("message").notNull(), // chosen speech bubble
   avatarSeed: text("avatar_seed").notNull(), // seed for deterministic avatar color/initials
   photoUrl: text("photo_url"),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  expiresAt: text("expires_at"),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(""),
 });
+
+export const eventChatMessages = sqliteTable("event_chat_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type EventChatMessage = typeof eventChatMessages.$inferSelect;
 
 export const insertAttendanceSchema = createInsertSchema(attendances).omit({ id: true, createdAt: true });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
@@ -264,6 +276,7 @@ export const users = sqliteTable("users", {
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
   subAdmin: integer("sub_admin", { mode: "boolean" }).default(false),
+  usernameChangedAt: text("username_changed_at"),
   createdAt: text("created_at").notNull().default(""),
 });
 
@@ -342,6 +355,7 @@ export const missedConnections = sqliteTable("missed_connections", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   eventId: integer("event_id"),
+  beachId: text("beach_id"),
   title: text("title").notNull(),
   body: text("body").notNull(),
   dayOfWeek: text("day_of_week"),
@@ -422,6 +436,108 @@ export type InsertGiftingInterest = z.infer<typeof insertGiftingInterestSchema>;
 export type GiftingInterest = typeof giftingInterests.$inferSelect;
 export type InsertGiftingReport = z.infer<typeof insertGiftingReportSchema>;
 export type GiftingReport = typeof giftingReports.$inferSelect;
+
+// River Brats — Nude Beaches social
+export const beachCheckins = sqliteTable("beach_checkins", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  beachId: text("beach_id").notNull(),
+  arrivalHour: integer("arrival_hour").notNull(),
+  note: text("note"),
+  calendarDate: text("calendar_date").notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  reportCount: integer("report_count").notNull().default(0),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const beachChatMessages = sqliteTable("beach_chat_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  beachId: text("beach_id").notNull(),
+  calendarDate: text("calendar_date").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const beachCarpoolPosts = sqliteTable("beach_carpool_posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  beachId: text("beach_id").notNull(),
+  postType: text("post_type").notNull(),
+  departureArea: text("departure_area").notNull(),
+  tripDate: text("trip_date").notNull(),
+  leaveHour: integer("leave_hour").notNull(),
+  seats: integer("seats"),
+  note: text("note").notNull(),
+  status: text("status").notNull().default("OPEN"),
+  reportCount: integer("report_count").notNull().default(0),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const beachCarpoolRequests = sqliteTable("beach_carpool_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: integer("post_id").notNull(),
+  userId: integer("user_id").notNull(),
+  note: text("note").notNull(),
+  status: text("status").notNull().default("INTERESTED"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const riverBratsReports = sqliteTable("river_brats_reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  targetType: text("target_type").notNull(),
+  targetId: integer("target_id").notNull(),
+  reporterUserId: integer("reporter_user_id").notNull(),
+  reason: text("reason").notNull(),
+  note: text("note"),
+  status: text("status").notNull().default("PENDING"),
+  adminNotes: text("admin_notes"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertBeachCheckinSchema = createInsertSchema(beachCheckins).omit({
+  id: true,
+  createdAt: true,
+  isActive: true,
+  reportCount: true,
+  expiresAt: true,
+});
+export const insertBeachCarpoolPostSchema = createInsertSchema(beachCarpoolPosts).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  reportCount: true,
+  expiresAt: true,
+});
+export const insertBeachCarpoolRequestSchema = createInsertSchema(beachCarpoolRequests).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+});
+export const insertRiverBratsReportSchema = createInsertSchema(riverBratsReports).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  adminNotes: true,
+});
+export const insertBeachChatMessageSchema = createInsertSchema(beachChatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+export type BeachCheckin = typeof beachCheckins.$inferSelect;
+export type BeachChatMessage = typeof beachChatMessages.$inferSelect;
+export type InsertBeachChatMessage = z.infer<typeof insertBeachChatMessageSchema>;
+export type InsertBeachCheckin = z.infer<typeof insertBeachCheckinSchema>;
+export type BeachCarpoolPost = typeof beachCarpoolPosts.$inferSelect;
+export type InsertBeachCarpoolPost = z.infer<typeof insertBeachCarpoolPostSchema>;
+export type BeachCarpoolRequest = typeof beachCarpoolRequests.$inferSelect;
+export type InsertBeachCarpoolRequest = z.infer<typeof insertBeachCarpoolRequestSchema>;
+export type RiverBratsReport = typeof riverBratsReports.$inferSelect;
+export type InsertRiverBratsReport = z.infer<typeof insertRiverBratsReportSchema>;
 
 // Soft launch tester feedback
 export const feedbackReports = sqliteTable("feedback_reports", {

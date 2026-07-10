@@ -7,7 +7,7 @@ export const spottedHeroContent = {
   lede: "Missed connections from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread.",
   tagline: "Stay kind · stay anonymous · reveal when ready",
   taglineAccent: "magenta",
-  bgImage: "/motifs/hero-spotted-bigfoot.jpg",
+  bgImage: "/motifs/hero-spotted.jpg",
   bgPosition: "center 42%",
 } as const satisfies Partial<PageHeroProps>;
 

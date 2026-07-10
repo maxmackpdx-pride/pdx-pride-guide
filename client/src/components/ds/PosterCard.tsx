@@ -22,9 +22,10 @@ const CSS = `
 a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color:color-mix(in srgb,var(--_day) 40%,var(--border-default));
   box-shadow:0 0 28px color-mix(in srgb, var(--_day) 40%, transparent); }
 
-.pdxBoard__poster{ position:relative; aspect-ratio:2/3; background:linear-gradient(135deg,#131313,#1d1d1d);
+.pdxBoard__poster{ position:relative; aspect-ratio:2/3; background:linear-gradient(135deg,#0a0a0a,#151515);
   overflow:hidden; }
-.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+/* Full flyer on the card face — never crop art/type off the edges */
+.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; }
 .pdxBoard__ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   padding:20px; text-align:center; }
 .pdxBoard__phTitle{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;
@@ -85,7 +86,8 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 @keyframes pdxBlink{ 50%{ opacity:.35; } }
 .pdxBoard__rsvp{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
   letter-spacing:.06em; text-transform:uppercase; color:#000; background:var(--neon-yellow);
-  border:0; border-radius:2px; padding:5px 12px 4px; cursor:pointer; }
+  border:0; border-radius:2px; padding:5px 12px 4px; cursor:pointer; white-space:nowrap;
+  flex-shrink:0; min-width:max-content; }
 .pdxBoard__rsvp:hover{ filter:brightness(1.08); }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-board-css")) {
@@ -109,18 +111,20 @@ export function PosterCard({
   types = [], admission, age, claimable = false,
   claimPending = false,
   onClaimClick,
-  going, onRsvp, href, showLink = true,
+  going, onRsvp, href, showLink = true, showDetailsLink = true,
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
 }: any) {
-  const Tag = href ? "a" : "div";
+  const cardHref = onRsvp ? undefined : href;
+  const detailsHref = onRsvp ? href : undefined;
+  const Tag = cardHref ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const dayt = DAY_TEXT[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   const showClaim = claimPending || claimable;
   return (
-    <Tag className={`pdxBoard ${className}`} href={href}
+    <Tag className={`pdxBoard ${className}`} href={cardHref}
       style={{ "--_day": base, "--_dayt": dayt, ...style }} {...rest}>
       <div className="pdxBoard__poster">
         {image
@@ -152,7 +156,9 @@ export function PosterCard({
           </a>
         )}
         {when && <div className="pdxBoard__when">{when}</div>}
-        <span className="pdxBoard__link">Event details &rarr;</span>
+        {showDetailsLink && (detailsHref
+          ? <a className="pdxBoard__link" href={detailsHref} onClick={stop}>Event details &rarr;</a>
+          : <span className="pdxBoard__link">Event details &rarr;</span>)}
 
         {(going != null || onRsvp) && (
           <div className="pdxBoard__foot">

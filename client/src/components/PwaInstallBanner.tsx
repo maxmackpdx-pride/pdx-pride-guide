@@ -68,7 +68,7 @@ export default function PwaInstallBanner() {
         </div>
         <p style={{ margin: 0, fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
           {iosHint
-            ? "Tap Share, then Add to Home Screen for the full app — required for push notifications on iPhone."
+            ? "Tap Share, then Add to Home Screen for the full app, required for push notifications on iPhone."
             : "Install the app for faster access and notifications during Pride weekend."}
         </p>
       </div>

@@ -1,5 +1,5 @@
 /* ============================================================
-   PDX Pride Guide — Schedule
+   PDX Pride Guide | Schedule
    Festival-timeline redesign of /schedule. The whole week side by
    side; packed days widen and scroll horizontally instead of
    squishing text; the day-color system carries the meaning.
@@ -38,9 +38,14 @@ import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { buildScheduleEvents, type ScheduleEvent } from "@/lib/scheduleEvents";
 import AuthModal from "@/components/AuthModal";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
+import ScheduleHero from "@/components/ScheduleHero";
+import ScrollReveal from "@/components/ScrollReveal";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
-import heroUrl from "@/assets/hero-collage.png";
+import { Button } from "@/components/ds";
+import { Download } from "lucide-react";
 import "./Schedule.css";
+import "./ScheduleToolbar.css";
 
 /** Legacy prop — event blocks always use full-bleed flyer backgrounds. */
 export type PosterStyle = 'Color blocks' | 'Poster chip' | 'Poster peek';
@@ -100,7 +105,7 @@ export default function Schedule({
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   usePageSeo(
-    "Schedule — Portland Pride 2026 | PDX Pride Guide",
+    "Schedule | Portland Pride 2026 | PDX Pride Guide",
     "Your full Pride Week schedule, July 13–19, side by side.",
     { skip: embed },
   );
@@ -358,7 +363,7 @@ export default function Schedule({
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       flashToast('Saved to downloads ✦ ready for Stories');
     } catch {
-      flashToast('Export hit a snag — try again');
+      flashToast('Export hit a snag. Try again');
     } finally {
       setExporting(false);
     }
@@ -800,32 +805,17 @@ export default function Schedule({
 
   const totalVisible = scheduleEvents.filter(pass).length;
   const myCount = myEventIds.size;
-  const segBtn = (active: boolean): React.CSSProperties =>
-    S({
-      fontFamily: 'var(--font-display)',
-      fontWeight: 900,
-      fontSize: '13.5px',
-      letterSpacing: '.03em',
-      textTransform: 'uppercase',
-      color: active ? 'var(--text-inverse)' : '#8a8a8a',
-      background: active ? 'var(--neon-yellow)' : 'transparent',
-      border: 'none',
-      padding: '11px 17px',
-      cursor: 'pointer',
-    });
-  const countPillStyle = S({
-    fontFamily: 'var(--font-display)',
-    fontWeight: 700,
-    fontSize: '12px',
-    letterSpacing: '.07em',
-    textTransform: 'uppercase',
-    color: 'var(--ink-900)',
-    background: view === 'mine' ? 'var(--green)' : 'var(--neon-cyan)',
-    padding: '6px 11px',
-    borderRadius: '999px',
-  });
   const countPillLabel =
     view === 'mine' ? myCount + ' in my schedule' : totalVisible + ' events';
+
+  const heroStats = useMemo(
+    () => [
+      { num: scheduleEvents.length, label: "Events on the grid", color: "#19e3ff" },
+      { num: myCount, label: "In your schedule", color: "#ccff00" },
+      { num: 7, label: "Days, one timeline", color: "#ff1fa0" },
+    ],
+    [scheduleEvents.length, myCount],
+  );
 
   /* ---- empty banner ----------------------------------------------- */
 
@@ -1183,337 +1173,171 @@ export default function Schedule({
     <div
       className={[
         'sch-root',
-        embed ? 'sch-root--embed' : '',
+        embed ? 'sch-root--embed' : 'zine-page schedule-page board-page board-page--makeover',
         calm ? 'calm' : '',
       ].filter(Boolean).join(' ')}
       style={{
         minHeight: embed ? undefined : '100vh',
-        background: embed ? 'transparent' : 'var(--ink-900)',
+        background: embed ? 'transparent' : undefined,
         color: 'var(--text-mid)',
         fontFamily: 'var(--font-body)',
       }}
     >
       {!embed && (
       <>
-      {/* ---- Hero ---- */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: 'var(--ink-900)' }}>
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${heroUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: '72% 40%',
-            opacity: 0.5,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(90deg,var(--ink-900) 25%,rgba(10,10,10,.5) 60%,rgba(10,10,10,.82))',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'radial-gradient(150% 130% at -5% 115%,rgba(10,10,10,.92),transparent 55%)',
-          }}
-        />
-        <div
-          style={{
-            position: 'relative',
-            maxWidth: '1400px',
-            margin: '0 auto',
-            padding: '32px clamp(16px,4vw,40px) 28px',
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '12px',
-              letterSpacing: '.14em',
-              textTransform: 'uppercase',
-              color: 'var(--neon-cyan)',
-              marginBottom: '14px',
-            }}
-          >
-            PDX Pride Guide <span style={{ color: 'rgba(255,255,255,.32)', margin: '0 4px' }}>/</span> Events
-          </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '.17em',
-              textTransform: 'uppercase',
-              color: 'rgba(230,227,218,.72)',
-              marginBottom: '4px',
-            }}
-          >
-            Portland Pride Week 2026 · July 13 to 19
-          </div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 900,
-              fontSize: 'clamp(3rem,7vw,5rem)',
-              lineHeight: 0.9,
-              letterSpacing: '.01em',
-              textTransform: 'uppercase',
-              color: 'var(--neon-cyan)',
-              margin: 0,
-              textShadow: '0 0 34px rgba(0,255,255,.32)',
-            }}
-          >
-            Schedule
-          </h1>
-          <p
-            style={{
-              maxWidth: '46ch',
-              margin: '13px 0 0',
-              color: 'var(--text-mid)',
-              fontSize: '16px',
-              lineHeight: 1.5,
-            }}
-          >
-            The whole week, laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other.
-          </p>
-        </div>
-        <div style={{ height: '3px', background: 'var(--grad-flag)', position: 'relative', zIndex: 1 }} />
-      </section>
+      <ScheduleHero stats={heroStats} />
 
       {/* ---- Sticky toolbar ---- */}
-      <div
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 55,
-          background: 'rgba(9,9,11,.94)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #1f1f1f',
-        }}
-      >
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px clamp(16px,4vw,40px)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '13px', flexWrap: 'wrap' }}>
-            <Link
-              href="/events"
-              className="btn-neon"
-              style={{ fontSize: '0.8rem', letterSpacing: '0.12em', flex: 'none' }}
-            >
-              ← Back to events
+      <ScrollReveal delay={30}>
+      <div className="schedule-toolbar">
+        <div className="schedule-toolbar__inner">
+          <div className="schedule-toolbar__row">
+            <Link href="/events" className="schedule-toolbar__back">
+              <Button as="span" variant="neon" accent="cyan" size="sm">
+                ← Back to events
+              </Button>
             </Link>
-            <div
-              style={{
-                display: 'inline-flex',
-                border: '2px solid rgba(255,255,255,.16)',
-                borderRadius: '10px',
-                overflow: 'hidden',
-                flex: 'none',
-              }}
-            >
-              <button onClick={() => setView('mine')} style={segBtn(view === 'mine')}>
+            <div className="schedule-seg" role="group" aria-label="Schedule view">
+              <button
+                type="button"
+                className={`schedule-seg__btn${view === 'mine' ? ' is-active' : ''}`}
+                onClick={() => setView('mine')}
+              >
                 My Schedule
               </button>
-              <button onClick={() => setView('all')} style={segBtn(view === 'all')}>
+              <button
+                type="button"
+                className={`schedule-seg__btn${view === 'all' ? ' is-active' : ''}`}
+                onClick={() => setView('all')}
+              >
                 All Events
               </button>
             </div>
-            <span style={countPillStyle}>{countPillLabel}</span>
-            <div style={{ flex: 1, minWidth: '12px' }} />
-            <button
-              className="sch-export"
-              onClick={exportStories}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '9px',
-                fontFamily: 'var(--font-display)',
-                fontWeight: 900,
-                fontSize: '13.5px',
-                letterSpacing: '.05em',
-                textTransform: 'uppercase',
-                color: 'var(--text-inverse)',
-                background: 'var(--neon-magenta)',
-                border: 'none',
-                borderRadius: '11px',
-                padding: '11px 19px',
-                cursor: 'pointer',
-                flex: 'none',
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span>{exporting ? 'Exporting…' : 'Export to Instagram Stories'}</span>
-            </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap', marginTop: '11px' }}>
-            <span
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                fontSize: '11px',
-                letterSpacing: '.13em',
-                color: '#6a6a6a',
-                textTransform: 'uppercase',
-                marginRight: '3px',
-                flex: 'none',
-              }}
-            >
-              Filter
+            <span className={`schedule-count-pill${view === 'mine' ? ' schedule-count-pill--mine' : ''}`}>
+              {countPillLabel}
             </span>
+            <div className="schedule-toolbar__spacer" />
+            <Button
+              type="button"
+              variant="solid"
+              accent="pink"
+              size="md"
+              className="schedule-toolbar__export sch-export"
+              onClick={exportStories}
+              disabled={exporting}
+            >
+              <Download size={16} aria-hidden />
+              {exporting ? "Exporting…" : "Export to Stories"}
+            </Button>
+          </div>
+          <div className="schedule-toolbar__filters">
+            <span className="schedule-toolbar__filter-label">Filter</span>
             {chips.map((c) => (
-              <button key={c.key} className="sch-chip" onClick={c.toggle} style={c.style}>
+              <button key={c.key} type="button" className="sch-chip" onClick={c.toggle} style={c.style}>
                 {c.label}
                 <span style={c.countStyle}>{c.count}</span>
               </button>
             ))}
             {anyFilter && (
-              <button
-                className="sch-chip"
-                onClick={clearFilters}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '6px 11px 5px',
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 700,
-                  fontSize: '12.5px',
-                  letterSpacing: '.05em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  border: '2px solid ' + hexA('#FF00CC', 0.6),
-                  color: '#FF3AD6',
-                  background: 'transparent',
-                }}
-              >
-                Clear ✕
+              <button type="button" className="sch-chip events-clear-filters" onClick={clearFilters}>
+                Clear ×
               </button>
             )}
           </div>
         </div>
       </div>
+      </ScrollReveal>
       </>
       )}
 
       {/* ---- Empty banner ---- */}
       {!embed && emptyBanner && (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px,4vw,40px)' }}>
-          <div
-            style={{
-              marginTop: '18px',
-              border: '1px dashed rgba(255,255,255,.2)',
-              borderRadius: '10px',
-              padding: '16px 20px',
-              color: 'var(--text-meta)',
-              fontSize: '14px',
-              textAlign: 'center',
-              fontFamily: 'var(--font-body)',
-            }}
-          >
+        <div className="schedule-empty-banner">
+          <div className="schedule-empty-banner__inner board-empty board-empty--prototype" style={{ marginTop: 0 }}>
             {emptyBanner}
           </div>
         </div>
       )}
 
       {/* ---- Grid ---- */}
-      <div
-        style={{
-          maxWidth: embed ? '100%' : '1400px',
-          margin: '0 auto',
-          padding: embed ? '0' : '18px clamp(16px,4vw,40px) 40px',
-        }}
-      >
-        <div className="sch-scroll" ref={scrollElRef} style={scrollStyle}>
-          <div style={{ display: 'flex', width: 'max-content', minWidth: '100%' }}>
-            {/* time axis */}
-            <div
-              style={{
-                position: 'sticky',
-                left: 0,
-                zIndex: 6,
-                flex: 'none',
-                width: AXIS_W + 'px',
-                background: 'var(--ink-900)',
-              }}
-            >
-              <div
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 7,
-                  height: HEADER_H + 'px',
-                  background: 'var(--ink-900)',
-                  borderBottom: '1px solid #202020',
-                }}
-              />
-              <div style={{ position: 'relative', height: TOTAL_H + 'px', backgroundImage: hourBg }}>
-                {timeLabels.map((t) => (
-                  <div key={t.key} style={t.style}>
-                    {t.label}
+      {(() => {
+        const grid = (
+          <div className={embed ? undefined : 'schedule-grid-shell'} style={embed ? { maxWidth: '100%', margin: '0 auto', padding: '0' } : undefined}>
+            <div className="sch-scroll" ref={scrollElRef} style={scrollStyle}>
+              <div style={{ display: 'flex', width: 'max-content', minWidth: '100%' }}>
+                {/* time axis */}
+                <div
+                  style={{
+                    position: 'sticky',
+                    left: 0,
+                    zIndex: 6,
+                    flex: 'none',
+                    width: AXIS_W + 'px',
+                    background: 'var(--ink-900)',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 7,
+                      height: HEADER_H + 'px',
+                      background: 'var(--ink-900)',
+                      borderBottom: '1px solid #202020',
+                    }}
+                  />
+                  <div style={{ position: 'relative', height: TOTAL_H + 'px', backgroundImage: hourBg }}>
+                    {timeLabels.map((t) => (
+                      <div key={t.key} style={t.style}>
+                        {t.label}
+                      </div>
+                    ))}
+                    {nowShown && <div style={nowAxisStyle}>NOW</div>}
+                  </div>
+                </div>
+                {/* day columns */}
+                {days.map((day) => (
+                  <div
+                    key={day.key}
+                    style={{ flex: 'none', width: day.width + 'px', borderLeft: '1px solid rgba(255,255,255,.05)' }}
+                  >
+                    <div style={day.headStyle}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                        <span style={day.nameStyle}>{day.short}</span>
+                        <span style={day.dateStyle}>{day.date}</span>
+                      </div>
+                      <div style={day.countStyle}>{day.countLabel}</div>
+                    </div>
+                    <div style={{ position: 'relative', height: TOTAL_H + 'px', backgroundImage: hourBg }}>
+                      {nowShown && <div style={nowLineStyle} />}
+                      {day.blocks.map((b) => (
+                        <div key={b.id} className="sch-block" onClick={b.onClick} style={b.style}>
+                          <div style={b.overlayStyle} aria-hidden />
+                          {b.showQuick && (
+                            <button onClick={b.onQuick} style={b.quickStyle}>
+                              {b.quickIcon}
+                            </button>
+                          )}
+                          <div style={b.contentStyle}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              {b.live && <span className="sch-livedot" style={b.liveDotStyle} />}
+                              <span style={b.timeStyle}>{b.time}</span>
+                              {b.showCheck && <span style={b.checkStyle}>✓</span>}
+                            </div>
+                            <div style={b.titleStyle}>{b.title}</div>
+                            {b.showVenue && <div style={b.venueStyle}>{b.venue}</div>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
-                {nowShown && <div style={nowAxisStyle}>NOW</div>}
               </div>
             </div>
-            {/* day columns */}
-            {days.map((day) => (
-              <div
-                key={day.key}
-                style={{ flex: 'none', width: day.width + 'px', borderLeft: '1px solid rgba(255,255,255,.05)' }}
-              >
-                <div style={day.headStyle}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                    <span style={day.nameStyle}>{day.short}</span>
-                    <span style={day.dateStyle}>{day.date}</span>
-                  </div>
-                  <div style={day.countStyle}>{day.countLabel}</div>
-                </div>
-                <div style={{ position: 'relative', height: TOTAL_H + 'px', backgroundImage: hourBg }}>
-                  {nowShown && <div style={nowLineStyle} />}
-                  {day.blocks.map((b) => (
-                    <div key={b.id} className="sch-block" onClick={b.onClick} style={b.style}>
-                      <div style={b.overlayStyle} aria-hidden />
-                      {b.showQuick && (
-                        <button onClick={b.onQuick} style={b.quickStyle}>
-                          {b.quickIcon}
-                        </button>
-                      )}
-                      <div style={b.contentStyle}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          {b.live && <span className="sch-livedot" style={b.liveDotStyle} />}
-                          <span style={b.timeStyle}>{b.time}</span>
-                          {b.showCheck && <span style={b.checkStyle}>✓</span>}
-                        </div>
-                        <div style={b.titleStyle}>{b.title}</div>
-                        {b.showVenue && <div style={b.venueStyle}>{b.venue}</div>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
           </div>
-        </div>
-      </div>
+        );
+        return embed ? grid : <ScrollReveal delay={50}>{grid}</ScrollReveal>;
+      })()}
 
       {/* ---- Detail popover ----
           Home embed: fixed-overlay flex-center wrapper (same idiom as
@@ -1559,6 +1383,13 @@ export default function Schedule({
       )}
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+
+      {!embed && (
+        <BoardCloseSeam
+          line="Build your week. Take care of each other."
+          url="prideguidepdx.com/schedule"
+        />
+      )}
 
       {/* ---- Toast ---- */}
       {toast && (

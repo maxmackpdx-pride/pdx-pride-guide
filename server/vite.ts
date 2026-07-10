@@ -1,6 +1,7 @@
 import type { Express } from 'express';
 import { createServer as createViteServer, createLogger } from "vite";
 import type { Server } from 'node:http';
+import { buildGoogleAnalyticsHead } from "./gaSnippet";
 import viteConfig from "../vite.config";
 import fs from "node:fs";
 import path from "node:path";
@@ -51,7 +52,11 @@ export async function setupVite(server: Server, app: Express) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${Date.now().toString(36)}"`,
       );
-      const page = await vite.transformIndexHtml(url, template);
+      let page = await vite.transformIndexHtml(url, template);
+      const gaHead = buildGoogleAnalyticsHead();
+      if (gaHead && !page.includes("__PDX_GA_ID__")) {
+        page = page.replace("</head>", `    ${gaHead}\n  </head>`);
+      }
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);

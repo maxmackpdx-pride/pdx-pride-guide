@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const DEFAULT_ACCEPT = "image/jpeg,image/png,image/gif,image/webp";
-const FORMAT_HINT = "JPG, PNG, WebP, or GIF — max 8MB";
+const FORMAT_HINT = "JPG, PNG, WebP, or GIF, max 8MB";
 
 interface Props {
   endpoint: string;        // e.g. "/api/upload/poster"

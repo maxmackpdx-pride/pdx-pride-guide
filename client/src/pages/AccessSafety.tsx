@@ -7,7 +7,7 @@ const CONTACT_EMAIL = "hello.tuckercasey@gmail.com";
 
 export default function AccessSafety() {
   usePageSeo(
-    "Access & Safety — PDX Pride Guide",
+    "Access & Safety | PDX Pride Guide",
     "What PDX Pride Guide listings cover, what we can't promise, and how to take care of each other during Pride week.",
   );
 

@@ -162,18 +162,6 @@ export default function Nav() {
     };
   }, [openDropdown]);
 
-  const { data: adminSession } = useQuery<{ isAdmin?: boolean } | null>({
-    queryKey: ["/api/admin/me"],
-    queryFn: async () => {
-      const r = await fetch("/api/admin/me", { credentials: "include" });
-      return r.ok ? r.json() : null;
-    },
-    retry: false,
-    refetchInterval: 120000,
-  });
-
-  const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
-
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
     queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
@@ -181,15 +169,7 @@ export default function Nav() {
     refetchInterval: 90000,
   });
 
-  const { data: adminPending = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/admin/pending-count"],
-    queryFn: () => fetch("/api/admin/pending-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
-    enabled: isAdmin,
-    refetchInterval: 90000,
-  });
-
   const unreadCount = unread.count || 0;
-  const adminPendingCount = adminPending.count || 0;
   const closeMenu = () => {
     setMenuOpen(false);
     setOpenDropdown(null);
@@ -265,44 +245,54 @@ export default function Nav() {
                     onClick={closeMenu}
                   />
                 </span>
-                {isAdmin && (
-                  <NavLink
-                    href="/admin"
-                    label="Admin"
-                    active={location === "/admin" || location.startsWith("/admin/")}
-                    showNotify={adminPendingCount > 0}
-                    notifyLabel={
-                      adminPendingCount > 0
-                        ? `Admin, ${adminPendingCount} pending item${adminPendingCount === 1 ? "" : "s"}`
-                        : undefined
-                    }
-                    onClick={closeMenu}
-                  />
-                )}
                 <div className={`site-profile-menu${profileActive ? " site-profile-menu--active" : ""}`} ref={profileRef}>
-                  <button
-                    type="button"
-                    className={`site-profile-menu__trigger${profileOpen ? " site-profile-menu__trigger--open" : ""}`}
-                    aria-expanded={profileOpen}
-                    aria-haspopup="menu"
-                    aria-label={
-                      unreadCount > 0
-                        ? `Profile menu: ${user.displayName || user.username}, ${unreadCount} unread`
-                        : `Profile menu: ${user.displayName || user.username}`
-                    }
-                    onClick={() => setProfileOpen(open => !open)}
-                  >
-                    <UserAvatar
-                      photoUrl={user.photoUrl}
-                      avatarChoice={user.avatarChoice}
-                      avatarRing={user.avatarRing}
-                      displayName={user.displayName}
-                      username={user.username}
-                    />
-                    {unreadCount > 0 && <span className="site-profile-menu__notify-dot" aria-hidden="true" />}
-                  </button>
+                  <div className="site-profile-menu__cluster">
+                    <Link
+                      href="/dashboard?edit=profile"
+                      className="site-profile-menu__avatar-link"
+                      aria-label="Edit profile"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        setMenuOpen(false);
+                      }}
+                    >
+                      <UserAvatar
+                        photoUrl={user.photoUrl}
+                        avatarChoice={user.avatarChoice}
+                        avatarRing={user.avatarRing}
+                        displayName={user.displayName}
+                        username={user.username}
+                      />
+                      {unreadCount > 0 && <span className="site-profile-menu__notify-dot" aria-hidden="true" />}
+                    </Link>
+                    <button
+                      type="button"
+                      className={`site-profile-menu__caret${profileOpen ? " site-profile-menu__caret--open" : ""}`}
+                      aria-expanded={profileOpen}
+                      aria-haspopup="menu"
+                      aria-label={
+                        unreadCount > 0
+                          ? `Profile menu: ${user.displayName || user.username}, ${unreadCount} unread`
+                          : `Profile menu: ${user.displayName || user.username}`
+                      }
+                      onClick={() => setProfileOpen(open => !open)}
+                    >
+                      <ChevronDown size={16} strokeWidth={2.4} aria-hidden="true" />
+                    </button>
+                  </div>
                   {profileOpen && (
                     <div className="site-profile-menu__panel" role="menu">
+                      <Link
+                        href="/dashboard?edit=profile"
+                        role="menuitem"
+                        className="site-profile-menu__item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Edit profile
+                      </Link>
                       <Link
                         href={profilePath}
                         role="menuitem"
@@ -353,18 +343,6 @@ export default function Nav() {
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {!user && isAdmin && (
-              <div className="site-auth">
-                <NavLink
-                  href="/admin"
-                  label="Admin"
-                  active={location === "/admin" || location.startsWith("/admin/")}
-                  showNotify={adminPendingCount > 0}
-                  onClick={closeMenu}
-                />
               </div>
             )}
 

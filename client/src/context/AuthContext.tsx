@@ -15,7 +15,10 @@ export interface AuthUser {
   promoterStatus?: "none" | "pending" | "approved" | "rejected";
   isAdmin?: boolean;
   isSuperAdmin?: boolean;
+  isPrimaryOwner?: boolean;
+  canManageTeam?: boolean;
   subAdmin?: boolean;
+  usernameChangedAt?: string | null;
 }
 
 interface AuthContextType {

@@ -569,7 +569,7 @@ function EventModalInner({
               </div>
             ) : (
               <p className="event-modal__host-updates-empty">
-                No host updates yet. Check back closer to the event — organizers post timing changes, door info, and last-minute notes here.
+                No host updates yet. Check back closer to the event. Organizers post timing changes, door info, and last-minute notes here.
               </p>
             )}
           </div>
@@ -766,7 +766,7 @@ function EventModalInner({
               </p>
               <p className="event-modal__mod-lede">
                 {modMode === "remove" && "Tell us why this event should be removed. If you're the organizer or have a specific reason, explain below. An admin will review."}
-                {modMode === "flag" && "Wrong time, venue, link, or description? Tell us what's off. Admins use this to fix the listing — not to remove it."}
+                {modMode === "flag" && "Wrong time, venue, link, or description? Tell us what's off. Admins use this to fix the listing, not to remove it."}
                 {modMode === "transfer" && "Release hosting to another verified organizer. Enter their username or email. An admin confirms the handoff."}
               </p>
               <form onSubmit={handleModSubmit}>
@@ -828,7 +828,7 @@ function EventModalInner({
             <div className="event-modal__warning">
               <span className="event-modal__warning-label">Warning</span>
               <p className="event-modal__warning-text">
-                This event has not been claimed by its organizer. Details were sourced from public listings — please confirm time, venue, and ticketing directly before attending.
+                This event has not been claimed by its organizer. Details were sourced from public listings. Please confirm time, venue, and ticketing directly before attending.
                 {hasPendingClaim ? " A claim is pending admin review." : ""}
               </p>
             </div>

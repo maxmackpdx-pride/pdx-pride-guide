@@ -254,7 +254,11 @@ export function MapView({
         />
       )}
       <div
-        className={variant === "events" ? "events-map-panel" : "home-map-panel"}
+        className={
+          variant === "events"
+            ? "directory-map-wrap events-map-wrap"
+            : "home-map-panel-wrap"
+        }
         style={{
           position: expanded ? "fixed" : "relative",
           top: expanded ? 0 : undefined,
@@ -264,7 +268,14 @@ export function MapView({
           zIndex: expanded ? 999 : 1,
           height: expanded ? "100vh" : undefined,
           width: "100%",
-          borderBottom: expanded ? "none" : "2px solid #1a1a1a",
+        }}
+      >
+      <div
+        className={variant === "events" ? "events-map-panel directory-map" : "home-map-panel"}
+        style={{
+          position: "relative",
+          height: expanded ? "100%" : undefined,
+          width: "100%",
         }}
       >
         <style>{`
@@ -394,6 +405,7 @@ export function MapView({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </>
   );

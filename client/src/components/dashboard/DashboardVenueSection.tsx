@@ -115,7 +115,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
           <div>
             <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginBottom: 8 }}>LOGO</p>
             <p style={{ fontSize: 12, color: "var(--dash-muted)", marginBottom: 8 }}>
-              Logo changes go to the site admin for conversion before going live — your current logo stays up until then.
+              Logo changes go to the site admin for conversion before going live. Your current logo stays up until then.
             </p>
             <ImageUploader
               endpoint="/api/upload/business-logo"

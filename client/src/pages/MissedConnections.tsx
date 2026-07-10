@@ -22,12 +22,13 @@ const HOW_IT_WORKS = [
 
 export default function MissedConnections() {
   usePageSeo(
-    "Spotted — Missed Connections — PDX Pride Guide",
+    "Spotted: Missed Connections | PDX Pride Guide",
     "Post anonymous missed connections from Portland Pride 2026 events. Spotted someone at PDX Pride? Say hi privately.",
   );
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<MissedConnectionPost | null>(null);
   const [editForm, setEditForm] = useState({ title: "", body: "" });
 
@@ -43,7 +44,8 @@ export default function MissedConnections() {
   const stats = useMemo(() => [
     { num: allPosts.length, label: "Spotted, live now", color: "#ff1fa0" },
     { num: allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },
-    { num: allPosts.filter(p => p.eventId == null).length, label: "Around town", color: "#ff8c00" },
+    { num: allPosts.filter(p => p.beachId != null).length, label: "At the beach", color: "#ff6600" },
+    { num: allPosts.filter(p => p.eventId == null && !p.beachId).length, label: "Around town", color: "#ff8c00" },
   ], [allPosts]);
 
   const { data: myPosts = [] } = useQuery<MissedConnectionPost[]>({
@@ -98,11 +100,10 @@ export default function MissedConnections() {
       setShowAuth(true);
       return;
     }
-    const toggle = document.getElementById("spotted-compose-toggle") as HTMLButtonElement | null;
-    toggle?.click();
+    setFormOpen(true);
     window.setTimeout(() => {
-      document.getElementById("spotted-compose")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 40);
+      document.getElementById("spotted-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 20);
   };
 
   return (
@@ -125,7 +126,7 @@ export default function MissedConnections() {
         <div className="board-active-feed" style={{ paddingTop: 0, paddingBottom: 0, background: "transparent" }}>
           <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 8px" }}>
             <p className="board-copy-sm" style={{ marginInline: "auto" }}>
-              Browse Spotted posts without an account. Log in to post or reply — threads stay anonymous until you both reveal in inbox.
+              Browse Spotted posts without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
             </p>
             <Button variant="solid" accent="magenta" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>
               Log in / Join
@@ -139,8 +140,10 @@ export default function MissedConnections() {
           mode="board"
           boardLayout
           makeover
+          composeOpen={formOpen}
+          onComposeOpenChange={setFormOpen}
           onRequireAuth={() => setShowAuth(true)}
-          onRequestCompose={() => openPost()}
+          onRequestCompose={openPost}
         />
       </div>
 

@@ -1,12 +1,17 @@
 export function MapViewFallback({ variant = "events" }: { variant?: "events" | "home" }) {
+  if (variant === "events") {
+    return (
+      <div className="directory-map-wrap events-map-wrap" aria-hidden role="status" aria-label="Loading map">
+        <div className="events-map-panel directory-map" style={{ background: "#0a0a0a" }} />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={variant === "events" ? "events-map-panel" : "home-map-panel"}
-      style={{
-        background: "#0a0a0a",
-        borderBottom: variant === "events" ? "2px solid #1a1a1a" : undefined,
-      }}
-      aria-hidden="true"
+      className="home-map-panel"
+      style={{ background: "#0a0a0a" }}
+      aria-hidden
       role="status"
       aria-label="Loading map"
     />

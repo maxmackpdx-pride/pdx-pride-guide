@@ -161,7 +161,7 @@ export function DashboardEventEditForm({
             />
             <div style={{ fontSize: "0.72rem", color: "var(--text-faint)", marginTop: 4 }}>
               {ADMISSION_OPTIONS.find(o => o.value === eventForm.admission)?.hint
-                || "Optional — add a link if you have one."}
+                || "Optional: add a link if you have one."}
             </div>
           </div>
           <div style={{ gridColumn: "1/-1" }}>

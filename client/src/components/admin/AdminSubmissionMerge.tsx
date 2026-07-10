@@ -108,7 +108,7 @@ export default function AdminSubmissionMerge({
       {selectedEvent && (
         <div className="space-y-3">
           <p className="text-white/40 text-xs uppercase tracking-wide m-0">
-            Merge preview — submission fields win when provided ({changedFields.length} change{changedFields.length === 1 ? "" : "s"})
+            Merge preview: submission fields win when provided ({changedFields.length} change{changedFields.length === 1 ? "" : "s"})
           </p>
           <div className="max-h-56 overflow-y-auto border border-white/10">
             <table className="w-full text-sm">
@@ -142,7 +142,7 @@ export default function AdminSubmissionMerge({
             className="sticker w-full py-3 text-sm"
             style={{ color: "#FF6600", borderColor: "#FF6600" }}
           >
-            {pending ? "Merging…" : `Merge into #${selectedEvent.id} — ${selectedEvent.title}`}
+            {pending ? "Merging…" : `Merge into #${selectedEvent.id}: ${selectedEvent.title}`}
           </button>
         </div>
       )}

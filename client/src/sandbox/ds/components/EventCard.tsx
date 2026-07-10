@@ -20,7 +20,7 @@ a.pdxRow:hover{ transform:translateY(-1px); text-decoration:none; background:var
 
 .pdxRow__thumb{ width:84px; height:96px; border-radius:var(--radius-sm); overflow:hidden;
   background:linear-gradient(135deg,#131313,#1d1d1d); position:relative; flex:none; }
-.pdxRow__thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.pdxRow__thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; }
 .pdxRow__thumbPh{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-family:var(--font-display); font-weight:var(--fw-black); font-size:1.6rem; color:var(--_day); opacity:.8; }
 

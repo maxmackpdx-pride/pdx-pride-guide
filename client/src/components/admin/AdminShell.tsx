@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import {
+  BarChart3,
   Briefcase,
   CalendarDays,
   Home,
   Inbox,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   MoreHorizontal,
@@ -12,12 +14,15 @@ import {
   Users,
   UserCircle,
 } from "lucide-react";
+import { Link } from "wouter";
 import logo from "@/assets/logo.png";
 import "./admin-panel.css";
 
 export type AdminView =
   | "overview"
+  | "stats"
   | "inbox"
+  | "owner"
   | "events"
   | "users"
   | "gigs"
@@ -39,8 +44,10 @@ type PushStatus = {
 } | null | undefined;
 
 const VIEW_TITLES: Record<AdminView, string> = {
-  overview: "Admin",
-  inbox: "Inbox",
+  overview: "Admin overview",
+  stats: "Stats",
+  inbox: "Review queue",
+  owner: "Owner desk",
   events: "All events",
   users: "All users",
   gigs: "Pride Werk",
@@ -50,19 +57,23 @@ const VIEW_TITLES: Record<AdminView, string> = {
 };
 
 const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
-  overview: { label: "Control room", color: "var(--lime, #c8fa3c)" },
-  inbox: { label: "The queue", color: "var(--pink, #ff1fa0)" },
-  events: { label: "The program", color: "var(--orange, #ff8c00)" },
-  users: { label: "The community", color: "var(--cyan, #19e3ff)" },
+  overview: { label: "Control room", color: "var(--lime, #ccff00)" },
+  stats: { label: "The numbers", color: "var(--cyan, #00ffff)" },
+  inbox: { label: "Shared queue", color: "var(--pink, #ff00cc)" },
+  owner: { label: "Owner only", color: "var(--purple, #8800ff)" },
+  events: { label: "The program", color: "var(--orange, #ff6600)" },
+  users: { label: "The community", color: "var(--cyan, #00ffff)" },
   gigs: { label: "The gig board", color: "var(--amber, #ffb020)" },
-  promoters: { label: "The scene makers", color: "var(--pink, #ff1fa0)" },
-  "venue-claims": { label: "The directory", color: "var(--cyan, #19e3ff)" },
-  team: { label: "Keyholders", color: "var(--lime, #c8fa3c)" },
+  promoters: { label: "The scene makers", color: "var(--pink, #ff00cc)" },
+  "venue-claims": { label: "The directory", color: "var(--cyan, #00ffff)" },
+  team: { label: "Keyholders", color: "var(--lime, #ccff00)" },
 };
 
 const VIEW_LEDES: Record<AdminView, string> = {
-  overview: "Pride is a protest — take care of each other. Clear the queue, check the pulse, then go live.",
-  inbox: "Submissions, promoters, talent, moderation, gifting, Spotted, and feedback — one queue.",
+  overview: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
+  stats: "First-party traffic tracking plus database counts: page views, sources, signups, RSVPs, listings, and queue depth.",
+  inbox: "One queue the whole admin team works together. Not a mailbox, a shared to-do list.",
+  owner: "Only you, the owner, see these. Keyholder grants, escalations, and account-level calls the team can't make.",
   events: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",
   users: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",
   gigs: "Live Pride Werk posts. Take down spam, keep the board useful for workers and hosts.",
@@ -79,7 +90,9 @@ function makeIcons(size: number): Record<AdminView | "more", ReactNode> {
   const p = { size, strokeWidth: size >= 32 ? 2 : 2.2, "aria-hidden": true as const };
   return {
     overview: <LayoutDashboard {...p} />,
+    stats: <BarChart3 {...p} />,
     inbox: <Inbox {...p} />,
+    owner: <KeyRound {...p} />,
     events: <CalendarDays {...p} />,
     users: <UserCircle {...p} />,
     gigs: <Briefcase {...p} />,
@@ -98,6 +111,7 @@ type Props = {
   onNavigate: (view: AdminView) => void;
   adminName: string;
   isSuperAdmin?: boolean;
+  isPrimaryOwner?: boolean;
   pendingCount: number;
   navCounts: Partial<Record<AdminView, number | string>>;
   pushStatus?: PushStatus;
@@ -115,6 +129,7 @@ export default function AdminShell({
   onNavigate,
   adminName,
   isSuperAdmin,
+  isPrimaryOwner,
   pendingCount,
   navCounts,
   pushStatus,
@@ -128,7 +143,8 @@ export default function AdminShell({
 }: Props) {
   const navItems: AdminNavItem[] = [
     { key: "overview", label: "Overview" },
-    { key: "inbox", label: "Inbox", alert: pendingCount > 0 ? pendingCount : undefined },
+    { key: "stats", label: "Stats" },
+    { key: "inbox", label: "Review queue", alert: pendingCount > 0 ? pendingCount : undefined },
     { key: "team", label: "My team", count: navCounts.team },
     { key: "events", label: "All events", count: navCounts.events },
     { key: "users", label: "All users", count: navCounts.users },
@@ -139,8 +155,8 @@ export default function AdminShell({
 
   const mobilePrimary: Array<{ key: AdminView | "more"; label: string; alert?: number }> = [
     { key: "overview", label: "Home" },
-    { key: "inbox", label: "Inbox", alert: pendingCount > 0 ? pendingCount : undefined },
-    { key: "team", label: "My team" },
+    { key: "stats", label: "Stats" },
+    { key: "inbox", label: "Queue", alert: pendingCount > 0 ? pendingCount : undefined },
     { key: "events", label: "Events" },
     { key: "more", label: "More" },
   ];
@@ -153,7 +169,7 @@ export default function AdminShell({
     { key: "team", label: "My team", count: navCounts.team },
   ];
 
-  const moreViews: AdminView[] = ["users", "gigs", "promoters", "venue-claims"];
+  const moreViews: AdminView[] = ["users", "gigs", "promoters", "venue-claims", "team"];
   const kicker = VIEW_KICKERS[view];
   const pushOk = !!pushStatus?.configured;
 
@@ -173,8 +189,19 @@ export default function AdminShell({
             <div className="pride">PRIDE</div>
             <div>GUIDE</div>
           </div>
-          <span className="admin-shell__badge">ADMIN</span>
         </div>
+
+        {/* Member / Admin mode toggle (design: cyan member, pink admin) */}
+        <div className="admin-shell__mode-toggle" role="group" aria-label="Hub mode">
+          <Link href="/dashboard" className="admin-shell__mode-btn">
+            Member
+          </Link>
+          <button type="button" className="admin-shell__mode-btn is-admin is-active" aria-current="page">
+            Admin
+          </button>
+        </div>
+
+        <div className="admin-shell__nav-kicker">Admin</div>
 
         <nav className="admin-shell__nav">
           {navItems.map(item => {
@@ -224,7 +251,7 @@ export default function AdminShell({
           <div className="admin-shell__user-meta">
             <div className="admin-shell__user-name">{adminName}</div>
             <div className="admin-shell__user-role">
-              {isSuperAdmin ? "Super admin" : "Site admin"}
+              {isPrimaryOwner ? "Owner" : isSuperAdmin ? "Super admin" : "Site admin"}
             </div>
           </div>
           <button
@@ -259,11 +286,7 @@ export default function AdminShell({
               {kicker.label}
             </div>
             <h1 className="admin-shell__title">{VIEW_TITLES[view]}</h1>
-            <p className="admin-shell__lede">
-              {view === "overview"
-                ? `Signed in as ${adminName}. ${VIEW_LEDES.overview}`
-                : VIEW_LEDES[view]}
-            </p>
+            <p className="admin-shell__lede">{VIEW_LEDES[view]}</p>
           </div>
           <div className="admin-shell__top-actions admin-shell__top-actions--desktop">
             <button type="button" className="admin-shell__ghost-btn" onClick={onRefreshAll}>

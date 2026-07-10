@@ -9,13 +9,32 @@ export function spottedAccent(id: number): string {
   return ACCENT_CYCLE[Math.abs(id) % ACCENT_CYCLE.length];
 }
 
-function timeAgo(iso: string): string {
+export function spottedTimeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 60000) return "just now";
   const m = Math.floor(diff / 60000);
-  if (m < 60) return `${Math.max(1, m)}m`;
+  if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" });
+  if (h < 48) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+export function spottedPlace(post: MissedConnectionPost): string {
+  if (post.eventTitle) {
+    return post.eventVenue ? `At ${post.eventTitle} · ${post.eventVenue}` : `At ${post.eventTitle}`;
+  }
+  if (post.beachId) {
+    return post.venueHint || (post.beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island");
+  }
+  return post.venueHint ? `Around town · ${post.venueHint}` : "Around town";
+}
+
+export function spottedKind(post: MissedConnectionPost): { label: string; color: string } {
+  if (post.eventId != null) return { label: "At an event", color: "#19e3ff" };
+  if (post.beachId === "rooster-rock") return { label: "Rooster Rock", color: "#19e3ff" };
+  if (post.beachId === "sauvie-island") return { label: "Sauvie Island", color: "#ff6600" };
+  if (post.beachId) return { label: "At the beach", color: "#ff6600" };
+  return { label: "Around town", color: "#ff8c00" };
 }
 
 export default function SpottedCard({
@@ -23,15 +42,49 @@ export default function SpottedCard({
   accentColor,
   onReply,
   animDelay = 0,
+  makeover = false,
 }: {
   post: MissedConnectionPost;
   accentColor: string;
   onReply: () => void;
   animDelay?: number;
+  makeover?: boolean;
 }) {
   const location = post.eventTitle || post.eventVenue || post.venueHint || "Around Town";
   const isClosed = post.status === "CLOSED" || post.status === "ARCHIVED";
   const { toast } = useToast();
+  const kind = spottedKind(post);
+  const displayTitle = post.title?.trim() || post.body.trim().split(/\n/)[0]?.slice(0, 80) || "Spotted";
+
+  if (makeover) {
+    return (
+      <article
+        className="board-spotted-card"
+        style={{ "--spotted-accent": kind.color } as React.CSSProperties}
+        onClick={onReply}
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onReply();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        <span className="board-spotted-card__quote" aria-hidden="true">&rdquo;</span>
+        <div className="board-spotted-card__meta">
+          <span className="board-spotted-card__kind" style={{ color: kind.color }}>{kind.label}</span>
+          <span className="board-spotted-card__time">{spottedTimeAgo(post.createdAt)}</span>
+        </div>
+        <h4 className="board-spotted-card__title">{displayTitle}</h4>
+        <p className="board-spotted-card__body">{post.body}</p>
+        <div className="board-spotted-card__foot">
+          <span className="board-spotted-card__place">{spottedPlace(post)}</span>
+          {!post.isMine && !isClosed && <span className="board-spotted-card__cta">Reply →</span>}
+        </div>
+      </article>
+    );
+  }
 
   const handleShare = async () => {
     try {
@@ -62,7 +115,7 @@ export default function SpottedCard({
           {location}
         </span>
         <span className="spotted-card__meta">
-          {post.isMine ? "Your post" : "Anonymous"} · {timeAgo(post.createdAt)}
+          {post.isMine ? "Your post" : "Anonymous"} · {spottedTimeAgo(post.createdAt)}
         </span>
       </div>
 

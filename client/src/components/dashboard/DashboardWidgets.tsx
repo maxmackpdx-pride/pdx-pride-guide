@@ -4,6 +4,7 @@ import type { Event } from "@shared/schema";
 import { PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
 import { parsePacificEventTime, useCountdown } from "@/lib/countdown";
 import { fetchPortlandWeather, isAfterPrideWeekend } from "@/lib/portlandWeather";
+import "@/components/hub/hub-home.css";
 
 export default function DashboardWidgets() {
   const { data: events = [] } = useQuery<Event[]>({
@@ -14,11 +15,17 @@ export default function DashboardWidgets() {
   const showPrideWidgets = !isAfterPrideWeekend();
   const showPrideWeather = showPrideWidgets;
 
-  const { data: weather, isError: weatherError } = useQuery({
-    queryKey: ["portland-weather", "pride-weekend-2026"],
+  const {
+    data: weather,
+    isError: weatherError,
+    isLoading: weatherLoading,
+    isFetching: weatherFetching,
+  } = useQuery({
+    queryKey: ["portland-weather", "pdx-or", "jul-13-19-2026", "f"],
     queryFn: fetchPortlandWeather,
-    staleTime: 1000 * 60 * 30,
-    retry: 1,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 60,
+    retry: 2,
     enabled: showPrideWeather,
   });
 
@@ -42,128 +49,141 @@ export default function DashboardWidgets() {
 
   const live = countdown !== null;
 
+  if (!showPrideWidgets && !showPrideWeather) return null;
+
   return (
-    <div className="dash-widget-stack">
-      {showPrideWeather && weather && (
-        <section className="dash-weather">
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <div className="dash-mono" style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--dash-muted)" }}>
-                  Pride Week · Jul 13–19
-                </div>
-                {(weatherError || weather.isEstimate) && (
-                  <span
-                    className="dash-mono"
-                    style={{
-                      fontSize: 9,
-                      color: "#0a0a0a",
-                      background: weatherError ? "rgba(255,255,255,0.55)" : "rgba(255,237,0,0.85)",
-                      padding: "3px 7px",
-                      borderRadius: 999,
-                      letterSpacing: "0.12em",
-                    }}
-                  >
-                    {weatherError ? "Offline" : "Estimate"}
-                  </span>
-                )}
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
-                <span className="dash-weather-temp">{weather.currentTemp}°</span>
-                <span className="dash-anton" style={{ fontSize: 16, color: "var(--dash-orange)" }}>{weather.condition}</span>
-              </div>
-              <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 8, textTransform: "none", letterSpacing: "0.04em" }}>
-                {weather.caption}
-              </div>
+    <div className="hub-widget-stack">
+      {showPrideWeather && (
+        <section className="hub-weather" aria-label="Portland, Oregon Pride week weather">
+          <div className="hub-weather__top">
+            <div className="hub-weather__titles">
+              <span className="hub-weather__city">Portland, OR</span>
+              <span className="hub-weather__kicker">Pride Week · Jul 13 to 19</span>
             </div>
-            <div style={{ position: "relative", width: 48, height: 48, flex: "0 0 auto" }}>
+            {weather && (
               <span
+                className="hub-weather__sun"
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  borderRadius: "50%",
                   background: weather.sunGradient,
                   boxShadow: weather.sunGlow,
                 }}
+                aria-hidden
               />
-            </div>
+            )}
           </div>
-          <div className="dash-weather-forecast">
-            {weather.forecast.map(day => (
-              <div key={day.day} className="dash-weather-day">
-                <div className="dash-mono" style={{ fontSize: 9.5, color: "#6f736c" }}>{day.day}</div>
-                <div
-                  className="dash-anton"
-                  style={{
-                    fontSize: 16,
-                    color: day.highlight ? "#FFED00" : "#fff",
-                    marginTop: 3,
-                  }}
-                >
-                  {day.high}°
+
+          {(weatherError || weather?.isEstimate) && (
+            <span className="hub-weather__badge">
+              {weatherError ? "Offline" : "Estimate"}
+            </span>
+          )}
+
+          {weatherLoading && !weather ? (
+            <div className="hub-weather__loading">Loading Portland forecast…</div>
+          ) : weather ? (
+            <>
+              <div className="hub-weather__temp-row">
+                <span className="hub-weather__temp">{weather.currentTemp}°</span>
+                <div className="hub-weather__temp-meta">
+                  <span className="hub-weather__unit">F</span>
+                  <span className="hub-weather__cond">{weather.condition}</span>
+                  <span className="hub-weather__now">{weather.tempContext}</span>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="hub-weather__caption">{weather.caption}</div>
+              <div className="hub-weather__forecast" aria-label="Portland daily highs July 13 to 19">
+                {weather.forecast.map(day => (
+                  <div key={day.day} className={`hub-weather__day${day.highlight ? " is-hot" : ""}`}>
+                    <div className="hub-weather__day-label">{day.day}</div>
+                    <div className="hub-weather__day-date">{day.dateLabel}</div>
+                    <div className={`hub-weather__day-temp${day.highlight ? " is-hot" : ""}`}>
+                      {day.high}°
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {weatherFetching && !weatherLoading && (
+                <span className="hub-weather__refresh" aria-hidden>
+                  Updating…
+                </span>
+              )}
+            </>
+          ) : (
+            <div className="hub-weather__loading">Could not load Portland weather.</div>
+          )}
         </section>
       )}
 
       {showPrideWidgets && (
-      <section className="dash-countdown">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-          <div className="dash-anton" style={{ fontSize: 22, color: "#fff" }}>Pride Week</div>
-          <span
-            className={`dash-mono${live ? " dash-live-badge" : ""}`}
-            style={{
-              fontSize: 10,
-              color: "#0a0a0a",
-              background: "var(--dash-lime)",
-              padding: "5px 9px",
-              borderRadius: 999,
-            }}
-          >
-            {live ? "Live" : "Soon"}
-          </span>
-        </div>
-        <div className="dash-mono" style={{ fontSize: 11, color: "#9d9a92", marginTop: 4 }}>
-          Jul 13 – 19 · Portland
-        </div>
-        {countdown ? (
-          <div className="dash-countdown-grid">
-            {[
-              [countdown.days, "Days", "var(--dash-lime)"],
-              [countdown.hours, "Hrs", "var(--dash-cyan)"],
-              [countdown.minutes, "Min", "var(--dash-magenta)"],
-            ].map(([value, label, color]) => (
-              <div key={label as string} className="dash-countdown-box">
-                <div className="dash-countdown-num" style={{ color: color as string }}>
-                  {String(value).padStart(2, "0")}
+        <section className="hub-pride-live" aria-label="Pride week countdown">
+          <div className="hub-pride-live__top">
+            <h3 className="hub-pride-live__title">Pride Week</h3>
+            <span className="hub-pride-live__badge">
+              <i aria-hidden />
+              {live ? "Live" : "Soon"}
+            </span>
+          </div>
+          <span className="hub-pride-live__kicker">Jul 13 to 19 · Portland, OR</span>
+          {countdown ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 8,
+                marginTop: 4,
+              }}
+            >
+              {[
+                [countdown.days, "Days", "#ccff00"],
+                [countdown.hours, "Hrs", "#00ffff"],
+                [countdown.minutes, "Min", "#ff00cc"],
+              ].map(([value, label, color]) => (
+                <div
+                  key={label as string}
+                  style={{
+                    textAlign: "center",
+                    background: "rgba(255,255,255,0.04)",
+                    borderRadius: 10,
+                    padding: "10px 6px",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "var(--font-display), sans-serif",
+                      fontWeight: 900,
+                      fontSize: 28,
+                      lineHeight: 1,
+                      color: color as string,
+                    }}
+                  >
+                    {String(value).padStart(2, "0")}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "ui-monospace, monospace",
+                      fontSize: 9,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "#666",
+                      marginTop: 4,
+                    }}
+                  >
+                    {label}
+                  </div>
                 </div>
-                <div className="dash-mono" style={{ fontSize: 9, color: "#6f736c", marginTop: 4 }}>{label}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ marginTop: 14, fontSize: 14, color: "var(--dash-muted)" }}>Pride weekend is here.</div>
-        )}
-        {nextEvent && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginTop: 14,
-              paddingTop: 12,
-              borderTop: "1px solid rgba(255,255,255,.08)",
-              fontSize: 12.5,
-              color: "#cbc8c0",
-            }}
-          >
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--dash-lime)" }} />
-            Next up: <span style={{ color: "#fff", fontWeight: 600 }}>{nextEvent.title}</span>
-          </div>
-        )}
-      </section>
+              ))}
+            </div>
+          ) : (
+            <div style={{ marginTop: 10, fontSize: 14, color: "#999" }}>Pride weekend is here.</div>
+          )}
+          {nextEvent && (
+            <div className="hub-pride-live__next">
+              <span aria-hidden />
+              Next up: <b>{nextEvent.title}</b>
+            </div>
+          )}
+        </section>
       )}
     </div>
   );

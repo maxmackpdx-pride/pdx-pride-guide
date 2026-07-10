@@ -3,10 +3,12 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
+import CountUpValue from "@/components/CountUpValue";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
+import ScrollReveal from "@/components/ScrollReveal";
 import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
@@ -68,7 +70,7 @@ const FAQ = [
 
 export default function About() {
   usePageSeo(
-    "About PDX Pride Guide — Portland Pride 2026",
+    "About PDX Pride Guide | Portland Pride 2026",
     "Built by one person in Portland. Free Pride week directory with zero interest in being a sanitized corporate pamphlet.",
   );
 
@@ -88,10 +90,17 @@ export default function About() {
         <div className="about-v2-hero__scrim" aria-hidden="true" />
         <div className="about-v2-hero__inner">
           <div>
-            <div className="about-v2-hero__kicker">About · Portland Pride 2026</div>
+            <div className="about-v2-hero__kicker">
+              <span className="about-v2-hero__dot" aria-hidden="true" />
+              About · Portland Pride 2026
+            </div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">
-                {eventCount} events.
+                <CountUpValue
+                  key={eventCount > 0 ? "events-ready" : "events-pending"}
+                  value={eventCount}
+                />{" "}
+                events.
               </span>
               <span className="about-v2-hero__lede">
                 And approximately zero interest in being a sanitized corporate Pride pamphlet.
@@ -117,11 +126,18 @@ export default function About() {
       <section className="about-v2-stats" aria-label="Guide stats">
         <div className="about-v2-stats__grid">
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--lime">{eventCount}</div>
+            <div className="about-v2-stats__num about-v2-stats__num--lime">
+              <CountUpValue
+                key={eventCount > 0 ? "stats-ready" : "stats-pending"}
+                value={eventCount}
+              />
+            </div>
             <div className="about-v2-stats__label">Events, and counting</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--cyan">7</div>
+            <div className="about-v2-stats__num about-v2-stats__num--cyan">
+              <CountUpValue value={7} />
+            </div>
             <div className="about-v2-stats__label">Days, one guide</div>
           </div>
           <div className="about-v2-stats__cell">
@@ -129,7 +145,9 @@ export default function About() {
             <div className="about-v2-stats__label">To browse. Always.</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--amber">1</div>
+            <div className="about-v2-stats__num about-v2-stats__num--amber">
+              <CountUpValue value={1} />
+            </div>
             <div className="about-v2-stats__label">Person building it</div>
           </div>
         </div>
@@ -137,6 +155,7 @@ export default function About() {
 
       {/* MANIFESTO */}
       <section className="about-v2-manifesto">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">What this actually is</div>
           <div className="about-v2-manifesto__copy">
@@ -161,10 +180,12 @@ export default function About() {
             </p>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* MADE BY TUCKER */}
       <section className="about-v2-creator">
+        <ScrollReveal delay={30}>
         <div className="about-v2__inner">
           <div className="about-v2-creator__grid">
             <div className="about-v2-creator__photo">
@@ -225,8 +246,8 @@ export default function About() {
               </span>
               <p>
                 And yes, I&apos;m still looking for work. I&apos;m a brand builder, sales leader, and
-                momentum-maker. I know how to connect people, move product, and build something people
-                actually care about. If you know somebody, you know where to find me.
+                momentum-maker who loves people, big ideas, and turning good energy into real results.
+                If something or someone comes to mind, send them my way.
               </p>
             </div>
             <Link href="/resume">
@@ -261,10 +282,12 @@ export default function About() {
             <span className="about-v2-project__go">Listen →</span>
           </a>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* KEEP ALIVE */}
       <section className="about-v2-donate">
+        <ScrollReveal>
         <div className="about-v2-donate__row">
           <div>
             <h2>Keep this guide alive</h2>
@@ -282,10 +305,12 @@ export default function About() {
             <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* INFRASTRUCTURE */}
       <section className="about-v2-infra">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">Necessary homosexual infrastructure</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
@@ -306,10 +331,12 @@ export default function About() {
             </Link>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* HOW IT WORKS */}
       <section className="about-v2-how" id="how-it-works">
+        <ScrollReveal delay={30}>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">How it works</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
@@ -345,10 +372,12 @@ export default function About() {
           </div>
           <p className="about-v2-how__foot">Account required to post · No pay to rank · Ever</p>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* VALUES */}
       <section className="about-v2-values">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">Transparency</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>
@@ -365,10 +394,12 @@ export default function About() {
             ))}
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* SPONSORS */}
       <section className="about-v2-sponsors">
+        <ScrollReveal delay={30}>
         <div className="about-v2__inner">
           <div className="about-v2-sponsors__grid">
             <div className="about-v2-sponsors__copy">
@@ -406,10 +437,12 @@ export default function About() {
             </div>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* FAQ */}
       <section className="about-v2-faq">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">FAQ</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
@@ -427,6 +460,7 @@ export default function About() {
             ))}
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* CLOSE */}

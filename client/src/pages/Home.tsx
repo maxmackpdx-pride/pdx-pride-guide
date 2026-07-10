@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,11 +27,7 @@ import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
-import HomeSchedule from "@/components/HomeSchedule";
-import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
-
-const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
 const COMMUNITY_LINKS = {
   spotted: { href: "/spotted", label: "Spotted" },
@@ -57,7 +53,7 @@ type GigFeedPost = GigPost & {
 
 export default function Home() {
   usePageSeo(
-    "PDX Pride Guide — Portland Pride 2026 Events",
+    "PDX Pride Guide | Portland Pride 2026 Events",
     "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   );
 
@@ -115,11 +111,6 @@ export default function Home() {
     );
   }, [businesses]);
 
-  const mappedBusinesses = useMemo(
-    () => businesses.filter(b => b.lat != null && b.lng != null),
-    [businesses],
-  );
-
   const spottedCount = spotted.length > 0 ? spotted.length : BOARD_COUNT_FALLBACK.spotted;
   const giftingCount = gifting.length > 0 ? gifting.length : BOARD_COUNT_FALLBACK.gifting;
   const gigsCount = gigs.length > 0 ? gigs.length : BOARD_COUNT_FALLBACK.gigs;
@@ -149,56 +140,36 @@ export default function Home() {
         />
       </div>
 
-      <div className="pg-block pg-block--schedule" style={{ paddingTop: 36 }}>
-        <ScrollReveal>
-          <SectionHeader
-            kicker="All Week"
-            title="The Schedule"
-            subtitle="Seven days, side by side, stacked hour by hour. Saturday is a wall of color. Scroll sideways, tap anything that looks like trouble."
-            accent="cyan"
-            style={{ marginBottom: 0 }}
-            action={
-              <Link href="/schedule">
-                <Button as="span" accent="cyan" size="sm" arrow>
-                  View all events
-                </Button>
-              </Link>
-            }
-          />
-          <div className="pg-home-schedule">
-            <HomeSchedule />
-          </div>
-        </ScrollReveal>
-      </div>
-
-      {/* Find Your People: community board tiles (isolated section) */}
       <section className="home-boards" aria-label="Community boards">
         <div className="home-boards__seam" aria-hidden="true" />
         <div className="home-boards__halftone" aria-hidden="true" />
         <div className="home-boards__tints" aria-hidden="true" />
 
         <div className="home-boards__inner">
-          <div className="home-boards__running">
-            <div className="home-boards__kicker">
-              <span className="home-boards__dot" aria-hidden="true" />
-              The Community Boards
+          <ScrollReveal>
+            <div className="home-boards__running">
+              <div className="home-boards__kicker">
+                <span className="home-boards__dot" aria-hidden="true" />
+                The Community Boards
+              </div>
+              <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
+                All Boards →
+              </Link>
             </div>
-            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
-              All Boards →
-            </Link>
-          </div>
 
-          <div className="home-boards__header">
-            <h2 className="home-boards__title">
-              <span className="home-boards__title-plain">Find Your </span>
-              <span className="home-boards__title-grad">People</span>
-            </h2>
-            <p className="home-boards__sub">
-              Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
-            </p>
-          </div>
+            <div className="home-boards__header">
+              <h2 className="home-boards__title">
+                <span className="home-boards__title-plain">Community </span>
+                <span className="home-boards__title-grad">Boards</span>
+              </h2>
+              <p className="home-boards__sub">
+                Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <div className="home-boards__grid">
+            <ScrollReveal delay={0} className="home-boards__reveal">
             <Link
               href={COMMUNITY_LINKS.spotted.href}
               className="home-boards__card home-boards__card--spotted"
@@ -226,7 +197,9 @@ export default function Home() {
                 <span className="home-boards__cta">Browse Spotted →</span>
               </div>
             </Link>
+            </ScrollReveal>
 
+            <ScrollReveal delay={50} className="home-boards__reveal">
             <Link
               href={COMMUNITY_LINKS.gifting.href}
               className="home-boards__card home-boards__card--gifting"
@@ -254,7 +227,9 @@ export default function Home() {
                 <span className="home-boards__cta">Browse Gifting →</span>
               </div>
             </Link>
+            </ScrollReveal>
 
+            <ScrollReveal delay={100} className="home-boards__reveal">
             <Link
               href={COMMUNITY_LINKS.gigs.href}
               className="home-boards__card home-boards__card--gigs"
@@ -282,8 +257,10 @@ export default function Home() {
                 <span className="home-boards__cta">Browse Gigs →</span>
               </div>
             </Link>
+            </ScrollReveal>
           </div>
 
+          <ScrollReveal delay={150}>
           <div className="home-boards__foot">
             <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__post-link">
               <Button as="span" variant="solid" accent="lime" size="lg" arrow>
@@ -294,6 +271,7 @@ export default function Home() {
               Free to post. Be kind. Take care of each other.
             </span>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -309,23 +287,10 @@ export default function Home() {
             accent="cyan"
           />
           <div className="pg-places pg-places--dual">
-            <div id="home-map">
-              <Suspense
-                fallback={
-                  <div
-                    style={{ flex: 1, minHeight: 200, background: "var(--ink-900)" }}
-                    role="status"
-                    aria-label="Loading directory map"
-                  />
-                }
-              >
-                <DirectoryMap businesses={mappedBusinesses} height="100%" />
-              </Suspense>
-            </div>
             <div className="pg-placescol">
               <div className="pg-colhd">
-                <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>Spots</span>
-                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
+                <span className="pg-colhd__t pg-colhd__t--places">Our Places</span>
+                <span className="pg-colhd__rule pg-colhd__rule--places" />
               </div>
               <div className="pg-placescroll">
                 {featuredSpots.map(biz => (
@@ -341,8 +306,8 @@ export default function Home() {
                   />
                 )}
               </div>
-              <Link href="/directory" className="pg-board-more" style={{ color: "var(--cyan)" }}>
-                View more spots →
+              <Link href="/directory" className="pg-board-more pg-board-more--places">
+                View more places →
               </Link>
             </div>
             <div className="pg-placescol">

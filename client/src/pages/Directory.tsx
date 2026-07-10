@@ -5,14 +5,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import PageHeader from "@/components/PageHeader";
+import DirectoryHero from "@/components/DirectoryHero";
 import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin, Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
-import { parsePacificDateTime } from "@shared/missedConnections";
+import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { dayAccentToken } from "@/lib/dsColors";
@@ -21,6 +21,7 @@ import {
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
 import PlaceModal from "@/components/PlaceModal";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
@@ -51,6 +52,7 @@ export type Business = {
   lat: number | null;
   lng: number | null;
   isNew: boolean;
+  createdAt?: string;
   ownerId?: number | null;
   isOwner?: boolean;
   upcomingEvents?: DirectoryEventSummary[];
@@ -109,7 +111,7 @@ const blankDirectoryForm = () => ({
 
 export default function Directory() {
   usePageSeo(
-    "Queer Portland Directory — PDX Pride Guide",
+    "Queer Portland Directory | PDX Pride Guide",
     "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   );
 
@@ -133,6 +135,13 @@ export default function Directory() {
     refetchOnMount: "always",
   });
 
+  useEffect(() => {
+    const placeId = Number(new URLSearchParams(window.location.search).get("place"));
+    if (!placeId || !businesses.length) return;
+    const match = businesses.find(b => b.id === placeId);
+    if (match) setSelectedPlace(match);
+  }, [businesses]);
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return businesses
@@ -151,6 +160,21 @@ export default function Directory() {
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(businesses.map(b => b.neighborhood).filter(Boolean));
     return NEIGHBORHOODS.filter(n => n === "ALL" || seen.has(n));
+  }, [businesses]);
+
+  const heroStats = useMemo(() => {
+    const thisMonth = pacificTodayDate().slice(0, 7);
+    const grandOpeningsThisMonth = businesses.filter(b => {
+      if (!b.isNew) return false;
+      const createdMonth = b.createdAt ? pacificCalendarDate(b.createdAt)?.slice(0, 7) : null;
+      return !createdMonth || createdMonth === thisMonth;
+    }).length;
+    const hostingPrideEvents = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
+    return [
+      { num: businesses.length, label: "Total places", color: "#ff1fa0" },
+      { num: grandOpeningsThisMonth, label: "Total grand openings this month", color: "#ccff00" },
+      { num: hostingPrideEvents, label: "Total hosting Pride events", color: "#19e3ff" },
+    ];
   }, [businesses]);
 
   const createMutation = useMutation({
@@ -193,29 +217,18 @@ export default function Directory() {
   };
 
   return (
-    <div className="zine-page directory-page board-page">
+    <div className="zine-page directory-page board-page board-page--makeover">
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <PageHeader
-        section="Portland"
-        title="Queer Directory"
-        titleAccent="magenta"
-        kicker="Queer-owned · Queer-friendly · Community-rooted"
-        lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
-        actions={
-          <button type="button" className="btn-neon magenta" onClick={openAddForm}>
-            <Plus size={16} /> Add a place
-          </button>
-        }
-      />
+      <DirectoryHero placeCount={businesses.length} stats={heroStats} onAddPlace={openAddForm} />
 
       {formOpen && (
         <ScrollReveal>
-          <section id="directory-form" className="gifting-form-panel directory-form-panel">
+          <section id="directory-form" className="gifting-form-panel gifting-form-panel--makeover directory-form-panel">
             <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
               <X size={18} />
             </button>
             <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. Goes live immediately — keep it accurate and community-rooted.</p>
+            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. Goes live immediately. Keep it accurate and community-rooted.</p>
             <div className="gifting-form-grid">
               <label className="span">
                 Place name *
@@ -281,12 +294,15 @@ export default function Directory() {
 
       {/* Map + pin color key */}
       {!isLoading && (
-        <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
-          <DirectoryMap businesses={filtered} showKey />
-        </Suspense>
+        <ScrollReveal>
+          <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
+            <DirectoryMap businesses={filtered} showKey />
+          </Suspense>
+        </ScrollReveal>
       )}
 
       {/* Filter bar */}
+      <ScrollReveal delay={30}>
       <div className="zine-filter-bar" style={{
         background: "#000", borderBottom: "1px solid #1a1a1a",
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
@@ -347,6 +363,7 @@ export default function Directory() {
           })}
         </div>
       </div>
+      </ScrollReveal>
 
       <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
         <ScrollReveal>
@@ -377,17 +394,24 @@ export default function Directory() {
             </button>
           </div>
         ) : (
-          <div className="directory-grid">
-            {filtered.map(biz => (
-              <DirectoryCard key={biz.id} biz={biz} onClick={() => setSelectedPlace(biz)} />
-            ))}
-          </div>
+          <ScrollReveal delay={50}>
+            <div className="directory-grid">
+              {filtered.map(biz => (
+                <DirectoryCard key={biz.id} biz={biz} onClick={() => setSelectedPlace(biz)} />
+              ))}
+            </div>
+          </ScrollReveal>
         )}
       </div>
 
       {selectedPlace && (
         <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} onRequireAuth={() => setShowAuth(true)} />
       )}
+
+      <BoardCloseSeam
+        line="Show up. Spend queer. Keep them alive."
+        url="prideguidepdx.com/directory"
+      />
     </div>
   );
 }

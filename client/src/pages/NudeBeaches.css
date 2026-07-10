@@ -1,0 +1,736 @@
+/* Nude Beaches — tab-scoped wireframe (live strip → logistics → checklist → links) */
+
+/* ---- ANIMATIONS (Delta #2: Motion/DS Polish) ---- */
+@keyframes board-hero-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes board-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.nude-beaches-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 10% 6%, rgba(255, 102, 0, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(255, 31, 160, 0.06), transparent 24rem),
+    #06060a;
+}
+
+.nude-beaches-page .events-board-feed.board-active-feed {
+  background: transparent;
+  padding-top: clamp(20px, 3vw, 28px);
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+
+.nude-beaches-page .events-board-feed .board-active-feed__inner {
+  padding-inline: clamp(20px, 4vw, 44px);
+}
+
+.nude-beaches-page .nude-refresh-bar {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 44px) 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.nude-refresh-bar__meta {
+  font-size: 12px;
+  color: #8a8a8a;
+  letter-spacing: 0.04em;
+  margin-right: auto;
+}
+
+.nude-refresh-bar__meta strong,
+.nude-refresh-bar__time {
+  color: #d8d4cb;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@keyframes nbSpin {
+  to { transform: rotate(360deg); }
+}
+
+.nude-refresh-bar__spin {
+  animation: nbSpin 0.8s linear infinite;
+}
+
+.nude-beaches-map-row--enter {
+  animation: board-hero-in 0.5s 0.16s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.nude-beaches-map-row__actions--enter {
+  animation: board-hero-in 0.5s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.board-active-feed__kicker--live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-active-feed__eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 11px;
+}
+
+.board-active-feed__eq-bar {
+  width: 3px;
+  height: 11px;
+  background: currentColor;
+  transform-origin: bottom;
+  animation: pdxEqBounce 0.9s ease-in-out infinite;
+}
+
+.board-active-feed__eq-bar--2 {
+  animation-duration: 1.15s;
+  animation-delay: -0.3s;
+}
+
+.board-active-feed__eq-bar--3 {
+  animation-duration: 0.75s;
+  animation-delay: -0.15s;
+}
+
+@keyframes pdxEqBounce {
+  0%, 100% { transform: scaleY(0.22); }
+  50% { transform: scaleY(1); }
+}
+
+.nude-refresh-bar__stale {
+  color: #ffb347;
+  margin-left: 8px;
+}
+
+/* Live metrics — always a horizontal strip, never mixed with prose blocks */
+.nude-live-strip {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .nude-live-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nude-rooster-status {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.nude-rooster-status.nude-live-card--good { border-top: 3px solid #39ff14; }
+.nude-rooster-status.nude-live-card--warn { border-top: 3px solid #ffb347; }
+.nude-rooster-status.nude-live-card--bad { border-top: 3px solid #ff4d4d; }
+.nude-rooster-status.nude-live-card--neutral { border-top: 3px solid #19e3ff; }
+
+.nude-rooster-status__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.nude-rooster-status__level {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.nude-rooster-status__unit {
+  font-size: 0.42em;
+  color: #8a8a8a;
+  margin-left: 4px;
+}
+
+.nude-rooster-status__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #333;
+  background: #121218;
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nude-rooster-status__verdict {
+  margin: 12px 0 0;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.nude-rooster-status__meta {
+  margin: 8px 0 0;
+  color: #8a8a8a;
+  font-size: 12px;
+}
+
+.nude-rooster-status__advice {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(25, 227, 255, 0.08);
+  border: 1px solid rgba(25, 227, 255, 0.18);
+  color: #d8d4cb;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.nude-metric-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+@media (min-width: 900px) {
+  .nude-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nude-metric-tile {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-height: 108px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nude-metric-tile__label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.nude-metric-tile__value {
+  margin-top: 8px;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.nude-metric-tile__detail {
+  margin-top: auto;
+  padding-top: 8px;
+  color: #9a9a9a;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.nude-panel {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #1c1c22;
+}
+
+.nude-panel__kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.nude-panel__kicker--cyan { color: #19e3ff; }
+.nude-panel__kicker--magenta { color: #ff1fa0; }
+.nude-panel__kicker--orange { color: var(--neon-orange, #FF6600); }
+.nude-panel__kicker--lime { color: #ccff00; }
+
+.nude-panel__title {
+  margin: 0 0 12px;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.nude-live-card {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  padding: 16px 18px;
+  border-radius: 10px;
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nude-live-card--good { border-top: 3px solid #39ff14; }
+.nude-live-card--warn { border-top: 3px solid #ffb347; }
+.nude-live-card--bad { border-top: 3px solid #ff4d4d; }
+.nude-live-card--neutral { border-top: 3px solid #19e3ff; }
+
+.nude-live-card__label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  margin-bottom: 8px;
+}
+
+.nude-live-card__value {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.nude-live-card__subvalue {
+  font-size: 0.62em;
+  font-weight: 700;
+  color: #b8b4ab;
+  letter-spacing: 0.02em;
+}
+
+.nude-live-card__detail {
+  margin-top: auto;
+  padding-top: 10px;
+  color: #b8b4ab;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.nude-live-card__link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #19e3ff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nude-live-card__link:hover {
+  text-decoration: underline;
+}
+
+.nude-section-copy {
+  color: #b8b4ab;
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 68ch;
+  margin: 0;
+}
+
+.nude-prose {
+  color: #b8b4ab;
+  font-size: 14px;
+  line-height: 1.65;
+  max-width: 68ch;
+}
+
+.nude-prose ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.nude-prose li + li {
+  margin-top: 6px;
+}
+
+.nude-checklist {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .nude-checklist {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nude-checklist li {
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  padding: 14px 16px;
+  border-radius: 10px;
+}
+
+.nude-checklist strong {
+  display: block;
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.nude-rules {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: #b8b4ab;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.nude-resource-list {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .nude-resource-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nude-resource-link {
+  display: block;
+  border: 1px solid #24242c;
+  background: #0d0d10;
+  padding: 14px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.nude-resource-link:hover {
+  border-color: #19e3ff;
+}
+
+.nude-resource-link--primary {
+  border-left: 4px solid var(--neon-orange, #FF6600);
+}
+
+.nude-resource-link__title {
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.nude-resource-link__desc {
+  margin-top: 5px;
+  color: #9a9a9a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Tab body only — hide inactive panel from layout/a11y */
+.nude-tab-panel[hidden] {
+  display: none !important;
+}
+
+/* Map + hub row — board-standard layout (matches Events) */
+.nude-beaches-page .nude-beaches-map-row .events-map-row__panel .nb-hub {
+  height: 100%;
+  min-height: 0;
+}
+
+.nude-beaches-page .nude-beaches-map {
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* Explicit map height — avoid height:100% chain that collapses on mobile stack layout */
+.nude-beaches-page .nude-beaches-map__canvas {
+  height: clamp(380px, 48vh, 520px);
+  min-height: 320px;
+}
+
+.nude-beaches-page .nude-beaches-map__canvas .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+@media (min-width: 900px) {
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map .directory-map-wrap,
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map .nude-beaches-map {
+    height: 100%;
+  }
+
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map .nude-beaches-map__canvas {
+    height: 100%;
+    min-height: clamp(440px, 52vh, 600px);
+  }
+}
+
+@media (max-width: 899px) {
+  .nude-beaches-page .nude-beaches-map-row {
+    flex-direction: column;
+  }
+
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__map {
+    width: 100%;
+    order: -1;
+  }
+
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__panel {
+    height: auto;
+    min-height: 0;
+  }
+}
+
+/* Header — tabs align with lede last line, just above stats band */
+.nude-beaches-header {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.nude-beaches-hero-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(16px, 3vw, 32px);
+  padding: clamp(34px, 5vw, 60px) clamp(20px, 4vw, 44px) clamp(18px, 2.5vw, 24px);
+}
+
+.nude-beaches-hero-row .board-hero {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nude-beaches-page .nude-beaches-tab-bar {
+  position: static;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  border-bottom: none;
+}
+
+.nude-beaches-page .nude-beaches-tab-bar .events-tab {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 20.2px;
+  letter-spacing: 0.06em;
+  padding: 14px 26px 17px;
+  border-bottom-width: 4.3px;
+}
+
+.nude-beaches-page--sauvie.board-page--makeover {
+  background:
+    radial-gradient(circle at 10% 6%, rgba(25, 227, 255, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(0, 238, 68, 0.06), transparent 24rem),
+    #06060a;
+}
+
+.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-beaches-tab-bar .events-tab.active {
+  border-bottom-color: var(--neon-orange, #FF6600);
+}
+
+.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-beaches-tab-bar .events-tab:hover {
+  color: var(--neon-orange, #FF6600);
+}
+
+.nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab.active {
+  border-bottom-color: var(--neon-green, #00EE44);
+}
+
+.nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab:hover {
+  color: var(--neon-green, #00EE44);
+}
+
+/* ---- ANIMATION APPLICATIONS (entrance + motion) ---- */
+
+/* Hero entrance — fade + rise over 0.48s */
+.nude-beaches-hero-row {
+  animation: board-hero-in 0.48s var(--ease-out);
+}
+
+/* Stats band entrance — delayed by 0.07s, same motion */
+.nude-beaches-page .board-stats-band {
+  animation: board-hero-in 0.48s var(--ease-out) 0.07s both;
+}
+
+/* Live metric tiles — pulse when calm mode is off */
+.nude-live-card {
+  animation: pdxPulse var(--dur-pulse) ease-in-out infinite;
+  --dc: var(--neon-cyan);
+}
+
+/* Live LIVE NOW kicker — gentle blink */
+.board-active-feed__kicker {
+  animation: pdxBlink 2.5s ease-in-out infinite;
+}
+
+/* Live status indicator dot — blink pulse */
+.board-stats-bar__dot,
+.board-stats-band__dot {
+  animation: pdxBlink 1.2s ease-in-out infinite;
+}
+
+/* Footer seam — gentle glow pulse */
+.nude-beaches-page .board-close-seam {
+  animation: pdxSeamGlow 3s ease-in-out infinite;
+}
+
+/* Calm mode: silence animations except entrance (already past) */
+:root[data-calm="true"] .nude-live-card,
+html.calm-mode .nude-live-card {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-calm="true"] .board-active-feed__kicker,
+html.calm-mode .board-active-feed__kicker {
+  animation: none !important;
+}
+
+:root[data-calm="true"] .board-stats-bar__dot,
+:root[data-calm="true"] .board-stats-band__dot,
+html.calm-mode .board-stats-bar__dot,
+html.calm-mode .board-stats-band__dot {
+  animation: none !important;
+}
+
+:root[data-calm="true"] .board-close-seam,
+html.calm-mode .board-close-seam {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 899px) {
+  .nude-beaches-hero-row {
+    flex-wrap: wrap;
+    padding-top: clamp(20px, 4vw, 32px);
+  }
+
+  .nude-beaches-page .nude-beaches-tab-bar {
+    width: 100%;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+}
+
+.nude-beaches-map-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px clamp(20px, 4vw, 44px) 18px;
+}
+
+.nude-map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.nude-map-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  border: 1px solid #333;
+  border-radius: 999px;
+  color: #d8d4cb;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.nude-map-btn:hover {
+  border-color: #19e3ff;
+  color: #19e3ff;
+}
+
+.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-map-btn:hover {
+  border-color: var(--neon-orange, #FF6600);
+  color: var(--neon-orange, #FF6600);
+}
+
+.nude-beaches-page--sauvie .nude-map-btn:hover {
+  border-color: var(--neon-green, #00EE44);
+  color: var(--neon-green, #00EE44);
+}
+
+.nude-beaches-map__chip {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(5, 5, 7, 0.78);
+  border: 1px solid #24242c;
+  border-radius: 6px;
+  padding: 9px 13px;
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.nude-beaches-map__chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  animation: board-live-blink 1.8s ease-in-out infinite;
+}
+
+.nude-beaches-map__chip-title {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.nude-beaches-map__chip-sub {
+  display: block;
+  margin-top: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+html.calm-mode .nude-beaches-map-row--enter,
+html.calm-mode .nude-beaches-map-row__actions--enter,
+html.calm-mode .board-active-feed__eq-bar,
+html.calm-mode .nude-refresh-bar__spin,
+html.calm-mode .nude-beaches-map__chip-dot {
+  animation: none;
+}

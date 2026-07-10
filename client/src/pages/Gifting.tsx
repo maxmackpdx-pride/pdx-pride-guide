@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import BoardRunningHead from "@/components/BoardRunningHead";
+import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -98,7 +98,7 @@ function thumbGradient(post: GiftingPost) {
 
 export default function Gifting() {
   usePageSeo(
-    "Gifting Board — PDX Pride Guide | Portland Pride 2026",
+    "Gifting Board | PDX Pride Guide | Portland Pride 2026",
     "Give and find free stuff in Portland's queer community during Pride 2026 and beyond. PDX Pride gifting and ISO board.",
   );
   const { user } = useAuth();
@@ -306,12 +306,8 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page board-page--makeover">
-      <BoardRunningHead active="gifting" />
-      <BoardHero
-        accent="lime"
-        kicker="Free board · Pride season 2026"
-        title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
-        lede="A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
+      <CommunityBoardHeroRow
+        active="gifting"
         actions={
           <>
             <Button variant="solid" accent="lime" size="lg" arrow onClick={() => openForm("GIFT")}>
@@ -322,7 +318,14 @@ export default function Gifting() {
             </Button>
           </>
         }
-      />
+      >
+        <BoardHero
+          accent="lime"
+          kicker="Free board · Pride season 2026"
+          title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
+          lede="A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
+        />
+      </CommunityBoardHeroRow>
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
@@ -616,7 +619,7 @@ export default function Gifting() {
                           <div className="gifting-owner">
                             {post.status === "PENDING" && (
                               <p className="gifting-pending-note">
-                                Held for admin review — only you see this on the board until it&apos;s approved.
+                                Held for admin review. Only you see this on the board until it&apos;s approved.
                               </p>
                             )}
                             {post.interests?.length ? (
