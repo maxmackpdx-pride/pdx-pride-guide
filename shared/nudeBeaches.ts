@@ -126,11 +126,15 @@ export function crossingBandFromLevel(ft: number): { band: string; advice: strin
   };
 }
 
+/** ODFW Sauvie Island Beach Parking Program — official permit purchase portal. */
+export const SAUVIE_ISLAND_PARKING_URL =
+  "https://odfw.huntfishoregon.com/customer/catalog?target=sibpp";
+
 export const SAUVIE_ISLAND_RESOURCES: ResourceLink[] = [
   {
-    title: "Sauvie Island parking permits",
-    description: "Official portal for mandatory parking permits — only place to see if a date is sold out in real time.",
-    href: "https://www.sauvieislandparking.com/",
+    title: "Sauvie Island parking permits (ODFW)",
+    description: "Official ODFW portal to buy Sauvie Island beach parking permits — check live sold-out dates before you go.",
+    href: SAUVIE_ISLAND_PARKING_URL,
     priority: "primary",
   },
   {
@@ -159,7 +163,7 @@ export const SAUVIE_ISLAND_RESOURCES: ResourceLink[] = [
 export const SAUVIE_ISLAND_CHECKLIST = [
   {
     step: "Check permit status",
-    detail: "Weekends and holidays through Labor Day require a Sauvie Island parking permit. SauvieIslandParking.com is the only place to see sold-out dates live.",
+    detail: "Weekends and holidays through Labor Day require a Sauvie Island parking permit. Buy and check availability on the official ODFW portal.",
   },
   {
     step: "Check water safety",

@@ -15,6 +15,7 @@ import {
   ROOSTER_ROCK_MAPS,
   ROOSTER_ROCK_PARKING,
   SAUVIE_ISLAND_CHECKLIST,
+  SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_RESOURCES,
   SAUVIE_ISLAND_RULES,
   type NudeBeachTab,
@@ -205,8 +206,8 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
             {live.parkingNote ||
               "Weekends and holidays through Labor Day require a permit. Sold-out dates update on the official portal only."}
           </p>
-          <a className="nude-live-card__link" href={live.parkingHref} target="_blank" rel="noopener noreferrer">
-            Sauvie Island Parking →
+          <a className="nude-live-card__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
+            Buy parking permit (ODFW) →
           </a>
         </article>
 
@@ -239,7 +240,7 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
             Access via the Sauvie Island bridge; permit-controlled parking on busy days.
           </p>
           <ul>
-            <li>Check SauvieIslandParking.com first on weekends and holidays.</li>
+            <li>Buy parking permits on the official ODFW portal before weekends and holidays.</li>
             <li>SICA beaches page consolidates island-wide alerts (roads, bridge, access).</li>
             <li>Windfinder at Reeder Beach is the best live read for wind and tide patterns nearby.</li>
           </ul>

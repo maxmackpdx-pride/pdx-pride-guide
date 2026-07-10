@@ -1,6 +1,7 @@
 import { sqlite } from "./storage";
 import {
   crossingBandFromLevel,
+  SAUVIE_ISLAND_PARKING_URL,
   type NudeBeachesSnapshot,
   type RoosterRockLive,
   type SauvieIslandLive,
@@ -152,17 +153,17 @@ async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStat
 
 async function fetchParkingNote(): Promise<string | null> {
   try {
-    const html = await fetchText("https://www.sauvieislandparking.com/");
+    const html = await fetchText(SAUVIE_ISLAND_PARKING_URL);
     const soldOut = /sold\s*out/i.test(html);
     const available = /available/i.test(html);
-    if (soldOut) return "At least one permit date appears sold out on the official portal — verify before you drive out.";
-    if (available) return "Permit inventory appears open on the official portal — confirm your date before you go.";
+    if (soldOut) return "At least one permit date appears sold out on the ODFW portal — verify before you drive out.";
+    if (available) return "Permit inventory appears open on the ODFW portal — confirm your date before you go.";
     if (html.length < 800) {
-      return "Permit portal loads dynamically — open SauvieIslandParking.com to check live sold-out dates.";
+      return "Permit portal loads dynamically — open the ODFW link to check live sold-out dates.";
     }
-    return "Check SauvieIslandParking.com for live permit availability on weekends and holidays through Labor Day.";
+    return "Buy and check permit availability on the official ODFW portal for weekends and holidays through Labor Day.";
   } catch {
-    return "Could not reach the permit portal — open SauvieIslandParking.com to check live sold-out dates.";
+    return "Could not reach the ODFW permit portal — use the parking link to check sold-out dates before you go.";
   }
 }
 
@@ -256,7 +257,7 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
     lastSampleAt: null,
     swimSummary: null,
     parkingNote: null,
-    parkingHref: "https://www.sauvieislandparking.com/",
+    parkingHref: SAUVIE_ISLAND_PARKING_URL,
     weatherSummary: null,
     airTempF: null,
     wind: null,
