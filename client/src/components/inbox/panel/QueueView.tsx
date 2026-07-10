@@ -1,19 +1,29 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { apiRequest } from "@/lib/queryClient";
+import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import { C, MONO } from "./sheet";
 
-type Row = {
+type QueueRowKind =
+  | "submission"
+  | "river_brats"
+  | "gifting_report"
+  | "gifting_flagged"
+  | "spotted";
+
+type QueueRow = {
   id: string;
+  kind: QueueRowKind;
+  entityId: number;
   tag: string;
   tagColor: string;
   title: string;
   meta: string;
-  claim: string;
   fields: Array<[string, string]>;
   note: string;
-  approveId?: number;
+  body?: string;
 };
 
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
@@ -25,41 +35,110 @@ const TYPE_TAG: Record<string, { label: string; color: string }> = {
   BUSINESS: { label: "PLACE", color: C.orange },
 };
 
+const TERMINAL_GIFTING = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
+
 function ts(v: unknown): string {
   if (!v) return "";
   const d = new Date(String(v));
   return isNaN(d.getTime()) ? String(v) : d.toLocaleString();
 }
 
-function mapSubmission(s: any): Row {
+function mapSubmission(s: any): QueueRow | null {
+  if (String(s.status).toUpperCase() !== "PENDING") return null;
   const t = TYPE_TAG[s.type] || { label: String(s.type || "ITEM"), color: C.cyan };
   const fields: Array<[string, string]> = [];
   if (s.venueName) fields.push(["Where", s.venueName + (s.address ? ` · ${s.address}` : "")]);
   if (s.dateStart) fields.push(["When", ts(s.dateStart)]);
-  if (s.admission) fields.push(["Cost", String(s.admission)]);
-  if (s.dayOfWeek) fields.push(["Day", String(s.dayOfWeek)]);
   if (s.submitterEmail) fields.push(["From", String(s.submitterEmail)]);
   return {
     id: `sub-${s.id}`,
+    kind: "submission",
+    entityId: s.id,
     tag: t.label,
     tagColor: t.color,
     title: s.title || s.name || "Untitled submission",
     meta: `Submitted by ${s.submittedBy || s.submitterEmail || "someone"}${s.createdAt ? " · " + ts(s.createdAt) : ""}`,
-    claim: "UNCLAIMED",
     fields,
-    note: s.note || s.description || "",
-    approveId: s.id,
+    note: s.description || "",
+    body: s.claimReason || undefined,
   };
 }
 
-function mapReport(r: any): Row {
+function mapRiverBratsReport(r: any): QueueRow | null {
+  if (String(r.status).toUpperCase() !== "PENDING") return null;
+  return {
+    id: `rb-${r.id}`,
+    kind: "river_brats",
+    entityId: r.id,
+    tag: "RIVER BRATS",
+    tagColor: C.orange,
+    title: `${r.target_type || "Content"} #${r.target_id}`,
+    meta: `${r.reason || "Reported"}${r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
+    fields: [
+      ["Target", `${r.target_type || "—"} #${r.target_id ?? "—"}`],
+      ["Reason", String(r.reason || "—")],
+    ],
+    note: r.details || r.message || "",
+  };
+}
+
+function mapGiftingReport(r: any): QueueRow | null {
+  if (String(r.status).toUpperCase() !== "PENDING") return null;
+  return {
+    id: `gr-${r.id}`,
+    kind: "gifting_report",
+    entityId: r.id,
+    tag: "GIFT REPORT",
+    tagColor: C.red,
+    title: r.postTitle || `Report #${r.id}`,
+    meta: String(r.reason || "Flagged gifting post"),
+    fields: [["Post", String(r.postTitle || r.postId || "—")]],
+    note: r.message || "",
+  };
+}
+
+function mapGiftingFlagged(p: any): QueueRow | null {
+  if (TERMINAL_GIFTING.has(String(p.status).toUpperCase())) return null;
+  if (Number(p.reportCount || 0) <= 0) return null;
+  return {
+    id: `gp-${p.id}`,
+    kind: "gifting_flagged",
+    entityId: p.id,
+    tag: "FLAGGED GIFT",
+    tagColor: C.purple,
+    title: p.title || `Gifting post #${p.id}`,
+    meta: `${p.postType || "POST"} · ${p.reportCount} report(s)`,
+    fields: [["Status", String(p.status || "—")]],
+    note: p.description || "",
+  };
+}
+
+function mapSpotted(p: any): QueueRow | null {
+  if (String(p.status).toUpperCase() !== "ACTIVE") return null;
+  return {
+    id: `sp-${p.id}`,
+    kind: "spotted",
+    entityId: p.id,
+    tag: "SPOTTED",
+    tagColor: C.magenta,
+    title: p.title || `Spotted #${p.id}`,
+    meta: p.eventTitle
+      ? `${p.eventTitle}${p.venueHint ? ` · ${p.venueHint}` : ""}`
+      : (p.venueHint || "Around town"),
+    fields: p.username ? [["Poster", String(p.displayName || p.username)]] : [],
+    note: p.body || "",
+  };
+}
+
+function mapOwnerReport(r: any): QueueRow {
   return {
     id: `fb-${r.id}`,
+    kind: "submission",
+    entityId: r.id,
     tag: "REPORT",
     tagColor: C.red,
     title: r.subject || r.reason || "Flagged content",
     meta: `${r.count ? r.count + " reports" : "Reported"}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
-    claim: "",
     fields: [
       ["Reason", String(r.reason || r.message || "—")],
       ["Target", String(r.targetType || r.context || "—")],
@@ -68,10 +147,22 @@ function mapReport(r: any): Row {
   };
 }
 
+function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/river-brats/reports"] });
+  qc.invalidateQueries({ queryKey: ["/api/gifting"] });
+  qc.invalidateQueries({ queryKey: ["/api/missed-connections"] });
+}
+
 export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
+  const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
   const accent = mode === "admin" ? C.magenta : C.purple;
 
   const { data: subs = [] } = useQuery<any[]>({
@@ -79,13 +170,30 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
     queryFn: () => fetch("/api/admin/submissions", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
     enabled: mode === "admin",
   });
-  const { data: reports = [] } = useQuery<any[]>({
+  const { data: giftingAdmin } = useQuery<{ posts: any[]; reports: any[] }>({
+    queryKey: ["/api/admin/gifting"],
+    queryFn: () => apiRequest("GET", "/api/admin/gifting").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: spotted = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/missed-connections"],
+    queryFn: () => apiRequest("GET", "/api/admin/missed-connections").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: riverBratsReports = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/river-brats/reports"],
+    queryFn: () => apiRequest("GET", "/api/admin/river-brats/reports").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: ownerReports = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/feedback"],
     queryFn: () => fetch("/api/admin/feedback", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
     enabled: mode === "owner",
   });
 
-  const approve = useMutation({
+  const onQueueSuccess = () => invalidateAdminQueue(qc);
+
+  const approveSub = useMutation({
     mutationFn: (id: number) =>
       fetch(`/api/admin/submissions/${id}/approve`, {
         method: "POST",
@@ -93,12 +201,9 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminName: user?.displayName || user?.username || "admin" }),
       }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
-    },
+    onSuccess: onQueueSuccess,
   });
-  const decline = useMutation({
+  const declineSub = useMutation({
     mutationFn: (id: number) =>
       fetch(`/api/admin/submissions/${id}/reject`, {
         method: "POST",
@@ -106,14 +211,90 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason: "" }),
       }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
-    },
+    onSuccess: onQueueSuccess,
+  });
+  const resolveRiverBrats = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/river-brats/reports/${id}/resolve`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const resolveGiftingReport = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/gifting/reports/${id}/resolve`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const rejectGifting = useMutation({
+    mutationFn: ({ id, reasonCode, note }: { id: number; reasonCode: string; note: string }) =>
+      apiRequest("POST", `/api/admin/gifting/${id}/reject`, { reasonCode, note }),
+    onSuccess: onQueueSuccess,
+  });
+  const approveSpotted = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/missed-connections/${id}/approve`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const removeSpotted = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/missed-connections/${id}`),
+    onSuccess: onQueueSuccess,
+  });
+  const rejectSpotted = useMutation({
+    mutationFn: ({ id, reasonCode, note }: { id: number; reasonCode: string; note: string }) =>
+      apiRequest("POST", `/api/admin/missed-connections/${id}/reject`, { reasonCode, note }),
+    onSuccess: onQueueSuccess,
   });
 
-  const rows: Row[] = mode === "admin" ? subs.map(mapSubmission) : reports.map(mapReport);
+  const rows: QueueRow[] = useMemo(() => {
+    if (mode === "owner") return ownerReports.map(mapOwnerReport);
+    const items: QueueRow[] = [];
+    for (const s of subs) {
+      const row = mapSubmission(s);
+      if (row) items.push(row);
+    }
+    for (const r of riverBratsReports) {
+      const row = mapRiverBratsReport(r);
+      if (row) items.push(row);
+    }
+    for (const r of giftingAdmin?.reports || []) {
+      const row = mapGiftingReport(r);
+      if (row) items.push(row);
+    }
+    for (const p of giftingAdmin?.posts || []) {
+      const row = mapGiftingFlagged(p);
+      if (row) items.push(row);
+    }
+    for (const p of spotted) {
+      const row = mapSpotted(p);
+      if (row) items.push(row);
+    }
+    return items;
+  }, [mode, subs, riverBratsReports, giftingAdmin, spotted, ownerReports]);
+
+  const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
+    || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
+    || removeSpotted.isPending || rejectSpotted.isPending;
+
   const kicker = mode === "admin" ? "SHARED QUEUE · WORKED BY THE WHOLE TEAM" : "OWNER DESK · JUST YOU";
+
+  const btn = (label: string, color: string, onClick: () => void, outline = false) => (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      style={{
+        flex: 1,
+        padding: "8px 14px",
+        borderRadius: 999,
+        border: outline ? `1.5px solid ${color}` : "none",
+        background: outline ? "none" : color,
+        color: outline ? color : "#06060a",
+        fontFamily: MONO,
+        fontSize: 9.5,
+        letterSpacing: ".07em",
+        fontWeight: 700,
+        cursor: pending ? "wait" : "pointer",
+        opacity: pending ? 0.6 : 1,
+      }}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <>
@@ -142,6 +323,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
         <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
           {rows.map((q, i) => {
             const isOpen = !!open[q.id];
+            const rejectKey = q.id;
             return (
               <div key={q.id} style={{ borderTop: i > 0 ? `1px solid ${C.border2}` : undefined, background: isOpen ? "#101014" : undefined }}>
                 <div
@@ -165,11 +347,6 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                       >
                         {q.tag}
                       </span>
-                      {q.claim && (
-                        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: ".08em", fontWeight: 600, color: accent }}>
-                          {q.claim}
-                        </span>
-                      )}
                     </div>
                     <div style={{ fontWeight: 600, fontSize: 14.5, color: C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {q.title}
@@ -181,7 +358,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                   </span>
                 </div>
                 {isOpen && (
-                  <div style={{ padding: "0 16px 16px" }}>
+                  <div style={{ padding: "0 16px 16px" }} onClick={(e) => e.stopPropagation()}>
                     {q.fields.length > 0 && (
                       <div style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${C.border2}` }}>
                         {q.fields.map(([label, value], fi) => (
@@ -194,70 +371,59 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                         ))}
                       </div>
                     )}
-                    {q.note && (
-                      <div style={{ marginTop: 10, background: C.inset, borderRadius: 12, padding: "11px 13px", fontSize: 12.5, color: C.muted, lineHeight: 1.45 }}>
-                        {q.note}
+                    {(q.note || q.body) && (
+                      <div style={{ marginTop: 10, background: C.inset, borderRadius: 12, padding: "11px 13px", fontSize: 12.5, color: C.muted, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>
+                        {q.body || q.note}
                       </div>
                     )}
-                    <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                      {mode === "admin" && q.approveId != null ? (
+                    <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+                      {q.kind === "submission" && (
                         <>
-                          <button
-                            onClick={() => approve.mutate(q.approveId!)}
-                            style={{
-                              flex: 1,
-                              padding: "8px 14px",
-                              borderRadius: 999,
-                              border: "none",
-                              background: C.green,
-                              color: "#06060a",
-                              fontFamily: MONO,
-                              fontSize: 9.5,
-                              letterSpacing: ".07em",
-                              fontWeight: 700,
-                              cursor: "pointer",
-                            }}
-                          >
-                            APPROVE
-                          </button>
-                          <button
-                            onClick={() => decline.mutate(q.approveId!)}
-                            style={{
-                              flex: 1,
-                              padding: "8px 14px",
-                              borderRadius: 999,
-                              border: `1.5px solid ${C.red}`,
-                              background: "none",
-                              color: C.red,
-                              fontFamily: MONO,
-                              fontSize: 9.5,
-                              letterSpacing: ".07em",
-                              fontWeight: 700,
-                              cursor: "pointer",
-                            }}
-                          >
-                            DECLINE
-                          </button>
+                          {btn("APPROVE", C.green, () => approveSub.mutate(q.entityId))}
+                          {btn("DECLINE", C.red, () => declineSub.mutate(q.entityId), true)}
                         </>
-                      ) : (
-                        <button
-                          style={{
-                            flex: 1,
-                            padding: "8px 16px",
-                            borderRadius: 999,
-                            border: `1.5px solid ${accent}`,
-                            background: "none",
-                            color: accent,
-                            fontFamily: MONO,
-                            fontSize: 9.5,
-                            letterSpacing: ".07em",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                          }}
-                        >
-                          REVIEW
-                        </button>
                       )}
+                      {q.kind === "river_brats" && btn("RESOLVE", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
+                      {q.kind === "gifting_report" && btn("RESOLVE REPORT", C.limeSoft, () => resolveGiftingReport.mutate(q.entityId))}
+                      {q.kind === "gifting_flagged" && (
+                        <div style={{ width: "100%" }}>
+                          <AdminBoardReject
+                            compact
+                            reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
+                            note={rejectNotes[rejectKey] || ""}
+                            onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
+                            onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
+                            onReject={() => rejectGifting.mutate({
+                              id: q.entityId,
+                              reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
+                              note: rejectNotes[rejectKey] || "",
+                            })}
+                            pending={pending}
+                          />
+                        </div>
+                      )}
+                      {q.kind === "spotted" && (
+                        <>
+                          {btn("CLEAR FROM QUEUE", C.green, () => approveSpotted.mutate(q.entityId))}
+                          {btn("REMOVE", C.red, () => removeSpotted.mutate(q.entityId), true)}
+                          <div style={{ width: "100%", marginTop: 4 }}>
+                            <AdminBoardReject
+                              compact
+                              reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
+                              note={rejectNotes[rejectKey] || ""}
+                              onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
+                              onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
+                              onReject={() => rejectSpotted.mutate({
+                                id: q.entityId,
+                                reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
+                                note: rejectNotes[rejectKey] || "",
+                              })}
+                              pending={pending}
+                            />
+                          </div>
+                        </>
+                      )}
+                      {mode === "owner" && btn("REVIEW", accent, () => {}, true)}
                     </div>
                   </div>
                 )}

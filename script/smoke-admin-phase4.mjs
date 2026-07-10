@@ -86,7 +86,8 @@ try {
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   const legacyQueue = page.url().includes("tab=overview");
   const sheetAfterQueue = await page.locator(".inbox-overlay").isVisible().catch(() => false);
-  record("Legacy ?tab=queue → overview + sheet", legacyQueue && sheetAfterQueue, `url=${page.url()} sheet=${sheetAfterQueue}`);
+  const queueKicker = await page.locator(".inbox-overlay").getByText(/SHARED QUEUE/i).isVisible().catch(() => false);
+  record("Legacy ?tab=queue → overview + admin sheet", legacyQueue && sheetAfterQueue && queueKicker, `url=${page.url()} sheet=${sheetAfterQueue} kicker=${queueKicker}`);
 
   await page.keyboard.press("Escape");
   await page.waitForTimeout(300);
@@ -99,7 +100,10 @@ try {
   const statsHeading = statsSheet
     ? await page.locator(".inbox-overlay").getByText("STATS", { exact: true }).isVisible().catch(() => false)
     : false;
-  record("Legacy ?tab=stats → overview + stats sheet", legacyStats && statsSheet && statsHeading, `url=${page.url()} stats=${statsHeading}`);
+  const memberGrowth = statsSheet
+    ? await page.locator(".inbox-overlay").getByText(/MEMBER GROWTH/i).isVisible().catch(() => false)
+    : false;
+  record("Legacy ?tab=stats → overview + stats sheet", legacyStats && statsSheet && statsHeading, `url=${page.url()} stats=${statsHeading} memberGrowth=${memberGrowth}`);
 
   await page.keyboard.press("Escape");
   await page.waitForTimeout(300);
