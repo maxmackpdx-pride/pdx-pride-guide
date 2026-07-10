@@ -1,5 +1,4 @@
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { lazyWithReload } from "@/lib/lazyWithReload";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -7,6 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
 import NudeBeachesHero from "@/components/NudeBeachesHero";
+import NudeBeachesMap from "@/components/NudeBeachesMap";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -27,32 +27,6 @@ import {
   type ResourceLink,
 } from "@shared/nudeBeaches";
 import "./NudeBeaches.css";
-
-const NudeBeachesMap = lazyWithReload(() => import("@/components/NudeBeachesMap"));
-
-function BeachMapSection({
-  tab,
-  links,
-}: {
-  tab: NudeBeachTab;
-  links: ReadonlyArray<{ label: string; href: string }>;
-}) {
-  return (
-    <section className="nude-panel">
-      <div className="nude-panel__kicker nude-panel__kicker--cyan">Maps &amp; directions</div>
-      <Suspense fallback={<div className="directory-map" style={{ height: 300, background: "#0a0a0a" }} />}>
-        <NudeBeachesMap tab={tab} height={300} />
-      </Suspense>
-      <div className="nude-map-actions">
-        {links.map(map => (
-          <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
-            {map.label}
-          </a>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 type ApiPayload = {
   data: NudeBeachesSnapshot;
@@ -239,7 +213,6 @@ function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
         </div>
       </section>
 
-      <BeachMapSection tab="rooster-rock" links={ROOSTER_ROCK_MAPS} />
     </div>
   );
 }
@@ -309,8 +282,6 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
           </ul>
         </div>
       </section>
-
-      <BeachMapSection tab="sauvie-island" links={SAUVIE_ISLAND_MAPS} />
 
       <section className="nude-panel">
         <div className="nude-panel__kicker nude-panel__kicker--lime">Before you go</div>
@@ -433,6 +404,19 @@ export default function NudeBeaches() {
           {refreshMutation.isPending ? "Refreshing…" : "Refresh"}
         </Button>
       </div>
+
+      <ScrollReveal delay={20}>
+        <div className="nude-beaches-map-row">
+          <NudeBeachesMap key={activeTab} tab={activeTab} />
+          <div className="nude-beaches-map-row__actions">
+            {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
+              <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
+                {map.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </ScrollReveal>
 
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">

@@ -366,10 +366,26 @@
   display: none !important;
 }
 
+/* Full-bleed map row — matches Directory map placement */
+.nude-beaches-map-row {
+  width: 100%;
+  background: #000;
+  border-bottom: 1px solid #1a1a1a;
+}
+
 .nude-beaches-page .nude-beaches-map {
-  border: 1px solid #1a1a1a;
+  border: none;
   border-radius: 0;
   overflow: hidden;
+}
+
+.nude-beaches-map-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px clamp(20px, 4vw, 44px) 18px;
 }
 
 .nude-map-actions {
