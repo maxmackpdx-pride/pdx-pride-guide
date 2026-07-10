@@ -59,6 +59,15 @@ function statusClass(status?: string | null) {
   return "nude-live-card--neutral";
 }
 
+function formatShortTime(iso?: string | null) {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  } catch {
+    return null;
+  }
+}
+
 function ResourceList({ links }: { links: ResourceLink[] }) {
   return (
     <div className="nude-resource-list">
@@ -81,21 +90,32 @@ function ResourceList({ links }: { links: ResourceLink[] }) {
 function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
   const live = data.roosterRock;
   const worth = live.worthCrossing;
+  const lowTime = formatShortTime(live.todayLowAt);
+  const highTime = formatShortTime(live.todayHighAt);
 
   return (
     <div className="nude-tab-panel">
       <div className="nude-live-strip">
         <article className={`nude-live-card ${statusClass(worth === false ? "bad" : worth ? "good" : "neutral")}`}>
-          <div className="nude-live-card__label">River level · USGS</div>
+          <div className="nude-live-card__label">River level · USGS 14128870</div>
           <div className="nude-live-card__value">
             {live.riverLevelFt != null ? `${live.riverLevelFt.toFixed(2)} ft` : "—"}
+            {live.crossingBand ? (
+              <span className="nude-live-card__subvalue"> · {live.crossingBand}</span>
+            ) : null}
           </div>
           <p className="nude-live-card__detail">
-            {live.crossingBand ? `${live.crossingBand}. ` : ""}
-            {live.crossingAdvice || "Gage at Bonneville Dam — check roosterrockcrossing.com for charts."}
+            {live.crossingWindowNote || live.crossingAdvice || "Gage below Bonneville Dam — relative guide for the Sand Island crossing."}
+            {live.todayLowFt != null && live.todayHighFt != null && !live.crossingWindowNote ? (
+              <>
+                {" "}
+                Today: {live.todayLowFt.toFixed(2)} ft{lowTime ? ` (${lowTime})` : ""} – {live.todayHighFt.toFixed(2)} ft
+                {highTime ? ` (${highTime})` : ""}.
+              </>
+            ) : null}
           </p>
           <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
-            Full level history →
+            Charts &amp; level history →
           </a>
         </article>
 

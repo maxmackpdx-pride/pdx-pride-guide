@@ -100,6 +100,13 @@
   line-height: 1.1;
 }
 
+.nude-live-card__subvalue {
+  font-size: 0.62em;
+  font-weight: 700;
+  color: #b8b4ab;
+  letter-spacing: 0.02em;
+}
+
 .nude-live-card__detail {
   margin-top: auto;
   padding-top: 10px;

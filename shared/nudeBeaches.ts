@@ -20,6 +20,11 @@ export type ResourceLink = {
 export type RoosterRockLive = {
   riverLevelFt: number | null;
   riverLevelAt: string | null;
+  todayLowFt: number | null;
+  todayLowAt: string | null;
+  todayHighFt: number | null;
+  todayHighAt: string | null;
+  crossingWindowNote: string | null;
   crossingBand: string | null;
   crossingAdvice: string | null;
   worthCrossing: boolean | null;

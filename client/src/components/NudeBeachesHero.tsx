@@ -16,11 +16,15 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
           num: snapshot?.roosterRock.riverLevelFt != null
             ? Number(snapshot.roosterRock.riverLevelFt.toFixed(1))
             : "—",
-          label: "ft · Columbia gage",
+          label: snapshot?.roosterRock.crossingBand || "ft · Columbia gage",
           color:
-            snapshot?.roosterRock.riverLevelFt != null && snapshot.roosterRock.riverLevelFt < 18
-              ? "#19e3ff"
-              : "#ff8c00",
+            snapshot?.roosterRock.worthCrossing === false
+              ? "#ff8c00"
+              : snapshot?.roosterRock.riverLevelFt != null && snapshot.roosterRock.riverLevelFt < 15
+                ? "#19e3ff"
+                : snapshot?.roosterRock.riverLevelFt != null
+                  ? "#ffb347"
+                  : "#19e3ff",
         },
         {
           num: snapshot?.roosterRock.waterTempF != null ? `${Math.round(snapshot.roosterRock.waterTempF)}°` : "—",

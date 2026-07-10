@@ -73,7 +73,59 @@ async function fetchJson<T>(url: string): Promise<T> {
   return JSON.parse(text) as T;
 }
 
-async function fetchUsgsRiverLevel(): Promise<{ ft: number; at: string } | null> {
+type UsgsRiverSnapshot = {
+  ft: number;
+  at: string;
+  todayLowFt: number | null;
+  todayLowAt: string | null;
+  todayHighFt: number | null;
+  todayHighAt: string | null;
+  crossingWindowNote: string | null;
+};
+
+function crossingWindowNoteFromSeries(
+  series: Array<{ ft: number; at: string }>,
+  latest: { ft: number; at: string },
+): string | null {
+  if (series.length < 2) return null;
+
+  const midnight = new Date();
+  midnight.setHours(0, 0, 0, 0);
+  const today = series.filter(p => new Date(p.at).getTime() >= midnight.getTime());
+  const window = today.length ? today : series.slice(-96);
+  if (!window.length) return null;
+
+  let lo = window[0];
+  let hi = window[0];
+  for (const p of window) {
+    if (p.ft < lo.ft) lo = p;
+    if (p.ft > hi.ft) hi = p;
+  }
+
+  const target = new Date(latest.at).getTime() - 3_600_000;
+  let past = series[0];
+  for (let i = series.length - 1; i >= 0; i--) {
+    if (new Date(series[i].at).getTime() <= target) {
+      past = series[i];
+      break;
+    }
+  }
+  const delta = latest.ft - past.ft;
+  const loTime = new Date(lo.at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+  if (latest.ft - lo.ft < 0.15) {
+    return `About as low as it's been today — a good window to cross. Today's range: ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
+  }
+  if (delta < -0.1) {
+    return `Should keep getting easier over the next few hours. Today's range: ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
+  }
+  if (delta > 0.1) {
+    return `Earlier is better, or wait for the next low (today's was ${lo.ft.toFixed(2)} ft around ${loTime}). Today's range: ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
+  }
+  return `Today the level has ranged ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
+}
+
+async function fetchUsgsRiverLevel(): Promise<UsgsRiverSnapshot | null> {
   const data = await fetchJson<{
     value: {
       timeSeries: Array<{
@@ -81,13 +133,38 @@ async function fetchUsgsRiverLevel(): Promise<{ ft: number; at: string } | null>
       }>;
     };
   }>(
-    "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=14128870&parameterCd=00065&siteStatus=all",
+    "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=14128870&parameterCd=00065&period=P1D&siteStatus=all",
   );
-  const point = data.value?.timeSeries?.[0]?.values?.[0]?.value?.[0];
-  if (!point?.value) return null;
-  const ft = Number(point.value);
-  if (!Number.isFinite(ft)) return null;
-  return { ft, at: point.dateTime };
+  const points = data.value?.timeSeries?.[0]?.values?.[0]?.value ?? [];
+  if (!points.length) return null;
+
+  const series = points
+    .map(p => ({ ft: Number(p.value), at: p.dateTime }))
+    .filter(p => Number.isFinite(p.ft));
+  if (!series.length) return null;
+
+  const latest = series[series.length - 1];
+  const midnight = new Date();
+  midnight.setHours(0, 0, 0, 0);
+  const today = series.filter(p => new Date(p.at).getTime() >= midnight.getTime());
+  const window = today.length ? today : series.slice(-96);
+
+  let lo = window[0];
+  let hi = window[0];
+  for (const p of window) {
+    if (p.ft < lo.ft) lo = p;
+    if (p.ft > hi.ft) hi = p;
+  }
+
+  return {
+    ft: latest.ft,
+    at: latest.at,
+    todayLowFt: lo.ft,
+    todayLowAt: lo.at,
+    todayHighFt: hi.ft,
+    todayHighAt: hi.at,
+    crossingWindowNote: crossingWindowNoteFromSeries(series, latest),
+  };
 }
 
 type NwsForecast = {
@@ -210,6 +287,11 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
   const base: RoosterRockLive = {
     riverLevelFt: null,
     riverLevelAt: null,
+    todayLowFt: null,
+    todayLowAt: null,
+    todayHighFt: null,
+    todayHighAt: null,
+    crossingWindowNote: null,
     crossingBand: null,
     crossingAdvice: null,
     worthCrossing: null,
@@ -233,6 +315,11 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
       const band = crossingBandFromLevel(river.ft);
       base.riverLevelFt = river.ft;
       base.riverLevelAt = river.at;
+      base.todayLowFt = river.todayLowFt;
+      base.todayLowAt = river.todayLowAt;
+      base.todayHighFt = river.todayHighFt;
+      base.todayHighAt = river.todayHighAt;
+      base.crossingWindowNote = river.crossingWindowNote;
       base.crossingBand = band.band;
       base.crossingAdvice = band.advice;
       base.worthCrossing = band.worthCrossing;
