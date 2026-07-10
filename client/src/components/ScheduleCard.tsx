@@ -44,7 +44,7 @@ export default function ScheduleCard({
         )}
       </div>
       {description && <p className="sc-desc">{description}</p>}
-      <div className="sc-seam" />
+      <div className="sc-seam pdx-rainbow-rule" />
       <div className="sc-body">{children}</div>
     </div>
   );

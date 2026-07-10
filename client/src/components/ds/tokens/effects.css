@@ -150,11 +150,13 @@ html.calm-mode .pdxRow {
 :root[data-calm="true"] .pdx-rainbow-rule,
 :root[data-calm="true"] .pdxSeam,
 :root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line,
+:root[data-calm="true"] .pdxMap__seam,
 :root[data-calm="true"] .rainbow-bar,
 html.calm-mode .pdx-seam,
 html.calm-mode .pdx-rainbow-rule,
 html.calm-mode .pdxSeam,
 html.calm-mode .pdxDivider--rainbow .pdxDivider__line,
+html.calm-mode .pdxMap__seam,
 html.calm-mode .rainbow-bar {
   background: var(--rainbow-bar);
   background-size: auto;
@@ -163,11 +165,13 @@ html.calm-mode .rainbow-bar {
 :root[data-calm="true"] .pdx-rainbow-rule::after,
 :root[data-calm="true"] .pdxSeam::after,
 :root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after,
+:root[data-calm="true"] .pdxMap__seam::after,
 :root[data-calm="true"] .rainbow-bar::after,
 html.calm-mode .pdx-seam::after,
 html.calm-mode .pdx-rainbow-rule::after,
 html.calm-mode .pdxSeam::after,
 html.calm-mode .pdxDivider--rainbow .pdxDivider__line::after,
+html.calm-mode .pdxMap__seam::after,
 html.calm-mode .rainbow-bar::after {
   display: none;
 }
@@ -178,6 +182,7 @@ html.calm-mode .rainbow-bar::after {
   .pdx-rainbow-rule,
   .pdxSeam,
   .pdxDivider--rainbow .pdxDivider__line,
+  .pdxMap__seam,
   .rainbow-bar {
     background: var(--rainbow-bar);
     background-size: auto;
@@ -188,6 +193,7 @@ html.calm-mode .rainbow-bar::after {
   .pdx-rainbow-rule::after,
   .pdxSeam::after,
   .pdxDivider--rainbow .pdxDivider__line::after,
+  .pdxMap__seam::after,
   .rainbow-bar::after {
     display: none;
   }

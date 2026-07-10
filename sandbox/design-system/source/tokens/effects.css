@@ -79,13 +79,15 @@
 :root[data-calm="true"] .pdx-seam,
 :root[data-calm="true"] .pdx-rainbow-rule,
 :root[data-calm="true"] .pdxSeam,
-:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line {
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line,
+:root[data-calm="true"] .pdxMap__seam {
   background: var(--rainbow-bar);
   background-size: auto;
 }
 :root[data-calm="true"] .pdx-seam::after,
 :root[data-calm="true"] .pdx-rainbow-rule::after,
 :root[data-calm="true"] .pdxSeam::after,
-:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after {
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after,
+:root[data-calm="true"] .pdxMap__seam::after {
   display: none;
 }

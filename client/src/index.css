@@ -9505,6 +9505,9 @@ html.calm-mode .page-hero__accent--rainbow {
 
 /* ── Rainbow bars → solid dark gray ── */
 html.calm-mode .rainbow-bar,
+html.calm-mode .pdx-rainbow-rule,
+html.calm-mode .pdx-seam,
+html.calm-mode .pdxMap__seam,
 html.calm-mode .site-header::after,
 html.calm-mode .site-header-rainbow-seam.pdxSeam,
 html.calm-mode .pdxSeam {
@@ -9515,6 +9518,9 @@ html.calm-mode .pdxSeam {
   box-shadow: none !important;
 }
 html.calm-mode .rainbow-bar::after,
+html.calm-mode .pdx-rainbow-rule::after,
+html.calm-mode .pdx-seam::after,
+html.calm-mode .pdxMap__seam::after,
 html.calm-mode .site-header-rainbow-seam.pdxSeam::after,
 html.calm-mode .pdxSeam::after {
   display: none !important;

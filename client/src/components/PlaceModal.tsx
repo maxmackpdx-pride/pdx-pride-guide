@@ -412,6 +412,7 @@ export default function PlaceModal({
               }}
             />
             <div
+              className="pdx-rainbow-rule"
               aria-hidden="true"
               style={{
                 position: "absolute",
@@ -419,7 +420,6 @@ export default function PlaceModal({
                 right: 0,
                 top: 0,
                 height: 3,
-                background: "var(--grad-flag)",
               }}
             />
             {logoUrl ? (

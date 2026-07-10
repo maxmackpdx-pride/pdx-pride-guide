@@ -79,7 +79,7 @@
   height: 3px;
   z-index: 4;
   pointer-events: none;
-  background: var(--grad-flag, linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982));
+  overflow: hidden;
 }
 
 .home-hero__inner {
