@@ -13,7 +13,7 @@ import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./Miss
 const AROUND_TOWN_KEY = "around" as const;
 const CUSTOM_SPOT_KEY = "custom" as const;
 type SpotMode = typeof AROUND_TOWN_KEY | typeof CUSTOM_SPOT_KEY | "event";
-type BoardFilter = "ALL" | "EVENT" | "TOWN";
+type BoardFilter = "ALL" | "EVENT" | "TOWN" | "ROOSTER" | "SAUVIE";
 
 function deriveTitle(title: string, body: string): string {
   const trimmed = title.trim();
@@ -81,13 +81,17 @@ export default function SpottedCardGrid({
   const filterCounts = useMemo(() => ({
     ALL: posts.length,
     EVENT: posts.filter(p => p.eventId != null).length,
-    TOWN: posts.filter(p => p.eventId == null).length,
+    TOWN: posts.filter(p => p.eventId == null && !p.beachId).length,
+    ROOSTER: posts.filter(p => p.beachId === "rooster-rock").length,
+    SAUVIE: posts.filter(p => p.beachId === "sauvie-island").length,
   }), [posts]);
 
   const filteredPosts = useMemo(() => {
     let rows = posts.slice();
     if (filter === "EVENT") rows = rows.filter(p => p.eventId != null);
-    else if (filter === "TOWN") rows = rows.filter(p => p.eventId == null);
+    else if (filter === "TOWN") rows = rows.filter(p => p.eventId == null && !p.beachId);
+    else if (filter === "ROOSTER") rows = rows.filter(p => p.beachId === "rooster-rock");
+    else if (filter === "SAUVIE") rows = rows.filter(p => p.beachId === "sauvie-island");
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter(p =>
@@ -435,6 +439,12 @@ export default function SpottedCardGrid({
               </BoardFilterChip>
               <BoardFilterChip active={filter === "TOWN"} onClick={() => setFilter("TOWN")} accent="orange" count={filterCounts.TOWN}>
                 Around town
+              </BoardFilterChip>
+              <BoardFilterChip active={filter === "ROOSTER"} onClick={() => setFilter("ROOSTER")} accent="cyan" count={filterCounts.ROOSTER}>
+                Rooster
+              </BoardFilterChip>
+              <BoardFilterChip active={filter === "SAUVIE"} onClick={() => setFilter("SAUVIE")} accent="orange" count={filterCounts.SAUVIE}>
+                Sauvie
               </BoardFilterChip>
             </>
           }

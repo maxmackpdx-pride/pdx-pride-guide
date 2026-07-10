@@ -23,11 +23,17 @@ export function spottedPlace(post: MissedConnectionPost): string {
   if (post.eventTitle) {
     return post.eventVenue ? `At ${post.eventTitle} · ${post.eventVenue}` : `At ${post.eventTitle}`;
   }
+  if (post.beachId) {
+    return post.venueHint || (post.beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island");
+  }
   return post.venueHint ? `Around town · ${post.venueHint}` : "Around town";
 }
 
 export function spottedKind(post: MissedConnectionPost): { label: string; color: string } {
   if (post.eventId != null) return { label: "At an event", color: "#19e3ff" };
+  if (post.beachId === "rooster-rock") return { label: "Rooster Rock", color: "#19e3ff" };
+  if (post.beachId === "sauvie-island") return { label: "Sauvie Island", color: "#ff6600" };
+  if (post.beachId) return { label: "At the beach", color: "#ff6600" };
   return { label: "Around town", color: "#ff8c00" };
 }
 

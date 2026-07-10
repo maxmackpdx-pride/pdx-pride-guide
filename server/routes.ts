@@ -7,7 +7,11 @@ import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, ge
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
 import { BetterSqliteSessionStore } from "./sessionStore";
-import { insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema, insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema } from "@shared/schema";
+import {
+  insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
+  insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema,
+  insertBeachCheckinSchema, insertBeachCarpoolPostSchema, insertRiverBratsReportSchema,
+} from "@shared/schema";
 import { z } from "zod";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -43,6 +47,12 @@ import {
   submissionHasStrongDuplicate,
 } from "@shared/submissionMatch";
 import type { Event } from "@shared/schema";
+import {
+  beachVenueLabel,
+  isValidBeachId,
+  isValidRiverBratsHour,
+  pacificTodayDate,
+} from "@shared/riverBrats";
 import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
@@ -2069,6 +2079,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/missed-connections", (req: any, res) => {
+    const beach = String(req.query.beach || "").trim();
+    if (beach && isValidBeachId(beach)) {
+      return res.json(storage.getMissedConnectionsByBeach(beach, req.session?.userId));
+    }
     res.json(storage.getMissedConnections("ACTIVE", req.session?.userId));
   });
 
@@ -2085,11 +2099,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/missed-connections", requireAuth, (req, res) => {
     try {
       const rawEventId = req.body.eventId;
+      const rawBeachId = req.body.beachId;
       const hasEvent = rawEventId !== undefined && rawEventId !== null && rawEventId !== "";
+      const hasBeach = rawBeachId !== undefined && rawBeachId !== null && rawBeachId !== "";
       const eventId = hasEvent ? Number(rawEventId) : null;
+      const beachId = hasBeach ? String(rawBeachId) : null;
 
+      if (hasEvent && hasBeach) {
+        return res.status(400).json({ error: "Link to an event or a beach, not both" });
+      }
       if (hasEvent && !Number.isFinite(eventId)) {
         return res.status(400).json({ error: "Invalid event" });
+      }
+      if (hasBeach && !isValidBeachId(beachId)) {
+        return res.status(400).json({ error: "Invalid beach" });
       }
 
       if (moderationGate(res, "Spotted / Missed Connections", {
@@ -2105,7 +2128,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const scope = String(req.body.scope || "");
       const boardScope = scope === "board";
 
-      if (eventId != null) {
+      if (beachId) {
+        payload = {
+          ...req.body,
+          userId: req.session.userId!,
+          eventId: null,
+          beachId,
+          dayOfWeek: pacificDayOfWeek(),
+          venueHint: beachVenueLabel(beachId as "rooster-rock" | "sauvie-island"),
+          closesAt: generalSpottedClosesAt(),
+        };
+      } else if (eventId != null) {
         const evt = storage.getEvent(eventId);
         if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
 
@@ -2185,6 +2218,144 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     storage.createMissedConnectionThread(msg.threadId, post.id, post.userId, req.session.userId!);
     res.json(msg);
+  });
+
+  // ─── RIVER BRATS (Nude Beaches social) ───────────────────────────────────
+  app.get("/api/river-brats/checkins", (req: any, res) => {
+    const beachId = String(req.query.beach || "");
+    const date = String(req.query.date || pacificTodayDate());
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    res.json(storage.getBeachCheckins(beachId, date));
+  });
+
+  app.post("/api/river-brats/checkins", requireAuth, (req, res) => {
+    try {
+      const beachId = String(req.body.beachId || "");
+      const arrivalHour = Number(req.body.arrivalHour);
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (!isValidRiverBratsHour(arrivalHour)) return res.status(400).json({ error: "Pick a time between 7am and 9pm" });
+      const note = String(req.body.note || "").trim().slice(0, 80) || null;
+      if (moderationGate(res, "River Brats check-in", { note: note || "" })) return;
+      const calendarDate = String(req.body.date || pacificTodayDate());
+      const row = storage.upsertBeachCheckin(insertBeachCheckinSchema.parse({
+        userId: req.session.userId!,
+        beachId,
+        arrivalHour,
+        note,
+        calendarDate,
+      }));
+      res.json(row);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/river-brats/checkins/:id", requireAuth, (req, res) => {
+    const ok = storage.deleteBeachCheckin(Number(req.params.id), req.session.userId!);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  app.get("/api/river-brats/carpool", (req: any, res) => {
+    const beachId = String(req.query.beach || "");
+    const tripDate = String(req.query.date || pacificTodayDate());
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    res.json(storage.getBeachCarpoolPosts(beachId, tripDate, req.session?.userId));
+  });
+
+  app.post("/api/river-brats/carpool", requireAuth, (req, res) => {
+    try {
+      const beachId = String(req.body.beachId || "");
+      const postType = String(req.body.postType || "");
+      const leaveHour = Number(req.body.leaveHour);
+      const departureArea = String(req.body.departureArea || "").trim();
+      const note = String(req.body.note || "").trim();
+      const tripDate = String(req.body.tripDate || pacificTodayDate());
+      const seats = req.body.seats != null ? Number(req.body.seats) : null;
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (postType !== "OFFERING_RIDE" && postType !== "NEED_RIDE") return res.status(400).json({ error: "Invalid post type" });
+      if (!isValidRiverBratsHour(leaveHour)) return res.status(400).json({ error: "Leave time required (7am–9pm)" });
+      if (!departureArea) return res.status(400).json({ error: "Departure area required" });
+      if (!note || note.length < 8) return res.status(400).json({ error: "Add a short note (min 8 characters)" });
+      if (postType === "OFFERING_RIDE" && (!seats || seats < 1 || seats > 4)) {
+        return res.status(400).json({ error: "Seats required (1–4) when offering a ride" });
+      }
+      if (moderationGate(res, "River Brats carpool", { note, departureArea })) return;
+      const row = storage.createBeachCarpoolPost(insertBeachCarpoolPostSchema.parse({
+        userId: req.session.userId!,
+        beachId,
+        postType,
+        departureArea,
+        tripDate,
+        leaveHour,
+        seats: postType === "OFFERING_RIDE" ? seats : null,
+        note,
+      }));
+      res.json({ ...row, isMine: true, requestCount: 0 });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/river-brats/carpool/:id", requireAuth, (req, res) => {
+    const ok = storage.deleteBeachCarpoolPost(Number(req.params.id), req.session.userId!);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  app.post("/api/river-brats/carpool/:id/request", requireAuth, (req, res) => {
+    try {
+      const note = String(req.body.note || "").trim();
+      if (!note) return res.status(400).json({ error: "note required" });
+      if (moderationGate(res, "River Brats carpool request", { note })) return;
+      const row = storage.requestBeachCarpool(Number(req.params.id), req.session.userId!, note);
+      res.json(row);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/river-brats/carpool/:id/requests", requireAuth, (req, res) => {
+    try {
+      res.json(storage.getBeachCarpoolRequests(Number(req.params.id), req.session.userId!));
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/river-brats/carpool/:id/select/:requestId", requireAuth, (req, res) => {
+    try {
+      const msg = storage.selectBeachCarpoolRequest(
+        Number(req.params.id),
+        Number(req.params.requestId),
+        req.session.userId!,
+      );
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/river-brats/report", requireAuth, (req, res) => {
+    try {
+      const reason = String(req.body.reason || "").trim();
+      const targetType = String(req.body.targetType || "");
+      const targetId = Number(req.body.targetId);
+      if (!reason) return res.status(400).json({ error: "reason required" });
+      if (!["CHECKIN", "CARPOOL", "MISSED_CONNECTION"].includes(targetType)) {
+        return res.status(400).json({ error: "Invalid target" });
+      }
+      storage.reportRiverBrats(insertRiverBratsReportSchema.parse({
+        targetType,
+        targetId,
+        reporterUserId: req.session.userId!,
+        reason,
+        note: req.body.note ? String(req.body.note).trim() : null,
+      }));
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   // ─── PUSH NOTIFICATIONS ─────────────────────────────────────────────────
@@ -3136,6 +3307,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
     storage.resolveGiftingReport(Number(req.params.id), String(req.body.adminNotes || ""));
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/river-brats/reports", requireAdmin, (_req, res) => {
+    res.json(storage.getRiverBratsReports());
+  });
+
+  app.post("/api/admin/river-brats/reports/:id/resolve", requireAdmin, (req, res) => {
+    storage.resolveRiverBratsReport(Number(req.params.id), String(req.body.adminNotes || ""));
     res.json({ ok: true });
   });
 

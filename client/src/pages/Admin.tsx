@@ -405,6 +405,12 @@ export default function Admin() {
     enabled: authenticated,
   });
 
+  const { data: riverBratsReports = [], refetch: refetchRiverBratsReports } = useQuery<any[]>({
+    queryKey: ["/api/admin/river-brats/reports"],
+    queryFn: () => apiRequest("GET", "/api/admin/river-brats/reports").then(r => r.json()),
+    enabled: authenticated,
+  });
+
   const { data: ownerDesk = [], isLoading: ownerDeskLoading, isError: ownerDeskError, refetch: refetchOwnerDesk } = useQuery<OwnerDeskItem[]>({
     queryKey: ["/api/admin/owner-desk"],
     queryFn: () => apiRequest("GET", "/api/admin/owner-desk").then(r => r.json()),
@@ -711,6 +717,15 @@ export default function Admin() {
     onSuccess: () => {
       invalidateInboxQueries();
       toast({ title: "Report resolved" });
+    },
+  });
+
+  const resolveRiverBratsReportMutation = useMutation({
+    mutationFn: ({ id, adminNotes }: { id: number; adminNotes?: string }) =>
+      apiRequest("POST", `/api/admin/river-brats/reports/${id}/resolve`, { adminNotes }),
+    onSuccess: () => {
+      refetchRiverBratsReports();
+      toast({ title: "River Brats report resolved" });
     },
   });
 
@@ -1357,6 +1372,7 @@ export default function Admin() {
 
         {/* ── INBOX / REVIEW QUEUE ── */}
         {activeTab === "inbox" && (
+          <>
           <AdminInbox
             submissions={submissions}
             promoterRequests={promoterRequests}
@@ -1395,6 +1411,30 @@ export default function Admin() {
             onRemoveSpotted={(id) => removeSpottedMutation.mutate(id)}
             actionPending={inboxActionPending || rejectBoardPostMutation.isPending}
           />
+          {riverBratsReports.filter((r: any) => r.status === "PENDING").length > 0 && (
+            <div className="mt-8 border border-white/10 rounded-lg p-4">
+              <h3 className="text-white font-display font-bold text-sm uppercase tracking-wider mb-3">River Brats reports</h3>
+              <ul className="space-y-3">
+                {riverBratsReports.filter((r: any) => r.status === "PENDING").map((r: any) => (
+                  <li key={r.id} className="text-sm text-white/80 flex flex-wrap items-center justify-between gap-3">
+                    <span>
+                      <strong className="text-white">{r.target_type}</strong> #{r.target_id} · {r.reason}
+                      {r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-xs uppercase tracking-wide text-[#C8FA3C] hover:underline"
+                      disabled={resolveRiverBratsReportMutation.isPending}
+                      onClick={() => resolveRiverBratsReportMutation.mutate({ id: r.id })}
+                    >
+                      Resolve
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          </>
         )}
 
         {/* ── MANAGE EVENTS ── */}

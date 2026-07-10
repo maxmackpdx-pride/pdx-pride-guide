@@ -20,7 +20,9 @@ import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
 import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports, feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
+  giftingPosts, giftingInterests, giftingReports,
+  beachCheckins, beachCarpoolPosts, beachCarpoolRequests, riverBratsReports,
+  feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
   businessClaims, businessSubmissions, businessBlocks, businessLogoRequests,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
@@ -31,6 +33,8 @@ import {
   type User, type Message,
   type MissedConnection, type InsertMissedConnection,
   type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
+  type BeachCheckin, type InsertBeachCheckin, type BeachCarpoolPost, type InsertBeachCarpoolPost,
+  type BeachCarpoolRequest, type InsertBeachCarpoolRequest, type InsertRiverBratsReport,
   type FeedbackReport, type InsertFeedbackReport,
   type HostMessage, type InsertHostMessage,
   type Business, type InsertBusiness,
@@ -42,6 +46,7 @@ import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
+import { pacificMidnightIso, pacificTodayDate } from "@shared/riverBrats";
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
@@ -637,6 +642,7 @@ function ensureMissedConnectionsSchema() {
     if (!names.has("closes_at")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN closes_at TEXT`);
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_notes TEXT`);
     if (!names.has("admin_reviewed")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_reviewed INTEGER DEFAULT 0`);
+    if (!names.has("beach_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN beach_id TEXT`);
     // Spotted is public without approval — mark existing live posts reviewed so nothing sits in a fake queue.
     try {
       sqlite.exec(`UPDATE missed_connections SET admin_reviewed = 1 WHERE status = 'ACTIVE' AND (admin_reviewed IS NULL OR admin_reviewed = 0)`);
@@ -655,6 +661,7 @@ function ensureMissedConnectionsSchema() {
       )
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS missed_conn_event_idx ON missed_connections(event_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS missed_conn_beach_idx ON missed_connections(beach_id)`);
     sqlite.exec(`
       UPDATE missed_connections
       SET closes_at = datetime(created_at, '+7 days')
@@ -665,6 +672,73 @@ function ensureMissedConnectionsSchema() {
   }
 }
 ensureMissedConnectionsSchema();
+
+function ensureRiverBratsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS beach_checkins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        beach_id TEXT NOT NULL,
+        arrival_hour INTEGER NOT NULL,
+        note TEXT,
+        calendar_date TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        report_count INTEGER NOT NULL DEFAULT 0,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS beach_checkin_user_day_idx
+      ON beach_checkins(user_id, beach_id, calendar_date)
+    `);
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS beach_carpool_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        beach_id TEXT NOT NULL,
+        post_type TEXT NOT NULL,
+        departure_area TEXT NOT NULL,
+        trip_date TEXT NOT NULL,
+        leave_hour INTEGER NOT NULL,
+        seats INTEGER,
+        note TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'OPEN',
+        report_count INTEGER NOT NULL DEFAULT 0,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS beach_carpool_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        note TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'INTERESTED',
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS river_brats_reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        target_type TEXT NOT NULL,
+        target_id INTEGER NOT NULL,
+        reporter_user_id INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        note TEXT,
+        status TEXT NOT NULL DEFAULT 'PENDING',
+        admin_notes TEXT,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS beach_carpool_beach_date_idx ON beach_carpool_posts(beach_id, trip_date)`);
+  } catch (e) {
+    console.error("[river_brats] schema migration failed:", e);
+  }
+}
+ensureRiverBratsSchema();
 
 function ensureGiftingPostsSchema() {
   try {
@@ -4629,7 +4703,24 @@ export interface IStorage {
   getMissedConnection(id: number): MissedConnection | undefined;
   getMissedConnections(status?: string, viewerUserId?: number): any[];
   getMissedConnectionsByEvent(eventId: number, viewerUserId?: number): any[];
+  getMissedConnectionsByBeach(beachId: string, viewerUserId?: number): any[];
   getMissedConnectionsByUser(userId: number): MissedConnection[];
+  expireRiverBratsCheckins(): void;
+  getBeachCheckins(beachId: string, calendarDate: string): any[];
+  getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string): BeachCheckin | undefined;
+  upsertBeachCheckin(data: InsertBeachCheckin): BeachCheckin;
+  deleteBeachCheckin(id: number, userId: number): boolean;
+  expireBeachCarpoolPosts(): void;
+  getBeachCarpoolPosts(beachId: string, tripDate: string, viewerUserId?: number): any[];
+  getBeachCarpoolPost(id: number): any;
+  createBeachCarpoolPost(data: InsertBeachCarpoolPost): BeachCarpoolPost;
+  deleteBeachCarpoolPost(id: number, userId: number): boolean;
+  requestBeachCarpool(postId: number, userId: number, note: string): BeachCarpoolRequest;
+  selectBeachCarpoolRequest(postId: number, requestId: number, posterUserId: number): Message;
+  getBeachCarpoolRequests(postId: number, posterUserId: number): any[];
+  reportRiverBrats(data: InsertRiverBratsReport): void;
+  getRiverBratsReports(status?: string): any[];
+  resolveRiverBratsReport(id: number, adminNotes?: string): void;
   getPostableEventsForMissedConnections(requireToday?: boolean): Event[];
   getLinkableEventsForMissedConnections(): Array<{
     id: number;
@@ -6444,6 +6535,7 @@ export const storage: IStorage = {
         m.day_of_week AS dayOfWeek,
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
+        m.beach_id AS beachId,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -6459,6 +6551,32 @@ export const storage: IStorage = {
     `).all(status) as any[];
     return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
   },
+  getMissedConnectionsByBeach(beachId: string, viewerUserId?: number) {
+    archiveExpiredMissedConnections();
+    const rows = sqlite.prepare(`
+      SELECT
+        m.id,
+        m.title,
+        m.body,
+        m.day_of_week AS dayOfWeek,
+        m.venue_hint AS venueHint,
+        m.event_id AS eventId,
+        m.beach_id AS beachId,
+        m.status,
+        m.created_at AS createdAt,
+        m.closes_at AS closesAt,
+        m.user_id,
+        e.title AS eventTitle,
+        e.venue_name AS eventVenue,
+        e.day_of_week AS eventDay,
+        e.date_start AS eventDateStart
+      FROM missed_connections m
+      LEFT JOIN events e ON e.id = m.event_id
+      WHERE m.status = 'ACTIVE' AND m.beach_id = ?
+      ORDER BY m.created_at DESC
+    `).all(beachId) as any[];
+    return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
+  },
   getMissedConnectionsByEvent(eventId, viewerUserId?: number) {
     archiveExpiredMissedConnections();
     const rows = sqlite.prepare(`
@@ -6469,6 +6587,7 @@ export const storage: IStorage = {
         m.day_of_week AS dayOfWeek,
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
+        m.beach_id AS beachId,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -6494,6 +6613,7 @@ export const storage: IStorage = {
         m.day_of_week AS dayOfWeek,
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
+        m.beach_id AS beachId,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -7379,6 +7499,166 @@ export const storage: IStorage = {
     db.update(businessLogoRequests).set({ status: "REJECTED", adminNotes: reason ?? null }).where(eq(businessLogoRequests.id, id)).run();
     const req = db.select().from(businessLogoRequests).where(eq(businessLogoRequests.id, id)).get();
     if (req) notifyGuideInbox(req.userId, "Logo update", "Your submitted logo wasn't used. Reach out via Contact for details.", { contextType: "GUIDE_UPDATE" });
+  },
+
+  expireRiverBratsCheckins() {
+    const now = new Date().toISOString();
+    sqlite.prepare(`UPDATE beach_checkins SET is_active = 0 WHERE is_active = 1 AND expires_at <= ?`).run(now);
+  },
+  getBeachCheckins(beachId: string, calendarDate: string) {
+    storage.expireRiverBratsCheckins();
+    return sqlite.prepare(`
+      SELECT c.*, u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice, u.photo_url AS photoUrl
+      FROM beach_checkins c
+      JOIN users u ON u.id = c.user_id
+      WHERE c.beach_id = ? AND c.calendar_date = ? AND c.is_active = 1
+      ORDER BY c.arrival_hour ASC, c.created_at ASC
+    `).all(beachId, calendarDate) as any[];
+  },
+  getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string) {
+    storage.expireRiverBratsCheckins();
+    return sqlite.prepare(`
+      SELECT * FROM beach_checkins
+      WHERE beach_id = ? AND user_id = ? AND calendar_date = ? AND is_active = 1
+    `).get(beachId, userId, calendarDate) as BeachCheckin | undefined;
+  },
+  upsertBeachCheckin(data: InsertBeachCheckin) {
+    const createdAt = new Date().toISOString();
+    const expiresAt = pacificMidnightIso(data.calendarDate);
+    const existing = sqlite.prepare(`
+      SELECT id FROM beach_checkins WHERE user_id = ? AND beach_id = ? AND calendar_date = ?
+    `).get(data.userId, data.beachId, data.calendarDate) as { id: number } | undefined;
+    if (existing) {
+      sqlite.prepare(`
+        UPDATE beach_checkins
+        SET arrival_hour = ?, note = ?, is_active = 1, expires_at = ?, created_at = ?
+        WHERE id = ?
+      `).run(data.arrivalHour, data.note || null, expiresAt, createdAt, existing.id);
+      return db.select().from(beachCheckins).where(eq(beachCheckins.id, existing.id)).get()!;
+    }
+    return db.insert(beachCheckins).values({
+      ...data,
+      isActive: true,
+      reportCount: 0,
+      expiresAt,
+      createdAt,
+    } as any).returning().get();
+  },
+  deleteBeachCheckin(id: number, userId: number) {
+    const row = db.select().from(beachCheckins).where(eq(beachCheckins.id, id)).get();
+    if (!row || row.userId !== userId) return false;
+    db.update(beachCheckins).set({ isActive: false } as any).where(eq(beachCheckins.id, id)).run();
+    return true;
+  },
+
+  expireBeachCarpoolPosts() {
+    const now = new Date().toISOString();
+    sqlite.prepare(`UPDATE beach_carpool_posts SET status = 'EXPIRED' WHERE status = 'OPEN' AND expires_at <= ?`).run(now);
+  },
+  getBeachCarpoolPosts(beachId: string, tripDate: string, viewerUserId?: number) {
+    storage.expireBeachCarpoolPosts();
+    const rows = sqlite.prepare(`
+      SELECT p.*, u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice, u.photo_url AS photoUrl
+      FROM beach_carpool_posts p
+      JOIN users u ON u.id = p.user_id
+      WHERE p.beach_id = ? AND p.trip_date = ? AND p.status = 'OPEN'
+      ORDER BY p.leave_hour ASC, p.created_at DESC
+    `).all(beachId, tripDate) as any[];
+    return rows.map(row => ({
+      ...row,
+      isMine: viewerUserId != null && row.user_id === viewerUserId,
+      requestCount: Number((sqlite.prepare(`SELECT COUNT(*) AS c FROM beach_carpool_requests WHERE post_id = ? AND status = 'INTERESTED'`).get(row.id) as { c: number })?.c || 0),
+    }));
+  },
+  getBeachCarpoolPost(id: number) {
+    return sqlite.prepare(`SELECT * FROM beach_carpool_posts WHERE id = ?`).get(id) as any;
+  },
+  createBeachCarpoolPost(data: InsertBeachCarpoolPost) {
+    const createdAt = new Date().toISOString();
+    const expiresAt = pacificMidnightIso(data.tripDate);
+    return db.insert(beachCarpoolPosts).values({
+      ...data,
+      status: "OPEN",
+      reportCount: 0,
+      expiresAt,
+      createdAt,
+    } as any).returning().get();
+  },
+  deleteBeachCarpoolPost(id: number, userId: number) {
+    const post = storage.getBeachCarpoolPost(id);
+    if (!post || post.user_id !== userId) return false;
+    db.update(beachCarpoolPosts).set({ status: "REMOVED" } as any).where(eq(beachCarpoolPosts.id, id)).run();
+    return true;
+  },
+  requestBeachCarpool(postId: number, userId: number, note: string) {
+    const post = storage.getBeachCarpoolPost(postId);
+    if (!post || post.status !== "OPEN") throw new Error("Post not found");
+    if (post.user_id === userId) throw new Error("Cannot request your own post");
+    const count = sqlite.prepare(`SELECT COUNT(*) AS c FROM beach_carpool_requests WHERE post_id = ? AND status = 'INTERESTED'`).get(postId) as { c: number };
+    if (count.c >= 3) throw new Error("This ride already has 3 requests");
+    const dup = sqlite.prepare(`SELECT id FROM beach_carpool_requests WHERE post_id = ? AND user_id = ? AND status = 'INTERESTED'`).get(postId, userId);
+    if (dup) throw new Error("You already requested this ride");
+    const createdAt = new Date().toISOString();
+    return db.insert(beachCarpoolRequests).values({
+      postId,
+      userId,
+      note,
+      status: "INTERESTED",
+      createdAt,
+    } as any).returning().get();
+  },
+  selectBeachCarpoolRequest(postId: number, requestId: number, posterUserId: number) {
+    const post = storage.getBeachCarpoolPost(postId);
+    if (!post || post.user_id !== posterUserId) throw new Error("Not your post");
+    const req = sqlite.prepare(`SELECT * FROM beach_carpool_requests WHERE id = ? AND post_id = ?`).get(requestId, postId) as any;
+    if (!req || req.status !== "INTERESTED") throw new Error("Request not found");
+    sqlite.prepare(`UPDATE beach_carpool_requests SET status = 'DECLINED' WHERE post_id = ? AND id != ? AND status = 'INTERESTED'`).run(postId, requestId);
+    sqlite.prepare(`UPDATE beach_carpool_requests SET status = 'SELECTED' WHERE id = ?`).run(requestId);
+    db.update(beachCarpoolPosts).set({ status: "FILLED" } as any).where(eq(beachCarpoolPosts.id, postId)).run();
+    const msg = storage.sendMessage(posterUserId, req.user_id, `River Brats carpool: ${post.departure_area}`, req.note, {
+      contextType: "BEACH_CARPOOL",
+      contextId: postId,
+      contextLabel: post.departure_area,
+    });
+    return msg;
+  },
+  getBeachCarpoolRequests(postId: number, posterUserId: number) {
+    const post = storage.getBeachCarpoolPost(postId);
+    if (!post || post.user_id !== posterUserId) throw new Error("Not your post");
+    return sqlite.prepare(`
+      SELECT r.*, u.username, u.display_name AS displayName
+      FROM beach_carpool_requests r
+      JOIN users u ON u.id = r.user_id
+      WHERE r.post_id = ? AND r.status = 'INTERESTED'
+      ORDER BY r.created_at ASC
+    `).all(postId);
+  },
+
+  reportRiverBrats(data: InsertRiverBratsReport) {
+    db.insert(riverBratsReports).values({
+      ...data,
+      status: "PENDING",
+      createdAt: new Date().toISOString(),
+    } as any).run();
+    if (data.targetType === "CHECKIN") {
+      sqlite.prepare(`UPDATE beach_checkins SET report_count = report_count + 1 WHERE id = ?`).run(data.targetId);
+    } else if (data.targetType === "CARPOOL") {
+      sqlite.prepare(`UPDATE beach_carpool_posts SET report_count = report_count + 1 WHERE id = ?`).run(data.targetId);
+    }
+  },
+  getRiverBratsReports(status?: string) {
+    const where = status ? `WHERE r.status = ?` : "";
+    const params = status ? [status] : [];
+    return sqlite.prepare(`
+      SELECT r.*, u.username AS reporterUsername
+      FROM river_brats_reports r
+      JOIN users u ON u.id = r.reporter_user_id
+      ${where}
+      ORDER BY r.created_at DESC
+    `).all(...params);
+  },
+  resolveRiverBratsReport(id: number, adminNotes?: string) {
+    db.update(riverBratsReports).set({ status: "RESOLVED", adminNotes: adminNotes || null } as any).where(eq(riverBratsReports.id, id)).run();
   },
 };
 

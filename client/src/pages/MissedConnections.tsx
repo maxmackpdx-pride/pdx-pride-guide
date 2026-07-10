@@ -44,7 +44,8 @@ export default function MissedConnections() {
   const stats = useMemo(() => [
     { num: allPosts.length, label: "Spotted, live now", color: "#ff1fa0" },
     { num: allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },
-    { num: allPosts.filter(p => p.eventId == null).length, label: "Around town", color: "#ff8c00" },
+    { num: allPosts.filter(p => p.beachId != null).length, label: "At the beach", color: "#ff6600" },
+    { num: allPosts.filter(p => p.eventId == null && !p.beachId).length, label: "Around town", color: "#ff8c00" },
   ], [allPosts]);
 
   const { data: myPosts = [] } = useQuery<MissedConnectionPost[]>({

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import NudeBeachesHero from "@/components/NudeBeachesHero";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
+import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -275,6 +276,8 @@ export default function NudeBeaches() {
           </a>
         ))}
       </div>
+
+      <RiverBratsShell beachId={activeTab} />
 
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">

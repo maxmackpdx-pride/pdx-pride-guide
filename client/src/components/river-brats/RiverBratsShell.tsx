@@ -1,0 +1,73 @@
+import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import type { NudeBeachTab } from "@shared/nudeBeaches";
+import { RIVER_BRATS_SHORE_TABS, readRiverBratsShore, type RiverBratsShoreTab } from "@shared/riverBrats";
+import RiverBratsCheckIn from "./RiverBratsCheckIn";
+import RiverBratsCarpool from "./RiverBratsCarpool";
+import RiverBratsSpotted from "./RiverBratsSpotted";
+import "./RiverBrats.css";
+
+type Props = {
+  beachId: NudeBeachTab;
+};
+
+export default function RiverBratsShell({ beachId }: Props) {
+  const [, setLocation] = useLocation();
+  const accent = beachId === "rooster-rock" ? "cyan" : "orange";
+  const [shore, setShoreState] = useState<RiverBratsShoreTab>(() =>
+    readRiverBratsShore(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("shore") : null),
+  );
+
+  const setShore = useCallback(
+    (tab: RiverBratsShoreTab) => {
+      setShoreState(tab);
+      const params = new URLSearchParams(window.location.search);
+      if (beachId === "sauvie-island") params.set("tab", "sauvie-island");
+      else params.delete("tab");
+      if (tab === "checkin") params.delete("shore");
+      else params.set("shore", tab);
+      const qs = params.toString();
+      setLocation(qs ? `/nude-beaches?${qs}` : "/nude-beaches");
+    },
+    [beachId, setLocation],
+  );
+
+  useEffect(() => {
+    const onPopState = () => {
+      setShoreState(readRiverBratsShore(new URLSearchParams(window.location.search).get("shore")));
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  return (
+    <section className={`river-brats river-brats--${accent}`}>
+      <div className="river-brats__head">
+        <div className={`board-active-feed__kicker board-active-feed__kicker--${accent === "cyan" ? "cyan" : "orange"}`}>
+          River Brats
+        </div>
+        <h2 className="display section-heading river-brats__title">Carpool · check-in · spotted</h2>
+        <p className="nude-section-copy">Same-day coordination for {beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island"} — all year, live on post.</p>
+      </div>
+
+      <nav className="events-tab-bar river-brats__tabs" aria-label="River Brats">
+        {RIVER_BRATS_SHORE_TABS.map(tab => (
+          <button
+            key={tab.key}
+            type="button"
+            className={`events-tab${shore === tab.key ? " active" : ""}`}
+            onClick={() => setShore(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="river-brats__body">
+        {shore === "checkin" && <RiverBratsCheckIn beachId={beachId} accent={accent} />}
+        {shore === "carpool" && <RiverBratsCarpool beachId={beachId} accent={accent} />}
+        {shore === "spotted" && <RiverBratsSpotted beachId={beachId} />}
+      </div>
+    </section>
+  );
+}
