@@ -1,0 +1,44 @@
+/* Events page — full-width map row (matches Nude Beaches / Directory) */
+
+.events-page .events-map-row--solo {
+  display: block;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px clamp(20px, 4vw, 44px) 0;
+}
+
+.events-page .events-map-row--solo .events-map-row__map {
+  width: 100%;
+  min-width: 0;
+}
+
+.events-page .events-map-row--solo .events-map-wrap,
+.events-page .events-map-row--solo .events-map-panel {
+  height: clamp(380px, 48vh, 520px);
+}
+
+.events-page .events-map-wrap {
+  width: 100%;
+  background: #000;
+  border-bottom: 1px solid #1a1a1a;
+  overflow: hidden;
+}
+
+.events-page .events-map-row--solo .directory-map {
+  position: relative;
+}
+
+.events-page .events-map-row--solo .events-map-panel {
+  border-bottom: none;
+}
+
+@media (min-width: 900px) {
+  .events-page .events-map-row--solo .events-map-wrap,
+  .events-page .events-map-row--solo .events-map-panel {
+    height: clamp(440px, 52vh, 600px);
+  }
+}
+
+.events-page .events-tab-bar {
+  justify-content: flex-end;
+}

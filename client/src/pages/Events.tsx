@@ -18,8 +18,6 @@ import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
-import EventsNowPanel from "@/components/EventsNowPanel";
-
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
@@ -36,6 +34,7 @@ import { dayAccentToken } from "@/lib/dsColors";
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
 import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import "./Events.css";
 
 const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
 /** MON/TUE fills are too dark for black pill text — flip to white. */
@@ -291,22 +290,19 @@ export default function Events() {
       <EventsHero eventCount={events.length} stats={heroStats} />
 
       <ScrollReveal>
-      <div className="events-map-row">
-        <div className="events-map-row__panel">
-          <EventsNowPanel />
+        <div className="events-map-row events-map-row--solo">
+          <div className="events-map-row__map">
+            <Suspense fallback={<MapViewFallback variant="events" />}>
+              <MapView
+                events={filtered}
+                expanded={mapExpanded}
+                onExpand={() => setMapExpanded(true)}
+                onCollapse={() => setMapExpanded(false)}
+                onSelect={openEvent}
+              />
+            </Suspense>
+          </div>
         </div>
-        <div className="events-map-row__map">
-          <Suspense fallback={<MapViewFallback variant="events" />}>
-            <MapView
-              events={filtered}
-              expanded={mapExpanded}
-              onExpand={() => setMapExpanded(true)}
-              onCollapse={() => setMapExpanded(false)}
-              onSelect={openEvent}
-            />
-          </Suspense>
-        </div>
-      </div>
       </ScrollReveal>
 
       {/* Board | Schedule tabs */}
