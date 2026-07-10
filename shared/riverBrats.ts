@@ -5,7 +5,7 @@ export type RiverBratsShoreTab = "checkin" | "carpool" | "spotted";
 export const RIVER_BRATS_SHORE_TABS: Array<{ key: RiverBratsShoreTab; label: string }> = [
   { key: "checkin", label: "Check-in" },
   { key: "carpool", label: "Carpool" },
-  { key: "spotted", label: "Spotted" },
+  { key: "spotted", label: "Missed Connections" },
 ];
 
 export const RIVER_BRATS_HOUR_START = 7;

@@ -148,21 +148,48 @@ export default function RiverBratsCarpool({ beachId, accent }: Props) {
     return false;
   };
 
+  const startCompose = (type: CarpoolPostType) => {
+    if (!requireAuth()) return;
+    setPostType(type);
+    setComposeOpen(true);
+  };
+
+  const typeToggle = (
+    <div className="rb-type-toggle">
+      <button
+        type="button"
+        className={postType === "OFFERING_RIDE" ? "active" : ""}
+        onClick={() => setPostType("OFFERING_RIDE")}
+      >
+        Offering a ride
+      </button>
+      <button
+        type="button"
+        className={postType === "NEED_RIDE" ? "active" : ""}
+        onClick={() => setPostType("NEED_RIDE")}
+      >
+        Needing a ride
+      </button>
+    </div>
+  );
+
   return (
     <div className="rb-panel">
       <div className="rb-panel__head">
         <p className="rb-panel__lede">Meet at public lots only — share exact details in private messages.</p>
-        <Button variant="solid" accent={accent === "cyan" ? "cyan" : "orange"} size="sm" onClick={() => (requireAuth() ? setComposeOpen(v => !v) : null)}>
-          {composeOpen ? "Close" : "Post ride"}
-        </Button>
       </div>
 
-      {composeOpen && (
-        <div className="rb-compose">
-          <div className="rb-type-toggle">
-            <button type="button" className={postType === "OFFERING_RIDE" ? "active" : ""} onClick={() => setPostType("OFFERING_RIDE")}>Offering ride</button>
-            <button type="button" className={postType === "NEED_RIDE" ? "active" : ""} onClick={() => setPostType("NEED_RIDE")}>Need ride</button>
+      {!composeOpen ? (
+        <div className="rb-carpool-start">
+          <p className="rb-carpool-start__prompt">What do you need today?</p>
+          <div className="rb-type-toggle rb-type-toggle--start">
+            <button type="button" onClick={() => startCompose("OFFERING_RIDE")}>Offering a ride</button>
+            <button type="button" onClick={() => startCompose("NEED_RIDE")}>Needing a ride</button>
           </div>
+        </div>
+      ) : (
+        <div className="rb-compose">
+          {typeToggle}
           <label className="rb-compose__label">
             From
             <select className="rb-select" value={departureArea} onChange={e => setDepartureArea(e.target.value)}>
@@ -178,9 +205,12 @@ export default function RiverBratsCarpool({ beachId, accent }: Props) {
             </label>
           )}
           <textarea className="rb-textarea" value={note} onChange={e => setNote(e.target.value)} placeholder="Short note — no home addresses or phone numbers" rows={3} />
-          <Button variant="solid" accent={accent === "cyan" ? "cyan" : "orange"} size="sm" disabled={leaveHour == null || note.trim().length < 8 || createMutation.isPending} onClick={() => createMutation.mutate()}>
-            Post for today
-          </Button>
+          <div className="rb-compose__actions">
+            <Button variant="solid" accent={accent === "cyan" ? "cyan" : "orange"} size="sm" disabled={leaveHour == null || note.trim().length < 8 || createMutation.isPending} onClick={() => createMutation.mutate()}>
+              Post for today
+            </Button>
+            <button type="button" className="rb-link-btn" onClick={() => setComposeOpen(false)}>Cancel</button>
+          </div>
         </div>
       )}
 
@@ -196,7 +226,7 @@ export default function RiverBratsCarpool({ beachId, accent }: Props) {
               <div className="rb-card__body">
                 <div className="rb-card__title">{row.displayName || row.username}</div>
                 <div className="rb-card__meta">
-                  <span className="rb-chip">{row.post_type === "OFFERING_RIDE" ? "Offering" : "Need ride"}</span>
+                  <span className="rb-chip">{row.post_type === "OFFERING_RIDE" ? "Offering a ride" : "Needing a ride"}</span>
                   <span>{row.departure_area}</span>
                   <span className={`rb-chip rb-chip--${accent}`}>
                     {row.post_type === "OFFERING_RIDE" ? "Leaving" : "Leave"} {formatRiverBratsHour(row.leave_hour)}

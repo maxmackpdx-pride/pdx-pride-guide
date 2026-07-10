@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Menu, X, Zap } from "lucide-react";
@@ -9,8 +9,11 @@ import AuthModal from "./AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
 import { Divider } from "@/components/ds";
+import { counterpartyAvatar } from "@/lib/inboxAvatar";
+import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
 import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import type { AuthUser } from "@/context/AuthContext";
+import type { ApiMessageRow } from "@/components/inbox/types";
 
 type NavItem = { href: string; label: string };
 
@@ -265,6 +268,29 @@ function ProfileMenu({
   );
 }
 
+function formatNotifyTime(value?: string): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const diff = Date.now() - date.getTime();
+  if (diff < 60_000) return "now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h`;
+  return date.toLocaleDateString(undefined, { weekday: "short" });
+}
+
+function senderLabel(row: ApiMessageRow): string {
+  const party = counterpartyAvatar(row, "inbox");
+  const handle = party.username || party.displayName || "Someone";
+  return handle.toUpperCase();
+}
+
+function notifyHeadline(row: ApiMessageRow): string {
+  const tag = notifyContextTag(contextTypeOf(row)).toUpperCase();
+  const label = contextLabelOf(row);
+  return label ? `${tag}: ${label.toUpperCase()}` : tag;
+}
+
 function MobileNotifyMenu({
   unreadCount,
   adminPending,
@@ -279,6 +305,24 @@ function MobileNotifyMenu({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const alertTotal = unreadCount + adminPending;
+
+  const { data: inbox = [], isLoading } = useQuery<ApiMessageRow[]>({
+    queryKey: ["/api/messages/inbox"],
+    queryFn: () =>
+      fetch("/api/messages/inbox", { credentials: "include" }).then(r => (r.ok ? r.json() : [])),
+    enabled: open,
+    staleTime: 30_000,
+  });
+
+  const notifications = useMemo(
+    () =>
+      [...inbox].sort((a, b) => {
+        const ta = new Date(a.createdAt || a.created_at || 0).getTime();
+        const tb = new Date(b.createdAt || b.created_at || 0).getTime();
+        return tb - ta;
+      }),
+    [inbox],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -307,9 +351,9 @@ function MobileNotifyMenu({
     <div className={`site-mobile-notify${open ? " open" : ""}`} ref={ref}>
       <button
         type="button"
-        className={`hub-notify-btn${alertTotal > 0 ? " site-mobile-notify--alert" : ""}`}
+        className={`hub-notify-btn site-mobile-notify__bolt${alertTotal > 0 ? " site-mobile-notify--alert" : ""}`}
         aria-expanded={open}
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
         aria-label={
           alertTotal > 0
             ? `Notifications, ${alertTotal} pending`
@@ -324,39 +368,60 @@ function MobileNotifyMenu({
         {alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}
       </button>
       {open && (
-        <div className="site-mobile-notify__panel" role="menu">
-          <button
-            type="button"
-            role="menuitem"
-            className="site-mobile-notify__item"
-            onClick={() => {
-              close();
-              openSheet();
-            }}
-          >
-            Messages{unreadCount > 0 ? ` (${unreadCount})` : ""}
-          </button>
-          {adminPending > 0 && (
-            <button
-              type="button"
-              role="menuitem"
-              className="site-mobile-notify__item"
-              onClick={() => {
-                close();
-                openSheet({ view: "inbox", account: "admin" });
-              }}
+        <div className="site-mobile-notify__panel" role="dialog" aria-label="Notifications">
+          <div className="site-mobile-notify__head">Notifications</div>
+          <div className="site-mobile-notify__list">
+            {isLoading && <p className="site-mobile-notify__empty">Loading…</p>}
+            {!isLoading && notifications.length === 0 && (
+              <p className="site-mobile-notify__empty">No messages yet.</p>
+            )}
+            {notifications.map(row => {
+              const unread = !(row.isRead ?? row.is_read);
+              const subject = row.subject?.trim() || "New message";
+              return (
+                <button
+                  key={row.id}
+                  type="button"
+                  className={`site-mobile-notify__row${unread ? " is-unread" : ""}`}
+                  onClick={() => {
+                    close();
+                    openSheet();
+                  }}
+                >
+                  {unread && <span className="site-mobile-notify__dot" aria-hidden="true" />}
+                  <span className="site-mobile-notify__row-top">
+                    <span className="site-mobile-notify__sender">{senderLabel(row)}</span>
+                    <span className="site-mobile-notify__time">
+                      {formatNotifyTime(row.createdAt || row.created_at)}
+                    </span>
+                  </span>
+                  <span className="site-mobile-notify__tag">{notifyHeadline(row)}</span>
+                  <span className="site-mobile-notify__subject">{subject}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="site-mobile-notify__foot">
+            {adminPending > 0 && (
+              <button
+                type="button"
+                className="site-mobile-notify__foot-btn"
+                onClick={() => {
+                  close();
+                  openSheet({ view: "inbox", account: "admin" });
+                }}
+              >
+                Admin queue ({adminPending})
+              </button>
+            )}
+            <Link
+              href="/settings/notifications"
+              className="site-mobile-notify__foot-btn"
+              onClick={close}
             >
-              Admin queue ({adminPending})
-            </button>
-          )}
-          <Link
-            href="/settings/notifications"
-            role="menuitem"
-            className="site-mobile-notify__item"
-            onClick={close}
-          >
-            Notification settings
-          </Link>
+              Notification settings
+            </Link>
+          </div>
         </div>
       )}
     </div>

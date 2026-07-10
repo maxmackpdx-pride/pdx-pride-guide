@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutGrid, MapPin, MessageCircle, Sun } from "lucide-react";
+import { CalendarDays, LayoutGrid, MapPin, MessageCircle, Sun } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useUnreadCount } from "@/hooks/useUnreadCount";
@@ -30,14 +30,8 @@ export default function MobileBottomNav() {
 
   const placesActive = navLinkActive(location, "/directory");
   const beachesActive = navLinkActive(location, "/nude-beaches");
-  const hubActive = location === "/dashboard" || location.startsWith("/dashboard?");
+  const eventsActive = navLinkActive(location, "/events") || navLinkActive(location, "/schedule");
   const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
-
-  const handleHub = () => {
-    if (!user) {
-      setShowAuth(true);
-    }
-  };
 
   const handleMessages = () => {
     if (!user) {
@@ -89,27 +83,15 @@ export default function MobileBottomNav() {
           <span>Beaches</span>
         </Link>
 
-        {user ? (
-          <Link
-            href="/dashboard"
-            className={`${tabClass(hubActive, "lime")} hub-mobile-tab--center`}
-            aria-label="Hub"
-            aria-current={hubActive ? "page" : undefined}
-          >
-            <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Hub</span>
-          </Link>
-        ) : (
-          <button
-            type="button"
-            className={`${tabClass(false, "lime")} hub-mobile-tab--center`}
-            aria-label="Hub"
-            onClick={handleHub}
-          >
-            <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Hub</span>
-          </button>
-        )}
+        <Link
+          href="/events"
+          className={`${tabClass(eventsActive, "orange")} hub-mobile-tab--center`}
+          aria-label="Events"
+          aria-current={eventsActive ? "page" : undefined}
+        >
+          <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+          <span>Events</span>
+        </Link>
 
         <button
           type="button"

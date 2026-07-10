@@ -247,7 +247,11 @@ export default function MissedConnectionsPanel({
       </div>
     ) : (
       <div style={{ color: "#9d9a92", padding: compact ? "12px 0" : "32px 0" }}>
-        {mode === "event" ? "No missed connections for this event yet." : "No active missed connections yet."}
+        {mode === "event"
+          ? "No missed connections for this event yet."
+          : mode === "beach"
+            ? "No missed connections at this beach yet."
+            : "No active missed connections yet."}
       </div>
     )
   ) : (
@@ -307,10 +311,10 @@ export default function MissedConnectionsPanel({
 
       {(mode === "event" || mode === "beach") && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
-          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>POST TO SPOTTED!</h3>
+          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>Post a missed connection</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
             {mode === "beach"
-              ? "Beach missed connections · also show on the main Spotted board · anonymous until you both reveal."
+              ? "Missed connections from the beach · also on the main Spotted board · anonymous until you both reveal in inbox."
               : "Missed connections for this event · anonymous on the board until you both reveal in inbox."}
           </p>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />

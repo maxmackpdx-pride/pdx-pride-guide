@@ -14,6 +14,7 @@ function MaybeAdultGate({ gated, children }: { gated: boolean; children: React.R
   return <AdultContentGate>{children}</AdultContentGate>;
 }
 
+
 type ChatMessage = {
   id: number;
   body: string;
