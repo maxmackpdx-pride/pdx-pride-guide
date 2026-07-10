@@ -85,6 +85,29 @@ export default function InboxOverlay({
       <div className="inbox-overlay__backdrop" onClick={onClose} aria-hidden="true" />
       <div className="inbox-overlay" role="dialog" aria-label="Inbox" ref={panelRef}>
         <div className="inbox-overlay__head">
+          <div className="inbox-overlay__head-top">
+            <span className="inbox-overlay__title">Inbox</span>
+            <div className="inbox-overlay__head-actions">
+              <button
+                type="button"
+                className="inbox-overlay__icon-btn"
+                onClick={openFullInbox}
+                aria-label="Open full inbox"
+                title="Open full inbox"
+              >
+                <Maximize2 size={16} />
+              </button>
+              <button
+                type="button"
+                className="inbox-overlay__icon-btn"
+                onClick={onClose}
+                aria-label="Close inbox"
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
           <div className="inbox-overlay__tabs" role="tablist" aria-label="Inbox categories">
             <FilterChip
               role="tab"
@@ -122,26 +145,6 @@ export default function InboxOverlay({
               </FilterChip>
             )}
           </div>
-          <div className="inbox-overlay__head-actions">
-            <button
-              type="button"
-              className="inbox-overlay__icon-btn"
-              onClick={openFullInbox}
-              aria-label="Open full inbox"
-              title="Open full inbox"
-            >
-              <Maximize2 size={16} />
-            </button>
-            <button
-              type="button"
-              className="inbox-overlay__icon-btn"
-              onClick={onClose}
-              aria-label="Close inbox"
-              title="Close"
-            >
-              <X size={18} />
-            </button>
-          </div>
         </div>
 
         <div className="inbox-overlay__body">
@@ -149,6 +152,7 @@ export default function InboxOverlay({
             <InboxShell
               forceNarrow
               hideBrandHeader
+              compact
               density="compact"
               initialThreadId={threadId}
               onThreadChange={setThreadId}

@@ -1974,8 +1974,8 @@ h2.display,
   overflow: hidden;
   /* Frameless floating panel, Directory-listing surface + border language. */
   background: var(--surface-card);
-  border: var(--bw-bold, 2px) solid var(--border-default);
-  border-radius: var(--radius-lg, 14px);
+  border: var(--bw-hair, 1px) solid var(--border-default);
+  border-radius: 22px;
   box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.6));
   animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
 }
@@ -1998,16 +1998,31 @@ h2.display,
   to { opacity: 1; }
 }
 
-/* Header: Directory-style filter row — chips left, actions right, seam under. */
+/* Header: "Inbox" title row on top, role tabs beneath (minimal). */
 .inbox-overlay__head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  flex-shrink: 0;
+  background: var(--ink-1000);
+  border-bottom: var(--bw-hair, 1px) solid var(--border-faint, var(--border-default));
+  border-radius: 22px 22px 0 0;
+}
+
+.inbox-overlay__head-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 12px 14px;
-  flex-shrink: 0;
-  background: var(--ink-1000);
-  border-bottom: var(--bw-bold, 2px) solid var(--border-default);
+}
+
+.inbox-overlay__title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--text-hi);
 }
 
 .inbox-overlay__tabs {
@@ -2024,7 +2039,7 @@ h2.display,
 
 /* Slightly denser chips inside the compact panel. */
 .inbox-overlay__tabs .pdxChip {
-  padding: 7px 12px 5px;
+  padding: 7px 13px 5px;
 }
 
 .inbox-overlay__head-actions {
