@@ -52,6 +52,34 @@ export const ROOSTER_ROCK_PARKING = {
   note: "Day-use only — Oregon State Parks pass or pay at the fee machine / QR on site.",
 };
 
+export type BeachMapLocation = {
+  label: string;
+  subtitle: string;
+  lat: number;
+  lng: number;
+  zoom: number;
+  pinColor: string;
+};
+
+export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
+  "rooster-rock": {
+    label: "Rooster Rock State Park",
+    subtitle: "I-84 Exit 25 · Corbett, OR",
+    lat: 45.5446,
+    lng: -122.2342,
+    zoom: 13,
+    pinColor: "#19E3FF",
+  },
+  "sauvie-island": {
+    label: "Collins Beach",
+    subtitle: "Sauvie Island Wildlife Area · OR",
+    lat: 45.7142,
+    lng: -122.8189,
+    zoom: 12,
+    pinColor: "#FF00CC",
+  },
+};
+
 export const ROOSTER_ROCK_MAPS = [
   {
     label: "Google Maps directions",
@@ -68,6 +96,21 @@ export const ROOSTER_ROCK_MAPS = [
   {
     label: "OpenStreetMap",
     href: "https://www.openstreetmap.org/?mlat=45.5446&mlon=-122.2342#map=15/45.5446/-122.2342",
+  },
+] as const;
+
+export const SAUVIE_ISLAND_MAPS = [
+  {
+    label: "Google Maps directions",
+    href: "https://www.google.com/maps/dir/?api=1&destination=Collins+Beach,+Sauvie+Island,+OR",
+  },
+  {
+    label: "Apple Maps directions",
+    href: "https://maps.apple.com/?daddr=Collins+Beach,+Sauvie+Island,+OR&dirflg=d",
+  },
+  {
+    label: "OpenStreetMap",
+    href: "https://www.openstreetmap.org/?mlat=45.7142&mlon=-122.8189#map=13/45.7142/-122.8189",
   },
 ] as const;
 

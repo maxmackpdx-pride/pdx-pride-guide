@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import { useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -14,6 +15,7 @@ import {
   NUDE_BEACH_TABS,
   ROOSTER_ROCK_MAPS,
   ROOSTER_ROCK_PARKING,
+  SAUVIE_ISLAND_MAPS,
   SAUVIE_ISLAND_CHECKLIST,
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_RESOURCES,
@@ -25,6 +27,32 @@ import {
   type ResourceLink,
 } from "@shared/nudeBeaches";
 import "./NudeBeaches.css";
+
+const NudeBeachesMap = lazyWithReload(() => import("@/components/NudeBeachesMap"));
+
+function BeachMapSection({
+  tab,
+  links,
+}: {
+  tab: NudeBeachTab;
+  links: ReadonlyArray<{ label: string; href: string }>;
+}) {
+  return (
+    <section className="nude-panel">
+      <div className="nude-panel__kicker nude-panel__kicker--cyan">Maps &amp; directions</div>
+      <Suspense fallback={<div className="directory-map" style={{ height: 300, background: "#0a0a0a" }} />}>
+        <NudeBeachesMap tab={tab} height={300} />
+      </Suspense>
+      <div className="nude-map-actions">
+        {links.map(map => (
+          <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
+            {map.label}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 type ApiPayload = {
   data: NudeBeachesSnapshot;
@@ -211,23 +239,7 @@ function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
         </div>
       </section>
 
-      <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--cyan">Maps &amp; directions</div>
-        <div className="nude-map-frame">
-          <iframe
-            title="Rooster Rock State Park map"
-            src="https://www.openstreetmap.org/export/embed.html?bbox=-122.252%2C45.532%2C-122.216%2C45.556&layer=mapnik&marker=45.5446%2C-122.2342"
-            loading="lazy"
-          />
-        </div>
-        <div className="nude-map-actions">
-          {ROOSTER_ROCK_MAPS.map(map => (
-            <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
-              {map.label}
-            </a>
-          ))}
-        </div>
-      </section>
+      <BeachMapSection tab="rooster-rock" links={ROOSTER_ROCK_MAPS} />
     </div>
   );
 }
@@ -297,6 +309,8 @@ function SauvieIslandPanel({ data }: { data: NudeBeachesSnapshot }) {
           </ul>
         </div>
       </section>
+
+      <BeachMapSection tab="sauvie-island" links={SAUVIE_ISLAND_MAPS} />
 
       <section className="nude-panel">
         <div className="nude-panel__kicker nude-panel__kicker--lime">Before you go</div>
