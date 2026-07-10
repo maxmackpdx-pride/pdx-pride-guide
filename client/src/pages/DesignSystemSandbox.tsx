@@ -150,7 +150,7 @@ export default function DesignSystemSandbox() {
       data-calm={calm ? "true" : "false"}
     >
       <div className="ds-sandbox__dev-banner" role="note">
-        Dev preview — design system sandbox only
+        Dev preview: design system sandbox only
       </div>
 
       <header className="ds-sandbox__header">
@@ -196,7 +196,7 @@ export default function DesignSystemSandbox() {
           </p>
         )}
 
-        <Section id="tokens" title="Tokens — day colors & neon palette">
+        <Section id="tokens" title="Tokens: day colors & neon palette">
           <div className="ds-sandbox__stack">
             <h3 className="ds-sandbox__card-title" style={{ fontSize: "1rem" }}>
               Pride week days
@@ -482,7 +482,7 @@ export default function DesignSystemSandbox() {
         </Section>
 
         <footer className="ds-sandbox__footer-note">
-          Sandbox only — not production. Open via{" "}
+          Sandbox only, not production. Open via{" "}
           <code>npm run dev</code> → /design-preview
         </footer>
       </main>

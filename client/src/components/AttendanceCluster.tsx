@@ -357,7 +357,7 @@ export default function AttendanceCluster({
                   color: "#e6e3da",
                 }}
               >
-                "{resolveAttendancePhrase(messageTarget.message).label}" — see you there?
+                "{resolveAttendancePhrase(messageTarget.message).label}". See you there?
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, padding: "14px 16px", borderTop: "1px solid #222" }}>

@@ -234,8 +234,8 @@ export default function MemberProfile() {
 
   usePageSeo(
     data
-      ? `${data.displayName || data.username} (@${data.username}) — PDX Pride Guide`
-      : "Member Profile — PDX Pride Guide",
+      ? `${data.displayName || data.username} (@${data.username}) | PDX Pride Guide`
+      : "Member Profile | PDX Pride Guide",
     (data?.bio || "PDX Pride Guide member profile.").replace(/\s+/g, " ").slice(0, 160),
   );
 
@@ -863,7 +863,7 @@ export default function MemberProfile() {
                     ))}
                   </div>
                 ) : (
-                  <div className="mp-empty"><p>No RSVPs yet — browse the <Link href="/events">events board</Link>.</p></div>
+                  <div className="mp-empty"><p>No RSVPs yet. Browse the <Link href="/events">events board</Link>.</p></div>
                 )}
               </section>
             )}

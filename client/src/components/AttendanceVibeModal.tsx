@@ -52,7 +52,7 @@ export default function AttendanceVibeModal({
             ×
           </button>
         </div>
-        <p className="attendance-vibe-modal__lede">Pick a vibe — it shows on your bubble.</p>
+        <p className="attendance-vibe-modal__lede">Pick a vibe. It shows on your bubble.</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();

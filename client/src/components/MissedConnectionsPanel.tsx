@@ -142,7 +142,7 @@ export default function MissedConnectionsPanel({
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       if (eventId) queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-      toast({ title: "Posted", description: "Your note is live — you stay anonymous until you both reveal in inbox." });
+      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
     },
     onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
   });
@@ -257,7 +257,7 @@ export default function MissedConnectionsPanel({
       <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 22 }}>
         <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE REPLY</h3>
         <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
-          {replyingTo.title} — your reply stays anonymous in inbox until you both choose to reveal.
+          {replyingTo.title}. Your reply stays anonymous in inbox until you both choose to reveal.
         </p>
         <textarea style={{ ...inputStyle, minHeight: 120, resize: "vertical" }} value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="Write your reply..." />
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>

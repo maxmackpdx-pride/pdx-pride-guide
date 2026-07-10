@@ -28,7 +28,7 @@ export default function Contact() {
   const [contactOpen, setContactOpen] = useState(false);
 
   usePageSeo(
-    "Contact — PDX Pride Guide",
+    "Contact | PDX Pride Guide",
     "Reach PDX Pride Guide about listings, privacy, or help. Messages go to the site owner inbox.",
   );
 
@@ -58,7 +58,7 @@ export default function Contact() {
               Message me
             </Button>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
-              Goes to my Owner Desk on the guide — not a personal email, not the shared admin queue.
+              Goes to my Owner Desk on the guide, not a personal email or the shared admin queue.
             </p>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
               Or hit the feedback button at the bottom of any page to report a bug.

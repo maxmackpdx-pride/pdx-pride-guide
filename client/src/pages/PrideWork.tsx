@@ -111,7 +111,7 @@ function thumbGradient(isLooking: boolean) {
 
 export default function PrideWork() {
   usePageSeo(
-    "Pride Work — Jobs & Gigs — PDX Pride Guide",
+    "Pride Work: Jobs & Gigs | PDX Pride Guide",
     "Find queer-friendly gigs and workers for Portland Pride 2026. Post or browse Pride Work listings in PDX.",
   );
   const { toast } = useToast();
@@ -167,7 +167,7 @@ export default function PrideWork() {
   const newBusinessMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory/new-submission", newBusinessForm),
     onSuccess: () => {
-      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed — your gig will keep using the plain location for now." });
+      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed. Your gig will keep using the plain location for now." });
       setNewBusinessForm({ name: "", type: "bar", description: "", address: "", neighborhood: "", hours: "", phone: "", website: "", instagram: "", logoImageUrl: "" });
       setVenueBranch("idle");
       setVenueQuery("");
@@ -447,7 +447,7 @@ export default function PrideWork() {
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
                   <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
-                    Link this gig to a directory venue (optional) — it'll show up on that venue's Gigs tab.
+                    Link this gig to a directory venue (optional). It'll show up on that venue's Gigs tab.
                   </p>
                   {linkedBusiness ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -520,7 +520,7 @@ export default function PrideWork() {
                               style={{ textAlign: "left" }}
                               onClick={() => setLinkedBusiness({ id: b.id, name: b.name })}
                             >
-                              {b.name}{b.address ? ` — ${b.address}` : ""}
+                              {b.name}{b.address ? `, ${b.address}` : ""}
                             </button>
                           ))}
                         </div>
@@ -536,7 +536,7 @@ export default function PrideWork() {
                             className="board-mini-btn"
                             onClick={() => { setNewBusinessForm(f => ({ ...f, name: venueQuery })); setVenueBranch("newBusiness"); }}
                           >
-                            This is a business — add it →
+                            This is a business. Add it →
                           </button>
                         </div>
                       )}

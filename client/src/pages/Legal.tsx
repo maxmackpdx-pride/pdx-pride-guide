@@ -12,7 +12,7 @@ const SECTIONS = [
     title: "Terms of use",
     bullets: [
       "PDX Pride Guide is a free community directory for Portland Pride Week and related queer events.",
-      "Listings are submitted by promoters and community members; accuracy is not guaranteed — verify details with official venues and organizers.",
+      "Listings are submitted by promoters and community members; accuracy is not guaranteed. Verify details with official venues and organizers.",
       "Do not use this site to harass, spam, scrape personal data, or post misleading or harmful content.",
       "We may remove listings or accounts that violate community standards or applicable law.",
     ],
@@ -34,7 +34,7 @@ const SECTIONS = [
     tone: "magenta",
     title: "Community guidelines",
     bullets: [
-      "Be honest in event submissions and claims — only claim listings you represent.",
+      "Be honest in event submissions and claims. Only claim listings you represent.",
       "Sex-positive, leather, and adult-themed events are welcome when tagged accurately.",
       "Gifting and Spotted posts must follow posted community rules; no restricted items or harassment.",
       "Pride Werk gig posts should use real contact info and describe paid or volunteer work clearly.",
@@ -46,7 +46,7 @@ const SECTIONS = [
     title: "Disclaimer",
     bullets: [
       "PDX Pride Guide is independently run and is not affiliated with Pride Northwest unless a listing says otherwise.",
-      "Event times, prices, and policies can change — always confirm with the organizer.",
+      "Event times, prices, and policies can change. Always confirm with the organizer.",
       "This site is provided as-is without warranties; use at your own discretion.",
     ],
   },
@@ -54,7 +54,7 @@ const SECTIONS = [
 
 export default function Legal() {
   usePageSeo(
-    "Legal — PDX Pride Guide",
+    "Legal | PDX Pride Guide",
     "Terms of use, privacy policy, and community guidelines for PDX Pride Guide.",
   );
 
@@ -82,7 +82,7 @@ export default function Legal() {
           <span className="board-sticker board-sticker--cyan">Last updated June 2026</span>
           <h2 className="display section-heading">LEGAL & COMMUNITY</h2>
           <p className="board-copy">
-            Plain-language policies for a community-run Pride directory. Not legal advice — just how we operate.
+            Plain-language policies for a community-run Pride directory. Not legal advice. Just how we operate.
           </p>
           <div className="about-mission-grid">
             {SECTIONS.map(section => (

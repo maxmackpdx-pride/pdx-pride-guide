@@ -213,8 +213,8 @@ export default function Events() {
   const shareEvent = selectedEvent || routeEvent || null;
   usePageSeo(
     shareEvent
-      ? `${shareEvent.title} — Portland Pride 2026 | PDX Pride Guide`
-      : "Portland Pride 2026 Events — PDX Pride Guide",
+      ? `${shareEvent.title} | Portland Pride 2026 | PDX Pride Guide`
+      : "Portland Pride 2026 Events | PDX Pride Guide",
     shareEvent
       ? truncateSeo(
           `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,
@@ -272,7 +272,7 @@ export default function Events() {
         titlePrefix={events.length > 0 ? events.length : undefined}
         titleAccent="cyan"
         kicker="Portland Pride Week 2026 · July 13–19"
-        lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond — all in one place."
+        lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond, all in one place."
         actions={
           <Link href="/schedule" className="btn-neon" style={{ fontSize: "0.85rem", letterSpacing: "0.12em" }}>
             View schedule →

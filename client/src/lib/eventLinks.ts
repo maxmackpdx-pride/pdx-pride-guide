@@ -42,7 +42,7 @@ function buildEventDetails(event: Pick<Event, "description" | "venueName" | "add
   if (event.venueName) lines.push(`Venue: ${event.venueName}`);
   if (event.address) lines.push(`Address: ${event.address}`);
   if (event.ticketUrl) lines.push(`Tickets: ${event.ticketUrl}`);
-  lines.push("via PDX Pride Guide — prideguidepdx.com");
+  lines.push("via PDX Pride Guide at prideguidepdx.com");
   return lines.join("\n");
 }
 

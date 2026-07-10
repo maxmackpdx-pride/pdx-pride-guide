@@ -172,7 +172,7 @@ export default function PlaceModal({
     onError: (err: unknown) => {
       toast({
         title: "Could not save",
-        description: err instanceof Error ? err.message : "Something went wrong — try again.",
+        description: err instanceof Error ? err.message : "Something went wrong. Try again.",
         variant: "destructive",
       });
     },
@@ -195,7 +195,7 @@ export default function PlaceModal({
     onError: (err: unknown) => {
       toast({
         title: "Could not submit claim",
-        description: err instanceof Error ? err.message : "Something went wrong — try again.",
+        description: err instanceof Error ? err.message : "Something went wrong. Try again.",
         variant: "destructive",
       });
     },
@@ -623,7 +623,7 @@ export default function PlaceModal({
               </label>
               {isOwner && (
                 <p style={{ fontSize: "0.78rem", color: "var(--text-lo)", marginBottom: 12 }}>
-                  Logo changes go through the Hub's venue section — they're sent to the site admin for conversion before going live.
+                  Logo changes go through the Hub's venue section. They're sent to the site admin for conversion before going live.
                 </p>
               )}
               <div style={{ display: "flex", gap: 10, marginTop: 10 }}>

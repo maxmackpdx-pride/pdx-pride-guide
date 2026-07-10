@@ -82,9 +82,9 @@ function prideCaption(high: number, low: number, code: number, isEstimate: boole
   const range = `H ${high}° · L ${low}°`;
   if (isEstimate) return `${range} · Jul 13–19 · Forecast updates closer to Pride`;
   if (code >= 51 && code <= 82) return `${range} · Pack a light layer`;
-  if (high >= 75) return `${range} · Hot out — hydrate`;
+  if (high >= 75) return `${range} · Hot out. Hydrate`;
   if (high >= 65) return `${range} · Solid parade weather`;
-  return `${range} · Cooler — bring a layer`;
+  return `${range} · Cooler. Bring a layer`;
 }
 
 function pacificTodayIso() {

@@ -644,7 +644,7 @@ function InboxCard({
               <p className="text-white/65 text-sm whitespace-pre-wrap">{payload.description}</p>
               {Number(payload.reportCount || 0) > 0 && (
                 <p className="text-white/40 text-xs uppercase tracking-wide">
-                  {payload.reportCount} report(s) — review or remove if needed
+                  {payload.reportCount} report(s). Review or remove if needed
                 </p>
               )}
               <AdminBoardReject

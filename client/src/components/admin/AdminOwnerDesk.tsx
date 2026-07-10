@@ -62,7 +62,7 @@ export default function AdminOwnerDesk({
         </span>
         <p>
           <strong>Owner only.</strong> Keyholders (site admins) can&apos;t see or touch this lane.
-          Contact form messages, bug reports, and sponsorship pitches land here — not the shared review queue.
+          Contact form messages, bug reports, and sponsorship pitches land here, not the shared review queue.
         </p>
       </div>
 

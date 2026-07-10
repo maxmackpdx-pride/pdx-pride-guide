@@ -109,7 +109,7 @@ export default function PortfolioContactModal({
             <p className="pcm-sub">
               {isSponsor
                 ? "Goes straight to my Owner Desk. Tell me who you are and how long you want to be on the guide."
-                : "Goes straight to my Owner Desk — not personal email, not the shared admin queue."}
+                : "Goes straight to my Owner Desk, not personal email or the shared admin queue."}
             </p>
 
             <label className="pcm-field">

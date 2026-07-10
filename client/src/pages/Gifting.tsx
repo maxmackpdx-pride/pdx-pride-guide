@@ -98,7 +98,7 @@ function thumbGradient(post: GiftingPost) {
 
 export default function Gifting() {
   usePageSeo(
-    "Gifting Board — PDX Pride Guide | Portland Pride 2026",
+    "Gifting Board | PDX Pride Guide | Portland Pride 2026",
     "Give and find free stuff in Portland's queer community during Pride 2026 and beyond. PDX Pride gifting and ISO board.",
   );
   const { user } = useAuth();
@@ -616,7 +616,7 @@ export default function Gifting() {
                           <div className="gifting-owner">
                             {post.status === "PENDING" && (
                               <p className="gifting-pending-note">
-                                Held for admin review — only you see this on the board until it&apos;s approved.
+                                Held for admin review. Only you see this on the board until it&apos;s approved.
                               </p>
                             )}
                             {post.interests?.length ? (

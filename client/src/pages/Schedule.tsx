@@ -1,5 +1,5 @@
 /* ============================================================
-   PDX Pride Guide — Schedule
+   PDX Pride Guide | Schedule
    Festival-timeline redesign of /schedule. The whole week side by
    side; packed days widen and scroll horizontally instead of
    squishing text; the day-color system carries the meaning.
@@ -100,7 +100,7 @@ export default function Schedule({
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   usePageSeo(
-    "Schedule — Portland Pride 2026 | PDX Pride Guide",
+    "Schedule | Portland Pride 2026 | PDX Pride Guide",
     "Your full Pride Week schedule, July 13–19, side by side.",
     { skip: embed },
   );
@@ -358,7 +358,7 @@ export default function Schedule({
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       flashToast('Saved to downloads ✦ ready for Stories');
     } catch {
-      flashToast('Export hit a snag — try again');
+      flashToast('Export hit a snag. Try again');
     } finally {
       setExporting(false);
     }

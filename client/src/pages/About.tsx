@@ -69,7 +69,7 @@ const FAQ = [
 
 export default function About() {
   usePageSeo(
-    "About PDX Pride Guide — Portland Pride 2026",
+    "About PDX Pride Guide | Portland Pride 2026",
     "Built by one person in Portland. Free Pride week directory with zero interest in being a sanitized corporate pamphlet.",
   );
 

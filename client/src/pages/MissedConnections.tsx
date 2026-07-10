@@ -22,7 +22,7 @@ const HOW_IT_WORKS = [
 
 export default function MissedConnections() {
   usePageSeo(
-    "Spotted — Missed Connections — PDX Pride Guide",
+    "Spotted: Missed Connections | PDX Pride Guide",
     "Post anonymous missed connections from Portland Pride 2026 events. Spotted someone at PDX Pride? Say hi privately.",
   );
   const { user } = useAuth();
@@ -125,7 +125,7 @@ export default function MissedConnections() {
         <div className="board-active-feed" style={{ paddingTop: 0, paddingBottom: 0, background: "transparent" }}>
           <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 8px" }}>
             <p className="board-copy-sm" style={{ marginInline: "auto" }}>
-              Browse Spotted posts without an account. Log in to post or reply — threads stay anonymous until you both reveal in inbox.
+              Browse Spotted posts without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
             </p>
             <Button variant="solid" accent="magenta" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>
               Log in / Join

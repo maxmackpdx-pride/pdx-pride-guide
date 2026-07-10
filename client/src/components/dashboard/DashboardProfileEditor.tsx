@@ -160,7 +160,7 @@ export default function DashboardProfileEditor({
       <label style={labelStyle}>
         Social links{" "}
         <span style={{ color: "var(--text-meta)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>
-          — shown on your public profile at /u/{user?.username}
+         , shown on your public profile at /u/{user?.username}
         </span>
       </label>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>

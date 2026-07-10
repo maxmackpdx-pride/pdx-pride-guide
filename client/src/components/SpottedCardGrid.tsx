@@ -134,7 +134,7 @@ export default function SpottedCardGrid({
       setComposeOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-      toast({ title: "Posted", description: "Your note is live — you stay anonymous until you both reveal in inbox." });
+      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
     },
     onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
   });
@@ -223,7 +223,7 @@ export default function SpottedCardGrid({
           </div>
 
           {spotMode === AROUND_TOWN_KEY && (
-            <input className="board-text-field" value={draftVenueHint} onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))} placeholder="Optional — e.g. Waterfront Park, Hawthorne…" maxLength={80} />
+            <input className="board-text-field" value={draftVenueHint} onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))} placeholder="Optional: e.g. Waterfront Park, Hawthorne…" maxLength={80} />
           )}
           {spotMode === "event" && (
             <select className="board-select" value={draftEventId} onChange={e => setDraftEventId(e.target.value)}>
@@ -235,8 +235,8 @@ export default function SpottedCardGrid({
           )}
           {spotMode === CUSTOM_SPOT_KEY && (
             <>
-              <input className="board-text-field" value={draftCustomEventName} onChange={e => setDraftCustomEventName(e.target.value.slice(0, 80))} placeholder="Event or moment name — e.g. Afterparty, Backyard pregame…" maxLength={80} />
-              <input className="board-text-field" style={{ marginTop: 8 }} value={draftCustomLocation} onChange={e => setDraftCustomLocation(e.target.value.slice(0, 80))} placeholder="Where — bar, park, cross streets…" maxLength={80} />
+              <input className="board-text-field" value={draftCustomEventName} onChange={e => setDraftCustomEventName(e.target.value.slice(0, 80))} placeholder="Event or moment name, e.g. Afterparty, Backyard pregame…" maxLength={80} />
+              <input className="board-text-field" style={{ marginTop: 8 }} value={draftCustomLocation} onChange={e => setDraftCustomLocation(e.target.value.slice(0, 80))} placeholder="Where: bar, park, cross streets…" maxLength={80} />
             </>
           )}
 
@@ -280,7 +280,7 @@ export default function SpottedCardGrid({
           <p className="board-copy-sm">
             {makeover
               ? "Loosen the filter, or be the one to break the ice. Someone out there is hoping you post first."
-              : "Be the first — tie it to an event, write your own spot, or post around town."}
+              : "Be the first. Tie it to an event, write your own spot, or post around town."}
           </p>
         </div>
       ) : (
@@ -310,7 +310,7 @@ export default function SpottedCardGrid({
           >
             <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE MESSAGE</h3>
             <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
-              "{replyingTo.title || replyingTo.body.slice(0, 60)}" — your message stays anonymous in inbox until you both choose to reveal.
+              "{replyingTo.title || replyingTo.body.slice(0, 60)}". Your message stays anonymous in inbox until you both choose to reveal.
             </p>
             <textarea
               style={{ width: "100%", padding: "10px 12px", border: "1px solid #333", fontSize: "0.9rem", background: "#000", color: "#fff", fontFamily: "var(--font-body)", boxSizing: "border-box", minHeight: 120, resize: "vertical" }}

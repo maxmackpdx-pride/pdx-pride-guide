@@ -173,7 +173,7 @@ export default function MissedConnectionsBubbleBoard({
       setComposeOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-      toast({ title: "Posted", description: "Your note is live — you stay anonymous until you both reveal in inbox." });
+      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
     },
     onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
   });
@@ -357,7 +357,7 @@ export default function MissedConnectionsBubbleBoard({
                     className="board-text-field mc-compose__venue"
                     value={draftVenueHint}
                     onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
-                    placeholder="Optional — e.g. Waterfront Park, Hawthorne, parade route…"
+                    placeholder="Optional: e.g. Waterfront Park, Hawthorne, parade route…"
                     maxLength={80}
                   />
                 )}
@@ -381,14 +381,14 @@ export default function MissedConnectionsBubbleBoard({
                       className="board-text-field mc-compose__venue"
                       value={draftCustomEventName}
                       onChange={e => setDraftCustomEventName(e.target.value.slice(0, 80))}
-                      placeholder="Event or moment name — e.g. Backyard pregame, Afterparty…"
+                      placeholder="Event or moment name, e.g. Backyard pregame, Afterparty…"
                       maxLength={80}
                     />
                     <input
                       className="board-text-field mc-compose__venue"
                       value={draftCustomLocation}
                       onChange={e => setDraftCustomLocation(e.target.value.slice(0, 80))}
-                      placeholder="Where — bar, park, neighborhood, cross streets…"
+                      placeholder="Where: bar, park, neighborhood, cross streets…"
                       maxLength={80}
                     />
                   </div>
@@ -445,7 +445,7 @@ export default function MissedConnectionsBubbleBoard({
       ) : posts.length === 0 ? (
         <div className="mc-pulse-field mc-pulse-field--empty">
           <p className="display section-heading">Nothing here yet</p>
-          <p className="board-copy-sm">Be the first — tie it to an event, write your own spot, or post around town.</p>
+          <p className="board-copy-sm">Be the first. Tie it to an event, write your own spot, or post around town.</p>
         </div>
       ) : (
         <div ref={fieldRef} className="mc-pulse-field">

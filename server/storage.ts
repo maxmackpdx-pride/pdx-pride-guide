@@ -714,7 +714,7 @@ function seedData() {
   const seedEvents = [
     {
       title: "Portland Pride Waterfront Festival",
-      description: "2026 theme 'Made with Pride' — celebrates creativity and entrepreneurship in Portland LGBTQ2SIA+ community. Live music (Lushious Massacr, DeJa Skye, Tenderoni), makers' market, food/drink vendors, nonprofit booths. $10 suggested donation.",
+      description: "2026 theme 'Made with Pride', celebrates creativity and entrepreneurship in Portland LGBTQ2SIA+ community. Live music (Lushious Massacr, DeJa Skye, Tenderoni), makers' market, food/drink vendors, nonprofit booths. $10 suggested donation.",
       venueName: "Tom McCall Waterfront Park",
       address: "98 SW Naito Pkwy, Portland, OR 97204",
       neighborhood: "Downtown",
@@ -1113,7 +1113,7 @@ function seedData() {
     },
     {
       title: "BOYeurism: Pride Spectacular",
-      description: "An explosive celebration of queerness from IZOHNNY — Isaiah Esquire & Johnny Nuriel, the Goliaths of Glam. Drag, burlesque, circus, and dance. Internationally acclaimed, unapologetically queer, fiercely inclusive. Featuring legendary icons.",
+      description: "An explosive celebration of queerness from IZOHNNY, Isaiah Esquire & Johnny Nuriel, the Goliaths of Glam. Drag, burlesque, circus, and dance. Internationally acclaimed, unapologetically queer, fiercely inclusive. Featuring legendary icons.",
       venueName: "Alberta Rose Theatre",
       address: "3000 NE Alberta St, Portland, OR 97211",
       neighborhood: "Alberta Arts District",
@@ -1130,7 +1130,7 @@ function seedData() {
     },
     {
       title: "Twirl! PDX Queer Disco — Pride Edition (HOLD)",
-      description: "PDX Queer Disco Pride Edition at Green Anchors in St. Johns — an outdoor eco-park under the St. Johns Bridge. Disco, funk, and house sounds. Special guest performances. Food and craft vendors, outdoor space with Willamette River views.",
+      description: "PDX Queer Disco Pride Edition at Green Anchors in St. Johns, an outdoor eco-park under the St. Johns Bridge. Disco, funk, and house sounds. Special guest performances. Food and craft vendors, outdoor space with Willamette River views.",
       venueName: "Green Anchors",
       address: "8940 N Bradford St, Portland, OR 97203",
       neighborhood: "St. Johns",
@@ -1164,7 +1164,7 @@ function seedData() {
     },
     {
       title: "Darcelle XV Friday Night Show",
-      description: "TGIF at Darcelle XV Showplace — glittery entertainment, fierce performances, and nonstop sparkle. Celebrating something special? Bachelor/bachelorette, birthday, or just making it through the week — do it here. Doors 7pm, show 8pm. Cover $32. Ages 21+. Reservations recommended via Darcelle XV.",
+      description: "TGIF at Darcelle XV Showplace, glittery entertainment, fierce performances, and nonstop sparkle. Celebrating something special? Bachelor/bachelorette, birthday, or just making it through the week, do it here. Doors 7pm, show 8pm. Cover $32. Ages 21+. Reservations recommended via Darcelle XV.",
       venueName: "Darcelle XV Showplace",
       address: "208 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
@@ -1181,7 +1181,7 @@ function seedData() {
     },
     {
       title: "Darcelle XV Saturday Night Show",
-      description: "Saturday night glitter, glam, and unforgettable drag at Darcelle XV Showplace. Keep the party going with the Men of Darcelle after the main show. Doors 7pm, show 8pm. Cover $32. Men of Darcelle at 9:30pm — $10 cover after 9:30pm. Ages 21+. Reservations recommended.",
+      description: "Saturday night glitter, glam, and unforgettable drag at Darcelle XV Showplace. Keep the party going with the Men of Darcelle after the main show. Doors 7pm, show 8pm. Cover $32. Men of Darcelle at 9:30pm, $10 cover after 9:30pm. Ages 21+. Reservations recommended.",
       venueName: "Darcelle XV Showplace",
       address: "208 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
@@ -1198,7 +1198,7 @@ function seedData() {
     },
     {
       title: "Darcelle XV Sunday Funday Drag Brunch",
-      description: "Sunday brunch, fiercer. Weekly Sunday Funday Drag Brunch at Darcelle XV Showplace — fabulous performances, big laughs, and all the glam. Doors 11:30am, show 12:30pm. Cover $32. Ages 21+. Reservations recommended.",
+      description: "Sunday brunch, fiercer. Weekly Sunday Funday Drag Brunch at Darcelle XV Showplace, fabulous performances, big laughs, and all the glam. Doors 11:30am, show 12:30pm. Cover $32. Ages 21+. Reservations recommended.",
       venueName: "Darcelle XV Showplace",
       address: "208 NW 3rd Ave, Portland, OR 97209",
       neighborhood: "Old Town",
@@ -1504,7 +1504,7 @@ function seedData() {
     },
     {
       title: "Fresh Paint — Weekly Open-Call Drag Showcase",
-      description: "Weekly Monday drag showcase at Badlands. Hosted by @theriodiehl — new talent plus a dance party after. Runs through Pride Month. No cover before 9PM.",
+      description: "Weekly Monday drag showcase at Badlands. Hosted by @theriodiehl, new talent plus a dance party after. Runs through Pride Month. No cover before 9PM.",
       venueName: "Badlands Portland",
       address: "110 NW Broadway, Portland, OR 97209",
       neighborhood: "Old Town",
@@ -1682,7 +1682,7 @@ function applyVerifiedEventOverrides() {
   });
 
   runTitle("Portland Pride Waterfront Festival", {
-    description: "Official PrideNW festival at Tom McCall Waterfront Park. 2026 theme: \"Made with Pride\" — celebrating creativity, entrepreneurship, and Pride's protest roots. Saturday noon-8pm and Sunday 11:30am-6pm. $10 suggested donation; no one turned away. Headliners announced so far: Lushious Massacr, DeJa Skye, Tenderoni. Features main stage and north stage, ASL interpreters, ADA viewing areas, accessible flooring, and VIP pass options.",
+    description: "Official PrideNW festival at Tom McCall Waterfront Park. 2026 theme: \"Made with Pride\", celebrating creativity, entrepreneurship, and Pride's protest roots. Saturday noon-8pm and Sunday 11:30am-6pm. $10 suggested donation; no one turned away. Headliners announced so far: Lushious Massacr, DeJa Skye, Tenderoni. Features main stage and north stage, ASL interpreters, ADA viewing areas, accessible flooring, and VIP pass options.",
     dateStart: "2026-07-18T12:00:00",
     dateEnd: "2026-07-19T18:00:00",
     admission: "SUGGESTED_DONATION",
@@ -1741,7 +1741,7 @@ function applyVerifiedEventOverrides() {
     description: "Sabrina the Teenage Witch 30th anniversary celebration featuring Gordie and Harvey, with drag performances and nostalgia. Doors 7:30pm.",
   });
   runTitle("Darcelle XV Friday Night Show", {
-    description: "TGIF at Darcelle XV Showplace — glittery entertainment, fierce performances, and nonstop sparkle. Doors 7pm, show 8pm. Cover $32. Ages 21+. Reservations recommended via Darcelle XV.",
+    description: "TGIF at Darcelle XV Showplace, glittery entertainment, fierce performances, and nonstop sparkle. Doors 7pm, show 8pm. Cover $32. Ages 21+. Reservations recommended via Darcelle XV.",
     ticketUrl: "https://dcxv.empxv.com/reservations/",
     posterImageUrl: "/posters/darcelle-xv-friday.jpg",
     dateStart: "2026-07-17T19:00:00",
@@ -1749,7 +1749,7 @@ function applyVerifiedEventOverrides() {
     ageRequirement: "21_PLUS",
   });
   runTitle("Darcelle XV Saturday Night Show", {
-    description: "Saturday night glitter, glam, and unforgettable drag at Darcelle XV Showplace. Men of Darcelle after the main show. Doors 7pm, show 8pm. Cover $32. Men of Darcelle at 9:30pm — $10 after 9:30pm. Ages 21+.",
+    description: "Saturday night glitter, glam, and unforgettable drag at Darcelle XV Showplace. Men of Darcelle after the main show. Doors 7pm, show 8pm. Cover $32. Men of Darcelle at 9:30pm, $10 after 9:30pm. Ages 21+.",
     ticketUrl: "https://dcxv.empxv.com/reservations/",
     posterImageUrl: "/posters/darcelle-xv-saturday.jpg",
     dateStart: "2026-07-18T19:00:00",
@@ -1757,7 +1757,7 @@ function applyVerifiedEventOverrides() {
     ageRequirement: "21_PLUS",
   });
   runTitle("Darcelle XV Sunday Funday Drag Brunch", {
-    description: "Sunday Funday Drag Brunch at Darcelle XV Showplace — fabulous performances, big laughs, and glam. Doors 11:30am, show 12:30pm. Cover $32. Ages 21+. Reservations recommended.",
+    description: "Sunday Funday Drag Brunch at Darcelle XV Showplace, fabulous performances, big laughs, and glam. Doors 11:30am, show 12:30pm. Cover $32. Ages 21+. Reservations recommended.",
     ticketUrl: "https://dcxv.empxv.com/reservations/",
     posterImageUrl: "/posters/darcelle-xv-sunday.jpg",
     dateStart: "2026-07-19T11:30:00",
@@ -1824,7 +1824,7 @@ function applyVerifiedEventOverrides() {
     description: "INFERNO PRIDE PORTLAND 2026 at Formerly Opaline. DJs Lauren 6-8pm and Wild Fire 8-10pm. $20 presale, $25 door.",
   });
   runTitle("BOYeurism: Pride Spectacular", {
-    description: "BOYeurism Pride Spectacular at Alberta Rose Theatre. Created by IZOHNNY — Isaiah Esquire and Johnny Nuriel.",
+    description: "BOYeurism Pride Spectacular at Alberta Rose Theatre. Created by IZOHNNY, Isaiah Esquire and Johnny Nuriel.",
   });
   runTitle("RADIANCE by Gaylabration", {
     description: "RADIANCE by Gaylabration at Crystal Ballroom. Headliner Matt Suave, with Poundstar, Mircat Dragonfae, and Bro Hoe Sappho. Sponsored by Q Care+.",
@@ -1920,7 +1920,7 @@ function seedPdxPahJuly2026Events() {
   insert({
     title: "Bearly Awake: Morning Grounding & Meditation",
     description:
-      "All-creature morning grounding, gentle movement, and meditation hour hosted by Alty Bear. Monthly on 3rd Wednesdays — this July session leads into Pride Weekend. Hosted by Portland Pets and Handlers (PDX PAH).",
+      "All-creature morning grounding, gentle movement, and meditation hour hosted by Alty Bear. Monthly on 3rd Wednesdays, this July session leads into Pride Weekend. Hosted by Portland Pets and Handlers (PDX PAH).",
     venueName: "Q Center",
     address: "4115 N Mississippi Ave, Portland, OR 97217",
     neighborhood: "N Portland",
@@ -1950,7 +1950,7 @@ function seedPdxPahJuly2026Events() {
   insert({
     title: "PDXPAH Social & AWOO: The Petplayers Social",
     description:
-      "Friday Pride kickoff social at Eagle Portland. Strut, catch up with the crew, and ask for a welcome pet if you need a hand breaking into the space. Dance party from 9pm with rotating DJs — show tails only. Contact @PorkyGrinds or @DaddyBandit1989 on Telegram to volunteer as a welcome pet.",
+      "Friday Pride kickoff social at Eagle Portland. Strut, catch up with the crew, and ask for a welcome pet if you need a hand breaking into the space. Dance party from 9pm with rotating DJs, show tails only. Contact @PorkyGrinds or @DaddyBandit1989 on Telegram to volunteer as a welcome pet.",
     venueName: "Eagle Portland",
     address: "835 N Lombard St, Portland, OR 97217",
     neighborhood: "N Portland",
@@ -1981,7 +1981,7 @@ function seedPdxPahJuly2026Events() {
     title: "The Pahvillion — PDX PAH at Waterfront Pride Festival",
     description:
       "Hang with the puppies at Pride Weekend. PDX PAH hosts booths #7 and #8 at Tom McCall Waterfront Park with Portland Sisters of Perpetual Indulgence, Quirky Witches, Animal Expressants of a Different Breed, and elected officials. Snacks, drinks, headpats, and a cool-down from the heat. Henna and handcrafted dupatta sales from Amrapali Boutique on behalf of the Sisters.",
-    venueName: "Tom McCall Waterfront Park — PDX PAH Booths 7 & 8",
+    venueName: "Tom McCall Waterfront Park, PDX PAH Booths 7 & 8",
     address: "98 SW Naito Pkwy, Portland, OR 97204",
     neighborhood: "Downtown",
     lat: 45.5201241,
@@ -2010,8 +2010,8 @@ function seedPdxPahJuly2026Events() {
   insert({
     title: "Portland Pets and Handlers in the Pahrade",
     description:
-      "Join the pack for PDX PAH's annual Pride parade march. Wear your best, your worst, or your most expressive self. A float is available for anyone who has difficulty walking the route. Group photo tradition at 10:15am — rally point posted in the Bark Box Telegram channel once confirmed.",
-    venueName: "Portland Pride Parade — PDX PAH contingent",
+      "Join the pack for PDX PAH's annual Pride parade march. Wear your best, your worst, or your most expressive self. A float is available for anyone who has difficulty walking the route. Group photo tradition at 10:15am, rally point posted in the Bark Box Telegram channel once confirmed.",
+    venueName: "Portland Pride Parade, PDX PAH contingent",
     address: "North Park Blocks to Naito Pkwy, Portland, OR 97209",
     neighborhood: "Downtown",
     lat: 45.523011535188,
@@ -2100,7 +2100,7 @@ function seedPdxPahJuly2026Events() {
   insert({
     title: "OSLC Info Session — So You Want to Be a Titleholder?",
     description:
-      "Virtual info session for anyone curious about becoming an Oregon State Leather titleholder. July session via Google Meet — links on the OSLC calendar. Additional sessions run through July 19.",
+      "Virtual info session for anyone curious about becoming an Oregon State Leather titleholder. July session via Google Meet, links on the OSLC calendar. Additional sessions run through July 19.",
     venueName: "Virtual (Google Meet)",
     address: null,
     neighborhood: "Portland",
@@ -2290,7 +2290,7 @@ function seedMissingWweekPrideEvents2026() {
   insert({
     title: 'TWIRL: A PDX Queer Disco (Pride "Fruity" edition)',
     description:
-      "Queer daytime disco Twirl's Pride edition — OG Disco, Nu Disco, House, Funk & Boogie — relocated for Pride weekend to inner Southeast as a landing pad across the river from the downtown festival.",
+      "Queer daytime disco Twirl's Pride edition, OG Disco, Nu Disco, House, Funk & Boogie, relocated for Pride weekend to inner Southeast as a landing pad across the river from the downtown festival.",
     venueName: "Redd on Salmon",
     address: "831 SE Salmon St, Portland, OR 97214",
     neighborhood: "Central Eastside",
@@ -2316,7 +2316,7 @@ function seedMissingWweekPrideEvents2026() {
     claimedBy: null,
     submittedBy: null,
     adminNotes:
-      'From WW/Queer Social Club missing-events pass. Distinct from hidden 2025 "Twirl! PDX Queer Disco — Pride Edition (HOLD)". Source id twirl-pdx-queer-disco-2026-07-19.',
+      'From WW/Queer Social Club missing-events pass. Distinct from hidden 2025 "Twirl! PDX Queer Disco, Pride Edition (HOLD)". Source id twirl-pdx-queer-disco-2026-07-19.',
   });
 }
 
@@ -2344,7 +2344,7 @@ function seedCheckingPortlandEventsJuly2026() {
     ...base,
     title: "Trans-UHH-Licious",
     description:
-      "Weekly residency dedicated to the trans community at CC Slaughters — local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.",
+      "Weekly residency dedicated to the trans community at CC Slaughters, local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.",
     venueName: "CC Slaughters",
     address: "219 NW Davis St, Portland, OR 97209",
     neighborhood: "Old Town",
@@ -2402,7 +2402,7 @@ function deleteUnverifiedCheckingPortlandEvents() {
     "CC Slaughters GLOW: Parade Day Viewing + Bloody Mary Bar",
     "Gaylabration Pool Party",
     "Pride Tea Dance: Silver Foxes",
-    "Purple Rain — Queer Pop-Up Strip Club",
+    "Purple Rain, Queer Pop-Up Strip Club",
   ];
   const placeholders = titles.map(() => "?").join(",");
   const idRows = sqlite
@@ -2448,7 +2448,7 @@ function applyEventDataAuditFixes() {
   sqlite.prepare(`
     UPDATE events SET
       date_start = '2026-07-18T20:00:00',
-      description = 'BOYeurism Pride Spectacular at Alberta Rose Theatre. Doors 7pm, show 8pm. Created by IZOHNNY — Isaiah Esquire and Johnny Nuriel.'
+      description = 'BOYeurism Pride Spectacular at Alberta Rose Theatre. Doors 7pm, show 8pm. Created by IZOHNNY, Isaiah Esquire and Johnny Nuriel.'
     WHERE title = 'BOYeurism: Pride Spectacular'
   `).run();
   sqlite.prepare(`
@@ -2481,8 +2481,8 @@ function applyEventDataAuditFixes() {
       date_end = '2026-07-17T23:59:00',
       day_of_week = 'FRI'
     WHERE title IN (
-      'Pride in Demand — Friday Night',
-      'Pride in Demand — Portland Queer Takeover'
+      'Pride in Demand, Friday Night',
+      'Pride in Demand, Portland Queer Takeover'
     )
       AND date_start LIKE '2026-07-17%'
   `).run();
@@ -2496,8 +2496,8 @@ function applyEventDataAuditFixes() {
         ELSE poster_image_url
       END
     WHERE title IN (
-      'Pride in Demand — Portland Queer Takeover',
-      'Pride in Demand — Portland Queer Takeover — Night 2'
+      'Pride in Demand, Portland Queer Takeover',
+      'Pride in Demand, Portland Queer Takeover, Night 2'
     )
       AND date_start LIKE '2026-07-18%'
   `).run();
@@ -2562,7 +2562,7 @@ function seedBusinessesDirectory() {
     { name: "Stag PDX", type: "bar", description: "Gay bar and lounge on Broadway in Old Town. Part of Portland's historic Burnside Triangle nightlife district.", address: "317 NW Broadway", neighborhood: "Old Town", website: null, instagram: "@stagpdx", queerOwned: true, queerFriendly: true },
     { name: "Badlands", type: "bar", description: "High-energy queer dance bar known for a diverse crowd, strong drinks, and a packed floor on weekend nights.", address: "208 NW Davis St", neighborhood: "Old Town", website: null, instagram: "@badlandspdx", queerOwned: true, queerFriendly: true },
     { name: "Eagle Portland", type: "bar", description: "Leather and bear bar on N Lombard serving the leather, fetish, and bear community with themed nights and a no-frills vibe.", address: "835 N Lombard St", neighborhood: "N Portland", website: null, instagram: "@eagleportland", queerOwned: true, queerFriendly: true },
-    { name: "The Nest Lounge", type: "bar", description: "A queer sanctuary on SE Belmont — relaxed, inclusive dive bar beloved for its welcoming atmosphere and community feel.", address: "2715 SE Belmont St", neighborhood: "SE Belmont", website: null, instagram: "@nestloungepdx", queerOwned: true, queerFriendly: true },
+    { name: "The Nest Lounge", type: "bar", description: "A queer sanctuary on SE Belmont, relaxed, inclusive dive bar beloved for its welcoming atmosphere and community feel.", address: "2715 SE Belmont St", neighborhood: "SE Belmont", website: null, instagram: "@nestloungepdx", queerOwned: true, queerFriendly: true },
     { name: "Silverado", type: "bar", description: "Long-running gay bar and club in Old Town. A staple of Portland's queer nightlife scene.", address: "318 SW 3rd Ave", neighborhood: "Old Town", website: null, instagram: null, queerOwned: true, queerFriendly: true },
     // ── Restaurants ───────────────────────────────────────────────────────
     { name: "Kann", type: "restaurant", description: "James Beard Award–winning wood-fired Haitian restaurant by Chef Gregory Gourdet. One of Portland's most celebrated dining destinations.", address: "548 SE Ankeny St", neighborhood: "SE Portland", website: "https://kannrestaurant.com", instagram: "@kannrestaurant", queerOwned: true, queerFriendly: true },
@@ -2800,7 +2800,7 @@ function runBootMigrationsOnce() {
       name: "The Lodge Bar and Grill",
       type: "bar",
       description:
-        "Neighborhood dive bar and grill on SE Powell with comfort-food hits — eggs benedict, fries, poutine, and collard greens — plus a heated enclosed dog-friendly patio, karaoke Saturdays, pool, darts, and pinball.",
+        "Neighborhood dive bar and grill on SE Powell with comfort-food hits, eggs benedict, fries, poutine, and collard greens, plus a heated enclosed dog-friendly patio, karaoke Saturdays, pool, darts, and pinball.",
       address: "6605 SE Powell Blvd",
       neighborhood: "SE Portland",
       website: "https://thelodgebarandgrill.shop/",
@@ -2820,14 +2820,14 @@ function runBootMigrationsOnce() {
     if (!hasBootMigration("seed_nonprofits_directory_v9")) {
     const now = new Date().toISOString();
     const orgs = [
-      { name: "Cascade AIDS Project (CAP) & Our House", type: "nonprofit", description: "The Northwest's leading HIV services org since 1983 — prevention, testing, supportive housing, and LGBTQ+ health care, plus Our House residential care for people living with HIV.", website: "https://www.capnw.org/", donateUrl: "https://www.capnw.org/donate", neighborhood: "Old Town" },
+      { name: "Cascade AIDS Project (CAP) & Our House", type: "nonprofit", description: "The Northwest's leading HIV services org since 1983, prevention, testing, supportive housing, and LGBTQ+ health care, plus Our House residential care for people living with HIV.", website: "https://www.capnw.org/", donateUrl: "https://www.capnw.org/donate", neighborhood: "Old Town" },
       { name: "Pride Northwest", type: "nonprofit", description: "The organizers of Portland Pride. Year-round programs celebrating and supporting the LGBTQ2SIA+ community, including Trans Unity and Pride Days of Service.", website: "https://www.pridenw.org/", donateUrl: "https://www.pridenw.org/donate" },
-      { name: "Basic Rights Oregon", type: "nonprofit", description: "Oregon's statewide LGBTQ2SIA+ advocacy organization — political, legal, and grassroots work to ensure all Oregonians experience equality.", website: "https://www.basicrights.org/", donateUrl: "https://www.basicrights.org/donate" },
-      { name: "New Avenues for Youth / SMYRC", type: "nonprofit", description: "SMYRC, a program of New Avenues for Youth, has served LGBTQIA2S+ youth ages 13–24 since 1998 — a drop-in space with food, clothing, gender-affirming garments, counseling, and community events.", website: "https://newavenues.org/smyrc/", donateUrl: "https://newavenues.org/donate/give-lgbtqia2s/", address: "1220 SW Columbia St", neighborhood: "Downtown" },
-      { name: "Outside In", type: "nonprofit", description: "Health care and social services for young people experiencing homelessness since 1968 — including the QueerZone drop-in, an LGBTQ-affirming clinic with gender-affirming care, meals, showers, and housing help.", website: "https://outsidein.org/", donateUrl: "https://outsidein.org/about-us/donate-now/", address: "1132 SW 13th Ave", neighborhood: "Downtown" },
-      { name: "The Marie Equi Center", type: "nonprofit", description: "Trauma-informed, culturally affirming health and social services for trans, queer, intersex, and gender-diverse communities — peer support, harm reduction, and housing advocacy from their Brooklyn service center.", website: "https://www.marieequi.center/", donateUrl: "https://www.marieequi.center/donate", neighborhood: "SE Portland" },
+      { name: "Basic Rights Oregon", type: "nonprofit", description: "Oregon's statewide LGBTQ2SIA+ advocacy organization, political, legal, and grassroots work to ensure all Oregonians experience equality.", website: "https://www.basicrights.org/", donateUrl: "https://www.basicrights.org/donate" },
+      { name: "New Avenues for Youth / SMYRC", type: "nonprofit", description: "SMYRC, a program of New Avenues for Youth, has served LGBTQIA2S+ youth ages 13–24 since 1998, a drop-in space with food, clothing, gender-affirming garments, counseling, and community events.", website: "https://newavenues.org/smyrc/", donateUrl: "https://newavenues.org/donate/give-lgbtqia2s/", address: "1220 SW Columbia St", neighborhood: "Downtown" },
+      { name: "Outside In", type: "nonprofit", description: "Health care and social services for young people experiencing homelessness since 1968, including the QueerZone drop-in, an LGBTQ-affirming clinic with gender-affirming care, meals, showers, and housing help.", website: "https://outsidein.org/", donateUrl: "https://outsidein.org/about-us/donate-now/", address: "1132 SW 13th Ave", neighborhood: "Downtown" },
+      { name: "The Marie Equi Center", type: "nonprofit", description: "Trauma-informed, culturally affirming health and social services for trans, queer, intersex, and gender-diverse communities, peer support, harm reduction, and housing advocacy from their Brooklyn service center.", website: "https://www.marieequi.center/", donateUrl: "https://www.marieequi.center/donate", neighborhood: "SE Portland" },
       { name: "WERQ Together", type: "nonprofit", description: "Trans-led org providing relocation assistance, emergency shelter, peer support, and economic justice for two-spirit, trans, non-binary, and gender non-conforming people in Oregon.", website: "https://werqt.org/", donateUrl: "https://werqt.org/donate" },
-      { name: "Portland Gay Men's Chorus", type: "nonprofit", description: "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980 — concerts, community performances, and queer joy in four-part harmony.", website: "https://www.pdxgmc.org/", donateUrl: "https://www.pdxgmc.org/support/donate/", imageUrl: "https://www.pdxgmc.org/wp-content/uploads/2017/04/PGMC-Logo.png" },
+      { name: "Portland Gay Men's Chorus", type: "nonprofit", description: "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980, concerts, community performances, and queer joy in four-part harmony.", website: "https://www.pdxgmc.org/", donateUrl: "https://www.pdxgmc.org/support/donate/", imageUrl: "https://www.pdxgmc.org/wp-content/uploads/2017/04/PGMC-Logo.png" },
     ];
     for (const o of orgs) {
       db.insert(businesses).values({ queerOwned: true, queerFriendly: true, active: true, isNew: false, createdAt: now, ...o } as any).run();
@@ -2839,7 +2839,7 @@ function runBootMigrationsOnce() {
     db.insert(businesses).values({
       name: "underU4men",
       type: "shop",
-      description: "Men's underwear, swimwear, gymwear, and apothecary boutique — a longtime queer Portland staple, now at its new downtown home on SW Morrison.",
+      description: "Men's underwear, swimwear, gymwear, and apothecary boutique, a longtime queer Portland staple, now at its new downtown home on SW Morrison.",
       address: "1013 SW Morrison St",
       neighborhood: "Downtown",
       website: "https://shop.underu4men.com",
@@ -3028,7 +3028,7 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`
       UPDATE events SET
         title = 'Trans-UHH-Licious',
-        description = 'Weekly residency dedicated to the trans community at CC Slaughters — local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.',
+        description = 'Weekly residency dedicated to the trans community at CC Slaughters, local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.',
         venue_name = 'CC Slaughters',
         address = '219 NW Davis St, Portland, OR 97209',
         neighborhood = 'Old Town',
@@ -3076,7 +3076,7 @@ function runBootMigrationsOnce() {
   }
   if (!hasBootMigration("seed_fridays_are_a_drag_pride_2026_v1")) {
     const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1").get(
-      "Fridays Are A DRAG — Pride Weekend",
+      "Fridays Are A DRAG, Pride Weekend",
     );
     if (!exists) {
       const now = new Date().toISOString();
@@ -3297,7 +3297,7 @@ function runBootMigrationsOnce() {
       {
         title: "Musical Mondays at Badlands",
         description:
-          "Musical Mondays at Badlands — songs from stage and screen on Broadway St, hosted by Quesa D'Mondays and Dieter Davis. 9pm–2am. 21+.",
+          "Musical Mondays at Badlands, songs from stage and screen on Broadway St, hosted by Quesa D'Mondays and Dieter Davis. 9pm–2am. 21+.",
         dateStart: "2026-07-13T21:00:00",
         dateEnd: "2026-07-14T02:00:00",
         eventTypes: ["DRAG", "PERFORMANCE", "MUSIC"],
@@ -3308,7 +3308,7 @@ function runBootMigrationsOnce() {
       {
         title: "Fresh Paint at Badlands",
         description:
-          "An open-call drag show where anything can (and often does) happen. Hosted by Rio Diehl Volt — Portland entertainers get their wings. 10pm–2am. 21+.",
+          "An open-call drag show where anything can (and often does) happen. Hosted by Rio Diehl Volt, Portland entertainers get their wings. 10pm–2am. 21+.",
         dateStart: "2026-07-13T22:00:00",
         dateEnd: "2026-07-14T02:00:00",
         eventTypes: ["DRAG", "PERFORMANCE", "OPEN_MIC"],
@@ -3349,7 +3349,7 @@ function runBootMigrationsOnce() {
       {
         title: "Woman Crush Wednesdays PRIDE",
         description:
-          "Woman Crush Wednesdays PRIDE at Badlands — a night for the girlies in all of us. Harlow Quinzel hosts a femmetastic drag show; 55x DJs the afterparty for the girls, gays, and theys. 10pm–2am. 21+.",
+          "Woman Crush Wednesdays PRIDE at Badlands, a night for the girlies in all of us. Harlow Quinzel hosts a femmetastic drag show; 55x DJs the afterparty for the girls, gays, and theys. 10pm–2am. 21+.",
         dateStart: "2026-07-15T22:00:00",
         dateEnd: "2026-07-16T02:00:00",
         eventTypes: ["DRAG", "DANCE", "PARTY", "NIGHTLIFE"],
@@ -3370,7 +3370,7 @@ function runBootMigrationsOnce() {
       {
         title: "Y2GAY Pride Edition",
         description:
-          "Y2GAY Pride Edition at Badlands — Y2K nostalgia meets Pride. Official Badlands calendar listing. 10pm–2am. 21+.",
+          "Y2GAY Pride Edition at Badlands, Y2K nostalgia meets Pride. Official Badlands calendar listing. 10pm–2am. 21+.",
         dateStart: "2026-07-16T22:00:00",
         dateEnd: "2026-07-17T02:00:00",
         eventTypes: ["PARTY", "DANCE", "DRAG", "PRIDE"],
@@ -3507,7 +3507,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "Eastsiders Munch",
       description:
-        "Laid-back kink community munch for folks on the far east side of the PDX metro. Good food and conversation at Spinella's Off the Wall in Gresham — they usually aren't busy Tuesday evenings, so the group tends to take over. Ask for the Eastsiders table if you're not sure which group is ours. Vanilla dress code: no obvious collars, leashes, or fetishwear (day collars / discrete gear OK). ~6:30–8:30pm or until close.",
+        "Laid-back kink community munch for folks on the far east side of the PDX metro. Good food and conversation at Spinella's Off the Wall in Gresham, they usually aren't busy Tuesday evenings, so the group tends to take over. Ask for the Eastsiders table if you're not sure which group is ours. Vanilla dress code: no obvious collars, leashes, or fetishwear (day collars / discrete gear OK). ~6:30–8:30pm or until close.",
       venueName: "Spinella's Off the Wall",
       address: "436 N Main Ave, Gresham, OR 97030",
       neighborhood: "Gresham",
@@ -3530,7 +3530,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "PDX Nerd Munch",
       description:
-        "Kinky nerds unite — weekly board-game munch at Lucky Labrador Beer Hall on NW Quimby. Meet around 5:30 for food and drinks, games from ~6:00, official end 8:00pm (people often stay until Lucky Lab closes ~9:30, or head to Sanctuary for Game Bang). Look for the pile of board games on a long table. Food available for purchase. Streetwear / Portland vanilla dress. Free entry.",
+        "Kinky nerds unite, weekly board-game munch at Lucky Labrador Beer Hall on NW Quimby. Meet around 5:30 for food and drinks, games from ~6:00, official end 8:00pm (people often stay until Lucky Lab closes ~9:30, or head to Sanctuary for Game Bang). Look for the pile of board games on a long table. Food available for purchase. Streetwear / Portland vanilla dress. Free entry.",
       venueName: "Lucky Labrador Beer Hall (NW Quimby)",
       address: "1945 NW Quimby St, Portland, OR 97209",
       neighborhood: "NW Portland",
@@ -3553,7 +3553,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "STFU at The Den!",
       description:
-        "Pride Week edition of STFU — the infamous FemDom BDSM play party (formerly 50 Shades of STFU), hosted by Mistress Viola. Pop-up takeover of The Den (SE Industrial): play stations, equipment, multi-domme foot worship/massage, hard point for suspension, vendors, full bar, snacks, security + dungeon monitors. Explicitly Pride Week–framed and LGBTQIA+/queer inclusive for femme/them dommes and submissives who love femdom. 21+ · ADA accessible · sliding-scale tickets $15–45 · dress code enforced (subs/men: no plain street clothes). Consent-forward house rules; no phones in club.",
+        "Pride Week edition of STFU, the infamous FemDom BDSM play party (formerly 50 Shades of STFU), hosted by Mistress Viola. Pop-up takeover of The Den (SE Industrial): play stations, equipment, multi-domme foot worship/massage, hard point for suspension, vendors, full bar, snacks, security + dungeon monitors. Explicitly Pride Week–framed and LGBTQIA+/queer inclusive for femme/them dommes and submissives who love femdom. 21+ · ADA accessible · sliding-scale tickets $15–45 · dress code enforced (subs/men: no plain street clothes). Consent-forward house rules; no phones in club.",
       venueName: "The Den PDX",
       address: "116 SE Yamhill St, Portland, OR 97214",
       neighborhood: "SE Industrial",
@@ -3576,7 +3576,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "PLA @ Portland Pride Waterfront Festival (Saturday)",
       description:
-        "Portland Leather Alliance hosts a community presence at the official Portland Pride Waterfront Festival. Meet PLA, learn about kink education, classes, workshops, and membership — consent-forward, KECC-aligned educators. Festival is donation-based ($10 suggested by Pride Northwest; no one turned away). Free to visit the PLA booth/space during Saturday festival hours. More PLA events: forbiddentickets.com/events/portland-leather-alliance · portlandleather.org.",
+        "Portland Leather Alliance hosts a community presence at the official Portland Pride Waterfront Festival. Meet PLA, learn about kink education, classes, workshops, and membership, consent-forward, KECC-aligned educators. Festival is donation-based ($10 suggested by Pride Northwest; no one turned away). Free to visit the PLA booth/space during Saturday festival hours. More PLA events: forbiddentickets.com/events/portland-leather-alliance · portlandleather.org.",
       venueName: "Tom McCall Waterfront Park",
       address: "Naito Pkwy, Portland, OR 97204",
       neighborhood: "Waterfront",
@@ -3593,7 +3593,7 @@ function runBootMigrationsOnce() {
       nudityOk: false,
       posterImageUrl: "/posters/portland-pride-waterfront.png",
       adminNotes:
-        "FetLife PLA listing (The-PLA). Distinct from general Waterfront Festival listing — leather/kink education org presence. education@portlandleather.org.",
+        "FetLife PLA listing (The-PLA). Distinct from general Waterfront Festival listing, leather/kink education org presence. education@portlandleather.org.",
     });
 
     recordBootMigration("seed_fetlife_pride_week_gaps_2026_v1");
@@ -3669,7 +3669,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "Jock Mondays! at Hawks",
       description:
-        "Step into your jock and step into community. Mondays at Hawks are all about sporty vibes, playful energy, and showing up just as you are. Wear a jockstrap and get $5 off your visit (not valid with Happy Hour locker pricing). Open til 2AM. Sex-positive spa — body-positive, nudity-friendly space.",
+        "Step into your jock and step into community. Mondays at Hawks are all about sporty vibes, playful energy, and showing up just as you are. Wear a jockstrap and get $5 off your visit (not valid with Happy Hour locker pricing). Open til 2AM. Sex-positive spa, body-positive, nudity-friendly space.",
       dateStart: "2026-07-13T10:00:00",
       dateEnd: "2026-07-14T02:00:00",
       dayOfWeek: "MON",
@@ -3707,7 +3707,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "Sapphic Takeover Thursday! Women's Day at Hawks",
       description:
-        "A dedicated Sapphic-centered day at Hawks for women, trans, nonbinary, and gender-expansive folks across the Sapphic spectrum — spa, hot tub, connect, touch, be sensual, be playful. Spearheaded with PNW Poly Sapphics. Space shifts to all-women's day from 10am; PNW Poly Sapphic group concentrates around 6:30pm, but you're welcome anytime day and night. Sex-positive, body-positive.",
+        "A dedicated Sapphic-centered day at Hawks for women, trans, nonbinary, and gender-expansive folks across the Sapphic spectrum, spa, hot tub, connect, touch, be sensual, be playful. Spearheaded with PNW Poly Sapphics. Space shifts to all-women's day from 10am; PNW Poly Sapphic group concentrates around 6:30pm, but you're welcome anytime day and night. Sex-positive, body-positive.",
       dateStart: "2026-07-16T10:00:00",
       dateEnd: "2026-07-17T08:00:00",
       dayOfWeek: "THU",
@@ -3726,7 +3726,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "Gender Glow Fridays with Karaoke at Hawks",
       description:
-        "Friday Mixxxers are all-gender nights celebrating the full LGBTQIA2S+ spectrum — blacklight, glow sticks, draw on each other with glow pens, plus karaoke. Whether you're queer or questioning, come connect, explore, and celebrate community in a welcoming, body-positive, sex-positive spa space.",
+        "Friday Mixxxers are all-gender nights celebrating the full LGBTQIA2S+ spectrum, blacklight, glow sticks, draw on each other with glow pens, plus karaoke. Whether you're queer or questioning, come connect, explore, and celebrate community in a welcoming, body-positive, sex-positive spa space.",
       dateStart: "2026-07-17T10:00:00",
       dateEnd: "2026-07-18T08:00:00",
       dayOfWeek: "FRI",
@@ -3745,7 +3745,7 @@ function runBootMigrationsOnce() {
     insertIfMissing({
       title: "Bi Sundays & Nude Yoga at Hawks",
       description:
-        "Sundays at Hawks are all-gender and body-positive — friendly vibes through the day, a restorative 4 PM Nude Yoga class in the courtyard, then Bi Night as the evening heats up. Come unwind, reconnect, and enjoy a little post-weekend aftercare. Sex-positive spa; nudity OK.",
+        "Sundays at Hawks are all-gender and body-positive, friendly vibes through the day, a restorative 4 PM Nude Yoga class in the courtyard, then Bi Night as the evening heats up. Come unwind, reconnect, and enjoy a little post-weekend aftercare. Sex-positive spa; nudity OK.",
       dateStart: "2026-07-19T10:00:00",
       dateEnd: "2026-07-20T08:00:00",
       dayOfWeek: "SUN",
@@ -3776,7 +3776,7 @@ function runBootMigrationsOnce() {
           name: "Hawks PDX",
           type: "venue",
           description:
-            "Portland's LGBTQ+ community spa and social space in SE — hot tub, sauna, lockers, themed nights (Jock Mondays, OMEN Wednesdays, Sapphic Takeover, Gender Glow Fridays, Bi Sundays & Nude Yoga), and body-positive, sex-positive hospitality.",
+            "Portland's LGBTQ+ community spa and social space in SE, hot tub, sauna, lockers, themed nights (Jock Mondays, OMEN Wednesdays, Sapphic Takeover, Gender Glow Fridays, Bi Sundays & Nude Yoga), and body-positive, sex-positive hospitality.",
           address: "335 SE 99th Ave, Portland, OR 97216",
           neighborhood: "SE Portland",
           website: "https://hawkspdx.com/",
@@ -3813,7 +3813,7 @@ function runBootMigrationsOnce() {
           WHERE id = ?`,
         )
         .run(
-          "Portland's LGBTQ+ community spa and social space in SE — hot tub, sauna, lockers, themed nights, and body-positive hospitality.",
+          "Portland's LGBTQ+ community spa and social space in SE, hot tub, sauna, lockers, themed nights, and body-positive hospitality.",
           "335 SE 99th Ave, Portland, OR 97216",
           logo,
           45.520175147981,
@@ -3900,7 +3900,7 @@ function expireGiftingPosts() {
 
 export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 export const SITE_ADMIN_GIG_OWNER_USERNAME = "tucker_pdmax";
-export const SITE_OWNER_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
+export const SITE_OWNER_EVENT_TITLE = "Stank Yes Coach, PDX PRIDE";
 export const SITE_OWNER_EMAIL = (
   process.env.SITE_OWNER_EMAIL
   || process.env.ADMIN_USER_EMAILS?.split(",")[0]
@@ -4127,7 +4127,7 @@ function notifySubmissionMerged(
   notifyGuideInbox(
     recipient.id,
     `Merged: ${sub.title}`,
-    `Your submission was merged into the existing listing "${eventTitle}". You're attached as the host — open your dashboard to manage it and post updates.`,
+    `Your submission was merged into the existing listing "${eventTitle}". You're attached as the host, open your dashboard to manage it and post updates.`,
     {
       contextType: "SUBMISSION",
       contextId: sub.id,
@@ -4187,7 +4187,7 @@ function ensureSiteAdminGigPost() {
     contactEmail: owner?.email || "hello@pdxprideguide.com",
     description: SITE_ADMIN_GIG_DESCRIPTION,
     skills: "Moderation, Event review, Community support, Detail-oriented",
-    compensation: "Volunteer — community help",
+    compensation: "Volunteer, community help",
     location: "Portland / Remote",
     isRemote: true,
     status: "LIVE",
@@ -4722,7 +4722,7 @@ export const storage: IStorage = {
     db.update(submissions).set({
       status: "APPROVED",
       approvals: JSON.stringify([claimedByUsername]),
-      adminNotes: `Auto-approved: @${claimedByUsername} is a verified promoter — no manual review required.`,
+      adminNotes: `Auto-approved: @${claimedByUsername} is a verified promoter, no manual review required.`,
     }).where(eq(submissions.id, id)).run();
     db.update(events).set({
       isClaimable: false,
@@ -5252,7 +5252,7 @@ export const storage: IStorage = {
         db.update(events).set({ status: "REMOVED" }).where(eq(events.id, req.eventId)).run();
       }
       if (req.type === "TRANSFER") {
-        const target = String(req.proof || "").split(" — ")[0].trim();
+        const target = String(req.proof || "").split(", ")[0].trim();
         const nextOwner = storage.getUserByUsername(target) || storage.getUserByEmail(target);
         if (nextOwner) {
           storage.replaceEventPrimaryHost(req.eventId, nextOwner.id);
@@ -5437,7 +5437,7 @@ export const storage: IStorage = {
       notifyGuideInbox(
         userId,
         "Promoter request update",
-        "Your promoter request wasn't approved right now. You can still claim existing listings — those go through the review queue.",
+        "Your promoter request wasn't approved right now. You can still claim existing listings, those go through the review queue.",
         { contextType: "PROMOTER" },
       );
     }
@@ -6785,7 +6785,7 @@ export const storage: IStorage = {
           eventTitle: evt.title,
           requesterName: "Venue owner",
           requesterEmail: "",
-          proof: `Venue owner blocked @${blockedUser.username} from ${business.name} — this existing listing needs review.`,
+          proof: `Venue owner blocked @${blockedUser.username} from ${business.name}, this existing listing needs review.`,
         } as any);
       }
     }

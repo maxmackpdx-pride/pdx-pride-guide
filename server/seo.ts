@@ -54,7 +54,7 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Portland Pride 2026 Events — PDX Pride Guide",
+    name: "Portland Pride 2026 Events | PDX Pride Guide",
     description: "Community-run directory of Portland Pride Week and year-round queer events.",
     numberOfItems: events.length,
     itemListElement: events.map((evt, index) => ({
@@ -97,7 +97,7 @@ function formatEventLine(evt: SeoEvent) {
   return {
     when,
     where,
-    html: `<li><strong>${escapeHtml(evt.title)}</strong> — ${escapeHtml(when)}${where ? ` @ ${escapeHtml(where)}` : ""}${evt.admission ? ` (${escapeHtml(evt.admission)})` : ""}</li>`,
+    html: `<li><strong>${escapeHtml(evt.title)}</strong> · ${escapeHtml(when)}${where ? ` @ ${escapeHtml(where)}` : ""}${evt.admission ? ` (${escapeHtml(evt.admission)})` : ""}</li>`,
   };
 }
 
@@ -114,7 +114,7 @@ export function buildCrawlerEventDirectory(events: SeoEvent[]) {
   const items = events.map(evt => formatEventLine(evt).html).join("\n      ");
 
   return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}">
-      <h1>PDX Pride Guide — Portland Pride 2026 Events</h1>
+      <h1>PDX Pride Guide | Portland Pride 2026 Events</h1>
       <p>${events.length} live events listed for Portland Pride Week and summer 2026. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
       <ul>
       ${items}
@@ -131,7 +131,7 @@ export function buildNoscriptEventDirectory(events: SeoEvent[]) {
 
   return `<noscript>
     <section aria-label="Portland Pride 2026 events" style="max-width:960px;margin:0 auto;padding:24px;font-family:system-ui,sans-serif;color:#f5f5f0;background:#0a0a0a">
-      <h1>PDX Pride Guide — Portland Pride 2026 Events</h1>
+      <h1>PDX Pride Guide | Portland Pride 2026 Events</h1>
       <p>${events.length} live events listed for Portland Pride Week and summer 2026. Full JSON API: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a></p>
       <ul>
       ${items}
@@ -151,7 +151,7 @@ export function buildLlmsTxt(events: SeoEvent[]) {
     `- Live events JSON API: ${SITE_URL}/api/events`,
     `- Event count: ${events.length}`,
     "",
-    "## Portland Pride 2026 — Live events",
+    "## Portland Pride 2026: Live events",
     "",
   ];
 
@@ -209,15 +209,15 @@ export function buildCanonicalUrl(requestPath: string) {
 
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
-    title: "PDX Pride Guide — Portland Pride 2026 Events",
+    title: "PDX Pride Guide | Portland Pride 2026 Events",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/events": {
-    title: "Portland Pride 2026 Events — PDX Pride Guide",
+    title: "Portland Pride 2026 Events | PDX Pride Guide",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/about": {
-    title: "About PDX Pride Guide — Portland Pride 2026",
+    title: "About PDX Pride Guide | Portland Pride 2026",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/resume": {
@@ -225,43 +225,43 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
   },
   "/contact": {
-    title: "Contact — PDX Pride Guide",
+    title: "Contact | PDX Pride Guide",
     description: "One inbox, one guy. Reach PDX Pride Guide about listings, privacy, or help.",
   },
   "/sponsors": {
-    title: "Sponsors — PDX Pride Guide",
+    title: "Sponsors | PDX Pride Guide",
     description: "Local businesses can help keep PDX Pride Guide free. Sponsorship is support, not pay-to-rank.",
   },
   "/access": {
-    title: "Access & Safety — PDX Pride Guide",
+    title: "Access & Safety | PDX Pride Guide",
     description: "What PDX Pride Guide listings cover, what we can't promise, and how to take care of each other during Pride week.",
   },
   "/legal": {
-    title: "Legal — PDX Pride Guide",
+    title: "Legal | PDX Pride Guide",
     description: "Terms of use, privacy policy, and community guidelines for PDX Pride Guide.",
   },
   "/gifting": {
-    title: "Gift with Pride — PDX Pride Guide",
+    title: "Gift with Pride | PDX Pride Guide",
     description: "Free queer gifting board for Portland Pride 2026. Post gifts and in-search-of requests in PDX through July 26.",
   },
   "/pride-work": {
-    title: "Pride Werk — Gigs & Jobs | PDX Pride Guide",
+    title: "Pride Werk: Gigs & Jobs | PDX Pride Guide",
     description: "Portland Pride 2026 gig board and queer work listings. Post gigs or find Pride weekend work in PDX.",
   },
   "/spotted": {
-    title: "Spotted — Missed Connections | PDX Pride Guide",
+    title: "Spotted: Missed Connections | PDX Pride Guide",
     description: "Missed connections and spotted posts from Portland Pride 2026 events. Reconnect after PDX Pride weekend.",
   },
   "/submit": {
-    title: "Submit an Event — PDX Pride Guide",
+    title: "Submit an Event | PDX Pride Guide",
     description: "Submit or claim a Portland Pride 2026 event listing on the community-run PDX Pride Guide.",
   },
   "/inbox": {
-    title: "Inbox — PDX Pride Guide",
+    title: "Inbox | PDX Pride Guide",
     description: "Private messages from missed connections, Pride Werk, event hosts, and check-ins on the PDX Pride Guide.",
   },
   "/dashboard": {
-    title: "Dashboard — PDX Pride Guide",
+    title: "Dashboard | PDX Pride Guide",
     description: "Your PDX Pride Guide profile, submissions, gigs, gifting, and event check-ins.",
   },
 };
@@ -343,7 +343,7 @@ export function buildFaqJsonLd() {
         name: "Where can I find Portland Pride 2026 events?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Browse all live Portland Pride and PDX Pride events at prideguidepdx.com/events — filter by day, neighborhood, and type, or open any event page for details and tickets.",
+          text: "Browse all live Portland Pride and PDX Pride events at prideguidepdx.com/events. Filter by day, neighborhood, and type, or open any event page for details and tickets.",
         },
       },
       {
@@ -351,7 +351,7 @@ export function buildFaqJsonLd() {
         name: "What is PDX Pride Guide?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "PDX Pride Guide is a free, community-run directory of Portland Pride 2026 events, queer parties, festivals, and year-round PDX listings — independent from corporate Pride apps.",
+          text: "PDX Pride Guide is a free, community-run directory of Portland Pride 2026 events, queer parties, festivals, and year-round PDX listings, independent from corporate Pride apps.",
         },
       },
       {
@@ -405,7 +405,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
 
   const routeSeo = ROUTE_SEO[pathKey] || ROUTE_SEO["/"];
   const pageTitle = liveEvent
-    ? `${liveEvent.title} — Portland Pride 2026 | PDX Pride Guide`
+    ? `${liveEvent.title} | Portland Pride 2026 | PDX Pride Guide`
     : routeSeo.title;
   const pageDescription = liveEvent
     ? truncateText(
@@ -444,7 +444,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     description: pageDescription,
     url: pageUrl,
     image: pageImage,
-    imageAlt: liveEvent ? liveEvent.title : "PDX Pride Week July 13-19 — Events, Gigs, Missed Connections",
+    imageAlt: liveEvent ? liveEvent.title : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
     type: liveEvent ? "article" : "website",
   });
 

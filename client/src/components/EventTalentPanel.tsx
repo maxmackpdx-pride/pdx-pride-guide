@@ -215,7 +215,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
         </div>
       ) : (
         <p style={{ fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, margin: 0 }}>
-          No talent tagged yet{isClaimable ? " — unclaimed listing" : ""}.
+          No talent tagged yet{isClaimable ? " (unclaimed listing)" : ""}.
         </p>
       )}
 
@@ -273,7 +273,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             I WORKED THIS EVENT
           </div>
           <p style={{ fontSize: "0.78rem", color: "#888", marginBottom: 10, lineHeight: 1.45 }}>
-            Pick your role below — Drag, DJ, Bartender, MC, Go-Go, Performer, or Other. Your tag goes live right away (no admin approval).
+            Pick your role below: Drag, DJ, Bartender, MC, Go-Go, Performer, or Other. Your tag goes live right away (no admin approval).
           </p>
           <div className="event-talent-role-grid">
             {EVENT_TALENT_ROLES.map(role => (

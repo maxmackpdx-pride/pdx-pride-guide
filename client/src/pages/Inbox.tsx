@@ -20,7 +20,7 @@ export default function Inbox() {
   const [threadId, setThreadId] = useState<string | null>(threadFromQuery() || null);
 
   usePageSeo(
-    "Inbox — PDX Pride Guide",
+    "Inbox | PDX Pride Guide",
     "Private messages from missed connections, Pride Werk, event hosts, and check-ins.",
   );
 

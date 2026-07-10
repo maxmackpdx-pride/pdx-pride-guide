@@ -725,7 +725,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         const now = new Date().toISOString();
         const data = insertSubmissionSchema.parse({
           type: "PROMOTER_APPLICATION",
-          title: `Promoter Application — ${user.displayName || user.username}`,
+          title: `Promoter Application: ${user.displayName || user.username}`,
           description: String(req.body.claimReason || req.body.description || "").trim() || "No details provided",
           venueName: "N/A",
           dateStart: now,

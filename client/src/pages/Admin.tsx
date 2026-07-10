@@ -160,7 +160,7 @@ const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
 
 export default function Admin() {
-  usePageSeo("Admin — PDX Pride Guide", "Site administration panel.");
+  usePageSeo("Admin | PDX Pride Guide", "Site administration panel.");
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
@@ -994,7 +994,7 @@ export default function Admin() {
                 style={{ width: "100%", padding: "10px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 14 }}
                 placeholder="Tucker"
               />
-              <p className="dash-mono" style={{ fontSize: 9, color: "var(--dash-muted)", marginTop: 6 }}>Shown on approvals — not your login username</p>
+              <p className="dash-mono" style={{ fontSize: 9, color: "var(--dash-muted)", marginTop: 6 }}>Shown on approvals, not your login username</p>
             </div>
             <div>
               <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Password</label>
@@ -1619,7 +1619,7 @@ export default function Admin() {
                               </div>
                             ) : (
                               <p className="text-white/35 text-xs">
-                                Use the assign row above this form — promoter becomes host, gets approved, and claimable turns off.
+                                Use the assign row above this form: promoter becomes host, gets approved, and claimable turns off.
                               </p>
                             )}
                           </div>
@@ -1649,7 +1649,7 @@ export default function Admin() {
         {activeTab === "gigs" && (
           <div>
             <p className="text-white/40 text-sm mb-6">
-              Edit gig board posts — including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
+              Edit gig board posts, including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
             </p>
             {gigsError ? (
               <AdminLoadError label="gig posts" onRetry={() => refetchGigs()} />
@@ -1770,7 +1770,7 @@ export default function Admin() {
                           <div>
                             <label className="display text-xs text-white/40 block mb-1">COMPENSATION</label>
                             <input value={gigEditForm.compensation || ""} onChange={e => setGigEditForm(f => ({ ...f, compensation: e.target.value }))}
-                              placeholder="e.g. Volunteer — community help" className={adminFieldClass} />
+                              placeholder="e.g. Volunteer: community help" className={adminFieldClass} />
                           </div>
                           <div>
                             <label className="display text-xs text-white/40 block mb-1">LOCATION</label>
@@ -2055,7 +2055,7 @@ export default function Admin() {
                     <div key={claim.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
                       <div className="min-w-0 flex-1">
                         <p className="text-white text-sm font-semibold">{claim.businessName}</p>
-                        <p className="text-white/50 text-xs mt-1">@{claim.username || claim.email} — {claim.claimReason}</p>
+                        <p className="text-white/50 text-xs mt-1">@{claim.username || claim.email}: {claim.claimReason}</p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         <button
@@ -2156,7 +2156,7 @@ export default function Admin() {
             {newUsersToday.length > 0 && (
               <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #C8FA3C33", background: "#0a0f00" }}>
                 <p className="display text-sm" style={{ color: "#C8FA3C", marginBottom: 12 }}>
-                  🌱 NEW TODAY — {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
+                  🌱 NEW TODAY: {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {newUsersToday.map(u => (

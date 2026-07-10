@@ -6,7 +6,7 @@ export function DsPlaceholder({ name }: { name: string }) {
   return createElement(
     "div",
     { className: "ds-sandbox__placeholder", role: "status" },
-    `${name} — not available in sandbox yet`,
+    `${name} not available in sandbox yet`,
   );
 }
 

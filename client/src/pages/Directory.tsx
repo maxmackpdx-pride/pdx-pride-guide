@@ -109,7 +109,7 @@ const blankDirectoryForm = () => ({
 
 export default function Directory() {
   usePageSeo(
-    "Queer Portland Directory — PDX Pride Guide",
+    "Queer Portland Directory | PDX Pride Guide",
     "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   );
 
@@ -215,7 +215,7 @@ export default function Directory() {
               <X size={18} />
             </button>
             <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. Goes live immediately — keep it accurate and community-rooted.</p>
+            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. Goes live immediately. Keep it accurate and community-rooted.</p>
             <div className="gifting-form-grid">
               <label className="span">
                 Place name *

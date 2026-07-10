@@ -211,7 +211,7 @@ export default function AvatarEditor({
 
       {sourceImage && (
         <div className="avatar-editor__crop-panel">
-          <label className="avatar-editor__label">CIRCLE CROP — DRAG & ZOOM</label>
+          <label className="avatar-editor__label">CIRCLE CROP: DRAG & ZOOM</label>
           <canvas
             ref={canvasRef}
             width={CROP_CANVAS}
