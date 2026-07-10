@@ -4,8 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { X, Maximize2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { InboxShell } from "@/components/inbox/InboxShell";
+import { FilterChip } from "@/components/ds";
 
 type Tab = "personal" | "admin" | "owner";
+
+const TAB_ACCENT: Record<Tab, string> = {
+  personal: "cyan",
+  admin: "amber",
+  owner: "purple",
+};
 
 /**
  * Frameless, floating inbox panel shared by the mobile bottom-nav Inbox icon
@@ -79,39 +86,40 @@ export default function InboxOverlay({
       <div className="inbox-overlay" role="dialog" aria-label="Inbox" ref={panelRef}>
         <div className="inbox-overlay__head">
           <div className="inbox-overlay__tabs" role="tablist" aria-label="Inbox categories">
-            <button
-              type="button"
+            <FilterChip
               role="tab"
               aria-selected={tab === "personal"}
-              className={`inbox-overlay__tab${tab === "personal" ? " active" : ""}`}
-              onClick={() => setTab("personal")}
+              selected={tab === "personal"}
+              fill={tab === "personal"}
+              accent={TAB_ACCENT.personal}
+              count={unreadCount > 0 ? unreadCount : null}
+              onToggle={() => setTab("personal")}
             >
               Personal
-              {unreadCount > 0 && (
-                <span className="inbox-overlay__tab-count">{unreadCount}</span>
-              )}
-            </button>
+            </FilterChip>
             {isAdmin && (
-              <button
-                type="button"
+              <FilterChip
                 role="tab"
                 aria-selected={tab === "admin"}
-                className={`inbox-overlay__tab${tab === "admin" ? " active" : ""}`}
-                onClick={() => setTab("admin")}
+                selected={tab === "admin"}
+                fill={tab === "admin"}
+                accent={TAB_ACCENT.admin}
+                onToggle={() => setTab("admin")}
               >
                 Admin
-              </button>
+              </FilterChip>
             )}
             {isOwner && (
-              <button
-                type="button"
+              <FilterChip
                 role="tab"
                 aria-selected={tab === "owner"}
-                className={`inbox-overlay__tab${tab === "owner" ? " active" : ""}`}
-                onClick={() => setTab("owner")}
+                selected={tab === "owner"}
+                fill={tab === "owner"}
+                accent={TAB_ACCENT.owner}
+                onToggle={() => setTab("owner")}
               >
                 Owner
-              </button>
+              </FilterChip>
             )}
           </div>
           <div className="inbox-overlay__head-actions">
@@ -140,6 +148,7 @@ export default function InboxOverlay({
           {tab === "personal" ? (
             <InboxShell
               forceNarrow
+              hideBrandHeader
               density="compact"
               initialThreadId={threadId}
               onThreadChange={setThreadId}

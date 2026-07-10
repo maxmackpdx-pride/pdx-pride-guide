@@ -53,6 +53,9 @@ export interface InboxShellProps extends InboxProps {
   /** Force the single-column (list ↔ thread) layout regardless of viewport
    *  width. Used when the shell is embedded in a narrow floating panel. */
   forceNarrow?: boolean;
+  /** Hide the "Pride Guide / Messages / Calm" brand bar. Used when the shell
+   *  is embedded in the floating overlay, which supplies its own header. */
+  hideBrandHeader?: boolean;
 }
 
 export function InboxShell({
@@ -62,6 +65,7 @@ export function InboxShell({
   initialThreadId = null,
   onThreadChange,
   forceNarrow,
+  hideBrandHeader = false,
 }: InboxShellProps) {
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
   const { threads, loading, sendMessage, setRead, archive, remove, revealSelf, resolveLineup } =
@@ -502,62 +506,66 @@ export function InboxShell({
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          flex: "0 0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "16px",
-          padding: "11px clamp(14px,4vw,26px)",
-          background: "var(--ink-1000)",
-          borderBottom: "1px solid var(--border-faint)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+      {!hideBrandHeader && (
+        <>
           <div
             style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              background: "var(--ink-1000)",
-              border: "1px solid var(--border-default)",
-              display: "grid",
-              placeItems: "center",
-              boxShadow: "0 0 14px -4px var(--lime)",
               flex: "0 0 auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+              padding: "11px clamp(14px,4vw,26px)",
+              background: "var(--ink-1000)",
+              borderBottom: "1px solid var(--border-faint)",
             }}
           >
-            <span
-              className="pdx-display"
-              style={{ fontSize: "0.72rem", lineHeight: 0.82, color: "var(--lime)", textAlign: "center" }}
-            >
-              PDX
-            </span>
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div
-              className="pdx-display"
-              style={{ fontSize: "1.02rem", lineHeight: 1.05, letterSpacing: ".01em", whiteSpace: "nowrap" }}
-            >
-              Pride Guide
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "8px",
+                  background: "var(--ink-1000)",
+                  border: "1px solid var(--border-default)",
+                  display: "grid",
+                  placeItems: "center",
+                  boxShadow: "0 0 14px -4px var(--lime)",
+                  flex: "0 0 auto",
+                }}
+              >
+                <span
+                  className="pdx-display"
+                  style={{ fontSize: "0.72rem", lineHeight: 0.82, color: "var(--lime)", textAlign: "center" }}
+                >
+                  PDX
+                </span>
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div
+                  className="pdx-display"
+                  style={{ fontSize: "1.02rem", lineHeight: 1.05, letterSpacing: ".01em", whiteSpace: "nowrap" }}
+                >
+                  Pride Guide
+                </div>
+                <div className="pdx-kicker" style={{ fontSize: "0.56rem", color: "var(--text-faint)", marginTop: "2px" }}>
+                  Messages
+                </div>
+              </div>
             </div>
-            <div className="pdx-kicker" style={{ fontSize: "0.56rem", color: "var(--text-faint)", marginTop: "2px" }}>
-              Messages
-            </div>
+            <button
+              className="pxCalmBtn"
+              onClick={() => setCalm((c) => !c)}
+              style={calmBtn}
+              title="Calm mode dims the neon"
+            >
+              <MoonIcon size={15} />
+              Calm
+            </button>
           </div>
-        </div>
-        <button
-          className="pxCalmBtn"
-          onClick={() => setCalm((c) => !c)}
-          style={calmBtn}
-          title="Calm mode dims the neon"
-        >
-          <MoonIcon size={15} />
-          Calm
-        </button>
-      </div>
-      <hr className="pdx-seam" style={{ margin: 0, flex: "0 0 auto" }} />
+          <hr className="pdx-seam" style={{ margin: 0, flex: "0 0 auto" }} />
+        </>
+      )}
 
       {/* Body */}
       <div style={bodyStyle}>

@@ -1972,13 +1972,12 @@ h2.display,
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Frameless: translucent, blurred, soft shadow — no hard border. */
-  background: color-mix(in srgb, var(--surface-card, #1a1a1a) 90%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  animation: inbox-overlay-in 0.2s ease-out;
+  /* Frameless floating panel, Directory-listing surface + border language. */
+  background: var(--surface-card);
+  border: var(--bw-bold, 2px) solid var(--border-default);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.6));
+  animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
 }
 
 @keyframes inbox-overlay-in {
@@ -1990,8 +1989,8 @@ h2.display,
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.5);
-  animation: inbox-overlay-fade 0.2s ease-out;
+  background: color-mix(in srgb, var(--ink-1000, #000) 62%, transparent);
+  animation: inbox-overlay-fade 0.2s var(--ease-out, ease-out);
 }
 
 @keyframes inbox-overlay-fade {
@@ -1999,65 +1998,33 @@ h2.display,
   to { opacity: 1; }
 }
 
+/* Header: Directory-style filter row — chips left, actions right, seam under. */
 .inbox-overlay__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 12px 14px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--ink-1000);
+  border-bottom: var(--bw-bold, 2px) solid var(--border-default);
 }
 
 .inbox-overlay__tabs {
   display: inline-flex;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.inbox-overlay__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: none;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary, #999);
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+.inbox-overlay__tabs::-webkit-scrollbar {
+  display: none;
 }
 
-.inbox-overlay__tab:hover {
-  color: var(--text-primary, #fff);
-}
-
-.inbox-overlay__tab.active {
-  background: var(--neon-magenta, #FF00CC);
-  color: #000;
-}
-
-.inbox-overlay__tab-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background: var(--neon-cyan, #00FFFF);
-  color: #000;
-  font-size: 0.6rem;
-  font-weight: 700;
-}
-
-.inbox-overlay__tab.active .inbox-overlay__tab-count {
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
+/* Slightly denser chips inside the compact panel. */
+.inbox-overlay__tabs .pdxChip {
+  padding: 7px 12px 5px;
 }
 
 .inbox-overlay__head-actions {
@@ -2071,19 +2038,22 @@ h2.display,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: none;
-  border: none;
-  color: var(--text-secondary, #999);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm, 6px);
+  background: transparent;
+  border: var(--bw-hair, 1px) solid transparent;
+  color: var(--text-meta);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background var(--dur-base, 0.16s) var(--ease-out, ease),
+              color var(--dur-base, 0.16s) var(--ease-out, ease),
+              border-color var(--dur-base, 0.16s) var(--ease-out, ease);
 }
 
 .inbox-overlay__icon-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #fff);
+  background: var(--surface-inset);
+  border-color: var(--border-default);
+  color: var(--text-hi);
 }
 
 .inbox-overlay__body {
@@ -2102,20 +2072,24 @@ h2.display,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 24px;
+  gap: 10px;
+  padding: 28px 24px;
   text-align: center;
+  background: var(--grad-nightglow, var(--surface-card));
 }
 
 .inbox-overlay__placeholder p {
-  font-weight: 700;
-  color: var(--text-primary, #fff);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
+  color: var(--text-hi);
   margin: 0;
 }
 
 .inbox-overlay__placeholder span {
-  font-size: 0.85rem;
-  color: var(--text-secondary, #999);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-meta);
   max-width: 34ch;
 }
 
