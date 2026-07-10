@@ -286,6 +286,7 @@ function authUserResponse(req: any, user: any) {
     createdAt: user.createdAt || "",
     isAdmin,
     isSuperAdmin: isMainAdminUser(user),
+    isPrimaryOwner: storage.isPrimarySiteOwner(user),
     subAdmin: !!user.subAdmin,
   };
 }
@@ -2551,15 +2552,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (userByHandle && verifyPassword(password, userByHandle.passwordHash) && isMainAdminUser(userByHandle)) {
       req.session.isAdmin = true;
       req.session.userId = userByHandle.id;
-      return res.json({ isAdmin: true, username: userByHandle.username });
+      return res.json({
+        isAdmin: true,
+        username: userByHandle.username,
+        isSuperAdmin: isMainAdminUser(userByHandle),
+        isPrimaryOwner: storage.isPrimarySiteOwner(userByHandle),
+      });
     }
 
     // Legacy env-var credential fallback (set ADMIN_USERNAME + ADMIN_PASSWORD in Railway if needed)
     if (ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       req.session.isAdmin = true;
       const actorId = getAdminActorUserId(req);
+      const actor = actorId ? storage.getUserById(actorId) : null;
       if (actorId) req.session.userId = actorId;
-      return res.json({ isAdmin: true, username: ADMIN_USERNAME });
+      return res.json({
+        isAdmin: true,
+        username: ADMIN_USERNAME,
+        isSuperAdmin: true,
+        isPrimaryOwner: actor ? storage.isPrimarySiteOwner(actor) : false,
+      });
     }
 
     return res.status(401).json({ error: "Invalid credentials" });
@@ -2579,7 +2591,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       username: resolved?.displayName || resolved?.username || ADMIN_USERNAME,
       email: resolved?.email || null,
       isSuperAdmin: !!mainUser,
-      canManageTeam: true,
+      isPrimaryOwner: resolved ? storage.isPrimarySiteOwner(resolved) : false,
+      canManageTeam: !!mainUser,
     });
   });
 
@@ -2588,14 +2601,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/team", requireAdmin, (req, res) => {
-    const actor = getSessionAdminUser(req);
+    const caller = getSessionAdminUser(req);
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
     const { identifier, note } = req.body || {};
-    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), actor?.id ?? null, note);
+    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), caller?.id ?? null, note);
     if (result.error) return res.status(400).json({ error: result.error });
     res.json(result.admin);
   });
 
   app.delete("/api/admin/team/:userId", requireAdmin, (req, res) => {
+    const caller = getSessionAdminUser(req);
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
     const result = storage.revokeSiteAdmin(Number(req.params.userId));
     if (result.error) return res.status(400).json({ error: result.error });
     res.json({ ok: true });
@@ -2856,30 +2872,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
-    const metrics = storage.getAdminMetrics();
-    const gaTrackingEnabled = !!readGaMeasurementId();
-    const gaReportingEnabled = isGoogleAnalyticsAdminConfigured();
+    try {
+      const metrics = storage.getAdminMetrics();
+      const gaTrackingEnabled = !!readGaMeasurementId();
+      const gaReportingEnabled = isGoogleAnalyticsAdminConfigured();
 
-    if (gaReportingEnabled) {
-      const gaTraffic = await getGoogleAnalyticsTrafficMetrics();
-      if (gaTraffic) {
-        metrics.traffic = gaTraffic;
+      if (gaReportingEnabled) {
+        const gaTraffic = await getGoogleAnalyticsTrafficMetrics();
+        if (gaTraffic) {
+          metrics.traffic = gaTraffic;
+        } else {
+          metrics.traffic = {
+            ...metrics.traffic,
+            gaTrackingEnabled,
+            gaReportingEnabled,
+          };
+        }
       } else {
         metrics.traffic = {
           ...metrics.traffic,
           gaTrackingEnabled,
-          gaReportingEnabled,
+          gaReportingEnabled: false,
         };
       }
-    } else {
-      metrics.traffic = {
-        ...metrics.traffic,
-        gaTrackingEnabled,
-        gaReportingEnabled: false,
-      };
-    }
 
-    res.json(metrics);
+      res.json(metrics);
+    } catch (err) {
+      console.error("[admin/metrics]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : "Failed to load admin metrics" });
+    }
   });
 
   app.get("/api/admin/users/new-today", requireAdmin, (_req, res) => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -15,7 +15,7 @@ import {
 import ImageUploader from "@/components/ImageUploader";
 import AdminLoadError from "@/components/admin/AdminLoadError";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
-import AdminInbox, { type BoardRejectTarget } from "@/components/admin/AdminInbox";
+import AdminInbox, { type BoardRejectTarget, type InboxKindFilter } from "@/components/admin/AdminInbox";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { type AdminView } from "@/components/admin/AdminShell";
 import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
@@ -159,6 +159,23 @@ const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
 
+const OVERVIEW_PILL_TO_INBOX_KIND: Record<string, InboxKindFilter> = {
+  submissions: "submission",
+  promoters: "promoter",
+  moderation: "moderation",
+  reports: "gifting_report",
+  gifting: "gifting_post",
+};
+
+function adminTabFromQuery(search: string, canAccessOwner: boolean): AdminTab | null {
+  let tab = new URLSearchParams(search).get("tab");
+  if (tab === "queue") tab = "inbox";
+  if (tab === "analytics") tab = "stats";
+  if (tab === "owner" && !canAccessOwner) tab = "overview";
+  if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) return tab as AdminTab;
+  return null;
+}
+
 export default function Admin() {
   usePageSeo("Admin | PDX Pride Guide", "Site administration panel.");
   const { toast } = useToast();
@@ -188,12 +205,14 @@ export default function Admin() {
   const [teamIdentifier, setTeamIdentifier] = useState("");
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isPrimaryOwner, setIsPrimaryOwner] = useState(false);
   const [userSearchQ, setUserSearchQ] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<Array<AdminUserProfile & { id: number; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
   const [allUsersFilter, setAllUsersFilter] = useState("");
   const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
   const [fixUsernameValue, setFixUsernameValue] = useState("");
+  const [inboxKindFilter, setInboxKindFilter] = useState<InboxKindFilter>("all");
 
   useEffect(() => {
     if (authLoading) return;
@@ -206,6 +225,7 @@ export default function Admin() {
           setAuthenticated(true);
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
+          if (user.isPrimaryOwner) setIsPrimaryOwner(true);
         }
         if (!cancelled) setSessionReady(true);
         return;
@@ -218,6 +238,7 @@ export default function Admin() {
           setAuthenticated(true);
           if (data.username) setAdminName(data.username);
           if (data.isSuperAdmin) setIsSuperAdmin(true);
+          if (data.isPrimaryOwner) setIsPrimaryOwner(true);
         }
       } catch {
         // fall through to legacy login gate
@@ -232,15 +253,29 @@ export default function Admin() {
     };
   }, [authLoading, user]);
 
+  const syncAdminTabFromUrl = useCallback(() => {
+    const rawTab = new URLSearchParams(window.location.search).get("tab");
+    const tab = adminTabFromQuery(window.location.search, isPrimaryOwner);
+    if (!tab) return;
+    setActiveTab(tab);
+    if (rawTab === "owner" && !isPrimaryOwner) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "overview");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [isPrimaryOwner]);
+
   useEffect(() => {
     if (!authenticated) return;
-    let tab = new URLSearchParams(window.location.search).get("tab");
-    if (tab === "queue") tab = "inbox";
-    if (tab === "analytics") tab = "stats";
-    if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) {
-      setActiveTab(tab as AdminTab);
-    }
-  }, [authenticated]);
+    syncAdminTabFromUrl();
+  }, [authenticated, syncAdminTabFromUrl]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    const onPopState = () => syncAdminTabFromUrl();
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [authenticated, syncAdminTabFromUrl]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -282,8 +317,18 @@ export default function Admin() {
     try {
       const res = await apiRequest("POST", "/api/admin/login", { username, password });
       const data = await res.json();
-      setAuthenticated(true);
       if (data?.username) setAdminName(data.username);
+      try {
+        const meRes = await fetch("/api/admin/me", { credentials: "include" });
+        const me = meRes.ok ? await meRes.json() : null;
+        if (me?.username) setAdminName(me.username);
+        if (me?.isSuperAdmin) setIsSuperAdmin(true);
+        if (me?.isPrimaryOwner) setIsPrimaryOwner(true);
+      } catch {
+        if (data?.isSuperAdmin) setIsSuperAdmin(true);
+        if (data?.isPrimaryOwner) setIsPrimaryOwner(true);
+      }
+      setAuthenticated(true);
       setPasswordError(false);
     } catch {
       setPasswordError(true);
@@ -302,6 +347,7 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
     queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
   };
 
   const { data: submissions = [], isLoading: subLoading, isError: subError, refetch: refetchSubs } = useQuery<Submission[]>({
@@ -348,11 +394,23 @@ export default function Admin() {
   const { data: ownerDesk = [], isLoading: ownerDeskLoading, isError: ownerDeskError, refetch: refetchOwnerDesk } = useQuery<OwnerDeskItem[]>({
     queryKey: ["/api/admin/owner-desk"],
     queryFn: () => apiRequest("GET", "/api/admin/owner-desk").then(r => r.json()),
-    enabled: authenticated && isSuperAdmin,
+    enabled: authenticated && isPrimaryOwner,
     refetchInterval: 90_000,
   });
 
-  const ownerCount = ownerDesk.filter(i => i.status === "OPEN").length;
+  const ownerDeskCount = ownerDesk.filter(i => i.status === "OPEN").length;
+
+  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
+    queryKey: ["/api/admin/pending-count"],
+    queryFn: () =>
+      fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
+        r.ok ? r.json() : { count: 0, ownerCount: 0 },
+      ),
+    enabled: authenticated,
+    refetchInterval: 90_000,
+  });
+  const pendingCount = pendingAdmin.count || 0;
+  const ownerCount = isPrimaryOwner ? (pendingAdmin.ownerCount ?? ownerDeskCount) : 0;
 
   const { data: pushStatus, refetch: refetchPushStatus } = useQuery<{
     configured: boolean;
@@ -420,14 +478,6 @@ export default function Admin() {
     queryKey: ["/api/admin/business-logo-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then(r => r.json()),
     enabled: authenticated,
-  });
-
-  const { data: adminMetrics } = useQuery<{ users: number }>({
-    queryKey: ["/api/admin/metrics"],
-    queryFn: () => apiRequest("GET", "/api/admin/metrics").then(r => r.json()),
-    enabled: authenticated,
-    staleTime: 0,
-    refetchOnMount: "always",
   });
 
   const { data: newUsersToday = [] } = useQuery<{ id: number; username: string; displayName: string | null; email: string; createdAt: string; photoUrl: string | null }[]>({
@@ -875,12 +925,7 @@ export default function Admin() {
   const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
   const pendingPromoters = promoterRequests;
-  const totalActionItems =
-    pendingSubs.length
-    + pendingMod.length
-    + pendingPromoters.length
-    + pendingGiftingFlagged.length
-    + pendingGiftingReports.length;
+  const venueClaimsPendingCount = businessClaims.length + businessSubmissions.length + businessLogoRequests.length;
 
   const overviewAttention = useMemo(() => {
     const items: AttentionItem[] = [];
@@ -920,8 +965,35 @@ export default function Admin() {
         color: "#AA66FF",
       });
     }
+    for (const claim of businessClaims.slice(0, 3)) {
+      items.push({
+        key: `business-claim-${claim.id}`,
+        title: claim.businessName || "Venue claim",
+        subtitle: `@${claim.username || claim.email || "unknown"}: ${claim.claimReason || "Claim request"}`,
+        kindLabel: "Venue claim",
+        color: "#19E3FF",
+      });
+    }
+    for (const sub of businessSubmissions.slice(0, 2)) {
+      items.push({
+        key: `business-submission-${sub.id}`,
+        title: sub.name || "New venue",
+        subtitle: `${sub.type || "Business"} · ${sub.neighborhood || sub.address || "No location"}`,
+        kindLabel: "New venue",
+        color: "#FF6600",
+      });
+    }
+    for (const req of businessLogoRequests.slice(0, 2)) {
+      items.push({
+        key: `business-logo-${req.id}`,
+        title: req.businessName || "Logo change",
+        subtitle: "Pending logo approval",
+        kindLabel: "Logo request",
+        color: "#FF00CC",
+      });
+    }
     return items.slice(0, 8);
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, businessClaims, businessSubmissions, businessLogoRequests]);
 
   const overviewKindPills = useMemo(() => {
     const pills: KindPill[] = [];
@@ -930,8 +1002,9 @@ export default function Admin() {
     if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
     if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
     if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
+    if (venueClaimsPendingCount) pills.push({ key: "venue-claims", label: "Venue claims", count: venueClaimsPendingCount, color: "#19E3FF" });
     return pills;
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, venueClaimsPendingCount]);
 
   const approvedPromoters = useMemo(
     () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
@@ -1077,6 +1150,7 @@ export default function Admin() {
 
   const refreshAdminData = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
     refetchInbox();
     refetchUsers();
     refetchEvents();
@@ -1087,17 +1161,29 @@ export default function Admin() {
     refetchBusinessLogoRequests();
   };
 
-  const venueClaimsPendingCount = businessClaims.length + businessSubmissions.length + businessLogoRequests.length;
-
   const setAdminTab = (tab: AdminTab) => {
-    setActiveTab(tab);
+    const resolved = tab === "owner" && !isPrimaryOwner ? "overview" : tab;
+    setActiveTab(resolved);
     setMoreOpen(false);
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", tab);
+    url.searchParams.set("tab", resolved);
     window.history.replaceState({}, "", url.toString());
   };
 
-  const userCount = adminMetrics?.users ?? allUsers.length;
+  const openInboxFromOverview = (filterHint?: string) => {
+    if (filterHint === "venue-claims") {
+      setAdminTab("venue-claims");
+      return;
+    }
+    if (filterHint && OVERVIEW_PILL_TO_INBOX_KIND[filterHint]) {
+      setInboxKindFilter(OVERVIEW_PILL_TO_INBOX_KIND[filterHint]);
+    } else {
+      setInboxKindFilter("all");
+    }
+    setAdminTab("inbox");
+  };
+
+  const userCount = allUsers.length;
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
@@ -1128,12 +1214,13 @@ export default function Admin() {
         onAdminNavigate={(view) => setAdminTab(view as AdminTab)}
         isAdminUser
         isSuperAdmin={isSuperAdmin}
+        isPrimaryOwner={isPrimaryOwner}
         userName={adminName}
         userHandle={user?.username}
         photoUrl={user?.photoUrl}
         avatarChoice={user?.avatarChoice}
         avatarRing={user?.avatarRing}
-        pendingCount={totalActionItems}
+        pendingCount={pendingCount}
         ownerCount={ownerCount}
         navCounts={{
           team: teamAdmins.length,
@@ -1182,16 +1269,22 @@ export default function Admin() {
         {/* ── OVERVIEW ── */}
         {activeTab === "overview" && (
           <AdminOverview
-            pendingCount={totalActionItems}
+            pendingCount={pendingCount}
             attentionItems={overviewAttention}
             kindPills={overviewKindPills}
             showMetrics={false}
             isSuperAdmin={isSuperAdmin}
+            isPrimaryOwner={isPrimaryOwner}
             ownerCount={ownerCount}
-            onOpenInbox={() => setAdminTab("inbox")}
+            onOpenInbox={openInboxFromOverview}
             onOpenOwner={() => setAdminTab("owner")}
             onReviewItem={(key) => {
+              if (key.startsWith("business-")) {
+                setAdminTab("venue-claims");
+                return;
+              }
               setExpandedInboxKey(key);
+              setInboxKindFilter("all");
               setAdminTab("inbox");
             }}
             onMetricClick={(tab, metricKey) => {
@@ -1258,7 +1351,7 @@ export default function Admin() {
             giftingPosts={giftingAdmin.posts || []}
             giftingReports={giftingAdmin.reports || []}
             missedConnections={missedAdmin}
-            feedback={[]}
+            initialKindFilter={inboxKindFilter}
             loading={inboxLoading}
             error={inboxError}
             onRetry={refetchInbox}
@@ -1279,7 +1372,6 @@ export default function Admin() {
             onDismissStaleTests={() => dismissStaleTestsMutation.mutate()}
             onGiftingStatus={(id, status) => updateGiftingStatusMutation.mutate({ id, status })}
             onResolveGiftingReport={id => resolveGiftingReportMutation.mutate({ id })}
-            onResolveFeedback={() => {}}
             boardRejectReasons={boardRejectReasons}
             boardRejectNotes={boardRejectNotes}
             onBoardRejectReasonChange={(key, code) => setBoardRejectReasons(prev => ({ ...prev, [key]: code }))}
@@ -2251,7 +2343,7 @@ export default function Admin() {
           </div>
         )}
 
-        {activeTab === "owner" && isSuperAdmin && (
+        {activeTab === "owner" && isPrimaryOwner && (
           <AdminOwnerDesk
             items={ownerDesk}
             loading={ownerDeskLoading}

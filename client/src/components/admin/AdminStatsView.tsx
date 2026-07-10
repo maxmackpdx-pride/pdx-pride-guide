@@ -4,6 +4,7 @@ import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { StatCard } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
+import AdminLoadError from "@/components/admin/AdminLoadError";
 import MemberGrowthChart from "@/components/admin/MemberGrowthChart";
 import "./admin-stats.css";
 
@@ -149,6 +150,37 @@ function formatDelta(current: number, previous: number): string {
   return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 }
 
+function buildTrafficLede(traffic: AdminMetrics["traffic"]): string {
+  const base = "Last 7 days versus the week before.";
+  if (traffic.source === "google_analytics") {
+    return `${base} Pulled from Google Analytics.`;
+  }
+  if (traffic.gaReportingEnabled) {
+    return `${base} GA reporting configured — showing first-party data.`;
+  }
+  if (traffic.gaTrackingEnabled) {
+    return `${base} GA is collecting on the site; add GA_PROPERTY_ID and GA_SERVICE_ACCOUNT_JSON on Railway for GA reporting here.`;
+  }
+  return `${base} First-party pageview tracking — set GA_MEASUREMENT_ID on Railway to enable Google Analytics.`;
+}
+
+function GaStatusChips({ traffic }: { traffic: AdminMetrics["traffic"] }) {
+  const sourceLabel = traffic.source === "google_analytics" ? "Google Analytics" : "First-party";
+  return (
+    <div className="admin-stats__traffic-meta" aria-label="Analytics status">
+      <span className={`admin-stats__ga-chip${traffic.gaTrackingEnabled ? " admin-stats__ga-chip--on" : ""}`}>
+        GA tracking {traffic.gaTrackingEnabled ? "on" : "off"}
+      </span>
+      <span className={`admin-stats__ga-chip${traffic.gaReportingEnabled ? " admin-stats__ga-chip--on" : ""}`}>
+        GA reporting {traffic.gaReportingEnabled ? "on" : "off"}
+      </span>
+      <span className="admin-stats__ga-chip admin-stats__ga-chip--source">
+        Source: {sourceLabel}
+      </span>
+    </div>
+  );
+}
+
 function BarRow({
   label,
   value,
@@ -187,7 +219,7 @@ export default function AdminStatsView({
   enabled: boolean;
   onMetricClick?: (tab: string, metricKey: keyof AdminMetrics) => void;
 }) {
-  const { data, isFetching, refetch, dataUpdatedAt } = useQuery<AdminMetrics>({
+  const { data, isFetching, isLoading, isError, refetch, dataUpdatedAt } = useQuery<AdminMetrics>({
     queryKey: ["/api/admin/metrics"],
     queryFn: () => apiRequest("GET", "/api/admin/metrics").then(r => r.json()),
     enabled,
@@ -201,7 +233,11 @@ export default function AdminStatsView({
     return trendPoints(data.traffic.pageViewsTrend14d);
   }, [data]);
 
-  if (!data) {
+  if (isError) {
+    return <AdminLoadError label="stats" onRetry={() => refetch()} />;
+  }
+
+  if (isLoading || !data) {
     return (
       <div className="admin-stats" aria-busy="true">
         <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)" }}>Loading stats…</p>
@@ -267,12 +303,10 @@ export default function AdminStatsView({
   const traffic = data.traffic;
   const trafficSourceLabel = traffic.source === "google_analytics"
     ? "Google Analytics"
-    : "First-party tracking";
-  const trafficLede = traffic.source === "google_analytics"
-    ? "Last 7 days versus the week before, pulled from Google Analytics."
-    : traffic.gaTrackingEnabled
-      ? "Last 7 days versus the week before. GA is collecting on the site; add GA_PROPERTY_ID and GA_SERVICE_ACCOUNT_JSON on Railway for GA reporting here."
-      : "Last 7 days versus the week before. First-party pageview tracking — set GA_MEASUREMENT_ID on Railway to enable Google Analytics.";
+    : traffic.gaReportingEnabled
+      ? "First-party (GA API fallback)"
+      : "First-party tracking";
+  const trafficLede = buildTrafficLede(traffic);
   const maxPageViews = Math.max(...traffic.topPages.map(p => p.views), 1);
   const trafficSpark = traffic.pageViewsTrend14d.slice(-8);
 
@@ -386,7 +420,8 @@ export default function AdminStatsView({
       <div className="admin-stats__grid admin-stats__grid--program">{program.map(renderStat)}</div>
 
       <h2 className="admin-stats__section-title">Traffic and audience</h2>
-      <p className="admin-stats__section-lede">{trafficLede}</p>
+      <GaStatusChips traffic={traffic} />
+      <p className="admin-stats__traffic-lede">{trafficLede}</p>
       <div className="admin-stats__kpi-grid">
         {trafficKpis.map((kpi, i) => (
           <div key={kpi.id} className="admin-stats__kpi" style={{ animationDelay: `${i * 55}ms` }}>

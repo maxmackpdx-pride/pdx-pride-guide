@@ -36,6 +36,15 @@ export default function Dashboard() {
     else url.searchParams.delete("view");
     window.history.replaceState({}, "", url.toString());
   }, [memberView]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const v = new URLSearchParams(window.location.search).get("view");
+      setMemberView(v === "posts" ? "posts" : "home");
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [avatarChoice, setAvatarChoice] = useState(user?.avatarChoice || 1);
@@ -93,7 +102,7 @@ export default function Dashboard() {
   const myGifting = myGiftingQuery.data ?? [];
   const myCheckIns = myCheckInsQuery.data ?? [];
 
-  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean } | null>({
+  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean } | null>({
     queryKey: ["/api/admin/me"],
     queryFn: async () => {
       const r = await fetch("/api/admin/me", { credentials: "include" });
@@ -111,6 +120,7 @@ export default function Dashboard() {
 
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
+  const isPrimaryOwner = Boolean(user?.isPrimaryOwner || adminSession?.isPrimaryOwner);
   const unreadCount = unread.count || 0;
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
@@ -123,7 +133,7 @@ export default function Dashboard() {
     refetchInterval: 90_000,
   });
   const pendingCount = pendingAdmin.count || 0;
-  const ownerCount = isSuperAdmin ? (pendingAdmin.ownerCount || 0) : 0;
+  const ownerCount = isPrimaryOwner ? (pendingAdmin.ownerCount || 0) : 0;
 
   const dashboardQueryErrors = [
     myGigsQuery.isError && "gigs",
@@ -415,6 +425,7 @@ export default function Dashboard() {
         onMemberNavigate={onMemberNavigate}
         isAdminUser={isAdmin}
         isSuperAdmin={isSuperAdmin}
+        isPrimaryOwner={isPrimaryOwner}
         userName={user.displayName || user.username || "Member"}
         userHandle={user.username}
         photoUrl={user.photoUrl}
@@ -423,6 +434,7 @@ export default function Dashboard() {
         unreadCount={unreadCount}
         postsCount={postsCount}
         pendingCount={pendingCount}
+        ownerCount={ownerCount}
         kicker={memberView === "posts" ? "Your stuff" : "Your hub"}
         kickerColor={memberView === "posts" ? "var(--green, #39ff14)" : "var(--cyan, #00ffff)"}
         title={memberView === "posts" ? "My posts" : `Hey, ${firstName}`}

@@ -15,6 +15,7 @@ export interface AuthUser {
   promoterStatus?: "none" | "pending" | "approved" | "rejected";
   isAdmin?: boolean;
   isSuperAdmin?: boolean;
+  isPrimaryOwner?: boolean;
   subAdmin?: boolean;
 }
 

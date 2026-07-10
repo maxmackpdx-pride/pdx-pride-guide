@@ -113,6 +113,7 @@ type Props = {
   onMemberNavigate?: (view: MemberView) => void;
   isAdminUser?: boolean;
   isSuperAdmin?: boolean;
+  isPrimaryOwner?: boolean;
   userName: string;
   userHandle?: string;
   photoUrl?: string | null;
@@ -178,6 +179,7 @@ export default function HubShell({
   onMemberNavigate,
   isAdminUser = false,
   isSuperAdmin = false,
+  isPrimaryOwner = false,
   userName,
   userHandle,
   photoUrl,
@@ -200,12 +202,15 @@ export default function HubShell({
   children,
 }: Props) {
   const [location] = useLocation();
-  const alertTotal = pendingCount + (isSuperAdmin ? ownerCount : 0);
-  const roleLabel = isSuperAdmin
-    ? "Owner · super admin"
-    : isAdminUser
-      ? "Site admin"
-      : "Member";
+  const adminTabHref = `/admin?tab=${encodeURIComponent(adminView)}`;
+  const alertTotal = pendingCount + (isPrimaryOwner ? ownerCount : 0);
+  const roleLabel = isPrimaryOwner
+    ? "Owner"
+    : isSuperAdmin
+      ? "Super admin"
+      : isAdminUser
+        ? "Site admin"
+        : "Member";
 
   const goMember = (v: MemberView) => {
     onMoreOpenChange?.(false);
@@ -257,7 +262,7 @@ export default function HubShell({
                 Member
               </Link>
               <Link
-                href="/admin?tab=overview"
+                href={adminTabHref}
                 className={`hub-side__mode-btn${mode === "admin" ? " is-active is-admin" : ""}`}
               >
                 Admin
@@ -300,7 +305,7 @@ export default function HubShell({
             <>
               <div className="hub-side__kicker">Admin</div>
               <nav className="hub-side__nav">
-                {ADMIN_PRIMARY_NAV.filter(item => !item.superOnly || isSuperAdmin).map(item => {
+                {ADMIN_PRIMARY_NAV.filter(item => !item.superOnly || isPrimaryOwner).map(item => {
                   const Icon = item.icon;
                   const active = adminView === item.key;
                   const alert =
@@ -379,7 +384,7 @@ export default function HubShell({
                   Me
                 </Link>
                 <Link
-                  href="/admin?tab=overview"
+                  href={adminTabHref}
                   className={`hub-mtop__mode-btn${mode === "admin" ? " is-active is-admin" : ""}`}
                 >
                   Admin
@@ -462,7 +467,7 @@ export default function HubShell({
               <span>Posts</span>
             </button>
             {isAdminUser && (
-              <Link href="/admin?tab=overview" className="hub-mobile-tab is-switch is-pink">
+              <Link href={adminTabHref} className="hub-mobile-tab is-switch is-pink">
                 <span className="hub-mobile-tab__icon-wrap">
                   <Shield size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
                   {alertTotal > 0 && <i className="is-blink">{alertTotal}</i>}
@@ -500,7 +505,7 @@ export default function HubShell({
               </span>
               <span>Queue</span>
             </button>
-            {isSuperAdmin ? (
+            {isPrimaryOwner && (
               <button
                 type="button"
                 className={`hub-mobile-tab${adminView === "owner" ? " is-active is-purple" : ""}`}
@@ -512,16 +517,15 @@ export default function HubShell({
                 </span>
                 <span>Owner</span>
               </button>
-            ) : (
-              <button
-                type="button"
-                className={`hub-mobile-tab${moreOpen || MORE_VIEWS.includes(adminView) ? " is-active is-more" : ""}`}
-                onClick={() => onMoreOpenChange?.(!moreOpen)}
-              >
-                <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-                <span>More</span>
-              </button>
             )}
+            <button
+              type="button"
+              className={`hub-mobile-tab${moreOpen || MORE_VIEWS.includes(adminView) ? " is-active is-more" : ""}`}
+              onClick={() => onMoreOpenChange?.(!moreOpen)}
+            >
+              <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>More</span>
+            </button>
             <Link href="/dashboard" className="hub-mobile-tab is-switch is-cyan">
               <UserCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
               <span>Me</span>

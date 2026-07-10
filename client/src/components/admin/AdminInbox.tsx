@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle, ChevronDown, Clock, XCircle } from "lucide-react";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import AdminLoadError from "@/components/admin/AdminLoadError";
@@ -12,8 +12,7 @@ export type InboxKind =
   | "moderation"
   | "gifting_post"
   | "gifting_report"
-  | "missed_connection"
-  | "feedback";
+  | "missed_connection";
 
 export type BoardRejectTarget = "gigs" | "gifting" | "missed-connections";
 
@@ -68,7 +67,6 @@ const KIND_META: Record<InboxKind, { label: string; color: string }> = {
   gifting_post: { label: "Gifting", color: "#B451FF" },
   gifting_report: { label: "Gifting report", color: "#FF2400" },
   missed_connection: { label: "Spotted", color: "#FF1FA0" },
-  feedback: { label: "Feedback", color: "#750787" },
 };
 
 const KIND_FILTERS: { key: InboxKindFilter; label: string }[] = [
@@ -80,7 +78,6 @@ const KIND_FILTERS: { key: InboxKindFilter; label: string }[] = [
   { key: "gifting_post", label: "Gifting" },
   { key: "gifting_report", label: "Reports" },
   { key: "missed_connection", label: "Spotted" },
-  { key: "feedback", label: "Feedback" },
 ];
 
 function kindLabel(kind: InboxKind) {
@@ -99,7 +96,7 @@ export interface AdminInboxProps {
   giftingPosts: any[];
   giftingReports: any[];
   missedConnections: any[];
-  feedback: any[];
+  initialKindFilter?: InboxKindFilter;
   loading: boolean;
   error: boolean;
   onRetry: () => void;
@@ -122,7 +119,6 @@ export interface AdminInboxProps {
   onDismissStaleTests: () => void;
   onGiftingStatus: (id: number, status: string) => void;
   onResolveGiftingReport: (id: number) => void;
-  onResolveFeedback: (id: number) => void;
   boardRejectReasons: Record<string, string>;
   boardRejectNotes: Record<string, string>;
   onBoardRejectReasonChange: (key: string, code: string) => void;
@@ -249,28 +245,18 @@ function buildInboxItems(props: AdminInboxProps): InboxItem[] {
     });
   }
 
-  for (const item of props.feedback) {
-    const pending = item.status === "OPEN";
-    items.push({
-      key: `feedback-${item.id}`,
-      kind: "feedback",
-      id: item.id,
-      createdAt: item.createdAt || item.created_at,
-      title: item.category || "Feedback",
-      subtitle: item.message?.slice(0, 120) || "",
-      status: item.status,
-      pending,
-      severity: item.severity,
-      payload: item,
-    });
-  }
-
   return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export default function AdminInbox(props: AdminInboxProps) {
-  const [kindFilter, setKindFilter] = useState<InboxKindFilter>("all");
+  const [kindFilter, setKindFilter] = useState<InboxKindFilter>(props.initialKindFilter ?? "all");
   const [showResolved, setShowResolved] = useState(false);
+
+  useEffect(() => {
+    if (props.initialKindFilter) {
+      setKindFilter(props.initialKindFilter);
+    }
+  }, [props.initialKindFilter]);
 
   const allItems = useMemo(() => buildInboxItems(props), [
     props.submissions,
@@ -280,7 +266,6 @@ export default function AdminInbox(props: AdminInboxProps) {
     props.giftingPosts,
     props.giftingReports,
     props.missedConnections,
-    props.feedback,
   ]);
 
   const pendingCount = allItems.filter(item => item.pending).length;
@@ -318,7 +303,7 @@ export default function AdminInbox(props: AdminInboxProps) {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <p className="text-white/40 text-sm m-0">
-          {pendingCount} pending across submissions, promoters, moderation, gifting reports, and feedback.
+          {pendingCount} pending across submissions, promoters, moderation, and gifting reports.
         </p>
         <button
           type="button"
@@ -401,7 +386,6 @@ function InboxCard({
   onResolveModeration,
   onGiftingStatus,
   onResolveGiftingReport,
-  onResolveFeedback,
   boardRejectReasons,
   boardRejectNotes,
   onBoardRejectReasonChange,
@@ -693,21 +677,6 @@ function InboxCard({
             </button>
           )}
 
-          {item.kind === "feedback" && (
-            <>
-              <p className="text-white/90 text-sm whitespace-pre-wrap">{payload.message}</p>
-              {payload.steps && <p className="text-white/55 text-xs whitespace-pre-wrap">Steps: {payload.steps}</p>}
-              <div className="text-white/35 text-xs space-y-1">
-                <div>Page: {payload.pageUrl || payload.page_url}</div>
-                {payload.email && <div>Email: {payload.email}</div>}
-              </div>
-              {item.pending && (
-                <button type="button" className="sticker" style={{ color: "#CCFF00", borderColor: "#CCFF00" }} onClick={() => onResolveFeedback(payload.id)}>
-                  MARK RESOLVED
-                </button>
-              )}
-            </>
-          )}
         </div>
       )}
     </div>

@@ -29,6 +29,7 @@ type Props = {
   metricsEnabled?: boolean;
   showMetrics?: boolean;
   isSuperAdmin?: boolean;
+  isPrimaryOwner?: boolean;
   ownerCount?: number;
   onOpenInbox: (filterHint?: string) => void;
   onOpenOwner?: () => void;
@@ -47,6 +48,7 @@ export default function AdminOverview({
   metricsEnabled = false,
   showMetrics = false,
   isSuperAdmin = false,
+  isPrimaryOwner = false,
   ownerCount = 0,
   onOpenInbox,
   onOpenOwner,
@@ -57,7 +59,7 @@ export default function AdminOverview({
   onSendTestPush,
   testPushPending,
 }: Props) {
-  const showOwner = isSuperAdmin && ownerCount > 0 && onOpenOwner;
+  const showOwner = isPrimaryOwner && ownerCount > 0 && onOpenOwner;
 
   return (
     <div className="admin-overview">

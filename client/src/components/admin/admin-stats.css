@@ -163,6 +163,34 @@
   margin-bottom: 28px;
 }
 
+.admin-stats__traffic-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -4px 0 10px;
+}
+
+.admin-stats__ga-chip {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #1f1f1f);
+  color: var(--text-faint, #666);
+}
+
+.admin-stats__ga-chip--on {
+  border-color: var(--lime, #c8fa3c);
+  color: var(--lime, #c8fa3c);
+}
+
+.admin-stats__ga-chip--source {
+  border-color: var(--cyan, #00ffff);
+  color: var(--cyan, #00ffff);
+}
+
 .admin-stats__traffic-lede {
   font-size: 12.5px;
   color: var(--text-faint, #666);

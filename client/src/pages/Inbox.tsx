@@ -24,7 +24,7 @@ export default function Inbox() {
     "Private messages from missed connections, Pride Werk, event hosts, and check-ins.",
   );
 
-  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean } | null>({
+  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean } | null>({
     queryKey: ["/api/admin/me"],
     queryFn: async () => {
       const r = await fetch("/api/admin/me", { credentials: "include" });
@@ -45,6 +45,7 @@ export default function Inbox() {
 
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
+  const isPrimaryOwner = Boolean(user?.isPrimaryOwner || adminSession?.isPrimaryOwner);
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
@@ -89,6 +90,7 @@ export default function Inbox() {
       memberView="inbox"
       isAdminUser={isAdmin}
       isSuperAdmin={isSuperAdmin}
+      isPrimaryOwner={isPrimaryOwner}
       userName={user.displayName || user.username || "Member"}
       userHandle={user.username}
       photoUrl={user.photoUrl}
@@ -96,7 +98,7 @@ export default function Inbox() {
       avatarRing={user.avatarRing}
       unreadCount={unread.count || 0}
       pendingCount={pendingAdmin.count || 0}
-      ownerCount={isSuperAdmin ? (pendingAdmin.ownerCount || 0) : 0}
+      ownerCount={isPrimaryOwner ? (pendingAdmin.ownerCount || 0) : 0}
       kicker="Private messages"
       kickerColor="var(--cyan, #00ffff)"
       title="Inbox"
