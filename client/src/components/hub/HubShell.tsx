@@ -2,13 +2,18 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
   BarChart3,
+  Bell,
   Briefcase,
   CalendarDays,
   Home,
   Inbox,
-  LayoutDashboard,
+  KeyRound,
   Layers,
+  LayoutDashboard,
   LogOut,
+  MoreHorizontal,
+  Shield,
+  ShoppingCart,
   Store,
   Users,
   UserCircle,
@@ -24,6 +29,7 @@ export type AdminViewKey =
   | "overview"
   | "stats"
   | "inbox"
+  | "owner"
   | "events"
   | "users"
   | "gigs"
@@ -45,13 +51,19 @@ export const ADMIN_VIEW_META: Record<
     title: "Stats",
     kicker: "The numbers",
     kickerColor: "var(--cyan, #00ffff)",
-    lede: "Everything in one place: site pulse, community counts, and what is live right now.",
+    lede: "Everything in one place: site pulse, visitors, sources, and what people open.",
   },
   inbox: {
     title: "Review queue",
     kicker: "Shared queue",
     kickerColor: "var(--pink, #ff00cc)",
     lede: "One queue the whole admin team works together. Not a mailbox, a shared to-do list.",
+  },
+  owner: {
+    title: "Owner desk",
+    kicker: "Owner only",
+    kickerColor: "var(--purple, #8800ff)",
+    lede: "Only you, the owner, see these. Keyholder grants, escalations, and account-level calls the team can't make.",
   },
   events: {
     title: "All events",
@@ -91,11 +103,11 @@ export const ADMIN_VIEW_META: Record<
   },
 };
 
+type NavAccent = "cyan" | "green" | "lime" | "pink" | "purple" | "orange";
+
 type Props = {
   mode: HubMode;
-  /** Active member sub-view (member mode) */
   memberView?: MemberView;
-  /** Active admin sub-view (admin mode) */
   adminView?: AdminViewKey;
   onAdminNavigate?: (view: AdminViewKey) => void;
   onMemberNavigate?: (view: MemberView) => void;
@@ -109,21 +121,38 @@ type Props = {
   unreadCount?: number;
   postsCount?: number;
   pendingCount?: number;
+  ownerCount?: number;
+  navCounts?: Partial<Record<AdminViewKey, number | string>>;
+  moreOpen?: boolean;
+  onMoreOpenChange?: (open: boolean) => void;
   kicker: string;
   kickerColor?: string;
   title: string;
   lede?: string;
   topRight?: ReactNode;
-  /** Optional block above the sidebar user row (e.g. push status) */
   sideExtra?: ReactNode;
   onLogout: () => void;
   children: ReactNode;
 };
 
-const ADMIN_NAV: Array<{ key: AdminViewKey; label: string; icon: typeof Home }> = [
-  { key: "overview", label: "Overview", icon: LayoutDashboard },
-  { key: "stats", label: "Stats", icon: BarChart3 },
-  { key: "inbox", label: "Review queue", icon: Inbox },
+const ADMIN_PRIMARY_NAV: Array<{
+  key: AdminViewKey;
+  label: string;
+  icon: typeof Home;
+  accent: NavAccent;
+  superOnly?: boolean;
+}> = [
+  { key: "overview", label: "Overview", icon: LayoutDashboard, accent: "lime" },
+  { key: "stats", label: "Stats", icon: BarChart3, accent: "cyan" },
+  { key: "inbox", label: "Review queue", icon: ShoppingCart, accent: "pink" },
+  { key: "owner", label: "Owner desk", icon: KeyRound, accent: "purple", superOnly: true },
+];
+
+const ADMIN_MORE_NAV: Array<{
+  key: AdminViewKey;
+  label: string;
+  icon: typeof Home;
+}> = [
   { key: "events", label: "All events", icon: CalendarDays },
   { key: "users", label: "All users", icon: UserCircle },
   { key: "gigs", label: "Pride Werk", icon: Briefcase },
@@ -131,6 +160,15 @@ const ADMIN_NAV: Array<{ key: AdminViewKey; label: string; icon: typeof Home }> 
   { key: "venue-claims", label: "Venue claims", icon: Store },
   { key: "team", label: "My team", icon: Users },
 ];
+
+const MORE_VIEWS: AdminViewKey[] = ["events", "users", "gigs", "promoters", "venue-claims", "team"];
+
+const MOBILE_ICON = 26;
+
+function navBtnClass(active: boolean, accent?: NavAccent) {
+  if (!active || !accent) return "";
+  return ` is-active is-${accent}`;
+}
 
 export default function HubShell({
   mode,
@@ -148,6 +186,10 @@ export default function HubShell({
   unreadCount = 0,
   postsCount = 0,
   pendingCount = 0,
+  ownerCount = 0,
+  navCounts = {},
+  moreOpen = false,
+  onMoreOpenChange,
   kicker,
   kickerColor = "var(--cyan, #00ffff)",
   title,
@@ -158,6 +200,7 @@ export default function HubShell({
   children,
 }: Props) {
   const [location] = useLocation();
+  const alertTotal = pendingCount + (isSuperAdmin ? ownerCount : 0);
   const roleLabel = isSuperAdmin
     ? "Owner · super admin"
     : isAdminUser
@@ -165,6 +208,7 @@ export default function HubShell({
       : "Member";
 
   const goMember = (v: MemberView) => {
+    onMoreOpenChange?.(false);
     if (onMemberNavigate) {
       onMemberNavigate(v);
       if (typeof window !== "undefined") window.scrollTo(0, 0);
@@ -172,16 +216,28 @@ export default function HubShell({
   };
 
   const goAdmin = (v: AdminViewKey) => {
+    onMoreOpenChange?.(false);
     onAdminNavigate?.(v);
     if (typeof window !== "undefined") window.scrollTo(0, 0);
   };
+
+  const notifyBell = mode === "admin" && (
+    <button
+      type="button"
+      className="hub-notify-btn"
+      onClick={() => goAdmin("inbox")}
+      aria-label={`Notifications${alertTotal > 0 ? `, ${alertTotal} pending` : ""}`}
+    >
+      <Bell size={mode === "admin" ? 21 : 17} strokeWidth={2.2} aria-hidden />
+      {alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}
+    </button>
+  );
 
   return (
     <div className={`hub-shell hub-shell--${mode}`}>
       <div className="hub-shell__rainbow" aria-hidden="true" />
 
       <div className="hub-shell__frame">
-        {/* ── SIDEBAR ── */}
         <aside className="hub-side" aria-label="Hub navigation">
           <Link href="/" className="hub-side__brand" aria-label="PDX Pride Guide home">
             <img src={logo} alt="" width={42} height={42} className="hub-side__logo" />
@@ -215,7 +271,7 @@ export default function HubShell({
               <nav className="hub-side__nav">
                 <button
                   type="button"
-                  className={`hub-side__nav-btn${memberView === "home" ? " is-active is-cyan" : ""}`}
+                  className={`hub-side__nav-btn${navBtnClass(memberView === "home", "cyan")}`}
                   onClick={() => goMember("home")}
                 >
                   <Home size={18} strokeWidth={2.2} aria-hidden />
@@ -223,7 +279,7 @@ export default function HubShell({
                 </button>
                 <Link
                   href="/inbox"
-                  className={`hub-side__nav-btn${location.startsWith("/inbox") || memberView === "inbox" ? " is-active is-cyan" : ""}`}
+                  className={`hub-side__nav-btn${navBtnClass(location.startsWith("/inbox") || memberView === "inbox", "cyan")}`}
                 >
                   <Inbox size={18} strokeWidth={2.2} aria-hidden />
                   <span className="label">Inbox</span>
@@ -231,7 +287,7 @@ export default function HubShell({
                 </Link>
                 <button
                   type="button"
-                  className={`hub-side__nav-btn${memberView === "posts" ? " is-active is-green" : ""}`}
+                  className={`hub-side__nav-btn${navBtnClass(memberView === "posts", "green")}`}
                   onClick={() => goMember("posts")}
                 >
                   <Layers size={18} strokeWidth={2.2} aria-hidden />
@@ -244,23 +300,41 @@ export default function HubShell({
             <>
               <div className="hub-side__kicker">Admin</div>
               <nav className="hub-side__nav">
-                {ADMIN_NAV.map(item => {
+                {ADMIN_PRIMARY_NAV.filter(item => !item.superOnly || isSuperAdmin).map(item => {
                   const Icon = item.icon;
                   const active = adminView === item.key;
-                  const alert = item.key === "inbox" && pendingCount > 0 ? pendingCount : undefined;
+                  const alert =
+                    item.key === "inbox" && pendingCount > 0
+                      ? pendingCount
+                      : item.key === "owner" && ownerCount > 0
+                        ? ownerCount
+                        : undefined;
+                  const alertClass = item.key === "owner" ? "hub-side__pill--purple" : "hub-side__pill--pink";
                   return (
                     <button
                       key={item.key}
                       type="button"
-                      className={`hub-side__nav-btn${active ? " is-active is-lime" : ""}`}
+                      className={`hub-side__nav-btn${navBtnClass(active, item.accent)}`}
                       onClick={() => goAdmin(item.key)}
                     >
                       <Icon size={18} strokeWidth={2.2} aria-hidden />
                       <span className="label">{item.label}</span>
-                      {alert != null && <span className="hub-side__pill hub-side__pill--pink">{alert}</span>}
+                      {alert != null && (
+                        <span className={`hub-side__pill ${alertClass}`}>{alert}</span>
+                      )}
                     </button>
                   );
                 })}
+                {onMoreOpenChange && (
+                  <button
+                    type="button"
+                    className={`hub-side__nav-btn${moreOpen || MORE_VIEWS.includes(adminView) ? " is-active is-orange" : ""}`}
+                    onClick={() => onMoreOpenChange(!moreOpen)}
+                  >
+                    <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden />
+                    <span className="label">More</span>
+                  </button>
+                )}
               </nav>
             </>
           )}
@@ -288,8 +362,32 @@ export default function HubShell({
           </div>
         </aside>
 
-        {/* ── MAIN ── */}
         <div className="hub-main">
+          <header className="hub-mtop" aria-label="Hub mobile header">
+            <img src={logo} alt="" width={30} height={30} className="hub-mtop__logo" />
+            <div className="hub-mtop__wordmark">
+              PDX <span className="pride">PRIDE</span> GUIDE
+            </div>
+            <div className="hub-mtop__spacer" />
+            {mode === "admin" && notifyBell}
+            {isAdminUser && (
+              <div className="hub-mtop__mode" role="group" aria-label="Hub mode">
+                <Link
+                  href="/dashboard"
+                  className={`hub-mtop__mode-btn${mode === "member" ? " is-active is-member" : ""}`}
+                >
+                  Me
+                </Link>
+                <Link
+                  href="/admin?tab=overview"
+                  className={`hub-mtop__mode-btn${mode === "admin" ? " is-active is-admin" : ""}`}
+                >
+                  Admin
+                </Link>
+              </div>
+            )}
+          </header>
+
           <header className="hub-main__top">
             <div>
               <div className="hub-main__kicker" style={{ color: kickerColor }}>
@@ -299,48 +397,134 @@ export default function HubShell({
               <h1 className="hub-main__title">{title}</h1>
               {lede && <p className="hub-main__lede">{lede}</p>}
             </div>
-            {topRight && <div className="hub-main__top-right">{topRight}</div>}
+            <div className="hub-main__top-right">
+              {mode === "admin" && <span className="hub-main__notify-desktop">{notifyBell}</span>}
+              {topRight}
+            </div>
           </header>
 
           <div className="hub-main__body">{children}</div>
         </div>
       </div>
 
-      {/* Mobile bottom nav */}
+      {mode === "admin" && moreOpen && onMoreOpenChange && (
+        <>
+          <div className="hub-more-backdrop" onClick={() => onMoreOpenChange(false)} />
+          <div className="hub-more-sheet" role="dialog" aria-label="More admin sections">
+            <h3>More</h3>
+            {ADMIN_MORE_NAV.map(item => {
+              const Icon = item.icon;
+              const count = navCounts[item.key];
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`hub-more-item${adminView === item.key ? " is-active" : ""}`}
+                  onClick={() => goAdmin(item.key)}
+                >
+                  <Icon size={18} strokeWidth={2.2} aria-hidden />
+                  <span>{item.label}</span>
+                  {count != null && count !== "" && <span className="count">{count}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+
       <nav className="hub-mobile-bar" aria-label="Hub mobile navigation">
         {mode === "member" ? (
           <>
-            <button type="button" className={memberView === "home" ? "is-active" : ""} onClick={() => goMember("home")}>
-              <Home size={22} /><span>Home</span>
+            <button
+              type="button"
+              className={`hub-mobile-tab${memberView === "home" ? " is-active is-cyan" : ""}`}
+              onClick={() => goMember("home")}
+            >
+              <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Home</span>
             </button>
-            <Link href="/inbox" className={location.startsWith("/inbox") ? "is-active" : ""}>
-              <Inbox size={22} /><span>Inbox</span>
-              {unreadCount > 0 && <i>{unreadCount}</i>}
+            <Link
+              href="/inbox"
+              className={`hub-mobile-tab${location.startsWith("/inbox") ? " is-active is-cyan" : ""}`}
+            >
+              <span className="hub-mobile-tab__icon-wrap">
+                <Inbox size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+                {unreadCount > 0 && <i>{unreadCount}</i>}
+              </span>
+              <span>Inbox</span>
             </Link>
-            <button type="button" className={memberView === "posts" ? "is-active" : ""} onClick={() => goMember("posts")}>
-              <Layers size={22} /><span>Posts</span>
+            <button
+              type="button"
+              className={`hub-mobile-tab${memberView === "posts" ? " is-active is-green" : ""}`}
+              onClick={() => goMember("posts")}
+            >
+              <Layers size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Posts</span>
             </button>
             {isAdminUser && (
-              <Link href="/admin?tab=overview">
-                <LayoutDashboard size={22} /><span>Admin</span>
-                {pendingCount > 0 && <i>{pendingCount}</i>}
+              <Link href="/admin?tab=overview" className="hub-mobile-tab is-switch is-pink">
+                <span className="hub-mobile-tab__icon-wrap">
+                  <Shield size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+                  {alertTotal > 0 && <i className="is-blink">{alertTotal}</i>}
+                </span>
+                <span>Admin</span>
               </Link>
             )}
           </>
         ) : (
           <>
-            <button type="button" className={adminView === "overview" ? "is-active" : ""} onClick={() => goAdmin("overview")}>
-              <Home size={22} /><span>Home</span>
+            <button
+              type="button"
+              className={`hub-mobile-tab${adminView === "overview" ? " is-active is-lime" : ""}`}
+              onClick={() => goAdmin("overview")}
+            >
+              <LayoutDashboard size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Home</span>
             </button>
-            <button type="button" className={adminView === "stats" ? "is-active" : ""} onClick={() => goAdmin("stats")}>
-              <BarChart3 size={22} /><span>Stats</span>
+            <button
+              type="button"
+              className={`hub-mobile-tab${adminView === "stats" ? " is-active is-cyan" : ""}`}
+              onClick={() => goAdmin("stats")}
+            >
+              <BarChart3 size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Stats</span>
             </button>
-            <button type="button" className={adminView === "inbox" ? "is-active" : ""} onClick={() => goAdmin("inbox")}>
-              <Inbox size={22} /><span>Queue</span>
-              {pendingCount > 0 && <i>{pendingCount}</i>}
+            <button
+              type="button"
+              className={`hub-mobile-tab${adminView === "inbox" ? " is-active is-pink" : ""}`}
+              onClick={() => goAdmin("inbox")}
+            >
+              <span className="hub-mobile-tab__icon-wrap">
+                <ShoppingCart size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+                {pendingCount > 0 && <i className="is-blink">{pendingCount}</i>}
+              </span>
+              <span>Queue</span>
             </button>
-            <Link href="/dashboard" className="is-cyan">
-              <UserCircle size={22} /><span>Me</span>
+            {isSuperAdmin ? (
+              <button
+                type="button"
+                className={`hub-mobile-tab${adminView === "owner" ? " is-active is-purple" : ""}`}
+                onClick={() => goAdmin("owner")}
+              >
+                <span className="hub-mobile-tab__icon-wrap">
+                  <KeyRound size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+                  {ownerCount > 0 && <i className="is-purple">{ownerCount}</i>}
+                </span>
+                <span>Owner</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`hub-mobile-tab${moreOpen || MORE_VIEWS.includes(adminView) ? " is-active is-more" : ""}`}
+                onClick={() => onMoreOpenChange?.(!moreOpen)}
+              >
+                <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+                <span>More</span>
+              </button>
+            )}
+            <Link href="/dashboard" className="hub-mobile-tab is-switch is-cyan">
+              <UserCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Me</span>
             </Link>
           </>
         )}

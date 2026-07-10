@@ -424,6 +424,37 @@
   filter: brightness(1.15);
 }
 
+.admin-owner-desk-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid #8800ff;
+  border-radius: 11px;
+  background: rgba(136, 0, 255, 0.1);
+  margin-bottom: 18px;
+}
+
+.admin-owner-desk-banner__icon {
+  flex: none;
+  color: #8800ff;
+  display: flex;
+}
+
+.admin-owner-desk-banner p {
+  margin: 0;
+  font-size: 13.5px;
+  color: #c8c5bc;
+  line-height: 1.45;
+}
+
+.admin-owner-desk-banner strong {
+  color: #8800ff;
+  font-family: var(--font-display), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* Mobile top bar + bottom nav */
 .admin-shell__mobile-top {
   display: none;
@@ -617,7 +648,8 @@
   display: none; /* shell topbar replaces */
 }
 
-.admin-shell .admin-panel-body {
+.admin-shell .admin-panel-body,
+.hub-shell .admin-panel-body {
   max-width: 1100px;
 }
 

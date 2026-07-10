@@ -143,7 +143,7 @@ interface AdminUser extends AdminUserProfile {
 type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "stats", "inbox", "events", "gigs", "promoters", "venue-claims", "users", "team"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "stats", "inbox", "owner", "events", "gigs", "promoters", "venue-claims", "users", "team"];
 
 interface SiteAdminMember extends AdminUserProfile {
   userId: number;
@@ -171,6 +171,7 @@ export default function Admin() {
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [moreOpen, setMoreOpen] = useState(false);
   const [expandedInboxKey, setExpandedInboxKey] = useState<string | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [modNote, setModNote] = useState<Record<number, string>>({});
@@ -233,8 +234,8 @@ export default function Admin() {
   useEffect(() => {
     if (!authenticated) return;
     let tab = new URLSearchParams(window.location.search).get("tab");
-    // Alias design "queue" tab to review inbox
     if (tab === "queue") tab = "inbox";
+    if (tab === "analytics") tab = "stats";
     if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) {
       setActiveTab(tab as AdminTab);
     }
@@ -938,6 +939,15 @@ export default function Admin() {
     return pills;
   }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, openFeedback]);
 
+  const approvedPromoters = useMemo(
+    () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
+    [allUsers],
+  );
+  const pendingPromoterUsers = useMemo(
+    () => allUsers.filter(u => u.promoterStatus === "pending"),
+    [allUsers],
+  );
+
   if (authLoading || !sessionReady) {
     return (
       <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
@@ -1088,6 +1098,7 @@ export default function Admin() {
 
   const setAdminTab = (tab: AdminTab) => {
     setActiveTab(tab);
+    setMoreOpen(false);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.replaceState({}, "", url.toString());
@@ -1097,14 +1108,6 @@ export default function Admin() {
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
-  const approvedPromoters = useMemo(
-    () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
-    [allUsers],
-  );
-  const pendingPromoterUsers = useMemo(
-    () => allUsers.filter(u => u.promoterStatus === "pending"),
-    [allUsers],
-  );
   const approvedPromoterCount = approvedPromoters.length;
 
   const inboxActionPending =
@@ -1138,6 +1141,17 @@ export default function Admin() {
         avatarChoice={user?.avatarChoice}
         avatarRing={user?.avatarRing}
         pendingCount={totalActionItems}
+        ownerCount={0}
+        navCounts={{
+          team: teamAdmins.length,
+          events: events.length,
+          users: userCount,
+          gigs: gigs.length,
+          promoters: approvedPromoterCount || pendingPromoters.length || undefined,
+          "venue-claims": venueClaimsPendingCount || undefined,
+        }}
+        moreOpen={moreOpen}
+        onMoreOpenChange={setMoreOpen}
         kicker={viewMeta.kicker}
         kickerColor={viewMeta.kickerColor}
         title={viewMeta.title}
@@ -1182,7 +1196,7 @@ export default function Admin() {
             isSuperAdmin={isSuperAdmin}
             ownerCount={0}
             onOpenInbox={() => setAdminTab("inbox")}
-            onOpenOwner={() => setAdminTab("team")}
+            onOpenOwner={() => setAdminTab("owner")}
             onReviewItem={(key) => {
               setExpandedInboxKey(key);
               setAdminTab("inbox");
@@ -2244,8 +2258,18 @@ export default function Admin() {
           </div>
         )}
 
-        {activeTab === "team" && (
+        {(activeTab === "owner" || activeTab === "team") && (
           <div className="space-y-8">
+            {activeTab === "owner" && (
+              <div className="admin-owner-desk-banner">
+                <span className="admin-owner-desk-banner__icon" aria-hidden>
+                  <Lock size={17} />
+                </span>
+                <p>
+                  <strong>Owner only.</strong> Keyholders (site admins) can&apos;t see or touch this lane. These are your calls.
+                </p>
+              </div>
+            )}
             <div>
               <p className="text-white/40 text-sm mb-4">
                 Site admins can open this dashboard while logged into their PDX Pride Guide account (footer Admin Panel link). Owner accounts in Railway env cannot be removed here.

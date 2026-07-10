@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Home,
   Inbox,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   MoreHorizontal,
@@ -21,6 +22,7 @@ export type AdminView =
   | "overview"
   | "stats"
   | "inbox"
+  | "owner"
   | "events"
   | "users"
   | "gigs"
@@ -45,6 +47,7 @@ const VIEW_TITLES: Record<AdminView, string> = {
   overview: "Admin overview",
   stats: "Stats",
   inbox: "Review queue",
+  owner: "Owner desk",
   events: "All events",
   users: "All users",
   gigs: "Pride Werk",
@@ -57,6 +60,7 @@ const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
   overview: { label: "Control room", color: "var(--lime, #ccff00)" },
   stats: { label: "The numbers", color: "var(--cyan, #00ffff)" },
   inbox: { label: "Shared queue", color: "var(--pink, #ff00cc)" },
+  owner: { label: "Owner only", color: "var(--purple, #8800ff)" },
   events: { label: "The program", color: "var(--orange, #ff6600)" },
   users: { label: "The community", color: "var(--cyan, #00ffff)" },
   gigs: { label: "The gig board", color: "var(--amber, #ffb020)" },
@@ -69,6 +73,7 @@ const VIEW_LEDES: Record<AdminView, string> = {
   overview: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
   stats: "Everything in one place: site pulse, community counts, and what is live right now.",
   inbox: "One queue the whole admin team works together. Not a mailbox, a shared to-do list.",
+  owner: "Only you, the owner, see these. Keyholder grants, escalations, and account-level calls the team can't make.",
   events: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",
   users: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",
   gigs: "Live Pride Werk posts. Take down spam, keep the board useful for workers and hosts.",
@@ -87,6 +92,7 @@ function makeIcons(size: number): Record<AdminView | "more", ReactNode> {
     overview: <LayoutDashboard {...p} />,
     stats: <BarChart3 {...p} />,
     inbox: <Inbox {...p} />,
+    owner: <KeyRound {...p} />,
     events: <CalendarDays {...p} />,
     users: <UserCircle {...p} />,
     gigs: <Briefcase {...p} />,

@@ -113,6 +113,17 @@ export default function Dashboard() {
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
   const unreadCount = unread.count || 0;
 
+  const { data: pendingAdmin = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ["/api/admin/pending-count"],
+    queryFn: () =>
+      fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
+        r.ok ? r.json() : { count: 0 },
+      ),
+    enabled: isAdmin,
+    refetchInterval: 90_000,
+  });
+  const pendingCount = pendingAdmin.count || 0;
+
   const dashboardQueryErrors = [
     myGigsQuery.isError && "gigs",
     myEventsQuery.isError && "claimed events",
@@ -410,6 +421,7 @@ export default function Dashboard() {
         avatarRing={user.avatarRing}
         unreadCount={unreadCount}
         postsCount={postsCount}
+        pendingCount={pendingCount}
         kicker={memberView === "posts" ? "Your stuff" : "Your hub"}
         kickerColor={memberView === "posts" ? "var(--green, #39ff14)" : "var(--cyan, #00ffff)"}
         title={memberView === "posts" ? "My posts" : `Hey, ${firstName}`}
@@ -433,6 +445,7 @@ export default function Dashboard() {
             }}
             isAdmin={isAdmin}
             isSuperAdmin={isSuperAdmin}
+            ownerCount={0}
             editMode={editMode}
             onEditProfile={() => setEditMode(!editMode)}
             onLogout={() => logout()}

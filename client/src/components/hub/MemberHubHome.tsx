@@ -30,6 +30,7 @@ type Props = {
   counts: Counts;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  ownerCount?: number;
   editMode: boolean;
   onEditProfile: () => void;
   onLogout: () => void;
@@ -55,6 +56,7 @@ export default function MemberHubHome({
   counts,
   isAdmin,
   isSuperAdmin,
+  ownerCount = 0,
   editMode,
   onEditProfile,
   onLogout,
@@ -155,7 +157,8 @@ export default function MemberHubHome({
               {isSuperAdmin && (
                 <>
                   <span style={{ color: "#999" }}> · </span>
-                  open Owner desk for keyholder-only calls
+                  <span className="hub-keys__n hub-keys__n--purple">{ownerCount}</span>
+                  {" "}on your owner desk
                 </>
               )}
             </p>
