@@ -1,5 +1,16 @@
 /* Nude Beaches — tab-scoped wireframe (live strip → logistics → checklist → links) */
 
+/* ---- ANIMATIONS (Delta #2: Motion/DS Polish) ---- */
+@keyframes board-hero-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes board-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .nude-beaches-page.board-page--makeover {
   background:
     radial-gradient(circle at 10% 6%, rgba(255, 102, 0, 0.08), transparent 22rem),
@@ -499,6 +510,65 @@
 
 .nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab:hover {
   color: var(--neon-green, #00EE44);
+}
+
+/* ---- ANIMATION APPLICATIONS (entrance + motion) ---- */
+
+/* Hero entrance — fade + rise over 0.48s */
+.nude-beaches-hero-row {
+  animation: board-hero-in 0.48s var(--ease-out);
+}
+
+/* Stats band entrance — delayed by 0.07s, same motion */
+.nude-beaches-page .board-stats-band {
+  animation: board-hero-in 0.48s var(--ease-out) 0.07s both;
+}
+
+/* Live metric tiles — pulse when calm mode is off */
+.nude-live-card {
+  animation: pdxPulse var(--dur-pulse) ease-in-out infinite;
+  --dc: var(--neon-cyan);
+}
+
+/* Live LIVE NOW kicker — gentle blink */
+.board-active-feed__kicker {
+  animation: pdxBlink 2.5s ease-in-out infinite;
+}
+
+/* Live status indicator dot — blink pulse */
+.board-stats-bar__dot,
+.board-stats-band__dot {
+  animation: pdxBlink 1.2s ease-in-out infinite;
+}
+
+/* Footer seam — gentle glow pulse */
+.nude-beaches-page .board-close-seam {
+  animation: pdxSeamGlow 3s ease-in-out infinite;
+}
+
+/* Calm mode: silence animations except entrance (already past) */
+:root[data-calm="true"] .nude-live-card,
+html.calm-mode .nude-live-card {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-calm="true"] .board-active-feed__kicker,
+html.calm-mode .board-active-feed__kicker {
+  animation: none !important;
+}
+
+:root[data-calm="true"] .board-stats-bar__dot,
+:root[data-calm="true"] .board-stats-band__dot,
+html.calm-mode .board-stats-bar__dot,
+html.calm-mode .board-stats-band__dot {
+  animation: none !important;
+}
+
+:root[data-calm="true"] .board-close-seam,
+html.calm-mode .board-close-seam {
+  animation: none !important;
+  box-shadow: none !important;
 }
 
 @media (max-width: 899px) {
