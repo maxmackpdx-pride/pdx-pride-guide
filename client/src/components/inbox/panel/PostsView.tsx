@@ -195,7 +195,7 @@ function Section({
   );
 }
 
-export default function PostsView({ onOpenHub }: { onOpenHub: () => void }) {
+export default function PostsView() {
   const [open, setOpen] = useState<Record<string, boolean>>({ events: true });
   const toggle = (id: string) => setOpen((p) => ({ ...p, [id]: !p[id] }));
 
@@ -220,6 +220,28 @@ export default function PostsView({ onOpenHub }: { onOpenHub: () => void }) {
       actions: ["EDIT"],
     })),
   );
+  const claimed = useMine<any>("/api/events/mine/claimed", (rows) =>
+    rows.map((e) => ({
+      title: e.title || "Event",
+      meta: `${e.dayOfWeek || ""}${e.venueName ? " · " + e.venueName : ""}`.trim() || "Claimed",
+      actions: ["CLAIMED", "EDIT"],
+    })),
+  );
+  const submitted = useMine<any>("/api/events/mine/submitted", (rows) =>
+    rows.map((s) => ({
+      title: s.title || "Event submission",
+      meta: s.status ? `Submitted · ${s.status}` : "Submitted",
+      actions: ["EDIT"],
+    })),
+  );
+  const events = [...claimed, ...submitted];
+  const checkins = useMine<any>("/api/events/mine/check-ins", (rows) =>
+    rows.map((a) => ({
+      title: a.eventTitle || a.title || "Check-in",
+      meta: `${a.status || "Going"}${a.dayOfWeek ? " · " + a.dayOfWeek : ""}`,
+      actions: ["VIEW"],
+    })),
+  );
 
   return (
     <>
@@ -230,12 +252,10 @@ export default function PostsView({ onOpenHub }: { onOpenHub: () => void }) {
         <Section
           title="MY EVENTS"
           color={C.cyan}
-          countLabel="IN HUB"
-          items={[]}
-          hubHref
+          countLabel={`${events.length} TOTAL`}
+          items={events}
           open={!!open.events}
           onToggle={() => toggle("events")}
-          onHub={onOpenHub}
         />
         <Section
           title="GIG POSTS"
@@ -264,12 +284,10 @@ export default function PostsView({ onOpenHub }: { onOpenHub: () => void }) {
         <Section
           title="CHECK-INS"
           color={C.limeSoft}
-          countLabel="IN HUB"
-          items={[]}
-          hubHref
+          countLabel={`${checkins.length} ACTIVE`}
+          items={checkins}
           open={!!open.checkins}
           onToggle={() => toggle("checkins")}
-          onHub={onOpenHub}
         />
       </div>
     </>

@@ -296,7 +296,7 @@ export default function InboxOverlay({ open, onClose }: { open: boolean; onClose
           )}
           {inboxActive && account === "admin" && <QueueView mode="admin" />}
           {inboxActive && account === "owner" && <QueueView mode="owner" />}
-          {view === "posts" && <PostsView onOpenHub={() => { onClose(); setLocation("/dashboard"); }} />}
+          {view === "posts" && <PostsView />}
           {view === "stats" && <StatsView />}
         </div>
 
