@@ -12737,37 +12737,39 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   text-shadow: 0 0 34px rgba(204, 255, 0, 0.4);
 }
 
-.board-hero__title-accent--rainbow {
-  background: var(--grad-rainbow, linear-gradient(100deg, #00ffff 0%, #39ff14 24%, #ccff00 44%, #ff6600 70%, #ff00cc 100%));
-  background-size: 220% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  text-shadow: none;
-  animation: board-hero-rainbow-shimmer 9s linear infinite;
-}
-
-.board-hero--magenta .board-hero__title-accent--rainbow,
-.board-hero--cyan .board-hero__title-accent--rainbow,
-.board-hero--purple .board-hero__title-accent--rainbow,
-.board-hero--orange .board-hero__title-accent--rainbow,
-.board-hero--lime .board-hero__title-accent--rainbow {
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+.board-hero__title-accent--glitch {
   text-shadow: none;
 }
 
-@keyframes board-hero-rainbow-shimmer {
-  to { background-position: 200% center; }
+.board-hero__title-accent--glitch .glitch-word {
+  display: inline-block;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  line-height: inherit;
 }
 
-html.calm-mode .board-hero__title-accent--rainbow {
-  animation: none;
-  background: none;
-  background-size: 100% auto;
-  -webkit-text-fill-color: #fff;
-  color: #fff;
+.board-hero__title-accent--glitch .glitch-word__gradient,
+.board-hero__title-accent--glitch .glitch-word__outline,
+.board-hero__title-accent--glitch .glitch-word::before,
+.board-hero__title-accent--glitch .glitch-word::after {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  line-height: inherit;
+}
+
+.board-hero--magenta .board-hero__title-accent--glitch,
+.board-hero--cyan .board-hero__title-accent--glitch,
+.board-hero--purple .board-hero__title-accent--glitch,
+.board-hero--orange .board-hero__title-accent--glitch,
+.board-hero--lime .board-hero__title-accent--glitch {
+  color: inherit;
+  text-shadow: none;
 }
 
 .board-hero__lede {

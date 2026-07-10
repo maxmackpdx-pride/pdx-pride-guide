@@ -3,6 +3,7 @@ import BoardHero from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import CountUpValue from "@/components/CountUpValue";
 import { Button } from "@/components/ds";
+import GlitchWord from "@/components/GlitchWord";
 
 type Stat = { num: number; label: string; color: string };
 
@@ -24,7 +25,9 @@ export default function DirectoryHero({ placeCount, stats, onAddPlace }: Props) 
               key={placeCount > 0 ? "dir-hero-ready" : "dir-hero-pending"}
               value={placeCount}
             />{" "}
-            <span className="board-hero__title-accent board-hero__title-accent--rainbow">Places</span>
+            <span className="board-hero__title-accent board-hero__title-accent--glitch">
+              <GlitchWord text="Places" />
+            </span>
           </>
         }
         lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
