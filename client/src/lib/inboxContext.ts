@@ -11,6 +11,18 @@ export function inboxContextBadge(contextType?: string | null): string | null {
   return null;
 }
 
+export function notifyContextTag(contextType?: string | null): string {
+  if (contextType === "MISSED_CONNECTION") return "Spotted";
+  if (contextType === "GIG" || contextType === "EVENT_TALENT" || contextType === "EVENT_TALENT_REQUEST") {
+    return "Gigs";
+  }
+  if (contextType === "EVENT_HOST" || contextType === "HOST_UPDATE" || contextType === "HOST_MESSAGE") {
+    return "Event host";
+  }
+  if (contextType === "CHECK_IN") return "Check-in";
+  return "Message";
+}
+
 export function contextLabelOf(
   msg: { contextLabel?: string | null; context_label?: string | null } | null | undefined,
 ): string | null {

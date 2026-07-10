@@ -1,6 +1,6 @@
 /* Unified Hub shell — matches Hub.dc.html / Hub-print design */
 
-.hub-shell {
+:root {
   --hub-ink: #050505;
   --hub-bg: #0a0a0a;
   --hub-panel: #0c0c0f;
@@ -9,6 +9,9 @@
   --hub-pink: #ff00cc;
   --hub-lime: #ccff00;
   --hub-green: #39ff14;
+}
+
+.hub-shell {
   --hub-side-w: 266px;
   min-height: 100vh;
   background: var(--hub-bg);
