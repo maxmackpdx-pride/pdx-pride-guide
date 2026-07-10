@@ -178,27 +178,30 @@ export default function Home() {
         <div className="home-boards__tints" aria-hidden="true" />
 
         <div className="home-boards__inner">
-          <div className="home-boards__running">
-            <div className="home-boards__kicker">
-              <span className="home-boards__dot" aria-hidden="true" />
-              The Community Boards
+          <ScrollReveal>
+            <div className="home-boards__running">
+              <div className="home-boards__kicker">
+                <span className="home-boards__dot" aria-hidden="true" />
+                The Community Boards
+              </div>
+              <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
+                All Boards →
+              </Link>
             </div>
-            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
-              All Boards →
-            </Link>
-          </div>
 
-          <div className="home-boards__header">
-            <h2 className="home-boards__title">
-              <span className="home-boards__title-plain">Find Your </span>
-              <span className="home-boards__title-grad">People</span>
-            </h2>
-            <p className="home-boards__sub">
-              Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
-            </p>
-          </div>
+            <div className="home-boards__header">
+              <h2 className="home-boards__title">
+                <span className="home-boards__title-plain">Find Your </span>
+                <span className="home-boards__title-grad">People</span>
+              </h2>
+              <p className="home-boards__sub">
+                Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <div className="home-boards__grid">
+            <ScrollReveal delay={0} className="home-boards__reveal">
             <Link
               href={COMMUNITY_LINKS.spotted.href}
               className="home-boards__card home-boards__card--spotted"
@@ -226,7 +229,9 @@ export default function Home() {
                 <span className="home-boards__cta">Browse Spotted →</span>
               </div>
             </Link>
+            </ScrollReveal>
 
+            <ScrollReveal delay={50} className="home-boards__reveal">
             <Link
               href={COMMUNITY_LINKS.gifting.href}
               className="home-boards__card home-boards__card--gifting"
@@ -254,7 +259,9 @@ export default function Home() {
                 <span className="home-boards__cta">Browse Gifting →</span>
               </div>
             </Link>
+            </ScrollReveal>
 
+            <ScrollReveal delay={100} className="home-boards__reveal">
             <Link
               href={COMMUNITY_LINKS.gigs.href}
               className="home-boards__card home-boards__card--gigs"
@@ -282,8 +289,10 @@ export default function Home() {
                 <span className="home-boards__cta">Browse Gigs →</span>
               </div>
             </Link>
+            </ScrollReveal>
           </div>
 
+          <ScrollReveal delay={150}>
           <div className="home-boards__foot">
             <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__post-link">
               <Button as="span" variant="solid" accent="lime" size="lg" arrow>
@@ -294,6 +303,7 @@ export default function Home() {
               Free to post. Be kind. Take care of each other.
             </span>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 

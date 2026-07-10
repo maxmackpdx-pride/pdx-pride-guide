@@ -22,9 +22,10 @@ const CSS = `
 a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color:color-mix(in srgb,var(--_day) 40%,var(--border-default));
   box-shadow:0 0 28px color-mix(in srgb, var(--_day) 40%, transparent); }
 
-.pdxBoard__poster{ position:relative; aspect-ratio:2/3; background:linear-gradient(135deg,#131313,#1d1d1d);
+.pdxBoard__poster{ position:relative; aspect-ratio:2/3; background:linear-gradient(135deg,#0a0a0a,#151515);
   overflow:hidden; }
-.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+/* Full flyer on the card face — never crop art/type off the edges */
+.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; }
 .pdxBoard__ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   padding:20px; text-align:center; }
 .pdxBoard__phTitle{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;

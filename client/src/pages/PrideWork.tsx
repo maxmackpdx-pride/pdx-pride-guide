@@ -587,8 +587,8 @@ export default function PrideWork() {
           <>
             {([
               { key: "ALL" as const, label: "All", accent: "purple" },
-              { key: "LOOKING_FOR_WORK" as const, label: "Talent", accent: "cyan" },
-              { key: "POSTING_GIG" as const, label: "Gigs", accent: "purple" },
+              { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
+              { key: "POSTING_GIG" as const, label: "Gigs open", accent: "purple" },
             ]).map(f => (
               <BoardFilterChip
                 key={f.key}
@@ -665,7 +665,7 @@ export default function PrideWork() {
       </BoardActiveSection>
 
       <BoardCloseSeam
-        line="Paid. Respected. Valued. Take care of each other."
+        line="Pay your people. Take care of each other."
         url="prideguidepdx.com/gigs"
       />
 

@@ -62,6 +62,21 @@
   50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
 }
 
+/* Entrance reveal: fade + short rise (.sch-block / schIn) */
+@keyframes pdxReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Popover / panel entrance: fade + rise + slight scale (.sch-pop) */
+@keyframes pdxPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Live status blink (going dots, board running head) */
+@keyframes pdxBlink { 50% { opacity: 0.35; } }
+
 /* Reduced motion + calm mode both silence glows/animations */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -128,11 +143,20 @@ html.calm-mode .pdxRow {
   --_dayt: #888;
 }
 
-/* Additive motion add-ons (pdxa* prefix — do not collide with pdx* keys) */
+/* Additive motion add-ons (pdxa* = in-app aliases; pdx* = DS canonical names) */
+@keyframes pdxSeamFill  { 0%{transform:scaleX(0)} 68%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
+@keyframes pdxSeamGlint { 0%{transform:translateX(-165%)} 60%{transform:translateX(150%)} 100%{transform:translateX(150%)} }
+@keyframes pdxSeamFlash { 0%,64%{opacity:0} 74%{opacity:.5} 88%{opacity:0} 100%{opacity:0} }
+@keyframes pdxEqBounce  { 0%,100%{transform:scaleY(.22)} 50%{transform:scaleY(1)} }
+@keyframes pdxNumPop    { 0%{transform:translateY(0) scale(1)} 42%{transform:translateY(-2px) scale(1.14)} 100%{transform:translateY(0) scale(1)} }
+@keyframes pdxFloatUp   { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-28px)} }
+@keyframes pdxSparkFly  { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity:0 } }
+@keyframes pdxRingShimmer { to { transform: rotate(360deg); } }
+
 @keyframes pdxaSeamFill  { 0%{transform:scaleX(0)} 68%{transform:scaleX(1)} 100%{transform:scaleX(1)} }
 @keyframes pdxaSeamGlint { 0%{transform:translateX(-165%)} 60%{transform:translateX(150%)} 100%{transform:translateX(150%)} }
 @keyframes pdxaSeamFlash { 0%,64%{opacity:0} 74%{opacity:.5} 88%{opacity:0} 100%{opacity:0} }
-@keyframes pdxaShimmer   { to { transform: rotate(360deg) } }
+@keyframes pdxaShimmer   { to { transform: rotate(360deg); } }
 @keyframes pdxaEq        { 0%,100%{transform:scaleY(.22)} 50%{transform:scaleY(1)} }
 @keyframes pdxaSpark     { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity:0 } }
 @keyframes pdxaNumPop    { 0%{transform:translateY(0) scale(1)} 42%{transform:translateY(-2px) scale(1.14)} 100%{transform:translateY(0) scale(1)} }

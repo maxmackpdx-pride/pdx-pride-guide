@@ -23,7 +23,7 @@ export default function ScheduleCard({
   title = "The Schedule",
   description = "The whole weekend on one clock. Every event placed by start time, the magenta line is now.",
   actionHref = "/schedule",
-  actionLabel = "View all events",
+  actionLabel = "Full schedule",
 }: ScheduleCardProps) {
   return (
     <div className="sc-card">

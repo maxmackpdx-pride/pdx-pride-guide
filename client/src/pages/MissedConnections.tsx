@@ -28,6 +28,7 @@ export default function MissedConnections() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<MissedConnectionPost | null>(null);
   const [editForm, setEditForm] = useState({ title: "", body: "" });
 
@@ -98,11 +99,10 @@ export default function MissedConnections() {
       setShowAuth(true);
       return;
     }
-    const toggle = document.getElementById("spotted-compose-toggle") as HTMLButtonElement | null;
-    toggle?.click();
+    setFormOpen(true);
     window.setTimeout(() => {
-      document.getElementById("spotted-compose")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 40);
+      document.getElementById("spotted-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 20);
   };
 
   return (
@@ -139,8 +139,10 @@ export default function MissedConnections() {
           mode="board"
           boardLayout
           makeover
+          composeOpen={formOpen}
+          onComposeOpenChange={setFormOpen}
           onRequireAuth={() => setShowAuth(true)}
-          onRequestCompose={() => openPost()}
+          onRequestCompose={openPost}
         />
       </div>
 

@@ -15,11 +15,17 @@ export default function DashboardWidgets() {
   const showPrideWidgets = !isAfterPrideWeekend();
   const showPrideWeather = showPrideWidgets;
 
-  const { data: weather, isError: weatherError } = useQuery({
-    queryKey: ["portland-weather", "pride-weekend-2026"],
+  const {
+    data: weather,
+    isError: weatherError,
+    isLoading: weatherLoading,
+    isFetching: weatherFetching,
+  } = useQuery({
+    queryKey: ["portland-weather", "pdx-or", "jul-13-19-2026", "f"],
     queryFn: fetchPortlandWeather,
-    staleTime: 1000 * 60 * 30,
-    retry: 1,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 60,
+    retry: 2,
     enabled: showPrideWeather,
   });
 
@@ -47,37 +53,64 @@ export default function DashboardWidgets() {
 
   return (
     <div className="hub-widget-stack">
-      {showPrideWeather && weather && (
-        <section className="hub-weather" aria-label="Pride week weather">
+      {showPrideWeather && (
+        <section className="hub-weather" aria-label="Portland, Oregon Pride week weather">
           <div className="hub-weather__top">
-            <span className="hub-weather__kicker">Pride Week · Jul 13 to 19</span>
-            <span
-              className="hub-weather__sun"
-              style={{
-                background: weather.sunGradient,
-                boxShadow: weather.sunGlow,
-              }}
-              aria-hidden
-            />
+            <div className="hub-weather__titles">
+              <span className="hub-weather__city">Portland, OR</span>
+              <span className="hub-weather__kicker">Pride Week · Jul 13 to 19</span>
+            </div>
+            {weather && (
+              <span
+                className="hub-weather__sun"
+                style={{
+                  background: weather.sunGradient,
+                  boxShadow: weather.sunGlow,
+                }}
+                aria-hidden
+              />
+            )}
           </div>
-          {(weatherError || weather.isEstimate) && (
-            <span className="hub-weather__badge">{weatherError ? "Offline" : "Estimate"}</span>
+
+          {(weatherError || weather?.isEstimate) && (
+            <span className="hub-weather__badge">
+              {weatherError ? "Offline" : "Estimate"}
+            </span>
           )}
-          <div className="hub-weather__temp-row">
-            <span className="hub-weather__temp">{weather.currentTemp}°</span>
-            <span className="hub-weather__cond">{weather.condition}</span>
-          </div>
-          <div className="hub-weather__caption">{weather.caption}</div>
-          <div className="hub-weather__forecast">
-            {weather.forecast.map(day => (
-              <div key={day.day} className="hub-weather__day">
-                <div className="hub-weather__day-label">{day.day}</div>
-                <div className={`hub-weather__day-temp${day.highlight ? " is-hot" : ""}`}>
-                  {day.high}°
+
+          {weatherLoading && !weather ? (
+            <div className="hub-weather__loading">Loading Portland forecast…</div>
+          ) : weather ? (
+            <>
+              <div className="hub-weather__temp-row">
+                <span className="hub-weather__temp">{weather.currentTemp}°</span>
+                <div className="hub-weather__temp-meta">
+                  <span className="hub-weather__unit">F</span>
+                  <span className="hub-weather__cond">{weather.condition}</span>
+                  <span className="hub-weather__now">{weather.tempContext}</span>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="hub-weather__caption">{weather.caption}</div>
+              <div className="hub-weather__forecast" aria-label="Portland daily highs July 13 to 19">
+                {weather.forecast.map(day => (
+                  <div key={day.day} className={`hub-weather__day${day.highlight ? " is-hot" : ""}`}>
+                    <div className="hub-weather__day-label">{day.day}</div>
+                    <div className="hub-weather__day-date">{day.dateLabel}</div>
+                    <div className={`hub-weather__day-temp${day.highlight ? " is-hot" : ""}`}>
+                      {day.high}°
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {weatherFetching && !weatherLoading && (
+                <span className="hub-weather__refresh" aria-hidden>
+                  Updating…
+                </span>
+              )}
+            </>
+          ) : (
+            <div className="hub-weather__loading">Could not load Portland weather.</div>
+          )}
         </section>
       )}
 
@@ -90,7 +123,7 @@ export default function DashboardWidgets() {
               {live ? "Live" : "Soon"}
             </span>
           </div>
-          <span className="hub-pride-live__kicker">Jul 13 to 19 · Portland</span>
+          <span className="hub-pride-live__kicker">Jul 13 to 19 · Portland, OR</span>
           {countdown ? (
             <div
               style={{

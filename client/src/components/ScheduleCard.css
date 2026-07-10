@@ -1,9 +1,8 @@
 .sc-card {
-  background: #0a0a0a;
-  border: 2px solid #2b2b2b;
-  border-radius: 12px;
+  background: #0c0c0f;
+  border: 2px solid #1c1c22;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
 }
 
 .sc-head {
@@ -16,32 +15,26 @@
 }
 
 .sc-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
-  letter-spacing: 0.16em;
-  color: var(--neon-magenta, #ff00cc);
+  letter-spacing: 0.2em;
+  color: #19e3ff;
   text-transform: uppercase;
+  margin-bottom: 14px;
 }
 
 .sc-kicker-bar {
-  width: 26px;
-  height: 2px;
-  background: var(--neon-magenta, #ff00cc);
-  display: inline-block;
+  display: none;
 }
 
 .sc-title {
-  font-family: var(--font-display);
+  font-family: var(--font-board-display, var(--font-display));
   font-weight: 900;
-  font-size: 54px;
-  line-height: 0.9;
-  letter-spacing: 0.01em;
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
   color: #fff;
-  margin: 11px 0 0;
+  margin: 0;
   text-transform: uppercase;
 }
 

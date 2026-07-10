@@ -8,6 +8,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
+import ScrollReveal from "@/components/ScrollReveal";
 import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
@@ -89,7 +90,10 @@ export default function About() {
         <div className="about-v2-hero__scrim" aria-hidden="true" />
         <div className="about-v2-hero__inner">
           <div>
-            <div className="about-v2-hero__kicker">About · Portland Pride 2026</div>
+            <div className="about-v2-hero__kicker">
+              <span className="about-v2-hero__dot" aria-hidden="true" />
+              About · Portland Pride 2026
+            </div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">
                 <CountUpValue
@@ -151,6 +155,7 @@ export default function About() {
 
       {/* MANIFESTO */}
       <section className="about-v2-manifesto">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">What this actually is</div>
           <div className="about-v2-manifesto__copy">
@@ -175,10 +180,12 @@ export default function About() {
             </p>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* MADE BY TUCKER */}
       <section className="about-v2-creator">
+        <ScrollReveal delay={30}>
         <div className="about-v2__inner">
           <div className="about-v2-creator__grid">
             <div className="about-v2-creator__photo">
@@ -275,10 +282,12 @@ export default function About() {
             <span className="about-v2-project__go">Listen →</span>
           </a>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* KEEP ALIVE */}
       <section className="about-v2-donate">
+        <ScrollReveal>
         <div className="about-v2-donate__row">
           <div>
             <h2>Keep this guide alive</h2>
@@ -296,10 +305,12 @@ export default function About() {
             <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* INFRASTRUCTURE */}
       <section className="about-v2-infra">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">Necessary homosexual infrastructure</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
@@ -320,10 +331,12 @@ export default function About() {
             </Link>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* HOW IT WORKS */}
       <section className="about-v2-how" id="how-it-works">
+        <ScrollReveal delay={30}>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">How it works</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
@@ -359,10 +372,12 @@ export default function About() {
           </div>
           <p className="about-v2-how__foot">Account required to post · No pay to rank · Ever</p>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* VALUES */}
       <section className="about-v2-values">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">Transparency</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>
@@ -379,10 +394,12 @@ export default function About() {
             ))}
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* SPONSORS */}
       <section className="about-v2-sponsors">
+        <ScrollReveal delay={30}>
         <div className="about-v2__inner">
           <div className="about-v2-sponsors__grid">
             <div className="about-v2-sponsors__copy">
@@ -420,10 +437,12 @@ export default function About() {
             </div>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* FAQ */}
       <section className="about-v2-faq">
+        <ScrollReveal>
         <div className="about-v2__inner">
           <div className="about-v2__kicker">FAQ</div>
           <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
@@ -441,6 +460,7 @@ export default function About() {
             ))}
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* CLOSE */}

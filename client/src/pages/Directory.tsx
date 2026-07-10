@@ -21,6 +21,7 @@ import {
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
 import PlaceModal from "@/components/PlaceModal";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
@@ -222,7 +223,7 @@ export default function Directory() {
 
       {formOpen && (
         <ScrollReveal>
-          <section id="directory-form" className="gifting-form-panel directory-form-panel">
+          <section id="directory-form" className="gifting-form-panel gifting-form-panel--makeover directory-form-panel">
             <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
               <X size={18} />
             </button>
@@ -406,6 +407,11 @@ export default function Directory() {
       {selectedPlace && (
         <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} onRequireAuth={() => setShowAuth(true)} />
       )}
+
+      <BoardCloseSeam
+        line="Show up. Spend queer. Keep them alive."
+        url="prideguidepdx.com/directory"
+      />
     </div>
   );
 }

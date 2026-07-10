@@ -46,34 +46,23 @@
 }
 
 .hub-side__brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 2px 4px 14px;
+  display: block;
+  padding: 2px 4px 10px;
   text-decoration: none;
   color: inherit;
 }
 
-.hub-side__logo {
-  border-radius: 9px;
-  flex: none;
+.hub-side__logo-full {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
 }
 
-.hub-side__wordmark {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 900;
-  line-height: 0.92;
-  font-size: 15px;
-  letter-spacing: 0.02em;
-  color: #fff;
-  text-transform: uppercase;
-}
-
-.hub-side__wordmark .pride {
-  background: var(--grad-rainbow, linear-gradient(90deg, #00ffff, #39ff14, #ffee00, #ff6600, #ff00cc));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.hub-side__back {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 14px;
 }
 
 .hub-side__mode {
@@ -351,24 +340,25 @@
   z-index: 50;
 }
 
-.hub-mtop__logo {
-  border-radius: 7px;
+.hub-mtop__back {
   flex: none;
+  margin-bottom: 0;
+  padding: 7px 10px;
+  font-size: 12px;
 }
 
-.hub-mtop__wordmark {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 900;
-  font-size: 13px;
-  color: #fff;
-  letter-spacing: 0.02em;
+.hub-mtop__brand {
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
 }
 
-.hub-mtop__wordmark .pride {
-  background: var(--grad-rainbow, linear-gradient(90deg, #00ffff, #39ff14, #ffee00, #ff6600, #ff00cc));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.hub-mtop__logo-full {
+  display: block;
+  width: 100%;
+  max-width: 168px;
+  height: auto;
+  border-radius: 8px;
 }
 
 .hub-mtop__spacer {
@@ -756,6 +746,7 @@
   font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
   font-size: 13px;
+  text-decoration: none;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 

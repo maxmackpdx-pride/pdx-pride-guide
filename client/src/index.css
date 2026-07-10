@@ -5128,12 +5128,11 @@ footer a:hover { color: #00FFFF !important; }
   height: 8px;
   border-radius: 50%;
   background: var(--neon-yellow);
-  animation: board-live-blink 1.5s ease-in-out infinite;
+  animation: board-live-blink 1.8s ease-in-out infinite;
 }
 
 @keyframes board-live-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50% { opacity: 0.3; }
 }
 
 /* Active board feed — unified Gifting / Gigs / Missed layout */
@@ -6554,8 +6553,10 @@ footer a:hover { color: #00FFFF !important; }
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   min-height: 108px;
+  background: #0a0a0a;
 }
 
 .event-board-card__poster--empty {
@@ -7894,13 +7895,16 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
 
 .scroll-reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translateY(5px);
+  transition:
+    opacity var(--dur-base, 220ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    transform var(--dur-base, 220ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+  will-change: opacity, transform;
 }
 
 .scroll-reveal--visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 /* Event tags — filled sticker standard (lime border + hard offset shadow) */
@@ -8013,6 +8017,40 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
     transform: none;
     transition: none;
   }
+
+  .board-spotted-card:hover,
+  .board-listing-card--makeover:hover {
+    transform: none;
+  }
+}
+
+html.calm-mode .scroll-reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+html.calm-mode .board-running__dot,
+html.calm-mode .board-stats-bar__dot {
+  animation: none;
+  opacity: 1;
+}
+
+html.calm-mode .board-spotted-card:hover {
+  border-color: #262626;
+  box-shadow: none;
+  transform: none;
+}
+
+html.calm-mode .board-listing-card--makeover:hover,
+html.calm-mode .board-listing-card--makeover.is-expanded {
+  border-color: #262626;
+  box-shadow: none;
+  transform: none;
+}
+
+html.calm-mode .board-detail-backdrop {
+  backdrop-filter: none;
 }
 
 
@@ -10454,9 +10492,11 @@ html.calm-mode .schedule-now-line {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  background-size: cover;
+  /* Full flyer on the card face — letterbox instead of cropping */
+  background-size: contain;
   background-position: center;
-  background-color: #111;
+  background-repeat: no-repeat;
+  background-color: #0a0a0a;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.5);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
@@ -12349,6 +12389,10 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   animation: board-live-blink 1.8s ease-in-out infinite;
 }
 
+.board-page--makeover .board-running {
+  animation: board-fade-in 0.35s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
 .board-running__nav {
   display: flex;
   gap: 20px;
@@ -12444,8 +12488,31 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   }
 }
 
+/* Board compose panels + modals (design gbFade) */
+@keyframes board-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gifting-form-panel--makeover {
+  animation: board-fade-in 0.25s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+.board-detail-modal {
+  animation: board-fade-in 0.2s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
 html.calm-mode .board-page--makeover .board-hero,
-html.calm-mode .board-page--makeover .board-stats-band {
+html.calm-mode .board-page--makeover .board-stats-band,
+html.calm-mode .board-page--makeover .board-running,
+html.calm-mode .gifting-form-panel--makeover,
+html.calm-mode .board-detail-modal {
   animation: none;
 }
 
@@ -12626,6 +12693,7 @@ html.calm-mode .board-page--makeover .board-stats-band {
   box-shadow: 0 0 30px -14px #ccff00;
   background: #0c0c0f;
   padding: clamp(22px, 3vw, 32px);
+  /* board-fade-in applied above */
 }
 
 /* Active feed head */
@@ -12963,6 +13031,118 @@ html.calm-mode .board-page--makeover .board-stats-band {
     #06060a;
 }
 
+.schedule-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 10% 6%, rgba(25, 227, 255, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(255, 31, 160, 0.06), transparent 24rem),
+    #06060a;
+}
+
+/* Events + Schedule makeover — board-standard layout chrome */
+.events-page.board-page--makeover .events-map-row {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px clamp(20px, 4vw, 44px) 0;
+}
+
+.events-page.board-page--makeover .events-tab-bar {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px clamp(20px, 4vw, 44px) 0;
+  border-bottom: 1px solid #1c1c22;
+}
+
+.events-page.board-page--makeover .events-tab {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+.events-page.board-page--makeover .events-tab.active {
+  color: #19e3ff;
+  border-bottom-color: #19e3ff;
+}
+
+.events-page.board-page--makeover .events-page__body,
+.events-page.board-page--makeover .events-page__body--schedule {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 32px) clamp(20px, 4vw, 44px) clamp(40px, 6vw, 72px);
+}
+
+.events-page.board-page--makeover .events-board-feed {
+  background: transparent;
+  padding: clamp(20px, 3vw, 28px) 0 clamp(40px, 6vw, 72px);
+}
+
+.events-page.board-page--makeover .events-board-feed .board-active-feed__inner {
+  padding-inline: clamp(20px, 4vw, 44px);
+}
+
+.events-page.board-page--makeover .events-board-feed__sticky {
+  position: sticky;
+  top: var(--site-header-height);
+  z-index: 50;
+  margin: 0 calc(-1 * clamp(20px, 4vw, 44px));
+  padding: 14px clamp(20px, 4vw, 44px) 12px;
+  background: rgba(6, 6, 10, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1c1c22;
+}
+
+.events-page.board-page--makeover .events-board-feed .board-active-feed__head {
+  margin-bottom: 12px;
+}
+
+.events-page.board-page--makeover .events-board-feed .board-active-feed__controls {
+  margin-bottom: 0;
+}
+
+.events-page.board-page--makeover .events-filter-row {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.events-page.board-page--makeover .zine-filter-bar,
+.events-page.board-page--makeover .events-board-feed .events-filter-row {
+  font-size: 1rem;
+}
+
+.events-filter-spacer {
+  flex: 1;
+  min-width: 12px;
+}
+
+.events-clear-filters {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #8c8980;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 0 0;
+}
+
+.events-clear-filters:hover {
+  color: #ff1fa0;
+}
+
+.events-page.board-page--makeover .events-submit-panel {
+  margin-top: 40px;
+  max-width: 560px;
+}
+
+.schedule-page.board-page--makeover {
+  max-width: none;
+  padding: 0;
+}
+
 .directory-page.board-page--makeover {
   background:
     radial-gradient(circle at 12% 8%, rgba(255, 31, 160, 0.07), transparent 22rem),
@@ -13005,7 +13185,10 @@ html.calm-mode .board-page--makeover .board-stats-band {
   padding: 20px 20px 17px;
   cursor: pointer;
   overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color var(--dur-fast, 150ms) ease,
+    box-shadow var(--dur-fast, 150ms) ease,
+    transform var(--dur-fast, 150ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
 }
 .board-spotted-card:hover {
   border-color: #ff1fa0;
@@ -13089,6 +13272,65 @@ html.calm-mode .board-page--makeover .board-stats-band {
   color: #ff1fa0;
   white-space: nowrap;
 }
+
+.board-empty--spotted {
+  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 31, 160, 0.05), transparent 60%);
+}
+
+.board-empty--spotted__quote {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 64px;
+  line-height: 1;
+  color: rgba(255, 31, 160, 0.4);
+}
+
+.board-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(3, 3, 6, 0.86);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.board-detail-modal {
+  position: relative;
+  background: #0c0c0f;
+  border: 2px solid var(--listing-accent, #ff1fa0);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 0 50px -10px var(--listing-accent, #ff1fa0);
+  padding: 22px 22px 24px;
+}
+
+.board-detail-modal__quote {
+  position: absolute;
+  top: -14px;
+  right: 44px;
+  font-family: Georgia, serif;
+  font-size: 110px;
+  line-height: 1;
+  color: rgba(255, 31, 160, 0.14);
+  pointer-events: none;
+}
+
+.board-detail-modal__kind {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  padding: 4px 9px;
+  border-radius: 3px;
+}
+
 .board-active-feed__kicker--purple { color: #b06bff; }
 
 /* ============================================================

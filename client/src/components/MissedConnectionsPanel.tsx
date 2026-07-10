@@ -48,6 +48,8 @@ export default function MissedConnectionsPanel({
   makeover = false,
   onRequireAuth,
   onRequestCompose,
+  composeOpen,
+  onComposeOpenChange,
 }: {
   mode: "board" | "event";
   eventId?: number;
@@ -57,6 +59,8 @@ export default function MissedConnectionsPanel({
   makeover?: boolean;
   onRequireAuth?: () => void;
   onRequestCompose?: () => void;
+  composeOpen?: boolean;
+  onComposeOpenChange?: (open: boolean) => void;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -272,39 +276,19 @@ export default function MissedConnectionsPanel({
 
   if (boardLayout && mode === "board") {
     return (
-      <div className={`board-active-feed diag${makeover ? " board-active-feed--makeover" : ""}`}>
-        <div className="board-active-feed__inner">
-          <div className="board-active-feed__head">
-            {makeover ? (
-              <div className="board-active-feed__head-row">
-                <div>
-                  <div className="board-active-feed__kicker board-active-feed__kicker--magenta">Active board</div>
-                  <h2 className="display section-heading board-active-feed__title">Who got spotted</h2>
-                </div>
-                <span className="board-active-feed__count">{posts.length} showing</span>
-              </div>
-            ) : (
-              <>
-                <span className="board-sticker board-sticker--magenta">Active board</span>
-                <h2 className="display section-heading board-active-feed__title">SPOTTED!</h2>
-              </>
-            )}
-          </div>
-          <div className="board-active-feed__body" id="spotted-compose">
-            <SpottedCardGrid
-              posts={posts}
-              isLoading={isLoading}
-              isError={isError}
-              refetch={refetch}
-              linkableEvents={linkableEvents}
-              canInteract={!!user}
-              onRequireAuth={requireAuth}
-              makeover={makeover}
-              onRequestCompose={onRequestCompose}
-            />
-          </div>
-        </div>
-      </div>
+      <SpottedCardGrid
+        posts={posts}
+        isLoading={isLoading}
+        isError={isError}
+        refetch={refetch}
+        linkableEvents={linkableEvents}
+        canInteract={!!user}
+        onRequireAuth={requireAuth}
+        makeover={makeover}
+        onRequestCompose={onRequestCompose}
+        composeOpen={composeOpen}
+        onComposeOpenChange={onComposeOpenChange}
+      />
     );
   }
 

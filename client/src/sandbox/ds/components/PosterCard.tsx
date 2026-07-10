@@ -25,7 +25,7 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 
 .pdxBoard__poster{ position:relative; aspect-ratio:2/3; background:linear-gradient(135deg,#131313,#1d1d1d);
   overflow:hidden; }
-.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; }
 .pdxBoard__ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   padding:20px; text-align:center; }
 .pdxBoard__phTitle{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;
