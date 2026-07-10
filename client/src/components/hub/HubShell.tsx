@@ -352,14 +352,27 @@ export default function HubShell({
           {sideExtra && <div className="hub-side__extra">{sideExtra}</div>}
 
           <div className="hub-side__user">
-            <UserAvatar
-              photoUrl={photoUrl}
-              avatarChoice={avatarChoice}
-              avatarRing={avatarRing}
-              displayName={userName}
-              username={userHandle}
-              size={38}
-            />
+            {mode === "member" ? (
+              <Link href="/dashboard?edit=profile" className="hub-side__avatar-link" aria-label="Edit profile">
+                <UserAvatar
+                  photoUrl={photoUrl}
+                  avatarChoice={avatarChoice}
+                  avatarRing={avatarRing}
+                  displayName={userName}
+                  username={userHandle}
+                  size={38}
+                />
+              </Link>
+            ) : (
+              <UserAvatar
+                photoUrl={photoUrl}
+                avatarChoice={avatarChoice}
+                avatarRing={avatarRing}
+                displayName={userName}
+                username={userHandle}
+                size={38}
+              />
+            )}
             <div className="hub-side__user-meta">
               <div className="hub-side__user-name">{userName}</div>
               <div className="hub-side__user-role">{roleLabel}</div>

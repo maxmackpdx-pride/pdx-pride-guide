@@ -16,6 +16,7 @@ import {
   isValidProfileBanner,
 } from "@shared/profileConstants";
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
+import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
 import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
@@ -442,6 +443,7 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN business_place_id INTEGER`); } c
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN marquee TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_media TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN pup TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN username_changed_at TEXT`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS profile_packmates (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -4549,7 +4551,8 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'accentColor' | 'profileBanner' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'businessPlaceId' | 'marquee' | 'profileMedia' | 'pup' | 'promoterStatus' | 'subAdmin'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'accentColor' | 'profileBanner' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'businessPlaceId' | 'marquee' | 'profileMedia' | 'pup' | 'promoterStatus' | 'subAdmin' | 'usernameChangedAt'>>): void;
+  changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
   setProfilePackmates(userId: number, packmateUserIds: number[]): void;
   setProfileHandlers(userId: number, handlerUserIds: number[]): void;
   updatePasswordHash(id: number, passwordHash: string): void;
@@ -5773,6 +5776,25 @@ export const storage: IStorage = {
   },
   updateUser(id, data) {
     db.update(users).set(data).where(eq(users.id, id)).run();
+  },
+  changeUsername(userId, rawUsername) {
+    const user = storage.getUserById(userId);
+    if (!user) return { error: "User not found" };
+    const clean = normalizeUsername(rawUsername);
+    if (!clean) return { error: "Username must be 3 to 32 letters, numbers, or underscores" };
+    if (clean === user.username) return { username: clean };
+    const { canChange, nextChangeAt } = usernameChangeEligibility(user.usernameChangedAt);
+    if (!canChange) {
+      const when = nextChangeAt
+        ? new Date(nextChangeAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
+        : "later";
+      return { error: `You can change your username again on ${when}` };
+    }
+    const existing = storage.getUserByUsername(clean);
+    if (existing && existing.id !== userId) return { error: "Username already taken" };
+    const now = new Date().toISOString();
+    db.update(users).set({ username: clean, usernameChangedAt: now }).where(eq(users.id, userId)).run();
+    return { username: clean };
   },
   updatePasswordHash(id, passwordHash) {
     db.update(users).set({ passwordHash }).where(eq(users.id, id)).run();

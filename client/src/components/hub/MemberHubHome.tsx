@@ -88,14 +88,16 @@ export default function MemberHubHome({
     <div className="hub-home">
       <section className="hub-profile" aria-label="Your profile">
         <div className="hub-profile__id">
-          <UserAvatar
-            photoUrl={user.photoUrl}
-            avatarChoice={user.avatarChoice}
-            avatarRing={user.avatarRing}
-            displayName={user.displayName ?? undefined}
-            username={user.username ?? undefined}
-            size={64}
-          />
+          <Link href="/dashboard?edit=profile" className="hub-profile__avatar-link" aria-label="Edit profile">
+            <UserAvatar
+              photoUrl={user.photoUrl}
+              avatarChoice={user.avatarChoice}
+              avatarRing={user.avatarRing}
+              displayName={user.displayName ?? undefined}
+              username={user.username ?? undefined}
+              size={64}
+            />
+          </Link>
           <div>
             <h2 className="hub-profile__name">{displayName}</h2>
             <p className="hub-profile__meta">

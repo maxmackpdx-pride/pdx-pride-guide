@@ -244,29 +244,53 @@ export default function Nav() {
                   onClick={closeMenu}
                 />
                 <div className={`site-profile-menu${profileActive ? " site-profile-menu--active" : ""}`} ref={profileRef}>
-                  <button
-                    type="button"
-                    className={`site-profile-menu__trigger${profileOpen ? " site-profile-menu__trigger--open" : ""}`}
-                    aria-expanded={profileOpen}
-                    aria-haspopup="menu"
-                    aria-label={
-                      unreadCount > 0
-                        ? `Profile menu: ${user.displayName || user.username}, ${unreadCount} unread`
-                        : `Profile menu: ${user.displayName || user.username}`
-                    }
-                    onClick={() => setProfileOpen(open => !open)}
-                  >
-                    <UserAvatar
-                      photoUrl={user.photoUrl}
-                      avatarChoice={user.avatarChoice}
-                      avatarRing={user.avatarRing}
-                      displayName={user.displayName}
-                      username={user.username}
-                    />
-                    {unreadCount > 0 && <span className="site-profile-menu__notify-dot" aria-hidden="true" />}
-                  </button>
+                  <div className="site-profile-menu__cluster">
+                    <Link
+                      href="/dashboard?edit=profile"
+                      className="site-profile-menu__avatar-link"
+                      aria-label="Edit profile"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        setMenuOpen(false);
+                      }}
+                    >
+                      <UserAvatar
+                        photoUrl={user.photoUrl}
+                        avatarChoice={user.avatarChoice}
+                        avatarRing={user.avatarRing}
+                        displayName={user.displayName}
+                        username={user.username}
+                      />
+                      {unreadCount > 0 && <span className="site-profile-menu__notify-dot" aria-hidden="true" />}
+                    </Link>
+                    <button
+                      type="button"
+                      className={`site-profile-menu__caret${profileOpen ? " site-profile-menu__caret--open" : ""}`}
+                      aria-expanded={profileOpen}
+                      aria-haspopup="menu"
+                      aria-label={
+                        unreadCount > 0
+                          ? `Profile menu: ${user.displayName || user.username}, ${unreadCount} unread`
+                          : `Profile menu: ${user.displayName || user.username}`
+                      }
+                      onClick={() => setProfileOpen(open => !open)}
+                    >
+                      <ChevronDown size={16} strokeWidth={2.4} aria-hidden="true" />
+                    </button>
+                  </div>
                   {profileOpen && (
                     <div className="site-profile-menu__panel" role="menu">
+                      <Link
+                        href="/dashboard?edit=profile"
+                        role="menuitem"
+                        className="site-profile-menu__item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        Edit profile
+                      </Link>
                       <Link
                         href={profilePath}
                         role="menuitem"

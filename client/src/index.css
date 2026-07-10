@@ -4385,6 +4385,65 @@ h2.display,
   flex: 0 0 auto;
 }
 
+.site-profile-menu__cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.site-profile-menu__avatar-link {
+  position: relative;
+  display: inline-flex;
+  border-radius: 999px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.site-profile-menu__avatar-link:hover {
+  opacity: 0.9;
+}
+
+.site-profile-menu__avatar-link:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+.site-profile-menu__avatar-link .user-avatar {
+  --avatar-size: clamp(44px, 5vw, 52px);
+}
+
+.site-profile-menu--active .site-profile-menu__avatar-link .user-avatar {
+  box-shadow: 0 0 0 2px var(--neon-yellow), 0 0 14px rgba(204, 255, 0, 0.35);
+}
+
+.site-profile-menu__caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-lo);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+
+.site-profile-menu__caret:hover,
+.site-profile-menu__caret[aria-expanded="true"] {
+  color: var(--text-hi);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-profile-menu__caret:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
 .site-profile-menu__trigger {
   display: inline-flex;
   align-items: center;

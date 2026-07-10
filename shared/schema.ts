@@ -266,6 +266,7 @@ export const users = sqliteTable("users", {
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
   subAdmin: integer("sub_admin", { mode: "boolean" }).default(false),
+  usernameChangedAt: text("username_changed_at"),
   createdAt: text("created_at").notNull().default(""),
 });
 

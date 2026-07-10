@@ -57,7 +57,24 @@ export default function ProfileHero({
       <div className="pp-hero__content">
         <div className="pp-hero__identity">
           <div className={`pp-hero__avatar${isPromoter ? " pp-hero__avatar--promo" : ""}`}>
-            {isPromoter && !data.photoUrl ? (
+            {isOwner ? (
+              <Link href="/dashboard?edit=profile" className="pp-hero__avatar-link" aria-label="Edit profile">
+                {isPromoter && !data.photoUrl ? (
+                  <div className="pp-hero__monogram display" aria-hidden="true">
+                    {promoterMonogram(data.displayName, data.username)}
+                  </div>
+                ) : (
+                  <UserAvatar
+                    photoUrl={data.photoUrl}
+                    avatarChoice={data.avatarChoice}
+                    avatarRing={isPromoter ? "none" : data.avatarRing}
+                    displayName={data.displayName}
+                    username={data.username}
+                    size={104}
+                  />
+                )}
+              </Link>
+            ) : isPromoter && !data.photoUrl ? (
               <div className="pp-hero__monogram display" aria-label={displayName}>
                 {promoterMonogram(data.displayName, data.username)}
               </div>

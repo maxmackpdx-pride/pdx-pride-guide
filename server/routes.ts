@@ -298,6 +298,7 @@ function authUserResponse(req: any, user: any) {
     isPrimaryOwner: storage.isPrimarySiteOwner(user),
     canManageTeam: isMainAdminUser(user),
     subAdmin: !!user.subAdmin,
+    usernameChangedAt: user.usernameChangedAt || null,
   };
 }
 
@@ -1930,7 +1931,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
     const {
-      displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
+      username, displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
       socialLinks, profileEmbeds, profilePhotos, accentColor, profileBanner, talents, standFor,
       affiliatedVenueIds, businessPlaceId, marquee, profileMedia, pup, packmates, handlers,
     } = req.body;
@@ -1939,6 +1940,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       bio: typeof bio === "string" ? bio : undefined,
       pronouns: typeof pronouns === "string" ? pronouns : undefined,
       location: typeof location === "string" ? location : undefined,
+      username: typeof username === "string" ? username : undefined,
     };
     if (profileMedia && typeof profileMedia === "object" && !Array.isArray(profileMedia)) {
       const pm = profileMedia as Record<string, unknown>;
@@ -1961,6 +1963,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
     }
     if (moderationGate(res, "Member profile", moderated)) return;
+    if (username !== undefined) {
+      const result = storage.changeUsername(req.session.userId!, username);
+      if ("error" in result) return res.status(400).json({ error: result.error });
+    }
     const patch: Record<string, unknown> = {};
     if (displayName !== undefined) patch.displayName = displayName;
     if (avatarChoice !== undefined) patch.avatarChoice = avatarChoice;

@@ -272,6 +272,25 @@
   margin-top: 8px;
 }
 
+.hub-side__avatar-link {
+  display: inline-flex;
+  flex: none;
+  border-radius: 999px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+
+.hub-side__avatar-link:hover {
+  opacity: 0.88;
+}
+
+.hub-side__avatar-link:focus-visible {
+  outline: 2px solid var(--hub-cyan, #19e3ff);
+  outline-offset: 2px;
+}
+
 .hub-side__user-meta {
   flex: 1;
   min-width: 0;

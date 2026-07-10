@@ -18,6 +18,7 @@ export interface AuthUser {
   isPrimaryOwner?: boolean;
   canManageTeam?: boolean;
   subAdmin?: boolean;
+  usernameChangedAt?: string | null;
 }
 
 interface AuthContextType {

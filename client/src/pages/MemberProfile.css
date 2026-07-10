@@ -165,6 +165,25 @@
   flex: 1;
 }
 
+.pp-hero__avatar-link {
+  display: inline-flex;
+  border-radius: 50%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.pp-hero__avatar-link:hover {
+  transform: scale(1.02);
+  opacity: 0.94;
+}
+
+.pp-hero__avatar-link:focus-visible {
+  outline: 2px solid var(--profile-acc);
+  outline-offset: 4px;
+}
+
 .pp-hero__avatar--promo {
   border-radius: 50%;
   box-shadow: 0 0 0 3px var(--ink-900), 0 0 22px -4px var(--profile-acc);

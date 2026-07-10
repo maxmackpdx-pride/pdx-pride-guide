@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -22,6 +23,7 @@ export default function Dashboard() {
   usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, gigs, messages, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
   const [memberView, setMemberView] = useState<MemberView>(() => {
     if (typeof window === "undefined") return "home";
@@ -52,8 +54,17 @@ export default function Dashboard() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
   const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [username, setUsername] = useState(user?.username || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [avatarChoice, setAvatarChoice] = useState(user?.avatarChoice || 1);
+
+  useEffect(() => {
+    if (!user) return;
+    setDisplayName(user.displayName || "");
+    setUsername(user.username || "");
+    setBio(user.bio || "");
+    setAvatarChoice(user.avatarChoice || 1);
+  }, [user?.id, user?.displayName, user?.username, user?.bio, user?.avatarChoice]);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [editingEvent, setEditingEvent] = useState<any>(null);
@@ -295,17 +306,25 @@ export default function Dashboard() {
 
   const handleSave = async () => {
     setSaving(true);
+    const priorUsername = user?.username || "";
     const res = await fetch("/api/users/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ displayName, bio, avatarChoice }),
+      body: JSON.stringify({ displayName, bio, avatarChoice, username: username.trim() }),
     });
     if (res.ok) {
+      const data = await res.json();
       await refreshUser();
       setSaveMsg("Saved!");
       setEditMode(false);
       setTimeout(() => setSaveMsg(""), 2000);
+      if (data.username && data.username !== priorUsername) {
+        setLocation(`/u/${encodeURIComponent(data.username)}`);
+      }
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toast({ title: err.error || "Could not save profile", variant: "destructive" });
     }
     setSaving(false);
   };
@@ -410,6 +429,8 @@ export default function Dashboard() {
   const profileEditor = editMode ? (
     <DashboardProfileEditor
       user={user}
+      username={username}
+      setUsername={setUsername}
       displayName={displayName}
       setDisplayName={setDisplayName}
       bio={bio}

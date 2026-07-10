@@ -27,6 +27,25 @@
   min-width: 0;
 }
 
+.hub-profile__avatar-link {
+  display: inline-flex;
+  border-radius: 999px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.hub-profile__avatar-link:hover {
+  transform: scale(1.03);
+  opacity: 0.92;
+}
+
+.hub-profile__avatar-link:focus-visible {
+  outline: 2px solid var(--hub-lime, #c8fa3c);
+  outline-offset: 3px;
+}
+
 .hub-profile__name {
   margin: 0;
   font-family: var(--font-display), sans-serif;
