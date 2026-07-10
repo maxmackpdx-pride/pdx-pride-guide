@@ -457,11 +457,14 @@
 
 .admin-shell__mobile-bar-inner {
   display: flex;
+  width: 100%;
+  align-items: stretch;
 }
 
 .admin-shell__mobile-tab {
-  flex: 1;
-  min-height: 60px;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: clamp(5.5rem, 18vw, 6.5rem);
   background: none;
   border: none;
   color: var(--text-faint, #666);
@@ -469,15 +472,43 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: clamp(4px, 1.2vw, 8px);
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
   position: relative;
-  padding: 8px 4px;
+  padding: clamp(8px, 2vw, 12px) 2px clamp(10px, 2.5vw, 14px);
+}
+
+.admin-shell__mobile-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ~3× previous 15px icons; scales with viewport */
+  width: clamp(2.75rem, 12vw, 3rem);
+  height: clamp(2.75rem, 12vw, 3rem);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.admin-shell__mobile-tab-icon svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.admin-shell__mobile-tab-label {
+  font-size: clamp(0.65rem, 2.6vw, 0.78rem);
+  line-height: 1.15;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 2px;
 }
 
 .admin-shell__mobile-tab.is-active {
@@ -486,19 +517,19 @@
 
 .admin-shell__mobile-tab .alert {
   position: absolute;
-  top: 6px;
-  right: calc(50% - 18px);
-  min-width: 16px;
-  height: 16px;
+  top: clamp(6px, 1.5vw, 10px);
+  right: calc(50% - 1.4rem);
+  min-width: 1.25rem;
+  height: 1.25rem;
   border-radius: 99px;
   background: var(--pink, #ff1fa0);
   color: #000;
-  font-size: 10px;
+  font-size: 0.7rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
+  padding: 0 5px;
 }
 
 .admin-shell__more-backdrop {
@@ -539,9 +570,9 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 48px;
-  padding: 10px 4px;
+  gap: 14px;
+  min-height: 56px;
+  padding: 12px 4px;
   background: none;
   border: none;
   border-bottom: 1px solid #1a1a1a;
@@ -553,6 +584,12 @@
   text-transform: uppercase;
   cursor: pointer;
   text-align: left;
+}
+
+.admin-shell__more-item svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
 }
 
 .admin-shell__more-item:last-child {
@@ -599,7 +636,8 @@
   }
 
   .admin-shell__content {
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    /* Taller bar for ~3× icons */
+    padding-bottom: calc(7.25rem + env(safe-area-inset-bottom, 0px));
   }
 
   .admin-shell__topbar {

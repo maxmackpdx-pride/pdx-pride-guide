@@ -22,9 +22,18 @@ function injectCss() {
   document.head.appendChild(s);
 }
 
+function isInViewport(el: Element): boolean {
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+  const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+  if (rect.width <= 0 && rect.height <= 0) return false;
+  return rect.bottom > 0 && rect.right > 0 && rect.top < vh && rect.left < vw;
+}
+
 /**
  * Count-up number with optional +N float on increases.
- * First paint and still-motion always show the final value (never stuck at 0).
+ * Replays 0 → value on every mount (page reload / remount) when in view.
+ * Reduced-motion / calm mode always show the final value.
  */
 export default function CountUpValue({
   value,
@@ -37,12 +46,16 @@ export default function CountUpValue({
 }) {
   injectCss();
   const target = Number.isFinite(value) ? value : 0;
-  // SSR / first paint: final value immediately
-  const [display, setDisplay] = useState(target);
+  const targetRef = useRef(target);
+  targetRef.current = target;
+
+  const still = prefersStillMotion();
+  // Motion: start at 0 so reload shows the climb. Still: final value only.
+  const [display, setDisplay] = useState(() => (still ? target : 0));
   const [pop, setPop] = useState(false);
   const [delta, setDelta] = useState<number | null>(null);
-  const prevRef = useRef(target);
-  const revealed = useRef(false);
+  const prevRef = useRef(still ? target : 0);
+  const revealedRef = useRef(still);
   const rootRef = useRef<HTMLSpanElement>(null);
   const rafRef = useRef<number | null>(null);
   const deltaTimer = useRef<number | null>(null);
@@ -71,50 +84,81 @@ export default function CountUpValue({
     rafRef.current = requestAnimationFrame(tick);
   };
 
-  // Reveal on scroll into view (count from 0 once)
+  // Every mount (incl. full page reload): count 0 → current when visible.
+  // Effect-local `started` so React Strict Mode cleanup can re-run cleanly.
   useEffect(() => {
+    if (still) {
+      revealedRef.current = true;
+      setDisplay(targetRef.current);
+      prevRef.current = targetRef.current;
+      return;
+    }
+
+    let cancelled = false;
+    let started = false;
     const el = rootRef.current;
-    if (!el || revealed.current) return;
-    if (prefersStillMotion()) {
-      revealed.current = true;
+    if (!el) return;
+
+    const startCountUp = () => {
+      if (cancelled || started) return;
+      started = true;
+      revealedRef.current = true;
+      const to = targetRef.current;
+      setDisplay(0);
+      animateTo(0, to, duration);
+      prevRef.current = to;
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        startCountUp();
+        io.disconnect();
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -4% 0px" },
+    );
+    io.observe(el);
+
+    // Page reload / above-the-fold: IO can lag a frame — kick immediately when visible.
+    const kick = window.requestAnimationFrame(() => {
+      if (!cancelled && isInViewport(el)) startCountUp();
+    });
+
+    // Safety: if never intersecting (off-screen forever), snap to final so we never stick at 0.
+    const safety = window.setTimeout(() => {
+      if (cancelled || started) return;
+      setDisplay(targetRef.current);
+      prevRef.current = targetRef.current;
+      // Leave revealed false so a later scroll-in can still animate via IO…
+      // but IO may have already disconnected only after start. Keep observing.
+    }, 2500);
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(kick);
+      window.clearTimeout(safety);
+      io.disconnect();
+      cancelRaf();
+      // Allow a remount (reload / Strict Mode re-run) to animate again.
+      revealedRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duration, still]);
+
+  // Subsequent value changes after the first count-up (live metrics refresh).
+  useEffect(() => {
+    targetRef.current = target;
+    if (still) {
       setDisplay(target);
       prevRef.current = target;
       return;
     }
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting || revealed.current) return;
-        revealed.current = true;
-        setDisplay(0);
-        animateTo(0, target, duration);
-        prevRef.current = target;
-        io.disconnect();
-      },
-      { threshold: 0.4 },
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      cancelRaf();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Subsequent value changes
-  useEffect(() => {
-    if (!revealed.current) {
-      // Keep final value before first reveal (no stuck 0)
-      setDisplay(target);
-      prevRef.current = target;
+    if (!revealedRef.current) {
+      // Pre-reveal: keep target ready; first paint stays 0 until count-up kicks.
       return;
     }
     const prev = prevRef.current;
     if (prev === target) return;
-    if (prefersStillMotion()) {
-      setDisplay(target);
-      prevRef.current = target;
-      return;
-    }
     animateTo(prev, target, Math.min(duration, 600));
     if (target > prev) {
       const d = target - prev;
@@ -132,18 +176,23 @@ export default function CountUpValue({
       if (deltaTimer.current) window.clearTimeout(deltaTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target]);
+  }, [target, duration, still]);
 
-  useEffect(() => () => {
-    cancelRaf();
-    if (deltaTimer.current) window.clearTimeout(deltaTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      cancelRaf();
+      if (deltaTimer.current) window.clearTimeout(deltaTimer.current);
+    },
+    [],
+  );
 
   return (
     <span ref={rootRef} className={`pdxCountUp ${className}`.trim()}>
       <span className={`pdxCountUp__num${pop ? " is-pop" : ""}`}>{display}</span>
       {delta != null && (
-        <span className="pdxCountUp__delta" aria-hidden="true">+{delta}</span>
+        <span className="pdxCountUp__delta" aria-hidden="true">
+          +{delta}
+        </span>
       )}
     </span>
   );

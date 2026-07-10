@@ -71,17 +71,27 @@ const VIEW_LEDES: Record<AdminView, string> = {
   team: "Site admins can open this panel while logged into their own account. Grant it to people you trust with the queues.",
 };
 
-const ICONS: Record<AdminView | "more", ReactNode> = {
-  overview: <LayoutDashboard size={15} strokeWidth={2.2} />,
-  inbox: <Inbox size={15} strokeWidth={2.2} />,
-  events: <CalendarDays size={15} strokeWidth={2.2} />,
-  users: <UserCircle size={15} strokeWidth={2.2} />,
-  gigs: <Briefcase size={15} strokeWidth={2.2} />,
-  promoters: <Users size={15} strokeWidth={2.2} />,
-  "venue-claims": <Store size={15} strokeWidth={2.2} />,
-  team: <Users size={15} strokeWidth={2.2} />,
-  more: <MoreHorizontal size={15} strokeWidth={2.2} />,
-};
+const SIDEBAR_ICON = 15;
+/** Mobile bottom bar — ~3× sidebar icons; CSS also scales with viewport. */
+const MOBILE_ICON = 45;
+
+function makeIcons(size: number): Record<AdminView | "more", ReactNode> {
+  const p = { size, strokeWidth: size >= 32 ? 2 : 2.2, "aria-hidden": true as const };
+  return {
+    overview: <LayoutDashboard {...p} />,
+    inbox: <Inbox {...p} />,
+    events: <CalendarDays {...p} />,
+    users: <UserCircle {...p} />,
+    gigs: <Briefcase {...p} />,
+    promoters: <Users {...p} />,
+    "venue-claims": <Store {...p} />,
+    team: <Users {...p} />,
+    more: <MoreHorizontal {...p} />,
+  };
+}
+
+const ICONS = makeIcons(SIDEBAR_ICON);
+const MOBILE_ICONS = makeIcons(MOBILE_ICON);
 
 type Props = {
   view: AdminView;
@@ -311,8 +321,14 @@ export default function AdminShell({
                   else go(tab.key);
                 }}
               >
-                {tab.key === "overview" ? <Home size={16} strokeWidth={2.2} /> : ICONS[tab.key]}
-                <span>{tab.label}</span>
+                <span className="admin-shell__mobile-tab-icon" aria-hidden="true">
+                  {tab.key === "overview" ? (
+                    <Home size={MOBILE_ICON} strokeWidth={2} />
+                  ) : (
+                    MOBILE_ICONS[tab.key]
+                  )}
+                </span>
+                <span className="admin-shell__mobile-tab-label">{tab.label}</span>
                 {tab.alert != null && tab.alert > 0 && (
                   <span className="alert">{tab.alert}</span>
                 )}
