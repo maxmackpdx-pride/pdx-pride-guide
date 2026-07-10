@@ -71,7 +71,7 @@ const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
 
 const VIEW_LEDES: Record<AdminView, string> = {
   overview: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
-  stats: "Everything in one place: site pulse, community counts, and what is live right now.",
+  stats: "First-party traffic tracking plus database counts: page views, sources, signups, RSVPs, listings, and queue depth.",
   inbox: "One queue the whole admin team works together. Not a mailbox, a shared to-do list.",
   owner: "Only you, the owner, see these. Keyholder grants, escalations, and account-level calls the team can't make.",
   events: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",

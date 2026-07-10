@@ -32,10 +32,13 @@ import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
+import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
 const db = drizzle(sqlite);
+
+ensureAnalyticsTable(sqlite);
 
 // Initialize tables
 sqlite.exec(`
@@ -4275,6 +4278,7 @@ export type AdminMetricsSnapshot = {
     rsvpsThisWeek: number;
     rsvpsPrevWeek: number;
   };
+  traffic: TrafficMetrics;
 };
 
 export interface IStorage {
@@ -6693,6 +6697,7 @@ export const storage: IStorage = {
         rsvpsThisWeek: countSince("attendances", weekStart.toISOString(), "is_active = 1"),
         rsvpsPrevWeek: countBetween("attendances", prevWeekStart.toISOString(), weekStart.toISOString(), "is_active = 1"),
       },
+      traffic: getTrafficMetrics(sqlite),
     };
   },
   resolveOwnerDeskItem(id, source = "desk") {

@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import FilmGrainOverlay from "./components/FilmGrainOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
+import AnalyticsTracker from "./components/AnalyticsTracker";
 
 function RouteBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -110,6 +111,7 @@ export default function App() {
         <PushNotificationPrompt />
         <Router>
           <ScrollToTop />
+          <AnalyticsTracker />
           <AppLayout />
           <Toaster />
         </Router>

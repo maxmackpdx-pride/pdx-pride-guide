@@ -19,6 +19,7 @@ import {
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
 import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
+import { recordPageView } from "./analytics";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -663,6 +664,33 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.use("/uploads", (req: any, res: any, next: any) => {
     const express = require("express");
     express.static(UPLOADS_DIR)(req, res, next);
+  });
+
+  // ─── ANALYTICS ──────────────────────────────────────────────────────────
+  app.post("/api/analytics/pageview", (req, res) => {
+    const schema = z.object({
+      path: z.string().trim().min(1).max(240),
+      visitorId: z.string().trim().min(8).max(80),
+      sessionId: z.string().trim().min(8).max(80),
+      referrer: z.string().trim().max(500).optional().nullable(),
+      deviceType: z.enum(["mobile", "desktop", "tablet"]).optional().nullable(),
+      userId: z.number().int().positive().optional().nullable(),
+    });
+    try {
+      const data = schema.parse(req.body);
+      const ok = recordPageView(sqlite, {
+        path: data.path,
+        visitorId: data.visitorId,
+        sessionId: data.sessionId,
+        referrer: data.referrer,
+        deviceType: data.deviceType,
+        userId: data.userId ?? req.session?.userId ?? null,
+      });
+      if (!ok) return res.status(204).end();
+      res.json({ ok: true });
+    } catch {
+      res.status(400).json({ error: "Invalid analytics payload" });
+    }
   });
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────

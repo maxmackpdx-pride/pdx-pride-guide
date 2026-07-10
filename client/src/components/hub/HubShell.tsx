@@ -51,7 +51,7 @@ export const ADMIN_VIEW_META: Record<
     title: "Stats",
     kicker: "The numbers",
     kickerColor: "var(--cyan, #00ffff)",
-    lede: "Everything in one place: site pulse, live inventory, signups, RSVPs, and what is waiting in the queue.",
+    lede: "First-party traffic tracking plus database counts: page views, sources, signups, RSVPs, listings, and queue depth.",
   },
   inbox: {
     title: "Review queue",

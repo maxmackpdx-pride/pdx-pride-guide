@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { StatCard } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
-import { prefersStillMotion } from "@/lib/motion";
 import "./admin-stats.css";
 
 interface AdminMetrics {
@@ -42,9 +41,65 @@ interface AdminMetrics {
     rsvpsPrevWeek: number;
   };
   generatedAt?: string;
+  traffic: {
+    activeNow: number;
+    pageViews7d: number;
+    pageViewsPrev7d: number;
+    uniqueVisitors7d: number;
+    uniqueVisitorsPrev7d: number;
+    sessions7d: number;
+    sessionsPrev7d: number;
+    avgSessionSeconds7d: number;
+    avgSessionSecondsPrev7d: number;
+    bounceRate7d: number;
+    bounceRatePrev7d: number;
+    pagesPerSession7d: number;
+    pagesPerSessionPrev7d: number;
+    pageViewsTrend14d: number[];
+    topPages: Array<{ path: string; views: number }>;
+    sources: Array<{ label: string; pct: number }>;
+    devices: Array<{ label: string; pct: number }>;
+    newReturning: Array<{ label: string; pct: number }>;
+  };
 }
 
 type StatCardColor = "lime" | "cyan" | "orange" | "pink" | "purple" | "green";
+
+const TRAFFIC_COLORS = [
+  "var(--lime, #c8fa3c)",
+  "var(--cyan, #00ffff)",
+  "var(--orange, #ff8c00)",
+  "var(--pink, #ff00cc)",
+  "var(--purple, #8800ff)",
+  "var(--amber, #ffee00)",
+];
+
+function fmtK(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  return String(Math.round(n));
+}
+
+function mmss(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
+}
+
+function sparkPts(arr: number[]): string {
+  if (arr.length < 2) return "0,10 60,10";
+  const mn = Math.min(...arr);
+  const mx = Math.max(...arr);
+  const range = mx - mn || 1;
+  return arr
+    .map((v, i) => `${((i / (arr.length - 1)) * 60).toFixed(1)},${(18 - ((v - mn) / range) * 16).toFixed(1)}`)
+    .join(" ");
+}
+
+function trafficDelta(current: number, previous: number): string {
+  if (previous === 0) return current > 0 ? "new" : "steady";
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) return "steady";
+  return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
+}
 
 const BREAKDOWN_COLORS = [
   "var(--cyan, #00ffff)",
@@ -61,16 +116,6 @@ const SOURCE_COLORS = [
   "var(--orange, #ff8c00)",
   "var(--pink, #ff00cc)",
 ];
-
-function sparkPts(arr: number[]): string {
-  if (arr.length < 2) return "0,10 60,10";
-  const mn = Math.min(...arr);
-  const mx = Math.max(...arr);
-  const range = mx - mn || 1;
-  return arr
-    .map((v, i) => `${((i / (arr.length - 1)) * 60).toFixed(1)},${(18 - ((v - mn) / range) * 16).toFixed(1)}`)
-    .join(" ");
-}
 
 function trendPoints(values: number[]): { line: string; area: string } {
   if (values.length < 2) {
@@ -90,11 +135,6 @@ function formatDelta(current: number, previous: number): string {
   const pct = Math.round(((current - previous) / previous) * 100);
   if (pct === 0) return "steady";
   return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
-}
-
-function peakKey(): string {
-  const d = new Date();
-  return `pdx-stats-peak-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
 function BarRow({
@@ -144,21 +184,15 @@ export default function AdminStatsView({
     refetchInterval: 60_000,
   });
 
-  const [peakToday, setPeakToday] = useState(0);
-
-  useEffect(() => {
-    if (!data) return;
-    const key = peakKey();
-    const stored = Number(localStorage.getItem(key) || 0);
-    const next = Math.max(stored, data.activeSessions);
-    if (next !== stored) localStorage.setItem(key, String(next));
-    setPeakToday(next);
-  }, [data?.activeSessions]);
-
   const activityTrend = useMemo(() => {
     if (!data) return trendPoints([]);
     const combined = data.signupsTrend14d.map((v, i) => v + (data.rsvpsTrend14d[i] ?? 0));
     return trendPoints(combined);
+  }, [data]);
+
+  const trafficTrend = useMemo(() => {
+    if (!data?.traffic) return trendPoints([]);
+    return trendPoints(data.traffic.pageViewsTrend14d);
   }, [data]);
 
   if (!data) {
@@ -171,9 +205,9 @@ export default function AdminStatsView({
 
   const community: { key: keyof AdminMetrics; label: string; color: StatCardColor; tab?: string }[] = [
     { key: "users", label: "Registered users", color: "lime", tab: "users" },
-    { key: "activeSessions", label: "Stored sessions", color: "cyan" },
-    { key: "messages", label: "Active messages", color: "cyan", tab: "inbox" },
     { key: "newUsersToday", label: "New users today", color: "lime", tab: "users" },
+    { key: "messages", label: "Active messages", color: "cyan", tab: "inbox" },
+    { key: "activeSessions", label: "Server sessions", color: "cyan" },
   ];
 
   const program: { key: keyof AdminMetrics; label: string; color: StatCardColor; tab?: string }[] = [
@@ -185,63 +219,6 @@ export default function AdminStatsView({
     { key: "giftingPosts", label: "Gifting posts", color: "lime" },
     { key: "missedConnections", label: "Spotted posts", color: "pink" },
     { key: "unclaimedEvents", label: "Unclaimed events", color: "cyan", tab: "events" },
-  ];
-
-  const inventoryKpis = [
-    {
-      id: "users",
-      label: "Registered users",
-      target: data.users,
-      format: "n" as const,
-      delta: formatDelta(data.newUsersThisWeek, data.conversions.newSignupsPrevWeek),
-      color: "var(--lime, #c8fa3c)",
-      spark: data.signupsTrend14d.slice(-8),
-    },
-    {
-      id: "events",
-      label: "Live events",
-      target: data.liveEvents,
-      format: "n" as const,
-      delta: `${data.claimedEvents} claimed`,
-      color: "var(--orange, #ff8c00)",
-      spark: data.rsvpsTrend14d.slice(-8),
-    },
-    {
-      id: "rsvps",
-      label: "Member RSVPs",
-      target: data.attendances,
-      format: "n" as const,
-      delta: formatDelta(data.conversions.rsvpsThisWeek, data.conversions.rsvpsPrevWeek),
-      color: "var(--green, #39ff14)",
-      spark: data.rsvpsTrend14d.slice(-8),
-    },
-    {
-      id: "directory",
-      label: "Directory places",
-      target: data.directoryPlaces,
-      format: "n" as const,
-      delta: `${data.approvedPromoters} promoters`,
-      color: "var(--pink, #ff00cc)",
-      spark: data.signupsTrend14d.slice(-8),
-    },
-    {
-      id: "unclaimed",
-      label: "Unclaimed events",
-      target: data.unclaimedEvents,
-      format: "n" as const,
-      delta: `${data.pendingSubmissions} submissions pending`,
-      color: "var(--cyan, #00ffff)",
-      spark: data.rsvpsTrend14d.slice(-8),
-    },
-    {
-      id: "queue",
-      label: "Review queue",
-      target: data.pendingQueue,
-      format: "n" as const,
-      delta: data.pendingPromoterRequests > 0 ? `${data.pendingPromoterRequests} promoter asks` : "shared queue",
-      color: "var(--purple, #8800ff)",
-      spark: data.signupsTrend14d.slice(-8),
-    },
   ];
 
   const maxContent = Math.max(...data.contentBreakdown.map(r => r.count), 1);
@@ -261,19 +238,16 @@ export default function AdminStatsView({
     {
       label: "New signups",
       target: data.conversions.newSignupsThisWeek,
-      format: "n" as const,
       delta: formatDelta(data.conversions.newSignupsThisWeek, data.conversions.newSignupsPrevWeek),
     },
     {
       label: "Event submissions",
       target: data.conversions.eventSubmissionsThisWeek,
-      format: "n" as const,
       delta: formatDelta(data.conversions.eventSubmissionsThisWeek, data.conversions.eventSubmissionsPrevWeek),
     },
     {
       label: "RSVPs going",
       target: data.conversions.rsvpsThisWeek,
-      format: "n" as const,
       delta: formatDelta(data.conversions.rsvpsThisWeek, data.conversions.rsvpsPrevWeek),
     },
   ];
@@ -282,8 +256,62 @@ export default function AdminStatsView({
     ? new Date(data.generatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
     : new Date(dataUpdatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
-  const trendTotal = data.signupsTrend14d.reduce((a, b) => a + b, 0) + data.rsvpsTrend14d.reduce((a, b) => a + b, 0);
-  const trendTag = trendTotal > 0 ? "Live from database" : "Quiet week so far";
+  const signupTotal = data.signupsTrend14d.reduce((a, b) => a + b, 0);
+  const rsvpTotal = data.rsvpsTrend14d.reduce((a, b) => a + b, 0);
+  const traffic = data.traffic;
+  const maxPageViews = Math.max(...traffic.topPages.map(p => p.views), 1);
+  const trafficSpark = traffic.pageViewsTrend14d.slice(-8);
+
+  const trafficKpis = [
+    {
+      id: "pv",
+      label: "Page views",
+      value: fmtK(traffic.pageViews7d),
+      delta: trafficDelta(traffic.pageViews7d, traffic.pageViewsPrev7d),
+      color: TRAFFIC_COLORS[0],
+      spark: trafficSpark,
+    },
+    {
+      id: "uv",
+      label: "Unique visitors",
+      value: fmtK(traffic.uniqueVisitors7d),
+      delta: trafficDelta(traffic.uniqueVisitors7d, traffic.uniqueVisitorsPrev7d),
+      color: TRAFFIC_COLORS[1],
+      spark: trafficSpark,
+    },
+    {
+      id: "ss",
+      label: "Sessions",
+      value: fmtK(traffic.sessions7d),
+      delta: trafficDelta(traffic.sessions7d, traffic.sessionsPrev7d),
+      color: TRAFFIC_COLORS[0],
+      spark: trafficSpark,
+    },
+    {
+      id: "dur",
+      label: "Avg. session",
+      value: mmss(traffic.avgSessionSeconds7d),
+      delta: trafficDelta(traffic.avgSessionSeconds7d, traffic.avgSessionSecondsPrev7d),
+      color: TRAFFIC_COLORS[0],
+      spark: trafficSpark,
+    },
+    {
+      id: "br",
+      label: "Bounce rate",
+      value: `${traffic.bounceRate7d}%`,
+      delta: trafficDelta(traffic.bounceRate7d, traffic.bounceRatePrev7d),
+      color: TRAFFIC_COLORS[2],
+      spark: trafficSpark,
+    },
+    {
+      id: "pp",
+      label: "Pages / session",
+      value: traffic.pagesPerSession7d.toFixed(1),
+      delta: trafficDelta(traffic.pagesPerSession7d, traffic.pagesPerSessionPrev7d),
+      color: TRAFFIC_COLORS[0],
+      spark: trafficSpark,
+    },
+  ];
 
   const renderStat = (item: (typeof community)[number]) => {
     const count = Number(data[item.key]) || 0;
@@ -316,13 +344,13 @@ export default function AdminStatsView({
               Live right now
             </div>
             <div className="admin-stats__live-num">
-              <CountUpValue value={data.activeSessions} />{" "}
-              <span className="admin-stats__live-sub">stored sessions</span>
+              <CountUpValue value={traffic.activeNow} />{" "}
+              <span className="admin-stats__live-sub">visitors in the last 5 min</span>
             </div>
           </div>
         </div>
         <div className="admin-stats__live-meta">
-          Peak today: {peakToday} · Updated {updatedLabel}
+          Updated {updatedLabel}
           <button
             type="button"
             className="dash-btn dash-btn-ghost"
@@ -343,16 +371,14 @@ export default function AdminStatsView({
       <p className="admin-stats__section-kicker">The program</p>
       <div className="admin-stats__grid admin-stats__grid--program">{program.map(renderStat)}</div>
 
-      <h2 className="admin-stats__section-title">Platform snapshot</h2>
-      <p className="admin-stats__traffic-lede">Pulled live from the database. Refreshes every minute.</p>
+      <h2 className="admin-stats__section-title">Traffic and audience</h2>
+      <p className="admin-stats__section-lede">Last 7 days versus the week before. First-party pageview tracking — no Google Analytics.</p>
       <div className="admin-stats__kpi-grid">
-        {inventoryKpis.map((kpi, i) => (
+        {trafficKpis.map((kpi, i) => (
           <div key={kpi.id} className="admin-stats__kpi" style={{ animationDelay: `${i * 55}ms` }}>
             <div className="admin-stats__kpi-label">{kpi.label}</div>
             <div className="admin-stats__kpi-row">
-              <span className="admin-stats__kpi-value">
-                <CountUpValue value={kpi.target} />
-              </span>
+              <span className="admin-stats__kpi-value">{kpi.value}</span>
               <svg className="admin-stats__kpi-spark" viewBox="0 0 60 20" width="60" height="20" preserveAspectRatio="none" aria-hidden>
                 <polyline
                   points={sparkPts(kpi.spark)}
@@ -373,8 +399,112 @@ export default function AdminStatsView({
 
       <div className="admin-stats__panel">
         <div className="admin-stats__panel-head">
+          <h3 className="admin-stats__panel-title admin-stats__panel-title--lg">Page views · 14 days</h3>
+          <span className="admin-stats__trend-tag">
+            {traffic.pageViews7d > 0 ? "Tracking live" : "Collecting data"}
+          </span>
+        </div>
+        <div className="admin-stats__chart-wipe">
+          <svg viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden>
+            <defs>
+              <linearGradient id="adminStatsTrafficArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="var(--lime, #c8fa3c)" stopOpacity="0.34" />
+                <stop offset="1" stopColor="var(--lime, #c8fa3c)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <polygon points={trafficTrend.area} fill="url(#adminStatsTrafficArea)" />
+            <polyline
+              points={trafficTrend.line}
+              fill="none"
+              stroke="var(--lime, #c8fa3c)"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div className="admin-stats__two-col">
+        <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
+          <h3 className="admin-stats__panel-title">Top pages</h3>
+          {traffic.topPages.length === 0 ? (
+            <p className="admin-stats__insight">No pageviews recorded yet. Browse the public site to seed data.</p>
+          ) : (
+            traffic.topPages.map((row, i) => (
+              <BarRow
+                key={row.path}
+                label={row.path}
+                value={fmtK(row.views)}
+                pct={(row.views / maxPageViews) * 100}
+                color={TRAFFIC_COLORS[i % TRAFFIC_COLORS.length]}
+                delay={i * 70}
+                mono
+              />
+            ))
+          )}
+        </div>
+        <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
+          <h3 className="admin-stats__panel-title">Where they come from</h3>
+          {traffic.sources.length === 0 ? (
+            <p className="admin-stats__insight">Referrer data appears after visitors arrive from external links.</p>
+          ) : (
+            traffic.sources.map((row, i) => (
+              <BarRow
+                key={row.label}
+                label={row.label}
+                value={`${row.pct}%`}
+                pct={row.pct}
+                color={TRAFFIC_COLORS[i % TRAFFIC_COLORS.length]}
+                delay={i * 70}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="admin-stats__two-col">
+        <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
+          <h3 className="admin-stats__panel-title">Devices</h3>
+          {traffic.devices.length === 0 ? (
+            <p className="admin-stats__insight">Device mix fills in as pageviews arrive.</p>
+          ) : (
+            traffic.devices.map((row, i) => (
+              <BarRow
+                key={row.label}
+                label={row.label}
+                value={`${row.pct}%`}
+                pct={row.pct}
+                color={TRAFFIC_COLORS[i % TRAFFIC_COLORS.length]}
+                delay={i * 70}
+              />
+            ))
+          )}
+        </div>
+        <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
+          <h3 className="admin-stats__panel-title">New vs returning</h3>
+          {traffic.newReturning.map((row, i) => (
+            <BarRow
+              key={row.label}
+              label={row.label}
+              value={`${row.pct}%`}
+              pct={row.pct}
+              color={TRAFFIC_COLORS[i % TRAFFIC_COLORS.length]}
+              delay={i * 70}
+            />
+          ))}
+        </div>
+      </div>
+
+      <h2 className="admin-stats__section-title">Member growth</h2>
+      <p className="admin-stats__section-lede">
+        Daily signups and new RSVPs over the last 14 days. {signupTotal} signup{signupTotal === 1 ? "" : "s"},{" "}
+        {rsvpTotal} RSVP{rsvpTotal === 1 ? "" : "s"} in this window.
+      </p>
+      <div className="admin-stats__panel">
+        <div className="admin-stats__panel-head">
           <h3 className="admin-stats__panel-title admin-stats__panel-title--lg">Signups + RSVPs · 14 days</h3>
-          <span className="admin-stats__trend-tag">{trendTag}</span>
+          <span className="admin-stats__trend-tag">Database only</span>
         </div>
         <div className="admin-stats__chart-wipe">
           <svg viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden>
@@ -468,7 +598,8 @@ export default function AdminStatsView({
         </div>
       </div>
 
-      <h2 className="admin-stats__section-title" style={{ marginBottom: 12 }}>Conversions this week</h2>
+      <h2 className="admin-stats__section-title" style={{ marginBottom: 12 }}>This week</h2>
+      <p className="admin-stats__section-lede">Rolling 7-day counts compared to the prior week.</p>
       <div className="admin-stats__conv-grid">
         {conversions.map((c, i) => (
           <div key={c.label} className="admin-stats__conv" style={{ animationDelay: `${i * 60}ms` }}>

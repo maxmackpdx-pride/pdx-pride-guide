@@ -47,6 +47,14 @@ const contactLimiter = rateLimit({
   message: { error: "Too many messages sent. Try again in a few minutes." },
 });
 app.use("/api/contact/message", contactLimiter);
+const analyticsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 400,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many analytics events." },
+});
+app.use("/api/analytics/pageview", analyticsLimiter);
 // Admin JSON routes rely on requireAdmin session checks; avoid a separate strict
 // cap — the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
 app.use("/api", limiter);
