@@ -67,15 +67,15 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
     subtitle: "I-84 Exit 25 · Corbett, OR",
     lat: 45.5446,
     lng: -122.2342,
-    zoom: 13,
+    zoom: 15,
     pinColor: "#19E3FF",
   },
   "sauvie-island": {
     label: "Collins Beach",
-    subtitle: "Sauvie Island Wildlife Area · OR",
-    lat: 45.7142,
-    lng: -122.8189,
-    zoom: 12,
+    subtitle: "Clothing-optional · Sauvie Island Wildlife Area",
+    lat: 45.793,
+    lng: -122.789,
+    zoom: 14,
     pinColor: "#FF00CC",
   },
 };
@@ -110,7 +110,7 @@ export const SAUVIE_ISLAND_MAPS = [
   },
   {
     label: "OpenStreetMap",
-    href: "https://www.openstreetmap.org/?mlat=45.7142&mlon=-122.8189#map=13/45.7142/-122.8189",
+    href: "https://www.openstreetmap.org/?mlat=45.793&mlon=-122.789#map=14/45.793/-122.789",
   },
 ] as const;
 
