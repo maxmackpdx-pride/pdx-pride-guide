@@ -4250,6 +4250,43 @@ function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
     }));
 }
 
+export type AdminMetricsSnapshot = {
+  generatedAt: string;
+  users: number;
+  newUsersToday: number;
+  newUsersThisWeek: number;
+  activeSessions: number;
+  messages: number;
+  liveEvents: number;
+  hiddenEvents: number;
+  userSubmittedEvents: number;
+  seededEvents: number;
+  attendances: number;
+  attendancesThisWeek: number;
+  pendingSubmissions: number;
+  pendingQueue: number;
+  gigPosts: number;
+  giftingPosts: number;
+  missedConnections: number;
+  directoryPlaces: number;
+  unclaimedEvents: number;
+  claimedEvents: number;
+  approvedPromoters: number;
+  pendingPromoterRequests: number;
+  signupsTrend14d: number[];
+  rsvpsTrend14d: number[];
+  contentBreakdown: Array<{ label: string; count: number }>;
+  eventSources: Array<{ label: string; count: number }>;
+  conversions: {
+    newSignupsThisWeek: number;
+    newSignupsPrevWeek: number;
+    eventSubmissionsThisWeek: number;
+    eventSubmissionsPrevWeek: number;
+    rsvpsThisWeek: number;
+    rsvpsPrevWeek: number;
+  };
+};
+
 export interface IStorage {
   // Events
   getEvents(filters?: { status?: string; day?: string }): Event[];
@@ -4295,6 +4332,7 @@ export interface IStorage {
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   dismissStaleTestModerationRequests(): number;
   getAdminPendingCount(): number;
+  getAdminMetrics(): AdminMetricsSnapshot;
   hasSiteAdminGrant(userId: number): boolean;
   ensureSiteAdminGrant(userId: number, grantedByUserId: number | null, note?: string | null, createdAt?: string): void;
   listSiteAdmins(): Array<{
@@ -6701,6 +6739,129 @@ export const storage: IStorage = {
   },
   getOwnerDeskCount() {
     return storage.getOwnerDeskItems("OPEN").length;
+  },
+  getAdminMetrics() {
+    const counts = getTableCounts();
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - 7);
+    weekStart.setHours(0, 0, 0, 0);
+    const prevWeekStart = new Date(now);
+    prevWeekStart.setDate(prevWeekStart.getDate() - 14);
+    prevWeekStart.setHours(0, 0, 0, 0);
+
+    const countSince = (table: string, sinceIso: string, extraWhere = "") => {
+      const row = sqlite.prepare(
+        `SELECT COUNT(*) AS count FROM ${table} WHERE created_at >= ?${extraWhere ? ` AND ${extraWhere}` : ""}`,
+      ).get(sinceIso) as { count: number };
+      return row?.count ?? 0;
+    };
+    const countBetween = (table: string, startIso: string, endIso: string, extraWhere = "") => {
+      const row = sqlite.prepare(
+        `SELECT COUNT(*) AS count FROM ${table} WHERE created_at >= ? AND created_at < ?${extraWhere ? ` AND ${extraWhere}` : ""}`,
+      ).get(startIso, endIso) as { count: number };
+      return row?.count ?? 0;
+    };
+
+    const dailyTrend14d = (table: string, extraWhere = "") => {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 13);
+      start.setHours(0, 0, 0, 0);
+      const rows = sqlite.prepare(`
+        SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS count
+        FROM ${table}
+        WHERE created_at >= ?${extraWhere ? ` AND ${extraWhere}` : ""}
+        GROUP BY substr(created_at, 1, 10)
+      `).all(start.toISOString()) as Array<{ day: string; count: number }>;
+      const byDay = Object.fromEntries(rows.map(r => [r.day, r.count]));
+      const series: number[] = [];
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        series.push(byDay[key] ?? 0);
+      }
+      return series;
+    };
+
+    const liveEvents = storage.getEvents({ status: "LIVE" });
+    const hiddenEvents = storage.getEvents({ status: "HIDDEN" });
+    const unclaimedEvents = liveEvents.filter(e => e.isClaimable && !e.claimedBy).length;
+    const claimedEvents = liveEvents.filter(e => !!e.claimedBy).length;
+    const seededEvents = liveEvents.filter(e => e.source === "admin_seeded").length;
+    const userSubmittedEvents = storage.countEventsBySource("user_submitted", "LIVE");
+
+    const sourceRows = sqlite.prepare(`
+      SELECT source, COUNT(*) AS count
+      FROM events
+      WHERE status = 'LIVE'
+      GROUP BY source
+      ORDER BY count DESC
+    `).all() as Array<{ source: string; count: number }>;
+    const sourceLabels: Record<string, string> = {
+      admin_seeded: "Seeded",
+      user_submitted: "Community",
+    };
+    const eventSources = sourceRows.map(row => ({
+      label: sourceLabels[row.source] || row.source.replace(/_/g, " "),
+      count: row.count,
+    }));
+
+    const directoryPlaces = storage.getBusinesses().length;
+    const gigPosts = storage.getGigPosts("LIVE").length;
+    const giftingPosts = storage.getGiftingPosts().length;
+    const missedConnections = storage.getMissedConnections("ACTIVE").length;
+
+    const contentBreakdown = [
+      { label: "Events", count: liveEvents.length },
+      { label: "Directory", count: directoryPlaces },
+      { label: "Gifting", count: giftingPosts },
+      { label: "Gigs", count: gigPosts },
+      { label: "Spotted", count: missedConnections },
+    ].sort((a, b) => b.count - a.count);
+
+    const approvedPromoters = (sqlite.prepare(
+      `SELECT COUNT(*) AS count FROM users WHERE promoter_status = 'approved'`,
+    ).get() as { count: number })?.count ?? 0;
+
+    return {
+      generatedAt: now.toISOString(),
+      users: counts.users ?? 0,
+      newUsersToday: countSince("users", todayStart.toISOString()),
+      newUsersThisWeek: countSince("users", weekStart.toISOString()),
+      activeSessions: counts.express_sessions ?? 0,
+      messages: storage.countActiveMessages(),
+      liveEvents: liveEvents.length,
+      hiddenEvents: hiddenEvents.length,
+      userSubmittedEvents,
+      seededEvents,
+      attendances: counts.attendances ?? 0,
+      attendancesThisWeek: countSince("attendances", weekStart.toISOString(), "is_active = 1"),
+      pendingSubmissions: storage.getSubmissions("PENDING").length,
+      pendingQueue: storage.getAdminPendingCount(),
+      gigPosts,
+      giftingPosts,
+      missedConnections,
+      directoryPlaces,
+      unclaimedEvents,
+      claimedEvents,
+      approvedPromoters,
+      pendingPromoterRequests: storage.getPendingPromoterRequests().length,
+      signupsTrend14d: dailyTrend14d("users"),
+      rsvpsTrend14d: dailyTrend14d("attendances", "is_active = 1"),
+      contentBreakdown,
+      eventSources,
+      conversions: {
+        newSignupsThisWeek: countSince("users", weekStart.toISOString()),
+        newSignupsPrevWeek: countBetween("users", prevWeekStart.toISOString(), weekStart.toISOString()),
+        eventSubmissionsThisWeek: countSince("submissions", weekStart.toISOString(), "type IN ('NEW_EVENT', 'SUGGEST')"),
+        eventSubmissionsPrevWeek: countBetween("submissions", prevWeekStart.toISOString(), weekStart.toISOString(), "type IN ('NEW_EVENT', 'SUGGEST')"),
+        rsvpsThisWeek: countSince("attendances", weekStart.toISOString(), "is_active = 1"),
+        rsvpsPrevWeek: countBetween("attendances", prevWeekStart.toISOString(), weekStart.toISOString(), "is_active = 1"),
+      },
+    };
   },
   resolveOwnerDeskItem(id, source = "desk") {
     const now = new Date().toISOString();

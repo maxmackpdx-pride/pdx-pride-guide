@@ -10,34 +10,60 @@ import "./admin-stats.css";
 interface AdminMetrics {
   users: number;
   newUsersToday: number;
+  newUsersThisWeek: number;
   activeSessions: number;
   liveEvents: number;
+  hiddenEvents: number;
   userSubmittedEvents: number;
+  seededEvents: number;
   messages: number;
   attendances: number;
+  attendancesThisWeek: number;
   pendingSubmissions: number;
+  pendingQueue: number;
   gigPosts: number;
   giftingPosts: number;
   missedConnections: number;
-  openFeedback: number;
+  directoryPlaces: number;
+  unclaimedEvents: number;
+  claimedEvents: number;
+  approvedPromoters: number;
+  pendingPromoterRequests: number;
+  signupsTrend14d: number[];
+  rsvpsTrend14d: number[];
+  contentBreakdown: Array<{ label: string; count: number }>;
+  eventSources: Array<{ label: string; count: number }>;
+  conversions: {
+    newSignupsThisWeek: number;
+    newSignupsPrevWeek: number;
+    eventSubmissionsThisWeek: number;
+    eventSubmissionsPrevWeek: number;
+    rsvpsThisWeek: number;
+    rsvpsPrevWeek: number;
+  };
   generatedAt?: string;
 }
 
 type StatCardColor = "lime" | "cyan" | "orange" | "pink" | "purple" | "green";
 
-type KpiFormat = "k" | "dur" | "pct" | "dec" | "n";
+const BREAKDOWN_COLORS = [
+  "var(--cyan, #00ffff)",
+  "var(--lime, #c8fa3c)",
+  "var(--pink, #ff00cc)",
+  "var(--orange, #ff8c00)",
+  "var(--amber, #ffee00)",
+  "var(--purple, #8800ff)",
+];
 
-function fmtK(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-  return String(Math.round(n));
-}
-
-function mmss(seconds: number): string {
-  const s = Math.max(0, Math.round(seconds));
-  return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
-}
+const SOURCE_COLORS = [
+  "var(--lime, #c8fa3c)",
+  "var(--cyan, #00ffff)",
+  "var(--orange, #ff8c00)",
+  "var(--pink, #ff00cc)",
+];
 
 function sparkPts(arr: number[]): string {
+  if (arr.length < 2) return "0,10 60,10";
   const mn = Math.min(...arr);
   const mx = Math.max(...arr);
   const range = mx - mn || 1;
@@ -47,6 +73,9 @@ function sparkPts(arr: number[]): string {
 }
 
 function trendPoints(values: number[]): { line: string; area: string } {
+  if (values.length < 2) {
+    return { line: "0,18 100,18", area: "0,36 0,18 100,18 100,36" };
+  }
   const mn = Math.min(...values);
   const mx = Math.max(...values);
   const range = mx - mn || 1;
@@ -56,83 +85,12 @@ function trendPoints(values: number[]): { line: string; area: string } {
   return { line, area: `0,36 ${line} 100,36` };
 }
 
-function useAnimatedNumber(target: number, duration = 900): number {
-  const [value, setValue] = useState(prefersStillMotion() ? target : 0);
-
-  useEffect(() => {
-    if (prefersStillMotion()) {
-      setValue(target);
-      return;
-    }
-    let frame = 0;
-    let start: number | null = null;
-    const from = 0;
-    const tick = (ts: number) => {
-      if (start == null) start = ts;
-      const t = Math.min(1, (ts - start) / duration);
-      const eased = 1 - (1 - t) ** 3;
-      setValue(Math.round(from + (target - from) * eased));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [target, duration]);
-
-  return value;
+function formatDelta(current: number, previous: number): string {
+  if (previous === 0) return current > 0 ? "new this week" : "steady";
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) return "steady";
+  return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 }
-
-function AnimatedKpiValue({ target, format }: { target: number; format: KpiFormat }) {
-  const animated = useAnimatedNumber(target);
-  if (format === "k") return <>{fmtK(animated)}</>;
-  if (format === "dur") return <>{mmss(animated)}</>;
-  if (format === "pct") return <>{animated}%</>;
-  if (format === "dec") return <>{(animated / 10).toFixed(1)}</>;
-  return <CountUpValue value={animated} />;
-}
-
-const TRAFFIC_KPIS = [
-  { id: "pv", label: "Page views", target: 128_400, format: "k" as const, delta: "+18%", color: "var(--lime, #c8fa3c)", spark: [9, 11, 10, 13, 14, 16, 19, 21] },
-  { id: "uv", label: "Unique visitors", target: 41_200, format: "k" as const, delta: "+22%", color: "var(--lime, #c8fa3c)", spark: [6, 7, 7, 9, 10, 11, 13, 15] },
-  { id: "ss", label: "Sessions", target: 63_800, format: "k" as const, delta: "+15%", color: "var(--lime, #c8fa3c)", spark: [7, 8, 9, 9, 11, 12, 13, 14] },
-  { id: "dur", label: "Avg. session", target: 192, format: "dur" as const, delta: "+6%", color: "var(--lime, #c8fa3c)", spark: [150, 160, 158, 170, 175, 180, 188, 192] },
-  { id: "br", label: "Bounce rate", target: 38, format: "pct" as const, delta: "-4%", color: "var(--lime, #c8fa3c)", spark: [46, 45, 43, 42, 41, 40, 39, 38] },
-  { id: "pp", label: "Pages / session", target: 46, format: "dec" as const, delta: "+9%", color: "var(--lime, #c8fa3c)", spark: [38, 39, 40, 42, 43, 44, 45, 46] },
-];
-
-const TREND = [9, 11, 10, 12, 14, 13, 15, 14, 16, 18, 17, 19, 22, 21];
-
-const TOP_PAGES = [
-  { path: "/events", views: 38_900, color: "var(--cyan, #00ffff)" },
-  { path: "/", views: 24_100, color: "var(--lime, #c8fa3c)" },
-  { path: "/spotted", views: 15_600, color: "var(--pink, #ff00cc)" },
-  { path: "/schedule", views: 12_300, color: "var(--orange, #ff8c00)" },
-  { path: "/gifting", views: 8_700, color: "var(--amber, #ffee00)" },
-];
-
-const SOURCES = [
-  { label: "Instagram", pct: 34, color: "var(--pink, #ff00cc)" },
-  { label: "Direct", pct: 28, color: "var(--cyan, #00ffff)" },
-  { label: "Google", pct: 19, color: "var(--lime, #c8fa3c)" },
-  { label: "TikTok", pct: 12, color: "var(--orange, #ff8c00)" },
-  { label: "Referral", pct: 7, color: "var(--purple, #8800ff)" },
-];
-
-const DEVICES = [
-  { label: "Mobile", pct: 78, color: "var(--cyan, #00ffff)" },
-  { label: "Desktop", pct: 17, color: "var(--lime, #c8fa3c)" },
-  { label: "Tablet", pct: 5, color: "var(--orange, #ff8c00)" },
-];
-
-const NEW_RETURNING = [
-  { label: "New", pct: 61, color: "var(--lime, #c8fa3c)" },
-  { label: "Returning", pct: 39, color: "var(--cyan, #00ffff)" },
-];
-
-const SAMPLE_CONVERSIONS = [
-  { label: "New signups", target: 214, format: "n" as const, delta: "+31%" },
-  { label: "Event submissions", target: 5, format: "n" as const, delta: "steady" },
-  { label: "RSVPs going", target: 1840, format: "k" as const, delta: "+27%" },
-];
 
 function peakKey(): string {
   const d = new Date();
@@ -197,8 +155,11 @@ export default function AdminStatsView({
     setPeakToday(next);
   }, [data?.activeSessions]);
 
-  const trend = useMemo(() => trendPoints(TREND), []);
-  const maxPageViews = Math.max(...TOP_PAGES.map(p => p.views));
+  const activityTrend = useMemo(() => {
+    if (!data) return trendPoints([]);
+    const combined = data.signupsTrend14d.map((v, i) => v + (data.rsvpsTrend14d[i] ?? 0));
+    return trendPoints(combined);
+  }, [data]);
 
   if (!data) {
     return (
@@ -210,31 +171,119 @@ export default function AdminStatsView({
 
   const community: { key: keyof AdminMetrics; label: string; color: StatCardColor; tab?: string }[] = [
     { key: "users", label: "Registered users", color: "lime", tab: "users" },
-    { key: "activeSessions", label: "Active sessions", color: "cyan" },
+    { key: "activeSessions", label: "Stored sessions", color: "cyan" },
     { key: "messages", label: "Active messages", color: "cyan", tab: "inbox" },
     { key: "newUsersToday", label: "New users today", color: "lime", tab: "users" },
   ];
 
   const program: { key: keyof AdminMetrics; label: string; color: StatCardColor; tab?: string }[] = [
     { key: "liveEvents", label: "Live events", color: "orange", tab: "events" },
-    { key: "userSubmittedEvents", label: "Community-submitted", color: "cyan", tab: "events" },
-    { key: "attendances", label: "Member check-ins", color: "green", tab: "events" },
+    { key: "directoryPlaces", label: "Directory places", color: "pink" },
+    { key: "attendances", label: "Member RSVPs", color: "green", tab: "events" },
+    { key: "pendingQueue", label: "Queue pending", color: "orange", tab: "inbox" },
     { key: "gigPosts", label: "Live gig posts", color: "orange", tab: "gigs" },
+    { key: "giftingPosts", label: "Gifting posts", color: "lime" },
+    { key: "missedConnections", label: "Spotted posts", color: "pink" },
+    { key: "unclaimedEvents", label: "Unclaimed events", color: "cyan", tab: "events" },
   ];
 
-  const conversions = SAMPLE_CONVERSIONS.map((c, i) => {
-    if (c.label === "Event submissions") {
-      return { ...c, target: Math.max(c.target, data.userSubmittedEvents) };
-    }
-    if (c.label === "New signups") {
-      return { ...c, target: Math.max(c.target, data.newUsersToday) };
-    }
-    return { ...c, delay: i * 60 };
-  });
+  const inventoryKpis = [
+    {
+      id: "users",
+      label: "Registered users",
+      target: data.users,
+      format: "n" as const,
+      delta: formatDelta(data.newUsersThisWeek, data.conversions.newSignupsPrevWeek),
+      color: "var(--lime, #c8fa3c)",
+      spark: data.signupsTrend14d.slice(-8),
+    },
+    {
+      id: "events",
+      label: "Live events",
+      target: data.liveEvents,
+      format: "n" as const,
+      delta: `${data.claimedEvents} claimed`,
+      color: "var(--orange, #ff8c00)",
+      spark: data.rsvpsTrend14d.slice(-8),
+    },
+    {
+      id: "rsvps",
+      label: "Member RSVPs",
+      target: data.attendances,
+      format: "n" as const,
+      delta: formatDelta(data.conversions.rsvpsThisWeek, data.conversions.rsvpsPrevWeek),
+      color: "var(--green, #39ff14)",
+      spark: data.rsvpsTrend14d.slice(-8),
+    },
+    {
+      id: "directory",
+      label: "Directory places",
+      target: data.directoryPlaces,
+      format: "n" as const,
+      delta: `${data.approvedPromoters} promoters`,
+      color: "var(--pink, #ff00cc)",
+      spark: data.signupsTrend14d.slice(-8),
+    },
+    {
+      id: "unclaimed",
+      label: "Unclaimed events",
+      target: data.unclaimedEvents,
+      format: "n" as const,
+      delta: `${data.pendingSubmissions} submissions pending`,
+      color: "var(--cyan, #00ffff)",
+      spark: data.rsvpsTrend14d.slice(-8),
+    },
+    {
+      id: "queue",
+      label: "Review queue",
+      target: data.pendingQueue,
+      format: "n" as const,
+      delta: data.pendingPromoterRequests > 0 ? `${data.pendingPromoterRequests} promoter asks` : "shared queue",
+      color: "var(--purple, #8800ff)",
+      spark: data.signupsTrend14d.slice(-8),
+    },
+  ];
+
+  const maxContent = Math.max(...data.contentBreakdown.map(r => r.count), 1);
+  const maxSources = Math.max(...data.eventSources.map(r => r.count), 1);
+  const claimTotal = Math.max(data.claimedEvents + data.unclaimedEvents, 1);
+
+  const memberActivity = [
+    { label: "RSVPs", count: data.attendances },
+    { label: "Messages", count: data.messages },
+    { label: "Gig posts", count: data.gigPosts },
+    { label: "Gifting", count: data.giftingPosts },
+    { label: "Spotted", count: data.missedConnections },
+  ].sort((a, b) => b.count - a.count);
+  const maxActivity = Math.max(...memberActivity.map(r => r.count), 1);
+
+  const conversions = [
+    {
+      label: "New signups",
+      target: data.conversions.newSignupsThisWeek,
+      format: "n" as const,
+      delta: formatDelta(data.conversions.newSignupsThisWeek, data.conversions.newSignupsPrevWeek),
+    },
+    {
+      label: "Event submissions",
+      target: data.conversions.eventSubmissionsThisWeek,
+      format: "n" as const,
+      delta: formatDelta(data.conversions.eventSubmissionsThisWeek, data.conversions.eventSubmissionsPrevWeek),
+    },
+    {
+      label: "RSVPs going",
+      target: data.conversions.rsvpsThisWeek,
+      format: "n" as const,
+      delta: formatDelta(data.conversions.rsvpsThisWeek, data.conversions.rsvpsPrevWeek),
+    },
+  ];
 
   const updatedLabel = data.generatedAt
     ? new Date(data.generatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
     : new Date(dataUpdatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  const trendTotal = data.signupsTrend14d.reduce((a, b) => a + b, 0) + data.rsvpsTrend14d.reduce((a, b) => a + b, 0);
+  const trendTag = trendTotal > 0 ? "Live from database" : "Quiet week so far";
 
   const renderStat = (item: (typeof community)[number]) => {
     const count = Number(data[item.key]) || 0;
@@ -268,7 +317,7 @@ export default function AdminStatsView({
             </div>
             <div className="admin-stats__live-num">
               <CountUpValue value={data.activeSessions} />{" "}
-              <span className="admin-stats__live-sub">active on the site</span>
+              <span className="admin-stats__live-sub">stored sessions</span>
             </div>
           </div>
         </div>
@@ -294,15 +343,15 @@ export default function AdminStatsView({
       <p className="admin-stats__section-kicker">The program</p>
       <div className="admin-stats__grid admin-stats__grid--program">{program.map(renderStat)}</div>
 
-      <h2 className="admin-stats__section-title">Traffic and audience</h2>
-      <p className="admin-stats__traffic-lede">Last 7 days versus the week before.</p>
+      <h2 className="admin-stats__section-title">Platform snapshot</h2>
+      <p className="admin-stats__traffic-lede">Pulled live from the database. Refreshes every minute.</p>
       <div className="admin-stats__kpi-grid">
-        {TRAFFIC_KPIS.map((kpi, i) => (
+        {inventoryKpis.map((kpi, i) => (
           <div key={kpi.id} className="admin-stats__kpi" style={{ animationDelay: `${i * 55}ms` }}>
             <div className="admin-stats__kpi-label">{kpi.label}</div>
             <div className="admin-stats__kpi-row">
               <span className="admin-stats__kpi-value">
-                <AnimatedKpiValue target={kpi.target} format={kpi.format} />
+                <CountUpValue value={kpi.target} />
               </span>
               <svg className="admin-stats__kpi-spark" viewBox="0 0 60 20" width="60" height="20" preserveAspectRatio="none" aria-hidden>
                 <polyline
@@ -316,7 +365,7 @@ export default function AdminStatsView({
               </svg>
             </div>
             <div className="admin-stats__kpi-delta" style={{ color: kpi.color }}>
-              {kpi.delta} <span>vs last week</span>
+              {kpi.delta}
             </div>
           </div>
         ))}
@@ -324,8 +373,8 @@ export default function AdminStatsView({
 
       <div className="admin-stats__panel">
         <div className="admin-stats__panel-head">
-          <h3 className="admin-stats__panel-title admin-stats__panel-title--lg">Page views · 14 days</h3>
-          <span className="admin-stats__trend-tag">Trending up</span>
+          <h3 className="admin-stats__panel-title admin-stats__panel-title--lg">Signups + RSVPs · 14 days</h3>
+          <span className="admin-stats__trend-tag">{trendTag}</span>
         </div>
         <div className="admin-stats__chart-wipe">
           <svg viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden>
@@ -335,9 +384,9 @@ export default function AdminStatsView({
                 <stop offset="1" stopColor="var(--cyan, #00ffff)" stopOpacity="0" />
               </linearGradient>
             </defs>
-            <polygon points={trend.area} fill="url(#adminStatsArea)" />
+            <polygon points={activityTrend.area} fill="url(#adminStatsArea)" />
             <polyline
-              points={trend.line}
+              points={activityTrend.line}
               fill="none"
               stroke="var(--cyan, #00ffff)"
               strokeWidth="1.4"
@@ -350,62 +399,71 @@ export default function AdminStatsView({
 
       <div className="admin-stats__two-col">
         <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
-          <h3 className="admin-stats__panel-title">Top pages</h3>
-          {TOP_PAGES.map((row, i) => (
+          <h3 className="admin-stats__panel-title">Content live on site</h3>
+          {data.contentBreakdown.map((row, i) => (
             <BarRow
-              key={row.path}
-              label={row.path}
-              value={fmtK(row.views)}
-              pct={(row.views / maxPageViews) * 100}
-              color={row.color}
+              key={row.label}
+              label={row.label}
+              value={String(row.count)}
+              pct={(row.count / maxContent) * 100}
+              color={BREAKDOWN_COLORS[i % BREAKDOWN_COLORS.length]}
               delay={i * 70}
-              mono
             />
           ))}
         </div>
         <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
-          <h3 className="admin-stats__panel-title">Where they come from</h3>
-          {SOURCES.map((row, i) => (
-            <BarRow
-              key={row.label}
-              label={row.label}
-              value={`${row.pct}%`}
-              pct={row.pct}
-              color={row.color}
-              delay={i * 70}
-            />
-          ))}
+          <h3 className="admin-stats__panel-title">Event catalog sources</h3>
+          {data.eventSources.length === 0 ? (
+            <p className="admin-stats__insight">No live events in the catalog yet.</p>
+          ) : (
+            data.eventSources.map((row, i) => (
+              <BarRow
+                key={row.label}
+                label={row.label}
+                value={String(row.count)}
+                pct={(row.count / maxSources) * 100}
+                color={SOURCE_COLORS[i % SOURCE_COLORS.length]}
+                delay={i * 70}
+              />
+            ))
+          )}
         </div>
       </div>
 
       <div className="admin-stats__two-col">
         <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
-          <h3 className="admin-stats__panel-title">Devices</h3>
-          {DEVICES.map((row, i) => (
+          <h3 className="admin-stats__panel-title">Board activity</h3>
+          {memberActivity.map((row, i) => (
             <BarRow
               key={row.label}
               label={row.label}
-              value={`${row.pct}%`}
-              pct={row.pct}
-              color={row.color}
+              value={String(row.count)}
+              pct={(row.count / maxActivity) * 100}
+              color={BREAKDOWN_COLORS[i % BREAKDOWN_COLORS.length]}
               delay={i * 70}
             />
           ))}
         </div>
         <div className="admin-stats__panel" style={{ marginBottom: 0 }}>
-          <h3 className="admin-stats__panel-title">New vs returning</h3>
-          {NEW_RETURNING.map((row, i) => (
-            <BarRow
-              key={row.label}
-              label={row.label}
-              value={`${row.pct}%`}
-              pct={row.pct}
-              color={row.color}
-              delay={i * 70}
-            />
-          ))}
+          <h3 className="admin-stats__panel-title">Claimed vs unclaimed</h3>
+          <BarRow
+            label="Claimed"
+            value={String(data.claimedEvents)}
+            pct={(data.claimedEvents / claimTotal) * 100}
+            color="var(--lime, #c8fa3c)"
+            delay={0}
+          />
+          <BarRow
+            label="Unclaimed"
+            value={String(data.unclaimedEvents)}
+            pct={(data.unclaimedEvents / claimTotal) * 100}
+            color="var(--cyan, #00ffff)"
+            delay={70}
+          />
           <p className="admin-stats__insight">
-            Returning visitors are climbing as Pride week nears. Keep the schedule fresh.
+            {data.unclaimedEvents > 0
+              ? `${data.unclaimedEvents} live listing${data.unclaimedEvents === 1 ? "" : "s"} still open for promoters to claim.`
+              : "Every live event has a host attached."}
           </p>
         </div>
       </div>
@@ -415,7 +473,7 @@ export default function AdminStatsView({
         {conversions.map((c, i) => (
           <div key={c.label} className="admin-stats__conv" style={{ animationDelay: `${i * 60}ms` }}>
             <div className="admin-stats__conv-value">
-              <AnimatedKpiValue target={c.target} format={c.format} />
+              <CountUpValue value={c.target} />
             </div>
             <div className="admin-stats__conv-label">{c.label}</div>
             <div className="admin-stats__conv-delta">{c.delta}</div>
