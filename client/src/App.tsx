@@ -5,6 +5,7 @@ import { queryClient } from "./lib/queryClient";
 import { resetPageScroll } from "./lib/resetPageScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
+import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -121,10 +122,12 @@ export default function App() {
         <AuthProvider>
           <PushNotificationPrompt />
           <Router>
-            <ScrollToTop />
-            <AnalyticsTracker />
-            <AppLayout />
-            <Toaster />
+            <InboxSheetProvider>
+              <ScrollToTop />
+              <AnalyticsTracker />
+              <AppLayout />
+              <Toaster />
+            </InboxSheetProvider>
           </Router>
         </AuthProvider>
       </ThemeProvider>

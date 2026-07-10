@@ -1,37 +1,19 @@
-import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Home, LayoutGrid, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import InboxOverlay from "@/components/InboxOverlay";
+import { useInboxSheet } from "@/context/InboxSheetContext";
+import { useUnreadCount } from "@/hooks/useUnreadCount";
 
 /**
  * Mobile bottom navigation (signed-in users only). Three plain icon tabs:
- * Home, Hub (→ /dashboard), and Inbox (opens the floating overlay). Hidden on
- * desktop, where the top nav + floating inbox FAB take over.
+ * Home, Hub (→ /dashboard), and Inbox (opens the shared sheet via provider).
  */
 export default function MobileBottomNav() {
   const [location] = useLocation();
   const { user } = useAuth();
-  const [inboxOpen, setInboxOpen] = useState(false);
+  const { open, toggleSheet } = useInboxSheet();
+  const unreadCount = useUnreadCount();
 
-  // Close the inbox overlay when navigating.
-  useEffect(() => {
-    setInboxOpen(false);
-  }, [location]);
-
-  const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/messages/unread-count"],
-    queryFn: () =>
-      fetch("/api/messages/unread-count", { credentials: "include" }).then(r =>
-        r.ok ? r.json() : { count: 0 }
-      ),
-    enabled: !!user,
-    refetchInterval: 90000,
-  });
-  const unreadCount = unread.count || 0;
-
-  // Bottom nav only exists for signed-in users (Hub + Inbox are auth-gated).
   if (!user) return null;
 
   const homeActive = location === "/";
@@ -59,9 +41,9 @@ export default function MobileBottomNav() {
 
       <button
         type="button"
-        className={`site-mobile-nav__tab${inboxOpen ? " active" : ""}`}
-        onClick={() => setInboxOpen(o => !o)}
-        aria-expanded={inboxOpen}
+        className={`site-mobile-nav__tab${open ? " active" : ""}`}
+        onClick={toggleSheet}
+        aria-expanded={open}
         aria-label={
           unreadCount > 0
             ? `Inbox, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
@@ -78,8 +60,6 @@ export default function MobileBottomNav() {
         </span>
         <span>Inbox</span>
       </button>
-
-      <InboxOverlay open={inboxOpen} onClose={() => setInboxOpen(false)} />
     </div>
   );
 }
