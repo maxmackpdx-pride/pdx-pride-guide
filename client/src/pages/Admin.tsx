@@ -294,6 +294,15 @@ export default function Admin() {
 
   useEffect(() => {
     if (!authenticated) return;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    const effectiveTab = tab === "queue" || tab === "inbox" || tab === "analytics" || tab === "stats" ? "overview" : tab || "overview";
+    if (effectiveTab === "overview") {
+      navigate("/dashboard?section=admin");
+    }
+  }, [authenticated, navigate]);
+
+  useEffect(() => {
+    if (!authenticated) return;
     const onPopState = () => syncAdminTabFromUrl();
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
