@@ -58,14 +58,25 @@ export default function RiverBratsShell({ beachId }: Props) {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
+  const beachName = beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island";
+  const beachChatName = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
+
   return (
     <section className={`river-brats river-brats--${accent}`}>
       <div className="river-brats__head">
-        <div className={`board-active-feed__kicker board-active-feed__kicker--${accent}`}>
-          River Brats
+        <div className={`river-brats__kicker river-brats__kicker--${accent}`}>
+          River Brats · {beachName}
         </div>
-        <h2 className="display section-heading river-brats__title">Carpool · check-in · spotted</h2>
-        <p className="nude-section-copy">Same-day coordination for {beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island"} — all year, live on post.</p>
+        <h2 className="display river-brats__hero-title">
+          Check in.{" "}
+          <span className={`river-brats__hero-accent river-brats__hero-accent--${accent}`}>
+            You're in the chat.
+          </span>
+        </h2>
+        <p className="river-brats__hero-lede">
+          Checking in drops you into today's {beachChatName} group chat. It lives in your Messages and
+          clears at midnight. No addresses, no drama.
+        </p>
       </div>
 
       <nav className="events-tab-bar river-brats__tabs" aria-label="River Brats">

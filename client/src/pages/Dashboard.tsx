@@ -8,28 +8,56 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHeader from "@/components/PageHeader";
-import HubShell, { type MemberView } from "@/components/hub/HubShell";
-import MemberHubHome from "@/components/hub/MemberHubHome";
-import DashboardDrawer, { DashboardItemRow } from "@/components/dashboard/DashboardDrawer";
+import HubV2 from "@/components/hub/HubV2";
+import type { HubEventRow } from "@/components/hub/sections/HubEvents";
+import { parseHubSection, type HubSection } from "@/components/hub/types";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
-import DashboardVenueSection from "@/components/dashboard/DashboardVenueSection";
-import PwaInstallBanner from "@/components/PwaInstallBanner";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
 import { editFormToApiPayload, eventToEditForm } from "@/lib/eventEditForm";
 import "@/components/dashboard/dashboard.css";
-import "@/components/hub/hub-home.css";
+
+function mapCheckInRow(check: any): HubEventRow {
+  return {
+    id: check.id,
+    title: check.eventTitle,
+    when: `${check.venueName} · ${new Date(check.dateStart).toLocaleString()}`,
+    dayOfWeek: check.dayOfWeek,
+    chip: "Checked in",
+  };
+}
+
+function mapEventRow(evt: any, chip?: string): HubEventRow {
+  return {
+    id: evt.id,
+    title: evt.title,
+    when: `${evt.dayOfWeek ?? ""} · ${evt.venueName ?? ""}`.replace(/^ · /, ""),
+    neighborhood: evt.neighborhood ?? undefined,
+    admission: evt.admission ?? undefined,
+    dayOfWeek: evt.dayOfWeek ?? undefined,
+    chip,
+  };
+}
+
+function hubSectionFromSearch(params: URLSearchParams): HubSection {
+  if (params.get("view") === "posts") return "events";
+  if (params.get("edit") === "profile") return "profile";
+  const legacy = params.get("section");
+  if (legacy === "events" || legacy === "gigs" || legacy === "gifting" || legacy === "spotted" || legacy === "checkins") {
+    return "events";
+  }
+  return parseHubSection(params.get("section"));
+}
 
 export default function Dashboard() {
-  usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, gigs, messages, and more.");
+  usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, feed, people, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
   const readSearch = () => new URLSearchParams(window.location.search);
-  const [memberView, setMemberView] = useState<MemberView>(() => {
-    if (typeof window === "undefined") return "home";
-    return readSearch().get("view") === "posts" ? "posts" : "home";
-  });
+  const [hubSection, setHubSection] = useState<HubSection>(() =>
+    typeof window === "undefined" ? "feed" : hubSectionFromSearch(readSearch()),
+  );
   const [editMode, setEditMode] = useState(() => {
     if (typeof window === "undefined") return false;
     return readSearch().get("edit") === "profile";
@@ -40,16 +68,12 @@ export default function Dashboard() {
   const [pendingEditGigId, setPendingEditGigId] = useState<string | null>(() =>
     typeof window === "undefined" ? null : readSearch().get("editGig"),
   );
-  const [pendingSection, setPendingSection] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : readSearch().get("section"),
-  );
 
   const applySearchParams = (params: URLSearchParams) => {
-    setMemberView(params.get("view") === "posts" ? "posts" : "home");
+    setHubSection(hubSectionFromSearch(params));
     setEditMode(params.get("edit") === "profile");
     setPendingEditEventId(params.get("editEvent"));
     setPendingEditGigId(params.get("editGig"));
-    setPendingSection(params.get("section"));
   };
 
   useEffect(() => {
@@ -61,6 +85,7 @@ export default function Dashboard() {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [username, setUsername] = useState(user?.username || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -73,6 +98,7 @@ export default function Dashboard() {
     setBio(user.bio || "");
     setAvatarChoice(user.avatarChoice || 1);
   }, [user?.id, user?.displayName, user?.username, user?.bio, user?.avatarChoice]);
+
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [editingEvent, setEditingEvent] = useState<any>(null);
@@ -80,12 +106,10 @@ export default function Dashboard() {
   const [hostUpdate, setHostUpdate] = useState("");
   const [editingGig, setEditingGig] = useState<any>(null);
   const [gigForm, setGigForm] = useState({ title: "", description: "", skills: "", compensation: "", location: "" });
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ events: true });
-  const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (memberView === "posts") url.searchParams.set("view", "posts");
+    if (hubSection === "events") url.searchParams.set("view", "posts");
     else url.searchParams.delete("view");
     if (editMode) url.searchParams.set("edit", "profile");
     else url.searchParams.delete("edit");
@@ -93,10 +117,10 @@ export default function Dashboard() {
     else if (!pendingEditEventId) url.searchParams.delete("editEvent");
     if (editingGig) url.searchParams.set("editGig", String(editingGig.id));
     else if (!pendingEditGigId) url.searchParams.delete("editGig");
-    if (pendingSection && memberView === "posts") url.searchParams.set("section", pendingSection);
+    if (hubSection !== "feed") url.searchParams.set("section", hubSection);
     else url.searchParams.delete("section");
     window.history.replaceState({}, "", url.toString());
-  }, [memberView, editMode, editingEvent, editingGig, pendingEditEventId, pendingEditGigId, pendingSection]);
+  }, [hubSection, editMode, editingEvent, editingGig, pendingEditEventId, pendingEditGigId]);
 
   const fetchMine = async (url: string) => {
     const r = await fetch(url, { credentials: "include" });
@@ -142,7 +166,7 @@ export default function Dashboard() {
   const myGifting = myGiftingQuery.data ?? [];
   const myCheckIns = myCheckInsQuery.data ?? [];
 
-  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean } | null>({
+  const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean; canManageTeam?: boolean } | null>({
     queryKey: ["/api/admin/me"],
     queryFn: async () => {
       const r = await fetch("/api/admin/me", { credentials: "include" });
@@ -152,28 +176,20 @@ export default function Dashboard() {
     retry: false,
   });
 
-  const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/messages/unread-count"],
-    queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
-    enabled: !!user,
-  });
-
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
-  const isPrimaryOwner = Boolean(user?.isPrimaryOwner || adminSession?.isPrimaryOwner);
-  const unreadCount = unread.count || 0;
+  const canManageTeam = Boolean(user?.canManageTeam || adminSession?.canManageTeam || isSuperAdmin);
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
-      fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
+      fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
         r.ok ? r.json() : { count: 0, ownerCount: 0 },
       ),
     enabled: isAdmin,
     refetchInterval: 90_000,
   });
   const pendingCount = pendingAdmin.count || 0;
-  const ownerCount = isPrimaryOwner ? (pendingAdmin.ownerCount || 0) : 0;
 
   const dashboardQueryErrors = [
     myGigsQuery.isError && "gigs",
@@ -209,7 +225,7 @@ export default function Dashboard() {
       toast({
         title: "Host update posted",
         description: n > 0
-          ? `Visible on the event page. ${n} attendee${n === 1 ? "" : "s"} notified in inbox.`
+          ? `Visible on the event page. ${n} attendee${n === 1 ? "" : "s"} notified.`
           : "Visible on the event detail page.",
       });
       setHostUpdate("");
@@ -265,19 +281,6 @@ export default function Dashboard() {
       toast({ title: "Could not delete event", description: err.message, variant: "destructive" }),
   });
 
-  const giftingActionMutation = useMutation({
-    mutationFn: async (url: string) => {
-      const res = await fetch(url, { method: "POST", credentials: "include" });
-      if (!res.ok) throw new Error((await res.text()) || "Update failed");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-      toast({ title: "Gifting post updated" });
-    },
-    onError: () => toast({ title: "Could not update gifting post", variant: "destructive" }),
-  });
-
   const gigEditMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const res = await fetch(`/api/gigs/${id}`, {
@@ -305,8 +308,7 @@ export default function Dashboard() {
       setPendingEditEventId(null);
       return;
     }
-    setMemberView("posts");
-    setOpenSections((prev) => ({ ...prev, events: true }));
+    setHubSection("events");
     setEditingEvent(evt);
     setHostUpdate("");
     setEventForm(eventToEditForm(evt));
@@ -321,8 +323,7 @@ export default function Dashboard() {
       setPendingEditGigId(null);
       return;
     }
-    setMemberView("posts");
-    setOpenSections((prev) => ({ ...prev, gigs: true }));
+    setHubSection("events");
     setEditingGig(gig);
     setGigForm({
       title: gig.title || "",
@@ -333,17 +334,6 @@ export default function Dashboard() {
     });
     setPendingEditGigId(null);
   }, [pendingEditGigId, user, myGigs, myGigsQuery.isLoading]);
-
-  useEffect(() => {
-    if (!pendingSection || !user) return;
-    setMemberView("posts");
-    setOpenSections((prev) => ({ ...prev, [pendingSection]: true }));
-    const sectionId = pendingSection;
-    setPendingSection(null);
-    requestAnimationFrame(() => {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [pendingSection, user]);
 
   if (loading) {
     return (
@@ -362,7 +352,7 @@ export default function Dashboard() {
           section="Account"
           title="Your Hub"
           titleAccent="cyan"
-          lede="Free, community-run. Log in to manage submissions, boards, and private threads."
+          lede="Free, community-run. Log in to manage submissions, boards, and your feed."
         />
         <div className="dash-inner" style={{ minHeight: "40vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 48 }}>
           <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>You need to be logged in to view your dashboard.</p>
@@ -400,47 +390,6 @@ export default function Dashboard() {
     setSaving(false);
   };
 
-  const handleDeleteGig = async (id: number) => {
-    if (!confirm("Delete this gig post?")) return;
-    await fetch(`/api/gigs/${id}`, { method: "DELETE", credentials: "include" });
-    queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
-  };
-
-  const handleDeleteGifting = async (id: number, title: string) => {
-    if (!confirm(`Delete "${title}" from the gifting board?`)) return;
-    const res = await fetch(`/api/gifting/${id}`, { method: "DELETE", credentials: "include" });
-    if (!res.ok) {
-      toast({ title: "Could not delete post", variant: "destructive" });
-      return;
-    }
-    queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-    toast({ title: "Gifting post deleted" });
-  };
-
-  const startGigEdit = (gig: any) => {
-    setEditingGig(gig);
-    setGigForm({
-      title: gig.title || "",
-      description: gig.description || "",
-      skills: gig.skills || "",
-      compensation: gig.compensation || "",
-      location: gig.location || "",
-    });
-  };
-
-  const handleDeleteMissed = async (id: number) => {
-    if (!confirm("Delete this missed connection?")) return;
-    await fetch(`/api/missed-connections/${id}`, { method: "DELETE", credentials: "include" });
-    queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-  };
-
-  const startEventEdit = (evt: any) => {
-    setEditingEvent(evt);
-    setHostUpdate("");
-    setEventForm(eventToEditForm(evt));
-  };
-
   const saveEventEdit = () => {
     if (!editingEvent || !eventForm) return;
     eventEditMutation.mutate({ id: editingEvent.id, data: editFormToApiPayload(eventForm) });
@@ -448,28 +397,12 @@ export default function Dashboard() {
 
   const eventCount = submittedEvents.length + myEvents.length;
   const postsCount = eventCount + myGigs.length + myMissed.length + myGifting.length + myCheckIns.length;
-  const CYAN = "#19E3FF";
-  const LIME = "#C8FA3C";
-  const MAGENTA = "#FF1FA0";
-  const ORANGE = "#FF8C00";
 
-  const firstName = (user.displayName || user.username || "friend")
-    .trim()
-    .split(/[\s_]+/)[0]
-    .toUpperCase();
-
-  const scrollToSection = (key: string) => {
-    setMemberView("posts");
-    setOpenSections(prev => ({ ...prev, [key]: true }));
-    requestAnimationFrame(() => {
-      document.getElementById(key)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  };
-
-  const onMemberNavigate = (view: MemberView) => {
-    if (view === "inbox") return;
-    setMemberView(view);
-  };
+  const goingEvents = myCheckIns.map(mapCheckInRow);
+  const hostingEvents = [
+    ...submittedEvents.map((evt: any) => mapEventRow(evt, `Submitted · ${evt.status}`)),
+    ...myEvents.map((evt: any) => mapEventRow(evt, "Claimed")),
+  ];
 
   const errorBanner =
     dashboardQueryErrors.length > 0 ? (
@@ -515,286 +448,77 @@ export default function Dashboard() {
     />
   ) : null;
 
+  const eventsEditorSlot = (
+    <>
+      {editingEvent && eventForm && (
+        <div style={{ marginBottom: 20 }}>
+          <DashboardEventEditForm
+            editingEvent={editingEvent}
+            eventForm={eventForm}
+            setEventForm={(fn) => setEventForm((prev: any) => (prev ? fn(prev) : prev))}
+            hostUpdate={hostUpdate}
+            setHostUpdate={setHostUpdate}
+            onCancel={() => {
+              setEditingEvent(null);
+              setEventForm(null);
+            }}
+            onSave={saveEventEdit}
+            onPostUpdate={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
+            onDelete={
+              isAdmin
+                ? () => {
+                    if (!editingEvent) return;
+                    const ok = window.confirm(
+                      `Delete “${editingEvent.title}”?\n\nThis hides it from the public site (status → HIDDEN). You can restore it from Admin → Events.`,
+                    );
+                    if (!ok) return;
+                    eventDeleteMutation.mutate(editingEvent.id);
+                  }
+                : undefined
+            }
+            saving={eventEditMutation.isPending}
+            posting={hostUpdateMutation.isPending}
+            deleting={eventDeleteMutation.isPending}
+          />
+        </div>
+      )}
+      {editingGig && (
+        <div style={{ marginBottom: 20 }}>
+          <DashboardGigEditForm
+            gigForm={gigForm}
+            setGigForm={setGigForm}
+            onSave={() => gigEditMutation.mutate({ id: editingGig.id, data: gigForm })}
+            onCancel={() => setEditingGig(null)}
+          />
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="dash-page hub-nested">
-      <HubShell
-        mode="member"
-        memberView={memberView}
-        onMemberNavigate={onMemberNavigate}
-        isAdminUser={isAdmin}
-        isSuperAdmin={isSuperAdmin}
-        isPrimaryOwner={isPrimaryOwner}
-        userName={user.displayName || user.username || "Member"}
-        userHandle={user.username}
-        photoUrl={user.photoUrl}
-        avatarChoice={user.avatarChoice}
-        avatarRing={user.avatarRing}
-        unreadCount={unreadCount}
-        postsCount={postsCount}
+      <HubV2
+        user={user}
+        isAdmin={isAdmin}
+        canManageTeam={canManageTeam}
         pendingCount={pendingCount}
-        ownerCount={ownerCount}
-        kicker={memberView === "posts" ? "Your stuff" : "Your hub"}
-        kickerColor={memberView === "posts" ? "var(--green, #39ff14)" : "var(--cyan, #00ffff)"}
-        title={memberView === "posts" ? "My posts" : `Hey, ${firstName}`}
-        lede={
-          memberView === "posts"
-            ? "Everything you've submitted, claimed, or posted to the boards."
-            : "Your events, messages, and posts in one place. Community run and free."
-        }
+        postsCount={postsCount}
+        goingEvents={goingEvents}
+        hostingEvents={hostingEvents}
+        savedEvents={[]}
+        eventsLoading={myEventsQuery.isLoading || submittedEventsQuery.isLoading || myCheckInsQuery.isLoading}
+        eventsEditorSlot={eventsEditorSlot}
+        profileEditor={profileEditor}
+        editMode={editMode}
+        onEditProfile={() => {
+          setHubSection("profile");
+          setEditMode(true);
+        }}
         onLogout={() => logout()}
-      >
-        <PwaInstallBanner />
-        {memberView === "home" && (
-          <MemberHubHome
-            user={user}
-            counts={{
-              eventCount,
-              gigCount: myGigs.length,
-              giftingCount: myGifting.length,
-              spottedCount: myMissed.length,
-              checkInCount: myCheckIns.length,
-            }}
-            isAdmin={isAdmin}
-            isPrimaryOwner={isPrimaryOwner}
-            pendingCount={pendingCount}
-            ownerCount={ownerCount}
-            editMode={editMode}
-            onEditProfile={() => setEditMode(!editMode)}
-            onLogout={() => logout()}
-            onSelectSection={scrollToSection}
-            profileEditor={profileEditor}
-            errorBanner={errorBanner}
-          />
-        )}
-
-        {memberView === "posts" && (
-        <div className="dash-drawers">
-          {errorBanner}
-          <DashboardVenueSection open={!!openSections.venues} onToggle={() => toggleSection("venues")} />
-
-          <DashboardDrawer
-            title="My events"
-            id="events"
-            color={CYAN}
-            countLabel={`${eventCount} total`}
-            open={!!openSections.events}
-            onToggle={() => toggleSection("events")}
-            loading={myEventsQuery.isLoading || submittedEventsQuery.isLoading}
-            isEmpty={eventCount === 0}
-            emptyText="No submitted or claimed events yet."
-            cta={eventCount === 0 ? { label: "Submit or claim an event →", href: "/submit" } : undefined}
-          >
-            {editingEvent && eventForm && (
-              <DashboardEventEditForm
-                editingEvent={editingEvent}
-                eventForm={eventForm}
-                setEventForm={(fn) => setEventForm((prev: any) => (prev ? fn(prev) : prev))}
-                hostUpdate={hostUpdate}
-                setHostUpdate={setHostUpdate}
-                onCancel={() => { setEditingEvent(null); setEventForm(null); }}
-                onSave={saveEventEdit}
-                onPostUpdate={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
-                onDelete={isAdmin ? () => {
-                  if (!editingEvent) return;
-                  const ok = window.confirm(
-                    `Delete “${editingEvent.title}”?\n\nThis hides it from the public site (status → HIDDEN). You can restore it from Admin → Events.`,
-                  );
-                  if (!ok) return;
-                  eventDeleteMutation.mutate(editingEvent.id);
-                } : undefined}
-                saving={eventEditMutation.isPending}
-                posting={hostUpdateMutation.isPending}
-                deleting={eventDeleteMutation.isPending}
-              />
-            )}
-            {submittedEvents.map((evt: any) => (
-              <DashboardItemRow
-                key={`submitted-${evt.id}`}
-                color={MAGENTA}
-                title={evt.title}
-                meta={`${evt.dayOfWeek} · ${evt.venueName}`}
-                chip={`Submitted · ${evt.status}`}
-                chipColor={MAGENTA}
-              />
-            ))}
-            {myEvents.map((evt: any) => (
-              <DashboardItemRow
-                key={evt.id}
-                color={CYAN}
-                title={evt.title}
-                meta={`${evt.dayOfWeek} · ${evt.venueName}`}
-                chip="Claimed"
-                chipColor={CYAN}
-                actions={
-                  <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => startEventEdit(evt)}>
-                    Edit
-                  </button>
-                }
-              />
-            ))}
-          </DashboardDrawer>
-
-          <DashboardDrawer
-            title="Gig posts"
-            id="gigs"
-            color={ORANGE}
-            countLabel={`${myGigs.length} posts`}
-            open={!!openSections.gigs}
-            onToggle={() => toggleSection("gigs")}
-            loading={myGigsQuery.isLoading}
-            isEmpty={myGigs.length === 0}
-            emptyText="No gig posts yet."
-            pageHref="/pride-work"
-            cta={{ label: "Post on Gig Board →", href: "/pride-work" }}
-          >
-            {editingGig && (
-              <DashboardGigEditForm
-                gigForm={gigForm}
-                setGigForm={setGigForm}
-                onSave={() => gigEditMutation.mutate({ id: editingGig.id, data: gigForm })}
-                onCancel={() => setEditingGig(null)}
-              />
-            )}
-            {myGigs.map((gig: any) => (
-              <DashboardItemRow
-                key={gig.id}
-                color={ORANGE}
-                title={gig.title}
-                meta={`${gig.postType === "LOOKING_FOR_WORK" ? "Looking for work" : "Posting a gig"}${gig.gigDate ? ` · ${gig.gigDate}` : ""}${gig.gigTime ? ` · ${gig.gigTime}` : ""}`}
-                chip={gig.status}
-                chipColor={gig.status === "LIVE" ? LIME : "#6f736c"}
-                actions={
-                  <>
-                    <button type="button" className="dash-mini-btn" style={{ color: ORANGE }} onClick={() => startGigEdit(gig)}>Edit</button>
-                    <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteGig(gig.id)}>Delete</button>
-                  </>
-                }
-              />
-            ))}
-          </DashboardDrawer>
-
-          <DashboardDrawer
-            title="Spotted"
-            id="spotted"
-            color={MAGENTA}
-            countLabel={`${myMissed.length} posts`}
-            open={!!openSections.spotted}
-            onToggle={() => toggleSection("spotted")}
-            loading={myMissedQuery.isLoading}
-            isEmpty={myMissed.length === 0}
-            emptyText="No Spotted posts yet."
-            pageHref="/spotted"
-            cta={{ label: "Post on Spotted →", href: "/spotted" }}
-          >
-            {myMissed.map((post: any) => (
-              <DashboardItemRow
-                key={post.id}
-                color={MAGENTA}
-                title={post.title}
-                meta={`${post.eventTitle || post.venueHint || post.dayOfWeek || "Event"}${post.status !== "ACTIVE" ? ` · ${post.status}` : ""}`}
-                chip={post.status}
-                chipColor={MAGENTA}
-                actions={
-                  <>
-                    <a href="/spotted" className="dash-mini-btn" style={{ color: MAGENTA, textDecoration: "none" }}>Edit</a>
-                    <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteMissed(post.id)}>Delete</button>
-                  </>
-                }
-              />
-            ))}
-          </DashboardDrawer>
-
-          <DashboardDrawer
-            title="Gifting"
-            id="gifting"
-            color={CYAN}
-            countLabel={`${myGifting.length} posts`}
-            open={!!openSections.gifting}
-            onToggle={() => toggleSection("gifting")}
-            loading={myGiftingQuery.isLoading}
-            isEmpty={myGifting.length === 0}
-            emptyText="No gifting posts yet."
-            pageHref="/gifting"
-            cta={{ label: "Open gifting board →", href: "/gifting" }}
-          >
-            {myGifting.map((post: any) => (
-              <div key={post.id}>
-                <DashboardItemRow
-                  color={post.postType === "GIFT" ? LIME : "#B451FF"}
-                  title={post.title}
-                  meta={`${post.postType === "ISO" ? "In search of" : post.postType} · ${post.category} · ${post.neighborhood}`}
-                  chip={post.status}
-                  chipColor={CYAN}
-                  actions={
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                      <span className="dash-mono" style={{ fontSize: 10, color: "var(--dash-muted)", textTransform: "none" }}>
-                        {post.interestCount || 0} response{(post.interestCount === 1) ? "" : "s"}
-                      </span>
-                      <a href="/gifting" className="dash-mini-btn" style={{ color: CYAN, textDecoration: "none" }}>Board</a>
-                      {post.postType === "GIFT" && !["GIFTED", "EXPIRED"].includes(post.status) && (
-                        <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-gifted`)}>Mark gifted</button>
-                      )}
-                      {post.postType === "ISO" && !["FOUND", "EXPIRED"].includes(post.status) && (
-                        <button type="button" className="dash-mini-btn" style={{ color: LIME }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/mark-found`)}>Mark found</button>
-                      )}
-                      {!["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
-                        <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/renew`)}>Renew</button>
-                      )}
-                      <button type="button" className="dash-mini-btn" style={{ color: "#FF2400" }} onClick={() => handleDeleteGifting(post.id, post.title)}>Delete</button>
-                    </div>
-                  }
-                />
-                {(post.interests || []).filter((i: any) => i.status === "INTERESTED").slice(0, 3).map((interest: any) => (
-                  <div key={interest.id} className="dash-item" style={{ marginLeft: 18, marginTop: -4, paddingTop: 0 }}>
-                    <span className="dash-item-main">
-                      <span className="dash-item-meta" style={{ textTransform: "none" }}>
-                        {interest.displayName || interest.username}: {interest.note}
-                      </span>
-                    </span>
-                    <div className="dash-item-actions">
-                      <button
-                        type="button"
-                        className="dash-mini-btn"
-                        style={{ color: LIME }}
-                        onClick={() => giftingActionMutation.mutate(`/api/gifting/${post.id}/interests/${interest.id}/choose`)}
-                      >
-                        Pick
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </DashboardDrawer>
-
-          <DashboardDrawer
-            title="Check-ins"
-            id="checkins"
-            color={LIME}
-            countLabel={`${myCheckIns.length} active`}
-            open={!!openSections.checkins}
-            onToggle={() => toggleSection("checkins")}
-            loading={myCheckInsQuery.isLoading}
-            isEmpty={myCheckIns.length === 0}
-            emptyText="No active check-ins yet."
-            pageHref="/events"
-            cta={{ label: "Browse events to check in →", href: "/events" }}
-          >
-            {myCheckIns.map((check: any) => (
-              <DashboardItemRow
-                key={check.id}
-                color={LIME}
-                title={check.eventTitle}
-                meta={`${check.venueName} · ${new Date(check.dateStart).toLocaleString()}`}
-                actions={
-                  <span style={{ fontSize: 13, color: LIME, maxWidth: 200 }}>{check.message}</span>
-                }
-              />
-            ))}
-          </DashboardDrawer>
-        </div>
-        )}
-      </HubShell>
+        errorBanner={errorBanner}
+        section={hubSection}
+        onSectionChange={setHubSection}
+      />
     </div>
   );
 }

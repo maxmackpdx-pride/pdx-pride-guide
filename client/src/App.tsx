@@ -74,7 +74,7 @@ function AppLayout() {
     >
       <FilmGrainOverlay />
       {!profile && <Nav />}
-      {!profile && <MobileBottomNav />}
+      {!profile && !hub && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
           <Switch>

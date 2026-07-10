@@ -8,12 +8,12 @@ type Props = {
 
 export default function RiverBratsHourChips({ value, onChange, accent }: Props) {
   return (
-    <div className={`rb-hour-chips rb-hour-chips--${accent}`} role="group" aria-label="Time">
+    <div className={`rb-hour-chips rb-hour-chips--${accent}`} role="group" aria-label="Arrival time">
       {RIVER_BRATS_HOURS.map(hour => (
         <button
           key={hour}
           type="button"
-          className={`rb-hour-chip${value === hour ? " active" : ""}`}
+          className={`rb-hour-chip cv-chip${value === hour ? " active" : ""}`}
           onClick={() => onChange(hour)}
         >
           {formatRiverBratsHour(hour)}

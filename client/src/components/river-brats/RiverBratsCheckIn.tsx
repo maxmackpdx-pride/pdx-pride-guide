@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Link } from "wouter";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import {
   RIVER_BRATS_HOUR_END,
   RIVER_BRATS_HOUR_START,
-  beachVenueLabel,
   formatRiverBratsHour,
   pacificCurrentHour,
   pacificTodayDate,
@@ -14,10 +12,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import UserAvatar from "@/components/UserAvatar";
-import { Button } from "@/components/ds";
 import RiverBratsHourChips from "./RiverBratsHourChips";
-import RiverBratsReportButton from "./RiverBratsReportButton";
-import RiverBratsChatPanel from "./RiverBratsChatPanel";
+import RiverBratsGroupChat from "./RiverBratsGroupChat";
 
 type CheckinVisibility = "visible" | "anonymous";
 
@@ -40,23 +36,12 @@ type CheckinRow = {
 
 type Props = {
   beachId: NudeBeachTab;
-  accent: "cyan" | "orange" | "green";
+  accent: "orange" | "green";
   /** From ?verify=1 deep link (arrival push) — auto-run the GPS confirm once. */
   autoVerify?: boolean;
-  /** From ?chat=1 deep link — auto-open the beach chat once checked in. */
+  /** From ?chat=1 deep link (Inbox GROUP row) — scroll the chat into view. */
   autoOpenChat?: boolean;
 };
-
-function buttonAccentProps(accent: Props["accent"]) {
-  if (accent === "green") {
-    return {
-      accent: "cyan" as const,
-      style: { "--_c": "var(--neon-green)", "--_sh": "rgba(0,238,68,0.32)", "--_shx": "rgba(0,238,68,0.46)" },
-    };
-  }
-  if (accent === "orange") return { accent: "orange" as const, style: undefined };
-  return { accent: "cyan" as const, style: undefined };
-}
 
 export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpenChat }: Props) {
   const { user } = useAuth();
@@ -66,24 +51,26 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   const [hour, setHour] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [visibility, setVisibility] = useState<CheckinVisibility>("visible");
-  const [showChat, setShowChat] = useState(false);
-  const [messageTarget, setMessageTarget] = useState<CheckinRow | null>(null);
-  const [messageBody, setMessageBody] = useState("");
   const [verifying, setVerifying] = useState(false);
   const autoVerifyRan = useRef(false);
   const autoChatRan = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
   const today = pacificTodayDate();
-  const beachLabel = beachVenueLabel(beachId);
-  const btnAccent = buttonAccentProps(accent);
+  const beachShortLabel = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
 
   const queryKey = ["/api/river-brats/checkins", beachId, today] as const;
 
   const { data: rows = [], isLoading } = useQuery<CheckinRow[]>({
     queryKey,
-    queryFn: () => fetch(`/api/river-brats/checkins?beach=${beachId}&date=${today}`, { credentials: "include" }).then(r => r.json()),
+    queryFn: () =>
+      fetch(`/api/river-brats/checkins?beach=${beachId}&date=${today}`, { credentials: "include" }).then(r =>
+        r.json(),
+      ),
   });
 
   const mine = user ? rows.find(r => (r.userId ?? r.user_id) === user.id) : undefined;
+  const checkedIn = Boolean(mine);
+  const goingCount = rows.length;
 
   useEffect(() => {
     if (!mine) return;
@@ -112,10 +99,10 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
-      setShowChat(true);
       toast({ title: "Checked in", description: "Beach chat is open until 10pm." });
     },
-    onError: (err: Error) => toast({ title: "Could not check in", description: err.message, variant: "destructive" }),
+    onError: (err: Error) =>
+      toast({ title: "Could not check in", description: err.message, variant: "destructive" }),
   });
 
   // "I am here" — grab the device location once, confirm presence server-side.
@@ -143,7 +130,6 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
           const data = await r.json().catch(() => ({}));
           if (r.ok && data.ok) {
             queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
-            setShowChat(true);
             toast({ title: "You're here", description: "Verified on the beach — say hi in chat." });
           } else if (data.error === "TOO_FAR") {
             toast({
@@ -160,10 +146,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
       },
       () => {
         setVerifying(false);
-        toast({
-          title: "Couldn't get your location",
-          description: "No worries — you're still listed as planned.",
-        });
+        toast({ title: "Couldn't get your location", description: "No worries — you're still listed as planned." });
       },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 30_000 },
     );
@@ -172,7 +155,6 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   const imHere = async () => {
     if (!requireAuth()) return;
     if (!mine) {
-      // Not checked in yet: check in for right now, then verify.
       const nowHour = Math.min(RIVER_BRATS_HOUR_END, Math.max(RIVER_BRATS_HOUR_START, pacificCurrentHour()));
       try {
         await saveMutation.mutateAsync({ arrivalHour: nowHour });
@@ -186,38 +168,24 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   const withdrawMutation = useMutation({
     mutationFn: (id: number) =>
       fetch(`/api/river-brats/checkins/${id}`, { method: "DELETE", credentials: "include" }).then(async r => {
-        if (!r.ok) throw new Error("Could not withdraw check-in");
+        if (!r.ok) throw new Error("Could not uncheck in");
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
-      setShowChat(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/chat"] });
       setHour(null);
       setNote("");
       setVisibility("visible");
-      toast({ title: "Check-in withdrawn" });
+      toast({ title: "Unchecked in", description: "You're off today's beach list and out of the group chat." });
     },
-    onError: (err: Error) => toast({ title: "Could not withdraw", description: err.message, variant: "destructive" }),
+    onError: (err: Error) =>
+      toast({ title: "Could not uncheck in", description: err.message, variant: "destructive" }),
   });
 
-  const messageMutation = useMutation({
-    mutationFn: ({ checkinId, body }: { checkinId: number; body: string }) =>
-      fetch(`/api/river-brats/checkins/${checkinId}/message`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ beachId, date: today, body }),
-      }).then(async r => {
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(data.error || "Could not send message");
-        return data;
-      }),
-    onSuccess: () => {
-      setMessageTarget(null);
-      setMessageBody("");
-      toast({ title: "Message sent", description: "Find the thread in your inbox." });
-    },
-    onError: (err: Error) => toast({ title: "Could not send", description: err.message, variant: "destructive" }),
-  });
+  const uncheckIn = () => {
+    if (!mine) return;
+    withdrawMutation.mutate(mine.id);
+  };
 
   const requireAuth = () => {
     if (user) return true;
@@ -226,282 +194,218 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   };
 
   const iAmHere = mine?.presence === "HERE";
-  const arrivalDue =
-    !!mine && !iAmHere && pacificCurrentHour() >= mine.arrival_hour;
+  const arrivalDue = !!mine && !iAmHere && pacificCurrentHour() >= mine.arrival_hour;
 
-  // ?verify=1 deep link (arrival push): run the GPS confirm once when the
-  // viewer's check-in is known.
+  // ?verify=1 deep link (arrival push): run the GPS confirm once the viewer's
+  // check-in is known.
   useEffect(() => {
     if (!autoVerify || autoVerifyRan.current || isLoading || !user) return;
     autoVerifyRan.current = true;
     if (mine && !iAmHere) runGpsVerify();
   }, [autoVerify, isLoading, user, mine?.id, iAmHere]);
 
-  // ?chat=1 deep link (Inbox GROUP row): open the beach chat once.
+  // ?chat=1 deep link (Inbox GROUP row): bring the inline chat into view once.
   useEffect(() => {
     if (!autoOpenChat || autoChatRan.current || isLoading) return;
-    if (mine) {
-      autoChatRan.current = true;
-      setShowChat(true);
-    }
-  }, [autoOpenChat, isLoading, mine?.id]);
+    autoChatRan.current = true;
+    rootRef.current?.querySelector(".rb-group-chat")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [autoOpenChat, isLoading]);
+
+  const headerAvatars = useMemo(
+    () =>
+      rows.slice(0, 4).map(row => ({
+        key: String(row.id),
+        username: row.username,
+        displayName: row.displayName,
+        photoUrl: row.photoUrl,
+        avatarChoice: row.avatarChoice,
+        masked: row.masked,
+      })),
+    [rows],
+  );
+
+  const selfLabel =
+    visibility === "anonymous" || mine?.masked
+      ? "You (anonymous)"
+      : `You · @${user?.username ?? mine?.username ?? "you"}`;
 
   return (
-    <div className="rb-panel">
-      <p className="rb-panel__lede">
-        <strong>{rows.length}</strong> heading out today · pick when you expect to arrive (7am–9pm).
-      </p>
+    <div className={`rb-checkin rb-checkin--${accent}`} ref={rootRef}>
+      <div className="rb-checkin__pulse">
+        <span className="rb-checkin__pulse-dot" aria-hidden />
+        <span>
+          <strong>{isLoading ? "…" : goingCount}</strong> heading out today · pick when you'll get there
+        </span>
+      </div>
 
       {arrivalDue && (
         <div className={`rb-arrival-banner rb-arrival-banner--${accent}`} role="status">
           <span className="rb-arrival-banner__copy">
-            You planned {formatRiverBratsHour(mine!.arrival_hour)} — are you at {beachLabel}?
+            You planned {formatRiverBratsHour(mine!.arrival_hour)} — are you at {beachShortLabel}?
           </span>
-          <Button
-            variant="solid"
-            accent={btnAccent.accent}
-            style={btnAccent.style}
-            size="sm"
+          <button
+            type="button"
+            className="rb-checkin__primary"
             disabled={verifying}
             onClick={imHere}
           >
             {verifying ? "Checking…" : "I'm here"}
-          </Button>
+          </button>
         </div>
       )}
 
-      <div className="rb-compose">
-        <div className="rb-compose__label">I'll be there around</div>
-        <RiverBratsHourChips value={hour ?? mine?.arrival_hour ?? null} onChange={setHour} accent={accent} />
-        <input
-          className="rb-input"
-          value={note}
-          onChange={e => setNote(e.target.value.slice(0, 80))}
-          placeholder="Optional note (no addresses)"
-          maxLength={80}
-        />
-        <fieldset className="rb-visibility">
-          <legend className="rb-visibility__legend">Show as</legend>
-          <div className="rb-visibility__options">
-            <label className={`rb-visibility__option${visibility === "visible" ? " rb-visibility__option--active" : ""}`}>
-              <input
-                type="radio"
-                name="rb-checkin-visibility"
-                checked={visibility === "visible"}
-                onChange={() => setVisibility("visible")}
-              />
-              <span className="rb-visibility__label">@username visible</span>
-              <span className="rb-visibility__hint">Others can see your profile and slide into your DMs</span>
-            </label>
-            <label className={`rb-visibility__option${visibility === "anonymous" ? " rb-visibility__option--active" : ""}`}>
-              <input
-                type="radio"
-                name="rb-checkin-visibility"
-                checked={visibility === "anonymous"}
-                onChange={() => setVisibility("anonymous")}
-              />
-              <span className="rb-visibility__label">Stay anonymous</span>
-              <span className="rb-visibility__hint">Arrival time only — no name or photo on the list</span>
-            </label>
+      <div className="rb-checkin__grid">
+        <section className="rb-checkin__form">
+          <div className="rb-checkin__field-label">I'll be there around</div>
+          <RiverBratsHourChips value={hour ?? mine?.arrival_hour ?? null} onChange={setHour} accent={accent} />
+
+          <label className="rb-checkin__field-label" htmlFor="rb-checkin-note">
+            Optional note
+          </label>
+          <input
+            id="rb-checkin-note"
+            className="rb-checkin__input"
+            value={note}
+            onChange={e => setNote(e.target.value.slice(0, 80))}
+            placeholder="e.g. bringing a canopy + cooler (no addresses)"
+            maxLength={80}
+          />
+
+          <div className="rb-checkin__field-label">Show as</div>
+          <div className="rb-checkin__visibility" role="group" aria-label="Visibility">
+            <button
+              type="button"
+              className={`rb-checkin__seg${visibility === "visible" ? " rb-checkin__seg--active" : ""}`}
+              onClick={() => setVisibility("visible")}
+            >
+              <span className="rb-checkin__seg-title">@username</span>
+              <span className="rb-checkin__seg-hint">Name + photo on the list and in chat</span>
+            </button>
+            <button
+              type="button"
+              className={`rb-checkin__seg${visibility === "anonymous" ? " rb-checkin__seg--active" : ""}`}
+              onClick={() => setVisibility("anonymous")}
+            >
+              <span className="rb-checkin__seg-title">Anonymous</span>
+              <span className="rb-checkin__seg-hint">
+                Counted in "going" · no name or photo, posts as "Anonymous"
+              </span>
+            </button>
           </div>
-        </fieldset>
-        <div className="rb-compose__actions">
-          {mine ? (
-            <>
-              <Button
-                variant="solid"
-                accent={btnAccent.accent}
-                style={btnAccent.style}
-                size="sm"
-                disabled={hour == null || saveMutation.isPending}
-                onClick={() => requireAuth() && saveMutation.mutate(undefined)}
-              >
-                Update check-in
-              </Button>
-              {!iAmHere && (
-                <Button
-                  variant="outline"
-                  accent="cyan"
-                  size="sm"
-                  disabled={verifying}
-                  onClick={imHere}
-                >
-                  {verifying ? "Checking…" : "I'm here"}
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                accent="cyan"
-                size="sm"
-                onClick={() => setShowChat(true)}
-              >
-                Open beach chat
-              </Button>
-              <Button
-                variant="outline"
-                accent="cyan"
-                size="sm"
-                disabled={withdrawMutation.isPending}
-                onClick={() => withdrawMutation.mutate(mine.id)}
-              >
-                {withdrawMutation.isPending ? "Withdrawing…" : "Withdraw check-in"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="solid"
-                accent={btnAccent.accent}
-                style={btnAccent.style}
-                size="sm"
-                disabled={hour == null || saveMutation.isPending}
-                onClick={() => requireAuth() && saveMutation.mutate(undefined)}
-              >
-                Check in for today
-              </Button>
-              <Button
-                variant="outline"
-                accent="cyan"
-                size="sm"
+
+          <div className="rb-checkin__actions">
+            <button
+              type="button"
+              className={`rb-checkin__primary${checkedIn ? " rb-checkin__primary--update" : ""}`}
+              disabled={hour == null || saveMutation.isPending}
+              onClick={() => requireAuth() && saveMutation.mutate(undefined)}
+            >
+              {saveMutation.isPending
+                ? "Saving…"
+                : checkedIn
+                  ? "Update check-in"
+                  : "Check in · join chat"}
+            </button>
+            {!iAmHere && (
+              <button
+                type="button"
+                className="rb-checkin__withdraw"
                 disabled={verifying || saveMutation.isPending}
                 onClick={imHere}
+                title="GPS-confirm you're on the beach"
               >
-                {verifying ? "Checking…" : "I'm here now"}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {isLoading ? (
-        <p className="rb-empty">Loading check-ins…</p>
-      ) : rows.length === 0 ? (
-        <p className="rb-empty">Nobody's checked in yet today. Be first.</p>
-      ) : (
-        <ul className="rb-feed">
-          {rows.map(row => {
-            const rowUserId = row.userId ?? row.user_id;
-            const isSelf = !!user && rowUserId === user.id;
-            const canMessage = !!user && !!mine && rowUserId !== user.id && !row.masked;
-            return (
-              <li
-                key={row.id}
-                className={`rb-card${canMessage ? " rb-card--clickable" : ""}`}
-                onClick={() => canMessage && setMessageTarget(row)}
-                onKeyDown={e => {
-                  if (canMessage && (e.key === "Enter" || e.key === " ")) {
-                    e.preventDefault();
-                    setMessageTarget(row);
-                  }
-                }}
-                role={canMessage ? "button" : undefined}
-                tabIndex={canMessage ? 0 : undefined}
+                {verifying ? "Checking…" : checkedIn ? "I'm here" : "I'm here now"}
+              </button>
+            )}
+            {checkedIn && mine && (
+              <button
+                type="button"
+                className="rb-checkin__withdraw"
+                disabled={withdrawMutation.isPending}
+                onClick={uncheckIn}
               >
-                <UserAvatar
-                  username={row.masked ? "anonymous" : row.username}
-                  displayName={row.masked ? undefined : row.displayName}
-                  photoUrl={row.masked ? null : row.photoUrl}
-                  avatarChoice={row.masked ? undefined : row.avatarChoice}
-                  size={36}
-                />
-                <div className="rb-card__body">
-                  <div className="rb-card__title">
-                    {row.masked ? "Anonymous" : row.displayName || `@${row.username}`}
-                  </div>
-                  <div className="rb-card__meta">
-                    {row.presence === "HERE" ? (
-                      <span
-                        className="rb-chip rb-chip--here"
-                        title={row.gpsVerifiedAt ? `Verified ${new Date(row.gpsVerifiedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : undefined}
-                      >
-                        Here
-                      </span>
-                    ) : (
-                      <span className={`rb-chip rb-chip--${accent}`}>{formatRiverBratsHour(row.arrival_hour)}</span>
-                    )}
-                    {row.note ? <span className="rb-card__note">{row.note}</span> : null}
-                    {canMessage ? <span className="rb-card__dm-hint">Tap to message →</span> : null}
-                  </div>
-                </div>
-                {isSelf ? (
-                  <span className="rb-card__you-pill">You</span>
-                ) : rowUserId !== user?.id ? (
-                  <RiverBratsReportButton targetType="CHECKIN" targetId={row.id} />
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                {withdrawMutation.isPending ? "Unchecking…" : "Uncheck in"}
+              </button>
+            )}
+          </div>
+          <p className="rb-checkin__fine">
+            Check-ins and the group chat clear at 10pm. Be kind, keep exact meetup details to DMs.
+          </p>
+        </section>
 
-      {showChat && mine && (
-        <RiverBratsChatPanel
+        <RiverBratsGroupChat
           beachId={beachId}
           date={today}
-          beachLabel={beachLabel}
-          onClose={() => setShowChat(false)}
+          beachShortLabel={beachShortLabel}
+          accent={accent}
+          locked={!checkedIn}
+          checkedIn={checkedIn}
+          goingCount={goingCount}
+          headerAvatars={headerAvatars}
         />
-      )}
+      </div>
 
-      {messageTarget && (
-        <div className="rb-dm-backdrop" onClick={() => setMessageTarget(null)}>
-          <div
-            className="rb-dm-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Message ${messageTarget.displayName || messageTarget.username}`}
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="rb-dm-panel__head">
-              <UserAvatar
-                username={messageTarget.username}
-                displayName={messageTarget.displayName}
-                photoUrl={messageTarget.photoUrl}
-                avatarChoice={messageTarget.avatarChoice}
-                size={42}
-              />
-              <div className="rb-dm-panel__who">
-                <Link
-                  href={`/members/${messageTarget.username}`}
-                  className="display rb-dm-panel__name rb-dm-panel__profile-link"
-                >
-                  {messageTarget.displayName || messageTarget.username}
-                </Link>
-                <div className="rb-dm-panel__context">Both checked in · {beachLabel}</div>
+      <div className="rb-checkin__going-row">
+        {checkedIn && user && mine ? (
+          <div className="rb-checkin__self">
+            <UserAvatar
+              photoUrl={visibility === "anonymous" ? null : user.photoUrl}
+              avatarChoice={user.avatarChoice}
+              avatarRing={user.avatarRing}
+              displayName={user.displayName}
+              username={user.username}
+              size={40}
+            />
+            <div className="rb-checkin__self-copy">
+              <div className="rb-checkin__self-name">{selfLabel}</div>
+              <div className="rb-checkin__self-meta">
+                {iAmHere ? (
+                  <>
+                    <span
+                      className="rb-chip rb-chip--here"
+                      title={mine.gpsVerifiedAt ? `Verified ${new Date(mine.gpsVerifiedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : undefined}
+                    >
+                      Here
+                    </span>{" "}
+                    · on the beach · in the chat
+                  </>
+                ) : (
+                  <>Going · {formatRiverBratsHour(mine.arrival_hour)} · in the chat</>
+                )}
               </div>
-              <button type="button" className="rb-dm-panel__close" onClick={() => setMessageTarget(null)} aria-label="Close">
-                ×
+              <button
+                type="button"
+                className="rb-checkin__uncheck"
+                disabled={withdrawMutation.isPending}
+                onClick={uncheckIn}
+              >
+                {withdrawMutation.isPending ? "Unchecking…" : "Uncheck in · leave chat"}
               </button>
             </div>
-            <div className="rb-dm-panel__body">
-              <p className="rb-dm-panel__seed">
-                Heading out around {formatRiverBratsHour(messageTarget.arrival_hour)}
-                {messageTarget.note ? ` · "${messageTarget.note}"` : ""}. Say hi?
-              </p>
-            </div>
-            <div className="rb-dm-panel__composer">
-              <input
-                value={messageBody}
-                onChange={e => setMessageBody(e.target.value)}
-                placeholder="Slide into their DMs…"
-                maxLength={500}
-              />
-              <Button
-                variant="solid"
-                accent="lime"
-                size="sm"
-                disabled={!messageBody.trim() || messageMutation.isPending}
-                onClick={() => messageMutation.mutate({ checkinId: messageTarget.id, body: messageBody.trim() })}
-              >
-                Send
-              </Button>
-            </div>
-            <p className="rb-dm-panel__inbox">
-              Replies land in <Link href="/inbox">your inbox</Link>.
-            </p>
           </div>
+        ) : (
+          <div className="rb-checkin__self-placeholder">You haven't checked in yet — pick a time to join.</div>
+        )}
+
+        <div className="rb-checkin__going-stack">
+          {headerAvatars.map((row, index) => (
+            <span
+              key={row.key}
+              className="rb-checkin__going-avatar"
+              style={{ marginLeft: index === 0 ? 0 : -8 }}
+            >
+              <UserAvatar
+                username={row.masked ? "anonymous" : row.username}
+                displayName={row.masked ? undefined : row.displayName}
+                photoUrl={row.masked ? null : row.photoUrl}
+                avatarChoice={row.masked ? undefined : row.avatarChoice}
+                size={30}
+              />
+            </span>
+          ))}
+          <span className="rb-checkin__going-count">{goingCount} going</span>
         </div>
-      )}
+      </div>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>

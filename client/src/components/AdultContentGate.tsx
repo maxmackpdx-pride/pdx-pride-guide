@@ -20,7 +20,8 @@ export default function AdultContentGate({
   onDecline,
 }: {
   children: React.ReactNode;
-  onDecline: () => void;
+  /** Optional: hides the "Not now" button when absent (inline panels). */
+  onDecline?: () => void;
 }) {
   const [acked, setAcked] = useState(hasAdultChatAck);
 
@@ -47,9 +48,11 @@ export default function AdultContentGate({
         <button type="button" className="adult-gate__enter display" onClick={accept}>
           I'm 18+ — enter chat
         </button>
-        <button type="button" className="adult-gate__leave" onClick={onDecline}>
-          Not now
-        </button>
+        {onDecline && (
+          <button type="button" className="adult-gate__leave" onClick={onDecline}>
+            Not now
+          </button>
+        )}
       </div>
     </div>
   );

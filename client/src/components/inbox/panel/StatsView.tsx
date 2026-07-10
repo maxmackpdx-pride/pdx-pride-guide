@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import MemberGrowthChart from "@/components/admin/MemberGrowthChart";
+import "@/components/admin/admin-stats.css";
 import { C, MONO, DISPLAY, sectionTitle, barTrack, hbars } from "./sheet";
 
 type Traffic = {
@@ -20,6 +22,15 @@ type Traffic = {
   newReturning: Array<{ label: string; pct: number }>;
 };
 
+type MemberGrowthBucket = {
+  at: string;
+  signups: number;
+  rsvps: number;
+  total: number;
+  cumulativeSignups: number;
+  cumulativeRsvps: number;
+};
+
 type Metrics = {
   users: number;
   newUsersToday: number;
@@ -33,6 +44,9 @@ type Metrics = {
   giftingPosts: number;
   missedConnections: number;
   openFeedback: number;
+  signupsTrend14d?: number[];
+  rsvpsTrend14d?: number[];
+  memberGrowth12h?: MemberGrowthBucket[];
   traffic?: Traffic;
 };
 
@@ -143,6 +157,10 @@ export default function StatsView() {
     ],
     C.purple,
   );
+
+  const memberGrowth = m.memberGrowth12h ?? [];
+  const signupTotal = (m.signupsTrend14d ?? []).reduce((a, b) => a + b, 0);
+  const rsvpTotal = (m.rsvpsTrend14d ?? []).reduce((a, b) => a + b, 0);
 
   return (
     <>
@@ -343,6 +361,23 @@ export default function StatsView() {
           )}
         </>
       )}
+
+      {/* MEMBER GROWTH — same 12h buckets as AdminStatsView */}
+      <div style={sectionTitle}>MEMBER GROWTH</div>
+      <p style={{ margin: "0 2px 12px", fontSize: 12, color: C.faint, lineHeight: 1.4 }}>
+        Signups and RSVPs in 12-hour buckets over the last 14 days. {signupTotal} signup{signupTotal === 1 ? "" : "s"},{" "}
+        {rsvpTotal} RSVP{rsvpTotal === 1 ? "" : "s"} total.
+      </p>
+      <div style={{ border: `1px solid ${C.border}`, borderRadius: 16, background: C.card, padding: 15, marginBottom: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: C.meta }}>SIGNUPS + RSVPS · 14 DAYS</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 8.5, letterSpacing: ".09em", color: C.cyan }}>
+            <span style={{ width: 5, height: 5, borderRadius: 999, background: C.cyan }} />
+            12-HOUR BUCKETS
+          </span>
+        </div>
+        <MemberGrowthChart buckets={memberGrowth} />
+      </div>
     </>
   );
 }

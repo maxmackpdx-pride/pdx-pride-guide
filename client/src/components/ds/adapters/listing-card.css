@@ -44,6 +44,12 @@
   flex: 1;
 }
 
+/* Grid thumbnails — fill the 2:3 poster frame (modal shows full flyer) */
+.events-poster-grid .pdxBoard__img {
+  object-fit: cover;
+  object-position: center top;
+}
+
 .ds-listing-card:hover .pdxBoard {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--_day, var(--neon-cyan)) 40%, var(--border-default, #2b2b2b));

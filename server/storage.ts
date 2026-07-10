@@ -1304,23 +1304,6 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Twirl! PDX Queer Disco — Pride Edition (HOLD)",
-      description: "PDX Queer Disco Pride Edition at Green Anchors in St. Johns, an outdoor eco-park under the St. Johns Bridge. Disco, funk, and house sounds. Special guest performances. Food and craft vendors, outdoor space with Willamette River views.",
-      venueName: "Green Anchors",
-      address: "8940 N Bradford St, Portland, OR 97203",
-      neighborhood: "St. Johns",
-      lat: 45.5882, lng: -122.7478,
-      dateStart: "2026-07-20T15:00:00", dateEnd: "2026-07-20T22:30:00",
-      dayOfWeek: "MON",
-      ageRequirement: "21_PLUS",
-      eventTypes: JSON.stringify(["PARTY", "DANCE", "OUTDOOR"]),
-      admission: "TICKETED",
-      ticketUrl: "https://events.humanitix.com/twirl-pdx-queer-disco-pride-edition",
-      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: null, status: "HIDDEN", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: "Hold: 2025 Humanitix link, no 2026 source confirmed", createdAt: now,
-    },
-    {
       title: "Chai & Roses Pride Party",
       description: "A Sunday tea dance for QTBIPOC & allies. DJs Suavecito (Reyna Tropical) + DJ Anjali. Performances by Blossom Drearie, Chiffon Cherie, Hibiscus Lust. MC Armaan Singh. Co-hosted with PDX Queer Asians.",
       venueName: "Holocene",
@@ -1885,7 +1868,7 @@ function applyVerifiedEventOverrides() {
     lat: 45.520416,
     lng: -122.678127,
     dateStart: "2026-07-17T17:00:00",
-    dateEnd: "2026-07-20T20:00:00",
+    dateEnd: "2026-07-19T20:00:00",
     dayOfWeek: "FRI",
     description: "Official PrideNW outdoor beer garden open across Pride weekend at 431 SW Harvey Milk St. Community drinks and Pride energy just outside the main festival footprint.",
   });
@@ -2243,36 +2226,6 @@ function seedPdxPahJuly2026Events() {
   });
 
   insert({
-    title: "Oregon State Leather Contest 2026",
-    description:
-      "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
-    venueName: "Oregon State Leather Contest",
-    address: "Portland, OR",
-    neighborhood: "Portland",
-    lat: null,
-    lng: null,
-    dateStart: "2026-08-07T19:00:00",
-    dateEnd: "2026-08-09T23:00:00",
-    dayOfWeek: "FRI",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.oslcontest.org",
-    isPublic: true,
-    isPrivate: false,
-    isHouseParty: false,
-    isSexPositive: true,
-    nudityOk: false,
-    posterImageUrl: "/posters/oslc-leather-contest-2026.png",
-    status: "LIVE",
-    source: "admin_seeded",
-    isClaimable: true,
-    claimedBy: null,
-    submittedBy: null,
-    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Apps close Jul 19.",
-  });
-
-  insert({
     title: "OSLC Info Session — So You Want to Be a Titleholder?",
     description:
       "Virtual info session for anyone curious about becoming an Oregon State Leather titleholder. July session via Google Meet, links on the OSLC calendar. Additional sessions run through July 19.",
@@ -2300,6 +2253,36 @@ function seedPdxPahJuly2026Events() {
     claimedBy: null,
     submittedBy: null,
     adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Wed Jul 15 7pm session.",
+  });
+
+  insert({
+    title: "Oregon State Leather Contest 2026",
+    description:
+      "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
+    venueName: "Oregon State Leather Contest",
+    address: "Portland, OR",
+    neighborhood: "Portland",
+    lat: null,
+    lng: null,
+    dateStart: "2026-08-07T19:00:00",
+    dateEnd: "2026-08-09T23:00:00",
+    dayOfWeek: "FRI",
+    ageRequirement: "21_PLUS",
+    eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
+    admission: "TICKETED",
+    ticketUrl: "https://www.oslcontest.org",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: true,
+    nudityOk: false,
+    posterImageUrl: "/posters/oslc-leather-contest-2026.png",
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Apps close Jul 19.",
   });
 }
 
@@ -2564,6 +2547,110 @@ function seedCheckingPortlandEventsJuly2026() {
   });
 }
 
+/** Hard-delete events and dependent rows (attendance, hosts, messages, etc.). */
+function hardDeleteEventIds(ids: number[]) {
+  if (!ids.length) return;
+  const idPh = ids.map(() => "?").join(",");
+  sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
+  try {
+    sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* table may not exist in older DBs */ }
+  try {
+    sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* ignore */ }
+  try {
+    sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* ignore */ }
+  sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
+}
+
+/** Pride-week listings that legitimately run into Mon Jul 20 or later — never prune these. */
+const POST_PRIDE_PRUNE_ALLOWLIST = new Set([
+  "Midtown Beer Garden Pride",
+  "Oregon State Leather Contest 2026",
+]);
+
+/** Remove stray post-Pride listings — never hard-delete allowlisted community events. */
+function prunePostPrideWeekEvents() {
+  const allowlist = Array.from(POST_PRIDE_PRUNE_ALLOWLIST);
+  const postRows = sqlite
+    .prepare(`
+      SELECT id, title FROM events
+      WHERE date_start >= '2026-07-20'
+        AND title NOT IN (${allowlist.map(() => "?").join(",")})
+    `)
+    .all(...allowlist) as Array<{ id: number; title: string }>;
+  hardDeleteEventIds(postRows.map((r) => r.id));
+
+  const spanAllow = allowlist;
+  const spanRows = sqlite
+    .prepare(`
+      SELECT id, date_end FROM events
+      WHERE date_start < '2026-07-20'
+        AND date_end >= '2026-07-20T12:00:00'
+        AND title NOT IN (${spanAllow.map(() => "?").join(",")})
+    `)
+    .all(...spanAllow) as Array<{ id: number; date_end: string }>;
+
+  for (const row of spanRows) {
+    const endClock = row.date_end.includes("T") ? row.date_end.split("T")[1] : "23:59:59";
+    sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run(`2026-07-19T${endClock}`, row.id);
+  }
+}
+
+/** Undo accidental deletions from the first prune_post_pride_week_v1 boot pass. */
+function restorePrunedPrideEvents() {
+  const now = new Date().toISOString();
+
+  sqlite.prepare(`
+    UPDATE events SET
+      date_end = '2026-07-20T20:00:00',
+      admin_notes = COALESCE(admin_notes || ' | ', '') || 'Restored Mon Jul 20 hours after post-prune rollback'
+    WHERE title = 'Midtown Beer Garden Pride'
+      AND date_end < '2026-07-20T12:00:00'
+  `).run();
+
+  const leatherExists = sqlite
+    .prepare("SELECT id FROM events WHERE title = 'Oregon State Leather Contest 2026' LIMIT 1")
+    .get() as { id: number } | undefined;
+  if (!leatherExists) {
+    db.insert(events)
+      .values({
+        title: "Oregon State Leather Contest 2026",
+        description:
+          "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
+        venueName: "Oregon State Leather Contest",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        lat: null,
+        lng: null,
+        dateStart: "2026-08-07T19:00:00",
+        dateEnd: "2026-08-09T23:00:00",
+        dayOfWeek: "FRI",
+        ageRequirement: "21_PLUS",
+        eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
+        admission: "TICKETED",
+        ticketUrl: "https://www.oslcontest.org",
+        isPublic: true,
+        isPrivate: false,
+        isHouseParty: false,
+        isSexPositive: true,
+        nudityOk: false,
+        posterImageUrl: "/posters/oslc-leather-contest-2026.png",
+        status: "LIVE",
+        source: "admin_seeded",
+        isClaimable: true,
+        claimedBy: null,
+        submittedBy: null,
+        adminNotes: "Restored after post-prune rollback. From PDX PAH Barking Chain July 2026 newsletter.",
+        createdAt: now,
+      } as any)
+      .run();
+  }
+}
+
 /** Hard-delete unverified Checking-Portland batch rows (and Purple Rain duplicate). */
 function deleteUnverifiedCheckingPortlandEvents() {
   const titles = [
@@ -2583,22 +2670,7 @@ function deleteUnverifiedCheckingPortlandEvents() {
   const idRows = sqlite
     .prepare(`SELECT id FROM events WHERE title IN (${placeholders})`)
     .all(...titles) as Array<{ id: number }>;
-  const ids = idRows.map((r) => r.id);
-  if (!ids.length) return;
-  const idPh = ids.map(() => "?").join(",");
-  sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
-  sqlite.prepare(`DELETE FROM event_hosts WHERE event_id IN (${idPh})`).run(...ids);
-  sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
-  try {
-    sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* table may not exist in older DBs */ }
-  try {
-    sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* ignore */ }
-  try {
-    sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* ignore */ }
-  sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
+  hardDeleteEventIds(idRows.map((r) => r.id));
 }
 
 function applyEventDataAuditFixes() {
@@ -3998,6 +4070,14 @@ function runBootMigrationsOnce() {
         );
     }
     recordBootMigration("seed_hawks_directory_v12");
+  }
+  if (!hasBootMigration("prune_post_pride_week_v1")) {
+    prunePostPrideWeekEvents();
+    recordBootMigration("prune_post_pride_week_v1");
+  }
+  if (!hasBootMigration("restore_pruned_pride_events_v1")) {
+    restorePrunedPrideEvents();
+    recordBootMigration("restore_pruned_pride_events_v1");
   }
 }
 
