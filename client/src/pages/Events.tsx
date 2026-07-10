@@ -287,7 +287,27 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <EventsHero eventCount={events.length} stats={heroStats} />
+      <header className="events-page-header">
+        <nav className="events-tab-bar events-page-tab-bar" aria-label="Events view">
+          <button
+            type="button"
+            className={`events-tab${activeTab === "board" ? " active" : ""}`}
+            onClick={() => setActiveTab("board")}
+            data-testid="events-tab-board"
+          >
+            The Board
+          </button>
+          <button
+            type="button"
+            className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
+            onClick={() => setActiveTab("schedule")}
+            data-testid="events-tab-schedule"
+          >
+            The Schedule
+          </button>
+        </nav>
+        <EventsHero eventCount={events.length} stats={heroStats} />
+      </header>
 
       <ScrollReveal>
         <div className="events-map-row events-map-row--solo">
@@ -303,28 +323,6 @@ export default function Events() {
             </Suspense>
           </div>
         </div>
-      </ScrollReveal>
-
-      {/* Board | Schedule tabs */}
-      <ScrollReveal delay={30}>
-      <div className="events-tab-bar">
-        <button
-          type="button"
-          className={`events-tab${activeTab === "board" ? " active" : ""}`}
-          onClick={() => setActiveTab("board")}
-          data-testid="events-tab-board"
-        >
-          The Board
-        </button>
-        <button
-          type="button"
-          className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
-          onClick={() => setActiveTab("schedule")}
-          data-testid="events-tab-schedule"
-        >
-          The Schedule
-        </button>
-      </div>
       </ScrollReveal>
 
       {activeTab === "schedule" ? (
