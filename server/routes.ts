@@ -19,6 +19,7 @@ import {
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
 import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
+import { isProfileAccentColor, isProfileBanner } from "@shared/profileTheme";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -285,7 +286,7 @@ function authUserResponse(req: any, user: any) {
 // ─── Member profile field validation ─────────────────────────────────────────
 const SOCIAL_LINK_KEYS = [
   "instagram", "tiktok", "soundcloud", "spotify", "bluesky", "x",
-  "facebook", "website", "linktree", "venmo", "onlyfans", "fetlife",
+  "facebook", "website", "linktree", "venmo", "onlyfans", "fetlife", "bookingEmail",
 ] as const;
 
 function sanitizeSocialLinks(input: unknown): string | null {
@@ -341,6 +342,53 @@ function sanitizeProfilePhotos(input: unknown): string | null {
       caption: String(entry.caption || "").replace(/[<>]/g, "").trim().slice(0, 60),
     }));
   return JSON.stringify(clean);
+}
+
+function sanitizeTalents(input: unknown): string | null {
+  if (input === null) return null;
+  if (!Array.isArray(input)) return null;
+  const clean = input
+    .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+    .slice(0, 12)
+    .map(entry => entry.replace(/[<>]/g, "").trim().slice(0, 40));
+  return JSON.stringify(clean);
+}
+
+function sanitizeAffiliatedVenueIds(input: unknown): string | null {
+  if (input === null) return null;
+  if (!Array.isArray(input)) return null;
+  const clean = input
+    .map(entry => Number(entry))
+    .filter(id => Number.isInteger(id) && id > 0 && !!storage.getBusiness(id))
+    .slice(0, 6);
+  return JSON.stringify(clean);
+}
+
+function sanitizeMarquee(input: unknown): string | null {
+  if (input === null) return null;
+  if (typeof input !== "object" || Array.isArray(input)) return null;
+  const raw = input as Record<string, unknown>;
+  const items = Array.isArray(raw.items)
+    ? raw.items.filter((i): i is string => typeof i === "string" && i.trim().length > 0)
+        .slice(0, 12).map(i => i.replace(/[<>]/g, "").trim().slice(0, 60))
+    : [];
+  const speed = Number(raw.speed);
+  const color = typeof raw.color === "string" ? raw.color.replace(/[<>]/g, "").trim().slice(0, 20) : "rainbow";
+  return JSON.stringify({
+    items,
+    speed: Number.isFinite(speed) ? Math.min(60, Math.max(12, speed)) : 30,
+    color: color || "rainbow",
+  });
+}
+
+function sanitizePup(input: unknown): string | null {
+  if (input === null) return null;
+  if (typeof input !== "object" || Array.isArray(input)) return null;
+  const raw = input as Record<string, unknown>;
+  const field = (v: unknown) => (typeof v === "string" ? v.replace(/[<>]/g, "").trim().slice(0, 60) : "");
+  const name = field(raw.name);
+  if (!name) return null;
+  return JSON.stringify({ name, hood: field(raw.hood), role: field(raw.role), lookingFor: field(raw.lookingFor) });
 }
 
 // ─── Content moderation gate ──────────────────────────────────────────────────
@@ -1761,7 +1809,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
-    const { displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location, socialLinks, profileEmbeds, profilePhotos } = req.body;
+    const {
+      displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
+      socialLinks, profileEmbeds, profilePhotos, talents, standFor, affiliatedVenueIds, marquee, accentColor, banner, pup,
+    } = req.body;
     const moderated: Record<string, string | null | undefined> = {
       displayName: typeof displayName === "string" ? displayName : undefined,
       bio: typeof bio === "string" ? bio : undefined,
@@ -1777,6 +1828,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
     }
     if (moderationGate(res, "Member profile", moderated)) return;
+    if (accentColor !== undefined && accentColor !== null && !isProfileAccentColor(accentColor)) {
+      return res.status(400).json({ error: "Invalid accent color" });
+    }
+    if (banner !== undefined && banner !== null && !isProfileBanner(banner)) {
+      return res.status(400).json({ error: "Invalid banner option" });
+    }
+    const user = storage.getUserById(req.session.userId!);
     const patch: Record<string, unknown> = {};
     if (displayName !== undefined) patch.displayName = displayName;
     if (avatarChoice !== undefined) patch.avatarChoice = avatarChoice;
@@ -1789,9 +1847,73 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (socialLinks !== undefined) patch.socialLinks = sanitizeSocialLinks(socialLinks);
     if (profileEmbeds !== undefined) patch.profileEmbeds = sanitizeProfileEmbeds(profileEmbeds);
     if (profilePhotos !== undefined) patch.profilePhotos = sanitizeProfilePhotos(profilePhotos);
+    if (talents !== undefined) patch.talents = sanitizeTalents(talents);
+    // "Stand for" is promoter-only, same reasoning as marquee below.
+    if (standFor !== undefined && user?.promoterStatus === "approved") patch.standFor = sanitizeTalents(standFor);
+    if (affiliatedVenueIds !== undefined) patch.affiliatedVenueIds = sanitizeAffiliatedVenueIds(affiliatedVenueIds);
+    // Marquee is promoter-only — silently ignored for everyone else rather than erroring,
+    // since the field simply doesn't apply to a member's own profile.
+    if (marquee !== undefined && user?.promoterStatus === "approved") patch.marquee = sanitizeMarquee(marquee);
+    if (accentColor !== undefined) patch.accentColor = accentColor;
+    if (banner !== undefined) patch.banner = banner;
+    if (pup !== undefined) patch.pup = sanitizePup(pup);
     storage.updateUser(req.session.userId!, patch as any);
     const updated = storage.getUserById(req.session.userId!);
     res.json(authUserResponse(req, updated));
+  });
+
+  // Owner-only: full replace of the profile media card (podcast/playlist) + its item list
+  app.put("/api/users/me/media", requireAuth, (req, res) => {
+    const { kind, title, tag, cadence, blurb, coverUrl, platformLinks, items } = req.body || {};
+    if (kind !== "podcast" && kind !== "playlist") return res.status(400).json({ error: "kind must be podcast or playlist" });
+    if (typeof title !== "string" || !title.trim()) return res.status(400).json({ error: "title required" });
+    const cleanItems = Array.isArray(items)
+      ? items
+          .filter((it: any) => it && typeof it.title === "string" && typeof it.audioUrl === "string")
+          .slice(0, 30)
+          .map((it: any) => ({
+            label: typeof it.label === "string" ? it.label.replace(/[<>]/g, "").trim().slice(0, 20) : null,
+            title: String(it.title).replace(/[<>]/g, "").trim().slice(0, 120),
+            meta: typeof it.meta === "string" ? it.meta.replace(/[<>]/g, "").trim().slice(0, 60) : null,
+            audioUrl: String(it.audioUrl).trim().slice(0, 500),
+            isEmbed: !!it.isEmbed,
+          }))
+      : [];
+    const cleanPlatforms = Array.isArray(platformLinks)
+      ? platformLinks
+          .filter((p: any) => p && typeof p.label === "string" && typeof p.url === "string")
+          .slice(0, 6)
+          .map((p: any) => ({ label: String(p.label).slice(0, 30), url: String(p.url).slice(0, 300) }))
+      : [];
+    const saved = storage.saveProfileMedia(req.session.userId!, {
+      kind,
+      title: title.replace(/[<>]/g, "").trim().slice(0, 80),
+      tag: typeof tag === "string" ? tag.replace(/[<>]/g, "").trim().slice(0, 30) : null,
+      cadence: typeof cadence === "string" ? cadence.replace(/[<>]/g, "").trim().slice(0, 40) : null,
+      blurb: typeof blurb === "string" ? blurb.replace(/[<>]/g, "").trim().slice(0, 240) : null,
+      coverUrl: typeof coverUrl === "string" ? coverUrl.trim().slice(0, 300) : null,
+      platformLinks: cleanPlatforms,
+      items: cleanItems,
+    });
+    res.json(saved);
+  });
+
+  // Pack & pup: link/unlink a packmate or handler (real user references, not free text)
+  app.post("/api/users/me/pack/:relation", requireAuth, (req, res) => {
+    const relation = req.params.relation;
+    if (relation !== "packmate" && relation !== "handler") return res.status(400).json({ error: "Invalid relation" });
+    const username = String(req.body?.username || "").trim();
+    if (!username) return res.status(400).json({ error: "username required" });
+    const result = storage.addPackLink(req.session.userId!, relation, username);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/users/me/pack/:relation/:userId", requireAuth, (req, res) => {
+    const relation = req.params.relation;
+    if (relation !== "packmate" && relation !== "handler") return res.status(400).json({ error: "Invalid relation" });
+    storage.removePackLink(req.session.userId!, relation, Number(req.params.userId));
+    res.json({ ok: true });
   });
 
   // ─── MEMBER PROFILES + FOLLOWS ───────────────────────────────────────────

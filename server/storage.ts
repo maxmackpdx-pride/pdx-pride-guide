@@ -6,6 +6,7 @@ import {
   isMissedConnectionPostable,
   isMissedConnectionLinkable,
   missedConnectionClosesAt,
+  parsePacificDateTime,
 } from "@shared/missedConnections";
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import { formatBoardRejectMessage } from "@shared/boardModeration";
@@ -32,6 +33,7 @@ import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
+import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
@@ -406,6 +408,52 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN location TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN social_links TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_embeds TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN profile_photos TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN talents TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN stand_for TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN affiliated_venue_ids TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN marquee TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN accent_color TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN banner TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN pup TEXT`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS pack_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    linked_user_id INTEGER NOT NULL,
+    relation TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT '',
+    UNIQUE(user_id, linked_user_id, relation)
+  )
+`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS profile_media (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    kind TEXT NOT NULL,
+    title TEXT NOT NULL,
+    tag TEXT,
+    cadence TEXT,
+    blurb TEXT,
+    cover_url TEXT,
+    platform_links TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT ''
+  )
+`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS profile_media_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    media_id INTEGER NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    label TEXT,
+    title TEXT NOT NULL,
+    meta TEXT,
+    audio_url TEXT NOT NULL,
+    is_embed INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  )
+`); } catch(e) {}
+try { sqlite.exec(`CREATE INDEX IF NOT EXISTS profile_media_items_media_idx ON profile_media_items(media_id)`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS follows (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -3873,6 +3921,15 @@ function safeJson(value: string) {
   }
 }
 
+function safeJsonOrNull(value: string | null | undefined) {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 function expireGiftingPosts() {
   sqlite.prepare(`
     UPDATE gifting_posts
@@ -4300,12 +4357,17 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'accentColor' | 'banner' | 'pup'>>): void;
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
   getAllUsers(): User[];
   // Member profiles + follows
   getPublicProfile(username: string, viewerUserId?: number | null): any | undefined;
+  getPackLinks(userId: number, relation: "packmate" | "handler"): Array<{ id: number; username: string; displayName: string | null; avatarChoice: number; avatarRing: string; photoUrl: string | null }>;
+  addPackLink(userId: number, relation: "packmate" | "handler", targetUsername: string): { ok?: boolean; error?: string };
+  removePackLink(userId: number, relation: "packmate" | "handler", linkedUserId: number): void;
+  getProfileMedia(userId: number): any | null;
+  saveProfileMedia(userId: number, data: any): any;
   followUser(followerUserId: number, followingUserId: number): void;
   unfollowUser(followerUserId: number, followingUserId: number): void;
   getFollowerCount(userId: number): number;
@@ -4537,6 +4599,7 @@ export const storage: IStorage = {
     const user = storage.getUserByUsername(username);
     if (!user || user.status !== "active") return undefined;
     const isOwner = viewerUserId != null && viewerUserId === user.id;
+    const verifiedHost = user.promoterStatus === "approved";
 
     // Distinct LIVE talent role labels
     const talentByEvent = storage.getEventTalentByUser(user.id);
@@ -4549,16 +4612,23 @@ export const storage: IStorage = {
       }
     }
 
-    // LIVE events this user hosts (primary or co-host)
-    const hostedEvents = sqlite.prepare(`
+    // LIVE events this user hosts (primary or co-host), split by whether they've already ended
+    const hostedEventsAll = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.admission
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission, e.ticket_url AS ticketUrl
       FROM event_hosts eh
       JOIN events e ON e.id = eh.event_id
       WHERE eh.user_id = ? AND e.status = 'LIVE'
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
-    if (hostedEvents.length > 0 && !roles.includes("Party Host")) roles.push("Party Host");
+    if (hostedEventsAll.length > 0 && !roles.includes("Party Host")) roles.push("Party Host");
+    const nowMs = Date.now();
+    const isPastEvent = (e: { dateEnd: string }) => {
+      const endMs = parsePacificDateTime(e.dateEnd);
+      return endMs != null && endMs < nowMs;
+    };
+    const hostedUpcoming = hostedEventsAll.filter(e => !isPastEvent(e));
+    const hostedPast = hostedEventsAll.filter(isPastEvent);
 
     // Publicly visible gig + gifting posts
     const gigs = storage.getGigPostsByUser(user.id)
@@ -4582,25 +4652,50 @@ export const storage: IStorage = {
         createdAt: post.createdAt ?? post.created_at,
         description: post.description,
       }));
+    const spotted = storage.getMissedConnectionsByUser(user.id)
+      .filter((post: any) => post.status === "ACTIVE")
+      .map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        body: post.body,
+        dayOfWeek: post.dayOfWeek ?? null,
+        venueHint: post.venueHint ?? null,
+        createdAt: post.createdAt,
+      }));
 
     const checkIns = storage.getAttendancesByUser(user.id).length;
 
-    // PRIVACY: goingTo is ONLY visible to the profile owner themselves.
-    let goingTo: any[] | undefined;
-    if (isOwner) {
-      goingTo = sqlite.prepare(`
-        SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-               e.date_start AS dateStart, e.admission
-        FROM attendances a
-        JOIN events e ON e.id = a.event_id
-        WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
-        ORDER BY e.date_start ASC
-      `).all(user.id) as any[];
-    }
+    // PRIVACY: upcoming RSVPs ("going to") are only visible to the profile owner
+    // (real-time whereabouts are safety-sensitive). Past attendance is historical
+    // and safe to show publicly, same as hosting history.
+    const attendedAll = sqlite.prepare(`
+      SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission
+      FROM attendances a
+      JOIN events e ON e.id = a.event_id
+      WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
+      ORDER BY e.date_start ASC
+    `).all(user.id) as any[];
+    const attendedPast = attendedAll.filter(isPastEvent);
+    const goingToUpcoming = isOwner ? attendedAll.filter(e => !isPastEvent(e)) : [];
 
     const socialLinksRaw = safeJson(user.socialLinks || "{}");
-    const activity: any = { hostedEvents, gigs, gifting };
-    if (goingTo) activity.goingTo = goingTo;
+    const activity: any = {
+      hostedEvents: hostedUpcoming,
+      hostedEventsPast: hostedPast,
+      gigs,
+      gifting,
+      spotted,
+      goingTo: goingToUpcoming,
+      attendedPast,
+    };
+
+    const ownedBusinesses = storage.getUserOwnedBusinesses(user.id);
+    const affiliatedVenueIds: number[] = safeJson(user.affiliatedVenueIds || "[]");
+    const affiliatedVenues = affiliatedVenueIds
+      .map(id => storage.getBusiness(id))
+      .filter((b): b is Business => !!b)
+      .map(b => ({ id: b.id, name: b.name, type: b.type }));
 
     return {
       username: user.username,
@@ -4613,13 +4708,28 @@ export const storage: IStorage = {
       avatarRing: user.avatarRing || "none",
       avatarCrop: user.avatarCrop || null,
       memberSince: user.createdAt,
-      verifiedHost: user.promoterStatus === "approved",
+      verifiedHost,
+      showPromoterVariant: verifiedHost,
       roles,
+      talents: safeJson(user.talents || "[]"),
+      standFor: verifiedHost ? safeJson(user.standFor || "[]") : [],
+      affiliatedVenues,
+      ownedBusiness: ownedBusinesses[0] || null,
+      accentColor: user.accentColor || null,
+      banner: user.banner || DEFAULT_PROFILE_BANNER,
+      marquee: verifiedHost ? safeJsonOrNull(user.marquee) : null,
+      pup: !verifiedHost ? safeJsonOrNull(user.pup) : null,
+      packmates: !verifiedHost ? storage.getPackLinks(user.id, "packmate") : [],
+      handlers: !verifiedHost ? storage.getPackLinks(user.id, "handler") : [],
+      media: storage.getProfileMedia(user.id),
       socialLinks: socialLinksRaw && typeof socialLinksRaw === "object" && !Array.isArray(socialLinksRaw) ? socialLinksRaw : {},
       profileEmbeds: safeJson(user.profileEmbeds || "[]"),
       profilePhotos: safeJson(user.profilePhotos || "[]"),
       stats: {
-        events: hostedEvents.length,
+        events: hostedUpcoming.length + hostedPast.length,
+        hosting: hostedUpcoming.length,
+        going: goingToUpcoming.length,
+        posts: gigs.length + gifting.length + spotted.length,
         gigs: gigs.length,
         gifting: gifting.length,
         checkIns,
@@ -4630,6 +4740,102 @@ export const storage: IStorage = {
       activity,
       linkedVenues: storage.getUserLinkedBusinesses(user.id),
     };
+  },
+  getPackLinks(userId, relation) {
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS avatarRing, u.photo_url AS photoUrl
+      FROM pack_links pl
+      JOIN users u ON u.id = pl.linked_user_id
+      WHERE pl.user_id = ? AND pl.relation = ? AND u.status = 'active'
+      ORDER BY pl.created_at ASC
+    `).all(userId, relation) as any[];
+    return rows.map(r => ({
+      id: r.id, username: r.username, displayName: r.displayName ?? null,
+      avatarChoice: r.avatarChoice ?? 1, avatarRing: r.avatarRing || "none", photoUrl: r.photoUrl ?? null,
+    }));
+  },
+  addPackLink(userId, relation, targetUsername) {
+    const target = storage.getUserByUsername(targetUsername.replace(/^@/, "").trim());
+    if (!target || target.status !== "active") return { error: "That member could not be found." };
+    if (target.id === userId) return { error: "You can't link yourself." };
+    try {
+      sqlite.prepare(`
+        INSERT INTO pack_links (user_id, linked_user_id, relation, created_at)
+        VALUES (?, ?, ?, ?)
+      `).run(userId, target.id, relation, new Date().toISOString());
+      return { ok: true };
+    } catch (e: any) {
+      if (String(e?.message || "").includes("UNIQUE")) return { error: "Already added." };
+      return { error: "Could not add link." };
+    }
+  },
+  removePackLink(userId, relation, linkedUserId) {
+    sqlite.prepare(`DELETE FROM pack_links WHERE user_id = ? AND relation = ? AND linked_user_id = ?`)
+      .run(userId, relation, linkedUserId);
+  },
+  getProfileMedia(userId) {
+    const media = sqlite.prepare(`SELECT * FROM profile_media WHERE user_id = ?`).get(userId) as any;
+    if (media) {
+      const items = sqlite.prepare(`
+        SELECT id, label, title, meta, audio_url AS audioUrl, is_embed AS isEmbed
+        FROM profile_media_items WHERE media_id = ? ORDER BY sort_order ASC, id ASC
+      `).all(media.id) as any[];
+      return {
+        kind: media.kind,
+        title: media.title,
+        tag: media.tag ?? null,
+        cadence: media.cadence ?? null,
+        blurb: media.blurb ?? null,
+        coverUrl: media.cover_url ?? null,
+        platformLinks: safeJson(media.platform_links || "[]"),
+        items: items.map(it => ({ ...it, isEmbed: !!it.isEmbed })),
+      };
+    }
+    // Legacy fallback: synthesize a media card from SoundCloud embeds so
+    // existing promoters' sets don't vanish before they set up the new model.
+    const user = storage.getUserById(userId);
+    const embeds = safeJson(user?.profileEmbeds || "[]") as Array<{ id: string; src: string; title: string }>;
+    if (!user || embeds.length === 0) return null;
+    return {
+      kind: user.promoterStatus === "approved" ? "podcast" : "playlist",
+      title: "My tracks",
+      tag: null,
+      cadence: null,
+      blurb: null,
+      coverUrl: null,
+      platformLinks: [],
+      items: embeds.map(e => ({ id: e.id, label: null, title: e.title, meta: null, audioUrl: e.src, isEmbed: true })),
+    };
+  },
+  saveProfileMedia(userId, data) {
+    const now = new Date().toISOString();
+    const existing = sqlite.prepare(`SELECT id FROM profile_media WHERE user_id = ?`).get(userId) as { id: number } | undefined;
+    let mediaId: number;
+    if (existing) {
+      sqlite.prepare(`
+        UPDATE profile_media SET kind = ?, title = ?, tag = ?, cadence = ?, blurb = ?, cover_url = ?,
+          platform_links = ?, updated_at = ? WHERE id = ?
+      `).run(data.kind, data.title, data.tag ?? null, data.cadence ?? null, data.blurb ?? null,
+        data.coverUrl ?? null, JSON.stringify(data.platformLinks || []), now, existing.id);
+      mediaId = existing.id;
+      sqlite.prepare(`DELETE FROM profile_media_items WHERE media_id = ?`).run(mediaId);
+    } else {
+      const result = sqlite.prepare(`
+        INSERT INTO profile_media (user_id, kind, title, tag, cadence, blurb, cover_url, platform_links, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(userId, data.kind, data.title, data.tag ?? null, data.cadence ?? null, data.blurb ?? null,
+        data.coverUrl ?? null, JSON.stringify(data.platformLinks || []), now, now);
+      mediaId = Number(result.lastInsertRowid);
+    }
+    const items = (data.items || []).slice(0, 30);
+    items.forEach((item: any, i: number) => {
+      sqlite.prepare(`
+        INSERT INTO profile_media_items (media_id, sort_order, label, title, meta, audio_url, is_embed, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(mediaId, i, item.label ?? null, item.title, item.meta ?? null, item.audioUrl, item.isEmbed ? 1 : 0, now);
+    });
+    return storage.getProfileMedia(userId);
   },
   countActiveMessages() {
     const row = sqlite.prepare(`

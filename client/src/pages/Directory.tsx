@@ -123,7 +123,7 @@ export default function Directory() {
     return t && t in TYPE_LABELS ? t : "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
 
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({

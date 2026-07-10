@@ -253,6 +253,13 @@ export const users = sqliteTable("users", {
   socialLinks: text("social_links"), // JSON object keyed by platform
   profileEmbeds: text("profile_embeds"), // JSON array of {id,src,title}
   profilePhotos: text("profile_photos"), // JSON array of {url,caption}
+  talents: text("talents"), // JSON string[] — skills/roles the profile owner offers
+  standFor: text("stand_for"), // JSON string[] — promoter-only "what we stand for" checklist
+  affiliatedVenueIds: text("affiliated_venue_ids"), // JSON number[] — "Resident at" venues (business ids)
+  marquee: text("marquee"), // JSON {items:string[],speed:number,color:string} | null — promoter-only ticker
+  accentColor: text("accent_color"), // hex from the fixed neon allowlist, or null for the site default
+  banner: text("banner"), // 'accent-gradient' | 'neon-collage' | 'sticker-wall' | 'pride-guide-social'
+  pup: text("pup"), // JSON {name,hood,role,lookingFor} | null — member-only, opt-in pup identity
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
@@ -272,6 +279,45 @@ export const follows = sqliteTable("follows", {
   createdAt: text("created_at").notNull().default(""),
 });
 export type Follow = typeof follows.$inferSelect;
+
+// Pack links (profile "Pack & pup life" card — packmate/handler relations between real users)
+export const packLinks = sqliteTable("pack_links", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  linkedUserId: integer("linked_user_id").notNull(),
+  relation: text("relation").notNull(), // packmate | handler
+  createdAt: text("created_at").notNull().default(""),
+});
+export type PackLink = typeof packLinks.$inferSelect;
+
+// Profile media (promoter podcast / member playlist card)
+export const profileMedia = sqliteTable("profile_media", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull().unique(),
+  kind: text("kind").notNull(), // podcast | playlist
+  title: text("title").notNull(),
+  tag: text("tag"),
+  cadence: text("cadence"),
+  blurb: text("blurb"),
+  coverUrl: text("cover_url"),
+  platformLinks: text("platform_links").notNull().default("[]"), // JSON [{label,url}]
+  createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(""),
+});
+export type ProfileMedia = typeof profileMedia.$inferSelect;
+
+export const profileMediaItems = sqliteTable("profile_media_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  mediaId: integer("media_id").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  label: text("label"),
+  title: text("title").notNull(),
+  meta: text("meta"),
+  audioUrl: text("audio_url").notNull(),
+  isEmbed: integer("is_embed", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type ProfileMediaItem = typeof profileMediaItems.$inferSelect;
 
 // Messages
 export const messages = sqliteTable("messages", {
