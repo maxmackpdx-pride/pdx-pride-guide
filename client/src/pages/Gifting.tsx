@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import BoardRunningHead from "@/components/BoardRunningHead";
+import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -306,12 +306,8 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page board-page--makeover">
-      <BoardRunningHead active="gifting" />
-      <BoardHero
-        accent="lime"
-        kicker="Free board · Pride season 2026"
-        title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
-        lede="A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
+      <CommunityBoardHeroRow
+        active="gifting"
         actions={
           <>
             <Button variant="solid" accent="lime" size="lg" arrow onClick={() => openForm("GIFT")}>
@@ -322,7 +318,14 @@ export default function Gifting() {
             </Button>
           </>
         }
-      />
+      >
+        <BoardHero
+          accent="lime"
+          kicker="Free board · Pride season 2026"
+          title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
+          lede="A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
+        />
+      </CommunityBoardHeroRow>
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 

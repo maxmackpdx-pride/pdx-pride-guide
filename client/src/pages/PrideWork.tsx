@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import BoardRunningHead from "@/components/BoardRunningHead";
+import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -282,12 +282,8 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page board-page--makeover">
-      <BoardRunningHead active="gigs" />
-      <BoardHero
-        accent="purple"
-        kicker="Two-way work board · Pride season and beyond"
-        title={<>The Gig <span className="board-hero__title-accent">Board</span></>}
-        lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
+      <CommunityBoardHeroRow
+        active="gigs"
         actions={
           <>
             <Button variant="neon" accent="cyan" size="lg" onClick={() => openForm("LOOKING_FOR_WORK")}>
@@ -298,7 +294,14 @@ export default function PrideWork() {
             </Button>
           </>
         }
-      />
+      >
+        <BoardHero
+          accent="purple"
+          kicker="Two-way work board · Pride season and beyond"
+          title={<>The Gig <span className="board-hero__title-accent">Board</span></>}
+          lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
+        />
+      </CommunityBoardHeroRow>
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 

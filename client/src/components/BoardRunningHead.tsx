@@ -14,28 +14,23 @@ const ACCENT: Record<BoardKey, string> = {
   gigs: "purple",
 };
 
-export default function BoardRunningHead({ active }: { active: BoardKey }) {
+export function BoardCommunityNav({ active }: { active: BoardKey }) {
   return (
-    <div className={`board-running board-running--${ACCENT[active]}`}>
-      <div className="board-running__inner">
-        <div className="board-running__live">
-          <span className="board-running__dot" aria-hidden="true" />
-          The Community Boards
-        </div>
-        <nav className="board-running__nav" aria-label="Community boards">
-          {LINKS.map(link =>
-            link.key === active ? (
-              <span key={link.key} className="board-running__link is-active" aria-current="page">
-                {link.label}
-              </span>
-            ) : (
-              <Link key={link.key} href={link.href} className="board-running__link">
-                {link.label}
-              </Link>
-            ),
-          )}
-        </nav>
-      </div>
-    </div>
+    <nav
+      className={`events-tab-bar community-board-tab-bar community-board-tab-bar--${ACCENT[active]}`}
+      aria-label="Community boards"
+    >
+      {LINKS.map(link =>
+        link.key === active ? (
+          <span key={link.key} className="events-tab active" aria-current="page">
+            {link.label}
+          </span>
+        ) : (
+          <Link key={link.key} href={link.href} className="events-tab">
+            {link.label}
+          </Link>
+        ),
+      )}
+    </nav>
   );
 }
