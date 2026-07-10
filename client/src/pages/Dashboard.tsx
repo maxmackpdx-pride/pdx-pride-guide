@@ -28,19 +28,25 @@ export default function Dashboard() {
     const v = new URLSearchParams(window.location.search).get("view");
     return v === "posts" ? "posts" : "home";
   });
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("edit") === "profile";
+  });
 
   useEffect(() => {
     const url = new URL(window.location.href);
     if (memberView === "posts") url.searchParams.set("view", "posts");
     else url.searchParams.delete("view");
+    if (editMode) url.searchParams.set("edit", "profile");
+    else url.searchParams.delete("edit");
     window.history.replaceState({}, "", url.toString());
-  }, [memberView]);
+  }, [memberView, editMode]);
 
   useEffect(() => {
     const onPopState = () => {
-      const v = new URLSearchParams(window.location.search).get("view");
-      setMemberView(v === "posts" ? "posts" : "home");
+      const params = new URLSearchParams(window.location.search);
+      setMemberView(params.get("view") === "posts" ? "posts" : "home");
+      setEditMode(params.get("edit") === "profile");
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);

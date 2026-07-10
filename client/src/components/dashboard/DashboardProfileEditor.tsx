@@ -128,6 +128,16 @@ export default function DashboardProfileEditor({
         username={user.username}
         onSaved={() => void onRefresh()}
       />
+      <label style={labelStyle}>Username</label>
+      <input
+        style={{ ...inputStyle, color: "var(--text-lo)", cursor: "default" }}
+        value={`@${user?.username || ""}`}
+        readOnly
+        aria-readonly="true"
+      />
+      <p style={{ margin: "6px 0 0", fontSize: "0.78rem", color: "var(--text-lo)", lineHeight: 1.4 }}>
+        Your handle is set when you join. It powers your profile link and login. Message the team if you need it changed.
+      </p>
       <label style={labelStyle}>Display name</label>
       <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={40} />
       <label style={labelStyle}>Bio <span style={{ color: "var(--text-meta)", fontWeight: 400 }}>({bio.length}/160)</span></label>

@@ -179,7 +179,7 @@ export default function MemberProfile() {
 
   return (
     <div className="pp-page" style={profileCssVars(accent)}>
-      <ProfileTopBar />
+      <ProfileTopBar isOwner={isOwner} />
 
       <ProfileHero
         data={data}

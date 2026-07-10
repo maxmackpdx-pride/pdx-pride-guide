@@ -68,6 +68,19 @@
   color: var(--text-faint);
 }
 
+.pp-topbar__edit {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--neon-lime, #ccff00);
+  text-decoration: none;
+}
+
+.pp-topbar__edit:hover {
+  text-decoration: underline;
+}
+
 /* Hero */
 .pp-hero {
   position: relative;
@@ -298,10 +311,12 @@
 .pp-hero__picker-wrap { position: relative; }
 
 /* Buttons */
-.pp-btn {
+.pp-btn,
+a.pp-btn {
   appearance: none;
   cursor: pointer;
   display: inline-flex;
+  text-decoration: none;
   align-items: center;
   gap: 8px;
   font-family: var(--font-display);

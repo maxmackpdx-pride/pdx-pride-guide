@@ -1,6 +1,10 @@
 import { Link } from "wouter";
 
-export default function ProfileTopBar() {
+type Props = {
+  isOwner?: boolean;
+};
+
+export default function ProfileTopBar({ isOwner = false }: Props) {
   return (
     <header className="pp-topbar">
       <div className="pp-topbar__left">
@@ -13,7 +17,13 @@ export default function ProfileTopBar() {
           PDX Pride <span className="pp-topbar__accent">Guide</span>
         </span>
       </div>
-      <span className="pp-topbar__label display">Public profile</span>
+      {isOwner ? (
+        <Link href="/dashboard?edit=profile" className="pp-topbar__edit display">
+          Edit profile
+        </Link>
+      ) : (
+        <span className="pp-topbar__label display">Public profile</span>
+      )}
     </header>
   );
 }

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
@@ -126,6 +127,12 @@ export default function ProfileHero({
               )}
               {isFollowing ? "Following" : "Follow"}
             </button>
+          )}
+
+          {isOwner && (
+            <Link href="/dashboard?edit=profile" className="pp-btn pp-btn--outline display">
+              Edit profile
+            </Link>
           )}
 
           {isOwner && (
