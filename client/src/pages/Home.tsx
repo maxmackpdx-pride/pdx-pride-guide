@@ -8,6 +8,9 @@ import type { EventListing } from "@shared/multiDayEvents";
 import ScrollReveal from "@/components/ScrollReveal";
 import HomeHero from "@/components/HomeHero";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import AuthModal from "@/components/AuthModal";
+import PlaceModal from "@/components/PlaceModal";
+import { TYPE_LABELS, TYPE_TO_DS_CATEGORY, type Business } from "@/pages/Directory";
 import {
   Button,
   Divider,
@@ -43,46 +46,6 @@ const BOARD_COUNT_FALLBACK = {
   gigs: 37,
 } as const;
 
-const TYPE_LABELS: Record<string, string> = {
-  bar: "Bars & Clubs",
-  restaurant: "Restaurants",
-  cafe: "Cafes",
-  venue: "Venues",
-  service: "Services",
-  shop: "Shops",
-  hotel: "Hotels",
-  nonprofit: "Nonprofits",
-};
-
-const TYPE_TO_DS_CATEGORY: Record<string, string> = {
-  bar: "bars",
-  restaurant: "food",
-  cafe: "cafes",
-  venue: "venues",
-  service: "services",
-  shop: "shops",
-  hotel: "hotels",
-  nonprofit: "services",
-};
-
-type DirectoryBusiness = {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  address: string | null;
-  neighborhood: string | null;
-  website: string | null;
-  instagram: string | null;
-  donateUrl: string | null;
-  hours: string | null;
-  phone: string | null;
-  imageUrl: string | null;
-  isNew: boolean;
-  lat: number | null;
-  lng: number | null;
-};
-
 type GiftingFeedPost = GiftingPost & {
   neighborhood: string;
 };
@@ -99,8 +62,10 @@ export default function Home() {
   );
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
-  const [featuredSpots, setFeaturedSpots] = useState<DirectoryBusiness[]>([]);
-  const [featuredNonprofits, setFeaturedNonprofits] = useState<DirectoryBusiness[]>([]);
+  const [featuredSpots, setFeaturedSpots] = useState<Business[]>([]);
+  const [featuredNonprofits, setFeaturedNonprofits] = useState<Business[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
 
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -127,7 +92,7 @@ export default function Home() {
     staleTime: 60_000,
   });
 
-  const { data: businesses = [] } = useQuery<DirectoryBusiness[]>({
+  const { data: businesses = [] } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
     staleTime: 60_000,
@@ -161,6 +126,14 @@ export default function Home() {
 
   return (
     <div className="home-main-stage">
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+      {selectedPlace && (
+        <PlaceModal
+          place={selectedPlace}
+          onClose={() => setSelectedPlace(null)}
+          onRequireAuth={() => setShowAuth(true)}
+        />
+      )}
       <HomeHero eventCount={events.length} />
 
       <div className="home-live-ticker" aria-label="Live event ticker">
@@ -356,7 +329,7 @@ export default function Home() {
               </div>
               <div className="pg-placescroll">
                 {featuredSpots.map(biz => (
-                  <HomePlaceCard key={biz.id} biz={biz} />
+                  <HomePlaceCard key={biz.id} biz={biz} onOpen={() => setSelectedPlace(biz)} />
                 ))}
                 {featuredSpots.length === 0 && (
                   <PlaceCard
@@ -379,7 +352,7 @@ export default function Home() {
               </div>
               <div className="pg-placescroll">
                 {featuredNonprofits.map(biz => (
-                  <HomePlaceCard key={biz.id} biz={biz} />
+                  <HomePlaceCard key={biz.id} biz={biz} onOpen={() => setSelectedPlace(biz)} />
                 ))}
                 {featuredNonprofits.length === 0 && (
                   <PlaceCard
@@ -415,18 +388,22 @@ export default function Home() {
 }
 
 /** Same logo resolution as Directory cards (neon pack + DB imageUrl + type fallback). */
-function HomePlaceCard({ biz }: { biz: DirectoryBusiness }) {
+function HomePlaceCard({ biz, onOpen }: { biz: Business; onOpen: () => void }) {
   const isNonprofit = biz.type === "nonprofit";
   const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
   const fallbackLogoUrl = directoryFallbackLogo(biz.type);
   return (
     <PlaceCard
       name={biz.name}
+      onClick={onOpen}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className={isNonprofit ? "pdxPlace--rainbow" : undefined}
+      className={`pdxPlace--clickable${isNonprofit ? " pdxPlace--rainbow" : ""}`}
       isNonprofit={isNonprofit}
       logoUrl={logoUrl}
       fallbackLogoUrl={fallbackLogoUrl}
+      lat={biz.lat}
+      lng={biz.lng}
+      promoters={biz.promoters}
       donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
