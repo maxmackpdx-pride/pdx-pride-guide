@@ -2682,28 +2682,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
-    const counts = getTableCounts();
-    const pendingSubmissions = storage.getSubmissions("PENDING").length;
-    const liveEvents = storage.getEvents({ status: "LIVE" }).length;
-    const userSubmittedEvents = storage.countEventsBySource("user_submitted", "LIVE");
-    const openFeedback = 0;
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-    const newUsersToday = (sqlite.prepare(`SELECT COUNT(*) AS count FROM users WHERE created_at >= ?`).get(todayStart.toISOString()) as { count: number })?.count ?? 0;
-    res.json({
-      users: counts.users ?? 0,
-      newUsersToday,
-      activeSessions: counts.express_sessions ?? 0,
-      liveEvents,
-      userSubmittedEvents,
-      messages: storage.countActiveMessages(),
-      attendances: counts.attendances ?? 0,
-      pendingSubmissions,
-      gigPosts: storage.getGigPosts("LIVE").length,
-      giftingPosts: storage.getGiftingPosts().length,
-      missedConnections: storage.getMissedConnections("ACTIVE").length,
-      openFeedback,
-      generatedAt: new Date().toISOString(),
-    });
+    res.json(storage.getAdminMetrics());
   });
 
   app.get("/api/admin/users/new-today", requireAdmin, (_req, res) => {
