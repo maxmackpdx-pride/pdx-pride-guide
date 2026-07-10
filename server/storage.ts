@@ -4268,6 +4268,14 @@ export type AdminMetricsSnapshot = {
   pendingPromoterRequests: number;
   signupsTrend14d: number[];
   rsvpsTrend14d: number[];
+  memberGrowth12h: Array<{
+    at: string;
+    signups: number;
+    rsvps: number;
+    total: number;
+    cumulativeSignups: number;
+    cumulativeRsvps: number;
+  }>;
   contentBreakdown: Array<{ label: string; count: number }>;
   eventSources: Array<{ label: string; count: number }>;
   conversions: {
@@ -6622,6 +6630,42 @@ export const storage: IStorage = {
       return series;
     };
 
+    const memberGrowth12h = (() => {
+      const bucketMs = 12 * 60 * 60 * 1000;
+      const windowStart = new Date(now);
+      windowStart.setDate(windowStart.getDate() - 14);
+      windowStart.setHours(0, 0, 0, 0);
+      const buckets: Array<{
+        at: string;
+        signups: number;
+        rsvps: number;
+        total: number;
+        cumulativeSignups: number;
+        cumulativeRsvps: number;
+      }> = [];
+      let cumulativeSignups = 0;
+      let cumulativeRsvps = 0;
+      for (let i = 0; i < 28; i++) {
+        const bucketStart = new Date(windowStart.getTime() + i * bucketMs);
+        if (bucketStart > now) break;
+        const bucketEnd = new Date(bucketStart.getTime() + bucketMs);
+        const endIso = bucketEnd > now ? now.toISOString() : bucketEnd.toISOString();
+        const signups = countBetween("users", bucketStart.toISOString(), endIso);
+        const rsvps = countBetween("attendances", bucketStart.toISOString(), endIso, "is_active = 1");
+        cumulativeSignups += signups;
+        cumulativeRsvps += rsvps;
+        buckets.push({
+          at: bucketStart.toISOString(),
+          signups,
+          rsvps,
+          total: signups + rsvps,
+          cumulativeSignups,
+          cumulativeRsvps,
+        });
+      }
+      return buckets;
+    })();
+
     const liveEvents = storage.getEvents({ status: "LIVE" });
     const hiddenEvents = storage.getEvents({ status: "HIDDEN" });
     const unclaimedEvents = liveEvents.filter(e => e.isClaimable && !e.claimedBy).length;
@@ -6687,6 +6731,7 @@ export const storage: IStorage = {
       pendingPromoterRequests: storage.getPendingPromoterRequests().length,
       signupsTrend14d: dailyTrend14d("users"),
       rsvpsTrend14d: dailyTrend14d("attendances", "is_active = 1"),
+      memberGrowth12h,
       contentBreakdown,
       eventSources,
       conversions: {

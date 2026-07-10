@@ -4,6 +4,7 @@ import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { StatCard } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
+import MemberGrowthChart from "@/components/admin/MemberGrowthChart";
 import "./admin-stats.css";
 
 interface AdminMetrics {
@@ -30,6 +31,14 @@ interface AdminMetrics {
   pendingPromoterRequests: number;
   signupsTrend14d: number[];
   rsvpsTrend14d: number[];
+  memberGrowth12h: Array<{
+    at: string;
+    signups: number;
+    rsvps: number;
+    total: number;
+    cumulativeSignups: number;
+    cumulativeRsvps: number;
+  }>;
   contentBreakdown: Array<{ label: string; count: number }>;
   eventSources: Array<{ label: string; count: number }>;
   conversions: {
@@ -183,12 +192,6 @@ export default function AdminStatsView({
     refetchOnMount: "always",
     refetchInterval: 60_000,
   });
-
-  const activityTrend = useMemo(() => {
-    if (!data) return trendPoints([]);
-    const combined = data.signupsTrend14d.map((v, i) => v + (data.rsvpsTrend14d[i] ?? 0));
-    return trendPoints(combined);
-  }, [data]);
 
   const trafficTrend = useMemo(() => {
     if (!data?.traffic) return trendPoints([]);
@@ -498,33 +501,15 @@ export default function AdminStatsView({
 
       <h2 className="admin-stats__section-title">Member growth</h2>
       <p className="admin-stats__section-lede">
-        Daily signups and new RSVPs over the last 14 days. {signupTotal} signup{signupTotal === 1 ? "" : "s"},{" "}
-        {rsvpTotal} RSVP{rsvpTotal === 1 ? "" : "s"} in this window.
+        Signups and RSVPs in 12-hour buckets over the last 14 days. {signupTotal} signup{signupTotal === 1 ? "" : "s"},{" "}
+        {rsvpTotal} RSVP{rsvpTotal === 1 ? "" : "s"} total.
       </p>
       <div className="admin-stats__panel">
         <div className="admin-stats__panel-head">
           <h3 className="admin-stats__panel-title admin-stats__panel-title--lg">Signups + RSVPs · 14 days</h3>
-          <span className="admin-stats__trend-tag">Database only</span>
+          <span className="admin-stats__trend-tag">12-hour buckets</span>
         </div>
-        <div className="admin-stats__chart-wipe">
-          <svg viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden>
-            <defs>
-              <linearGradient id="adminStatsArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="var(--cyan, #00ffff)" stopOpacity="0.34" />
-                <stop offset="1" stopColor="var(--cyan, #00ffff)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <polygon points={activityTrend.area} fill="url(#adminStatsArea)" />
-            <polyline
-              points={activityTrend.line}
-              fill="none"
-              stroke="var(--cyan, #00ffff)"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
+        <MemberGrowthChart buckets={data.memberGrowth12h} />
       </div>
 
       <div className="admin-stats__two-col">
