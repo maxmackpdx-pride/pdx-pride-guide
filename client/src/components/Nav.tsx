@@ -162,18 +162,6 @@ export default function Nav() {
     };
   }, [openDropdown]);
 
-  const { data: adminSession } = useQuery<{ isAdmin?: boolean } | null>({
-    queryKey: ["/api/admin/me"],
-    queryFn: async () => {
-      const r = await fetch("/api/admin/me", { credentials: "include" });
-      return r.ok ? r.json() : null;
-    },
-    retry: false,
-    refetchInterval: 120000,
-  });
-
-  const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
-
   const { data: unread = { count: 0 } } = useQuery<{ count: number }>({
     queryKey: ["/api/messages/unread-count"],
     queryFn: () => fetch("/api/messages/unread-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
@@ -181,15 +169,7 @@ export default function Nav() {
     refetchInterval: 90000,
   });
 
-  const { data: adminPending = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/admin/pending-count"],
-    queryFn: () => fetch("/api/admin/pending-count", { credentials: "include" }).then(r => r.ok ? r.json() : { count: 0 }),
-    enabled: isAdmin,
-    refetchInterval: 90000,
-  });
-
   const unreadCount = unread.count || 0;
-  const adminPendingCount = adminPending.count || 0;
   const closeMenu = () => {
     setMenuOpen(false);
     setOpenDropdown(null);
@@ -263,20 +243,6 @@ export default function Nav() {
                   }
                   onClick={closeMenu}
                 />
-                {isAdmin && (
-                  <NavLink
-                    href="/admin"
-                    label="Admin"
-                    active={location === "/admin" || location.startsWith("/admin/")}
-                    showNotify={adminPendingCount > 0}
-                    notifyLabel={
-                      adminPendingCount > 0
-                        ? `Admin, ${adminPendingCount} pending item${adminPendingCount === 1 ? "" : "s"}`
-                        : undefined
-                    }
-                    onClick={closeMenu}
-                  />
-                )}
                 <div className={`site-profile-menu${profileActive ? " site-profile-menu--active" : ""}`} ref={profileRef}>
                   <button
                     type="button"
@@ -351,18 +317,6 @@ export default function Nav() {
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {!user && isAdmin && (
-              <div className="site-auth">
-                <NavLink
-                  href="/admin"
-                  label="Admin"
-                  active={location === "/admin" || location.startsWith("/admin/")}
-                  showNotify={adminPendingCount > 0}
-                  onClick={closeMenu}
-                />
               </div>
             )}
 
