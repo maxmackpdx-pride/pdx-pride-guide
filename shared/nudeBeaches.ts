@@ -157,24 +157,46 @@ export const SAUVIE_ISLAND_RESOURCES: ResourceLink[] = [
   },
 ];
 
-export const TRAVELER_RULES = [
-  "Alcohol is strictly prohibited on all beaches in the Sauvie Island Wildlife Area.",
-  "Day-use hours are 4 a.m. to 10 p.m. in the wildlife area.",
-  "Columbia River water is cold. Currents and underwater sand ridges can change fast.",
-  "Rooster Rock east end is Oregon's designated clothing-optional beach; Collins Beach is partly clothing-optional.",
+export const ROOSTER_ROCK_CHECKLIST = [
+  {
+    step: "Check the river level",
+    detail: "Read the live USGS gage and Rooster Rock Crossing before you attempt the Sand Island wade. About 18 ft is the highest worth trying.",
+  },
+  {
+    step: "Time it for low water",
+    detail: "The Columbia swings through the day. Aim for the low-water window — early July is usually the first safe bet; August is easiest.",
+  },
+  {
+    step: "Pack for mud and cold",
+    detail: "Trails stay muddy after the river drops. Water is cold, currents are strong, and sand ridges drop off without warning.",
+  },
 ];
 
-export const PLANNING_CHECKLIST = [
+export const SAUVIE_ISLAND_CHECKLIST = [
   {
     step: "Check permit status",
-    detail: "Weekends and holidays through Labor Day require a Sauvie Island parking permit. Check SauvieIslandParking.com before you go.",
+    detail: "Weekends and holidays through Labor Day require a Sauvie Island parking permit. SauvieIslandParking.com is the only place to see sold-out dates live.",
   },
   {
     step: "Check water safety",
-    detail: "If you plan to swim at Collins, verify the latest Swim Guide sample. At Rooster Rock, read the live river level before crossing.",
+    detail: "Verify the latest Swim Guide sample for Collins Beach before you swim. Sampling on the Columbia is limited.",
   },
   {
-    step: "Review rules & hours",
-    detail: "No alcohol on wildlife-area beaches. Pack water, sun protection, and shoes that handle mud.",
+    step: "Review wildlife-area rules",
+    detail: "No alcohol on the beaches. Day-use hours are 4 a.m. to 10 p.m. Check SICA for road or bridge alerts.",
   },
+];
+
+export const ROOSTER_ROCK_RULES = [
+  "Rooster Rock State Park is day-use: $10/day or an Oregon State Parks annual pass.",
+  "The far east end of the park is Oregon's designated clothing-optional beach.",
+  "Columbia River water is cold. Currents and underwater sand ridges can change fast.",
+  "Never cross to Sand Island alone if you are unsure — check roosterrockcrossing.com at the water's edge.",
+];
+
+export const SAUVIE_ISLAND_RULES = [
+  "Alcohol is strictly prohibited on all beaches in the Sauvie Island Wildlife Area.",
+  "Day-use hours are 4 a.m. to 10 p.m. in the wildlife area.",
+  "Collins Beach is partly clothing-optional — wild, sandy, and on the island's western shore.",
+  "Parking permits are required on busy days through Labor Day — verify before you drive out.",
 ];
