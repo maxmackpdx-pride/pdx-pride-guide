@@ -6742,7 +6742,11 @@ export const storage: IStorage = {
         rsvpsThisWeek: countSince("attendances", weekStart.toISOString(), "is_active = 1"),
         rsvpsPrevWeek: countBetween("attendances", prevWeekStart.toISOString(), weekStart.toISOString(), "is_active = 1"),
       },
-      traffic: getTrafficMetrics(sqlite),
+      traffic: getTrafficMetrics(sqlite, {
+        source: "first_party",
+        gaTrackingEnabled: false,
+        gaReportingEnabled: false,
+      }),
     };
   },
   resolveOwnerDeskItem(id, source = "desk") {

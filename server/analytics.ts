@@ -9,7 +9,12 @@ export type PageViewInput = {
   userId?: number | null;
 };
 
+export type TrafficSource = "first_party" | "google_analytics";
+
 export type TrafficMetrics = {
+  source: TrafficSource;
+  gaTrackingEnabled: boolean;
+  gaReportingEnabled: boolean;
   activeNow: number;
   pageViews7d: number;
   pageViewsPrev7d: number;
@@ -248,7 +253,10 @@ function bucketPercents(
     }));
 }
 
-export function getTrafficMetrics(db: Database): TrafficMetrics {
+export function getTrafficMetrics(
+  db: Database,
+  meta?: { gaTrackingEnabled?: boolean; gaReportingEnabled?: boolean; source?: TrafficSource },
+): TrafficMetrics {
   const bounds = periodBounds();
   const pageViews7d = countViews(db, bounds.weekStartIso);
   const pageViewsPrev7d = countViews(db, bounds.prevWeekStartIso, bounds.weekStartIso);
@@ -311,6 +319,9 @@ export function getTrafficMetrics(db: Database): TrafficMetrics {
   const activeNow = countDistinct(db, "visitor_id", bounds.activeSinceIso);
 
   return {
+    source: meta?.source ?? "first_party",
+    gaTrackingEnabled: meta?.gaTrackingEnabled ?? false,
+    gaReportingEnabled: meta?.gaReportingEnabled ?? false,
     activeNow,
     pageViews7d,
     pageViewsPrev7d,

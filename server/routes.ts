@@ -20,6 +20,8 @@ import {
 } from "./mapCoordinateSync";
 import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
+import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
+import { readGaMeasurementId } from "./gaSnippet";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -2709,8 +2711,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ count: storage.getAdminPendingCount(), ownerCount });
   });
 
-  app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
-    res.json(storage.getAdminMetrics());
+  app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
+    const metrics = storage.getAdminMetrics();
+    const gaTrackingEnabled = !!readGaMeasurementId();
+    const gaReportingEnabled = isGoogleAnalyticsAdminConfigured();
+
+    if (gaReportingEnabled) {
+      const gaTraffic = await getGoogleAnalyticsTrafficMetrics();
+      if (gaTraffic) {
+        metrics.traffic = gaTraffic;
+      } else {
+        metrics.traffic = {
+          ...metrics.traffic,
+          gaTrackingEnabled,
+          gaReportingEnabled,
+        };
+      }
+    } else {
+      metrics.traffic = {
+        ...metrics.traffic,
+        gaTrackingEnabled,
+        gaReportingEnabled: false,
+      };
+    }
+
+    res.json(metrics);
   });
 
   app.get("/api/admin/users/new-today", requireAdmin, (_req, res) => {

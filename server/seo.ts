@@ -1,3 +1,4 @@
+import { buildGoogleAnalyticsHead } from "./gaSnippet";
 import { storage } from "./storage";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { eventUrl } from "@shared/eventSlug";
@@ -434,6 +435,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     process.env.BING_SITE_VERIFICATION
       ? `<meta name="msvalidate.01" content="${escapeHtml(process.env.BING_SITE_VERIFICATION)}" />`
       : "",
+    buildGoogleAnalyticsHead(),
   ].filter(Boolean).join("\n    ");
 
   const crawlerDirectory = buildCrawlerEventDirectory(events);

@@ -51,6 +51,9 @@ interface AdminMetrics {
   };
   generatedAt?: string;
   traffic: {
+    source: "first_party" | "google_analytics";
+    gaTrackingEnabled: boolean;
+    gaReportingEnabled: boolean;
     activeNow: number;
     pageViews7d: number;
     pageViewsPrev7d: number;
@@ -262,6 +265,14 @@ export default function AdminStatsView({
   const signupTotal = data.signupsTrend14d.reduce((a, b) => a + b, 0);
   const rsvpTotal = data.rsvpsTrend14d.reduce((a, b) => a + b, 0);
   const traffic = data.traffic;
+  const trafficSourceLabel = traffic.source === "google_analytics"
+    ? "Google Analytics"
+    : "First-party tracking";
+  const trafficLede = traffic.source === "google_analytics"
+    ? "Last 7 days versus the week before, pulled from Google Analytics."
+    : traffic.gaTrackingEnabled
+      ? "Last 7 days versus the week before. GA is collecting on the site; add GA_PROPERTY_ID and GA_SERVICE_ACCOUNT_JSON on Railway for GA reporting here."
+      : "Last 7 days versus the week before. First-party pageview tracking — set GA_MEASUREMENT_ID on Railway to enable Google Analytics.";
   const maxPageViews = Math.max(...traffic.topPages.map(p => p.views), 1);
   const trafficSpark = traffic.pageViewsTrend14d.slice(-8);
 
@@ -348,7 +359,7 @@ export default function AdminStatsView({
             </div>
             <div className="admin-stats__live-num">
               <CountUpValue value={traffic.activeNow} />{" "}
-              <span className="admin-stats__live-sub">visitors in the last 5 min</span>
+              <span className="admin-stats__live-sub">visitors in the last 5 min · {trafficSourceLabel}</span>
             </div>
           </div>
         </div>
@@ -375,7 +386,7 @@ export default function AdminStatsView({
       <div className="admin-stats__grid admin-stats__grid--program">{program.map(renderStat)}</div>
 
       <h2 className="admin-stats__section-title">Traffic and audience</h2>
-      <p className="admin-stats__section-lede">Last 7 days versus the week before. First-party pageview tracking — no Google Analytics.</p>
+      <p className="admin-stats__section-lede">{trafficLede}</p>
       <div className="admin-stats__kpi-grid">
         {trafficKpis.map((kpi, i) => (
           <div key={kpi.id} className="admin-stats__kpi" style={{ animationDelay: `${i * 55}ms` }}>
@@ -404,7 +415,11 @@ export default function AdminStatsView({
         <div className="admin-stats__panel-head">
           <h3 className="admin-stats__panel-title admin-stats__panel-title--lg">Page views · 14 days</h3>
           <span className="admin-stats__trend-tag">
-            {traffic.pageViews7d > 0 ? "Tracking live" : "Collecting data"}
+            {traffic.source === "google_analytics"
+              ? "Google Analytics"
+              : traffic.pageViews7d > 0
+                ? "Tracking live"
+                : "Collecting data"}
           </span>
         </div>
         <div className="admin-stats__chart-wipe">
