@@ -74,16 +74,33 @@ export function profileCssVars(accent: string): React.CSSProperties {
   } as React.CSSProperties;
 }
 
+function promoterMonogramSource(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
+  return (parts[0]?.slice(0, 2) || "?").toUpperCase();
+}
+
+export function promoterMonogram(displayName: string | null | undefined, username: string): string {
+  return promoterMonogramSource(displayName || username);
+}
+
 export function promoterHeroLine(data: PublicProfileData): { lead: string; accent: string } {
-  const bits = data.talents?.length
-    ? data.talents.slice(0, 4)
-    : (data.roles?.length ? data.roles.slice(0, 4) : ["Portland nightlife"]);
-  const lead = `${bits.join(". ")}.`;
+  let lead = "";
+  if (data.talents?.length) {
+    lead = data.talents.slice(0, 4).join(". ");
+  } else if (data.bio?.trim()) {
+    lead = data.bio.trim().split(/\n/)[0].replace(/\.\s*$/, "");
+  } else {
+    lead = "Portland nightlife";
+  }
+  if (!lead.endsWith(".")) lead += ".";
+
   const sinceYear = data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
     ? new Date(data.memberSince).getFullYear()
     : null;
   const accentParts = [data.location || "Portland", sinceYear ? `since ${sinceYear}` : null].filter(Boolean);
-  return { lead, accent: accentParts.join(", ") };
+  const accent = accentParts.length ? `${accentParts.join(", ")}.` : "";
+  return { lead, accent };
 }
 
 export function promoterSectionKicker(data: PublicProfileData): string {

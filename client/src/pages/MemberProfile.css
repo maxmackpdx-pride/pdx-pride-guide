@@ -8,6 +8,10 @@
   --profile-acc-t: var(--neon-magenta);
 }
 
+.app-shell--profile .film-grain-overlay {
+  display: none;
+}
+
 .pp-shell {
   max-width: 1160px;
   margin: 0 auto;
@@ -131,8 +135,43 @@
   flex-wrap: wrap;
 }
 
+.pp-hero__meta {
+  min-width: 0;
+  flex: 1;
+}
+
 .pp-hero__avatar--promo {
   border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--ink-900), 0 0 22px -4px var(--profile-acc);
+}
+
+.pp-hero__avatar--promo .user-avatar[data-ring="none"] .user-avatar__inner {
+  background: var(--profile-acc);
+  border: none;
+}
+
+.pp-hero__avatar--promo .user-avatar__fallback {
+  background: var(--profile-acc) !important;
+  color: #000 !important;
+  font-size: 1.65rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.pp-hero__monogram {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--profile-acc);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   box-shadow: 0 0 0 3px var(--ink-900), 0 0 22px -4px var(--profile-acc);
 }
 
@@ -180,7 +219,16 @@
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
 }
 
-.pp-hero__tagline,
+.pp-hero__tagline {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  line-height: 1.35;
+}
+
 .pp-hero__location {
   margin: 8px 0 0;
   font-size: 0.9rem;
@@ -523,8 +571,18 @@
 
 .pp-poster-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 280px));
+  justify-content: start;
   gap: 18px;
+}
+
+.pp-poster-grid > .pdxBoard {
+  max-width: 280px;
+  width: 100%;
+}
+
+.pp-poster-grid > .pp-empty-copy {
+  grid-column: 1 / -1;
 }
 
 .pp-event-rows {
@@ -937,7 +995,13 @@
 }
 
 @media (max-width: 640px) {
-  .pp-poster-grid { grid-template-columns: 1fr; }
+  .pp-poster-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pp-poster-grid > .pdxBoard {
+    max-width: none;
+  }
   .pp-media__featured { grid-template-columns: 1fr; }
   .pp-hero__name { font-size: 2rem; }
 }

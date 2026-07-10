@@ -6,7 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { eventPath } from "@shared/eventSlug";
-import { formatListingWhen, listingDay, listingPosterUrl, listingTypeTags } from "@/lib/dsEvent";
+import { formatListingWhen, listingDay, listingTypeTags } from "@/lib/dsEvent";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { Event } from "@shared/schema";
 import { fmtEventWhen, promoterSectionKicker } from "./profileHelpers";
@@ -95,7 +95,7 @@ export default function EventsTab({ data }: Props) {
         venue={e.venueName || undefined}
         when={formatListingWhen(evt)}
         day={listingDay(evt)}
-        image={listingPosterUrl(evt)}
+        image={resolveEventPosterUrl(e.id, e.posterImageUrl)}
         types={types}
         admission={e.admission || undefined}
         going={goingCount}

@@ -2,7 +2,7 @@ import { useRef } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
-import { promoterHeroLine } from "./profileHelpers";
+import { promoterHeroLine, promoterMonogram } from "./profileHelpers";
 import type { PublicProfileData } from "./types";
 
 type Props = {
@@ -56,14 +56,20 @@ export default function ProfileHero({
       <div className="pp-hero__content">
         <div className="pp-hero__identity">
           <div className={`pp-hero__avatar${isPromoter ? " pp-hero__avatar--promo" : ""}`}>
-            <UserAvatar
-              photoUrl={data.photoUrl}
-              avatarChoice={data.avatarChoice}
-              avatarRing={isPromoter ? "none" : data.avatarRing}
-              displayName={data.displayName}
-              username={data.username}
-              size={104}
-            />
+            {isPromoter && !data.photoUrl ? (
+              <div className="pp-hero__monogram display" aria-label={displayName}>
+                {promoterMonogram(data.displayName, data.username)}
+              </div>
+            ) : (
+              <UserAvatar
+                photoUrl={data.photoUrl}
+                avatarChoice={data.avatarChoice}
+                avatarRing={isPromoter ? "none" : data.avatarRing}
+                displayName={data.displayName}
+                username={data.username}
+                size={104}
+              />
+            )}
           </div>
           <div className="pp-hero__meta">
             <div className="pp-hero__chips">
@@ -76,9 +82,12 @@ export default function ProfileHero({
             </div>
             <h1 className="display pp-hero__name">{displayName}</h1>
             {isPromoter ? (
-              <p className="display pp-hero__tagline">
-                {promoLine.lead} <span className="pp-hero__tagline-acc">{promoLine.accent}</span>
-              </p>
+              (promoLine.lead || promoLine.accent) ? (
+                <p className="display pp-hero__tagline">
+                  {promoLine.lead}
+                  {promoLine.accent ? <> <span className="pp-hero__tagline-acc">{promoLine.accent}</span></> : null}
+                </p>
+              ) : null
             ) : (
               <p className="pp-hero__location">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

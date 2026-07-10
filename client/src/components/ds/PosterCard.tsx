@@ -86,7 +86,8 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 @keyframes pdxBlink{ 50%{ opacity:.35; } }
 .pdxBoard__rsvp{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
   letter-spacing:.06em; text-transform:uppercase; color:#000; background:var(--neon-yellow);
-  border:0; border-radius:2px; padding:5px 12px 4px; cursor:pointer; }
+  border:0; border-radius:2px; padding:5px 12px 4px; cursor:pointer; white-space:nowrap;
+  flex-shrink:0; min-width:max-content; }
 .pdxBoard__rsvp:hover{ filter:brightness(1.08); }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-board-css")) {
@@ -110,7 +111,7 @@ export function PosterCard({
   types = [], admission, age, claimable = false,
   claimPending = false,
   onClaimClick,
-  going, onRsvp, href, showLink = true,
+  going, onRsvp, href, showLink = true, showDetailsLink = true,
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
 }: any) {
@@ -153,7 +154,7 @@ export function PosterCard({
           </a>
         )}
         {when && <div className="pdxBoard__when">{when}</div>}
-        <span className="pdxBoard__link">Event details &rarr;</span>
+        {showDetailsLink && <span className="pdxBoard__link">Event details &rarr;</span>}
 
         {(going != null || onRsvp) && (
           <div className="pdxBoard__foot">

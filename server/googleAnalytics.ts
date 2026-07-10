@@ -1,10 +1,13 @@
-import { BetaAnalyticsDataClient } from "@google-analytics/data";
 import type { TrafficMetrics } from "./analytics";
 import { readGaMeasurementId } from "./gaSnippet";
 
-type GaClient = BetaAnalyticsDataClient;
+type GaClient = {
+  runReport: (request: Record<string, unknown>) => Promise<[{ rows?: GaRow[] | null }]>;
+  runRealtimeReport: (request: Record<string, unknown>) => Promise<[{ rows?: GaRow[] | null }]>;
+};
 
 let client: GaClient | null | undefined;
+let gaImportFailed = false;
 let warned = false;
 
 function parsePropertyId(): string | null {
@@ -27,7 +30,7 @@ function parseCredentials(): Record<string, unknown> | null {
   }
 }
 
-function getClient(): GaClient | null {
+async function getClient(): Promise<GaClient | null> {
   if (client !== undefined) return client;
   const propertyId = parsePropertyId();
   const credentials = parseCredentials();
@@ -35,10 +38,19 @@ function getClient(): GaClient | null {
     client = null;
     return null;
   }
+  if (gaImportFailed) {
+    client = null;
+    return null;
+  }
   try {
-    client = new BetaAnalyticsDataClient({ credentials });
+    const mod = await import("@google-analytics/data");
+    client = new mod.BetaAnalyticsDataClient({ credentials }) as unknown as GaClient;
   } catch (err) {
-    console.warn("[ga] Failed to initialize Analytics Data client:", err);
+    gaImportFailed = true;
+    if (!warned) {
+      console.warn("[ga] @google-analytics/data unavailable — admin GA metrics disabled:", err);
+      warned = true;
+    }
     client = null;
   }
   return client;
@@ -94,7 +106,7 @@ let cache: { at: number; data: TrafficMetrics } | null = null;
 const CACHE_MS = 60_000;
 
 export async function getGoogleAnalyticsTrafficMetrics(): Promise<TrafficMetrics | null> {
-  const gaClient = getClient();
+  const gaClient = await getClient();
   const propertyId = parsePropertyId();
   if (!gaClient || !propertyId) return null;
 
