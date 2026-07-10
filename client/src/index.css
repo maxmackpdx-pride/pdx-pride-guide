@@ -1811,111 +1811,129 @@ h2.display,
 }
 
 @media (max-width: 640px) {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--hub-ink, #050505);
+    border-bottom: 1px solid var(--hub-border, #1c1c22);
+    box-shadow: none;
+  }
+
   .site-header-inner {
     --site-logo-h: 40px;
-    padding: 6px 10px;
-  }
-
-  .site-brand-lockup {
-    max-width: min(240px, 68vw);
-  }
-
-  .site-brand-wordmark {
-    --site-wordmark-size: 0.58rem;
-    line-height: 0.8;
-  }
-
-  /* Mobile Bottom Navigation */
-  .site-mobile-nav {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    padding-bottom: env(safe-area-inset-bottom, 12px);
-    background: var(--surface-card, #1a1a1a);
-    border-top: 1px solid var(--border-primary, #333);
-    z-index: 50;
+    flex-wrap: nowrap;
+    padding: 0;
     gap: 0;
-    align-items: stretch;
+    min-height: 0;
   }
 
-  /* Only reserve space when the bottom nav is actually mounted (signed in). */
-  .app-shell:has(.site-mobile-nav) main {
-    padding-bottom: 80px;
+  .site-brand--desktop,
+  .site-nav,
+  .site-nav-toggle,
+  .site-header-calm--desktop,
+  .site-header-rainbow-seam {
+    display: none !important;
   }
 
-  /* Hub lives in the bottom nav on mobile — hide it from the top nav. */
-  .site-auth__hub {
-    display: none;
-  }
-
-  .site-mobile-nav__tab {
-    flex: 1;
+  .site-hub-mtop {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    font-size: 0.7rem;
-    color: var(--text-secondary, #999);
-    text-decoration: none;
-    border: none;
-    background: none;
-    cursor: pointer;
-    position: relative;
-    padding: 4px 0 0;
+    width: 100%;
+    position: static;
+    border-bottom: 0;
   }
 
-  .site-mobile-nav__tab svg {
+  .site-hub-mtop .site-profile-menu__cluster .user-avatar {
+    --avatar-size: 34px;
+  }
+
+  .site-hub-mtop .site-profile-menu__caret {
     width: 24px;
     height: 24px;
   }
 
-  .site-mobile-nav__tab.active,
-  .site-mobile-nav__tab:active {
-    color: var(--neon-magenta);
-  }
-
-  /* Inbox icon tab: badge overlay on the icon. */
-  .site-mobile-nav__icon-wrap {
+  .site-mobile-notify {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    flex: none;
   }
 
-  .site-mobile-nav__icon-badge {
+  .site-mobile-notify .hub-notify-btn.site-mobile-notify--alert {
+    border-color: rgba(255, 0, 60, 0.55);
+    color: #ff3b3b;
+    box-shadow: 0 0 14px rgba(255, 40, 40, 0.45);
+  }
+
+  .site-mobile-notify__panel {
     position: absolute;
-    top: -6px;
-    right: -10px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--neon-magenta);
-    color: #000;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 210px;
+    padding: 6px 0;
+    background: #080808;
+    border: 1px solid #2b2b2b;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+    z-index: 120;
+  }
+
+  .site-mobile-notify__item {
+    display: block;
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    background: transparent;
+    color: #ccc;
+    font-family: var(--font-display), sans-serif;
     font-weight: 700;
-    font-size: 0.6rem;
-    line-height: 1;
-    border-radius: 8px;
-    border: 2px solid var(--surface-card, #1a1a1a);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .site-mobile-notify__item:hover {
+    color: var(--hub-cyan, #00ffff);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .site-hub-mobile-bar {
+    display: flex;
+  }
+
+  .app-shell:not(.app-shell--hub):has(.site-hub-mobile-bar) main {
+    padding-bottom: 104px;
+  }
+
+  .site-auth__hub {
+    display: none;
   }
 }
 
 @media (min-width: 641px) {
-  .site-mobile-nav {
-    display: none;
+  .site-hub-mtop,
+  .site-hub-mobile-bar {
+    display: none !important;
   }
 }
 
-/* Hide Inbox from profile menu on mobile (shown in bottom nav instead) */
+/* Hub + Inbox live in bottom nav on mobile — hide duplicates from avatar menu */
 @media (max-width: 640px) {
-  .site-profile-menu__item--inbox {
+  .site-profile-menu__item--inbox,
+  .site-profile-menu__item--hub {
     display: none;
+  }
+
+  /* Center anchor: Hub */
+  .site-hub-mobile-bar .hub-mobile-tab--center svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab--center span:last-child {
+    font-size: 10px;
+    letter-spacing: 0.08em;
   }
 }
 

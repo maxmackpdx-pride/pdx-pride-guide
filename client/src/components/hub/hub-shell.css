@@ -577,6 +577,7 @@
   text-transform: uppercase;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
 }
 
 .hub-more-item:hover,
@@ -646,6 +647,11 @@
 
 .hub-mobile-tab.is-active.is-lime {
   background: var(--hub-lime);
+  color: #000;
+}
+
+.hub-mobile-tab.is-active.is-orange {
+  background: var(--neon-orange, #ff6600);
   color: #000;
 }
 

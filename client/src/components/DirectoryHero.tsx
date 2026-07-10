@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import BoardHero from "@/components/BoardHero";
+import BoardExploreActions from "@/components/BoardExploreActions";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import CountUpValue from "@/components/CountUpValue";
 import { Button } from "@/components/ds";
@@ -32,9 +33,13 @@ export default function DirectoryHero({ placeCount, stats, onAddPlace }: Props) 
         }
         lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
         actions={
-          <Button variant="solid" accent="magenta" size="lg" arrow onClick={onAddPlace}>
-            <Plus size={16} aria-hidden /> Add a place
-          </Button>
+          <BoardExploreActions
+            primary={
+              <Button variant="solid" accent="magenta" size="lg" arrow onClick={onAddPlace}>
+                <Plus size={16} aria-hidden /> Add a place
+              </Button>
+            }
+          />
         }
       />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />

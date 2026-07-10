@@ -14,7 +14,7 @@ export type NavEntry =
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/about", label: "About" },
   { type: "link", href: "/events", label: "Events" },
-  { type: "link", href: "/directory", label: "Directory" },
+  { type: "link", href: "/directory", label: "Places" },
   { type: "link", href: "/nude-beaches", label: "Nude Beaches" },
   {
     type: "dropdown",
@@ -41,7 +41,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/pride-work": { section: "Boards", title: "Gig Board" },
   "/gifting": { section: "Boards", title: "Gifting" },
   "/spotted": { section: "Boards", title: "Spotted!" },
-  "/directory": { section: "Directory", title: "Queer Directory" },
+  "/directory": { section: "Places", title: "Queer Directory" },
   "/nude-beaches": { section: "Explore", title: "Nude Beaches" },
   "/about": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
@@ -53,6 +53,16 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/settings/notifications": { section: "Account", title: "Notification settings" },
   "/inbox": { section: "Account", title: "Inbox" },
 };
+
+export const BOARD_NAV: NavLinkItem[] = [
+  { href: "/pride-work", label: "Gig Board" },
+  { href: "/gifting", label: "Gifting" },
+  { href: "/spotted", label: "Spotted!" },
+];
+
+export function navLinkActive(location: string, href: string) {
+  return location === href || location.startsWith(`${href}?`) || location.startsWith(`${href}/`);
+}
 
 export function pageHeaderForPath(path: string): PageHeaderMeta | null {
   const base = path.split("?")[0].replace(/\/$/, "") || "/";

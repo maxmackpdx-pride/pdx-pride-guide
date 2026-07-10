@@ -1,8 +1,7 @@
-import { Link } from "wouter";
 import BoardHero from "@/components/BoardHero";
+import BoardExploreActions from "@/components/BoardExploreActions";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import CountUpValue from "@/components/CountUpValue";
-import { Button } from "@/components/ds";
 
 type Stat = { num: number; label: string; color: string };
 
@@ -27,20 +26,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
           </>
         }
         lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond — all in one place."
-        actions={
-          <>
-            <Link href="/schedule">
-              <Button as="span" variant="solid" accent="cyan" size="lg" arrow>
-                View schedule
-              </Button>
-            </Link>
-            <Link href="/submit">
-              <Button as="span" variant="neon" accent="lime" size="lg">
-                Submit an event
-              </Button>
-            </Link>
-          </>
-        }
+        actions={<BoardExploreActions showSchedule scheduleLead />}
       />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
     </>
