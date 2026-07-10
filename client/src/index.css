@@ -12420,6 +12420,30 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   margin-top: 26px;
 }
 
+.board-page--makeover .board-hero {
+  animation: board-hero-in 0.48s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.board-page--makeover .board-stats-band {
+  animation: board-hero-in 0.52s 0.07s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes board-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html.calm-mode .board-page--makeover .board-hero,
+html.calm-mode .board-page--makeover .board-stats-band {
+  animation: none;
+}
+
 /* Stats band (3-col full bleed) */
 .board-stats-band {
   background: #050505;
@@ -12925,6 +12949,20 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   line-height: 1.55;
   color: #c8c5bc;
   margin: 0 0 16px;
+}
+
+.events-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 10% 6%, rgba(25, 227, 255, 0.08), transparent 22rem),
+    radial-gradient(circle at 90% 12%, rgba(204, 255, 0, 0.05), transparent 24rem),
+    #06060a;
+}
+
+.directory-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 31, 160, 0.07), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(25, 227, 255, 0.05), transparent 24rem),
+    #06060a;
 }
 
 .gigs-page.board-page--makeover {

@@ -11,7 +11,7 @@ import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
-import PageHeader from "@/components/PageHeader";
+import EventsHero from "@/components/EventsHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
@@ -258,6 +258,16 @@ export default function Events() {
     [events, activeDay, activeFilters, searchQuery, sortMode],
   );
 
+  const heroStats = useMemo(() => {
+    const neighborhoods = new Set(events.map(e => e.neighborhood).filter(Boolean));
+    const days = new Set(events.map(e => e.dayOfWeek).filter(Boolean));
+    return [
+      { num: events.length, label: "Live listings", color: "#19e3ff" },
+      { num: days.size || PRIDE_WEEK_DAYS.length, label: "Days with events", color: "#ccff00" },
+      { num: neighborhoods.size, label: "Neighborhoods", color: "#ff8c00" },
+    ];
+  }, [events]);
+
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0;
 
@@ -265,21 +275,10 @@ export default function Events() {
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
   return (
-    <div className="zine-page events-page board-page">
-      <PageHeader
-        section="Events"
-        title="Events"
-        titlePrefix={events.length > 0 ? events.length : undefined}
-        titleAccent="cyan"
-        kicker="Portland Pride Week 2026 · July 13–19"
-        lede="Every queer party, parade, show, and gathering for Pride Week 2026 and beyond, all in one place."
-        actions={
-          <Link href="/schedule" className="btn-neon" style={{ fontSize: "0.85rem", letterSpacing: "0.12em" }}>
-            View schedule →
-          </Link>
-        }
-      />
+    <div className="zine-page events-page board-page board-page--makeover">
+      <EventsHero eventCount={events.length} stats={heroStats} />
 
+      <ScrollReveal>
       <div className="events-map-row">
         <div className="events-map-row__panel">
           <EventsNowPanel />
@@ -296,8 +295,10 @@ export default function Events() {
           </Suspense>
         </div>
       </div>
+      </ScrollReveal>
 
       {/* Board | Schedule tabs */}
+      <ScrollReveal delay={30}>
       <div className="events-tab-bar">
         <button
           type="button"
@@ -316,6 +317,7 @@ export default function Events() {
           The Schedule
         </button>
       </div>
+      </ScrollReveal>
 
       {activeTab === "schedule" ? (
         <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px 40px" }}>
@@ -326,6 +328,7 @@ export default function Events() {
       ) : (
       <>
       {/* Filters + View Toggle */}
+      <ScrollReveal delay={40}>
       <div className="zine-filter-bar" style={{
         background: "var(--ink-1000)", borderBottom: "1px solid var(--ink-border-faint)",
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
@@ -392,6 +395,7 @@ export default function Events() {
           </div>
         </div>
       </div>
+      </ScrollReveal>
 
       {/* Events listing */}
       <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>

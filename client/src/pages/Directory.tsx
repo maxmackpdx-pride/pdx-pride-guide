@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import PageHeader from "@/components/PageHeader";
+import DirectoryHero from "@/components/DirectoryHero";
 import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
@@ -153,6 +153,12 @@ export default function Directory() {
     return NEIGHBORHOODS.filter(n => n === "ALL" || seen.has(n));
   }, [businesses]);
 
+  const heroStats = useMemo(() => [
+    { num: businesses.length, label: "Places listed", color: "#ff1fa0" },
+    { num: businesses.filter(b => b.queerOwned).length, label: "Queer-owned", color: "#ccff00" },
+    { num: businesses.filter(b => b.isNew).length, label: "New this season", color: "#19e3ff" },
+  ], [businesses]);
+
   const createMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory", form),
     onSuccess: () => {
@@ -193,20 +199,9 @@ export default function Directory() {
   };
 
   return (
-    <div className="zine-page directory-page board-page">
+    <div className="zine-page directory-page board-page board-page--makeover">
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <PageHeader
-        section="Portland"
-        title="Queer Directory"
-        titleAccent="magenta"
-        kicker="Queer-owned · Queer-friendly · Community-rooted"
-        lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
-        actions={
-          <button type="button" className="btn-neon magenta" onClick={openAddForm}>
-            <Plus size={16} /> Add a place
-          </button>
-        }
-      />
+      <DirectoryHero placeCount={businesses.length} stats={heroStats} onAddPlace={openAddForm} />
 
       {formOpen && (
         <ScrollReveal>
@@ -281,12 +276,15 @@ export default function Directory() {
 
       {/* Map + pin color key */}
       {!isLoading && (
-        <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
-          <DirectoryMap businesses={filtered} showKey />
-        </Suspense>
+        <ScrollReveal>
+          <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
+            <DirectoryMap businesses={filtered} showKey />
+          </Suspense>
+        </ScrollReveal>
       )}
 
       {/* Filter bar */}
+      <ScrollReveal delay={30}>
       <div className="zine-filter-bar" style={{
         background: "#000", borderBottom: "1px solid #1a1a1a",
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
@@ -347,6 +345,7 @@ export default function Directory() {
           })}
         </div>
       </div>
+      </ScrollReveal>
 
       <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
         <ScrollReveal>
@@ -377,11 +376,13 @@ export default function Directory() {
             </button>
           </div>
         ) : (
-          <div className="directory-grid">
-            {filtered.map(biz => (
-              <DirectoryCard key={biz.id} biz={biz} onClick={() => setSelectedPlace(biz)} />
-            ))}
-          </div>
+          <ScrollReveal delay={50}>
+            <div className="directory-grid">
+              {filtered.map(biz => (
+                <DirectoryCard key={biz.id} biz={biz} onClick={() => setSelectedPlace(biz)} />
+              ))}
+            </div>
+          </ScrollReveal>
         )}
       </div>
 
