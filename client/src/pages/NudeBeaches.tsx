@@ -221,6 +221,21 @@ export default function NudeBeaches() {
     <div className="zine-page nude-beaches-page board-page board-page--makeover events-page">
       <NudeBeachesHero activeTab={activeTab} snapshot={snapshot} />
 
+      <div className="nude-beaches-top">
+        <div className="events-tab-bar nude-beaches-tab-bar">
+          {NUDE_BEACH_TABS.map(tab => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`events-tab${activeTab === tab.key ? " active" : ""}`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="nude-refresh-bar">
         <p className="nude-refresh-bar__meta">
           {isRooster ? "Rooster Rock" : "Sauvie Island"} · updated{" "}
@@ -253,21 +268,6 @@ export default function NudeBeaches() {
             <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
               {map.label}
             </a>
-          ))}
-        </div>
-      </ScrollReveal>
-
-      <ScrollReveal delay={30}>
-        <div className="events-tab-bar nude-beaches-tab-bar">
-          {NUDE_BEACH_TABS.map(tab => (
-            <button
-              key={tab.key}
-              type="button"
-              className={`events-tab${activeTab === tab.key ? " active" : ""}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
           ))}
         </div>
       </ScrollReveal>
