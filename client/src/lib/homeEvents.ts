@@ -4,6 +4,8 @@ import { PRIDE_WEEK_DAY_OPTIONS, PRIDE_WEEK_START_DATE } from "@shared/prideWeek
 import { pacificCalendarDate, parsePacificDateTime } from "@shared/missedConnections";
 import { formatListingWhen, listingDay, listingPosterUrl, listingTypeTags } from "@/lib/dsEvent";
 
+const PACIFIC_TZ = "America/Los_Angeles";
+
 /** Fallback if no Jul 13 listings are loaded yet (midnight PDT Pride Week open). */
 export const HOME_COUNTDOWN_TARGET = `${PRIDE_WEEK_START_DATE}T00:00:00-07:00`;
 
@@ -99,11 +101,46 @@ function uniqueByEventId(list: EventListing[]): EventListing[] {
   return out;
 }
 
-/** Shuffled event titles for the home ticker (capped so the band scrolls smoothly). */
-export function pickMarqueeItems(events: EventListing[], limit = 12): string[] {
-  const titles = shuffleArray(events.map(e => e.title).filter(Boolean));
+/** Shuffled event titles for the home ticker (all Pride-week names for the rainbow band). */
+export function pickMarqueeItems(events: EventListing[], limit = 21): string[] {
+  const titles = events.map(e => e.title).filter(Boolean);
   if (titles.length > 0) return titles.slice(0, limit);
-  return shuffleArray(HOME_MARQUEE_FALLBACK).slice(0, limit);
+  return shuffleArray(HOME_MARQUEE_FALLBACK).slice(0, Math.min(limit, HOME_MARQUEE_FALLBACK.length));
+}
+
+/** First N Monday (Jul 13) listings, earliest start first — home Up Next row. */
+export function eventsForMonday(events: EventListing[], limit = 4): EventListing[] {
+  return events
+    .filter(e => e.dayOfWeek === "MON" || pacificCalendarDate(e.dateStart) === PRIDE_WEEK_START_DATE)
+    .sort((a, b) => {
+      const aMs = parsePacificDateTime(a.dateStart) ?? 0;
+      const bMs = parsePacificDateTime(b.dateStart) ?? 0;
+      return aMs - bMs;
+    })
+    .slice(0, limit);
+}
+
+/** "Mon, Jul 13 · 6:30 PM" for Up Next cards. */
+export function formatUpNextWhen(event: EventListing): string {
+  const ms = parsePacificDateTime(event.dateStart);
+  const dateLabel =
+    ms != null
+      ? new Intl.DateTimeFormat("en-US", {
+          timeZone: PACIFIC_TZ,
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        }).format(new Date(ms))
+      : "Mon, Jul 13";
+  const time =
+    ms != null
+      ? new Intl.DateTimeFormat("en-US", {
+          timeZone: PACIFIC_TZ,
+          hour: "numeric",
+          minute: "2-digit",
+        }).format(new Date(ms))
+      : "";
+  return dateLabel && time ? `${dateLabel} · ${time}` : dateLabel;
 }
 
 /** Random directory picks for the home "Where to Go" column. */
@@ -152,8 +189,6 @@ export function countEventsByHomeDay(events: EventListing[]): Record<HomeDayKey,
   }
   return counts;
 }
-
-const PACIFIC_TZ = "America/Los_Angeles";
 
 export function formatHomeWhen(event: Event): string {
   const day = listingDay(event) as HomeDayKey;

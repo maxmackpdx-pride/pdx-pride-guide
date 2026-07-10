@@ -1,32 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { GiftingPost, GigPost, MissedConnection } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
+import { pacificTodayDate } from "@shared/missedConnections";
 
 import ScrollReveal from "@/components/ScrollReveal";
 import HomeHero from "@/components/HomeHero";
+import HomeStatStrip from "@/components/HomeStatStrip";
+import HomeUpNext from "@/components/HomeUpNext";
+import HomeBeachWidget from "@/components/HomeBeachWidget";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import AuthModal from "@/components/AuthModal";
-import PlaceModal from "@/components/PlaceModal";
-import { TYPE_LABELS, TYPE_TO_DS_CATEGORY, type Business } from "@/pages/Directory";
 import {
   Button,
   Divider,
   Marquee,
-  PlaceCard,
-  SectionHeader,
 } from "@/components/ds";
 import {
   HOME_MARQUEE_FALLBACK,
+  eventsForMonday,
   pickMarqueeItems,
-  pickRandomBusinesses,
 } from "@/lib/homeEvents";
-import {
-  directoryFallbackLogo,
-  resolveDirectoryLogo,
-} from "@/lib/directoryLogos";
 import "./Home.css";
 
 const COMMUNITY_LINKS = {
@@ -35,21 +29,16 @@ const COMMUNITY_LINKS = {
   gigs: { href: "/pride-work", label: "Gigs" },
 } as const;
 
-/** Static design placeholders when a board feed has not loaded any rows yet. */
-const BOARD_COUNT_FALLBACK = {
-  spotted: 128,
-  gifting: 64,
-  gigs: 37,
-} as const;
+const PLACES_FALLBACK = 64;
+const BEACH_CHECKINS_FALLBACK = 128;
 
-type GiftingFeedPost = GiftingPost & {
-  neighborhood: string;
-};
-
-type GigFeedPost = GigPost & {
-  location: string | null;
-  compensation: string | null;
-};
+const DIRECTORY_CHIPS = [
+  { label: "Bars", color: "var(--cat-bars)" },
+  { label: "Food", color: "var(--cat-food)" },
+  { label: "Cafes", color: "var(--cat-cafes)" },
+  { label: "Venues", color: "var(--cat-venues)" },
+  { label: "Shops", color: "var(--cat-shops)" },
+] as const;
 
 export default function Home() {
   usePageSeo(
@@ -58,10 +47,6 @@ export default function Home() {
   );
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
-  const [featuredSpots, setFeaturedSpots] = useState<Business[]>([]);
-  const [featuredNonprofits, setFeaturedNonprofits] = useState<Business[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
-  const [showAuth, setShowAuth] = useState(false);
 
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -70,27 +55,25 @@ export default function Home() {
     refetchOnMount: "always",
   });
 
-  const { data: spotted = [] } = useQuery<MissedConnection[]>({
-    queryKey: ["/api/missed-connections"],
-    queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()),
-    staleTime: 60_000,
-  });
-
-  const { data: gifting = [] } = useQuery<GiftingFeedPost[]>({
-    queryKey: ["/api/gifting"],
-    queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()),
-    staleTime: 60_000,
-  });
-
-  const { data: gigs = [] } = useQuery<GigFeedPost[]>({
-    queryKey: ["/api/gigs"],
-    queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()),
-    staleTime: 60_000,
-  });
-
-  const { data: businesses = [] } = useQuery<Business[]>({
+  const { data: businesses = [] } = useQuery<{ id: number }[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const today = pacificTodayDate();
+
+  const { data: roosterCheckins = [] } = useQuery<unknown[]>({
+    queryKey: ["/api/river-brats/checkins", "rooster-rock", today],
+    queryFn: () =>
+      apiRequest("GET", `/api/river-brats/checkins?beach=rooster-rock&date=${today}`).then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  const { data: sauvieCheckins = [] } = useQuery<unknown[]>({
+    queryKey: ["/api/river-brats/checkins", "sauvie-island", today],
+    queryFn: () =>
+      apiRequest("GET", `/api/river-brats/checkins?beach=sauvie-island&date=${today}`).then(r => r.json()),
     staleTime: 60_000,
   });
 
@@ -101,166 +84,80 @@ export default function Home() {
     );
   }, [events]);
 
-  useEffect(() => {
-    if (businesses.length === 0) return;
-    setFeaturedSpots(prev =>
-      prev.length > 0 ? prev : pickRandomBusinesses(businesses.filter(b => b.type !== "nonprofit"), 10),
-    );
-    setFeaturedNonprofits(prev =>
-      prev.length > 0 ? prev : pickRandomBusinesses(businesses.filter(b => b.type === "nonprofit"), 10),
-    );
-  }, [businesses]);
-
-  const spottedCount = spotted.length > 0 ? spotted.length : BOARD_COUNT_FALLBACK.spotted;
-  const giftingCount = gifting.length > 0 ? gifting.length : BOARD_COUNT_FALLBACK.gifting;
-  const gigsCount = gigs.length > 0 ? gigs.length : BOARD_COUNT_FALLBACK.gigs;
+  const upNext = useMemo(() => eventsForMonday(events, 4), [events]);
+  const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
+  const beachCheckins =
+    roosterCheckins.length + sauvieCheckins.length > 0
+      ? roosterCheckins.length + sauvieCheckins.length
+      : BEACH_CHECKINS_FALLBACK;
 
   return (
     <div className="home-main-stage">
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      {selectedPlace && (
-        <PlaceModal
-          place={selectedPlace}
-          onClose={() => setSelectedPlace(null)}
-          onRequireAuth={() => setShowAuth(true)}
-        />
-      )}
       <HomeHero eventCount={events.length} />
+      <HomeStatStrip placesCount={placesCount} beachCheckins={beachCheckins} />
 
-      <div className="home-live-ticker" aria-label="Live event ticker">
-        <Link href="/events" className="home-live-ticker__label">
-          Live
-        </Link>
+      <div className="home-marquee-band" aria-label="Event name ticker">
         <Marquee
           color="rainbow"
-          items={marqueeItems.length > 0 ? marqueeItems : HOME_MARQUEE_FALLBACK.slice(0, 12)}
-          className="home-live-ticker__marquee pdxMarquee--band"
-          speed={67}
-          separator="★"
+          items={marqueeItems.length > 0 ? marqueeItems : HOME_MARQUEE_FALLBACK}
+          className="home-marquee-band__track"
+          speed={60}
+          separator="✦"
         />
       </div>
 
-      <section className="home-boards" aria-label="Community boards">
-        <div className="home-boards__seam" aria-hidden="true" />
-        <div className="home-boards__halftone" aria-hidden="true" />
-        <div className="home-boards__tints" aria-hidden="true" />
+      <div className="home-body">
+        <ScrollReveal>
+          <HomeUpNext events={upNext} posterBackdrop />
+        </ScrollReveal>
 
-        <div className="home-boards__inner">
-          <ScrollReveal>
-            <div className="home-boards__running">
-              <div className="home-boards__kicker">
-                <span className="home-boards__dot" aria-hidden="true" />
-                The Community Boards
-              </div>
-              <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
-                All Boards →
-              </Link>
+        <div className="home-body__seam" aria-hidden />
+
+        <section className="home-boards" aria-label="Community boards">
+          <div className="home-boards__running">
+            <div className="home-boards__kicker">
+              <span className="home-boards__dot" aria-hidden />
+              The Community Boards
             </div>
-
-            <div className="home-boards__header">
-              <h2 className="home-boards__title">
-                <span className="home-boards__title-plain">Community </span>
-                <span className="home-boards__title-grad">Boards</span>
-              </h2>
-              <p className="home-boards__sub">
-                Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <div className="home-boards__grid">
-            <ScrollReveal delay={0} className="home-boards__reveal">
-            <Link
-              href={COMMUNITY_LINKS.spotted.href}
-              className="home-boards__card home-boards__card--spotted"
-              data-testid="home-board-spotted"
-            >
-              <img
-                className="home-boards__img"
-                src="/boards/board-spotted.png"
-                alt=""
-                width={800}
-                height={800}
-                decoding="async"
-                loading="lazy"
-              />
-              <div className="home-boards__scrim" aria-hidden="true" />
-              <span className="home-boards__chip">{spottedCount} this week</span>
-              <div className="home-boards__body">
-                <div className="home-boards__name-row">
-                  <span className="home-boards__name-dot" aria-hidden="true" />
-                  <h3 className="home-boards__name">Spotted</h3>
-                </div>
-                <p className="home-boards__desc">
-                  Missed connections and &quot;saw you at the bar&quot; notes. Shoot your shot.
-                </p>
-                <span className="home-boards__cta">Browse Spotted →</span>
-              </div>
+            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
+              All Boards →
             </Link>
-            </ScrollReveal>
-
-            <ScrollReveal delay={50} className="home-boards__reveal">
-            <Link
-              href={COMMUNITY_LINKS.gifting.href}
-              className="home-boards__card home-boards__card--gifting"
-              data-testid="home-board-gifting"
-            >
-              <img
-                className="home-boards__img"
-                src="/boards/board-gifting.png"
-                alt=""
-                width={800}
-                height={800}
-                decoding="async"
-                loading="lazy"
-              />
-              <div className="home-boards__scrim" aria-hidden="true" />
-              <span className="home-boards__chip">{giftingCount} up for grabs</span>
-              <div className="home-boards__body">
-                <div className="home-boards__name-row">
-                  <span className="home-boards__name-dot" aria-hidden="true" />
-                  <h3 className="home-boards__name">Gifting</h3>
-                </div>
-                <p className="home-boards__desc">
-                  Free gear and hand-me-downs looking for a new home. Take what you need.
-                </p>
-                <span className="home-boards__cta">Browse Gifting →</span>
-              </div>
-            </Link>
-            </ScrollReveal>
-
-            <ScrollReveal delay={100} className="home-boards__reveal">
-            <Link
-              href={COMMUNITY_LINKS.gigs.href}
-              className="home-boards__card home-boards__card--gigs"
-              data-testid="home-board-gigs"
-            >
-              <img
-                className="home-boards__img"
-                src="/boards/board-gigs.png"
-                alt=""
-                width={800}
-                height={800}
-                decoding="async"
-                loading="lazy"
-              />
-              <div className="home-boards__scrim" aria-hidden="true" />
-              <span className="home-boards__chip">{gigsCount} open</span>
-              <div className="home-boards__body">
-                <div className="home-boards__name-row">
-                  <span className="home-boards__name-dot" aria-hidden="true" />
-                  <h3 className="home-boards__name">Gigs</h3>
-                </div>
-                <p className="home-boards__desc">
-                  Performers, DJs, and helping hands for hire. Book the talent.
-                </p>
-                <span className="home-boards__cta">Browse Gigs →</span>
-              </div>
-            </Link>
-            </ScrollReveal>
           </div>
 
-          <ScrollReveal delay={150}>
+          <div className="home-boards__header">
+            <h2 className="home-boards__title">
+              <span className="home-boards__title-plain">Show up for </span>
+              <span className="home-boards__title-grad">each other</span>
+            </h2>
+            <p className="home-boards__sub">
+              Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
+            </p>
+          </div>
+
+          <div className="home-boards__utility-grid">
+            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__utility home-boards__utility--magenta" data-testid="home-board-spotted">
+              <div className="home-boards__utility-name">Spotted!</div>
+              <p className="home-boards__utility-desc">
+                Anonymous missed connections. Say the thing you didn&apos;t get to say.
+              </p>
+              <div className="home-boards__utility-mantra">Stay kind · stay anonymous · reveal when ready</div>
+            </Link>
+            <Link href={COMMUNITY_LINKS.gifting.href} className="home-boards__utility home-boards__utility--lime" data-testid="home-board-gifting">
+              <div className="home-boards__utility-name">Gifting</div>
+              <p className="home-boards__utility-desc">
+                A free board. Give what you can, take what you need. No money changes hands.
+              </p>
+              <div className="home-boards__utility-mantra">Keep it free · keep it kind · keep it moving</div>
+            </Link>
+            <Link href={COMMUNITY_LINKS.gigs.href} className="home-boards__utility home-boards__utility--purple" data-testid="home-board-gigs">
+              <div className="home-boards__utility-name">Gig Board</div>
+              <p className="home-boards__utility-desc">
+                Two-way work board. Performers, hosts, crew. Get paid, get help.
+              </p>
+              <div className="home-boards__utility-mantra">Need work? Need help? Both belong here.</div>
+            </Link>
+          </div>
+
           <div className="home-boards__foot">
             <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__post-link">
               <Button as="span" variant="solid" accent="lime" size="lg" arrow>
@@ -271,113 +168,37 @@ export default function Home() {
               Free to post. Be kind. Take care of each other.
             </span>
           </div>
-          </ScrollReveal>
-        </div>
-      </section>
+        </section>
+
+        <section className="home-directory-row" aria-label="Directory and nude beaches">
+          <div className="home-directory-teaser">
+            <div className="home-directory-teaser__kicker">THE DIRECTORY FOR US</div>
+            <h3 className="home-directory-teaser__title">SPEND QUEER, KEEP US HEALTHY</h3>
+            <p className="home-directory-teaser__copy">
+              Bars, cafes, shops, and venues that are queer-owned or genuinely queer-friendly. Filter by category, find them on the map.
+            </p>
+            <div className="home-directory-teaser__chips">
+              {DIRECTORY_CHIPS.map(chip => (
+                <span
+                  key={chip.label}
+                  className="home-directory-teaser__chip"
+                  style={{ color: chip.color, borderColor: chip.color }}
+                >
+                  {chip.label}
+                </span>
+              ))}
+            </div>
+            <Link href="/directory" className="home-directory-teaser__cta">
+              Browse the directory →
+            </Link>
+          </div>
+          <HomeBeachWidget showCollins />
+        </section>
+      </div>
 
       <div className="pg-seam-wrap--sm">
         <Divider seam />
       </div>
-      <div className="pg-block">
-        <ScrollReveal>
-          <SectionHeader
-            kicker="Queer Places"
-            title="Where to Go"
-            subtitle="The bars, the cafes, the venues, the nonprofits keeping people housed and fed. All of it run by and for the community. Hit refresh for a whole new set of picks."
-            accent="cyan"
-          />
-          <div className="pg-places pg-places--dual">
-            <div className="pg-placescol">
-              <div className="pg-colhd">
-                <span className="pg-colhd__t pg-colhd__t--places">Our Places</span>
-                <span className="pg-colhd__rule pg-colhd__rule--places" />
-              </div>
-              <div className="pg-placescroll">
-                {featuredSpots.map(biz => (
-                  <HomePlaceCard key={biz.id} biz={biz} onOpen={() => setSelectedPlace(biz)} />
-                ))}
-                {featuredSpots.length === 0 && (
-                  <PlaceCard
-                    name="Queer Portland"
-                    category="venues"
-                    donateUrl={undefined}
-                    categoryLabel="Directory"
-                    description="The community directory is being built. Check back for bars, cafes, and venues."
-                  />
-                )}
-              </div>
-              <Link href="/directory" className="pg-board-more pg-board-more--places">
-                View more places →
-              </Link>
-            </div>
-            <div className="pg-placescol">
-              <div className="pg-colhd">
-                <span className="pg-colhd__t" style={{ color: "var(--purple)" }}>Nonprofits</span>
-                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--purple), transparent)" }} />
-              </div>
-              <div className="pg-placescroll">
-                {featuredNonprofits.map(biz => (
-                  <HomePlaceCard key={biz.id} biz={biz} onOpen={() => setSelectedPlace(biz)} />
-                ))}
-                {featuredNonprofits.length === 0 && (
-                  <PlaceCard
-                    name="Community Nonprofits"
-                    category="venues"
-                    categoryLabel="Directory"
-                    description="Nonprofit listings are being added. Check back for organizations doing the work."
-                  />
-                )}
-              </div>
-              <Link href="/directory?type=nonprofit" className="pg-board-more" style={{ color: "var(--purple)" }}>
-                View more nonprofits →
-              </Link>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 24 }}>
-            <Link href="/directory" style={{ textDecoration: "none" }}>
-              <Button as="span" accent="cyan" arrow>
-                Full directory
-              </Button>
-            </Link>
-            <Link href="/directory?add=1" style={{ textDecoration: "none" }}>
-              <Button as="span" accent="magenta">
-                Add your business
-              </Button>
-            </Link>
-          </div>
-        </ScrollReveal>
-      </div>
-
     </div>
-  );
-}
-
-/** Same logo resolution as Directory cards (neon pack + DB imageUrl + type fallback). */
-function HomePlaceCard({ biz, onOpen }: { biz: Business; onOpen: () => void }) {
-  const isNonprofit = biz.type === "nonprofit";
-  const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
-  const fallbackLogoUrl = directoryFallbackLogo(biz.type);
-  return (
-    <PlaceCard
-      name={biz.name}
-      onClick={onOpen}
-      category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className={`pdxPlace--clickable${isNonprofit ? " pdxPlace--rainbow" : ""}`}
-      isNonprofit={isNonprofit}
-      logoUrl={logoUrl}
-      fallbackLogoUrl={fallbackLogoUrl}
-      lat={biz.lat}
-      lng={biz.lng}
-      promoters={biz.promoters}
-      donateUrl={biz.donateUrl || undefined}
-      categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-      address={[biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined}
-      hours={biz.hours || undefined}
-      phone={biz.phone || undefined}
-      description={biz.description || undefined}
-      website={biz.website || undefined}
-      instagram={biz.instagram || undefined}
-      grandOpening={biz.isNew}
-    />
   );
 }

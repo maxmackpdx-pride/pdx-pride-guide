@@ -1,125 +1,86 @@
-import { useState } from "react";
 import { Link } from "wouter";
-import { Button, Countdown } from "@/components/ds";
-import AuthModal from "@/components/AuthModal";
+import { Button } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
-import GlitchWord from "@/components/GlitchWord";
 import { useAuth } from "@/context/AuthContext";
-import heroCollageImg from "@/assets/hero-collage.png";
-
-/** Week opener: Monday July 13 2026, 6pm PDT (matches design panel target). */
-export const HERO_COUNTDOWN_TARGET = "2026-07-13T18:00:00-07:00";
+import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
 
 type Props = {
   eventCount: number;
 };
 
-/**
- * Full-bleed editorial masthead from Homepage Panel (standalone) / design zip.
- * Isolated: only used on the home page top section.
- */
+/** Full-bleed zine hero — wallpaper, aurora orbs, PDX / PRIDE / GUIDE wordmark (design 1a). */
 export default function HomeHero({ eventCount }: Props) {
   const { user } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
 
   return (
     <section className="home-hero" aria-label="Portland Pride Guide hero">
-      {/* full-bleed collage */}
       <img
         className="home-hero__bg"
-        src={heroCollageImg}
-        alt="Neon Portland skyline over the river with Mt. Hood and glowing roses"
+        src={heroWallpaper}
+        alt=""
       />
-      <div className="home-hero__scrim home-hero__scrim--angle" aria-hidden="true" />
-      <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden="true" />
-      <div className="home-hero__scrim home-hero__scrim--top" aria-hidden="true" />
-      <div className="home-hero__halftone" aria-hidden="true" />
-      <div className="home-hero__seam pdx-rainbow-rule" aria-hidden="true" />
+      <div className="home-hero__aurora home-hero__aurora--magenta" aria-hidden />
+      <div className="home-hero__aurora home-hero__aurora--cyan" aria-hidden />
+      <div className="home-hero__aurora home-hero__aurora--violet" aria-hidden />
+      <div className="home-hero__scrim home-hero__scrim--angle" aria-hidden />
+      <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden />
+      <div className="home-hero__grain" aria-hidden />
 
       <div className="home-hero__inner">
-        {/* running head */}
-        <header className="home-hero__running">
-          <div className="home-hero__kicker">
-            <span className="home-hero__dot" aria-hidden="true" />
-            Portland Pride Week 2026
-          </div>
-          <div className="home-hero__date">July 13 to 19 / Portland, OR</div>
-        </header>
+        <div className="home-hero__kicker">
+          <span className="home-hero__dot" aria-hidden />
+          Portland Pride Week 2026 · July 13 to 19
+        </div>
 
-        {/* left content column */}
-        <div className="home-hero__col">
-          <h1 className="home-hero__title">
-            <span className="home-hero__word">Portland</span>
-            <span className="home-hero__word home-hero__word--pride">
-              <GlitchWord text="Pride" />
-            </span>
-            <span className="home-hero__word">Guide</span>
-          </h1>
+        <h1 className="home-hero__title">
+          <span className="home-hero__word">PDX</span>
+          <span className="home-hero__word home-hero__word--pride">PRIDE</span>
+          <span className="home-hero__word">GUIDE</span>
+        </h1>
 
-          <p className="home-hero__tagline">
-            Seven days, one city, every color. Find the parties, the parade, and your people.
-          </p>
+        <p className="home-hero__tagline">
+          Your welcoming map to Pride Week: discover events, find your people, back the queer venues that host it, and{" "}
+          <strong>take care of each other.</strong>
+        </p>
 
-          <div
-            className="home-hero__stat"
-            aria-label={`${eventCount} events across seven days`}
-          >
+        <div className="home-hero__stat" aria-label={`${eventCount} total events`}>
+          <div className="home-hero__stat-label">Total events</div>
+          <div className="home-hero__stat-row">
             <span className="home-hero__stat-num" data-testid="home-events-count">
               <CountUpValue
                 key={eventCount > 0 ? "events-ready" : "events-pending"}
                 value={eventCount}
               />
             </span>
-            <div className="home-hero__stat-meta">
-              <span className="home-hero__stat-label">Events</span>
-              <span className="home-hero__stat-sub">Across seven days</span>
-            </div>
+            <span className="home-hero__stat-meta">
+              and counting
+              <br />
+              across 7 days · Jul 13 to 19
+            </span>
           </div>
+        </div>
 
-          <div className="home-hero__rule" aria-hidden="true" />
-
-          <div className="home-hero__countdown">
-            <div className="home-hero__cd-label">Pride Week kicks off in</div>
-            <Countdown
-              target={HERO_COUNTDOWN_TARGET}
-              accent="lime"
-              aria-label="Countdown to Pride Week start Monday July 13 2026"
-              doneLabel="Pride Week is on!"
-            />
-          </div>
-
-          <div className="home-hero__cta">
-            <Link href="/events" data-testid="hero-cta-events">
-              <Button as="span" variant="solid" accent="lime" size="lg" arrow>
-                View All Events
+        <div className="home-hero__cta">
+          <Link href="/events" data-testid="hero-cta-events">
+            <Button as="span" variant="solid" accent="lime" size="lg" arrow>
+              View all events
+            </Button>
+          </Link>
+          <Link href="/schedule" data-testid="hero-cta-schedule">
+            <Button as="span" variant="neon" accent="cyan" size="lg" arrow>
+              Browse schedule
+            </Button>
+          </Link>
+          {user && (
+            <Link href="/dashboard" data-testid="hero-cta-account">
+              <Button as="span" variant="neon" accent="cyan" size="lg">
+                Your Hub
               </Button>
             </Link>
-
-            {user ? (
-              <Link href="/dashboard" data-testid="hero-cta-account">
-                <Button as="span" variant="neon" accent="cyan" size="lg">
-                  Your Hub
-                </Button>
-              </Link>
-            ) : (
-              <Button
-                type="button"
-                variant="neon"
-                accent="cyan"
-                size="lg"
-                data-testid="hero-cta-auth"
-                onClick={() => setShowAuth(true)}
-              >
-                Sign Up / Log In
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
-      {showAuth && !user && (
-        <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />
-      )}
     </section>
   );
 }

@@ -1,0 +1,59 @@
+import { useEffect, useState } from "react";
+import { HOME_COUNTDOWN_TARGET } from "@/lib/homeEvents";
+
+type Props = {
+  placesCount: number;
+  beachCheckins: number;
+};
+
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function diffMs(target: string) {
+  return Math.max(0, new Date(target).getTime() - Date.now());
+}
+
+/** Three-column stat band: kickoff countdown, directory places, beach check-ins. */
+export default function HomeStatStrip({ placesCount, beachCheckins }: Props) {
+  const [left, setLeft] = useState(() => diffMs(HOME_COUNTDOWN_TARGET));
+
+  useEffect(() => {
+    const id = window.setInterval(() => setLeft(diffMs(HOME_COUNTDOWN_TARGET)), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  let diff = Math.floor(left / 1000);
+  const days = Math.floor(diff / 86400);
+  diff -= days * 86400;
+  const hrs = Math.floor(diff / 3600);
+  diff -= hrs * 3600;
+  const min = Math.floor(diff / 60);
+  const sec = diff - min * 60;
+
+  return (
+    <div className="home-stat-strip" aria-label="Live site stats">
+      <div className="home-stat-strip__cell">
+        <div className="home-stat-strip__value home-stat-strip__value--countdown" aria-live="polite">
+          <span>{days}</span>
+          <span className="home-stat-strip__unit">D</span>
+          <span className="home-stat-strip__sep"> </span>
+          <span>{pad(hrs)}</span>
+          <span className="home-stat-strip__colon">:</span>
+          <span className="home-stat-strip__min">{pad(min)}</span>
+          <span className="home-stat-strip__colon">:</span>
+          <span className="home-stat-strip__sec">{pad(sec)}</span>
+        </div>
+        <div className="home-stat-strip__label">Kickoff in</div>
+      </div>
+      <div className="home-stat-strip__cell">
+        <div className="home-stat-strip__value home-stat-strip__value--lime">{placesCount}</div>
+        <div className="home-stat-strip__label">Queer places to back</div>
+      </div>
+      <div className="home-stat-strip__cell home-stat-strip__cell--last">
+        <div className="home-stat-strip__value home-stat-strip__value--orange">{beachCheckins}</div>
+        <div className="home-stat-strip__label">Check-ins · nude beaches</div>
+      </div>
+    </div>
+  );
+}
