@@ -3,7 +3,7 @@ import { RIVER_BRATS_HOURS, formatRiverBratsHour } from "@shared/riverBrats";
 type Props = {
   value: number | null;
   onChange: (hour: number) => void;
-  accent: "cyan" | "orange";
+  accent: "cyan" | "orange" | "green";
 };
 
 export default function RiverBratsHourChips({ value, onChange, accent }: Props) {

@@ -47,7 +47,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, tabs }: Props) {
         {
           num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "—",
           label: "air temp",
-          color: "var(--neon-orange, #FF6600)",
+          color: "var(--neon-green, #00EE44)",
         },
       ];
 
@@ -55,7 +55,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, tabs }: Props) {
     <>
       <div className="nude-beaches-hero-row">
         <BoardHero
-          accent={isRooster ? "cyan" : "orange"}
+          accent={isRooster ? "orange" : "green"}
           kicker={isRooster ? "Columbia River · Corbett" : "Sauvie Island · Collins Beach"}
           title={
             isRooster ? (

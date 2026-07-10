@@ -13,7 +13,7 @@ type Props = {
 
 export default function RiverBratsShell({ beachId }: Props) {
   const [, setLocation] = useLocation();
-  const accent = beachId === "rooster-rock" ? "cyan" : "orange";
+  const accent = beachId === "rooster-rock" ? "orange" : "green";
   const [shore, setShoreState] = useState<RiverBratsShoreTab>(() =>
     readRiverBratsShore(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("shore") : null),
   );
@@ -43,7 +43,7 @@ export default function RiverBratsShell({ beachId }: Props) {
   return (
     <section className={`river-brats river-brats--${accent}`}>
       <div className="river-brats__head">
-        <div className={`board-active-feed__kicker board-active-feed__kicker--${accent === "cyan" ? "cyan" : "orange"}`}>
+        <div className={`board-active-feed__kicker board-active-feed__kicker--${accent}`}>
           River Brats
         </div>
         <h2 className="display section-heading river-brats__title">Carpool · check-in · spotted</h2>

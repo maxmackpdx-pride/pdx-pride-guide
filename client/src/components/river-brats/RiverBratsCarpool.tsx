@@ -33,7 +33,7 @@ type CarpoolRow = {
 
 type Props = {
   beachId: NudeBeachTab;
-  accent: "cyan" | "orange";
+  accent: "cyan" | "orange" | "green";
 };
 
 export default function RiverBratsCarpool({ beachId, accent }: Props) {

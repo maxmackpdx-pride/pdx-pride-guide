@@ -23,7 +23,7 @@ type CheckinRow = {
 
 type Props = {
   beachId: NudeBeachTab;
-  accent: "cyan" | "orange";
+  accent: "cyan" | "orange" | "green";
 };
 
 export default function RiverBratsCheckIn({ beachId, accent }: Props) {

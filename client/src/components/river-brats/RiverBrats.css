@@ -28,12 +28,20 @@
   border-bottom-color: var(--neon-orange, #ff6600);
 }
 
+.river-brats--green .river-brats__tabs .events-tab.active {
+  border-bottom-color: var(--neon-green, #00EE44);
+}
+
 .river-brats--cyan .river-brats__tabs .events-tab:hover {
   color: #19e3ff;
 }
 
 .river-brats--orange .river-brats__tabs .events-tab:hover {
   color: var(--neon-orange, #ff6600);
+}
+
+.river-brats--green .river-brats__tabs .events-tab:hover {
+  color: var(--neon-green, #00EE44);
 }
 
 .rb-panel__lede {
@@ -102,6 +110,12 @@
   border-color: var(--neon-orange, #ff6600);
   color: var(--neon-orange, #ff6600);
   box-shadow: 0 0 12px rgba(255, 102, 0, 0.25);
+}
+
+.rb-hour-chips--green .rb-hour-chip.active {
+  border-color: var(--neon-green, #00EE44);
+  color: var(--neon-green, #00EE44);
+  box-shadow: 0 0 12px rgba(0, 238, 68, 0.25);
 }
 
 .rb-input,
@@ -211,6 +225,11 @@
 .rb-chip--orange {
   border-color: rgba(255, 102, 0, 0.4);
   color: var(--neon-orange, #ff6600);
+}
+
+.rb-chip--green {
+  border-color: rgba(0, 238, 68, 0.4);
+  color: var(--neon-green, #00EE44);
 }
 
 .rb-card__note {
