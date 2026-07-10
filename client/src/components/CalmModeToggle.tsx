@@ -32,7 +32,11 @@ export default function CalmModeToggle({
       <span className="calm-mode-toggle__track" aria-hidden="true">
         <span className="calm-mode-toggle__thumb" />
       </span>
-      {!minimal && (
+      {minimal ? (
+        <span className="calm-mode-toggle__label calm-mode-toggle__label--minimal" aria-hidden="true">
+          CALM
+        </span>
+      ) : (
         <span className="calm-mode-toggle__copy">
           <span className="calm-mode-toggle__label">
             {calmMode ? "Neon" : "Calm"}

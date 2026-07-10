@@ -9268,10 +9268,10 @@ html.calm-mode .push-notification-toggle--on .push-notification-toggle__thumb {
   font-size: 0.72rem;
 }
 
-/* Nav header: ghost switch — no pill, no label */
+/* Nav header: ghost switch + CALM label */
 .calm-mode-toggle--minimal {
   padding: 6px 4px;
-  gap: 0;
+  gap: 6px;
   border: none;
   background: transparent;
   box-shadow: none;
@@ -9317,6 +9317,24 @@ html.calm-mode .push-notification-toggle--on .push-notification-toggle__thumb {
   transform: translateX(13px);
   background: #d4d4d4;
   box-shadow: none;
+}
+
+.calm-mode-toggle__label--minimal {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: #a3a3a3;
+  user-select: none;
+}
+
+html:not(.calm-mode) .calm-mode-toggle__label--minimal {
+  color: #c8c8c8;
+}
+
+html.calm-mode .calm-mode-toggle__label--minimal {
+  color: #e8e8e8;
 }
 
 html:not(.calm-mode) .calm-mode-toggle--minimal {
