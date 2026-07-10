@@ -19,7 +19,7 @@ import {
   Users,
   UserCircle,
 } from "lucide-react";
-import hubLogo from "@/assets/hub-logo.jpg";
+
 import UserAvatar from "@/components/UserAvatar";
 import "./hub-shell.css";
 
@@ -251,19 +251,9 @@ export default function HubShell({
 
       <div className="hub-shell__frame">
         <aside className="hub-side" aria-label="Hub navigation">
-          <Link href="/" className="hub-side__brand" aria-label="PDX Pride Guide home">
-            <img
-              src={hubLogo}
-              alt="PDX Pride Guide 2026"
-              width={1024}
-              height={468}
-              className="hub-side__logo-full"
-            />
-          </Link>
-
-          <Link href="/" className="hub-back-btn hub-side__back">
+          <Link href="/" className="hub-home-link hub-side__home" aria-label="Return to Pride Guide home">
             <ChevronLeft size={15} strokeWidth={2.4} aria-hidden />
-            Back to website
+            <span>Return to Pride Guide</span>
           </Link>
 
           {isAdminUser && (
@@ -382,18 +372,9 @@ export default function HubShell({
 
         <div className="hub-main">
           <header className="hub-mtop" aria-label="Hub mobile header">
-            <Link href="/" className="hub-back-btn hub-mtop__back">
+            <Link href="/" className="hub-home-link hub-mtop__home" aria-label="Return to Pride Guide home">
               <ChevronLeft size={16} strokeWidth={2.4} aria-hidden />
-              <span>Back</span>
-            </Link>
-            <Link href="/" className="hub-mtop__brand" aria-label="PDX Pride Guide home">
-              <img
-                src={hubLogo}
-                alt="PDX Pride Guide 2026"
-                width={1024}
-                height={468}
-                className="hub-mtop__logo-full"
-              />
+              <span>Return to Pride Guide</span>
             </Link>
             <div className="hub-mtop__spacer" />
             {mode === "admin" && notifyBell}
