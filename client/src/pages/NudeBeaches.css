@@ -384,28 +384,47 @@
   overflow: hidden;
 }
 
-/* Tab switcher — top right, 20% larger than board tabs */
-.nude-beaches-top {
+/* Header shell — tabs pinned top-right over hero */
+.nude-beaches-header {
+  position: relative;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 44px);
-  display: flex;
-  justify-content: flex-end;
 }
 
 .nude-beaches-page .nude-beaches-tab-bar {
+  position: absolute;
+  top: clamp(34px, 5vw, 60px);
+  right: clamp(20px, 4vw, 44px);
+  left: auto;
+  z-index: 2;
+  display: flex;
   justify-content: flex-end;
+  gap: 4px;
   margin: 0;
-  padding: 10px 0 0;
+  padding: 0;
   max-width: none;
   border-bottom: none;
 }
 
 .nude-beaches-page .nude-beaches-tab-bar .events-tab {
-  font-size: 14.4px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 16.8px;
+  letter-spacing: 0.06em;
   padding: 12px 22px 14px;
   border-bottom-width: 3.6px;
+}
+
+@media (max-width: 899px) {
+  .nude-beaches-page .nude-beaches-tab-bar {
+    position: static;
+    justify-content: flex-end;
+    padding: 0 clamp(20px, 4vw, 44px) 4px;
+  }
+
+  .nude-beaches-header .board-hero {
+    padding-top: clamp(20px, 4vw, 32px);
+  }
 }
 
 .nude-beaches-map-row__actions {

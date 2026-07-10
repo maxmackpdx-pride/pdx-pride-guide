@@ -219,10 +219,8 @@ export default function NudeBeaches() {
 
   return (
     <div className="zine-page nude-beaches-page board-page board-page--makeover events-page">
-      <NudeBeachesHero activeTab={activeTab} snapshot={snapshot} />
-
-      <div className="nude-beaches-top">
-        <div className="events-tab-bar nude-beaches-tab-bar">
+      <header className="nude-beaches-header">
+        <nav className="events-tab-bar nude-beaches-tab-bar" aria-label="Beach location">
           {NUDE_BEACH_TABS.map(tab => (
             <button
               key={tab.key}
@@ -233,8 +231,9 @@ export default function NudeBeaches() {
               {tab.label}
             </button>
           ))}
-        </div>
-      </div>
+        </nav>
+        <NudeBeachesHero activeTab={activeTab} snapshot={snapshot} />
+      </header>
 
       <div className="nude-refresh-bar">
         <p className="nude-refresh-bar__meta">
