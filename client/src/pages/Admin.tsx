@@ -128,6 +128,7 @@ interface AdminGig {
 }
 
 interface AdminUser extends AdminUserProfile {
+  id: number;
   promoterStatus: string;
   subAdmin: boolean;
   googleLinked: boolean;
@@ -1093,7 +1094,15 @@ export default function Admin() {
   const missingFlyerCount = events.filter(ev => isMissingEventFlyer(ev.posterImageUrl)).length;
   const userSubmittedCount = events.filter(ev => ev.source === "user_submitted").length;
   const unclaimedCount = events.filter(ev => !ev.claimedBy).length;
-  const approvedPromoterCount = allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner).length;
+  const approvedPromoters = useMemo(
+    () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
+    [allUsers],
+  );
+  const pendingPromoterUsers = useMemo(
+    () => allUsers.filter(u => u.promoterStatus === "pending"),
+    [allUsers],
+  );
+  const approvedPromoterCount = approvedPromoters.length;
 
   const inboxActionPending =
     approveMutation.isPending
@@ -1729,11 +1738,141 @@ export default function Admin() {
 
         {/* ── TEAM ── */}
         {activeTab === "promoters" && (
-          <div>
-            <p className="text-white/40 text-sm mb-6">Manage promoter statuses and sub-admin roles.</p>
+          <div className="space-y-8">
+            <p className="text-white/40 text-sm">
+              Approved promoters ({approvedPromoterCount}) · pending ({pendingPromoterUsers.length || pendingPromoters.length}).
+              Manage status below, or search any account to grant access.
+            </p>
+
+            {usersError || promotersError ? (
+              <AdminLoadError
+                label="promoters"
+                onRetry={() => {
+                  refetchUsers();
+                  refetchPromoters();
+                }}
+              />
+            ) : usersLoading || promotersLoading ? (
+              <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
+            ) : (
+              <>
+                {/* Approved promoters */}
+                <div>
+                  <p className="display text-sm mb-3" style={{ color: "#CCFF00" }}>
+                    APPROVED PROMOTERS · {approvedPromoters.length}
+                  </p>
+                  {approvedPromoters.length === 0 ? (
+                    <p className="text-white/30 text-sm">No approved promoters yet. Search below to grant status.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {approvedPromoters.map(u => (
+                        <div
+                          key={u.id}
+                          className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap"
+                          style={{ background: "#0d0d0d" }}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <AdminUserIdentity profile={u} showEmail size={40} />
+                            <p className="text-xs mt-2 ml-[52px]" style={{ color: "#CCFF00" }}>
+                              promoter: approved
+                              {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
+                              {u.createdAt && (
+                                <span className="text-white/35"> · joined {new Date(u.createdAt).toLocaleDateString()}</span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
+                              className="display text-xs px-3 py-1 border"
+                              style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
+                            >
+                              SET PENDING
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
+                              className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                            >
+                              REVOKE
+                            </button>
+                            {isSuperAdmin && (
+                              <button
+                                type="button"
+                                onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
+                                className="display text-xs px-3 py-1 border"
+                                style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}
+                              >
+                                {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Pending requests */}
+                <div>
+                  <p className="display text-sm mb-3" style={{ color: "#00FFFF" }}>
+                    PENDING REQUESTS · {Math.max(pendingPromoterUsers.length, pendingPromoters.length)}
+                  </p>
+                  {pendingPromoters.length === 0 && pendingPromoterUsers.length === 0 ? (
+                    <p className="text-white/30 text-sm">No pending promoter applications.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(pendingPromoters.length > 0 ? pendingPromoters : pendingPromoterUsers).map(u => {
+                        const uid = u.id as number;
+                        return (
+                        <div
+                          key={uid}
+                          className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap"
+                          style={{ background: "#0d0d0d" }}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <AdminUserIdentity profile={u} showEmail size={40} />
+                            <p className="text-xs mt-2 ml-[52px] text-white/45">
+                              {"eventTitle" in u && u.eventTitle
+                                ? `Claiming: ${u.eventTitle}`
+                                : "Promoter application"}
+                              {"submitterOrg" in u && u.submitterOrg ? ` · ${u.submitterOrg}` : ""}
+                              {"claimReason" in u && u.claimReason ? (
+                                <span className="block mt-1 text-white/35 line-clamp-2">{String(u.claimReason)}</span>
+                              ) : null}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => approvePromoterMutation.mutate(uid)}
+                              disabled={approvePromoterMutation.isPending}
+                              className="display text-xs px-3 py-1 border"
+                              style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                            >
+                              APPROVE
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => denyPromoterMutation.mutate(uid)}
+                              disabled={denyPromoterMutation.isPending}
+                              className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                            >
+                              DENY
+                            </button>
+                          </div>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Manual user override */}
-            <div className="mt-4 pt-4 border-t border-white/10">
+            <div className="pt-4 border-t border-white/10">
               <p className="display text-sm mb-3" style={{ color: "#FF6600" }}>MANUAL PROMOTER OVERRIDE</p>
               <p className="text-white/40 text-xs mb-4">Search any user by username, email, or display name to manually set their promoter status.</p>
               <div className="flex gap-2 mb-4">
