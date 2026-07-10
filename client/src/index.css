@@ -1998,125 +1998,27 @@ h2.display,
   to { opacity: 1; }
 }
 
-/* Header: "Inbox" title row on top, role tabs beneath (minimal). */
-.inbox-overlay__head {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 14px 16px 12px;
-  flex-shrink: 0;
-  background: var(--ink-1000);
-  border-bottom: var(--bw-hair, 1px) solid var(--border-faint, var(--border-default));
-  border-radius: 22px 22px 0 0;
-}
-
-.inbox-overlay__head-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.inbox-overlay__title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  line-height: 1;
-  letter-spacing: 0.01em;
-  color: var(--text-hi);
-}
-
-.inbox-overlay__tabs {
-  display: inline-flex;
-  gap: 8px;
-  min-width: 0;
-  overflow-x: auto;
+/* Bottom-sheet body scroll (hidden scrollbar). */
+.inbox-overlay__scroll {
   scrollbar-width: none;
 }
-
-.inbox-overlay__tabs::-webkit-scrollbar {
-  display: none;
-}
-
-/* Slightly denser chips inside the compact panel. */
-.inbox-overlay__tabs .pdxChip {
-  padding: 7px 13px 5px;
-}
-
-.inbox-overlay__head-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.inbox-overlay__icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-sm, 6px);
-  background: transparent;
-  border: var(--bw-hair, 1px) solid transparent;
-  color: var(--text-meta);
-  cursor: pointer;
-  transition: background var(--dur-base, 0.16s) var(--ease-out, ease),
-              color var(--dur-base, 0.16s) var(--ease-out, ease),
-              border-color var(--dur-base, 0.16s) var(--ease-out, ease);
-}
-
-.inbox-overlay__icon-btn:hover {
-  background: var(--surface-inset);
-  border-color: var(--border-default);
-  color: var(--text-hi);
-}
-
-.inbox-overlay__body {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.inbox-overlay__body > * {
-  height: 100%;
-}
-
-.inbox-overlay__placeholder {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 28px 24px;
-  text-align: center;
-  background: var(--grad-nightglow, var(--surface-card));
-}
-
-.inbox-overlay__placeholder p {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  letter-spacing: 0.01em;
-  color: var(--text-hi);
-  margin: 0;
-}
-
-.inbox-overlay__placeholder span {
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--text-meta);
-  max-width: 34ch;
+.inbox-overlay__scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 /* Desktop: bottom-right panel, ~30% of viewport, no dimming backdrop. */
 @media (min-width: 641px) {
   .floating-inbox .inbox-overlay {
     right: 24px;
-    bottom: 96px;
-    width: 30vw;
-    min-width: 380px;
-    max-width: 560px;
-    height: min(72vh, 720px);
+    /* Anchor between the site header and the bottom so the sheet's heading
+       switcher is never clipped under the header. */
+    top: 116px;
+    bottom: 88px;
+    height: auto;
+    width: 34vw;
+    min-width: 400px;
+    max-width: 600px;
   }
 
   .floating-inbox .inbox-overlay__backdrop {
@@ -2130,7 +2032,7 @@ h2.display,
     left: 8px;
     right: 8px;
     bottom: calc(64px + env(safe-area-inset-bottom, 12px));
-    height: min(70vh, 560px);
+    height: min(82vh, 720px);
   }
 }
 
