@@ -136,12 +136,14 @@ export default function PersonalView({
                     </span>
                     {t.unread && (
                       <span
+                        aria-hidden="true"
                         style={{
-                          width: 7,
-                          height: 7,
+                          width: 11,
+                          height: 11,
                           borderRadius: 999,
                           background: C.lime,
                           flex: "none",
+                          boxShadow: `0 0 12px ${C.lime}, 0 0 4px ${C.lime}`,
                         }}
                       />
                     )}

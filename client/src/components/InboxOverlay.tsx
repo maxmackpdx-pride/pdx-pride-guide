@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Maximize2, X, SlidersHorizontal, ChevronDown, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -49,6 +50,16 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const { threads } = useInboxThreads(null);
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const isOwner = Boolean(user?.username === "tuckerhelms" || user?.isSuperAdmin);
+
+  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
+    queryKey: ["/api/admin/pending-count"],
+    queryFn: () =>
+      fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
+        r.ok ? r.json() : { count: 0, ownerCount: 0 },
+      ),
+    enabled: isAdmin,
+    refetchInterval: 90_000,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -104,6 +115,11 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const visibleAccounts = ACCOUNTS.filter(([id]) => id === "personal" || (id === "admin" && isAdmin) || (id === "owner" && isOwner));
 
   const active = threads.filter((t) => !t.archived);
+  const accountUnread: Record<Account, number> = {
+    personal: active.filter((t) => t.folder === "inbox" && t.unread).length,
+    admin: pendingAdmin.count || 0,
+    owner: isOwner ? pendingAdmin.ownerCount || 0 : 0,
+  };
   const folderCount = (f: Folder) => active.filter((t) => t.folder === f).length;
   const catCount = (id: string) => (id === "all" ? active.length : active.filter((t) => t.cat === id).length);
   const activeFilterLabel = (FILTERS.find((f) => f[0] === filter)?.[1] || "All").toUpperCase();
@@ -211,7 +227,19 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                       boxShadow: act ? "0 1px 2px rgba(0,0,0,.4)" : undefined,
                     }}
                   >
-                    {!act && <span style={{ width: 7, height: 7, borderRadius: 999, background: color, flex: "none", boxShadow: `0 0 7px ${color}` }} />}
+                    {!act && accountUnread[id] > 0 && (
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width: 11,
+                          height: 11,
+                          borderRadius: 999,
+                          background: color,
+                          flex: "none",
+                          boxShadow: `0 0 12px ${color}, 0 0 4px ${color}`,
+                        }}
+                      />
+                    )}
                     {label}
                   </button>
                 );

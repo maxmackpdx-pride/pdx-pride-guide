@@ -680,21 +680,22 @@
 
 .hub-mobile-bar i {
   position: absolute;
-  top: -6px;
-  right: -10px;
+  top: -8px;
+  right: -12px;
   font-style: normal;
-  font-size: 10px;
+  font-size: 11px;
   background: var(--hub-pink);
   color: #000;
   border-radius: 99px;
-  padding: 0 5px;
-  min-width: 18px;
-  height: 18px;
+  padding: 0 6px;
+  min-width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
   border: 2px solid var(--hub-ink);
+  box-shadow: 0 0 10px rgba(255, 0, 204, 0.65);
 }
 
 .hub-mobile-bar i.is-purple {

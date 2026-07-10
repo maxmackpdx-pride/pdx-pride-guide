@@ -1990,19 +1990,20 @@ h2.display,
 
   .floating-inbox__fab-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    border-radius: 10px;
+    top: -4px;
+    right: -4px;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 13px;
     background: var(--neon-cyan, #00FFFF);
     color: #000;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    line-height: 20px;
+    line-height: 26px;
     text-align: center;
     border: 2px solid var(--surface-card, #1a1a1a);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.7);
   }
 }
 

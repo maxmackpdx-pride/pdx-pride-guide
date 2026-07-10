@@ -9,7 +9,7 @@ import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 26;
 
-function tabClass(active: boolean, accent: "cyan" | "green" | "orange" | "more") {
+function tabClass(active: boolean, accent: "cyan" | "green" | "lime" | "orange" | "more") {
   return `hub-mobile-tab${active ? ` is-active is-${accent}` : ""}`;
 }
 
