@@ -106,7 +106,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
 
 function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
   return (
-    <div className="nb-hub">
+    <div className="nb-hub nb-hub--sauvie">
       <section className="nb-hub__section">
         <div className="nb-hub__kicker">Water quality</div>
         <div className="nb-hub__level-value" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}>

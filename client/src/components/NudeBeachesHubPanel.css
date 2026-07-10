@@ -60,6 +60,11 @@
   text-shadow: 0 0 22px rgba(255, 0, 204, 0.35);
 }
 
+.nb-hub--sauvie .nb-hub__weather-value {
+  color: var(--neon-orange, #FF6600);
+  text-shadow: 0 0 22px rgba(255, 102, 0, 0.35);
+}
+
 .nb-hub__weather-label,
 .nb-hub__weather-stat-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

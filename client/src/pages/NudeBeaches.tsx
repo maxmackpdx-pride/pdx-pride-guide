@@ -150,7 +150,7 @@ function SauvieIslandPanel() {
       </section>
 
       <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--magenta">Links</div>
+        <div className="nude-panel__kicker nude-panel__kicker--orange">Links</div>
         <ResourceList links={SAUVIE_ISLAND_RESOURCES} />
       </section>
     </div>
@@ -218,7 +218,9 @@ export default function NudeBeaches() {
   const isRooster = activeTab === "rooster-rock";
 
   return (
-    <div className="zine-page nude-beaches-page board-page board-page--makeover events-page">
+    <div
+      className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
+    >
       <header className="nude-beaches-header">
         <NudeBeachesHero
           activeTab={activeTab}
@@ -278,7 +280,7 @@ export default function NudeBeaches() {
         <div className="board-active-feed__inner">
           <ScrollReveal delay={30}>
             <div className="board-active-feed__head">
-              <div className={`board-active-feed__kicker ${isRooster ? "board-active-feed__kicker--cyan" : "board-active-feed__kicker--magenta"}`}>
+              <div className={`board-active-feed__kicker ${isRooster ? "board-active-feed__kicker--cyan" : "board-active-feed__kicker--orange"}`}>
                 Live now
               </div>
               <div className="board-active-feed__head-row">

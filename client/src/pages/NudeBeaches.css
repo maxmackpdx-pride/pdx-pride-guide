@@ -195,6 +195,7 @@
 
 .nude-panel__kicker--cyan { color: #19e3ff; }
 .nude-panel__kicker--magenta { color: #ff1fa0; }
+.nude-panel__kicker--orange { color: var(--neon-orange, #FF6600); }
 .nude-panel__kicker--lime { color: #ccff00; }
 
 .nude-panel__title {
@@ -359,7 +360,7 @@
 }
 
 .nude-resource-link--primary {
-  border-left: 4px solid #ff00cc;
+  border-left: 4px solid var(--neon-orange, #FF6600);
 }
 
 .nude-resource-link__title {
@@ -475,6 +476,21 @@
   letter-spacing: 0.06em;
   padding: 14px 26px 17px;
   border-bottom-width: 4.3px;
+}
+
+.nude-beaches-page--sauvie.board-page--makeover {
+  background:
+    radial-gradient(circle at 10% 6%, rgba(25, 227, 255, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(255, 102, 0, 0.06), transparent 24rem),
+    #06060a;
+}
+
+.nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab.active {
+  border-bottom-color: var(--neon-orange, #FF6600);
+}
+
+.nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab:hover {
+  color: var(--neon-orange, #FF6600);
 }
 
 @media (max-width: 899px) {

@@ -5,8 +5,8 @@ type BoardHeroProps = {
   title: ReactNode;
   lede: string;
   actions?: ReactNode;
-  /** lime | cyan | magenta | purple */
-  accent?: "lime" | "cyan" | "magenta" | "purple";
+  /** lime | cyan | magenta | purple | orange */
+  accent?: "lime" | "cyan" | "magenta" | "purple" | "orange";
   className?: string;
 };
 
