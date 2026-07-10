@@ -43,7 +43,7 @@ export default function MemberProfile() {
   });
 
   const accent = data?.accentColor || DEFAULT_PROFILE_ACCENT;
-  const banner = data?.profileBanner === undefined ? DEFAULT_PROFILE_BANNER : data.profileBanner;
+  const banner = data?.profileBanner ?? (data?.isPromoter ? DEFAULT_PROFILE_BANNER : null);
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
   const marquee: ProfileMarquee = data?.marquee || { items: [], speed: 26, color: "rainbow" };
 

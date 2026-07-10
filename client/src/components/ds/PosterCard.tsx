@@ -115,14 +115,16 @@ export function PosterCard({
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
   className = "", style = {}, ...rest
 }: any) {
-  const Tag = href ? "a" : "div";
+  const cardHref = onRsvp ? undefined : href;
+  const detailsHref = onRsvp ? href : undefined;
+  const Tag = cardHref ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const dayt = DAY_TEXT[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   const showClaim = claimPending || claimable;
   return (
-    <Tag className={`pdxBoard ${className}`} href={href}
+    <Tag className={`pdxBoard ${className}`} href={cardHref}
       style={{ "--_day": base, "--_dayt": dayt, ...style }} {...rest}>
       <div className="pdxBoard__poster">
         {image
@@ -154,7 +156,9 @@ export function PosterCard({
           </a>
         )}
         {when && <div className="pdxBoard__when">{when}</div>}
-        {showDetailsLink && <span className="pdxBoard__link">Event details &rarr;</span>}
+        {showDetailsLink && (detailsHref
+          ? <a className="pdxBoard__link" href={detailsHref} onClick={stop}>Event details &rarr;</a>
+          : <span className="pdxBoard__link">Event details &rarr;</span>)}
 
         {(going != null || onRsvp) && (
           <div className="pdxBoard__foot">

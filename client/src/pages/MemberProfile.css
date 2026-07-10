@@ -2,10 +2,22 @@
 
 .pp-page {
   min-height: 100vh;
+  width: 100%;
   background: var(--ink-900, #0a0a0a);
   color: var(--text-mid);
   --profile-acc: var(--neon-magenta);
   --profile-acc-t: var(--neon-magenta);
+}
+
+.app-shell--profile {
+  background: #0a0a0a;
+}
+
+.app-shell--profile > main {
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  width: 100%;
 }
 
 .app-shell--profile .film-grain-overlay {
@@ -549,6 +561,10 @@
   margin-bottom: 20px;
 }
 
+.pp-section-head .pp-filter-seg {
+  margin-bottom: 0;
+}
+
 .pp-filter-seg__btn {
   appearance: none;
   cursor: pointer;
@@ -579,6 +595,24 @@
 .pp-poster-grid > .pdxBoard {
   max-width: 280px;
   width: 100%;
+  cursor: default;
+}
+
+.pp-poster-grid > .pdxBoard:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.pp-poster-grid .pdxBoard__img {
+  object-fit: cover;
+}
+
+.pp-poster-grid .pdxBoard__link {
+  text-decoration: none;
+}
+
+.pp-poster-grid .pdxBoard__link:hover {
+  text-decoration: underline;
 }
 
 .pp-poster-grid > .pp-empty-copy {

@@ -101,7 +101,7 @@ export default function EventsTab({ data }: Props) {
         going={goingCount}
         onRsvp={withRsvp ? () => toggleRsvp(e.id) : undefined}
         href={eventPath(e.id, e.title)}
-        showLink={!withRsvp}
+        showLink={false}
       />
     );
   };
