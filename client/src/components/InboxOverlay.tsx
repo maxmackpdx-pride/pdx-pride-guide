@@ -91,6 +91,10 @@ export default function InboxOverlay({ open, onClose }: { open: boolean; onClose
     onClose();
     setLocation("/inbox");
   };
+  const navigateFromSheet = (href: string) => {
+    onClose();
+    setLocation(href);
+  };
 
   const headStyle = (v: View) => ({
     background: "none",
@@ -296,7 +300,7 @@ export default function InboxOverlay({ open, onClose }: { open: boolean; onClose
           )}
           {inboxActive && account === "admin" && <QueueView mode="admin" />}
           {inboxActive && account === "owner" && <QueueView mode="owner" />}
-          {view === "posts" && <PostsView />}
+          {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
           {view === "stats" && <StatsView />}
         </div>
 

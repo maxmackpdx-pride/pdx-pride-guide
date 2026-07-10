@@ -23,33 +23,41 @@ export default function Dashboard() {
   usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, gigs, messages, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
+  const readSearch = () => new URLSearchParams(window.location.search);
   const [memberView, setMemberView] = useState<MemberView>(() => {
     if (typeof window === "undefined") return "home";
-    const v = new URLSearchParams(window.location.search).get("view");
-    return v === "posts" ? "posts" : "home";
+    return readSearch().get("view") === "posts" ? "posts" : "home";
   });
   const [editMode, setEditMode] = useState(() => {
     if (typeof window === "undefined") return false;
-    return new URLSearchParams(window.location.search).get("edit") === "profile";
+    return readSearch().get("edit") === "profile";
   });
+  const [pendingEditEventId, setPendingEditEventId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : readSearch().get("editEvent"),
+  );
+  const [pendingEditGigId, setPendingEditGigId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : readSearch().get("editGig"),
+  );
+  const [pendingSection, setPendingSection] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : readSearch().get("section"),
+  );
+
+  const applySearchParams = (params: URLSearchParams) => {
+    setMemberView(params.get("view") === "posts" ? "posts" : "home");
+    setEditMode(params.get("edit") === "profile");
+    setPendingEditEventId(params.get("editEvent"));
+    setPendingEditGigId(params.get("editGig"));
+    setPendingSection(params.get("section"));
+  };
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (memberView === "posts") url.searchParams.set("view", "posts");
-    else url.searchParams.delete("view");
-    if (editMode) url.searchParams.set("edit", "profile");
-    else url.searchParams.delete("edit");
-    window.history.replaceState({}, "", url.toString());
-  }, [memberView, editMode]);
+    applySearchParams(readSearch());
+  }, [location]);
 
   useEffect(() => {
-    const onPopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      setMemberView(params.get("view") === "posts" ? "posts" : "home");
-      setEditMode(params.get("edit") === "profile");
-    };
+    const onPopState = () => applySearchParams(readSearch());
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
@@ -74,6 +82,21 @@ export default function Dashboard() {
   const [gigForm, setGigForm] = useState({ title: "", description: "", skills: "", compensation: "", location: "" });
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ events: true });
   const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (memberView === "posts") url.searchParams.set("view", "posts");
+    else url.searchParams.delete("view");
+    if (editMode) url.searchParams.set("edit", "profile");
+    else url.searchParams.delete("edit");
+    if (editingEvent) url.searchParams.set("editEvent", String(editingEvent.id));
+    else if (!pendingEditEventId) url.searchParams.delete("editEvent");
+    if (editingGig) url.searchParams.set("editGig", String(editingGig.id));
+    else if (!pendingEditGigId) url.searchParams.delete("editGig");
+    if (pendingSection && memberView === "posts") url.searchParams.set("section", pendingSection);
+    else url.searchParams.delete("section");
+    window.history.replaceState({}, "", url.toString());
+  }, [memberView, editMode, editingEvent, editingGig, pendingEditEventId, pendingEditGigId, pendingSection]);
 
   const fetchMine = async (url: string) => {
     const r = await fetch(url, { credentials: "include" });
@@ -273,6 +296,54 @@ export default function Dashboard() {
     },
     onError: () => toast({ title: "Error", description: "Could not update gig post.", variant: "destructive" }),
   });
+
+  useEffect(() => {
+    if (!pendingEditEventId || !user) return;
+    if (myEventsQuery.isLoading) return;
+    const evt = myEvents.find((e) => String(e.id) === pendingEditEventId);
+    if (!evt) {
+      setPendingEditEventId(null);
+      return;
+    }
+    setMemberView("posts");
+    setOpenSections((prev) => ({ ...prev, events: true }));
+    setEditingEvent(evt);
+    setHostUpdate("");
+    setEventForm(eventToEditForm(evt));
+    setPendingEditEventId(null);
+  }, [pendingEditEventId, user, myEvents, myEventsQuery.isLoading]);
+
+  useEffect(() => {
+    if (!pendingEditGigId || !user) return;
+    if (myGigsQuery.isLoading) return;
+    const gig = myGigs.find((g) => String(g.id) === pendingEditGigId);
+    if (!gig) {
+      setPendingEditGigId(null);
+      return;
+    }
+    setMemberView("posts");
+    setOpenSections((prev) => ({ ...prev, gigs: true }));
+    setEditingGig(gig);
+    setGigForm({
+      title: gig.title || "",
+      description: gig.description || "",
+      skills: gig.skills || "",
+      compensation: gig.compensation || "",
+      location: gig.location || "",
+    });
+    setPendingEditGigId(null);
+  }, [pendingEditGigId, user, myGigs, myGigsQuery.isLoading]);
+
+  useEffect(() => {
+    if (!pendingSection || !user) return;
+    setMemberView("posts");
+    setOpenSections((prev) => ({ ...prev, [pendingSection]: true }));
+    const sectionId = pendingSection;
+    setPendingSection(null);
+    requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [pendingSection, user]);
 
   if (loading) {
     return (
