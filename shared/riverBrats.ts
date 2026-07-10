@@ -81,3 +81,6 @@ export function isValidRiverBratsHour(hour: unknown): hour is number {
 export function isValidBeachId(id: unknown): id is NudeBeachTab {
   return id === "rooster-rock" || id === "sauvie-island";
 }
+
+/** Beach check-in unlocks the day-room chat until Pacific midnight. */
+export const RIVER_BRATS_CHAT_CLOSES_AT = "midnight Pacific";

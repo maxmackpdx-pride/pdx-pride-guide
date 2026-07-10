@@ -706,6 +706,18 @@ function ensureRiverBratsSchema() {
       CREATE UNIQUE INDEX IF NOT EXISTS beach_checkin_user_day_idx
       ON beach_checkins(user_id, beach_id, calendar_date)
     `);
+    try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN is_anonymous INTEGER NOT NULL DEFAULT 0`); } catch (e) {}
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS beach_chat_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        beach_id TEXT NOT NULL,
+        calendar_date TEXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        body TEXT NOT NULL,
+        is_anonymous INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS beach_carpool_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -4778,10 +4790,12 @@ export interface IStorage {
   getMissedConnectionsByBeach(beachId: string, viewerUserId?: number): any[];
   getMissedConnectionsByUser(userId: number): MissedConnection[];
   expireRiverBratsCheckins(): void;
-  getBeachCheckins(beachId: string, calendarDate: string): any[];
+  getBeachCheckins(beachId: string, calendarDate: string, viewerUserId?: number): any[];
   getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string): BeachCheckin | undefined;
-  upsertBeachCheckin(data: InsertBeachCheckin): BeachCheckin;
+  upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }): BeachCheckin;
   deleteBeachCheckin(id: number, userId: number): boolean;
+  getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number): { messages: any[]; expiresAt: string | null; chatOpen: boolean };
+  postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string): any;
   expireBeachCarpoolPosts(): void;
   getBeachCarpoolPosts(beachId: string, tripDate: string, viewerUserId?: number): any[];
   getBeachCarpoolPost(id: number): any;
@@ -7674,15 +7688,46 @@ export const storage: IStorage = {
     const now = new Date().toISOString();
     sqlite.prepare(`UPDATE beach_checkins SET is_active = 0 WHERE is_active = 1 AND expires_at <= ?`).run(now);
   },
-  getBeachCheckins(beachId: string, calendarDate: string) {
+  getBeachCheckins(beachId: string, calendarDate: string, viewerUserId?: number) {
     storage.expireRiverBratsCheckins();
-    return sqlite.prepare(`
-      SELECT c.*, u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice, u.photo_url AS photoUrl
+    const rows = sqlite.prepare(`
+      SELECT c.id, c.user_id AS userId, c.beach_id AS beachId, c.arrival_hour AS arrival_hour,
+             c.note, c.calendar_date AS calendarDate, c.is_anonymous AS isAnonymous,
+             c.is_active AS isActive, c.expires_at AS expiresAt, c.created_at AS createdAt,
+             u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice, u.photo_url AS photoUrl
       FROM beach_checkins c
       JOIN users u ON u.id = c.user_id
       WHERE c.beach_id = ? AND c.calendar_date = ? AND c.is_active = 1
       ORDER BY c.arrival_hour ASC, c.created_at ASC
     `).all(beachId, calendarDate) as any[];
+    const viewerCheckedIn = viewerUserId != null && rows.some((r: any) => r.userId === viewerUserId);
+    return rows.map((r: any) => {
+      const isSelf = viewerUserId != null && r.userId === viewerUserId;
+      const isAnonymous = Boolean(r.isAnonymous);
+      if (!viewerCheckedIn && !isSelf) {
+        return {
+          ...r,
+          username: "anonymous",
+          displayName: "Anonymous",
+          photoUrl: null,
+          avatarChoice: null,
+          isAnonymous: true,
+          masked: true,
+        };
+      }
+      if (isAnonymous && !isSelf) {
+        return {
+          ...r,
+          username: "anonymous",
+          displayName: "Anonymous",
+          photoUrl: null,
+          avatarChoice: null,
+          isAnonymous: true,
+          masked: true,
+        };
+      }
+      return { ...r, isAnonymous, masked: false, isMine: isSelf };
+    });
   },
   getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string) {
     storage.expireRiverBratsCheckins();
@@ -7691,22 +7736,24 @@ export const storage: IStorage = {
       WHERE beach_id = ? AND user_id = ? AND calendar_date = ? AND is_active = 1
     `).get(beachId, userId, calendarDate) as BeachCheckin | undefined;
   },
-  upsertBeachCheckin(data: InsertBeachCheckin) {
+  upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }) {
     const createdAt = new Date().toISOString();
     const expiresAt = pacificMidnightIso(data.calendarDate);
+    const isAnonymous = Boolean(data.isAnonymous);
     const existing = sqlite.prepare(`
       SELECT id FROM beach_checkins WHERE user_id = ? AND beach_id = ? AND calendar_date = ?
     `).get(data.userId, data.beachId, data.calendarDate) as { id: number } | undefined;
     if (existing) {
       sqlite.prepare(`
         UPDATE beach_checkins
-        SET arrival_hour = ?, note = ?, is_active = 1, expires_at = ?, created_at = ?
+        SET arrival_hour = ?, note = ?, is_anonymous = ?, is_active = 1, expires_at = ?, created_at = ?
         WHERE id = ?
-      `).run(data.arrivalHour, data.note || null, expiresAt, createdAt, existing.id);
+      `).run(data.arrivalHour, data.note || null, isAnonymous ? 1 : 0, expiresAt, createdAt, existing.id);
       return db.select().from(beachCheckins).where(eq(beachCheckins.id, existing.id)).get()!;
     }
     return db.insert(beachCheckins).values({
       ...data,
+      isAnonymous,
       isActive: true,
       reportCount: 0,
       expiresAt,
@@ -7718,6 +7765,80 @@ export const storage: IStorage = {
     if (!row || row.userId !== userId) return false;
     db.update(beachCheckins).set({ isActive: false } as any).where(eq(beachCheckins.id, id)).run();
     return true;
+  },
+  getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number) {
+    storage.expireRiverBratsCheckins();
+    const mine = storage.getBeachCheckinByUser(beachId, viewerUserId, calendarDate);
+    if (!mine) return { messages: [], expiresAt: null, chatOpen: false };
+    const rows = sqlite.prepare(`
+      SELECT m.id, m.beach_id AS beachId, m.calendar_date AS calendarDate, m.user_id AS userId,
+             m.body, m.is_anonymous AS isAnonymous, m.created_at AS createdAt,
+             u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM beach_chat_messages m
+      LEFT JOIN users u ON u.id = m.user_id
+      WHERE m.beach_id = ? AND m.calendar_date = ?
+      ORDER BY m.created_at ASC
+      LIMIT 200
+    `).all(beachId, calendarDate) as any[];
+    const messages = rows.map(row => {
+      const isSelf = row.userId === viewerUserId;
+      const anonymous = Boolean(row.isAnonymous);
+      if (anonymous && !isSelf) {
+        return {
+          id: row.id,
+          body: row.body,
+          isAnonymous: true,
+          createdAt: row.createdAt,
+          displayName: "Anonymous",
+          username: "anonymous",
+          photoUrl: null,
+          avatarChoice: null,
+          avatarRing: null,
+          isMine: false,
+        };
+      }
+      return {
+        id: row.id,
+        body: row.body,
+        isAnonymous: anonymous,
+        createdAt: row.createdAt,
+        displayName: row.displayName || row.username,
+        username: row.username,
+        photoUrl: row.photoUrl,
+        avatarChoice: row.avatarChoice,
+        avatarRing: row.avatarRing,
+        isMine: isSelf,
+      };
+    });
+    return {
+      messages,
+      expiresAt: mine.expiresAt ?? null,
+      chatOpen: Boolean(mine.expiresAt && mine.expiresAt > new Date().toISOString()),
+    };
+  },
+  postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string) {
+    const mine = storage.getBeachCheckinByUser(beachId, userId, calendarDate);
+    if (!mine) throw new Error("Active check-in required");
+    if (mine.expiresAt && mine.expiresAt <= new Date().toISOString()) {
+      throw new Error("Beach chat has closed");
+    }
+    const createdAt = new Date().toISOString();
+    const row = sqlite.prepare(`
+      INSERT INTO beach_chat_messages (beach_id, calendar_date, user_id, body, is_anonymous, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(beachId, calendarDate, userId, body, mine.isAnonymous ? 1 : 0, createdAt);
+    const id = Number(row.lastInsertRowid);
+    const user = storage.getUserById(userId);
+    return {
+      id,
+      body,
+      isAnonymous: Boolean(mine.isAnonymous),
+      createdAt,
+      isMine: true,
+      displayName: mine.isAnonymous ? "Anonymous" : (user?.displayName || user?.username || "You"),
+      username: mine.isAnonymous ? "anonymous" : user?.username,
+    };
   },
 
   expireBeachCarpoolPosts() {

@@ -2245,7 +2245,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const beachId = String(req.query.beach || "");
     const date = String(req.query.date || pacificTodayDate());
     if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-    res.json(storage.getBeachCheckins(beachId, date));
+    res.json(storage.getBeachCheckins(beachId, date, req.session?.userId));
   });
 
   app.post("/api/river-brats/checkins", requireAuth, (req, res) => {
@@ -2257,13 +2257,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const note = String(req.body.note || "").trim().slice(0, 80) || null;
       if (moderationGate(res, "River Brats check-in", { note: note || "" })) return;
       const calendarDate = String(req.body.date || pacificTodayDate());
-      const row = storage.upsertBeachCheckin(insertBeachCheckinSchema.parse({
-        userId: req.session.userId!,
-        beachId,
-        arrivalHour,
-        note,
-        calendarDate,
-      }));
+      const isAnonymous = Boolean(req.body.isAnonymous);
+      const row = storage.upsertBeachCheckin({
+        ...insertBeachCheckinSchema.parse({
+          userId: req.session.userId!,
+          beachId,
+          arrivalHour,
+          note,
+          calendarDate,
+        }),
+        isAnonymous,
+      });
       res.json(row);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -2274,6 +2278,59 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const ok = storage.deleteBeachCheckin(Number(req.params.id), req.session.userId!);
     if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ ok: true });
+  });
+
+  app.get("/api/river-brats/checkins/chat", requireAuth, (req: any, res) => {
+    const beachId = String(req.query.beach || "");
+    const date = String(req.query.date || pacificTodayDate());
+    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    const payload = storage.getBeachChatMessages(beachId, date, req.session.userId!);
+    res.json(payload);
+  });
+
+  app.post("/api/river-brats/checkins/chat", requireAuth, (req, res) => {
+    try {
+      const beachId = String(req.body.beachId || "");
+      const date = String(req.body.date || pacificTodayDate());
+      const body = String(req.body.body || "").trim();
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (!body) return res.status(400).json({ error: "body required" });
+      if (body.length > 500) return res.status(400).json({ error: "Message too long" });
+      if (moderationGate(res, "River Brats beach chat", { body })) return;
+      const msg = storage.postBeachChatMessage(beachId, date, req.session.userId!, body);
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/river-brats/checkins/:id/message", requireAuth, (req, res) => {
+    try {
+      const checkinId = Number(req.params.id);
+      const beachId = String(req.body.beachId || "");
+      const date = String(req.body.date || pacificTodayDate());
+      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+      if (!storage.getBeachCheckinByUser(beachId, req.session.userId!, date)) {
+        return res.status(403).json({ error: "Check-in required to message others" });
+      }
+      const rows = storage.getBeachCheckins(beachId, date, req.session.userId!);
+      const target = rows.find((r: any) => r.id === checkinId);
+      if (!target?.userId || target.masked) return res.status(404).json({ error: "Check-in not found" });
+      if (target.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
+      const body = String(req.body.body || "").trim();
+      if (!body) return res.status(400).json({ error: "body required" });
+      if (moderationGate(res, "River Brats DM", { body })) return;
+      const msg = storage.sendMessage(
+        req.session.userId!,
+        Number(target.userId),
+        `River Brats: ${beachVenueLabel(beachId)}`,
+        body,
+        { contextType: "RIVER_BRATS_CHECKIN", contextId: checkinId, contextLabel: beachVenueLabel(beachId) },
+      );
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   app.get("/api/river-brats/carpool", (req: any, res) => {

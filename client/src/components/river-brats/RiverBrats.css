@@ -262,6 +262,218 @@
   margin: 12px 0 0;
 }
 
+.rb-visibility {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rb-visibility__legend {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  margin-bottom: 8px;
+}
+
+.rb-visibility__options {
+  display: grid;
+  gap: 8px;
+}
+
+.rb-visibility__option {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #0a0a0a;
+}
+
+.rb-visibility__option--active {
+  border-color: #666;
+  background: #121218;
+}
+
+.rb-visibility__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rb-visibility__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.rb-visibility__hint {
+  font-size: 12px;
+  color: #8a8a8a;
+  line-height: 1.4;
+}
+
+.rb-card--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.rb-card--clickable:hover,
+.rb-card--clickable:focus-visible {
+  border-color: #444;
+  background: #111116;
+  outline: none;
+}
+
+.rb-card__dm-hint {
+  font-size: 11px;
+  color: #19e3ff;
+  letter-spacing: 0.02em;
+}
+
+.rb-card__you-pill {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ccff00;
+  padding: 4px 8px;
+  border: 1px solid rgba(204, 255, 0, 0.35);
+  border-radius: 999px;
+  flex: none;
+}
+
+.rb-dm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1100;
+}
+
+.rb-dm-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(100%, 380px);
+  background: #0a0a0a;
+  border-left: 2px solid #ccff00;
+  display: flex;
+  flex-direction: column;
+  z-index: 1101;
+  animation: rb-dm-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes rb-dm-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.rb-dm-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #222;
+}
+
+.rb-dm-panel__who {
+  flex: 1;
+  min-width: 0;
+}
+
+.rb-dm-panel__name {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.rb-dm-panel__profile-link {
+  text-decoration: none;
+  color: #fff;
+}
+
+.rb-dm-panel__profile-link:hover {
+  color: #19e3ff;
+}
+
+.rb-dm-panel__context {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #19e3ff;
+  margin-top: 2px;
+}
+
+.rb-dm-panel__close {
+  background: none;
+  border: none;
+  color: #8a8a8a;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.rb-dm-panel__body {
+  flex: 1;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow-y: auto;
+}
+
+.rb-dm-panel__seed {
+  align-self: flex-start;
+  max-width: 82%;
+  margin: 0;
+  background: #15151a;
+  border: 1px solid #222;
+  border-radius: 4px;
+  padding: 10px 13px;
+  font-size: 0.85rem;
+  color: #e6e3da;
+  line-height: 1.45;
+}
+
+.rb-dm-panel__composer {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid #222;
+}
+
+.rb-dm-panel__composer input {
+  flex: 1;
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+.rb-dm-panel__inbox {
+  margin: 0;
+  padding: 0 16px 14px;
+  font-size: 11px;
+  color: #8a8a8a;
+}
+
+.rb-dm-panel__inbox a {
+  color: #19e3ff;
+}
+
+.rb-chat-backdrop {
+  z-index: 1090;
+}
+
+html.calm-mode .rb-dm-panel {
+  animation: none;
+}
+
 .rb-report-link {
   background: none;
   border: none;

@@ -423,9 +423,20 @@ export const beachCheckins = sqliteTable("beach_checkins", {
   arrivalHour: integer("arrival_hour").notNull(),
   note: text("note"),
   calendarDate: text("calendar_date").notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   reportCount: integer("report_count").notNull().default(0),
   expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const beachChatMessages = sqliteTable("beach_chat_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  beachId: text("beach_id").notNull(),
+  calendarDate: text("calendar_date").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull().default(""),
 });
 
@@ -491,7 +502,13 @@ export const insertRiverBratsReportSchema = createInsertSchema(riverBratsReports
   status: true,
   adminNotes: true,
 });
+export const insertBeachChatMessageSchema = createInsertSchema(beachChatMessages).omit({
+  id: true,
+  createdAt: true,
+});
 export type BeachCheckin = typeof beachCheckins.$inferSelect;
+export type BeachChatMessage = typeof beachChatMessages.$inferSelect;
+export type InsertBeachChatMessage = z.infer<typeof insertBeachChatMessageSchema>;
 export type InsertBeachCheckin = z.infer<typeof insertBeachCheckinSchema>;
 export type BeachCarpoolPost = typeof beachCarpoolPosts.$inferSelect;
 export type InsertBeachCarpoolPost = z.infer<typeof insertBeachCarpoolPostSchema>;
