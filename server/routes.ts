@@ -287,6 +287,7 @@ function authUserResponse(req: any, user: any) {
     isAdmin,
     isSuperAdmin: isMainAdminUser(user),
     isPrimaryOwner: storage.isPrimarySiteOwner(user),
+    canManageTeam: isMainAdminUser(user),
     subAdmin: !!user.subAdmin,
   };
 }
@@ -2596,7 +2597,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
-  app.get("/api/admin/team", requireAdmin, (_req, res) => {
+  app.get("/api/admin/team", requireAdmin, (req, res) => {
+    const caller = getSessionAdminUser(req);
+    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
     res.json(storage.listSiteAdmins());
   });
 

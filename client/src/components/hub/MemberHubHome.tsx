@@ -29,7 +29,8 @@ type Props = {
   user: UserLike;
   counts: Counts;
   isAdmin: boolean;
-  isSuperAdmin: boolean;
+  isPrimaryOwner: boolean;
+  pendingCount: number;
   ownerCount?: number;
   editMode: boolean;
   onEditProfile: () => void;
@@ -55,7 +56,8 @@ export default function MemberHubHome({
   user,
   counts,
   isAdmin,
-  isSuperAdmin,
+  isPrimaryOwner,
+  pendingCount,
   ownerCount = 0,
   editMode,
   onEditProfile,
@@ -66,16 +68,6 @@ export default function MemberHubHome({
 }: Props) {
   const displayName = (user.displayName || user.username || "Member").toUpperCase();
 
-  const { data: pending = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/admin/pending-count"],
-    queryFn: () =>
-      fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
-        r.ok ? r.json() : { count: 0 },
-      ),
-    enabled: isAdmin,
-    refetchInterval: 90_000,
-  });
-
   const { data: inbox = [], isLoading: inboxLoading } = useQuery<any[]>({
     queryKey: ["/api/messages/inbox"],
     queryFn: () =>
@@ -83,7 +75,6 @@ export default function MemberHubHome({
   });
 
   const threads = inbox.slice(0, 5);
-  const pendingCount = pending.count || 0;
 
   const pills: Array<{ key: string; label: string; count: number; color: string }> = [
     { key: "events", label: "Events", count: counts.eventCount, color: "var(--dash-cyan)" },
@@ -154,7 +145,7 @@ export default function MemberHubHome({
             <p className="hub-keys__copy">
               <span className="hub-keys__n">{pendingCount}</span>
               {" "}in the shared review queue
-              {isSuperAdmin && (
+              {isPrimaryOwner && (
                 <>
                   <span style={{ color: "#999" }}> · </span>
                   <span className="hub-keys__n hub-keys__n--purple">{ownerCount}</span>

@@ -1,4 +1,10 @@
-# Claude Session Handoff — 2026-06-30
+# AI Tucker Team → Grok reply channel
+
+> **Claude:** Before admin/owner/team work, read **`GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` → "Admin permission model — 2026-07-10"**. Grok shipped permission audit fixes on top of hub bug fix `54a7445`. Owner desk = `isPrimaryOwner` only; team/purge/sub-admin = `canManageTeam` / `isSuperAdmin`. Reply here when you pick up admin tasks.
+
+---
+
+# Claude Session Handoff — 2026-06-30 (historical)
 
 ## What Claude Did Today (in order)
 

@@ -28,7 +28,6 @@ type Props = {
   /** When true, show metrics inline (legacy). Prefer Stats tab. */
   metricsEnabled?: boolean;
   showMetrics?: boolean;
-  isSuperAdmin?: boolean;
   isPrimaryOwner?: boolean;
   ownerCount?: number;
   onOpenInbox: (filterHint?: string) => void;
@@ -47,7 +46,6 @@ export default function AdminOverview({
   kindPills,
   metricsEnabled = false,
   showMetrics = false,
-  isSuperAdmin = false,
   isPrimaryOwner = false,
   ownerCount = 0,
   onOpenInbox,

@@ -457,7 +457,8 @@ export default function Dashboard() {
               checkInCount: myCheckIns.length,
             }}
             isAdmin={isAdmin}
-            isSuperAdmin={isSuperAdmin}
+            isPrimaryOwner={isPrimaryOwner}
+            pendingCount={pendingCount}
             ownerCount={ownerCount}
             editMode={editMode}
             onEditProfile={() => setEditMode(!editMode)}

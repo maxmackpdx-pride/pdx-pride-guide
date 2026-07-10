@@ -16,6 +16,7 @@ export interface AuthUser {
   isAdmin?: boolean;
   isSuperAdmin?: boolean;
   isPrimaryOwner?: boolean;
+  canManageTeam?: boolean;
   subAdmin?: boolean;
 }
 

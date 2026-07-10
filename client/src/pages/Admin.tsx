@@ -167,11 +167,16 @@ const OVERVIEW_PILL_TO_INBOX_KIND: Record<string, InboxKindFilter> = {
   gifting: "gifting_post",
 };
 
-function adminTabFromQuery(search: string, canAccessOwner: boolean): AdminTab | null {
+function adminTabFromQuery(
+  search: string,
+  canAccessOwner: boolean,
+  canManageTeam: boolean,
+): AdminTab | null {
   let tab = new URLSearchParams(search).get("tab");
   if (tab === "queue") tab = "inbox";
   if (tab === "analytics") tab = "stats";
   if (tab === "owner" && !canAccessOwner) tab = "overview";
+  if (tab === "team" && !canManageTeam) tab = "overview";
   if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) return tab as AdminTab;
   return null;
 }
@@ -206,6 +211,7 @@ export default function Admin() {
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isPrimaryOwner, setIsPrimaryOwner] = useState(false);
+  const [canManageTeam, setCanManageTeam] = useState(false);
   const [userSearchQ, setUserSearchQ] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<Array<AdminUserProfile & { id: number; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
@@ -226,6 +232,7 @@ export default function Admin() {
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
           if (user.isPrimaryOwner) setIsPrimaryOwner(true);
+          if (user.canManageTeam || user.isSuperAdmin) setCanManageTeam(true);
         }
         if (!cancelled) setSessionReady(true);
         return;
@@ -239,6 +246,7 @@ export default function Admin() {
           if (data.username) setAdminName(data.username);
           if (data.isSuperAdmin) setIsSuperAdmin(true);
           if (data.isPrimaryOwner) setIsPrimaryOwner(true);
+          if (data.canManageTeam || data.isSuperAdmin) setCanManageTeam(true);
         }
       } catch {
         // fall through to legacy login gate
@@ -255,15 +263,15 @@ export default function Admin() {
 
   const syncAdminTabFromUrl = useCallback(() => {
     const rawTab = new URLSearchParams(window.location.search).get("tab");
-    const tab = adminTabFromQuery(window.location.search, isPrimaryOwner);
+    const tab = adminTabFromQuery(window.location.search, isPrimaryOwner, canManageTeam);
     if (!tab) return;
     setActiveTab(tab);
-    if (rawTab === "owner" && !isPrimaryOwner) {
+    if ((rawTab === "owner" && !isPrimaryOwner) || (rawTab === "team" && !canManageTeam)) {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", "overview");
       window.history.replaceState({}, "", url.toString());
     }
-  }, [isPrimaryOwner]);
+  }, [isPrimaryOwner, canManageTeam]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -285,11 +293,13 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+    if (isPrimaryOwner) {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+    }
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
-  }, [authenticated]);
+  }, [authenticated, isPrimaryOwner]);
 
   const purgeQaMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/admin/users/purge-qa", {}),
@@ -324,9 +334,11 @@ export default function Admin() {
         if (me?.username) setAdminName(me.username);
         if (me?.isSuperAdmin) setIsSuperAdmin(true);
         if (me?.isPrimaryOwner) setIsPrimaryOwner(true);
+        if (me?.canManageTeam || me?.isSuperAdmin) setCanManageTeam(true);
       } catch {
         if (data?.isSuperAdmin) setIsSuperAdmin(true);
         if (data?.isPrimaryOwner) setIsPrimaryOwner(true);
+        if (data?.canManageTeam || data?.isSuperAdmin) setCanManageTeam(true);
       }
       setAuthenticated(true);
       setPasswordError(false);
@@ -341,7 +353,9 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+    if (isPrimaryOwner) {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+    }
     queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
@@ -459,7 +473,7 @@ export default function Admin() {
   const { data: teamAdmins = [], isLoading: teamLoading, isError: teamError, refetch: refetchTeam } = useQuery<SiteAdminMember[]>({
     queryKey: ["/api/admin/team"],
     queryFn: () => apiRequest("GET", "/api/admin/team").then(r => r.json()),
-    enabled: authenticated,
+    enabled: authenticated && canManageTeam,
   });
 
   const { data: businessClaims = [], isLoading: businessClaimsLoading, isError: businessClaimsError, refetch: refetchBusinessClaims } = useQuery<any[]>({
@@ -1215,6 +1229,7 @@ export default function Admin() {
         isAdminUser
         isSuperAdmin={isSuperAdmin}
         isPrimaryOwner={isPrimaryOwner}
+        canManageTeam={canManageTeam}
         userName={adminName}
         userHandle={user?.username}
         photoUrl={user?.photoUrl}
@@ -1273,7 +1288,6 @@ export default function Admin() {
             attentionItems={overviewAttention}
             kindPills={overviewKindPills}
             showMetrics={false}
-            isSuperAdmin={isSuperAdmin}
             isPrimaryOwner={isPrimaryOwner}
             ownerCount={ownerCount}
             onOpenInbox={openInboxFromOverview}
@@ -2354,7 +2368,7 @@ export default function Admin() {
           />
         )}
 
-        {activeTab === "team" && (
+        {activeTab === "team" && canManageTeam && (
           <div className="space-y-8">
             <div>
               <p className="text-white/40 text-sm mb-4">

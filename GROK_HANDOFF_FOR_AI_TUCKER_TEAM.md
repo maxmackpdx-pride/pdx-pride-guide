@@ -27,12 +27,12 @@ Long-form updates still go in handoff markdown files below.
 
 | Field | Value |
 |-------|-------|
-| **Bridge updated** | 2026-06-26 20:18 UTC · 13:18 PDT |
-| **master HEAD** | `7f9ca4c` |
-| **Last Grok post** | `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` update 11 — 2026-06-26 20:13 UTC |
-| **Last Claude post** | update 9 — 2026-06-24 (**>15 min — verify before citing**) |
-| **Last tunnel** | `2026-06-26T20:13:26Z-grok-17167` grok → claude |
-| **Next reply owed by** | **Claude** (update 12 in reply channel) |
+| **Bridge updated** | 2026-07-10 (permission hardening pass) |
+| **master HEAD** | `1fc4a0c` |
+| **Last Grok post** | `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` — admin permission model + audit fixes |
+| **Last Claude post** | 2026-06-30 in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` (**stale — verify before citing**) |
+| **Last tunnel** | *(none this session)* |
+| **Next reply owed by** | **Claude** (ack permission model in reply channel) |
 
 **When you post:** refresh this block + the same block at top of `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md`.
 
@@ -51,6 +51,44 @@ Legacy aliases (redirect here):
 
 **Team start prompt:**
 > Read `SESSION_HANDOFF_2026-06-23.md` (latest session), then `GROK_HANDOFF_FOR_AI_TUCKER_TEAM.md` and `SOFT_LAUNCH_UAT_REPORT_CODEX.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` or via commits.
+
+---
+
+## Admin permission model — 2026-07-10 (authoritative)
+
+After the four-agent hub bug fix (`54a7445`) and four-agent **permission audit**, Grok aligned client + server on three flags:
+
+| Flag | Server source | Who gets it | UI / API scope |
+|------|---------------|-------------|----------------|
+| `isAdmin` | `requireAdmin` (env password, `site_admin_grants`, `subAdmin`) | Tucker + granted site admins + sub-admins | Admin hub, review queue, most admin tabs |
+| `isSuperAdmin` | `isMainAdminUser` (Railway env owner accounts + primary site owner) | Tucker (env) + primary owner | Team roster, purge QA, sub-admin grant/revoke, promoter override |
+| `isPrimaryOwner` | `storage.isPrimarySiteOwner` (Tucker only) | Tucker only | Owner desk tab, owner nav, owner banner, owner-desk APIs |
+
+**Also exposed:** `canManageTeam` on `/api/auth/me` and `/api/admin/me` (= `isSuperAdmin` today). Client should gate **My team** tab/nav/query on `canManageTeam`.
+
+### Owner desk vs team (common confusion)
+
+- **Owner desk** = primary owner only (`isPrimaryOwner`). Co-admins and sub-admins must **not** see owner nav, owner copy on dashboard, or owner-desk counts.
+- **My team** = super-admin only (`canManageTeam` / `isSuperAdmin`). Sub-admins can use the review queue but cannot list/grant/revoke site admins.
+
+### Permission fix pass (this session)
+
+**Server (`server/routes.ts`):**
+- `GET /api/admin/team` → 403 unless `isMainAdminUser` (was open to any admin)
+- `authUserResponse` → adds `canManageTeam`
+
+**Client:**
+- `MemberHubHome` — owner-desk copy gated on `isPrimaryOwner` (was `isSuperAdmin`); uses `pendingCount` prop (no duplicate fetch)
+- `Dashboard` — passes `isPrimaryOwner`, `pendingCount`
+- `Admin.tsx` — `canManageTeam` state; team query/tab/`?tab=team` gated; owner-desk invalidation gated on `isPrimaryOwner`
+- `HubShell` — `superOnly` renamed `ownerOnly`; team hidden from More nav unless `canManageTeam`
+- `AdminOverview` — dropped unused `isSuperAdmin` prop
+- `AdminShell` — role label: Owner / Super admin / Site admin
+- `AuthContext` — `canManageTeam` on `AuthUser`
+
+**Prior hub fixes still on `54a7445`:** pending-count badges, overview→inbox deep links, `popstate` tab sync, super-admin mobile Owner+More tabs, team POST/DELETE guard, metrics try/catch.
+
+Claude: read this block before touching admin auth, owner desk, or team management. Reply in `AI_TUCKER_TEAM_HANDOFF_FOR_GROK.md` when you pick up admin work.
 
 ---
 

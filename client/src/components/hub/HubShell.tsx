@@ -5,6 +5,7 @@ import {
   Bell,
   Briefcase,
   CalendarDays,
+  ChevronLeft,
   Home,
   Inbox,
   KeyRound,
@@ -18,7 +19,7 @@ import {
   Users,
   UserCircle,
 } from "lucide-react";
-import logo from "@/assets/logo.png";
+import hubLogo from "@/assets/hub-logo.jpg";
 import UserAvatar from "@/components/UserAvatar";
 import "./hub-shell.css";
 
@@ -114,6 +115,7 @@ type Props = {
   isAdminUser?: boolean;
   isSuperAdmin?: boolean;
   isPrimaryOwner?: boolean;
+  canManageTeam?: boolean;
   userName: string;
   userHandle?: string;
   photoUrl?: string | null;
@@ -141,25 +143,26 @@ const ADMIN_PRIMARY_NAV: Array<{
   label: string;
   icon: typeof Home;
   accent: NavAccent;
-  superOnly?: boolean;
+  ownerOnly?: boolean;
 }> = [
   { key: "overview", label: "Overview", icon: LayoutDashboard, accent: "lime" },
   { key: "stats", label: "Stats", icon: BarChart3, accent: "cyan" },
   { key: "inbox", label: "Review queue", icon: ShoppingCart, accent: "pink" },
-  { key: "owner", label: "Owner desk", icon: KeyRound, accent: "purple", superOnly: true },
+  { key: "owner", label: "Owner desk", icon: KeyRound, accent: "purple", ownerOnly: true },
 ];
 
 const ADMIN_MORE_NAV: Array<{
   key: AdminViewKey;
   label: string;
   icon: typeof Home;
+  teamOnly?: boolean;
 }> = [
   { key: "events", label: "All events", icon: CalendarDays },
   { key: "users", label: "All users", icon: UserCircle },
   { key: "gigs", label: "Pride Werk", icon: Briefcase },
   { key: "promoters", label: "Promoters", icon: Users },
   { key: "venue-claims", label: "Venue claims", icon: Store },
-  { key: "team", label: "My team", icon: Users },
+  { key: "team", label: "My team", icon: Users, teamOnly: true },
 ];
 
 const MORE_VIEWS: AdminViewKey[] = ["events", "users", "gigs", "promoters", "venue-claims", "team"];
@@ -180,6 +183,7 @@ export default function HubShell({
   isAdminUser = false,
   isSuperAdmin = false,
   isPrimaryOwner = false,
+  canManageTeam = false,
   userName,
   userHandle,
   photoUrl,
@@ -204,6 +208,9 @@ export default function HubShell({
   const [location] = useLocation();
   const adminTabHref = `/admin?tab=${encodeURIComponent(adminView)}`;
   const alertTotal = pendingCount + (isPrimaryOwner ? ownerCount : 0);
+  const moreViews = MORE_VIEWS.filter(v => v !== "team" || canManageTeam);
+  const moreNav = ADMIN_MORE_NAV.filter(item => !item.teamOnly || canManageTeam);
+
   const roleLabel = isPrimaryOwner
     ? "Owner"
     : isSuperAdmin
@@ -245,12 +252,18 @@ export default function HubShell({
       <div className="hub-shell__frame">
         <aside className="hub-side" aria-label="Hub navigation">
           <Link href="/" className="hub-side__brand" aria-label="PDX Pride Guide home">
-            <img src={logo} alt="" width={42} height={42} className="hub-side__logo" />
-            <div className="hub-side__wordmark">
-              <div>PDX</div>
-              <div className="pride">PRIDE</div>
-              <div>GUIDE</div>
-            </div>
+            <img
+              src={hubLogo}
+              alt="PDX Pride Guide 2026"
+              width={1024}
+              height={468}
+              className="hub-side__logo-full"
+            />
+          </Link>
+
+          <Link href="/" className="hub-back-btn hub-side__back">
+            <ChevronLeft size={15} strokeWidth={2.4} aria-hidden />
+            Back to website
           </Link>
 
           {isAdminUser && (
@@ -305,7 +318,7 @@ export default function HubShell({
             <>
               <div className="hub-side__kicker">Admin</div>
               <nav className="hub-side__nav">
-                {ADMIN_PRIMARY_NAV.filter(item => !item.superOnly || isPrimaryOwner).map(item => {
+                {ADMIN_PRIMARY_NAV.filter(item => !item.ownerOnly || isPrimaryOwner).map(item => {
                   const Icon = item.icon;
                   const active = adminView === item.key;
                   const alert =
@@ -333,7 +346,7 @@ export default function HubShell({
                 {onMoreOpenChange && (
                   <button
                     type="button"
-                    className={`hub-side__nav-btn${moreOpen || MORE_VIEWS.includes(adminView) ? " is-active is-orange" : ""}`}
+                    className={`hub-side__nav-btn${moreOpen || moreViews.includes(adminView) ? " is-active is-orange" : ""}`}
                     onClick={() => onMoreOpenChange(!moreOpen)}
                   >
                     <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden />
@@ -369,10 +382,19 @@ export default function HubShell({
 
         <div className="hub-main">
           <header className="hub-mtop" aria-label="Hub mobile header">
-            <img src={logo} alt="" width={30} height={30} className="hub-mtop__logo" />
-            <div className="hub-mtop__wordmark">
-              PDX <span className="pride">PRIDE</span> GUIDE
-            </div>
+            <Link href="/" className="hub-back-btn hub-mtop__back">
+              <ChevronLeft size={16} strokeWidth={2.4} aria-hidden />
+              <span>Back</span>
+            </Link>
+            <Link href="/" className="hub-mtop__brand" aria-label="PDX Pride Guide home">
+              <img
+                src={hubLogo}
+                alt="PDX Pride Guide 2026"
+                width={1024}
+                height={468}
+                className="hub-mtop__logo-full"
+              />
+            </Link>
             <div className="hub-mtop__spacer" />
             {mode === "admin" && notifyBell}
             {isAdminUser && (
@@ -417,7 +439,7 @@ export default function HubShell({
           <div className="hub-more-backdrop" onClick={() => onMoreOpenChange(false)} />
           <div className="hub-more-sheet" role="dialog" aria-label="More admin sections">
             <h3>More</h3>
-            {ADMIN_MORE_NAV.map(item => {
+            {moreNav.map(item => {
               const Icon = item.icon;
               const count = navCounts[item.key];
               return (
@@ -520,7 +542,7 @@ export default function HubShell({
             )}
             <button
               type="button"
-              className={`hub-mobile-tab${moreOpen || MORE_VIEWS.includes(adminView) ? " is-active is-more" : ""}`}
+              className={`hub-mobile-tab${moreOpen || moreViews.includes(adminView) ? " is-active is-more" : ""}`}
               onClick={() => onMoreOpenChange?.(!moreOpen)}
             >
               <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />

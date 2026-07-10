@@ -111,6 +111,7 @@ type Props = {
   onNavigate: (view: AdminView) => void;
   adminName: string;
   isSuperAdmin?: boolean;
+  isPrimaryOwner?: boolean;
   pendingCount: number;
   navCounts: Partial<Record<AdminView, number | string>>;
   pushStatus?: PushStatus;
@@ -128,6 +129,7 @@ export default function AdminShell({
   onNavigate,
   adminName,
   isSuperAdmin,
+  isPrimaryOwner,
   pendingCount,
   navCounts,
   pushStatus,
@@ -249,7 +251,7 @@ export default function AdminShell({
           <div className="admin-shell__user-meta">
             <div className="admin-shell__user-name">{adminName}</div>
             <div className="admin-shell__user-role">
-              {isSuperAdmin ? "Owner · super admin" : "Site admin"}
+              {isPrimaryOwner ? "Owner" : isSuperAdmin ? "Super admin" : "Site admin"}
             </div>
           </div>
           <button
