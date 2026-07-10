@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import PlaceCard from "@/components/ds/PlaceCard";
+import { PlaceCard } from "@/components/ds";
 import { TYPE_LABELS, TYPE_TO_DS_CATEGORY } from "@/pages/Directory";
 import PackPupCard from "../PackPupCard";
 import { parseSocialLinks, socialCardsFor } from "../helpers";
