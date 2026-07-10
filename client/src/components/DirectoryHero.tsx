@@ -24,7 +24,7 @@ export default function DirectoryHero({ placeCount, stats, onAddPlace }: Props) 
               key={placeCount > 0 ? "dir-hero-ready" : "dir-hero-pending"}
               value={placeCount}
             />{" "}
-            <span className="board-hero__title-accent">Places</span>
+            <span className="board-hero__title-accent board-hero__title-accent--rainbow">Places</span>
           </>
         }
         lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
