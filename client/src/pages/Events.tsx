@@ -259,12 +259,23 @@ export default function Events() {
   );
 
   const heroStats = useMemo(() => {
-    const neighborhoods = new Set(events.map(e => e.neighborhood).filter(Boolean));
-    const days = new Set(events.map(e => e.dayOfWeek).filter(Boolean));
+    const parseTags = (raw: string) => {
+      try {
+        const parsed = JSON.parse(raw || "[]");
+        return Array.isArray(parsed) ? parsed.map((t: unknown) => String(t)) : [];
+      } catch {
+        return [];
+      }
+    };
+    const isDanceParty = (e: EventListing) =>
+      parseTags(e.eventTypes).some(tag => tag.trim().toUpperCase().replace(/[\s-]+/g, "_").includes("DANCE"));
+    const unclaimedIds = new Set(
+      events.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
+    );
     return [
-      { num: events.length, label: "Live listings", color: "#19e3ff" },
-      { num: days.size || PRIDE_WEEK_DAYS.length, label: "Days with events", color: "#ccff00" },
-      { num: neighborhoods.size, label: "Neighborhoods", color: "#ff8c00" },
+      { num: events.length, label: "Total events", color: "#19e3ff" },
+      { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
+      { num: events.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
     ];
   }, [events]);
 
