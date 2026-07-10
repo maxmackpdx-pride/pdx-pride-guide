@@ -166,6 +166,45 @@ async function fetchParkingNote(): Promise<string | null> {
   }
 }
 
+type RrcWaterPayload = {
+  clarity?: { label?: string; windFrom?: string; windMph?: number };
+  temp?: { f?: number; site?: string };
+};
+
+type RrcAirPayload = {
+  category?: string;
+  aqi?: number;
+};
+
+async function fetchRrcWater(): Promise<Pick<RoosterRockLive, "waterTempF" | "waterTempSite" | "waterClarity" | "wind">> {
+  try {
+    const data = await fetchJson<RrcWaterPayload>("https://roosterrockcrossing.com/api/water");
+    const wind =
+      data.clarity?.windFrom && data.clarity?.windMph != null
+        ? `${data.clarity.windFrom} ${data.clarity.windMph} mph`
+        : null;
+    return {
+      waterTempF: typeof data.temp?.f === "number" ? data.temp.f : null,
+      waterTempSite: data.temp?.site || null,
+      waterClarity: data.clarity?.label || null,
+      wind,
+    };
+  } catch {
+    return { waterTempF: null, waterTempSite: null, waterClarity: null, wind: null };
+  }
+}
+
+async function fetchRrcAir(): Promise<Pick<RoosterRockLive, "airQuality">> {
+  try {
+    const data = await fetchJson<RrcAirPayload>("https://roosterrockcrossing.com/api/air");
+    if (!data.category) return { airQuality: null };
+    const aqi = typeof data.aqi === "number" ? ` · AQI ${data.aqi}` : "";
+    return { airQuality: `${data.category}${aqi}` };
+  } catch {
+    return { airQuality: null };
+  }
+}
+
 async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
   const base: RoosterRockLive = {
     riverLevelFt: null,
@@ -176,12 +215,18 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     weatherSummary: null,
     airTempF: null,
     wind: null,
-    source: "USGS + NWS",
+    waterTempF: null,
+    waterTempSite: null,
+    waterClarity: null,
+    airQuality: null,
+    source: "USGS + NWS + roosterrockcrossing.com",
   };
   try {
-    const [river, weather] = await Promise.all([
+    const [river, weather, rrcWater, rrcAir] = await Promise.all([
       fetchUsgsRiverLevel(),
       fetchNwsSummary(45.5446, -122.2342),
+      fetchRrcWater(),
+      fetchRrcAir(),
     ]);
     if (river) {
       const band = crossingBandFromLevel(river.ft);
@@ -193,7 +238,11 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     }
     base.weatherSummary = weather.summary;
     base.airTempF = weather.airTempF;
-    base.wind = weather.wind;
+    base.wind = rrcWater.wind || weather.wind;
+    base.waterTempF = rrcWater.waterTempF;
+    base.waterTempSite = rrcWater.waterTempSite;
+    base.waterClarity = rrcWater.waterClarity;
+    base.airQuality = rrcAir.airQuality;
   } catch (err) {
     base.error = err instanceof Error ? err.message : "Could not refresh Rooster Rock data";
   }

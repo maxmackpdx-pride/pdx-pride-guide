@@ -12,9 +12,8 @@ import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import {
   NUDE_BEACH_TABS,
-  ROOSTER_ROCK_CHECKLIST,
-  ROOSTER_ROCK_RESOURCES,
-  ROOSTER_ROCK_RULES,
+  ROOSTER_ROCK_MAPS,
+  ROOSTER_ROCK_PARKING,
   SAUVIE_ISLAND_CHECKLIST,
   SAUVIE_ISLAND_RESOURCES,
   SAUVIE_ISLAND_RULES,
@@ -92,30 +91,21 @@ function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
           </div>
           <p className="nude-live-card__detail">
             {live.crossingBand ? `${live.crossingBand}. ` : ""}
-            {live.crossingAdvice || "Check roosterrockcrossing.com before you cross."}
+            {live.crossingAdvice || "Gage at Bonneville Dam — check roosterrockcrossing.com for charts."}
           </p>
           <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
-            Rooster Rock Crossing →
+            Full level history →
           </a>
         </article>
 
-        <article className={`nude-live-card ${statusClass(worth === false ? "bad" : worth ? "good" : "neutral")}`}>
-          <div className="nude-live-card__label">Sand Island crossing</div>
-          <div className="nude-live-card__value">{live.crossingBand || "—"}</div>
-          <p className="nude-live-card__detail">
-            {worth === false
-              ? "Gage is high — crossing is usually not worth attempting right now."
-              : "Rough ceiling: ~18 ft gage. Always re-check at the water's edge."}
-          </p>
-        </article>
-
         <article className="nude-live-card nude-live-card--neutral">
-          <div className="nude-live-card__label">Park weather · NWS</div>
+          <div className="nude-live-card__label">Air · NWS</div>
           <div className="nude-live-card__value">
             {live.airTempF != null ? `${live.airTempF}°F` : "—"}
           </div>
           <p className="nude-live-card__detail">
             {live.weatherSummary || "Forecast unavailable."}
+            {live.airQuality ? ` Air quality: ${live.airQuality}.` : ""}
             {live.wind ? ` Wind ${live.wind}.` : ""}
           </p>
           <a
@@ -127,44 +117,64 @@ function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
             NWS forecast →
           </a>
         </article>
+
+        <article className="nude-live-card nude-live-card--neutral">
+          <div className="nude-live-card__label">Water temp · Columbia</div>
+          <div className="nude-live-card__value">
+            {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
+          </div>
+          <p className="nude-live-card__detail">
+            {live.waterTempSite ? `${live.waterTempSite}. ` : ""}
+            {live.waterClarity ? `Clarity estimate: ${live.waterClarity}.` : "Columbia water is cold year-round."}
+          </p>
+          <a className="nude-live-card__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
+            Live water read →
+          </a>
+        </article>
       </div>
 
       <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--cyan">Getting there</div>
-        <h3 className="nude-panel__title">Rooster Rock State Park</h3>
+        <div className="nude-panel__kicker nude-panel__kicker--lime">Parking &amp; pass</div>
+        <h3 className="nude-panel__title">Day-use fees</h3>
         <div className="nude-prose">
-          <p>
-            I-84 Exit 25 · Corbett, Oregon. Day-use fee ($10/day or Oregon State Parks pass). The far east end is
-            Oregon&apos;s designated clothing-optional beach.
-          </p>
+          <p>{ROOSTER_ROCK_PARKING.location}</p>
           <ul>
-            <li>Park near the east end of the lot, walk east along the beach or Sand Island Trail.</li>
-            <li>Early July is usually the first safe crossing window; August is typically easiest.</li>
-            <li>Mosquitoes are worst on the paths near the lot — less so on Sand Island, worst in early evening.</li>
+            <li>Oregon residents: {ROOSTER_ROCK_PARKING.dayUseOr}</li>
+            <li>Out of state: {ROOSTER_ROCK_PARKING.dayUseOutOfState}</li>
+            <li>Annual pass (OR): {ROOSTER_ROCK_PARKING.annualOr}</li>
+            <li>Annual pass (out of state): {ROOSTER_ROCK_PARKING.annualOutOfState}</li>
           </ul>
+          <p>{ROOSTER_ROCK_PARKING.note}</p>
+        </div>
+        <div className="nude-map-actions" style={{ marginTop: 14 }}>
+          <a className="nude-map-btn" href="https://stateparks.oregon.gov/index.cfm?do=visit.day-use" target="_blank" rel="noopener noreferrer">
+            Buy day-use permit
+          </a>
+          <a className="nude-map-btn" href="https://stateparks.oregon.gov/index.cfm?do=v.page&id=30" target="_blank" rel="noopener noreferrer">
+            Where to buy passes
+          </a>
+          <a className="nude-map-btn" href="https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126" target="_blank" rel="noopener noreferrer">
+            Official park page
+          </a>
         </div>
       </section>
 
       <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--lime">Before you go</div>
-        <ul className="nude-checklist">
-          {ROOSTER_ROCK_CHECKLIST.map(item => (
-            <li key={item.step}>
-              <strong>{item.step}</strong>
-              {item.detail}
-            </li>
+        <div className="nude-panel__kicker nude-panel__kicker--cyan">Maps &amp; directions</div>
+        <div className="nude-map-frame">
+          <iframe
+            title="Rooster Rock State Park map"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=-122.252%2C45.532%2C-122.216%2C45.556&layer=mapnik&marker=45.5446%2C-122.2342"
+            loading="lazy"
+          />
+        </div>
+        <div className="nude-map-actions">
+          {ROOSTER_ROCK_MAPS.map(map => (
+            <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
+              {map.label}
+            </a>
           ))}
-        </ul>
-        <ul className="nude-rules">
-          {ROOSTER_ROCK_RULES.map(rule => (
-            <li key={rule}>{rule}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--magenta">Links</div>
-        <ResourceList links={ROOSTER_ROCK_RESOURCES} />
+        </div>
       </section>
     </div>
   );
@@ -367,13 +377,13 @@ export default function NudeBeaches() {
               </div>
               <div className="board-active-feed__head-row">
                 <h2 className="display section-heading board-active-feed__title">
-                  {isRooster ? "River & crossing" : "Water & parking"}
+                  {isRooster ? "Level · weather · maps · parking" : "Water & parking"}
                 </h2>
               </div>
               <p className="nude-section-copy" style={{ marginTop: 10 }}>
                 {isRooster
-                  ? "Columbia gage and park weather only — nothing here about Collins or Sauvie permits."
-                  : "Collins swim samples, permit portal, and island weather only — no Rooster Rock crossing data."}
+                  ? "River gage, air and water temps, forecast, directions, and Oregon State Parks day-use fees."
+                  : "Collins swim samples, permit portal, and island weather only."}
               </p>
             </div>
           </ScrollReveal>

@@ -26,9 +26,37 @@ export type RoosterRockLive = {
   weatherSummary: string | null;
   airTempF: number | null;
   wind: string | null;
+  waterTempF: number | null;
+  waterTempSite: string | null;
+  waterClarity: string | null;
+  airQuality: string | null;
   source: string;
   error?: string;
 };
+
+export const ROOSTER_ROCK_PARKING = {
+  location: "Rooster Rock State Park · I-84 Exit 25 · Corbett, OR",
+  dayUseOr: "$10 / vehicle / day",
+  dayUseOutOfState: "$12 / vehicle / day",
+  annualOr: "$60 / year",
+  annualOutOfState: "$75 / year",
+  note: "Day-use only — Oregon State Parks pass or pay at the fee machine / QR on site.",
+};
+
+export const ROOSTER_ROCK_MAPS = [
+  {
+    label: "Google Maps directions",
+    href: "https://www.google.com/maps/dir/?api=1&destination=Rooster+Rock+State+Park%2C+Corbett%2C+OR",
+  },
+  {
+    label: "Apple Maps directions",
+    href: "https://maps.apple.com/?daddr=Rooster+Rock+State+Park,+Corbett,+OR&dirflg=d",
+  },
+  {
+    label: "OpenStreetMap",
+    href: "https://www.openstreetmap.org/?mlat=45.5446&mlon=-122.2342#map=15/45.5446/-122.2342",
+  },
+] as const;
 
 export type SauvieIslandLive = {
   swimStatus: SwimGuideStatus | null;
@@ -98,35 +126,6 @@ export function crossingBandFromLevel(ft: number): { band: string; advice: strin
   };
 }
 
-export const ROOSTER_ROCK_RESOURCES: ResourceLink[] = [
-  {
-    title: "Rooster Rock Crossing (live)",
-    description: "River level, crossing bands, seasonal guide, and live camera — the best unofficial read for Sand Island access.",
-    href: "https://roosterrockcrossing.com",
-    priority: "primary",
-  },
-  {
-    title: "Rooster Rock State Park (official)",
-    description: "Hours, amenities, rules, and the park map from Oregon State Parks.",
-    href: "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
-  },
-  {
-    title: "USGS live river gage",
-    description: "Columbia River below Bonneville Dam — raw gage height we mirror on this page.",
-    href: "https://waterdata.usgs.gov/monitoring-location/USGS-14128870/",
-  },
-  {
-    title: "NWS forecast",
-    description: "National Weather Service forecast for the park area.",
-    href: "https://forecast.weather.gov/MapClick.php?lat=45.5446&lon=-122.2342",
-  },
-  {
-    title: "RoosterRock.org (community)",
-    description: "Community trip reports and on-the-ground beach notes.",
-    href: "https://roosterrock.org",
-  },
-];
-
 export const SAUVIE_ISLAND_RESOURCES: ResourceLink[] = [
   {
     title: "Sauvie Island parking permits",
@@ -157,21 +156,6 @@ export const SAUVIE_ISLAND_RESOURCES: ResourceLink[] = [
   },
 ];
 
-export const ROOSTER_ROCK_CHECKLIST = [
-  {
-    step: "Check the river level",
-    detail: "Read the live USGS gage and Rooster Rock Crossing before you attempt the Sand Island wade. About 18 ft is the highest worth trying.",
-  },
-  {
-    step: "Time it for low water",
-    detail: "The Columbia swings through the day. Aim for the low-water window — early July is usually the first safe bet; August is easiest.",
-  },
-  {
-    step: "Pack for mud and cold",
-    detail: "Trails stay muddy after the river drops. Water is cold, currents are strong, and sand ridges drop off without warning.",
-  },
-];
-
 export const SAUVIE_ISLAND_CHECKLIST = [
   {
     step: "Check permit status",
@@ -185,13 +169,6 @@ export const SAUVIE_ISLAND_CHECKLIST = [
     step: "Review wildlife-area rules",
     detail: "No alcohol on the beaches. Day-use hours are 4 a.m. to 10 p.m. Check SICA for road or bridge alerts.",
   },
-];
-
-export const ROOSTER_ROCK_RULES = [
-  "Rooster Rock State Park is day-use: $10/day or an Oregon State Parks annual pass.",
-  "The far east end of the park is Oregon's designated clothing-optional beach.",
-  "Columbia River water is cold. Currents and underwater sand ridges can change fast.",
-  "Never cross to Sand Island alone if you are unsure — check roosterrockcrossing.com at the water's edge.",
 ];
 
 export const SAUVIE_ISLAND_RULES = [

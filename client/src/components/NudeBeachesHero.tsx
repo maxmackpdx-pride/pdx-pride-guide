@@ -23,9 +23,9 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
               : "#ff8c00",
         },
         {
-          num: snapshot?.roosterRock.crossingBand || "—",
-          label: "crossing band",
-          color: snapshot?.roosterRock.worthCrossing === false ? "#ff8c00" : "#39ff14",
+          num: snapshot?.roosterRock.waterTempF != null ? `${Math.round(snapshot.roosterRock.waterTempF)}°` : "—",
+          label: "water temp",
+          color: "#19e3ff",
         },
         {
           num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "—",
@@ -69,7 +69,7 @@ export default function NudeBeachesHero({ activeTab, snapshot }: Props) {
         }
         lede={
           isRooster
-            ? "Live river gage, crossing bands, and weather for the clothing-optional east end of Rooster Rock State Park — plus Sand Island access."
+            ? "River level, air and water temps, forecast, directions, and day-use parking pass info — nothing else."
             : "Swim Guide samples, parking permits, island weather, and the links you need before a Collins Beach trip."
         }
       />
