@@ -50,6 +50,9 @@ const CATS: Array<[string, string]> = [
 export interface InboxShellProps extends InboxProps {
   initialThreadId?: string | null;
   onThreadChange?: (threadId: string | null) => void;
+  /** Force the single-column (list ↔ thread) layout regardless of viewport
+   *  width. Used when the shell is embedded in a narrow floating panel. */
+  forceNarrow?: boolean;
 }
 
 export function InboxShell({
@@ -58,6 +61,7 @@ export function InboxShell({
   chromeAccent = "lime",
   initialThreadId = null,
   onThreadChange,
+  forceNarrow,
 }: InboxShellProps) {
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
   const { threads, loading, sendMessage, setRead, archive, remove, revealSelf, resolveLineup } =
@@ -79,12 +83,16 @@ export function InboxShell({
   };
 
   useEffect(() => {
+    if (forceNarrow !== undefined) {
+      setIsNarrow(forceNarrow);
+      return;
+    }
     const mq = window.matchMedia("(max-width: 860px)");
     const sync = () => setIsNarrow(mq.matches);
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
-  }, []);
+  }, [forceNarrow]);
 
   useEffect(() => {
     setActiveId(initialThreadId ?? null);

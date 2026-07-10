@@ -251,18 +251,20 @@ export default function Nav() {
 
             {user && (
               <div className="site-auth">
-                <NavLink
-                  href="/dashboard"
-                  label="Hub"
-                  active={hubActive}
-                  showNotify={unreadCount > 0}
-                  notifyLabel={
-                    unreadCount > 0
-                      ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
-                      : undefined
-                  }
-                  onClick={closeMenu}
-                />
+                <span className="site-auth__hub">
+                  <NavLink
+                    href="/dashboard"
+                    label="Hub"
+                    active={hubActive}
+                    showNotify={unreadCount > 0}
+                    notifyLabel={
+                      unreadCount > 0
+                        ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
+                        : undefined
+                    }
+                    onClick={closeMenu}
+                  />
+                </span>
                 {isAdmin && (
                   <NavLink
                     href="/admin"
