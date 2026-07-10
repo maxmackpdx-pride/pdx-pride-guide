@@ -46,21 +46,6 @@
   margin: 0 auto;
 }
 
-.events-page.board-page--makeover .events-page-tab-bar {
-  position: absolute;
-  top: clamp(34px, 5vw, 60px);
-  right: clamp(20px, 4vw, 44px);
-  left: auto;
-  z-index: 2;
-  display: flex;
-  justify-content: flex-end;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  max-width: none;
-  border-bottom: none;
-}
-
 .events-page.board-page--makeover .events-page-tab-bar .events-tab {
   font-family: var(--font-display), sans-serif;
   font-weight: 800;
@@ -70,14 +55,41 @@
   border-bottom-width: 3.6px;
 }
 
-@media (max-width: 899px) {
-  .events-page.board-page--makeover .events-page-tab-bar {
-    position: static;
+/* Desktop — tabs pinned top-right over hero */
+.events-page-tab-bar--mobile {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .events-page.board-page--makeover .events-page-tab-bar--hero {
+    position: absolute;
+    top: clamp(34px, 5vw, 60px);
+    right: clamp(20px, 4vw, 44px);
+    left: auto;
+    z-index: 2;
+    display: flex;
     justify-content: flex-end;
-    padding: 0 clamp(20px, 4vw, 44px) 4px;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    border-bottom: none;
+  }
+}
+
+/* Mobile — tabs below map, right-aligned */
+@media (max-width: 899px) {
+  .events-page-tab-bar--hero {
+    display: none;
   }
 
-  .events-page-header .board-hero {
-    padding-top: clamp(20px, 4vw, 32px);
+  .events-page.board-page--makeover .events-page-tab-bar--mobile {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px clamp(20px, 4vw, 44px) 0;
+    border-bottom: none;
   }
 }
