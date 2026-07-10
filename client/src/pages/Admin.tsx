@@ -20,6 +20,7 @@ import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/Adm
 import { type AdminView } from "@/components/admin/AdminShell";
 import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
+import AdminOwnerDesk, { type OwnerDeskItem } from "@/components/admin/AdminOwnerDesk";
 import AdminStatsView from "@/components/admin/AdminStatsView";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
@@ -249,7 +250,7 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
@@ -295,7 +296,7 @@ export default function Admin() {
     queryClient.invalidateQueries({ queryKey: ["/api/admin/talent-requests"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
     queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
     queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
@@ -344,11 +345,14 @@ export default function Admin() {
     enabled: authenticated,
   });
 
-  const { data: feedback = [], isLoading: feedbackLoading, isError: feedbackError, refetch: refetchFeedback } = useQuery<any[]>({
-    queryKey: ["/api/admin/feedback", "all"],
-    queryFn: () => apiRequest("GET", "/api/admin/feedback?all=true").then(r => r.json()),
-    enabled: authenticated,
+  const { data: ownerDesk = [], isLoading: ownerDeskLoading, isError: ownerDeskError, refetch: refetchOwnerDesk } = useQuery<OwnerDeskItem[]>({
+    queryKey: ["/api/admin/owner-desk"],
+    queryFn: () => apiRequest("GET", "/api/admin/owner-desk").then(r => r.json()),
+    enabled: authenticated && isSuperAdmin,
+    refetchInterval: 90_000,
   });
+
+  const ownerCount = ownerDesk.filter(i => i.status === "OPEN").length;
 
   const { data: pushStatus, refetch: refetchPushStatus } = useQuery<{
     configured: boolean;
@@ -646,11 +650,13 @@ export default function Admin() {
     },
   });
 
-  const resolveFeedbackMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("POST", `/api/admin/feedback/${id}/resolve`, {}),
+  const resolveOwnerDeskMutation = useMutation({
+    mutationFn: ({ id, source }: { id: number; source: "desk" | "feedback" }) =>
+      apiRequest("POST", `/api/admin/owner-desk/${id}/resolve`, { source }),
     onSuccess: () => {
-      invalidateInboxQueries();
-      toast({ title: "Feedback resolved" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-desk"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
+      toast({ title: "Owner item resolved" });
     },
   });
 
@@ -868,15 +874,13 @@ export default function Admin() {
   // Only gifting *reports* (and flagged posts with reportCount) need eyes.
   const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
-  const openFeedback = feedback.filter((item: any) => item.status === "OPEN");
   const pendingPromoters = promoterRequests;
   const totalActionItems =
     pendingSubs.length
     + pendingMod.length
     + pendingPromoters.length
     + pendingGiftingFlagged.length
-    + pendingGiftingReports.length
-    + openFeedback.length;
+    + pendingGiftingReports.length;
 
   const overviewAttention = useMemo(() => {
     const items: AttentionItem[] = [];
@@ -916,17 +920,8 @@ export default function Admin() {
         color: "#AA66FF",
       });
     }
-    for (const f of openFeedback.slice(0, 3)) {
-      items.push({
-        key: `feedback-${f.id}`,
-        title: f.category || "Feedback",
-        subtitle: String(f.message || "Open feedback").slice(0, 80),
-        kindLabel: "Feedback",
-        color: "#4488FF",
-      });
-    }
     return items.slice(0, 8);
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, openFeedback]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged]);
 
   const overviewKindPills = useMemo(() => {
     const pills: KindPill[] = [];
@@ -935,9 +930,8 @@ export default function Admin() {
     if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
     if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
     if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
-    if (openFeedback.length) pills.push({ key: "feedback", label: "Feedback", count: openFeedback.length, color: "#4488FF" });
     return pills;
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, openFeedback]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports]);
 
   const approvedPromoters = useMemo(
     () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
@@ -1067,9 +1061,9 @@ export default function Admin() {
   };
 
   const inboxLoading =
-    subLoading || modLoading || giftingLoading || missedLoading || feedbackLoading || promotersLoading || talentLoading;
+    subLoading || modLoading || giftingLoading || missedLoading || promotersLoading || talentLoading;
   const inboxError =
-    subError || modError || giftingError || missedError || feedbackError || promotersError || talentError;
+    subError || modError || giftingError || missedError || promotersError || talentError;
   const refetchInbox = () => {
     refetchSubs();
     refetchMod();
@@ -1122,7 +1116,7 @@ export default function Admin() {
     || denyTalentMutation.isPending
     || updateGiftingStatusMutation.isPending
     || resolveGiftingReportMutation.isPending
-    || resolveFeedbackMutation.isPending;
+    || resolveOwnerDeskMutation.isPending;
 
   const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
   const pushOk = !!pushStatus?.configured;
@@ -1141,7 +1135,7 @@ export default function Admin() {
         avatarChoice={user?.avatarChoice}
         avatarRing={user?.avatarRing}
         pendingCount={totalActionItems}
-        ownerCount={0}
+        ownerCount={ownerCount}
         navCounts={{
           team: teamAdmins.length,
           events: events.length,
@@ -1194,7 +1188,7 @@ export default function Admin() {
             kindPills={overviewKindPills}
             showMetrics={false}
             isSuperAdmin={isSuperAdmin}
-            ownerCount={0}
+            ownerCount={ownerCount}
             onOpenInbox={() => setAdminTab("inbox")}
             onOpenOwner={() => setAdminTab("owner")}
             onReviewItem={(key) => {
@@ -1265,7 +1259,7 @@ export default function Admin() {
             giftingPosts={giftingAdmin.posts || []}
             giftingReports={giftingAdmin.reports || []}
             missedConnections={missedAdmin}
-            feedback={feedback}
+            feedback={[]}
             loading={inboxLoading}
             error={inboxError}
             onRetry={refetchInbox}
@@ -1286,7 +1280,7 @@ export default function Admin() {
             onDismissStaleTests={() => dismissStaleTestsMutation.mutate()}
             onGiftingStatus={(id, status) => updateGiftingStatusMutation.mutate({ id, status })}
             onResolveGiftingReport={id => resolveGiftingReportMutation.mutate({ id })}
-            onResolveFeedback={id => resolveFeedbackMutation.mutate(id)}
+            onResolveFeedback={() => {}}
             boardRejectReasons={boardRejectReasons}
             boardRejectNotes={boardRejectNotes}
             onBoardRejectReasonChange={(key, code) => setBoardRejectReasons(prev => ({ ...prev, [key]: code }))}
@@ -2258,18 +2252,19 @@ export default function Admin() {
           </div>
         )}
 
-        {(activeTab === "owner" || activeTab === "team") && (
+        {activeTab === "owner" && isSuperAdmin && (
+          <AdminOwnerDesk
+            items={ownerDesk}
+            loading={ownerDeskLoading}
+            error={ownerDeskError}
+            onRetry={() => refetchOwnerDesk()}
+            onResolve={(id, source) => resolveOwnerDeskMutation.mutate({ id, source })}
+            resolvePending={resolveOwnerDeskMutation.isPending}
+          />
+        )}
+
+        {activeTab === "team" && (
           <div className="space-y-8">
-            {activeTab === "owner" && (
-              <div className="admin-owner-desk-banner">
-                <span className="admin-owner-desk-banner__icon" aria-hidden>
-                  <Lock size={17} />
-                </span>
-                <p>
-                  <strong>Owner only.</strong> Keyholders (site admins) can&apos;t see or touch this lane. These are your calls.
-                </p>
-              </div>
-            )}
             <div>
               <p className="text-white/40 text-sm mb-4">
                 Site admins can open this dashboard while logged into their PDX Pride Guide account (footer Admin Panel link). Owner accounts in Railway env cannot be removed here.

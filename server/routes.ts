@@ -616,8 +616,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
   });
 
-  // Public "Message me" / sponsorship pitch form on the About page — no login
-  // required, always lands in the site owner's inbox (see storage.sendPortfolioContactMessage).
+  // Public "Message me" / sponsorship pitch form — no login required, lands in Owner Desk only.
   app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
     const honeypot = String(req.body?.company || "").trim();
     if (honeypot) return res.json({ ok: true }); // bot filled the hidden field — silently drop
@@ -644,6 +643,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const files = Array.isArray(req.files) ? req.files : [];
     const attachmentUrls = files.map((file: any) => `/uploads/${file.filename}`);
 
+    const pageUrl = String(req.body?.pageUrl || req.get("referer") || "/about").slice(0, 500);
     const delivered = storage.sendPortfolioContactMessage({
       kind,
       name,
@@ -653,6 +653,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       businessName: businessName || undefined,
       lengthNeeded: lengthNeeded || undefined,
       attachmentUrls,
+      pageUrl,
     });
     if (!delivered) return res.status(500).json({ error: "Could not deliver the message right now." });
     res.json({ ok: true });
@@ -2674,8 +2675,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(getPersistenceAudit(getTableCounts()));
   });
 
-  app.get("/api/admin/pending-count", requireAdmin, (_req, res) => {
-    res.json({ count: storage.getAdminPendingCount() });
+  app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
+    res.json({ count: storage.getAdminPendingCount(), ownerCount });
   });
 
   app.get("/api/admin/metrics", requireAdmin, (_req, res) => {
@@ -2683,7 +2686,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const pendingSubmissions = storage.getSubmissions("PENDING").length;
     const liveEvents = storage.getEvents({ status: "LIVE" }).length;
     const userSubmittedEvents = storage.countEventsBySource("user_submitted", "LIVE");
-    const openFeedback = storage.getFeedbackReports("OPEN").length;
+    const openFeedback = 0;
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const newUsersToday = (sqlite.prepare(`SELECT COUNT(*) AS count FROM users WHERE created_at >= ?`).get(todayStart.toISOString()) as { count: number })?.count ?? 0;
     res.json({
@@ -2720,11 +2723,38 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/feedback", requireAdmin, (req, res) => {
-    res.json(req.query.all === "true" ? storage.getFeedbackReports() : storage.getFeedbackReports("OPEN"));
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
   });
 
   app.post("/api/admin/feedback/:id/resolve", requireAdmin, (req, res) => {
-    storage.resolveFeedbackReport(Number(req.params.id));
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    const source = String(req.body?.source || "desk") === "feedback" ? "feedback" as const : "desk" as const;
+    storage.resolveOwnerDeskItem(Number(req.params.id), source);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/owner-desk", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    res.json(storage.getOwnerDeskItems());
+  });
+
+  app.post("/api/admin/owner-desk/:id/resolve", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    const source = String(req.body?.source || "desk") === "feedback" ? "feedback" as const : "desk" as const;
+    storage.resolveOwnerDeskItem(Number(req.params.id), source);
     res.json({ ok: true });
   });
 

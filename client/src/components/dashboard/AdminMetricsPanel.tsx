@@ -31,7 +31,7 @@ const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: st
   { key: "gigPosts",           label: "Live gig posts",                 color: "#FF8C00", tab: "gigs",    alwaysClickable: true },
   { key: "giftingPosts",       label: "Active gifting posts",           color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
   { key: "missedConnections",  label: "Active missed connections",      color: "#FF1FA0", tab: "inbox",   alwaysClickable: true },
-  { key: "openFeedback",       label: "Open feedback",                  color: "#750787", tab: "inbox",   alwaysClickable: true },
+
 ];
 
 type StatCardColor = "lime" | "cyan" | "orange" | "pink" | "purple";

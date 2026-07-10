@@ -94,8 +94,8 @@ export default function PortfolioContactModal({
             <h2>{isSponsor ? "Pitch sent" : "Message sent"}</h2>
             <p>
               {isSponsor
-                ? "It's in my inbox. I'll read it and get back to you."
-                : "It's in my inbox. I'll get back to you."}
+                ? "It's on my Owner Desk. I'll read it and get back to you."
+                : "It's on my Owner Desk. I'll get back to you."}
             </p>
             <button type="button" className="btn-neon magenta" onClick={onClose}>
               Close
@@ -108,8 +108,8 @@ export default function PortfolioContactModal({
             </h2>
             <p className="pcm-sub">
               {isSponsor
-                ? "Goes straight to my inbox. Tell me who you are and how long you want to be on the guide."
-                : "Goes straight to my inbox, no email needed on my end."}
+                ? "Goes straight to my Owner Desk. Tell me who you are and how long you want to be on the guide."
+                : "Goes straight to my Owner Desk — not personal email, not the shared admin queue."}
             </p>
 
             <label className="pcm-field">

@@ -113,16 +113,17 @@ export default function Dashboard() {
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
   const unreadCount = unread.count || 0;
 
-  const { data: pendingAdmin = { count: 0 } } = useQuery<{ count: number }>({
+  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
       fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
-        r.ok ? r.json() : { count: 0 },
+        r.ok ? r.json() : { count: 0, ownerCount: 0 },
       ),
     enabled: isAdmin,
     refetchInterval: 90_000,
   });
   const pendingCount = pendingAdmin.count || 0;
+  const ownerCount = isSuperAdmin ? (pendingAdmin.ownerCount || 0) : 0;
 
   const dashboardQueryErrors = [
     myGigsQuery.isError && "gigs",
@@ -445,7 +446,7 @@ export default function Dashboard() {
             }}
             isAdmin={isAdmin}
             isSuperAdmin={isSuperAdmin}
-            ownerCount={0}
+            ownerCount={ownerCount}
             editMode={editMode}
             onEditProfile={() => setEditMode(!editMode)}
             onLogout={() => logout()}

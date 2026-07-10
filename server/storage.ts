@@ -232,6 +232,22 @@ sqlite.exec(`
     status TEXT NOT NULL DEFAULT 'OPEN',
     created_at TEXT NOT NULL DEFAULT ''
   );
+  CREATE TABLE IF NOT EXISTS owner_desk_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT NOT NULL,
+    title TEXT NOT NULL,
+    summary TEXT,
+    body TEXT NOT NULL,
+    contact_name TEXT,
+    contact_email TEXT,
+    contact_phone TEXT,
+    page_url TEXT,
+    severity TEXT,
+    meta_json TEXT,
+    status TEXT NOT NULL DEFAULT 'OPEN',
+    created_at TEXT NOT NULL DEFAULT '',
+    resolved_at TEXT
+  );
   CREATE TABLE IF NOT EXISTS site_admin_grants (
     user_id INTEGER PRIMARY KEY,
     granted_by_user_id INTEGER,
@@ -4355,6 +4371,7 @@ export interface IStorage {
     businessName?: string;
     lengthNeeded?: string;
     attachmentUrls?: string[];
+    pageUrl?: string;
   }): boolean;
   getNotificationPrefs(userId: number): NotificationPrefs;
   setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin?: boolean): NotificationPrefs;
@@ -4411,10 +4428,42 @@ export interface IStorage {
   updateGiftingPostStatus(id: number, status: string, adminNotes?: string): void;
   resolveGiftingReport(id: number, adminNotes?: string): void;
   expireGiftingPosts(): void;
-  // Soft launch feedback
+  // Soft launch feedback (legacy table; new reports land in owner_desk_items)
   createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
   getFeedbackReports(status?: string): FeedbackReport[];
   resolveFeedbackReport(id: number): void;
+  // Owner desk — contact form, bug reports, owner-only escalations
+  createOwnerDeskItem(data: {
+    kind: string;
+    title: string;
+    summary?: string | null;
+    body: string;
+    contactName?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    pageUrl?: string | null;
+    severity?: string | null;
+    metaJson?: Record<string, unknown> | null;
+  }): { id: number; kind: string; title: string; status: string; createdAt: string };
+  getOwnerDeskItems(status?: string): Array<{
+    id: number;
+    source: "desk" | "feedback";
+    kind: string;
+    kindLabel: string;
+    title: string;
+    summary: string;
+    body: string;
+    contactName: string | null;
+    contactEmail: string | null;
+    contactPhone: string | null;
+    pageUrl: string | null;
+    severity: string | null;
+    meta: Record<string, unknown>;
+    status: string;
+    createdAt: string;
+  }>;
+  getOwnerDeskCount(): number;
+  resolveOwnerDeskItem(id: number, source?: "desk" | "feedback"): void;
   // Business directory
   getBusinesses(opts?: { type?: string; neighborhood?: string; queerOwned?: boolean }): Business[];
   getBusiness(id: number): Business | undefined;
@@ -5093,13 +5142,12 @@ export const storage: IStorage = {
   },
   getAdminPendingCount() {
     // Talent, gigs, and gifting posts do not need admin approval.
-    // Gifting *reports* and event submissions / promoters / mod / feedback still do.
+    // Bug reports / contact form / feedback are owner-desk only (not in shared queue).
     return (
       this.getSubmissions("PENDING").length
       + this.getModerationRequests("PENDING").length
       + this.getPendingPromoterRequests().length
       + this.getGiftingReports("PENDING").length
-      + this.getFeedbackReports("OPEN").length
       + this.getPendingBusinessClaims().length
       + this.getPendingBusinessSubmissions().length
       + this.getPendingBusinessLogoRequests().length
@@ -5852,29 +5900,25 @@ export const storage: IStorage = {
     if (!owner) return;
     notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
   },
-  sendPortfolioContactMessage({ kind = "message", name, email, phone, message, businessName, lengthNeeded, attachmentUrls }) {
-    // Pinned directly to the tucker_pdmax account (not the shared resolveSiteOwner()
-    // pool other features use) so this can never fan out to other admins, even if
-    // more admins are granted later.
-    const tucker = storage.getUserByUsername(SITE_ADMIN_GIG_OWNER_USERNAME);
-    if (!tucker) return false;
+  sendPortfolioContactMessage({ kind = "message", name, email, phone, message, businessName, lengthNeeded, attachmentUrls, pageUrl }) {
     const isSponsor = kind === "sponsor";
-    const lines = [
-      isSponsor ? "Type: Sponsorship pitch" : "Type: Portfolio / contact message",
-      `From: ${name} <${email}>`,
-      phone ? `Phone: ${phone}` : null,
-      isSponsor && businessName ? `Business: ${businessName}` : null,
-      isSponsor && lengthNeeded ? `Length of time needed: ${lengthNeeded}` : null,
-      attachmentUrls && attachmentUrls.length ? `Attachments: ${attachmentUrls.join(", ")}` : null,
-      "",
-      message,
-    ].filter((line): line is string => line != null);
-    const subject = isSponsor
-      ? `Sponsorship pitch: ${businessName || name}`
-      : `Portfolio message from ${name}`;
-    storage.sendMessage(tucker.id, tucker.id, subject, lines.join("\n"), {
-      contextType: isSponsor ? "SPONSOR_PITCH" : "CONTACT_FORM",
-      contextLabel: isSponsor ? (businessName || name) : name,
+    const summary = isSponsor
+      ? `${businessName || name}${lengthNeeded ? ` · ${lengthNeeded}` : ""}`
+      : (phone ? `Phone: ${phone}` : email);
+    storage.createOwnerDeskItem({
+      kind: isSponsor ? "sponsor" : "contact",
+      title: isSponsor ? `Sponsorship pitch: ${businessName || name}` : `Message from ${name}`,
+      summary,
+      body: message,
+      contactName: name,
+      contactEmail: email,
+      contactPhone: phone || null,
+      pageUrl: pageUrl || "/about",
+      metaJson: {
+        businessName: businessName || null,
+        lengthNeeded: lengthNeeded || null,
+        attachmentUrls: attachmentUrls || [],
+      },
     });
     return true;
   },
@@ -6352,10 +6396,36 @@ export const storage: IStorage = {
     expireGiftingPosts();
   },
   createFeedbackReport(data) {
-    return db.insert(feedbackReports).values({
-      ...data,
-      createdAt: new Date().toISOString(),
-    } as any).returning().get();
+    const createdAt = new Date().toISOString();
+    const category = String(data.category || "BUG").toUpperCase();
+    const desk = storage.createOwnerDeskItem({
+      kind: category === "BUG" ? "bug" : "feedback",
+      title: category === "BUG" ? `Bug report: ${data.pageUrl}` : `Site feedback: ${data.pageUrl}`,
+      summary: String(data.message || "").slice(0, 160),
+      body: [
+        data.message,
+        data.steps ? `\n\nSteps to reproduce:\n${data.steps}` : null,
+        data.userAgent ? `\n\nUser agent: ${data.userAgent}` : null,
+      ].filter(Boolean).join(""),
+      contactName: null,
+      contactEmail: data.email || null,
+      contactPhone: null,
+      pageUrl: data.pageUrl,
+      severity: data.severity || "MEDIUM",
+      metaJson: { category, legacyFeedback: true },
+    });
+    return {
+      id: desk.id,
+      pageUrl: data.pageUrl,
+      category,
+      severity: data.severity || "MEDIUM",
+      message: data.message,
+      steps: data.steps || null,
+      email: data.email || null,
+      userAgent: data.userAgent || null,
+      status: "OPEN",
+      createdAt,
+    } as FeedbackReport;
   },
   getFeedbackReports(status) {
     const rows = db.select().from(feedbackReports).all();
@@ -6364,6 +6434,115 @@ export const storage: IStorage = {
   },
   resolveFeedbackReport(id) {
     db.update(feedbackReports).set({ status: "RESOLVED" } as any).where(eq(feedbackReports.id, id)).run();
+  },
+  createOwnerDeskItem(data) {
+    const now = new Date().toISOString();
+    const inserted = sqlite.prepare(`
+      INSERT INTO owner_desk_items (
+        kind, title, summary, body, contact_name, contact_email, contact_phone,
+        page_url, severity, meta_json, status, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?)
+    `).run(
+      data.kind,
+      data.title,
+      data.summary || null,
+      data.body,
+      data.contactName || null,
+      data.contactEmail || null,
+      data.contactPhone || null,
+      data.pageUrl || null,
+      data.severity || null,
+      data.metaJson ? JSON.stringify(data.metaJson) : null,
+      now,
+    );
+    return {
+      id: Number(inserted.lastInsertRowid),
+      kind: data.kind,
+      title: data.title,
+      status: "OPEN",
+      createdAt: now,
+    };
+  },
+  getOwnerDeskItems(status?: string) {
+    const kindLabel = (kind: string) => {
+      const labels: Record<string, string> = {
+        contact: "Contact",
+        sponsor: "Sponsorship",
+        bug: "Bug report",
+        feedback: "Feedback",
+        keyholder: "Keyholder",
+        escalation: "Escalation",
+      };
+      return labels[kind] || kind;
+    };
+    const mapDeskRow = (row: Record<string, unknown>) => {
+      let meta: Record<string, unknown> = {};
+      if (row.meta_json) {
+        try { meta = JSON.parse(String(row.meta_json)); } catch { meta = {}; }
+      }
+      return {
+        id: Number(row.id),
+        source: "desk" as const,
+        kind: String(row.kind),
+        kindLabel: kindLabel(String(row.kind)),
+        title: String(row.title),
+        summary: String(row.summary || ""),
+        body: String(row.body),
+        contactName: row.contact_name ? String(row.contact_name) : null,
+        contactEmail: row.contact_email ? String(row.contact_email) : null,
+        contactPhone: row.contact_phone ? String(row.contact_phone) : null,
+        pageUrl: row.page_url ? String(row.page_url) : null,
+        severity: row.severity ? String(row.severity) : null,
+        meta,
+        status: String(row.status),
+        createdAt: String(row.created_at),
+      };
+    };
+    const deskRows = (status
+      ? sqlite.prepare(`SELECT * FROM owner_desk_items WHERE status = ? ORDER BY created_at DESC`).all(status)
+      : sqlite.prepare(`SELECT * FROM owner_desk_items ORDER BY created_at DESC`).all()
+    ).map(row => mapDeskRow(row as Record<string, unknown>));
+
+    const legacyRows = storage.getFeedbackReports(status).map(report => ({
+      id: report.id,
+      source: "feedback" as const,
+      kind: report.category === "BUG" ? "bug" : "feedback",
+      kindLabel: kindLabel(report.category === "BUG" ? "bug" : "feedback"),
+      title: report.category === "BUG" ? `Bug report: ${report.pageUrl}` : `Site feedback: ${report.pageUrl}`,
+      summary: String(report.message || "").slice(0, 160),
+      body: [
+        report.message,
+        report.steps ? `\n\nSteps to reproduce:\n${report.steps}` : null,
+        report.userAgent ? `\n\nUser agent: ${report.userAgent}` : null,
+      ].filter(Boolean).join(""),
+      contactName: null,
+      contactEmail: report.email || null,
+      contactPhone: null,
+      pageUrl: report.pageUrl,
+      severity: report.severity || null,
+      meta: { category: report.category, legacyFeedback: true },
+      status: report.status,
+      createdAt: report.createdAt,
+    }));
+
+    const deskIds = new Set(deskRows.map(r => `${r.kind}:${r.title}:${r.createdAt}`));
+    const legacyOnly = legacyRows.filter(r => !deskIds.has(`${r.kind}:${r.title}:${r.createdAt}`));
+    return [...deskRows, ...legacyOnly].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  },
+  getOwnerDeskCount() {
+    return storage.getOwnerDeskItems("OPEN").length;
+  },
+  resolveOwnerDeskItem(id, source = "desk") {
+    const now = new Date().toISOString();
+    if (source === "feedback") {
+      storage.resolveFeedbackReport(id);
+      return;
+    }
+    sqlite.prepare(`
+      UPDATE owner_desk_items SET status = 'RESOLVED', resolved_at = ? WHERE id = ?
+    `).run(now, id);
   },
   // Business directory
   getBusinesses(opts) {

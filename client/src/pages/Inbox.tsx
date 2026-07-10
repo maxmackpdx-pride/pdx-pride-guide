@@ -46,11 +46,11 @@ export default function Inbox() {
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
 
-  const { data: pendingAdmin = { count: 0 } } = useQuery<{ count: number }>({
+  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
       fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
-        r.ok ? r.json() : { count: 0 },
+        r.ok ? r.json() : { count: 0, ownerCount: 0 },
       ),
     enabled: isAdmin,
     refetchInterval: 90_000,
@@ -96,6 +96,7 @@ export default function Inbox() {
       avatarRing={user.avatarRing}
       unreadCount={unread.count || 0}
       pendingCount={pendingAdmin.count || 0}
+      ownerCount={isSuperAdmin ? (pendingAdmin.ownerCount || 0) : 0}
       kicker="Private messages"
       kickerColor="var(--cyan, #00ffff)"
       title="Inbox"
