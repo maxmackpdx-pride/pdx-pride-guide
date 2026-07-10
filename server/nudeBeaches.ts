@@ -1,7 +1,9 @@
 import { sqlite } from "./storage";
 import {
+  aqiCategoryFromValue,
   crossingBandFromLevel,
   depthEstimateFromGage,
+  estimateWaterClarity,
   SAUVIE_ISLAND_PARKING_URL,
   type NudeBeachesSnapshot,
   type RiverLevelTrend,
@@ -199,23 +201,117 @@ type NwsForecast = {
   };
 };
 
+function parseWindParts(windDir?: string | null, windSpeed?: string | null) {
+  const dir = windDir && windDir !== "null" ? windDir : null;
+  const speedRaw = windSpeed && windSpeed !== "null" ? windSpeed : null;
+  const mph = speedRaw ? Number.parseInt(speedRaw, 10) : null;
+  const wind =
+    dir && speedRaw ? `${dir} ${speedRaw} mph` : dir ? dir : null;
+  return { wind, windFrom: dir, windMph: Number.isFinite(mph) ? mph : null };
+}
+
 async function fetchNwsSummary(lat: number, lon: number) {
   const data = await fetchJson<NwsForecast>(
     `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}&unit=0&lg=english&FcstType=json`,
   );
   const summary = data.data?.text?.[0]?.replace(/\s+/g, " ").trim() || null;
   const temp = data.data?.temperature?.[0];
-  const windSpeed = data.data?.windSpeed?.[0];
-  const windDir = data.data?.windDirection?.[0];
-  const wind =
-    windSpeed && windDir && windSpeed !== "null"
-      ? `${windDir} ${windSpeed} mph`
-      : null;
+  const { wind, windFrom, windMph } = parseWindParts(
+    data.data?.windDirection?.[0],
+    data.data?.windSpeed?.[0],
+  );
   return {
     summary,
     airTempF: temp && temp !== "null" ? Number(temp) : null,
     wind,
+    windFrom,
+    windMph,
   };
+}
+
+async function fetchUsgsWaterTemp(): Promise<Pick<RoosterRockLive, "waterTempF" | "waterTempSite">> {
+  try {
+    const data = await fetchJson<{
+      value?: {
+        timeSeries?: Array<{
+          values?: Array<{ value?: Array<{ value?: string }> }>;
+        }>;
+      };
+    }>(
+      "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=14105700&parameterCd=00010&siteStatus=all",
+    );
+    const point = data.value?.timeSeries?.[0]?.values?.[0]?.value?.[0];
+    const c = Number(point?.value);
+    if (!Number.isFinite(c)) return { waterTempF: null, waterTempSite: null };
+    return {
+      waterTempF: (c * 9) / 5 + 32,
+      waterTempSite: "Columbia at Warrendale (below Bonneville)",
+    };
+  } catch {
+    return { waterTempF: null, waterTempSite: null };
+  }
+}
+
+function compassFromDegrees(deg: number): string {
+  const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+
+async function fetchOpenMeteoCurrent(lat: number, lon: number) {
+  try {
+    const data = await fetchJson<{
+      current?: {
+        temperature_2m?: number;
+        wind_speed_10m?: number;
+        wind_direction_10m?: number;
+      };
+    }>(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+        "&current=temperature_2m,wind_speed_10m,wind_direction_10m" +
+        "&temperature_unit=fahrenheit&wind_speed_unit=mph",
+    );
+    const current = data.current;
+    if (!current) return null;
+    const windFrom =
+      typeof current.wind_direction_10m === "number"
+        ? compassFromDegrees(current.wind_direction_10m)
+        : null;
+    const windMph =
+      typeof current.wind_speed_10m === "number"
+        ? Math.round(current.wind_speed_10m)
+        : null;
+    return {
+      airTempF: typeof current.temperature_2m === "number" ? Math.round(current.temperature_2m) : null,
+      wind: windFrom && windMph != null ? `${windFrom} ${windMph} mph` : null,
+      windFrom,
+      windMph,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchOpenMeteoAirQuality(
+  lat: number,
+  lon: number,
+): Promise<Pick<RoosterRockLive, "airQuality">> {
+  try {
+    const data = await fetchJson<{
+      current?: { us_aqi?: number; pm2_5?: number };
+    }>(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5`,
+    );
+    const current = data.current;
+    const aqi = current?.us_aqi;
+    if (aqi == null) return { airQuality: null };
+    const pm =
+      typeof current?.pm2_5 === "number"
+        ? ` · PM2.5 ${current.pm2_5.toFixed(1)}`
+        : "";
+    return { airQuality: `${aqiCategoryFromValue(aqi)} · AQI ${aqi}${pm}` };
+  } catch {
+    return { airQuality: null };
+  }
 }
 
 function swimStatusLabel(status: SwimGuideStatus | null): string | null {
@@ -267,45 +363,6 @@ async function fetchParkingNote(): Promise<string | null> {
   }
 }
 
-type RrcWaterPayload = {
-  clarity?: { label?: string; windFrom?: string; windMph?: number };
-  temp?: { f?: number; site?: string };
-};
-
-type RrcAirPayload = {
-  category?: string;
-  aqi?: number;
-};
-
-async function fetchRrcWater(): Promise<Pick<RoosterRockLive, "waterTempF" | "waterTempSite" | "waterClarity" | "wind">> {
-  try {
-    const data = await fetchJson<RrcWaterPayload>("https://roosterrockcrossing.com/api/water");
-    const wind =
-      data.clarity?.windFrom && data.clarity?.windMph != null
-        ? `${data.clarity.windFrom} ${data.clarity.windMph} mph`
-        : null;
-    return {
-      waterTempF: typeof data.temp?.f === "number" ? data.temp.f : null,
-      waterTempSite: data.temp?.site || null,
-      waterClarity: data.clarity?.label || null,
-      wind,
-    };
-  } catch {
-    return { waterTempF: null, waterTempSite: null, waterClarity: null, wind: null };
-  }
-}
-
-async function fetchRrcAir(): Promise<Pick<RoosterRockLive, "airQuality">> {
-  try {
-    const data = await fetchJson<RrcAirPayload>("https://roosterrockcrossing.com/api/air");
-    if (!data.category) return { airQuality: null };
-    const aqi = typeof data.aqi === "number" ? ` · AQI ${data.aqi}` : "";
-    return { airQuality: `${data.category}${aqi}` };
-  } catch {
-    return { airQuality: null };
-  }
-}
-
 async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
   const base: RoosterRockLive = {
     riverLevelFt: null,
@@ -327,15 +384,21 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     waterTempSite: null,
     waterClarity: null,
     airQuality: null,
-    source: "USGS + NWS + roosterrockcrossing.com",
+    source: "USGS + NWS + Open-Meteo",
   };
   try {
-    const [river, weather, rrcWater, rrcAir] = await Promise.all([
+    const parkLat = 45.5446;
+    const parkLon = -122.2342;
+    const [river, weather, waterTemp, airQuality, openMeteo] = await Promise.all([
       fetchUsgsRiverLevel(),
-      fetchNwsSummary(45.5446, -122.2342),
-      fetchRrcWater(),
-      fetchRrcAir(),
+      fetchNwsSummary(parkLat, parkLon),
+      fetchUsgsWaterTemp(),
+      fetchOpenMeteoAirQuality(parkLat, parkLon),
+      fetchOpenMeteoCurrent(parkLat, parkLon),
     ]);
+    const windFrom = weather.windFrom ?? openMeteo?.windFrom ?? null;
+    const windMph = weather.windMph ?? openMeteo?.windMph ?? null;
+    const wind = weather.wind ?? openMeteo?.wind ?? null;
     if (river) {
       const band = crossingBandFromLevel(river.ft);
       base.riverLevelFt = river.ft;
@@ -352,12 +415,12 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
       base.worthCrossing = band.worthCrossing;
     }
     base.weatherSummary = weather.summary;
-    base.airTempF = weather.airTempF;
-    base.wind = rrcWater.wind || weather.wind;
-    base.waterTempF = rrcWater.waterTempF;
-    base.waterTempSite = rrcWater.waterTempSite;
-    base.waterClarity = rrcWater.waterClarity;
-    base.airQuality = rrcAir.airQuality;
+    base.airTempF = weather.airTempF ?? openMeteo?.airTempF ?? null;
+    base.wind = wind;
+    base.waterTempF = waterTemp.waterTempF;
+    base.waterTempSite = waterTemp.waterTempSite;
+    base.waterClarity = estimateWaterClarity(windFrom, windMph);
+    base.airQuality = airQuality.airQuality;
   } catch (err) {
     base.error = err instanceof Error ? err.message : "Could not refresh Rooster Rock data";
   }

@@ -88,6 +88,26 @@ export function depthEstimateFromGage(gageFt: number): string {
   return "Over your head";
 }
 
+/** Wind-from-east pushes marsh material toward the crossing (roosterrockcrossing logic). */
+export function estimateWaterClarity(windFrom: string | null, windMph: number | null): string | null {
+  if (!windFrom) return null;
+  const mph = windMph ?? 0;
+  const fromEast = /^(E|NE|ENE|ESE|SE|SSE)$/.test(windFrom);
+  if (fromEast && mph >= 12) return "Likely murky";
+  if (fromEast && mph >= 6) return "Some debris possible";
+  if (fromEast) return "Watch clarity";
+  return "Likely clear";
+}
+
+export function aqiCategoryFromValue(aqi: number): string {
+  if (aqi <= 50) return "Good";
+  if (aqi <= 100) return "Moderate";
+  if (aqi <= 150) return "Unhealthy for sensitive groups";
+  if (aqi <= 200) return "Unhealthy";
+  if (aqi <= 300) return "Very unhealthy";
+  return "Hazardous";
+}
+
 export type SauvieIslandLive = {
   swimStatus: SwimGuideStatus | null;
   swimStatusLabel: string | null;

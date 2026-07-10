@@ -178,7 +178,7 @@ function RoosterRockPanel({ data }: { data: NudeBeachesSnapshot }) {
           <div className="nude-metric-tile__label">Air quality</div>
           <div className="nude-metric-tile__value">{live.airQuality?.split(" · ")[0] || "—"}</div>
           <p className="nude-metric-tile__detail">
-            {live.airQuality?.includes("·") ? live.airQuality.split(" · ").slice(1).join(" · ") : "PurpleAir near Corbett"}
+            {live.airQuality?.includes("·") ? live.airQuality.split(" · ").slice(1).join(" · ") : "Open-Meteo near Rooster Rock"}
           </p>
         </article>
       </div>
