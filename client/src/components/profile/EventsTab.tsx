@@ -30,7 +30,7 @@ function toDsEvent(e: ProfileEvent): Event {
     address: e.address || null,
     lat: null,
     lng: null,
-    ageRequirement: "ALL_AGES",
+    ageRequirement: (e.ageRequirement as Event["ageRequirement"]) || "ALL_AGES",
     ticketUrl: e.ticketUrl || null,
     isPublic: true,
     isPrivate: false,
@@ -98,6 +98,7 @@ export default function EventsTab({ data }: Props) {
         image={resolveEventPosterUrl(e.id, e.posterImageUrl)}
         types={types}
         admission={e.admission || undefined}
+        age={e.ageRequirement || undefined}
         going={goingCount}
         onRsvp={withRsvp ? () => toggleRsvp(e.id) : undefined}
         href={eventPath(e.id, e.title)}

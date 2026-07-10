@@ -8,6 +8,7 @@ export type ProfileEvent = {
   dateStart?: string | null;
   dateEnd?: string | null;
   admission?: string | null;
+  ageRequirement?: string | null;
   ticketUrl?: string | null;
   posterImageUrl?: string | null;
   eventTypes?: string[];

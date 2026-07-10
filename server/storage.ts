@@ -3974,6 +3974,7 @@ function mapProfileEventRow(row: any, goingCount = 0) {
     dateStart: row.dateStart || null,
     dateEnd: row.dateEnd || null,
     admission: row.admission || null,
+    ageRequirement: row.ageRequirement || null,
     ticketUrl: row.ticketUrl || null,
     posterImageUrl: row.posterImageUrl || null,
     eventTypes: Array.isArray(types) ? types.map(String) : [],
@@ -4836,8 +4837,8 @@ export const storage: IStorage = {
     const hostedRows = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.address, e.neighborhood,
              e.day_of_week AS dayOfWeek, e.date_start AS dateStart, e.date_end AS dateEnd,
-             e.admission, e.ticket_url AS ticketUrl, e.poster_image_url AS posterImageUrl,
-             e.event_types AS eventTypes
+             e.admission, e.age_requirement AS ageRequirement, e.ticket_url AS ticketUrl,
+             e.poster_image_url AS posterImageUrl, e.event_types AS eventTypes
       FROM event_hosts eh
       JOIN events e ON e.id = eh.event_id
       WHERE eh.user_id = ? AND e.status = 'LIVE'
@@ -4852,8 +4853,8 @@ export const storage: IStorage = {
     const goingRows = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.address, e.neighborhood,
              e.day_of_week AS dayOfWeek, e.date_start AS dateStart, e.date_end AS dateEnd,
-             e.admission, e.ticket_url AS ticketUrl, e.poster_image_url AS posterImageUrl,
-             e.event_types AS eventTypes
+             e.admission, e.age_requirement AS ageRequirement, e.ticket_url AS ticketUrl,
+             e.poster_image_url AS posterImageUrl, e.event_types AS eventTypes
       FROM attendances a
       JOIN events e ON e.id = a.event_id
       WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'

@@ -84,14 +84,14 @@ export function promoterMonogram(displayName: string | null | undefined, usernam
   return promoterMonogramSource(displayName || username);
 }
 
+const PROMOTER_TAGLINE_DEFAULT = "Techno. Disco. Drag";
+
 export function promoterHeroLine(data: PublicProfileData): { lead: string; accent: string } {
   let lead = "";
   if (data.talents?.length) {
-    lead = data.talents.slice(0, 4).join(". ");
-  } else if (data.bio?.trim()) {
-    lead = data.bio.trim().split(/\n/)[0].replace(/\.\s*$/, "");
+    lead = data.talents.slice(0, 3).join(". ");
   } else {
-    lead = "Portland nightlife";
+    lead = PROMOTER_TAGLINE_DEFAULT;
   }
   if (!lead.endsWith(".")) lead += ".";
 

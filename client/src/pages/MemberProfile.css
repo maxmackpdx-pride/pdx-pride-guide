@@ -603,8 +603,18 @@
   box-shadow: none;
 }
 
+.pp-poster-grid .pdxBoard__poster {
+  aspect-ratio: 2/3;
+  max-height: 260px;
+}
+
+.pp-poster-grid .pdxBoard__phTitle {
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+
 .pp-poster-grid .pdxBoard__img {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .pp-poster-grid .pdxBoard__link {
@@ -906,7 +916,14 @@
 }
 
 /* Marquee */
-.pp-marquee-wrap { position: relative; }
+.pp-marquee-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.pp-marquee-wrap .pdxMarquee {
+  border-block: 1px solid var(--border-faint, #1a1a1a);
+}
 .pp-marquee-edit {
   position: absolute;
   right: 12px;

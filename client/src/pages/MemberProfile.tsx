@@ -201,6 +201,8 @@ export default function MemberProfile() {
         onBanner={path => savePatch({ profileBanner: path }, "Banner updated")}
       />
 
+      <ProfileStatStrip data={data} />
+
       {data.isPromoter && (
         <MarqueeBand
           marquee={marquee}
@@ -210,7 +212,6 @@ export default function MemberProfile() {
         />
       )}
 
-      <ProfileStatStrip data={data} />
       <ProfileTabs active={tab} onChange={setTab} />
 
       <div className="pp-shell pp-panel">
