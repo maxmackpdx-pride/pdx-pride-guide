@@ -1815,9 +1815,9 @@ h2.display,
     position: sticky;
     top: 0;
     z-index: 100;
-    background: var(--hub-ink, #050505);
-    border-bottom: 1px solid var(--hub-border, #1c1c22);
-    box-shadow: none;
+    background: #050505;
+    border-bottom: 1px solid #1c1c22;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
   }
 
   .site-header-inner {
@@ -1840,7 +1840,27 @@ h2.display,
     display: flex;
     width: 100%;
     position: static;
+    background: #050505;
     border-bottom: 0;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .site-hub-mtop .hub-mtop__mode {
+    background: #111;
+    border-color: #2b2b2b;
+  }
+
+  .site-hub-mtop .hub-mtop__mode-btn {
+    color: #9a9a9a;
+  }
+
+  .site-hub-mtop .hub-mtop__mode-btn.is-active.is-member {
+    color: #000;
+  }
+
+  .site-hub-mtop .hub-mtop__mode-btn.is-active.is-admin {
+    color: #000;
   }
 
   .site-hub-mtop .site-profile-menu__cluster .user-avatar {
@@ -1900,6 +1920,19 @@ h2.display,
 
   .site-hub-mobile-bar {
     display: flex;
+    background: #050505;
+    border-top: 2px solid #1c1c22;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.75);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab {
+    color: #8a8a8a;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-bar i {
+    border-color: #050505;
   }
 
   .app-shell:not(.app-shell--hub):has(.site-hub-mobile-bar) main {
@@ -1918,14 +1951,13 @@ h2.display,
   }
 }
 
-/* Hub + Inbox live in bottom nav on mobile — hide duplicates from avatar menu */
+/* Inbox lives in bottom nav on mobile — Hub stays in avatar menu */
 @media (max-width: 640px) {
-  .site-profile-menu__item--inbox,
-  .site-profile-menu__item--hub {
+  .site-profile-menu__item--inbox {
     display: none;
   }
 
-  /* Center anchor: Hub */
+  /* Center anchor: Events */
   .site-hub-mobile-bar .hub-mobile-tab--center svg {
     width: 28px;
     height: 28px;
