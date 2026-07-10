@@ -15,11 +15,11 @@ export default function BoardTab({ posts }: Props) {
         {posts.map(post => (
           <article
             key={`${post.board}-${post.id}`}
-            className="pp-board__card"
+            className={`pp-board__card ${post.board === "Spotted" ? "u-spot-pulse" : "u-board-pulse"}`}
             style={{
               borderColor: post.color,
               borderLeftColor: post.color,
-              boxShadow: `0 0 16px -9px ${post.color}`,
+              ["--dc" as string]: post.color,
             }}
           >
             <div className="pp-board__head">

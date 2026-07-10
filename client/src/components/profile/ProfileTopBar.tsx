@@ -22,7 +22,7 @@ export default function ProfileTopBar({ isOwner = false }: Props) {
           Edit profile
         </Link>
       ) : (
-        <span className="pp-topbar__label display">Public profile</span>
+        <span className="pp-topbar__label">Public profile</span>
       )}
     </header>
   );

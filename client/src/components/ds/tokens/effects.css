@@ -68,6 +68,12 @@
   to   { opacity: 1; transform: none; }
 }
 
+/* Hero entrance: fade + 10px rise, slower than pdxReveal (profile hero/stat strip) */
+@keyframes pdxHeroIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
 /* Popover / panel entrance: fade + rise + slight scale (.sch-pop) */
 @keyframes pdxPop {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }

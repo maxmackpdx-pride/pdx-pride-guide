@@ -61,8 +61,9 @@
 .pp-topbar__accent { color: var(--neon-cyan); }
 
 .pp-topbar__label {
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   font-size: 0.66rem;
   color: var(--text-faint);
@@ -90,6 +91,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
 }
 
 .pp-hero--member { min-height: clamp(280px, 32vw, 420px); }
@@ -141,7 +143,9 @@
   right: 0;
   top: 0;
   height: 4px;
-  background: var(--grad-rainbow, var(--rainbow-bar));
+  background: var(--rainbow-bar);
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 6s linear infinite, pdxSeamGlow 6s var(--ease-inout) infinite;
   z-index: 1;
 }
 
@@ -293,8 +297,10 @@
 }
 
 .pp-hero__venues-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 600;
   font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-faint);
 }
@@ -480,6 +486,7 @@ a.pp-btn {
   display: flex;
   gap: 28px;
   flex-wrap: wrap;
+  animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) 0.07s both;
 }
 
 .pp-stats {
@@ -507,11 +514,18 @@ a.pp-btn {
 
 .pp-stats__num--accent {
   color: var(--profile-acc-t);
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+}
+
+.u-numpop {
+  animation: pdxNumPop 0.42s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
 
 .pp-stats__label {
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   font-size: 0.62rem;
   color: var(--text-lo);
@@ -564,6 +578,7 @@ a.pp-btn {
 /* Main panel */
 .pp-panel {
   padding: 28px clamp(18px, 3.4vw, 46px) 48px;
+  animation: pdxReveal 0.35s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
 }
 
 .pp-empty-copy,
@@ -859,6 +874,10 @@ a.pp-btn {
   background: var(--surface-card);
   padding: 16px;
 }
+
+/* Slow ambient identity-color glow, matching each board's own accent (--dc) */
+.u-board-pulse { animation: pdxPulse var(--dur-pulse, 4s) ease-in-out infinite; }
+.u-spot-pulse { animation: pdxSpotPulse 4s ease-in-out infinite; }
 
 .pp-board__head {
   display: flex;

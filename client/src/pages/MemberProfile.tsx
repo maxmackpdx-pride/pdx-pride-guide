@@ -214,7 +214,7 @@ export default function MemberProfile() {
 
       <ProfileTabs active={tab} onChange={setTab} />
 
-      <div className="pp-shell pp-panel">
+      <div className="pp-shell pp-panel" key={tab}>
         {tab === "events" && <EventsTab data={data} />}
         {tab === "media" && <MediaTab media={data.media || null} active={tab === "media"} />}
         {tab === "board" && <BoardTab posts={data.boardPosts || []} />}
