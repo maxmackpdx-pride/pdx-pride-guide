@@ -63,12 +63,24 @@ try {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
+  const unreadRes = await page
+    .waitForResponse((r) => r.url().includes("/api/messages/unread-count") && r.ok(), { timeout: 15000 })
+    .then((r) => r.json())
+    .catch(() => ({ count: 0 }));
+  await page.locator(".floating-inbox__fab").waitFor({ state: "visible", timeout: 10000 });
 
   const fabBadgeClosed = await page.locator(".floating-inbox__fab-badge").isVisible().catch(() => false);
+  const fabBadgeText = fabBadgeClosed ? await page.locator(".floating-inbox__fab-badge").innerText() : "";
+  record(
+    "Desktop FAB unread badge (after unread-count loads)",
+    unreadRes.count > 0 && fabBadgeClosed && fabBadgeText === String(unreadRes.count > 9 ? "9+" : unreadRes.count),
+    `apiCount=${unreadRes.count} badgeVisible=${fabBadgeClosed} badgeText=${fabBadgeText}`,
+  );
+
   record(
     "Single host, no overlay when closed (desktop)",
     (await hostCount(page)) === 1 && (await overlayCount(page)) === 0,
-    `hosts=${await hostCount(page)} overlays=${await overlayCount(page)} unreadBadge=${fabBadgeClosed}`,
+    `hosts=${await hostCount(page)} overlays=${await overlayCount(page)}`,
   );
 
   await page.locator(".floating-inbox__fab").click();
