@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import UserAvatar from "@/components/UserAvatar";
 import { Button, StatPill } from "@/components/ds";
-import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { dashVarToDsAccent } from "@/lib/dsColors";
 import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import "./hub-home.css";
@@ -40,18 +38,6 @@ type Props = {
   errorBanner?: ReactNode;
 };
 
-function formatTime(value?: string) {
-  if (!value) return "";
-  const date = new Date(value);
-  const diff = Date.now() - date.getTime();
-  if (diff < 60_000) return "now";
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m`;
-  if (diff < 86_400_000) {
-    return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-  }
-  return date.toLocaleDateString(undefined, { weekday: "short" });
-}
-
 export default function MemberHubHome({
   user,
   counts,
@@ -67,14 +53,6 @@ export default function MemberHubHome({
   errorBanner,
 }: Props) {
   const displayName = (user.displayName || user.username || "Member").toUpperCase();
-
-  const { data: inbox = [], isLoading: inboxLoading } = useQuery<any[]>({
-    queryKey: ["/api/messages/inbox"],
-    queryFn: () =>
-      fetch("/api/messages/inbox", { credentials: "include" }).then(r => (r.ok ? r.json() : [])),
-  });
-
-  const threads = inbox.slice(0, 5);
 
   const pills: Array<{ key: string; label: string; count: number; color: string }> = [
     { key: "events", label: "Events", count: counts.eventCount, color: "var(--dash-cyan)" },
@@ -165,65 +143,6 @@ export default function MemberHubHome({
       )}
 
       <div className="hub-home-grid">
-        <section className="hub-card" aria-label="Inbox preview">
-          <div className="hub-card__head">
-            <div className="hub-card__title-row">
-              <span className="hub-card__dot" aria-hidden />
-              <h2 className="hub-card__title">Inbox</h2>
-              <span className="hub-card__sub">private</span>
-            </div>
-            <Link href="/inbox">
-              <Button accent="cyan" size="sm" arrow>
-                Open
-              </Button>
-            </Link>
-          </div>
-          {inboxLoading ? (
-            <div className="hub-empty">Loading threads…</div>
-          ) : threads.length === 0 ? (
-            <div className="hub-empty">
-              No threads yet. Replies from Spotted, Pride Werk, event hosts, and check-ins show up here.
-            </div>
-          ) : (
-            threads.map((msg: any) => {
-              const name =
-                msg.fromDisplayName ||
-                msg.from_display_name ||
-                msg.fromUsername ||
-                msg.from_username ||
-                "Community";
-              const party = counterpartyAvatar(msg, "inbox");
-              const unreadMsg = !msg.isRead && !msg.is_read;
-              const threadId = msg.threadId || msg.thread_id;
-              const href = threadId ? `/inbox?thread=${encodeURIComponent(threadId)}` : "/inbox";
-              const subject =
-                msg.subject || msg.preview || msg.body || msg.lastMessage || "Message";
-              return (
-                <Link key={msg.id} href={href} className="hub-thread">
-                  <UserAvatar
-                    photoUrl={party.photoUrl}
-                    avatarChoice={party.avatarChoice ?? undefined}
-                    avatarRing={party.avatarRing}
-                    displayName={name}
-                    username={party.username ?? undefined}
-                    size={40}
-                  />
-                  <span className="hub-thread__body">
-                    <span className="hub-thread__top">
-                      <span className="hub-thread__name">{name}</span>
-                      <span className="hub-thread__at">
-                        {formatTime(msg.createdAt || msg.created_at || msg.lastMessageAt)}
-                      </span>
-                    </span>
-                    <span className="hub-thread__sub">{subject}</span>
-                  </span>
-                  {unreadMsg && <span className="hub-thread__unread" aria-label="Unread" />}
-                </Link>
-              );
-            })
-          )}
-        </section>
-
         <div className="hub-widget-stack hub-widgets-design">
           <DashboardWidgets />
         </div>
