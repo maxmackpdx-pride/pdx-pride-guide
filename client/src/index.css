@@ -190,16 +190,29 @@ body::before {
   bottom: calc(-1 * var(--site-rainbow-bar-height-thick));
   height: var(--site-rainbow-bar-height-thick);
   opacity: 0.8;
-  background: var(--site-rainbow-bar);
+  /* Animated rainbow treatment comes from .pdxSeam (Divider CSS) */
   z-index: 1;
 }
 
 .rainbow-bar {
+  position: relative;
   height: var(--site-rainbow-bar-height);
   width: 100%;
-  background: var(--site-rainbow-bar);
+  overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite;
   opacity: 0.8;
   flex-shrink: 0;
+}
+.rainbow-bar::after {
+  content: "";
+  position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
+  transform: translateX(-165%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen; pointer-events: none;
+  animation: pdxSeamGlint 3.4s var(--ease-inout, ease-in-out) infinite;
 }
 
 .rainbow-bar--thick {
@@ -9492,9 +9505,19 @@ html.calm-mode .page-hero__accent--rainbow {
 
 /* ── Rainbow bars → solid dark gray ── */
 html.calm-mode .rainbow-bar,
-html.calm-mode .site-header::after {
+html.calm-mode .site-header::after,
+html.calm-mode .site-header-rainbow-seam.pdxSeam,
+html.calm-mode .pdxSeam {
   background: #1a1a1a !important;
+  background-size: auto !important;
   opacity: 1;
+  animation: none !important;
+  box-shadow: none !important;
+}
+html.calm-mode .rainbow-bar::after,
+html.calm-mode .site-header-rainbow-seam.pdxSeam::after,
+html.calm-mode .pdxSeam::after {
+  display: none !important;
 }
 
 /* ── Heroes & panels — 10% photo, 90% dark scrim, no FX overlays ── */

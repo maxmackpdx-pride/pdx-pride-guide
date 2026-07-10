@@ -1282,7 +1282,7 @@ export default function Schedule({
             The whole week, laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other.
           </p>
         </div>
-        <div style={{ height: '3px', background: 'var(--grad-flag)', position: 'relative', zIndex: 1 }} />
+        <div className="pdx-rainbow-rule" style={{ position: 'relative', zIndex: 1 }} aria-hidden="true" />
       </section>
 
       {/* ---- Sticky toolbar ---- */}
