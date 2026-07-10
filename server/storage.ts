@@ -19,7 +19,7 @@ import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } fro
 import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
 import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
-  events, submissions, gigPosts, promoters, moderationRequests, attendances, users, messages, missedConnections,
+  events, submissions, gigPosts, promoters, moderationRequests, attendances, eventChatMessages, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports,
   beachCheckins, beachCarpoolPosts, beachCarpoolRequests, riverBratsReports,
   feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
@@ -47,6 +47,7 @@ import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPr
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
 import { pacificMidnightIso, pacificTodayDate } from "@shared/riverBrats";
+import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
@@ -426,6 +427,18 @@ try { sqlite.exec(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_unique ON u
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN is_anonymous INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN expires_at TEXT`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS event_chat_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    body TEXT NOT NULL,
+    is_anonymous INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  )
+`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_type TEXT NOT NULL DEFAULT 'THREAD'`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE messages ADD COLUMN context_label TEXT`); } catch(e) {}
@@ -4486,20 +4499,77 @@ function attendanceInitials(handle: string): string {
   return clean.slice(0, 2).toUpperCase();
 }
 
-function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
-    const viewerRsvped = viewerUserId != null && rows.some((r: any) => (r.userId ?? r.user_id) === viewerUserId);
-    if (viewerRsvped) return rows;
-    return rows.map((r: any) => ({
+function attendanceChatExpiresAt(from = new Date()): string {
+  return new Date(from.getTime() + ATTENDANCE_CHAT_HOURS * 60 * 60 * 1000).toISOString();
+}
+
+function expireStaleAttendances(eventId?: number) {
+  const now = new Date().toISOString();
+  if (eventId != null) {
+    sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE event_id = ? AND is_active = 1 AND expires_at IS NOT NULL AND expires_at <= ?`).run(eventId, now);
+    return;
+  }
+  sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE is_active = 1 AND expires_at IS NOT NULL AND expires_at <= ?`).run(now);
+}
+
+function maskAttendanceRow(viewerUserId: number | undefined, viewerRsvped: boolean, r: any): any {
+  const uid = r.userId ?? r.user_id;
+  const isSelf = viewerUserId != null && uid === viewerUserId;
+  const isAnonymous = Boolean(r.isAnonymous ?? r.is_anonymous);
+  const expiresAt = r.expiresAt ?? r.expires_at ?? null;
+
+  if (!viewerRsvped && !isSelf) {
+    return {
       id: r.id,
       event_id: r.event_id,
-      handle: r.handle,
+      handle: "Anonymous",
       message: r.message,
       avatarSeed: r.avatarSeed ?? r.avatar_seed,
       photoUrl: null,
       created_at: r.created_at,
       is_active: r.is_active,
+      isAnonymous: true,
+      expiresAt,
       masked: true,
-    }));
+    };
+  }
+
+  if (isAnonymous && !isSelf) {
+    return {
+      id: r.id,
+      event_id: r.event_id,
+      handle: "Anonymous",
+      message: r.message,
+      avatarSeed: r.avatarSeed ?? r.avatar_seed,
+      photoUrl: null,
+      created_at: r.created_at,
+      is_active: r.is_active,
+      isAnonymous: true,
+      expiresAt,
+      masked: true,
+    };
+  }
+
+  return {
+    ...r,
+    isAnonymous,
+    expiresAt,
+    masked: false,
+  };
+}
+
+function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
+  const viewerRsvped = viewerUserId != null && rows.some((r: any) => (r.userId ?? r.user_id) === viewerUserId);
+  return rows.map(r => maskAttendanceRow(viewerUserId, viewerRsvped, r));
+}
+
+function getActiveAttendanceForUser(eventId: number, userId: number) {
+  expireStaleAttendances(eventId);
+  return sqlite.prepare(`
+    SELECT * FROM attendances
+    WHERE event_id = ? AND user_id = ? AND is_active = 1
+    LIMIT 1
+  `).get(eventId, userId) as Attendance | undefined;
 }
 
 export type AdminMetricsSnapshot = {
@@ -4616,8 +4686,10 @@ export interface IStorage {
   getAttendances(eventId: number, viewerUserId?: number): any[];
   getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
   getAttendancesByUser(userId: number): any[];
-  upsertAttendance(eventId: number, user: User, message: string): Attendance;
+  upsertAttendance(eventId: number, user: User, message: string, isAnonymous?: boolean): Attendance;
   removeAttendance(eventId: number, userId: number): void;
+  getEventChatMessages(eventId: number, viewerUserId: number): { messages: any[]; expiresAt: string | null; chatOpen: boolean };
+  postEventChatMessage(eventId: number, userId: number, body: string): any;
   // Users
   getUserById(id: number): User | undefined;
   getUserByEmail(email: string): User | undefined;
@@ -5726,19 +5798,28 @@ export const storage: IStorage = {
       }
     }
   },
-    getAttendances(eventId, viewerUserId) {      return maskAttendances(viewerUserId, sqlite.prepare(`      SELECT a.id, a.event_id, a.user_id AS userId, a.handle, a.message, a.avatar_seed AS avatarSeed, a.photo_url AS photoUrl, a.is_active, a.created_at, u.username, u.display_name AS displayName, u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+    getAttendances(eventId, viewerUserId) {
+      expireStaleAttendances(eventId);
+      return maskAttendances(viewerUserId, sqlite.prepare(`
+      SELECT a.id, a.event_id, a.user_id AS userId, a.handle, a.message, a.avatar_seed AS avatarSeed,
+             a.photo_url AS photoUrl, a.is_anonymous AS isAnonymous, a.expires_at AS expiresAt,
+             a.is_active, a.created_at, u.username, u.display_name AS displayName,
+             u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.event_id = ? AND a.is_active = 1
       ORDER BY a.created_at DESC
-      `).all(eventId) as any[]);  },
+      `).all(eventId) as any[]);
+    },
   getAttendanceSummaries() {
+    expireStaleAttendances();
     const rows = sqlite.prepare(`
       SELECT
         a.id,
         a.event_id AS eventId,
         a.user_id AS userId,
         a.handle,
+        a.is_anonymous AS isAnonymous,
         a.avatar_seed AS avatarSeed,
         u.avatar_ring AS avatarRing,
         u.avatar_choice AS avatarChoice,
@@ -5752,6 +5833,7 @@ export const storage: IStorage = {
       eventId: number;
       userId: number | null;
       handle: string;
+      isAnonymous: number | boolean;
       avatarSeed: string;
       avatarRing: string | null;
       avatarChoice: number | null;
@@ -5762,20 +5844,22 @@ export const storage: IStorage = {
       if (!map[row.eventId]) map[row.eventId] = { count: 0, preview: [] };
       map[row.eventId].count += 1;
       if (map[row.eventId].preview.length < 8) {
+        const anonymous = Boolean(row.isAnonymous);
         map[row.eventId].preview.push({
           id: row.id,
-          initials: attendanceInitials(row.handle),
-          avatarSeed: row.avatarSeed || row.handle,
-          userId: row.userId,
-          avatarRing: row.avatarRing,
-          avatarChoice: row.avatarChoice,
-          photoUrl: row.photoUrl,
+          initials: anonymous ? "?" : attendanceInitials(row.handle),
+          avatarSeed: anonymous ? `anon-${row.id}` : (row.avatarSeed || row.handle),
+          userId: anonymous ? null : row.userId,
+          avatarRing: anonymous ? null : row.avatarRing,
+          avatarChoice: anonymous ? null : row.avatarChoice,
+          photoUrl: anonymous ? null : row.photoUrl,
         });
       }
     }
     return map;
   },
   getAttendancesByUser(userId) {
+    expireStaleAttendances();
     return sqlite.prepare(`
       SELECT
         a.id,
@@ -5785,6 +5869,8 @@ export const storage: IStorage = {
         a.message,
         a.avatar_seed AS avatarSeed,
         a.photo_url AS photoUrl,
+        a.is_anonymous AS isAnonymous,
+        a.expires_at AS expiresAt,
         a.is_active AS isActive,
         a.created_at AS createdAt,
         e.title AS eventTitle,
@@ -5796,8 +5882,10 @@ export const storage: IStorage = {
       ORDER BY e.date_start ASC
     `).all(userId) as any[];
   },
-  upsertAttendance(eventId, user, message) {
+  upsertAttendance(eventId, user, message, isAnonymous = false) {
     const handle = user.displayName || user.username;
+    const createdAt = new Date().toISOString();
+    const expiresAt = attendanceChatExpiresAt();
     const existing = sqlite.prepare(`SELECT * FROM attendances WHERE event_id = ? AND user_id = ?`).get(eventId, user.id) as Attendance | undefined;
     const values = {
       eventId,
@@ -5806,14 +5894,95 @@ export const storage: IStorage = {
       message,
       avatarSeed: user.username,
       photoUrl: user.photoUrl || null,
+      isAnonymous,
+      expiresAt,
       isActive: true,
-      createdAt: new Date().toISOString(),
+      createdAt,
     };
     if (existing) {
       db.update(attendances).set(values as any).where(eq(attendances.id, existing.id)).run();
       return db.select().from(attendances).where(eq(attendances.id, existing.id)).get()!;
     }
     return db.insert(attendances).values(values as any).returning().get();
+  },
+  getEventChatMessages(eventId, viewerUserId) {
+    const mine = getActiveAttendanceForUser(eventId, viewerUserId);
+    if (!mine) return { messages: [], expiresAt: null, chatOpen: false };
+    const rows = sqlite.prepare(`
+      SELECT m.id, m.event_id AS eventId, m.user_id AS userId, m.body, m.is_anonymous AS isAnonymous,
+             m.created_at AS createdAt, u.username, u.display_name AS displayName,
+             u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM event_chat_messages m
+      LEFT JOIN users u ON u.id = m.user_id
+      WHERE m.event_id = ?
+      ORDER BY m.created_at ASC
+      LIMIT 200
+    `).all(eventId) as any[];
+    const messages = rows.map(row => {
+      const isSelf = row.userId === viewerUserId;
+      const anonymous = Boolean(row.isAnonymous);
+      if (anonymous && !isSelf) {
+        return {
+          id: row.id,
+          eventId: row.eventId,
+          userId: null,
+          body: row.body,
+          isAnonymous: true,
+          createdAt: row.createdAt,
+          displayName: "Anonymous",
+          username: "anonymous",
+          photoUrl: null,
+          avatarChoice: null,
+          avatarRing: null,
+          isMine: false,
+        };
+      }
+      return {
+        id: row.id,
+        eventId: row.eventId,
+        userId: row.userId,
+        body: row.body,
+        isAnonymous: anonymous,
+        createdAt: row.createdAt,
+        displayName: row.displayName || row.username,
+        username: row.username,
+        photoUrl: row.photoUrl,
+        avatarChoice: row.avatarChoice,
+        avatarRing: row.avatarRing,
+        isMine: isSelf,
+      };
+    });
+    return {
+      messages,
+      expiresAt: mine.expiresAt ?? null,
+      chatOpen: Boolean(mine.expiresAt && mine.expiresAt > new Date().toISOString()),
+    };
+  },
+  postEventChatMessage(eventId, userId, body) {
+    const mine = getActiveAttendanceForUser(eventId, userId);
+    if (!mine) throw new Error("Active check-in required");
+    if (mine.expiresAt && mine.expiresAt <= new Date().toISOString()) {
+      throw new Error("Event chat has closed");
+    }
+    const createdAt = new Date().toISOString();
+    const row = db.insert(eventChatMessages).values({
+      eventId,
+      userId,
+      body,
+      isAnonymous: Boolean(mine.isAnonymous),
+      createdAt,
+    } as any).returning().get();
+    return {
+      id: row.id,
+      eventId: row.eventId,
+      userId: row.userId,
+      body: row.body,
+      isAnonymous: Boolean(row.isAnonymous),
+      createdAt: row.createdAt,
+      isMine: true,
+      displayName: mine.isAnonymous ? "Anonymous" : (mine.handle || "You"),
+      username: mine.isAnonymous ? "anonymous" : undefined,
+    };
   },
   removeAttendance(eventId, userId) {
     sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE event_id = ? AND user_id = ?`).run(eventId, userId);

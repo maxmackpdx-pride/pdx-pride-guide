@@ -228,9 +228,21 @@ export const attendances = sqliteTable("attendances", {
   message: text("message").notNull(), // chosen speech bubble
   avatarSeed: text("avatar_seed").notNull(), // seed for deterministic avatar color/initials
   photoUrl: text("photo_url"),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  expiresAt: text("expires_at"),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(""),
 });
+
+export const eventChatMessages = sqliteTable("event_chat_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type EventChatMessage = typeof eventChatMessages.$inferSelect;
 
 export const insertAttendanceSchema = createInsertSchema(attendances).omit({ id: true, createdAt: true });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;

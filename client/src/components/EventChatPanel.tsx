@@ -1,0 +1,158 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import UserAvatar from "@/components/UserAvatar";
+import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
+
+type ChatMessage = {
+  id: number;
+  body: string;
+  createdAt: string;
+  isAnonymous: boolean;
+  isMine?: boolean;
+  displayName?: string;
+  username?: string;
+  photoUrl?: string | null;
+  avatarChoice?: number | null;
+  avatarRing?: string | null;
+};
+
+type ChatPayload = {
+  messages: ChatMessage[];
+  expiresAt: string | null;
+  chatOpen: boolean;
+};
+
+function formatCountdown(expiresAt: string | null): string | null {
+  if (!expiresAt) return null;
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (ms <= 0) return "Chat closed";
+  const totalMin = Math.ceil(ms / 60_000);
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  if (hours > 0) return `${hours}h ${mins}m left`;
+  return `${mins}m left`;
+}
+
+type Props = {
+  eventId: number;
+  onClose: () => void;
+};
+
+export default function EventChatPanel({ eventId, onClose }: Props) {
+  const [body, setBody] = useState("");
+  const [tick, setTick] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const { data, isLoading } = useQuery<ChatPayload>({
+    queryKey: ["/api/events", eventId, "chat"],
+    queryFn: () => apiRequest("GET", `/api/events/${eventId}/chat`).then(r => r.json()),
+    refetchInterval: 8_000,
+  });
+
+  const messages = data?.messages ?? [];
+  const expiresAt = data?.expiresAt ?? null;
+  const chatOpen = data?.chatOpen ?? false;
+  const countdown = useMemo(() => formatCountdown(expiresAt), [expiresAt, tick]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setTick(t => t + 1), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages.length]);
+
+  const postMutation = useMutation({
+    mutationFn: (text: string) =>
+      apiRequest("POST", `/api/events/${eventId}/chat`, { body: text }),
+    onSuccess: () => {
+      setBody("");
+      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "chat"] });
+    },
+  });
+
+  return (
+    <div className="event-chat-backdrop" data-testid="event-chat-backdrop" onClick={onClose}>
+      <div
+        className="event-chat-panel"
+        data-testid="event-chat-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Event chat"
+        onClick={e => e.stopPropagation()}
+      >
+        <header className="event-chat-panel__head">
+          <div>
+            <h3 className="display event-chat-panel__title">Event chat</h3>
+            <p className="event-chat-panel__meta">
+              {chatOpen
+                ? `Open for ${ATTENDANCE_CHAT_HOURS} hours · ${countdown ?? "active"}`
+                : countdown ?? "Chat closed"}
+            </p>
+          </div>
+          <button type="button" className="event-chat-panel__close" onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </header>
+
+        <div className="event-chat-panel__messages" ref={listRef}>
+          {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
+          {!isLoading && messages.length === 0 && (
+            <p className="event-chat-panel__empty">
+              You're checked in. Say hi — others going can see this for the next {ATTENDANCE_CHAT_HOURS} hours.
+            </p>
+          )}
+          {messages.map(msg => (
+            <div
+              key={msg.id}
+              className={`event-chat-panel__msg${msg.isMine ? " event-chat-panel__msg--mine" : ""}`}
+            >
+              {!msg.isMine && (
+                <UserAvatar
+                  username={msg.username}
+                  displayName={msg.isAnonymous ? undefined : msg.displayName}
+                  photoUrl={msg.photoUrl}
+                  avatarChoice={msg.avatarChoice ?? undefined}
+                  avatarRing={msg.avatarRing}
+                  size={28}
+                />
+              )}
+              <div className="event-chat-panel__bubble">
+                {!msg.isMine && (
+                  <span className="event-chat-panel__author">
+                    {msg.isAnonymous ? "Anonymous" : `@${msg.username || msg.displayName}`}
+                  </span>
+                )}
+                <p>{msg.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <footer className="event-chat-panel__composer">
+          <input
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            placeholder={chatOpen ? "Say something to the room…" : "Chat closed"}
+            disabled={!chatOpen || postMutation.isPending}
+            maxLength={500}
+            data-testid="event-chat-input"
+          />
+          <button
+            type="button"
+            className="display event-chat-panel__send"
+            disabled={!chatOpen || !body.trim() || postMutation.isPending}
+            onClick={() => postMutation.mutate(body.trim())}
+            data-testid="event-chat-send"
+          >
+            Send
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
+}

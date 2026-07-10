@@ -27,6 +27,9 @@ export const ATTENDANCE_PHRASE_BY_KEY: Record<AttendancePhraseKey, AttendancePhr
 
 export const DEFAULT_ATTENDANCE_PHRASE_KEY: AttendancePhraseKey = "ILL_BE_HERE";
 
+/** Active check-in unlocks the event chat for this many hours. */
+export const ATTENDANCE_CHAT_HOURS = 8;
+
 export function attendancePhraseLabel(key: AttendancePhraseKey): string {
   return ATTENDANCE_PHRASE_BY_KEY[key].label;
 }

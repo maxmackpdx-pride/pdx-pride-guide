@@ -3,7 +3,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
-import AttendanceVibeModal from "./AttendanceVibeModal";
+import AttendanceVibeModal, { type AttendanceVisibility } from "./AttendanceVibeModal";
+import EventChatPanel from "./EventChatPanel";
 import UserAvatar from "@/components/UserAvatar";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
 import LiveWave from "@/components/LiveWave";
@@ -32,6 +33,8 @@ interface Attendee {
   avatarChoice?: number;
   avatarRing?: string | null;
   masked?: boolean;
+  isAnonymous?: boolean;
+  expiresAt?: string | null;
 }
 
 interface ExtraPerson {
@@ -60,6 +63,8 @@ export default function AttendanceCluster({
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedPhraseKey, setSelectedPhraseKey] = useState<AttendancePhraseKey>(DEFAULT_ATTENDANCE_PHRASE_KEY);
+  const [visibility, setVisibility] = useState<AttendanceVisibility>("visible");
+  const [showChat, setShowChat] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [messageTarget, setMessageTarget] = useState<Attendee | null>(null);
   const [messageBody, setMessageBody] = useState("");
@@ -82,12 +87,16 @@ export default function AttendanceCluster({
   });
 
   const mutation = useMutation({
-    mutationFn: (data: { message: string }) =>
+    mutationFn: (data: { message: string; isAnonymous: boolean }) =>
       apiRequest("POST", `/api/events/${eventId}/attendance`, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
       setShowForm(false);
+      setShowChat(true);
+      if (variables.isAnonymous) setVisibility("anonymous");
+      else setVisibility("visible");
     },
   });
 
@@ -115,12 +124,16 @@ export default function AttendanceCluster({
   const submitVibe = (btnEl?: HTMLElement | null) => {
     const wasGoing = Boolean(myAttendance);
     if (!wasGoing && btnEl) spawnRsvpSparks(btnEl);
-    mutation.mutate({ message: attendancePhraseLabel(selectedPhraseKey) });
+    mutation.mutate({
+      message: attendancePhraseLabel(selectedPhraseKey),
+      isAnonymous: visibility === "anonymous",
+    });
   };
 
   useEffect(() => {
     if (!showForm || !myAttendance) return;
     setSelectedPhraseKey(resolveAttendancePhrase(myAttendance.message).key);
+    setVisibility(myAttendance.isAnonymous ? "anonymous" : "visible");
   }, [showForm, myAttendance]);
 
   const phrasePicker = (
@@ -216,15 +229,28 @@ export default function AttendanceCluster({
             </span>
           )}
           {myAttendance && (
-            <button
-              type="button"
-              data-testid="button-withdraw-rsvp"
-              onClick={() => removeMutation.mutate()}
-              disabled={removeMutation.isPending}
-              className="attendance-cluster-cta__withdraw"
-            >
-              {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
-            </button>
+            <>
+              <button
+                type="button"
+                data-testid="button-open-event-chat"
+                onClick={() => setShowChat(true)}
+                className="attendance-cluster-cta__chat"
+              >
+                Open event chat →
+              </button>
+              <button
+                type="button"
+                data-testid="button-withdraw-rsvp"
+                onClick={() => {
+                  setShowChat(false);
+                  removeMutation.mutate();
+                }}
+                disabled={removeMutation.isPending}
+                className="attendance-cluster-cta__withdraw"
+              >
+                {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
+              </button>
+            </>
           )}
         </div>
       )}
@@ -288,12 +314,20 @@ export default function AttendanceCluster({
         isPending={mutation.isPending}
         hasAttendance={!!myAttendance}
         title="Say something"
+        visibility={visibility}
+        onVisibilityChange={setVisibility}
         onClose={() => setShowForm(false)}
         onSubmit={submitVibe}
-        onRemove={() => removeMutation.mutate()}
+        onRemove={() => {
+          setShowChat(false);
+          removeMutation.mutate();
+        }}
       >
         {phrasePicker}
       </AttendanceVibeModal>
+      {showChat && myAttendance && (
+        <EventChatPanel eventId={eventId} onClose={() => setShowChat(false)} />
+      )}
       {messageTarget && (
         <div
           data-testid="message-panel-backdrop"

@@ -28,6 +28,7 @@ export function useEventRsvp() {
     mutationFn: (eventId: number) =>
       apiRequest("POST", `/api/events/${eventId}/attendance`, {
         message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
+        isAnonymous: false,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });

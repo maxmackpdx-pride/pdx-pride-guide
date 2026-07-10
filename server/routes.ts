@@ -1141,8 +1141,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const message = String(req.body.message || "").trim();
       if (!message) return res.status(400).json({ error: "message required" });
+      const isAnonymous = Boolean(req.body.isAnonymous);
       const eventId = Number(req.params.id);
-      const att = storage.upsertAttendance(eventId, user, message);
+      const att = storage.upsertAttendance(eventId, user, message, isAnonymous);
       notifyAttendanceUpdate(eventId);
       res.json(att);
     } catch (e: any) {
@@ -1155,6 +1156,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     storage.removeAttendance(eventId, req.session.userId!);
     notifyAttendanceUpdate(eventId);
     res.json({ ok: true });
+  });
+
+  app.get("/api/events/:id/chat", requireAuth, (req, res) => {
+    const eventId = Number(req.params.id);
+    const payload = storage.getEventChatMessages(eventId, req.session.userId!);
+    res.json(payload);
+  });
+
+  app.post("/api/events/:id/chat", requireAuth, (req, res) => {
+    try {
+      const eventId = Number(req.params.id);
+      const body = String(req.body.body || "").trim();
+      if (!body) return res.status(400).json({ error: "body required" });
+      if (body.length > 500) return res.status(400).json({ error: "Message too long" });
+      const msg = storage.postEventChatMessage(eventId, req.session.userId!, body);
+      res.json(msg);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   app.post("/api/events/:eventId/attendance/:attendanceId/message", requireAuth, (req, res) => {
