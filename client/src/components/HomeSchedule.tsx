@@ -111,7 +111,7 @@ export default function HomeSchedule() {
             })}
           </div>
         ) : (
-          <div className="hsch-quiet">Nothing on this day yet — check back soon.</div>
+          <div className="hsch-quiet">Nothing on this day yet, check back soon.</div>
         )}
       </div>
 

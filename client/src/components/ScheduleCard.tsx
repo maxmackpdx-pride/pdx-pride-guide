@@ -21,7 +21,7 @@ export default function ScheduleCard({
   children,
   kicker = "All Week",
   title = "The Schedule",
-  description = "The whole weekend on one clock. Every event placed by start time — the magenta line is now.",
+  description = "The whole weekend on one clock. Every event placed by start time, the magenta line is now.",
   actionHref = "/schedule",
   actionLabel = "View all events",
 }: ScheduleCardProps) {
