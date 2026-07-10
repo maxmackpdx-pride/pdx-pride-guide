@@ -311,13 +311,13 @@ body::before {
 .glitch-logo__ghost--cyan {
   z-index: 2;
   filter: saturate(2.4) brightness(1.15) hue-rotate(165deg);
-  animation: glitch-word-cyan 7.5s infinite steps(1, end);
+  animation: glitch-word-cyan 3s infinite steps(1, end);
 }
 
 .glitch-logo__ghost--magenta {
   z-index: 3;
   filter: saturate(2.6) brightness(1.1) hue-rotate(285deg);
-  animation: glitch-word-magenta 7.5s infinite steps(1, end);
+  animation: glitch-word-magenta 3s infinite steps(1, end);
   animation-delay: 0.12s;
 }
 
@@ -419,12 +419,12 @@ body::before {
 
 .glitch-word::before {
   color: #19e3ff;
-  animation: glitch-word-cyan 7.5s infinite steps(1, end);
+  animation: glitch-word-cyan 3s infinite steps(1, end);
 }
 
 .glitch-word::after {
   color: #ff1fa0;
-  animation: glitch-word-magenta 7.5s infinite steps(1, end);
+  animation: glitch-word-magenta 3s infinite steps(1, end);
   animation-delay: 0.12s;
 }
 
