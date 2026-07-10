@@ -307,7 +307,7 @@ export default function Nav() {
                       <Link
                         href="/inbox"
                         role="menuitem"
-                        className={`site-profile-menu__item${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
+                        className={`site-profile-menu__item site-profile-menu__item--inbox${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
                         onClick={() => {
                           setProfileOpen(false);
                           setMenuOpen(false);

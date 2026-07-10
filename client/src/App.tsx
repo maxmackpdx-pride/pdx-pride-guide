@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
+import MobileBottomNav from "./components/MobileBottomNav";
 import Footer from "./components/Footer";
 import FilmGrainOverlay from "./components/FilmGrainOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -71,6 +72,7 @@ function AppLayout() {
     >
       <FilmGrainOverlay />
       {!profile && <Nav />}
+      {!profile && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
           <Switch>
@@ -114,15 +116,15 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-      <AuthProvider>
-        <PushNotificationPrompt />
-        <Router>
-          <ScrollToTop />
-          <AnalyticsTracker />
-          <AppLayout />
-          <Toaster />
-        </Router>
-      </AuthProvider>
+        <AuthProvider>
+          <PushNotificationPrompt />
+          <Router>
+            <ScrollToTop />
+            <AnalyticsTracker />
+            <AppLayout />
+            <Toaster />
+          </Router>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
