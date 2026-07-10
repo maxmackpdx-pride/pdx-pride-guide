@@ -29,6 +29,7 @@ import { List, Grid, MapPin } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
+import CountUpValue from "@/components/CountUpValue";
 import { dayAccentToken } from "@/lib/dsColors";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
@@ -260,15 +261,6 @@ export default function Events() {
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0;
 
-  const eventsCountLabel = useMemo(() => {
-    const total = events.length;
-    const visible = filtered.length;
-    if (hasActiveFilters && visible !== total) {
-      return `${visible} of ${total} events`;
-    }
-    return `${total} event${total === 1 ? "" : "s"}`;
-  }, [events.length, filtered.length, hasActiveFilters]);
-
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
@@ -408,7 +400,26 @@ export default function Events() {
             <div className="events-count-banner">
               <MapPin size={13} />
               <span data-testid="events-count">
-                {isLoading ? "Loading events…" : eventsCountLabel}
+                {isLoading ? (
+                  "Loading events…"
+                ) : hasActiveFilters && filtered.length !== events.length ? (
+                  <>
+                    <CountUpValue value={filtered.length} /> of{" "}
+                    <CountUpValue
+                      key={events.length > 0 ? "total-ready" : "total-pending"}
+                      value={events.length}
+                    />{" "}
+                    events
+                  </>
+                ) : (
+                  <>
+                    <CountUpValue
+                      key={events.length > 0 ? "total-ready" : "total-pending"}
+                      value={events.length}
+                    />{" "}
+                    event{events.length === 1 ? "" : "s"}
+                  </>
+                )}
               </span>
               {activeDay !== "ALL" && <span className="events-count-meta">· {activeDay}</span>}
             </div>

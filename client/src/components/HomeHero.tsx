@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Button, Countdown } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
+import CountUpValue from "@/components/CountUpValue";
 import { useAuth } from "@/context/AuthContext";
 import heroCollageImg from "@/assets/hero-collage.png";
 
@@ -61,7 +62,10 @@ export default function HomeHero({ eventCount }: Props) {
             aria-label={`${eventCount} events across seven days`}
           >
             <span className="home-hero__stat-num" data-testid="home-events-count">
-              {eventCount}
+              <CountUpValue
+                key={eventCount > 0 ? "events-ready" : "events-pending"}
+                value={eventCount}
+              />
             </span>
             <div className="home-hero__stat-meta">
               <span className="home-hero__stat-label">Events</span>

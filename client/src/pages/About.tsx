@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
+import CountUpValue from "@/components/CountUpValue";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
@@ -91,7 +92,11 @@ export default function About() {
             <div className="about-v2-hero__kicker">About · Portland Pride 2026</div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">
-                {eventCount} events.
+                <CountUpValue
+                  key={eventCount > 0 ? "events-ready" : "events-pending"}
+                  value={eventCount}
+                />{" "}
+                events.
               </span>
               <span className="about-v2-hero__lede">
                 And approximately zero interest in being a sanitized corporate Pride pamphlet.
@@ -117,11 +122,18 @@ export default function About() {
       <section className="about-v2-stats" aria-label="Guide stats">
         <div className="about-v2-stats__grid">
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--lime">{eventCount}</div>
+            <div className="about-v2-stats__num about-v2-stats__num--lime">
+              <CountUpValue
+                key={eventCount > 0 ? "stats-ready" : "stats-pending"}
+                value={eventCount}
+              />
+            </div>
             <div className="about-v2-stats__label">Events, and counting</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--cyan">7</div>
+            <div className="about-v2-stats__num about-v2-stats__num--cyan">
+              <CountUpValue value={7} />
+            </div>
             <div className="about-v2-stats__label">Days, one guide</div>
           </div>
           <div className="about-v2-stats__cell">
@@ -129,7 +141,9 @@ export default function About() {
             <div className="about-v2-stats__label">To browse. Always.</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--amber">1</div>
+            <div className="about-v2-stats__num about-v2-stats__num--amber">
+              <CountUpValue value={1} />
+            </div>
             <div className="about-v2-stats__label">Person building it</div>
           </div>
         </div>

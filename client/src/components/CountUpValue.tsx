@@ -159,8 +159,16 @@ export default function CountUpValue({
     }
     const prev = prevRef.current;
     if (prev === target) return;
-    animateTo(prev, target, Math.min(duration, 600));
-    if (target > prev) {
+    // First climb from empty → real total uses full duration (async data after mount).
+    const ms = prev === 0 && target > 0 ? duration : Math.min(duration, 600);
+    if (prev === 0 && target > 0) {
+      setDisplay(0);
+      animateTo(0, target, ms);
+    } else {
+      animateTo(prev, target, ms);
+    }
+    if (target > prev && prev > 0) {
+      // +N float only for live bumps after the initial climb
       const d = target - prev;
       setDelta(d);
       setPop(true);

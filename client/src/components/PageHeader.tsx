@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import GlitchWord from "@/components/GlitchWord";
+import CountUpValue from "@/components/CountUpValue";
 import type { PageHeroAccent } from "@/components/PageHero";
 
 export type PageHeaderProps = {
@@ -45,7 +46,18 @@ export default function PageHeader({
 
         <div className="page-header__row">
           <h1 className="page-header__title">
-            {titlePrefix != null && <span className="page-header__count">{titlePrefix}</span>}
+            {titlePrefix != null && (
+              <span className="page-header__count">
+                {typeof titlePrefix === "number" ? (
+                  <CountUpValue
+                    key={titlePrefix > 0 ? "count-ready" : "count-pending"}
+                    value={titlePrefix}
+                  />
+                ) : (
+                  titlePrefix
+                )}
+              </span>
+            )}
             {titleAccent === "rainbow" ? (
               <span className="page-header__title-accent page-header__title-accent--rainbow">
                 <GlitchWord text={title} />
