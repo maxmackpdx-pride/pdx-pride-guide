@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,10 +27,7 @@ import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
-import { lazyWithReload } from "@/lib/lazyWithReload";
 import "./Home.css";
-
-const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
 const COMMUNITY_LINKS = {
   spotted: { href: "/spotted", label: "Spotted" },
@@ -114,11 +111,6 @@ export default function Home() {
     );
   }, [businesses]);
 
-  const mappedBusinesses = useMemo(
-    () => businesses.filter(b => b.lat != null && b.lng != null),
-    [businesses],
-  );
-
   const spottedCount = spotted.length > 0 ? spotted.length : BOARD_COUNT_FALLBACK.spotted;
   const giftingCount = gifting.length > 0 ? gifting.length : BOARD_COUNT_FALLBACK.gifting;
   const gigsCount = gigs.length > 0 ? gigs.length : BOARD_COUNT_FALLBACK.gigs;
@@ -148,7 +140,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Find Your People: community board tiles (isolated section) */}
       <section className="home-boards" aria-label="Community boards">
         <div className="home-boards__seam" aria-hidden="true" />
         <div className="home-boards__halftone" aria-hidden="true" />
@@ -168,8 +159,8 @@ export default function Home() {
 
             <div className="home-boards__header">
               <h2 className="home-boards__title">
-                <span className="home-boards__title-plain">Find Your </span>
-                <span className="home-boards__title-grad">People</span>
+                <span className="home-boards__title-plain">Community </span>
+                <span className="home-boards__title-grad">Boards</span>
               </h2>
               <p className="home-boards__sub">
                 Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
@@ -296,23 +287,10 @@ export default function Home() {
             accent="cyan"
           />
           <div className="pg-places pg-places--dual">
-            <div id="home-map">
-              <Suspense
-                fallback={
-                  <div
-                    style={{ flex: 1, minHeight: 200, background: "var(--ink-900)" }}
-                    role="status"
-                    aria-label="Loading directory map"
-                  />
-                }
-              >
-                <DirectoryMap businesses={mappedBusinesses} height="100%" />
-              </Suspense>
-            </div>
             <div className="pg-placescol">
               <div className="pg-colhd">
-                <span className="pg-colhd__t" style={{ color: "var(--cyan)" }}>Spots</span>
-                <span className="pg-colhd__rule" style={{ background: "linear-gradient(to right, var(--cyan), transparent)" }} />
+                <span className="pg-colhd__t pg-colhd__t--places">Our Places</span>
+                <span className="pg-colhd__rule pg-colhd__rule--places" />
               </div>
               <div className="pg-placescroll">
                 {featuredSpots.map(biz => (
@@ -328,8 +306,8 @@ export default function Home() {
                   />
                 )}
               </div>
-              <Link href="/directory" className="pg-board-more" style={{ color: "var(--cyan)" }}>
-                View more spots →
+              <Link href="/directory" className="pg-board-more pg-board-more--places">
+                View more places →
               </Link>
             </div>
             <div className="pg-placescol">

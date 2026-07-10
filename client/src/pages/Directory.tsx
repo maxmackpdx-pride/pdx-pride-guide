@@ -171,7 +171,7 @@ export default function Directory() {
     }).length;
     const hostingPrideEvents = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
     return [
-      { num: businesses.length, label: "Total places", color: "#ff1fa0" },
+      { num: businesses.length, label: "Our Places", color: "#ff1fa0" },
       { num: grandOpeningsThisMonth, label: "Total grand openings this month", color: "#ccff00" },
       { num: hostingPrideEvents, label: "Total hosting Pride events", color: "#19e3ff" },
     ];
