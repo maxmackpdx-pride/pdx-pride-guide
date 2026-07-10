@@ -335,7 +335,7 @@ export default function Events() {
       <>
       {/* Filters + View Toggle */}
       <div className="zine-filter-bar" style={{
-        background: "#000", borderBottom: "1px solid #1a1a1a",
+        background: "var(--ink-1000)", borderBottom: "1px solid var(--ink-border-faint)",
         position: "sticky", top: "var(--site-header-height)", zIndex: 50,
       }}>
         <div className="events-filter-row">
@@ -349,7 +349,7 @@ export default function Events() {
                 accent={dayAccentToken(d)}
                 onToggle={() => setActiveDay(d)}
                 data-testid={`filter-day-${d}`}
-                style={selected && DARK_FILL_DAYS.has(d) ? { color: "#fff" } : undefined}
+                style={selected && DARK_FILL_DAYS.has(d) ? { color: "var(--text-hi)" } : undefined}
               >
                 {d}
               </FilterChip>
@@ -447,8 +447,8 @@ export default function Events() {
         {isLoading ? (
           <BoardLoadingState label="Loading events" />
         ) : isError ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", border: "2px dashed #FF6600", background: "rgba(8,8,8,0.72)" }}>
-            <p className="display" style={{ fontSize: "1.4rem", color: "#fff" }}>COULD NOT LOAD EVENTS</p>
+          <div style={{ textAlign: "center", padding: "60px 20px", border: "2px dashed var(--neon-orange)", background: "rgba(8,8,8,0.72)" }}>
+            <p className="display" style={{ fontSize: "1.4rem", color: "var(--text-hi)" }}>COULD NOT LOAD EVENTS</p>
             <p style={{ color: "#9d9a92", fontSize: "0.9rem", marginTop: 10, maxWidth: 420, marginInline: "auto" }}>
               {error instanceof Error ? error.message : "The events API is unavailable right now."}
             </p>
@@ -461,7 +461,7 @@ export default function Events() {
             <p className="display" style={{ fontSize: "1.4rem" }}>NO EVENTS MATCH</p>
             <button
               onClick={() => { setActiveDay("ALL"); setActiveFilters([]); setSearchQuery(""); }}
-              style={{ marginTop: 12, background: "none", border: "1px solid #333", color: "#888", padding: "8px 18px", cursor: "pointer", fontSize: "0.8rem" }}
+              style={{ marginTop: 12, background: "none", border: "1px solid var(--ink-border-strong)", color: "var(--text-lo)", padding: "8px 18px", cursor: "pointer", fontSize: "0.8rem" }}
             >
               Clear Filters
             </button>

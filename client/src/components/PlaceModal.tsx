@@ -75,6 +75,10 @@ const DAY_COLOR: Record<string, string> = {
   SUN: "var(--orange)",
 };
 
+/** Nonprofit card border — full-spectrum rainbow instead of a single category color. */
+const NONPROFIT_RAINBOW_EDGE =
+  "linear-gradient(120deg,var(--neon-red),#FF9500,var(--yellow),var(--green),var(--neon-cyan),#3A6BFF,var(--neon-violet),var(--neon-magenta))";
+
 function Icon({ d }: { d: React.ReactNode }) {
   return (
     <svg
@@ -222,7 +226,7 @@ export default function PlaceModal({
         hotels: "var(--blue)",
       } as Record<string, string>)[category] || "var(--pink)";
   const edge = isNonprofit
-    ? "linear-gradient(120deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC)"
+    ? NONPROFIT_RAINBOW_EDGE
     : `linear-gradient(${accent},${accent})`;
   const logoUrl = resolveDirectoryLogo(place.name, place.imageUrl);
   const fallbackLogoUrl = directoryFallbackLogo(place.type);
@@ -281,7 +285,7 @@ export default function PlaceModal({
   };
 
   const fieldStyle: React.CSSProperties = {
-    width: "100%", background: "#141416", color: "#fff", border: "1px solid #333",
+    width: "100%", background: "var(--ink-750)", color: "var(--text-hi)", border: "1px solid var(--ink-border-strong)",
     borderRadius: 6, padding: "8px 10px", fontFamily: "var(--font-body)", fontSize: "0.9rem",
     marginTop: 4, marginBottom: 12,
   };
@@ -322,7 +326,7 @@ export default function PlaceModal({
           display: "flex",
           flexDirection: "column",
           borderRadius: 12,
-          background: "linear-gradient(#0b0b0e,#0b0b0e) padding-box, " + edge + " border-box",
+          background: "linear-gradient(var(--ink-800),var(--ink-800)) padding-box, " + edge + " border-box",
           border: "2px solid transparent",
           boxShadow: `0 30px 70px -18px rgba(0,0,0,.9), 0 0 42px -6px color-mix(in srgb, ${accent} 55%, transparent)`,
           overflow: "hidden",
@@ -342,7 +346,7 @@ export default function PlaceModal({
             borderRadius: "50%",
             border: "none",
             background: "rgba(0,0,0,.55)",
-            color: "#fff",
+            color: "var(--text-hi)",
             fontSize: 16,
             lineHeight: 1,
             cursor: "pointer",
@@ -392,7 +396,7 @@ export default function PlaceModal({
               display: "grid",
               placeItems: "center",
               padding: 22,
-              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 17%, #060608), #060608 72%)`,
+              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 17%, var(--ink-1000)), var(--ink-1000) 72%)`,
               borderBottom: `1px solid color-mix(in srgb, ${accent} 26%, transparent)`,
               overflow: "hidden",
             }}
@@ -415,7 +419,7 @@ export default function PlaceModal({
                 right: 0,
                 top: 0,
                 height: 3,
-                background: "var(--grad-flag, linear-gradient(90deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC))",
+                background: "var(--grad-flag)",
               }}
             />
             {logoUrl ? (
@@ -471,7 +475,7 @@ export default function PlaceModal({
               textTransform: "uppercase",
               fontSize: "1.9rem",
               lineHeight: 1.02,
-              color: "#fff",
+              color: "var(--text-hi)",
               margin: "0 0 14px",
             }}
           >
@@ -724,7 +728,7 @@ export default function PlaceModal({
             </>
           )}
 
-          <div style={{ marginTop: 6, paddingTop: 16, borderTop: "1px solid #292929" }}>
+          <div style={{ marginTop: 6, paddingTop: 16, borderTop: "1px solid var(--ink-border)" }}>
             <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
               {tabs.map(t => (
                 <button
@@ -734,7 +738,7 @@ export default function PlaceModal({
                   style={{
                     padding: "7px 13px",
                     borderRadius: 999,
-                    border: `1px solid ${tab === t.key ? accent : "#333"}`,
+                    border: `1px solid ${tab === t.key ? accent : "var(--ink-border-strong)"}`,
                     background: tab === t.key ? `color-mix(in srgb, ${accent} 16%, transparent)` : "transparent",
                     color: tab === t.key ? accent : "var(--text-lo)",
                     fontFamily: "var(--font-display)",
@@ -773,7 +777,7 @@ export default function PlaceModal({
                         <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: dayAccent }}>
                           {formatDirectoryEventWhen(ev)}
                         </div>
-                        <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff" }}>
+                        <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)" }}>
                           {ev.title}
                         </div>
                       </Link>
@@ -790,7 +794,7 @@ export default function PlaceModal({
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {spotted.map(mc => (
                     <div key={mc.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
-                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff", marginBottom: 2 }}>
+                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)", marginBottom: 2 }}>
                         {mc.body}
                       </div>
                     </div>
@@ -812,7 +816,7 @@ export default function PlaceModal({
                       <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: accent }}>
                         {g.postType === "LOOKING_FOR_WORK" ? "Available" : "Gig"}
                       </div>
-                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#fff" }}>
+                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)" }}>
                         {g.title}
                       </div>
                     </div>

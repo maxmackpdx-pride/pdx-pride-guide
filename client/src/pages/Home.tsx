@@ -313,7 +313,7 @@ export default function Home() {
               <Suspense
                 fallback={
                   <div
-                    style={{ flex: 1, minHeight: 200, background: "#0a0a0a" }}
+                    style={{ flex: 1, minHeight: 200, background: "var(--ink-900)" }}
                     role="status"
                     aria-label="Loading directory map"
                   />

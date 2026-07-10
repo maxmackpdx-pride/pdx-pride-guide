@@ -27,7 +27,7 @@ const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
 
 const SUBMIT_RETURN_KEY = "pdx-submit-return";
 
-const sectionHeadStyle: React.CSSProperties = { fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.05rem", letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--neon-yellow)", marginBottom: 14, borderBottom: "1px solid #1a1a1a", paddingBottom: 8 };
+const sectionHeadStyle: React.CSSProperties = { fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.05rem", letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--neon-yellow)", marginBottom: 14, borderBottom: "1px solid var(--ink-border-faint)", paddingBottom: 8 };
 
 type PageMode = "landing" | "submit" | "apply" | "suggest" | "claim";
 type SubmitStep = "promoter_app" | "event_details";
@@ -563,7 +563,7 @@ export default function Submit() {
                   {eventSubmitSuccess.desc}
                 </p>
                 {eventSubmitSuccess.potentialMatches && eventSubmitSuccess.potentialMatches.length > 0 && (
-                  <div style={{ border: "1px solid #444", background: "#111", padding: 14, marginBottom: 22, borderRadius: 3 }}>
+                  <div style={{ border: "1px solid #444", background: "var(--ink-850)", padding: 14, marginBottom: 22, borderRadius: 3 }}>
                     <p style={{ color: "var(--neon-orange)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>
                       Similar events in the guide
                     </p>
@@ -852,7 +852,7 @@ export default function Submit() {
                     ))}
                   </select>
                   {unclaimedError ? (
-                    <div style={{ fontSize: "0.76rem", color: "#FF6600", marginTop: 6, textTransform: "none", letterSpacing: "normal" }}>
+                    <div style={{ fontSize: "0.76rem", color: "var(--neon-orange)", marginTop: 6, textTransform: "none", letterSpacing: "normal" }}>
                       Could not load unclaimed events.{" "}
                       <button type="button" onClick={() => refetchUnclaimed()} style={{ background: "none", border: "none", color: "var(--neon-yellow)", cursor: "pointer", padding: 0, fontFamily: "var(--font-display)", fontSize: "0.76rem" }}>Retry</button>
                     </div>

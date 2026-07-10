@@ -9,7 +9,10 @@ import { useEventRsvp } from "@/hooks/useEventRsvp";
 import RailCard from "@/components/RailCard";
 import EventModal from "@/components/EventModal";
 import AuthModal from "@/components/AuthModal";
+import { FilterChip } from "@/components/ds";
 import "./HomeSchedule.css";
+
+const dayColorVar = (key: string) => `var(--day-${key.toLowerCase()})`;
 
 /**
  * Home page "1D" — day-tabbed big-flyer grid. Ported from the design
@@ -69,31 +72,18 @@ export default function HomeSchedule() {
 
       <div className="hsch-section">
         <div className="hsch-tabs">
-          {daysWithCounts.map(d => {
-            const active = d.key === activeDay;
-            return (
-              <button
-                key={d.key}
-                type="button"
-                className="hsch-tab"
-                onClick={() => setActiveDay(d.key)}
-                style={{
-                  borderColor: active ? d.color : "#2b2b2b",
-                  background: active ? d.color : "transparent",
-                  color: active ? "#000" : "#c9c9c9",
-                  boxShadow: active ? `0 0 16px -5px ${d.color}` : "none",
-                }}
-              >
-                <span>{d.short}</span>
-                <span className="hsch-tab-date" style={{ color: active ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.4)" }}>
-                  {d.date}
-                </span>
-                <span className="hsch-tab-count" style={{ color: active ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.35)" }}>
-                  {d.count}
-                </span>
-              </button>
-            );
-          })}
+          {daysWithCounts.map(d => (
+            <FilterChip
+              key={d.key}
+              selected={d.key === activeDay}
+              fill
+              accent={dayColorVar(d.key)}
+              count={d.count}
+              onToggle={() => setActiveDay(d.key)}
+            >
+              {d.short} <span className="hsch-tab-date">{d.date}</span>
+            </FilterChip>
+          ))}
         </div>
 
         {activeDayDef && (

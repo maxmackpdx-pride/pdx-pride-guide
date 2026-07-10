@@ -479,7 +479,7 @@ export default function Schedule({
           cursor: 'pointer',
           border: '1px solid ' + hexA(dc, rsvp ? 0.6 : 0.22),
           borderLeft: '3px solid ' + dc,
-          backgroundColor: '#0b0b0e',
+          backgroundColor: 'var(--ink-800)',
           backgroundImage: 'url(' + e.posterUrl + ')',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -526,7 +526,7 @@ export default function Schedule({
             fontWeight: 800,
             textTransform: 'uppercase',
             lineHeight: 1.02,
-            color: '#fff',
+            color: 'var(--text-hi)',
             fontSize: (embed ? 11 : compact ? 12.5 : 14.5) + 'px',
             letterSpacing: '.01em',
             display: '-webkit-box',
@@ -551,13 +551,13 @@ export default function Schedule({
             height: '7px',
             borderRadius: '50%',
             flex: 'none',
-            background: '#FF00CC',
-            boxShadow: calm ? 'none' : '0 0 7px #FF00CC',
+            background: 'var(--neon-magenta)',
+            boxShadow: calm ? 'none' : '0 0 7px var(--neon-magenta)',
           }),
           checkStyle: S({
             marginLeft: 'auto',
             fontSize: '10px',
-            color: '#000',
+            color: 'var(--text-inverse)',
             background: dc,
             borderRadius: '3px',
             width: '15px',
@@ -578,7 +578,7 @@ export default function Schedule({
             borderRadius: '6px',
             border: '1px solid ' + hexA(dc, 0.55),
             background: rsvp ? dc : 'rgba(0,0,0,.45)',
-            color: rsvp ? '#000' : dc,
+            color: rsvp ? 'var(--text-inverse)' : dc,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -603,7 +603,7 @@ export default function Schedule({
         position: 'sticky',
         top: 0,
         zIndex: 5,
-        background: '#0a0a0a',
+        background: 'var(--ink-900)',
         padding: embed ? '5px 8px 5px' : '9px 10px 9px',
         borderBottom: embed ? '2px solid ' + dc : '3px solid ' + dc,
         display: 'flex',
@@ -678,8 +678,8 @@ export default function Schedule({
     right: 0,
     top: nowTop + 'px',
     height: '2px',
-    background: '#FF00CC',
-    boxShadow: calm ? 'none' : '0 0 8px #FF00CC',
+    background: 'var(--neon-magenta)',
+    boxShadow: calm ? 'none' : '0 0 8px var(--neon-magenta)',
     zIndex: 9,
     pointerEvents: 'none',
   });
@@ -691,8 +691,8 @@ export default function Schedule({
     fontWeight: 800,
     fontSize: '9px',
     letterSpacing: '.08em',
-    color: '#FF00CC',
-    background: '#0a0a0a',
+    color: 'var(--neon-magenta)',
+    background: 'var(--ink-900)',
     padding: '1px 3px',
     borderRadius: '2px',
   });
@@ -713,7 +713,7 @@ export default function Schedule({
       whiteSpace: 'nowrap',
       borderRadius: '4px',
       cursor: 'pointer',
-      border: '2px solid ' + (active ? accent : '#333'),
+      border: '2px solid ' + (active ? accent : 'var(--ink-border-strong)'),
       color: active ? accent : '#c9c9c9',
       background: 'transparent',
       boxShadow: active && !calm ? '0 0 13px -4px ' + accent : 'none',
@@ -723,7 +723,7 @@ export default function Schedule({
       fontFamily: 'var(--font-body)',
       fontWeight: 700,
       fontSize: '10.5px',
-      color: active ? accent : '#666',
+      color: active ? accent : 'var(--text-faint)',
     });
 
   type ChipVM = {
@@ -736,9 +736,9 @@ export default function Schedule({
   };
   const chips: ChipVM[] = [];
   const admDefs: [AdmKey, string, string][] = [
-    ['FREE', 'Free', '#CCFF00'],
-    ['TICKETED', 'Ticketed', '#00FFFF'],
-    ['SUGGESTED_DONATION', 'Donation', '#FFB23D'],
+    ['FREE', 'Free', 'var(--neon-yellow)'],
+    ['TICKETED', 'Ticketed', 'var(--neon-cyan)'],
+    ['SUGGESTED_DONATION', 'Donation', 'var(--amber)'],
   ];
   admDefs.forEach(([k, label, accent]) => {
     const active = !!fAdm[k];
@@ -763,7 +763,7 @@ export default function Schedule({
   ];
   typeDefs.forEach(([k, label]) => {
     const active = !!fType[k];
-    const accent = calm ? '#c8c8cc' : '#CCFF00';
+    const accent = calm ? '#c8c8cc' : 'var(--neon-yellow)';
     const count = viewSet.filter((e) => e.types.indexOf(k) >= 0).length;
     chips.push({
       key: 'type' + k,
@@ -780,7 +780,7 @@ export default function Schedule({
   ];
   ageDefs.forEach(([k, label]) => {
     const active = !!fAge[k];
-    const accent = calm ? '#c8c8cc' : '#00FFFF';
+    const accent = calm ? '#c8c8cc' : 'var(--neon-cyan)';
     const count = viewSet.filter((e) => e.age === k).length;
     chips.push({
       key: 'age' + k,
@@ -807,8 +807,8 @@ export default function Schedule({
       fontSize: '13.5px',
       letterSpacing: '.03em',
       textTransform: 'uppercase',
-      color: active ? '#000' : '#8a8a8a',
-      background: active ? '#CCFF00' : 'transparent',
+      color: active ? 'var(--text-inverse)' : '#8a8a8a',
+      background: active ? 'var(--neon-yellow)' : 'transparent',
       border: 'none',
       padding: '11px 17px',
       cursor: 'pointer',
@@ -819,8 +819,8 @@ export default function Schedule({
     fontSize: '12px',
     letterSpacing: '.07em',
     textTransform: 'uppercase',
-    color: '#0a0a0a',
-    background: view === 'mine' ? '#39FF14' : '#00FFFF',
+    color: 'var(--ink-900)',
+    background: view === 'mine' ? 'var(--green)' : 'var(--neon-cyan)',
     padding: '6px 11px',
     borderRadius: '999px',
   });
@@ -871,7 +871,7 @@ export default function Schedule({
         display: 'flex',
         flexDirection: 'column',
         zIndex: 120,
-        background: '#0b0b0e',
+        background: 'var(--ink-800)',
         border: '2px solid ' + hexA(dc, 0.6),
         borderRadius: '12px',
         overflow: 'hidden',
@@ -899,7 +899,7 @@ export default function Schedule({
         display: 'flex',
         flexDirection: 'column',
         zIndex: 120,
-        background: '#0b0b0e',
+        background: 'var(--ink-800)',
         border: '2px solid ' + hexA(dc, 0.6),
         borderRadius: '12px',
         overflow: 'hidden',
@@ -914,7 +914,7 @@ export default function Schedule({
         fontSize: '11px',
         letterSpacing: '.06em',
         textTransform: 'uppercase',
-        color: '#000',
+        color: 'var(--text-inverse)',
         background: bg,
         padding: '4px 8px 3px',
         borderRadius: '3px',
@@ -941,7 +941,7 @@ export default function Schedule({
         position: 'relative',
         flex: 'none',
         height: '128px',
-        backgroundColor: '#0b0b0e',
+        backgroundColor: 'var(--ink-800)',
         backgroundImage: 'url(' + e.posterUrl + ')',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -973,7 +973,7 @@ export default function Schedule({
               letterSpacing: '.05em',
               textTransform: 'uppercase',
               color: 'rgba(230,227,218,.65)',
-              border: '1px solid #333',
+              border: '1px solid var(--ink-border-strong)',
               padding: '3px 8px 2px',
               borderRadius: '3px',
             }),
@@ -990,9 +990,9 @@ export default function Schedule({
         cursor: 'pointer',
         padding: '11px 18px',
         borderRadius: '8px',
-        border: '2px solid ' + (rsvp ? dc : '#CCFF00'),
-        color: '#000',
-        background: rsvp ? dc : '#CCFF00',
+        border: '2px solid ' + (rsvp ? dc : 'var(--neon-yellow)'),
+        color: 'var(--text-inverse)',
+        background: rsvp ? dc : 'var(--neon-yellow)',
         boxShadow: calm
           ? 'none'
           : rsvp
@@ -1008,9 +1008,9 @@ export default function Schedule({
     maxHeight: embed
       ? TOTAL_H + HEADER_H + 4 + 'px'
       : 'min(80vh, ' + (TOTAL_H + HEADER_H + 4) + 'px)',
-    border: embed ? '1px solid #2b2b2b' : '2px solid #2b2b2b',
+    border: embed ? '1px solid var(--ink-border)' : '2px solid var(--ink-border)',
     borderRadius: embed ? '6px' : '8px',
-    background: '#0a0a0a',
+    background: 'var(--ink-900)',
     position: 'relative',
   });
 
@@ -1043,7 +1043,7 @@ export default function Schedule({
               fontWeight: 900,
               textTransform: 'uppercase',
               lineHeight: 1,
-              color: '#fff',
+              color: 'var(--text-hi)',
               fontSize: '26px',
               textShadow: '0 2px 10px rgba(0,0,0,.6)',
             }}
@@ -1062,7 +1062,7 @@ export default function Schedule({
             borderRadius: '50%',
             border: 'none',
             background: 'rgba(0,0,0,.55)',
-            color: '#fff',
+            color: 'var(--text-hi)',
             cursor: 'pointer',
             fontSize: '16px',
             lineHeight: 1,
@@ -1128,7 +1128,7 @@ export default function Schedule({
             <circle cx="12" cy="10" r="3" />
           </svg>
           <span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>{selected.venue}</span> · {selected.hood}
+            <span style={{ color: 'var(--text-hi)', fontWeight: 600 }}>{selected.venue}</span> · {selected.hood}
           </span>
         </div>
         <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.55, color: 'var(--text-mid)' }}>
@@ -1188,7 +1188,7 @@ export default function Schedule({
       ].filter(Boolean).join(' ')}
       style={{
         minHeight: embed ? undefined : '100vh',
-        background: embed ? 'transparent' : '#0a0a0a',
+        background: embed ? 'transparent' : 'var(--ink-900)',
         color: 'var(--text-mid)',
         fontFamily: 'var(--font-body)',
       }}
@@ -1196,7 +1196,7 @@ export default function Schedule({
       {!embed && (
       <>
       {/* ---- Hero ---- */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: '#0a0a0a' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: 'var(--ink-900)' }}>
         <div
           style={{
             position: 'absolute',
@@ -1211,7 +1211,7 @@ export default function Schedule({
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(90deg,#0a0a0a 25%,rgba(10,10,10,.5) 60%,rgba(10,10,10,.82))',
+            background: 'linear-gradient(90deg,var(--ink-900) 25%,rgba(10,10,10,.5) 60%,rgba(10,10,10,.82))',
           }}
         />
         <div
@@ -1236,7 +1236,7 @@ export default function Schedule({
               fontSize: '12px',
               letterSpacing: '.14em',
               textTransform: 'uppercase',
-              color: '#00FFFF',
+              color: 'var(--neon-cyan)',
               marginBottom: '14px',
             }}
           >
@@ -1263,7 +1263,7 @@ export default function Schedule({
               lineHeight: 0.9,
               letterSpacing: '.01em',
               textTransform: 'uppercase',
-              color: '#00FFFF',
+              color: 'var(--neon-cyan)',
               margin: 0,
               textShadow: '0 0 34px rgba(0,255,255,.32)',
             }}
@@ -1336,8 +1336,8 @@ export default function Schedule({
                 fontSize: '13.5px',
                 letterSpacing: '.05em',
                 textTransform: 'uppercase',
-                color: '#000',
-                background: '#FF00CC',
+                color: 'var(--text-inverse)',
+                background: 'var(--neon-magenta)',
                 border: 'none',
                 borderRadius: '11px',
                 padding: '11px 19px',
@@ -1452,7 +1452,7 @@ export default function Schedule({
                 zIndex: 6,
                 flex: 'none',
                 width: AXIS_W + 'px',
-                background: '#0a0a0a',
+                background: 'var(--ink-900)',
               }}
             >
               <div
@@ -1461,7 +1461,7 @@ export default function Schedule({
                   top: 0,
                   zIndex: 7,
                   height: HEADER_H + 'px',
-                  background: '#0a0a0a',
+                  background: 'var(--ink-900)',
                   borderBottom: '1px solid #202020',
                 }}
               />
@@ -1569,9 +1569,9 @@ export default function Schedule({
             bottom: '28px',
             transform: 'translateX(-50%)',
             zIndex: 130,
-            background: '#111',
-            border: '2px solid #39FF14',
-            color: '#fff',
+            background: 'var(--ink-850)',
+            border: '2px solid var(--green)',
+            color: 'var(--text-hi)',
             fontFamily: 'var(--font-display)',
             fontWeight: 700,
             letterSpacing: '.04em',

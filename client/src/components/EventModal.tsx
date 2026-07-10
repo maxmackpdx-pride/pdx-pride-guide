@@ -49,9 +49,9 @@ type ModerationMode = null | "remove" | "flag" | "transfer";
 
 
 const modAccent: Record<Exclude<ModerationMode, null>, string> = {
-  remove: "#888",
-  flag: "#FF6600",
-  transfer: "#CCFF00",
+  remove: "var(--text-lo)",
+  flag: "var(--neon-orange)",
+  transfer: "var(--neon-yellow)",
 };
 
 export default function EventModal({
@@ -113,7 +113,7 @@ function EventModalInner({
 
   const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
-  const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#fff";
+  const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
 
   const extraPeople = [
     ...eventHosts.map(h => ({
@@ -137,7 +137,7 @@ function EventModalInner({
         avatarChoice: t.avatarChoice,
         avatarRing: t.avatarRing,
         roleChip: t.role,
-        roleColor: "#FF8C00",
+        roleColor: "var(--flag-orange)",
       })),
   ];
 
@@ -347,7 +347,7 @@ function EventModalInner({
     });
   };
 
-  const modColor = modMode ? modAccent[modMode] : "#888";
+  const modColor = modMode ? modAccent[modMode] : "var(--text-lo)";
 
   return (
     <div className="event-modal-overlay" onClick={onClose}>
@@ -521,7 +521,7 @@ function EventModalInner({
                           value={coHostUsername}
                           onChange={setCoHostUsername}
                           style={{ flex: 1 }}
-                          inputStyle={{ width: "100%", padding: "8px 10px", background: "#0a0a0a", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
+                          inputStyle={{ width: "100%", padding: "8px 10px", background: "var(--ink-900)", border: "1px solid var(--ink-border-strong)", color: "var(--text-hi)", fontSize: "0.82rem" }}
                         />
                       </div>
                       <div className="event-modal__inline-actions">
@@ -553,7 +553,7 @@ function EventModalInner({
 
           <div
             className="event-modal__section event-modal__host-updates"
-            style={{ "--section-accent": hostMessages.length > 0 ? dayColor : "#222" } as React.CSSProperties}
+            style={{ "--section-accent": hostMessages.length > 0 ? dayColor : "var(--ink-border)" } as React.CSSProperties}
           >
             <div className="event-modal__section-label">Latest from host</div>
             {hostMessages.length > 0 ? (

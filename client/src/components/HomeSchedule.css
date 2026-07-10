@@ -1,6 +1,6 @@
 .hsch-card {
-  background: #0a0a0a;
-  border: 2px solid #2b2b2b;
+  background: var(--ink-900);
+  border: 2px solid var(--ink-border);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
@@ -8,7 +8,7 @@
 
 .hsch-seam {
   height: 3px;
-  background: var(--grad-flag, linear-gradient(to right, #00ffff, #ccff00 34%, #ff00cc 67%, #ff6600));
+  background: var(--grad-flag);
 }
 
 .hsch-section {
@@ -21,32 +21,12 @@
   flex-wrap: wrap;
 }
 
-.hsch-tab {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 9px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  border-width: 2px;
-  border-style: solid;
-}
-
 .hsch-tab-date {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 10px;
-}
-
-.hsch-tab-count {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 10px;
+  opacity: 0.7;
+  margin-left: 2px;
 }
 
 .hsch-day-head {
