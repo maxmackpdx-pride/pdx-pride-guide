@@ -137,22 +137,17 @@ function readSearchParam(key: string) {
 function EventsTabBar({
   activeTab,
   onSelect,
-  placement,
 }: {
   activeTab: "board" | "schedule";
   onSelect: (tab: "board" | "schedule") => void;
-  placement: "hero" | "mobile";
 }) {
   return (
-    <nav
-      className={`events-tab-bar events-page-tab-bar events-page-tab-bar--${placement}`}
-      aria-label="Events view"
-    >
+    <nav className="events-tab-bar events-page-tab-bar" aria-label="Events view">
       <button
         type="button"
         className={`events-tab${activeTab === "board" ? " active" : ""}`}
         onClick={() => onSelect("board")}
-        {...(placement === "hero" ? { "data-testid": "events-tab-board" } : {})}
+        data-testid="events-tab-board"
       >
         The Board
       </button>
@@ -160,7 +155,7 @@ function EventsTabBar({
         type="button"
         className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
         onClick={() => onSelect("schedule")}
-        {...(placement === "hero" ? { "data-testid": "events-tab-schedule" } : {})}
+        data-testid="events-tab-schedule"
       >
         The Schedule
       </button>
@@ -321,10 +316,7 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <header className="events-page-header">
-        <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} placement="hero" />
-        <EventsHero eventCount={events.length} stats={heroStats} />
-      </header>
+      <EventsHero eventCount={events.length} stats={heroStats} />
 
       <ScrollReveal>
         <div className="events-map-row events-map-row--solo">
@@ -342,7 +334,7 @@ export default function Events() {
         </div>
       </ScrollReveal>
 
-      <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} placement="mobile" />
+      <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
 
       {activeTab === "schedule" ? (
         <ScrollReveal delay={50}>

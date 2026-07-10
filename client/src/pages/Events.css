@@ -39,57 +39,22 @@
   }
 }
 
-/* Header shell — tabs pinned top-right over hero (matches Nude Beaches) */
-.events-page-header {
-  position: relative;
+/* Board / Schedule tabs — right-aligned below map, 20% larger than board standard */
+.events-page.board-page--makeover .events-page-tab-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
   max-width: 1180px;
   margin: 0 auto;
+  padding: 14px clamp(20px, 4vw, 44px) 0;
+  border-bottom: none;
 }
 
 .events-page.board-page--makeover .events-page-tab-bar .events-tab {
   font-family: var(--font-display), sans-serif;
   font-weight: 800;
-  font-size: 16.8px;
+  font-size: 20.2px;
   letter-spacing: 0.06em;
-  padding: 12px 22px 14px;
-  border-bottom-width: 3.6px;
-}
-
-/* Desktop — tabs pinned top-right over hero */
-.events-page-tab-bar--mobile {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .events-page.board-page--makeover .events-page-tab-bar--hero {
-    position: absolute;
-    top: clamp(34px, 5vw, 60px);
-    right: clamp(20px, 4vw, 44px);
-    left: auto;
-    z-index: 2;
-    display: flex;
-    justify-content: flex-end;
-    gap: 4px;
-    margin: 0;
-    padding: 0;
-    max-width: none;
-    border-bottom: none;
-  }
-}
-
-/* Mobile — tabs below map, right-aligned */
-@media (max-width: 899px) {
-  .events-page-tab-bar--hero {
-    display: none;
-  }
-
-  .events-page.board-page--makeover .events-page-tab-bar--mobile {
-    display: flex;
-    justify-content: flex-end;
-    gap: 4px;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 12px clamp(20px, 4vw, 44px) 0;
-    border-bottom: none;
-  }
+  padding: 14px 26px 17px;
+  border-bottom-width: 4.3px;
 }
