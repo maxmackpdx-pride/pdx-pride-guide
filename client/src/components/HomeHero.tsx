@@ -33,6 +33,7 @@ export default function HomeHero({ eventCount }: Props) {
       <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden="true" />
       <div className="home-hero__scrim home-hero__scrim--top" aria-hidden="true" />
       <div className="home-hero__halftone" aria-hidden="true" />
+      <div className="home-hero__film-grain" aria-hidden="true" />
       <div className="home-hero__seam pdx-rainbow-rule" aria-hidden="true" />
 
       <div className="home-hero__inner">
