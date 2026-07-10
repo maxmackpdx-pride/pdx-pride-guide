@@ -2,9 +2,11 @@ import {
   Archive,
   ArrowLeft,
   Check,
+  ChevronDown,
   Mail,
   Moon,
   Search,
+  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
@@ -25,3 +27,5 @@ export const MailIcon = wrap(Mail);
 export const MoonIcon = wrap(Moon);
 export const SearchIcon = wrap(Search);
 export const TrashIcon = wrap(Trash2);
+export const FilterIcon = wrap(SlidersHorizontal);
+export const ChevronDownIcon = wrap(ChevronDown);

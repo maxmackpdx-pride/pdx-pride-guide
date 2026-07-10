@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
+import FloatingInbox from "./components/FloatingInbox";
 import Footer from "./components/Footer";
 import FilmGrainOverlay from "./components/FilmGrainOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -108,6 +109,7 @@ function AppLayout() {
       </main>
       {!profile && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
       {!profile && <Footer />}
+      {!profile && <FloatingInbox />}
     </div>
   );
 }

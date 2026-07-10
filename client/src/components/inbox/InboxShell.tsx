@@ -9,7 +9,9 @@ import {
   ArchiveIcon,
   BackIcon,
   CheckIcon,
+  ChevronDownIcon,
   ClearIcon,
+  FilterIcon,
   MailIcon,
   MoonIcon,
   SearchIcon,
@@ -50,6 +52,15 @@ const CATS: Array<[string, string]> = [
 export interface InboxShellProps extends InboxProps {
   initialThreadId?: string | null;
   onThreadChange?: (threadId: string | null) => void;
+  /** Force the single-column (list ↔ thread) layout regardless of viewport
+   *  width. Used when the shell is embedded in a narrow floating panel. */
+  forceNarrow?: boolean;
+  /** Hide the "Pride Guide / Messages / Calm" brand bar. Used when the shell
+   *  is embedded in the floating overlay, which supplies its own header. */
+  hideBrandHeader?: boolean;
+  /** Minimal chrome for the floating overlay: no list heading/segments row,
+   *  filters collapse into a dropdown, and search moves to the bottom. */
+  compact?: boolean;
 }
 
 export function InboxShell({
@@ -58,6 +69,9 @@ export function InboxShell({
   chromeAccent = "lime",
   initialThreadId = null,
   onThreadChange,
+  forceNarrow,
+  hideBrandHeader = false,
+  compact = false,
 }: InboxShellProps) {
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
   const { threads, loading, sendMessage, setRead, archive, remove, revealSelf, resolveLineup } =
@@ -67,24 +81,39 @@ export function InboxShell({
   const [cat, setCat] = useState<string>("all");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [query, setQuery] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [mobileView, setMobileView] = useState<"list" | "thread">("list");
   const [isNarrow, setIsNarrow] = useState(false);
   const [calm, setCalm] = useState(false);
 
   const msgRef = useRef<HTMLDivElement | null>(null);
+  const filtersRef = useRef<HTMLDivElement | null>(null);
   const scrollMsgs = () => {
     const el = msgRef.current;
     if (el) requestAnimationFrame(() => (el.scrollTop = el.scrollHeight));
   };
 
   useEffect(() => {
+    if (!filtersOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!filtersRef.current?.contains(e.target as Node)) setFiltersOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [filtersOpen]);
+
+  useEffect(() => {
+    if (forceNarrow !== undefined) {
+      setIsNarrow(forceNarrow);
+      return;
+    }
     const mq = window.matchMedia("(max-width: 860px)");
     const sync = () => setIsNarrow(mq.matches);
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
-  }, []);
+  }, [forceNarrow]);
 
   useEffect(() => {
     setActiveId(initialThreadId ?? null);
@@ -437,6 +466,74 @@ export function InboxShell({
     color: active ? (calm ? "var(--text-hi)" : "var(--text-inverse)") : "var(--text-lo)",
     background: active ? (calm ? "var(--surface-card-hover)" : accent) : "transparent",
   });
+  const segCount: CSSProperties = {
+    opacity: 0.7,
+    fontFamily: "var(--font-body)",
+    fontWeight: 700,
+    fontSize: "0.7rem",
+  };
+  const activeCatLabel = CATS.find(([k]) => k === cat)?.[1] ?? "All";
+  const filtersActive = cat !== "all" || unreadOnly || folder === "sent";
+  const compactBar: CSSProperties = {
+    flex: "0 0 auto",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    padding: "10px 12px",
+    borderBottom: "1px solid var(--border-faint)",
+    background: "var(--ink-1000)",
+  };
+  const compactFiltersBtn: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 14px",
+    fontFamily: "var(--font-display)",
+    fontWeight: 700,
+    fontSize: "0.74rem",
+    letterSpacing: ".05em",
+    textTransform: "uppercase",
+    color: filtersActive ? "var(--text-inverse)" : "var(--text-hi)",
+    background: filtersActive ? accent : "var(--surface-inset)",
+    border: "1px solid " + (filtersActive ? accent : "var(--border-default)"),
+    borderRadius: "999px",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  };
+  const compactFiltersPopover: CSSProperties = {
+    position: "absolute",
+    top: "calc(100% + 8px)",
+    left: 0,
+    zIndex: 20,
+    width: "min(280px, 78vw)",
+    padding: "14px",
+    background: "var(--surface-card)",
+    border: "2px solid var(--border-default)",
+    borderRadius: "16px",
+    boxShadow: "var(--shadow-lg, 0 14px 30px rgba(0,0,0,.42))",
+  };
+  const compactGroupLabel: CSSProperties = {
+    fontFamily: "var(--font-mono)",
+    fontSize: "0.58rem",
+    fontWeight: 700,
+    letterSpacing: ".14em",
+    textTransform: "uppercase",
+    color: "var(--text-meta)",
+    margin: "0 0 8px",
+  };
+  const compactSearchWrap: CSSProperties = {
+    flex: "0 0 auto",
+    display: "flex",
+    alignItems: "center",
+    gap: "9px",
+    height: "46px",
+    margin: "10px 12px calc(10px + env(safe-area-inset-bottom, 0px))",
+    padding: "0 15px",
+    background: "var(--surface-inset)",
+    border: "1px solid var(--border-default)",
+    borderRadius: "999px",
+  };
   const calmBtn: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -494,67 +591,122 @@ export function InboxShell({
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          flex: "0 0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "16px",
-          padding: "11px clamp(14px,4vw,26px)",
-          background: "var(--ink-1000)",
-          borderBottom: "1px solid var(--border-faint)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+      {!hideBrandHeader && (
+        <>
           <div
             style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              background: "var(--ink-1000)",
-              border: "1px solid var(--border-default)",
-              display: "grid",
-              placeItems: "center",
-              boxShadow: "0 0 14px -4px var(--lime)",
               flex: "0 0 auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+              padding: "11px clamp(14px,4vw,26px)",
+              background: "var(--ink-1000)",
+              borderBottom: "1px solid var(--border-faint)",
             }}
           >
-            <span
-              className="pdx-display"
-              style={{ fontSize: "0.72rem", lineHeight: 0.82, color: "var(--lime)", textAlign: "center" }}
-            >
-              PDX
-            </span>
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div
-              className="pdx-display"
-              style={{ fontSize: "1.02rem", lineHeight: 1.05, letterSpacing: ".01em", whiteSpace: "nowrap" }}
-            >
-              Pride Guide
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "8px",
+                  background: "var(--ink-1000)",
+                  border: "1px solid var(--border-default)",
+                  display: "grid",
+                  placeItems: "center",
+                  boxShadow: "0 0 14px -4px var(--lime)",
+                  flex: "0 0 auto",
+                }}
+              >
+                <span
+                  className="pdx-display"
+                  style={{ fontSize: "0.72rem", lineHeight: 0.82, color: "var(--lime)", textAlign: "center" }}
+                >
+                  PDX
+                </span>
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div
+                  className="pdx-display"
+                  style={{ fontSize: "1.02rem", lineHeight: 1.05, letterSpacing: ".01em", whiteSpace: "nowrap" }}
+                >
+                  Pride Guide
+                </div>
+                <div className="pdx-kicker" style={{ fontSize: "0.56rem", color: "var(--text-faint)", marginTop: "2px" }}>
+                  Messages
+                </div>
+              </div>
             </div>
-            <div className="pdx-kicker" style={{ fontSize: "0.56rem", color: "var(--text-faint)", marginTop: "2px" }}>
-              Messages
-            </div>
+            <button
+              className="pxCalmBtn"
+              onClick={() => setCalm((c) => !c)}
+              style={calmBtn}
+              title="Calm mode dims the neon"
+            >
+              <MoonIcon size={15} />
+              Calm
+            </button>
           </div>
-        </div>
-        <button
-          className="pxCalmBtn"
-          onClick={() => setCalm((c) => !c)}
-          style={calmBtn}
-          title="Calm mode dims the neon"
-        >
-          <MoonIcon size={15} />
-          Calm
-        </button>
-      </div>
-      <hr className="pdx-seam" style={{ margin: 0, flex: "0 0 auto" }} />
+          <hr className="pdx-seam" style={{ margin: 0, flex: "0 0 auto" }} />
+        </>
+      )}
 
       {/* Body */}
       <div style={bodyStyle}>
         {/* Sidebar */}
         <aside style={sidebarStyle}>
+          {compact && (
+            <div style={compactBar}>
+              <div ref={filtersRef} style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen((o) => !o)}
+                  style={compactFiltersBtn}
+                  aria-expanded={filtersOpen}
+                  aria-label="Filters"
+                >
+                  <FilterIcon size={14} />
+                  {folder === "sent" ? "Sent" : "Received"}
+                  {cat !== "all" ? ` · ${activeCatLabel}` : ""}
+                  {unreadOnly ? " · Unread" : ""}
+                  <ChevronDownIcon size={14} />
+                </button>
+                {filtersOpen && (
+                  <div style={compactFiltersPopover}>
+                    <div style={compactGroupLabel}>Folder</div>
+                    <div style={{ display: "flex", gap: "7px", marginBottom: "13px" }}>
+                      <button onClick={() => switchFolder("inbox")} style={seg(folder === "inbox")}>
+                        Received <span style={segCount}>{inboxCount}</span>
+                      </button>
+                      <button onClick={() => switchFolder("sent")} style={seg(folder === "sent")}>
+                        Sent <span style={segCount}>{sentCount}</span>
+                      </button>
+                    </div>
+                    <div style={compactGroupLabel}>Category</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "7px", marginBottom: "13px" }}>
+                      {chips.map((c) => (
+                        <button key={c.key} onClick={c.onToggle} style={c.style}>
+                          {c.label}
+                          <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.66rem", opacity: 0.8 }}>
+                            {c.count}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <button onClick={() => setUnreadOnly((u) => !u)} style={chipStyle(unreadOnly, accent)}>
+                      <span
+                        style={{ width: "8px", height: "8px", borderRadius: "999px", background: "currentColor", flex: "0 0 auto" }}
+                      />
+                      Unread only
+                    </button>
+                  </div>
+                )}
+              </div>
+              {inboxUnread > 0 && <span style={unreadPill}>{inboxUnread} new</span>}
+            </div>
+          )}
+          {!compact && (
           <div
             style={{
               flex: "0 0 auto",
@@ -636,6 +788,7 @@ export function InboxShell({
               </button>
             </div>
           </div>
+          )}
 
           <div style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}>
             {visibleThreads.length === 0 && (
@@ -719,6 +872,34 @@ export function InboxShell({
               </div>
             ))}
           </div>
+
+          {compact && (
+            <div style={compactSearchWrap}>
+              <span style={{ color: "var(--text-meta)", display: "flex", flex: "0 0 auto" }}>
+                <SearchIcon size={17} />
+              </span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search messages"
+                style={{
+                  flex: "1 1 auto",
+                  minWidth: 0,
+                  border: 0,
+                  outline: 0,
+                  background: "transparent",
+                  color: "var(--text-hi)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.92rem",
+                }}
+              />
+              {!!query && (
+                <button className="pxClearBtn" onClick={() => setQuery("")} aria-label="Clear search">
+                  <ClearIcon size={15} />
+                </button>
+              )}
+            </div>
+          )}
         </aside>
 
         {/* Thread pane */}
