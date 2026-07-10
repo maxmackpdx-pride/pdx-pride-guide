@@ -239,8 +239,8 @@ export default function About() {
               </span>
               <p>
                 And yes, I&apos;m still looking for work. I&apos;m a brand builder, sales leader, and
-                momentum-maker. I know how to connect people, move product, and build something people
-                actually care about. If you know somebody, you know where to find me.
+                momentum-maker who loves people, big ideas, and turning good energy into real results.
+                If something or someone comes to mind, send them my way.
               </p>
             </div>
             <Link href="/resume">
