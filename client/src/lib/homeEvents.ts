@@ -22,7 +22,9 @@ export function toCountdownTarget(dateStart: string): string {
  * Countdown target = start time of the earliest event on Pride Week day 1 (Jul 13).
  * Recomputes from live listings so the home clock stays synced as the schedule changes.
  */
-export function earliestPrideWeekStartTarget(events: EventListing[]): string {
+export function earliestPrideWeekStartTarget(
+  events: Array<Pick<EventListing, "dateStart">>,
+): string {
   let earliestMs: number | null = null;
   let earliestRaw: string | null = null;
 

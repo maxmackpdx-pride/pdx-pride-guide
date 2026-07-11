@@ -149,65 +149,74 @@ function levelTrendFromSeries(
   return "steady";
 }
 
-async function fetchUsgsRiverLevel(): Promise<UsgsRiverSnapshot | null> {
+const ROOSTER_GAGE_ID = "USGS-14128870";
+const ROOSTER_PARAM_CODE = "00065";
+const ROOSTER_PARK = { lat: 45.5446, lon: -122.2342 };
+const USGS_OGC_BASE = "https://api.waterdata.usgs.gov/ogcapi/v0/collections";
+const RRC_WATER_URL = "https://roosterrockcrossing.com/api/water";
+const RRC_AIR_URL = "https://roosterrockcrossing.com/api/air";
+
+function parseOgcContinuousSeries(geojson: {
+  features?: Array<{ properties?: { time?: string; value?: string } }>;
+}): Array<{ ft: number; at: string }> {
+  return (geojson.features ?? [])
+    .map(f => f.properties)
+    .filter(
+      (p): p is { time: string; value: string } =>
+        !!p?.time && p.value != null && p.value !== "" && Number.isFinite(Number(p.value)),
+    )
+    .map(p => ({ ft: Number(p.value), at: p.time }))
+    .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+}
+
+async function fetchOgcRiverLevel(): Promise<UsgsRiverSnapshot | null> {
   try {
-  const data = await fetchJson<{
-    value: {
-      timeSeries: Array<{
-        values: Array<{ value: Array<{ value: string; dateTime: string }> }>;
-      }>;
+    const endISO = new Date().toISOString();
+    const startISO = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const url =
+      `${USGS_OGC_BASE}/continuous/items?monitoring_location_id=${ROOSTER_GAGE_ID}` +
+      `&parameter_code=${ROOSTER_PARAM_CODE}` +
+      `&datetime=${encodeURIComponent(`${startISO}/${endISO}`)}` +
+      `&sortby=-time&limit=1500&f=json`;
+    const data = await fetchJson<{ features?: Array<{ properties?: { time?: string; value?: string } }> }>(url);
+    const series = parseOgcContinuousSeries(data);
+    if (!series.length) return null;
+
+    const latest = series[series.length - 1];
+    const midnight = new Date();
+    midnight.setHours(0, 0, 0, 0);
+    const today = series.filter(p => new Date(p.at).getTime() >= midnight.getTime());
+    const window = today.length ? today : series.slice(-96);
+
+    let lo = window[0];
+    let hi = window[0];
+    for (const p of window) {
+      if (p.ft < lo.ft) lo = p;
+      if (p.ft > hi.ft) hi = p;
+    }
+
+    return {
+      ft: latest.ft,
+      at: latest.at,
+      todayLowFt: lo.ft,
+      todayLowAt: lo.at,
+      todayHighFt: hi.ft,
+      todayHighAt: hi.at,
+      crossingWindowNote: crossingWindowNoteFromSeries(series, latest),
+      levelTrend: levelTrendFromSeries(series, latest),
     };
-  }>(
-    "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=14128870&parameterCd=00065&period=P1D&siteStatus=all",
-  );
-  const points = data.value?.timeSeries?.[0]?.values?.[0]?.value ?? [];
-  if (!points.length) return null;
-
-  const series = points
-    .map(p => ({ ft: Number(p.value), at: p.dateTime }))
-    .filter(p => Number.isFinite(p.ft));
-  if (!series.length) return null;
-
-  const latest = series[series.length - 1];
-  const midnight = new Date();
-  midnight.setHours(0, 0, 0, 0);
-  const today = series.filter(p => new Date(p.at).getTime() >= midnight.getTime());
-  const window = today.length ? today : series.slice(-96);
-
-  let lo = window[0];
-  let hi = window[0];
-  for (const p of window) {
-    if (p.ft < lo.ft) lo = p;
-    if (p.ft > hi.ft) hi = p;
-  }
-
-  return {
-    ft: latest.ft,
-    at: latest.at,
-    todayLowFt: lo.ft,
-    todayLowAt: lo.at,
-    todayHighFt: hi.ft,
-    todayHighAt: hi.at,
-    crossingWindowNote: crossingWindowNoteFromSeries(series, latest),
-    levelTrend: levelTrendFromSeries(series, latest),
-  };
   } catch {
     return null;
   }
 }
 
 type NwsPoints = {
-  properties?: { forecast?: string };
+  properties?: { forecast?: string; forecastHourly?: string };
 };
 
 type NwsGridForecast = {
   properties?: {
-    periods?: Array<{
-      shortForecast?: string;
-      temperature?: number;
-      windSpeed?: string;
-      windDirection?: string;
-    }>;
+    periods?: NwsForecastPeriod[];
   };
 };
 
@@ -219,114 +228,136 @@ const EMPTY_NWS_SUMMARY = {
   windMph: null as number | null,
 };
 
+function parseWindMph(speedRaw?: string | null): number | null {
+  if (!speedRaw || speedRaw === "null") return null;
+  const nums = speedRaw.match(/\d+/g)?.map(Number) ?? [];
+  if (!nums.length) return null;
+  return Math.max(...nums);
+}
+
 function parseWindParts(windDir?: string | null, windSpeed?: string | null) {
   const dir = windDir && windDir !== "null" ? windDir : null;
   const speedRaw = windSpeed && windSpeed !== "null" ? windSpeed : null;
-  const mph = speedRaw ? Number.parseInt(speedRaw, 10) : null;
+  const mph = parseWindMph(speedRaw);
   const wind =
     dir && speedRaw ? `${dir} ${speedRaw}` : dir ? dir : speedRaw ? speedRaw : null;
   return { wind, windFrom: dir, windMph: Number.isFinite(mph) ? mph : null };
 }
 
+type NwsForecastPeriod = {
+  startTime?: string;
+  endTime?: string;
+  isDaytime?: boolean;
+  shortForecast?: string;
+  temperature?: number;
+  windSpeed?: string;
+  windDirection?: string;
+};
+
+type NwsHourlyForecast = {
+  properties?: {
+    periods?: NwsForecastPeriod[];
+  };
+};
+
+/** NWS daily forecast period[0] is often "Tonight" (overnight low), not current air temp. */
+function pickCurrentNwsPeriod(periods?: NwsForecastPeriod[]): NwsForecastPeriod | null {
+  if (!periods?.length) return null;
+  const now = Date.now();
+  for (const period of periods) {
+    const start = period.startTime ? new Date(period.startTime).getTime() : NaN;
+    const end = period.endTime ? new Date(period.endTime).getTime() : NaN;
+    if (Number.isFinite(start) && Number.isFinite(end) && now >= start && now < end) {
+      return period;
+    }
+  }
+  return periods[0] ?? null;
+}
+
 async function fetchNwsSummary(lat: number, lon: number) {
   try {
     const points = await fetchJson<NwsPoints>(`https://api.weather.gov/points/${lat},${lon}`);
-    const forecastUrl = points.properties?.forecast;
-    if (!forecastUrl) return { ...EMPTY_NWS_SUMMARY };
+    const hourlyUrl = points.properties?.forecastHourly;
+    const dailyUrl = points.properties?.forecast;
+    const [hourly, daily] = await Promise.all([
+      hourlyUrl ? fetchJson<NwsHourlyForecast>(hourlyUrl).catch(() => null) : null,
+      dailyUrl ? fetchJson<NwsGridForecast>(dailyUrl).catch(() => null) : null,
+    ]);
+    const now = pickCurrentNwsPeriod(hourly?.properties?.periods);
+    const today = pickCurrentNwsPeriod(daily?.properties?.periods);
+    if (!now && !today) return { ...EMPTY_NWS_SUMMARY };
 
-    const forecast = await fetchJson<NwsGridForecast>(forecastUrl);
-    const period = forecast.properties?.periods?.[0];
-    if (!period) return { ...EMPTY_NWS_SUMMARY };
-
-    const summary = period.shortForecast?.replace(/\s+/g, " ").trim() || null;
-    const airTempF = typeof period.temperature === "number" ? period.temperature : null;
-    const { wind, windFrom, windMph } = parseWindParts(period.windDirection, period.windSpeed);
+    const summary = (now?.shortForecast ?? today?.shortForecast)?.replace(/\s+/g, " ").trim() || null;
+    const airTempF =
+      typeof now?.temperature === "number"
+        ? now.temperature
+        : typeof today?.temperature === "number"
+          ? today.temperature
+          : null;
+    const { wind, windFrom, windMph } = parseWindParts(
+      now?.windDirection ?? today?.windDirection,
+      now?.windSpeed ?? today?.windSpeed,
+    );
     return { summary, airTempF, wind, windFrom, windMph };
   } catch {
     return { ...EMPTY_NWS_SUMMARY };
   }
 }
 
-async function fetchUsgsWaterTemp(): Promise<Pick<RoosterRockLive, "waterTempF" | "waterTempSite">> {
+type RrcWaterPayload = {
+  clarity?: { label?: string; why?: string; windFrom?: string; windMph?: number };
+  temp?: { f?: number; site?: string };
+};
+
+type RrcAirPayload = {
+  aqi?: number;
+  pm25?: number;
+  category?: string;
+};
+
+async function fetchRrcWaterExtras(): Promise<{
+  waterTempF: number | null;
+  waterTempSite: string | null;
+  waterClarity: string | null;
+  clarityWindFrom: string | null;
+  clarityWindMph: number | null;
+}> {
+  const empty = {
+    waterTempF: null as number | null,
+    waterTempSite: null as string | null,
+    waterClarity: null as string | null,
+    clarityWindFrom: null as string | null,
+    clarityWindMph: null as number | null,
+  };
   try {
-    const data = await fetchJson<{
-      value?: {
-        timeSeries?: Array<{
-          values?: Array<{ value?: Array<{ value?: string }> }>;
-        }>;
-      };
-    }>(
-      "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=14105700&parameterCd=00010&siteStatus=all",
-    );
-    const point = data.value?.timeSeries?.[0]?.values?.[0]?.value?.[0];
-    const c = Number(point?.value);
-    if (!Number.isFinite(c)) return { waterTempF: null, waterTempSite: null };
+    const data = await fetchJson<RrcWaterPayload>(RRC_WATER_URL);
+    const clarity = data.clarity;
+    const clarityLabel = clarity?.label?.trim();
+    const clarityWhy = clarity?.why?.trim();
     return {
-      waterTempF: (c * 9) / 5 + 32,
-      waterTempSite: "Columbia at Warrendale (below Bonneville)",
+      waterTempF: typeof data.temp?.f === "number" ? data.temp.f : null,
+      waterTempSite: data.temp?.site ?? "Columbia at Warrendale (below Bonneville)",
+      waterClarity: clarityLabel
+        ? clarityWhy
+          ? `${clarityLabel} — ${clarityWhy}`
+          : clarityLabel
+        : null,
+      clarityWindFrom: clarity?.windFrom ?? null,
+      clarityWindMph: typeof clarity?.windMph === "number" ? clarity.windMph : null,
     };
   } catch {
-    return { waterTempF: null, waterTempSite: null };
+    return empty;
   }
 }
 
-function compassFromDegrees(deg: number): string {
-  const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-  return dirs[Math.round(deg / 22.5) % 16];
-}
-
-async function fetchOpenMeteoCurrent(lat: number, lon: number) {
+async function fetchRrcAirQuality(): Promise<Pick<RoosterRockLive, "airQuality">> {
   try {
-    const data = await fetchJson<{
-      current?: {
-        temperature_2m?: number;
-        wind_speed_10m?: number;
-        wind_direction_10m?: number;
-      };
-    }>(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-        "&current=temperature_2m,wind_speed_10m,wind_direction_10m" +
-        "&temperature_unit=fahrenheit&wind_speed_unit=mph",
-    );
-    const current = data.current;
-    if (!current) return null;
-    const windFrom =
-      typeof current.wind_direction_10m === "number"
-        ? compassFromDegrees(current.wind_direction_10m)
-        : null;
-    const windMph =
-      typeof current.wind_speed_10m === "number"
-        ? Math.round(current.wind_speed_10m)
-        : null;
-    return {
-      airTempF: typeof current.temperature_2m === "number" ? Math.round(current.temperature_2m) : null,
-      wind: windFrom && windMph != null ? `${windFrom} ${windMph} mph` : null,
-      windFrom,
-      windMph,
-    };
-  } catch {
-    return null;
-  }
-}
-
-async function fetchOpenMeteoAirQuality(
-  lat: number,
-  lon: number,
-): Promise<Pick<RoosterRockLive, "airQuality">> {
-  try {
-    const data = await fetchJson<{
-      current?: { us_aqi?: number; pm2_5?: number };
-    }>(
-      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5`,
-    );
-    const current = data.current;
-    const aqi = current?.us_aqi;
+    const data = await fetchJson<RrcAirPayload>(RRC_AIR_URL);
+    const aqi = data.aqi;
     if (aqi == null) return { airQuality: null };
-    const pm =
-      typeof current?.pm2_5 === "number"
-        ? ` · PM2.5 ${current.pm2_5.toFixed(1)}`
-        : "";
-    return { airQuality: `${aqiCategoryFromValue(aqi)} · AQI ${aqi}${pm}` };
+    const pm = typeof data.pm25 === "number" ? ` · PM2.5 ${data.pm25.toFixed(1)}` : "";
+    const category = data.category ?? aqiCategoryFromValue(aqi);
+    return { airQuality: `${category} · AQI ${aqi}${pm}` };
   } catch {
     return { airQuality: null };
   }
@@ -456,20 +487,16 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     waterTempSite: null,
     waterClarity: null,
     airQuality: null,
-    source: "USGS + NWS + Open-Meteo",
+    source: "USGS OGC + NWS + RoosterRockCrossing.com (DART + PurpleAir)",
   };
-  const parkLat = 45.5446;
-  const parkLon = -122.2342;
-  const [river, weather, waterTemp, airQuality, openMeteo] = await Promise.all([
-    fetchUsgsRiverLevel(),
-    fetchNwsSummary(parkLat, parkLon),
-    fetchUsgsWaterTemp(),
-    fetchOpenMeteoAirQuality(parkLat, parkLon),
-    fetchOpenMeteoCurrent(parkLat, parkLon),
+  const [river, weather, rrcWater, airQuality] = await Promise.all([
+    fetchOgcRiverLevel(),
+    fetchNwsSummary(ROOSTER_PARK.lat, ROOSTER_PARK.lon),
+    fetchRrcWaterExtras(),
+    fetchRrcAirQuality(),
   ]);
-  const windFrom = weather.windFrom ?? openMeteo?.windFrom ?? null;
-  const windMph = weather.windMph ?? openMeteo?.windMph ?? null;
-  const wind = weather.wind ?? openMeteo?.wind ?? null;
+  const windFrom = weather.windFrom ?? rrcWater.clarityWindFrom ?? null;
+  const windMph = weather.windMph ?? rrcWater.clarityWindMph ?? null;
   if (river) {
     const band = crossingBandFromLevel(river.ft);
     base.riverLevelFt = river.ft;
@@ -486,11 +513,11 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     base.worthCrossing = band.worthCrossing;
   }
   base.weatherSummary = weather.summary;
-  base.airTempF = weather.airTempF ?? openMeteo?.airTempF ?? null;
-  base.wind = wind;
-  base.waterTempF = waterTemp.waterTempF;
-  base.waterTempSite = waterTemp.waterTempSite;
-  base.waterClarity = estimateWaterClarity(windFrom, windMph);
+  base.airTempF = weather.airTempF;
+  base.wind = weather.wind;
+  base.waterTempF = rrcWater.waterTempF;
+  base.waterTempSite = rrcWater.waterTempSite;
+  base.waterClarity = rrcWater.waterClarity ?? estimateWaterClarity(windFrom, windMph);
   base.airQuality = airQuality.airQuality;
   if (!hasRoosterRockLiveData(base)) {
     base.error = "Live conditions temporarily unavailable";

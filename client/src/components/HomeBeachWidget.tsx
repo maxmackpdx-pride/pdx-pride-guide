@@ -4,41 +4,58 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { NudeBeachesSnapshot } from "@shared/nudeBeaches";
 
-
 type BeachTab = "rooster" | "collins";
+
+type ApiPayload = {
+  data: NudeBeachesSnapshot;
+  stale: boolean;
+  fromCache: boolean;
+  rateLimited?: boolean;
+};
 
 type Props = {
   showCollins?: boolean;
 };
 
-function crowdLabel(band?: string | null): { text: string; status: "good" | "warn" | "bad" | "neutral" } {
-  if (!band) return { text: "—", status: "neutral" };
-  const lower = band.toLowerCase();
-  if (lower.includes("busy") || lower.includes("flood")) return { text: "Busy", status: "warn" };
-  if (lower.includes("mellow") || lower.includes("low")) return { text: "Mellow", status: "good" };
-  return { text: band, status: "neutral" };
+function swimStatusTone(status?: string | null): "good" | "warn" | "bad" | "neutral" {
+  if (status === "pass") return "good";
+  if (status === "fail") return "bad";
+  if (status === "warning") return "warn";
+  return "neutral";
+}
+
+function riverLevelTone(ft?: number | null): "good" | "warn" | "neutral" {
+  if (ft == null) return "neutral";
+  return ft >= 15 ? "warn" : "good";
+}
+
+function windDisplay(wind?: string | null): string {
+  if (!wind) return "—";
+  return wind.split(" ")[0] || "—";
 }
 
 export default function HomeBeachWidget({ showCollins = true }: Props) {
   const [tab, setTab] = useState<BeachTab>("rooster");
 
-  const { data } = useQuery<{ data: NudeBeachesSnapshot }>({
+  const { data } = useQuery<ApiPayload>({
     queryKey: ["/api/nude-beaches"],
     queryFn: () => apiRequest("GET", "/api/nude-beaches").then(r => r.json()),
-    staleTime: 120_000,
+    staleTime: 5 * 60_000,
+    refetchInterval: query => (query.state.data?.stale ? 20_000 : false),
+    refetchOnWindowFocus: true,
   });
 
   const snapshot = data?.data;
   const rooster = snapshot?.roosterRock;
   const sauvie = snapshot?.sauvieIsland;
-  const roosterCrowd = crowdLabel(rooster?.crossingBand);
-  const sauvieCrowd = { text: "Mellow", status: "good" as const };
+  const isStale = Boolean(data?.stale);
 
   return (
     <div className="home-beach-widget">
       <div className="home-beach-widget__live">
         <span className="home-beach-widget__live-dot" aria-hidden />
         Live conditions
+        {isStale ? <span className="home-beach-widget__stale">· refreshing</span> : null}
       </div>
       <div className="home-beach-widget__tabs" role="tablist" aria-label="Beach location">
         <button
@@ -68,28 +85,32 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <h3 className="home-beach-widget__name">Rooster Rock</h3>
             <div className="home-beach-widget__grid">
               <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--good`}>
+                <div className="home-beach-widget__stat home-beach-widget__stat--good">
                   {rooster.airTempF != null ? `${rooster.airTempF}°` : "—"}
                 </div>
-                <div className="home-beach-widget__stat-label">Weather</div>
+                <div className="home-beach-widget__stat-label">Air temp</div>
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--neutral">
+                  {rooster.waterTempF != null ? `${Math.round(rooster.waterTempF)}°` : "—"}
+                </div>
+                <div className="home-beach-widget__stat-label">Water temp</div>
+              </div>
+              <div>
+                <div className="home-beach-widget__stat home-beach-widget__stat--good">
+                  {windDisplay(rooster.wind)}
+                </div>
+                <div className="home-beach-widget__stat-label">
+                  {rooster.wind?.includes("mph") ? "Wind · mph" : "Wind"}
+                </div>
+              </div>
+              <div>
+                <div className={`home-beach-widget__stat home-beach-widget__stat--${riverLevelTone(rooster.riverLevelFt)}`}>
                   {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)}ft` : "—"}
                 </div>
-                <div className="home-beach-widget__stat-label">River level</div>
-              </div>
-              <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--${roosterCrowd.status}`}>
-                  {roosterCrowd.text}
+                <div className="home-beach-widget__stat-label">
+                  {rooster.crossingBand ? `River · ${rooster.crossingBand}` : "River level"}
                 </div>
-                <div className="home-beach-widget__stat-label">Crowd</div>
-              </div>
-              <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--${rooster.worthCrossing === false ? "warn" : "good"}`}>
-                  {rooster.worthCrossing === false ? "Check" : "Open"}
-                </div>
-                <div className="home-beach-widget__stat-label">Access</div>
               </div>
             </div>
             <Link href="/nude-beaches?tab=rooster-rock" className="home-beach-widget__link home-beach-widget__link--cyan">
@@ -103,26 +124,28 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <div className="home-beach-widget__sub">Sauvie Island</div>
             <div className="home-beach-widget__grid">
               <div>
+                <div className={`home-beach-widget__stat home-beach-widget__stat--${swimStatusTone(sauvie.swimStatus)}`}>
+                  {sauvie.swimStatusLabel || "—"}
+                </div>
+                <div className="home-beach-widget__stat-label">Collins swim</div>
+              </div>
+              <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
                   {sauvie.airTempF != null ? `${sauvie.airTempF}°` : "—"}
                 </div>
-                <div className="home-beach-widget__stat-label">Weather</div>
+                <div className="home-beach-widget__stat-label">Air temp</div>
               </div>
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--neutral">
-                  {sauvie.swimStatusLabel || "—"}
+                <div className="home-beach-widget__stat home-beach-widget__stat--good">
+                  {windDisplay(sauvie.wind)}
                 </div>
-                <div className="home-beach-widget__stat-label">Water quality</div>
-              </div>
-              <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--${sauvieCrowd.status}`}>
-                  {sauvieCrowd.text}
+                <div className="home-beach-widget__stat-label">
+                  {sauvie.wind?.includes("mph") ? "Wind · mph" : "Wind"}
                 </div>
-                <div className="home-beach-widget__stat-label">Crowd</div>
               </div>
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--good">Open</div>
-                <div className="home-beach-widget__stat-label">Access</div>
+                <div className="home-beach-widget__stat home-beach-widget__stat--neutral">Permits</div>
+                <div className="home-beach-widget__stat-label">Parking</div>
               </div>
             </div>
             <Link href="/nude-beaches?tab=sauvie-island" className="home-beach-widget__link home-beach-widget__link--orange">

@@ -25,7 +25,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   const trend = trendLabel(live.levelTrend);
   const lowTime = formatShortTime(live.todayLowAt);
   const highTime = formatShortTime(live.todayHighAt);
-  const worth = live.worthCrossing;
+  const swimBand = live.riverLevelFt != null && live.riverLevelFt >= 15;
 
   return (
     <div className="nb-hub">
@@ -46,7 +46,9 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
             <span className="nb-hub__weather-stat-value">
               {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
             </span>
-            <span className="nb-hub__weather-stat-label">Water</span>
+            <span className="nb-hub__weather-stat-label">
+              Water{live.waterTempSite ? " · Warrendale" : ""}
+            </span>
           </div>
           <div className="nb-hub__weather-stat">
             <span className="nb-hub__weather-stat-value">
@@ -56,13 +58,18 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           </div>
         </div>
         <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
+        {live.waterClarity ? (
+          <p className="nb-hub__summary" style={{ marginTop: 8 }}>
+            {live.waterClarity}
+          </p>
+        ) : null}
       </section>
 
       <section
         className={`nb-hub__section nb-hub__level${
-          worth === false ? " nb-hub__level--bad" : worth ? " nb-hub__level--good" : ""
+          swimBand ? " nb-hub__level--bad" : live.riverLevelFt != null ? " nb-hub__level--good" : ""
         }`}
-        style={{ ["--dc" as string]: worth === false ? "#ff8c00" : worth ? "#39ff14" : "#19e3ff" }}
+        style={{ ["--dc" as string]: swimBand ? "#ff8c00" : live.riverLevelFt != null ? "#39ff14" : "#19e3ff" }}
       >
         <div className="nb-hub__level-head">
           <div className="nb-hub__kicker">River level</div>
@@ -73,7 +80,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           <span className="nb-hub__level-unit">ft</span>
         </div>
         <p className="nb-hub__level-detail">
-          {live.depthEstimate || live.crossingAdvice || "USGS gage below Bonneville Dam."}
+          {live.crossingAdvice || live.depthEstimate || "USGS gage below Bonneville Dam."}
         </p>
         <div className="nb-hub__level-range">
           <div>

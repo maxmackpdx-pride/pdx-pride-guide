@@ -389,6 +389,30 @@
   margin-bottom: 6px;
 }
 
+.nude-checklist__link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--neon-cyan, #19e3ff);
+  text-decoration: none;
+}
+
+.nude-checklist__link:hover {
+  text-decoration: underline;
+}
+
+.nude-farm-intro {
+  margin: 0 0 14px;
+  color: #b8b4ab;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.nude-farm-intro strong {
+  color: #fff;
+}
+
 .nude-rules {
   display: grid;
   gap: 8px;

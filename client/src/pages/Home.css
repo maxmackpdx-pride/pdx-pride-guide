@@ -1719,6 +1719,12 @@ html.calm-mode .home-boards__card {
   flex-direction: column;
 }
 
+.home-beach-widget__stale {
+  color: var(--text-lo);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
 .home-beach-widget__live {
   display: inline-flex;
   align-items: center;
