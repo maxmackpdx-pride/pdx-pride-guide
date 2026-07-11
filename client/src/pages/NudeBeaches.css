@@ -264,16 +264,6 @@
 .nude-panel__kicker--orange { color: var(--neon-orange, #FF6600); }
 .nude-panel__kicker--lime { color: #ccff00; }
 
-.nude-panel__title {
-  margin: 0 0 12px;
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: #fff;
-}
-
 .nude-live-card {
   border: 1px solid #24242c;
   background: #0d0d10;
@@ -356,71 +346,6 @@
 
 .nude-prose li + li {
   margin-top: 6px;
-}
-
-.nude-checklist {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 900px) {
-  .nude-checklist {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.nude-checklist li {
-  border: 1px solid #24242c;
-  background: #0d0d10;
-  padding: 14px 16px;
-  border-radius: 10px;
-}
-
-.nude-checklist strong {
-  display: block;
-  color: #fff;
-  font-family: var(--font-display), sans-serif;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.nude-checklist__link {
-  display: inline-block;
-  margin-top: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--neon-cyan, #19e3ff);
-  text-decoration: none;
-}
-
-.nude-checklist__link:hover {
-  text-decoration: underline;
-}
-
-.nude-farm-intro {
-  margin: 0 0 14px;
-  color: #b8b4ab;
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.nude-farm-intro strong {
-  color: #fff;
-}
-
-.nude-rules {
-  display: grid;
-  gap: 8px;
-  margin: 14px 0 0;
-  padding-left: 18px;
-  color: #b8b4ab;
-  font-size: 14px;
-  line-height: 1.55;
 }
 
 .nude-resource-list {
@@ -709,6 +634,213 @@ html.calm-mode .board-close-seam {
 .nude-beaches-page--sauvie .nude-map-btn:hover {
   border-color: var(--neon-cyan, #19e3ff);
   color: var(--neon-cyan, #19e3ff);
+}
+
+.nude-map-btn--primary {
+  border-color: rgba(255, 102, 0, 0.4);
+  color: var(--neon-orange, #FF6600);
+}
+
+/* ===================================================================
+   Trip-logistics section (.nb-log-*) — Sauvie + Rooster bottom half
+   =================================================================== */
+.nb-log__kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+.nb-log__kicker--green { color: var(--neon-green, #00EE44); }
+.nb-log__kicker--orange { color: var(--neon-orange, #FF6600); }
+.nb-log__kicker--farm { color: #ff8c00; }
+.nb-log__kicker--section { margin-top: 44px; }
+
+.nb-log__title {
+  margin: 0 0 6px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  color: #fff;
+}
+
+.nb-log__lede {
+  margin: 0 0 28px;
+  color: #c8c4bb;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+.nb-log__intro {
+  margin: 0 0 16px;
+  color: #c8c4bb;
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 66ch;
+}
+.nb-log__intro strong { color: #fff; }
+
+.nb-log__grid { display: grid; gap: 14px; }
+.nb-log__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.nb-log__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.nb-log__grid--fees {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 760px;
+}
+
+@media (max-width: 720px) {
+  .nb-log__grid--3,
+  .nb-log__grid--2,
+  .nb-log__grid--fees {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Step cards (numbered "Before you go") */
+.nb-log-step {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #24242c;
+  background: #0c0c0f;
+  border-radius: 12px;
+  padding: 22px;
+  transition: border-color 0.15s ease;
+}
+.nb-log-step:hover { border-color: var(--neon-green, #00EE44); }
+.nb-log-step__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--neon-green, #00EE44);
+  background: rgba(0, 238, 68, 0.12);
+  border: 1px solid rgba(0, 238, 68, 0.4);
+  margin-bottom: 16px;
+}
+.nb-log-step__title {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.nb-log-step__detail {
+  flex: 1;
+  margin: 0;
+  color: #b8b4ab;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.nb-log-step__link {
+  display: inline-block;
+  margin-top: 14px;
+  color: #19e3ff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.nb-log-step__link:hover { text-decoration: underline; }
+
+/* Rule tiles (checkmark) */
+.nb-log-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid #1c1c22;
+  border-left: 3px solid var(--neon-green, #00EE44);
+  background: #0c0c0f;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.nb-log-rule__icon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--neon-green, #00EE44);
+}
+.nb-log-rule__text {
+  margin: 0;
+  color: #c8c4bb;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Farm-stop link cards */
+.nb-log-farm {
+  display: block;
+  border: 1px solid #24242c;
+  background: #0c0c0f;
+  border-radius: 10px;
+  padding: 16px 18px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.nb-log-farm:hover { border-color: #ff8c00; }
+.nb-log-farm__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.nb-log-farm__title {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.nb-log-farm__arrow {
+  color: #ff8c00;
+  font-size: 16px;
+}
+.nb-log-farm__desc {
+  margin: 6px 0 0;
+  color: #9a9a9a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Rooster fee tiles */
+.nb-log-fee {
+  border: 1px solid #24242c;
+  background: #0c0c0f;
+  border-radius: 12px;
+  padding: 18px 20px;
+  transition: border-color 0.15s ease;
+}
+.nb-log-fee:hover { border-color: var(--neon-orange, #FF6600); }
+.nb-log-fee__label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+.nb-log-fee__value {
+  margin-top: 8px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: var(--neon-orange, #FF6600);
+}
+
+.nb-log__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .nude-beaches-map__chip {
