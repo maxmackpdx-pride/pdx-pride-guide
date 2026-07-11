@@ -1837,6 +1837,7 @@ html.calm-mode .home-boards__card {
 
 .home-beach-widget__stat--good { color: var(--status-good, #39ff14); }
 .home-beach-widget__stat--orange { color: var(--neon-orange, #ff6600); }
+.home-beach-widget__stat--water { color: var(--neon-cyan, #19e3ff); }
 .home-beach-widget__stat--warn { color: var(--status-warn, #ffb347); }
 .home-beach-widget__stat--bad { color: var(--status-bad, #ff4d4d); }
 .home-beach-widget__stat--neutral { color: var(--status-neutral, #19e3ff); }

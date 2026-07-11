@@ -18,13 +18,6 @@ type Props = {
   showCollins?: boolean;
 };
 
-function swimStatusTone(status?: string | null): "good" | "warn" | "bad" | "neutral" {
-  if (status === "pass") return "good";
-  if (status === "fail") return "bad";
-  if (status === "warning") return "warn";
-  return "neutral";
-}
-
 function roosterRiverTone(ft?: number | null): "orange" | "warn" | "neutral" {
   if (ft == null) return "neutral";
   return ft >= 15 ? "warn" : "orange";
@@ -95,7 +88,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 <div className="home-beach-widget__stat-label">Air temp</div>
               </div>
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--neutral">
+                <div className="home-beach-widget__stat home-beach-widget__stat--water">
                   {rooster.waterTempF != null ? `${Math.round(rooster.waterTempF)}°` : "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">Water temp</div>
@@ -126,7 +119,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <div className="home-beach-widget__sub">Sauvie Island</div>
             <div className="home-beach-widget__grid">
               <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--${swimStatusTone(sauvie.swimStatus)}`}>
+                <div className="home-beach-widget__stat home-beach-widget__stat--water">
                   {sauvie.swimStatusLabel || "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">Collins swim</div>

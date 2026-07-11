@@ -7,9 +7,11 @@
   background: #0a0a0a;
   border: 2px solid #2b2b2b;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
   padding: 14px;
+  scrollbar-gutter: stable;
 }
 
 .nb-hub--loading {
@@ -104,12 +106,26 @@
   color: #b8b4ab;
 }
 
+.nb-hub__summary--water {
+  color: var(--neon-cyan, #19e3ff);
+}
+
+.nb-hub__weather-stat--water .nb-hub__weather-stat-value {
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 16px rgba(25, 227, 255, 0.28);
+}
+
+.nb-hub--rooster .nb-hub__section--pulse {
+  --dc: #ff6600;
+  border-top: 3px solid #ff6600;
+  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
 .nb-hub__level {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  border-top: 3px solid #19e3ff;
-  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  flex-shrink: 0;
+  border-top: 3px solid #333;
 }
 
 @keyframes nbHubPulse {
@@ -122,13 +138,11 @@
 }
 
 .nb-hub__swim {
-  border-top: 3px solid #19e3ff;
-  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  border-top: 3px solid var(--neon-cyan, #19e3ff);
 }
 
-.nb-hub__swim--pass {
-  --dc: #39ff14;
-  border-top-color: #39ff14;
+.nb-hub__section--water.nb-hub__swim--pass {
+  border-top-color: var(--neon-cyan, #19e3ff);
 }
 
 .nb-hub__swim--fail {
@@ -146,23 +160,20 @@
   border-top-color: #19e3ff;
 }
 
-.nb-hub__swim-value--pass { color: #39ff14; text-shadow: 0 0 22px rgba(57, 255, 20, 0.35); }
+.nb-hub__swim-value--pass { color: var(--neon-cyan, #19e3ff); text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
 .nb-hub__swim-value--fail { color: #ff4d4d; text-shadow: 0 0 22px rgba(255, 77, 77, 0.35); }
 .nb-hub__swim-value--warning { color: #ffb347; text-shadow: 0 0 22px rgba(255, 179, 71, 0.35); }
 .nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
 
 .nb-hub__level--good {
-  --dc: #ff6600;
   border-top-color: #ff6600;
 }
 
 .nb-hub__level--bad {
-  --dc: #ff8c00;
   border-top-color: #ff8c00;
 }
 
-html.calm-mode .nb-hub__level,
-html.calm-mode .nb-hub__swim {
+html.calm-mode .nb-hub__section--pulse {
   animation: none;
 }
 
@@ -244,6 +255,10 @@ html.calm-mode .nb-hub__swim {
   color: #b8b4ab;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.nb-hub__level .nb-hub__link {
+  margin-bottom: 2px;
 }
 
 .nb-hub__link {

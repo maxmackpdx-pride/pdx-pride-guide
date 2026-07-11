@@ -41,7 +41,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
         {
           num: snapshot?.sauvieIsland.swimStatusLabel || "—",
           label: "Collins swim",
-          color: snapshot?.sauvieIsland.swimStatus === "pass" ? "#39ff14" : "#ff8c00",
+          color: "#19e3ff",
         },
         {
           num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "—",

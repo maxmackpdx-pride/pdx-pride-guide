@@ -29,7 +29,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
 
   return (
     <div className="nb-hub nb-hub--rooster">
-      <section className="nb-hub__section">
+      <section className="nb-hub__section nb-hub__section--pulse">
         <div className="nb-hub__kicker">Weather</div>
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
@@ -42,7 +42,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
             <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
             <span className="nb-hub__weather-stat-label">Wind</span>
           </div>
-          <div className="nb-hub__weather-stat">
+          <div className="nb-hub__weather-stat nb-hub__weather-stat--water">
             <span className="nb-hub__weather-stat-value">
               {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
             </span>
@@ -59,7 +59,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         </div>
         <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
         {live.waterClarity ? (
-          <p className="nb-hub__summary" style={{ marginTop: 8 }}>
+          <p className="nb-hub__summary nb-hub__summary--water" style={{ marginTop: 8 }}>
             {live.waterClarity}
           </p>
         ) : null}
@@ -69,7 +69,6 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         className={`nb-hub__section nb-hub__level${
           swimBand ? " nb-hub__level--bad" : live.riverLevelFt != null ? " nb-hub__level--good" : ""
         }`}
-        style={{ ["--dc" as string]: swimBand ? "#ff8c00" : live.riverLevelFt != null ? "#ff6600" : "#19e3ff" }}
       >
         <div className="nb-hub__level-head">
           <div className="nb-hub__kicker">River level</div>
@@ -124,7 +123,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
 
   return (
     <div className="nb-hub nb-hub--sauvie">
-      <section className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass}`}>
+      <section className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}>
         <div className="nb-hub__kicker">Water quality</div>
         <div
           className={`nb-hub__level-value nb-hub__swim-value--${swimClass}`}
