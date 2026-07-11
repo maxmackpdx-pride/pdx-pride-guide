@@ -62,7 +62,7 @@ async function fetchText(url: string, timeoutMs = 12_000): Promise<string> {
       signal: controller.signal,
       headers: {
         "User-Agent": "PDX-Pride-Guide/1.0 (+https://www.prideguidepdx.com)",
-        Accept: "text/html,application/json",
+        Accept: "application/geo+json,application/json,text/html",
       },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -150,6 +150,7 @@ function levelTrendFromSeries(
 }
 
 async function fetchUsgsRiverLevel(): Promise<UsgsRiverSnapshot | null> {
+  try {
   const data = await fetchJson<{
     value: {
       timeSeries: Array<{
@@ -190,15 +191,32 @@ async function fetchUsgsRiverLevel(): Promise<UsgsRiverSnapshot | null> {
     crossingWindowNote: crossingWindowNoteFromSeries(series, latest),
     levelTrend: levelTrendFromSeries(series, latest),
   };
+  } catch {
+    return null;
+  }
 }
 
-type NwsForecast = {
-  data?: {
-    text?: string[];
-    temperature?: string[];
-    windSpeed?: string[];
-    windDirection?: string[];
+type NwsPoints = {
+  properties?: { forecast?: string };
+};
+
+type NwsGridForecast = {
+  properties?: {
+    periods?: Array<{
+      shortForecast?: string;
+      temperature?: number;
+      windSpeed?: string;
+      windDirection?: string;
+    }>;
   };
+};
+
+const EMPTY_NWS_SUMMARY = {
+  summary: null as string | null,
+  airTempF: null as number | null,
+  wind: null as string | null,
+  windFrom: null as string | null,
+  windMph: null as number | null,
 };
 
 function parseWindParts(windDir?: string | null, windSpeed?: string | null) {
@@ -206,27 +224,27 @@ function parseWindParts(windDir?: string | null, windSpeed?: string | null) {
   const speedRaw = windSpeed && windSpeed !== "null" ? windSpeed : null;
   const mph = speedRaw ? Number.parseInt(speedRaw, 10) : null;
   const wind =
-    dir && speedRaw ? `${dir} ${speedRaw} mph` : dir ? dir : null;
+    dir && speedRaw ? `${dir} ${speedRaw}` : dir ? dir : speedRaw ? speedRaw : null;
   return { wind, windFrom: dir, windMph: Number.isFinite(mph) ? mph : null };
 }
 
 async function fetchNwsSummary(lat: number, lon: number) {
-  const data = await fetchJson<NwsForecast>(
-    `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}&unit=0&lg=english&FcstType=json`,
-  );
-  const summary = data.data?.text?.[0]?.replace(/\s+/g, " ").trim() || null;
-  const temp = data.data?.temperature?.[0];
-  const { wind, windFrom, windMph } = parseWindParts(
-    data.data?.windDirection?.[0],
-    data.data?.windSpeed?.[0],
-  );
-  return {
-    summary,
-    airTempF: temp && temp !== "null" ? Number(temp) : null,
-    wind,
-    windFrom,
-    windMph,
-  };
+  try {
+    const points = await fetchJson<NwsPoints>(`https://api.weather.gov/points/${lat},${lon}`);
+    const forecastUrl = points.properties?.forecast;
+    if (!forecastUrl) return { ...EMPTY_NWS_SUMMARY };
+
+    const forecast = await fetchJson<NwsGridForecast>(forecastUrl);
+    const period = forecast.properties?.periods?.[0];
+    if (!period) return { ...EMPTY_NWS_SUMMARY };
+
+    const summary = period.shortForecast?.replace(/\s+/g, " ").trim() || null;
+    const airTempF = typeof period.temperature === "number" ? period.temperature : null;
+    const { wind, windFrom, windMph } = parseWindParts(period.windDirection, period.windSpeed);
+    return { summary, airTempF, wind, windFrom, windMph };
+  } catch {
+    return { ...EMPTY_NWS_SUMMARY };
+  }
 }
 
 async function fetchUsgsWaterTemp(): Promise<Pick<RoosterRockLive, "waterTempF" | "waterTempSite">> {
@@ -330,21 +348,31 @@ function swimStatusLabel(status: SwimGuideStatus | null): string | null {
 }
 
 async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStatus" | "swimStatusLabel" | "lastSampleAt" | "swimSummary">> {
-  const html = await fetchText("https://www.theswimguide.org/beach/1792");
-  const headerStatus = html.match(/header-section[\s\S]*?beach-status status-(pass|fail|warning|unknown)/i);
-  const status = (headerStatus?.[1]?.toLowerCase() as SwimGuideStatus | undefined) || "unknown";
-  const sampleMatch = html.match(/taken on\s+([^.<]+)/i);
-  const lastSampleAt = sampleMatch?.[1]?.trim() || null;
-  const summaryMatch = html.match(/Passed water quality tests[\s\S]*?<\/p>/i)
-    || html.match(/Failed water quality tests[\s\S]*?<\/p>/i)
-    || html.match(/We have no current water quality[\s\S]*?<\/p>/i);
-  const swimSummary = summaryMatch?.[0]?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() || null;
-  return {
-    swimStatus: status,
-    swimStatusLabel: swimStatusLabel(status),
-    lastSampleAt,
-    swimSummary,
+  const empty = {
+    swimStatus: null as SwimGuideStatus | null,
+    swimStatusLabel: null as string | null,
+    lastSampleAt: null as string | null,
+    swimSummary: null as string | null,
   };
+  try {
+    const html = await fetchText("https://www.theswimguide.org/beach/1792");
+    const headerStatus = html.match(/header-section[\s\S]*?beach-status status-(pass|fail|warning|unknown)/i);
+    const status = (headerStatus?.[1]?.toLowerCase() as SwimGuideStatus | undefined) || "unknown";
+    const sampleMatch = html.match(/taken on\s+([^.<]+)/i);
+    const lastSampleAt = sampleMatch?.[1]?.trim() || null;
+    const summaryMatch = html.match(/Passed water quality tests[\s\S]*?<\/p>/i)
+      || html.match(/Failed water quality tests[\s\S]*?<\/p>/i)
+      || html.match(/We have no current water quality[\s\S]*?<\/p>/i);
+    const swimSummary = summaryMatch?.[0]?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() || null;
+    return {
+      swimStatus: status,
+      swimStatusLabel: swimStatusLabel(status),
+      lastSampleAt,
+      swimSummary,
+    };
+  } catch {
+    return empty;
+  }
 }
 
 async function fetchParkingNote(): Promise<string | null> {
@@ -361,6 +389,50 @@ async function fetchParkingNote(): Promise<string | null> {
   } catch {
     return "Could not reach Sauvie Island Parking — use the permit link to check sold-out dates before you go.";
   }
+}
+
+function hasRoosterRockLiveData(live: RoosterRockLive): boolean {
+  return (
+    live.riverLevelFt != null
+    || live.weatherSummary != null
+    || live.airTempF != null
+    || live.wind != null
+    || live.waterTempF != null
+    || live.airQuality != null
+    || live.waterClarity != null
+  );
+}
+
+function hasSauvieIslandLiveData(live: SauvieIslandLive): boolean {
+  return (
+    live.swimStatus != null
+    || live.swimSummary != null
+    || live.parkingNote != null
+    || live.weatherSummary != null
+    || live.airTempF != null
+    || live.wind != null
+  );
+}
+
+function mergeLiveSnapshot<T extends RoosterRockLive | SauvieIslandLive>(
+  previous: T | undefined,
+  next: T,
+  hasData: (live: T) => boolean,
+): T {
+  if (!previous) return next;
+  const merged = { ...next };
+  for (const key of Object.keys(next) as Array<keyof T>) {
+    if (key === "error" || key === "source") continue;
+    const nextVal = next[key];
+    const prevVal = previous[key];
+    if ((nextVal == null || nextVal === "") && prevVal != null && prevVal !== "") {
+      merged[key] = prevVal;
+    }
+  }
+  if ("error" in merged && hasData(merged)) {
+    delete (merged as { error?: string }).error;
+  }
+  return merged;
 }
 
 async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
@@ -386,43 +458,42 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     airQuality: null,
     source: "USGS + NWS + Open-Meteo",
   };
-  try {
-    const parkLat = 45.5446;
-    const parkLon = -122.2342;
-    const [river, weather, waterTemp, airQuality, openMeteo] = await Promise.all([
-      fetchUsgsRiverLevel(),
-      fetchNwsSummary(parkLat, parkLon),
-      fetchUsgsWaterTemp(),
-      fetchOpenMeteoAirQuality(parkLat, parkLon),
-      fetchOpenMeteoCurrent(parkLat, parkLon),
-    ]);
-    const windFrom = weather.windFrom ?? openMeteo?.windFrom ?? null;
-    const windMph = weather.windMph ?? openMeteo?.windMph ?? null;
-    const wind = weather.wind ?? openMeteo?.wind ?? null;
-    if (river) {
-      const band = crossingBandFromLevel(river.ft);
-      base.riverLevelFt = river.ft;
-      base.riverLevelAt = river.at;
-      base.todayLowFt = river.todayLowFt;
-      base.todayLowAt = river.todayLowAt;
-      base.todayHighFt = river.todayHighFt;
-      base.todayHighAt = river.todayHighAt;
-      base.crossingWindowNote = river.crossingWindowNote;
-      base.levelTrend = river.levelTrend;
-      base.depthEstimate = depthEstimateFromGage(river.ft);
-      base.crossingBand = band.band;
-      base.crossingAdvice = band.advice;
-      base.worthCrossing = band.worthCrossing;
-    }
-    base.weatherSummary = weather.summary;
-    base.airTempF = weather.airTempF ?? openMeteo?.airTempF ?? null;
-    base.wind = wind;
-    base.waterTempF = waterTemp.waterTempF;
-    base.waterTempSite = waterTemp.waterTempSite;
-    base.waterClarity = estimateWaterClarity(windFrom, windMph);
-    base.airQuality = airQuality.airQuality;
-  } catch (err) {
-    base.error = err instanceof Error ? err.message : "Could not refresh Rooster Rock data";
+  const parkLat = 45.5446;
+  const parkLon = -122.2342;
+  const [river, weather, waterTemp, airQuality, openMeteo] = await Promise.all([
+    fetchUsgsRiverLevel(),
+    fetchNwsSummary(parkLat, parkLon),
+    fetchUsgsWaterTemp(),
+    fetchOpenMeteoAirQuality(parkLat, parkLon),
+    fetchOpenMeteoCurrent(parkLat, parkLon),
+  ]);
+  const windFrom = weather.windFrom ?? openMeteo?.windFrom ?? null;
+  const windMph = weather.windMph ?? openMeteo?.windMph ?? null;
+  const wind = weather.wind ?? openMeteo?.wind ?? null;
+  if (river) {
+    const band = crossingBandFromLevel(river.ft);
+    base.riverLevelFt = river.ft;
+    base.riverLevelAt = river.at;
+    base.todayLowFt = river.todayLowFt;
+    base.todayLowAt = river.todayLowAt;
+    base.todayHighFt = river.todayHighFt;
+    base.todayHighAt = river.todayHighAt;
+    base.crossingWindowNote = river.crossingWindowNote;
+    base.levelTrend = river.levelTrend;
+    base.depthEstimate = depthEstimateFromGage(river.ft);
+    base.crossingBand = band.band;
+    base.crossingAdvice = band.advice;
+    base.worthCrossing = band.worthCrossing;
+  }
+  base.weatherSummary = weather.summary;
+  base.airTempF = weather.airTempF ?? openMeteo?.airTempF ?? null;
+  base.wind = wind;
+  base.waterTempF = waterTemp.waterTempF;
+  base.waterTempSite = waterTemp.waterTempSite;
+  base.waterClarity = estimateWaterClarity(windFrom, windMph);
+  base.airQuality = airQuality.airQuality;
+  if (!hasRoosterRockLiveData(base)) {
+    base.error = "Live conditions temporarily unavailable";
   }
   return base;
 }
@@ -440,32 +511,32 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
     wind: null,
     source: "Swim Guide + NWS + Sauvie Island Parking",
   };
-  try {
-    const [swim, parking, weather] = await Promise.all([
-      fetchSwimGuideCollins(),
-      fetchParkingNote(),
-      fetchNwsSummary(45.696, -122.774),
-    ]);
-    Object.assign(base, swim);
-    base.parkingNote = parking;
-    base.weatherSummary = weather.summary;
-    base.airTempF = weather.airTempF;
-    base.wind = weather.wind;
-  } catch (err) {
-    base.error = err instanceof Error ? err.message : "Could not refresh Sauvie Island data";
+  const [swim, parking, weather] = await Promise.all([
+    fetchSwimGuideCollins(),
+    fetchParkingNote(),
+    fetchNwsSummary(45.696, -122.774),
+  ]);
+  Object.assign(base, swim);
+  base.parkingNote = parking;
+  base.weatherSummary = weather.summary;
+  base.airTempF = weather.airTempF;
+  base.wind = weather.wind;
+  if (!hasSauvieIslandLiveData(base)) {
+    base.error = "Live conditions temporarily unavailable";
   }
   return base;
 }
 
 export async function refreshNudeBeachesSnapshot(): Promise<NudeBeachesSnapshot> {
+  const previous = readCache();
   const [roosterRock, sauvieIsland] = await Promise.all([
     fetchRoosterRockLive(),
     fetchSauvieIslandLive(),
   ]);
   const snapshot: NudeBeachesSnapshot = {
     fetchedAt: new Date().toISOString(),
-    roosterRock,
-    sauvieIsland,
+    roosterRock: mergeLiveSnapshot(previous?.roosterRock, roosterRock, hasRoosterRockLiveData),
+    sauvieIsland: mergeLiveSnapshot(previous?.sauvieIsland, sauvieIsland, hasSauvieIslandLiveData),
   };
   writeCache(snapshot);
   return snapshot;
