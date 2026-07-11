@@ -80,6 +80,47 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
   },
 };
 
+/** Points of interest dropped on the beach map. `marker: "rainbow"` swaps the
+ *  accent-colored pin for a Pride ring (queer hangout areas); everything else
+ *  uses the beach's accent color. */
+export type BeachPoi = {
+  lat: number;
+  lng: number;
+  title: string;
+  marker?: "accent" | "rainbow";
+};
+
+export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
+  "rooster-rock": [
+    { lat: 45.54688, lng: -122.2364, title: "Parking" },
+    { lat: 45.54901, lng: -122.22716, title: "Shortcut to Sand Island" },
+    { lat: 45.54975, lng: -122.22741, title: "Turn right here" },
+    {
+      lat: 45.55144,
+      lng: -122.22405,
+      title: "The crossing — you can hang here, but it tends to draw a lot of families",
+    },
+    { lat: 45.55258, lng: -122.22276, title: "Keep walking" },
+    {
+      lat: 45.5526,
+      lng: -122.21769,
+      title:
+        "One of the queer areas — bring a shade structure and sunscreen, there's no cover out here",
+      marker: "rainbow",
+    },
+    { lat: 45.55338, lng: -122.21663, title: "Very hot sand" },
+    { lat: 45.55521, lng: -122.21643, title: "Fun spot for photos, especially later in the day" },
+    { lat: 45.55152, lng: -122.21923, title: "A lot of straight people hang out here" },
+    { lat: 45.55262, lng: -122.22011, title: "A lot of families hang out here" },
+    { lat: 45.55169, lng: -122.2143, title: "Careful walking here — the trail is eroded" },
+    { lat: 45.54931, lng: -122.22077, title: "Shortcut, but bring bug spray" },
+    { lat: 45.55028, lng: -122.21031, title: "A fork in the road" },
+    { lat: 45.55085, lng: -122.2115, title: "Popular gay hangout area", marker: "rainbow" },
+    { lat: 45.54978, lng: -122.20488, title: "Worth the hike" },
+  ],
+  "sauvie-island": [],
+};
+
 /** GPS presence anchors. Radius is generous — both beaches are 1–2km
  *  shorelines and the anchor sits mid-beach. Client coordinates are checked
  *  against these on the server and immediately discarded, never stored. */

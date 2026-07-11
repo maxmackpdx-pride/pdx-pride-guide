@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { divIcon } from "leaflet";
+import { divIcon, latLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { BEACH_MAP_LOCATIONS, type NudeBeachTab } from "@shared/nudeBeaches";
+import { BEACH_MAP_LOCATIONS, BEACH_POIS, type NudeBeachTab } from "@shared/nudeBeaches";
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
@@ -50,6 +50,43 @@ function buildPin(color: string) {
   });
 }
 
+const RAINBOW_RING =
+  "conic-gradient(#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#5e5ce6,#ff2d92,#ff3b30)";
+
+/** Smaller solid dot for points of interest so they read as secondary to the
+ *  beach anchor. Rainbow variant marks the queer hangout areas. */
+function buildPoiPin(color: string, rainbow: boolean) {
+  const ring = rainbow ? RAINBOW_RING : color;
+  return divIcon({
+    className: "",
+    html: `<div style="width:15px;height:15px;border-radius:50%;background:${ring};border:2px solid #050505;box-shadow:0 0 8px ${rainbow ? "rgba(255,255,255,0.5)" : color + "cc"},0 2px 5px rgba(0,0,0,0.85);"></div>`,
+    iconSize: [15, 15],
+    iconAnchor: [7.5, 7.5],
+    popupAnchor: [0, -10],
+  });
+}
+
+function PoiPopup({ title, accent }: { title: string; accent: string }) {
+  return (
+    <div
+      style={{
+        border: `2px solid ${accent}`,
+        boxShadow: `0 0 24px -14px ${accent}99`,
+        background: "#050505",
+        color: "#fff",
+        padding: "11px 14px",
+        fontFamily: "var(--font-body, sans-serif)",
+        fontSize: "0.8125rem",
+        lineHeight: 1.4,
+        minWidth: 150,
+        maxWidth: 240,
+      }}
+    >
+      {title}
+    </div>
+  );
+}
+
 function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: string; accent: string }) {
   return (
     <div
@@ -82,6 +119,20 @@ function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: stri
       </div>
     </div>
   );
+}
+
+function FitToPois({ tab }: { tab: NudeBeachTab }) {
+  const map = useMap();
+  useEffect(() => {
+    const location = BEACH_MAP_LOCATIONS[tab];
+    const pois = BEACH_POIS[tab] ?? [];
+    if (pois.length === 0) return;
+    const bounds = latLngBounds(
+      [[location.lat, location.lng], ...pois.map(p => [p.lat, p.lng] as [number, number])],
+    );
+    map.fitBounds(bounds, { padding: [36, 36], maxZoom: 16 });
+  }, [map, tab]);
+  return null;
 }
 
 function MapResizer({ tab }: { tab: NudeBeachTab }) {
@@ -159,6 +210,7 @@ export default function NudeBeachesMap({ tab, height }: Props) {
             subdomains="abcd"
           />
           <MapResizer tab={tab} />
+          <FitToPois tab={tab} />
           <Marker position={[location.lat, location.lng]} icon={buildPin(location.pinColor)}>
             <Popup className="pdx-beach-popup" maxWidth={280}>
               <BeachPopup
@@ -168,6 +220,17 @@ export default function NudeBeachesMap({ tab, height }: Props) {
               />
             </Popup>
           </Marker>
+          {(BEACH_POIS[tab] ?? []).map((poi, i) => (
+            <Marker
+              key={`${poi.lat},${poi.lng},${i}`}
+              position={[poi.lat, poi.lng]}
+              icon={buildPoiPin(location.pinColor, poi.marker === "rainbow")}
+            >
+              <Popup className="pdx-beach-popup" maxWidth={260}>
+                <PoiPopup title={poi.title} accent={location.pinColor} />
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
       </div>
     </div>
