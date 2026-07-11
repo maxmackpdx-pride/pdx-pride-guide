@@ -12,7 +12,7 @@ export function inboxContextBadge(contextType?: string | null): string | null {
 }
 
 export function notifyContextTag(contextType?: string | null): string {
-  if (contextType === "MISSED_CONNECTION") return "Spotted";
+  if (contextType === "MISSED_CONNECTION") return "Missed Connections";
   if (contextType === "GIG" || contextType === "EVENT_TALENT" || contextType === "EVENT_TALENT_REQUEST") {
     return "Gigs";
   }

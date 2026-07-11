@@ -3,7 +3,7 @@ import { Link } from "wouter";
 export type BoardKey = "spotted" | "gifting" | "gigs";
 
 const LINKS: Array<{ key: BoardKey; href: string; label: string }> = [
-  { key: "spotted", href: "/spotted", label: "Spotted" },
+  { key: "spotted", href: "/spotted", label: "Missed Connections" },
   { key: "gifting", href: "/gifting", label: "Gifting" },
   { key: "gigs", href: "/pride-work", label: "Gigs" },
 ];

@@ -54,7 +54,7 @@ export default function SpottedCard({
   const isClosed = post.status === "CLOSED" || post.status === "ARCHIVED";
   const { toast } = useToast();
   const kind = spottedKind(post);
-  const displayTitle = post.title?.trim() || post.body.trim().split(/\n/)[0]?.slice(0, 80) || "Spotted";
+  const displayTitle = post.title?.trim() || post.body.trim().split(/\n/)[0]?.slice(0, 80) || "Missed connection";
 
   if (makeover) {
     return (

@@ -51,7 +51,7 @@ export default function DashboardHubSummary({
     },
     {
       key: "spotted",
-      label: "Spotted",
+      label: "Missed Connections",
       count: counts.spottedCount,
       section: "spotted",
       color: "var(--dash-magenta)",
@@ -85,7 +85,7 @@ export default function DashboardHubSummary({
     <section className="dash-hub-summary" aria-label="Hub summary">
       {total === 0 && (
         <p className="dash-hub-summary__lede">
-          Nothing on your boards yet. Submit an event, post on Pride Werk, or reply on Spotted to get started.
+          Nothing on your boards yet. Submit an event, post on Pride Werk, or reply on Missed Connections to get started.
         </p>
       )}
       <div className="dash-hub-summary__chips">

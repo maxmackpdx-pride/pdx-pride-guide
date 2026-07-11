@@ -247,8 +247,8 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
   const spotted = useMine<any>("/api/missed-connections/mine", (rows) =>
     rows.map((s) => ({
       key: `spotted-${s.id}`,
-      title: s.title || s.body?.slice(0, 40) || "Spotted post",
-      meta: s.status === "ACTIVE" ? "Spotted! · Live" : "Spotted! · Pending review",
+      title: s.title || s.body?.slice(0, 40) || "Missed connection post",
+      meta: s.status === "ACTIVE" ? "Missed Connections · Live" : "Missed Connections · Pending review",
       actions: [{ label: "EDIT", href: "/spotted" }],
     })),
   );
@@ -306,7 +306,7 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
           onNavigate={onNavigate}
         />
         <Section
-          title="SPOTTED"
+          title="MISSED CONNECTIONS"
           color={C.magenta}
           countLabel={`${spotted.length} POSTS`}
           items={spotted}

@@ -36,7 +36,7 @@ const SECTIONS = [
     bullets: [
       "Be honest in event submissions and claims. Only claim listings you represent.",
       "Sex-positive, leather, and adult-themed events are welcome when tagged accurately.",
-      "Gifting and Spotted posts must follow posted community rules; no restricted items or harassment.",
+      "Gifting and Missed Connections posts must follow posted community rules; no restricted items or harassment.",
       "Pride Werk gig posts should use real contact info and describe paid or volunteer work clearly.",
     ],
   },

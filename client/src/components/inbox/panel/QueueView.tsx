@@ -119,9 +119,9 @@ function mapSpotted(p: any): QueueRow | null {
     id: `sp-${p.id}`,
     kind: "spotted",
     entityId: p.id,
-    tag: "SPOTTED",
+    tag: "MISSED CONN",
     tagColor: C.magenta,
-    title: p.title || `Spotted #${p.id}`,
+    title: p.title || `Missed connection #${p.id}`,
     meta: p.eventTitle
       ? `${p.eventTitle}${p.venueHint ? ` · ${p.venueHint}` : ""}`
       : (p.venueHint || "Around town"),

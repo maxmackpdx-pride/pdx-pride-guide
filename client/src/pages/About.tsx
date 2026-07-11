@@ -20,7 +20,7 @@ const STANK_EVENT_HREF = eventPath(STANK_EVENT_ID, STANK_EVENT_TITLE, "SAT");
 
 const LIVE_NOW = [
   "RSVPs, once you are logged in",
-  "Spotted, gigs, gifting, and talent tags",
+  "Missed Connections, gigs, gifting, and talent tags",
   "New events and claims from approved promoters",
 ] as const;
 

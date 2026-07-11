@@ -102,7 +102,7 @@ export default function Inbox() {
       kicker="Private messages"
       kickerColor="var(--cyan, #00ffff)"
       title="Inbox"
-      lede="Your 1:1 threads from Spotted, Pride Werk, event hosts, and check-ins. Only you can see these."
+      lede="Your 1:1 threads from Missed Connections, Pride Werk, event hosts, and check-ins. Only you can see these."
       onLogout={() => logout()}
       onMemberNavigate={(view) => {
         if (view === "posts") setLocation("/dashboard?view=posts");

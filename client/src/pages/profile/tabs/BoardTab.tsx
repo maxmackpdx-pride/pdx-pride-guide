@@ -32,7 +32,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
     })),
     ...(activity.spotted ?? []).map(s => ({
       key: `spotted-${s.id}`,
-      board: "Spotted",
+      board: "Missed Connections",
       hex: "var(--neon-magenta)",
       where: [s.venueHint, s.dayOfWeek].filter(Boolean).join(" · ") || "Around town",
       text: s.body,

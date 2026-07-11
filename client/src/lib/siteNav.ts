@@ -23,7 +23,7 @@ export const PRIMARY_NAV: NavEntry[] = [
     items: [
       { href: "/pride-work", label: "Gig Board" },
       { href: "/gifting", label: "Gifting" },
-      { href: "/spotted", label: "Spotted!" },
+      { href: "/spotted", label: "Missed Connections" },
     ],
   },
   { type: "link", href: "/submit", label: "Promoters" },
@@ -40,7 +40,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/schedule": { section: "Events", title: "Schedule" },
   "/pride-work": { section: "Boards", title: "Gig Board" },
   "/gifting": { section: "Boards", title: "Gifting" },
-  "/spotted": { section: "Boards", title: "Spotted!" },
+  "/spotted": { section: "Boards", title: "Missed Connections" },
   "/directory": { section: "Places", title: "Queer Directory" },
   "/nude-beaches": { section: "Explore", title: "Nude Beaches" },
   "/about": { section: "About", title: "About" },
@@ -57,7 +57,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 export const BOARD_NAV: NavLinkItem[] = [
   { href: "/pride-work", label: "Gig Board" },
   { href: "/gifting", label: "Gifting" },
-  { href: "/spotted", label: "Spotted!" },
+  { href: "/spotted", label: "Missed Connections" },
 ];
 
 export function navLinkActive(location: string, href: string) {

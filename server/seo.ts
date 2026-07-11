@@ -250,8 +250,8 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "Portland Pride 2026 gig board and queer work listings. Post gigs or find Pride weekend work in PDX.",
   },
   "/spotted": {
-    title: "Spotted: Missed Connections | PDX Pride Guide",
-    description: "Missed connections and spotted posts from Portland Pride 2026 events. Reconnect after PDX Pride weekend.",
+    title: "Missed Connections | PDX Pride Guide",
+    description: "Missed connections from Portland Pride 2026 events. Reconnect after PDX Pride weekend.",
   },
   "/submit": {
     title: "Submit an Event | PDX Pride Guide",

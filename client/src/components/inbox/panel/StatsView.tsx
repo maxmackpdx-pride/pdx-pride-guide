@@ -143,7 +143,7 @@ export default function StatsView() {
     [places.length || "—", "DIRECTORY PLACES"],
     [m.attendances, "MEMBER RSVPS"],
     [m.giftingPosts, "GIFTING POSTS"],
-    [m.missedConnections, "SPOTTED POSTS"],
+    [m.missedConnections, "MISSED CONNECTIONS"],
     [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
   ];
 
@@ -153,7 +153,7 @@ export default function StatsView() {
       ["RSVPs", m.attendances],
       ["Gig posts", m.gigPosts],
       ["Gifting", m.giftingPosts],
-      ["Spotted", m.missedConnections],
+      ["Missed Connections", m.missedConnections],
     ],
     C.purple,
   );

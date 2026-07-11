@@ -35,7 +35,7 @@ function deriveTitle(title: string, body: string): string {
   const trimmed = title.trim();
   if (trimmed) return trimmed.slice(0, 80);
   const line = body.trim().split(/\n/)[0] || body.trim();
-  return line.slice(0, 80) || "Spotted";
+  return line.slice(0, 80) || "Missed connection";
 }
 
 type Props = {

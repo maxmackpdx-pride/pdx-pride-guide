@@ -127,7 +127,7 @@ export default function MissedConnectionsPanel({
     const trimmed = title.trim();
     if (trimmed) return trimmed.slice(0, 80);
     const line = body.trim().split(/\n/)[0] || body.trim();
-    return line.slice(0, 80) || "Spotted";
+    return line.slice(0, 80) || "Missed connection";
   };
 
   const createMutation = useMutation({
@@ -314,7 +314,7 @@ export default function MissedConnectionsPanel({
           <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>Post a missed connection</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
             {mode === "beach"
-              ? "Missed connections from the beach · also on the main Spotted board · anonymous until you both reveal in inbox."
+              ? "Missed connections from the beach · also on the main Missed Connections board · anonymous until you both reveal in inbox."
               : "Missed connections for this event · anonymous on the board until you both reveal in inbox."}
           </p>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />

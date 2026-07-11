@@ -58,7 +58,7 @@ export default function MemberHubHome({
     { key: "events", label: "Events", count: counts.eventCount, color: "var(--dash-cyan)" },
     { key: "gigs", label: "Gigs", count: counts.gigCount, color: "var(--dash-orange)" },
     { key: "gifting", label: "Gifting", count: counts.giftingCount, color: "var(--dash-lime)" },
-    { key: "spotted", label: "Spotted", count: counts.spottedCount, color: "var(--dash-magenta)" },
+    { key: "spotted", label: "Missed Connections", count: counts.spottedCount, color: "var(--dash-magenta)" },
     { key: "checkins", label: "Check-ins", count: counts.checkInCount, color: "var(--dash-lime)" },
   ];
 

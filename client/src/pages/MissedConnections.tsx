@@ -22,8 +22,8 @@ const HOW_IT_WORKS = [
 
 export default function MissedConnections() {
   usePageSeo(
-    "Spotted: Missed Connections | PDX Pride Guide",
-    "Post anonymous missed connections from Portland Pride 2026 events. Spotted someone at PDX Pride? Say hi privately.",
+    "Missed Connections | PDX Pride Guide",
+    "Post anonymous missed connections from Portland Pride 2026 events. See someone at PDX Pride? Say hi privately.",
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -42,7 +42,7 @@ export default function MissedConnections() {
   });
 
   const stats = useMemo(() => [
-    { num: allPosts.length, label: "Spotted, live now", color: "#ff1fa0" },
+    { num: allPosts.length, label: "Missed connections, live now", color: "#ff1fa0" },
     { num: allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },
     { num: allPosts.filter(p => p.beachId != null).length, label: "At the beach", color: "#ff6600" },
     { num: allPosts.filter(p => p.eventId == null && !p.beachId).length, label: "Around town", color: "#ff8c00" },
@@ -116,7 +116,7 @@ export default function MissedConnections() {
           className="missed-how"
           kickerTone="cyan"
           title={<>Private by <span style={{ color: "#ff1fa0" }}>default</span></>}
-          lede="Spotted is our missed connections board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
+          lede="Missed Connections is our anonymous board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
           steps={HOW_IT_WORKS}
           footerLine="Stay kind · stay anonymous · reveal when ready"
         />
@@ -126,7 +126,7 @@ export default function MissedConnections() {
         <div className="board-active-feed" style={{ paddingTop: 0, paddingBottom: 0, background: "transparent" }}>
           <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 8px" }}>
             <p className="board-copy-sm" style={{ marginInline: "auto" }}>
-              Browse Spotted posts without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
+              Browse missed connections without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
             </p>
             <Button variant="solid" accent="magenta" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>
               Log in / Join

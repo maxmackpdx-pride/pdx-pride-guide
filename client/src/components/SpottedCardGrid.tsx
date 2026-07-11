@@ -19,7 +19,7 @@ function deriveTitle(title: string, body: string): string {
   const trimmed = title.trim();
   if (trimmed) return trimmed.slice(0, 80);
   const line = body.trim().split(/\n/)[0] || body.trim();
-  return line.slice(0, 80) || "Spotted";
+  return line.slice(0, 80) || "Missed connection";
 }
 
 type Props = {
@@ -293,7 +293,7 @@ export default function SpottedCardGrid({
         <button type="button" className="gifting-close" onClick={() => setComposeOpen(false)} aria-label="Close form">
           <X size={18} />
         </button>
-        <div className="board-section-kicker board-section-kicker--magenta">New spotted</div>
+        <div className="board-section-kicker board-section-kicker--magenta">New missed connections</div>
         <h2 className="display section-heading">Post a missed connection</h2>
         <p className="board-copy-sm">
           Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.
@@ -323,7 +323,7 @@ export default function SpottedCardGrid({
       {composePanel}
 
       {isLoading ? (
-        <BoardLoadingState label="Loading spotted notes" />
+        <BoardLoadingState label="Loading missed connections" />
       ) : isError ? (
         <div className="board-empty board-empty--makeover">
           <p className="display section-heading">Could not load</p>
@@ -341,7 +341,7 @@ export default function SpottedCardGrid({
           {makeover && (
             <div className="board-empty__actions">
               <Button variant="solid" accent="magenta" onClick={() => onRequestCompose?.()}>
-                Post a spotted
+                Post a missed connection
               </Button>
               <Button variant="neon" accent="cyan" onClick={clearFilters}>Clear filters</Button>
             </div>
@@ -427,7 +427,7 @@ export default function SpottedCardGrid({
           sticker="Active board"
           stickerTone="magenta"
           stickerStyle="mono"
-          title="Who got spotted"
+          title="Who you saw"
           resultCount={`${filteredPosts.length} showing`}
           filters={
             <>

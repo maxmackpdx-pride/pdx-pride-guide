@@ -5573,7 +5573,7 @@ export const storage: IStorage = {
     if (row.status === "REJECTED") return { error: "Already rejected" };
     const adminNotes = formatBoardRejectMessage(reasonCode, note);
     db.update(missedConnections).set({ status: "REJECTED", adminNotes } as any).where(eq(missedConnections.id, id)).run();
-    notifyBoardReject(row.userId, "Spotted", row.title, reasonCode, note, {
+    notifyBoardReject(row.userId, "Missed Connections", row.title, reasonCode, note, {
       contextType: "MISSED_CONNECTION",
       contextId: id,
       contextLabel: row.title,
@@ -7385,7 +7385,7 @@ export const storage: IStorage = {
       { label: "Directory", count: directoryPlaces },
       { label: "Gifting", count: giftingPosts },
       { label: "Gigs", count: gigPosts },
-      { label: "Spotted", count: missedConnections },
+      { label: "Missed Connections", count: missedConnections },
     ].sort((a, b) => b.count - a.count);
 
     const approvedPromoters = (sqlite.prepare(

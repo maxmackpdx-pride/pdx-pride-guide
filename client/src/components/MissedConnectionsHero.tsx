@@ -19,7 +19,7 @@ export default function MissedConnectionsHero({ onPost }: Props) {
           else document.getElementById("spotted-compose")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }}
       >
-        Post a spotted
+        Post a missed connection
       </Button>
       <Button variant="neon" accent="cyan" size="lg" as="a" href="#feed">
         Browse the board
@@ -32,7 +32,7 @@ export default function MissedConnectionsHero({ onPost }: Props) {
       <BoardHero
         accent="magenta"
         kicker="Anonymous board · Pride season 2026"
-        title={<>Spotted <span className="board-hero__title-accent">someone?</span></>}
+        title={<>Missed a <span className="board-hero__title-accent">connection?</span></>}
         lede="Missed connections from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread."
       />
     </CommunityBoardHeroRow>

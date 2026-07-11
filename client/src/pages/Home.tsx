@@ -24,7 +24,7 @@ import {
 import "./Home.css";
 
 const COMMUNITY_LINKS = {
-  spotted: { href: "/spotted", label: "Spotted" },
+  spotted: { href: "/spotted", label: "Missed Connections" },
   gifting: { href: "/gifting", label: "Gifting" },
   gigs: { href: "/pride-work", label: "Gigs" },
 } as const;
@@ -136,7 +136,7 @@ export default function Home() {
 
           <div className="home-boards__utility-grid">
             <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__utility home-boards__utility--magenta" data-testid="home-board-spotted">
-              <div className="home-boards__utility-name">Spotted!</div>
+              <div className="home-boards__utility-name">Missed Connections</div>
               <p className="home-boards__utility-desc">
                 Anonymous missed connections. Say the thing you didn&apos;t get to say.
               </p>
