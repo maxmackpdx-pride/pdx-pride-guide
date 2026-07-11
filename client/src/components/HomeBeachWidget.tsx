@@ -96,10 +96,10 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--water">
-                  {rooster.depthEstimate || "—"}
+                  {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)}ft` : "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">
-                  {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)} ft` : "Depth"}
+                  {rooster.depthEstimate || "River depth"}
                   {rooster.crossingBand ? ` · ${rooster.crossingBand}` : ""}
                 </div>
               </div>

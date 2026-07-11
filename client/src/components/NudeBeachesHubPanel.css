@@ -106,10 +106,6 @@
   color: #b8b4ab;
 }
 
-.nb-hub__summary--water {
-  color: var(--neon-cyan, #19e3ff);
-}
-
 .nb-hub__weather-stat--water .nb-hub__weather-stat-value {
   color: var(--neon-cyan, #19e3ff);
   text-shadow: 0 0 16px rgba(25, 227, 255, 0.28);
@@ -220,11 +216,6 @@ html.calm-mode .nb-hub__section--pulse {
   color: #d8d4cb;
   font-size: 14px;
   line-height: 1.45;
-}
-
-.nb-hub__level-detail--water {
-  color: var(--neon-cyan, #19e3ff);
-  font-weight: 700;
 }
 
 .nb-hub__level-range {

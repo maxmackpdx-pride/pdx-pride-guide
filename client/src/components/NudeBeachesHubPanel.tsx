@@ -59,7 +59,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         </div>
         <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
         {live.waterClarity ? (
-          <p className="nb-hub__summary nb-hub__summary--water" style={{ marginTop: 8 }}>
+          <p className="nb-hub__summary" style={{ marginTop: 8 }}>
             {live.waterClarity}
           </p>
         ) : null}
@@ -78,14 +78,9 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           {live.riverLevelFt != null ? live.riverLevelFt.toFixed(2) : "—"}
           <span className="nb-hub__level-unit">ft</span>
         </div>
-        {live.depthEstimate ? (
-          <p className="nb-hub__level-detail nb-hub__level-detail--water">{live.depthEstimate}</p>
-        ) : null}
-        {(live.crossingAdvice || !live.depthEstimate) && (
-          <p className="nb-hub__level-detail">
-            {live.crossingAdvice || "USGS gage below Bonneville Dam."}
-          </p>
-        )}
+        <p className="nb-hub__level-detail">
+          {live.crossingAdvice || live.depthEstimate || "USGS gage below Bonneville Dam."}
+        </p>
         <div className="nb-hub__level-range">
           <div>
             <span className="nb-hub__range-label">Today&apos;s low</span>
