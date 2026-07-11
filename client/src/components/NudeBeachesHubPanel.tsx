@@ -28,7 +28,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   const swimBand = live.riverLevelFt != null && live.riverLevelFt >= 15;
 
   return (
-    <div className="nb-hub">
+    <div className="nb-hub nb-hub--rooster">
       <section className="nb-hub__section">
         <div className="nb-hub__kicker">Weather</div>
         <div className="nb-hub__weather-grid">
@@ -69,7 +69,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         className={`nb-hub__section nb-hub__level${
           swimBand ? " nb-hub__level--bad" : live.riverLevelFt != null ? " nb-hub__level--good" : ""
         }`}
-        style={{ ["--dc" as string]: swimBand ? "#ff8c00" : live.riverLevelFt != null ? "#39ff14" : "#19e3ff" }}
+        style={{ ["--dc" as string]: swimBand ? "#ff8c00" : live.riverLevelFt != null ? "#ff6600" : "#19e3ff" }}
       >
         <div className="nb-hub__level-head">
           <div className="nb-hub__kicker">River level</div>

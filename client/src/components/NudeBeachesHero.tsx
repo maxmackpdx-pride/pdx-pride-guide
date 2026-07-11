@@ -21,7 +21,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
         {
           num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "—",
           label: "air temp",
-          color: "#ff00cc",
+          color: "var(--neon-orange, #ff6600)",
         },
         {
           num:
@@ -34,7 +34,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
         {
           num: roosterWind.value,
           label: roosterWind.label,
-          color: "#39ff14",
+          color: "var(--neon-orange, #ff6600)",
         },
       ]
     : [

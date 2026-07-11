@@ -60,6 +60,15 @@
   text-shadow: 0 0 22px rgba(255, 0, 204, 0.35);
 }
 
+.nb-hub--rooster .nb-hub__weather-value {
+  color: var(--neon-orange, #ff6600);
+  text-shadow: 0 0 22px rgba(255, 102, 0, 0.35);
+}
+
+.nb-hub--rooster .nb-hub__weather-grid > .nb-hub__weather-stat:first-of-type .nb-hub__weather-stat-value {
+  color: var(--neon-orange, #ff6600);
+}
+
 .nb-hub--sauvie .nb-hub__weather-value {
   color: var(--neon-green, #00EE44);
   text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
@@ -143,8 +152,8 @@
 .nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
 
 .nb-hub__level--good {
-  --dc: #39ff14;
-  border-top-color: #39ff14;
+  --dc: #ff6600;
+  border-top-color: #ff6600;
 }
 
 .nb-hub__level--bad {

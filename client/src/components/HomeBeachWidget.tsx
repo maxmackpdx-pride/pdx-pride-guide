@@ -25,9 +25,9 @@ function swimStatusTone(status?: string | null): "good" | "warn" | "bad" | "neut
   return "neutral";
 }
 
-function riverLevelTone(ft?: number | null): "good" | "warn" | "neutral" {
+function roosterRiverTone(ft?: number | null): "orange" | "warn" | "neutral" {
   if (ft == null) return "neutral";
-  return ft >= 15 ? "warn" : "good";
+  return ft >= 15 ? "warn" : "orange";
 }
 
 function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
@@ -55,7 +55,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
   const isStale = Boolean(data?.stale);
 
   return (
-    <div className="home-beach-widget">
+    <div className={`home-beach-widget${tab === "rooster" ? " home-beach-widget--rooster" : " home-beach-widget--sauvie"}`}>
       <div className="home-beach-widget__live">
         <span className="home-beach-widget__live-dot" aria-hidden />
         Live conditions
@@ -66,7 +66,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
           type="button"
           role="tab"
           aria-selected={tab === "rooster"}
-          className={`home-beach-widget__tab${tab === "rooster" ? " home-beach-widget__tab--active home-beach-widget__tab--cyan" : ""}`}
+          className={`home-beach-widget__tab${tab === "rooster" ? " home-beach-widget__tab--active home-beach-widget__tab--orange" : ""}`}
           onClick={() => setTab("rooster")}
         >
           Rooster Rock
@@ -89,7 +89,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <h3 className="home-beach-widget__name">Rooster Rock</h3>
             <div className="home-beach-widget__grid">
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--good">
+                <div className="home-beach-widget__stat home-beach-widget__stat--orange">
                   {rooster.airTempF != null ? `${rooster.airTempF}°` : "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">Air temp</div>
@@ -101,13 +101,13 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 <div className="home-beach-widget__stat-label">Water temp</div>
               </div>
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--good">
+                <div className="home-beach-widget__stat home-beach-widget__stat--orange">
                   {roosterWind.value}
                 </div>
                 <div className="home-beach-widget__stat-label">{roosterWind.label}</div>
               </div>
               <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--${riverLevelTone(rooster.riverLevelFt)}`}>
+                <div className={`home-beach-widget__stat home-beach-widget__stat--${roosterRiverTone(rooster.riverLevelFt)}`}>
                   {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)}ft` : "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">
@@ -115,7 +115,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 </div>
               </div>
             </div>
-            <Link href="/nude-beaches?tab=rooster-rock" className="home-beach-widget__link home-beach-widget__link--cyan">
+            <Link href="/nude-beaches?tab=rooster-rock" className="home-beach-widget__link home-beach-widget__link--orange">
               Full conditions →
             </Link>
           </>
