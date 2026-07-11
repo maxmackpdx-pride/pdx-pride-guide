@@ -70,6 +70,10 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
 
   const mine = user ? rows.find(r => (r.userId ?? r.user_id) === user.id) : undefined;
   const checkedIn = Boolean(mine);
+  // Anonymous check-ins are counted in "going" but never connected to the group
+  // chat — they can't read or post, since the chat is not anonymous.
+  const isAnon = Boolean(mine?.isAnonymous);
+  const inChat = checkedIn && !isAnon;
   const goingCount = rows.length;
 
   useEffect(() => {
@@ -288,7 +292,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             >
               <span className="rb-checkin__seg-title">Anonymous</span>
               <span className="rb-checkin__seg-hint">
-                Counted in "going" · no name or photo, posts as "Anonymous"
+                Counted in "going" · no name or photo, stays off the group chat
               </span>
             </button>
           </div>
@@ -304,7 +308,9 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
                 ? "Saving…"
                 : checkedIn
                   ? "Update check-in"
-                  : "Check in · join chat"}
+                  : visibility === "anonymous"
+                    ? "Check in"
+                    : "Check in · join chat"}
             </button>
             {!iAmHere && (
               <button
@@ -338,8 +344,9 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
           date={today}
           beachShortLabel={beachShortLabel}
           accent={accent}
-          locked={!checkedIn}
-          checkedIn={checkedIn}
+          locked={!inChat}
+          checkedIn={inChat}
+          anonymous={isAnon}
           goingCount={goingCount}
           headerAvatars={headerAvatars}
         />
@@ -367,10 +374,13 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
                     >
                       Here
                     </span>{" "}
-                    · on the beach · in the chat
+                    · on the beach {isAnon ? "· off the chat (anonymous)" : "· in the chat"}
                   </>
                 ) : (
-                  <>Going · {formatRiverBratsHour(mine.arrival_hour)} · in the chat</>
+                  <>
+                    Going · {formatRiverBratsHour(mine.arrival_hour)}{" "}
+                    {isAnon ? "· off the chat (anonymous)" : "· in the chat"}
+                  </>
                 )}
               </div>
               <button

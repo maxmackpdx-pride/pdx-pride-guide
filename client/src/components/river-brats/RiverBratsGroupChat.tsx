@@ -61,6 +61,8 @@ type Props = {
   accent: "orange" | "green";
   locked: boolean;
   checkedIn: boolean;
+  /** Checked in but anonymous — counted in going, never connected to the chat. */
+  anonymous?: boolean;
   goingCount: number;
   headerAvatars: AvatarPreview[];
 };
@@ -72,6 +74,7 @@ export default function RiverBratsGroupChat({
   accent,
   locked,
   checkedIn,
+  anonymous = false,
   goingCount,
   headerAvatars,
 }: Props) {
@@ -189,10 +192,17 @@ export default function RiverBratsGroupChat({
         {locked && (
           <div className="rb-group-chat__lock">
             <Lock size={22} strokeWidth={2} aria-hidden />
-            <p>
-              Check in to unlock the chat. You'll see <strong>{goingCount}</strong> people already
-              talking and it'll show up in your Messages.
-            </p>
+            {anonymous ? (
+              <p>
+                You're checked in anonymously, so you're counted in <strong>{goingCount}</strong> going
+                but stay off the chat. Switch to your @username to join.
+              </p>
+            ) : (
+              <p>
+                Check in to unlock the chat. You'll see <strong>{goingCount}</strong> people already
+                talking and it'll show up in your Messages.
+              </p>
+            )}
           </div>
         )}
       </div>

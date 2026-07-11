@@ -7946,6 +7946,7 @@ export const storage: IStorage = {
     const beachRows = sqlite.prepare(`
       SELECT beach_id AS beachId FROM beach_checkins
       WHERE user_id = ? AND calendar_date = ? AND is_active = 1
+        AND COALESCE(is_anonymous, 0) = 0
     `).all(userId, today) as Array<{ beachId: string }>;
     for (const { beachId } of beachRows) {
       const closesAt = riverBratsChatClosesAtIso(today);
@@ -7971,7 +7972,9 @@ export const storage: IStorage = {
     const closesAt = riverBratsChatClosesAtIso(calendarDate);
     const chatOpen = closesAt > new Date().toISOString();
     const mine = storage.getBeachCheckinByUser(beachId, viewerUserId, calendarDate);
-    if (!mine) return { messages: [], expiresAt: closesAt, chatOpen: false };
+    // Anonymous check-ins are counted in "going" but are never connected to the
+    // chat — they can neither read nor post.
+    if (!mine || (mine as any).is_anonymous) return { messages: [], expiresAt: closesAt, chatOpen: false };
     const rows = sqlite.prepare(`
       SELECT m.id, m.beach_id AS beachId, m.calendar_date AS calendarDate, m.user_id AS userId,
              m.body, m.is_anonymous AS isAnonymous, m.created_at AS createdAt,
@@ -8022,6 +8025,8 @@ export const storage: IStorage = {
   postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string) {
     const mine = storage.getBeachCheckinByUser(beachId, userId, calendarDate);
     if (!mine) throw new Error("Active check-in required");
+    // Anonymous check-ins stay off the chat and cannot post.
+    if ((mine as any).is_anonymous) throw new Error("Anonymous check-ins can't post to the chat");
     if (riverBratsChatClosesAtIso(calendarDate) <= new Date().toISOString()) {
       throw new Error("Beach chat closed at 10pm");
     }
