@@ -2083,7 +2083,8 @@ h2.display,
     display: none;
   }
 
-  /* Center anchor: Events */
+  /* Center anchor: Hub — always shows a subtle cyan chip so it reads as the
+     home anchor even when the footer isn't on a hub route. */
   .site-hub-mobile-bar .hub-mobile-tab--center svg {
     width: 28px;
     height: 28px;
@@ -2092,6 +2093,12 @@ h2.display,
   .site-hub-mobile-bar .hub-mobile-tab--center span:last-child {
     font-size: 10px;
     letter-spacing: 0.08em;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab--center:not(.is-active) {
+    color: var(--hub-cyan, #00ffff);
+    background: rgba(0, 255, 255, 0.12);
+    border-radius: 12px;
   }
 }
 

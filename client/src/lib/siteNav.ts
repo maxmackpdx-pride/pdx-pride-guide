@@ -60,6 +60,13 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/spotted", label: "Missed Connections" },
 ];
 
+/** Destinations behind the mobile footer "Events" tab sheet (Beaches folded in). */
+export const EVENTS_NAV: NavLinkItem[] = [
+  { href: "/events", label: "Events" },
+  { href: "/schedule", label: "Schedule" },
+  { href: "/nude-beaches", label: "Nude Beaches" },
+];
+
 export function navLinkActive(location: string, href: string) {
   return location === href || location.startsWith(`${href}?`) || location.startsWith(`${href}/`);
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
-import { CalendarDays, LayoutGrid, MapPin, MessageCircle, Sun } from "lucide-react";
+import { CalendarDays, Home, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useUnreadCount } from "@/hooks/useUnreadCount";
-import { BOARD_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 26;
@@ -15,7 +15,10 @@ function tabClass(active: boolean, accent: "cyan" | "green" | "lime" | "orange" 
 }
 
 /**
- * Mobile bottom navigation (all visitors). Matches hub admin mobile bar styling.
+ * Mobile bottom navigation (all visitors), a single 5-tab footer used across the
+ * whole site: Places / Events / Hub (center) / Boards / Messages. Beaches lives
+ * inside the Events sheet (same pattern as Boards). This is the only mobile
+ * bottom bar — hub/admin shells no longer render their own.
  */
 export default function MobileBottomNav() {
   const [location] = useLocation();
@@ -23,16 +26,18 @@ export default function MobileBottomNav() {
   const { open, toggleSheet } = useInboxSheet();
   const unreadCount = useUnreadCount();
   const [boardsOpen, setBoardsOpen] = useState(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     setBoardsOpen(false);
+    setEventsOpen(false);
   }, [location]);
 
   const placesActive = navLinkActive(location, "/directory");
-  const beachesActive = navLinkActive(location, "/nude-beaches");
-  const eventsActive = navLinkActive(location, "/events") || navLinkActive(location, "/schedule");
+  const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
+  const hubActive = navLinkActive(location, "/dashboard");
 
   const handleMessages = () => {
     if (!user) {
@@ -46,6 +51,25 @@ export default function MobileBottomNav() {
   // clips overflow (#root/.app-shell do), so the bar must live outside them.
   return createPortal(
     <>
+      {eventsOpen && (
+        <>
+          <div className="hub-more-backdrop" onClick={() => setEventsOpen(false)} aria-hidden="true" />
+          <div className="hub-more-sheet" role="dialog" aria-label="Events">
+            <h3>Events</h3>
+            {EVENTS_NAV.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
+                onClick={() => setEventsOpen(false)}
+              >
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
       {boardsOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setBoardsOpen(false)} aria-hidden="true" />
@@ -76,25 +100,39 @@ export default function MobileBottomNav() {
           <span>Places</span>
         </Link>
 
-        <Link
-          href="/nude-beaches"
-          className={tabClass(beachesActive, "green")}
-          aria-label="Nude Beaches"
-          aria-current={beachesActive ? "page" : undefined}
-        >
-          <Sun size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-          <span>Beaches</span>
-        </Link>
-
-        <Link
-          href="/events"
-          className={`${tabClass(eventsActive, "orange")} hub-mobile-tab--center`}
+        <button
+          type="button"
+          className={tabClass(eventsActive || eventsOpen, "orange")}
+          aria-expanded={eventsOpen}
+          aria-haspopup="dialog"
           aria-label="Events"
-          aria-current={eventsActive ? "page" : undefined}
+          onClick={() => setEventsOpen(o => !o)}
         >
           <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
           <span>Events</span>
-        </Link>
+        </button>
+
+        {user ? (
+          <Link
+            href="/dashboard"
+            className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center`}
+            aria-label="Hub"
+            aria-current={hubActive ? "page" : undefined}
+          >
+            <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Hub</span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className={`${tabClass(false, "cyan")} hub-mobile-tab--center`}
+            aria-label="Hub"
+            onClick={() => setShowAuth(true)}
+          >
+            <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Hub</span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -102,7 +140,7 @@ export default function MobileBottomNav() {
           aria-expanded={boardsOpen}
           aria-haspopup="dialog"
           aria-label="Boards"
-          onClick={() => setBoardsOpen(open => !open)}
+          onClick={() => setBoardsOpen(o => !o)}
         >
           <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
           <span>Boards</span>
