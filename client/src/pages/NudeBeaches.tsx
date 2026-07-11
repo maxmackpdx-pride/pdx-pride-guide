@@ -22,6 +22,7 @@ import {
   SAUVIE_ISLAND_RULES,
   type NudeBeachTab,
   type NudeBeachesSnapshot,
+  type ResourceLink,
 } from "@shared/nudeBeaches";
 import "./NudeBeaches.css";
 
@@ -53,133 +54,96 @@ function formatFetchedAt(iso?: string) {
   }
 }
 
-function RoosterRockPanel() {
-  const fees = [
-    { label: "Oregon residents", value: ROOSTER_ROCK_PARKING.dayUseOr },
-    { label: "Out of state", value: ROOSTER_ROCK_PARKING.dayUseOutOfState },
-    { label: "Annual pass · OR", value: ROOSTER_ROCK_PARKING.annualOr },
-    { label: "Annual pass · out of state", value: ROOSTER_ROCK_PARKING.annualOutOfState },
-  ];
+function ResourceList({ links }: { links: ResourceLink[] }) {
   return (
-    <div className="nb-log nb-log--rooster">
-      <div className="nb-log__kicker nb-log__kicker--orange">Trip logistics · Rooster Rock</div>
-      <h2 className="nb-log__title">Parking &amp; pass</h2>
-      <p className="nb-log__lede">
-        {ROOSTER_ROCK_PARKING.location}. Day-use only, pay at the fee machine or the QR on site, or bring
-        an Oregon State Parks pass.
-      </p>
-      <div className="nb-log__grid nb-log__grid--fees">
-        {fees.map(fee => (
-          <div className="nb-log-fee" key={fee.label}>
-            <div className="nb-log-fee__label">{fee.label}</div>
-            <div className="nb-log-fee__value">{fee.value}</div>
-          </div>
-        ))}
-      </div>
-      <div className="nb-log__actions">
+    <div className="nude-resource-list">
+      {links.map(link => (
         <a
-          className="nude-map-btn nude-map-btn--primary"
-          href="https://stateparks.oregon.gov/index.cfm?do=visit.day-use"
+          key={link.href}
+          href={link.href}
           target="_blank"
           rel="noopener noreferrer"
+          className={`nude-resource-link${link.priority === "primary" ? " nude-resource-link--primary" : ""}`}
         >
-          Buy day-use permit
+          <div className="nude-resource-link__title">{link.title}</div>
+          <p className="nude-resource-link__desc">{link.description}</p>
         </a>
-        <a
-          className="nude-map-btn"
-          href="https://stateparks.oregon.gov/index.cfm?do=v.page&id=30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Where to buy passes
-        </a>
-        <a
-          className="nude-map-btn"
-          href="https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Official park page
-        </a>
-      </div>
+      ))}
+    </div>
+  );
+}
+
+function RoosterRockPanel() {
+  return (
+    <div className="nude-tab-panel">
+      <section className="nude-panel">
+        <div className="nude-panel__kicker nude-panel__kicker--lime">Parking &amp; pass</div>
+        <h3 className="nude-panel__title">Day-use fees</h3>
+        <div className="nude-prose">
+          <p>{ROOSTER_ROCK_PARKING.location}</p>
+          <ul>
+            <li>Oregon residents: {ROOSTER_ROCK_PARKING.dayUseOr}</li>
+            <li>Out of state: {ROOSTER_ROCK_PARKING.dayUseOutOfState}</li>
+            <li>Annual pass (OR): {ROOSTER_ROCK_PARKING.annualOr}</li>
+            <li>Annual pass (out of state): {ROOSTER_ROCK_PARKING.annualOutOfState}</li>
+          </ul>
+          <p>{ROOSTER_ROCK_PARKING.note}</p>
+        </div>
+        <div className="nude-map-actions" style={{ marginTop: 14 }}>
+          <a className="nude-map-btn" href="https://stateparks.oregon.gov/index.cfm?do=visit.day-use" target="_blank" rel="noopener noreferrer">
+            Buy day-use permit
+          </a>
+          <a className="nude-map-btn" href="https://stateparks.oregon.gov/index.cfm?do=v.page&id=30" target="_blank" rel="noopener noreferrer">
+            Where to buy passes
+          </a>
+          <a className="nude-map-btn" href="https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126" target="_blank" rel="noopener noreferrer">
+            Official park page
+          </a>
+        </div>
+      </section>
+
     </div>
   );
 }
 
 function SauvieIslandPanel() {
   return (
-    <div className="nb-log nb-log--sauvie">
-      <div className="nb-log__kicker nb-log__kicker--green">Trip logistics · Collins Beach</div>
-      <h2 className="nb-log__title">Before you go</h2>
-      <p className="nb-log__lede">
-        Three checks before you point the car at the bridge. Collins Beach is wild, sandy, and worth the
-        small bit of prep.
-      </p>
-      <div className="nb-log__grid nb-log__grid--3">
-        {SAUVIE_ISLAND_CHECKLIST.map((step, i) => (
-          <div className="nb-log-step" key={step.step}>
-            <div className="nb-log-step__num">{i + 1}</div>
-            <div className="nb-log-step__title">{step.step}</div>
-            <p className="nb-log-step__detail">{step.detail}</p>
-            {step.href && step.linkLabel ? (
-              <a
-                className="nb-log-step__link"
-                href={step.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {step.linkLabel} →
-              </a>
-            ) : null}
-          </div>
-        ))}
-      </div>
+    <div className="nude-tab-panel">
+      <section className="nude-panel">
+        <div className="nude-panel__kicker nude-panel__kicker--lime">Before you go</div>
+        <ul className="nude-checklist">
+          {SAUVIE_ISLAND_CHECKLIST.map(item => (
+            <li key={item.step}>
+              <strong>{item.step}</strong>
+              {item.detail}
+              {item.href && item.linkLabel ? (
+                <a
+                  className="nude-checklist__link"
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {item.linkLabel} →
+                </a>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+        <ul className="nude-rules">
+          {SAUVIE_ISLAND_RULES.map(rule => (
+            <li key={rule}>{rule}</li>
+          ))}
+        </ul>
+      </section>
 
-      <div className="nb-log__kicker nb-log__kicker--green nb-log__kicker--section">Know the rules</div>
-      <div className="nb-log__grid nb-log__grid--2">
-        {SAUVIE_ISLAND_RULES.map(rule => (
-          <div className="nb-log-rule" key={rule}>
-            <svg
-              className="nb-log-rule__icon"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            <p className="nb-log-rule__text">{rule}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="nb-log__kicker nb-log__kicker--farm nb-log__kicker--section">Farm stops on the drive</div>
-      <p className="nb-log__intro">
-        <strong>Cracker Barrel Grocery</strong> sits right after the bridge, your last easy stop for
-        snacks, drinks, and supplies before the wildlife area. A few island classics on the drive out:
-      </p>
-      <div className="nb-log__grid nb-log__grid--2">
-        {SAUVIE_ISLAND_FARM_STORES.map(store => (
-          <a
-            className="nb-log-farm"
-            key={store.href}
-            href={store.href}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <div className="nb-log-farm__row">
-              <div className="nb-log-farm__title">{store.title}</div>
-              <span className="nb-log-farm__arrow" aria-hidden="true">→</span>
-            </div>
-            <p className="nb-log-farm__desc">{store.description}</p>
-          </a>
-        ))}
-      </div>
+      <section className="nude-panel">
+        <div className="nude-panel__kicker nude-panel__kicker--orange">Farm stops</div>
+        <p className="nude-prose nude-farm-intro">
+          <strong>Cracker Barrel Grocery</strong> sits right after the bridge — your last easy stop for snacks,
+          drinks, and supplies before the wildlife area. Popular farm stands on the drive out:
+        </p>
+        <ResourceList links={SAUVIE_ISLAND_FARM_STORES} />
+      </section>
     </div>
   );
 }
