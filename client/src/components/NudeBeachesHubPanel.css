@@ -296,10 +296,6 @@ html.calm-mode .nb-hub__section--pulse {
   text-decoration: none;
 }
 
-.nb-hub--sauvie .nb-hub__link {
-  color: var(--neon-green, #00ee44);
-}
-
 .nb-hub__link:hover {
   text-decoration: underline;
 }

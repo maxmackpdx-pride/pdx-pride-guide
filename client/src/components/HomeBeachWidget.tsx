@@ -127,7 +127,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 <div className="home-beach-widget__stat-label">Air temp</div>
               </div>
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--good">
+                <div className="home-beach-widget__stat home-beach-widget__stat--water">
                   {sauvieWind.value}
                 </div>
                 <div className="home-beach-widget__stat-label">{sauvieWind.label}</div>

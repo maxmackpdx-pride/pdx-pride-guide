@@ -707,8 +707,8 @@ html.calm-mode .board-close-seam {
 }
 
 .nude-beaches-page--sauvie .nude-map-btn:hover {
-  border-color: var(--neon-green, #00EE44);
-  color: var(--neon-green, #00EE44);
+  border-color: var(--neon-cyan, #19e3ff);
+  color: var(--neon-cyan, #19e3ff);
 }
 
 .nude-beaches-map__chip {
@@ -776,12 +776,21 @@ html.calm-mode .nude-beaches-map__chip-dot {
   border-bottom-color: var(--neon-green, #00ee44);
 }
 
-/* Sauvie stats — full green strip */
+/* Sauvie stats — green for swim + air; wind stays cyan */
 .nude-beaches-page--sauvie .board-stats-band__num {
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+.nude-beaches-page--sauvie .board-stats-band__item:nth-child(1) .board-stats-band__num,
+.nude-beaches-page--sauvie .board-stats-band__item:nth-child(2) .board-stats-band__num {
   color: var(--neon-green, #00ee44);
   text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
+}
+
+.nude-beaches-page--sauvie .board-stats-band__item:nth-child(3) .board-stats-band__num {
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 22px rgba(25, 227, 255, 0.35);
 }
 
 .nude-beaches-page--sauvie .nude-refresh-bar .pdxBtn {
