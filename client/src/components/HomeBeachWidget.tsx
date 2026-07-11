@@ -115,7 +115,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <div className="home-beach-widget__sub">Sauvie Island</div>
             <div className="home-beach-widget__grid">
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--water">
+                <div className="home-beach-widget__stat home-beach-widget__stat--good">
                   {normalizeSwimStatusLabel(sauvie.swimStatusLabel, sauvie.swimStatus) || "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">Collins swim</div>

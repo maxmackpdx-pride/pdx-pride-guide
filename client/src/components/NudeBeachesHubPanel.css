@@ -78,7 +78,7 @@
 }
 
 .nb-hub--sauvie > .nb-hub__section {
-  border-top: 3px solid var(--neon-cyan, #19e3ff);
+  border-top: 3px solid var(--neon-green, #00EE44);
 }
 
 .nb-hub--sauvie .nb-hub__level-value {
@@ -149,7 +149,13 @@
 }
 
 .nb-hub__section--water.nb-hub__swim--pass {
-  border-top-color: var(--neon-cyan, #19e3ff);
+  border-top-color: var(--neon-green, #00EE44);
+}
+
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--pass,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--unknown {
+  --dc: var(--neon-green, #00EE44);
+  border-top-color: var(--neon-green, #00EE44);
 }
 
 .nb-hub__swim--fail,
@@ -164,13 +170,12 @@
   border-top-color: #ffb347;
 }
 
-.nb-hub__swim--unknown,
-.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--unknown {
+.nb-hub__swim--unknown {
   --dc: #19e3ff;
   border-top-color: #19e3ff;
 }
 
-.nb-hub__swim-value--pass { color: var(--neon-cyan, #19e3ff); text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
+.nb-hub__swim-value--pass { color: var(--neon-green, #00EE44); text-shadow: 0 0 22px rgba(0, 238, 68, 0.35); }
 .nb-hub__swim-value--fail { color: #ff4d4d; text-shadow: 0 0 22px rgba(255, 77, 77, 0.35); }
 .nb-hub__swim-value--warning { color: #ffb347; text-shadow: 0 0 22px rgba(255, 179, 71, 0.35); }
 .nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
