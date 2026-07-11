@@ -193,6 +193,11 @@ export default function NudeBeaches() {
     queryKey: ["/api/nude-beaches"],
     queryFn: () => apiRequest("GET", "/api/nude-beaches").then(r => r.json()),
     staleTime: 5 * 60_000,
+    // A stale snapshot means the server is refreshing live conditions in the
+    // background; poll so the fresh numbers land without a manual reload, and
+    // stop once the snapshot is current again.
+    refetchInterval: query => (query.state.data?.stale ? 20_000 : false),
+    refetchOnWindowFocus: true,
   });
 
   const refreshMutation = useMutation({
