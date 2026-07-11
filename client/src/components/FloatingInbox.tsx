@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useLocation } from "wouter";
 import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +9,7 @@ import {
   readFloatingInboxBottom,
   writeFloatingInboxBottom,
 } from "@/lib/floatingInboxPosition";
+import { pickFloatingInboxNeon } from "@/lib/floatingInboxNeon";
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -25,6 +26,7 @@ export default function FloatingInbox() {
   const unreadCount = useUnreadCount();
   const [bottomPx, setBottomPx] = useState(() => readFloatingInboxBottom());
   const [dragging, setDragging] = useState(false);
+  const [neon] = useState(() => pickFloatingInboxNeon());
 
   const dragRef = useRef({
     active: false,
@@ -111,12 +113,18 @@ export default function FloatingInbox() {
 
   if (!user || onInboxPage) return null;
 
+  const anchorStyle = {
+    bottom: `${bottomPx}px`,
+    "--fab-neon": neon.color,
+    "--fab-neon-rgb": neon.rgb,
+  } as CSSProperties;
+
   return (
-    <div className="floating-inbox">
+    <div className="floating-inbox" style={anchorStyle}>
+      <span className="floating-inbox__halo" aria-hidden />
       <button
         type="button"
         className={`floating-inbox__fab${open ? " floating-inbox__fab--open" : ""}${dragging ? " floating-inbox__fab--dragging" : ""}`}
-        style={{ bottom: `${bottomPx}px` }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
