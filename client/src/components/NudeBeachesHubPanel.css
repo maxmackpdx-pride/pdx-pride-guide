@@ -77,6 +77,10 @@
   text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
 }
 
+.nb-hub--sauvie > .nb-hub__section {
+  border-top: 3px solid var(--neon-cyan, #19e3ff);
+}
+
 .nb-hub__weather-label,
 .nb-hub__weather-stat-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -143,17 +147,20 @@
   border-top-color: var(--neon-cyan, #19e3ff);
 }
 
-.nb-hub__swim--fail {
+.nb-hub__swim--fail,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--fail {
   --dc: #ff4d4d;
   border-top-color: #ff4d4d;
 }
 
-.nb-hub__swim--warning {
+.nb-hub__swim--warning,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--warning {
   --dc: #ffb347;
   border-top-color: #ffb347;
 }
 
-.nb-hub__swim--unknown {
+.nb-hub__swim--unknown,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--unknown {
   --dc: #19e3ff;
   border-top-color: #19e3ff;
 }
