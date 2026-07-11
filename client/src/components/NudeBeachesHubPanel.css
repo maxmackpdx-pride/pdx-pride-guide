@@ -10,8 +10,9 @@
   overflow-x: hidden;
   overflow-y: auto;
   box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
-  padding: 14px;
+  padding: 14px 14px 20px;
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nb-hub--loading {
@@ -122,6 +123,7 @@
   flex-direction: column;
   flex-shrink: 0;
   border-top: 3px solid #333;
+  padding-bottom: 4px;
 }
 
 @keyframes nbHubPulse {
@@ -205,6 +207,11 @@ html.calm-mode .nb-hub__section--pulse {
   color: #fff;
 }
 
+.nb-hub--rooster .nb-hub__level .nb-hub__level-value {
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 22px rgba(25, 227, 255, 0.35);
+}
+
 .nb-hub__level-unit {
   font-size: 0.42em;
   color: #8a8a8a;
@@ -251,10 +258,12 @@ html.calm-mode .nb-hub__section--pulse {
   color: #b8b4ab;
   font-size: 12px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .nb-hub__level .nb-hub__link {
-  margin-bottom: 2px;
+  margin-top: 12px;
+  margin-bottom: 4px;
 }
 
 .nb-hub__link {

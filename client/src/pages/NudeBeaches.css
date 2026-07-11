@@ -524,6 +524,13 @@
     height: auto;
     min-height: 0;
   }
+
+  .nude-beaches-page .nude-beaches-map-row .events-map-row__panel .nb-hub {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+    padding-bottom: 18px;
+  }
 }
 
 /* Header — tabs align with lede last line, just above stats band */
