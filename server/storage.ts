@@ -4753,6 +4753,7 @@ export interface IStorage {
     message: string;
     businessName?: string;
     lengthNeeded?: string;
+    sponsorshipType?: string;
     attachmentUrls?: string[];
     pageUrl?: string;
   }): boolean;
@@ -6607,10 +6608,10 @@ export const storage: IStorage = {
     if (!owner) return;
     notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
   },
-  sendPortfolioContactMessage({ kind = "message", name, email, phone, message, businessName, lengthNeeded, attachmentUrls, pageUrl }) {
+  sendPortfolioContactMessage({ kind = "message", name, email, phone, message, businessName, lengthNeeded, sponsorshipType, attachmentUrls, pageUrl }) {
     const isSponsor = kind === "sponsor";
     const summary = isSponsor
-      ? `${businessName || name}${lengthNeeded ? ` · ${lengthNeeded}` : ""}`
+      ? `${businessName || name}${sponsorshipType ? ` · ${sponsorshipType}` : ""}${lengthNeeded ? ` · ${lengthNeeded}` : ""}`
       : (phone ? `Phone: ${phone}` : email);
     storage.createOwnerDeskItem({
       kind: isSponsor ? "sponsor" : "contact",
@@ -6623,6 +6624,7 @@ export const storage: IStorage = {
       pageUrl: pageUrl || "/about",
       metaJson: {
         businessName: businessName || null,
+        sponsorshipType: sponsorshipType || null,
         lengthNeeded: lengthNeeded || null,
         attachmentUrls: attachmentUrls || [],
       },

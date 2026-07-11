@@ -13,6 +13,15 @@ type Status = "idle" | "sending" | "sent" | "error";
 
 const MAX_FILES = 3;
 
+const SPONSORSHIP_TYPES = [
+  "Event sponsor",
+  "Directory / Places listing",
+  "Homepage / banner",
+  "Newsletter",
+  "Pride Week takeover",
+  "Other",
+] as const;
+
 export default function PortfolioContactModal({
   onClose,
   variant = "message",
@@ -22,6 +31,7 @@ export default function PortfolioContactModal({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [sponsorshipType, setSponsorshipType] = useState("");
   const [lengthNeeded, setLengthNeeded] = useState("");
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -40,8 +50,8 @@ export default function PortfolioContactModal({
       setError("Name, email, and a message are required.");
       return;
     }
-    if (isSponsor && (!businessName.trim() || !lengthNeeded.trim())) {
-      setError("Business name and length of time needed are required.");
+    if (isSponsor && (!businessName.trim() || !sponsorshipType.trim() || !lengthNeeded.trim())) {
+      setError("Business name, sponsorship type, and length of time needed are required.");
       return;
     }
     setStatus("sending");
@@ -55,6 +65,7 @@ export default function PortfolioContactModal({
       form.append("message", message.trim());
       if (isSponsor) {
         form.append("businessName", businessName.trim());
+        form.append("sponsorshipType", sponsorshipType.trim());
         form.append("lengthNeeded", lengthNeeded.trim());
       }
       form.append("company", honeypot);
@@ -160,6 +171,24 @@ export default function PortfolioContactModal({
                     autoComplete="organization"
                     placeholder="Your business or brand"
                   />
+                </label>
+
+                <label className="pcm-field">
+                  <span>Sponsorship type *</span>
+                  <select
+                    value={sponsorshipType}
+                    onChange={e => setSponsorshipType(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>
+                      Choose one…
+                    </option>
+                    {SPONSORSHIP_TYPES.map(t => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 <label className="pcm-field">

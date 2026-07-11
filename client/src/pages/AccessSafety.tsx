@@ -1,11 +1,13 @@
+import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
+import PortfolioContactModal from "@/components/PortfolioContactModal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Link } from "wouter";
 
-const CONTACT_EMAIL = "hello.tuckercasey@gmail.com";
-
 export default function AccessSafety() {
+  const [reportOpen, setReportOpen] = useState(false);
+
   usePageSeo(
     "Access & Safety | PDX Pride Guide",
     "What PDX Pride Guide listings cover, what we can't promise, and how to take care of each other during Pride week.",
@@ -50,15 +52,17 @@ export default function AccessSafety() {
           </p>
 
           <div style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <a className="btn-neon magenta" href={`mailto:${CONTACT_EMAIL}?subject=Report%20a%20problem`}>
+            <button type="button" className="btn-neon magenta" onClick={() => setReportOpen(true)}>
               Report a problem
-            </a>
+            </button>
             <Link href="/contact" className="btn-neon">
               Contact
             </Link>
           </div>
         </ScrollReveal>
       </div>
+
+      {reportOpen && <PortfolioContactModal onClose={() => setReportOpen(false)} />}
     </div>
   );
 }

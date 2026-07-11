@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
+import PortfolioContactModal from "@/components/PortfolioContactModal";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -26,7 +28,7 @@ const SECTIONS = [
       "Account info (email, username, profile fields) is used to run the site: submissions, messaging, RSVPs, and moderation.",
       "Messages and inbox threads are private between participants; hosts and admins only see what the product surfaces for support or review.",
       "Optional Google sign-in shares your verified email and basic profile with us for authentication only.",
-      "Contact hello.tuckercasey@gmail.com for privacy questions or removal requests.",
+      "Use the contact form for privacy questions or removal requests.",
     ],
   },
   {
@@ -53,6 +55,8 @@ const SECTIONS = [
 ] as const;
 
 export default function Legal() {
+  const [contactOpen, setContactOpen] = useState(false);
+
   usePageSeo(
     "Legal | PDX Pride Guide",
     "Terms of use, privacy policy, and community guidelines for PDX Pride Guide.",
@@ -72,7 +76,7 @@ export default function Legal() {
         actions={
           <>
             <Link href="/about"><Button as="span" variant="solid">About the guide</Button></Link>
-            <Button as="a" href="mailto:hello.tuckercasey@gmail.com" accent="cyan">Contact</Button>
+            <Button type="button" accent="cyan" onClick={() => setContactOpen(true)}>Contact</Button>
           </>
         }
       />
@@ -103,12 +107,20 @@ export default function Legal() {
       <ScrollReveal>
         <section className="board-how" style={{ paddingBottom: 64 }}>
           <p className="board-copy" style={{ maxWidth: 640 }}>
-            Questions about a listing, your account, or a report? Email{" "}
-            <a href="mailto:hello.tuckercasey@gmail.com" style={{ color: "var(--neon-cyan)" }}>hello.tuckercasey@gmail.com</a>
-            {" "}or use the feedback button in the site footer.
+            Questions about a listing, your account, or a report?{" "}
+            <button
+              type="button"
+              onClick={() => setContactOpen(true)}
+              style={{ color: "var(--neon-cyan)", background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer", textDecoration: "underline" }}
+            >
+              Use the contact form
+            </button>
+            {" "}or hit the feedback button in the site footer.
           </p>
         </section>
       </ScrollReveal>
+
+      {contactOpen && <PortfolioContactModal onClose={() => setContactOpen(false)} />}
     </div>
   );
 }

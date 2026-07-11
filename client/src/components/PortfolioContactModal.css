@@ -76,6 +76,7 @@
 .pcm-field input[type="text"],
 .pcm-field input[type="email"],
 .pcm-field input[type="tel"],
+.pcm-field select,
 .pcm-field textarea {
   font-family: var(--font-body);
   font-size: 0.95rem;
@@ -90,7 +91,13 @@
   resize: vertical;
 }
 
+.pcm-field select {
+  appearance: none;
+  cursor: pointer;
+}
+
 .pcm-field input:focus,
+.pcm-field select:focus,
 .pcm-field textarea:focus {
   outline: none;
   border-color: var(--pink, #ff00cc);

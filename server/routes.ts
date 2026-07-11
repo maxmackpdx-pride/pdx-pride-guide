@@ -89,7 +89,7 @@ const contactUpload = multer({
       cb(null, `contact-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
     },
   }),
-  limits: { fileSize: 8 * 1024 * 1024, files: 3 },
+  limits: { fileSize: 10 * 1024 * 1024, files: 3 },
   fileFilter: (_req, file, cb) => {
     const ok = /^image\/(jpeg|jpg|png|gif|webp)$/.test(file.mimetype) || file.mimetype === "application/pdf";
     cb(null, ok);
@@ -704,6 +704,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const message = String(req.body?.message || "").trim().slice(0, 4000);
     const businessName = String(req.body?.businessName || "").trim().slice(0, 160);
     const lengthNeeded = String(req.body?.lengthNeeded || "").trim().slice(0, 120);
+    const sponsorshipType = String(req.body?.sponsorshipType || "").trim().slice(0, 80);
 
     if (!name || !email || !message) {
       return res.status(400).json({ error: "Name, email, and message are required." });
@@ -727,6 +728,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       message,
       businessName: businessName || undefined,
       lengthNeeded: lengthNeeded || undefined,
+      sponsorshipType: sponsorshipType || undefined,
       attachmentUrls,
       pageUrl,
     });

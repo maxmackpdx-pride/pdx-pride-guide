@@ -37,7 +37,6 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
     title: "Guide",
     links: [
       ["/about", "About"],
-      ["/sponsors", "Sponsors"],
       ["/access", "Access & Safety"],
       ["/contact", "Contact"],
       ["/legal", "Legal"],

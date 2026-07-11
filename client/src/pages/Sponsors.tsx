@@ -1,10 +1,12 @@
+import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
+import PortfolioContactModal from "@/components/PortfolioContactModal";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
 
-const CONTACT_EMAIL = "hello.tuckercasey@gmail.com";
-
 export default function Sponsors() {
+  const [pitchOpen, setPitchOpen] = useState(false);
+
   usePageSeo(
     "Sponsors | PDX Pride Guide",
     "Local businesses can help keep PDX Pride Guide free. Sponsorship is support, not pay-to-rank.",
@@ -30,18 +32,19 @@ export default function Sponsors() {
           </p>
 
           <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-start" }}>
-            <a className="btn-neon solid" href={`mailto:${CONTACT_EMAIL}?subject=Sponsor%20PDX%20Pride%20Guide`}>
-              Email about sponsoring
-            </a>
-            <p className="board-copy-sm" style={{ margin: 0 }}>
-              <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--lime)" }}>{CONTACT_EMAIL}</a>
-            </p>
+            <button type="button" className="btn-neon solid" onClick={() => setPitchOpen(true)}>
+              Pitch a sponsorship
+            </button>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
-              Sponsors are reviewed one at a time by a human. Slow, on purpose.
+              Goes straight to my Owner Desk on the guide, not a personal inbox. Sponsors are reviewed one at a time by a human. Slow, on purpose.
             </p>
           </div>
         </ScrollReveal>
       </div>
+
+      {pitchOpen && (
+        <PortfolioContactModal variant="sponsor" onClose={() => setPitchOpen(false)} />
+      )}
     </div>
   );
 }

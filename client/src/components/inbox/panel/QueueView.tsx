@@ -11,7 +11,8 @@ type QueueRowKind =
   | "river_brats"
   | "gifting_report"
   | "gifting_flagged"
-  | "spotted";
+  | "spotted"
+  | "owner_desk";
 
 type QueueRow = {
   id: string;
@@ -24,6 +25,9 @@ type QueueRow = {
   fields: Array<[string, string]>;
   note: string;
   body?: string;
+  /** Owner-desk contact/sponsor messages: reply target + file links. */
+  replyEmail?: string;
+  attachments?: string[];
 };
 
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
@@ -130,20 +134,42 @@ function mapSpotted(p: any): QueueRow | null {
   };
 }
 
-function mapOwnerReport(r: any): QueueRow {
+const DESK_TAG: Record<string, { label: string; color: string }> = {
+  contact: { label: "MESSAGE", color: C.cyan },
+  sponsor: { label: "SPONSOR", color: C.lime },
+  bug: { label: "BUG", color: C.red },
+  feedback: { label: "FEEDBACK", color: C.orange },
+  keyholder: { label: "KEYHOLDER", color: C.purple },
+  escalation: { label: "ESCALATION", color: C.magenta },
+};
+
+/** Owner Desk items come from /api/admin/feedback (owner_desk_items): contact +
+ * sponsor messages with full sender details, not moderation reports. */
+function mapOwnerDeskItem(r: any): QueueRow {
+  const kind = String(r.kind || "contact");
+  const meta = r.meta || {};
+  const t = DESK_TAG[kind] || { label: String(r.kindLabel || kind).toUpperCase(), color: C.purple };
+  const fields: Array<[string, string]> = [];
+  if (r.contactName) fields.push(["From", String(r.contactName)]);
+  if (r.contactEmail) fields.push(["Email", String(r.contactEmail)]);
+  if (r.contactPhone) fields.push(["Phone", String(r.contactPhone)]);
+  if (meta.businessName) fields.push(["Business", String(meta.businessName)]);
+  if (meta.sponsorshipType) fields.push(["Type", String(meta.sponsorshipType)]);
+  if (meta.lengthNeeded) fields.push(["Length", String(meta.lengthNeeded)]);
+  if (r.pageUrl) fields.push(["Sent from", String(r.pageUrl)]);
+  const attachments = Array.isArray(meta.attachmentUrls) ? meta.attachmentUrls.filter(Boolean) : [];
   return {
-    id: `fb-${r.id}`,
-    kind: "submission",
+    id: `desk-${r.id}`,
+    kind: "owner_desk",
     entityId: r.id,
-    tag: "REPORT",
-    tagColor: C.red,
-    title: r.subject || r.reason || "Flagged content",
-    meta: `${r.count ? r.count + " reports" : "Reported"}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
-    fields: [
-      ["Reason", String(r.reason || r.message || "—")],
-      ["Target", String(r.targetType || r.context || "—")],
-    ],
-    note: r.message || "",
+    tag: t.label,
+    tagColor: t.color,
+    title: String(r.title || r.summary || "Message"),
+    meta: `${r.contactName || "Someone"}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
+    fields,
+    note: String(r.body || ""),
+    replyEmail: r.contactEmail ? String(r.contactEmail) : undefined,
+    attachments,
   };
 }
 
@@ -192,6 +218,14 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   });
 
   const onQueueSuccess = () => invalidateAdminQueue(qc);
+  const resolveOwnerDesk = useMutation({
+    mutationFn: (id: number) =>
+      fetch(`/api/admin/feedback/${id}/resolve`, { method: "POST", credentials: "include" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
+    },
+  });
 
   const approveSub = useMutation({
     mutationFn: (id: number) =>
@@ -241,7 +275,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   });
 
   const rows: QueueRow[] = useMemo(() => {
-    if (mode === "owner") return ownerReports.map(mapOwnerReport);
+    if (mode === "owner") return ownerReports.map(mapOwnerDeskItem);
     const items: QueueRow[] = [];
     for (const s of subs) {
       const row = mapSubmission(s);
@@ -268,7 +302,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
 
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
-    || removeSpotted.isPending || rejectSpotted.isPending;
+    || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending;
 
   const kicker = mode === "admin" ? "SHARED QUEUE · WORKED BY THE WHOLE TEAM" : "OWNER DESK · JUST YOU";
 
@@ -376,6 +410,30 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                         {q.body || q.note}
                       </div>
                     )}
+                    {q.attachments && q.attachments.length > 0 && (
+                      <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                        {q.attachments.map((url, ai) => (
+                          <a
+                            key={ai}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontFamily: MONO,
+                              fontSize: 10,
+                              letterSpacing: ".06em",
+                              color: accent,
+                              border: `1px solid ${C.border2}`,
+                              borderRadius: 8,
+                              padding: "6px 10px",
+                              textDecoration: "none",
+                            }}
+                          >
+                            Attachment {ai + 1} ↗
+                          </a>
+                        ))}
+                      </div>
+                    )}
                     <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
                       {q.kind === "submission" && (
                         <>
@@ -423,7 +481,16 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                           </div>
                         </>
                       )}
-                      {mode === "owner" && btn("REVIEW", accent, () => {}, true)}
+                      {q.kind === "owner_desk" && (
+                        <>
+                          {q.replyEmail
+                            ? btn("REPLY", C.cyan, () => {
+                                window.location.href = `mailto:${q.replyEmail}?subject=${encodeURIComponent(`Re: ${q.title}`)}`;
+                              })
+                            : null}
+                          {btn("MARK DONE", C.green, () => resolveOwnerDesk.mutate(q.entityId), true)}
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -435,7 +502,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
 
       {mode === "owner" && (
         <p style={{ margin: "14px 2px 4px", fontSize: 11.5, color: C.faint, lineHeight: 1.5 }}>
-          Sponsorship &amp; press messages from the contact form will appear here once that feed is wired to the desk.
+          Contact and sponsorship messages from the site's forms land here. Reply goes to the sender's email; Mark done clears it from the desk.
         </p>
       )}
     </>
