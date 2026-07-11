@@ -1,14 +1,15 @@
 export type FloatingInboxNeon = {
   id: "orange" | "cyan" | "magenta" | "yellow";
   color: string;
+  /** Space-separated for `rgb(var(--fab-neon-rgb) / alpha)` */
   rgb: string;
 };
 
 export const FLOATING_INBOX_NEON_PALETTE: FloatingInboxNeon[] = [
-  { id: "orange", color: "var(--neon-orange, #FF6600)", rgb: "255, 102, 0" },
-  { id: "cyan", color: "var(--neon-cyan, #00FFFF)", rgb: "0, 255, 255" },
-  { id: "magenta", color: "var(--neon-magenta, #FF00CC)", rgb: "255, 0, 204" },
-  { id: "yellow", color: "var(--neon-yellow, #CCFF00)", rgb: "204, 255, 0" },
+  { id: "orange", color: "#FF6600", rgb: "255 102 0" },
+  { id: "cyan", color: "#00FFFF", rgb: "0 255 255" },
+  { id: "magenta", color: "#FF00CC", rgb: "255 0 204" },
+  { id: "yellow", color: "#CCFF00", rgb: "204 255 0" },
 ];
 
 /** Picks a new neon accent on each page load / refresh. */

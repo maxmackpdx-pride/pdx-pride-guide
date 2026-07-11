@@ -26,7 +26,7 @@ export default function FloatingInbox() {
   const unreadCount = useUnreadCount();
   const [bottomPx, setBottomPx] = useState(() => readFloatingInboxBottom());
   const [dragging, setDragging] = useState(false);
-  const [neon] = useState(() => pickFloatingInboxNeon());
+  const [neon, setNeon] = useState(() => pickFloatingInboxNeon());
 
   const dragRef = useRef({
     active: false,
@@ -44,6 +44,16 @@ export default function FloatingInbox() {
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setNeon(pickFloatingInboxNeon());
+      }
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
   }, []);
 
   const finishDrag = useCallback((pointerId: number) => {
@@ -120,7 +130,11 @@ export default function FloatingInbox() {
   } as CSSProperties;
 
   return (
-    <div className="floating-inbox" style={anchorStyle}>
+    <div
+      className={`floating-inbox floating-inbox--${neon.id}`}
+      style={anchorStyle}
+      data-fab-neon={neon.id}
+    >
       <span className="floating-inbox__halo" aria-hidden />
       <button
         type="button"
