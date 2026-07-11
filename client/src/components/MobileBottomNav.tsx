@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { CalendarDays, LayoutGrid, MapPin, MessageCircle, Sun } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -41,7 +42,9 @@ export default function MobileBottomNav() {
     toggleSheet();
   };
 
-  return (
+  // Portaled to <body>: position:fixed breaks on iOS Safari when any ancestor
+  // clips overflow (#root/.app-shell do), so the bar must live outside them.
+  return createPortal(
     <>
       {boardsOpen && (
         <>
@@ -125,6 +128,7 @@ export default function MobileBottomNav() {
       </nav>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    </>
+    </>,
+    document.body,
   );
 }

@@ -97,9 +97,11 @@
 
 * { box-sizing: border-box; }
 
+/* No overflow clipping on html/body: iOS Safari detaches position:fixed
+   descendants (the mobile bottom nav) when the scroll root clips.
+   Horizontal overflow is contained by #root/.app-shell instead. */
 html {
   width: 100%;
-  overflow-x: clip;
   scrollbar-gutter: stable;
 }
 
@@ -109,7 +111,6 @@ body {
   font-family: var(--font-body);
   margin: 0;
   width: 100%;
-  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -2058,7 +2059,8 @@ h2.display,
     color: #8a8a8a;
   }
 
-  .app-shell:not(.app-shell--hub):has(.site-hub-mobile-bar) main {
+  /* Bar is portaled to <body>, so match from body instead of .app-shell */
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main {
     padding-bottom: 104px;
   }
 
@@ -2452,6 +2454,7 @@ h2.display,
   color: #fff;
   border-bottom-color: var(--neon-magenta, #ff00cc);
 }
+
 
 .events-page .page-hero {
   min-height: clamp(148px, 20vh, 210px);
@@ -14609,4 +14612,28 @@ html.calm-mode .board-detail-modal {
   margin: 12px 0 8px;
   border-radius: 0;
   background: #070708;
+}
+
+/* "Missed Connections" is a long tab label — let the community board strip
+   scroll on phones instead of clipping offscreen (overrides the makeover
+   bar's flex-end alignment). */
+@media (max-width: 640px) {
+  .community-board-tab-bar,
+  .board-page--makeover .community-board-tab-bar {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .community-board-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .community-board-tab-bar .events-tab,
+  .board-page--makeover .community-board-tab-bar .events-tab {
+    flex: none;
+    white-space: nowrap;
+    padding-inline: 12px;
+  }
 }
