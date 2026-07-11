@@ -39,6 +39,16 @@ export function normalizeSwimSummary(summary: string | null | undefined): string
     .replace(/\bFailed\b/gi, "FAILED");
 }
 
+/** Hub card copy — drops the status word already shown in the hero stats band. */
+export function swimSummaryDetail(summary: string | null | undefined): string | null {
+  const normalized = normalizeSwimSummary(summary);
+  if (!normalized) return null;
+  const stripped = normalized
+    .replace(/^(PASSED|FAILED|ADVISORY|UNKNOWN)\s+/i, "")
+    .trim();
+  return stripped || null;
+}
+
 export type LiveMetric = {
   label: string;
   value: string;
