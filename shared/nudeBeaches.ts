@@ -118,7 +118,18 @@ export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
     { lat: 45.55085, lng: -122.2115, title: "Popular gay hangout area", marker: "rainbow" },
     { lat: 45.54978, lng: -122.20488, title: "Worth the hike" },
   ],
-  "sauvie-island": [],
+  "sauvie-island": [
+    { lat: 45.76949, lng: -122.7705, title: "If you see stairs, this is NOT a nude beach" },
+    { lat: 45.7831, lng: -122.78479, title: "Sorry gay — this isn't our spot" },
+    { lat: 45.78893, lng: -122.7903, title: "Queers park here" },
+    { lat: 45.79136, lng: -122.78876, title: "Nice, chill, shaded and quiet — but mosquitos" },
+    {
+      lat: 45.79339,
+      lng: -122.79009,
+      title: "Walk through the trees — there are lots of trails, get lost",
+    },
+    { lat: 45.79587, lng: -122.79003, title: "Welcome to gay beach!", marker: "rainbow" },
+  ],
 };
 
 /** GPS presence anchors. Radius is generous — both beaches are 1–2km
