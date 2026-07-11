@@ -81,6 +81,11 @@
   border-top: 3px solid var(--neon-cyan, #19e3ff);
 }
 
+.nb-hub--sauvie .nb-hub__level-value {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .nb-hub__weather-label,
 .nb-hub__weather-stat-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

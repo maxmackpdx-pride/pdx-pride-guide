@@ -29,12 +29,14 @@ export function normalizeSwimStatusLabel(
   if (/^failed$/i.test(trimmed)) return "FAILED";
   if (/^advisory$/i.test(trimmed)) return "ADVISORY";
   if (/^unknown$/i.test(trimmed)) return "UNKNOWN";
-  return trimmed;
+  return trimmed.toUpperCase();
 }
 
 export function normalizeSwimSummary(summary: string | null | undefined): string | null {
   if (!summary) return null;
-  return summary.replace(/^Passed\b/, "PASSED").replace(/^Failed\b/, "FAILED");
+  return summary
+    .replace(/\bPassed\b/gi, "PASSED")
+    .replace(/\bFailed\b/gi, "FAILED");
 }
 
 export type LiveMetric = {
