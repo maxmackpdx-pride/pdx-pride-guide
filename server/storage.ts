@@ -3064,6 +3064,29 @@ function runBootMigrationsOnce() {
     } as any).run();
     recordBootMigration("seed_businesses_directory_v8");
   }
+  if (!hasBootMigration("seed_business_bowery_bagels_v1")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "Bowery Bagels",
+      type: "cafe",
+      description:
+        "Portland's premier New York-style handcrafted kosher bagels—boiled & baked fresh daily, with delicious schmears, sandwiches, vegan options, and Stumptown coffee. Active Pride participant with rainbow schmear specials.",
+      address: "310 NW Broadway",
+      neighborhood: "Old Town Chinatown",
+      website: "https://www.bowerybagels.com/",
+      instagram: "@bowerybagels",
+      queerOwned: false,
+      queerFriendly: true,
+      lat: 45.5257,
+      lng: -122.6758,
+      hours: "Old Town: Mon–Fri 7am–1pm, Sat–Sun 8am–2pm (PSU location also available)",
+      phone: "(503) 227-6674",
+      active: true,
+      isNew: false,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_business_bowery_bagels_v1");
+  }
     if (!hasBootMigration("seed_nonprofits_directory_v9")) {
     const now = new Date().toISOString();
     const orgs = [
