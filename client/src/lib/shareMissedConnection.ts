@@ -8,9 +8,55 @@ type ShareMissedConnection = {
   accentColor: string;
 };
 
+/** Largest integer font-size (px) at which `text` fits within `maxW`×`maxH`
+ *  when rendered as the impact headline. Measured with a hidden probe using
+ *  the exact wrapping styles so html2canvas rasterizes the same layout. */
+function fitHeadlineSize(text: string, maxW: number, maxH: number): number {
+  const probe = document.createElement("div");
+  probe.style.cssText = `
+    position: absolute; left: -9999px; top: 0; visibility: hidden;
+    width: ${maxW}px; white-space: normal; overflow-wrap: break-word; word-break: break-word;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
+    text-transform: uppercase; line-height: 1.02; letter-spacing: 0.01em;
+  `;
+  probe.textContent = text;
+  document.body.appendChild(probe);
+  let lo = 36;
+  let hi = 170;
+  let best = lo;
+  try {
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      probe.style.fontSize = `${mid}px`;
+      if (probe.scrollHeight <= maxH && probe.scrollWidth <= maxW) {
+        best = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+  } finally {
+    document.body.removeChild(probe);
+  }
+  return best;
+}
+
 /** Builds a 1080×1920 Instagram-Story card mirroring SpottedCard's quote look. */
 async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise<HTMLCanvasElement> {
   const accent = post.accentColor;
+
+  // Fonts must be ready before html2canvas rasterizes, or it falls back to a
+  // system font with different metrics (clipping + wrong look). Time-bounded so
+  // a stalled font fetch can never hang the share action.
+  try {
+    const fontsReady = Promise.all([
+      document.fonts.load("800 100px 'Barlow Condensed'"),
+      document.fonts.load("700 46px 'Inter'"),
+    ]).then(() => document.fonts.ready);
+    await Promise.race([fontsReady, new Promise(resolve => setTimeout(resolve, 2500))]);
+  } catch {
+    /* fonts API best-effort; continue */
+  }
 
   const node = document.createElement("div");
   node.style.cssText = `
@@ -37,17 +83,30 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
   `;
 
   const quote = document.createElement("div");
-  quote.style.cssText = `font-family:'Barlow Condensed',sans-serif; font-size: 120px; color: ${accent}; line-height: 1;`;
+  quote.style.cssText = `font-family:'Barlow Condensed',sans-serif; font-weight: 700; font-size: 120px; color: ${accent}; line-height: 1;`;
   quote.textContent = "❝";
   card.appendChild(quote);
 
+  // Card content width = 1080 − 2×88 (node pad) − 2×56 (card pad) = 792px.
+  const BOX_W = 792;
+  const BOX_H = 560;
+  const headlineText = post.body.trim().toUpperCase();
+  const fontSize = fitHeadlineSize(headlineText, BOX_W, BOX_H);
+
+  const bodyWrap = document.createElement("div");
+  bodyWrap.style.cssText = `
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: ${BOX_H}px; overflow: hidden;
+  `;
   const body = document.createElement("div");
   body.style.cssText = `
-    font-family:'Inter',sans-serif; font-weight: 600; font-size: 46px; line-height: 1.4; color: #fff;
-    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical;
+    font-family:'Barlow Condensed',sans-serif; font-weight: 800; text-transform: uppercase;
+    font-size: ${fontSize}px; line-height: 1.02; letter-spacing: 0.01em; color: #fff;
+    text-align: center; width: 100%; white-space: normal; overflow-wrap: break-word; word-break: break-word;
   `;
-  body.textContent = post.body;
-  card.appendChild(body);
+  body.textContent = headlineText;
+  bodyWrap.appendChild(body);
+  card.appendChild(bodyWrap);
 
   if (post.location) {
     const location = document.createElement("div");
@@ -74,7 +133,7 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
       width: 1080,
       height: 1920,
       backgroundColor: "#050505",
-      scale: 1,
+      scale: 2,
       useCORS: true,
       allowTaint: false,
       windowWidth: 1080,
