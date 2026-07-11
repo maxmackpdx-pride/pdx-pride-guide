@@ -1,9 +1,9 @@
 .river-brats {
   --rb-accent: var(--neon-orange, #ff6600);
   --rb-accent-rgb: 255, 102, 0;
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(22px, 4vw, 48px) clamp(18px, 4vw, 44px) clamp(40px, 6vw, 72px);
+  padding: clamp(22px, 4vw, 48px) clamp(20px, 4vw, 44px) clamp(40px, 6vw, 72px);
 }
 
 .river-brats--green {
