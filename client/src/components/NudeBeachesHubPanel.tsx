@@ -153,23 +153,6 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
           Sauvie Island Parking →
         </a>
       </section>
-
-      <section className="nb-hub__section">
-        <div className="nb-hub__kicker">Weather</div>
-        <div className="nb-hub__weather-grid">
-          <div className="nb-hub__weather-main">
-            <span className="nb-hub__weather-value">
-              {live.airTempF != null ? `${live.airTempF}°F` : "—"}
-            </span>
-            <span className="nb-hub__weather-label">Air temp</span>
-          </div>
-          <div className="nb-hub__weather-stat">
-            <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
-            <span className="nb-hub__weather-stat-label">Wind</span>
-          </div>
-        </div>
-        <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
-      </section>
     </div>
   );
 }
