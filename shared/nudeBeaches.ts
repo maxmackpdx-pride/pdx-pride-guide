@@ -125,10 +125,14 @@ export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
     {
       lat: 45.55085,
       lng: -122.2115,
-      title: "Popular gay hangout. If you know, you know — and now you know.",
+      title: "Popular gay hangout. If you spot a bear, no need to play dead — just say hi.",
       marker: "rainbow",
     },
-    { lat: 45.54978, lng: -122.20488, title: "Worth the hike. We wouldn't send you this far for nothing." },
+    {
+      lat: 45.54978,
+      lng: -122.20488,
+      title: "Worth the hike. The distance is the whole point — it keeps this end for those in the know.",
+    },
   ],
   "sauvie-island": [
     {
