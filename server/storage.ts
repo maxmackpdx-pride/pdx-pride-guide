@@ -3427,6 +3427,91 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("cc_slaughters_glow_pride_2026_v1");
   }
+  if (!hasBootMigration("cc_slaughters_glow_pride_2026_v2")) {
+    // Per the poster, each listing is its own event. Break the Friday and
+    // Saturday add-ons out of the party descriptions into standalone events.
+    const now = new Date().toISOString();
+    const POSTER = "/posters/cc-slaughters-glow-2026.jpg";
+    const DJ_LINE =
+      "Feat. DJ Robb, DJ Mawmie, Lyta Blunt, Chelsea Starr, DJ Ragnarok, and special guest DJ Pup Sam.";
+    // Trim the now-standalone sub-events out of the two party descriptions.
+    sqlite.prepare(`
+      UPDATE events SET description = ?
+      WHERE title = 'CC Slaughters GLOW: Pride Weekend Kick-Off Party'
+    `).run(
+      "Pride Weekend Kick-Off Party at CC Slaughters for GLOW Pride 2026, hosted by Bolivia Carmichaels with live DJs (9pm–2am). $15 cover beginning at 8pm. 21+. " +
+        DJ_LINE,
+    );
+    sqlite.prepare(`
+      UPDATE events SET description = ?
+      WHERE title = 'CC Slaughters GLOW: Pride Party'
+    `).run(
+      "The GLOW Pride Party at CC Slaughters — glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). $20 cover beginning at 8pm. 21+. " +
+        DJ_LINE,
+    );
+    const glowBase = {
+      venueName: "CC Slaughters",
+      address: "219 NW Davis St, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5246801,
+      lng: -122.6729454,
+      ticketUrl: "https://ccslaughterspdx.com/",
+      posterImageUrl: POSTER,
+      ageRequirement: "21_PLUS",
+      isPublic: true,
+      isPrivate: false,
+      isHouseParty: false,
+      isSexPositive: false,
+      nudityOk: false,
+      status: "LIVE",
+      source: "admin_seeded",
+      isClaimable: true,
+      claimedBy: null,
+      submittedBy: null,
+      createdAt: now,
+    };
+    const subEvents = [
+      {
+        title: "CC Slaughters GLOW: The Queens Keys",
+        description:
+          "The Queens Keys in the Rainbow Room at CC Slaughters, part of GLOW Pride 2026. 7–9pm. 21+.",
+        dateStart: "2026-07-17T19:00:00",
+        dateEnd: "2026-07-17T21:00:00",
+        dayOfWeek: "FRI",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["PERFORMANCE", "DRAG", "NIGHTLIFE"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: RuPaul's Drag Race All Stars Viewing",
+        description:
+          "RuPaul's Drag Race All Stars viewing party at CC Slaughters, part of GLOW Pride 2026. 8–9pm. 21+.",
+        dateStart: "2026-07-17T20:00:00",
+        dateEnd: "2026-07-17T21:00:00",
+        dayOfWeek: "FRI",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["SOCIAL", "DRAG"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: Gay Cinema Matinee",
+        description:
+          "Gay Cinema Matinee at CC Slaughters for GLOW Pride 2026 — a triple bill of The Birdcage, Fire Island, and To Wong Foo. 3–9pm. 21+.",
+        dateStart: "2026-07-18T15:00:00",
+        dateEnd: "2026-07-18T21:00:00",
+        dayOfWeek: "SAT",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["FILM", "SOCIAL"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+    ];
+    const glowExists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+    for (const ev of subEvents) {
+      if (glowExists.get(ev.title)) continue;
+      db.insert(events).values({ ...glowBase, ...ev } as any).run();
+    }
+    recordBootMigration("cc_slaughters_glow_pride_2026_v2");
+  }
   if (!hasBootMigration("seed_fridays_are_a_drag_pride_2026_v1")) {
     const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1").get(
       "Fridays Are A DRAG, Pride Weekend",
