@@ -5643,6 +5643,7 @@ export const storage: IStorage = {
       JOIN users u ON u.id = m.user_id
       LEFT JOIN events e ON e.id = m.event_id
       WHERE m.status = 'ACTIVE'
+        AND (m.admin_reviewed IS NULL OR m.admin_reviewed = 0)
       ORDER BY m.created_at DESC
     `).all();
   },
