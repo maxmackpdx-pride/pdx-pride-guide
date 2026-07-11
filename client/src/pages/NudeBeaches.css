@@ -583,27 +583,16 @@
     #06060a;
 }
 
-.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-beaches-tab-bar .events-tab.active {
+.nude-beaches-page .nude-beaches-tab-bar .events-tab--rooster-rock.active,
+.nude-beaches-page .nude-beaches-tab-bar .events-tab--rooster-rock:hover {
   color: var(--neon-orange, #ff6600);
   border-bottom-color: var(--neon-orange, #ff6600);
 }
 
-.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-beaches-tab-bar .events-tab:hover {
-  color: var(--neon-orange, #ff6600);
-}
-
-.nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab.active {
+.nude-beaches-page .nude-beaches-tab-bar .events-tab--sauvie-island.active,
+.nude-beaches-page .nude-beaches-tab-bar .events-tab--sauvie-island:hover {
   color: var(--neon-green, #00ee44);
   border-bottom-color: var(--neon-green, #00ee44);
-}
-
-.nude-beaches-page--sauvie .nude-beaches-tab-bar .events-tab:hover {
-  color: var(--neon-green, #00ee44);
-}
-
-.nude-beaches-page--sauvie .board-stats-band__num {
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 /* ---- ANIMATION APPLICATIONS (entrance + motion) ---- */
@@ -774,28 +763,35 @@ html.calm-mode .nude-beaches-map__chip-dot {
   animation: none;
 }
 
-/* Sauvie tab — beat events-page makeover cyan (#19e3ff) */
-.nude-beaches-page.nude-beaches-page--sauvie.events-page.board-page--makeover
-  .nude-beaches-tab-bar
-  .events-tab.active {
+/* Beat events-page makeover cyan (#19e3ff) on beach tabs */
+.nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--rooster-rock.active,
+.nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--rooster-rock:hover {
+  color: var(--neon-orange, #ff6600);
+  border-bottom-color: var(--neon-orange, #ff6600);
+}
+
+.nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--sauvie-island.active,
+.nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--sauvie-island:hover {
   color: var(--neon-green, #00ee44);
   border-bottom-color: var(--neon-green, #00ee44);
 }
 
-.nude-beaches-page.nude-beaches-page--sauvie.events-page.board-page--makeover
-  .nude-beaches-tab-bar
-  .events-tab:hover {
-  color: var(--neon-green, #00ee44);
-}
-
-/* Sauvie stats + refresh — full green strip */
-.nude-beaches-page.nude-beaches-page--sauvie .board-stats-band__num {
+/* Sauvie stats — full green strip */
+.nude-beaches-page--sauvie .board-stats-band__num {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--neon-green, #00ee44);
   text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
 }
 
-.nude-beaches-page.nude-beaches-page--sauvie .nude-refresh-bar .pdxBtn {
+.nude-beaches-page--sauvie .nude-refresh-bar .pdxBtn {
   --_c: var(--neon-green, #00ee44);
   --_sh: rgba(255, 0, 204, 0.28);
   --_shx: rgba(255, 0, 204, 0.42);
+}
+
+.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-refresh-bar .pdxBtn {
+  --_c: var(--neon-orange, #ff6600);
+  --_sh: rgba(255, 0, 204, 0.32);
+  --_shx: rgba(255, 0, 204, 0.46);
 }

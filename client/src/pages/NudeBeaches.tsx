@@ -229,7 +229,7 @@ export default function NudeBeaches() {
                 <button
                   key={tab.key}
                   type="button"
-                  className={`events-tab${activeTab === tab.key ? " active" : ""}`}
+                  className={`events-tab events-tab--${tab.key}${activeTab === tab.key ? " active" : ""}`}
                   onClick={() => setActiveTab(tab.key)}
                 >
                   {tab.label}
