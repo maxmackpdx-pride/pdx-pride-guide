@@ -3,7 +3,7 @@ import { parsePacificDateTime } from "@shared/missedConnections";
 import type { EventListing } from "@shared/multiDayEvents";
 import { PRIDE_WEEK_DAYS, type AdmKey, type DayKey, type EventType, type PrideEvent } from "@shared/prideWeek";
 
-const GRID_START = 11 * 60;
+const GRID_START = 10 * 60;
 const GRID_END = 27 * 60;
 
 const JSON_TAG_TO_TYPE: Record<string, EventType> = {

@@ -17,7 +17,7 @@ export default function ScheduleHero({ stats }: Props) {
         kicker="Portland Pride Week 2026 · July 13–19"
         title={
           <>
-            The <span className="board-hero__title-accent">schedule</span>
+            My <span className="board-hero__title-accent">schedule</span>
           </>
         }
         lede="The whole week, laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other."

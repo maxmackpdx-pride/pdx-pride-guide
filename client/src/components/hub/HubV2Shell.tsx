@@ -1,7 +1,4 @@
 import type { ReactNode } from "react";
-import hubLogo from "@/assets/hub-logo.jpg";
-import { SearchInput } from "@/components/ds";
-import CalmModeToggle from "@/components/CalmModeToggle";
 import type { HubSection } from "./types";
 import {
   HubIconAdmin,
@@ -62,8 +59,6 @@ export default function HubV2Shell({
   children,
   rightRail,
   calmMode,
-  searchValue = "",
-  onSearchChange,
 }: HubV2ShellProps) {
   const adminNav = ADMIN_NAV.filter((item) => !item.teamOnly || canManageTeam);
 
@@ -77,51 +72,6 @@ export default function HubV2Shell({
         fontFamily: "var(--font-body)",
       }}
     >
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          background: "color-mix(in srgb, var(--panel-ink) 93%, transparent)",
-          backdropFilter: "blur(10px)",
-          borderBottom: "1px solid var(--panel-border)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1240,
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            padding: "11px 24px",
-          }}
-        >
-          <img
-            src={hubLogo}
-            alt="PDX Pride Guide"
-            width={36}
-            height={36}
-            style={{ borderRadius: 8, flex: "none" }}
-          />
-          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-            <span className="ld" />
-            <span className="kick" style={{ letterSpacing: ".22em" }}>
-              Your Hub
-            </span>
-          </div>
-          <div style={{ flex: 1, maxWidth: 360, margin: "0 auto" }}>
-            <SearchInput
-              placeholder="Search the guide..."
-              size="sm"
-              value={searchValue}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange?.(e.target.value)}
-            />
-          </div>
-          <CalmModeToggle minimal />
-        </div>
-      </div>
-
       <div className="grid3">
         <aside className="lrail hs" style={{ maxHeight: "calc(100vh - 100px)", overflow: "auto" }}>
           {MAIN_NAV.map((item) => (

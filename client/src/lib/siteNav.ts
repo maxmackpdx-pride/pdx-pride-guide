@@ -37,7 +37,7 @@ export type PageHeaderMeta = {
 /** Breadcrumb section + H1 title for interior pages. */
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/events": { section: "Events", title: "Events" },
-  "/schedule": { section: "Events", title: "Schedule" },
+  "/schedule": { section: "Events", title: "My Schedule" },
   "/pride-work": { section: "Boards", title: "Gig Board" },
   "/gifting": { section: "Boards", title: "Gifting" },
   "/spotted": { section: "Boards", title: "Missed Connections" },
@@ -63,8 +63,9 @@ export const BOARD_NAV: NavLinkItem[] = [
 /** Destinations behind the mobile footer "Events" tab sheet (Beaches folded in). */
 export const EVENTS_NAV: NavLinkItem[] = [
   { href: "/events", label: "Events" },
-  { href: "/schedule", label: "Schedule" },
+  { href: "/schedule", label: "My Schedule" },
   { href: "/nude-beaches", label: "Nude Beaches" },
+  { href: "/submit", label: "Promoters" },
 ];
 
 export function navLinkActive(location: string, href: string) {

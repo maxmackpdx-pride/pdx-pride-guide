@@ -160,6 +160,13 @@ body::before {
   opacity: 0.23;
 }
 
+/* Schedule: the shared zine texture is `position: fixed`, which pins it to the
+   viewport and reads as a parallax layer as the long grid + footer scroll past.
+   Anchor it to the page instead so it scrolls with the content. */
+.schedule-page.zine-page::before {
+  position: absolute;
+}
+
 /* Responsive site header */
 .site-header {
   background:
@@ -10049,6 +10056,13 @@ html.calm-mode .footer-coffee__btn:hover {
   .site-footer__bottom {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* In the column layout, the flap's `flex: 1 1 220px` basis was being read
+     as a 220px HEIGHT, opening a huge empty gap under the sign-off. Size the
+     flap to its content instead. */
+  .site-footer__flap {
+    flex: 0 0 auto;
   }
 
   .site-footer__legal {

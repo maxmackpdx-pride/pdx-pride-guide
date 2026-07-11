@@ -198,7 +198,7 @@ export default function Schedule({
       const compact = density === 'Compact';
       const HH = embed ? 42 : compact ? 58 : 74;
       const BASE = embed ? 156 : compact ? 230 : 290;
-      el.scrollTop = Math.max(0, (15 - 11) * HH - 8);
+      el.scrollTop = Math.max(0, (15 - 10) * HH - 8);
       el.scrollLeft = Math.round(3.15 * BASE);
     }, 80);
     return () => clearTimeout(id);
@@ -376,7 +376,7 @@ export default function Schedule({
   const MIN_LANE = embed ? 104 : compact ? 124 : 152;
   const BASE_DAY = embed ? 156 : compact ? 230 : 290;
   const MIN_H = embed ? 24 : compact ? 36 : 44;
-  const START = 11;
+  const START = 10;
   const END = 27;
   const HEADER_H = embed ? 34 : 56;
   const AXIS_W = embed ? 44 : 62;
