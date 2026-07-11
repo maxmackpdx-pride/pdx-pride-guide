@@ -22,14 +22,6 @@ const DROP_LABELS: Partial<Record<PostType, string>> = {
   video: "Drop a video or tap to upload",
 };
 
-type MyPost = { kind: string; time: string; text: string; media?: string };
-
-const MY_POSTS: MyPost[] = [
-  { kind: "PHOTO", time: "2d", text: "Parade route signage, batch one done." },
-  { kind: "UPDATE", time: "4d", text: "Reminder: the gifting board is live all week. Bring your extra flags." },
-  { kind: "VIDEO", time: "1w", text: "Confetti cannon test. Volume warning." },
-];
-
 type Props = {
   initialType?: PostType;
 };
@@ -100,27 +92,10 @@ export default function HubPost({ initialType = "update" }: Props) {
       <div className="kick" style={{ margin: "30px 0 16px" }}>
         Your recent posts
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {MY_POSTS.map((m, i) => (
-          <div key={i} className="card" style={{ padding: "16px 18px", display: "flex", gap: 15, alignItems: "center" }}>
-            <div
-              style={{
-                width: 68,
-                height: 68,
-                borderRadius: 9,
-                flex: "none",
-                background: "var(--ink-850)",
-                border: "1px solid var(--panel-border-2)",
-              }}
-            />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="kick" style={{ letterSpacing: ".14em", color: "var(--panel-cyan)" }}>
-                {m.kind} · {m.time}
-              </div>
-              <div style={{ fontSize: 14, color: "var(--board-text)", marginTop: 6, lineHeight: 1.45 }}>{m.text}</div>
-            </div>
-          </div>
-        ))}
+      <div className="card" style={{ padding: "28px 20px", textAlign: "center" }}>
+        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+          Nothing posted yet. What you share will show up here.
+        </p>
       </div>
     </div>
   );

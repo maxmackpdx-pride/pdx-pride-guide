@@ -15,12 +15,6 @@ export default function HubProfile({ user, stats, postsCount, profileEditor, onE
   const displayName = user.displayName || user.username;
   const isPromoter = user.promoterStatus === "approved";
 
-  const samplePosts = [
-    { kind: "PHOTO", time: "2d", text: "Parade route signage, batch one done." },
-    { kind: "UPDATE", time: "4d", text: "Reminder: the gifting board is live all week." },
-    { kind: "VIDEO", time: "1w", text: "Confetti cannon test. Volume warning." },
-  ].slice(0, Math.min(3, postsCount || 3));
-
   return (
     <div className="reveal">
       {profileEditor}
@@ -132,18 +126,12 @@ export default function HubProfile({ user, stats, postsCount, profileEditor, onE
       <div className="kick" style={{ marginBottom: 16 }}>
         Your posts
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
-        {samplePosts.map((m, i) => (
-          <div key={i} className="card" style={{ overflow: "hidden" }}>
-            <div style={{ height: 130, background: "var(--ink-850)", borderBottom: "1px solid var(--panel-border)" }} />
-            <div style={{ padding: "13px 14px" }}>
-              <div className="kick" style={{ letterSpacing: ".12em", color: "var(--panel-cyan)" }}>
-                {m.kind} · {m.time}
-              </div>
-              <div style={{ fontSize: 13, color: "var(--board-text)", marginTop: 6, lineHeight: 1.45 }}>{m.text}</div>
-            </div>
-          </div>
-        ))}
+      <div className="card" style={{ padding: "32px 20px", textAlign: "center" }}>
+        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+          {postsCount > 0
+            ? "Your posts will show here."
+            : "You haven't posted yet. Share a photo, update, or check-in from your feed."}
+        </p>
       </div>
     </div>
   );

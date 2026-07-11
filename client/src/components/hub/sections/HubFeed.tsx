@@ -40,79 +40,9 @@ const FEED_FILTERS: Array<{ key: FeedFilter; label: string }> = [
   { key: "boards", label: "Boards" },
 ];
 
-const MOCK_FEED: FeedItem[] = [
-  {
-    id: "1",
-    cat: "events",
-    name: "Holocene",
-    ring: "none",
-    time: "20m",
-    head: "Posted a new event",
-    typeLabel: "Event",
-    day: "THU",
-    isEvent: true,
-    evTitle: "BANG: Queer Techno Transmission",
-    evWhen: "Thu, Jul 16 · 9:00 PM · SE Portland",
-    likes: 31,
-    comments: 4,
-  },
-  {
-    id: "2",
-    cat: "posts",
-    name: "Marisol Vega",
-    ring: "lesbian",
-    time: "1h",
-    head: "Shared a photo",
-    typeLabel: "Photo",
-    text: "Poster wall for the Old Town Block Party is UP. Come find it in Ankeny Alley this weekend.",
-    likes: 84,
-    comments: 12,
-  },
-  {
-    id: "3",
-    cat: "rsvps",
-    name: "Dev Okafor",
-    ring: "gay-men",
-    time: "2h",
-    head: "And 11 others are going",
-    typeLabel: "RSVP",
-    day: "SAT",
-    isRsvp: true,
-    evTitle: "Portland Pride Waterfront Festival",
-    evWhen: "Sat, Jul 18 · 12:00 PM",
-    goingCount: 220,
-    likes: 22,
-    comments: 3,
-  },
-  {
-    id: "4",
-    cat: "posts",
-    name: "Juno Park",
-    ring: "nonbinary",
-    time: "3h",
-    head: "Checked in",
-    typeLabel: "Check-in",
-    place: "CC Slaughters · Old Town",
-    text: "Drag brunch chaos in the best possible way.",
-    likes: 41,
-    comments: 6,
-  },
-  {
-    id: "5",
-    cat: "boards",
-    name: "Gifting Board",
-    ring: "none",
-    time: "4h",
-    head: "New listing",
-    typeLabel: "Board",
-    isBoard: true,
-    boardLabel: "GIFTING",
-    boardTitle: "3 pairs of platform boots, size 9",
-    boardText: "Rehoming gently-worn club platforms. Porch pickup, no questions.",
-    likes: 18,
-    comments: 9,
-  },
-];
+// No live feed API yet (that lands in a later PR). Until then the feed shows a
+// real empty state rather than fabricated sample posts.
+const FEED: FeedItem[] = [];
 
 function dayDotClass(day?: string) {
   const map: Record<string, string> = {
@@ -130,7 +60,7 @@ type Props = {
 
 export default function HubFeed({ onGoPost }: Props) {
   const [filter, setFilter] = useState<FeedFilter>("all");
-  const feed = MOCK_FEED.filter((f) => (filter === "all" ? true : f.cat === filter));
+  const feed = FEED.filter((f) => (filter === "all" ? true : f.cat === filter));
 
   const composeShortcuts = [
     { key: "photo", label: "Photo", paths: ["M4 5h16v14H4z", "M8 11l2.5 3L14 9l3 4"] },
@@ -201,6 +131,33 @@ export default function HubFeed({ onGoPost }: Props) {
           </button>
         ))}
       </div>
+
+      {feed.length === 0 && (
+        <div className="card" style={{ padding: "40px 24px", textAlign: "center" }}>
+          <div
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 800,
+              fontSize: 20,
+              color: "#fff",
+              textTransform: "uppercase",
+              letterSpacing: ".02em",
+            }}
+          >
+            Your feed is quiet
+          </div>
+          <p style={{ margin: "10px auto 18px", maxWidth: 340, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+            {filter === "all"
+              ? "Nothing here yet. Share a photo, check in somewhere, or RSVP to an event to get things going."
+              : "Nothing here yet in this filter."}
+          </p>
+          {filter === "all" && (
+            <Button variant="neon" accent="cyan" size="sm" onClick={() => onGoPost()}>
+              Share something
+            </Button>
+          )}
+        </div>
+      )}
 
       {feed.map((it) => (
         <article key={it.id} className="card fitem" style={{ padding: "18px 20px", overflow: "hidden" }}>
