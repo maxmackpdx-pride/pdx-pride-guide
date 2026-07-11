@@ -247,7 +247,7 @@ export default function NudeBeaches() {
           {data?.stale && <span className="nude-refresh-bar__stale">· refreshing in background</span>}
         </p>
         <Button
-          accent="cyan"
+          accent={isRooster ? "orange" : "green"}
           variant="outline"
           size="sm"
           disabled={refreshMutation.isPending}
