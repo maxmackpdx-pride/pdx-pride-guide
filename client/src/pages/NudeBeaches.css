@@ -28,6 +28,20 @@
   padding-inline: clamp(20px, 4vw, 44px);
 }
 
+/* Trip-logistics is a full-bleed band (ref §6) whose inner content lines up
+   with the 1180px header/hero/map sections so the titles don't drift. */
+.nude-beaches-page .nude-beach-logistics {
+  background: #070708;
+  border-top: 1px solid #1c1c22;
+  padding: clamp(40px, 6vw, 72px) 0;
+  margin-top: clamp(24px, 4vw, 40px);
+}
+
+.nude-beaches-page .nude-beach-logistics .board-active-feed__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
 .nude-beaches-page .nude-refresh-bar {
   max-width: 1180px;
   margin: 0 auto;
@@ -833,7 +847,7 @@ html.calm-mode .board-close-seam {
   font-family: var(--font-display), sans-serif;
   font-weight: 900;
   font-size: 1.6rem;
-  color: var(--neon-orange, #FF6600);
+  color: #fff;
 }
 
 .nb-log__actions {

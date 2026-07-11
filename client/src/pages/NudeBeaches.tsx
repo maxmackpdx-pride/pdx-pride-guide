@@ -9,7 +9,6 @@ import NudeBeachesHero from "@/components/NudeBeachesHero";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
-import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import {
@@ -324,11 +323,6 @@ export default function NudeBeaches() {
           </ScrollReveal>
         </div>
       </section>
-
-      <BoardCloseSeam
-        line={isRooster ? "Check the gage before you wade." : "Check permits before you drive out."}
-        url="prideguidepdx.com/nude-beaches"
-      />
     </div>
   );
 }

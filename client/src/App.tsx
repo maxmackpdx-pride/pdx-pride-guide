@@ -11,7 +11,6 @@ import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingInbox from "./components/FloatingInbox";
 import Footer from "./components/Footer";
-import FilmGrainOverlay from "./components/FilmGrainOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
 import AnalyticsTracker from "./components/AnalyticsTracker";
@@ -72,7 +71,6 @@ function AppLayout() {
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
       style={{ background: "#0a0a0a" }}
     >
-      <FilmGrainOverlay />
       {!profile && <Nav />}
       {!profile && !hub && <MobileBottomNav />}
       <main className="flex-1">
