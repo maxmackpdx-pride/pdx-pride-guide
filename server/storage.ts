@@ -3344,6 +3344,89 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("verify_checking_portland_events_v2");
   }
+  if (!hasBootMigration("cc_slaughters_glow_pride_2026_v1")) {
+    // Official CC Slaughters "GLOW Pride 2026" poster (Jul 16–19). One shared
+    // poster for the whole run, repeated across each day's event.
+    const now = new Date().toISOString();
+    const POSTER = "/posters/cc-slaughters-glow-2026.jpg";
+    const DJ_LINE =
+      "Feat. DJ Robb, DJ Mawmie, Lyta Blunt, Chelsea Starr, DJ Ragnarok, and special guest DJ Pup Sam.";
+    // Thursday (Trans-UHH-Licious) already exists — align it to the poster and
+    // attach the shared GLOW artwork.
+    sqlite.prepare(`
+      UPDATE events SET
+        poster_image_url = ?,
+        admission = 'TICKETED',
+        description = 'GLOW Pride 2026 edition of Trans-Uhh-Licious at CC Slaughters — the residency dedicated to the trans community, hosted by Sheniqua Volt with DJ Robb. Live show 9–11pm. $10 cover. 21+.',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Updated from official CC Slaughters GLOW Pride 2026 poster: $10 cover, DJ Robb, poster attached.'
+      WHERE title = 'Trans-UHH-Licious' AND venue_name = 'CC Slaughters'
+    `).run(POSTER);
+    const glowBase = {
+      venueName: "CC Slaughters",
+      address: "219 NW Davis St, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5246801,
+      lng: -122.6729454,
+      ticketUrl: "https://ccslaughterspdx.com/",
+      posterImageUrl: POSTER,
+      ageRequirement: "21_PLUS",
+      isPublic: true,
+      isPrivate: false,
+      isHouseParty: false,
+      isSexPositive: false,
+      nudityOk: false,
+      status: "LIVE",
+      source: "admin_seeded",
+      isClaimable: true,
+      claimedBy: null,
+      submittedBy: null,
+      createdAt: now,
+    };
+    const glowEvents = [
+      {
+        title: "CC Slaughters GLOW: Pride Weekend Kick-Off Party",
+        description:
+          "Pride Weekend Kick-Off Party at CC Slaughters for GLOW Pride 2026, hosted by Bolivia Carmichaels with live DJs (9pm–2am). Earlier in the Rainbow Room: The Queens Keys (7–9pm) and a RuPaul's Drag Race All Stars viewing (8–9pm). $15 cover beginning at 8pm. 21+. " +
+          DJ_LINE,
+        dateStart: "2026-07-17T21:00:00",
+        dateEnd: "2026-07-18T02:00:00",
+        dayOfWeek: "FRI",
+        admission: "TICKETED",
+        eventTypes: JSON.stringify(["DRAG", "DANCE", "NIGHTLIFE", "PERFORMANCE"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: Pride Party",
+        description:
+          "The GLOW Pride Party at CC Slaughters — glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). Earlier: a Gay Cinema Matinee (3–9pm) screening The Birdcage, Fire Island, and To Wong Foo. $20 cover beginning at 8pm. 21+. " +
+          DJ_LINE,
+        dateStart: "2026-07-18T21:00:00",
+        dateEnd: "2026-07-19T02:00:00",
+        dayOfWeek: "SAT",
+        admission: "TICKETED",
+        eventTypes: JSON.stringify(["DANCE", "DRAG", "NIGHTLIFE"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: Parade Day Party",
+        description:
+          "GLOW Pride 2026 parade day at CC Slaughters — front-row NW Pride Parade viewing, a self-serve bloody mary bar, live DJs, and a puppy mosh. No cover. 21+. " +
+          DJ_LINE,
+        dateStart: "2026-07-19T10:00:00",
+        dateEnd: "2026-07-20T02:00:00",
+        dayOfWeek: "SUN",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["PARTY", "DJ", "SOCIAL"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+    ];
+    const glowExists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+    for (const ev of glowEvents) {
+      if (glowExists.get(ev.title)) continue;
+      db.insert(events).values({ ...glowBase, ...ev } as any).run();
+    }
+    recordBootMigration("cc_slaughters_glow_pride_2026_v1");
+  }
   if (!hasBootMigration("seed_fridays_are_a_drag_pride_2026_v1")) {
     const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1").get(
       "Fridays Are A DRAG, Pride Weekend",
