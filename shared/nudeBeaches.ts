@@ -205,6 +205,23 @@ export function depthAtCrossing(gageFt: number): number {
   return 5 + (gageFt - 15);
 }
 
+/** Columbia Gorge beaches report "today" on Pacific time, not UTC. */
+export const BEACH_TIME_ZONE = "America/Los_Angeles";
+
+export function calendarDayInTimeZone(isoOrDate: string | Date, timeZone = BEACH_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(
+    typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate,
+  );
+}
+
+export function formatWindStat(wind?: string | null): { value: string; label: string } {
+  if (!wind?.trim()) return { value: "—", label: "Wind" };
+  const mphMatch = wind.match(/(\d+(?:\s*to\s*\d+)?)\s*mph/i);
+  const dir = wind.trim().split(/\s+/)[0] ?? "—";
+  if (mphMatch) return { value: `${dir} ${mphMatch[1]}`, label: "Wind · mph" };
+  return { value: wind.trim(), label: "Wind" };
+}
+
 export function depthEstimateFromGage(gageFt: number): string {
   const depth = depthAtCrossing(gageFt);
   if (depth <= 0.05) return "Dry — walk across";

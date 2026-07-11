@@ -1,6 +1,9 @@
 import { sqlite } from "./storage";
 import {
   aqiCategoryFromValue,
+  BEACH_MAP_LOCATIONS,
+  BEACH_TIME_ZONE,
+  calendarDayInTimeZone,
   crossingBandFromLevel,
   depthEstimateFromGage,
   estimateWaterClarity,
@@ -88,16 +91,19 @@ type UsgsRiverSnapshot = {
   levelTrend: RiverLevelTrend | null;
 };
 
+function filterSeriesForBeachToday(series: Array<{ ft: number; at: string }>) {
+  const today = calendarDayInTimeZone(new Date(), BEACH_TIME_ZONE);
+  const points = series.filter(p => calendarDayInTimeZone(p.at, BEACH_TIME_ZONE) === today);
+  return points.length ? points : series.slice(-96);
+}
+
 function crossingWindowNoteFromSeries(
   series: Array<{ ft: number; at: string }>,
   latest: { ft: number; at: string },
 ): string | null {
   if (series.length < 2) return null;
 
-  const midnight = new Date();
-  midnight.setHours(0, 0, 0, 0);
-  const today = series.filter(p => new Date(p.at).getTime() >= midnight.getTime());
-  const window = today.length ? today : series.slice(-96);
+  const window = filterSeriesForBeachToday(series);
   if (!window.length) return null;
 
   let lo = window[0];
@@ -151,7 +157,7 @@ function levelTrendFromSeries(
 
 const ROOSTER_GAGE_ID = "USGS-14128870";
 const ROOSTER_PARAM_CODE = "00065";
-const ROOSTER_PARK = { lat: 45.5446, lon: -122.2342 };
+const ROOSTER_PARK = BEACH_MAP_LOCATIONS["rooster-rock"];
 const USGS_OGC_BASE = "https://api.waterdata.usgs.gov/ogcapi/v0/collections";
 const RRC_WATER_URL = "https://roosterrockcrossing.com/api/water";
 const RRC_AIR_URL = "https://roosterrockcrossing.com/api/air";
@@ -183,10 +189,7 @@ async function fetchOgcRiverLevel(): Promise<UsgsRiverSnapshot | null> {
     if (!series.length) return null;
 
     const latest = series[series.length - 1];
-    const midnight = new Date();
-    midnight.setHours(0, 0, 0, 0);
-    const today = series.filter(p => new Date(p.at).getTime() >= midnight.getTime());
-    const window = today.length ? today : series.slice(-96);
+    const window = filterSeriesForBeachToday(series);
 
     let lo = window[0];
     let hi = window[0];
@@ -378,6 +381,13 @@ function swimStatusLabel(status: SwimGuideStatus | null): string | null {
   }
 }
 
+function parseSwimGuideSampleDate(html: string): string | null {
+  const match = html.match(
+    /taken on\s+((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})/i,
+  );
+  return match?.[1]?.replace(/\s+/g, " ").trim() || null;
+}
+
 async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStatus" | "swimStatusLabel" | "lastSampleAt" | "swimSummary">> {
   const empty = {
     swimStatus: null as SwimGuideStatus | null,
@@ -389,8 +399,7 @@ async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStat
     const html = await fetchText("https://www.theswimguide.org/beach/1792");
     const headerStatus = html.match(/header-section[\s\S]*?beach-status status-(pass|fail|warning|unknown)/i);
     const status = (headerStatus?.[1]?.toLowerCase() as SwimGuideStatus | undefined) || "unknown";
-    const sampleMatch = html.match(/taken on\s+([^.<]+)/i);
-    const lastSampleAt = sampleMatch?.[1]?.trim() || null;
+    const lastSampleAt = parseSwimGuideSampleDate(html);
     const summaryMatch = html.match(/Passed water quality tests[\s\S]*?<\/p>/i)
       || html.match(/Failed water quality tests[\s\S]*?<\/p>/i)
       || html.match(/We have no current water quality[\s\S]*?<\/p>/i);
@@ -491,7 +500,7 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
   };
   const [river, weather, rrcWater, airQuality] = await Promise.all([
     fetchOgcRiverLevel(),
-    fetchNwsSummary(ROOSTER_PARK.lat, ROOSTER_PARK.lon),
+    fetchNwsSummary(ROOSTER_PARK.lat, ROOSTER_PARK.lng),
     fetchRrcWaterExtras(),
     fetchRrcAirQuality(),
   ]);
@@ -541,7 +550,10 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
   const [swim, parking, weather] = await Promise.all([
     fetchSwimGuideCollins(),
     fetchParkingNote(),
-    fetchNwsSummary(45.696, -122.774),
+    fetchNwsSummary(
+      BEACH_MAP_LOCATIONS["sauvie-island"].lat,
+      BEACH_MAP_LOCATIONS["sauvie-island"].lng,
+    ),
   ]);
   Object.assign(base, swim);
   base.parkingNote = parking;

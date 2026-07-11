@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { NudeBeachesSnapshot } from "@shared/nudeBeaches";
+import { formatWindStat } from "@shared/nudeBeaches";
 
 type BeachTab = "rooster" | "collins";
 
@@ -29,11 +30,6 @@ function riverLevelTone(ft?: number | null): "good" | "warn" | "neutral" {
   return ft >= 15 ? "warn" : "good";
 }
 
-function windDisplay(wind?: string | null): string {
-  if (!wind) return "—";
-  return wind.split(" ")[0] || "—";
-}
-
 export default function HomeBeachWidget({ showCollins = true }: Props) {
   const [tab, setTab] = useState<BeachTab>("rooster");
 
@@ -48,6 +44,8 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
   const snapshot = data?.data;
   const rooster = snapshot?.roosterRock;
   const sauvie = snapshot?.sauvieIsland;
+  const roosterWind = formatWindStat(rooster?.wind);
+  const sauvieWind = formatWindStat(sauvie?.wind);
   const isStale = Boolean(data?.stale);
 
   return (
@@ -98,11 +96,9 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
-                  {windDisplay(rooster.wind)}
+                  {roosterWind.value}
                 </div>
-                <div className="home-beach-widget__stat-label">
-                  {rooster.wind?.includes("mph") ? "Wind · mph" : "Wind"}
-                </div>
+                <div className="home-beach-widget__stat-label">{roosterWind.label}</div>
               </div>
               <div>
                 <div className={`home-beach-widget__stat home-beach-widget__stat--${riverLevelTone(rooster.riverLevelFt)}`}>
@@ -137,11 +133,9 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
-                  {windDisplay(sauvie.wind)}
+                  {sauvieWind.value}
                 </div>
-                <div className="home-beach-widget__stat-label">
-                  {sauvie.wind?.includes("mph") ? "Wind · mph" : "Wind"}
-                </div>
+                <div className="home-beach-widget__stat-label">{sauvieWind.label}</div>
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--neutral">Permits</div>

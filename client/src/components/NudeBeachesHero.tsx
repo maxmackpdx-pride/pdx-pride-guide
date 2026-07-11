@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import BoardHero from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
+import { formatWindStat } from "@shared/nudeBeaches";
 
 type Props = {
   activeTab: NudeBeachTab;
@@ -12,6 +13,8 @@ type Props = {
 
 export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }: Props) {
   const isRooster = activeTab === "rooster-rock";
+  const roosterWind = formatWindStat(snapshot?.roosterRock.wind);
+  const sauvieWind = formatWindStat(snapshot?.sauvieIsland.wind);
 
   const stats = isRooster
     ? [
@@ -29,8 +32,8 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           color: "#19e3ff",
         },
         {
-          num: snapshot?.roosterRock.wind?.split(" ")[0] || "—",
-          label: snapshot?.roosterRock.wind?.includes("mph") ? "wind · mph" : "wind",
+          num: roosterWind.value,
+          label: roosterWind.label,
           color: "#39ff14",
         },
       ]
@@ -41,14 +44,14 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           color: snapshot?.sauvieIsland.swimStatus === "pass" ? "#39ff14" : "#ff8c00",
         },
         {
-          num: "Permits",
-          label: "SauvieIslandParking.com",
-          color: "#19e3ff",
-        },
-        {
           num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "—",
           label: "air temp",
           color: "var(--neon-green, #00EE44)",
+        },
+        {
+          num: sauvieWind.value,
+          label: sauvieWind.label,
+          color: "#19e3ff",
         },
       ];
 
