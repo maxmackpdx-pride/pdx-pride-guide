@@ -5,6 +5,7 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   ariumbotanicals: "Arium_Botanicals",
   badlands: "Badlands",
   basicrightsoregon: "Basic_Rights_Oregon",
+  bowerybagels: "Bowery_Bagels",
   campbarpdx: "Camp_Bar_PDX",
   cascadeaidsprojectcapandourhouse: "Cascade_AIDS_Project",
   cascadeaidsprojectcapourhouse: "Cascade_AIDS_Project",
