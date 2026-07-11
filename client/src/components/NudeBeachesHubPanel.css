@@ -41,6 +41,28 @@
   margin-bottom: 10px;
 }
 
+.nb-hub__swim-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.nb-hub__swim-value {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.nb-hub__swim-sampled {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #8a8a8a;
+}
+
 .nb-hub__weather-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr;

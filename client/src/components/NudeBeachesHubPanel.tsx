@@ -1,9 +1,18 @@
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import {
   swimSummaryDetail,
+  normalizeSwimStatusLabel,
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_SWIM_GUIDE_URL,
 } from "@shared/nudeBeaches";
+
+/** Swim-status color ramp used for the big water-quality value + card border. */
+function swimStatusColor(status?: string | null) {
+  if (status === "pass") return "#39FF14";
+  if (status === "fail") return "#FF4D4D";
+  if (status === "warning") return "#FFB347";
+  return "#19E3FF";
+}
 import "./NudeBeachesHubPanel.css";
 
 function formatShortTime(iso?: string | null) {
@@ -121,15 +130,30 @@ function swimStatusClass(status?: string | null) {
 
 function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
   const swimClass = swimStatusClass(live.swimStatus);
+  const swimLabel = normalizeSwimStatusLabel(live.swimStatusLabel, live.swimStatus);
+  const swimColor = swimStatusColor(live.swimStatus);
 
   return (
     <div className="nb-hub nb-hub--sauvie">
-      <section className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}>
+      <section
+        className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}
+        style={{ borderTop: `3px solid ${swimColor}` }}
+      >
         <div className="nb-hub__kicker">Water quality</div>
+        <div className="nb-hub__swim-head">
+          <span
+            className="nb-hub__swim-value"
+            style={{ color: swimColor, textShadow: `0 0 22px ${swimColor}59` }}
+          >
+            {swimLabel || "—"}
+          </span>
+          {live.lastSampleAt ? (
+            <span className="nb-hub__swim-sampled">sampled {live.lastSampleAt}</span>
+          ) : null}
+        </div>
         <p className="nb-hub__summary">
           {swimSummaryDetail(live.swimSummary)
-            || "Bi-weekly Collins Beach samples — verify before you swim."}
-          {live.lastSampleAt ? ` Latest: ${live.lastSampleAt}.` : ""}
+            || "Collins Beach is sampled bi-weekly through the Swim Guide. Verify the current sample before you get in."}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_SWIM_GUIDE_URL} target="_blank" rel="noopener noreferrer">
           Swim Guide →
