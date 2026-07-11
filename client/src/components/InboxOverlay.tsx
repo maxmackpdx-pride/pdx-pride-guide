@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Maximize2, X, SlidersHorizontal, ChevronDown, Search } from "lucide-react";
+import { X, SlidersHorizontal, ChevronDown, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxThreads } from "@/components/inbox/useInboxThreads";
 import type { Folder } from "@/components/inbox/types";
@@ -128,10 +128,6 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     onClose();
     setLocation(`/inbox?thread=${encodeURIComponent(id)}`);
   };
-  const openFull = () => {
-    onClose();
-    setLocation("/inbox");
-  };
   const navigateFromSheet = (href: string) => {
     onClose();
     setLocation(href);
@@ -186,14 +182,9 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
             <button style={headStyle("posts")} onClick={() => setView("posts")}>POSTS</button>
             <button style={headStyle("stats")} onClick={() => setView("stats")}>STATS</button>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <button style={iconBtn} onClick={openFull} aria-label="Open full inbox" title="Open full inbox">
-              <Maximize2 size={15} />
-            </button>
-            <button style={iconBtn} onClick={onClose} aria-label="Close" title="Close">
-              <X size={16} />
-            </button>
-          </div>
+          <button style={iconBtn} onClick={onClose} aria-label="Close" title="Close">
+            <X size={16} />
+          </button>
         </div>
 
         {/* account tabs (inbox only) */}
