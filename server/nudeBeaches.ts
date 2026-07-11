@@ -7,6 +7,8 @@ import {
   crossingBandFromLevel,
   depthEstimateFromGage,
   estimateWaterClarity,
+  formatSwimStatusLabel,
+  normalizeNudeBeachesSnapshot,
   SAUVIE_ISLAND_PARKING_URL,
   type NudeBeachesSnapshot,
   type RiverLevelTrend,
@@ -366,21 +368,6 @@ async function fetchRrcAirQuality(): Promise<Pick<RoosterRockLive, "airQuality">
   }
 }
 
-function swimStatusLabel(status: SwimGuideStatus | null): string | null {
-  switch (status) {
-    case "pass":
-      return "PASSED";
-    case "fail":
-      return "FAILED";
-    case "warning":
-      return "ADVISORY";
-    case "unknown":
-      return "UNKNOWN";
-    default:
-      return null;
-  }
-}
-
 function parseSwimGuideSampleDate(html: string): string | null {
   const match = html.match(
     /taken on\s+((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})/i,
@@ -406,7 +393,7 @@ async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStat
     const swimSummary = summaryMatch?.[0]?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() || null;
     return {
       swimStatus: status,
-      swimStatusLabel: swimStatusLabel(status),
+      swimStatusLabel: formatSwimStatusLabel(status),
       lastSampleAt,
       swimSummary,
     };
@@ -598,8 +585,9 @@ export async function refreshNudeBeachesSnapshot(): Promise<NudeBeachesSnapshot>
     roosterRock: mergeLiveSnapshot(previous?.roosterRock, roosterRock, hasRoosterRockLiveData),
     sauvieIsland: mergeLiveSnapshot(previous?.sauvieIsland, sauvieIsland, hasSauvieIslandLiveData),
   };
-  writeCache(snapshot);
-  return snapshot;
+  const normalized = normalizeNudeBeachesSnapshot(snapshot);
+  writeCache(normalized);
+  return normalized;
 }
 
 export async function getNudeBeachesSnapshot(options?: { force?: boolean }): Promise<{
@@ -612,14 +600,14 @@ export async function getNudeBeachesSnapshot(options?: { force?: boolean }): Pro
   const stale = !cached || ageMs > CACHE_TTL_MS;
 
   if (!options?.force && cached && !stale) {
-    return { data: cached, stale: false, fromCache: true };
+    return { data: normalizeNudeBeachesSnapshot(cached), stale: false, fromCache: true };
   }
 
   if (!options?.force && cached && stale) {
     void refreshNudeBeachesSnapshot().catch(err => {
       console.error("Background nude beaches refresh failed:", err);
     });
-    return { data: cached, stale: true, fromCache: true };
+    return { data: normalizeNudeBeachesSnapshot(cached), stale: true, fromCache: true };
   }
 
   const fresh = await refreshNudeBeachesSnapshot();
@@ -633,7 +621,7 @@ export async function forceRefreshNudeBeachesSnapshot(): Promise<{
   const now = Date.now();
   if (now - lastForcedRefreshAt < MIN_REFRESH_GAP_MS) {
     const cached = readCache();
-    if (cached) return { data: cached, rateLimited: true };
+    if (cached) return { data: normalizeNudeBeachesSnapshot(cached), rateLimited: true };
     const fresh = await refreshNudeBeachesSnapshot();
     return { data: fresh };
   }

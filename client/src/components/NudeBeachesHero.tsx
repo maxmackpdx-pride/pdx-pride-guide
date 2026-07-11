@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import BoardHero from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
-import { formatWindStat } from "@shared/nudeBeaches";
+import { formatWindStat, normalizeSwimStatusLabel } from "@shared/nudeBeaches";
 
 type Props = {
   activeTab: NudeBeachTab;
@@ -39,7 +39,11 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
       ]
     : [
         {
-          num: snapshot?.sauvieIsland.swimStatusLabel || "—",
+          num:
+            normalizeSwimStatusLabel(
+              snapshot?.sauvieIsland.swimStatusLabel,
+              snapshot?.sauvieIsland.swimStatus,
+            ) || "—",
           label: "Collins swim",
           color: "#19e3ff",
         },

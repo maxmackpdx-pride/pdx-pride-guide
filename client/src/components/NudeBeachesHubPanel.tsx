@@ -1,5 +1,7 @@
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import {
+  normalizeSwimStatusLabel,
+  normalizeSwimSummary,
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_SWIM_GUIDE_URL,
 } from "@shared/nudeBeaches";
@@ -129,10 +131,11 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
           className={`nb-hub__level-value nb-hub__swim-value--${swimClass}`}
           style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}
         >
-          {live.swimStatusLabel || "—"}
+          {normalizeSwimStatusLabel(live.swimStatusLabel, live.swimStatus) || "—"}
         </div>
         <p className="nb-hub__summary">
-          {live.swimSummary || "Bi-weekly Collins Beach samples — verify before you swim."}
+          {normalizeSwimSummary(live.swimSummary)
+            || "Bi-weekly Collins Beach samples — verify before you swim."}
           {live.lastSampleAt ? ` Latest: ${live.lastSampleAt}.` : ""}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_SWIM_GUIDE_URL} target="_blank" rel="noopener noreferrer">

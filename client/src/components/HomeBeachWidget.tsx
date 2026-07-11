@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { NudeBeachesSnapshot } from "@shared/nudeBeaches";
-import { formatWindStat } from "@shared/nudeBeaches";
+import { formatWindStat, normalizeSwimStatusLabel } from "@shared/nudeBeaches";
 
 type BeachTab = "rooster" | "collins";
 
@@ -116,7 +116,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <div className="home-beach-widget__grid">
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--water">
-                  {sauvie.swimStatusLabel || "—"}
+                  {normalizeSwimStatusLabel(sauvie.swimStatusLabel, sauvie.swimStatus) || "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">Collins swim</div>
               </div>

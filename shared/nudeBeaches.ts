@@ -2,6 +2,41 @@ export type NudeBeachTab = "rooster-rock" | "sauvie-island";
 
 export type SwimGuideStatus = "pass" | "fail" | "warning" | "unknown";
 
+export function formatSwimStatusLabel(status: SwimGuideStatus | null): string | null {
+  switch (status) {
+    case "pass":
+      return "PASSED";
+    case "fail":
+      return "FAILED";
+    case "warning":
+      return "ADVISORY";
+    case "unknown":
+      return "UNKNOWN";
+    default:
+      return null;
+  }
+}
+
+export function normalizeSwimStatusLabel(
+  label: string | null | undefined,
+  status?: SwimGuideStatus | null,
+): string | null {
+  const fromStatus = status ? formatSwimStatusLabel(status) : null;
+  if (fromStatus) return fromStatus;
+  if (!label) return null;
+  const trimmed = label.trim();
+  if (/^passed$/i.test(trimmed)) return "PASSED";
+  if (/^failed$/i.test(trimmed)) return "FAILED";
+  if (/^advisory$/i.test(trimmed)) return "ADVISORY";
+  if (/^unknown$/i.test(trimmed)) return "UNKNOWN";
+  return trimmed;
+}
+
+export function normalizeSwimSummary(summary: string | null | undefined): string | null {
+  if (!summary) return null;
+  return summary.replace(/^Passed\b/, "PASSED").replace(/^Failed\b/, "FAILED");
+}
+
 export type LiveMetric = {
   label: string;
   value: string;
@@ -273,6 +308,21 @@ export type NudeBeachesSnapshot = {
   roosterRock: RoosterRockLive;
   sauvieIsland: SauvieIslandLive;
 };
+
+export function normalizeSauvieIslandLive(live: SauvieIslandLive): SauvieIslandLive {
+  return {
+    ...live,
+    swimStatusLabel: normalizeSwimStatusLabel(live.swimStatusLabel, live.swimStatus),
+    swimSummary: normalizeSwimSummary(live.swimSummary),
+  };
+}
+
+export function normalizeNudeBeachesSnapshot(snapshot: NudeBeachesSnapshot): NudeBeachesSnapshot {
+  return {
+    ...snapshot,
+    sauvieIsland: normalizeSauvieIslandLive(snapshot.sauvieIsland),
+  };
+}
 
 export const NUDE_BEACH_TABS: { key: NudeBeachTab; label: string }[] = [
   { key: "rooster-rock", label: "Rooster Rock" },
