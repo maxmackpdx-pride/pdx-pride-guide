@@ -55,7 +55,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
         {
           num: sauvieWind.value,
           label: sauvieWind.label,
-          color: "#19e3ff",
+          color: "var(--neon-green, #00EE44)",
         },
       ];
 

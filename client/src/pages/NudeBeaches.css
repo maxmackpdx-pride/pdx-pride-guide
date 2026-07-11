@@ -773,3 +773,29 @@ html.calm-mode .nude-refresh-bar__spin,
 html.calm-mode .nude-beaches-map__chip-dot {
   animation: none;
 }
+
+/* Sauvie tab — beat events-page makeover cyan (#19e3ff) */
+.nude-beaches-page.nude-beaches-page--sauvie.events-page.board-page--makeover
+  .nude-beaches-tab-bar
+  .events-tab.active {
+  color: var(--neon-green, #00ee44);
+  border-bottom-color: var(--neon-green, #00ee44);
+}
+
+.nude-beaches-page.nude-beaches-page--sauvie.events-page.board-page--makeover
+  .nude-beaches-tab-bar
+  .events-tab:hover {
+  color: var(--neon-green, #00ee44);
+}
+
+/* Sauvie stats + refresh — full green strip */
+.nude-beaches-page.nude-beaches-page--sauvie .board-stats-band__num {
+  color: var(--neon-green, #00ee44);
+  text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
+}
+
+.nude-beaches-page.nude-beaches-page--sauvie .nude-refresh-bar .pdxBtn {
+  --_c: var(--neon-green, #00ee44);
+  --_sh: rgba(255, 0, 204, 0.28);
+  --_shx: rgba(255, 0, 204, 0.42);
+}

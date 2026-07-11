@@ -144,8 +144,12 @@
   }
 }
 
-.nb-hub__swim {
+.nb-hub:not(.nb-hub--sauvie) .nb-hub__swim {
   border-top: 3px solid var(--neon-cyan, #19e3ff);
+}
+
+.nb-hub--sauvie .nb-hub__swim {
+  border-top: 3px solid var(--neon-green, #00ee44);
 }
 
 .nb-hub__section--water.nb-hub__swim--pass {
@@ -290,6 +294,10 @@ html.calm-mode .nb-hub__section--pulse {
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
+}
+
+.nb-hub--sauvie .nb-hub__link {
+  color: var(--neon-green, #00ee44);
 }
 
 .nb-hub__link:hover {
