@@ -65,6 +65,9 @@ function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
   const profile = isProfilePath(location);
+  // /admin (HubShell) renders its own bottom bar; everywhere else the global
+  // 5-tab footer is the single bar, including the member hub and inbox.
+  const adminShell = location.split("?")[0] === "/admin";
 
   return (
     <div
@@ -72,7 +75,7 @@ function AppLayout() {
       style={{ background: "#0a0a0a" }}
     >
       {!profile && <Nav />}
-      {!profile && !hub && <MobileBottomNav />}
+      {!profile && !adminShell && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
           <Switch>

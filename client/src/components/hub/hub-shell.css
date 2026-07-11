@@ -710,8 +710,8 @@
   animation: hubNotifyBlink 1.6s ease-in-out infinite;
 }
 
-/* Hide public site chrome when hub is full-bleed */
-.app-shell--hub .site-header,
+/* Keep the site top nav on the hub so it stays connected to the rest of the
+   site; only the big desktop site footer / pre-footer seam stay hidden. */
 .app-shell--hub .site-pre-footer-rainbow,
 .app-shell--hub > footer {
   display: none !important;

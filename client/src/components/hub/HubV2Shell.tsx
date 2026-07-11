@@ -9,7 +9,6 @@ import {
   HubIconEvents,
   HubIconFeed,
   HubIconPeople,
-  HubIconPost,
   HubIconProfile,
   HubIconSettings,
   HubIconWerk,
@@ -25,7 +24,6 @@ type NavItem = {
 
 const MAIN_NAV: NavItem[] = [
   { key: "feed", label: "Feed", icon: <HubIconFeed /> },
-  { key: "post", label: "Post", icon: <HubIconPost /> },
   { key: "profile", label: "Profile", icon: <HubIconProfile /> },
   { key: "events", label: "Events", icon: <HubIconEvents /> },
   { key: "people", label: "People", icon: <HubIconPeople /> },

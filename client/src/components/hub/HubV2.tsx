@@ -5,7 +5,6 @@ import type { AuthUser } from "@/context/AuthContext";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import HubV2Shell from "./HubV2Shell";
 import HubFeed from "./sections/HubFeed";
-import HubPost from "./sections/HubPost";
 import HubProfile from "./sections/HubProfile";
 import HubEvents, { type HubEventRow } from "./sections/HubEvents";
 import HubPeople from "./sections/HubPeople";
@@ -134,7 +133,6 @@ export default function HubV2({
 }: HubV2Props) {
   const { calmMode, toggleCalmMode } = useTheme();
   const [, navigate] = useLocation();
-  const [postType, setPostType] = useState<"photo" | "video" | "update" | "checkin">(initialPostType ?? "update");
   const [searchQ, setSearchQ] = useState("");
 
   const handleSectionChange = (next: HubSection) => {
@@ -148,16 +146,11 @@ export default function HubV2({
     onSectionChange(next);
   };
 
-  const handleGoPost = (type?: string) => {
-    const t = (type as typeof postType) || "update";
-    setPostType(t);
-    onSectionChange("post");
-  };
-
-  const upcoming = useMemo(
-    () => [...goingEvents, ...hostingEvents].slice(0, 3),
+  const feedEvents = useMemo(
+    () => [...goingEvents, ...hostingEvents],
     [goingEvents, hostingEvents],
   );
+  const upcoming = useMemo(() => feedEvents.slice(0, 3), [feedEvents]);
 
   const stats =
     profileStats ??
@@ -174,8 +167,7 @@ export default function HubV2({
     <>
       <PwaInstallBanner />
       {errorBanner}
-      {section === "feed" && <HubFeed key="feed" onGoPost={handleGoPost} />}
-      {section === "post" && <HubPost key={`post-${postType}`} initialType={postType} />}
+      {section === "feed" && <HubFeed key="feed" events={feedEvents} />}
       {section === "profile" && (
         <HubProfile
           key={`profile-${editMode ? "edit" : "view"}`}
