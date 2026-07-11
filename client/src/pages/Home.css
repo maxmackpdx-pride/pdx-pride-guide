@@ -1719,6 +1719,12 @@ html.calm-mode .home-boards__card {
   flex-direction: column;
 }
 
+.home-beach-widget__stale {
+  color: var(--text-lo);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
 .home-beach-widget__live {
   display: inline-flex;
   align-items: center;
@@ -1731,6 +1737,10 @@ html.calm-mode .home-boards__card {
   padding: 16px 24px 0;
 }
 
+.home-beach-widget--rooster .home-beach-widget__live {
+  color: var(--neon-orange, #ff6600);
+}
+
 .home-beach-widget__live-dot {
   width: 7px;
   height: 7px;
@@ -1738,6 +1748,16 @@ html.calm-mode .home-boards__card {
   background: var(--status-good, #39ff14);
   box-shadow: 0 0 8px var(--status-good, #39ff14);
   animation: homeHeroBlink 1.8s ease-in-out infinite;
+}
+
+.home-beach-widget--rooster .home-beach-widget__live-dot {
+  background: var(--neon-orange, #ff6600);
+  box-shadow: 0 0 10px var(--neon-orange, #ff6600);
+}
+
+.home-beach-widget--rooster {
+  border-color: rgba(255, 102, 0, 0.28);
+  box-shadow: 0 0 24px rgba(255, 102, 0, 0.1);
 }
 
 .home-beach-widget__tabs {
@@ -1816,6 +1836,13 @@ html.calm-mode .home-boards__card {
 }
 
 .home-beach-widget__stat--good { color: var(--status-good, #39ff14); }
+.home-beach-widget__stat--orange { color: var(--neon-orange, #ff6600); }
+.home-beach-widget__stat--water {
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 14px rgba(25, 227, 255, 0.28);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
 .home-beach-widget__stat--warn { color: var(--status-warn, #ffb347); }
 .home-beach-widget__stat--bad { color: var(--status-bad, #ff4d4d); }
 .home-beach-widget__stat--neutral { color: var(--status-neutral, #19e3ff); }

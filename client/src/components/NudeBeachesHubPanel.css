@@ -7,9 +7,12 @@
   background: #0a0a0a;
   border: 2px solid #2b2b2b;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
-  padding: 14px;
+  padding: 14px 14px 20px;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nb-hub--loading {
@@ -60,9 +63,27 @@
   text-shadow: 0 0 22px rgba(255, 0, 204, 0.35);
 }
 
+.nb-hub--rooster .nb-hub__weather-value {
+  color: var(--neon-orange, #ff6600);
+  text-shadow: 0 0 22px rgba(255, 102, 0, 0.35);
+}
+
+.nb-hub--rooster .nb-hub__weather-grid > .nb-hub__weather-stat:first-of-type .nb-hub__weather-stat-value {
+  color: var(--neon-orange, #ff6600);
+}
+
 .nb-hub--sauvie .nb-hub__weather-value {
   color: var(--neon-green, #00EE44);
   text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
+}
+
+.nb-hub--sauvie > .nb-hub__section {
+  border-top: 3px solid var(--neon-green, #00EE44);
+}
+
+.nb-hub--sauvie .nb-hub__level-value {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .nb-hub__weather-label,
@@ -95,12 +116,23 @@
   color: #b8b4ab;
 }
 
+.nb-hub__weather-stat--water .nb-hub__weather-stat-value {
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 16px rgba(25, 227, 255, 0.28);
+}
+
+.nb-hub--rooster .nb-hub__section--pulse {
+  --dc: #ff6600;
+  border-top: 3px solid #ff6600;
+  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
 .nb-hub__level {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  border-top: 3px solid #19e3ff;
-  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  flex-shrink: 0;
+  border-top: 3px solid #333;
+  padding-bottom: 4px;
 }
 
 @keyframes nbHubPulse {
@@ -112,22 +144,32 @@
   }
 }
 
-.nb-hub__swim {
-  border-top: 3px solid #19e3ff;
-  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+.nb-hub:not(.nb-hub--sauvie) .nb-hub__swim {
+  border-top: 3px solid var(--neon-cyan, #19e3ff);
 }
 
-.nb-hub__swim--pass {
-  --dc: #39ff14;
-  border-top-color: #39ff14;
+.nb-hub--sauvie .nb-hub__swim {
+  border-top: 3px solid var(--neon-green, #00ee44);
 }
 
-.nb-hub__swim--fail {
+.nb-hub__section--water.nb-hub__swim--pass {
+  border-top-color: var(--neon-green, #00EE44);
+}
+
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--pass,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--unknown {
+  --dc: var(--neon-green, #00EE44);
+  border-top-color: var(--neon-green, #00EE44);
+}
+
+.nb-hub__swim--fail,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--fail {
   --dc: #ff4d4d;
   border-top-color: #ff4d4d;
 }
 
-.nb-hub__swim--warning {
+.nb-hub__swim--warning,
+.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--warning {
   --dc: #ffb347;
   border-top-color: #ffb347;
 }
@@ -137,23 +179,20 @@
   border-top-color: #19e3ff;
 }
 
-.nb-hub__swim-value--pass { color: #39ff14; text-shadow: 0 0 22px rgba(57, 255, 20, 0.35); }
+.nb-hub__swim-value--pass { color: var(--neon-green, #00EE44); text-shadow: 0 0 22px rgba(0, 238, 68, 0.35); }
 .nb-hub__swim-value--fail { color: #ff4d4d; text-shadow: 0 0 22px rgba(255, 77, 77, 0.35); }
 .nb-hub__swim-value--warning { color: #ffb347; text-shadow: 0 0 22px rgba(255, 179, 71, 0.35); }
 .nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
 
 .nb-hub__level--good {
-  --dc: #39ff14;
-  border-top-color: #39ff14;
+  border-top-color: #ff6600;
 }
 
 .nb-hub__level--bad {
-  --dc: #ff8c00;
   border-top-color: #ff8c00;
 }
 
-html.calm-mode .nb-hub__level,
-html.calm-mode .nb-hub__swim {
+html.calm-mode .nb-hub__section--pulse {
   animation: none;
 }
 
@@ -187,6 +226,11 @@ html.calm-mode .nb-hub__swim {
   font-size: clamp(2.2rem, 5vw, 3rem);
   line-height: 1;
   color: #fff;
+}
+
+.nb-hub--rooster .nb-hub__level .nb-hub__level-value {
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 22px rgba(25, 227, 255, 0.35);
 }
 
 .nb-hub__level-unit {
@@ -235,6 +279,12 @@ html.calm-mode .nb-hub__swim {
   color: #b8b4ab;
   font-size: 12px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.nb-hub__level .nb-hub__link {
+  margin-top: 12px;
+  margin-bottom: 4px;
 }
 
 .nb-hub__link {

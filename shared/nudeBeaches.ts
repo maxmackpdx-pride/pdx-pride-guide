@@ -2,6 +2,53 @@ export type NudeBeachTab = "rooster-rock" | "sauvie-island";
 
 export type SwimGuideStatus = "pass" | "fail" | "warning" | "unknown";
 
+export function formatSwimStatusLabel(status: SwimGuideStatus | null): string | null {
+  switch (status) {
+    case "pass":
+      return "PASSED";
+    case "fail":
+      return "FAILED";
+    case "warning":
+      return "ADVISORY";
+    case "unknown":
+      return "UNKNOWN";
+    default:
+      return null;
+  }
+}
+
+export function normalizeSwimStatusLabel(
+  label: string | null | undefined,
+  status?: SwimGuideStatus | null,
+): string | null {
+  const fromStatus = status ? formatSwimStatusLabel(status) : null;
+  if (fromStatus) return fromStatus;
+  if (!label) return null;
+  const trimmed = label.trim();
+  if (/^passed$/i.test(trimmed)) return "PASSED";
+  if (/^failed$/i.test(trimmed)) return "FAILED";
+  if (/^advisory$/i.test(trimmed)) return "ADVISORY";
+  if (/^unknown$/i.test(trimmed)) return "UNKNOWN";
+  return trimmed.toUpperCase();
+}
+
+export function normalizeSwimSummary(summary: string | null | undefined): string | null {
+  if (!summary) return null;
+  return summary
+    .replace(/\bPassed\b/gi, "PASSED")
+    .replace(/\bFailed\b/gi, "FAILED");
+}
+
+/** Hub card copy — drops the status word already shown in the hero stats band. */
+export function swimSummaryDetail(summary: string | null | undefined): string | null {
+  const normalized = normalizeSwimSummary(summary);
+  if (!normalized) return null;
+  const stripped = normalized
+    .replace(/^(PASSED|FAILED|ADVISORY|UNKNOWN)\s+/i, "")
+    .trim();
+  return stripped || null;
+}
+
 export type LiveMetric = {
   label: string;
   value: string;
@@ -205,6 +252,23 @@ export function depthAtCrossing(gageFt: number): number {
   return 5 + (gageFt - 15);
 }
 
+/** Columbia Gorge beaches report "today" on Pacific time, not UTC. */
+export const BEACH_TIME_ZONE = "America/Los_Angeles";
+
+export function calendarDayInTimeZone(isoOrDate: string | Date, timeZone = BEACH_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(
+    typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate,
+  );
+}
+
+export function formatWindStat(wind?: string | null): { value: string; label: string } {
+  if (!wind?.trim()) return { value: "—", label: "Wind" };
+  const mphMatch = wind.match(/(\d+(?:\s*to\s*\d+)?)\s*mph/i);
+  const dir = wind.trim().split(/\s+/)[0] ?? "—";
+  if (mphMatch) return { value: `${dir} ${mphMatch[1]}`, label: "Wind · mph" };
+  return { value: wind.trim(), label: "Wind" };
+}
+
 export function depthEstimateFromGage(gageFt: number): string {
   const depth = depthAtCrossing(gageFt);
   if (depth <= 0.05) return "Dry — walk across";
@@ -241,6 +305,8 @@ export type SauvieIslandLive = {
   lastSampleAt: string | null;
   swimSummary: string | null;
   parkingNote: string | null;
+  /** Short live read from SauvieIslandParking.com scrape: SOLD OUT, OPEN, or CHECK. */
+  parkingStatusLabel: string | null;
   parkingHref: string;
   weatherSummary: string | null;
   airTempF: number | null;
@@ -255,52 +321,55 @@ export type NudeBeachesSnapshot = {
   sauvieIsland: SauvieIslandLive;
 };
 
+export function normalizeSauvieIslandLive(live: SauvieIslandLive): SauvieIslandLive {
+  return {
+    ...live,
+    swimStatusLabel: normalizeSwimStatusLabel(live.swimStatusLabel, live.swimStatus),
+    swimSummary: normalizeSwimSummary(live.swimSummary),
+  };
+}
+
+export function normalizeNudeBeachesSnapshot(snapshot: NudeBeachesSnapshot): NudeBeachesSnapshot {
+  return {
+    ...snapshot,
+    sauvieIsland: normalizeSauvieIslandLive(snapshot.sauvieIsland),
+  };
+}
+
 export const NUDE_BEACH_TABS: { key: NudeBeachTab; label: string }[] = [
   { key: "rooster-rock", label: "Rooster Rock" },
   { key: "sauvie-island", label: "Sauvie Island" },
 ];
 
+/** Five bands aligned with roosterrockcrossing.com LEVEL_BANDS (<9, 9–11, 11–13, 13–15, 15+). */
 export function crossingBandFromLevel(ft: number): { band: string; advice: string; worthCrossing: boolean } {
-  if (ft >= 18) {
-    return {
-      band: "Flooded",
-      advice: "Usually too flooded to bother — check again right before you leave.",
-      worthCrossing: false,
-    };
-  }
+  return {
+    band: crossingBandLabel(ft),
+    advice: crossingVerdictFromLevel(ft),
+    worthCrossing: ft <= 18,
+  };
+}
+
+export function crossingBandLabel(ft: number): string {
+  if (ft >= 15) return "Swim or float";
+  if (ft >= 13) return "Wade or swim";
+  if (ft >= 11) return "Wade or walk";
+  if (ft >= 9) return "Very low";
+  return "Dry";
+}
+
+/** Verdict copy from roosterrockcrossing.com tierFor(). */
+export function crossingVerdictFromLevel(ft: number): string {
   if (ft >= 15) {
-    return {
-      band: "Swim or float",
-      advice: "Expect a swim or float crossing. Cold water and strong currents possible.",
-      worthCrossing: ft < 18,
-    };
+    return "The water's high — you'll likely need to swim or float to reach Sand Island. Be careful.";
   }
   if (ft >= 13) {
-    return {
-      band: "Wade or swim",
-      advice: "Shallow wading may turn into swimming. Sand ridges drop off abruptly.",
-      worthCrossing: true,
-    };
+    return "Expect to wade, and possibly swim across the deeper channel. Tread carefully.";
   }
-  if (ft >= 11) {
-    return {
-      band: "Wade or walk",
-      advice: "Often walkable with shallow wading — still check at the water's edge.",
-      worthCrossing: true,
-    };
+  if (ft < 9) {
+    return "The crossing may be dry enough to walk straight across.";
   }
-  if (ft >= 9) {
-    return {
-      band: "Very low",
-      advice: "Low water — trails may still be muddy from recent highs.",
-      worthCrossing: true,
-    };
-  }
-  return {
-    band: "Dry sand",
-    advice: "Sandbars and trails are usually exposed. Mud can linger after recent floods.",
-    worthCrossing: true,
-  };
+  return "The water's low — you can likely wade, or even walk, to Sand Island.";
 }
 
 /** Official Sauvie Island beach parking permit portal (Collins, Walton, North Unit). */
@@ -313,45 +382,50 @@ export const SAUVIE_ISLAND_SWIM_GUIDE_URL = "https://www.theswimguide.org/beach/
 
 export const SAUVIE_ISLAND_SICA_BEACHES_URL = "https://www.sauvieisland.org/beaches/";
 
-export const SAUVIE_ISLAND_RESOURCES: ResourceLink[] = [
+export const SAUVIE_ISLAND_FARM_STORES: ResourceLink[] = [
   {
-    title: "Swim Guide — Collins Beach",
-    description:
-      "Best source for current water quality — updated bi-weekly from actual samples at the beach. Health advisories and bacteria spikes post here.",
-    href: SAUVIE_ISLAND_SWIM_GUIDE_URL,
-    priority: "primary",
+    title: "Sauvie Island Farms",
+    description: "Berries, flowers, and u-pick fields — one of the island's classic farm stops on the road to Collins.",
+    href: "http://www.sauvieislandfarms.com/",
   },
   {
-    title: "Sauvie Island Parking",
-    description:
-      "Mandatory permit portal for Collins, Walton, and North Unit. Only place to see live sold-out dates and the exact schedule through Labor Day.",
-    href: SAUVIE_ISLAND_PARKING_URL,
-    priority: "primary",
+    title: "The Pumpkin Patch & Corn Maze",
+    description: "Farm market, animals, and seasonal produce — a Sauvie Island institution year-round.",
+    href: "https://www.thepumpkinpatch.com/",
   },
   {
-    title: "Sauvie Island beaches (SICA)",
-    description:
-      "Community hub for island-wide alerts — major road closures, bridge issues, and significant beach access changes.",
-    href: SAUVIE_ISLAND_SICA_BEACHES_URL,
+    title: "Topaz Farm",
+    description: "Organic farm stand with produce, flowers, and pasture-raised eggs — great mid-island detour.",
+    href: "https://topazfarm.com/",
   },
   {
-    title: "Windfinder — Reeder Beach",
-    description:
-      "Live wind, tides, and weather for the Sauvie Island area — the most reliable real-time read near Collins Beach.",
-    href: SAUVIE_ISLAND_WINDFINDER_URL,
+    title: "Columbia Farms U-Pick",
+    description: "Seasonal berries and produce on the north end — check what's picking before you swing by.",
+    href: "https://www.columbiafarmsu-pick.com/",
   },
 ];
 
-export const SAUVIE_ISLAND_CHECKLIST = [
+export type SauvieChecklistItem = {
+  step: string;
+  detail: string;
+  href?: string;
+  linkLabel?: string;
+};
+
+export const SAUVIE_ISLAND_CHECKLIST: SauvieChecklistItem[] = [
   {
     step: "Check permit status",
     detail:
-      "Weekends and holidays through Labor Day require a permit. Always check SauvieIslandParking.com first — sold-out dates update there in real time.",
+      "Weekends and holidays through Labor Day require a permit. Sold-out dates update in real time on the official portal.",
+    href: SAUVIE_ISLAND_PARKING_URL,
+    linkLabel: "Sauvie Island Parking",
   },
   {
     step: "Check water safety",
     detail:
-      "If you plan to swim, verify the latest Collins Beach sample on Swim Guide before you go.",
+      "If you plan to swim, verify the latest Collins Beach sample before you go.",
+    href: SAUVIE_ISLAND_SWIM_GUIDE_URL,
+    linkLabel: "Swim Guide",
   },
   {
     step: "Review wildlife-area rules",

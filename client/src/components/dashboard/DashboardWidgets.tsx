@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
-import { PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
+import { earliestPrideWeekStartTarget } from "@/lib/homeEvents";
 import { parsePacificEventTime, useCountdown } from "@/lib/countdown";
 import { fetchPortlandWeather, isAfterPrideWeekend } from "@/lib/portlandWeather";
 import "@/components/hub/hub-home.css";
@@ -29,13 +29,10 @@ export default function DashboardWidgets() {
     enabled: showPrideWeather,
   });
 
-  const prideTarget = useMemo(() => {
-    const starts = events
-      .map(event => parsePacificEventTime(event.dateStart))
-      .filter((time): time is number => typeof time === "number" && Number.isFinite(time))
-      .sort((a, b) => a - b);
-    return starts[0] || new Date(`${PRIDE_WEEK_START_DATE}T00:00:00-07:00`).getTime();
-  }, [events]);
+  const prideTarget = useMemo(
+    () => new Date(earliestPrideWeekStartTarget(events)).getTime(),
+    [events],
+  );
 
   const countdown = useCountdown(prideTarget);
   const nextEvent = useMemo(() => {

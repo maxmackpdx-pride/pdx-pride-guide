@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { HOME_COUNTDOWN_TARGET } from "@/lib/homeEvents";
 
 type Props = {
   placesCount: number;
   beachCheckins: number;
+  countdownTarget: string;
 };
 
 function pad(n: number) {
@@ -15,13 +15,16 @@ function diffMs(target: string) {
 }
 
 /** Three-column stat band: kickoff countdown, directory places, beach check-ins. */
-export default function HomeStatStrip({ placesCount, beachCheckins }: Props) {
-  const [left, setLeft] = useState(() => diffMs(HOME_COUNTDOWN_TARGET));
+export default function HomeStatStrip({ placesCount, beachCheckins, countdownTarget }: Props) {
+  const [left, setLeft] = useState(() => diffMs(countdownTarget));
 
   useEffect(() => {
-    const id = window.setInterval(() => setLeft(diffMs(HOME_COUNTDOWN_TARGET)), 1000);
+    setLeft(diffMs(countdownTarget));
+    const id = window.setInterval(() => setLeft(diffMs(countdownTarget)), 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [countdownTarget]);
+
+  const live = left === 0;
 
   let diff = Math.floor(left / 1000);
   const days = Math.floor(diff / 86400);
@@ -35,16 +38,22 @@ export default function HomeStatStrip({ placesCount, beachCheckins }: Props) {
     <div className="home-stat-strip" aria-label="Live site stats">
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--countdown" aria-live="polite">
-          <span>{days}</span>
-          <span className="home-stat-strip__unit">D</span>
-          <span className="home-stat-strip__sep"> </span>
-          <span>{pad(hrs)}</span>
-          <span className="home-stat-strip__colon">:</span>
-          <span className="home-stat-strip__min">{pad(min)}</span>
-          <span className="home-stat-strip__colon">:</span>
-          <span className="home-stat-strip__sec">{pad(sec)}</span>
+          {live ? (
+            <span>Live</span>
+          ) : (
+            <>
+              <span>{days}</span>
+              <span className="home-stat-strip__unit">D</span>
+              <span className="home-stat-strip__sep"> </span>
+              <span>{pad(hrs)}</span>
+              <span className="home-stat-strip__colon">:</span>
+              <span className="home-stat-strip__min">{pad(min)}</span>
+              <span className="home-stat-strip__colon">:</span>
+              <span className="home-stat-strip__sec">{pad(sec)}</span>
+            </>
+          )}
         </div>
-        <div className="home-stat-strip__label">Kickoff in</div>
+        <div className="home-stat-strip__label">{live ? "Pride Week" : "Kickoff in"}</div>
       </div>
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--lime">{placesCount}</div>

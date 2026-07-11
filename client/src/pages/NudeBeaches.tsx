@@ -10,7 +10,6 @@ import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
-import BoardLoadingState from "@/components/BoardLoadingState";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import {
@@ -19,10 +18,8 @@ import {
   ROOSTER_ROCK_PARKING,
   SAUVIE_ISLAND_MAPS,
   SAUVIE_ISLAND_CHECKLIST,
-  SAUVIE_ISLAND_PARKING_URL,
-  SAUVIE_ISLAND_RESOURCES,
+  SAUVIE_ISLAND_FARM_STORES,
   SAUVIE_ISLAND_RULES,
-  SAUVIE_ISLAND_WINDFINDER_URL,
   type NudeBeachTab,
   type NudeBeachesSnapshot,
   type ResourceLink,
@@ -113,33 +110,22 @@ function SauvieIslandPanel() {
   return (
     <div className="nude-tab-panel">
       <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--cyan">Getting there</div>
-        <h3 className="nude-panel__title">Collins Beach</h3>
-        <div className="nude-prose">
-          <p>
-            Western shore of Sauvie Island inside the wildlife area — sandy, wild, and partly clothing-optional.
-            Access via the Sauvie Island bridge; permit-controlled parking on busy days.
-          </p>
-          <ul>
-            <li>Check SauvieIslandParking.com first for weekends and holidays — permits are limited and dates sell out.</li>
-            <li>Swim Guide posts bi-weekly Collins Beach samples; verify before you swim.</li>
-            <li>SICA consolidates island-wide alerts; Windfinder at Reeder Beach covers live wind and tides nearby.</li>
-          </ul>
-          <div className="nude-map-actions" style={{ marginTop: 14 }}>
-            <a className="nude-map-btn" href={SAUVIE_ISLAND_WINDFINDER_URL} target="_blank" rel="noopener noreferrer">
-              Windfinder at Reeder Beach
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section className="nude-panel">
         <div className="nude-panel__kicker nude-panel__kicker--lime">Before you go</div>
         <ul className="nude-checklist">
           {SAUVIE_ISLAND_CHECKLIST.map(item => (
             <li key={item.step}>
               <strong>{item.step}</strong>
               {item.detail}
+              {item.href && item.linkLabel ? (
+                <a
+                  className="nude-checklist__link"
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {item.linkLabel} →
+                </a>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -151,8 +137,12 @@ function SauvieIslandPanel() {
       </section>
 
       <section className="nude-panel">
-        <div className="nude-panel__kicker nude-panel__kicker--orange">Links</div>
-        <ResourceList links={SAUVIE_ISLAND_RESOURCES} />
+        <div className="nude-panel__kicker nude-panel__kicker--orange">Farm stops</div>
+        <p className="nude-prose nude-farm-intro">
+          <strong>Cracker Barrel Grocery</strong> sits right after the bridge — your last easy stop for snacks,
+          drinks, and supplies before the wildlife area. Popular farm stands on the drive out:
+        </p>
+        <ResourceList links={SAUVIE_ISLAND_FARM_STORES} />
       </section>
     </div>
   );
@@ -189,7 +179,7 @@ export default function NudeBeaches() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  const { data, isLoading, isError, refetch } = useQuery<ApiPayload>({
+  const { data } = useQuery<ApiPayload>({
     queryKey: ["/api/nude-beaches"],
     queryFn: () => apiRequest("GET", "/api/nude-beaches").then(r => r.json()),
     staleTime: 5 * 60_000,
@@ -222,7 +212,6 @@ export default function NudeBeaches() {
 
   const snapshot = data?.data;
   const isRooster = activeTab === "rooster-rock";
-  const beachAccent = isRooster ? "orange" : "green";
 
   return (
     <div
@@ -240,7 +229,7 @@ export default function NudeBeaches() {
                 <button
                   key={tab.key}
                   type="button"
-                  className={`events-tab${activeTab === tab.key ? " active" : ""}`}
+                  className={`events-tab events-tab--${tab.key}${activeTab === tab.key ? " active" : ""}`}
                   onClick={() => setActiveTab(tab.key)}
                 >
                   {tab.label}
@@ -258,7 +247,7 @@ export default function NudeBeaches() {
           {data?.stale && <span className="nude-refresh-bar__stale">· refreshing in background</span>}
         </p>
         <Button
-          accent="cyan"
+          accent={isRooster ? "orange" : "green"}
           variant="outline"
           size="sm"
           disabled={refreshMutation.isPending}
@@ -292,50 +281,10 @@ export default function NudeBeaches() {
 
       <RiverBratsShell beachId={activeTab} />
 
-      <section className="events-board-feed board-active-feed diag">
+      <section className="events-board-feed nude-beach-logistics diag">
         <div className="board-active-feed__inner">
           <ScrollReveal delay={30}>
-            <div className="board-active-feed__head">
-              <div className={`board-active-feed__kicker board-active-feed__kicker--live board-active-feed__kicker--${beachAccent}`}>
-                <span className="board-active-feed__eq" aria-hidden="true">
-                  <span className="board-active-feed__eq-bar" />
-                  <span className="board-active-feed__eq-bar board-active-feed__eq-bar--2" />
-                  <span className="board-active-feed__eq-bar board-active-feed__eq-bar--3" />
-                </span>
-                Live now
-              </div>
-              <div className="board-active-feed__head-row">
-                <h2 className="display section-heading board-active-feed__title">
-                  {isRooster ? "Level · weather · maps · parking" : "Water & parking"}
-                </h2>
-              </div>
-              <p className="nude-section-copy" style={{ marginTop: 10 }}>
-                {isRooster
-                  ? "River gage, air and water temps, forecast, directions, and Oregon State Parks day-use fees."
-                  : "Collins swim samples, permit portal, and island weather only."}
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={50}>
-            <div className="board-active-feed__body" style={{ marginTop: 18 }}>
-              {isLoading && !snapshot ? (
-                <BoardLoadingState label="beach conditions" />
-              ) : isError && !snapshot ? (
-                <div className="board-empty board-empty--prototype">
-                  <p>Could not load live beach data.</p>
-                  <Button accent="cyan" variant="solid" size="sm" onClick={() => refetch()}>
-                    Try again
-                  </Button>
-                </div>
-              ) : snapshot ? (
-                isRooster ? (
-                  <RoosterRockPanel />
-                ) : (
-                  <SauvieIslandPanel />
-                )
-              ) : null}
-            </div>
+            {isRooster ? <RoosterRockPanel /> : <SauvieIslandPanel />}
           </ScrollReveal>
         </div>
       </section>

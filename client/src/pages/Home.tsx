@@ -18,6 +18,7 @@ import {
 } from "@/components/ds";
 import {
   HOME_MARQUEE_FALLBACK,
+  earliestPrideWeekStartTarget,
   eventsForMonday,
   pickMarqueeItems,
 } from "@/lib/homeEvents";
@@ -85,6 +86,7 @@ export default function Home() {
   }, [events]);
 
   const upNext = useMemo(() => eventsForMonday(events, 4), [events]);
+  const countdownTarget = useMemo(() => earliestPrideWeekStartTarget(events), [events]);
   const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
   const beachCheckins =
     roosterCheckins.length + sauvieCheckins.length > 0
@@ -94,7 +96,11 @@ export default function Home() {
   return (
     <div className="home-main-stage">
       <HomeHero eventCount={events.length} />
-      <HomeStatStrip placesCount={placesCount} beachCheckins={beachCheckins} />
+      <HomeStatStrip
+        placesCount={placesCount}
+        beachCheckins={beachCheckins}
+        countdownTarget={countdownTarget}
+      />
 
       <div className="home-marquee-band" aria-label="Event name ticker">
         <Marquee

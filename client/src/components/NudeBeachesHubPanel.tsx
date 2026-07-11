@@ -1,5 +1,6 @@
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import {
+  swimSummaryDetail,
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_SWIM_GUIDE_URL,
 } from "@shared/nudeBeaches";
@@ -25,11 +26,11 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   const trend = trendLabel(live.levelTrend);
   const lowTime = formatShortTime(live.todayLowAt);
   const highTime = formatShortTime(live.todayHighAt);
-  const worth = live.worthCrossing;
+  const swimBand = live.riverLevelFt != null && live.riverLevelFt >= 15;
 
   return (
-    <div className="nb-hub">
-      <section className="nb-hub__section">
+    <div className="nb-hub nb-hub--rooster">
+      <section className="nb-hub__section nb-hub__section--pulse">
         <div className="nb-hub__kicker">Weather</div>
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
@@ -42,11 +43,13 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
             <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
             <span className="nb-hub__weather-stat-label">Wind</span>
           </div>
-          <div className="nb-hub__weather-stat">
+          <div className="nb-hub__weather-stat nb-hub__weather-stat--water">
             <span className="nb-hub__weather-stat-value">
               {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
             </span>
-            <span className="nb-hub__weather-stat-label">Water</span>
+            <span className="nb-hub__weather-stat-label">
+              Water{live.waterTempSite ? " · Warrendale" : ""}
+            </span>
           </div>
           <div className="nb-hub__weather-stat">
             <span className="nb-hub__weather-stat-value">
@@ -56,13 +59,17 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           </div>
         </div>
         <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
+        {live.waterClarity ? (
+          <p className="nb-hub__summary" style={{ marginTop: 8 }}>
+            {live.waterClarity}
+          </p>
+        ) : null}
       </section>
 
       <section
         className={`nb-hub__section nb-hub__level${
-          worth === false ? " nb-hub__level--bad" : worth ? " nb-hub__level--good" : ""
+          swimBand ? " nb-hub__level--bad" : live.riverLevelFt != null ? " nb-hub__level--good" : ""
         }`}
-        style={{ ["--dc" as string]: worth === false ? "#ff8c00" : worth ? "#39ff14" : "#19e3ff" }}
       >
         <div className="nb-hub__level-head">
           <div className="nb-hub__kicker">River level</div>
@@ -73,7 +80,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           <span className="nb-hub__level-unit">ft</span>
         </div>
         <p className="nb-hub__level-detail">
-          {live.depthEstimate || live.crossingAdvice || "USGS gage below Bonneville Dam."}
+          {live.crossingAdvice || live.depthEstimate || "USGS gage below Bonneville Dam."}
         </p>
         <div className="nb-hub__level-range">
           <div>
@@ -117,16 +124,11 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
 
   return (
     <div className="nb-hub nb-hub--sauvie">
-      <section className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass}`}>
+      <section className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}>
         <div className="nb-hub__kicker">Water quality</div>
-        <div
-          className={`nb-hub__level-value nb-hub__swim-value--${swimClass}`}
-          style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}
-        >
-          {live.swimStatusLabel || "—"}
-        </div>
         <p className="nb-hub__summary">
-          {live.swimSummary || "Bi-weekly Collins Beach samples — verify before you swim."}
+          {swimSummaryDetail(live.swimSummary)
+            || "Bi-weekly Collins Beach samples — verify before you swim."}
           {live.lastSampleAt ? ` Latest: ${live.lastSampleAt}.` : ""}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_SWIM_GUIDE_URL} target="_blank" rel="noopener noreferrer">
@@ -143,23 +145,6 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
         <a className="nb-hub__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
           Sauvie Island Parking →
         </a>
-      </section>
-
-      <section className="nb-hub__section">
-        <div className="nb-hub__kicker">Weather</div>
-        <div className="nb-hub__weather-grid">
-          <div className="nb-hub__weather-main">
-            <span className="nb-hub__weather-value">
-              {live.airTempF != null ? `${live.airTempF}°F` : "—"}
-            </span>
-            <span className="nb-hub__weather-label">Air temp</span>
-          </div>
-          <div className="nb-hub__weather-stat">
-            <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
-            <span className="nb-hub__weather-stat-label">Wind</span>
-          </div>
-        </div>
-        <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
       </section>
     </div>
   );

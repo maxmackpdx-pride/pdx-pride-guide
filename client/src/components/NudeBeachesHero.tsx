@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import BoardHero from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
+import { formatWindStat, normalizeSwimStatusLabel } from "@shared/nudeBeaches";
 
 type Props = {
   activeTab: NudeBeachTab;
@@ -12,13 +13,15 @@ type Props = {
 
 export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }: Props) {
   const isRooster = activeTab === "rooster-rock";
+  const roosterWind = formatWindStat(snapshot?.roosterRock.wind);
+  const sauvieWind = formatWindStat(snapshot?.sauvieIsland.wind);
 
   const stats = isRooster
     ? [
         {
           num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "—",
           label: "air temp",
-          color: "#ff00cc",
+          color: "var(--neon-orange, #ff6600)",
         },
         {
           num:
@@ -29,26 +32,30 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           color: "#19e3ff",
         },
         {
-          num: snapshot?.roosterRock.wind?.split(" ")[0] || "—",
-          label: snapshot?.roosterRock.wind?.includes("mph") ? "wind · mph" : "wind",
-          color: "#39ff14",
+          num: roosterWind.value,
+          label: roosterWind.label,
+          color: "var(--neon-orange, #ff6600)",
         },
       ]
     : [
         {
-          num: snapshot?.sauvieIsland.swimStatusLabel || "—",
+          num:
+            normalizeSwimStatusLabel(
+              snapshot?.sauvieIsland.swimStatusLabel,
+              snapshot?.sauvieIsland.swimStatus,
+            ) || "—",
           label: "Collins swim",
-          color: snapshot?.sauvieIsland.swimStatus === "pass" ? "#39ff14" : "#ff8c00",
-        },
-        {
-          num: "Permits",
-          label: "SauvieIslandParking.com",
-          color: "#19e3ff",
+          color: "var(--neon-green, #00EE44)",
         },
         {
           num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "—",
           label: "air temp",
           color: "var(--neon-green, #00EE44)",
+        },
+        {
+          num: sauvieWind.value,
+          label: sauvieWind.label,
+          color: "var(--neon-cyan, #19e3ff)",
         },
       ];
 

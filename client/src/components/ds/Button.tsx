@@ -77,6 +77,7 @@ const ACCENTS = {
   pink:    { c: "var(--neon-magenta)", sh: "rgba(0,255,255,0.30)", shx: "rgba(0,255,255,0.45)" },
   magenta: { c: "var(--neon-magenta)", sh: "rgba(0,255,255,0.30)", shx: "rgba(0,255,255,0.45)" },
   orange:  { c: "var(--neon-orange)",  sh: "rgba(255,0,204,0.32)", shx: "rgba(255,0,204,0.46)" },
+  green:   { c: "var(--neon-green)",   sh: "rgba(255,0,204,0.28)", shx: "rgba(255,0,204,0.42)" },
   purple:  { c: "var(--neon-violet)",  sh: "rgba(0,255,255,0.30)", shx: "rgba(0,255,255,0.45)" },
 };
 
@@ -87,7 +88,7 @@ const ACCENTS = {
 export function Button({
   children,
   variant = "neon",        // neon | solid | gradient | pill | ghost
-  accent = "lime",         // lime(=yellow primary) | cyan | pink | orange | purple
+  accent = "lime",         // lime(=yellow primary) | cyan | pink | orange | green | purple
   size = "md",
   block = false,
   live = false,
