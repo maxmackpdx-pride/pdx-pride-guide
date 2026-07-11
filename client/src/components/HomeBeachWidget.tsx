@@ -30,6 +30,12 @@ function riverLevelTone(ft?: number | null): "good" | "warn" | "neutral" {
   return ft >= 15 ? "warn" : "good";
 }
 
+function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
+  if (label === "OPEN") return "good";
+  if (label === "SOLD OUT") return "warn";
+  return "neutral";
+}
+
 export default function HomeBeachWidget({ showCollins = true }: Props) {
   const [tab, setTab] = useState<BeachTab>("rooster");
 
@@ -138,8 +144,12 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 <div className="home-beach-widget__stat-label">{sauvieWind.label}</div>
               </div>
               <div>
-                <div className="home-beach-widget__stat home-beach-widget__stat--neutral">Permits</div>
-                <div className="home-beach-widget__stat-label">Parking</div>
+                <div
+                  className={`home-beach-widget__stat home-beach-widget__stat--${parkingStatusTone(sauvie.parkingStatusLabel)}`}
+                >
+                  {sauvie.parkingStatusLabel || "—"}
+                </div>
+                <div className="home-beach-widget__stat-label">Parking permits</div>
               </div>
             </div>
             <Link href="/nude-beaches?tab=sauvie-island" className="home-beach-widget__link home-beach-widget__link--orange">

@@ -258,6 +258,8 @@ export type SauvieIslandLive = {
   lastSampleAt: string | null;
   swimSummary: string | null;
   parkingNote: string | null;
+  /** Short live read from SauvieIslandParking.com scrape: SOLD OUT, OPEN, or CHECK. */
+  parkingStatusLabel: string | null;
   parkingHref: string;
   weatherSummary: string | null;
   airTempF: number | null;

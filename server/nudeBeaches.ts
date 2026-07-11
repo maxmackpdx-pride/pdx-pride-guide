@@ -369,13 +369,13 @@ async function fetchRrcAirQuality(): Promise<Pick<RoosterRockLive, "airQuality">
 function swimStatusLabel(status: SwimGuideStatus | null): string | null {
   switch (status) {
     case "pass":
-      return "Passed";
+      return "PASSED";
     case "fail":
-      return "Failed";
+      return "FAILED";
     case "warning":
-      return "Advisory";
+      return "ADVISORY";
     case "unknown":
-      return "Unknown";
+      return "UNKNOWN";
     default:
       return null;
   }
@@ -415,19 +415,39 @@ async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStat
   }
 }
 
-async function fetchParkingNote(): Promise<string | null> {
+async function fetchParkingSnapshot(): Promise<Pick<SauvieIslandLive, "parkingNote" | "parkingStatusLabel">> {
+  const fallback = {
+    parkingNote: "Could not reach Sauvie Island Parking — use the permit link to check sold-out dates before you go.",
+    parkingStatusLabel: "CHECK" as const,
+  };
   try {
     const html = await fetchText(SAUVIE_ISLAND_PARKING_URL);
     const soldOut = /sold\s*out/i.test(html);
     const available = /available/i.test(html);
-    if (soldOut) return "At least one permit date appears sold out on SauvieIslandParking.com — verify before you drive out.";
-    if (available) return "Permit inventory appears open on SauvieIslandParking.com — confirm your date before you go.";
-    if (html.length < 800) {
-      return "Permit portal loads dynamically — open SauvieIslandParking.com to check live sold-out dates.";
+    if (soldOut) {
+      return {
+        parkingNote: "At least one permit date appears sold out on SauvieIslandParking.com — verify before you drive out.",
+        parkingStatusLabel: "SOLD OUT",
+      };
     }
-    return "Buy and check permit availability at SauvieIslandParking.com for weekends and holidays through Labor Day.";
+    if (available) {
+      return {
+        parkingNote: "Permit inventory appears open on SauvieIslandParking.com — confirm your date before you go.",
+        parkingStatusLabel: "OPEN",
+      };
+    }
+    if (html.length < 800) {
+      return {
+        parkingNote: "Permit portal loads dynamically — open SauvieIslandParking.com to check live sold-out dates.",
+        parkingStatusLabel: "CHECK",
+      };
+    }
+    return {
+      parkingNote: "Buy and check permit availability at SauvieIslandParking.com for weekends and holidays through Labor Day.",
+      parkingStatusLabel: "CHECK",
+    };
   } catch {
-    return "Could not reach Sauvie Island Parking — use the permit link to check sold-out dates before you go.";
+    return fallback;
   }
 }
 
@@ -448,6 +468,7 @@ function hasSauvieIslandLiveData(live: SauvieIslandLive): boolean {
     live.swimStatus != null
     || live.swimSummary != null
     || live.parkingNote != null
+    || live.parkingStatusLabel != null
     || live.weatherSummary != null
     || live.airTempF != null
     || live.wind != null
@@ -541,6 +562,7 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
     lastSampleAt: null,
     swimSummary: null,
     parkingNote: null,
+    parkingStatusLabel: null,
     parkingHref: SAUVIE_ISLAND_PARKING_URL,
     weatherSummary: null,
     airTempF: null,
@@ -549,14 +571,13 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
   };
   const [swim, parking, weather] = await Promise.all([
     fetchSwimGuideCollins(),
-    fetchParkingNote(),
+    fetchParkingSnapshot(),
     fetchNwsSummary(
       BEACH_MAP_LOCATIONS["sauvie-island"].lat,
       BEACH_MAP_LOCATIONS["sauvie-island"].lng,
     ),
   ]);
-  Object.assign(base, swim);
-  base.parkingNote = parking;
+  Object.assign(base, swim, parking);
   base.weatherSummary = weather.summary;
   base.airTempF = weather.airTempF;
   base.wind = weather.wind;
