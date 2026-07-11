@@ -18,11 +18,6 @@ type Props = {
   showCollins?: boolean;
 };
 
-function roosterRiverTone(ft?: number | null): "orange" | "warn" | "neutral" {
-  if (ft == null) return "neutral";
-  return ft >= 15 ? "warn" : "orange";
-}
-
 function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
   if (label === "OPEN") return "good";
   if (label === "SOLD OUT") return "warn";
@@ -100,11 +95,12 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 <div className="home-beach-widget__stat-label">{roosterWind.label}</div>
               </div>
               <div>
-                <div className={`home-beach-widget__stat home-beach-widget__stat--${roosterRiverTone(rooster.riverLevelFt)}`}>
-                  {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)}ft` : "—"}
+                <div className="home-beach-widget__stat home-beach-widget__stat--water">
+                  {rooster.depthEstimate || "—"}
                 </div>
                 <div className="home-beach-widget__stat-label">
-                  {rooster.crossingBand ? `River · ${rooster.crossingBand}` : "River level"}
+                  {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)} ft` : "Depth"}
+                  {rooster.crossingBand ? ` · ${rooster.crossingBand}` : ""}
                 </div>
               </div>
             </div>

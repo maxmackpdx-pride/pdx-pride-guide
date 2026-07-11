@@ -78,9 +78,14 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           {live.riverLevelFt != null ? live.riverLevelFt.toFixed(2) : "—"}
           <span className="nb-hub__level-unit">ft</span>
         </div>
-        <p className="nb-hub__level-detail">
-          {live.crossingAdvice || live.depthEstimate || "USGS gage below Bonneville Dam."}
-        </p>
+        {live.depthEstimate ? (
+          <p className="nb-hub__level-detail nb-hub__level-detail--water">{live.depthEstimate}</p>
+        ) : null}
+        {(live.crossingAdvice || !live.depthEstimate) && (
+          <p className="nb-hub__level-detail">
+            {live.crossingAdvice || "USGS gage below Bonneville Dam."}
+          </p>
+        )}
         <div className="nb-hub__level-range">
           <div>
             <span className="nb-hub__range-label">Today&apos;s low</span>

@@ -222,6 +222,11 @@ html.calm-mode .nb-hub__section--pulse {
   line-height: 1.45;
 }
 
+.nb-hub__level-detail--water {
+  color: var(--neon-cyan, #19e3ff);
+  font-weight: 700;
+}
+
 .nb-hub__level-range {
   display: grid;
   grid-template-columns: 1fr 1fr;
