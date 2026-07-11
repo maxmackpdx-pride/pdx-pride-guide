@@ -4,7 +4,7 @@ dist/
 .env.local
 .railway/production-secrets.txt
 .railway/vapid-keys.txt
-.vercel/.env*
+.vercel/
 *.log
 # Runtime DB should not be re-committed after initial seed; Railway uses deployed copy + startup migrations.
 # data.db is intentionally tracked until prod uses a persistent volume.
