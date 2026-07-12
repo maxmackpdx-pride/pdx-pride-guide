@@ -14638,6 +14638,16 @@ html.calm-mode .board-detail-modal {
   padding: 22px 22px 24px;
 }
 
+/* Gig/gift overlay: the wrapper is the single glowing panel (border + glow set
+   inline per-accent). Neutralize the reused board card's own chrome so the
+   accent border wraps the whole thing and the thumbnail clips to the corners. */
+.board-post-overlay > .board-listing-card {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
 .board-detail-modal__quote {
   position: absolute;
   top: -14px;

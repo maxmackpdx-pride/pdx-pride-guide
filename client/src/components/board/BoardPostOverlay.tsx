@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import GiftListingCard, { type GiftingPost } from "./GiftListingCard";
+import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
 import { GigListingCard, type GigPost } from "@/pages/PrideWork";
 
 /**
@@ -52,7 +52,10 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   }, [query.isLoading, query.data, post, onClose]);
 
   let card: React.ReactNode = null;
+  // Accent tints the panel border + glow, matching the board card's color.
+  let accent = "#ff1fa0";
   if (post && kind === "gifting") {
+    accent = cardAccent(post as GiftingPost);
     card = (
       <GiftListingCard
         post={post as GiftingPost}
@@ -66,10 +69,11 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     const gig = post as GigPost;
     const isLooking = gig.postType === "LOOKING_FOR_WORK";
     const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
+    accent = isLooking ? GIG_ACCENT.LOOKING_FOR_WORK : GIG_ACCENT.POSTING_GIG;
     card = (
       <GigListingCard
         gig={gig}
-        accent={isLooking ? GIG_ACCENT.LOOKING_FOR_WORK : GIG_ACCENT.POSTING_GIG}
+        accent={accent}
         expanded
         skills={skills}
         isLooking={isLooking}
@@ -83,7 +87,17 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
       <div
         className="board-post-overlay"
         onClick={e => e.stopPropagation()}
-        style={{ width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", position: "relative" }}
+        style={{
+          width: "100%",
+          maxWidth: 560,
+          maxHeight: "90vh",
+          overflow: "auto",
+          position: "relative",
+          background: "#0c0c0f",
+          border: `2px solid ${accent}`,
+          borderRadius: 14,
+          boxShadow: `0 0 50px -10px ${accent}`,
+        }}
       >
         <button
           type="button"
