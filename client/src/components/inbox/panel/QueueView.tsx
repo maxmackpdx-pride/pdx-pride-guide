@@ -13,6 +13,10 @@ type QueueRowKind =
   | "gifting_flagged"
   | "spotted"
   | "moderation"
+  | "promoter_request"
+  | "business_claim"
+  | "business_submission"
+  | "logo_request"
   | "owner_desk";
 
 type QueueRow = {
@@ -166,6 +170,84 @@ function mapModerationRequest(m: any): QueueRow | null {
   };
 }
 
+/** Promoter applications / requests (users with promoterStatus "pending",
+ * plus pending event-claim submitters). Approve/deny sets promoterStatus. */
+function mapPromoterRequest(r: any): QueueRow {
+  const who = r.displayName || r.username || "Applicant";
+  const fields: Array<[string, string]> = [];
+  if (r.username) fields.push(["Handle", `@${r.username}`]);
+  if (r.email) fields.push(["Email", String(r.email)]);
+  if (r.submitterOrg) fields.push(["Org", String(r.submitterOrg)]);
+  if (r.eventTitle) fields.push(["Event", String(r.eventTitle)]);
+  return {
+    id: `promo-${r.id}`,
+    kind: "promoter_request",
+    entityId: r.id,
+    tag: "PROMOTER",
+    tagColor: C.purple,
+    title: who,
+    meta: `Promoter request${r.requestedAt ? " · " + ts(r.requestedAt) : ""}`,
+    fields,
+    note: String(r.claimReason || ""),
+  };
+}
+
+/** Venue/business claims (business_claims table) — someone claiming a
+ * directory listing as its owner. */
+function mapBusinessClaim(r: any): QueueRow {
+  const who = r.displayName || r.username || "Someone";
+  const fields: Array<[string, string]> = [["From", who]];
+  if (r.email) fields.push(["Email", String(r.email)]);
+  return {
+    id: `bclaim-${r.id}`,
+    kind: "business_claim",
+    entityId: r.id,
+    tag: "VENUE CLAIM",
+    tagColor: C.orange,
+    title: String(r.businessName || "Venue claim"),
+    meta: `Claim by ${who}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
+    fields,
+    note: String(r.claimReason || ""),
+  };
+}
+
+/** New venue/business submissions (business_submissions table). */
+function mapBusinessSubmission(r: any): QueueRow {
+  const fields: Array<[string, string]> = [];
+  if (r.type) fields.push(["Type", String(r.type)]);
+  if (r.address) fields.push(["Where", String(r.address) + (r.neighborhood ? ` · ${r.neighborhood}` : "")]);
+  if (r.phone) fields.push(["Phone", String(r.phone)]);
+  if (r.website) fields.push(["Web", String(r.website)]);
+  if (r.instagram) fields.push(["IG", String(r.instagram)]);
+  return {
+    id: `bsub-${r.id}`,
+    kind: "business_submission",
+    entityId: r.id,
+    tag: "NEW VENUE",
+    tagColor: C.orange,
+    title: String(r.name || "New venue"),
+    meta: `New venue${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
+    fields,
+    note: String(r.description || ""),
+  };
+}
+
+/** Business logo update requests (business_logo_requests table). */
+function mapLogoRequest(r: any): QueueRow {
+  return {
+    id: `logo-${r.id}`,
+    kind: "logo_request",
+    entityId: r.id,
+    tag: "LOGO",
+    tagColor: C.cyan,
+    title: `${r.businessName || "Venue"} · new logo`,
+    meta: `Logo request${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
+    fields: [["Venue", String(r.businessName || "—")]],
+    note: "",
+    attachments: r.imageUrl ? [String(r.imageUrl)] : [],
+  };
+}
+
 const DESK_TAG: Record<string, { label: string; color: string }> = {
   contact: { label: "MESSAGE", color: C.cyan },
   sponsor: { label: "SPONSOR", color: C.lime },
@@ -212,6 +294,10 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/river-brats/reports"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/promoter-requests"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/business-claims"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/business-submissions"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/business-logo-requests"] });
   qc.invalidateQueries({ queryKey: ["/api/gifting"] });
   qc.invalidateQueries({ queryKey: ["/api/missed-connections"] });
 }
@@ -247,6 +333,26 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   const { data: moderationReqs = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/moderation"],
     queryFn: () => apiRequest("GET", "/api/admin/moderation").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: promoterReqs = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/promoter-requests"],
+    queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: businessClaims = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/business-claims"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-claims").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: businessSubs = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/business-submissions"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-submissions").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: logoReqs = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/business-logo-requests"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then((r) => r.json()),
     enabled: mode === "admin",
   });
   const { data: ownerReports = [] } = useQuery<any[]>({
@@ -315,6 +421,39 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
     mutationFn: (id: number) => apiRequest("POST", `/api/admin/moderation/${id}/resolve`, { status: "APPROVED" }),
     onSuccess: onQueueSuccess,
   });
+  const adminName = user?.displayName || user?.username || "Admin";
+  const approvePromoter = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/promoter-requests/${id}/approve`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const denyPromoter = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/promoter-requests/${id}/deny`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const approveClaim = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-claims/${id}/approve`, { adminName }),
+    onSuccess: onQueueSuccess,
+  });
+  const denyClaim = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-claims/${id}/deny`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const approveBizSub = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-submissions/${id}/approve`, { adminName }),
+    onSuccess: onQueueSuccess,
+  });
+  const denyBizSub = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-submissions/${id}/deny`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const approveLogo = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-logo-requests/${id}/approve`, {}),
+    onSuccess: onQueueSuccess,
+  });
+  const denyLogo = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-logo-requests/${id}/deny`, {}),
+    onSuccess: onQueueSuccess,
+  });
 
   const rows: QueueRow[] = useMemo(() => {
     if (mode === "owner") return ownerReports.map(mapOwnerDeskItem);
@@ -343,13 +482,19 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
       const row = mapModerationRequest(m);
       if (row) items.push(row);
     }
+    for (const p of promoterReqs) items.push(mapPromoterRequest(p));
+    for (const c of businessClaims) items.push(mapBusinessClaim(c));
+    for (const s of businessSubs) items.push(mapBusinessSubmission(s));
+    for (const l of logoReqs) items.push(mapLogoRequest(l));
     return items;
-  }, [mode, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, ownerReports]);
+  }, [mode, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, ownerReports]);
 
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
     || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending
-    || resolveModeration.isPending;
+    || resolveModeration.isPending || approvePromoter.isPending || denyPromoter.isPending
+    || approveClaim.isPending || denyClaim.isPending || approveBizSub.isPending
+    || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending;
 
   const kicker = mode === "admin" ? "SHARED QUEUE · WORKED BY THE WHOLE TEAM" : "OWNER DESK · JUST YOU";
 
@@ -490,6 +635,30 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                       )}
                       {q.kind === "river_brats" && btn("RESOLVE", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
                       {q.kind === "moderation" && btn("MARK REVIEWED", C.limeSoft, () => resolveModeration.mutate(q.entityId))}
+                      {q.kind === "promoter_request" && (
+                        <>
+                          {btn("APPROVE PROMOTER", C.green, () => approvePromoter.mutate(q.entityId))}
+                          {btn("DENY", C.red, () => denyPromoter.mutate(q.entityId), true)}
+                        </>
+                      )}
+                      {q.kind === "business_claim" && (
+                        <>
+                          {btn("APPROVE CLAIM", C.green, () => approveClaim.mutate(q.entityId))}
+                          {btn("DENY", C.red, () => denyClaim.mutate(q.entityId), true)}
+                        </>
+                      )}
+                      {q.kind === "business_submission" && (
+                        <>
+                          {btn("APPROVE VENUE", C.green, () => approveBizSub.mutate(q.entityId))}
+                          {btn("DENY", C.red, () => denyBizSub.mutate(q.entityId), true)}
+                        </>
+                      )}
+                      {q.kind === "logo_request" && (
+                        <>
+                          {btn("APPROVE LOGO", C.green, () => approveLogo.mutate(q.entityId))}
+                          {btn("DENY", C.red, () => denyLogo.mutate(q.entityId), true)}
+                        </>
+                      )}
                       {q.kind === "gifting_report" && btn("RESOLVE REPORT", C.limeSoft, () => resolveGiftingReport.mutate(q.entityId))}
                       {q.kind === "gifting_flagged" && (
                         <div style={{ width: "100%" }}>
