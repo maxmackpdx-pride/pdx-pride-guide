@@ -8762,14 +8762,18 @@ export const storage: IStorage = {
       const viewerRsvped = viewerUserId != null && viewerRsvpEventIds.has(row.eventId);
       const masked = maskAttendanceRow(viewerUserId, viewerRsvped, row);
       const anonymous = Boolean(masked.isAnonymous || masked.masked);
+      // Anonymous/masked RSVPs render as a nameless "Someone in the scene is
+      // going" card — too vague to be worth a public feed slot. Only surface
+      // RSVPs where a real name shows.
+      if (anonymous) continue;
       items.push({
         id: `rsvp-${row.id}`,
         kind: "rsvp",
         badge: "RSVP",
-        action: anonymous ? "Someone is going" : "Is going",
+        action: "Is going",
         text: masked.message || null,
         createdAt: row.createdAt,
-        author: hubFeedAuthorFromUser(anonymous ? null : row, anonymous),
+        author: hubFeedAuthorFromUser(row, false),
         event: hubFeedEventEmbed(row, goingCounts[row.eventId]?.count),
         link: null,
       });
