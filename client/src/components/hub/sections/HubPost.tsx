@@ -26,9 +26,11 @@ const PROMPTS: Record<PostType, string> = {
 
 type Props = {
   initialType?: PostType;
+  /** When rendered inline inside the feed, hide the page-style header. */
+  embedded?: boolean;
 };
 
-export default function HubPost({ initialType = "text" }: Props) {
+export default function HubPost({ initialType = "text", embedded = false }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [postType, setPostType] = useState<PostType>(initialType === "photo" ? "photo" : "text");
@@ -143,11 +145,15 @@ export default function HubPost({ initialType = "text" }: Props) {
 
   return (
     <div className="reveal">
-      <div className="kick" style={{ color: "var(--panel-cyan)" }}>
-        Share with the scene
-      </div>
-      <h1 className="h1">Post to the feed</h1>
-      <div className="card" style={{ padding: 20, marginTop: 20 }}>
+      {!embedded && (
+        <>
+          <div className="kick" style={{ color: "var(--panel-cyan)" }}>
+            Share with the scene
+          </div>
+          <h1 className="h1">Post to the feed</h1>
+        </>
+      )}
+      <div className="card" style={{ padding: 20, marginTop: embedded ? 0 : 20 }}>
         <div style={{ display: "flex", gap: 22, borderBottom: "1px solid var(--panel-border)", marginBottom: 18 }}>
           {POST_TYPES.map((pt) => (
             <button

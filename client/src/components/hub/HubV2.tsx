@@ -5,7 +5,6 @@ import type { AuthUser } from "@/context/AuthContext";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import HubV2Shell from "./HubV2Shell";
 import HubFeed from "./sections/HubFeed";
-import HubPost from "./sections/HubPost";
 import HubProfile from "./sections/HubProfile";
 import HubEvents, { type HubEventRow } from "./sections/HubEvents";
 import HubPeople from "./sections/HubPeople";
@@ -169,8 +168,7 @@ export default function HubV2({
     <>
       <PwaInstallBanner />
       {errorBanner}
-      {section === "feed" && <HubFeed key="feed" canPostToFeed={canPostToFeed} onGoPost={() => handleSectionChange("post")} />}
-      {section === "post" && <HubPost key="post" initialType={initialPostType} />}
+      {(section === "feed" || section === "post") && <HubFeed key="feed" canPostToFeed={canPostToFeed} />}
       {section === "profile" && (
         <HubProfile
           key={`profile-${editMode ? "edit" : "view"}`}

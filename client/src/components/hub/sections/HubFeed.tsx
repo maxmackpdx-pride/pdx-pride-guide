@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import {
   HUB_FEED_TABS,
@@ -7,7 +8,12 @@ import {
   type HubFeedResponse,
   type HubFeedTab,
 } from "@shared/hubFeed";
+import { eventPath } from "@shared/eventSlug";
+import type { EventListing } from "@shared/multiDayEvents";
 import HubFeedCard from "./HubFeedCard";
+import HubPost from "./HubPost";
+
+const STANK_PROMO_DISMISS_KEY = "hub-promo-stank-yes-coach-dismissed";
 
 function emptyCopy(tab: HubFeedTab): string {
   switch (tab) {
@@ -28,11 +34,15 @@ function emptyCopy(tab: HubFeedTab): string {
 
 type Props = {
   canPostToFeed?: boolean;
-  onGoPost?: () => void;
 };
 
-export default function HubFeed({ canPostToFeed = false, onGoPost }: Props) {
+export default function HubFeed({ canPostToFeed = false }: Props) {
   const [filter, setFilter] = useState<HubFeedTab>("all");
+  const [composing, setComposing] = useState(false);
+  const [promoDismissed, setPromoDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(STANK_PROMO_DISMISS_KEY) === "1";
+  });
 
   const feedQuery = useQuery<HubFeedResponse>({
     queryKey: ["/api/hub/feed", filter],
@@ -44,6 +54,22 @@ export default function HubFeed({ canPostToFeed = false, onGoPost }: Props) {
     },
   });
 
+  // Featured promo: find the Stank Yes Coach event to link the top card to.
+  const { data: events = [] } = useQuery<EventListing[]>({
+    queryKey: ["/api/events"],
+    queryFn: () => fetch("/api/events", { credentials: "include" }).then((r) => r.json()),
+    staleTime: 300_000,
+    enabled: !promoDismissed,
+  });
+  const stankEvent = promoDismissed
+    ? undefined
+    : events.find((e) => /stank\s*yes\s*coach|yes\s*coach\s*stank/i.test(e.title || ""));
+
+  const dismissPromo = () => {
+    setPromoDismissed(true);
+    try { window.localStorage.setItem(STANK_PROMO_DISMISS_KEY, "1"); } catch { /* ignore */ }
+  };
+
   const items = feedQuery.data?.items ?? [];
   const pinned = feedQuery.data?.pinned ?? [];
   const loading = feedQuery.isLoading;
@@ -52,6 +78,69 @@ export default function HubFeed({ canPostToFeed = false, onGoPost }: Props) {
 
   return (
     <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {stankEvent && (
+        <div
+          className="card"
+          style={{
+            position: "relative",
+            padding: 0,
+            overflow: "hidden",
+            border: "1px solid var(--panel-magenta)",
+            boxShadow: "0 0 0 1px var(--panel-magenta) inset",
+          }}
+        >
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={dismissPromo}
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              width: 26,
+              height: 26,
+              borderRadius: 999,
+              border: "none",
+              background: "rgba(0,0,0,0.55)",
+              color: "#fff",
+              fontSize: 15,
+              lineHeight: 1,
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
+          <Link
+            href={eventPath(stankEvent.id, stankEvent.title, stankEvent.dayOfWeek)}
+            style={{ textDecoration: "none", color: "inherit", display: "block", padding: "16px 18px" }}
+          >
+            <div
+              className="kick"
+              style={{ letterSpacing: ".16em", color: "var(--panel-magenta)", marginBottom: 8 }}
+            >
+              ★ Featured · Pride pick
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 800,
+                fontSize: 19,
+                color: "#fff",
+                textTransform: "uppercase",
+                lineHeight: 1.1,
+              }}
+            >
+              {stankEvent.title}
+            </div>
+            <div style={{ marginTop: 6, fontSize: 13.5, color: "var(--board-muted)" }}>
+              {stankEvent.venueName}
+              {stankEvent.dayOfWeek ? ` · ${stankEvent.dayOfWeek}` : ""} · Tap for details →
+            </div>
+          </Link>
+        </div>
+      )}
+
       <div className="card" style={{ padding: "15px 17px" }}>
         <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
           Scene feed
@@ -59,28 +148,30 @@ export default function HubFeed({ canPostToFeed = false, onGoPost }: Props) {
         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--board-muted)" }}>
           New events, board posts, RSVPs, and beach check-ins stack on top. Scene staples stay pinned below.
         </p>
-        {canPostToFeed && onGoPost && (
+        {canPostToFeed && (
           <button
             type="button"
-            onClick={onGoPost}
+            onClick={() => setComposing((v) => !v)}
             style={{
               marginTop: 14,
               fontFamily: "var(--font-mono)",
               fontSize: 11,
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "var(--panel-cyan)",
-              border: "1px solid var(--panel-cyan)",
+              color: composing ? "var(--board-muted)" : "var(--panel-cyan)",
+              border: `1px solid ${composing ? "var(--panel-border)" : "var(--panel-cyan)"}`,
               borderRadius: 8,
               padding: "9px 16px",
               background: "transparent",
               cursor: "pointer",
             }}
           >
-            Post to the feed
+            {composing ? "Close composer" : "Post to the feed"}
           </button>
         )}
       </div>
+
+      {canPostToFeed && composing && <HubPost embedded />}
 
       <div className="hs" style={{ display: "flex", gap: 22, overflowX: "auto", padding: "0 2px 2px" }}>
         {HUB_FEED_TABS.map((f) => (
