@@ -9,9 +9,7 @@ import {
   type HubFeedTab,
 } from "@shared/hubFeed";
 import type { EventListing } from "@shared/multiDayEvents";
-import { DAY_TEXT_COLORS } from "@shared/prideWeek";
-import { resolveEventPosterUrl } from "@shared/eventPoster";
-import EventModal from "@/components/EventModal";
+import FeaturedEventAd from "./FeaturedEventAd";
 import HubFeedCard from "./HubFeedCard";
 import HubPost from "./HubPost";
 
@@ -41,7 +39,6 @@ type Props = {
 export default function HubFeed({ canPostToFeed = false }: Props) {
   const [filter, setFilter] = useState<HubFeedTab>("all");
   const [composing, setComposing] = useState(false);
-  const [adEventOpen, setAdEventOpen] = useState(false);
   const [promoDismissed, setPromoDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(STANK_PROMO_DISMISS_KEY) === "1";
@@ -79,108 +76,9 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const error = feedQuery.isError;
   const hasContent = items.length > 0 || pinned.length > 0;
 
-  const stankAd = stankEvent ? (() => {
-    const day = stankEvent.dayOfWeek || "";
-    const accent = DAY_TEXT_COLORS[day] || "#19E3FF";
-    const poster = resolveEventPosterUrl(stankEvent.id, stankEvent.posterImageUrl);
-    return (
-      <div
-        style={{
-          position: "relative",
-          borderRadius: 16,
-          overflow: "hidden",
-          border: `2px solid ${accent}`,
-          boxShadow: `0 0 40px -14px ${accent}`,
-          background: "#0d0d0d",
-        }}
-      >
-        <button
-          type="button"
-          aria-label="Dismiss"
-          onClick={dismissPromo}
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            zIndex: 3,
-            width: 28,
-            height: 28,
-            borderRadius: 999,
-            border: "none",
-            background: "rgba(0,0,0,0.6)",
-            color: "#fff",
-            fontSize: 15,
-            lineHeight: 1,
-            cursor: "pointer",
-          }}
-        >
-          ✕
-        </button>
-        {poster && (
-          // Full-width, top-anchored: never crop left/right; crop the bottom.
-          <div style={{ width: "100%", aspectRatio: "1 / 1", overflow: "hidden" }}>
-            <img
-              src={poster}
-              alt={stankEvent.title}
-              style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
-            />
-          </div>
-        )}
-        <div style={{ padding: "13px 16px 15px" }}>
-          <div
-            className="kick"
-            style={{ letterSpacing: ".14em", color: accent, textTransform: "uppercase", fontSize: 10.5 }}
-          >
-            Don't miss{day ? ` · ${day}` : ""} · {stankEvent.venueName}
-          </div>
-          <div style={{ display: "flex", gap: 9, marginTop: 12 }}>
-            {stankEvent.ticketUrl && (
-              <a
-                href={stankEvent.ticketUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  flex: 1,
-                  textAlign: "center",
-                  background: accent,
-                  color: "#0a0a0a",
-                  fontWeight: 700,
-                  fontSize: 14,
-                  letterSpacing: ".01em",
-                  padding: "11px 14px",
-                  borderRadius: 10,
-                  textDecoration: "none",
-                }}
-              >
-                Get tickets
-              </a>
-            )}
-            <button
-              type="button"
-              onClick={() => setAdEventOpen(true)}
-              style={{
-                flex: 1,
-                background: "rgba(255,255,255,0.04)",
-                color: "#fff",
-                border: `1px solid ${accent}`,
-                fontWeight: 700,
-                fontSize: 14,
-                letterSpacing: ".01em",
-                padding: "11px 14px",
-                borderRadius: 10,
-                cursor: "pointer",
-              }}
-            >
-              RSVP
-            </button>
-          </div>
-        </div>
-        {adEventOpen && (
-          <EventModal event={stankEvent} onClose={() => setAdEventOpen(false)} />
-        )}
-      </div>
-    );
-  })() : null;
+  const stankAd = stankEvent ? (
+    <FeaturedEventAd event={stankEvent} onDismiss={dismissPromo} />
+  ) : null;
 
   return (
     <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
