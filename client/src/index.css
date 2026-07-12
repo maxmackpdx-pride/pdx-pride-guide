@@ -2260,9 +2260,11 @@ html.calm-mode .floating-inbox__halo {
   overflow: hidden;
   /* Frameless floating panel, Directory-listing surface + border language. */
   background: var(--surface-card);
-  border: var(--bw-hair, 1px) solid var(--border-default);
+  border: 2px solid var(--neon-blue);
   border-radius: 22px;
-  box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.6));
+  /* Navy-blue neon glow to match the glowing cards, over the depth shadow. */
+  box-shadow: 0 0 46px -8px var(--neon-blue), 0 0 14px -4px var(--neon-blue),
+    var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.6));
   animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
 }
 

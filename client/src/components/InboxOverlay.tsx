@@ -190,7 +190,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         role="dialog"
         aria-label="Inbox"
         ref={panelRef}
-        style={{ background: C.sheet, border: `1px solid ${C.border}`, padding: 0 }}
+        style={{ background: C.sheet, border: "2px solid var(--neon-blue)", padding: 0 }}
       >
         {/* grab handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", flex: "none" }}>
