@@ -8822,24 +8822,19 @@ export const storage: IStorage = {
       items.push({
         id: `spotted-${row.id}`,
         kind: "spotted",
-        badge: "Spotted",
-        action: "Posted to Spotted",
+        badge: "Missed Connection",
+        action: "New missed connection",
         text: row.body || row.title,
+        place: row.eventTitle
+          ? (row.eventVenue ? `${row.eventTitle} · ${row.eventVenue}` : row.eventTitle)
+          : (row.venueHint ? `Around town · ${row.venueHint}` : "Around town"),
         createdAt: row.createdAt,
-        author: row.anonymous
-          ? { displayName: row.venueHint ? `Someone at ${row.venueHint}` : "Someone in the scene", anonymous: true }
-          : hubFeedAuthorFromUser(null, true),
-        event: row.eventId
-          ? hubFeedEventEmbed({
-              id: row.eventId,
-              title: row.eventTitle,
-              venueName: row.eventVenue || row.venueHint || "",
-              dayOfWeek: row.eventDay || row.dayOfWeek,
-              dateStart: row.eventDateStart || row.createdAt,
-              admission: "FREE",
-            })
-          : null,
-        link: "/missed-connections",
+        // Missed connections are anonymous — the card renders without a person.
+        author: { displayName: "Missed Connection", anonymous: true },
+        // No event embed: the card carries the place in `place` and links
+        // straight to the Missed Connections board, not the event card.
+        event: null,
+        link: "/spotted",
       });
     }
 

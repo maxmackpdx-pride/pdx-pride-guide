@@ -38,6 +38,16 @@ export default function HubFeedCard({ item }: Props) {
   const href = item.link || eventHref(item);
   const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
 
+  // Board posts glow in their category color: gigs purple, gifts acid-yellow,
+  // missed connections magenta.
+  const BOARD_ACCENTS: Record<string, string> = {
+    gig: "var(--panel-purple)",
+    gifting: "var(--panel-lime)",
+    spotted: "var(--panel-magenta)",
+  };
+  const glow = BOARD_ACCENTS[item.kind];
+  const isSpotted = item.kind === "spotted";
+
   const eventBlock = item.event ? (
     <Link
       href={eventHref(item) || "/events"}
@@ -112,9 +122,80 @@ export default function HubFeedCard({ item }: Props) {
       style={{
         padding: "16px 18px",
         borderRadius: 16,
-        ...(item.pinned ? { borderColor: "var(--panel-border-2)" } : {}),
+        ...(glow
+          ? { border: `1px solid ${glow}`, boxShadow: `0 0 22px -9px ${glow}` }
+          : item.pinned
+            ? { borderColor: "var(--panel-border-2)" }
+            : {}),
       }}
     >
+      {isSpotted ? (
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "var(--panel-magenta)",
+                boxShadow: "0 0 8px var(--panel-magenta)",
+                flex: "none",
+              }}
+            />
+            <span
+              className="kick"
+              style={{
+                fontSize: 10.5,
+                letterSpacing: ".14em",
+                color: "var(--panel-magenta)",
+                textTransform: "uppercase",
+              }}
+            >
+              Missed Connection{when ? ` · ${when}` : ""}
+            </span>
+          </div>
+          {item.place && (
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: 15,
+                color: "#fff",
+                textTransform: "uppercase",
+                lineHeight: 1.15,
+                marginTop: 10,
+              }}
+            >
+              {item.place}
+            </div>
+          )}
+          {item.text && (
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 15,
+                lineHeight: 1.55,
+                color: "var(--board-text)",
+                fontStyle: "italic",
+              }}
+            >
+              &ldquo;{item.text}&rdquo;
+            </p>
+          )}
+          <div
+            className="kick"
+            style={{
+              marginTop: 14,
+              fontSize: 10.5,
+              letterSpacing: ".12em",
+              color: "var(--panel-magenta)",
+              textTransform: "uppercase",
+            }}
+          >
+            See on Missed Connections →
+          </div>
+        </div>
+      ) : (
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
         <UserAvatar
           photoUrl={item.author.photoUrl}
@@ -184,6 +265,7 @@ export default function HubFeedCard({ item }: Props) {
           {ctaBlock}
         </div>
       </div>
+      )}
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
