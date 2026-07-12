@@ -21,7 +21,7 @@ export default function PushNotificationPrompt() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!user || !canUseWebPush()) return;
+    if (!user) return;
     if (sessionStorage.getItem(DISMISS_KEY) === "1") return;
 
     let cancelled = false;
@@ -31,6 +31,22 @@ export default function PushNotificationPrompt() {
       const config = await fetchPushConfig();
       if (!config.configured || !config.publicKey) return;
 
+      // iOS Safari doesn't expose the Push/Notification APIs until the site is
+      // installed as a home-screen web app, so canUseWebPush() is false in the
+      // browser tab — exactly where the "Save as Web App" how-to needs to show.
+      // Surface it to not-yet-installed iPhone users regardless, or the prompt
+      // they need to act on would never appear.
+      if (shouldShowInstallBeforePush()) {
+        if (!cancelled) {
+          setInstallFirst(true);
+          setVisible(true);
+        }
+        return;
+      }
+
+      // The notification-permission flow below requires the web-push APIs.
+      if (!canUseWebPush()) return;
+
       if (await hasPushSubscription()) return;
 
       if (typeof Notification !== "undefined" && Notification.permission === "granted") {
@@ -39,14 +55,6 @@ export default function PushNotificationPrompt() {
       }
 
       if (!isPushPermissionPending()) return;
-
-      if (shouldShowInstallBeforePush()) {
-        if (!cancelled) {
-          setInstallFirst(true);
-          setVisible(true);
-        }
-        return;
-      }
 
       showTimer = window.setTimeout(() => {
         if (cancelled) return;
