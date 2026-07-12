@@ -5,6 +5,7 @@ import type { AuthUser } from "@/context/AuthContext";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import HubV2Shell from "./HubV2Shell";
 import HubFeed from "./sections/HubFeed";
+import HubPost from "./sections/HubPost";
 import HubProfile from "./sections/HubProfile";
 import HubEvents, { type HubEventRow } from "./sections/HubEvents";
 import HubPeople from "./sections/HubPeople";
@@ -20,6 +21,7 @@ import {
 export type HubV2Props = {
   user: AuthUser;
   isAdmin: boolean;
+  canPostToFeed?: boolean;
   canManageTeam?: boolean;
   pendingCount?: number;
   postsCount?: number;
@@ -36,7 +38,7 @@ export type HubV2Props = {
   errorBanner?: ReactNode;
   section: HubSection;
   onSectionChange: (section: HubSection) => void;
-  initialPostType?: "photo" | "video" | "update" | "checkin";
+  initialPostType?: "text" | "photo";
 };
 
 function dayDotClass(day?: string) {
@@ -113,6 +115,7 @@ function HubRightRail({
 export default function HubV2({
   user,
   isAdmin,
+  canPostToFeed = false,
   canManageTeam = false,
   pendingCount = 0,
   postsCount = 0,
@@ -166,7 +169,8 @@ export default function HubV2({
     <>
       <PwaInstallBanner />
       {errorBanner}
-      {section === "feed" && <HubFeed key="feed" />}
+      {section === "feed" && <HubFeed key="feed" canPostToFeed={canPostToFeed} onGoPost={() => handleSectionChange("post")} />}
+      {section === "post" && <HubPost key="post" initialType={initialPostType} />}
       {section === "profile" && (
         <HubProfile
           key={`profile-${editMode ? "edit" : "view"}`}
@@ -203,6 +207,7 @@ export default function HubV2({
       section={section}
       onSectionChange={handleSectionChange}
       isAdmin={isAdmin}
+      canPostToFeed={canPostToFeed}
       canManageTeam={canManageTeam}
       calmMode={calmMode}
       onToggleCalm={toggleCalmMode}

@@ -164,6 +164,21 @@ export default function HubFeedCard({ item }: Props) {
               {item.text}
             </p>
           )}
+          {item.photoUrl && (
+            <img
+              src={item.photoUrl}
+              alt=""
+              style={{
+                display: "block",
+                marginTop: 12,
+                maxWidth: "100%",
+                maxHeight: 360,
+                borderRadius: 11,
+                border: "1px solid var(--panel-border-2)",
+                objectFit: "cover",
+              }}
+            />
+          )}
           {eventBlock}
           {beachBlock}
           {ctaBlock}

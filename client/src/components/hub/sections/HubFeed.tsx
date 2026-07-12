@@ -16,7 +16,7 @@ function emptyCopy(tab: HubFeedTab): string {
     case "events":
       return "No new event listings or host updates yet.";
     case "posts":
-      return "No new beach check-ins yet. The beach boards are pinned below.";
+      return "No new scene posts or beach check-ins yet. The beach boards are pinned below.";
     case "rsvps":
       return "No new RSVPs yet. Be the first to say you are going.";
     case "boards":
@@ -26,7 +26,12 @@ function emptyCopy(tab: HubFeedTab): string {
   }
 }
 
-export default function HubFeed() {
+type Props = {
+  canPostToFeed?: boolean;
+  onGoPost?: () => void;
+};
+
+export default function HubFeed({ canPostToFeed = false, onGoPost }: Props) {
   const [filter, setFilter] = useState<HubFeedTab>("all");
 
   const feedQuery = useQuery<HubFeedResponse>({
@@ -54,6 +59,27 @@ export default function HubFeed() {
         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--board-muted)" }}>
           New events, board posts, RSVPs, and beach check-ins stack on top. Scene staples stay pinned below.
         </p>
+        {canPostToFeed && onGoPost && (
+          <button
+            type="button"
+            onClick={onGoPost}
+            style={{
+              marginTop: 14,
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              letterSpacing: ".12em",
+              textTransform: "uppercase",
+              color: "var(--panel-cyan)",
+              border: "1px solid var(--panel-cyan)",
+              borderRadius: 8,
+              padding: "9px 16px",
+              background: "transparent",
+              cursor: "pointer",
+            }}
+          >
+            Post to the feed
+          </button>
+        )}
       </div>
 
       <div className="hs" style={{ display: "flex", gap: 22, overflowX: "auto", padding: "0 2px 2px" }}>

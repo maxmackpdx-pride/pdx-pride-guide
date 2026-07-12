@@ -27,7 +27,7 @@ import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, eventChatMessages, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports,
   beachCheckins, beachCarpoolPosts, beachCarpoolRequests, riverBratsReports,
-  feedbackReports, hostMessages, eventHosts, eventTalent, businesses,
+  feedbackReports, hostMessages, hubFeedPosts, eventHosts, eventTalent, businesses,
   businessClaims, businessSubmissions, businessBlocks, businessLogoRequests,
   type Event, type InsertEvent,
   type Submission, type InsertSubmission,
@@ -42,6 +42,7 @@ import {
   type BeachCarpoolRequest, type InsertBeachCarpoolRequest, type InsertRiverBratsReport,
   type FeedbackReport, type InsertFeedbackReport,
   type HostMessage, type InsertHostMessage,
+  type HubFeedPost, type InsertHubFeedPost,
   type Business, type InsertBusiness,
   type BusinessClaim, type BusinessSubmission, type BusinessBlock, type BusinessLogoRequest,
 } from "@shared/schema";
@@ -541,6 +542,29 @@ try { sqlite.exec(`
     created_at TEXT NOT NULL DEFAULT ''
   )
 `); } catch(e) {}
+
+function ensureHubFeedPostsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS hub_feed_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        post_type TEXT NOT NULL,
+        body TEXT,
+        photo_url TEXT,
+        audience TEXT NOT NULL DEFAULT 'ALL',
+        event_id INTEGER,
+        status TEXT NOT NULL DEFAULT 'LIVE',
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS hub_feed_posts_user_idx ON hub_feed_posts(user_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS hub_feed_posts_created_idx ON hub_feed_posts(created_at)`);
+  } catch (e) {
+    console.error("[hub_feed_posts] schema migration failed:", e);
+  }
+}
+ensureHubFeedPostsSchema();
 
 const MAX_EVENT_HOSTS = 3;
 
@@ -4387,6 +4411,56 @@ function hubFeedCreatedAt(row: { createdAt?: string | null; created_at?: string 
   return row.createdAt ?? row.created_at ?? row.dateStart ?? row.date_start ?? "";
 }
 
+function canViewerSeeHubFeedPost(
+  post: { userId: number; audience: string; eventId: number | null; status: string },
+  viewerUserId: number | undefined,
+  viewerRsvpEventIds: Set<number>,
+  viewerIsAdmin: boolean,
+  posterHostedIds: number[],
+): boolean {
+  if (post.status !== "LIVE") return false;
+  if (viewerUserId == null) return false;
+  if (post.userId === viewerUserId) return true;
+  if (viewerIsAdmin) return true;
+  if (post.audience === "ALL") return true;
+  if (post.eventId != null) return viewerRsvpEventIds.has(post.eventId);
+  return posterHostedIds.some((id) => viewerRsvpEventIds.has(id));
+}
+
+function hubFeedPostToItem(row: any, goingCounts: Record<number, { count: number }>): HubFeedItem {
+  const postType = row.postType ?? row.post_type;
+  const audience = row.audience ?? "ALL";
+  const eventId = row.eventId ?? row.event_id ?? null;
+  let eventEmbed: HubFeedEventEmbed | null = null;
+  if (eventId != null) {
+    const evt = storage.getEvent(Number(eventId));
+    if (evt && evt.status === "LIVE") {
+      eventEmbed = hubFeedEventEmbed(evt, goingCounts[evt.id]?.count);
+    }
+  }
+  const action = audience === "RSVPS"
+    ? (eventEmbed ? `Shared with RSVPs for ${eventEmbed.title}` : "Shared with their RSVPs")
+    : "Shared with the scene";
+  return {
+    id: `feed_post-${row.id}`,
+    kind: postType === "photo" ? "feed_photo" : "feed_text",
+    badge: postType === "photo" ? "Photo" : "Post",
+    action,
+    text: row.body ?? null,
+    photoUrl: row.photoUrl ?? row.photo_url ?? null,
+    createdAt: row.createdAt ?? row.created_at ?? "",
+    author: hubFeedAuthorFromUser({
+      displayName: row.displayName,
+      username: row.username,
+      photoUrl: row.authorPhotoUrl ?? row.photoUrl,
+      avatarChoice: row.avatarChoice,
+      avatarRing: row.avatarRing,
+    }),
+    event: eventEmbed,
+    link: null,
+  };
+}
+
 const HUB_FEED_GUIDE_AUTHOR: HubFeedAuthor = {
   displayName: "PDX Pride Guide",
   username: "prideguidepdx",
@@ -5165,7 +5239,12 @@ export interface IStorage {
   reportRiverBrats(data: InsertRiverBratsReport): void;
   getRiverBratsReports(status?: string): any[];
   resolveRiverBratsReport(id: number, adminNotes?: string): void;
-  getHubFeed(opts?: { tab?: HubFeedTab; limit?: number; cursor?: string; viewerUserId?: number }): HubFeedResponse;
+  getHubFeed(opts?: { tab?: HubFeedTab; limit?: number; cursor?: string; viewerUserId?: number; viewerIsAdmin?: boolean }): HubFeedResponse;
+  canUserPostToHubFeed(userId: number, isAdmin?: boolean): boolean;
+  getHostedLiveEventIds(userId: number): number[];
+  createHubFeedPost(data: InsertHubFeedPost): HubFeedPost;
+  getHubFeedPostsByUser(userId: number, limit?: number): HubFeedPost[];
+  removeHubFeedPost(id: number, userId: number, opts?: { isAdmin?: boolean }): { ok: true } | { error: string };
   getPostableEventsForMissedConnections(requireToday?: boolean): Event[];
   getLinkableEventsForMissedConnections(): Array<{
     id: number;
@@ -8522,10 +8601,52 @@ export const storage: IStorage = {
     db.update(riverBratsReports).set({ status: "RESOLVED", adminNotes: adminNotes || null } as any).where(eq(riverBratsReports.id, id)).run();
   },
 
+  canUserPostToHubFeed(userId, isAdmin = false) {
+    if (isAdmin) return true;
+    const user = storage.getUserById(userId);
+    return user?.promoterStatus === "approved";
+  },
+  getHostedLiveEventIds(userId) {
+    return storage.getEvents({})
+      .filter((evt) => evt.status === "LIVE" && storage.isUserEventHost(evt.id, userId))
+      .map((evt) => evt.id);
+  },
+  createHubFeedPost(data) {
+    ensureHubFeedPostsSchema();
+    const now = new Date().toISOString();
+    const result = db.insert(hubFeedPosts).values({
+      ...data,
+      status: "LIVE",
+      createdAt: now,
+    } as any).run();
+    const id = Number(result.lastInsertRowid);
+    return db.select().from(hubFeedPosts).where(eq(hubFeedPosts.id, id)).get() as HubFeedPost;
+  },
+  getHubFeedPostsByUser(userId, limit = 20) {
+    ensureHubFeedPostsSchema();
+    const rows = sqlite.prepare(`
+      SELECT *
+      FROM hub_feed_posts
+      WHERE user_id = ? AND status = 'LIVE'
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).all(userId, Math.min(Math.max(limit, 1), 50)) as HubFeedPost[];
+    return rows;
+  },
+  removeHubFeedPost(id, userId, opts = {}) {
+    ensureHubFeedPostsSchema();
+    const row = db.select().from(hubFeedPosts).where(eq(hubFeedPosts.id, id)).get();
+    if (!row || row.status !== "LIVE") return { error: "Not found" };
+    if (!opts.isAdmin && row.userId !== userId) return { error: "Not your post" };
+    db.update(hubFeedPosts).set({ status: "REMOVED" } as any).where(eq(hubFeedPosts.id, id)).run();
+    return { ok: true as const };
+  },
+
   getHubFeed(opts = {}) {
     const tab = parseHubFeedTab(opts.tab);
     const limit = Math.min(Math.max(opts.limit ?? 30, 1), 50);
     const viewerUserId = opts.viewerUserId;
+    const viewerIsAdmin = !!opts.viewerIsAdmin;
     const cursor = opts.cursor?.trim() || null;
 
     expireStaleAttendances();
@@ -8741,6 +8862,29 @@ export const storage: IStorage = {
       });
     }
 
+    ensureHubFeedPostsSchema();
+    const feedPostRows = sqlite.prepare(`
+      SELECT p.id, p.user_id AS userId, p.post_type AS postType, p.body, p.photo_url AS photoUrl,
+             p.audience, p.event_id AS eventId, p.status, p.created_at AS createdAt,
+             u.display_name AS displayName, u.username, u.photo_url AS authorPhotoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM hub_feed_posts p
+      JOIN users u ON u.id = p.user_id
+      WHERE p.status = 'LIVE'
+      ORDER BY p.created_at DESC
+      LIMIT 40
+    `).all() as any[];
+    const hostedCache = new Map<number, number[]>();
+    for (const row of feedPostRows) {
+      let hosted = hostedCache.get(row.userId);
+      if (!hosted) {
+        hosted = storage.getHostedLiveEventIds(row.userId);
+        hostedCache.set(row.userId, hosted);
+      }
+      if (!canViewerSeeHubFeedPost(row, viewerUserId, viewerRsvpEventIds, viewerIsAdmin, hosted)) continue;
+      items.push(hubFeedPostToItem(row, goingCounts));
+    }
+
     const sorted = items
       .filter((item) => item.createdAt)
       .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -8786,6 +8930,7 @@ const PERSISTENCE_TABLES = [
   "attendances",
   "missed_connections",
   "host_messages",
+  "hub_feed_posts",
   "event_hosts",
   "event_talent",
   "moderation_requests",

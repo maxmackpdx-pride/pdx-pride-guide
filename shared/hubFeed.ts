@@ -7,7 +7,9 @@ export type HubFeedKind =
   | "spotted"
   | "gig"
   | "beach"
-  | "feedback";
+  | "feedback"
+  | "feed_text"
+  | "feed_photo";
 
 export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards";
 
@@ -42,6 +44,7 @@ export type HubFeedItem = {
   link?: string | null;
   beachId?: string | null;
   beachLabel?: string | null;
+  photoUrl?: string | null;
   /** Pinned scene cards sit below live activity; new posts stack above them. */
   pinned?: boolean;
   /** Opens the site feedback modal when set to "feedback". */
@@ -66,7 +69,11 @@ export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
 const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
   all: () => true,
   events: (item) => item.kind === "event" || item.kind === "event_update",
-  posts: (item) => item.kind === "checkin" || item.kind === "beach",
+  posts: (item) =>
+    item.kind === "checkin"
+    || item.kind === "beach"
+    || item.kind === "feed_text"
+    || item.kind === "feed_photo",
   rsvps: (item) => item.kind === "rsvp",
   boards: (item) => ["gifting", "spotted", "gig"].includes(item.kind),
 };
@@ -98,6 +105,8 @@ export function hubFeedBadgeColor(kind: HubFeedKind): string {
     gig: "var(--panel-purple)",
     beach: "var(--panel-orange)",
     feedback: "var(--panel-lime)",
+    feed_text: "var(--panel-cyan)",
+    feed_photo: "var(--panel-magenta)",
   };
   return map[kind] ?? "var(--panel-cyan)";
 }

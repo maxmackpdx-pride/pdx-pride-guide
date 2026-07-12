@@ -177,6 +177,7 @@ export default function Dashboard() {
   });
 
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
+  const canPostToFeed = Boolean(isAdmin || user?.promoterStatus === "approved");
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
   const canManageTeam = Boolean(user?.canManageTeam || adminSession?.canManageTeam || isSuperAdmin);
 
@@ -500,6 +501,7 @@ export default function Dashboard() {
       <HubV2
         user={user}
         isAdmin={isAdmin}
+        canPostToFeed={canPostToFeed}
         canManageTeam={canManageTeam}
         pendingCount={pendingCount}
         postsCount={postsCount}

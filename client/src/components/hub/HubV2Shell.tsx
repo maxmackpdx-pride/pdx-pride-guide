@@ -6,6 +6,7 @@ import {
   HubIconEvents,
   HubIconFeed,
   HubIconPeople,
+  HubIconPost,
   HubIconProfile,
   HubIconSettings,
   HubIconWerk,
@@ -17,10 +18,12 @@ type NavItem = {
   label: string;
   icon: ReactNode;
   teamOnly?: boolean;
+  posterOnly?: boolean;
 };
 
 const MAIN_NAV: NavItem[] = [
   { key: "feed", label: "Feed", icon: <HubIconFeed /> },
+  { key: "post", label: "Post", icon: <HubIconPost />, posterOnly: true },
   { key: "profile", label: "Profile", icon: <HubIconProfile /> },
   { key: "events", label: "Events", icon: <HubIconEvents /> },
   { key: "people", label: "People", icon: <HubIconPeople /> },
@@ -41,6 +44,7 @@ export type HubV2ShellProps = {
   section: HubSection;
   onSectionChange: (section: HubSection) => void;
   isAdmin: boolean;
+  canPostToFeed?: boolean;
   canManageTeam?: boolean;
   children: ReactNode;
   rightRail: ReactNode;
@@ -55,12 +59,14 @@ export default function HubV2Shell({
   section,
   onSectionChange,
   isAdmin,
+  canPostToFeed = false,
   canManageTeam = false,
   children,
   rightRail,
   calmMode,
 }: HubV2ShellProps) {
   const adminNav = ADMIN_NAV.filter((item) => !item.teamOnly || canManageTeam);
+  const mainNav = MAIN_NAV.filter((item) => !item.posterOnly || canPostToFeed);
 
   return (
     <div
@@ -74,7 +80,7 @@ export default function HubV2Shell({
     >
       <div className="grid3">
         <aside className="lrail hs" style={{ maxHeight: "calc(100vh - 100px)", overflow: "auto" }}>
-          {MAIN_NAV.map((item) => (
+          {mainNav.map((item) => (
             <button
               key={item.key}
               type="button"

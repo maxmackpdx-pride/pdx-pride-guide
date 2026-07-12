@@ -2055,8 +2055,111 @@ export function registerRoutes(httpServer: Server, app: Express) {
       limit: Number.isFinite(limit) ? limit : 30,
       cursor,
       viewerUserId: req.session.userId,
+      viewerIsAdmin: sessionIsAdmin(req),
     });
     res.json(feed);
+  });
+
+  app.get("/api/hub/feed/post-options", requireAuth, (req, res) => {
+    const userId = req.session.userId!;
+    const isAdmin = sessionIsAdmin(req);
+    const canPost = storage.canUserPostToHubFeed(userId, isAdmin);
+    const hostedIds = storage.getHostedLiveEventIds(userId);
+    const hostedEvents = hostedIds.map((id) => {
+      const evt = storage.getEvent(id);
+      if (!evt) return null;
+      return { id: evt.id, title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek };
+    }).filter(Boolean);
+    res.json({ canPost, hostedEvents });
+  });
+
+  app.get("/api/hub/feed/posts/mine", requireAuth, (req, res) => {
+    const userId = req.session.userId!;
+    const isAdmin = sessionIsAdmin(req);
+    if (!storage.canUserPostToHubFeed(userId, isAdmin)) {
+      return res.status(403).json({ error: "Not allowed to post to the scene feed" });
+    }
+    const posts = storage.getHubFeedPostsByUser(userId, 20);
+    res.json(posts);
+  });
+
+  app.post("/api/hub/feed/posts", requireAuth, (req, res) => {
+    const userId = req.session.userId!;
+    const user = storage.getUserById(userId);
+    const isAdmin = sessionIsAdmin(req);
+    if (!user || !storage.canUserPostToHubFeed(userId, isAdmin)) {
+      return res.status(403).json({ error: "Only approved promoters and admins can post to the scene feed" });
+    }
+
+    const postType = String(req.body.postType || "").trim().toLowerCase();
+    if (postType !== "text" && postType !== "photo") {
+      return res.status(400).json({ error: "postType must be text or photo" });
+    }
+
+    const audience = String(req.body.audience || "ALL").trim().toUpperCase();
+    if (audience !== "ALL" && audience !== "RSVPS") {
+      return res.status(400).json({ error: "audience must be ALL or RSVPS" });
+    }
+
+    const body = req.body.body != null ? String(req.body.body).trim().slice(0, 1000) : "";
+    const photoUrl = req.body.photoUrl != null ? String(req.body.photoUrl).trim() : "";
+
+    if (postType === "text") {
+      if (!body) return res.status(400).json({ error: "Text posts need a message" });
+      if (photoUrl) return res.status(400).json({ error: "Text posts cannot include a photo" });
+    } else {
+      if (!photoUrl || (!photoUrl.startsWith("/uploads/") && !photoUrl.startsWith("https://"))) {
+        return res.status(400).json({ error: "Photo posts need a valid uploaded image" });
+      }
+      if (!body && !photoUrl) return res.status(400).json({ error: "Photo posts need an image" });
+    }
+
+    let eventId: number | null = null;
+    if (req.body.eventId != null && req.body.eventId !== "") {
+      eventId = Number(req.body.eventId);
+      if (!Number.isInteger(eventId) || eventId <= 0) {
+        return res.status(400).json({ error: "Invalid event" });
+      }
+      if (!storage.isUserEventHost(eventId, userId)) {
+        return res.status(403).json({ error: "You can only target RSVPs for events you host" });
+      }
+    }
+
+    if (audience === "RSVPS") {
+      const hosted = storage.getHostedLiveEventIds(userId);
+      if (hosted.length === 0) {
+        return res.status(400).json({ error: "RSVP-only posts require at least one live hosted event" });
+      }
+      if (eventId != null && !hosted.includes(eventId)) {
+        return res.status(400).json({ error: "That event is not in your hosted list" });
+      }
+    } else if (eventId != null) {
+      return res.status(400).json({ error: "eventId is only valid for RSVP audience" });
+    }
+
+    if (moderationGate(res, "Scene feed post", { body: body || null })) return;
+
+    const post = storage.createHubFeedPost({
+      userId,
+      postType,
+      body: body || null,
+      photoUrl: photoUrl || null,
+      audience,
+      eventId,
+    });
+    res.json(post);
+  });
+
+  app.delete("/api/hub/feed/posts/:id", requireAuth, (req, res) => {
+    const userId = req.session.userId!;
+    const result = storage.removeHubFeedPost(Number(req.params.id), userId, { isAdmin: sessionIsAdmin(req) });
+    if ("error" in result) return res.status(400).json({ error: result.error });
+    res.json(result);
+  });
+
+  app.post("/api/upload/feed-photo", requireAuth, upload.single("photo"), (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
+    res.json({ url: `/uploads/${req.file.filename}` });
   });
 
   // ─── MEMBER PROFILES + FOLLOWS ───────────────────────────────────────────

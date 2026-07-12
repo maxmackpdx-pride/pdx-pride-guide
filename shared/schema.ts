@@ -591,6 +591,27 @@ export const insertHostMessageSchema = createInsertSchema(hostMessages).omit({ i
 export type InsertHostMessage = z.infer<typeof insertHostMessageSchema>;
 export type HostMessage = typeof hostMessages.$inferSelect;
 
+// Promoter/admin scene feed posts (text or photo)
+export const hubFeedPosts = sqliteTable("hub_feed_posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  postType: text("post_type").notNull(), // text | photo
+  body: text("body"),
+  photoUrl: text("photo_url"),
+  audience: text("audience").notNull().default("ALL"), // ALL | RSVPS
+  eventId: integer("event_id"),
+  status: text("status").notNull().default("LIVE"), // LIVE | REMOVED
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertHubFeedPostSchema = createInsertSchema(hubFeedPosts).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+});
+export type InsertHubFeedPost = z.infer<typeof insertHubFeedPostSchema>;
+export type HubFeedPost = typeof hubFeedPosts.$inferSelect;
+
 // Event hosts (up to 3 per event — primary + co-hosts)
 export const eventHosts = sqliteTable("event_hosts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
