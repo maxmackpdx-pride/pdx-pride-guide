@@ -93,7 +93,12 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
     staleTime: 300_000,
     enabled: !dismissedToday,
   });
-  const foundEvent = events.find((e) => /stank\s*yes\s*coach|yes\s*coach\s*stank/i.test(e.title || ""));
+  // Match "stank" + "yes coach" in any order, tolerating any separators
+  // (spaces, dashes, colons, em-dashes) so a punctuation variant can't hide it.
+  const foundEvent = events.find((e) => {
+    const t = e.title || "";
+    return /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(t) || /\bstank\b/i.test(t);
+  });
   // Show unless dismissed today or the event has already ended.
   const stankEvent = foundEvent && !dismissedToday && Date.now() <= eventEndMs(foundEvent)
     ? foundEvent
