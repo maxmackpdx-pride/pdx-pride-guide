@@ -4555,7 +4555,8 @@ function buildHubFeedPinnedItems(goingCounts: Record<number, { count: number }>)
         kind: "gig",
         badge: "Gig",
         action: "Open on Pride Werk",
-        text: gig.description || gig.title,
+        title: gig.title,
+        text: gig.description || null,
         createdAt: anchorTime,
         author: hubFeedAuthorFromUser({
           displayName: gig.displayName || gig.name,
@@ -4564,7 +4565,7 @@ function buildHubFeedPinnedItems(goingCounts: Record<number, { count: number }>)
           avatarChoice: gig.avatarChoice,
           avatarRing: gig.posterAvatarRing,
         }),
-        link: "/pride-work",
+        link: `/pride-work?post=${gig.id}`,
         pinned: true,
       });
     }
@@ -8785,7 +8786,8 @@ export const storage: IStorage = {
         kind: "gifting",
         badge: post.postType === "ISO" ? "ISO" : "Gifting",
         action: post.postType === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
-        text: post.description || post.title,
+        title: post.title,
+        text: post.description || null,
         createdAt: post.createdAt || post.created_at,
         author: hubFeedAuthorFromUser({
           displayName: post.displayName,
@@ -8794,7 +8796,8 @@ export const storage: IStorage = {
           avatarChoice: post.avatarChoice,
           avatarRing: post.posterAvatarRing,
         }),
-        link: "/gifting",
+        // Deep-link opens the free board with this exact post expanded.
+        link: `/gifting?post=${post.id}`,
       });
     }
 
@@ -8805,7 +8808,8 @@ export const storage: IStorage = {
         kind: "gig",
         badge: gig.postType === "LOOKING_FOR_WORK" ? "Looking" : "Gig",
         action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Pride Werk" : "Posted a gig on Pride Werk",
-        text: gig.description || gig.title,
+        title: gig.title,
+        text: gig.description || null,
         createdAt: gig.createdAt,
         author: hubFeedAuthorFromUser({
           displayName: gig.displayName,
@@ -8814,7 +8818,8 @@ export const storage: IStorage = {
           avatarChoice: gig.avatarChoice,
           avatarRing: gig.posterAvatarRing,
         }),
-        link: "/pride-work",
+        // Deep-link opens Pride Werk with this exact post expanded.
+        link: `/pride-work?post=${gig.id}`,
       });
     }
 

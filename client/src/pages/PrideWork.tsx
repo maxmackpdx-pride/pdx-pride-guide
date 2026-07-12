@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -123,6 +123,7 @@ export default function PrideWork() {
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [sort, setSort] = useState("RECENT");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const deepLinkHandled = useRef(false);
   const [acceptRules, setAcceptRules] = useState(false);
   const [venueQuery, setVenueQuery] = useState("");
   const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
@@ -140,6 +141,21 @@ export default function PrideWork() {
       return r.json();
     },
   });
+
+  // Deep-link from the hub feed: /pride-work?post=<id> opens that gig expanded.
+  useEffect(() => {
+    if (deepLinkHandled.current || !gigs.length) return;
+    const pid = new URLSearchParams(window.location.search).get("post");
+    if (!pid) { deepLinkHandled.current = true; return; }
+    const id = Number(pid);
+    deepLinkHandled.current = true;
+    if (Number.isFinite(id) && gigs.some(g => g.id === id)) {
+      setExpandedId(id);
+      window.setTimeout(() => {
+        document.getElementById(`board-post-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 350);
+    }
+  }, [gigs]);
 
   const { data: ownedBusinesses = [] } = useQuery<Business[]>({
     queryKey: ["/api/directory/mine/owned"],
@@ -720,6 +736,7 @@ function GigListingCard({
 
   return (
     <article
+      id={`board-post-${gig.id}`}
       data-testid={`card-gig-${gig.id}`}
       className={`board-listing-card board-listing-card--makeover${expanded ? " is-expanded" : ""}`}
       style={{ "--listing-accent": accent } as React.CSSProperties}

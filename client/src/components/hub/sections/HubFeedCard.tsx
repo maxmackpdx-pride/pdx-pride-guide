@@ -49,6 +49,9 @@ export default function HubFeedCard({ item }: Props) {
   };
   const glow = BOARD_ACCENTS[item.kind];
   const isSpotted = item.kind === "spotted";
+  // Board posts with an author (gigs, gifts) show the post title as a bold
+  // subject line, matching the board's expanded card.
+  const showSubject = (item.kind === "gig" || item.kind === "gifting") && !!item.title;
 
   const eventBlock = item.event ? (
     <Link
@@ -262,6 +265,21 @@ export default function HubFeedCard({ item }: Props) {
               {item.badge}
             </span>
           </div>
+          {showSubject && (
+            <h4
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 800,
+                fontSize: 19,
+                color: "#fff",
+                textTransform: "uppercase",
+                lineHeight: 1.08,
+                margin: "12px 0 0",
+              }}
+            >
+              {item.title}
+            </h4>
+          )}
           {item.text && (
             <p style={{ margin: "12px 0 0", fontSize: 14.5, lineHeight: 1.55, color: "var(--board-text)" }}>
               {item.text}

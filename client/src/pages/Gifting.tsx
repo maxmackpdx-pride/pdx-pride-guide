@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Gift, HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
@@ -114,6 +114,7 @@ export default function Gifting() {
   const [activeNote, setActiveNote] = useState<Record<number, string>>({});
   const [report, setReport] = useState<Record<number, string>>({});
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const deepLinkHandled = useRef(false);
 
   const { data: posts = [], isLoading, isError, error } = useQuery<GiftingPost[]>({
     queryKey: ["/api/gifting"],
@@ -144,6 +145,23 @@ export default function Gifting() {
       else gift += 1;
     }
     return { ALL: active.length, GIFT: gift, ISO: iso, GRAB: grab };
+  }, [posts]);
+
+  // Deep-link from the hub feed: /gifting?post=<id> opens that post expanded.
+  useEffect(() => {
+    if (deepLinkHandled.current || !posts.length) return;
+    const pid = new URLSearchParams(window.location.search).get("post");
+    if (!pid) { deepLinkHandled.current = true; return; }
+    const id = Number(pid);
+    if (Number.isFinite(id) && posts.some(p => p.id === id)) {
+      deepLinkHandled.current = true;
+      setExpandedId(id);
+      window.setTimeout(() => {
+        document.getElementById(`board-post-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 350);
+    } else if (posts.length) {
+      deepLinkHandled.current = true;
+    }
   }, [posts]);
 
   const filtered = useMemo(() => {
@@ -509,6 +527,7 @@ export default function Gifting() {
               return (
                 <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
                   <article
+                    id={`board-post-${post.id}`}
                     className={`board-listing-card board-listing-card--makeover${expanded ? " is-expanded" : ""}`}
                     style={{ "--listing-accent": accent } as React.CSSProperties}
                     onClick={() => setExpandedId(expanded ? null : post.id)}
