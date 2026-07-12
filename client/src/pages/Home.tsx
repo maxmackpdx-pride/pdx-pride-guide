@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { EventListing } from "@shared/multiDayEvents";
-import { pacificTodayDate } from "@shared/missedConnections";
 
 import ScrollReveal from "@/components/ScrollReveal";
 import HomeHero from "@/components/HomeHero";
@@ -31,7 +30,6 @@ const COMMUNITY_LINKS = {
 } as const;
 
 const PLACES_FALLBACK = 64;
-const BEACH_CHECKINS_FALLBACK = 128;
 
 const DIRECTORY_CHIPS = [
   { label: "Bars", color: "var(--cat-bars)" },
@@ -62,19 +60,9 @@ export default function Home() {
     staleTime: 60_000,
   });
 
-  const today = pacificTodayDate();
-
-  const { data: roosterCheckins = [] } = useQuery<unknown[]>({
-    queryKey: ["/api/river-brats/checkins", "rooster-rock", today],
-    queryFn: () =>
-      apiRequest("GET", `/api/river-brats/checkins?beach=rooster-rock&date=${today}`).then(r => r.json()),
-    staleTime: 60_000,
-  });
-
-  const { data: sauvieCheckins = [] } = useQuery<unknown[]>({
-    queryKey: ["/api/river-brats/checkins", "sauvie-island", today],
-    queryFn: () =>
-      apiRequest("GET", `/api/river-brats/checkins?beach=sauvie-island&date=${today}`).then(r => r.json()),
+  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count?: number }>>({
+    queryKey: ["/api/events/attendance-summaries"],
+    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
     staleTime: 60_000,
   });
 
@@ -88,17 +76,17 @@ export default function Home() {
   const upNext = useMemo(() => eventsForMonday(events, 4), [events]);
   const countdownTarget = useMemo(() => earliestPrideWeekStartTarget(events), [events]);
   const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
-  const beachCheckins =
-    roosterCheckins.length + sauvieCheckins.length > 0
-      ? roosterCheckins.length + sauvieCheckins.length
-      : BEACH_CHECKINS_FALLBACK;
+  const goingCount = useMemo(
+    () => Object.values(attendanceSummaries).reduce((sum, s) => sum + (s?.count ?? 0), 0),
+    [attendanceSummaries],
+  );
 
   return (
     <div className="home-main-stage">
       <HomeHero eventCount={events.length} />
       <HomeStatStrip
         placesCount={placesCount}
-        beachCheckins={beachCheckins}
+        goingCount={goingCount}
         countdownTarget={countdownTarget}
       />
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 type Props = {
   placesCount: number;
-  beachCheckins: number;
+  goingCount: number;
   countdownTarget: string;
 };
 
@@ -14,8 +14,8 @@ function diffMs(target: string) {
   return Math.max(0, new Date(target).getTime() - Date.now());
 }
 
-/** Three-column stat band: kickoff countdown, directory places, beach check-ins. */
-export default function HomeStatStrip({ placesCount, beachCheckins, countdownTarget }: Props) {
+/** Three-column stat band: kickoff countdown, directory places, RSVPs going. */
+export default function HomeStatStrip({ placesCount, goingCount, countdownTarget }: Props) {
   const [left, setLeft] = useState(() => diffMs(countdownTarget));
 
   useEffect(() => {
@@ -60,8 +60,8 @@ export default function HomeStatStrip({ placesCount, beachCheckins, countdownTar
         <div className="home-stat-strip__label">Queer places to back</div>
       </div>
       <div className="home-stat-strip__cell home-stat-strip__cell--last">
-        <div className="home-stat-strip__value home-stat-strip__value--orange">{beachCheckins}</div>
-        <div className="home-stat-strip__label">Check-ins · nude beaches</div>
+        <div className="home-stat-strip__value home-stat-strip__value--orange">{goingCount}</div>
+        <div className="home-stat-strip__label">Going to events</div>
       </div>
     </div>
   );
