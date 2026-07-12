@@ -77,6 +77,30 @@ export default function PushNotificationPrompt() {
     setVisible(false);
   };
 
+  // Open the native Share sheet so the user can reach iOS's "Add to Home
+  // Screen" (which saves the site as a web app). On iOS Safari the OS still
+  // requires the manual Share → Add to Home Screen tap, so we also point there.
+  const saveAsWebApp = async () => {
+    const shareData = {
+      title: "PDX Pride Guide",
+      text: "Save PDX Pride Guide as an app on your home screen.",
+      url: window.location.origin,
+    };
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch {
+      // User cancelled the share sheet — nothing to do.
+      return;
+    }
+    toast({
+      title: "Tap Share, then Add to Home Screen",
+      description: "In Safari, tap the Share icon, then choose Add to Home Screen to save the web app.",
+    });
+  };
+
   const allow = async () => {
     if (installFirst) {
       dismiss();
@@ -161,17 +185,26 @@ export default function PushNotificationPrompt() {
           className="display"
           style={{ color: "#fff", fontSize: "clamp(1.6rem, 6vw, 2.4rem)", lineHeight: 1.05, marginBottom: 14 }}
         >
-          {installFirst ? "ADD TO HOME SCREEN FIRST" : "ALLOW NOTIFICATIONS?"}
+          {installFirst ? "SAVE AS WEB APP" : "ALLOW NOTIFICATIONS?"}
         </h2>
 
         <p style={{ color: "#bbb", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: 20 }}>
           {installFirst
-            ? "On iPhone, push alerts only work from the installed Pride Guide app. Tap Share, then Add to Home Screen. Open it from your home screen and we'll ask again."
+            ? "On iPhone, push alerts only work once Pride Guide is saved as an app. Tap Save as Web App below, then choose Add to Home Screen. Open it from your home screen and we'll ask again."
             : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer."}
         </p>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {!installFirst && (
+          {installFirst ? (
+            <button
+              type="button"
+              className="btn-neon solid"
+              onClick={saveAsWebApp}
+              style={{ borderColor: "#19E3FF", background: "#19E3FF", color: "#000" }}
+            >
+              SAVE AS WEB APP
+            </button>
+          ) : (
             <button
               type="button"
               className="btn-neon solid"
