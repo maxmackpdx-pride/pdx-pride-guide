@@ -13,13 +13,38 @@ import FeaturedEventAd from "./FeaturedEventAd";
 import HubFeedCard from "./HubFeedCard";
 import HubPost from "./HubPost";
 
-const STANK_PROMO_DISMISS_KEY = "hub-promo-stank-yes-coach-dismissed";
+// Stores the Pacific day the ad was dismissed on; it reappears the next day.
+// (New key name so the old "dismissed forever" flag is ignored.)
+const STANK_PROMO_DISMISS_KEY = "hub-promo-stank-dismissed-day";
 
 // Slideshow images that rotate after the poster in the Stank ad (2s each).
 // Add more files to /public/posters/stank-slides/ and list them here.
 const STANK_SLIDES = Array.from({ length: 11 }, (_, i) =>
   `/posters/stank-slides/slide-${String(i + 1).padStart(2, "0")}.jpg`,
 );
+
+function pacificDayKey(ms = Date.now()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(ms));
+}
+
+function withPacificTz(raw: string): string {
+  return /[zZ]|[+-]\d\d:?\d\d$/.test(raw) ? raw : `${raw}-07:00`;
+}
+
+function eventEndMs(e: EventListing): number {
+  const start = new Date(withPacificTz(e.dateStart)).getTime();
+  if (e.dateEnd) {
+    let end = new Date(withPacificTz(e.dateEnd)).getTime();
+    if (end < start) end += 86_400_000; // end time crosses midnight (e.g. 9pm–2am)
+    return end;
+  }
+  return start + 6 * 3_600_000; // no end time: assume a ~6h run
+}
 
 function emptyCopy(tab: HubFeedTab): string {
   switch (tab) {
@@ -45,10 +70,11 @@ type Props = {
 export default function HubFeed({ canPostToFeed = false }: Props) {
   const [filter, setFilter] = useState<HubFeedTab>("all");
   const [composing, setComposing] = useState(false);
-  const [promoDismissed, setPromoDismissed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(STANK_PROMO_DISMISS_KEY) === "1";
+  const [dismissedDay, setDismissedDay] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(STANK_PROMO_DISMISS_KEY) || "";
   });
+  const dismissedToday = dismissedDay === pacificDayKey();
 
   const feedQuery = useQuery<HubFeedResponse>({
     queryKey: ["/api/hub/feed", filter],
@@ -60,20 +86,23 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
     },
   });
 
-  // Featured promo: find the Stank Yes Coach event to link the top card to.
+  // Featured promo: find the Stank Yes Coach event to feature at the top.
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => fetch("/api/events", { credentials: "include" }).then((r) => r.json()),
     staleTime: 300_000,
-    enabled: !promoDismissed,
+    enabled: !dismissedToday,
   });
-  const stankEvent = promoDismissed
-    ? undefined
-    : events.find((e) => /stank\s*yes\s*coach|yes\s*coach\s*stank/i.test(e.title || ""));
+  const foundEvent = events.find((e) => /stank\s*yes\s*coach|yes\s*coach\s*stank/i.test(e.title || ""));
+  // Show unless dismissed today or the event has already ended.
+  const stankEvent = foundEvent && !dismissedToday && Date.now() <= eventEndMs(foundEvent)
+    ? foundEvent
+    : undefined;
 
   const dismissPromo = () => {
-    setPromoDismissed(true);
-    try { window.localStorage.setItem(STANK_PROMO_DISMISS_KEY, "1"); } catch { /* ignore */ }
+    const day = pacificDayKey();
+    setDismissedDay(day);
+    try { window.localStorage.setItem(STANK_PROMO_DISMISS_KEY, day); } catch { /* ignore */ }
   };
 
   const items = feedQuery.data?.items ?? [];
