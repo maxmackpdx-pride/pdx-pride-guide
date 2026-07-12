@@ -2314,13 +2314,16 @@ html.calm-mode .floating-inbox__halo {
   }
 }
 
-/* Mobile: bottom sheet floating above the bottom nav, near full width. */
+/* Mobile: bottom sheet floating above the bottom nav, near full width.
+   The bottom nav is ~84px tall, so clear it (plus a gap) or the reply/search
+   bar tucks under the nav. Cap the height so the top never slides under the
+   header. */
 @media (max-width: 640px) {
   .inbox-sheet-host .inbox-overlay {
     left: 8px;
     right: 8px;
-    bottom: calc(64px + env(safe-area-inset-bottom, 12px));
-    height: min(82vh, 720px);
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    height: min(80vh, 700px);
   }
 }
 
