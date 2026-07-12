@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -114,6 +115,9 @@ function EventModalInner({
   const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
+  // Border + glow accent: the day color, or a neutral neon for events with no
+  // weekday (so they don't get a stark white frame).
+  const accentColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
 
   const extraPeople = [
     ...eventHosts.map(h => ({
@@ -349,9 +353,14 @@ function EventModalInner({
 
   const modColor = modMode ? modAccent[modMode] : "var(--text-lo)";
 
-  return (
+  return createPortal(
     <div className="event-modal-overlay" onClick={onClose}>
-      <div className="event-modal" onClick={e => e.stopPropagation()} data-testid="event-modal">
+      <div
+        className="event-modal"
+        onClick={e => e.stopPropagation()}
+        data-testid="event-modal"
+        style={{ "--event-accent": accentColor } as React.CSSProperties}
+      >
         <div className="event-modal__bar" style={{ background: dayColor }} />
 
         <div className="event-modal__poster">
@@ -838,6 +847,7 @@ function EventModalInner({
         </div>
       </div>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    </div>
+    </div>,
+    document.body,
   );
 }

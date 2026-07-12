@@ -7666,22 +7666,27 @@ footer a:hover { color: #00FFFF !important; }
 .event-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  /* Above the mobile nav bars so the whole card (top + bottom edges) shows and
+     the dimmed backdrop covers the nav too, like the board overlays. */
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: calc(env(safe-area-inset-top, 0px) + 52px) 16px calc(env(safe-area-inset-bottom, 0px) + 76px);
   background: rgba(0, 0, 0, 0.88);
+  overflow-y: auto;
 }
 
 .event-modal {
   position: relative;
   width: 100%;
   max-width: 660px;
-  max-height: 90vh;
+  max-height: 76vh;
   overflow: auto;
   background: #0d0d0d;
-  border: 1px solid #222;
+  border: 2px solid var(--event-accent, #222);
+  border-radius: 18px;
+  box-shadow: 0 0 60px -14px var(--event-accent, transparent);
 }
 
 .event-modal__bar {
@@ -7700,7 +7705,7 @@ footer a:hover { color: #00FFFF !important; }
   display: block;
   width: 100%;
   height: auto;
-  max-height: min(75vh, 720px);
+  max-height: min(46vh, 460px);
   object-fit: contain;
 }
 
