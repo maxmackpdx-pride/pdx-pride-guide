@@ -8819,22 +8819,41 @@ export const storage: IStorage = {
     }
 
     for (const row of storage.getMissedConnections("ACTIVE", viewerUserId).slice(0, 12)) {
+      // Mirror the board's spottedKind()/spottedPlace() so the feed card and the
+      // detail card that opens on tap read identically.
+      const kind = row.eventId != null
+        ? { label: "At an event", color: "#19e3ff" }
+        : row.beachId === "rooster-rock"
+          ? { label: "Rooster Rock", color: "#19e3ff" }
+          : row.beachId === "sauvie-island"
+            ? { label: "Sauvie Island", color: "#ff6600" }
+            : row.beachId
+              ? { label: "At the beach", color: "#ff6600" }
+              : { label: "Around town", color: "#ff8c00" };
+      const place = row.eventTitle
+        ? (row.eventVenue ? `At ${row.eventTitle} · ${row.eventVenue}` : `At ${row.eventTitle}`)
+        : row.beachId
+          ? (row.venueHint || (row.beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island"))
+          : (row.venueHint ? `Around town · ${row.venueHint}` : "Around town");
+      const subject = (row.title && String(row.title).trim())
+        || (row.body ? String(row.body).trim().split(/\n/)[0].slice(0, 80) : "")
+        || "Missed connection";
       items.push({
         id: `spotted-${row.id}`,
         kind: "spotted",
         badge: "Missed Connection",
         action: "New missed connection",
-        text: row.body || row.title,
-        place: row.eventTitle
-          ? (row.eventVenue ? `${row.eventTitle} · ${row.eventVenue}` : row.eventTitle)
-          : (row.venueHint ? `Around town · ${row.venueHint}` : "Around town"),
+        title: subject,
+        text: row.body || "",
+        place,
         createdAt: row.createdAt,
         // Missed connections are anonymous — the card renders without a person.
         author: { displayName: "Missed Connection", anonymous: true },
-        // No event embed: the card carries the place in `place` and links
-        // straight to the Missed Connections board, not the event card.
+        // No event embed: tapping opens the Missed Connections detail card
+        // (see `spotted`), it does not deep-link to an event.
         event: null,
         link: "/spotted",
+        spotted: { id: row.id, kindLabel: kind.label, kindColor: kind.color },
       });
     }
 

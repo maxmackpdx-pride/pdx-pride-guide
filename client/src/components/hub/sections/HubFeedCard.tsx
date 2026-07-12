@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
+import SpottedDetailModal from "@/components/SpottedDetailModal";
 import { timeAgo } from "@/lib/boardFeed";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedItem } from "@shared/hubFeed";
@@ -34,6 +35,7 @@ function eventHref(item: HubFeedItem): string | null {
 
 export default function HubFeedCard({ item }: Props) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [spottedOpen, setSpottedOpen] = useState(false);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
   const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
@@ -119,9 +121,16 @@ export default function HubFeedCard({ item }: Props) {
   const body = (
     <div
       className={`card fitem${item.pinned ? " hub-feed-pin" : ""}`}
+      onClick={isSpotted ? () => setSpottedOpen(true) : undefined}
+      onKeyDown={isSpotted ? (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSpottedOpen(true); }
+      } : undefined}
+      role={isSpotted ? "button" : undefined}
+      tabIndex={isSpotted ? 0 : undefined}
       style={{
         padding: "16px 18px",
         borderRadius: 16,
+        ...(isSpotted ? { cursor: "pointer" } : {}),
         ...(glow
           ? { border: `1px solid ${glow}`, boxShadow: `0 0 22px -9px ${glow}` }
           : item.pinned
@@ -154,45 +163,58 @@ export default function HubFeedCard({ item }: Props) {
               Missed Connection{when ? ` · ${when}` : ""}
             </span>
           </div>
-          {item.place && (
-            <div
+          {(item.title || item.text) && (
+            <h3
+              className="display"
               style={{
                 fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 15,
+                fontWeight: 800,
+                fontSize: 27,
                 color: "#fff",
-                textTransform: "uppercase",
-                lineHeight: 1.15,
-                marginTop: 10,
+                lineHeight: 1.02,
+                margin: "11px 0 0",
               }}
             >
-              {item.place}
-            </div>
+              {item.title || item.text}
+            </h3>
           )}
           {item.text && (
             <p
               style={{
                 margin: "10px 0 0",
-                fontSize: 15,
+                fontSize: 14.5,
                 lineHeight: 1.55,
                 color: "var(--board-text)",
-                fontStyle: "italic",
               }}
             >
-              &ldquo;{item.text}&rdquo;
+              {item.text}
             </p>
+          )}
+          {item.place && (
+            <div
+              className="kick"
+              style={{
+                marginTop: 14,
+                fontSize: 10.5,
+                letterSpacing: ".12em",
+                color: "var(--panel-magenta)",
+                textTransform: "uppercase",
+              }}
+            >
+              {item.place} · Anonymous
+            </div>
           )}
           <div
             className="kick"
             style={{
-              marginTop: 14,
+              marginTop: 12,
               fontSize: 10.5,
               letterSpacing: ".12em",
               color: "var(--panel-magenta)",
               textTransform: "uppercase",
             }}
           >
-            See on Missed Connections →
+            Reply privately →
           </div>
         </div>
       ) : (
@@ -269,6 +291,27 @@ export default function HubFeedCard({ item }: Props) {
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
+
+  // Missed-connection cards open the board's detail card in place (same overlay
+  // you get tapping a post on the board), rather than deep-linking away.
+  if (isSpotted) {
+    return (
+      <>
+        {body}
+        {spottedOpen && item.spotted && (
+          <SpottedDetailModal
+            postId={item.spotted.id}
+            title={item.title || item.text || "Missed connection"}
+            body={item.text || ""}
+            place={item.place || ""}
+            kindLabel={item.spotted.kindLabel}
+            kindColor={item.spotted.kindColor}
+            onClose={() => setSpottedOpen(false)}
+          />
+        )}
+      </>
+    );
+  }
 
   if (href && !item.event && item.ctaAction !== "feedback") {
     return (

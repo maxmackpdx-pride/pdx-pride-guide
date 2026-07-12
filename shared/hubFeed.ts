@@ -44,8 +44,16 @@ export type HubFeedItem = {
   link?: string | null;
   beachId?: string | null;
   beachLabel?: string | null;
+  /** Subject line for missed-connection cards (shown in the display font). */
+  title?: string | null;
   /** Place hint for missed-connection cards (venue or "around town"). */
   place?: string | null;
+  /** Payload for opening the Missed Connections detail card from the feed. */
+  spotted?: {
+    id: number;
+    kindLabel: string;
+    kindColor: string;
+  } | null;
   photoUrl?: string | null;
   /** Pinned scene cards sit below live activity; new posts stack above them. */
   pinned?: boolean;

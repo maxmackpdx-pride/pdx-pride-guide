@@ -7,6 +7,7 @@ import BoardLoadingState from "./BoardLoadingState";
 import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "./BoardActiveSection";
 import ScrollReveal from "./ScrollReveal";
 import SpottedCard, { spottedKind, spottedPlace } from "./SpottedCard";
+import SpottedDetailModal from "./SpottedDetailModal";
 import { Button } from "@/components/ds";
 import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./MissedConnectionsPanel";
 
@@ -55,7 +56,6 @@ export default function SpottedCardGrid({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("RECENT");
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
-  const [replyBody, setReplyBody] = useState("");
 
   const [spotMode, setSpotMode] = useState<SpotMode>(AROUND_TOWN_KEY);
   const [draftEventId, setDraftEventId] = useState("");
@@ -154,26 +154,6 @@ export default function SpottedCardGrid({
       toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
     },
     onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
-  });
-
-  const replyMutation = useMutation({
-    mutationFn: () =>
-      fetch(`/api/missed-connections/${replyingTo!.id}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ body: replyBody }),
-      }).then(async r => {
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(data.error || "Could not send reply");
-        return data;
-      }),
-    onSuccess: () => {
-      setReplyingTo(null); setReplyBody("");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-      toast({ title: "Private reply sent", description: "Thread is private. Reveal yourself in inbox when you're ready." });
-    },
-    onError: () => toast({ title: "Could not send reply", variant: "destructive" }),
   });
 
   const renderEventOptions = (items: LinkableMissedConnectionEvent[], label: string) => {
@@ -366,56 +346,15 @@ export default function SpottedCardGrid({
   );
 
   const replyModal = replyingTo && (
-    <div className="board-detail-backdrop" onClick={() => setReplyingTo(null)}>
-      <div
-        className="board-detail-modal board-detail-modal--spotted"
-        onClick={e => e.stopPropagation()}
-        style={{ "--listing-accent": "#ff1fa0" } as React.CSSProperties}
-      >
-        <button type="button" className="gifting-close" onClick={() => setReplyingTo(null)} aria-label="Close">
-          <X size={18} />
-        </button>
-        <span className="board-detail-modal__quote" aria-hidden="true">&rdquo;</span>
-        <div className="board-detail-modal__tags">
-          <span className="board-detail-modal__kind" style={{ color: spottedKind(replyingTo).color }}>
-            {spottedKind(replyingTo).label}
-          </span>
-        </div>
-        <h3 className="display section-heading" style={{ marginTop: 12 }}>
-          {replyingTo.title || replyingTo.body.slice(0, 80)}
-        </h3>
-        <p className="board-copy-sm" style={{ marginTop: 12, lineHeight: 1.62, whiteSpace: "pre-line" }}>
-          {replyingTo.body}
-        </p>
-        <div className="board-section-kicker board-section-kicker--magenta" style={{ marginTop: 14, fontSize: 11 }}>
-          {spottedPlace(replyingTo)} · Anonymous
-        </div>
-        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #1c1c22" }}>
-          <textarea
-            className="board-text-field"
-            value={replyBody}
-            onChange={e => setReplyBody(e.target.value)}
-            rows={3}
-            placeholder="Was this you, or were you there? Reply privately. Kind and specific goes far."
-          />
-          <Button
-            variant="solid"
-            accent="magenta"
-            size="lg"
-            arrow
-            block
-            style={{ marginTop: 12 }}
-            disabled={!replyBody.trim() || replyMutation.isPending}
-            onClick={() => replyMutation.mutate()}
-          >
-            {replyMutation.isPending ? "Sending…" : "Send private reply"}
-          </Button>
-          <p className="board-copy-sm" style={{ marginTop: 12, color: "#6a675f", fontSize: "0.72rem" }}>
-            Replies open a private, anonymous inbox thread. Reveal your profile only when you are both ready.
-          </p>
-        </div>
-      </div>
-    </div>
+    <SpottedDetailModal
+      postId={replyingTo.id}
+      title={replyingTo.title || replyingTo.body.slice(0, 80)}
+      body={replyingTo.body}
+      place={spottedPlace(replyingTo)}
+      kindLabel={spottedKind(replyingTo).label}
+      kindColor={spottedKind(replyingTo).color}
+      onClose={() => setReplyingTo(null)}
+    />
   );
 
   if (makeover) {
