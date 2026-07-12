@@ -148,7 +148,7 @@ export default function About() {
             <div className="about-v2-stats__num about-v2-stats__num--amber">
               <CountUpValue value={1} />
             </div>
-            <div className="about-v2-stats__label">Person building it</div>
+            <div className="about-v2-stats__label">Guide with all our events — and room for more</div>
           </div>
         </div>
       </section>
