@@ -13,6 +13,16 @@ import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } fro
 import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
 import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
+  filterHubFeedItems,
+  parseHubFeedTab,
+  type HubFeedAuthor,
+  type HubFeedEventEmbed,
+  type HubFeedItem,
+  type HubFeedResponse,
+  type HubFeedTab,
+} from "@shared/hubFeed";
+import { beachVenueLabel } from "@shared/riverBrats";
+import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, eventChatMessages, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports,
   beachCheckins, beachCarpoolPosts, beachCarpoolRequests, riverBratsReports,
@@ -4321,6 +4331,61 @@ function mapMissedConnectionRow(row: any, viewerUserId?: number) {
   return { ...publicRow, isMine, anonymous: !isMine };
 }
 
+function hubFeedAuthorFromUser(
+  u: {
+    displayName?: string | null;
+    username?: string | null;
+    photoUrl?: string | null;
+    avatarChoice?: number | null;
+    avatarRing?: string | null;
+  } | null | undefined,
+  anonymous = false,
+): HubFeedAuthor {
+  if (anonymous || !u) {
+    return { displayName: "Someone in the scene", anonymous: true };
+  }
+  return {
+    displayName: u.displayName || u.username || "Member",
+    username: u.username ?? null,
+    photoUrl: u.photoUrl ?? null,
+    avatarChoice: u.avatarChoice ?? 1,
+    avatarRing: u.avatarRing ?? "none",
+  };
+}
+
+function hubFeedEventEmbed(evt: any, goingCount?: number): HubFeedEventEmbed {
+  return {
+    id: Number(evt.id ?? evt.eventId),
+    title: evt.title,
+    venueName: evt.venueName ?? evt.venue_name ?? "",
+    dayOfWeek: evt.dayOfWeek ?? evt.day_of_week ?? null,
+    dateStart: evt.dateStart ?? evt.date_start ?? "",
+    admission: evt.admission ?? "FREE",
+    goingCount,
+  };
+}
+
+function hubFeedEventAuthor(evt: Event | Record<string, unknown>): HubFeedAuthor {
+  const claimedBy = (evt as Event).claimedBy ?? (evt as any).claimed_by;
+  const submittedBy = (evt as Event).submittedBy ?? (evt as any).submitted_by;
+  const venueName = (evt as Event).venueName ?? (evt as any).venue_name;
+  if (claimedBy) {
+    const u = storage.getUserByUsername(String(claimedBy));
+    if (u) return hubFeedAuthorFromUser(u);
+    return { displayName: String(claimedBy), username: String(claimedBy) };
+  }
+  if (submittedBy) {
+    const u = storage.getUserByUsername(String(submittedBy)) || storage.getUserByEmail(String(submittedBy));
+    if (u) return hubFeedAuthorFromUser(u);
+  }
+  if (venueName) return { displayName: String(venueName) };
+  return { displayName: "The scene" };
+}
+
+function hubFeedCreatedAt(row: { createdAt?: string | null; created_at?: string | null; dateStart?: string | null; date_start?: string | null }) {
+  return row.createdAt ?? row.created_at ?? row.dateStart ?? row.date_start ?? "";
+}
+
 function giftingExpiry(postType: string, from = new Date()) {
   const d = new Date(from);
   d.setDate(d.getDate() + (postType === "ISO" ? 14 : 7));
@@ -4996,6 +5061,7 @@ export interface IStorage {
   reportRiverBrats(data: InsertRiverBratsReport): void;
   getRiverBratsReports(status?: string): any[];
   resolveRiverBratsReport(id: number, adminNotes?: string): void;
+  getHubFeed(opts?: { tab?: HubFeedTab; limit?: number; cursor?: string; viewerUserId?: number }): HubFeedResponse;
   getPostableEventsForMissedConnections(requireToday?: boolean): Event[];
   getLinkableEventsForMissedConnections(): Array<{
     id: number;
@@ -8350,6 +8416,227 @@ export const storage: IStorage = {
   },
   resolveRiverBratsReport(id: number, adminNotes?: string) {
     db.update(riverBratsReports).set({ status: "RESOLVED", adminNotes: adminNotes || null } as any).where(eq(riverBratsReports.id, id)).run();
+  },
+
+  getHubFeed(opts = {}) {
+    const tab = parseHubFeedTab(opts.tab);
+    const limit = Math.min(Math.max(opts.limit ?? 30, 1), 50);
+    const viewerUserId = opts.viewerUserId;
+    const cursor = opts.cursor?.trim() || null;
+
+    expireStaleAttendances();
+    storage.expireRiverBratsCheckins();
+    expireGiftingPosts();
+    archiveExpiredMissedConnections();
+
+    const goingCounts = storage.getAttendanceSummaries();
+    const viewerRsvpEventIds = new Set<number>();
+    const viewerBeachDays = new Set<string>();
+    if (viewerUserId != null) {
+      for (const row of sqlite.prepare(`
+        SELECT event_id AS eventId FROM attendances WHERE user_id = ? AND is_active = 1
+      `).all(viewerUserId) as { eventId: number }[]) {
+        viewerRsvpEventIds.add(row.eventId);
+      }
+      for (const row of sqlite.prepare(`
+        SELECT beach_id AS beachId, calendar_date AS calendarDate
+        FROM beach_checkins WHERE user_id = ? AND is_active = 1
+      `).all(viewerUserId) as { beachId: string; calendarDate: string }[]) {
+        viewerBeachDays.add(`${row.beachId}:${row.calendarDate}`);
+      }
+    }
+
+    const items: HubFeedItem[] = [];
+
+    const recentEvents = sqlite.prepare(`
+      SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
+             date_start AS dateStart, admission, created_at AS createdAt,
+             claimed_by AS claimedBy, submitted_by AS submittedBy
+      FROM events
+      WHERE status = 'LIVE' AND datetime(created_at) >= datetime('now', '-60 days')
+      ORDER BY created_at DESC
+      LIMIT 10
+    `).all() as any[];
+    for (const evt of recentEvents) {
+      const createdAt = hubFeedCreatedAt(evt);
+      if (!createdAt) continue;
+      items.push({
+        id: `event-${evt.id}`,
+        kind: "event",
+        badge: "Event",
+        action: "Posted a new event",
+        text: evt.description?.slice(0, 280) || null,
+        createdAt,
+        author: hubFeedEventAuthor(evt),
+        event: hubFeedEventEmbed(evt, goingCounts[evt.id]?.count),
+        link: null,
+      });
+    }
+
+    const hostRows = sqlite.prepare(`
+      SELECT hm.id, hm.body, hm.created_at AS createdAt, hm.event_id AS eventId,
+             e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.admission,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM host_messages hm
+      JOIN events e ON e.id = hm.event_id AND e.status = 'LIVE'
+      JOIN users u ON u.id = hm.user_id
+      ORDER BY hm.created_at DESC
+      LIMIT 12
+    `).all() as any[];
+    for (const row of hostRows) {
+      items.push({
+        id: `event_update-${row.id}`,
+        kind: "event_update",
+        badge: "Update",
+        action: "Posted a host update",
+        text: row.body,
+        createdAt: row.createdAt,
+        author: hubFeedAuthorFromUser(row),
+        event: hubFeedEventEmbed(row, goingCounts[row.eventId]?.count),
+        link: null,
+      });
+    }
+
+    const rsvpRows = sqlite.prepare(`
+      SELECT a.id, a.message, a.is_anonymous AS isAnonymous, a.created_at AS createdAt,
+             a.user_id AS userId, a.event_id AS eventId,
+             e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.admission,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM attendances a
+      JOIN events e ON e.id = a.event_id AND e.status = 'LIVE'
+      LEFT JOIN users u ON u.id = a.user_id
+      WHERE a.is_active = 1
+      ORDER BY a.created_at DESC
+      LIMIT 25
+    `).all() as any[];
+    for (const row of rsvpRows) {
+      const viewerRsvped = viewerUserId != null && viewerRsvpEventIds.has(row.eventId);
+      const masked = maskAttendanceRow(viewerUserId, viewerRsvped, row);
+      const anonymous = Boolean(masked.isAnonymous || masked.masked);
+      items.push({
+        id: `rsvp-${row.id}`,
+        kind: "rsvp",
+        badge: "RSVP",
+        action: anonymous ? "Someone is going" : "Is going",
+        text: masked.message || null,
+        createdAt: row.createdAt,
+        author: hubFeedAuthorFromUser(anonymous ? null : row, anonymous),
+        event: hubFeedEventEmbed(row, goingCounts[row.eventId]?.count),
+        link: null,
+      });
+    }
+
+    for (const post of storage.getGiftingPosts({ viewerUserId }).slice(0, 15)) {
+      items.push({
+        id: `gifting-${post.id}`,
+        kind: "gifting",
+        badge: post.postType === "ISO" ? "ISO" : "Gifting",
+        action: post.postType === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
+        text: post.description || post.title,
+        createdAt: post.createdAt || post.created_at,
+        author: hubFeedAuthorFromUser({
+          displayName: post.displayName,
+          username: post.username,
+          photoUrl: post.posterPhotoUrl,
+          avatarChoice: post.avatarChoice,
+          avatarRing: post.posterAvatarRing,
+        }),
+        link: "/gifting",
+      });
+    }
+
+    for (const gig of storage.getGigPosts("LIVE").slice(0, 12)) {
+      items.push({
+        id: `gig-${gig.id}`,
+        kind: "gig",
+        badge: gig.postType === "LOOKING_FOR_WORK" ? "Looking" : "Gig",
+        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Pride Werk" : "Posted a gig on Pride Werk",
+        text: gig.description || gig.title,
+        createdAt: gig.createdAt,
+        author: hubFeedAuthorFromUser({
+          displayName: gig.displayName,
+          username: gig.username,
+          photoUrl: gig.posterPhotoUrl,
+          avatarChoice: gig.avatarChoice,
+          avatarRing: gig.posterAvatarRing,
+        }),
+        link: "/pride-work",
+      });
+    }
+
+    for (const row of storage.getMissedConnections("ACTIVE", viewerUserId).slice(0, 12)) {
+      items.push({
+        id: `spotted-${row.id}`,
+        kind: "spotted",
+        badge: "Spotted",
+        action: "Posted to Spotted",
+        text: row.body || row.title,
+        createdAt: row.createdAt,
+        author: row.anonymous
+          ? { displayName: row.venueHint ? `Someone at ${row.venueHint}` : "Someone in the scene", anonymous: true }
+          : hubFeedAuthorFromUser({ displayName: "Someone in the scene", anonymous: true }),
+        event: row.eventId
+          ? hubFeedEventEmbed({
+              id: row.eventId,
+              title: row.eventTitle,
+              venueName: row.eventVenue || row.venueHint || "",
+              dayOfWeek: row.eventDay || row.dayOfWeek,
+              dateStart: row.eventDateStart || row.createdAt,
+              admission: "FREE",
+            })
+          : null,
+        link: "/missed-connections",
+      });
+    }
+
+    const checkinRows = sqlite.prepare(`
+      SELECT c.id, c.beach_id AS beachId, c.note, c.is_anonymous AS isAnonymous,
+             c.created_at AS createdAt, c.user_id AS userId, c.calendar_date AS calendarDate,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM beach_checkins c
+      JOIN users u ON u.id = c.user_id
+      WHERE c.is_active = 1
+      ORDER BY c.created_at DESC
+      LIMIT 12
+    `).all() as any[];
+    for (const row of checkinRows) {
+      const beachKey = `${row.beachId}:${row.calendarDate}`;
+      const viewerCheckedIn = viewerUserId != null && viewerBeachDays.has(beachKey);
+      const isSelf = viewerUserId != null && row.userId === viewerUserId;
+      const isAnonymous = Boolean(row.isAnonymous);
+      const mask = isAnonymous || (!viewerCheckedIn && !isSelf);
+      const beachLabel = beachVenueLabel(row.beachId);
+      items.push({
+        id: `checkin-${row.id}`,
+        kind: "checkin",
+        badge: "Check-in",
+        action: `Checked in at ${beachLabel}`,
+        text: mask ? null : (row.note || null),
+        createdAt: row.createdAt,
+        author: hubFeedAuthorFromUser(mask ? null : row, mask),
+        beachId: row.beachId,
+        beachLabel,
+        link: `/nude-beaches?tab=${encodeURIComponent(row.beachId)}`,
+      });
+    }
+
+    const sorted = items
+      .filter((item) => item.createdAt)
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+
+    const tabbed = filterHubFeedItems(sorted, tab);
+    const paged = cursor
+      ? tabbed.filter((item) => String(item.createdAt) < cursor)
+      : tabbed;
+    const slice = paged.slice(0, limit);
+    const nextCursor = paged.length > limit ? slice[slice.length - 1]?.createdAt ?? null : null;
+
+    return { items: slice, nextCursor };
   },
 };
 

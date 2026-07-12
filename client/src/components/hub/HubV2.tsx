@@ -146,11 +146,10 @@ export default function HubV2({
     onSectionChange(next);
   };
 
-  const feedEvents = useMemo(
-    () => [...goingEvents, ...hostingEvents],
+  const upcoming = useMemo(
+    () => [...goingEvents, ...hostingEvents].slice(0, 3),
     [goingEvents, hostingEvents],
   );
-  const upcoming = useMemo(() => feedEvents.slice(0, 3), [feedEvents]);
 
   const stats =
     profileStats ??
@@ -167,7 +166,7 @@ export default function HubV2({
     <>
       <PwaInstallBanner />
       {errorBanner}
-      {section === "feed" && <HubFeed key="feed" events={feedEvents} />}
+      {section === "feed" && <HubFeed key="feed" />}
       {section === "profile" && (
         <HubProfile
           key={`profile-${editMode ? "edit" : "view"}`}

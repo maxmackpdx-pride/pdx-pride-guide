@@ -37,6 +37,7 @@ import {
   pacificDayOfWeek,
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
+import { parseHubFeedTab } from "@shared/hubFeed";
 import { BOARD_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
 
 import {
@@ -2042,6 +2043,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (relation !== "packmate" && relation !== "handler") return res.status(400).json({ error: "Invalid relation" });
     storage.removePackLink(req.session.userId!, relation, Number(req.params.userId));
     res.json({ ok: true });
+  });
+
+  // ─── HUB SCENE FEED ──────────────────────────────────────────────────────
+  app.get("/api/hub/feed", requireAuth, (req, res) => {
+    const tab = parseHubFeedTab(typeof req.query.tab === "string" ? req.query.tab : null);
+    const limit = Number(req.query.limit) || 30;
+    const cursor = typeof req.query.cursor === "string" ? req.query.cursor : undefined;
+    const feed = storage.getHubFeed({
+      tab,
+      limit: Number.isFinite(limit) ? limit : 30,
+      cursor,
+      viewerUserId: req.session.userId,
+    });
+    res.json(feed);
   });
 
   // ─── MEMBER PROFILES + FOLLOWS ───────────────────────────────────────────

@@ -1,0 +1,89 @@
+export type HubFeedKind =
+  | "event"
+  | "event_update"
+  | "rsvp"
+  | "checkin"
+  | "gifting"
+  | "spotted"
+  | "gig";
+
+export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards";
+
+export type HubFeedAuthor = {
+  displayName: string;
+  username?: string | null;
+  photoUrl?: string | null;
+  avatarChoice?: number;
+  avatarRing?: string | null;
+  anonymous?: boolean;
+};
+
+export type HubFeedEventEmbed = {
+  id: number;
+  title: string;
+  venueName: string;
+  dayOfWeek?: string | null;
+  dateStart: string;
+  admission: string;
+  goingCount?: number;
+};
+
+export type HubFeedItem = {
+  id: string;
+  kind: HubFeedKind;
+  badge: string;
+  action: string;
+  text?: string | null;
+  createdAt: string;
+  author: HubFeedAuthor;
+  event?: HubFeedEventEmbed | null;
+  link?: string | null;
+  beachId?: string | null;
+  beachLabel?: string | null;
+};
+
+export type HubFeedResponse = {
+  items: HubFeedItem[];
+  nextCursor: string | null;
+};
+
+export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
+  { key: "all", label: "All" },
+  { key: "events", label: "Events" },
+  { key: "posts", label: "Posts" },
+  { key: "rsvps", label: "RSVPs" },
+  { key: "boards", label: "Boards" },
+];
+
+const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
+  all: () => true,
+  events: (item) => item.kind === "event" || item.kind === "event_update",
+  posts: (item) => item.kind === "checkin",
+  rsvps: (item) => item.kind === "rsvp",
+  boards: (item) => ["gifting", "spotted", "gig"].includes(item.kind),
+};
+
+export function filterHubFeedItems(items: HubFeedItem[], tab: HubFeedTab): HubFeedItem[] {
+  const pred = TAB_PREDICATES[tab] ?? TAB_PREDICATES.all;
+  return items.filter(pred);
+}
+
+export function hubFeedBadgeColor(kind: HubFeedKind): string {
+  const map: Record<HubFeedKind, string> = {
+    event: "var(--panel-cyan)",
+    event_update: "var(--panel-orange)",
+    rsvp: "var(--status-good)",
+    checkin: "var(--status-good)",
+    gifting: "var(--panel-lime)",
+    spotted: "var(--panel-magenta)",
+    gig: "var(--panel-purple)",
+  };
+  return map[kind] ?? "var(--panel-cyan)";
+}
+
+export function parseHubFeedTab(raw: string | null | undefined): HubFeedTab {
+  if (raw && (HUB_FEED_TABS as Array<{ key: string }>).some((t) => t.key === raw)) {
+    return raw as HubFeedTab;
+  }
+  return "all";
+}

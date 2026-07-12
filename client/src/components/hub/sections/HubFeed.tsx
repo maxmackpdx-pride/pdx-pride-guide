@@ -1,97 +1,106 @@
-import { type HubEventRow } from "./HubEvents";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import BoardLoadingState from "@/components/BoardLoadingState";
+import {
+  HUB_FEED_TABS,
+  parseHubFeedTab,
+  type HubFeedResponse,
+  type HubFeedTab,
+} from "@shared/hubFeed";
+import HubFeedCard from "./HubFeedCard";
 
-function dayDotClass(day?: string) {
-  const map: Record<string, string> = {
-    THU: "d-thu",
-    FRI: "d-fri",
-    SAT: "d-sat",
-    SUN: "d-sun",
-    MON: "d-mon",
-    TUE: "d-tue",
-    WED: "d-wed",
-  };
-  return day ? map[day] ?? "" : "";
+function emptyCopy(tab: HubFeedTab): string {
+  switch (tab) {
+    case "all":
+      return "The scene is quiet right now. Check back as Pride week heats up.";
+    case "events":
+      return "No recent event listings or host updates yet.";
+    case "posts":
+      return "Check-ins from the beaches will show here. Photo and video posts are coming soon.";
+    case "rsvps":
+      return "No RSVPs in the feed yet. Be the first to say you're going.";
+    case "boards":
+      return "No board activity yet. Gifting, gigs, and Spotted posts land here.";
+    default:
+      return "Nothing in this feed yet.";
+  }
 }
 
-type Props = {
-  /** Events the member is going to / hosting — the "RSVP'd" set. */
-  events: HubEventRow[];
-};
+export default function HubFeed() {
+  const [filter, setFilter] = useState<HubFeedTab>("all");
 
-/**
- * The hub news feed. Posting is disabled for now, so instead of a social
- * composer this surfaces the member's own event involvement: the events they
- * RSVP'd to (and host) plus the venues hosting them. A live change-feed lands
- * in a later PR.
- */
-export default function HubFeed({ events }: Props) {
+  const feedQuery = useQuery<HubFeedResponse>({
+    queryKey: ["/api/hub/feed", filter],
+    queryFn: async () => {
+      const params = new URLSearchParams({ tab: filter, limit: "30" });
+      const r = await fetch(`/api/hub/feed?${params}`, { credentials: "include" });
+      if (!r.ok) throw new Error("Could not load feed");
+      return r.json();
+    },
+  });
+
+  const items = feedQuery.data?.items ?? [];
+  const loading = feedQuery.isLoading;
+  const error = feedQuery.isError;
+
   return (
-    <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div>
-        <div className="kick" style={{ color: "var(--panel-cyan)", letterSpacing: ".16em" }}>
-          Your scene
+    <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <div className="card" style={{ padding: "15px 17px" }}>
+        <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
+          Scene feed
         </div>
-        <h1 className="h1" style={{ marginTop: 6 }}>
-          Latest from your events
-        </h1>
-        <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
-          Events you RSVP'd to and the venues hosting them.
+        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--board-muted)" }}>
+          Live updates from events, RSVPs, boards, and beaches across the guide.
         </p>
       </div>
 
-      {events.length === 0 ? (
-        <div className="card" style={{ padding: "40px 24px", textAlign: "center" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 800,
-              fontSize: 20,
-              color: "#fff",
-              textTransform: "uppercase",
-              letterSpacing: ".02em",
-            }}
+      <div className="hs" style={{ display: "flex", gap: 22, overflowX: "auto", padding: "0 2px 2px" }}>
+        {HUB_FEED_TABS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            className={`seg${filter === f.key ? " on" : ""}`}
+            onClick={() => setFilter(parseHubFeedTab(f.key))}
           >
-            Nothing here yet
-          </div>
-          <p style={{ margin: "10px auto 0", maxWidth: 340, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
-            RSVP to an event and updates from it, and the venue hosting it, will show up here.
-          </p>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {loading && (
+        <div className="card hub-empty" style={{ textAlign: "center", padding: "28px 20px" }}>
+          <BoardLoadingState label="Loading scene feed" />
         </div>
-      ) : (
-        events.map((e) => (
-          <article key={e.id} className="card fitem" style={{ padding: "16px 18px" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
-              <span className={`dot ${dayDotClass(e.dayOfWeek)}`} style={{ marginTop: 7, flex: "none" }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: 18,
-                    color: "#fff",
-                    lineHeight: 1.1,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {e.title}
-                </div>
-                <div className="kick" style={{ letterSpacing: ".06em", marginTop: 6 }}>
-                  {e.when}
-                </div>
-                {e.going != null && (
-                  <div className="kick" style={{ letterSpacing: ".06em", marginTop: 4, color: "var(--board-muted)" }}>
-                    {e.going} going
-                  </div>
-                )}
-              </div>
-              {e.chip && (
-                <span className="kick" style={{ letterSpacing: ".12em", flex: "none" }}>
-                  {e.chip}
-                </span>
-              )}
-            </div>
-          </article>
-        ))
+      )}
+
+      {error && !loading && (
+        <div className="card hub-empty" style={{ textAlign: "center" }}>
+          <p style={{ margin: 0, fontSize: 15, color: "var(--board-text)" }}>
+            Could not load the feed.
+          </p>
+          <button
+            type="button"
+            className="ico"
+            onClick={() => feedQuery.refetch()}
+            style={{ marginTop: 14, color: "var(--panel-cyan)", justifyContent: "center", width: "100%" }}
+          >
+            Try again →
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && items.length === 0 && (
+        <div className="card hub-empty" style={{ textAlign: "center" }}>
+          <p style={{ margin: 0, fontSize: 15, color: "var(--board-text)" }}>{emptyCopy(filter)}</p>
+        </div>
+      )}
+
+      {!loading && !error && items.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {items.map((item) => (
+            <HubFeedCard key={item.id} item={item} />
+          ))}
+        </div>
       )}
     </div>
   );
