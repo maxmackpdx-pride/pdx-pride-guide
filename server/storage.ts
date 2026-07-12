@@ -22,7 +22,6 @@ import {
   type HubFeedResponse,
   type HubFeedTab,
 } from "@shared/hubFeed";
-import { beachVenueLabel } from "@shared/riverBrats";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, eventChatMessages, users, messages, missedConnections,
   giftingPosts, giftingInterests, giftingReports,
@@ -58,6 +57,16 @@ import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { haversineMeters } from "@shared/geo";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
+
+/** getGigPosts LEFT JOINs users, so each row carries the poster's author
+ * fields on top of the raw gig_posts columns. */
+type GigPostWithAuthor = GigPost & {
+  username: string | null;
+  displayName: string | null;
+  posterPhotoUrl: string | null;
+  avatarChoice: number | null;
+  posterAvatarRing: string | null;
+};
 
 export const DB_PATH = process.env.DATABASE_PATH || "data.db";
 export const sqlite = new Database(DB_PATH);
@@ -5059,7 +5068,7 @@ export interface IStorage {
   mergeSubmissionIntoEvent(id: number, eventId: number, adminName: string): { event: Event; submission: Submission } | { error: string };
   rejectSubmission(id: number, reason: string): void;
   // Gigs
-  getGigPosts(status?: string): GigPost[];
+  getGigPosts(status?: string): GigPostWithAuthor[];
   createGigPost(data: InsertGigPost): GigPost;
   getGigPostsByUser(userId: number): GigPost[];
   updateGigPost(id: number, userId: number, data: Partial<GigPost>): void;
@@ -8815,7 +8824,7 @@ export const storage: IStorage = {
         createdAt: row.createdAt,
         author: row.anonymous
           ? { displayName: row.venueHint ? `Someone at ${row.venueHint}` : "Someone in the scene", anonymous: true }
-          : hubFeedAuthorFromUser({ displayName: "Someone in the scene", anonymous: true }),
+          : hubFeedAuthorFromUser(null, true),
         event: row.eventId
           ? hubFeedEventEmbed({
               id: row.eventId,
