@@ -7670,19 +7670,24 @@ footer a:hover { color: #00FFFF !important; }
      the dimmed backdrop covers the nav too, like the board overlays. */
   z-index: 3000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  /* The overlay scrolls the whole card as one piece, so the rounded bottom
+     corner lands at the real end of the content. */
+  overflow-y: auto;
   padding: calc(env(safe-area-inset-top, 0px) + 52px) 16px calc(env(safe-area-inset-bottom, 0px) + 76px);
   background: rgba(0, 0, 0, 0.88);
-  overflow-y: auto;
 }
 
 .event-modal {
   position: relative;
   width: 100%;
   max-width: 660px;
-  max-height: 76vh;
-  overflow: auto;
+  /* No fixed height / inner scroll: the card is as tall as its content and the
+     overlay scrolls it, so its bottom edge is the true bottom of the card.
+     overflow:hidden only clips the poster/corners to the rounded frame. */
+  margin: auto;
+  overflow: hidden;
   background: #0d0d0d;
   border: 2px solid var(--event-accent, #222);
   border-radius: 18px;
