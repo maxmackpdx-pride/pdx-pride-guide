@@ -79,117 +79,111 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const error = feedQuery.isError;
   const hasContent = items.length > 0 || pinned.length > 0;
 
-  return (
-    <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-      {stankEvent && (() => {
-        const day = stankEvent.dayOfWeek || "";
-        const accent = DAY_TEXT_COLORS[day] || "#19E3FF";
-        const poster = resolveEventPosterUrl(stankEvent.id, stankEvent.posterImageUrl);
-        return (
+  const stankAd = stankEvent ? (() => {
+    const day = stankEvent.dayOfWeek || "";
+    const accent = DAY_TEXT_COLORS[day] || "#19E3FF";
+    const poster = resolveEventPosterUrl(stankEvent.id, stankEvent.posterImageUrl);
+    return (
+      <div
+        style={{
+          position: "relative",
+          borderRadius: 16,
+          overflow: "hidden",
+          border: `2px solid ${accent}`,
+          boxShadow: `0 0 40px -14px ${accent}`,
+          background: "#0d0d0d",
+        }}
+      >
+        <button
+          type="button"
+          aria-label="Dismiss"
+          onClick={dismissPromo}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            zIndex: 3,
+            width: 28,
+            height: 28,
+            borderRadius: 999,
+            border: "none",
+            background: "rgba(0,0,0,0.6)",
+            color: "#fff",
+            fontSize: 15,
+            lineHeight: 1,
+            cursor: "pointer",
+          }}
+        >
+          ✕
+        </button>
+        {poster && (
+          // Full-width, top-anchored: never crop left/right; crop the bottom.
+          <div style={{ width: "100%", aspectRatio: "1 / 1", overflow: "hidden" }}>
+            <img
+              src={poster}
+              alt={stankEvent.title}
+              style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
+            />
+          </div>
+        )}
+        <div style={{ padding: "13px 16px 15px" }}>
           <div
-            style={{
-              position: "relative",
-              borderRadius: 18,
-              overflow: "hidden",
-              border: `2px solid ${accent}`,
-              boxShadow: `0 0 44px -12px ${accent}`,
-              background: "#0d0d0d",
-            }}
+            className="kick"
+            style={{ letterSpacing: ".14em", color: accent, textTransform: "uppercase", fontSize: 10.5 }}
           >
+            Don't miss{day ? ` · ${day}` : ""} · {stankEvent.venueName}
+          </div>
+          <div style={{ display: "flex", gap: 9, marginTop: 12 }}>
+            {stankEvent.ticketUrl && (
+              <a
+                href={stankEvent.ticketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  background: accent,
+                  color: "#0a0a0a",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  letterSpacing: ".01em",
+                  padding: "11px 14px",
+                  borderRadius: 10,
+                  textDecoration: "none",
+                }}
+              >
+                Get tickets
+              </a>
+            )}
             <button
               type="button"
-              aria-label="Dismiss"
-              onClick={dismissPromo}
+              onClick={() => setAdEventOpen(true)}
               style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                zIndex: 3,
-                width: 28,
-                height: 28,
-                borderRadius: 999,
-                border: "none",
-                background: "rgba(0,0,0,0.6)",
+                flex: 1,
+                background: "rgba(255,255,255,0.04)",
                 color: "#fff",
-                fontSize: 15,
-                lineHeight: 1,
+                border: `1px solid ${accent}`,
+                fontWeight: 700,
+                fontSize: 14,
+                letterSpacing: ".01em",
+                padding: "11px 14px",
+                borderRadius: 10,
                 cursor: "pointer",
               }}
             >
-              ✕
+              RSVP
             </button>
-            {poster && (
-              <img
-                src={poster}
-                alt={stankEvent.title}
-                style={{ display: "block", width: "100%", height: "auto" }}
-              />
-            )}
-            <div style={{ padding: "14px 16px 16px" }}>
-              <div
-                className="kick"
-                style={{
-                  letterSpacing: ".16em",
-                  color: accent,
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                }}
-              >
-                Don't miss{day ? ` · ${day}` : ""} · {stankEvent.venueName}
-              </div>
-              <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                {stankEvent.ticketUrl && (
-                  <a
-                    href={stankEvent.ticketUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      flex: 1,
-                      textAlign: "center",
-                      background: accent,
-                      color: "#08080a",
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: ".04em",
-                      fontSize: 14,
-                      padding: "12px 14px",
-                      borderRadius: 12,
-                      textDecoration: "none",
-                    }}
-                  >
-                    Get tickets →
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setAdEventOpen(true)}
-                  style={{
-                    flex: 1,
-                    background: "transparent",
-                    color: accent,
-                    border: `1.5px solid ${accent}`,
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: ".04em",
-                    fontSize: 14,
-                    padding: "12px 14px",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                  }}
-                >
-                  RSVP →
-                </button>
-              </div>
-            </div>
-            {adEventOpen && (
-              <EventModal event={stankEvent} onClose={() => setAdEventOpen(false)} />
-            )}
           </div>
-        );
-      })()}
+        </div>
+        {adEventOpen && (
+          <EventModal event={stankEvent} onClose={() => setAdEventOpen(false)} />
+        )}
+      </div>
+    );
+  })() : null;
 
+  return (
+    <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <div className="card" style={{ padding: "15px 17px" }}>
         <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
           Scene feed
@@ -234,6 +228,8 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
           </button>
         ))}
       </div>
+
+      {stankAd}
 
       {loading && (
         <div className="card hub-empty" style={{ textAlign: "center", padding: "28px 20px" }}>

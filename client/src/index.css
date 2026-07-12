@@ -7709,9 +7709,9 @@ footer a:hover { color: #00FFFF !important; }
 .event-modal__poster-img {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: min(46vh, 460px);
-  object-fit: contain;
+  height: min(48vh, 480px);
+  object-fit: cover;
+  object-position: top center;
 }
 
 .event-modal__close {
