@@ -14727,3 +14727,5 @@ html.calm-mode .board-detail-modal {
     padding-inline: 12px;
   }
 }
+
+@keyframes ptr-spin { to { transform: rotate(360deg); } }

@@ -10,6 +10,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingInbox from "./components/FloatingInbox";
+import PullToRefresh from "./components/PullToRefresh";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
@@ -74,6 +75,7 @@ function AppLayout() {
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
       style={{ background: "#0a0a0a" }}
     >
+      <PullToRefresh />
       {!profile && <Nav />}
       {!profile && !adminShell && <MobileBottomNav />}
       <main className="flex-1">
