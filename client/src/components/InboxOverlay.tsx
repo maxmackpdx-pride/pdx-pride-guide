@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { X, SlidersHorizontal, ChevronDown, Search } from "lucide-react";
+import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxThreads } from "@/components/inbox/useInboxThreads";
-import type { Folder } from "@/components/inbox/types";
+import type { Folder, Thread, LineupDecision } from "@/components/inbox/types";
 import { C, MONO, DISPLAY, BODY } from "@/components/inbox/panel/sheet";
+import ThreadAvatar from "@/components/inbox/ThreadAvatar";
 import PersonalView from "@/components/inbox/panel/PersonalView";
 import QueueView from "@/components/inbox/panel/QueueView";
 import PostsView from "@/components/inbox/panel/PostsView";
@@ -44,10 +45,13 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [filter, setFilter] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [reply, setReply] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const { threads } = useInboxThreads(null);
+  const { threads, sendMessage, setRead, archive, revealSelf, resolveLineup } = useInboxThreads(activeId);
+  const activeThread = activeId ? threads.find((t) => t.id === activeId) ?? null : null;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const isOwner = Boolean(user?.username === "tuckerhelms" || user?.isSuperAdmin);
 
@@ -90,6 +94,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   }, [filterOpen]);
 
   useEffect(() => {
+    setActiveId(null);
+    setReply("");
     if (!open) {
       setView("inbox");
       setAccount("personal");
@@ -124,9 +130,25 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const catCount = (id: string) => (id === "all" ? active.length : active.filter((t) => t.cat === id).length);
   const activeFilterLabel = (FILTERS.find((f) => f[0] === filter)?.[1] || "All").toUpperCase();
 
+  // Open the thread in place (no navigation) and mark it read so the badge resets.
   const openThread = (id: string) => {
-    onClose();
-    setLocation(`/inbox?thread=${encodeURIComponent(id)}`);
+    setActiveId(id);
+    setReply("");
+    void setRead(id, false);
+  };
+  const closeThread = () => {
+    setActiveId(null);
+    setReply("");
+  };
+  const send = async () => {
+    const body = reply.trim();
+    if (!body || !activeId) return;
+    setReply("");
+    try {
+      await sendMessage(activeId, body);
+    } catch {
+      setReply(body);
+    }
   };
   const navigateFromSheet = (href: string) => {
     onClose();
@@ -188,7 +210,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         </div>
 
         {/* account tabs (inbox only) */}
-        {inboxActive && (
+        {inboxActive && !activeThread && (
           <div style={{ padding: "14px 20px 0", flex: "none" }}>
             <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 14, padding: 4 }}>
               {visibleAccounts.map(([id, label, color]) => {
@@ -240,7 +262,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         )}
 
         {/* personal toolbar: received/sent + filter */}
-        {personalActive && (
+        {personalActive && !activeThread && (
           <div style={{ padding: "12px 20px 0", flex: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
             <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
               {(["inbox", "sent"] as Folder[]).map((f) => {
@@ -338,26 +360,54 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         )}
 
         {/* body */}
-        <div className="inbox-overlay__scroll" style={{ flex: 1, overflowY: "auto", padding: "14px 16px 12px", minHeight: 0 }}>
-          {inboxActive && account === "personal" && (
-            <PersonalView
-              folder={folder}
-              filter={filter}
-              query={query}
-              showTags
-              tintUnread
-              onOpenThread={openThread}
-              onNavigate={navigateFromSheet}
+        <div
+          className="inbox-overlay__scroll"
+          style={{
+            flex: 1,
+            overflowY: activeThread ? "hidden" : "auto",
+            padding: activeThread ? 0 : "14px 16px 12px",
+            minHeight: 0,
+            display: activeThread ? "flex" : undefined,
+            flexDirection: activeThread ? "column" : undefined,
+          }}
+        >
+          {activeThread ? (
+            <ThreadDetail
+              thread={activeThread}
+              reply={reply}
+              onReplyChange={setReply}
+              onSend={send}
+              onBack={closeThread}
+              onArchive={() => {
+                void archive(activeThread.id);
+                closeThread();
+              }}
+              onReveal={() => revealSelf(activeThread.id)}
+              onResolveLineup={(decision) => resolveLineup(activeThread.id, decision)}
             />
+          ) : (
+            <>
+              {inboxActive && account === "personal" && (
+                <PersonalView
+                  folder={folder}
+                  filter={filter}
+                  query={query}
+                  showTags
+                  tintUnread
+                  onOpenThread={openThread}
+                  onNavigate={navigateFromSheet}
+                />
+              )}
+              {inboxActive && account === "admin" && <QueueView mode="admin" />}
+              {inboxActive && account === "owner" && <QueueView mode="owner" />}
+              {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
+              {view === "stats" && <StatsView />}
+            </>
           )}
-          {inboxActive && account === "admin" && <QueueView mode="admin" />}
-          {inboxActive && account === "owner" && <QueueView mode="owner" />}
-          {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
-          {view === "stats" && <StatsView />}
         </div>
 
         {/* bottom search */}
-        {searchVisible && (
+        {searchVisible && !activeThread && (
           <div style={{ flex: "none", padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))", borderTop: `1px solid ${C.borderFaint}`, background: C.sheet }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, height: 46, padding: "0 16px", borderRadius: 999, background: C.inset, border: `1px solid ${C.border3}` }}>
               <Search size={17} color={C.faint} />
@@ -372,5 +422,310 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         )}
       </div>
     </>
+  );
+}
+
+const CAT_ACCENT: Record<string, string> = {
+  spotted: C.magenta,
+  gigs: C.purple,
+  hosts: C.cyan,
+  checkins: C.green,
+};
+
+type ThreadDetailProps = {
+  thread: Thread;
+  reply: string;
+  onReplyChange: (v: string) => void;
+  onSend: () => void;
+  onBack: () => void;
+  onArchive: () => void;
+  onReveal: () => void;
+  onResolveLineup: (decision: LineupDecision) => void;
+};
+
+// Full thread view rendered in place inside the floating inbox — no navigation.
+// Reading, replying, archiving, and lineup approve/deny all happen here.
+function ThreadDetail({
+  thread,
+  reply,
+  onReplyChange,
+  onSend,
+  onBack,
+  onArchive,
+  onReveal,
+  onResolveLineup,
+}: ThreadDetailProps) {
+  const accent = CAT_ACCENT[thread.cat] ?? C.cyan;
+  const showReveal = thread.anonymous && thread.reveal && !thread.reveal.iRevealed;
+  const lineupPending = thread.lineup?.status === "PENDING" && thread.lineupRequestId != null;
+
+  const iconBtn = {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    background: C.inset,
+    border: `1px solid ${C.border3}`,
+    color: C.meta,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    flex: "none" as const,
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+      {/* header: back · avatar · name/handle · archive */}
+      <div
+        style={{
+          flex: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "12px 16px",
+          borderBottom: `1px solid ${C.borderFaint}`,
+        }}
+      >
+        <button style={iconBtn} onClick={onBack} aria-label="Back to inbox" title="Back">
+          <ChevronLeft size={18} />
+        </button>
+        <ThreadAvatar party={thread.party} masked={thread.anonymous} size={36} ring={thread.ring} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontFamily: DISPLAY,
+              fontWeight: 800,
+              fontSize: 18,
+              color: C.heading,
+              lineHeight: 1.1,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {thread.name}
+          </div>
+          <div style={{ fontFamily: MONO, fontSize: 11, color: C.meta, letterSpacing: ".04em" }}>
+            {thread.handle}
+          </div>
+        </div>
+        <button style={iconBtn} onClick={onArchive} aria-label="Archive thread" title="Archive">
+          <Archive size={16} />
+        </button>
+      </div>
+
+      {/* subject */}
+      {thread.subject && (
+        <div
+          style={{
+            flex: "none",
+            padding: "10px 16px 0",
+            fontFamily: DISPLAY,
+            fontWeight: 700,
+            fontSize: 15,
+            color: accent,
+            letterSpacing: ".01em",
+          }}
+        >
+          {thread.subject}
+        </div>
+      )}
+
+      {/* reveal panel (anonymous threads) */}
+      {showReveal && (
+        <div
+          style={{
+            flex: "none",
+            margin: "12px 16px 0",
+            padding: "11px 13px",
+            background: C.inset,
+            border: `1px solid ${C.border3}`,
+            borderRadius: 12,
+          }}
+        >
+          <div style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5, marginBottom: 9 }}>
+            This thread is anonymous. Reveal yourself to share who you are.
+          </div>
+          <button
+            onClick={onReveal}
+            style={{
+              fontFamily: MONO,
+              fontSize: 11,
+              letterSpacing: ".08em",
+              fontWeight: 600,
+              padding: "8px 14px",
+              borderRadius: 10,
+              border: `1px solid ${C.magenta}`,
+              background: "transparent",
+              color: C.magenta,
+              cursor: "pointer",
+            }}
+          >
+            Reveal myself
+          </button>
+        </div>
+      )}
+
+      {/* lineup approve / deny */}
+      {lineupPending && (
+        <div
+          style={{
+            flex: "none",
+            margin: "12px 16px 0",
+            padding: "11px 13px",
+            background: C.inset,
+            border: `1px solid ${C.cyan}`,
+            borderRadius: 12,
+          }}
+        >
+          <div style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5, marginBottom: 10 }}>
+            Lineup request{thread.lineup?.role ? ` · ${thread.lineup.role}` : ""}
+            {thread.lineup?.eventTitle ? ` for ${thread.lineup.eventTitle}` : ""}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => onResolveLineup("APPROVED")}
+              style={{
+                fontFamily: MONO,
+                fontSize: 11,
+                letterSpacing: ".08em",
+                fontWeight: 600,
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: "none",
+                background: C.lime,
+                color: "#000",
+                cursor: "pointer",
+              }}
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => onResolveLineup("DENIED")}
+              style={{
+                fontFamily: MONO,
+                fontSize: 11,
+                letterSpacing: ".08em",
+                fontWeight: 600,
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: `1px solid ${C.border3}`,
+                background: "transparent",
+                color: C.body,
+                cursor: "pointer",
+              }}
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* messages */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          padding: "14px 16px 12px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        {thread.messages.map((m) => (
+          <div
+            key={m.id}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: m.self ? "flex-end" : "flex-start",
+            }}
+          >
+            <div
+              style={{
+                maxWidth: "82%",
+                padding: "9px 12px",
+                borderRadius: 14,
+                background: m.self ? accent : C.inset,
+                color: m.self ? "#000" : C.body2,
+                fontSize: 13.5,
+                lineHeight: 1.45,
+                fontFamily: BODY,
+                border: m.self ? "none" : `1px solid ${C.border3}`,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {m.body}
+            </div>
+            <div style={{ fontFamily: MONO, fontSize: 9.5, color: C.faint, marginTop: 3, padding: "0 4px" }}>
+              {m.at}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* composer */}
+      <div
+        style={{
+          flex: "none",
+          padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
+          borderTop: `1px solid ${C.borderFaint}`,
+          background: C.sheet,
+          display: "flex",
+          alignItems: "flex-end",
+          gap: 10,
+        }}
+      >
+        <textarea
+          value={reply}
+          onChange={(e) => onReplyChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSend();
+            }
+          }}
+          placeholder="Write a reply"
+          rows={1}
+          style={{
+            flex: 1,
+            minHeight: 44,
+            maxHeight: 120,
+            resize: "none",
+            padding: "12px 14px",
+            borderRadius: 14,
+            background: C.inset,
+            border: `1px solid ${C.border3}`,
+            color: C.body2,
+            fontFamily: BODY,
+            fontSize: 14,
+            lineHeight: 1.4,
+            outline: "none",
+          }}
+        />
+        <button
+          onClick={onSend}
+          disabled={!reply.trim()}
+          style={{
+            flex: "none",
+            height: 44,
+            padding: "0 18px",
+            borderRadius: 14,
+            border: "none",
+            background: reply.trim() ? accent : C.seg,
+            color: reply.trim() ? "#000" : C.faint,
+            fontFamily: MONO,
+            fontSize: 12,
+            letterSpacing: ".08em",
+            fontWeight: 700,
+            cursor: reply.trim() ? "pointer" : "default",
+          }}
+        >
+          Send
+        </button>
+      </div>
+    </div>
   );
 }
