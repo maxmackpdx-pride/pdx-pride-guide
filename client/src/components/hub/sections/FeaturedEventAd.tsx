@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import EventModal from "@/components/EventModal";
@@ -35,17 +35,39 @@ function useCountdown(targetMs: number) {
   };
 }
 
+const POSTER_MS = 4000;
+const SLIDE_MS = 2000;
+
 type Props = {
   event: Event;
   onDismiss: () => void;
+  /** Extra images that rotate after the poster (2s each). */
+  slides?: string[];
 };
 
-export default function FeaturedEventAd({ event, onDismiss }: Props) {
+export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props) {
   const [open, setOpen] = useState(false);
   const day = event.dayOfWeek || "";
   const accent = DAY_TEXT_COLORS[day as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
   const poster = resolveEventPosterUrl(event.id, event.posterImageUrl);
   const cd = useCountdown(eventStartMs(event.dateStart));
+
+  // Slideshow: poster (4s) then each extra image (2s), looping.
+  const frames = useMemo(() => {
+    const f: Array<{ src: string; ms: number }> = [];
+    if (poster) f.push({ src: poster, ms: POSTER_MS });
+    for (const s of slides) f.push({ src: s, ms: SLIDE_MS });
+    return f;
+  }, [poster, slides]);
+  const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    if (frames.length <= 1) return;
+    const t = window.setTimeout(
+      () => setFrame((i) => (i + 1) % frames.length),
+      frames[frame]?.ms ?? SLIDE_MS,
+    );
+    return () => window.clearTimeout(t);
+  }, [frame, frames]);
 
   const rowLabel: React.CSSProperties = {
     fontFamily: "var(--font-display)",
@@ -109,14 +131,26 @@ export default function FeaturedEventAd({ event, onDismiss }: Props) {
         ✕
       </button>
 
-      {poster && (
-        // Full-width, top-anchored: never crop left/right; crop the bottom.
-        <div style={{ width: "100%", aspectRatio: "1 / 1", overflow: "hidden" }}>
-          <img
-            src={poster}
-            alt={event.title}
-            style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
-          />
+      {frames.length > 0 && (
+        // Full-width, top-anchored slideshow: never crop left/right; crop the bottom.
+        <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", background: "#000" }}>
+          {frames.map((f, i) => (
+            <img
+              key={f.src}
+              src={f.src}
+              alt={i === 0 ? event.title : ""}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "top center",
+                opacity: i === frame ? 1 : 0,
+                transition: "opacity .6s ease",
+              }}
+            />
+          ))}
         </div>
       )}
 

@@ -15,6 +15,12 @@ import HubPost from "./HubPost";
 
 const STANK_PROMO_DISMISS_KEY = "hub-promo-stank-yes-coach-dismissed";
 
+// Slideshow images that rotate after the poster in the Stank ad (2s each).
+// Add more files to /public/posters/stank-slides/ and list them here.
+const STANK_SLIDES = Array.from({ length: 11 }, (_, i) =>
+  `/posters/stank-slides/slide-${String(i + 1).padStart(2, "0")}.jpg`,
+);
+
 function emptyCopy(tab: HubFeedTab): string {
   switch (tab) {
     case "all":
@@ -77,7 +83,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const hasContent = items.length > 0 || pinned.length > 0;
 
   const stankAd = stankEvent ? (
-    <FeaturedEventAd event={stankEvent} onDismiss={dismissPromo} />
+    <FeaturedEventAd event={stankEvent} onDismiss={dismissPromo} slides={STANK_SLIDES} />
   ) : null;
 
   return (
