@@ -38,7 +38,7 @@ export function FeedbackButton() {
   );
 }
 
-function FeedbackModal({ onClose }: { onClose: () => void }) {
+export function FeedbackModal({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState({
     category: "BUG",
     severity: "MEDIUM",

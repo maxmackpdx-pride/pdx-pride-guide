@@ -12,17 +12,17 @@ import HubFeedCard from "./HubFeedCard";
 function emptyCopy(tab: HubFeedTab): string {
   switch (tab) {
     case "all":
-      return "The scene is quiet right now. Check back as Pride week heats up.";
+      return "No new scene activity yet. Pinned boards and highlights stay below.";
     case "events":
-      return "No recent event listings or host updates yet.";
+      return "No new event listings or host updates yet.";
     case "posts":
-      return "Check-ins from the beaches will show here. Photo and video posts are coming soon.";
+      return "No new beach check-ins yet. The beach boards are pinned below.";
     case "rsvps":
-      return "No RSVPs in the feed yet. Be the first to say you're going.";
+      return "No new RSVPs yet. Be the first to say you are going.";
     case "boards":
-      return "No board activity yet. Gifting, gigs, and Spotted posts land here.";
+      return "No new board posts yet. The Pride Werk highlight stays below.";
     default:
-      return "Nothing in this feed yet.";
+      return "Nothing new in this feed yet.";
   }
 }
 
@@ -40,8 +40,10 @@ export default function HubFeed() {
   });
 
   const items = feedQuery.data?.items ?? [];
+  const pinned = feedQuery.data?.pinned ?? [];
   const loading = feedQuery.isLoading;
   const error = feedQuery.isError;
+  const hasContent = items.length > 0 || pinned.length > 0;
 
   return (
     <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -50,7 +52,7 @@ export default function HubFeed() {
           Scene feed
         </div>
         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--board-muted)" }}>
-          Live updates from events, RSVPs, boards, and beaches across the guide.
+          New events, board posts, RSVPs, and beach check-ins stack on top. Scene staples stay pinned below.
         </p>
       </div>
 
@@ -89,15 +91,23 @@ export default function HubFeed() {
         </div>
       )}
 
-      {!loading && !error && items.length === 0 && (
+      {!loading && !error && !hasContent && (
         <div className="card hub-empty" style={{ textAlign: "center" }}>
           <p style={{ margin: 0, fontSize: 15, color: "var(--board-text)" }}>{emptyCopy(filter)}</p>
         </div>
       )}
 
-      {!loading && !error && items.length > 0 && (
+      {!loading && !error && hasContent && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {items.map((item) => (
+            <HubFeedCard key={item.id} item={item} />
+          ))}
+          {items.length > 0 && pinned.length > 0 && (
+            <div className="kick" style={{ letterSpacing: ".14em", padding: "4px 2px 0", color: "var(--board-muted)" }}>
+              On the board
+            </div>
+          )}
+          {pinned.map((item) => (
             <HubFeedCard key={item.id} item={item} />
           ))}
         </div>

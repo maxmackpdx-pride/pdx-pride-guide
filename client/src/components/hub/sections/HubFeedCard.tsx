@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
+import { FeedbackModal } from "@/components/FeedbackForm";
 import { timeAgo } from "@/lib/boardFeed";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedItem } from "@shared/hubFeed";
@@ -31,9 +33,10 @@ function eventHref(item: HubFeedItem): string | null {
 }
 
 export default function HubFeedCard({ item }: Props) {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
-  const when = item.createdAt ? timeAgo(item.createdAt) : "";
+  const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
 
   const eventBlock = item.event ? (
     <Link
@@ -81,12 +84,35 @@ export default function HubFeedCard({ item }: Props) {
     </div>
   ) : null;
 
+  const ctaBlock = item.ctaAction === "feedback" && item.ctaLabel ? (
+    <button
+      type="button"
+      onClick={() => setFeedbackOpen(true)}
+      style={{
+        marginTop: 14,
+        fontFamily: "var(--font-mono)",
+        fontSize: 11,
+        letterSpacing: ".12em",
+        textTransform: "uppercase",
+        color: "var(--panel-lime)",
+        border: "1px solid var(--panel-lime)",
+        borderRadius: 8,
+        padding: "9px 16px",
+        background: "transparent",
+        cursor: "pointer",
+      }}
+    >
+      {item.ctaLabel}
+    </button>
+  ) : null;
+
   const body = (
     <div
-      className="card fitem"
+      className={`card fitem${item.pinned ? " hub-feed-pin" : ""}`}
       style={{
         padding: "16px 18px",
         borderRadius: 16,
+        ...(item.pinned ? { borderColor: "var(--panel-border-2)" } : {}),
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -140,12 +166,14 @@ export default function HubFeedCard({ item }: Props) {
           )}
           {eventBlock}
           {beachBlock}
+          {ctaBlock}
         </div>
       </div>
+      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
 
-  if (href && !item.event) {
+  if (href && !item.event && item.ctaAction !== "feedback") {
     return (
       <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
         {body}

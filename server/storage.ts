@@ -14,6 +14,7 @@ import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
 import { formatBoardRejectMessage } from "@shared/boardModeration";
 import {
   filterHubFeedItems,
+  filterHubFeedPinned,
   parseHubFeedTab,
   type HubFeedAuthor,
   type HubFeedEventEmbed,
@@ -4386,6 +4387,109 @@ function hubFeedCreatedAt(row: { createdAt?: string | null; created_at?: string 
   return row.createdAt ?? row.created_at ?? row.dateStart ?? row.date_start ?? "";
 }
 
+const HUB_FEED_GUIDE_AUTHOR: HubFeedAuthor = {
+  displayName: "PDX Pride Guide",
+  username: "prideguidepdx",
+  avatarChoice: 1,
+  avatarRing: "rainbow",
+};
+
+function buildHubFeedPinnedItems(goingCounts: Record<number, { count: number }>): HubFeedItem[] {
+  const pinned: HubFeedItem[] = [];
+  const anchorTime = "2000-01-01T00:00:00.000Z";
+
+  pinned.push({
+    id: "pin-beach-rooster-rock",
+    kind: "beach",
+    badge: "Beaches",
+    action: "River Brats board is live",
+    text: "Crossing levels, check-ins, and who is headed out to Rooster Rock today.",
+    createdAt: anchorTime,
+    author: HUB_FEED_GUIDE_AUTHOR,
+    beachId: "rooster-rock",
+    beachLabel: "Rooster Rock State Park",
+    link: "/nude-beaches?tab=rooster-rock",
+    pinned: true,
+  });
+
+  pinned.push({
+    id: "pin-beach-sauvie-island",
+    kind: "beach",
+    badge: "Beaches",
+    action: "River Brats board is live",
+    text: "Collins Beach check-ins, carpools, and the clothing-optional scene on Sauvie Island.",
+    createdAt: anchorTime,
+    author: HUB_FEED_GUIDE_AUTHOR,
+    beachId: "sauvie-island",
+    beachLabel: "Collins Beach · Sauvie Island",
+    link: "/nude-beaches?tab=sauvie-island",
+    pinned: true,
+  });
+
+  const stankId = findSiteOwnerEventId();
+  if (stankId != null) {
+    const stank = sqlite.prepare(`
+      SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
+             date_start AS dateStart, admission, created_at AS createdAt,
+             claimed_by AS claimedBy, submitted_by AS submittedBy
+      FROM events WHERE id = ? AND status = 'LIVE'
+    `).get(stankId) as any;
+    if (stank) {
+      pinned.push({
+        id: `pin-event-${stank.id}`,
+        kind: "event",
+        badge: "Event",
+        action: "Pride weekend highlight",
+        text: stank.description?.slice(0, 280) || null,
+        createdAt: anchorTime,
+        author: hubFeedEventAuthor(stank),
+        event: hubFeedEventEmbed(stank, goingCounts[stank.id]?.count),
+        link: null,
+        pinned: true,
+      });
+    }
+  }
+
+  pinned.push({
+    id: "pin-feedback",
+    kind: "feedback",
+    badge: "Feedback",
+    action: "Spot a bug?",
+    text: "Broken button, weird layout, or wrong event detail? Send it through the same feedback route as the site footer.",
+    createdAt: anchorTime,
+    author: HUB_FEED_GUIDE_AUTHOR,
+    ctaAction: "feedback",
+    ctaLabel: "Submit feedback",
+    pinned: true,
+  });
+
+  const adminGigId = findSiteAdminGigPostId();
+  if (adminGigId != null) {
+    const gig = storage.getGigPosts("LIVE").find((g) => g.id === adminGigId);
+    if (gig) {
+      pinned.push({
+        id: `pin-gig-${gig.id}`,
+        kind: "gig",
+        badge: "Gig",
+        action: "Open on Pride Werk",
+        text: gig.description || gig.title,
+        createdAt: anchorTime,
+        author: hubFeedAuthorFromUser({
+          displayName: gig.displayName || gig.name,
+          username: gig.username,
+          photoUrl: gig.posterPhotoUrl,
+          avatarChoice: gig.avatarChoice,
+          avatarRing: gig.posterAvatarRing,
+        }),
+        link: "/pride-work",
+        pinned: true,
+      });
+    }
+  }
+
+  return pinned;
+}
+
 function giftingExpiry(postType: string, from = new Date()) {
   const d = new Date(from);
   d.setDate(d.getDate() + (postType === "ISO" ? 14 : 7));
@@ -8446,18 +8550,29 @@ export const storage: IStorage = {
       }
     }
 
+    const pinnedStankId = findSiteOwnerEventId();
+    const pinnedGigId = findSiteAdminGigPostId();
+    const pinnedAll = buildHubFeedPinnedItems(goingCounts);
+    const pinned = filterHubFeedPinned(pinnedAll, tab);
+
     const items: HubFeedItem[] = [];
 
     const recentEvents = sqlite.prepare(`
       SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
              date_start AS dateStart, admission, created_at AS createdAt,
-             claimed_by AS claimedBy, submitted_by AS submittedBy
+             claimed_by AS claimedBy, submitted_by AS submittedBy, source
       FROM events
-      WHERE status = 'LIVE' AND datetime(created_at) >= datetime('now', '-60 days')
+      WHERE status = 'LIVE'
+        AND (
+          source = 'user_submitted'
+          OR TRIM(COALESCE(claimed_by, '')) != ''
+          OR datetime(created_at) >= datetime('now', '-45 days')
+        )
       ORDER BY created_at DESC
-      LIMIT 10
+      LIMIT 15
     `).all() as any[];
     for (const evt of recentEvents) {
+      if (pinnedStankId != null && evt.id === pinnedStankId) continue;
       const createdAt = hubFeedCreatedAt(evt);
       if (!createdAt) continue;
       items.push({
@@ -8550,6 +8665,7 @@ export const storage: IStorage = {
     }
 
     for (const gig of storage.getGigPosts("LIVE").slice(0, 12)) {
+      if (pinnedGigId != null && gig.id === pinnedGigId) continue;
       items.push({
         id: `gig-${gig.id}`,
         kind: "gig",
@@ -8636,7 +8752,7 @@ export const storage: IStorage = {
     const slice = paged.slice(0, limit);
     const nextCursor = paged.length > limit ? slice[slice.length - 1]?.createdAt ?? null : null;
 
-    return { items: slice, nextCursor };
+    return { items: slice, pinned, nextCursor };
   },
 };
 

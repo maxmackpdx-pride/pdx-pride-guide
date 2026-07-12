@@ -5,7 +5,9 @@ export type HubFeedKind =
   | "checkin"
   | "gifting"
   | "spotted"
-  | "gig";
+  | "gig"
+  | "beach"
+  | "feedback";
 
 export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards";
 
@@ -40,10 +42,16 @@ export type HubFeedItem = {
   link?: string | null;
   beachId?: string | null;
   beachLabel?: string | null;
+  /** Pinned scene cards sit below live activity; new posts stack above them. */
+  pinned?: boolean;
+  /** Opens the site feedback modal when set to "feedback". */
+  ctaAction?: "feedback" | null;
+  ctaLabel?: string | null;
 };
 
 export type HubFeedResponse = {
   items: HubFeedItem[];
+  pinned: HubFeedItem[];
   nextCursor: string | null;
 };
 
@@ -58,10 +66,21 @@ export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
 const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
   all: () => true,
   events: (item) => item.kind === "event" || item.kind === "event_update",
-  posts: (item) => item.kind === "checkin",
+  posts: (item) => item.kind === "checkin" || item.kind === "beach",
   rsvps: (item) => item.kind === "rsvp",
   boards: (item) => ["gifting", "spotted", "gig"].includes(item.kind),
 };
+
+export function filterHubFeedPinned(items: HubFeedItem[], tab: HubFeedTab): HubFeedItem[] {
+  return items.filter((item) => {
+    if (item.kind === "feedback") return tab === "all";
+    if (tab === "all") return true;
+    if (tab === "events") return item.kind === "event";
+    if (tab === "posts") return item.kind === "beach";
+    if (tab === "boards") return item.kind === "gig";
+    return false;
+  });
+}
 
 export function filterHubFeedItems(items: HubFeedItem[], tab: HubFeedTab): HubFeedItem[] {
   const pred = TAB_PREDICATES[tab] ?? TAB_PREDICATES.all;
@@ -77,6 +96,8 @@ export function hubFeedBadgeColor(kind: HubFeedKind): string {
     gifting: "var(--panel-lime)",
     spotted: "var(--panel-magenta)",
     gig: "var(--panel-purple)",
+    beach: "var(--panel-orange)",
+    feedback: "var(--panel-lime)",
   };
   return map[kind] ?? "var(--panel-cyan)";
 }
