@@ -6,6 +6,35 @@ behaves like the others: a colored card on its own board page, a matching card
 in the hub feed, and a tap-to-open overlay that shows the real, interactive
 card on top of the feed (close = back to your exact scroll spot).
 
+## Feed posts vs. glowing cards (important distinction)
+
+Not everything in the Scene Feed is a "card." Keep these separate:
+
+- **News-feed posts** — plain activity rows: RSVPs, beach check-ins, member
+  text/photo posts, event announcements/updates, the feedback prompt. These do
+  **not** glow and don't open an overlay; they're just posts in the stream.
+- **Glowing cards** — accent-bordered, glowing, tap-to-open things. In the feed
+  these are the board posts (gig purple, gift lime, missed-connection magenta)
+  and the **Featured event ad** (day color). Elsewhere: the board pages, the
+  board overlays, and the event modal. Only these carry the border + glow +
+  tap-to-open behavior.
+
+## Featured event ad (`FeaturedEventAd`)
+
+A standalone, glowing **ad** pinned as the top post of the Scene Feed — its own
+thing, not a member post. `client/src/components/hub/sections/FeaturedEventAd.tsx`,
+wired up in `HubFeed.tsx` (finds the event, passes the slide list).
+
+- **Glow** in the event's **day color** (SAT → green), rounded border, dismissible.
+- **Hero slideshow**: the event poster (4s) then extra promo images (2s each),
+  cross-fading and looping; each frame is full-width and top-anchored (never
+  crops left/right; crops the bottom). Slides live in
+  `/public/posters/<event>-slides/`, listed in `HubFeed.tsx`.
+- **Live countdown** to the event's Pacific start (cyan) · "Kickoff in".
+- **Stacked CTA rows** with neon-glow labels: "Buy tickets" (green) → ticket URL,
+  "RSVP" (orange) → opens the real event card (`EventModal`) in place.
+- Reusable: it takes an `event` + `slides`, so any event can be featured this way.
+
 ## The three surfaces every board has
 
 | Surface | Where | What it is |
