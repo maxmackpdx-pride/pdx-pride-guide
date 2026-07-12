@@ -119,7 +119,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
               className="kick"
               style={{ letterSpacing: ".16em", color: "var(--panel-magenta)", marginBottom: 8 }}
             >
-              ★ Featured · Pride pick
+              Don't miss
             </div>
             <div
               style={{
