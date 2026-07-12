@@ -196,7 +196,7 @@ export default function Gifting() {
       const body = await res.json();
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-      toast({ title: body.firstPostHeld ? "Held for review" : "Posted", description: body.message });
+      toast({ title: "Posted", description: body.message });
       setForm(blankForm);
       setPhotos(null);
       setFormOpen(false);
@@ -334,7 +334,7 @@ export default function Gifting() {
           className="gifting-how"
           kickerTone="cyan"
           title={<>How Gift with <span className="board-how__title-accent">Pride</span> works</>}
-          lede="Give what you can. Ask for what you need. Keep it local, free, and kind. First-time posts are held for a quick admin review."
+          lede="Give what you can. Ask for what you need. Keep it local, free, and kind. Posts go live right away; anything that breaks the rules gets pulled."
           steps={HOW_IT_WORKS}
           footerLine="Keep it free · keep it kind · keep it moving · now through July 26"
         />
@@ -351,7 +351,7 @@ export default function Gifting() {
               {form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
             </h2>
             <p className="board-copy-sm">
-              No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. First-time posts are held for admin review.
+              No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.
             </p>
             <div className="gifting-form-grid">
               <label>

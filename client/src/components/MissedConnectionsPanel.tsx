@@ -180,6 +180,32 @@ export default function MissedConnectionsPanel({
     onError: () => toast({ title: "Could not send reply", variant: "destructive" }),
   });
 
+  const reportMutation = useMutation({
+    mutationFn: (reason: string) => fetch(`/api/missed-connections/${replyingTo!.id}/report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ reason }),
+    }).then(async r => {
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Could not report");
+      return data;
+    }),
+    onSuccess: () => {
+      setReplyingTo(null);
+      setReplyBody("");
+      toast({ title: "Reported", description: "Thanks — our team will review this post." });
+    },
+    onError: () => toast({ title: "Could not report", variant: "destructive" }),
+  });
+
+  const handleReport = () => {
+    if (!replyingTo) return;
+    const reason = window.prompt("Report this post — what's wrong with it? (optional)");
+    if (reason === null) return; // cancelled
+    reportMutation.mutate(reason.trim());
+  };
+
   const requireAuth = () => {
     if (user) return true;
     if (onRequireAuth) onRequireAuth();
@@ -282,6 +308,9 @@ export default function MissedConnectionsPanel({
             {replyMutation.isPending ? "SENDING..." : "SEND"}
           </button>
           <button onClick={() => setReplyingTo(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "9px 12px", cursor: "pointer" }}>Cancel</button>
+          <button onClick={handleReport} disabled={reportMutation.isPending} style={{ marginLeft: "auto", background: "transparent", color: "#ff6666", border: "1px solid #5a2a2a", padding: "9px 12px", cursor: "pointer", fontSize: "0.78rem" }}>
+            {reportMutation.isPending ? "REPORTING…" : "⚐ Report"}
+          </button>
         </div>
       </div>
     </div>

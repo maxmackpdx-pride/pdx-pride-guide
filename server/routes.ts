@@ -906,7 +906,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
         claimReason: type === "CLAIM" ? req.body.claimReason : null,
         eventTypes: type === "CLAIM"
           ? source.eventTypes
-          : JSON.stringify(req.body.eventTypes || []),
+          : (typeof req.body.eventTypes === "string"
+              ? req.body.eventTypes
+              : JSON.stringify(req.body.eventTypes || [])),
       });
       const sub = storage.createSubmission(data);
       const potentialMatches = type === "NEW_EVENT" || type === "SUGGEST"
@@ -1212,6 +1214,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
         isNew: false,
         imageUrl: null,
       });
+      // Member directory adds go live immediately; notify all admins so they can
+      // review what just published.
+      const actor = storage.getUserById(req.session.userId!);
+      storage.createModerationRequest({
+        type: "NEW_DIRECTORY_LISTING",
+        eventId: 0,
+        eventTitle: `${biz.name} · ${biz.type}`,
+        requesterName: actor?.displayName || actor?.username || "member",
+        requesterEmail: actor?.email || null,
+        proof: [biz.neighborhood, biz.address, biz.description].filter(Boolean).join(" · ").slice(0, 500),
+      } as any);
       res.status(201).json(biz);
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Invalid directory listing" });
@@ -2228,6 +2241,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     storage.createMissedConnectionThread(msg.threadId, post.id, post.userId, req.session.userId!);
     res.json(msg);
+  });
+
+  app.post("/api/missed-connections/:id/report", requireAuth, (req, res) => {
+    const post = storage.getMissedConnection(Number(req.params.id));
+    if (!post || post.status !== "ACTIVE") return res.status(404).json({ error: "Not found" });
+    const reason = String(req.body.reason || "").trim().slice(0, 500) || "No reason given";
+    const actor = storage.getUserById(req.session.userId!);
+    storage.createModerationRequest({
+      type: "MISSED_CONNECTION_REPORT",
+      eventId: 0,
+      eventTitle: post.title || `Missed connection #${post.id}`,
+      requesterName: actor?.displayName || actor?.username || "member",
+      requesterEmail: actor?.email || null,
+      proof: `Missed connection #${post.id} reported — ${reason}`,
+    } as any);
+    res.json({ ok: true });
   });
 
   // ─── RIVER BRATS (Nude Beaches social) ───────────────────────────────────

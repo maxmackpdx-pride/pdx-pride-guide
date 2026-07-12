@@ -12,6 +12,7 @@ type QueueRowKind =
   | "gifting_report"
   | "gifting_flagged"
   | "spotted"
+  | "moderation"
   | "owner_desk";
 
 type QueueRow = {
@@ -134,6 +135,37 @@ function mapSpotted(p: any): QueueRow | null {
   };
 }
 
+const MODERATION_TAG: Record<string, { label: string; color: string }> = {
+  MISSED_CONNECTION_REPORT: { label: "MC REPORT", color: C.red },
+  NEW_DIRECTORY_LISTING: { label: "NEW PLACE", color: C.orange },
+  TRANSFER: { label: "TRANSFER", color: C.purple },
+  REMOVE: { label: "REMOVE REQ", color: C.red },
+  FLAG: { label: "FLAGGED", color: C.red },
+  FLAGGED_BY_OWNER: { label: "OWNER FLAG", color: C.red },
+};
+
+/** Shared admin moderation queue (moderation_requests) — reports and
+ * notifications that should reach every admin, not just the owner. */
+function mapModerationRequest(m: any): QueueRow | null {
+  if (String(m.status || "").toUpperCase() !== "PENDING") return null;
+  const type = String(m.type || "");
+  const t = MODERATION_TAG[type] || { label: type.replace(/_/g, " ") || "REVIEW", color: C.cyan };
+  const fields: Array<[string, string]> = [];
+  if (m.requesterName) fields.push(["From", String(m.requesterName)]);
+  if (m.eventTitle) fields.push(["Item", String(m.eventTitle)]);
+  return {
+    id: `mod-${m.id}`,
+    kind: "moderation",
+    entityId: m.id,
+    tag: t.label,
+    tagColor: t.color,
+    title: String(m.eventTitle || t.label),
+    meta: `${t.label}${m.createdAt ? " · " + ts(m.createdAt) : ""}`,
+    fields,
+    note: String(m.proof || ""),
+  };
+}
+
 const DESK_TAG: Record<string, { label: string; color: string }> = {
   contact: { label: "MESSAGE", color: C.cyan },
   sponsor: { label: "SPONSOR", color: C.lime },
@@ -179,6 +211,7 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/river-brats/reports"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
   qc.invalidateQueries({ queryKey: ["/api/gifting"] });
   qc.invalidateQueries({ queryKey: ["/api/missed-connections"] });
 }
@@ -209,6 +242,11 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   const { data: riverBratsReports = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/river-brats/reports"],
     queryFn: () => apiRequest("GET", "/api/admin/river-brats/reports").then((r) => r.json()),
+    enabled: mode === "admin",
+  });
+  const { data: moderationReqs = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/moderation"],
+    queryFn: () => apiRequest("GET", "/api/admin/moderation").then((r) => r.json()),
     enabled: mode === "admin",
   });
   const { data: ownerReports = [] } = useQuery<any[]>({
@@ -273,6 +311,10 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
       apiRequest("POST", `/api/admin/missed-connections/${id}/reject`, { reasonCode, note }),
     onSuccess: onQueueSuccess,
   });
+  const resolveModeration = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/moderation/${id}/resolve`, { status: "APPROVED" }),
+    onSuccess: onQueueSuccess,
+  });
 
   const rows: QueueRow[] = useMemo(() => {
     if (mode === "owner") return ownerReports.map(mapOwnerDeskItem);
@@ -297,12 +339,17 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
       const row = mapSpotted(p);
       if (row) items.push(row);
     }
+    for (const m of moderationReqs) {
+      const row = mapModerationRequest(m);
+      if (row) items.push(row);
+    }
     return items;
-  }, [mode, subs, riverBratsReports, giftingAdmin, spotted, ownerReports]);
+  }, [mode, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, ownerReports]);
 
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
-    || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending;
+    || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending
+    || resolveModeration.isPending;
 
   const kicker = mode === "admin" ? "SHARED QUEUE · WORKED BY THE WHOLE TEAM" : "OWNER DESK · JUST YOU";
 
@@ -442,6 +489,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                         </>
                       )}
                       {q.kind === "river_brats" && btn("RESOLVE", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
+                      {q.kind === "moderation" && btn("MARK REVIEWED", C.limeSoft, () => resolveModeration.mutate(q.entityId))}
                       {q.kind === "gifting_report" && btn("RESOLVE REPORT", C.limeSoft, () => resolveGiftingReport.mutate(q.entityId))}
                       {q.kind === "gifting_flagged" && (
                         <div style={{ width: "100%" }}>
