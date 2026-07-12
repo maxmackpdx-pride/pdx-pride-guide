@@ -58,7 +58,7 @@ function normalizeVenueQuery(v: string): string {
 
 type GigFormData = z.infer<typeof gigSchema>;
 
-type GigPost = {
+export type GigPost = {
   id: number;
   postType: "LOOKING_FOR_WORK" | "POSTING_GIG";
   name: string;
@@ -693,7 +693,7 @@ export default function PrideWork() {
   );
 }
 
-function GigListingCard({
+export function GigListingCard({
   gig,
   accent,
   expanded,

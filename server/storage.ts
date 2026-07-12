@@ -4566,6 +4566,7 @@ function buildHubFeedPinnedItems(goingCounts: Record<number, { count: number }>)
           avatarRing: gig.posterAvatarRing,
         }),
         link: `/pride-work?post=${gig.id}`,
+        boardPostId: gig.id,
         pinned: true,
       });
     }
@@ -8798,6 +8799,7 @@ export const storage: IStorage = {
         }),
         // Deep-link opens the free board with this exact post expanded.
         link: `/gifting?post=${post.id}`,
+        boardPostId: post.id,
       });
     }
 
@@ -8820,6 +8822,7 @@ export const storage: IStorage = {
         }),
         // Deep-link opens Pride Werk with this exact post expanded.
         link: `/pride-work?post=${gig.id}`,
+        boardPostId: gig.id,
       });
     }
 

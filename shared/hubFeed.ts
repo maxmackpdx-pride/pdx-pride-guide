@@ -54,6 +54,8 @@ export type HubFeedItem = {
     kindLabel: string;
     kindColor: string;
   } | null;
+  /** Numeric board post id for gig/gift cards, used to open the board overlay. */
+  boardPostId?: number | null;
   photoUrl?: string | null;
   /** Pinned scene cards sit below live activity; new posts stack above them. */
   pinned?: boolean;

@@ -14,8 +14,9 @@ import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
+import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
 import { Button } from "@/components/ds";
-import { isOpenGrabPost, timeAgo } from "@/lib/boardFeed";
+import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 
 const CATEGORIES = [
@@ -27,29 +28,6 @@ const CATEGORIES = [
 ];
 
 const PICKUP = ["Open Grab", "Porch pickup", "Public meetup", "Event handoff", "Flexible pickup", "Message to coordinate"];
-
-type GiftingPost = {
-  id: number;
-  userId: number;
-  postType: "GIFT" | "ISO";
-  title: string;
-  description: string;
-  category: string;
-  neighborhood: string;
-  pickupPreference: string;
-  photoUrls: string[];
-  status: string;
-  createdAt: string;
-  expiresAt: string;
-  username: string;
-  displayName?: string | null;
-  posterPhotoUrl?: string | null;
-  posterAvatarRing?: string | null;
-  avatarChoice?: number;
-  interestCount: number;
-  isMine?: boolean;
-  interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
-};
 
 const HOW_IT_WORKS: Array<{ title: string; body: string; color: string }> = [
   { title: "Post it", body: "Gift it, or search for it.", color: "#ccff00" },
@@ -80,21 +58,6 @@ function isActivePost(p: GiftingPost) {
   return !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(p.status);
 }
 
-function ghostLetter(category: string) {
-  return (category || "?").trim().charAt(0).toUpperCase();
-}
-
-function kindLabel(post: GiftingPost) {
-  if (isOpenGrabPost(post)) return "Open grab";
-  if (post.postType === "ISO") return "In search of";
-  return "Gift";
-}
-
-function thumbGradient(post: GiftingPost) {
-  if (isOpenGrabPost(post)) return "linear-gradient(135deg,#ff8c00,#ccff00)";
-  if (post.postType === "ISO") return "linear-gradient(135deg,#19e3ff,#8a4bff)";
-  return "linear-gradient(135deg,#ccff00,#19e3ff)";
-}
 
 export default function Gifting() {
   usePageSeo(
@@ -111,8 +74,6 @@ export default function Gifting() {
   const [category, setCategory] = useState("ALL");
   const [neighborhood, setNeighborhood] = useState("");
   const [sort, setSort] = useState("RECENT");
-  const [activeNote, setActiveNote] = useState<Record<number, string>>({});
-  const [report, setReport] = useState<Record<number, string>>({});
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const deepLinkHandled = useRef(false);
 
@@ -222,45 +183,6 @@ export default function Gifting() {
     onError: (err: any) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
   });
 
-  const actionMutation = useMutation({
-    mutationFn: async ({ url, data }: { url: string; data?: any }) => {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data || {}),
-      });
-      if (!res.ok) throw new Error((await res.text()) || res.statusText);
-      return res;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-      toast({ title: "Updated" });
-    },
-    onError: (err: any) => toast({ title: "Could not update", description: err.message, variant: "destructive" }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await fetch(`/api/gifting/${id}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
-      return res;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-      setExpandedId(null);
-      toast({ title: "Post deleted" });
-    },
-    onError: (err: any) => toast({ title: "Could not delete", description: err.message, variant: "destructive" }),
-  });
-
-  const handleDeletePost = (post: GiftingPost) => {
-    if (!confirm(`Delete "${post.title}"? This removes it from the board.`)) return;
-    deleteMutation.mutate(post.id);
-  };
-
   const submitPost = () => {
     if (!form.acceptRules) {
       toast({ title: "Accept the community rules first", variant: "destructive" });
@@ -282,37 +204,6 @@ export default function Gifting() {
     setCategory("ALL");
     setNeighborhood("");
     setSort("RECENT");
-  };
-
-  const submitResponse = (post: GiftingPost, endpoint: "interest" | "offer") => {
-    if (!user) return setShowAuth(true);
-    const note = (activeNote[post.id] || "").trim();
-    // Open Grab can proceed without a note; gift interest / ISO offer need one
-    if (!isOpenGrabPost(post) && !note) {
-      return toast({ title: "Add a short note first", variant: "destructive" });
-    }
-    actionMutation.mutate({ url: `/api/gifting/${post.id}/${endpoint}`, data: { note } });
-    setActiveNote(prev => ({ ...prev, [post.id]: "" }));
-  };
-
-  const cardAccent = (post: GiftingPost) => {
-    if (isOpenGrabPost(post)) return ACCENT.GRAB;
-    return post.postType === "ISO" ? ACCENT.ISO : ACCENT.GIFT;
-  };
-
-  const cardStatus = (post: GiftingPost) => {
-    if (post.status === "PENDING") return "Pending admin review";
-    if (post.postType === "ISO") return "Open · make an offer";
-    if (isOpenGrabPost(post)) return "First come · grab it";
-    if (post.interestCount >= 3) return "3 of 3 hands up";
-    return `${post.interestCount} of 3 hands up`;
-  };
-
-  const cardCta = (post: GiftingPost) => {
-    if (post.postType === "ISO") return "Offer it";
-    if (isOpenGrabPost(post)) return "Grab it";
-    if (post.interestCount >= 3) return "Full";
-    return "Raise hand";
   };
 
   const chipDefs: Array<{ key: string; label: string; accent: string }> = [
@@ -519,195 +410,16 @@ export default function Gifting() {
           </div>
         ) : (
           <div className="board-listing-grid board-listing-grid--makeover">
-            {filtered.map((post, index) => {
-              const accent = cardAccent(post);
-              const expanded = expandedId === post.id;
-              const showDots = post.postType === "GIFT" && !isOpenGrabPost(post);
-              const grab = isOpenGrabPost(post);
-              return (
-                <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
-                  <article
-                    id={`board-post-${post.id}`}
-                    className={`board-listing-card board-listing-card--makeover${expanded ? " is-expanded" : ""}`}
-                    style={{ "--listing-accent": accent } as React.CSSProperties}
-                    onClick={() => setExpandedId(expanded ? null : post.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setExpandedId(expanded ? null : post.id);
-                      }
-                    }}
-                  >
-                    <div className="board-listing-card__row">
-                      <div
-                        className="board-listing-card__thumb"
-                        style={
-                          post.photoUrls?.[0]
-                            ? undefined
-                            : { background: thumbGradient(post) }
-                        }
-                      >
-                        {post.photoUrls?.[0] ? (
-                          <img src={post.photoUrls[0]} alt="" />
-                        ) : (
-                          <>
-                            <span className="board-listing-card__ghost" aria-hidden="true">
-                              {ghostLetter(post.category)}
-                            </span>
-                            <div className="board-listing-card__thumb-fallback" aria-hidden="true" />
-                          </>
-                        )}
-                        {grab && <span className="board-listing-card__grab-badge">Grab</span>}
-                        {!grab && (post.photoUrls?.length || 0) > 0 && (
-                          <span className="board-listing-card__thumb-badge">▦ {post.photoUrls.length}</span>
-                        )}
-                      </div>
-                      <div className="board-listing-card__main">
-                        <div className="board-listing-card__tags">
-                          <span className="board-listing-card__kind board-listing-card__kind--text">
-                            {kindLabel(post)}
-                          </span>
-                          <span className="board-listing-card__time">{timeAgo(post.createdAt)}</span>
-                        </div>
-                        <h4 className="board-listing-card__title">{post.title}</h4>
-                        <div className="board-listing-card__poster">
-                          <UserAvatar
-                            photoUrl={post.posterPhotoUrl}
-                            avatarChoice={post.avatarChoice}
-                            avatarRing={post.posterAvatarRing}
-                            displayName={post.displayName}
-                            username={post.username}
-                            size={18}
-                          />
-                          <span>@{post.username} · {post.neighborhood || "Portland"}</span>
-                        </div>
-                        <div className="board-listing-card__footer">
-                          <div className="board-listing-card__status-wrap">
-                            {showDots && (
-                              <div className="board-listing-card__dots">
-                                {[0, 1, 2].map(i => (
-                                  <span
-                                    key={i}
-                                    className={`board-listing-card__dot${i < post.interestCount ? " is-filled" : ""}`}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                            <span className="board-listing-card__status">{cardStatus(post)}</span>
-                          </div>
-                          <span className="board-listing-card__cta">{cardCta(post)} →</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {expanded && (
-                      <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
-                        <p>{post.description}</p>
-                        <div className="gifting-details">{post.category} · {post.pickupPreference}</div>
-                        {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
-                          <div className="gifting-response">
-                            <textarea
-                              placeholder={
-                                grab
-                                  ? "Say hi (optional), then head over."
-                                  : post.postType === "GIFT"
-                                    ? "Short note: why you would use this."
-                                    : "Tell them what you have."
-                              }
-                              value={activeNote[post.id] || ""}
-                              onChange={e => setActiveNote(prev => ({ ...prev, [post.id]: e.target.value }))}
-                              maxLength={240}
-                            />
-                            <button
-                              onClick={() => submitResponse(post, post.postType === "GIFT" ? "interest" : "offer")}
-                              disabled={!grab && post.postType === "GIFT" && post.interestCount >= 3}
-                            >
-                              {grab
-                                ? "On my way, grab it"
-                                : post.postType === "GIFT" && post.interestCount >= 3
-                                  ? "Full, poster is choosing"
-                                  : post.postType === "GIFT"
-                                    ? "I'm interested"
-                                    : "I have this"}
-                            </button>
-                          </div>
-                        )}
-                        {post.isMine && (
-                          <div className="gifting-owner">
-                            {post.status === "PENDING" && (
-                              <p className="gifting-pending-note">
-                                Held for admin review. Only you see this on the board until it&apos;s approved.
-                              </p>
-                            )}
-                            {post.interests?.length ? (
-                              <div className="gifting-interest-list">
-                                {post.interests.map(i => (
-                                  <div key={i.id} className="gifting-interest-row">
-                                    <UserAvatar
-                                      photoUrl={i.photoUrl}
-                                      avatarChoice={i.avatarChoice}
-                                      avatarRing={i.avatarRing}
-                                      displayName={i.displayName}
-                                      username={i.username}
-                                      size={28}
-                                    />
-                                    <span>{i.displayName || i.username}: {i.note}</span>
-                                    {i.status === "INTERESTED" && (
-                                      <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/interests/${i.id}/choose` })}>
-                                        Pick
-                                      </button>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p>No responses yet.</p>
-                            )}
-                            {post.postType === "GIFT" && (
-                              <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-gifted` })}>
-                                <HeartHandshake size={14} /> Mark Gifted
-                              </button>
-                            )}
-                            {post.postType === "ISO" && (
-                              <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/mark-found` })}>
-                                <HeartHandshake size={14} /> Mark Found
-                              </button>
-                            )}
-                            <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/reopen` })}>
-                              <RefreshCw size={14} /> Reopen one spot
-                            </button>
-                            <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/renew` })}>
-                              <RefreshCw size={14} /> Renew once
-                            </button>
-                            <button
-                              type="button"
-                              className="gifting-delete-btn"
-                              onClick={() => handleDeletePost(post)}
-                              disabled={deleteMutation.isPending}
-                            >
-                              <X size={14} /> Delete post
-                            </button>
-                          </div>
-                        )}
-                        <details className="gifting-report">
-                          <summary><ShieldAlert size={13} /> Report</summary>
-                          <input
-                            placeholder="What's wrong?"
-                            value={report[post.id] || ""}
-                            onChange={e => setReport(prev => ({ ...prev, [post.id]: e.target.value }))}
-                          />
-                          <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/report`, data: { reason: report[post.id] } })}>
-                            Send report
-                          </button>
-                        </details>
-                      </div>
-                    )}
-                  </article>
-                </ScrollReveal>
-              );
-            })}
+            {filtered.map((post, index) => (
+              <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
+                <GiftListingCard
+                  post={post}
+                  expanded={expandedId === post.id}
+                  onToggle={() => setExpandedId(expandedId === post.id ? null : post.id)}
+                  onRequireAuth={() => setShowAuth(true)}
+                />
+              </ScrollReveal>
+            ))}
           </div>
         )}
       </BoardActiveSection>

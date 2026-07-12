@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
+import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import { timeAgo } from "@/lib/boardFeed";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedItem } from "@shared/hubFeed";
@@ -36,6 +37,7 @@ function eventHref(item: HubFeedItem): string | null {
 export default function HubFeedCard({ item }: Props) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [spottedOpen, setSpottedOpen] = useState(false);
+  const [boardOpen, setBoardOpen] = useState(false);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
   const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
@@ -52,6 +54,8 @@ export default function HubFeedCard({ item }: Props) {
   // Board posts with an author (gigs, gifts) show the post title as a bold
   // subject line, matching the board's expanded card.
   const showSubject = (item.kind === "gig" || item.kind === "gifting") && !!item.title;
+  // Gig/gift cards open the real board card as an overlay on top of the feed.
+  const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
 
   const eventBlock = item.event ? (
     <Link
@@ -124,16 +128,16 @@ export default function HubFeedCard({ item }: Props) {
   const body = (
     <div
       className={`card fitem${item.pinned ? " hub-feed-pin" : ""}`}
-      onClick={isSpotted ? () => setSpottedOpen(true) : undefined}
-      onKeyDown={isSpotted ? (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSpottedOpen(true); }
+      onClick={isSpotted ? () => setSpottedOpen(true) : isBoard ? () => setBoardOpen(true) : undefined}
+      onKeyDown={(isSpotted || isBoard) ? (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); isSpotted ? setSpottedOpen(true) : setBoardOpen(true); }
       } : undefined}
-      role={isSpotted ? "button" : undefined}
-      tabIndex={isSpotted ? 0 : undefined}
+      role={(isSpotted || isBoard) ? "button" : undefined}
+      tabIndex={(isSpotted || isBoard) ? 0 : undefined}
       style={{
         padding: "16px 18px",
         borderRadius: 16,
-        ...(isSpotted ? { cursor: "pointer" } : {}),
+        ...((isSpotted || isBoard) ? { cursor: "pointer" } : {}),
         ...(glow
           ? { border: `1px solid ${glow}`, boxShadow: `0 0 22px -9px ${glow}` }
           : item.pinned
@@ -325,6 +329,23 @@ export default function HubFeedCard({ item }: Props) {
             kindLabel={item.spotted.kindLabel}
             kindColor={item.spotted.kindColor}
             onClose={() => setSpottedOpen(false)}
+          />
+        )}
+      </>
+    );
+  }
+
+  // Gig/gift cards open the real board card as an overlay in place, so closing
+  // returns to the exact feed scroll spot (no navigation).
+  if (isBoard) {
+    return (
+      <>
+        {body}
+        {boardOpen && item.boardPostId != null && (
+          <BoardPostOverlay
+            kind={item.kind === "gig" ? "gig" : "gifting"}
+            postId={item.boardPostId}
+            onClose={() => setBoardOpen(false)}
           />
         )}
       </>
