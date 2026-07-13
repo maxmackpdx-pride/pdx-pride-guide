@@ -3634,7 +3634,7 @@ function runBootMigrationsOnce() {
     if (!exists) {
       db.insert(businesses).values({
         name: "Sold By Scott",
-        type: "service",
+        type: "realestate",
         description:
           "Bay Area and Pacific Northwest queer-friendly real estate team. Scott Edelman (scotte@soldxscott.com, 415-481-2962) and Scott Gunner Friesen (scottf@soldxscott.com, 415-961-0281). The one real estate listing in the Pride Guide.",
         address: null,
@@ -3655,6 +3655,11 @@ function runBootMigrationsOnce() {
     // Ensure Bridge City Mentors stays nonprofit (correct pin + rainbow treatment).
     sqlite.prepare(`UPDATE businesses SET type = 'nonprofit', queer_owned = 1, queer_friendly = 1 WHERE lower(name) = 'bridge city mentors'`).run();
     recordBootMigration("seed_businesses_directory_v10_sold_by_scott");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v11_type_accents")) {
+    // Reclassify Sold By Scott under realestate (green→white neon) if an older seed used service.
+    sqlite.prepare(`UPDATE businesses SET type = 'realestate' WHERE lower(name) = 'sold by scott'`).run();
+    recordBootMigration("seed_businesses_directory_v11_type_accents");
   }
   if (!hasBootMigration("seed_business_bowery_bagels_v1")) {
     const now = new Date().toISOString();

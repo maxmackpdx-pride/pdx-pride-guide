@@ -101,6 +101,7 @@ const FALLBACK_BY_TYPE: Record<string, string> = {
   nonprofit: "/directory-logos/fallback_nonprofits.png",
   hotel: "/directory-logos/fallback_venues.png",
   healthcare: "/directory-logos/fallback_healthcare.png",
+  realestate: "/directory-logos/fallback_realestate.png",
 };
 
 export function normalizeDirectoryName(name: string): string {

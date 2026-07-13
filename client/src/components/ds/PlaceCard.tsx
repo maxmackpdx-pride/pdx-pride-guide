@@ -118,8 +118,13 @@ if (typeof document !== "undefined" && !document.getElementById("pdx-place-css")
 const CAT_COLOR = {
   bars:"var(--pink)", food:"var(--orange)", cafes:"var(--green)", venues:"var(--cyan)",
   services:"var(--purple)", shops:"var(--amber)", hotels:"var(--blue)",
+  healthcare:"#FF00CC", realestate:"#0B3D2E",
 };
 const RAINBOW_EDGE = "linear-gradient(120deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC)";
+/** Pink → white neon for Health & Care cards. */
+const HEALTHCARE_EDGE = "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
+/** Dark green → white neon for Real Estate cards. */
+const REALESTATE_EDGE = "linear-gradient(125deg,#062A1F 0%,#0B3D2E 28%,#1F8A52 62%,#FFFFFF 100%)";
 const DAY_COLOR = { MON:"var(--day-mon,var(--pink))", TUE:"var(--day-tue,var(--orange))", WED:"var(--day-wed,var(--yellow))", THU:"var(--cyan)", FRI:"var(--pink)", SAT:"var(--green)", SUN:"var(--orange)" };
 
 function Icon({ d }) {
@@ -187,8 +192,18 @@ export function PlaceCard({
   style?: React.CSSProperties;
   [key: string]: unknown;
 }) {
-  const accent = isNonprofit ? "var(--cyan)" : (CAT_COLOR[category] || "var(--pink)");
-  const edge = isNonprofit ? RAINBOW_EDGE : `linear-gradient(${accent},${accent})`;
+  const isHealthcare = category === "healthcare";
+  const isRealEstate = category === "realestate";
+  const accent = isNonprofit
+    ? "var(--cyan)"
+    : (CAT_COLOR[category] || "var(--pink)");
+  const edge = isNonprofit
+    ? RAINBOW_EDGE
+    : isHealthcare
+      ? HEALTHCARE_EDGE
+      : isRealEstate
+        ? REALESTATE_EDGE
+        : `linear-gradient(${accent},${accent})`;
   const [logoFailed, setLogoFailed] = useState(false);
   const [sharing, setSharing] = useState(false);
   const showLogo = logoUrl && !logoFailed;

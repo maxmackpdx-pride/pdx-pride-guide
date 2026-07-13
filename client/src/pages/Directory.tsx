@@ -78,8 +78,10 @@ export const TYPE_LABELS: Record<string, string> = {
   hotel: "Hotels",
   nonprofit: "Nonprofits",
   healthcare: "Health & Care",
+  realestate: "Real Estate",
 };
 
+/** Solid pin / accent hex (gradients live on PlaceCard edges). */
 const TYPE_COLORS: Record<string, string> = {
   bar: "#FF00CC",
   restaurant: "#FF6600",
@@ -89,7 +91,8 @@ const TYPE_COLORS: Record<string, string> = {
   shop: "#FFD700",
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
-  healthcare: "#00F0C0",
+  healthcare: "#FF00CC", // pink pole of pink→white neon
+  realestate: "#0B3D2E", // dark green pole of green→white neon
 };
 
 const NEIGHBORHOODS = [
@@ -457,7 +460,8 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   shop: "shops",
   hotel: "hotels",
   nonprofit: "services",
-  healthcare: "services",
+  healthcare: "healthcare",
+  realestate: "realestate",
 };
 
 function DirectoryCard({

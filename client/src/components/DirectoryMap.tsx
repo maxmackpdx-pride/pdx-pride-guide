@@ -27,7 +27,22 @@ export const MAP_TYPE_COLORS: Record<string, string> = {
   shop: "#FFD700",
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
-  healthcare: "#00F0C0",
+  healthcare: "#FF00CC",
+  realestate: "#0B3D2E",
+};
+
+/** CSS backgrounds for legend swatches (solid or gradient neon). */
+export const MAP_TYPE_SWATCH: Record<string, string> = {
+  bar: "#FF00CC",
+  restaurant: "#FF6600",
+  cafe: "#39FF14",
+  venue: "#19E3FF",
+  service: "#A855F7",
+  shop: "#FFD700",
+  hotel: "#FF1FA0",
+  nonprofit: "conic-gradient(#FF2400,#FF6600,#FFEE00,#39FF14,#00FFFF,#0044FF,#8800FF,#FF00CC,#FF2400)",
+  healthcare: "linear-gradient(135deg,#FF00CC 0%,#FF7AE0 48%,#FFFFFF 100%)",
+  realestate: "linear-gradient(135deg,#0B3D2E 0%,#1F8A52 48%,#FFFFFF 100%)",
 };
 
 export const MAP_TYPE_LABELS: Record<string, string> = {
@@ -40,6 +55,7 @@ export const MAP_TYPE_LABELS: Record<string, string> = {
   hotel: "Hotels",
   nonprofit: "Nonprofits",
   healthcare: "Health & Care",
+  realestate: "Real Estate",
 };
 
 /** Legend order for the directory map key. */
@@ -53,6 +69,7 @@ export const MAP_KEY_TYPES = [
   "hotel",
   "nonprofit",
   "healthcare",
+  "realestate",
 ] as const;
 
 const TYPE_COLORS = MAP_TYPE_COLORS;
@@ -220,6 +237,7 @@ export function DirectoryMapKey({ className = "" }: { className?: string }) {
         {MAP_KEY_TYPES.map(type => {
           const isNonprofit = type === "nonprofit";
           const color = MAP_TYPE_COLORS[type];
+          const swatch = MAP_TYPE_SWATCH[type] || color;
           const label = MAP_TYPE_LABELS[type];
           return (
             <li key={type} className="directory-map-key__item">
@@ -229,7 +247,14 @@ export function DirectoryMapKey({ className = "" }: { className?: string }) {
                     ? "directory-map-key__swatch directory-map-key__swatch--rainbow"
                     : "directory-map-key__swatch"
                 }
-                style={isNonprofit ? undefined : { background: color, boxShadow: `0 0 8px ${color}99` }}
+                style={
+                  isNonprofit
+                    ? undefined
+                    : {
+                        background: swatch,
+                        boxShadow: `0 0 8px ${color}99`,
+                      }
+                }
                 aria-hidden="true"
               />
               <span className="directory-map-key__label">{label}</span>

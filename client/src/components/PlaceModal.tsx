@@ -80,6 +80,12 @@ const DAY_COLOR: Record<string, string> = {
 /** Nonprofit card border — full-spectrum rainbow instead of a single category color. */
 const NONPROFIT_RAINBOW_EDGE =
   "linear-gradient(120deg,var(--neon-red),#FF9500,var(--yellow),var(--green),var(--neon-cyan),#3A6BFF,var(--neon-violet),var(--neon-magenta))";
+/** Health & Care — pink → white neon edge. */
+const HEALTHCARE_EDGE =
+  "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
+/** Real Estate — dark green → white neon edge. */
+const REALESTATE_EDGE =
+  "linear-gradient(125deg,#062A1F 0%,#0B3D2E 28%,#1F8A52 62%,#FFFFFF 100%)";
 
 function Icon({ d }: { d: React.ReactNode }) {
   return (
@@ -216,20 +222,32 @@ export default function PlaceModal({
   const isOwner = Boolean(place.isOwner);
   const displayed: Business = { ...place, ...(savedOverrides || {}) };
   const isNonprofit = place.type === "nonprofit";
+  const isHealthcare = place.type === "healthcare" || category === "healthcare";
+  const isRealEstate = place.type === "realestate" || category === "realestate";
   const accent = isNonprofit
     ? "var(--cyan)"
-    : ({
-        bars: "var(--pink)",
-        food: "var(--orange)",
-        cafes: "var(--green)",
-        venues: "var(--cyan)",
-        services: "var(--purple)",
-        shops: "var(--amber)",
-        hotels: "var(--blue)",
-      } as Record<string, string>)[category] || "var(--pink)";
+    : isHealthcare
+      ? "#FF00CC"
+      : isRealEstate
+        ? "#0B3D2E"
+        : ({
+            bars: "var(--pink)",
+            food: "var(--orange)",
+            cafes: "var(--green)",
+            venues: "var(--cyan)",
+            services: "var(--purple)",
+            shops: "var(--amber)",
+            hotels: "var(--blue)",
+            healthcare: "#FF00CC",
+            realestate: "#0B3D2E",
+          } as Record<string, string>)[category] || "var(--pink)";
   const edge = isNonprofit
     ? NONPROFIT_RAINBOW_EDGE
-    : `linear-gradient(${accent},${accent})`;
+    : isHealthcare
+      ? HEALTHCARE_EDGE
+      : isRealEstate
+        ? REALESTATE_EDGE
+        : `linear-gradient(${accent},${accent})`;
   const logoUrl = resolveDirectoryLogo(place.name, place.imageUrl);
   const fallbackLogoUrl = directoryFallbackLogo(place.type);
 
