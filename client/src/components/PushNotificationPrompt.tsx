@@ -9,29 +9,48 @@ import {
   shouldShowInstallBeforePush,
   subscribeToPush,
 } from "@/lib/pushNotifications";
-import { canUseWebPush, isStandalonePwa } from "@/lib/pwa";
+import {
+  canUseWebPush,
+  hasInstallPrompt,
+  isAndroidDevice,
+  isStandalonePwa,
+  promptInstall,
+} from "@/lib/pwa";
 
 const DISMISS_KEY = "pdx-push-prompt-dismissed";
+type InstallMode = "ios" | "android";
 
 export default function PushNotificationPrompt() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
-  const [installFirst, setInstallFirst] = useState(false);
+  const [installMode, setInstallMode] = useState<InstallMode | null>(null);
+  const [installReady, setInstallReady] = useState(false); // Android: native prompt captured
   const [busy, setBusy] = useState(false);
+  const installFirst = installMode !== null;
 
   useEffect(() => {
     if (!user) return;
     if (sessionStorage.getItem(DISMISS_KEY) === "1") return;
 
-    // iPhone/iPad in Safari (not yet installed): show the "Save as Web App"
-    // how-to right away, independent of push config. Installing is the goal,
-    // and iOS can't do web push until the site is a home-screen app anyway —
-    // so this must not be gated behind VAPID/push being configured.
+    // iPhone/iPad in Safari, not yet installed → "Save as Web App" how-to.
+    // Independent of push config: iOS can't do web push until it's a home-screen app.
     if (shouldShowInstallBeforePush()) {
-      setInstallFirst(true);
+      setInstallMode("ios");
       setVisible(true);
       return;
+    }
+
+    // Android in the browser, not yet installed → install prompt. Chrome offers
+    // a real one-tap install (beforeinstallprompt); we also show the manual
+    // ⋮-menu how-to as a fallback. Independent of push config.
+    if (isAndroidDevice() && !isStandalonePwa()) {
+      setInstallMode("android");
+      setInstallReady(hasInstallPrompt());
+      setVisible(true);
+      const onAvailable = () => setInstallReady(true);
+      window.addEventListener("pdx-pwa-install-available", onAvailable);
+      return () => window.removeEventListener("pdx-pwa-install-available", onAvailable);
     }
 
     let cancelled = false;
@@ -55,7 +74,7 @@ export default function PushNotificationPrompt() {
 
       showTimer = window.setTimeout(() => {
         if (cancelled) return;
-        setInstallFirst(false);
+        setInstallMode(null);
         setVisible(true);
       }, isStandalonePwa() ? 800 : 2200);
     })();
@@ -82,11 +101,26 @@ export default function PushNotificationPrompt() {
     setVisible(false);
   };
 
-  const allow = async () => {
-    if (installFirst) {
-      dismiss();
-      return;
+  // Android one-tap install via the captured beforeinstallprompt.
+  const installNative = async () => {
+    setBusy(true);
+    try {
+      const outcome = await promptInstall();
+      if (outcome === "accepted") {
+        toast({ title: "Installing Pride Guide", description: "Look for it on your home screen in a moment." });
+        setVisible(false);
+        return;
+      }
+      if (outcome === "unavailable") {
+        setInstallReady(false); // fall back to the manual steps
+      }
+      // "dismissed": leave the popup open so they can use the manual steps.
+    } finally {
+      setBusy(false);
     }
+  };
+
+  const allow = async () => {
     setBusy(true);
     try {
       const result = await subscribeToPush();
@@ -111,6 +145,18 @@ export default function PushNotificationPrompt() {
       setBusy(false);
     }
   };
+
+  const sticker =
+    installMode === "ios" ? "IPHONE SETUP"
+    : installMode === "android" ? "ANDROID SETUP"
+    : isStandalonePwa() ? "INSTALLED APP" : "STAY IN THE LOOP";
+
+  const intro =
+    installMode === "ios"
+      ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
+      : installMode === "android"
+      ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. On Android, Chrome installs it in one tap:"
+      : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer.";
 
   return (
     <div
@@ -158,7 +204,7 @@ export default function PushNotificationPrompt() {
         </button>
 
         <div className="sticker" style={{ color: "#19E3FF", borderColor: "#19E3FF", marginBottom: 14 }}>
-          {installFirst ? "IPHONE SETUP" : isStandalonePwa() ? "INSTALLED APP" : "STAY IN THE LOOP"}
+          {sticker}
         </div>
 
         <h2
@@ -170,9 +216,7 @@ export default function PushNotificationPrompt() {
         </h2>
 
         <p style={{ color: "#bbb", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: installFirst ? 10 : 20 }}>
-          {installFirst
-            ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
-            : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer."}
+          {intro}
         </p>
 
         {installFirst && (
@@ -181,7 +225,27 @@ export default function PushNotificationPrompt() {
           </p>
         )}
 
-        {installFirst && <InstallSteps />}
+        {/* Android: the real one-tap install, shown when Chrome has offered it. */}
+        {installMode === "android" && installReady && (
+          <button
+            type="button"
+            className="btn-neon solid"
+            disabled={busy}
+            onClick={installNative}
+            style={{ borderColor: "#19E3FF", background: "#19E3FF", color: "#000", width: "100%", marginBottom: 16 }}
+          >
+            {busy ? "OPENING…" : "INSTALL APP"}
+          </button>
+        )}
+
+        {installMode === "android" && (
+          <p style={{ color: "#8a8a92", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 12 }}>
+            {installReady ? "Or do it yourself:" : "Your browser will offer a one-tap Install once it's ready — or do it now:"}
+          </p>
+        )}
+
+        {installMode === "ios" && <InstallSteps steps={IOS_STEPS} />}
+        {installMode === "android" && <InstallSteps steps={ANDROID_STEPS} />}
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: installFirst ? 20 : 0 }}>
           {!installFirst && (
@@ -206,8 +270,8 @@ export default function PushNotificationPrompt() {
 
 const CYAN = "#19E3FF";
 
-// The iOS Share glyph (up arrow out of a tray) — this is the button Apple uses
-// for "Add to Home Screen"; it can't be triggered from a web page.
+// The iOS Share glyph (up arrow out of a tray) — the button Apple uses for
+// "Add to Home Screen"; it can't be triggered from a web page.
 function ShareGlyph() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -218,7 +282,7 @@ function ShareGlyph() {
   );
 }
 
-// The "Add to Home Screen" row glyph — a rounded square with a plus.
+// A rounded square with a plus — "Add to Home Screen".
 function AddGlyph() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -228,36 +292,51 @@ function AddGlyph() {
   );
 }
 
-// On-brand, self-contained visual how-to for saving the site as a home-screen
-// web app on iPhone. No screenshots, no fake buttons — iOS only allows this
-// from Safari's own Share button, so we point the user straight at it.
-function InstallSteps() {
-  const steps: Array<{ icon: ReactNode; title: ReactNode; sub: string }> = [
-    {
-      icon: <ShareGlyph />,
-      title: <>Tap the <strong style={{ color: "#fff" }}>Share</strong> button</>,
-      sub: "In Safari's toolbar — the ⬆️ square, usually bottom-center.",
-    },
-    {
-      icon: <AddGlyph />,
-      title: <>Choose <strong style={{ color: "#fff" }}>Add to Home Screen</strong></>,
-      sub: "Scroll the share menu down a little if you don't see it.",
-    },
-    {
-      icon: (
-        <img
-          src="/icons/apple-touch-icon.png"
-          alt=""
-          width={30}
-          height={30}
-          style={{ borderRadius: 8, display: "block" }}
-        />
-      ),
-      title: <>Open it from your <strong style={{ color: "#fff" }}>home screen</strong></>,
-      sub: "It launches full-screen, like a real app — icon and all.",
-    },
-  ];
+// Android Chrome's ⋮ overflow-menu glyph (three vertical dots).
+function MenuGlyph() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill={CYAN} aria-hidden="true">
+      <circle cx="12" cy="5" r="1.8" />
+      <circle cx="12" cy="12" r="1.8" />
+      <circle cx="12" cy="19" r="1.8" />
+    </svg>
+  );
+}
 
+// Download-into-tray glyph — Chrome's "Install app".
+function InstallGlyph() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3v11" />
+      <path d="M8 10l4 4 4-4" />
+      <path d="M5 19h14" />
+    </svg>
+  );
+}
+
+function HomeIcon({ src }: { src: string }) {
+  return <img src={src} alt="" width={30} height={30} style={{ borderRadius: 8, display: "block" }} />;
+}
+
+type Step = { icon: ReactNode; title: ReactNode; sub: string };
+
+const b = (t: string) => <strong style={{ color: "#fff" }}>{t}</strong>;
+
+const IOS_STEPS: Step[] = [
+  { icon: <ShareGlyph />, title: <>Tap the {b("Share")} button</>, sub: "In Safari's toolbar — the ⬆️ square, usually bottom-center." },
+  { icon: <AddGlyph />, title: <>Choose {b("Add to Home Screen")}</>, sub: "Scroll the share menu down a little if you don't see it." },
+  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+];
+
+const ANDROID_STEPS: Step[] = [
+  { icon: <MenuGlyph />, title: <>Tap the {b("⋮ menu")}</>, sub: "Top-right corner of Chrome." },
+  { icon: <InstallGlyph />, title: <>Choose {b("Install app")}</>, sub: "Some phones label it \"Add to Home screen.\"" },
+  { icon: <HomeIcon src="/icons/icon-192.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+];
+
+// On-brand, self-contained visual how-to. No screenshots — the exact controls
+// live in the browser's own chrome, so we point the user straight at them.
+function InstallSteps({ steps }: { steps: Step[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {steps.map((s, i) => (

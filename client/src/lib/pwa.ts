@@ -16,6 +16,11 @@ export function isIosDevice(): boolean {
   return /iPad|iPhone|iPod/.test(navigator.userAgent);
 }
 
+export function isAndroidDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Android/.test(navigator.userAgent);
+}
+
 export function canUseWebPush(): boolean {
   return typeof window !== "undefined"
     && "serviceWorker" in navigator
