@@ -414,7 +414,8 @@ function EventModalInner({
         data-testid="event-modal"
         style={{ "--event-accent": accentColor } as React.CSSProperties}
       >
-        <div className="event-modal__bar" style={{ background: dayColor }} />
+        {/* Shared animated rainbow top divider (same system as PlaceCard / PlaceModal) */}
+        <div className="event-modal__bar pdx-rainbow-rule" aria-hidden="true" />
 
         <div className="event-modal__poster">
           <img src={posterUrl} alt={event.title} className="event-modal__poster-img" />

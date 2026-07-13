@@ -19,44 +19,89 @@ Not everything in the Scene Feed is a "card." Keep these separate:
   board overlays, and the event modal. Only these carry the border + glow +
   tap-to-open behavior.
 
-## Rainbow top seam (clickable cards: events, boards, places)
+## Rainbow top divider (required on every clickable card)
 
-**Rule:** Anything that is a **clickable card** — Events, Boards (gigs / gifts /
-missed connections), Places — gets the same animated rainbow bar across the
-top. Plain hub-feed activity rows (RSVP, check-in, text posts) do **not**.
+**Rule (locked):** Every **clickable card** — Events, Boards (gigs / gifts /
+missed connections), Places, featured event ad, glowing hub-feed board cards —
+must show the **same animated rainbow divider across the top**, the way
+**Place cards** do. This is not optional chrome and not a per-board stripe.
 
-Shared chrome: `client/src/components/ds/tokens/base.css` + calm rules in
-`effects.css` (flow + soft glow; calm/reduced-motion freezes it).
+Plain hub-feed activity rows (RSVP, check-in, member text/photo posts) do
+**not** get it.
 
-| Surface | Selector / component |
+### Visual reference — PlaceCard
+
+Directory `PlaceCard` is the canonical look:
+
+- 3px bar flush to the top edge of the card
+- Gradient: cyan → yellow → magenta → orange → cyan
+- **Motion:** colors flow left→right (`pdxSeamFlow`), soft rainbow glow pulse
+  (`pdxSeamGlow`), white glint sweep (`pdxSeamGlint`) — ~3.4s loop
+- **Calm mode / `prefers-reduced-motion`:** bar stays visible but **static**
+  (no flow, glint, or glow) — see `effects.css`
+
+PlaceCard implements it as an explicit element:
+
+```html
+<div class="pdxPlace__seam pdx-rainbow-rule" aria-hidden="true" />
+```
+
+(`client/src/components/ds/PlaceCard.tsx` · preview
+`design-system/previews/place-card.html`)
+
+Place detail uses the same class on the modal logo well (`PlaceModal`).
+
+### Shared system (do not fork)
+
+| Piece | Where |
 |---|---|
-| Events grid | `.pdxBoard` (`PosterCard` via ListingCard) |
-| Events list | `.pdxRow` (`EventCard`) |
-| Schedule cells | `.schedule-event-card` |
-| Legacy event board cards | `.event-board-card` |
-| Gigs / Gifting boards | `.board-listing-card` |
-| Missed Connections boards | `.board-spotted-card` / `.spotted-card` |
-| Hub feed **board** cards only | `.card.fitem.fitem--glow` (gig / gift / MC) — not plain activity rows |
-| Featured event ad | `.featured-event-ad` |
-| Directory / home places | `PlaceCard` — `.pdxPlace__seam.pdx-rainbow-rule` |
-| Place detail modal | `PlaceModal` — `.pdx-rainbow-rule` on logo well |
+| Element form (`.pdx-rainbow-rule` / `.pdx-seam`) | `client/src/components/ds/tokens/base.css` |
+| Pseudo form (card `::before` seams) | same `base.css` — “Card top rainbow seam” block |
+| Calm / reduced-motion flatten | `client/src/components/ds/tokens/effects.css` |
+| Gradient tokens | `colors.css` (`--rainbow-bar`, neon stops) |
 
-When adding a new clickable card, add its root class to the `::before` list in
-`base.css` (and calm rules in `effects.css`). Do not invent a one-off top stripe.
+**Two valid ways to attach it** (same animation system — pick one per surface):
+
+1. **Explicit element** (PlaceCard / PlaceModal style) — child with
+   `pdx-rainbow-rule`, positioned absolute top 0 / full width / height 3px.
+2. **Root `::before`** (most board + event cards) — add the card’s root class
+   to the shared selector list in `base.css` so the pseudo-element draws the
+   bar. Root needs `position: relative` and usually `overflow: hidden`.
+
+Do **not** invent a one-off top stripe, solid day-color cap, or static
+non-rainbow line. New clickable cards must join this system.
+
+### Surfaces that must carry the rainbow top divider
+
+| Surface | Selector / component | How |
+|---|---|---|
+| Events grid | `.pdxBoard` (`PosterCard` via ListingCard) | `::before` |
+| Events list | `.pdxRow` (`EventCard`) | `::before` |
+| Schedule cells | `.schedule-event-card` | `::before` |
+| Legacy event board cards | `.event-board-card` | `::before` |
+| Gigs / Gifting boards | `.board-listing-card` | `::before` |
+| Missed Connections boards | `.board-spotted-card` / `.spotted-card` | `::before` |
+| Hub feed **board** cards only | `.card.fitem.fitem--glow` (gig / gift / MC) | `::before` |
+| Featured event ad | `.featured-event-ad` | `::before` |
+| Directory / home places | `PlaceCard` — `.pdxPlace__seam.pdx-rainbow-rule` | explicit |
+| Place detail modal | `PlaceModal` — `.pdx-rainbow-rule` on logo well | explicit |
+| Event detail modal | `EventModal` — `.event-modal__bar.pdx-rainbow-rule` (day color stays on border glow / meta) | explicit |
+
+When adding a new clickable card: either mount a `.pdx-rainbow-rule` seam or
+add its root class to the `::before` list in `base.css` **and** the calm rules
+in `effects.css`.
 
 ## Directory place cards (related chrome)
 
 Directory venues use `PlaceCard` (`client/src/components/ds/PlaceCard.tsx`), not
 the board-listing card. Anatomy:
 
-- **Top rainbow seam** on *every* place card — `.pdxPlace__seam.pdx-rainbow-rule`
-  (same system as the table above).
+- **Top rainbow divider** on *every* place card — required (see section above).
 - **Category neon edge + outer glow** (`--_c` / `--cat-*`); nonprofits use a
   full-spectrum rainbow border instead of a single category color.
 - Logo media well, badges, meta rows, links, upcoming events, share.
 
-Also used on the home places scroll (same component). Preview:
-`design-system/previews/place-card.html`.
+Also used on the home places scroll (same component).
 
 ## Featured event ad (`FeaturedEventAd`)
 
@@ -176,17 +221,21 @@ pushes a `HubFeedItem`:
 3. **Card component** — `components/board/<Board>ListingCard.tsx`,
    self-contained (owns its own state + mutations). The board page and the feed
    overlay both render it.
-4. **Accent** — pick the signature color; export a `cardAccent(post)` if
+4. **Rainbow top divider** — same animated bar as PlaceCard. Prefer joining the
+   shared `::before` list in `base.css` (root class + calm rules in
+   `effects.css`), or an explicit `.pdx-rainbow-rule` seam. No custom stripe.
+5. **Accent** — pick the signature color; export a `cardAccent(post)` if
    sub-types vary. Add the feed glow to `BOARD_ACCENTS` and the badge color to
    `hubFeedBadgeColor()`.
-5. **Feed kind** — add to `HubFeedKind` in `shared/hubFeed.ts`, build the item
+6. **Feed kind** — add to `HubFeedKind` in `shared/hubFeed.ts`, build the item
    in `getHubFeed()` with `title`, `text`, `link`, `boardPostId`.
-6. **Feed overlay** — extend `BoardPostOverlay` (new `kind`) or add a dedicated
+7. **Feed overlay** — extend `BoardPostOverlay` (new `kind`) or add a dedicated
    modal for anomalous flows (anonymous, no author). Reuse the locked overlay
    look above.
-7. **Feed tab** (optional) — `HUB_FEED_TABS` / `TAB_PREDICATES` in
+8. **Feed tab** (optional) — `HUB_FEED_TABS` / `TAB_PREDICATES` in
    `shared/hubFeed.ts` if the category needs its own filter.
-8. **Verify** — `npx tsc --noEmit` + `npm run build`, then drive it: board card
-   expands, feed card shows the subject + glow, tap opens the overlay with the
-   full accent border + glow and the real actions, close returns to scroll spot.
+9. **Verify** — `npx tsc --noEmit` + `npm run build`, then drive it: rainbow
+   top divider animates (static in calm), board card expands, feed card shows
+   the subject + glow, tap opens the overlay with the full accent border + glow
+   and the real actions, close returns to scroll spot.
 ```
