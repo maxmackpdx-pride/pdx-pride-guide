@@ -4737,6 +4737,7 @@ function hubFeedPostToItem(row: any, goingCounts: Record<number, { count: number
 const HUB_FEED_GUIDE_AUTHOR: HubFeedAuthor = {
   displayName: "PDX Pride Guide",
   username: "prideguidepdx",
+  photoUrl: "/brand/pdx-pride-guide-avatar.jpg",
   avatarChoice: 1,
   avatarRing: "rainbow",
 };
