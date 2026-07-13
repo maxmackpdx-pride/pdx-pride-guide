@@ -486,6 +486,8 @@ export const beachCarpoolPosts = sqliteTable("beach_carpool_posts", {
   userId: integer("user_id").notNull(),
   beachId: text("beach_id").notNull(),
   postType: text("post_type").notNull(),
+  /** TO_BEACH (default) or FROM_BEACH for return rides. */
+  direction: text("direction").notNull().default("TO_BEACH"),
   departureArea: text("departure_area").notNull(),
   tripDate: text("trip_date").notNull(),
   leaveHour: integer("leave_hour").notNull(),

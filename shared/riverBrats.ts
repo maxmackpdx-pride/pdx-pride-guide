@@ -154,6 +154,32 @@ export const CARPOOL_DEPARTURE_AREAS = [
 
 export type CarpoolPostType = "OFFERING_RIDE" | "NEED_RIDE";
 
+/**
+ * Trip direction for carpool posts.
+ * TO_BEACH: leaving town for the beach.
+ * FROM_BEACH: heading back (day-of return rides, or planned pickup home).
+ */
+export type CarpoolDirection = "TO_BEACH" | "FROM_BEACH";
+
+export const CARPOOL_DIRECTIONS: Array<{ key: CarpoolDirection; label: string; short: string }> = [
+  { key: "TO_BEACH", label: "Going out", short: "Out" },
+  { key: "FROM_BEACH", label: "Heading back", short: "Back" },
+];
+
+export function carpoolDirectionLabel(direction: string | null | undefined): string {
+  const key = String(direction || "TO_BEACH").toUpperCase();
+  return CARPOOL_DIRECTIONS.find(d => d.key === key)?.label || "Going out";
+}
+
+export function isValidCarpoolDirection(raw: unknown): raw is CarpoolDirection {
+  return raw === "TO_BEACH" || raw === "FROM_BEACH";
+}
+
+/** Same planning window as beach check-ins (today through +N). */
+export function isAllowedCarpoolTripDate(dateStr: string, now = Date.now()): boolean {
+  return isAllowedBeachCheckinDate(dateStr, now);
+}
+
 export const RIVER_BRATS_REPORT_REASONS = [
   "Spam or scam",
   "Unsafe or harassing",

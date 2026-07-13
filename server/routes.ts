@@ -50,6 +50,8 @@ import type { Event } from "@shared/schema";
 import {
   beachVenueLabel,
   isAllowedBeachCheckinDate,
+  isAllowedCarpoolTripDate,
+  isValidCarpoolDirection,
   isValidBeachId,
   isValidRiverBratsDepartHour,
   isValidRiverBratsHour,
@@ -2613,9 +2615,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const departureArea = String(req.body.departureArea || "").trim();
       const note = String(req.body.note || "").trim();
       const tripDate = String(req.body.tripDate || pacificTodayDate());
+      const directionRaw = String(req.body.direction || "TO_BEACH").toUpperCase();
+      const direction = isValidCarpoolDirection(directionRaw) ? directionRaw : "TO_BEACH";
       const seats = req.body.seats != null ? Number(req.body.seats) : null;
       if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
       if (postType !== "OFFERING_RIDE" && postType !== "NEED_RIDE") return res.status(400).json({ error: "Invalid post type" });
+      if (!isAllowedCarpoolTripDate(tripDate)) {
+        return res.status(400).json({ error: "Pick a day from today through the next 7 days" });
+      }
       if (!isValidRiverBratsHour(leaveHour)) return res.status(400).json({ error: "Leave time required (7am–9pm)" });
       if (!departureArea) return res.status(400).json({ error: "Departure area required" });
       if (!note || note.length < 8) return res.status(400).json({ error: "Add a short note (min 8 characters)" });
@@ -2627,6 +2634,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         userId: req.session.userId!,
         beachId,
         postType,
+        direction,
         departureArea,
         tripDate,
         leaveHour,

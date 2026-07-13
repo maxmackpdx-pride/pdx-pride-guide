@@ -146,6 +146,25 @@
   color: #8a8a8a;
 }
 
+.rb-carpool-start__back {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #1c1c22;
+}
+
+.rb-carpool-start__hint {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  color: #9a968c;
+}
+
+.rb-carpool-start__back-btn {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
 .rb-compose {
   border: 1px solid #24242c;
   background: #0d0d10;

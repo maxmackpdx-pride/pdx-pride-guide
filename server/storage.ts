@@ -992,6 +992,15 @@ function ensureRiverBratsSchema() {
       )
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS beach_carpool_beach_date_idx ON beach_carpool_posts(beach_id, trip_date)`);
+    // Advance planning + return rides: direction column (TO_BEACH | FROM_BEACH).
+    try {
+      const cols = sqlite.prepare(`PRAGMA table_info(beach_carpool_posts)`).all() as Array<{ name: string }>;
+      if (!cols.some(c => c.name === "direction")) {
+        sqlite.exec(`ALTER TABLE beach_carpool_posts ADD COLUMN direction TEXT NOT NULL DEFAULT 'TO_BEACH'`);
+      }
+    } catch (e) {
+      console.error("[river_brats] carpool direction migration failed:", e);
+    }
   } catch (e) {
     console.error("[river_brats] schema migration failed:", e);
   }
@@ -9621,6 +9630,7 @@ export const storage: IStorage = {
     `).all(beachId, tripDate) as any[];
     return rows.map(row => ({
       ...row,
+      direction: row.direction || "TO_BEACH",
       isMine: viewerUserId != null && row.user_id === viewerUserId,
       requestCount: Number((sqlite.prepare(`SELECT COUNT(*) AS c FROM beach_carpool_requests WHERE post_id = ? AND status = 'INTERESTED'`).get(row.id) as { c: number })?.c || 0),
     }));
@@ -9633,6 +9643,7 @@ export const storage: IStorage = {
     const expiresAt = pacificMidnightIso(data.tripDate);
     return db.insert(beachCarpoolPosts).values({
       ...data,
+      direction: data.direction || "TO_BEACH",
       status: "OPEN",
       reportCount: 0,
       expiresAt,
