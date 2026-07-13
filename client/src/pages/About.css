@@ -556,7 +556,7 @@
 
 .about-v2-infra__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-top: 28px;
 }
@@ -582,6 +582,7 @@
 .about-v2-infra__card--cyan { border-left-color: var(--cyan, #19e3ff); }
 .about-v2-infra__card--amber { border-left-color: var(--amber, #ffb020); }
 .about-v2-infra__card--pink { border-left-color: var(--pink, #ff1fa0); }
+.about-v2-infra__card--lime { border-left-color: var(--lime, #ccff00); }
 
 .about-v2-infra__card h3 {
   font-family: var(--font-display);
@@ -594,6 +595,7 @@
 .about-v2-infra__card--cyan h3 { color: var(--cyan, #19e3ff); }
 .about-v2-infra__card--amber h3 { color: var(--amber, #ffb020); }
 .about-v2-infra__card--pink h3 { color: var(--pink, #ff1fa0); }
+.about-v2-infra__card--lime h3 { color: var(--lime, #ccff00); }
 
 .about-v2-infra__card p {
   font-size: 0.92rem;

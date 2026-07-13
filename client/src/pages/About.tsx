@@ -148,14 +148,14 @@ export default function About() {
           <div className="about-v2__kicker">What this actually is</div>
           <div className="about-v2-manifesto__copy">
             <p>
-              Pride week has not even started yet, and this thing already has parties, community events,
-              weird little gems, places to eat, places to shop, gigs, gifting, missed connections, and
-              other necessary homosexual infrastructure.
+              Pride starts now, it ends never, and this thing is already loaded: parties, community events,
+              weird little gems, places to eat, spots to shop, gigs, gifting, missed connections, and all the
+              real homosexual infrastructure that keeps the scene alive.
             </p>
             <p>
-              The family friendly newspaper roundup is cute. The local moms&apos; Pride list has its place.
-              But this is for the people who want the whole city, not just the parts a corporation can
-              clean up and sell back to us.
+              The family-friendly newspaper roundups are cute. The local moms&apos; Pride lists have their place.
+              But this is for the people who want the whole city, not the sanitized version corporations can
+              sell back to us.
             </p>
           </div>
           <div className="about-v2-manifesto__shout">
@@ -164,7 +164,9 @@ export default function About() {
               <br /><br />
               Fuck censoring our community.
               <br />
-              Fuck pretending queer culture only counts once it has been scrubbed clean for public approval.
+              Fuck pretending queer culture only matters once it&apos;s been scrubbed clean.
+              <br /><br />
+              This is raw. This is ours.
             </p>
           </div>
         </div>
@@ -194,18 +196,28 @@ export default function About() {
                 Made by <span className="hl">Tucker Max</span>
               </h2>
               <p>
-                I run Yes Coach, I host LockerRoom at The Eagle, and I produced the Digg&apos;n For Bones
-                podcast. I also built this entire site myself because I&apos;m tired of being tied down to
-                their platforms. No corporation, no algorithm, no whoever wrote the biggest check. Just me,
-                and the people who show up.
+                Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
+                like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
+                ago I was Oregon State Pet. Today, like many of you, I&apos;m unemployed and looking for work while
+                still dumping everything I have into the projects I care about.
               </p>
               <p>
-                This year got rough. A lot of you donated and checked in on me, and that is the only reason
-                year three exists.
+                I&apos;ve watched so many of you grow, figure out what you like, discover what you don&apos;t,
+                and find your place. I&apos;ve loved every minute of it.
               </p>
               <p className="about-v2-creator__thanks">
-                From the bottom of my heart thank you. You showed up for me and I hope this is a way I can
-                show up for you.
+                This year got rough. A lot of you showed up for me when I needed it most, donated, and checked
+                in. That&apos;s the only reason year three exists. From the bottom of my heart, thank you. You
+                showed up for me, and I hope this is me showing up for you.
+              </p>
+              <p>
+                I built this because I&apos;m done being tied down to their platforms. Built by a slutty puppy
+                with a cocky attitude, but run by heart and hopefully the community if it takes off.
+              </p>
+              <p>
+                I&apos;m tired of Meta deciding what our community gets to see. I&apos;m tired of the censorship,
+                the labels, and the way they&apos;ve gutted so many of us. So I made something better. Something
+                that works for us, with less bullshit for promoters and the people actually running the show.
               </p>
               <div className="about-v2-creator__actions">
                 <a href={IG_URL} target="_blank" rel="noopener noreferrer">
@@ -376,15 +388,19 @@ export default function About() {
           <div className="about-v2-infra__grid">
             <Link href="/pride-work" className="about-v2-infra__card about-v2-infra__card--cyan">
               <h3>Gigs</h3>
-              <p>Offer a trade, need work, or want to lend your talents? Check gigs.</p>
+              <p>Do you offer a trade, need work, or want to put your talents out there? Check gigs.</p>
             </Link>
             <Link href="/gifting" className="about-v2-infra__card about-v2-infra__card--amber">
               <h3>Gifting</h3>
-              <p>Need something for Pride week, or have old Pride stuff collecting dust? Check gifting.</p>
+              <p>Need something for Pride week or have old Pride gear collecting dust? Hit gifting.</p>
             </Link>
             <Link href="/spotted" className="about-v2-infra__card about-v2-infra__card--pink">
               <h3>Missed connections</h3>
-              <p>Trying to find someone during Pride week? Missed connections exists for a reason.</p>
+              <p>Trying to find someone after a Pride event? That&apos;s why missed connections exists.</p>
+            </Link>
+            <Link href="/nude-beaches" className="about-v2-infra__card about-v2-infra__card--lime">
+              <h3>Nude beaches</h3>
+              <p>Want to make new friends at the river or catch a ride there or back? Check out the nude beach section.</p>
             </Link>
           </div>
         </div>
