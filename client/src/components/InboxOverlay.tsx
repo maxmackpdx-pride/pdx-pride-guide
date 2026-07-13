@@ -37,6 +37,7 @@ const FILTERS: Array<[string, string, string]> = [
   ["all", "All", C.lime],
   ["spotted", "Missed Connections", C.magenta],
   ["gigs", "Gigs", C.purple],
+  ["gifting", "Gifting", C.lime],
   ["hosts", "Hosts", C.cyan],
   ["checkins", "Check-ins", C.green],
 ];
@@ -604,6 +605,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 const CAT_ACCENT: Record<string, string> = {
   spotted: C.magenta,
   gigs: C.purple,
+  gifting: C.lime,
   hosts: C.cyan,
   checkins: C.green,
 };

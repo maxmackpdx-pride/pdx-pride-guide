@@ -32,12 +32,14 @@ export interface InboxProps {
 const CATC: Record<Category, string> = {
   spotted: "var(--pink)",
   gigs: "var(--cyan)",
+  gifting: "var(--neon-yellow, #ccff00)",
   hosts: "var(--amber)",
   checkins: "var(--green)",
 };
 const BADGE: Record<Category, string> = {
   spotted: "Missed Connections",
   gigs: "Gig",
+  gifting: "Gifting",
   hosts: "Host",
   checkins: "Check-in",
 };
@@ -45,6 +47,7 @@ const CATS: Array<[string, string]> = [
   ["all", "All"],
   ["spotted", "Missed Connections"],
   ["gigs", "Gigs"],
+  ["gifting", "Gifting"],
   ["hosts", "Hosts"],
   ["checkins", "Check-ins"],
 ];

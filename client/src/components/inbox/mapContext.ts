@@ -1,18 +1,32 @@
 import type { Category } from "./types";
 
 export function categoryFromContext(contextType?: string | null): Category {
-  if (contextType === "MISSED_CONNECTION") return "spotted";
-  if (contextType === "EVENT_TALENT_REQUEST" || contextType === "GIG" || contextType === "EVENT_TALENT") {
+  const ctx = String(contextType || "").toUpperCase();
+  if (ctx === "MISSED_CONNECTION") return "spotted";
+  if (ctx === "EVENT_TALENT_REQUEST" || ctx === "GIG" || ctx === "EVENT_TALENT") {
     return "gigs";
   }
+  // Gift / ISO interest threads — never "Host" (that badge is for event hosts).
+  if (ctx === "GIFTING") return "gifting";
   if (
-    contextType === "HOST_UPDATE"
-    || contextType === "HOST_MESSAGE"
-    || contextType === "EVENT_HOST"
+    ctx === "HOST_UPDATE"
+    || ctx === "HOST_MESSAGE"
+    || ctx === "EVENT_HOST"
+    || ctx === "EVENT_INVITE"
+    || ctx === "EVENT_CLAIM"
   ) {
     return "hosts";
   }
-  if (contextType === "CHECK_IN") return "checkins";
+  if (
+    ctx === "CHECK_IN"
+    || ctx === "RIVER_BRATS_CHECKIN"
+    || ctx === "BEACH_CARPOOL"
+  ) {
+    return "checkins";
+  }
+  // Generic DMs / guide updates — neutral host bucket is wrong; keep hosts only
+  // for true event-host traffic above. Fallback = hosts for unknown legacy rows
+  // that were already event-adjacent, but GIFTING is handled explicitly.
   return "hosts";
 }
 

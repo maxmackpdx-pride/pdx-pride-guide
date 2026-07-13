@@ -5,27 +5,35 @@ export function contextTypeOf(
 }
 
 export function inboxContextBadge(contextType?: string | null): string | null {
-  if (contextType === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
-  if (contextType === "MISSED_CONNECTION") return "MISSED CONNECTION";
-  if (contextType === "EVENT_INVITE") return "EVENT INVITE";
-  if (contextType === "HOST_UPDATE" || contextType === "HOST_MESSAGE") return "HOST UPDATE";
+  const ctx = String(contextType || "").toUpperCase();
+  if (ctx === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
+  if (ctx === "MISSED_CONNECTION") return "MISSED CONNECTION";
+  if (ctx === "EVENT_INVITE") return "EVENT INVITE";
+  if (ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE") return "HOST UPDATE";
+  if (ctx === "GIFTING") return "GIFTING";
+  if (ctx === "GIG") return "PRIDE WERK";
+  if (ctx === "RIVER_BRATS_CHECKIN" || ctx === "BEACH_CARPOOL") return "RIVER BRATS";
   return null;
 }
 
 export function notifyContextTag(contextType?: string | null): string {
-  if (contextType === "MISSED_CONNECTION") return "Missed Connections";
-  if (contextType === "GIG" || contextType === "EVENT_TALENT" || contextType === "EVENT_TALENT_REQUEST") {
+  const ctx = String(contextType || "").toUpperCase();
+  if (ctx === "MISSED_CONNECTION") return "Missed Connections";
+  if (ctx === "GIG" || ctx === "EVENT_TALENT" || ctx === "EVENT_TALENT_REQUEST") {
     return "Gigs";
   }
+  if (ctx === "GIFTING") return "Gifting";
   if (
-    contextType === "EVENT_HOST"
-    || contextType === "HOST_UPDATE"
-    || contextType === "HOST_MESSAGE"
-    || contextType === "EVENT_INVITE"
+    ctx === "EVENT_HOST"
+    || ctx === "HOST_UPDATE"
+    || ctx === "HOST_MESSAGE"
+    || ctx === "EVENT_INVITE"
   ) {
     return "Event host";
   }
-  if (contextType === "CHECK_IN") return "Check-in";
+  if (ctx === "CHECK_IN" || ctx === "RIVER_BRATS_CHECKIN" || ctx === "BEACH_CARPOOL") {
+    return "Check-in";
+  }
   return "Message";
 }
 

@@ -1,6 +1,6 @@
 import type { InboxPartyAvatar } from "@/lib/inboxAvatar";
 
-export type Category = "spotted" | "gigs" | "hosts" | "checkins";
+export type Category = "spotted" | "gigs" | "gifting" | "hosts" | "checkins";
 export type Folder = "inbox" | "sent" | "deleted";
 export type QueueFolder = "active" | "completed";
 export type LineupDecision = "APPROVED" | "DENIED";
