@@ -252,6 +252,7 @@ export function normalizePublicProfile(
     },
     ticketUrl: hostingUpcoming[0]?.ticketUrl ?? null,
     isOwner: api.isOwner,
+    viewerIsAdmin: !!api.viewerIsAdmin,
     isFollowing: api.isFollowing,
     linkedVenues: api.linkedVenues,
   };

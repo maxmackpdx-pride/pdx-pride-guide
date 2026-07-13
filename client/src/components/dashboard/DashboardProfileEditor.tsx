@@ -2,6 +2,7 @@ import { useState } from "react";
 import AvatarEditor from "@/components/AvatarEditor";
 import { useToast } from "@/hooks/use-toast";
 import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
+import { PROFILE_PHOTO_RULES_SUMMARY } from "@shared/boardModeration";
 import { formatUsernameChangeDate, usernameChangeEligibility } from "@shared/username";
 
 const labelStyle: React.CSSProperties = {
@@ -134,6 +135,9 @@ export default function DashboardProfileEditor({
         ))}
       </div>
       <label style={labelStyle}>Profile photo & ring</label>
+      <p style={{ margin: "0 0 10px", fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, maxWidth: 560 }}>
+        {PROFILE_PHOTO_RULES_SUMMARY}
+      </p>
       <AvatarEditor
         photoUrl={user.photoUrl}
         avatarRing={user.avatarRing}

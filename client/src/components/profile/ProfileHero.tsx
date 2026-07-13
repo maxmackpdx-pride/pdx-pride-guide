@@ -4,6 +4,7 @@ import UserAvatar from "@/components/UserAvatar";
 import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
 import RoleStickers from "./RoleStickers";
+import AdminProfilePhotoReject from "@/components/admin/AdminProfilePhotoReject";
 import type { PublicProfileData } from "./types";
 import "./ProfileHero.css";
 
@@ -115,6 +116,9 @@ export default function ProfileHero({
             ) : (
               avatar
             )}
+            {data.viewerIsAdmin && !isOwner && data.photoUrl ? (
+              <AdminProfilePhotoReject username={data.username} />
+            ) : null}
           </div>
 
           <div className="pp-hero__meta">

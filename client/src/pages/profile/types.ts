@@ -148,6 +148,8 @@ export type MemberProfileData = {
   isOwner?: boolean;
   /** Site admin (env list, site_admin_grants, or subAdmin). */
   isAdmin?: boolean;
+  /** True when the signed-in viewer is a site admin viewing someone else's profile. */
+  viewerIsAdmin?: boolean;
   isFollowing?: boolean;
   activity?: {
     hostedEvents?: ProfileEvent[];

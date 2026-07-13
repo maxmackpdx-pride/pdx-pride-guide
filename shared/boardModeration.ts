@@ -25,6 +25,31 @@ export function formatBoardRejectMessage(reasonCode: string, note?: string): str
 export const GIG_BOARD_RULES_SUMMARY =
   "Pride Werk is PG-13 and work-focused: paid gigs, volunteer shifts, and real availability. No personals, dating, hookups, escorting, or adult content.";
 
+/** Shown beside profile photo upload — public-facing images only. */
+export const PROFILE_PHOTO_RULES_SUMMARY =
+  "Yes, this site is about keeping Pride events visible and uncensored, and what you do in private chats is on you. But public profile photos are a different story — this runs on one person and a laptop, so we can't keep nudes safe or legal here yet. No genitalia, no zoomed-in ass shots, no drugs — you get the point.";
+
+export const PROFILE_PHOTO_REJECT_REASONS = [
+  { code: "NSFW", label: "Nudity or sexual content" },
+  { code: "DRUGS", label: "Drugs or illegal content" },
+  { code: "SAFETY", label: "Safety or PG-13 concern" },
+  { code: "NOT_A_FACE", label: "Not appropriate for a profile photo" },
+  { code: "SPAM", label: "Spam, promo, or unrelated image" },
+  { code: "OTHER", label: "Other (see admin note)" },
+] as const;
+
+export type ProfilePhotoRejectReasonCode = (typeof PROFILE_PHOTO_REJECT_REASONS)[number]["code"];
+
+export function profilePhotoRejectReasonLabel(code: string): string {
+  return PROFILE_PHOTO_REJECT_REASONS.find(r => r.code === code)?.label ?? code;
+}
+
+export function formatProfilePhotoRejectMessage(reasonCode: string, note?: string): string {
+  const label = profilePhotoRejectReasonLabel(reasonCode);
+  const trimmed = (note || "").trim();
+  return trimmed ? `${label} — ${trimmed}` : label;
+}
+
 const GIG_PERSONALS_TERMS = [
   "personal ad",
   "personals",

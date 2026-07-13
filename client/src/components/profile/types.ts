@@ -142,6 +142,8 @@ export type PublicProfileData = {
   };
   ticketUrl?: string | null;
   isOwner?: boolean;
+  /** True when the signed-in viewer is a site admin viewing someone else's profile. */
+  viewerIsAdmin?: boolean;
   isFollowing?: boolean;
   linkedVenues?: ProfileVenue[];
 };
