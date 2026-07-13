@@ -5310,9 +5310,9 @@ export interface IStorage {
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
   /** Drop a content-moderation alert into the site owner's guide inbox. */
   notifyOwnerModeration(subject: string, body: string): void;
-  /** Public "Message me" / sponsorship pitch form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
+  /** Public "Message me" / sponsorship pitch / custom order form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
   sendPortfolioContactMessage(input: {
-    kind?: "message" | "sponsor";
+    kind?: "message" | "sponsor" | "order";
     name: string;
     email: string;
     phone?: string;
@@ -5320,6 +5320,10 @@ export interface IStorage {
     businessName?: string;
     lengthNeeded?: string;
     sponsorshipType?: string;
+    /** Custom disco-body order fields */
+    size?: string;
+    hangingSpace?: string;
+    ceilingHeight?: string;
     attachmentUrls?: string[];
     pageUrl?: string;
   }): boolean;
@@ -7190,16 +7194,45 @@ export const storage: IStorage = {
     if (!owner) return;
     notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
   },
-  sendPortfolioContactMessage({ kind = "message", name, email, phone, message, businessName, lengthNeeded, sponsorshipType, attachmentUrls, pageUrl }) {
+  sendPortfolioContactMessage({
+    kind = "message",
+    name,
+    email,
+    phone,
+    message,
+    businessName,
+    lengthNeeded,
+    sponsorshipType,
+    size,
+    hangingSpace,
+    ceilingHeight,
+    attachmentUrls,
+    pageUrl,
+  }) {
     const isSponsor = kind === "sponsor";
+    const isOrder = kind === "order";
     const summary = isSponsor
       ? `${businessName || name}${sponsorshipType ? ` · ${sponsorshipType}` : ""}${lengthNeeded ? ` · ${lengthNeeded}` : ""}`
-      : (phone ? `Phone: ${phone}` : email);
+      : isOrder
+        ? `${size || "size TBD"}${ceilingHeight ? ` · ceiling ${ceilingHeight}` : ""}${phone ? ` · ${phone}` : ""}`
+        : (phone ? `Phone: ${phone}` : email);
+    const deskKind = isSponsor ? "sponsor" : isOrder ? "order" : "contact";
+    const title = isSponsor
+      ? `Sponsorship pitch: ${businessName || name}`
+      : isOrder
+        ? `Disco body order: ${name}${size ? ` · ${size}` : ""}`
+        : `Message from ${name}`;
+    const bodyParts = [message];
+    if (isOrder) {
+      if (size) bodyParts.unshift(`Size: ${size}`);
+      if (hangingSpace) bodyParts.push(`Hanging space: ${hangingSpace}`);
+      if (ceilingHeight) bodyParts.push(`Ceiling height: ${ceilingHeight}`);
+    }
     storage.createOwnerDeskItem({
-      kind: isSponsor ? "sponsor" : "contact",
-      title: isSponsor ? `Sponsorship pitch: ${businessName || name}` : `Message from ${name}`,
+      kind: deskKind,
+      title,
       summary,
-      body: message,
+      body: bodyParts.join("\n\n"),
       contactName: name,
       contactEmail: email,
       contactPhone: phone || null,
@@ -7208,6 +7241,9 @@ export const storage: IStorage = {
         businessName: businessName || null,
         sponsorshipType: sponsorshipType || null,
         lengthNeeded: lengthNeeded || null,
+        size: size || null,
+        hangingSpace: hangingSpace || null,
+        ceilingHeight: ceilingHeight || null,
         attachmentUrls: attachmentUrls || [],
       },
     });
@@ -7788,6 +7824,7 @@ export const storage: IStorage = {
       const labels: Record<string, string> = {
         contact: "Contact",
         sponsor: "Sponsorship",
+        order: "Disco order",
         bug: "Bug report",
         feedback: "Feedback",
         keyholder: "Keyholder",

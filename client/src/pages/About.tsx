@@ -69,7 +69,7 @@ export default function About() {
   });
 
   const eventCount = events.length;
-  const [contactModal, setContactModal] = useState<"message" | "sponsor" | null>(null);
+  const [contactModal, setContactModal] = useState<"message" | "sponsor" | "order" | null>(null);
 
   return (
     <div className="about-v2">
@@ -306,6 +306,27 @@ export default function About() {
             </div>
             <span className="about-v2-project__go">Listen →</span>
           </a>
+
+          <button
+            type="button"
+            className="about-v2-project about-v2-project--button"
+            onClick={() => setContactModal("order")}
+          >
+            <img
+              src="/about/disco/card-thumb.jpg"
+              alt="Custom shibari disco body sculpture"
+              width={120}
+              height={120}
+            />
+            <div>
+              <div className="about-v2-project__meta">Made to order · $1600 for 18″</div>
+              <h3 className="about-v2-project__title">Shibari Disco Bodies</h3>
+              <p className="about-v2-project__desc">
+                Custom mirror mosaic · ~1 month · 14″ · 18″ · 24″ + bigger
+              </p>
+            </div>
+            <span className="about-v2-project__go">Order →</span>
+          </button>
         </div>
         </ScrollReveal>
       </section>

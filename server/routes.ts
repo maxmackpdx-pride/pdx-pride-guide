@@ -693,13 +693,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
   });
 
-  // Public "Message me" / sponsorship pitch form — no login required, lands in Owner Desk only.
+  // Public "Message me" / sponsorship pitch / custom order form — no login required, lands in Owner Desk only.
   app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
     const honeypot = String(req.body?.company || "").trim();
     if (honeypot) return res.json({ ok: true }); // bot filled the hidden field — silently drop
 
     const kindRaw = String(req.body?.kind || "message").trim().toLowerCase();
-    const kind = kindRaw === "sponsor" ? "sponsor" as const : "message" as const;
+    const kind =
+      kindRaw === "sponsor" ? "sponsor" as const
+      : kindRaw === "order" ? "order" as const
+      : "message" as const;
     const name = String(req.body?.name || "").trim().slice(0, 120);
     const email = String(req.body?.email || "").trim().slice(0, 200);
     const phone = String(req.body?.phone || "").trim().slice(0, 40);
@@ -707,12 +710,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const businessName = String(req.body?.businessName || "").trim().slice(0, 160);
     const lengthNeeded = String(req.body?.lengthNeeded || "").trim().slice(0, 120);
     const sponsorshipType = String(req.body?.sponsorshipType || "").trim().slice(0, 80);
+    const size = String(req.body?.size || "").trim().slice(0, 80);
+    const hangingSpace = String(req.body?.hangingSpace || "").trim().slice(0, 800);
+    const ceilingHeight = String(req.body?.ceilingHeight || "").trim().slice(0, 120);
 
     if (!name || !email || !message) {
       return res.status(400).json({ error: "Name, email, and message are required." });
     }
     if (kind === "sponsor" && (!businessName || !lengthNeeded)) {
       return res.status(400).json({ error: "Business name and length of time needed are required." });
+    }
+    if (kind === "order" && (!size || !hangingSpace || !ceilingHeight)) {
+      return res.status(400).json({ error: "Size, hanging space, and ceiling height are required for an order inquiry." });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "Enter a valid email address." });
@@ -731,6 +740,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       businessName: businessName || undefined,
       lengthNeeded: lengthNeeded || undefined,
       sponsorshipType: sponsorshipType || undefined,
+      size: size || undefined,
+      hangingSpace: hangingSpace || undefined,
+      ceilingHeight: ceilingHeight || undefined,
       attachmentUrls,
       pageUrl,
     });

@@ -447,11 +447,25 @@
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
+button.about-v2-project--button {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
 .about-v2-project:hover {
   border-color: var(--cyan, #19e3ff);
   transform: translateY(-2px);
   text-decoration: none;
   color: inherit;
+}
+
+button.about-v2-project--button:focus-visible {
+  outline: 2px solid var(--cyan, #19e3ff);
+  outline-offset: 2px;
 }
 
 .about-v2-project img {
