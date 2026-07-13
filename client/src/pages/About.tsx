@@ -227,16 +227,41 @@ export default function About() {
           </div>
 
           <div className="about-v2-creator__work">
-            <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+            <div className="about-v2-creator__work-inner">
               <span className="about-v2-creator__work-badge">
                 <span className="dot" aria-hidden="true" />
                 Open to work
               </span>
-              <p>
-                And yes, I&apos;m still looking for work. I&apos;m a brand builder, sales leader, and
-                momentum-maker who loves people, big ideas, and turning good energy into real results.
-                If something or someone comes to mind, send them my way.
-              </p>
+              <div
+                className="about-v2-creator__work-dynamic"
+                aria-label="And yes, I'm still looking for work. I'm a brand builder, sales leader, and momentum-maker who loves people, big ideas, and turning good energy into real results. If something or someone comes to mind, send them my way."
+              >
+                <p className="about-v2-creator__work-line">
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">And yes,</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--md">I&apos;m still</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--lime about-v2-creator__work-word--tilt">looking</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg">for work.</span>
+                </p>
+                <p className="about-v2-creator__work-line">
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">I&apos;m a</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg about-v2-creator__work-word--cyan about-v2-creator__work-word--tilt-alt">brand builder,</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg about-v2-creator__work-word--pink">sales leader,</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">and</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--lime about-v2-creator__work-word--tilt">momentum-maker</span>
+                </p>
+                <p className="about-v2-creator__work-line about-v2-creator__work-line--body">
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--md">who loves</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg about-v2-creator__work-word--pink about-v2-creator__work-word--tilt-alt">people,</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--cyan">big ideas,</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">and turning</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--md about-v2-creator__work-word--lime">good energy</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg">into real results.</span>
+                </p>
+                <p className="about-v2-creator__work-line about-v2-creator__work-line--cta">
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">If something or someone comes to mind,</span>{" "}
+                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--cyan about-v2-creator__work-word--tilt">send them my way.</span>
+                </p>
+              </div>
             </div>
             <Link href="/resume">
               <Button as="span" variant="neon" accent="cyan" size="md">
