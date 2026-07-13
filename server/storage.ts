@@ -530,6 +530,16 @@ try { sqlite.exec(`
 `); } catch(e) {}
 try { sqlite.exec(`CREATE INDEX IF NOT EXISTS follows_following_idx ON follows(following_user_id)`); } catch(e) {}
 try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS business_follows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    follower_user_id INTEGER NOT NULL,
+    business_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(follower_user_id, business_id)
+  )
+`); } catch(e) {}
+try { sqlite.exec(`CREATE INDEX IF NOT EXISTS business_follows_biz_idx ON business_follows(business_id)`); } catch(e) {}
+try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS push_subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -5429,6 +5439,10 @@ export interface IStorage {
   unfollowUser(followerUserId: number, followingUserId: number): void;
   getFollowerCount(userId: number): number;
   isFollowing(followerUserId: number, followingUserId: number): boolean;
+  followBusiness(followerUserId: number, businessId: number): void;
+  unfollowBusiness(followerUserId: number, businessId: number): void;
+  isFollowingBusiness(followerUserId: number, businessId: number): boolean;
+  getBusinessFollowerCount(businessId: number): number;
   countEventsHostedByUser(userId: number): number;
   purgeQaTestUsers(): { deleted: number; usernames: string[] };
   countActiveMessages(): number;
@@ -5731,6 +5745,22 @@ export const storage: IStorage = {
   },
   isFollowing(followerUserId, followingUserId) {
     return !!sqlite.prepare(`SELECT 1 FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).get(followerUserId, followingUserId);
+  },
+  followBusiness(followerUserId, businessId) {
+    sqlite.prepare(`
+      INSERT OR IGNORE INTO business_follows (follower_user_id, business_id, created_at)
+      VALUES (?, ?, ?)
+    `).run(followerUserId, businessId, new Date().toISOString());
+  },
+  unfollowBusiness(followerUserId, businessId) {
+    sqlite.prepare(`DELETE FROM business_follows WHERE follower_user_id = ? AND business_id = ?`).run(followerUserId, businessId);
+  },
+  isFollowingBusiness(followerUserId, businessId) {
+    return !!sqlite.prepare(`SELECT 1 FROM business_follows WHERE follower_user_id = ? AND business_id = ?`).get(followerUserId, businessId);
+  },
+  getBusinessFollowerCount(businessId) {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM business_follows WHERE business_id = ?`).get(businessId) as { count: number } | undefined;
+    return row?.count ?? 0;
   },
   countEventsHostedByUser(userId) {
     const row = sqlite.prepare(`
@@ -9116,7 +9146,12 @@ export const storage: IStorage = {
   canUserPostToHubFeed(userId, isAdmin = false) {
     if (isAdmin) return true;
     const user = storage.getUserById(userId);
-    return user?.promoterStatus === "approved";
+    if (!user) return false;
+    // Approved promoters, live event hosts, and directory venue owners.
+    if (user.promoterStatus === "approved") return true;
+    if (storage.getHostedLiveEventIds(userId).length > 0) return true;
+    if (storage.getUserOwnedBusinesses(userId).length > 0) return true;
+    return false;
   },
   getHostedLiveEventIds(userId) {
     return storage.getEvents({})

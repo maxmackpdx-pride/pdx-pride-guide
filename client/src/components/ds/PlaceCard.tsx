@@ -4,6 +4,7 @@ import { Badge } from "./Badge";
 import { Share2 } from "lucide-react";
 import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
 import { shareBusinessCard } from "@/lib/shareBusinessImage";
+import VenueFollowButton from "@/components/VenueFollowButton";
 
 /* PlaceCard = directory card from Queer Directory redesign mockup:
    animated rainbow seam across the top, neon glow frame, logo media well,
@@ -92,8 +93,12 @@ const CSS = `
   border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 45%, transparent); color:var(--_c,var(--pink)); }
 .pdxPlace__row a{ color:inherit; text-decoration:none; }
 .pdxPlace__row a:hover{ text-decoration:underline; text-underline-offset:2px; }
+.pdxPlace__actions{
+  position:absolute; top:10px; right:10px; z-index:4;
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;
+  max-width:calc(100% - 20px);
+}
 .pdxPlace__share{
-  position:absolute; top:10px; right:10px; z-index:2;
   display:flex; align-items:center; gap:5px;
   padding:6px 11px; border-radius:999px; cursor:pointer;
   background:rgba(0,0,0,.55); border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 60%, transparent);
@@ -149,6 +154,9 @@ export function PlaceCard({
   lat,
   lng,
   promoters = [],
+  businessId,
+  isFollowing = false,
+  onRequireAuth,
   className = "",
   style,
   ...rest
@@ -171,6 +179,10 @@ export function PlaceCard({
   lat?: number | null;
   lng?: number | null;
   promoters?: Array<{ id: number; username: string; displayName?: string | null }>;
+  /** Directory business id — enables Follow me on every venue card */
+  businessId?: number;
+  isFollowing?: boolean;
+  onRequireAuth?: () => void;
   className?: string;
   style?: React.CSSProperties;
   [key: string]: unknown;
@@ -206,9 +218,20 @@ export function PlaceCard({
       <div className="pdxPlace__glow" aria-hidden="true" />
       <div className="pdxPlace__body">
         <div className="pdxPlace__seam pdx-rainbow-rule" aria-hidden="true" />
-        <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
-          <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
-        </button>
+        <div className="pdxPlace__actions">
+          {businessId != null && (
+            <VenueFollowButton
+              businessId={businessId}
+              initialFollowing={isFollowing}
+              variant="card"
+              accent={accent}
+              onRequireAuth={onRequireAuth}
+            />
+          )}
+          <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
+            <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
+          </button>
+        </div>
         <div className="pdxPlace__media">
           <div className="pdxPlace__mediaScan" aria-hidden="true" />
           {showLogo && (

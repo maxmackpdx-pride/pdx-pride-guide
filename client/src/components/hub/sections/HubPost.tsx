@@ -131,12 +131,13 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
 
   if (!optionsQuery.data?.canPost) {
     return (
-      <div className="reveal">
-        <div className="kick" style={{ color: "var(--panel-cyan)" }}>Scene feed</div>
-        <h1 className="h1">Post to the feed</h1>
-        <div className="card" style={{ padding: 24, marginTop: 20 }}>
+      <div className={embedded ? undefined : "reveal"}>
+        <div className="card" style={{ padding: embedded ? "15px 17px" : 24, marginTop: embedded ? 0 : 20 }}>
+          <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
+            Post to the feed
+          </div>
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
-            Only approved promoters and site admins can post to the scene feed.
+            Coming soon for members. Admins, event hosts, and directory venue owners can post now.
           </p>
         </div>
       </div>
@@ -144,7 +145,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   }
 
   return (
-    <div className="reveal">
+    <div className={embedded ? undefined : "reveal"}>
       {!embedded && (
         <>
           <div className="kick" style={{ color: "var(--panel-cyan)" }}>
@@ -154,6 +155,11 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
         </>
       )}
       <div className="card" style={{ padding: 20, marginTop: embedded ? 0 : 20 }}>
+        {embedded && (
+          <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 12 }}>
+            Post to the feed
+          </div>
+        )}
         <div style={{ display: "flex", gap: 22, borderBottom: "1px solid var(--panel-border)", marginBottom: 18 }}>
           {POST_TYPES.map((pt) => (
             <button
@@ -265,22 +271,24 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
         </div>
       </div>
 
+      {!embedded && (
       <div className="kick" style={{ margin: "30px 0 16px" }}>
         Your recent posts
       </div>
-      {mineQuery.isLoading && (
+      )}
+      {!embedded && mineQuery.isLoading && (
         <div className="card" style={{ padding: "28px 20px", textAlign: "center" }}>
           <p style={{ margin: 0, fontSize: 14, color: "var(--board-muted)" }}>Loading...</p>
         </div>
       )}
-      {!mineQuery.isLoading && (mineQuery.data?.length ?? 0) === 0 && (
+      {!embedded && !mineQuery.isLoading && (mineQuery.data?.length ?? 0) === 0 && (
         <div className="card" style={{ padding: "28px 20px", textAlign: "center" }}>
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
             Nothing posted yet. What you share will show up here and in the scene feed.
           </p>
         </div>
       )}
-      {(mineQuery.data ?? []).map((post) => (
+      {!embedded && (mineQuery.data ?? []).map((post) => (
         <div key={post.id} className="card" style={{ padding: "16px 18px", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>

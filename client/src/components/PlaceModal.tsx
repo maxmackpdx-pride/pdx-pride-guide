@@ -21,6 +21,7 @@ import {
 } from "@/lib/directoryLogos";
 import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
 import { shareBusinessCard } from "@/lib/shareBusinessImage";
+import VenueFollowButton from "@/components/VenueFollowButton";
 
 type EditableFields = {
   description: string;
@@ -366,35 +367,50 @@ export default function PlaceModal({
           ✕
         </button>
 
-        <button
-          type="button"
-          onClick={handleShare}
-          disabled={sharing}
-          aria-label="Share this venue"
+        <div
           style={{
             position: "absolute",
             top: 12,
             right: 54,
             zIndex: 4,
-            height: 34,
-            padding: "0 12px",
-            borderRadius: 999,
-            border: `1px solid ${accent}`,
-            background: "rgba(0,0,0,.55)",
-            color: accent,
-            fontSize: 12,
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            letterSpacing: "0.04em",
-            cursor: sharing ? "default" : "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 6,
-            opacity: sharing ? 0.6 : 1,
+            gap: 8,
           }}
         >
-          <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
-        </button>
+          <VenueFollowButton
+            businessId={place.id}
+            initialFollowing={Boolean(place.isFollowing)}
+            variant="modal"
+            accent={accent}
+            onRequireAuth={onRequireAuth}
+          />
+          <button
+            type="button"
+            onClick={handleShare}
+            disabled={sharing}
+            aria-label="Share this venue"
+            style={{
+              height: 34,
+              padding: "0 12px",
+              borderRadius: 999,
+              border: `1px solid ${accent}`,
+              background: "rgba(0,0,0,.55)",
+              color: accent,
+              fontSize: 12,
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              cursor: sharing ? "default" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              opacity: sharing ? 0.6 : 1,
+            }}
+          >
+            <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
+          </button>
+        </div>
 
         <div>
           <div

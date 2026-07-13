@@ -55,6 +55,8 @@ export type Business = {
   createdAt?: string;
   ownerId?: number | null;
   isOwner?: boolean;
+  isFollowing?: boolean;
+  followerCount?: number;
   upcomingEvents?: DirectoryEventSummary[];
   canEditVenue?: boolean;
   promoters?: DirectoryPromoter[];
@@ -402,7 +404,12 @@ export default function Directory() {
           <ScrollReveal delay={50}>
             <div className="directory-grid">
               {filtered.map(biz => (
-                <DirectoryCard key={biz.id} biz={biz} onClick={() => setSelectedPlace(biz)} />
+                <DirectoryCard
+                  key={biz.id}
+                  biz={biz}
+                  onClick={() => setSelectedPlace(biz)}
+                  onRequireAuth={() => setShowAuth(true)}
+                />
               ))}
             </div>
           </ScrollReveal>
@@ -450,7 +457,15 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   nonprofit: "services",
 };
 
-function DirectoryCard({ biz, onClick }: { biz: Business; onClick?: () => void }) {
+function DirectoryCard({
+  biz,
+  onClick,
+  onRequireAuth,
+}: {
+  biz: Business;
+  onClick?: () => void;
+  onRequireAuth?: () => void;
+}) {
   const upcomingEvents = biz.upcomingEvents ?? [];
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   const isNonprofit = biz.type === "nonprofit";
@@ -477,6 +492,9 @@ function DirectoryCard({ biz, onClick }: { biz: Business; onClick?: () => void }
       instagram={biz.instagram || undefined}
       grandOpening={biz.isNew}
       promoters={biz.promoters}
+      businessId={biz.id}
+      isFollowing={Boolean(biz.isFollowing)}
+      onRequireAuth={onRequireAuth}
       events={upcomingEvents.map(event => ({
         day: event.dayOfWeek || undefined,
         date: formatDirectoryEventWhen(event),

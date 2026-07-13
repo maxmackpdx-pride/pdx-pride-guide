@@ -135,7 +135,7 @@ function publicEvent(
     || null;
   return {
     ...safe,
-    posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
+    posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
     hasPendingClaim: pendingClaimIds.has(evt.id),
     venueWebsite,
   };
@@ -982,7 +982,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const all = storage.getEvents({});
     const mine = all.filter(e => storage.isUserEventHost(e.id, userId)).map(evt => ({
       ...evt,
-      posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl),
+      posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
     }));
     res.json(mine);
   });
@@ -1189,8 +1189,36 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = req.session?.userId;
     res.json(withTabs.map(biz => {
       const isOwner = userId != null && biz.ownerId === userId;
-      return { ...biz, isOwner, canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false) };
+      return {
+        ...biz,
+        isOwner,
+        canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
+        isFollowing: userId != null ? storage.isFollowingBusiness(userId, biz.id) : false,
+        followerCount: storage.getBusinessFollowerCount(biz.id),
+      };
     }));
+  });
+
+  app.post("/api/directory/:id/follow", requireAuth, (req, res) => {
+    const businessId = Number(req.params.id);
+    const biz = storage.getBusiness(businessId);
+    if (!biz || !biz.active) return res.status(404).json({ error: "Venue not found" });
+    storage.followBusiness(req.session.userId!, businessId);
+    res.json({
+      isFollowing: true,
+      followerCount: storage.getBusinessFollowerCount(businessId),
+    });
+  });
+
+  app.delete("/api/directory/:id/follow", requireAuth, (req, res) => {
+    const businessId = Number(req.params.id);
+    const biz = storage.getBusiness(businessId);
+    if (!biz || !biz.active) return res.status(404).json({ error: "Venue not found" });
+    storage.unfollowBusiness(req.session.userId!, businessId);
+    res.json({
+      isFollowing: false,
+      followerCount: storage.getBusinessFollowerCount(businessId),
+    });
   });
 
   const memberBusinessSchema = z.object({
@@ -2103,7 +2131,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const user = storage.getUserById(userId);
     const isAdmin = sessionIsAdmin(req);
     if (!user || !storage.canUserPostToHubFeed(userId, isAdmin)) {
-      return res.status(403).json({ error: "Only approved promoters and admins can post to the scene feed" });
+      return res.status(403).json({ error: "Only admins, event hosts, venue owners, and approved promoters can post to the scene feed" });
     }
 
     const postType = String(req.body.postType || "").trim().toLowerCase();

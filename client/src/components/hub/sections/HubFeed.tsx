@@ -90,9 +90,13 @@ type Props = {
   canPostToFeed?: boolean;
 };
 
+type PostOptions = {
+  canPost: boolean;
+  hostedEvents: Array<{ id: number; title: string; venueName: string; dayOfWeek?: string | null }>;
+};
+
 export default function HubFeed({ canPostToFeed = false }: Props) {
   const [filter, setFilter] = useState<HubFeedTab>("all");
-  const [composing, setComposing] = useState(false);
   const [chosenKey, setChosenKey] = useState<string | null>(null);
   const [dismissTick, setDismissTick] = useState(0);
 
@@ -102,6 +106,17 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   };
   // Only fetch events if at least one featured ad could still show today.
   const anyFeaturedPossible = FEATURED.some((f) => !isDismissedToday(f.key));
+
+  // Server is source of truth: admins, event hosts, venue owners, approved promoters.
+  const postOptionsQuery = useQuery<PostOptions>({
+    queryKey: ["/api/hub/feed/post-options"],
+    queryFn: async () => {
+      const r = await fetch("/api/hub/feed/post-options", { credentials: "include" });
+      if (!r.ok) throw new Error("Could not load post options");
+      return r.json();
+    },
+  });
+  const canPost = postOptionsQuery.data?.canPost ?? canPostToFeed;
 
   const feedQuery = useQuery<HubFeedResponse>({
     queryKey: ["/api/hub/feed", filter],
@@ -172,6 +187,20 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
 
   return (
     <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* Post to feed sits at the top of the feed (not a second hub page). */}
+      {canPost ? (
+        <HubPost embedded />
+      ) : (
+        <div className="card" style={{ padding: "15px 17px" }}>
+          <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
+            Post to the feed
+          </div>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--board-muted)" }}>
+            Coming soon for members. Admins, event hosts, and directory venue owners can post now.
+          </p>
+        </div>
+      )}
+
       <div className="card" style={{ padding: "15px 17px" }}>
         <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
           Scene feed
@@ -179,30 +208,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--board-muted)" }}>
           New events, board posts, RSVPs, and beach check-ins stack on top. Scene staples stay pinned below.
         </p>
-        {canPostToFeed && (
-          <button
-            type="button"
-            onClick={() => setComposing((v) => !v)}
-            style={{
-              marginTop: 14,
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
-              color: composing ? "var(--board-muted)" : "var(--panel-cyan)",
-              border: `1px solid ${composing ? "var(--panel-border)" : "var(--panel-cyan)"}`,
-              borderRadius: 8,
-              padding: "9px 16px",
-              background: "transparent",
-              cursor: "pointer",
-            }}
-          >
-            {composing ? "Close composer" : "Post to the feed"}
-          </button>
-        )}
       </div>
-
-      {canPostToFeed && composing && <HubPost embedded />}
 
       <div className="hs" style={{ display: "flex", gap: 22, overflowX: "auto", padding: "0 2px 2px" }}>
         {HUB_FEED_TABS.map((f) => (
