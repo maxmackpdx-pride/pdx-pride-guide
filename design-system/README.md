@@ -28,7 +28,7 @@ Commit the synced folder in the **same PR/commit** as the app changes. If
   - `typography.html` (Type)
   - `buttons.html` (Buttons)
   - `event-card.html` (Cards — PosterCard + EventCard)
-  - `place-card.html` (Cards — PlaceCard / directory)
+  - `place-card.html` (Cards — PlaceCard / directory; rainbow top seam + category edge)
   - `chips-effects.html` (Effects — rainbow, day chips, glow, filters)
   - `events-page-layout.html` / `schedule-grid.html` (Layout)
   - `avatars.html` (Avatars)

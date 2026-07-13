@@ -218,7 +218,7 @@ Portable samples: `previews/event-card.html`, `events-page-layout.html`,
 | Search | `SearchInput` | Filter bar search |
 | Map legend | `MapLegend` | Day swatches + multi-day pie demo |
 | Primary CTAs | `Button` accent `lime` | RSVP / "I'll be there" — acid yellow only |
-| Directory venues | `PlaceCard` | Category neon edge (`--cat-*`), not day colors |
+| Directory venues | `PlaceCard` | Animated rainbow top seam (`.pdx-rainbow-rule`) + category neon edge (`--cat-*`), not day colors |
 
 ### Glow policy (cards)
 

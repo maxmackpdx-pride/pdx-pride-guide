@@ -6,7 +6,8 @@ import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
 import { shareBusinessCard } from "@/lib/shareBusinessImage";
 
 /* PlaceCard = directory card from Queer Directory redesign mockup:
-   neon glow frame, logo media well, badges, meta rows, links, upcoming events. */
+   animated rainbow seam across the top, neon glow frame, logo media well,
+   badges, meta rows, links, upcoming events. */
 const CSS = `
 .pdxPlace{
   position:relative; display:inline-block; width:100%; break-inside:avoid;
@@ -19,10 +20,15 @@ const CSS = `
              0 0 62px -14px color-mix(in srgb, var(--_c,var(--pink)) calc(var(--dir-gm,60) * .7%), transparent);
 }
 .pdxPlace__body{
-  position:relative; z-index:1; border-radius:9px;
+  position:relative; z-index:1; border-radius:9px; overflow:hidden;
   background:linear-gradient(#0b0b0d,#0b0b0d) padding-box, var(--_edge,linear-gradient(var(--_c,var(--pink)),var(--_c,var(--pink)))) border-box;
   border:2px solid transparent; padding:16px; display:flex; flex-direction:column; gap:12px;
   transition:filter .16s ease, box-shadow .16s ease;
+}
+/* Shared animated rainbow seam (same system as PlaceModal / site header) */
+.pdxPlace__seam.pdx-rainbow-rule{
+  position:absolute; left:0; right:0; top:0; height:3px; margin:0; z-index:3;
+  border-radius:0; pointer-events:none;
 }
 .pdxPlace--clickable{ cursor:pointer; }
 .pdxPlace--clickable:hover{ transform:translateY(-6px); }
@@ -199,6 +205,7 @@ export function PlaceCard({
     >
       <div className="pdxPlace__glow" aria-hidden="true" />
       <div className="pdxPlace__body">
+        <div className="pdxPlace__seam pdx-rainbow-rule" aria-hidden="true" />
         <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
           <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
         </button>

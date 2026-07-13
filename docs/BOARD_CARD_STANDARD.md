@@ -19,6 +19,21 @@ Not everything in the Scene Feed is a "card." Keep these separate:
   board overlays, and the event modal. Only these carry the border + glow +
   tap-to-open behavior.
 
+## Directory place cards (related chrome)
+
+Directory venues use `PlaceCard` (`client/src/components/ds/PlaceCard.tsx`), not
+the board-listing card. Anatomy:
+
+- **Top rainbow seam** on *every* place card — `.pdxPlace__seam.pdx-rainbow-rule`
+  (same animated divider system as the site header, place modal, and
+  `.rainbow-bar`: flow + glow + glint; calm/reduced-motion = static).
+- **Category neon edge + outer glow** (`--_c` / `--cat-*`); nonprofits use a
+  full-spectrum rainbow border instead of a single category color.
+- Logo media well, badges, meta rows, links, upcoming events, share.
+
+Also used on the home places scroll (same component). Preview:
+`design-system/previews/place-card.html`.
+
 ## Featured event ad (`FeaturedEventAd`)
 
 A standalone, glowing **ad** pinned as the top post of the Scene Feed — its own
