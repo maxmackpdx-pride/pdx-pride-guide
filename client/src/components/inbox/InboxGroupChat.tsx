@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import { isValidBeachId, pacificTodayDate } from "@shared/riverBrats";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
@@ -216,6 +217,7 @@ export default function InboxGroupChat({ target, onBack }: Props) {
                   photoUrl={msg.photoUrl}
                   avatarChoice={msg.avatarChoice ?? undefined}
                   avatarRing={msg.avatarRing}
+                  href={msg.isAnonymous ? null : memberProfileHref(msg.username)}
                   size={28}
                 />
               )}

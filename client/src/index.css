@@ -1667,6 +1667,21 @@ h2.display,
   min-width: 0;
 }
 
+a.event-host-card.event-host-card--link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+a.event-host-card.event-host-card--link:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+a.event-host-card.event-host-card--link:focus-visible {
+  outline: 2px solid var(--neon-cyan, #00ffff);
+  outline-offset: 3px;
+}
+
 .event-host-meta {
   display: flex;
   flex-direction: column;
@@ -1681,6 +1696,15 @@ h2.display,
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #fff;
+}
+
+a.event-host-name.event-host-name--link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+a.event-host-name.event-host-name--link:hover {
+  color: var(--neon-cyan, #00ffff);
 }
 
 .event-host-role {
@@ -5108,6 +5132,18 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   /* Own stacking context so glow never composites over the photo */
   isolation: isolate;
   z-index: 0;
+}
+
+/* Clickable face → profile or directory */
+a.user-avatar.user-avatar--link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+a.user-avatar.user-avatar--link:focus-visible {
+  outline: 2px solid var(--neon-cyan, #00ffff);
+  outline-offset: 3px;
+  border-radius: 50%;
 }
 
 /* Soft pride bloom — behind the photo only (z-index -1) */

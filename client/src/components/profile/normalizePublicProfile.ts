@@ -73,23 +73,33 @@ function contentTypeForBoard(board: string): ProfileBoardPost["contentType"] {
   return undefined;
 }
 
+function isSpottedBoardPost(p: { board?: string; contentType?: string }): boolean {
+  const type = String(p.contentType || "").toUpperCase();
+  if (type === "SPOTTED") return true;
+  const board = String(p.board || "").toLowerCase();
+  return board === "spotted" || board === "missed connections";
+}
+
 /** Prefer server boardPosts (with likes/replies); fall back to activity merge. */
 export function boardPostsFromActivity(
   activity: MemberProfileData["activity"] | undefined,
   wirePosts?: MemberProfileData["boardPosts"],
 ): ProfileBoardPost[] {
   if (wirePosts?.length) {
-    return wirePosts.map(p => ({
-      id: p.id,
-      board: p.board,
-      contentType: p.contentType || contentTypeForBoard(p.board),
-      color: p.color || BOARD_COLORS[p.board as keyof typeof BOARD_COLORS] || "var(--neon-cyan)",
-      where: p.where || "Portland",
-      text: p.text,
-      createdAt: p.createdAt ?? undefined,
-      likes: typeof p.likes === "number" ? p.likes : 0,
-      replies: typeof p.replies === "number" ? p.replies : 0,
-    }));
+    // Defense in depth: never surface missed connections on profiles.
+    return wirePosts
+      .filter(p => !isSpottedBoardPost(p))
+      .map(p => ({
+        id: p.id,
+        board: p.board,
+        contentType: p.contentType || contentTypeForBoard(p.board),
+        color: p.color || BOARD_COLORS[p.board as keyof typeof BOARD_COLORS] || "var(--neon-cyan)",
+        where: p.where || "Portland",
+        text: p.text,
+        createdAt: p.createdAt ?? undefined,
+        likes: typeof p.likes === "number" ? p.likes : 0,
+        replies: typeof p.replies === "number" ? p.replies : 0,
+      }));
   }
 
   if (!activity) return [];
@@ -121,19 +131,7 @@ export function boardPostsFromActivity(
       replies: g.replies ?? 0,
     });
   }
-  for (const s of activity.spotted ?? []) {
-    posts.push({
-      id: s.id,
-      board: "Spotted",
-      contentType: "SPOTTED",
-      color: BOARD_COLORS.Spotted,
-      where: s.venueHint || s.dayOfWeek || "Portland",
-      text: s.body || s.title,
-      createdAt: s.createdAt ?? undefined,
-      likes: s.likes ?? 0,
-      replies: s.replies ?? 0,
-    });
-  }
+  // activity.spotted intentionally ignored — anonymity.
 
   posts.sort((a, b) => {
     const ta = a.createdAt ? Date.parse(a.createdAt) : 0;

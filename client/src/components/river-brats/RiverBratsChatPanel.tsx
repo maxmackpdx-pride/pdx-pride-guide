@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_CHAT_CLOSES_AT } from "@shared/riverBrats";
@@ -122,6 +123,7 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
                   photoUrl={msg.photoUrl}
                   avatarChoice={msg.avatarChoice ?? undefined}
                   avatarRing={msg.avatarRing}
+                  href={msg.isAnonymous ? null : memberProfileHref(msg.username)}
                   size={28}
                 />
               )}

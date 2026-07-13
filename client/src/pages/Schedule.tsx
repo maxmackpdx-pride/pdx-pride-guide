@@ -36,7 +36,12 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { buildScheduleEvents, type ScheduleEvent } from "@/lib/scheduleEvents";
+import {
+  buildScheduleEvents,
+  isBeachScheduleEvent,
+  type BeachCheckinScheduleRow,
+  type ScheduleEvent,
+} from "@/lib/scheduleEvents";
 import AuthModal from "@/components/AuthModal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScheduleHero from "@/components/ScheduleHero";
@@ -130,14 +135,29 @@ export default function Schedule({
     enabled: !!user,
   });
 
+  const { data: myBeachCheckIns = [] } = useQuery<BeachCheckinScheduleRow[]>({
+    queryKey: ["/api/river-brats/checkins/mine"],
+    queryFn: () => apiRequest("GET", "/api/river-brats/checkins/mine").then(r => r.json()),
+    enabled: !!user,
+  });
+
   const myEventIds = useMemo(
     () => new Set(myCheckIns.map(c => c.eventId)),
     [myCheckIns],
   );
 
+  /** Beach blocks always count as “mine” (personal River Brats plans). */
+  const myScheduleIds = useMemo(() => {
+    const s = new Set(myEventIds);
+    for (const b of myBeachCheckIns) {
+      if (b?.id != null) s.add(-Math.abs(Number(b.id)));
+    }
+    return s;
+  }, [myEventIds, myBeachCheckIns]);
+
   const scheduleEvents = useMemo(
-    () => buildScheduleEvents(listings, attendanceSummaries),
-    [listings, attendanceSummaries],
+    () => buildScheduleEvents(listings, attendanceSummaries, user ? myBeachCheckIns : []),
+    [listings, attendanceSummaries, myBeachCheckIns, user],
   );
 
   const rsvpMutation = useMutation({
@@ -161,13 +181,27 @@ export default function Schedule({
     },
   });
 
+  const withdrawBeachMutation = useMutation({
+    mutationFn: (checkinId: number) =>
+      apiRequest("DELETE", `/api/river-brats/checkins/${checkinId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/mine"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
+      setSelKey(null);
+      setSelRect(null);
+      setToast("Removed beach day from your schedule");
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setToast(""), 3200);
+    },
+  });
+
   useEffect(() => {
     if (viewBootstrapped || !user) return;
-    if (myEventIds.size > 0) {
+    if (myEventIds.size > 0 || myBeachCheckIns.length > 0) {
       setViewState('mine');
       setViewBootstrapped(true);
     }
-  }, [user, myEventIds.size, viewBootstrapped]);
+  }, [user, myEventIds.size, myBeachCheckIns.length, viewBootstrapped]);
 
   /* ---- lifecycle -------------------------------------------------- */
 
@@ -222,12 +256,18 @@ export default function Schedule({
       setShowAuth(true);
       return;
     }
+    // Negative ids are synthetic beach schedule blocks — uncheck via River Brats.
+    if (eventId < 0) {
+      const checkinId = Math.abs(eventId);
+      if (checkinId > 0) withdrawBeachMutation.mutate(checkinId);
+      return;
+    }
     if (myEventIds.has(eventId)) {
       unrsvpMutation.mutate(eventId);
       return;
     }
     rsvpMutation.mutate(eventId);
-  }, [user, myEventIds, rsvpMutation, unrsvpMutation]);
+  }, [user, myEventIds, rsvpMutation, unrsvpMutation, withdrawBeachMutation]);
 
   const toggleFilter = useCallback((group: 'fAdm' | 'fType' | 'fAge', key: string) => {
     const setter = group === 'fAdm' ? setFAdm : group === 'fType' ? setFType : setFAge;
@@ -275,7 +315,7 @@ export default function Schedule({
 
   const exportStories = useCallback(async () => {
     if (exporting) return;
-    const mine = scheduleEvents.filter((e) => myEventIds.has(e.id));
+    const mine = scheduleEvents.filter((e) => myScheduleIds.has(e.id) || isBeachScheduleEvent(e));
     const list = mine.length ? mine : scheduleEvents.filter((e) => e.feat);
     const dayOrder: Record<string, number> = {};
     DAYS.forEach((d, i) => (dayOrder[d.key] = i));
@@ -367,7 +407,7 @@ export default function Schedule({
     } finally {
       setExporting(false);
     }
-  }, [exporting, scheduleEvents, myEventIds, flashToast]);
+  }, [exporting, scheduleEvents, myScheduleIds, flashToast]);
 
   /* ---- derived layout constants ----------------------------------- */
 
@@ -387,8 +427,9 @@ export default function Schedule({
     'px)';
 
   const inView = useCallback(
-    (e: ScheduleEvent) => embed || view === 'all' || myEventIds.has(e.id),
-    [embed, view, myEventIds],
+    (e: ScheduleEvent) =>
+      embed || view === 'all' || myScheduleIds.has(e.id) || isBeachScheduleEvent(e),
+    [embed, view, myScheduleIds],
   );
   const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
   const viewSet = useMemo(() => scheduleEvents.filter(inView), [scheduleEvents, inView]);
@@ -468,11 +509,12 @@ export default function Schedule({
         const width = laneW - 6;
         const top = ((e.s - START * 60) / 60) * HOUR_H;
         const height = Math.max(((e.e - e.s) / 60) * HOUR_H, MIN_H);
-        const rsvp = myEventIds.has(e.id);
+        const isBeach = isBeachScheduleEvent(e);
+        const rsvp = isBeach || myEventIds.has(e.id);
         const live = now != null && e.s <= now && now < e.e;
         const twoLine = height >= (embed ? 40 : 54);
         const showVenue = height >= (embed ? 56 : 74) && width >= (embed ? 96 : 116);
-        const showQuick = !embed && height >= 56 && width >= 100;
+        const showQuick = !embed && !isBeach && height >= 56 && width >= 100;
         const style = S({
           position: 'absolute',
           top: top + 'px',
@@ -804,7 +846,7 @@ export default function Schedule({
   /* ---- toggle + counts -------------------------------------------- */
 
   const totalVisible = scheduleEvents.filter(pass).length;
-  const myCount = myEventIds.size;
+  const myCount = myEventIds.size + myBeachCheckIns.length;
   const countPillLabel =
     view === 'mine' ? myCount + ' in my schedule' : totalVisible + ' events';
 
@@ -825,7 +867,7 @@ export default function Schedule({
       'Sign in and tap “I’ll be there” on events to build your schedule.';
   else if (view === 'mine' && myCount === 0)
     emptyBanner =
-      'Your week is wide open. Tap the heart on anything and it lands here. Build the whole week, or just get through Saturday.';
+      'Your week is wide open. Tap the heart on events — or plan a River Brats beach day — and it lands here.';
   else if (totalVisible === 0) emptyBanner = 'Nothing found. Check the spelling, or drop a word.';
 
   /* ---- selected popover ------------------------------------------- */
@@ -834,14 +876,15 @@ export default function Schedule({
     if (selKey == null) return null;
     const e = scheduleEvents.find((x) => x.scheduleKey === selKey);
     if (!e) return null;
-    const listing = listings.find(
-      l => (l.listingInstanceKey ?? String(l.id)) === selKey,
-    );
+    const isBeach = isBeachScheduleEvent(e);
+    const listing = isBeach
+      ? undefined
+      : listings.find(l => (l.listingInstanceKey ?? String(l.id)) === selKey);
     const d = DAYS.find((x) => x.key === e.day)!;
     const dc = calm ? '#7d7d82' : d.color;
     const dt = calm ? '#c8c8cc' : d.text;
     const adm = ADM[e.adm];
-    const rsvp = myEventIds.has(e.id);
+    const rsvp = isBeach || myEventIds.has(e.id);
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
     const POP_W = Math.min(344, vw - 20);
@@ -909,13 +952,49 @@ export default function Schedule({
         padding: '4px 8px 3px',
         borderRadius: '3px',
       });
+    const beachTags = isBeach
+      ? [
+          {
+            label: "River Brats",
+            style: S({
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: "11px",
+              letterSpacing: ".05em",
+              textTransform: "uppercase",
+              color: dt,
+              border: "1px solid " + hexA(dc, 0.5),
+              padding: "3px 8px 2px",
+              borderRadius: "3px",
+            }) as React.CSSProperties,
+          },
+          {
+            label: "Beach day",
+            style: S({
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: "11px",
+              letterSpacing: ".05em",
+              textTransform: "uppercase",
+              color: "rgba(230,227,218,.65)",
+              border: "1px solid var(--ink-border-strong)",
+              padding: "3px 8px 2px",
+              borderRadius: "3px",
+            }) as React.CSSProperties,
+          },
+        ]
+      : null;
+
     return {
       id: e.id,
-      eventHref: eventPath(
-        e.id,
-        listing?.title ?? e.title,
-        listing?.dayOfWeek ?? e.day,
-      ),
+      isBeach,
+      eventHref: isBeach
+        ? e.href || "/nude-beaches"
+        : eventPath(
+            e.id,
+            listing?.title ?? e.title,
+            listing?.dayOfWeek ?? e.day,
+          ),
       title: e.title,
       venue: e.venue,
       hood: e.hood,
@@ -924,72 +1003,82 @@ export default function Schedule({
       dt,
       dayShort: d.short,
       dayDate: d.date,
-      admLabel: adm.label,
-      timeRange: fmtClock(e.s) + ' – ' + fmtClock(e.e),
+      admLabel: isBeach ? "Free" : adm.label,
+      timeRange: fmtClock(e.s) + " – " + fmtClock(e.e),
       popStyle,
       posterStyle: S({
-        position: 'relative',
-        flex: 'none',
-        height: '128px',
-        backgroundColor: 'var(--ink-800)',
-        backgroundImage: 'url(' + e.posterUrl + ')',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        position: "relative",
+        flex: "none",
+        height: "128px",
+        backgroundColor: "var(--ink-800)",
+        backgroundImage: "url(" + e.posterUrl + ")",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }),
       dayBadgeStyle: badge(dc),
-      admBadgeStyle: badge(adm.color),
-      tags: e.types
-        .map((t) => ({
-          label: TYPE_LABEL[t] || t,
-          style: S({
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            fontSize: '11px',
-            letterSpacing: '.05em',
-            textTransform: 'uppercase',
-            color: dt,
-            border: '1px solid ' + hexA(dc, 0.5),
-            padding: '3px 8px 2px',
-            borderRadius: '3px',
-          }) as React.CSSProperties,
-        }))
-        .concat([
-          {
-            label: e.age,
-            style: S({
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '11px',
-              letterSpacing: '.05em',
-              textTransform: 'uppercase',
-              color: 'rgba(230,227,218,.65)',
-              border: '1px solid var(--ink-border-strong)',
-              padding: '3px 8px 2px',
-              borderRadius: '3px',
-            }),
-          },
-        ]),
+      admBadgeStyle: badge(isBeach ? "#FF8C00" : adm.color),
+      tags: beachTags
+        ? beachTags
+        : e.types
+            .map((t) => ({
+              label: TYPE_LABEL[t] || t,
+              style: S({
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: "11px",
+                letterSpacing: ".05em",
+                textTransform: "uppercase",
+                color: dt,
+                border: "1px solid " + hexA(dc, 0.5),
+                padding: "3px 8px 2px",
+                borderRadius: "3px",
+              }) as React.CSSProperties,
+            }))
+            .concat([
+              {
+                label: e.age,
+                style: S({
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: "11px",
+                  letterSpacing: ".05em",
+                  textTransform: "uppercase",
+                  color: "rgba(230,227,218,.65)",
+                  border: "1px solid var(--ink-border-strong)",
+                  padding: "3px 8px 2px",
+                  borderRadius: "3px",
+                }),
+              },
+            ]),
       rsvp,
-      rsvpLabel: rsvp ? 'You’re going ✓' : 'I’ll be there',
+      rsvpLabel: isBeach
+        ? "Remove beach day"
+        : rsvp
+          ? "You’re going ✓"
+          : "I’ll be there",
       rsvpBtnStyle: S({
-        fontFamily: 'var(--font-display)',
+        fontFamily: "var(--font-display)",
         fontWeight: 900,
-        fontSize: '14px',
-        letterSpacing: '.04em',
-        textTransform: 'uppercase',
-        cursor: 'pointer',
-        padding: '11px 18px',
-        borderRadius: '8px',
-        border: '2px solid ' + (rsvp ? dc : 'var(--neon-yellow)'),
-        color: 'var(--text-inverse)',
-        background: rsvp ? dc : 'var(--neon-yellow)',
+        fontSize: "14px",
+        letterSpacing: ".04em",
+        textTransform: "uppercase",
+        cursor: "pointer",
+        padding: "11px 18px",
+        borderRadius: "8px",
+        border: "2px solid " + (isBeach ? "var(--neon-magenta)" : rsvp ? dc : "var(--neon-yellow)"),
+        color: "var(--text-inverse)",
+        background: isBeach ? "transparent" : rsvp ? dc : "var(--neon-yellow)",
         boxShadow: calm
-          ? 'none'
-          : rsvp
-            ? '0 0 16px -4px ' + hexA(dc, 0.8)
-            : '4px 4px 0 rgba(255,0,204,.3)',
+          ? "none"
+          : isBeach
+            ? "none"
+            : rsvp
+              ? "0 0 16px -4px " + hexA(dc, 0.8)
+              : "4px 4px 0 rgba(255,0,204,.3)",
       }),
       dc,
+      detailLinkLabel: isBeach ? "Beach page →" : "Event page →",
+      goingLabel: isBeach ? "On your list" : null as string | null,
     };
   }, [selKey, selRect, calm, myEventIds, scheduleEvents, listings, embed]);
 
@@ -1134,15 +1223,24 @@ export default function Schedule({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
           <button
             onClick={(e) => {
-              if (!selected.rsvp) spawnRsvpSparks(e.currentTarget);
+              if (!selected.isBeach && !selected.rsvp) spawnRsvpSparks(e.currentTarget);
               toggleRsvp(selected.id);
             }}
             style={{ ...selected.rsvpBtnStyle, position: "relative", overflow: "visible" }}
+            disabled={selected.isBeach && withdrawBeachMutation.isPending}
           >
-            {selected.rsvpLabel}
+            {selected.isBeach && withdrawBeachMutation.isPending
+              ? "Removing…"
+              : selected.rsvpLabel}
           </button>
           <span style={{ fontSize: '12.5px', color: 'var(--text-meta)', fontFamily: 'var(--font-body)' }}>
-            <span style={{ color: selected.dt, fontWeight: 700 }}>{selected.going}</span> going
+            {selected.goingLabel ? (
+              <span style={{ color: selected.dt, fontWeight: 700 }}>{selected.goingLabel}</span>
+            ) : (
+              <>
+                <span style={{ color: selected.dt, fontWeight: 700 }}>{selected.going}</span> going
+              </>
+            )}
           </span>
           <div style={{ flex: 1 }} />
           <Link
@@ -1158,7 +1256,7 @@ export default function Schedule({
               whiteSpace: 'nowrap',
             }}
           >
-            Event page →
+            {selected.detailLinkLabel}
           </Link>
         </div>
       </div>

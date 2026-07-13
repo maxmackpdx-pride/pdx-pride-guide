@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { apiRequest } from "@/lib/queryClient";
@@ -605,24 +605,46 @@ function EventModalInner({
                 {eventHosts.length === 1 ? "Host" : "Hosts"}
               </div>
               <div className="event-hosts-row">
-                {eventHosts.map(host => (
-                  <div key={host.userId} className="event-host-card">
-                    <UserAvatar
-                      photoUrl={host.photoUrl}
-                      avatarChoice={host.avatarChoice}
-                      avatarRing={host.avatarRing}
-                      displayName={host.displayName}
-                      username={host.username}
-                      size={56}
-                    />
-                    <div className="event-host-meta">
-                      <span className="event-host-name">{host.displayName || host.username}</span>
-                      {host.role === "PRIMARY" && (
-                        <span className="event-host-role">Primary</span>
-                      )}
+                {eventHosts.map(host => {
+                  const hostHref = host.username
+                    ? `/u/${encodeURIComponent(host.username)}`
+                    : null;
+                  const inner = (
+                    <>
+                      <UserAvatar
+                        photoUrl={host.photoUrl}
+                        avatarChoice={host.avatarChoice}
+                        avatarRing={host.avatarRing}
+                        displayName={host.displayName}
+                        username={host.username}
+                        size={56}
+                      />
+                      <div className="event-host-meta">
+                        <span className="event-host-name">{host.displayName || host.username}</span>
+                        {host.role === "PRIMARY" && (
+                          <span className="event-host-role">Primary</span>
+                        )}
+                      </div>
+                    </>
+                  );
+                  if (hostHref) {
+                    return (
+                      <Link
+                        key={host.userId}
+                        href={hostHref}
+                        className="event-host-card event-host-card--link"
+                        aria-label={`View profile of ${host.displayName || host.username}`}
+                      >
+                        {inner}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <div key={host.userId} className="event-host-card">
+                      {inner}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {canAddCoHost && (
                 <div className="event-modal__cohost">

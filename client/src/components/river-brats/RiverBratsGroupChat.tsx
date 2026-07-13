@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Lock, MessageCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_CHAT_CLOSES_AT } from "@shared/riverBrats";
@@ -139,6 +140,7 @@ export default function RiverBratsGroupChat({
                 displayName={row.masked ? undefined : row.displayName}
                 photoUrl={row.masked ? null : row.photoUrl}
                 avatarChoice={row.masked ? undefined : row.avatarChoice}
+                href={row.masked ? null : memberProfileHref(row.username)}
                 size={34}
               />
             </span>
@@ -175,6 +177,7 @@ export default function RiverBratsGroupChat({
                 photoUrl={msg.photoUrl}
                 avatarChoice={msg.avatarChoice ?? undefined}
                 avatarRing={msg.avatarRing}
+                href={msg.isAnonymous ? null : memberProfileHref(msg.username)}
                 size={26}
               />
             )}

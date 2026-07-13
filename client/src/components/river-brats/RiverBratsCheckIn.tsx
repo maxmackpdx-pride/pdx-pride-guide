@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import EventLinkChoiceMenu from "@/components/EventLinkChoiceMenu";
 import {
   downloadIcsFileForBeachCheckin,
@@ -199,6 +200,7 @@ export default function RiverBratsCheckIn({
     },
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/mine"] });
       const dayLabel = formatBeachCheckinDateLabel(selectedDate);
       toast({
         title: "Checked in",
@@ -292,6 +294,7 @@ export default function RiverBratsCheckIn({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/chat"] });
       setHour(null);
       setDepartHour(null);
@@ -654,6 +657,7 @@ export default function RiverBratsCheckIn({
                 displayName={row.masked ? undefined : row.displayName}
                 photoUrl={row.masked ? null : row.photoUrl}
                 avatarChoice={row.masked ? undefined : row.avatarChoice}
+                href={row.masked ? null : memberProfileHref(row.username)}
                 size={30}
               />
             </span>

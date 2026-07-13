@@ -30,14 +30,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
       text: g.description || g.title,
       createdAt: g.createdAt || "",
     })),
-    ...(activity.spotted ?? []).map(s => ({
-      key: `spotted-${s.id}`,
-      board: "Missed Connections",
-      hex: "var(--neon-magenta)",
-      where: [s.venueHint, s.dayOfWeek].filter(Boolean).join(" · ") || "Around town",
-      text: s.body,
-      createdAt: s.createdAt || "",
-    })),
+    // Missed connections intentionally omitted — anonymous by design.
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (

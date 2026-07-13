@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import EventModal from "@/components/EventModal";
+import { avatarHrefFor } from "@/lib/avatarLinks";
 import { timeAgo } from "@/lib/boardFeed";
 import { apiRequest } from "@/lib/queryClient";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";
 import type { Event } from "@shared/schema";
+
+function stopCardNav(e: MouseEvent) {
+  e.stopPropagation();
+}
 
 type Props = {
   item: HubFeedItem;
@@ -89,6 +94,8 @@ function EventFeedRow({
           displayName={event.poster.displayName}
           username={event.poster.username ?? undefined}
           logoFit={event.poster.venueLogo}
+          href={avatarHrefFor(event.poster)}
+          onClick={stopCardNav}
           size={34}
         />
       ) : null}
@@ -317,6 +324,8 @@ export default function HubFeedCard({ item }: Props) {
           displayName={item.author.displayName}
           username={item.author.username ?? undefined}
           logoFit={item.author.venueLogo}
+          href={avatarHrefFor(item.author)}
+          onClick={stopCardNav}
           size={44}
         />
         <div style={{ flex: 1, minWidth: 0 }}>

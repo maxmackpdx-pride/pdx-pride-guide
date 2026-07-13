@@ -1,3 +1,5 @@
+import type { CSSProperties, MouseEvent } from "react";
+import { Link } from "wouter";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
 
 export interface UserAvatarProps {
@@ -13,6 +15,13 @@ export interface UserAvatarProps {
   shimmer?: boolean;
   /** Directory venue logo — contained with padding inside the circle. */
   logoFit?: boolean;
+  /**
+   * When set, avatar navigates here (member profile or directory place).
+   * Use avatarHrefFor() / memberProfileHref() from @/lib/avatarLinks.
+   */
+  href?: string | null;
+  /** Optional click hook (e.g. stop parent card expand). Fires for both link and plain. */
+  onClick?: (e: MouseEvent) => void;
 }
 
 export default function UserAvatar({
@@ -26,21 +35,31 @@ export default function UserAvatar({
   title,
   shimmer = true,
   logoFit = false,
+  href,
+  onClick,
 }: UserAvatarProps) {
   const emoji = AVATAR_EMOJI_OPTIONS.find(a => a.id === (avatarChoice || 1)) || AVATAR_EMOJI_OPTIONS[0];
   const initial = (displayName || username || "?").trim().slice(0, 1).toUpperCase();
   const ring = normalizeAvatarRing(avatarRing);
   const label = title || displayName || username || "Profile";
   const showShimmer = shimmer && ring !== "none";
+  const navHref = href?.trim() || null;
 
-  return (
-    <div
-      className={`user-avatar${showShimmer ? " user-avatar--shimmer" : ""}${logoFit ? " user-avatar--logo" : ""} ${className}`.trim()}
-      data-ring={ring}
-      style={size !== undefined ? ({ "--avatar-size": `${size}px` } as React.CSSProperties) : undefined}
-      title={label}
-      aria-label={label}
-    >
+  const classNames = [
+    "user-avatar",
+    showShimmer ? "user-avatar--shimmer" : "",
+    logoFit ? "user-avatar--logo" : "",
+    navHref ? "user-avatar--link" : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const style: CSSProperties | undefined =
+    size !== undefined ? ({ "--avatar-size": `${size}px` } as CSSProperties) : undefined;
+
+  const face = (
+    <>
       <div className="user-avatar__inner">
         {photoUrl ? (
           <img src={photoUrl} alt="" className="user-avatar__photo" />
@@ -60,6 +79,35 @@ export default function UserAvatar({
         />
       )}
       {ring === "chain" && <span className="user-avatar__padlock" aria-hidden="true">🔒</span>}
+    </>
+  );
+
+  if (navHref) {
+    return (
+      <Link
+        href={navHref}
+        className={classNames}
+        data-ring={ring}
+        style={style}
+        title={label}
+        aria-label={label}
+        onClick={onClick}
+      >
+        {face}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      className={classNames}
+      data-ring={ring}
+      style={style}
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+    >
+      {face}
     </div>
   );
 }

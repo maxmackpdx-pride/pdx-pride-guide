@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import { Button } from "@/components/ds";
 import RiverBratsHourChips from "./RiverBratsHourChips";
 import RiverBratsReportButton from "./RiverBratsReportButton";
@@ -356,6 +357,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
                   displayName={row.displayName}
                   photoUrl={row.photoUrl}
                   avatarChoice={row.avatarChoice}
+                  href={memberProfileHref(row.username)}
                   size={36}
                 />
                 <div className="rb-card__body">

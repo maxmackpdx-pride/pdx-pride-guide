@@ -22,6 +22,8 @@ export type HubFeedAuthor = {
   anonymous?: boolean;
   /** Directory venue logo — render contained with padding, not cropped. */
   venueLogo?: boolean;
+  /** When venueLogo, deep-link the avatar to this directory place. */
+  businessId?: number | null;
 };
 
 export type HubFeedEventEmbed = {

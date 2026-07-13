@@ -4723,10 +4723,16 @@ function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unkno
     resolveDirectoryLogo(String(name), biz?.imageUrl)
     || (biz ? directoryFallbackLogo(biz.type) : null)
     || resolveDirectoryLogo(String(venueName), null);
+  const businessId = biz?.id ?? null;
   if (logo) {
-    return { displayName: String(venueName || name), photoUrl: logo, venueLogo: true };
+    return {
+      displayName: String(venueName || name),
+      photoUrl: logo,
+      venueLogo: true,
+      businessId,
+    };
   }
-  return { displayName: String(venueName) };
+  return { displayName: String(venueName), venueLogo: !!biz, businessId };
 }
 
 function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor | null): HubFeedEventEmbed {
@@ -5738,6 +5744,17 @@ export interface IStorage {
   getMissedConnectionsByUser(userId: number): MissedConnection[];
   expireRiverBratsCheckins(): void;
   getBeachCheckins(beachId: string, calendarDate: string, viewerUserId?: number): any[];
+  /** Active planned beach days for My Schedule (advance check-ins). */
+  getBeachCheckinsByUser(userId: number): Array<{
+    id: number;
+    beachId: string;
+    calendarDate: string;
+    arrivalHour: number;
+    departHour: number | null;
+    note: string | null;
+    presence: string;
+    isAnonymous: boolean;
+  }>;
   getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string): BeachCheckin | undefined;
   upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }): BeachCheckin;
   deleteBeachCheckin(id: number, userId: number): boolean;
@@ -6026,19 +6043,17 @@ export const storage: IStorage = {
     const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
     const giftingRows = storage.getGiftingPostsByUser(user.id)
       .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)));
-    const spottedRows = storage.getMissedConnectionsByUser(user.id)
-      .filter((post: any) => post.status === "ACTIVE");
+    // Missed connections stay anonymous: never list them on public profiles
+    // (even for the owner). Authors manage theirs via /spotted and dashboard.
     const hubRows = storage.getHubFeedPostsByUser(user.id, 30)
       .filter((post: any) => post.status === "LIVE" && String(post.audience || "ALL").toUpperCase() === "ALL");
 
     const gigLikeCounts = bulkContentLikeCounts("GIG", gigRows.map(g => g.id));
     const giftLikeCounts = bulkContentLikeCounts("GIFTING", giftingRows.map((g: any) => g.id));
-    const spottedLikeCounts = bulkContentLikeCounts("SPOTTED", spottedRows.map((s: any) => s.id));
     const hubLikeCounts = bulkContentLikeCounts("HUB", hubRows.map((h: any) => h.id));
     const gigReplyCounts = bulkContentReplyCounts("GIG", gigRows.map(g => g.id));
     const hubReplyCounts = bulkContentReplyCounts("HUB", hubRows.map((h: any) => h.id));
-    // SPOTTED: private missed-connection threads (bodies never public). GIFTING: interests (not public replies).
-    const spottedReplyCounts = bulkSpottedReplyCounts(spottedRows.map((s: any) => s.id));
+    // GIFTING: interests (not public replies).
     const giftReplyCounts = bulkGiftingInterestCounts(giftingRows.map((g: any) => g.id));
 
     const gigs = gigRows.map(gig => ({
@@ -6061,18 +6076,8 @@ export const storage: IStorage = {
       likes: giftLikeCounts.get(post.id) ?? 0,
       replies: giftReplyCounts.get(post.id) ?? 0,
     }));
-    const spotted = spottedRows.map((post: any) => ({
-      id: post.id,
-      title: post.title,
-      body: post.body,
-      dayOfWeek: post.dayOfWeek ?? null,
-      venueHint: post.venueHint ?? null,
-      createdAt: post.createdAt,
-      likes: spottedLikeCounts.get(post.id) ?? 0,
-      replies: spottedReplyCounts.get(post.id) ?? 0,
-    }));
 
-    // Profile Updates rail: merged board + public hub posts with real engagement.
+    // Profile Updates rail: gigs + gifting + public hub posts (no spotted).
     const boardPosts = [
       ...gigs.map(g => ({
         id: g.id,
@@ -6095,17 +6100,6 @@ export const storage: IStorage = {
         createdAt: g.createdAt ?? null,
         likes: g.likes,
         replies: g.replies,
-      })),
-      ...spotted.map(s => ({
-        id: s.id,
-        board: "Spotted",
-        contentType: "SPOTTED" as const,
-        color: "var(--board-spotted)",
-        where: s.venueHint || s.dayOfWeek || "Portland",
-        text: s.body || s.title,
-        createdAt: s.createdAt ?? null,
-        likes: s.likes,
-        replies: s.replies,
       })),
       ...hubRows.map((h: any) => ({
         id: h.id,
@@ -6147,7 +6141,8 @@ export const storage: IStorage = {
       hostedEventsPast: hostedPast,
       gigs,
       gifting,
-      spotted,
+      // Always empty — missed connections must not de-anonymize on profiles.
+      spotted: [],
       goingTo: goingToUpcoming,
       attendedPast,
     };
@@ -9362,6 +9357,27 @@ export const storage: IStorage = {
       SELECT * FROM beach_checkins
       WHERE beach_id = ? AND user_id = ? AND calendar_date = ? AND is_active = 1
     `).get(beachId, userId, calendarDate) as BeachCheckin | undefined;
+  },
+  getBeachCheckinsByUser(userId: number) {
+    storage.expireRiverBratsCheckins();
+    const rows = sqlite.prepare(`
+      SELECT id, beach_id AS beachId, calendar_date AS calendarDate,
+             arrival_hour AS arrivalHour, depart_hour AS departHour,
+             note, presence, is_anonymous AS isAnonymous
+      FROM beach_checkins
+      WHERE user_id = ? AND is_active = 1
+      ORDER BY calendar_date ASC, arrival_hour ASC
+    `).all(userId) as any[];
+    return rows.map((r: any) => ({
+      id: Number(r.id),
+      beachId: String(r.beachId),
+      calendarDate: String(r.calendarDate),
+      arrivalHour: Number(r.arrivalHour),
+      departHour: r.departHour == null ? null : Number(r.departHour),
+      note: r.note ?? null,
+      presence: String(r.presence || "PLANNED"),
+      isAnonymous: Boolean(r.isAnonymous),
+    }));
   },
   upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }) {
     const createdAt = new Date().toISOString();

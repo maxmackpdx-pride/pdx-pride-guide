@@ -2475,6 +2475,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── RIVER BRATS (Nude Beaches social) ───────────────────────────────────
+  /** Active beach days for the signed-in user (feeds My Schedule flyer blocks). */
+  app.get("/api/river-brats/checkins/mine", requireAuth, (req, res) => {
+    res.json(storage.getBeachCheckinsByUser(req.session.userId!));
+  });
+
   app.get("/api/river-brats/checkins", (req: any, res) => {
     const beachId = String(req.query.beach || "");
     const date = String(req.query.date || pacificTodayDate());

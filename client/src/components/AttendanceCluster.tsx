@@ -6,6 +6,7 @@ import AuthModal from "./AuthModal";
 import AttendanceVibeModal, { type AttendanceVisibility } from "./AttendanceVibeModal";
 import EventChatPanel from "./EventChatPanel";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
 import LiveWave from "@/components/LiveWave";
 import { useAttendanceLive } from "@/hooks/useAttendanceLive";
@@ -275,6 +276,7 @@ export default function AttendanceCluster({
           {gridPeople.map(p => {
             const isSelf = !!user && p.userId === user?.id;
             const canMessage = user && myAttendance && p.userId && p.userId !== user.id && !p.masked;
+            const profileHref = !p.masked ? memberProfileHref(p.handle) : null;
             return (
               <div
                 key={p.key}
@@ -282,7 +284,7 @@ export default function AttendanceCluster({
                 onClick={() => {
                   if (canMessage && p.attendeeRef) setMessageTarget(p.attendeeRef);
                 }}
-                style={{ cursor: canMessage ? "pointer" : "default" }}
+                style={{ cursor: canMessage || profileHref ? "pointer" : "default" }}
                 data-testid={`grid-attendee-${p.key}`}
               >
                 <div style={{ position: "relative", display: "inline-block" }}>
@@ -291,6 +293,9 @@ export default function AttendanceCluster({
                     avatarChoice={p.avatarChoice}
                     avatarRing={p.avatarRing}
                     displayName={p.masked ? undefined : (p.displayName || p.handle)}
+                    username={p.masked ? undefined : p.handle}
+                    href={profileHref}
+                    onClick={e => e.stopPropagation()}
                     size={52}
                   />
                   {isSelf && (

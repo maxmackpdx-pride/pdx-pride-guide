@@ -16,6 +16,7 @@ import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
 import { Button } from "@/components/ds";
@@ -779,6 +780,8 @@ export function GigListingCard({
                 avatarRing={gig.posterAvatarRing}
                 displayName={gig.displayName}
                 username={gig.username}
+                href={memberProfileHref(gig.username)}
+                onClick={e => e.stopPropagation()}
                 size={18}
               />
             ) : null}

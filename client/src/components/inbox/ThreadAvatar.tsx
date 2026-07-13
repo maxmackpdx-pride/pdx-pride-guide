@@ -1,4 +1,5 @@
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import type { InboxPartyAvatar } from "@/lib/inboxAvatar";
 import { normalizeAvatarRing } from "@shared/avatarRings";
 
@@ -28,6 +29,7 @@ export default function ThreadAvatar({ party, masked = false, size, ring }: Thre
       avatarRing={ring && ring !== "none" ? normalizeAvatarRing(ring) : normalizeAvatarRing(party.avatarRing)}
       displayName={party.displayName ?? undefined}
       username={party.username ?? undefined}
+      href={memberProfileHref(party.username)}
       size={size}
     />
   );

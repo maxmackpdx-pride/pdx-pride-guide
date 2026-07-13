@@ -4,7 +4,9 @@ import { HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import type { MouseEvent } from "react";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import { isOpenGrabPost, timeAgo } from "@/lib/boardFeed";
 
 export type GiftingPost = {
@@ -191,6 +193,8 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
               avatarRing={post.posterAvatarRing}
               displayName={post.displayName}
               username={post.username}
+              href={memberProfileHref(post.username)}
+              onClick={(e: MouseEvent) => e.stopPropagation()}
               size={18}
             />
             <span>@{post.username} · {post.neighborhood || "Portland"}</span>
@@ -263,6 +267,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
                         avatarRing={i.avatarRing}
                         displayName={i.displayName}
                         username={i.username}
+                        href={memberProfileHref(i.username)}
                         size={28}
                       />
                       <span>{i.displayName || i.username}: {i.note}</span>

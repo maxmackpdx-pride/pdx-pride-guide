@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type MouseEvent } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -341,6 +342,7 @@ export default function UpdatesPanel({
                               avatarRing={reply.author.avatarRing}
                               displayName={reply.author.displayName}
                               username={reply.author.username}
+                              href={memberProfileHref(reply.author.username)}
                               size={22}
                             />
                             <div className="pp-updates__thread-body">

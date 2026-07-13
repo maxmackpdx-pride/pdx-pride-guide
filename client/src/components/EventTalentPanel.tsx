@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import {
   EVENT_TALENT_ROLES,
   EVENT_TALENT_ROLE_LABELS,
@@ -183,32 +185,45 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
                 {EVENT_TALENT_ROLE_LABELS[role].toUpperCase()}
               </div>
               <div className="event-hosts-row">
-                {rows.map(row => (
-                  <div key={row.id} className="event-host-card">
+                {rows.map(row => {
+                  const profileHref = memberProfileHref(row.username);
+                  const avatar = (
                     <UserAvatar
                       photoUrl={row.photoUrl}
                       avatarChoice={row.avatarChoice}
                       avatarRing={row.avatarRing}
                       displayName={row.displayName}
                       username={row.username}
+                      href={mode === "view" ? profileHref : null}
                       size={mode === "manage" ? 44 : 52}
                     />
-                    <div className="event-host-meta">
-                      <span className="event-host-name">{row.displayName || row.username}</span>
-                      <span style={{ fontSize: "0.68rem", color: "var(--text-meta)" }}>@{row.username}</span>
+                  );
+                  return (
+                    <div key={row.id} className="event-host-card">
+                      {avatar}
+                      <div className="event-host-meta">
+                        {mode === "view" && profileHref ? (
+                          <Link href={profileHref} className="event-host-name event-host-name--link">
+                            {row.displayName || row.username}
+                          </Link>
+                        ) : (
+                          <span className="event-host-name">{row.displayName || row.username}</span>
+                        )}
+                        <span style={{ fontSize: "0.68rem", color: "var(--text-meta)" }}>@{row.username}</span>
+                      </div>
+                      {mode === "manage" && (
+                        <button
+                          type="button"
+                          onClick={() => removeMutation.mutate(row.id)}
+                          disabled={removeMutation.isPending}
+                          style={{ background: "none", border: "none", color: "#FF2400", fontSize: "0.65rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
+                        >
+                          REMOVE
+                        </button>
+                      )}
                     </div>
-                    {mode === "manage" && (
-                      <button
-                        type="button"
-                        onClick={() => removeMutation.mutate(row.id)}
-                        disabled={removeMutation.isPending}
-                        style={{ background: "none", border: "none", color: "#FF2400", fontSize: "0.65rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
-                      >
-                        REMOVE
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

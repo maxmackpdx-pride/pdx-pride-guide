@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 
 type ChatMessage = {
@@ -212,6 +213,7 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
                   photoUrl={msg.photoUrl}
                   avatarChoice={msg.avatarChoice ?? undefined}
                   avatarRing={msg.avatarRing}
+                  href={msg.isAnonymous ? null : memberProfileHref(msg.username)}
                   size={28}
                 />
               )}
