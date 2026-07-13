@@ -75,6 +75,12 @@ export default function Home() {
 
   const upNext = useMemo(() => eventsForMonday(events, 4), [events]);
   const countdownTarget = useMemo(() => earliestPrideWeekStartTarget(events), [events]);
+  // /api/events expands multi-day festivals into one row per day — "total events"
+  // is unique listings (by id), not day-instances.
+  const eventCount = useMemo(
+    () => new Set(events.map(e => e.id)).size,
+    [events],
+  );
   const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
   const goingCount = useMemo(
     () => Object.values(attendanceSummaries).reduce((sum, s) => sum + (s?.count ?? 0), 0),
@@ -83,7 +89,7 @@ export default function Home() {
 
   return (
     <div className="home-main-stage">
-      <HomeHero eventCount={events.length} />
+      <HomeHero eventCount={eventCount} />
       <HomeStatStrip
         placesCount={placesCount}
         goingCount={goingCount}

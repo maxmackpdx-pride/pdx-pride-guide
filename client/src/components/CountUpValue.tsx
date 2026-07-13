@@ -100,20 +100,25 @@ export default function CountUpValue({
     if (!el) return;
 
     const startCountUp = () => {
-      if (cancelled || started) return;
+      if (cancelled || started || revealedRef.current) return;
       started = true;
       revealedRef.current = true;
       const to = targetRef.current;
+      // Already at target (e.g. still mode or prior snap) — don't restart 0→N.
+      if (prevRef.current === to && to > 0) {
+        setDisplay(to);
+        return;
+      }
       setDisplay(0);
       animateTo(0, to, duration);
       prevRef.current = to;
+      io.disconnect();
     };
 
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
         startCountUp();
-        io.disconnect();
       },
       { threshold: 0.15, rootMargin: "0px 0px -4% 0px" },
     );
@@ -124,13 +129,14 @@ export default function CountUpValue({
       if (!cancelled && isInViewport(el)) startCountUp();
     });
 
-    // Safety: if never intersecting (off-screen forever), snap to final so we never stick at 0.
+    // Safety: if never intersecting, snap once and mark revealed so IO won't re-climb.
     const safety = window.setTimeout(() => {
-      if (cancelled || started) return;
+      if (cancelled || started || revealedRef.current) return;
+      started = true;
+      revealedRef.current = true;
       setDisplay(targetRef.current);
       prevRef.current = targetRef.current;
-      // Leave revealed false so a later scroll-in can still animate via IO…
-      // but IO may have already disconnected only after start. Keep observing.
+      io.disconnect();
     }, 2500);
 
     return () => {
@@ -155,11 +161,13 @@ export default function CountUpValue({
     }
     if (!revealedRef.current) {
       // Pre-reveal: keep target ready; first paint stays 0 until count-up kicks.
+      // When async data arrives before reveal, startCountUp will use targetRef.
       return;
     }
     const prev = prevRef.current;
     if (prev === target) return;
     // First climb from empty → real total uses full duration (async data after mount).
+    // Do not re-zero if we already finished a climb to this target.
     const ms = prev === 0 && target > 0 ? duration : Math.min(duration, 600);
     if (prev === 0 && target > 0) {
       setDisplay(0);

@@ -47,10 +47,8 @@ export default function HomeHero({ eventCount }: Props) {
           <div className="home-hero__stat-label">Total events</div>
           <div className="home-hero__stat-row">
             <span className="home-hero__stat-num" data-testid="home-events-count">
-              <CountUpValue
-                key={eventCount > 0 ? "events-ready" : "events-pending"}
-                value={eventCount}
-              />
+              {/* No remount key — remounting when data arrives re-ran the climb twice */}
+              <CountUpValue value={eventCount} />
             </span>
             <span className="home-hero__stat-meta">
               and counting
