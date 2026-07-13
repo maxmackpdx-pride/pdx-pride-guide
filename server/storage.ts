@@ -4434,6 +4434,27 @@ function runBootMigrationsOnce() {
     restorePrunedPrideEvents();
     recordBootMigration("restore_pruned_pride_events_v1");
   }
+  // Iced Tea Pride closing party: flyer + merc tickets confirm 3pm–10pm (was wrongly 9pm–10pm).
+  // Source: icedteapdx IG https://www.instagram.com/p/DaZjSntlIFV/ + merctickets.com/events/185486634
+  if (!hasBootMigration("fix_iced_tea_pride_2026_time_v1")) {
+    sqlite.prepare(`
+      UPDATE events SET
+        date_start = '2026-07-19T15:00:00',
+        date_end = '2026-07-19T22:00:00',
+        day_of_week = 'SUN',
+        description = '3rd annual Pride Closing Party tea dance at White Owl Social Club. Sunday July 19, 3pm–10pm. DJs: Tripwire, JRX, Bro Hoe. Featuring multiple DJ sets and entertainment including Angel Darko, gogo dancing, and more. 21+.',
+        ticket_url = 'https://www.merctickets.com/events/185486634/iced-tea-dance-pride-2026',
+        admission = 'TICKETED',
+        event_types = '["DANCE","PARTY","TEA DANCE","SOCIAL"]',
+        lat = 45.5134484,
+        lng = -122.6579941,
+        neighborhood = 'SE Portland',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Verified icedteapdx flyer + merc tickets: Sun Jul 19 3pm–10pm White Owl (not 9pm). 2026-07-12.'
+      WHERE title = 'Iced Tea'
+        AND date_start LIKE '2026-07-19%'
+    `).run();
+    recordBootMigration("fix_iced_tea_pride_2026_time_v1");
+  }
 }
 
 function parseEnvAdminLists() {
@@ -5285,6 +5306,8 @@ export interface IStorage {
   createHostMessage(data: InsertHostMessage): HostMessage;
   notifyAttendeesOfHostUpdate(eventId: number, hostUserId: number, eventTitle: string, body: string): number;
   getEventHosts(eventId: number): any[];
+  resolveUserByIdentifier(identifier: string): User | undefined;
+  resolveEventPrimaryHostUser(eventId: number): User | undefined;
   isUserEventHost(eventId: number, userId: number): boolean;
   setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
   addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
@@ -5875,7 +5898,7 @@ export const storage: IStorage = {
       lng: sub.lng,
     }, directoryRows);
     db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
-    db.insert(events).values({
+    const created = db.insert(events).values({
       title: sub.title, description: sub.description,
       venueName: sub.venueName, address: sub.address,
       neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
@@ -5889,7 +5912,14 @@ export const storage: IStorage = {
       isClaimable: false, claimedBy: claimedByUsername,
       submittedBy: sub.submitterEmail, adminNotes: null,
       createdAt: new Date().toISOString(),
-    }).run();
+    }).returning().get();
+    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+    if (created && submitter) {
+      if (submitter.promoterStatus === "pending") {
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      }
+      storage.setPrimaryEventHost(created.id, submitter.id, null);
+    }
   },
   approveSubmission(id, adminName) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
@@ -6809,6 +6839,42 @@ export const storage: IStorage = {
     }
     return sent;
   },
+  resolveUserByIdentifier(identifier) {
+    const raw = String(identifier || "").trim().replace(/^@/, "");
+    if (!raw) return undefined;
+    const byEmail = storage.getUserByEmail(raw.toLowerCase());
+    if (byEmail) return byEmail;
+    const byUsername = storage.getUserByUsername(raw);
+    if (byUsername) return byUsername;
+    return sqlite.prepare(`SELECT * FROM users WHERE LOWER(username) = LOWER(?)`).get(raw) as User | undefined;
+  },
+  resolveEventPrimaryHostUser(eventId) {
+    ensureEventHostsSchema();
+    const hosts = storage.getEventHosts(eventId);
+    for (const h of hosts) {
+      const userId = Number(h.userId);
+      if (userId > 0) {
+        const user = storage.getUserById(userId);
+        if (user) return user;
+      }
+    }
+    const evt = storage.getEvent(eventId);
+    if (!evt) return undefined;
+    for (const key of [evt.claimedBy, evt.submittedBy]) {
+      if (!key) continue;
+      const user = storage.resolveUserByIdentifier(String(key));
+      if (!user) continue;
+      if (hosts.length === 0) {
+        try {
+          storage.setPrimaryEventHost(eventId, user.id, null);
+        } catch (err) {
+          console.error("[resolveEventPrimaryHostUser] host backfill failed:", err);
+        }
+      }
+      return user;
+    }
+    return undefined;
+  },
   getEventHosts(eventId) {
     ensureEventHostsSchema();
     return sqlite.prepare(`
@@ -6836,8 +6902,14 @@ export const storage: IStorage = {
     if (!evt) return false;
     const user = db.select().from(users).where(eq(users.id, userId)).get();
     if (!user) return false;
-    if (evt.claimedBy && user.username === evt.claimedBy) return true;
-    if (evt.submittedBy && (user.email === evt.submittedBy || user.username === evt.submittedBy)) return true;
+    if (evt.claimedBy) {
+      const claimedHost = storage.resolveUserByIdentifier(evt.claimedBy);
+      if (claimedHost?.id === userId) return true;
+    }
+    if (evt.submittedBy) {
+      const submittedHost = storage.resolveUserByIdentifier(evt.submittedBy);
+      if (submittedHost?.id === userId) return true;
+    }
     return false;
   },
   setPrimaryEventHost(eventId, userId, addedByUserId) {
@@ -9114,7 +9186,7 @@ try {
     if (countRow.count > 0) continue;
     const ownerKey = row.claimedBy || row.submittedBy;
     if (!ownerKey) continue;
-    const user = storage.getUserByUsername(ownerKey) || storage.getUserByEmail(ownerKey);
+    const user = storage.resolveUserByIdentifier(ownerKey);
     if (user) storage.setPrimaryEventHost(row.id, user.id, null);
   }
 } catch (e) {

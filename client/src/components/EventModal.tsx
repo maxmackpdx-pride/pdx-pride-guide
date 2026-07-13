@@ -194,6 +194,9 @@ function EventModalInner({
       toast({ title: "Message sent", description: "The host can reply in your inbox." });
       setHostMessage("");
       setHostDrawer("closed");
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
     },
     onError: (err: Error & { code?: string }) => {
       if (err.code === "NO_HOST") {
@@ -294,6 +297,34 @@ function EventModalInner({
     if (!ok) return;
     deleteEventMutation.mutate();
   };
+
+  const hostUpdateMutation = useMutation({
+    mutationFn: async (body: string) => {
+      const res = await fetch(`/api/events/${event.id}/host-messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ body }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Could not post update");
+      return payload as { notified?: number };
+    },
+    onSuccess: (data) => {
+      const n = data?.notified ?? 0;
+      toast({
+        title: "Host update posted",
+        description: n > 0
+          ? `Visible on the event page. ${n} attendee${n === 1 ? "" : "s"} notified.`
+          : "Visible on the event detail page.",
+      });
+      setEditHostUpdate("");
+      queryClient.invalidateQueries({ queryKey: ["/api/events", event.id, "host-messages"] });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not post update", description: err.message, variant: "destructive" });
+    },
+  });
 
   const addCoHostMutation = useMutation({
     mutationFn: async (data: { username: string; email: string }) => {
@@ -407,10 +438,10 @@ function EventModalInner({
               setHostUpdate={setEditHostUpdate}
               onCancel={() => { setEditing(false); setEventForm(null); }}
               onSave={() => editEventMutation.mutate(eventForm)}
-              onPostUpdate={() => undefined}
+              onPostUpdate={() => editHostUpdate.trim() && hostUpdateMutation.mutate(editHostUpdate.trim())}
               onDelete={user?.isAdmin ? handleAdminDelete : undefined}
               saving={editEventMutation.isPending}
-              posting={false}
+              posting={hostUpdateMutation.isPending}
               deleting={deleteEventMutation.isPending}
             />
           ) : (

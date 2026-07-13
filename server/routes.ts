@@ -2965,12 +2965,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    const hosts = storage.getEventHosts(evt.id);
-    const primary = hosts.find((h: any) => h.role === "PRIMARY") || hosts[0];
-    let host = primary?.userId ? storage.getUserById(primary.userId) : undefined;
-    if (!host && evt.claimedBy) {
-      host = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
-    }
+    const host = storage.resolveEventPrimaryHostUser(evt.id);
     if (!host) return res.status(400).json({ error: "NO_HOST", ticketUrl: evt.ticketUrl });
     if (host.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
@@ -2981,6 +2976,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       contextId: evt.id,
       contextLabel: evt.title,
     });
+    if (!msg?.id) {
+      console.error("[message-host] sendMessage returned no row", { eventId: evt.id, hostId: host.id });
+      return res.status(500).json({ error: "Could not deliver message" });
+    }
     res.json(msg);
   });
 
