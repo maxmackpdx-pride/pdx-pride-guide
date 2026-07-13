@@ -82,6 +82,8 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   "q restaurant and bar": "https://q-portland.com/",
   "sold by scott": "https://soldxscott.com",
   soldxscott: "https://soldxscott.com",
+  "plus psychiatry": "https://www.pluspsychiatry.com",
+  pluspsychiatry: "https://www.pluspsychiatry.com",
 };
 
 export type VenueWebsiteSource = {

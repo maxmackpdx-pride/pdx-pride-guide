@@ -3664,6 +3664,34 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`UPDATE businesses SET type = 'realestate' WHERE lower(name) = 'sold by scott'`).run();
     recordBootMigration("seed_businesses_directory_v11_type_accents");
   }
+  if (!hasBootMigration("seed_plus_psychiatry_v1")) {
+    const now = new Date().toISOString();
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE lower(name) IN ('plus psychiatry', '+psychiatry', 'pluspsychiatry') LIMIT 1`)
+      .get() as { id: number } | undefined;
+    if (!exists) {
+      db.insert(businesses).values({
+        name: "Plus Psychiatry",
+        type: "healthcare",
+        description:
+          "LGBTQIA2S+ affirming psychiatric care with Jermiah Floyd, PMHNP-BC. Trauma-informed, person-centered psychotherapy and medication management in Portland, in-person and telehealth.",
+        address: "1110 SE Alder St Suite 301",
+        neighborhood: "SE Portland",
+        website: "https://www.pluspsychiatry.com",
+        instagram: null,
+        phone: "(541) 414-4277",
+        hours: null,
+        lat: 45.5176,
+        lng: -122.6545,
+        queerOwned: true,
+        queerFriendly: true,
+        isNew: false,
+        active: true,
+        createdAt: now,
+      } as any).run();
+    }
+    recordBootMigration("seed_plus_psychiatry_v1");
+  }
   // Grand openings: ONLY verified doors-open dates — never "just added to directory".
   // Clear bad is_new flags from seed/add waves (Hawks, underU, Meet Rack, therapy, etc.).
   if (!hasBootMigration("grand_opening_verified_dates_v1")) {
