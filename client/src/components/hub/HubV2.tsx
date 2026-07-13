@@ -10,6 +10,7 @@ import HubEvents, { type HubEventRow } from "./sections/HubEvents";
 import HubPeople from "./sections/HubPeople";
 import HubSettings from "./sections/HubSettings";
 import HubAdminOverview from "./sections/HubAdminOverview";
+import HubAdminKeys from "./sections/HubAdminKeys";
 import HubAdminTable, { getAdminTableMeta } from "./sections/HubAdminTable";
 import {
   HUB_ADMIN_TABLE_SECTIONS,
@@ -23,6 +24,8 @@ export type HubV2Props = {
   canPostToFeed?: boolean;
   canManageTeam?: boolean;
   pendingCount?: number;
+  ownerCount?: number;
+  isPrimaryOwner?: boolean;
   postsCount?: number;
   profileStats?: Array<{ value: string | number; label: string }>;
   goingEvents?: HubEventRow[];
@@ -57,12 +60,28 @@ function dayDotClass(day?: string) {
 function HubRightRail({
   upcoming,
   onGoEvents,
+  isAdmin,
+  isPrimaryOwner,
+  pendingCount,
+  ownerCount,
 }: {
   upcoming: HubEventRow[];
   onGoEvents: () => void;
+  isAdmin?: boolean;
+  isPrimaryOwner?: boolean;
+  pendingCount?: number;
+  ownerCount?: number;
 }) {
   return (
     <>
+      {isAdmin && (
+        <HubAdminKeys
+          compact
+          pendingCount={pendingCount ?? 0}
+          ownerCount={ownerCount ?? 0}
+          isPrimaryOwner={isPrimaryOwner}
+        />
+      )}
       <div className="card" style={{ padding: 16 }}>
         <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 14 }}>
           Your next moves
@@ -117,6 +136,8 @@ export default function HubV2({
   canPostToFeed = false,
   canManageTeam = false,
   pendingCount = 0,
+  ownerCount = 0,
+  isPrimaryOwner = false,
   postsCount = 0,
   profileStats,
   goingEvents = [],
@@ -168,6 +189,13 @@ export default function HubV2({
     <>
       <PwaInstallBanner />
       {errorBanner}
+      {isAdmin && (section === "feed" || section === "post") && (
+        <HubAdminKeys
+          pendingCount={pendingCount}
+          ownerCount={ownerCount}
+          isPrimaryOwner={isPrimaryOwner}
+        />
+      )}
       {(section === "feed" || section === "post") && <HubFeed key="feed" canPostToFeed={canPostToFeed} />}
       {section === "profile" && (
         <HubProfile
@@ -192,7 +220,12 @@ export default function HubV2({
       {section === "people" && <HubPeople key="people" />}
       {section === "settings" && <HubSettings key="settings" onLogout={onLogout} />}
       {section === "admin" && isAdmin && (
-        <HubAdminOverview key="admin" pendingCount={pendingCount} />
+        <HubAdminOverview
+          key="admin"
+          pendingCount={pendingCount}
+          ownerCount={ownerCount}
+          isPrimaryOwner={isPrimaryOwner}
+        />
       )}
       {tableMeta && isAdmin && (
         <HubAdminTable key={section} section={section} {...tableMeta} />
@@ -212,7 +245,16 @@ export default function HubV2({
       onLogout={onLogout}
       searchValue={searchQ}
       onSearchChange={setSearchQ}
-      rightRail={<HubRightRail upcoming={upcoming} onGoEvents={() => handleSectionChange("events")} />}
+      rightRail={
+        <HubRightRail
+          upcoming={upcoming}
+          onGoEvents={() => handleSectionChange("events")}
+          isAdmin={isAdmin}
+          isPrimaryOwner={isPrimaryOwner}
+          pendingCount={pendingCount}
+          ownerCount={ownerCount}
+        />
+      }
     >
       {center}
     </HubV2Shell>

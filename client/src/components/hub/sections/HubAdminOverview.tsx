@@ -1,5 +1,6 @@
 import { Button } from "@/components/ds";
 import { Link } from "wouter";
+import { useInboxSheet } from "@/context/InboxSheetContext";
 
 type ReviewItem = {
   kind: string;
@@ -9,6 +10,8 @@ type ReviewItem = {
 
 type Props = {
   pendingCount: number;
+  ownerCount?: number;
+  isPrimaryOwner?: boolean;
   stats?: Array<{ value: string | number; label: string }>;
   reviewQueue?: ReviewItem[];
   onOpenAdminPanel?: () => void;
@@ -29,10 +32,13 @@ const DEFAULT_QUEUE: ReviewItem[] = [
 
 export default function HubAdminOverview({
   pendingCount,
+  ownerCount = 0,
+  isPrimaryOwner = false,
   stats = DEFAULT_STATS,
   reviewQueue = DEFAULT_QUEUE,
   onOpenAdminPanel,
 }: Props) {
+  const { openSheet } = useInboxSheet();
   const statsWithPending = stats.map((s) =>
     s.label === "Pending review" ? { ...s, value: pendingCount || s.value } : s,
   );
@@ -98,10 +104,36 @@ export default function HubAdminOverview({
             </div>
           </div>
         ))}
-        <div style={{ padding: "16px 0 12px", borderTop: "1px solid var(--panel-border)" }}>
+        <div
+          style={{
+            padding: "16px 0 12px",
+            borderTop: "1px solid var(--panel-border)",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          <Button
+            variant="neon"
+            accent="pink"
+            size="sm"
+            onClick={() => openSheet({ view: "inbox", account: "admin" })}
+          >
+            Open admin queue{pendingCount > 0 ? ` (${pendingCount})` : ""}
+          </Button>
+          {isPrimaryOwner && (
+            <Button
+              variant="ghost"
+              accent="purple"
+              size="sm"
+              onClick={() => openSheet({ view: "inbox", account: "owner" })}
+            >
+              Owner desk{ownerCount > 0 ? ` (${ownerCount})` : ""}
+            </Button>
+          )}
           <Link href="/admin?tab=overview" onClick={onOpenAdminPanel}>
             <Button variant="ghost" accent="cyan" size="sm">
-              Open full admin panel →
+              Full admin panel →
             </Button>
           </Link>
         </div>
