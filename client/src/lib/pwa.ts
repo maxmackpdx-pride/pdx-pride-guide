@@ -23,6 +23,12 @@ export function isAndroidDevice(): boolean {
   return /Android/.test(navigator.userAgent);
 }
 
+export function pushPlatform(): "ios" | "android" | "desktop" {
+  if (isIosDevice()) return "ios";
+  if (isAndroidDevice()) return "android";
+  return "desktop";
+}
+
 export function canUseWebPush(): boolean {
   return typeof window !== "undefined"
     && "serviceWorker" in navigator

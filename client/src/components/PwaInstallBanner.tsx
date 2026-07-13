@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { hasInstallPrompt, isIosDevice, isStandalonePwa, promptInstall } from "@/lib/pwa";
+import { hasInstallPrompt, isAndroidDevice, isIosDevice, isStandalonePwa, promptInstall } from "@/lib/pwa";
 
 const DISMISS_KEY = "pdx-pwa-install-dismissed";
 
@@ -21,8 +21,8 @@ export default function PwaInstallBanner() {
         setVisible(true);
         return;
       }
-      if (isIosDevice()) {
-        setIosHint(true);
+      if (isIosDevice() || isAndroidDevice()) {
+        setIosHint(isIosDevice());
         setVisible(true);
       }
     };
@@ -69,11 +69,11 @@ export default function PwaInstallBanner() {
         <p style={{ margin: 0, fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
           {iosHint
             ? "Tap Share, then Add to Home Screen for the full app, required for push notifications on iPhone."
-            : "Install the app for faster access and notifications during Pride weekend."}
+            : "Tap ⋮ in Chrome → Install app for full-screen Pride Guide and home-screen badge."}
         </p>
       </div>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-        {!iosHint && (
+        {!iosHint && hasInstallPrompt() && (
           <button
             type="button"
             onClick={install}

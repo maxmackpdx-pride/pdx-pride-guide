@@ -27,7 +27,8 @@ export default function PushNotificationPrompt() {
   const [installMode, setInstallMode] = useState<InstallMode | null>(null);
   const [installReady, setInstallReady] = useState(false); // Android: native prompt captured
   const [busy, setBusy] = useState(false);
-  const installFirst = installMode !== null;
+  const installFirst = installMode === "ios";
+  const androidOptionalInstall = installMode === "android";
 
   useEffect(() => {
     if (!user) return;
@@ -41,16 +42,15 @@ export default function PushNotificationPrompt() {
       return;
     }
 
-    // Android in the browser, not yet installed → install prompt. Chrome offers
-    // a real one-tap install (beforeinstallprompt); we also show the manual
-    // ⋮-menu how-to as a fallback. Independent of push config.
-    if (isAndroidDevice() && !isStandalonePwa()) {
+    // Android in the browser: optional install section, but push still works in
+    // Chrome without installing — fall through to the permission flow below.
+    const androidBrowser = isAndroidDevice() && !isStandalonePwa();
+    let onInstallAvailable: (() => void) | undefined;
+    if (androidBrowser) {
       setInstallMode("android");
       setInstallReady(hasInstallPrompt());
-      setVisible(true);
-      const onAvailable = () => setInstallReady(true);
-      window.addEventListener("pdx-pwa-install-available", onAvailable);
-      return () => window.removeEventListener("pdx-pwa-install-available", onAvailable);
+      onInstallAvailable = () => setInstallReady(true);
+      window.addEventListener("pdx-pwa-install-available", onInstallAvailable);
     }
 
     let cancelled = false;
@@ -74,7 +74,6 @@ export default function PushNotificationPrompt() {
 
       showTimer = window.setTimeout(() => {
         if (cancelled) return;
-        setInstallMode(null);
         setVisible(true);
       }, isStandalonePwa() ? 800 : 2200);
     })();
@@ -91,6 +90,9 @@ export default function PushNotificationPrompt() {
       cancelled = true;
       if (showTimer) window.clearTimeout(showTimer);
       window.removeEventListener(PUSH_STATE_EVENT, hideIfSubscribed);
+      if (onInstallAvailable) {
+        window.removeEventListener("pdx-pwa-install-available", onInstallAvailable);
+      }
     };
   }, [user]);
 
@@ -148,14 +150,14 @@ export default function PushNotificationPrompt() {
 
   const sticker =
     installMode === "ios" ? "IPHONE SETUP"
-    : installMode === "android" ? "ANDROID SETUP"
+    : installMode === "android" ? "ANDROID"
     : isStandalonePwa() ? "INSTALLED APP" : "STAY IN THE LOOP";
 
   const intro =
     installMode === "ios"
       ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
       : installMode === "android"
-      ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. On Android, Chrome installs it in one tap:"
+      ? "Allow notifications for inbox and host updates. You can also install the app for a full-screen home-screen experience and launcher badge:"
       : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer.";
 
   return (
@@ -212,7 +214,7 @@ export default function PushNotificationPrompt() {
           className="display"
           style={{ color: "#fff", fontSize: "clamp(1.6rem, 6vw, 2.4rem)", lineHeight: 1.05, marginBottom: 14 }}
         >
-          {installFirst ? "SAVE AS WEB APP" : "ALLOW NOTIFICATIONS?"}
+          {installFirst ? "SAVE AS WEB APP" : androidOptionalInstall ? "NOTIFICATIONS & INSTALL" : "ALLOW NOTIFICATIONS?"}
         </h2>
 
         <p style={{ color: "#bbb", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: installFirst ? 10 : 20 }}>
@@ -245,10 +247,10 @@ export default function PushNotificationPrompt() {
         )}
 
         {installMode === "ios" && <InstallSteps steps={IOS_STEPS} />}
-        {installMode === "android" && <InstallSteps steps={ANDROID_STEPS} />}
+        {androidOptionalInstall && <InstallSteps steps={ANDROID_STEPS} />}
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: installFirst ? 20 : 0 }}>
-          {!installFirst && (
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: (installFirst || androidOptionalInstall) ? 20 : 0 }}>
+          {(!installFirst) && (
             <button
               type="button"
               className="btn-neon solid"

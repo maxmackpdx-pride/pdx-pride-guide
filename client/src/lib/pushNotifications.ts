@@ -1,4 +1,4 @@
-import { canUseWebPush, isIosDevice, isStandalonePwa, waitForServiceWorker } from "@/lib/pwa";
+import { canUseWebPush, isStandalonePwa, pushPlatform, waitForServiceWorker } from "@/lib/pwa";
 
 /** Decode VAPID public key for PushManager.subscribe (Safari is picky about ArrayBuffer). */
 function urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
@@ -17,7 +17,7 @@ export async function fetchPushConfig(): Promise<{ configured: boolean; publicKe
 }
 
 export function shouldShowInstallBeforePush(): boolean {
-  return isIosDevice() && !isStandalonePwa();
+  return pushPlatform() === "ios" && !isStandalonePwa();
 }
 
 export function isPushPermissionPending(): boolean {
@@ -74,7 +74,7 @@ export async function syncPushSubscriptionWithServer(): Promise<void> {
       body: JSON.stringify({
         endpoint: json.endpoint,
         keys: json.keys,
-        platform: isIosDevice() ? "ios" : "desktop",
+        platform: pushPlatform(),
       }),
     });
     if (res.ok) emitPushStateChange();
@@ -127,7 +127,7 @@ export async function subscribeToPush(): Promise<"granted" | "denied" | "unsuppo
     body: JSON.stringify({
       endpoint: json.endpoint,
       keys: json.keys,
-      platform: isIosDevice() ? "ios" : "desktop",
+      platform: pushPlatform(),
     }),
   });
   if (!res.ok) return "unsupported";
@@ -165,7 +165,7 @@ export function listenForPushSubscriptionChanges(): void {
         body: JSON.stringify({
           endpoint: json.endpoint,
           keys: json.keys,
-          platform: isIosDevice() ? "ios" : "desktop",
+          platform: pushPlatform(),
         }),
       });
     });
