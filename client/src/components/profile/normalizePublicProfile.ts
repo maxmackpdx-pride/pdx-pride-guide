@@ -64,10 +64,34 @@ function mapEvent(e: WireEvent, counts?: GoingCountMap, isPast?: boolean): Profi
   };
 }
 
-/** Build Updates / board posts from activity gigs, gifting, and spotted. */
+function contentTypeForBoard(board: string): ProfileBoardPost["contentType"] {
+  const b = board.toLowerCase();
+  if (b === "gigs") return "GIG";
+  if (b === "gifting") return "GIFTING";
+  if (b === "spotted") return "SPOTTED";
+  if (b === "updates" || b === "hub") return "HUB";
+  return undefined;
+}
+
+/** Prefer server boardPosts (with likes/replies); fall back to activity merge. */
 export function boardPostsFromActivity(
   activity: MemberProfileData["activity"] | undefined,
+  wirePosts?: MemberProfileData["boardPosts"],
 ): ProfileBoardPost[] {
+  if (wirePosts?.length) {
+    return wirePosts.map(p => ({
+      id: p.id,
+      board: p.board,
+      contentType: p.contentType || contentTypeForBoard(p.board),
+      color: p.color || BOARD_COLORS[p.board as keyof typeof BOARD_COLORS] || "var(--neon-cyan)",
+      where: p.where || "Portland",
+      text: p.text,
+      createdAt: p.createdAt ?? undefined,
+      likes: typeof p.likes === "number" ? p.likes : 0,
+      replies: typeof p.replies === "number" ? p.replies : 0,
+    }));
+  }
+
   if (!activity) return [];
   const posts: ProfileBoardPost[] = [];
 
@@ -75,30 +99,39 @@ export function boardPostsFromActivity(
     posts.push({
       id: g.id,
       board: "Gigs",
+      contentType: "GIG",
       color: BOARD_COLORS.Gigs,
       where: g.venueText || "Portland",
       text: g.description || g.title,
       createdAt: g.createdAt ?? undefined,
+      likes: g.likes ?? 0,
+      replies: g.replies ?? 0,
     });
   }
   for (const g of activity.gifting ?? []) {
     posts.push({
       id: g.id,
       board: "Gifting",
+      contentType: "GIFTING",
       color: BOARD_COLORS.Gifting,
       where: g.neighborhood || "Portland",
       text: g.description || g.title,
       createdAt: g.createdAt ?? undefined,
+      likes: g.likes ?? 0,
+      replies: g.replies ?? 0,
     });
   }
   for (const s of activity.spotted ?? []) {
     posts.push({
       id: s.id,
       board: "Spotted",
+      contentType: "SPOTTED",
       color: BOARD_COLORS.Spotted,
       where: s.venueHint || s.dayOfWeek || "Portland",
       text: s.body || s.title,
       createdAt: s.createdAt ?? undefined,
+      likes: s.likes ?? 0,
+      replies: s.replies ?? 0,
     });
   }
 
@@ -139,6 +172,7 @@ export function normalizePublicProfile(
     memberSince: api.memberSince,
     verifiedHost: api.verifiedHost,
     isPromoter,
+    isAdmin: !!api.isAdmin,
     roles: api.roles,
     accentColor: api.accentColor || "#FF00CC",
     profileBanner: resolveProfileBannerSrc(api.banner),
@@ -184,7 +218,7 @@ export function normalizePublicProfile(
         }
       : null,
     socialLinks: api.socialLinks,
-    boardPosts: boardPostsFromActivity(api.activity),
+    boardPosts: boardPostsFromActivity(api.activity, api.boardPosts),
     pup: api.pup,
     packmates: api.packmates?.map(p => ({
       id: p.id,

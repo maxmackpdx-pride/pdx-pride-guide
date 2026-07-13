@@ -126,12 +126,7 @@ export default function ProfileHero({
                   <span className="pp-hero__verified-label">Verified</span>
                 </span>
               )}
-              <RoleStickers
-                isPromoter={isPromoter}
-                isAdmin={data.isAdmin}
-                username={data.username}
-                roles={data.roles}
-              />
+              <RoleStickers isPromoter={isPromoter} isAdmin={data.isAdmin} />
             </div>
 
             <div className="pp-hero__subrow">

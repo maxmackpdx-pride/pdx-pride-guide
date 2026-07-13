@@ -148,6 +148,26 @@
   color: var(--neon-magenta);
 }
 
+.pp-updates__like-btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.pp-updates__like-btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.pp-updates__like-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
 .pp-updates__stat--replies {
   color: var(--text-lo, #888);
 }

@@ -2214,6 +2214,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(profile);
   });
 
+  // Toggle a like on board / hub content shown on public profile Updates.
+  // Types: GIG | GIFTING | SPOTTED | HUB
+  app.post("/api/content/:type/:id/like", requireAuth, (req: any, res) => {
+    const type = String(req.params.type || "").trim().toUpperCase();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: "Invalid id" });
+    const result = storage.toggleContentLike(type, id, req.session.userId!);
+    if (result.error) {
+      const status = result.error === "Not found" ? 404 : 400;
+      return res.status(status).json({ error: result.error });
+    }
+    res.json({ liked: result.liked, likes: result.likes });
+  });
+
   app.post("/api/users/:username/follow", requireAuth, (req, res) => {
     const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
     if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });

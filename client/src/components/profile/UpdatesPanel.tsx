@@ -1,4 +1,8 @@
+import { useState, type MouseEvent } from "react";
 import UserAvatar from "@/components/UserAvatar";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import type { ProfileBoardPost } from "./types";
 import "./UpdatesPanel.css";
 
@@ -10,10 +14,11 @@ export type UpdatesAuthor = {
   username: string;
 };
 
-/** Posts may carry optional engagement counts when the feed provides them. */
+/** Posts carry engagement counts from the public profile boardPosts API. */
 export type UpdatesPost = ProfileBoardPost & {
   likes?: number;
   replies?: number;
+  contentType?: string;
 };
 
 type Props = {
@@ -22,6 +27,8 @@ type Props = {
   onPostClick?: (post: UpdatesPost) => void;
   /** Override the right-side meta label. Defaults to POSTS BY {name}. */
   metaLabel?: string;
+  /** Called after a successful like toggle so the parent can refresh. */
+  onLikeChange?: (post: UpdatesPost, likes: number, liked: boolean) => void;
 };
 
 function updatesWhen(iso?: string): string {
@@ -43,11 +50,53 @@ function updatesWhen(iso?: string): string {
   return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" }).toUpperCase();
 }
 
-export default function UpdatesPanel({ posts, author, onPostClick, metaLabel }: Props) {
+function contentTypeForPost(post: UpdatesPost): string | null {
+  if (post.contentType) return String(post.contentType).toUpperCase();
+  const b = (post.board || "").toLowerCase();
+  if (b === "gigs") return "GIG";
+  if (b === "gifting") return "GIFTING";
+  if (b === "spotted") return "SPOTTED";
+  if (b === "updates" || b === "hub") return "HUB";
+  return null;
+}
+
+export default function UpdatesPanel({ posts, author, onPostClick, metaLabel, onLikeChange }: Props) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [localLikes, setLocalLikes] = useState<Record<string, number>>({});
+  const [pending, setPending] = useState<Record<string, boolean>>({});
+
   if (!posts.length) return null;
 
   const name = (author.displayName || author.username || "Member").trim();
   const rightMeta = metaLabel || `POSTS BY ${name.toUpperCase()}`;
+
+  const likeKey = (post: UpdatesPost) => `${contentTypeForPost(post) || post.board}-${post.id}`;
+
+  const handleLike = async (post: UpdatesPost, e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const type = contentTypeForPost(post);
+    if (!type) return;
+    if (!user) {
+      toast({ title: "Sign in to like posts", duration: 2200 });
+      return;
+    }
+    const key = likeKey(post);
+    if (pending[key]) return;
+    setPending(p => ({ ...p, [key]: true }));
+    try {
+      const res = await apiRequest("POST", `/api/content/${encodeURIComponent(type)}/${post.id}/like`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const body = (await res.json()) as { liked: boolean; likes: number };
+      setLocalLikes(prev => ({ ...prev, [key]: body.likes }));
+      onLikeChange?.(post, body.likes, body.liked);
+    } catch (err) {
+      toast({ title: parseApiError(err, "Could not update like"), variant: "destructive" });
+    } finally {
+      setPending(p => ({ ...p, [key]: false }));
+    }
+  };
 
   return (
     <section className="pp-updates" aria-label="Updates">
@@ -62,9 +111,10 @@ export default function UpdatesPanel({ posts, author, onPostClick, metaLabel }: 
       <div className="pp-updates__rail" role="list">
         {posts.map(post => {
           const when = updatesWhen(post.createdAt);
-          const showLikes = typeof post.likes === "number";
-          const showReplies = typeof post.replies === "number";
-          const showFooter = showLikes || showReplies;
+          const key = likeKey(post);
+          const likes = localLikes[key] ?? (typeof post.likes === "number" ? post.likes : 0);
+          const replies = typeof post.replies === "number" ? post.replies : 0;
+          const canLike = !!contentTypeForPost(post);
           const clickable = typeof onPostClick === "function";
 
           const body = (
@@ -84,23 +134,29 @@ export default function UpdatesPanel({ posts, author, onPostClick, metaLabel }: 
                 </div>
               </div>
               <p className="pp-updates__text">{post.text}</p>
-              {showFooter ? (
-                <div className="pp-updates__footer">
-                  {showLikes ? (
-                    <span className="pp-updates__stat pp-updates__stat--likes">♥ {post.likes}</span>
-                  ) : null}
-                  {showReplies ? (
-                    <span className="pp-updates__stat pp-updates__stat--replies">💬 {post.replies}</span>
-                  ) : null}
-                </div>
-              ) : null}
+              <div className="pp-updates__footer">
+                {canLike ? (
+                  <button
+                    type="button"
+                    className="pp-updates__stat pp-updates__stat--likes pp-updates__like-btn"
+                    onClick={e => handleLike(post, e)}
+                    disabled={!!pending[key]}
+                    aria-label={`Like this post (${likes})`}
+                  >
+                    ♥ {likes}
+                  </button>
+                ) : (
+                  <span className="pp-updates__stat pp-updates__stat--likes">♥ {likes}</span>
+                )}
+                <span className="pp-updates__stat pp-updates__stat--replies">💬 {replies}</span>
+              </div>
             </>
           );
 
           if (clickable) {
             return (
               <button
-                key={`${post.board}-${post.id}`}
+                key={key}
                 type="button"
                 role="listitem"
                 className="pp-updates__card pp-updates__card--btn"
@@ -112,7 +168,7 @@ export default function UpdatesPanel({ posts, author, onPostClick, metaLabel }: 
           }
 
           return (
-            <article key={`${post.board}-${post.id}`} role="listitem" className="pp-updates__card">
+            <article key={key} role="listitem" className="pp-updates__card">
               {body}
             </article>
           );

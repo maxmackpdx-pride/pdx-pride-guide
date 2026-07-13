@@ -25,6 +25,10 @@ export type ProfileBoardPost = {
   where: string;
   text: string;
   createdAt?: string;
+  /** Like target type for POST /api/content/:type/:id/like */
+  contentType?: "GIG" | "GIFTING" | "SPOTTED" | "HUB" | string;
+  likes?: number;
+  replies?: number;
 };
 
 export type ProfileMediaItem = {
