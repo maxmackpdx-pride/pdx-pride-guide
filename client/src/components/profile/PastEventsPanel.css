@@ -1,0 +1,120 @@
+/* PastEventsPanel: attended events grid (year + venue + title) */
+
+.pp-past-events {
+  width: 100%;
+  min-width: 0;
+}
+
+.pp-past-events__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.pp-past-events__tile {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #24242c;
+  border-top: 3px solid var(--pp-day, #fff);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--pp-day, #fff) 13%, transparent),
+    #0b0b0b 72%
+  );
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  text-align: left;
+  color: inherit;
+  min-width: 0;
+}
+
+.pp-past-events__tile--btn {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  margin: 0;
+  width: 100%;
+}
+
+.pp-past-events__tile--btn:focus-visible {
+  outline: 2px solid var(--pp-day, var(--neon-cyan));
+  outline-offset: 2px;
+}
+
+.pp-past-events__year {
+  align-self: flex-start;
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--pp-day, #fff);
+  padding: 2px 4px 1px;
+  border-radius: 3px;
+  line-height: 1.2;
+}
+
+.pp-past-events__year--empty {
+  visibility: hidden;
+  min-height: 12px;
+}
+
+.pp-past-events__body {
+  min-width: 0;
+}
+
+.pp-past-events__title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.9;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pp-past-events__venue {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pp-day, #fff);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 900px) {
+  .pp-past-events__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pp-past-events__tile {
+    aspect-ratio: 4 / 5;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .pp-past-events__year {
+    font-size: 8px;
+    padding: 2px 5px 1px;
+  }
+
+  .pp-past-events__title {
+    font-size: 16px;
+  }
+
+  .pp-past-events__venue {
+    font-size: 8px;
+    margin-top: 5px;
+  }
+}

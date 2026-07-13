@@ -14,6 +14,8 @@ export type ProfileEvent = {
   eventTypes?: string[];
   goingCount?: number;
   isPast?: boolean;
+  /** Optional featured flag when the API starts returning one. */
+  featured?: boolean;
 };
 
 export type ProfileBoardPost = {
@@ -99,6 +101,11 @@ export type PublicProfileData = {
   memberSince?: string | null;
   verifiedHost?: boolean;
   isPromoter?: boolean;
+  /**
+   * Site admin on the public profile. May be absent until the API exposes it;
+   * RoleStickers also checks username allowlist (tucker_pdmax) and roles.
+   */
+  isAdmin?: boolean;
   roles?: string[];
   accentColor?: string;
   profileBanner?: string | null;

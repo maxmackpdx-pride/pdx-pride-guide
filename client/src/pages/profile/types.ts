@@ -4,11 +4,13 @@ export type ProfileEvent = {
   id: number;
   title: string;
   venueName?: string | null;
+  neighborhood?: string | null;
   dayOfWeek?: string | null;
   dateStart?: string | null;
   dateEnd?: string | null;
   admission?: string | null;
   ticketUrl?: string | null;
+  posterImageUrl?: string | null;
 };
 
 export type ProfileGig = {

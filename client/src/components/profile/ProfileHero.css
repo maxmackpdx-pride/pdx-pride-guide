@@ -1,0 +1,377 @@
+/* Reimagined profile hero: banner + overlapping glow avatar + identity row.
+   Self-contained layout styles; pairs with design tokens from index.css / ds tokens. */
+
+.pp-hero--reimagined {
+  position: relative;
+  min-height: 0;
+  overflow: visible;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+@keyframes pdxHeroIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.pp-hero--reimagined .pp-hero__banner,
+.pp-hero--reimagined .pp-hero__banner-fallback {
+  position: relative;
+  inset: auto;
+  display: block;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.pp-hero--reimagined .pp-hero__banner-dots {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.5px);
+  background-size: 15px 15px;
+}
+
+.pp-hero--reimagined .pp-hero__banner-fallback {
+  background:
+    radial-gradient(130% 120% at 18% -12%, color-mix(in srgb, var(--profile-acc, var(--neon-magenta)) 60%, transparent), transparent 58%),
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--profile-acc, var(--neon-magenta)) 26%, transparent), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--profile-acc, var(--neon-magenta)) 20%, #0b0b0b), #060606 80%);
+}
+
+.pp-hero--reimagined .pp-hero__rainbow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: var(--rainbow-bar, linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange)));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 6s linear infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes pdxSeamFlow {
+  to { background-position: 200% 0; }
+}
+
+.pp-hero--reimagined .pp-hero__avatar-link {
+  display: inline-flex;
+  border-radius: 50%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.pp-hero--reimagined .pp-hero__avatar-link:hover {
+  transform: scale(1.02);
+  opacity: 0.94;
+}
+
+.pp-hero--reimagined .pp-hero__avatar-link:focus-visible {
+  outline: 2px solid var(--profile-acc, var(--neon-cyan));
+  outline-offset: 4px;
+}
+
+.pp-hero--reimagined .pp-hero__picker-wrap {
+  position: relative;
+}
+
+.pp-hero--reimagined .pp-hero__chip--pronouns {
+  color: var(--neon-cyan);
+  border: 1px solid var(--neon-cyan);
+  border-radius: 999px;
+  padding: 2px 9px 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pp-hero--reimagined .pp-hero__scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 120px;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0.12), rgba(10, 10, 10, 0.92));
+  pointer-events: none;
+}
+
+.pp-hero--reimagined .pp-hero__rainbow {
+  z-index: 2;
+}
+
+.pp-hero--reimagined .pp-hero__content {
+  margin-top: -44px;
+  padding: 0 clamp(16px, 3vw, 30px) 18px;
+  position: relative;
+  z-index: 3;
+  gap: 0;
+}
+
+.pp-hero--reimagined .pp-hero__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.pp-hero--reimagined .pp-hero__avatar {
+  flex: none;
+  /* Room for flag glow outside the photo circle */
+  padding: 10px;
+  margin: -10px;
+}
+
+.pp-hero--reimagined .pp-hero__meta {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 2px;
+}
+
+.pp-hero__name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.pp-hero--reimagined .pp-hero__name {
+  font-size: clamp(1.65rem, 5.5vw, 2.5rem);
+  margin: 0;
+  line-height: 0.92;
+}
+
+/* Compact verified chip (cyan fill, black text) */
+.pp-hero__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--neon-cyan);
+  padding: 3px 7px 2px;
+  border-radius: 4px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.pp-hero__verified-label {
+  display: none;
+}
+
+.pp-hero__subrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+
+.pp-hero--reimagined .pp-hero__handle {
+  font-size: 0.84rem;
+  color: var(--neon-cyan);
+}
+
+.pp-hero--reimagined .pp-hero__chip--pronouns {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.pp-hero__meta-line {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+
+.pp-hero__bio {
+  margin: 12px 0 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-body, var(--text-mid));
+  max-width: 42rem;
+}
+
+.pp-hero--reimagined .pp-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.pp-hero__actions--desktop {
+  display: none;
+  flex: none;
+  padding-bottom: 2px;
+}
+
+.pp-hero__actions--mobile {
+  margin-top: 14px;
+}
+
+.pp-hero__actions--mobile .pp-btn--follow,
+.pp-hero__actions--mobile .pp-btn--message {
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Local button primitives so this hero works without dumping rules into index.css.
+   Parent may also load pages/MemberProfile.css .pp-btn; these are safe overrides. */
+.pp-hero--reimagined .pp-btn,
+.pp-hero--reimagined a.pp-btn {
+  appearance: none;
+  cursor: pointer;
+  display: inline-flex;
+  text-decoration: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.9rem;
+  padding: 10px 18px 9px;
+  border-radius: 2px;
+  border: 2px solid var(--profile-acc, var(--neon-magenta));
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--profile-acc-t, var(--profile-acc, var(--neon-magenta)));
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+
+.pp-hero--reimagined .pp-btn--follow:not(.is-on) {
+  background: var(--neon-yellow, var(--lime, #ccff00));
+  border-color: var(--neon-yellow, var(--lime, #ccff00));
+  color: #000;
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--neon-magenta) 55%, transparent);
+}
+
+.pp-hero--reimagined .pp-btn--follow:not(.is-on):hover {
+  filter: brightness(1.05);
+}
+
+.pp-hero--reimagined .pp-btn--follow.is-on {
+  background: var(--profile-acc, var(--neon-magenta));
+  color: #000;
+  box-shadow: 4px 4px 0 color-mix(in srgb, var(--profile-acc, var(--neon-magenta)) 42%, transparent);
+}
+
+.pp-hero--reimagined .pp-btn--message {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  background: transparent;
+}
+
+.pp-hero--reimagined .pp-btn--message:hover {
+  background: color-mix(in srgb, var(--neon-cyan) 12%, transparent);
+}
+
+.pp-hero--reimagined .pp-btn--outline {
+  border-color: var(--border-strong, #333);
+  color: var(--text-hi, #fff);
+}
+
+.pp-hero--reimagined .pp-btn--accent-swatch {
+  min-width: 44px;
+  min-height: 44px;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 999px;
+  border-color: var(--profile-acc, var(--neon-magenta));
+  color: var(--profile-acc-t, var(--profile-acc, var(--neon-magenta)));
+}
+
+@media (min-width: 900px) {
+  .pp-hero--reimagined .pp-hero__banner,
+  .pp-hero--reimagined .pp-hero__banner-fallback,
+  .pp-hero--reimagined .pp-hero__scrim {
+    height: 210px;
+  }
+
+  .pp-hero--reimagined .pp-hero__content {
+    margin-top: -52px;
+    padding: 0 clamp(24px, 3.4vw, 30px) 20px;
+  }
+
+  .pp-hero--reimagined .pp-hero__identity {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 22px;
+    flex-wrap: nowrap;
+  }
+
+  .pp-hero--reimagined .pp-hero__avatar .user-avatar {
+    --avatar-size: 128px !important;
+  }
+
+  .pp-hero--reimagined .pp-hero__name {
+    font-size: clamp(2.2rem, 3.2vw, 2.75rem);
+  }
+
+  .pp-hero__verified-label {
+    display: inline;
+  }
+
+  .pp-hero__name-row {
+    margin-top: 0;
+    gap: 10px;
+  }
+
+  .pp-hero__subrow {
+    margin-top: 8px;
+    gap: 12px;
+  }
+
+  .pp-hero--reimagined .pp-hero__handle {
+    font-size: 0.95rem;
+  }
+
+  .pp-hero__meta-line {
+    font-size: 0.62rem;
+  }
+
+  .pp-hero__bio {
+    margin-top: 14px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .pp-hero__actions--desktop {
+    display: flex;
+  }
+
+  .pp-hero__actions--mobile {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-hero--reimagined {
+    animation: none;
+  }
+
+  .pp-hero--reimagined .pp-hero__rainbow {
+    animation: none;
+  }
+}

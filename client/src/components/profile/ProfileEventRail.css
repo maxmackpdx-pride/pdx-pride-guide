@@ -1,0 +1,119 @@
+/* Shared Going rail primitives (day-token borders, condensed titles) */
+
+.pp-event-rail__head {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  margin-bottom: 11px;
+}
+
+.pp-event-rail__head--yellow {
+  color: var(--neon-yellow);
+}
+
+.pp-event-rail__head--muted {
+  color: var(--text-lo, #888);
+}
+
+.pp-event-rail__track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.pp-event-rail__card {
+  width: 150px;
+  flex: none;
+  scroll-snap-align: start;
+  background: #0c0c0f;
+  border: 1px solid #1c1c22;
+  border-top: 3px solid var(--pp-day, #fff);
+  border-radius: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  text-align: left;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  min-height: 108px;
+}
+
+.pp-event-rail__card--btn {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  margin: 0;
+}
+
+.pp-event-rail__card--btn:focus-visible {
+  outline: 2px solid var(--pp-day, var(--neon-cyan));
+  outline-offset: 2px;
+}
+
+.pp-event-rail__when {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pp-day, #fff);
+}
+
+.pp-event-rail__title {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-top: 5px;
+  line-height: 0.95;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pp-event-rail__venue {
+  font-family: var(--font-body), Inter, sans-serif;
+  color: var(--text-lo, #888);
+  font-size: 11px;
+  margin-top: 5px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Desktop: Going becomes a stacked list with left day seam (matches design) */
+@media (min-width: 900px) {
+  .pp-event-rail--going .pp-event-rail__track {
+    display: flex;
+    flex-direction: column;
+    overflow-x: visible;
+    gap: 9px;
+    padding-bottom: 0;
+    scroll-snap-type: none;
+  }
+
+  .pp-event-rail--going .pp-event-rail__card {
+    width: 100%;
+    min-height: 0;
+    border-top: 1px solid #1c1c22;
+    border-left: 3px solid var(--pp-day, #fff);
+    border-radius: 8px;
+    padding: 13px 15px;
+  }
+
+  .pp-event-rail--going .pp-event-rail__title {
+    font-size: 19px;
+  }
+
+  .pp-event-rail--going .pp-event-rail__venue {
+    font-size: 12px;
+    margin-top: 3px;
+  }
+}

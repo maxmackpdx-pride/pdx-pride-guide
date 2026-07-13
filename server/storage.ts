@@ -5805,7 +5805,8 @@ export const storage: IStorage = {
 
     const hostedEventsAll = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission, e.ticket_url AS ticketUrl
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission, e.ticket_url AS ticketUrl,
+             e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood
       FROM event_hosts eh
       JOIN events e ON e.id = eh.event_id
       WHERE eh.user_id = ? AND e.status = 'LIVE'
@@ -5856,7 +5857,9 @@ export const storage: IStorage = {
 
     const attendedAll = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
+             e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood,
+             e.ticket_url AS ticketUrl
       FROM attendances a
       JOIN events e ON e.id = a.event_id
       WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
