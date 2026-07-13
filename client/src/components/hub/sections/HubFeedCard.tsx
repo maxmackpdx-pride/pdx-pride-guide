@@ -4,9 +4,12 @@ import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
+import EventModal from "@/components/EventModal";
 import { timeAgo } from "@/lib/boardFeed";
+import { apiRequest } from "@/lib/queryClient";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";
+import type { Event } from "@shared/schema";
 
 type Props = {
   item: HubFeedItem;
@@ -43,25 +46,39 @@ function eventRowsForItem(item: HubFeedItem): HubFeedEventEmbed[] {
 function EventFeedRow({
   event,
   showPoster,
+  onOpen,
+  loading,
 }: {
   event: HubFeedEventEmbed;
   showPoster: boolean;
+  onOpen: (eventId: number) => void;
+  loading?: boolean;
 }) {
-  const href = eventPath(event.id, event.title, event.dayOfWeek);
   return (
-    <Link
-      href={href}
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onOpen(event.id);
+      }}
+      disabled={loading}
+      aria-label={`Open ${event.title}`}
       style={{
         display: "flex",
         alignItems: "center",
         gap: 11,
         marginTop: 12,
+        width: "100%",
         padding: "12px 14px",
         background: "var(--ink-900)",
         border: "1px solid var(--panel-border-2)",
         borderRadius: 11,
         textDecoration: "none",
         color: "inherit",
+        textAlign: "left",
+        cursor: loading ? "wait" : "pointer",
+        opacity: loading ? 0.75 : 1,
       }}
     >
       {showPoster && event.poster ? (
@@ -94,9 +111,10 @@ function EventFeedRow({
           {event.goingCount != null && event.goingCount > 0
             ? ` · ${event.goingCount} going`
             : ""}
+          {loading ? " · Opening…" : ""}
         </div>
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -104,9 +122,31 @@ export default function HubFeedCard({ item }: Props) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [spottedOpen, setSpottedOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
+  const [modalEvent, setModalEvent] = useState<Event | null>(null);
+  const [openingEventId, setOpeningEventId] = useState<number | null>(null);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
   const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
+
+  /** Open the real event modal in place — stay on the feed (no navigation). */
+  const openEventInPlace = async (eventId: number) => {
+    if (openingEventId != null) return;
+    setOpeningEventId(eventId);
+    try {
+      const res = await apiRequest("GET", `/api/events/${eventId}`);
+      if (!res.ok) throw new Error("Event not found");
+      const full = (await res.json()) as Event;
+      setModalEvent(full);
+    } catch {
+      // Fallback: deep-link only if the modal payload can't load
+      const embed = eventRowsForItem(item).find((e) => e.id === eventId);
+      if (embed) {
+        window.location.assign(eventPath(embed.id, embed.title, embed.dayOfWeek));
+      }
+    } finally {
+      setOpeningEventId(null);
+    }
+  };
 
   // Board posts glow in their category color: gigs purple, gifts acid-yellow,
   // missed connections magenta.
@@ -127,7 +167,13 @@ export default function HubFeedCard({ item }: Props) {
   const showPosterOnRows = bundledEvents.length > 1;
   const eventBlock = bundledEvents.length > 0
     ? bundledEvents.map((event) => (
-      <EventFeedRow key={event.id} event={event} showPoster={showPosterOnRows} />
+      <EventFeedRow
+        key={event.id}
+        event={event}
+        showPoster={showPosterOnRows}
+        onOpen={openEventInPlace}
+        loading={openingEventId === event.id}
+      />
     ))
     : null;
 
@@ -350,6 +396,13 @@ export default function HubFeedCard({ item }: Props) {
       </div>
       )}
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
+      {modalEvent && (
+        <EventModal
+          event={modalEvent}
+          onClose={() => setModalEvent(null)}
+          onEventUpdated={(ev) => setModalEvent(ev)}
+        />
+      )}
     </div>
   );
 
@@ -391,7 +444,9 @@ export default function HubFeedCard({ item }: Props) {
     );
   }
 
-  if (href && !item.event && item.ctaAction !== "feedback") {
+  // Don't wrap the whole card in a link when it embeds event rows — those open
+  // EventModal in place. Other non-event deep links still navigate.
+  if (href && !item.event && !item.events?.length && item.ctaAction !== "feedback") {
     return (
       <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
         {body}
