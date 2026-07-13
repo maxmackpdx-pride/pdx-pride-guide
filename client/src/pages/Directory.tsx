@@ -53,6 +53,8 @@ export type Business = {
   lat: number | null;
   lng: number | null;
   isNew: boolean;
+  /** Verified doors-open day (YYYY-MM-DD). Only this drives Grand Opening UI. */
+  grandOpeningDate?: string | null;
   createdAt?: string;
   ownerId?: number | null;
   isOwner?: boolean;
@@ -163,9 +165,9 @@ export default function Directory() {
         return true;
       })
       .sort((a, b) => {
-        // Active grand openings first (isNew within 60 days), then A–Z by name.
-        const aGo = isGrandOpeningActive(a.isNew, a.createdAt) ? 1 : 0;
-        const bGo = isGrandOpeningActive(b.isNew, b.createdAt) ? 1 : 0;
+        // Verified grand openings first (grandOpeningDate within 60 days), then A–Z.
+        const aGo = isGrandOpeningActive(a.grandOpeningDate) ? 1 : 0;
+        const bGo = isGrandOpeningActive(b.grandOpeningDate) ? 1 : 0;
         const newDiff = bGo - aGo;
         if (newDiff !== 0) return newDiff;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
@@ -180,9 +182,9 @@ export default function Directory() {
   const heroStats = useMemo(() => {
     const thisMonth = pacificTodayDate().slice(0, 7);
     const grandOpeningsThisMonth = businesses.filter(b => {
-      if (!isGrandOpeningActive(b.isNew, b.createdAt)) return false;
-      const createdMonth = b.createdAt ? pacificCalendarDate(b.createdAt)?.slice(0, 7) : null;
-      return !createdMonth || createdMonth === thisMonth;
+      if (!isGrandOpeningActive(b.grandOpeningDate)) return false;
+      const openMonth = b.grandOpeningDate?.slice(0, 7);
+      return !openMonth || openMonth === thisMonth;
     }).length;
     const hostingPrideEvents = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
     return [
@@ -479,8 +481,8 @@ function DirectoryCard({
   const upcomingEvents = biz.upcomingEvents ?? [];
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   const isNonprofit = biz.type === "nonprofit";
-  const grandOpening = isGrandOpeningActive(biz.isNew, biz.createdAt);
-  const grandOpeningDate = grandOpening ? formatGrandOpeningDate(biz.createdAt) : null;
+  const grandOpening = isGrandOpeningActive(biz.grandOpeningDate);
+  const grandOpeningDateLabel = grandOpening ? formatGrandOpeningDate(biz.grandOpeningDate) : null;
   const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
   const fallbackLogoUrl = directoryFallbackLogo(biz.type);
   return (
@@ -503,7 +505,7 @@ function DirectoryCard({
       website={biz.website || undefined}
       instagram={biz.instagram || undefined}
       grandOpening={grandOpening}
-      grandOpeningDate={grandOpeningDate}
+      grandOpeningDate={grandOpeningDateLabel}
       promoters={biz.promoters}
       businessId={biz.id}
       isFollowing={Boolean(biz.isFollowing)}

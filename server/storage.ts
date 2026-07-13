@@ -319,8 +319,9 @@ sqlite.exec(`
   );
 `);
 
-// Add is_new, hours, phone, owner_id columns to businesses if not present
+// Add is_new, hours, phone, owner_id, grand_opening_date columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN grand_opening_date TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN hours TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN phone TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN owner_id INTEGER`); } catch {}
@@ -3272,7 +3273,8 @@ function runBootMigrationsOnce() {
     db.insert(businesses).values({
       name: "Camp Bar PDX",
       type: "bar",
-      description: "Modern inclusive gay bar in downtown Portland's Gayborhood, taking over the historic former Scandals space on Harvey Milk Street. Grand opening June 2026.",
+      description:
+        "Modern inclusive gay bar in downtown Portland's Gayborhood, taking over the historic former Scandals space on Harvey Milk Street. Grand opening July 11, 2026.",
       address: "1125 SW Harvey Milk St",
       neighborhood: "Downtown",
       website: "https://campbarpdx.com",
@@ -3280,6 +3282,7 @@ function runBootMigrationsOnce() {
       queerOwned: true,
       queerFriendly: true,
       isNew: true,
+      grandOpeningDate: "2026-07-11",
       active: true,
       createdAt: now,
     } as any).run();
@@ -3298,7 +3301,7 @@ function runBootMigrationsOnce() {
       instagram: null,
       queerOwned: false,
       queerFriendly: true,
-      isNew: true,
+      isNew: false,
       active: true,
       createdAt: now,
     } as any).run();
@@ -3410,7 +3413,7 @@ function runBootMigrationsOnce() {
         lng: -122.6484,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Prism Health",
@@ -3426,7 +3429,7 @@ function runBootMigrationsOnce() {
         lng: -122.6430,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "The Automatic Bar",
@@ -3441,7 +3444,7 @@ function runBootMigrationsOnce() {
         lng: -122.6265,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Montavilla Station",
@@ -3457,7 +3460,7 @@ function runBootMigrationsOnce() {
         lng: -122.5820,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Covert Café",
@@ -3473,7 +3476,7 @@ function runBootMigrationsOnce() {
         lng: -122.5785,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Hunny Beez",
@@ -3490,7 +3493,7 @@ function runBootMigrationsOnce() {
         lng: -122.6845,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Q Restaurant & Bar",
@@ -3507,7 +3510,7 @@ function runBootMigrationsOnce() {
         lng: -122.6765,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "GiGi's Cafe",
@@ -3524,7 +3527,7 @@ function runBootMigrationsOnce() {
         lng: -122.7035,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Backstory Books & Yarn",
@@ -3540,7 +3543,7 @@ function runBootMigrationsOnce() {
         lng: -122.6325,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Bridge City Mentors",
@@ -3556,7 +3559,7 @@ function runBootMigrationsOnce() {
         lng: -122.6385,
         queerOwned: true,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Rebel Heart Therapy",
@@ -3571,7 +3574,7 @@ function runBootMigrationsOnce() {
         lng: -122.6615,
         queerOwned: true,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Full Spectrum Therapy",
@@ -3587,7 +3590,7 @@ function runBootMigrationsOnce() {
         lng: -122.6535,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "Sprout Therapy PDX",
@@ -3602,7 +3605,7 @@ function runBootMigrationsOnce() {
         lng: -122.6015,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
       {
         name: "The Center for Couples & Sex Therapy",
@@ -3618,7 +3621,7 @@ function runBootMigrationsOnce() {
         lng: -122.6355,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
       },
     ];
     for (const entry of wave) {
@@ -3647,7 +3650,7 @@ function runBootMigrationsOnce() {
         lng: null,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
         active: true,
         createdAt: now,
       } as any).run();
@@ -3661,18 +3664,42 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`UPDATE businesses SET type = 'realestate' WHERE lower(name) = 'sold by scott'`).run();
     recordBootMigration("seed_businesses_directory_v11_type_accents");
   }
-  // Grand Opening tags expire after 60 days from created_at (UI also enforces this).
+  // Grand openings: ONLY verified doors-open dates — never "just added to directory".
+  // Clear bad is_new flags from seed/add waves (Hawks, underU, Meet Rack, therapy, etc.).
+  if (!hasBootMigration("grand_opening_verified_dates_v1")) {
+    try {
+      sqlite.prepare(`UPDATE businesses SET is_new = 0, grand_opening_date = NULL`).run();
+      // Camp Bar PDX — verified grand opening Sat Jul 11, 2026 (KOIN / OregonLive / IG).
+      sqlite
+        .prepare(
+          `UPDATE businesses
+           SET is_new = 1, grand_opening_date = '2026-07-11',
+               description = 'Modern inclusive gay bar in downtown Portland''s Gayborhood, taking over the historic former Scandals space on Harvey Milk Street. Grand opening July 11, 2026.'
+           WHERE lower(name) IN ('camp bar pdx', 'camp bar', 'camp')`,
+        )
+        .run();
+      recordBootMigration("grand_opening_verified_dates_v1");
+    } catch (e) {
+      console.warn("[businesses] grand opening verified dates migration failed:", e);
+    }
+  }
+  // Expire is_new when verified opening day is older than 60 days.
   try {
-    const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    sqlite
-      .prepare(
-        `UPDATE businesses SET is_new = 0
-         WHERE is_new = 1
-           AND created_at IS NOT NULL
-           AND created_at != ''
-           AND created_at < ?`,
-      )
-      .run(cutoff);
+    const rows = sqlite
+      .prepare(`SELECT id, grand_opening_date FROM businesses WHERE is_new = 1 AND grand_opening_date IS NOT NULL`)
+      .all() as Array<{ id: number; grand_opening_date: string }>;
+    const now = Date.now();
+    const windowMs = 60 * 24 * 60 * 60 * 1000;
+    for (const row of rows) {
+      const iso = /^\d{4}-\d{2}-\d{2}$/.test(row.grand_opening_date)
+        ? `${row.grand_opening_date}T12:00:00-07:00`
+        : row.grand_opening_date;
+      const t = Date.parse(iso);
+      if (!Number.isFinite(t)) continue;
+      if (now - t >= windowMs) {
+        sqlite.prepare(`UPDATE businesses SET is_new = 0 WHERE id = ?`).run(row.id);
+      }
+    }
   } catch (e) {
     console.warn("[businesses] grand opening expiry cleanup failed:", e);
   }
@@ -3730,7 +3757,7 @@ function runBootMigrationsOnce() {
       queerOwned: true,
       queerFriendly: true,
       active: true,
-      isNew: true,
+      isNew: false,
       createdAt: now,
     } as any).run();
     recordBootMigration("seed_underu4men_v10");
@@ -3752,7 +3779,7 @@ function runBootMigrationsOnce() {
         instagram: null,
         queerOwned: false,
         queerFriendly: true,
-        isNew: true,
+        isNew: false,
         active: true,
         createdAt: now,
       } as any).run();
@@ -4840,7 +4867,7 @@ function runBootMigrationsOnce() {
           imageUrl: logo,
           lat: 45.520175147981,
           lng: -122.562357520572,
-          isNew: true,
+          isNew: false,
           active: true,
           hours: "Mon–Thu 10am–2am, Fri 10am–6am, Sat 10am–6am, Sun 10am–4am",
           phone: "(503) 946-8659",
@@ -6380,6 +6407,7 @@ export const storage: IStorage = {
         contentType: "GIG" as const,
         color: "var(--board-gigs)",
         where: g.venueText || "Portland",
+        title: g.title,
         text: g.description || g.title,
         createdAt: g.createdAt ?? null,
         likes: g.likes,
@@ -6391,6 +6419,7 @@ export const storage: IStorage = {
         contentType: "GIFTING" as const,
         color: "var(--board-gifting)",
         where: g.neighborhood || "Portland",
+        title: g.title,
         text: g.description || g.title,
         createdAt: g.createdAt ?? null,
         likes: g.likes,
@@ -6489,6 +6518,7 @@ export const storage: IStorage = {
       },
       isOwner,
       isAdmin: storage.userIsSiteAdmin(user),
+      isSiteOwner: storage.isPrimarySiteOwner(user),
       viewerIsAdmin: !!viewerIsAdmin && !isOwner,
       isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
       activity,
@@ -9493,7 +9523,7 @@ export const storage: IStorage = {
       queerOwned: false,
       queerFriendly: true,
       active: true,
-      isNew: true,
+      isNew: false,
       ownerId: sub.userId,
       createdAt: new Date().toISOString(),
     }).returning().get();

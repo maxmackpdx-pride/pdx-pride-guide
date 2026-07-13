@@ -15,6 +15,7 @@ type Business = {
   hours?: string | null;
   phone?: string | null;
   isNew?: boolean;
+  grandOpeningDate?: string | null;
   createdAt?: string;
   lat: number | null;
   lng: number | null;
@@ -96,8 +97,8 @@ function buildPin(color: string) {
 function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ");
   const categoryLabel = TYPE_LABELS[biz.type] || biz.type;
-  const grandOpening = isGrandOpeningActive(biz.isNew, biz.createdAt);
-  const grandDate = grandOpening ? formatGrandOpeningDate(biz.createdAt) : null;
+  const grandOpening = isGrandOpeningActive(biz.grandOpeningDate);
+  const grandDate = grandOpening ? formatGrandOpeningDate(biz.grandOpeningDate) : null;
 
   return (
     <div

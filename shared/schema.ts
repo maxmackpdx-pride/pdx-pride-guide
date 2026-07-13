@@ -120,7 +120,10 @@ export const businesses = sqliteTable("businesses", {
   lat: real("lat"),
   lng: real("lng"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
+  /** Legacy flag; do not use alone for UI. Prefer grandOpeningDate. */
   isNew: integer("is_new", { mode: "boolean" }).notNull().default(false),
+  /** Verified doors-open day (YYYY-MM-DD). Required for Grand Opening chrome. */
+  grandOpeningDate: text("grand_opening_date"),
   hours: text("hours"),
   phone: text("phone"),
   ownerId: integer("owner_id"),

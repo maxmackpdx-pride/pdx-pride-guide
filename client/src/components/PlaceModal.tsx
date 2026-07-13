@@ -496,7 +496,7 @@ export default function PlaceModal({
 
           <div style={{ padding: "22px 24px 26px" }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
-            {isGrandOpeningActive(place.isNew, place.createdAt) && (
+            {isGrandOpeningActive(place.grandOpeningDate) && (
               <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
                 Grand Opening
               </Badge>
@@ -519,12 +519,12 @@ export default function PlaceModal({
               fontSize: "1.9rem",
               lineHeight: 1.02,
               color: "var(--text-hi)",
-              margin: isGrandOpeningActive(place.isNew, place.createdAt) ? "0 0 4px" : "0 0 14px",
+              margin: isGrandOpeningActive(place.grandOpeningDate) ? "0 0 4px" : "0 0 14px",
             }}
           >
             {place.name}
           </h2>
-          {isGrandOpeningActive(place.isNew, place.createdAt) && formatGrandOpeningDate(place.createdAt) && (
+          {isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) && (
             <div
               style={{
                 fontFamily: "var(--font-display)",
@@ -538,7 +538,7 @@ export default function PlaceModal({
                 margin: "0 0 14px",
               }}
             >
-              {formatGrandOpeningDate(place.createdAt)}
+              {formatGrandOpeningDate(place.grandOpeningDate)}
             </div>
           )}
 
