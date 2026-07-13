@@ -305,7 +305,7 @@ export default function About() {
                 <div>
                   <div className="about-v2-project__meta">Yes Coach · Stank</div>
                   <h3 className="about-v2-project__title">Stank: Yes Coach!</h3>
-                  <p className="about-v2-project__desc">Hosted by Tucker Max · Sat, Sanctuary Club · Pride Week 2026</p>
+                  <p className="about-v2-project__desc">Hosted by Tucker Max and Spencer Stanks · Sat, Sanctuary Club · Pride Week 2026</p>
                 </div>
                 <span className="about-v2-project__go">See event →</span>
               </Link>

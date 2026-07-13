@@ -1208,7 +1208,7 @@ function seedData() {
     },
     {
       title: "Stank Yes Coach — PDX PRIDE",
-      description: "Sports-themed party with DJs JUMPR, Bro Hoe, Lake Everett, Spencer Adam, Tucker Max. Leather community sponsors.",
+      description: "Sports-themed party with DJs JUMPR, Bro Hoe, Lake Everett, Spencer Stanks, Tucker Max. Leather community sponsors. Hosted by Tucker Max and Spencer Stanks.",
       venueName: "Sanctuary Club",
       address: "33 NW 9th Ave, Portland, OR 97209",
       neighborhood: "Pearl District",
@@ -2170,7 +2170,7 @@ function applyVerifiedEventOverrides() {
       AND date_start = '2026-07-18T21:00:00'
   `).run();
   runTitle("Stank Yes Coach — PDX PRIDE", {
-    description: "Yes Coach / Stank Pride party at Sanctuary Club. DJs: JUMPR, Bro Hoe, Lake Everett, Spencer Adam, and Tucker Max.",
+    description: "Yes Coach / Stank Pride party at Sanctuary Club. Hosted by Tucker Max and Spencer Stanks. DJs: JUMPR, Bro Hoe, Lake Everett, Spencer Stanks, and Tucker Max.",
   });
   runTitle("Gay Witch Appreciation Day + Pride at Seagrape", {
     description: "All-ages witch-themed Pride market and apothecary event at Seagrape, 11am-5pm. All are welcome.",
