@@ -18,21 +18,9 @@ const STANK_EVENT_ID = 13;
 const STANK_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
 const STANK_EVENT_HREF = eventPath(STANK_EVENT_ID, STANK_EVENT_TITLE, "SAT");
 
-const LIVE_NOW = [
-  "RSVPs, once you are logged in",
-  "Missed Connections, gigs, gifting, and talent tags",
-  "New events and claims from approved promoters",
-] as const;
-
-const NEEDS_ADMIN = [
-  "New events, claims, and suggestions from anyone not approved yet",
-  "Promoter applications, moderation, and take-down requests",
-  "Gifting reports and site feedback",
-] as const;
-
 const VALUES = [
   { title: "Free to browse.", text: "No paywall, no popup begging for your email." },
-  { title: "The top spot is not for sale.", text: "Sponsors welcome if they fit the values. That is the whole bar." },
+  { title: "Sponsors can buy in.", text: "Featured feed posts and ads are on the table — only for businesses that are part of this community or already show up for us." },
   { title: "Post with a free account.", text: "That is how spam stays out and names stay on." },
   { title: "Your data is not for sale.", text: "Not now, not later, not for a nice offer." },
   { title: "We moderate the clearly over the line stuff.", text: "The rest of the community runs free." },
@@ -64,7 +52,7 @@ const FAQ = [
   },
   {
     q: "Can my business sponsor?",
-    a: "If you fit the values on this page, yes. You still cannot buy the top spot. Ever. Pitch via Contact or message Tucker.",
+    a: "If you are part of the community or already support what we are building, yes. Sponsors can buy featured posts in the feed and/or ads. Pitch via Contact or message Tucker.",
   },
 ] as const;
 
@@ -308,6 +296,50 @@ export default function About() {
         </ScrollReveal>
       </section>
 
+      {/* SPONSORS */}
+      <section className="about-v2-sponsors">
+        <ScrollReveal delay={30}>
+        <div className="about-v2__inner">
+          <div className="about-v2-sponsors__grid">
+            <div className="about-v2-sponsors__copy">
+              <div className="about-v2__kicker">Sponsors</div>
+              <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>
+                Help keep it free for <span className="hl">everyone else</span>
+              </h2>
+              <p>
+                Sponsors can buy featured posts in the scene feed and/or ads on the site. That is how this
+                stays free to browse. The bar is simple: you need to be part of the community or already
+                support what we are building. No scrubbing your brand first. No random corporate Pride
+                cosplay.
+              </p>
+              <p>
+                And it does not stop on July 19. After Pride week this becomes a{" "}
+                <strong style={{ color: "#fff" }}>year round resource</strong> for the scene, so your
+                support keeps working long after the parade.
+              </p>
+              <Button
+                type="button"
+                variant="solid"
+                accent="lime"
+                size="md"
+                onClick={() => setContactModal("sponsor")}
+              >
+                Pitch a sponsorship
+              </Button>
+            </div>
+            <div className="about-v2-sponsors__checks">
+              {SPONSOR_CHECKS.map(item => (
+                <div key={item} className="about-v2-sponsors__check">
+                  <span className="mark" aria-hidden="true">✓</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        </ScrollReveal>
+      </section>
+
       {/* INFRASTRUCTURE */}
       <section className="about-v2-infra">
         <ScrollReveal>
@@ -334,47 +366,6 @@ export default function About() {
         </ScrollReveal>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="about-v2-how" id="how-it-works">
-        <ScrollReveal delay={30}>
-        <div className="about-v2__inner">
-          <div className="about-v2__kicker">How it works</div>
-          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
-            Public by <span className="hl">default</span>
-          </h2>
-          <p className="about-v2__sub">
-            Most of the guide goes live the second you post it. Admins only step in for the stuff that
-            actually needs a human.
-          </p>
-          <div className="about-v2-how__grid">
-            <div className="about-v2-how__panel about-v2-how__panel--live">
-              <h3>Goes live instantly</h3>
-              <ul>
-                {LIVE_NOW.map(item => (
-                  <li key={item}>
-                    <span className="mark" aria-hidden="true">✓</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="about-v2-how__panel about-v2-how__panel--gate">
-              <h3>Needs an admin</h3>
-              <ul>
-                {NEEDS_ADMIN.map(item => (
-                  <li key={item}>
-                    <span className="mark" aria-hidden="true">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <p className="about-v2-how__foot">Account required to post · No pay to rank · Ever</p>
-        </div>
-        </ScrollReveal>
-      </section>
-
       {/* VALUES */}
       <section className="about-v2-values">
         <ScrollReveal>
@@ -392,49 +383,6 @@ export default function About() {
                 </span>
               </div>
             ))}
-          </div>
-        </div>
-        </ScrollReveal>
-      </section>
-
-      {/* SPONSORS */}
-      <section className="about-v2-sponsors">
-        <ScrollReveal delay={30}>
-        <div className="about-v2__inner">
-          <div className="about-v2-sponsors__grid">
-            <div className="about-v2-sponsors__copy">
-              <div className="about-v2__kicker">Sponsors</div>
-              <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>
-                Looking for sponsors who <span className="hl">fit the values</span>
-              </h2>
-              <p>
-                I am looking for sponsors, not landlords. If your business actually belongs in this scene
-                and shares what is on this page, you can help keep the whole thing free. You still cannot
-                buy the top spot. Ever.
-              </p>
-              <p>
-                And it does not stop on July 19. After Pride week this becomes a{" "}
-                <strong style={{ color: "#fff" }}>year round resource</strong> for the scene, so your
-                support keeps working long after the parade.
-              </p>
-              <Button
-                type="button"
-                variant="solid"
-                accent="lime"
-                size="md"
-                onClick={() => setContactModal("sponsor")}
-              >
-                Pitch a sponsorship
-              </Button>
-            </div>
-            <div className="about-v2-sponsors__checks">
-              {SPONSOR_CHECKS.map(item => (
-                <div key={item} className="about-v2-sponsors__check">
-                  <span className="mark" aria-hidden="true">✓</span>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
         </ScrollReveal>
