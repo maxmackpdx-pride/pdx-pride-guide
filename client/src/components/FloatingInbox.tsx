@@ -129,11 +129,22 @@ export default function FloatingInbox() {
     "--fab-neon-rgb": neon.rgb,
   } as CSSProperties;
 
+  // Pulse only when something needs attention (unread DMs and/or admin/owner queue).
+  // Idle FAB keeps a soft static neon — no perpetual "you've got mail" throb.
+  const needsAttention = !open && attentionCount > 0;
+
   return (
     <div
-      className={`floating-inbox floating-inbox--${neon.id}`}
+      className={[
+        "floating-inbox",
+        `floating-inbox--${neon.id}`,
+        needsAttention ? "floating-inbox--attention" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={anchorStyle}
       data-fab-neon={neon.id}
+      data-attention={needsAttention ? "true" : "false"}
     >
       <span className="floating-inbox__halo" aria-hidden />
       <button

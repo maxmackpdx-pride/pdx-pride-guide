@@ -2158,16 +2158,23 @@ h2.display,
     height: 60px;
   }
 
+  /* Idle: soft static neon. Pulse only with .floating-inbox--attention */
   .floating-inbox__halo {
     position: absolute;
     inset: -10px;
     border-radius: 50%;
     background: var(--fab-neon, #ff00cc);
     filter: blur(14px);
-    opacity: 0.5;
+    opacity: 0.32;
     pointer-events: none;
-    animation: floating-inbox-halo-pulse 2.6s ease-in-out infinite;
+    animation: none;
     z-index: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .floating-inbox--attention .floating-inbox__halo {
+    opacity: 0.55;
+    animation: floating-inbox-halo-pulse 2.6s ease-in-out infinite;
   }
 
   .floating-inbox__fab {
@@ -2187,8 +2194,15 @@ h2.display,
     box-shadow:
       0 6px 20px rgba(0, 0, 0, 0.45),
       0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 0 18px rgb(var(--fab-neon-rgb, 255 0 204) / 0.55);
+      0 0 12px rgb(var(--fab-neon-rgb, 255 0 204) / 0.35);
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .floating-inbox--attention .floating-inbox__fab {
+    box-shadow:
+      0 6px 20px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 0 22px rgb(var(--fab-neon-rgb, 255 0 204) / 0.65);
   }
 
   .floating-inbox__fab:hover {
@@ -2250,7 +2264,11 @@ h2.display,
 
 html.calm-mode .floating-inbox__halo {
   animation: none !important;
-  opacity: 0.32;
+  opacity: 0.28;
+}
+
+html.calm-mode .floating-inbox--attention .floating-inbox__halo {
+  opacity: 0.4;
 }
 
 /* ============================================================
