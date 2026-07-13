@@ -10,6 +10,7 @@ import {
 } from "@shared/hubFeed";
 import type { EventListing } from "@shared/multiDayEvents";
 import FeaturedEventAd from "./FeaturedEventAd";
+import FeedAffiliateAd from "./FeedAffiliateAd";
 import HubFeedCard from "./HubFeedCard";
 import HubPost from "./HubPost";
 
@@ -177,6 +178,32 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const error = feedQuery.isError;
   const hasContent = items.length > 0 || pinned.length > 0;
 
+  /** Inline affiliate slots at ~40% (CockBlock) and ~80% (Mr-S). Not sticky. */
+  type FeedRow =
+    | { kind: "post"; item: (typeof items)[number] }
+    | { kind: "affiliate"; brand: "cockblock" | "mrs"; key: string };
+
+  const feedRows = useMemo((): FeedRow[] => {
+    const rows: FeedRow[] = items.map(item => ({ kind: "post", item }));
+    if (rows.length === 0) return rows;
+
+    const idx40 = Math.floor(items.length * 0.4);
+    const idx80 = Math.floor(items.length * 0.8);
+
+    // Insert 80% first so the 40% index is not shifted by the later splice.
+    rows.splice(Math.min(idx80, rows.length), 0, {
+      kind: "affiliate",
+      brand: "mrs",
+      key: "feed-aff-mrs",
+    });
+    rows.splice(Math.min(idx40, rows.length), 0, {
+      kind: "affiliate",
+      brand: "cockblock",
+      key: "feed-aff-cockblock",
+    });
+    return rows;
+  }, [items]);
+
   const featuredAd = featured && featured.event ? (
     <FeaturedEventAd
       event={featured.event}
@@ -255,9 +282,13 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
 
       {!loading && !error && hasContent && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {items.map((item) => (
-            <HubFeedCard key={item.id} item={item} />
-          ))}
+          {feedRows.map((row) =>
+            row.kind === "affiliate" ? (
+              <FeedAffiliateAd key={row.key} brand={row.brand} />
+            ) : (
+              <HubFeedCard key={row.item.id} item={row.item} />
+            ),
+          )}
           {items.length > 0 && pinned.length > 0 && (
             <div className="kick" style={{ letterSpacing: ".14em", padding: "4px 2px 0", color: "var(--board-muted)" }}>
               On the board

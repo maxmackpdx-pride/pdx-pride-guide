@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -6,17 +6,23 @@ import { Button } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { EventListing } from "@shared/multiDayEvents";
-import { eventPath } from "@shared/eventSlug";
+import type { Event } from "@shared/schema";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
+import EventModal from "@/components/EventModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
-const STANK_EVENT_ID = 13;
-const STANK_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
-const STANK_EVENT_HREF = eventPath(STANK_EVENT_ID, STANK_EVENT_TITLE, "SAT");
+const COCKBLOCK_URL = "https://cockblocktoys.com/tucker060";
+const MR_S_LEATHER_URL = "https://www.mr-s-leather.com/?acc=TUCKERMAX";
+
+/** Match Yes Coach / Stank by title — never hardcode event ids (they differ local vs prod). */
+function isYesCoachEvent(title: string): boolean {
+  const t = title.toLowerCase();
+  return t.includes("yes coach") || /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(title);
+}
 
 const VALUES = [
   { title: "Free to browse.", text: "No paywall, no popup begging for your email." },
@@ -70,6 +76,29 @@ export default function About() {
 
   const eventCount = events.length;
   const [contactModal, setContactModal] = useState<"message" | "sponsor" | "order" | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+  const yesCoachEvent = useMemo(
+    () => events.find(e => isYesCoachEvent(e.title)) ?? null,
+    [events],
+  );
+
+  const openYesCoachCard = useCallback(async () => {
+    if (yesCoachEvent) {
+      setSelectedEvent(yesCoachEvent);
+      return;
+    }
+    // Fallback: list may still be loading or title variant differs — fetch by search among all events
+    try {
+      const res = await apiRequest("GET", "/api/events");
+      if (!res.ok) return;
+      const list = (await res.json()) as EventListing[];
+      const match = list.find(e => isYesCoachEvent(e.title));
+      if (match) setSelectedEvent(match);
+    } catch {
+      // Stay on About if the event cannot be resolved
+    }
+  }, [yesCoachEvent]);
 
   return (
     <div className="about-v2">
@@ -300,15 +329,19 @@ export default function About() {
           <div className="about-v2__inner">
             <div className="about-v2__kicker about-v2__kicker--pink">What else I&apos;m making</div>
             <div className="about-v2-projects__list">
-              <Link href={STANK_EVENT_HREF} className="about-v2-project">
+              <button
+                type="button"
+                className="about-v2-project about-v2-project--button"
+                onClick={() => void openYesCoachCard()}
+              >
                 <img src="/posters/stank-yes-coach.jpg" alt="" width={120} height={120} />
                 <div>
                   <div className="about-v2-project__meta">Yes Coach · Stank</div>
                   <h3 className="about-v2-project__title">Stank: Yes Coach!</h3>
                   <p className="about-v2-project__desc">Hosted by Tucker Max and Spencer Stanks · Sat, Sanctuary Club · Pride Week 2026</p>
                 </div>
-                <span className="about-v2-project__go">See event →</span>
-              </Link>
+                <span className="about-v2-project__go">Open event →</span>
+              </button>
 
               <a
                 className="about-v2-project"
@@ -375,6 +408,51 @@ export default function About() {
                 </a>
                 <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
               </div>
+            </div>
+
+            <div className="about-v2-partners">
+              <p className="about-v2-partners__kicker">
+                <span className="about-v2-partners__star" aria-hidden="true">*</span>
+                {" "}Or shop through these links at these partner brands
+              </p>
+              <div className="about-v2-partners__tiles">
+                <a
+                  className="about-v2-partners__tile about-v2-partners__tile--cockblock"
+                  href={COCKBLOCK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="about-v2-partners__badge">10% OFF CODE: TUCKERMAX</span>
+                  <img
+                    src="/about/cockblock.png"
+                    alt="CockBlock Toys"
+                    className="about-v2-partners__logo about-v2-partners__logo--cockblock"
+                    width={276}
+                    height={77}
+                    decoding="async"
+                  />
+                </a>
+                <a
+                  className="about-v2-partners__tile about-v2-partners__tile--mrs"
+                  href={MR_S_LEATHER_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="/about/mr-s-leather.png"
+                    alt="Mr. S Leather"
+                    className="about-v2-partners__logo about-v2-partners__logo--mrs"
+                    width={300}
+                    height={72}
+                    decoding="async"
+                  />
+                </a>
+              </div>
+              <p className="about-v2-partners__note">
+                Affiliate links. You pay the same, shop through this link, the guide gets a small cut.
+                CockBlock: 10% off with code{" "}
+                <span className="about-v2-partners__code">TUCKERMAX</span>.
+              </p>
             </div>
 
             <div className="about-v2-sponsors__grid">
@@ -502,6 +580,14 @@ export default function About() {
         <PortfolioContactModal
           variant={contactModal}
           onClose={() => setContactModal(null)}
+        />
+      )}
+
+      {selectedEvent && (
+        <EventModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onEventUpdated={updated => setSelectedEvent(updated)}
         />
       )}
     </div>

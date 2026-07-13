@@ -679,7 +679,7 @@ button.about-v2-project--button:focus-visible {
   border: 2px solid var(--aw-border);
   border-left: 4px solid var(--lime, #ccff00);
   border-radius: 8px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .about-v2-donate__copy {
@@ -715,6 +715,124 @@ button.about-v2-project--button:focus-visible {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 11.5px;
   color: var(--text-faint, #666);
+}
+
+/* Partner brand affiliate tiles (between donate panel and sponsors) */
+.about-v2-partners {
+  padding: 28px 36px;
+  background: #0c0c0f;
+  border: 2px solid #1c1c22;
+  border-left: 4px solid var(--cyan, #19e3ff);
+  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+.about-v2-partners__kicker {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan, #19e3ff);
+  margin: 0 0 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.about-v2-partners__star {
+  color: var(--lime, #ccff00);
+  font-weight: 900;
+}
+
+.about-v2-partners__tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.about-v2-partners__tile {
+  position: relative;
+  flex: 1 1 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 118px;
+  padding: 26px 24px;
+  background: #070708;
+  border: 2px solid #24242c;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  overflow: visible;
+}
+
+.about-v2-partners__tile--mrs {
+  overflow: hidden;
+}
+
+.about-v2-partners__tile:hover {
+  border-color: var(--cyan, #19e3ff);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.about-v2-partners__tile:focus-visible {
+  outline: 2px solid var(--cyan, #19e3ff);
+  outline-offset: 2px;
+}
+
+.about-v2-partners__logo {
+  width: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.about-v2-partners__logo--cockblock {
+  max-width: 276px;
+  max-height: 77px;
+}
+
+.about-v2-partners__logo--mrs {
+  max-width: 300px;
+  max-height: 72px;
+}
+
+.about-v2-partners__badge {
+  position: absolute;
+  top: -13px;
+  left: 16px;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: #000;
+  background: var(--lime, #ccff00);
+  border: 2px solid #000;
+  border-radius: 4px;
+  padding: 7px 11px 5px;
+  box-shadow: 4px 4px 0 0 #9702c1;
+  transform: rotate(-3deg);
+  -webkit-text-stroke: 0.75px #000;
+  paint-order: stroke fill;
+  white-space: nowrap;
+}
+
+.about-v2-partners__note {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #666;
+  margin: 16px 0 0;
+}
+
+.about-v2-partners__code {
+  color: #8c8980;
 }
 
 .about-v2-sponsors__grid {

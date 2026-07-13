@@ -11,6 +11,7 @@ import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
+import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import EventsHero from "@/components/EventsHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -24,6 +25,7 @@ import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { List, Grid } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
@@ -289,6 +291,9 @@ export default function Events() {
     [events, activeDay, activeFilters, searchQuery, sortMode],
   );
 
+  /** Grid-only: scatter affiliate poster cards among real events (not list view). */
+  const gridItems = useMemo(() => scatterAffiliateCards(filtered), [filtered]);
+
   const heroStats = useMemo(() => {
     const parseTags = (raw: string) => {
       try {
@@ -521,19 +526,35 @@ export default function Events() {
         ) : viewMode === "grid" ? (
           <ScrollReveal delay={50}>
           <div className="events-poster-grid">
-            {filtered.map((e, i) => (
-              <ListingCard
-                key={listingKey(e)}
-                event={e}
-                onClick={() => openEvent(e)}
-                viewMode="grid"
-                revealDelay={(i % 8) * 70}
-                attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
-                myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
-                selfUserId={user?.id}
-                shareHref={eventPath(e.id, e.title, e.dayOfWeek)}
-              />
-            ))}
+            {gridItems.map((item, i) => {
+              if (item.kind === "affiliate") {
+                return (
+                  <div
+                    key={item.key}
+                    className="ds-listing-card ds-listing-card--grid"
+                  >
+                    <AffiliatePosterCard
+                      brand={item.brand}
+                      style={{ height: "100%" }}
+                    />
+                  </div>
+                );
+              }
+              const e = item.event;
+              return (
+                <ListingCard
+                  key={listingKey(e)}
+                  event={e}
+                  onClick={() => openEvent(e)}
+                  viewMode="grid"
+                  revealDelay={(i % 8) * 70}
+                  attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
+                  myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
+                  selfUserId={user?.id}
+                  shareHref={eventPath(e.id, e.title, e.dayOfWeek)}
+                />
+              );
+            })}
           </div>
           </ScrollReveal>
         ) : (
