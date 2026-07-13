@@ -2495,7 +2495,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (moderationGate(res, "River Brats check-in", { note: note || "" })) return;
       const calendarDate = String(req.body.date || pacificTodayDate());
       if (!isAllowedBeachCheckinDate(calendarDate)) {
-        return res.status(400).json({ error: "Pick a day from today through the next 3 days" });
+        return res.status(400).json({ error: "Pick a day from today through the next 7 days" });
       }
       const isAnonymous = Boolean(req.body.isAnonymous);
       const row = storage.upsertBeachCheckin({

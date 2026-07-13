@@ -38,8 +38,8 @@ export function pacificTodayDate(now = Date.now()): string {
   }).format(new Date(now));
 }
 
-/** Max days ahead of Pacific "today" a beach check-in may be planned. */
-export const BEACH_CHECKIN_MAX_ADVANCE_DAYS = 3;
+/** Max days ahead of Pacific "today" a beach check-in may be planned (Rooster + Sauvie). */
+export const BEACH_CHECKIN_MAX_ADVANCE_DAYS = 7;
 
 /** Latest planned leave hour (10pm Pacific, same as chat close). */
 export const RIVER_BRATS_DEPART_HOUR_END = RIVER_BRATS_CHAT_CLOSE_HOUR;
@@ -57,7 +57,7 @@ export function pacificDateOffset(daysFromToday: number, now = Date.now()): stri
   return addCalendarDays(pacificTodayDate(now), daysFromToday);
 }
 
-/** Today through today+3 for check-in date chips. */
+/** Today through today+7 for check-in date chips. */
 export function beachCheckinDateOptions(now = Date.now()): string[] {
   return Array.from({ length: BEACH_CHECKIN_MAX_ADVANCE_DAYS + 1 }, (_, i) => pacificDateOffset(i, now));
 }

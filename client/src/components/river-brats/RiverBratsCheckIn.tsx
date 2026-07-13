@@ -342,7 +342,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
           <div className="rb-checkin__poster-kicker">Beach day flyer</div>
           <div className="rb-checkin__poster-title">{beachShortLabel}</div>
           <p className="rb-checkin__poster-lede">
-            Plan up to 3 days out, say how long you&apos;ll stay, and drop it on your calendar like an event.
+            Plan up to 7 days out, say how long you&apos;ll stay, and drop it on your calendar like an event.
           </p>
         </div>
       </div>
@@ -514,7 +514,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             )}
           </div>
           <p className="rb-checkin__fine">
-            Plan up to 3 days ahead. Chat opens that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
+            Plan up to 7 days ahead. Chat opens that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
           </p>
         </section>
 
