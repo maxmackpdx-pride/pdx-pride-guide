@@ -95,11 +95,6 @@ export default function About() {
               </span>
             </h1>
             <div className="about-v2-hero__actions">
-              <a href={IG_URL} target="_blank" rel="noopener noreferrer">
-                <Button as="span" variant="solid" accent="lime" size="lg">
-                  Follow Tucker
-                </Button>
-              </a>
               <Link href="/events">
                 <Button as="span" variant="neon" accent="cyan" size="lg">
                   Browse the {eventCount || "list"}
@@ -231,22 +226,6 @@ export default function About() {
                   Artist · Yes Coach · Brand promoter
                   <br />
                   Digg&apos;n For Bones · Former Oregon State Pet
-                </div>
-                <div className="about-v2-creator__actions">
-                  <a href={IG_URL} target="_blank" rel="noopener noreferrer">
-                    <Button as="span" variant="solid" accent="lime" size="md">
-                      Follow @tucker_pdmax
-                    </Button>
-                  </a>
-                  <Button
-                    type="button"
-                    variant="neon"
-                    accent="pink"
-                    size="md"
-                    onClick={() => setContactModal("message")}
-                  >
-                    Message me
-                  </Button>
                 </div>
               </div>
 
