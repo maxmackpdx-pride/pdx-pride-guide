@@ -5096,6 +5096,7 @@ export interface IStorage {
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   dismissStaleTestModerationRequests(): number;
   getAdminPendingCount(): number;
+  countAdminGiftingFlagged(): number;
   getAdminMetrics(): AdminMetricsSnapshot;
   hasSiteAdminGrant(userId: number): boolean;
   ensureSiteAdminGrant(userId: number, grantedByUserId: number | null, note?: string | null, createdAt?: string): void;
@@ -6143,17 +6144,26 @@ export const storage: IStorage = {
   dismissStaleTestModerationRequests() {
     return runDismissStaleTestModerationRequests();
   },
+  countAdminGiftingFlagged() {
+    const terminal = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
+    return storage.getGiftingPosts({ includeInactive: true })
+      .filter((p: any) => !terminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0)
+      .length;
+  },
   getAdminPendingCount() {
-    // Talent, gigs, and gifting posts do not need admin approval.
-    // Bug reports / contact form / feedback are owner-desk only (not in shared queue).
+    // Must match every category rendered in QueueView mode="admin".
+    // Owner Desk items are counted separately via getOwnerDeskCount().
     return (
       this.getSubmissions("PENDING").length
       + this.getModerationRequests("PENDING").length
       + this.getPendingPromoterRequests().length
       + this.getGiftingReports("PENDING").length
+      + this.countAdminGiftingFlagged()
       + this.getPendingBusinessClaims().length
       + this.getPendingBusinessSubmissions().length
       + this.getPendingBusinessLogoRequests().length
+      + this.getAdminMissedConnections().length
+      + this.getRiverBratsReports("PENDING").length
     );
   },
   hasSiteAdminGrant(userId) {

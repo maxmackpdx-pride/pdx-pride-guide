@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
-import { useUnreadCount } from "@/hooks/useUnreadCount";
+import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
 import {
   clampFloatingInboxBottom,
   readFloatingInboxBottom,
@@ -23,7 +23,7 @@ export default function FloatingInbox() {
   const { user } = useAuth();
   const [location] = useLocation();
   const { open, toggleSheet } = useInboxSheet();
-  const unreadCount = useUnreadCount();
+  const { total: attentionCount, unread, actionQueue } = useInboxAttentionCount();
   const [bottomPx, setBottomPx] = useState(() => readFloatingInboxBottom());
   const [dragging, setDragging] = useState(false);
   const [neon, setNeon] = useState(() => pickFloatingInboxNeon());
@@ -147,15 +147,18 @@ export default function FloatingInbox() {
         aria-label={
           open
             ? "Close inbox. Drag up or down to reposition."
-            : unreadCount > 0
-              ? `Open inbox, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}. Drag up or down to reposition.`
+            : attentionCount > 0
+              ? `Open inbox, ${unread} unread message${unread === 1 ? "" : "s"}${actionQueue > 0 ? `, ${actionQueue} in queue` : ""}. Drag up or down to reposition.`
               : "Open inbox. Drag up or down to reposition."
         }
       >
         {open ? <X size={24} /> : <MessageCircle size={24} />}
-        {!open && unreadCount > 0 && (
-          <span className="floating-inbox__fab-badge" aria-hidden="true">
-            {unreadCount > 9 ? "9+" : unreadCount}
+        {!open && attentionCount > 0 && (
+          <span
+            className={`floating-inbox__fab-badge${actionQueue > 0 && unread === 0 ? " floating-inbox__fab-badge--queue" : ""}`}
+            aria-hidden="true"
+          >
+            {attentionCount > 9 ? "9+" : attentionCount}
           </span>
         )}
       </button>

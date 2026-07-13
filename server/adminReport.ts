@@ -71,6 +71,10 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
   const gifting: any[] = (storage.getGiftingReports("PENDING") || []).filter(
     (r: any) => String(r.status || "").toUpperCase() === "PENDING",
   );
+  const giftingTerminal = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
+  const giftingFlagged: any[] = (storage.getGiftingPosts({ includeInactive: true }) || []).filter(
+    (p: any) => !giftingTerminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0,
+  );
 
   const categories: Category[] = [
     {
@@ -194,6 +198,18 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
         meta: `${r.reason || "Flagged post"} · ${fmt(r.createdAt)}`,
         fields: fields(r.postId && ["Post", `#${r.postId}`]),
         note: cut(r.message),
+      })),
+    },
+    {
+      key: "giftingFlagged",
+      label: "Flagged gifting posts",
+      accent: "#8a4dff",
+      count: giftingFlagged.length,
+      rows: giftingFlagged.map((p) => ({
+        head: p.title || `Gifting post #${p.id}`,
+        meta: `${p.postType || "POST"} · ${p.reportCount || 0} report(s)`,
+        fields: fields(["Status", String(p.status || "—")]),
+        note: cut(p.description),
       })),
     },
   ];

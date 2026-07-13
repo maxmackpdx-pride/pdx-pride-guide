@@ -53,7 +53,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const { threads, sendMessage, setRead, archive, revealSelf, resolveLineup } = useInboxThreads(activeId);
   const activeThread = activeId ? threads.find((t) => t.id === activeId) ?? null : null;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
-  const isOwner = Boolean(user?.username === "tuckerhelms" || user?.isSuperAdmin);
+  const isOwner = Boolean(user?.isPrimaryOwner || user?.isSuperAdmin);
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
@@ -106,12 +106,20 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
       return;
     }
     setView(initialView ?? "inbox");
-    setAccount(initialAccount ?? "personal");
+    if (initialAccount) {
+      setAccount(initialAccount);
+    } else if (isAdmin && (pendingAdmin.count || 0) > 0) {
+      setAccount("admin");
+    } else if (isOwner && (pendingAdmin.ownerCount || 0) > 0) {
+      setAccount("owner");
+    } else {
+      setAccount("personal");
+    }
     setFolder("inbox");
     setFilter("all");
     setFilterOpen(false);
     setQuery("");
-  }, [open, initialView, initialAccount]);
+  }, [open, initialView, initialAccount, isAdmin, isOwner, pendingAdmin.count, pendingAdmin.ownerCount]);
 
   if (!open || !user) return null;
 
@@ -240,18 +248,27 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                       boxShadow: act ? "0 1px 2px rgba(0,0,0,.4)" : undefined,
                     }}
                   >
-                    {!act && accountUnread[id] > 0 && (
+                    {accountUnread[id] > 0 && (
                       <span
                         aria-hidden="true"
                         style={{
-                          width: 11,
-                          height: 11,
+                          minWidth: act ? 18 : 11,
+                          height: act ? 18 : 11,
+                          padding: act ? "0 5px" : 0,
                           borderRadius: 999,
                           background: color,
                           flex: "none",
                           boxShadow: `0 0 12px ${color}, 0 0 4px ${color}`,
+                          fontFamily: MONO,
+                          fontSize: act ? 9 : undefined,
+                          fontWeight: act ? 700 : undefined,
+                          lineHeight: act ? "18px" : undefined,
+                          textAlign: "center",
+                          color: act ? "#06060a" : undefined,
                         }}
-                      />
+                      >
+                        {act ? (accountUnread[id] > 99 ? "99+" : accountUnread[id]) : null}
+                      </span>
                     )}
                     {label}
                   </button>
@@ -387,6 +404,54 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
             />
           ) : (
             <>
+              {inboxActive && account === "personal" && isAdmin && (pendingAdmin.count || 0) > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAccount("admin")}
+                  style={{
+                    display: "block",
+                    width: "calc(100% - 4px)",
+                    margin: "0 2px 14px",
+                    padding: "12px 14px",
+                    borderRadius: 14,
+                    border: `1px solid ${C.magenta}`,
+                    background: "rgba(255,31,160,0.08)",
+                    color: C.magenta,
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    letterSpacing: ".08em",
+                    fontWeight: 700,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  {pendingAdmin.count} item{pendingAdmin.count === 1 ? "" : "s"} waiting in the shared admin queue →
+                </button>
+              )}
+              {inboxActive && account === "personal" && isOwner && (pendingAdmin.ownerCount || 0) > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAccount("owner")}
+                  style={{
+                    display: "block",
+                    width: "calc(100% - 4px)",
+                    margin: "0 2px 14px",
+                    padding: "12px 14px",
+                    borderRadius: 14,
+                    border: `1px solid ${C.purple}`,
+                    background: "rgba(138,77,255,0.08)",
+                    color: C.purple,
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    letterSpacing: ".08em",
+                    fontWeight: 700,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  {pendingAdmin.ownerCount} item{(pendingAdmin.ownerCount || 0) === 1 ? "" : "s"} on your Owner Desk →
+                </button>
+              )}
               {inboxActive && account === "personal" && (
                 <PersonalView
                   folder={folder}

@@ -253,6 +253,7 @@ const DESK_TAG: Record<string, { label: string; color: string }> = {
   sponsor: { label: "SPONSOR", color: C.lime },
   bug: { label: "BUG", color: C.red },
   feedback: { label: "FEEDBACK", color: C.orange },
+  crash: { label: "CRASH", color: C.red },
   keyholder: { label: "KEYHOLDER", color: C.purple },
   escalation: { label: "ESCALATION", color: C.magenta },
 };
@@ -310,56 +311,113 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
   const accent = mode === "admin" ? C.magenta : C.purple;
 
-  const { data: subs = [] } = useQuery<any[]>({
+  const adminFetch = async (url: string) => {
+    const r = await fetch(url, { credentials: "include" });
+    if (!r.ok) throw new Error(`${r.status}`);
+    return r.json();
+  };
+
+  const subsQuery = useQuery<any[]>({
     queryKey: ["/api/admin/submissions"],
-    queryFn: () => fetch("/api/admin/submissions", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
+    queryFn: () => adminFetch("/api/admin/submissions"),
     enabled: mode === "admin",
   });
-  const { data: giftingAdmin } = useQuery<{ posts: any[]; reports: any[] }>({
+  const giftingQuery = useQuery<{ posts: any[]; reports: any[] }>({
     queryKey: ["/api/admin/gifting"],
-    queryFn: () => apiRequest("GET", "/api/admin/gifting").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/gifting").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: spotted = [] } = useQuery<any[]>({
+  const spottedQuery = useQuery<any[]>({
     queryKey: ["/api/admin/missed-connections"],
-    queryFn: () => apiRequest("GET", "/api/admin/missed-connections").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/missed-connections").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: riverBratsReports = [] } = useQuery<any[]>({
+  const riverBratsQuery = useQuery<any[]>({
     queryKey: ["/api/admin/river-brats/reports"],
-    queryFn: () => apiRequest("GET", "/api/admin/river-brats/reports").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/river-brats/reports").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: moderationReqs = [] } = useQuery<any[]>({
+  const moderationQuery = useQuery<any[]>({
     queryKey: ["/api/admin/moderation"],
-    queryFn: () => apiRequest("GET", "/api/admin/moderation").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/moderation").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: promoterReqs = [] } = useQuery<any[]>({
+  const promoterQuery = useQuery<any[]>({
     queryKey: ["/api/admin/promoter-requests"],
-    queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: businessClaims = [] } = useQuery<any[]>({
+  const claimsQuery = useQuery<any[]>({
     queryKey: ["/api/admin/business-claims"],
-    queryFn: () => apiRequest("GET", "/api/admin/business-claims").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/business-claims").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: businessSubs = [] } = useQuery<any[]>({
+  const bizSubsQuery = useQuery<any[]>({
     queryKey: ["/api/admin/business-submissions"],
-    queryFn: () => apiRequest("GET", "/api/admin/business-submissions").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/business-submissions").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: logoReqs = [] } = useQuery<any[]>({
+  const logoQuery = useQuery<any[]>({
     queryKey: ["/api/admin/business-logo-requests"],
-    queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then((r) => r.json()),
+    queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
     enabled: mode === "admin",
   });
-  const { data: ownerReports = [] } = useQuery<any[]>({
+  const ownerQuery = useQuery<any[]>({
     queryKey: ["/api/admin/feedback"],
-    queryFn: () => fetch("/api/admin/feedback", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
+    queryFn: () => adminFetch("/api/admin/feedback"),
     enabled: mode === "owner",
   });
+
+  const subs = subsQuery.data ?? [];
+  const giftingAdmin = giftingQuery.data;
+  const spotted = spottedQuery.data ?? [];
+  const riverBratsReports = riverBratsQuery.data ?? [];
+  const moderationReqs = moderationQuery.data ?? [];
+  const promoterReqs = promoterQuery.data ?? [];
+  const businessClaims = claimsQuery.data ?? [];
+  const businessSubs = bizSubsQuery.data ?? [];
+  const logoReqs = logoQuery.data ?? [];
+  const ownerReports = ownerQuery.data ?? [];
+
+  const failedSources = mode === "admin"
+    ? [
+        subsQuery.isError && "submissions",
+        giftingQuery.isError && "gifting",
+        spottedQuery.isError && "missed connections",
+        riverBratsQuery.isError && "river brats",
+        moderationQuery.isError && "moderation",
+        promoterQuery.isError && "promoters",
+        claimsQuery.isError && "venue claims",
+        bizSubsQuery.isError && "venue submissions",
+        logoQuery.isError && "logo requests",
+      ].filter(Boolean) as string[]
+    : ownerQuery.isError
+      ? ["owner desk"]
+      : [];
 
   const onQueueSuccess = () => invalidateAdminQueue(qc);
   const resolveOwnerDesk = useMutation({
@@ -496,7 +554,9 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
     || approveClaim.isPending || denyClaim.isPending || approveBizSub.isPending
     || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending;
 
-  const kicker = mode === "admin" ? "SHARED QUEUE · WORKED BY THE WHOLE TEAM" : "OWNER DESK · JUST YOU";
+  const kicker = mode === "admin"
+    ? `SHARED QUEUE · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
+    : `OWNER DESK · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`;
 
   const btn = (label: string, color: string, onClick: () => void, outline = false) => (
     <button
@@ -541,9 +601,32 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
         {kicker}
       </div>
 
+      {failedSources.length > 0 && (
+        <div
+          style={{
+            margin: "0 2px 12px",
+            padding: "12px 14px",
+            borderRadius: 12,
+            border: `1px solid ${C.red}`,
+            background: "rgba(201,57,31,0.1)",
+            fontFamily: MONO,
+            fontSize: 10.5,
+            letterSpacing: ".06em",
+            color: C.red,
+            lineHeight: 1.45,
+          }}
+        >
+          Could not load: {failedSources.join(", ")}. You may need to sign in again as admin, or the server returned an error — not an empty queue.
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <div style={{ textAlign: "center", padding: "44px 20px", color: C.faint2, fontFamily: MONO, fontSize: 11, letterSpacing: ".1em" }}>
-          {mode === "admin" ? "QUEUE IS CLEAR" : "OWNER DESK IS CLEAR"}
+          {failedSources.length > 0
+            ? "QUEUE COULD NOT LOAD"
+            : mode === "admin"
+              ? "QUEUE IS CLEAR"
+              : "OWNER DESK IS CLEAR"}
         </div>
       ) : (
         <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>

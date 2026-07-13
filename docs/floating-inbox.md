@@ -126,10 +126,14 @@ Crash reports are created by `client/src/components/ErrorBoundary.tsx` (`categor
   approving/denying, and Owner-Desk resolving all mutate in place. If you add a
   new action, do **not** use `setLocation`/router navigation inside the overlay.
 - **Badge vs. queue must agree.** `getAdminPendingCount` (`server/storage.ts`)
-  counts promoter requests + business claims/submissions + logo requests. Those
-  were historically NOT rendered by `QueueView` (they lived only on the old
-  `/admin` page) — that mismatch made the badge higher than the visible list.
-  They're wired into `QueueView` now; keep them in sync if you add categories.
+  must count every category `QueueView mode="admin"` renders: submissions,
+  moderation, promoters, gifting reports, flagged gifting posts, business
+  claims/submissions, logo requests, missed connections awaiting review, and
+  River Brats reports. Owner Desk is separate (`getOwnerDeskCount`).
+- **FAB + mobile Messages badge** use `useInboxAttentionCount` (unread DMs +
+  admin queue + owner desk) so backlog is visible without opening the Admin tab.
+- **Opening the inbox** with pending queue items defaults to the Admin tab (or
+  Owner when only desk items are waiting).
 - **Silent-empty on error.** Every queue query does `r.ok ? r.json() : []`, so a
   500 shows an empty section, not an error. When debugging "nothing shows,"
   check the endpoint response, not just the UI.

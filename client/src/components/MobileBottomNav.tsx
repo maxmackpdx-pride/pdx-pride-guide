@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { CalendarDays, Home, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
-import { useUnreadCount } from "@/hooks/useUnreadCount";
+import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
 import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import AuthModal from "./AuthModal";
 
@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
   const [location] = useLocation();
   const { user } = useAuth();
   const { open, toggleSheet } = useInboxSheet();
-  const unreadCount = useUnreadCount();
+  const { total: attentionCount } = useInboxAttentionCount();
   const [boardsOpen, setBoardsOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -152,14 +152,14 @@ export default function MobileBottomNav() {
           onClick={handleMessages}
           aria-expanded={user ? open : undefined}
           aria-label={
-            unreadCount > 0
-              ? `Messages, ${unreadCount} unread`
+            attentionCount > 0
+              ? `Messages, ${attentionCount} need attention`
               : "Messages"
           }
         >
           <span className="hub-mobile-tab__icon-wrap">
             <MessageCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            {user && unreadCount > 0 && <i>{unreadCount > 9 ? "9+" : unreadCount}</i>}
+            {user && attentionCount > 0 && <i>{attentionCount > 9 ? "9+" : attentionCount}</i>}
           </span>
           <span>Messages</span>
         </button>
