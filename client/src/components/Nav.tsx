@@ -14,6 +14,8 @@ import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxCont
 import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import type { AuthUser } from "@/context/AuthContext";
 import type { ApiMessageRow } from "@/components/inbox/types";
+import HubAdminFolder from "@/components/hub/HubAdminFolder";
+import { parseHubSection } from "@/components/hub/types";
 
 type NavItem = { href: string; label: string };
 
@@ -110,6 +112,8 @@ function ProfileMenuPanel({
   onClose,
   openSheet,
   logout,
+  isAdmin,
+  canManageTeam,
 }: {
   user: AuthUser;
   profilePath: string;
@@ -120,7 +124,13 @@ function ProfileMenuPanel({
   onClose: () => void;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner" }) => void;
   logout: () => void;
+  isAdmin: boolean;
+  canManageTeam: boolean;
 }) {
+  const hubSection = hubActive
+    ? parseHubSection(new URLSearchParams(window.location.search).get("section"))
+    : undefined;
+
   return (
     <div className="site-profile-menu__panel" role="menu">
       <Link
@@ -168,6 +178,15 @@ function ProfileMenuPanel({
       >
         Notification settings
       </Link>
+      {isAdmin && (
+        <HubAdminFolder
+          variant="menu"
+          canManageTeam={canManageTeam}
+          currentSection={hubSection}
+          onClose={onClose}
+          defaultOpen={hubActive}
+        />
+      )}
       <button
         type="button"
         role="menuitem"
@@ -196,6 +215,8 @@ function ProfileMenu({
   openSheet,
   logout,
   onMenuClose,
+  isAdmin,
+  canManageTeam,
 }: {
   user: AuthUser;
   profileOpen: boolean;
@@ -209,6 +230,8 @@ function ProfileMenu({
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner" }) => void;
   logout: () => void;
   onMenuClose: () => void;
+  isAdmin: boolean;
+  canManageTeam: boolean;
 }) {
   const closeAll = () => {
     setProfileOpen(false);
@@ -218,14 +241,13 @@ function ProfileMenu({
   return (
     <div className={`site-profile-menu${profileActive ? " site-profile-menu--active" : ""}`} ref={profileRef}>
       <div className="site-profile-menu__cluster">
-        <Link
-          href="/dashboard?edit=profile"
+        <button
+          type="button"
           className="site-profile-menu__avatar-link"
-          aria-label="Edit profile"
-          onClick={() => {
-            setProfileOpen(false);
-            onMenuClose();
-          }}
+          aria-label={`Open profile menu: ${user.displayName || user.username}`}
+          aria-expanded={profileOpen}
+          aria-haspopup="menu"
+          onClick={() => setProfileOpen((open) => !open)}
         >
           <UserAvatar
             photoUrl={user.photoUrl}
@@ -235,7 +257,7 @@ function ProfileMenu({
             username={user.username}
           />
           {unreadCount > 0 && <span className="site-profile-menu__notify-dot" aria-hidden="true" />}
-        </Link>
+        </button>
         <button
           type="button"
           className={`site-profile-menu__caret${profileOpen ? " site-profile-menu__caret--open" : ""}`}
@@ -262,6 +284,8 @@ function ProfileMenu({
           onClose={closeAll}
           openSheet={openSheet}
           logout={logout}
+          isAdmin={isAdmin}
+          canManageTeam={canManageTeam}
         />
       )}
     </div>
@@ -524,6 +548,7 @@ export default function Nav() {
   });
 
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
+  const canManageTeam = Boolean(user?.canManageTeam);
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
@@ -603,6 +628,8 @@ export default function Nav() {
                 openSheet={openSheet}
                 logout={logout}
                 onMenuClose={closeMenu}
+                isAdmin={isAdmin}
+                canManageTeam={canManageTeam}
               />
             ) : (
               <button
@@ -678,6 +705,8 @@ export default function Nav() {
                   openSheet={openSheet}
                   logout={logout}
                   onMenuClose={closeMenu}
+                  isAdmin={isAdmin}
+                  canManageTeam={canManageTeam}
                 />
               </div>
             )}

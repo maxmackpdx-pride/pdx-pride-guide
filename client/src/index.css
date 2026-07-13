@@ -5025,11 +5025,15 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 .site-profile-menu__avatar-link {
   position: relative;
   display: inline-flex;
+  border: none;
+  padding: 0;
+  background: transparent;
   border-radius: 999px;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
   transition: opacity 0.12s;
+  font: inherit;
 }
 
 .site-profile-menu__avatar-link:hover {
