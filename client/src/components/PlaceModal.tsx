@@ -84,9 +84,9 @@ const NONPROFIT_RAINBOW_EDGE =
 /** Health & Care — pink → white neon edge. */
 const HEALTHCARE_EDGE =
   "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
-/** Real Estate — dark green → white neon edge. */
+/** Real Estate — neon navy → white edge. */
 const REALESTATE_EDGE =
-  "linear-gradient(125deg,#062A1F 0%,#0B3D2E 28%,#1F8A52 62%,#FFFFFF 100%)";
+  "linear-gradient(125deg,#061A66 0%,#0A1F8C 28%,#1A4DFF 62%,#FFFFFF 100%)";
 
 function Icon({ d }: { d: React.ReactNode }) {
   return (
@@ -230,7 +230,7 @@ export default function PlaceModal({
     : isHealthcare
       ? "#FF00CC"
       : isRealEstate
-        ? "#0B3D2E"
+        ? "#1A4DFF"
         : ({
             bars: "var(--pink)",
             food: "var(--orange)",
@@ -240,7 +240,7 @@ export default function PlaceModal({
             shops: "var(--amber)",
             hotels: "var(--blue)",
             healthcare: "#FF00CC",
-            realestate: "#0B3D2E",
+            realestate: "#1A4DFF",
           } as Record<string, string>)[category] || "var(--pink)";
   const edge = isNonprofit
     ? NONPROFIT_RAINBOW_EDGE

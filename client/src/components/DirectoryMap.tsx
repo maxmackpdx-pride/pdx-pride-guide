@@ -31,7 +31,7 @@ export const MAP_TYPE_COLORS: Record<string, string> = {
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
   healthcare: "#FF00CC",
-  realestate: "#0B3D2E",
+  realestate: "#1A4DFF",
 };
 
 /** CSS backgrounds for legend swatches (solid or gradient neon). */
@@ -45,7 +45,7 @@ export const MAP_TYPE_SWATCH: Record<string, string> = {
   hotel: "#FF1FA0",
   nonprofit: "conic-gradient(#FF2400,#FF6600,#FFEE00,#39FF14,#00FFFF,#0044FF,#8800FF,#FF00CC,#FF2400)",
   healthcare: "linear-gradient(135deg,#FF00CC 0%,#FF7AE0 48%,#FFFFFF 100%)",
-  realestate: "linear-gradient(135deg,#0B3D2E 0%,#1F8A52 48%,#FFFFFF 100%)",
+  realestate: "linear-gradient(135deg,#0A1F8C 0%,#1A4DFF 48%,#FFFFFF 100%)",
 };
 
 export const MAP_TYPE_LABELS: Record<string, string> = {

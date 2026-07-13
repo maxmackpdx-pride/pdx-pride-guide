@@ -95,7 +95,7 @@ const TYPE_COLORS: Record<string, string> = {
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
   healthcare: "#FF00CC", // pink pole of pink→white neon
-  realestate: "#0B3D2E", // dark green pole of green→white neon
+  realestate: "#1A4DFF", // neon navy pole of navy→white neon
 };
 
 const NEIGHBORHOODS = [
