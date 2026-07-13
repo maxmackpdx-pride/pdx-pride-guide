@@ -75,12 +75,9 @@ export default function Home() {
 
   const upNext = useMemo(() => eventsForMonday(events, 4), [events]);
   const countdownTarget = useMemo(() => earliestPrideWeekStartTarget(events), [events]);
-  // /api/events expands multi-day festivals into one row per day — "total events"
-  // is unique listings (by id), not day-instances.
-  const eventCount = useMemo(
-    () => new Set(events.map(e => e.id)).size,
-    [events],
-  );
+  // Same source as /events hero: expanded listings from GET /api/events
+  // (multi-day festivals count once per day they appear on the board).
+  const eventCount = events.length;
   const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
   const goingCount = useMemo(
     () => Object.values(attendanceSummaries).reduce((sum, s) => sum + (s?.count ?? 0), 0),
