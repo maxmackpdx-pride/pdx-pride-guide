@@ -140,7 +140,7 @@ export default function TheBigOne({
   onOpen,
   className = "",
 }: TheBigOneProps) {
-  const poster = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const day = (event.dayOfWeek || "").toUpperCase();
   const dayColor = dayAccentToken(day || "SAT");
   const whenLine = formatWhenLine(event);
