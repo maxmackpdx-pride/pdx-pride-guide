@@ -150,7 +150,7 @@ export default function InboxGroupChat({ target, onBack }: Props) {
     ? windowState === "BEFORE"
       ? opensAtLabel
         ? `Opens ${opensAtLabel}`
-        : "Opens 6h before doors"
+        : "Opens 48h before doors"
       : windowState === "OPEN"
         ? countdown ?? "Open now"
         : "Chat closed"
@@ -158,12 +158,12 @@ export default function InboxGroupChat({ target, onBack }: Props) {
 
   const emptyCopy = isEvent
     ? windowState === "BEFORE"
-      ? "You're on the list. The room opens 6 hours before doors."
+      ? "You're on the list. The room opens 48 hours before doors."
       : windowState === "OPEN"
-        ? "You're checked in. Say hi — everyone going can see this."
+        ? "You're checked in. Say hi. Everyone going can see this."
         : "This chat has closed."
     : chatOpen
-      ? "You're checked in. Say hi — others heading out today can see this until 10pm."
+      ? "You're checked in. Say hi. Others heading out can see this until 10pm."
       : "Check in on the beach page to unlock this room (visible check-in only).";
 
   const badge = isEvent ? "EVENT GROUP" : "RIVER BRATS";

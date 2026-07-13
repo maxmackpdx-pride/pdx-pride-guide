@@ -75,7 +75,7 @@ export default function RiverBratsShell({ beachId }: Props) {
         </h2>
         <p className="river-brats__hero-lede">
           Check in up to 7 days ahead, say how long you&apos;ll stay, and add it to your calendar.
-          On the day, you drop into the {beachChatName} group chat until 10pm. No addresses, no drama.
+          Chat opens 48 hours before your beach day and stays open until 10pm. No addresses, no drama.
         </p>
       </div>
 

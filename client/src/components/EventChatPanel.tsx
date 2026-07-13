@@ -113,8 +113,8 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
   const metaLine =
     windowState === "BEFORE"
       ? opensAtLabel
-        ? `Chat opens ${opensAtLabel} (6h before doors)`
-        : "Chat opens 6 hours before doors"
+        ? `Chat opens ${opensAtLabel} (48h before doors)`
+        : "Chat opens 48 hours before doors"
       : windowState === "OPEN"
         ? countdown ?? "Open now"
         : "Chat closed";
@@ -189,7 +189,7 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
           {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
           {!isLoading && messages.length === 0 && windowState === "BEFORE" && (
             <p className="event-chat-panel__empty">
-              You're on the list. The room opens 6 hours before doors — check back then.
+              You&apos;re on the list. The room opens 48 hours before doors. Check back then.
             </p>
           )}
           {!isLoading && messages.length === 0 && windowState === "OPEN" && (

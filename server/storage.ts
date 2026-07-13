@@ -52,7 +52,15 @@ import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLo
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
-import { pacificMidnightIso, pacificTodayDate, riverBratsChatClosesAtIso, riverBratsArrivalPromptIso, beachVenueLabel } from "@shared/riverBrats";
+import {
+  pacificMidnightIso,
+  pacificTodayDate,
+  riverBratsChatClosesAtIso,
+  riverBratsChatOpensAtIso,
+  isRiverBratsChatOpen,
+  riverBratsArrivalPromptIso,
+  beachVenueLabel,
+} from "@shared/riverBrats";
 import { getEventChatWindow, CHAT_RETENTION_DAYS } from "@shared/eventChatWindow";
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { haversineMeters } from "@shared/geo";
@@ -5743,7 +5751,7 @@ export interface IStorage {
   claimDuePrompts(nowIso: string, limit?: number): any[];
   purgeExpiredChatMessages(now?: number): void;
   getMyGroupChats(userId: number): any[];
-  getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number): { messages: any[]; expiresAt: string | null; chatOpen: boolean };
+  getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number): { messages: any[]; expiresAt: string | null; opensAt?: string | null; chatOpen: boolean };
   postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string): any;
   expireBeachCarpoolPosts(): void;
   getBeachCarpoolPosts(beachId: string, tripDate: string, viewerUserId?: number): any[];
@@ -7350,7 +7358,7 @@ export const storage: IStorage = {
     const mine = getActiveAttendanceForUser(eventId, userId);
     if (!mine && !isHost) throw new Error("Active check-in required");
     if (win) {
-      if (win.state === "BEFORE") throw new Error("Event chat opens 6 hours before doors");
+      if (win.state === "BEFORE") throw new Error("Event chat opens 48 hours before doors");
       if (win.state === "CLOSED") throw new Error("Event chat has closed");
     } else if (!mine || (mine.expiresAt && mine.expiresAt <= new Date().toISOString())) {
       throw new Error("Event chat has closed");
@@ -9503,24 +9511,26 @@ export const storage: IStorage = {
         href: `/events/${eventId}?chat=1`,
       });
     }
-    // Beach room: today's active check-in, pre-10pm.
-    const today = pacificTodayDate(now);
+    // Beach rooms: active non-anon check-in while chat is in the open window
+    // (opens 48h before that beach day, closes 10pm Pacific that day).
     const beachRows = sqlite.prepare(`
-      SELECT beach_id AS beachId FROM beach_checkins
-      WHERE user_id = ? AND calendar_date = ? AND is_active = 1
+      SELECT beach_id AS beachId, calendar_date AS calendarDate FROM beach_checkins
+      WHERE user_id = ? AND is_active = 1
         AND COALESCE(is_anonymous, 0) = 0
-    `).all(userId, today) as Array<{ beachId: string }>;
-    for (const { beachId } of beachRows) {
-      const closesAt = riverBratsChatClosesAtIso(today);
+    `).all(userId) as Array<{ beachId: string; calendarDate: string }>;
+    for (const { beachId, calendarDate } of beachRows) {
+      if (!isRiverBratsChatOpen(calendarDate, now)) continue;
+      const opensAt = riverBratsChatOpensAtIso(calendarDate);
+      const closesAt = riverBratsChatClosesAtIso(calendarDate);
       if (closesAt <= nowIso) continue;
       out.push({
         kind: "BEACH",
         id: beachId,
         title: beachVenueLabel(beachId as any),
         state: "OPEN",
-        opensAt: null,
+        opensAt,
         closesAt,
-        href: `/nude-beaches?tab=${beachId}&chat=1`,
+        href: `/nude-beaches?tab=${beachId}&chat=1&date=${calendarDate}`,
       });
     }
     out.sort((a, b) => String(a.closesAt).localeCompare(String(b.closesAt)));
@@ -9528,17 +9538,17 @@ export const storage: IStorage = {
   },
   getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number) {
     storage.expireRiverBratsCheckins();
-    // Close is computed from the calendar date (10pm Pacific) rather than the
-    // stored expires_at, so pre-deploy rows stamped with midnight still gate
-    // correctly with zero migration.
+    // Window: opens 48h before the beach day (Pacific midnight of that date
+    // minus 48h), closes 10pm Pacific that day.
     const closesAt = riverBratsChatClosesAtIso(calendarDate);
-    // Day-room only opens on the Pacific calendar date of the check-in (not early).
-    const isToday = calendarDate === pacificTodayDate();
-    const chatOpen = isToday && closesAt > new Date().toISOString();
+    const opensAt = riverBratsChatOpensAtIso(calendarDate);
+    const chatOpen = isRiverBratsChatOpen(calendarDate);
     const mine = storage.getBeachCheckinByUser(beachId, viewerUserId, calendarDate);
     // Anonymous check-ins are counted in "going" but are never connected to the
-    // chat — they can neither read nor post.
-    if (!mine || (mine as any).is_anonymous) return { messages: [], expiresAt: closesAt, chatOpen: false };
+    // chat. They can neither read nor post.
+    if (!mine || (mine as any).is_anonymous) {
+      return { messages: [], expiresAt: closesAt, opensAt, chatOpen: false };
+    }
     const rows = sqlite.prepare(`
       SELECT m.id, m.beach_id AS beachId, m.calendar_date AS calendarDate, m.user_id AS userId,
              m.body, m.is_anonymous AS isAnonymous, m.created_at AS createdAt,
@@ -9583,6 +9593,7 @@ export const storage: IStorage = {
     return {
       messages,
       expiresAt: closesAt,
+      opensAt,
       chatOpen,
     };
   },
@@ -9591,10 +9602,11 @@ export const storage: IStorage = {
     if (!mine) throw new Error("Active check-in required");
     // Anonymous check-ins stay off the chat and cannot post.
     if ((mine as any).is_anonymous) throw new Error("Anonymous check-ins can't post to the chat");
-    if (calendarDate !== pacificTodayDate()) {
-      throw new Error("Beach chat opens on that day");
+    const nowIso = new Date().toISOString();
+    if (nowIso < riverBratsChatOpensAtIso(calendarDate)) {
+      throw new Error("Beach chat opens 48 hours before that day");
     }
-    if (riverBratsChatClosesAtIso(calendarDate) <= new Date().toISOString()) {
+    if (riverBratsChatClosesAtIso(calendarDate) <= nowIso) {
       throw new Error("Beach chat closed at 10pm");
     }
     const createdAt = new Date().toISOString();

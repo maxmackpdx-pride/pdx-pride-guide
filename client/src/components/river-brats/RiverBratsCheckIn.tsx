@@ -7,6 +7,7 @@ import {
   RIVER_BRATS_HOUR_END,
   RIVER_BRATS_HOUR_START,
   beachCheckinDateOptions,
+  isRiverBratsChatOpen,
   defaultDepartHour,
   formatBeachCheckinDateLabel,
   formatRiverBratsHour,
@@ -92,8 +93,9 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   // Anonymous check-ins are counted in "going" but never connected to the group
   // chat — they can't read or post, since the chat is not anonymous.
   const isAnon = Boolean(mine?.isAnonymous);
-  // Day-room only on the calendar day itself.
-  const inChat = checkedIn && !isAnon && isViewingToday;
+  // Day-room opens 48h before the beach day and closes 10pm that day.
+  const chatWindowOpen = isRiverBratsChatOpen(selectedDate);
+  const inChat = checkedIn && !isAnon && chatWindowOpen;
   const goingCount = rows.length;
 
   const departHourOptions = useMemo(() => {
@@ -170,9 +172,9 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
       const dayLabel = formatBeachCheckinDateLabel(selectedDate);
       toast({
         title: "Checked in",
-        description: isViewingToday
+        description: chatWindowOpen
           ? "Beach chat is open until 10pm. Add it to your calendar if you want."
-          : `You're on the ${dayLabel} list. Chat opens that day. Add it to your calendar if you want.`,
+          : `You're on the ${dayLabel} list. Chat opens 48 hours before that day. Add it to your calendar if you want.`,
       });
       if (row?.id) {
         // Keep local calendar payload id for ICS UID stability after first save.
@@ -514,7 +516,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             )}
           </div>
           <p className="rb-checkin__fine">
-            Plan up to 7 days ahead. Chat opens that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
+            Plan up to 7 days ahead. Chat opens 48 hours before that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
           </p>
         </section>
 
@@ -558,7 +560,11 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
                 ) : (
                   <>
                     {dayLabel} · {formatRiverBratsWindow(mine.arrival_hour, mine.depart_hour)}{" "}
-                    {isAnon ? "· off the chat (anonymous)" : isViewingToday ? "· in the chat" : "· chat opens that day"}
+                    {isAnon
+                      ? "· off the chat (anonymous)"
+                      : chatWindowOpen
+                        ? "· in the chat"
+                        : "· chat opens 48h before that day"}
                   </>
                 )}
               </div>

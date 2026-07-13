@@ -118,6 +118,23 @@ export function riverBratsChatClosesAtIso(dateStr: string): string {
   return new Date(`${dateStr}T22:00:00-07:00`).toISOString();
 }
 
+/** Beach day-room opens this far before Pacific midnight at the start of the beach day. */
+export const RIVER_BRATS_CHAT_OPENS_BEFORE_MS = 48 * 60 * 60 * 1000;
+
+/** ISO open time: 48 hours before 00:00 Pacific on the beach calendar date. */
+export function riverBratsChatOpensAtIso(dateStr: string): string {
+  const dayStart = new Date(`${dateStr}T00:00:00-07:00`).getTime();
+  return new Date(dayStart - RIVER_BRATS_CHAT_OPENS_BEFORE_MS).toISOString();
+}
+
+/** True while now is in [opensAt, closesAt) for that beach day room. */
+export function isRiverBratsChatOpen(dateStr: string, now = Date.now()): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const opens = new Date(riverBratsChatOpensAtIso(dateStr)).getTime();
+  const closes = new Date(riverBratsChatClosesAtIso(dateStr)).getTime();
+  return now >= opens && now < closes;
+}
+
 /** ISO fire time for an arrival-hour prompt on a given calendar date. */
 export function riverBratsArrivalPromptIso(dateStr: string, hour: number): string {
   return new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00-07:00`).toISOString();

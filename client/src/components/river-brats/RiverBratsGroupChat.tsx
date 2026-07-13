@@ -156,7 +156,7 @@ export default function RiverBratsGroupChat({
 
       <MaybeAdultGate gated={checkedIn}>
       <div className="rb-group-chat__thread" ref={listRef}>
-        <div className="rb-group-chat__day-marker">Today · clears at 10pm</div>
+        <div className="rb-group-chat__day-marker">Opens 48h early · clears at 10pm</div>
         {isLoading && !locked && <p className="rb-group-chat__empty">Loading chat…</p>}
         {!isLoading && messages.length === 0 && !locked && (
           <p className="rb-group-chat__empty">
