@@ -80,7 +80,6 @@ export default function ProfileHero({
       ? new Date(data.memberSince).getFullYear()
       : null;
   const metaLine = buildMetaLine(data, memberYear);
-  const verified = !!(data.verifiedHost || isPromoter);
 
   const avatar = (
     <UserAvatar
@@ -124,13 +123,11 @@ export default function ProfileHero({
           <div className="pp-hero__meta">
             <div className="pp-hero__name-row">
               <h1 className="display pp-hero__name">{displayName}</h1>
-              {verified && (
-                <span className="pp-hero__verified" title="Verified">
-                  <span className="pp-hero__verified-mark" aria-hidden="true">✓</span>
-                  <span className="pp-hero__verified-label">Verified</span>
-                </span>
-              )}
-              <RoleStickers isPromoter={isPromoter} isAdmin={data.isAdmin} />
+              <RoleStickers
+                isPromoter={isPromoter}
+                isAdmin={data.isAdmin}
+                isSiteOwner={data.isSiteOwner}
+              />
             </div>
 
             <div className="pp-hero__subrow">

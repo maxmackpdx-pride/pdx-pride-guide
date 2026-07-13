@@ -4,11 +4,14 @@
 .pp-hero--reimagined {
   position: relative;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
   overflow: visible;
   isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  box-sizing: border-box;
   animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
 }
 
@@ -23,7 +26,8 @@
   inset: auto;
   display: block;
   width: 100%;
-  height: 120px;
+  max-width: 100%;
+  height: clamp(108px, 22vw, 160px);
   object-fit: cover;
   object-position: center;
   z-index: 0;
@@ -98,7 +102,7 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 120px;
+  height: clamp(108px, 22vw, 160px);
   z-index: 1;
   background: linear-gradient(180deg, rgba(10, 10, 10, 0.12), rgba(10, 10, 10, 0.92));
   pointer-events: none;
@@ -109,11 +113,14 @@
 }
 
 .pp-hero--reimagined .pp-hero__content {
-  margin-top: -44px;
-  padding: 0 clamp(16px, 3vw, 30px) 18px;
+  margin-top: clamp(-40px, -8vw, -44px);
+  padding: 0 clamp(16px, 3vw, 40px) 18px;
   position: relative;
   z-index: 3;
   gap: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pp-hero--reimagined .pp-hero__identity {
@@ -306,27 +313,29 @@
   .pp-hero--reimagined .pp-hero__banner,
   .pp-hero--reimagined .pp-hero__banner-fallback,
   .pp-hero--reimagined .pp-hero__scrim {
-    height: 210px;
+    height: clamp(180px, 18vw, 260px);
   }
 
   .pp-hero--reimagined .pp-hero__content {
-    margin-top: -52px;
-    padding: 0 clamp(24px, 3.4vw, 30px) 20px;
+    margin-top: clamp(-48px, -5vw, -52px);
+    padding: 0 clamp(24px, 3.4vw, 40px) 20px;
   }
 
   .pp-hero--reimagined .pp-hero__identity {
     flex-direction: row;
     align-items: flex-end;
-    gap: 22px;
-    flex-wrap: nowrap;
+    gap: clamp(16px, 2.4vw, 28px);
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
   }
 
   .pp-hero--reimagined .pp-hero__avatar .user-avatar {
-    --avatar-size: 128px !important;
+    --avatar-size: clamp(104px, 10vw, 128px) !important;
   }
 
   .pp-hero--reimagined .pp-hero__name {
-    font-size: clamp(2.2rem, 3.2vw, 2.75rem);
+    font-size: clamp(2rem, 3.2vw, 2.85rem);
   }
 
   .pp-hero__verified-label {
@@ -363,6 +372,12 @@
 
   .pp-hero__actions--mobile {
     display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .pp-hero--reimagined .pp-hero__bio {
+    max-width: min(44rem, 72%);
   }
 }
 

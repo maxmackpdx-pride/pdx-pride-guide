@@ -1,12 +1,25 @@
-import { useCallback, useEffect, useState, type FormEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
+import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { ProfileBoardPost } from "./types";
 import "./UpdatesPanel.css";
+
+const BOARD_GLOW: Record<string, string> = {
+  GIG: "var(--panel-purple, #b06bff)",
+  GIFTING: "var(--panel-lime, #c8fa3c)",
+  HUB: "var(--panel-cyan, #00ffff)",
+};
+
+const BOARD_BADGE: Record<string, string> = {
+  GIG: "GIG",
+  GIFTING: "GIFT",
+  HUB: "UPDATE",
+};
 
 export type UpdatesAuthor = {
   photoUrl?: string | null;
@@ -104,6 +117,14 @@ function nativeCtaLabel(type: string | null): string {
   return "OPEN BOARD";
 }
 
+function isBoardOverlayType(type: string | null): type is "GIG" | "GIFTING" {
+  return type === "GIG" || type === "GIFTING";
+}
+
+function boardOverlayKind(type: "GIG" | "GIFTING"): "gig" | "gifting" {
+  return type === "GIG" ? "gig" : "gifting";
+}
+
 export default function UpdatesPanel({
   posts,
   author,
@@ -122,6 +143,7 @@ export default function UpdatesPanel({
   const [threadLoading, setThreadLoading] = useState<Record<string, boolean>>({});
   const [draftByKey, setDraftByKey] = useState<Record<string, string>>({});
   const [replyPending, setReplyPending] = useState<Record<string, boolean>>({});
+  const [boardOverlay, setBoardOverlay] = useState<{ kind: "gig" | "gifting"; postId: number } | null>(null);
 
   const name = (author.displayName || author.username || "Member").trim();
   const rightMeta = metaLabel || `POSTS BY ${name.toUpperCase()}`;
@@ -185,11 +207,21 @@ export default function UpdatesPanel({
     }
   };
 
+  const openBoardCard = useCallback((post: UpdatesPost) => {
+    const type = contentTypeForPost(post);
+    if (!isBoardOverlayType(type)) return;
+    setBoardOverlay({ kind: boardOverlayKind(type), postId: post.id });
+  }, []);
+
   const handleToggleThread = async (post: UpdatesPost, e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     const type = contentTypeForPost(post);
     if (!type) return;
+    if (isBoardOverlayType(type)) {
+      openBoardCard(post);
+      return;
+    }
     const key = likeKey(post);
     if (expandedKey === key) {
       setExpandedKey(null);
@@ -198,6 +230,22 @@ export default function UpdatesPanel({
     setExpandedKey(key);
     if (!threadByKey[key]) {
       await loadThread(post, key);
+    }
+  };
+
+  const handleCardActivate = (post: UpdatesPost) => {
+    const type = contentTypeForPost(post);
+    if (isBoardOverlayType(type)) {
+      openBoardCard(post);
+    }
+  };
+
+  const handleCardKeyDown = (post: UpdatesPost, e: KeyboardEvent) => {
+    const type = contentTypeForPost(post);
+    if (!isBoardOverlayType(type)) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openBoardCard(post);
     }
   };
 
@@ -275,10 +323,19 @@ export default function UpdatesPanel({
           const threadMode = isThreadType(type);
           const nativeHref =
             thread?.nativeHref || (!threadMode ? nativeHrefFor(type, post.id) : null);
-          const clickable = typeof onPostClick === "function" && !expanded;
+          const isBoardCard = isBoardOverlayType(type);
+          const glow = type ? BOARD_GLOW[type] : null;
+          const badgeColor = glow || post.color;
+          const badgeLabel = type ? (BOARD_BADGE[type] || post.board.toUpperCase()) : post.board.toUpperCase();
+          const showSubject = isBoardCard && !!(post.title || post.text);
+          const subjectLine = post.title || post.text;
+          const clickable = typeof onPostClick === "function" && !expanded && !isBoardCard;
 
           const footer = (
-            <div className="pp-updates__footer">
+            <div
+              className="pp-updates__footer"
+              onClick={isBoardCard ? e => e.stopPropagation() : undefined}
+            >
               {canLike ? (
                 <button
                   type="button"
@@ -302,9 +359,11 @@ export default function UpdatesPanel({
                   aria-expanded={expanded}
                   aria-controls={`pp-updates-thread-${key}`}
                   aria-label={
-                    expanded
-                      ? `Hide replies (${replies})`
-                      : `Show replies (${replies})`
+                    isBoardCard
+                      ? `Open board card (${replies} replies)`
+                      : expanded
+                        ? `Hide replies (${replies})`
+                        : `Show replies (${replies})`
                   }
                 >
                   💬 {replies}
@@ -418,25 +477,77 @@ export default function UpdatesPanel({
 
           const body = (
             <>
-              <div className="pp-updates__card-head">
+              <div className="pp-updates__card-top">
                 <UserAvatar
                   photoUrl={author.photoUrl}
                   avatarChoice={author.avatarChoice}
                   avatarRing={author.avatarRing}
                   displayName={author.displayName}
                   username={author.username}
-                  size={30}
+                  size={44}
                 />
-                <div className="pp-updates__card-id">
-                  <div className="display pp-updates__name">{name}</div>
-                  {when ? <div className="pp-updates__when">{when}</div> : null}
+                <div className="pp-updates__card-main">
+                  <div className="pp-updates__card-row">
+                    <div className="pp-updates__card-id">
+                      <div className="display pp-updates__name">{name}</div>
+                      <div className="pp-updates__kick">
+                        {post.board}
+                        {when ? ` · ${when}` : ""}
+                      </div>
+                    </div>
+                    <span
+                      className="pp-updates__badge"
+                      style={{
+                        color: badgeColor,
+                        borderColor: badgeColor,
+                      }}
+                    >
+                      {badgeLabel}
+                    </span>
+                  </div>
+                  {showSubject ? (
+                    <h4 className="display pp-updates__subject">{subjectLine}</h4>
+                  ) : null}
+                  {post.text && (!showSubject || post.text !== subjectLine) ? (
+                    <p className="pp-updates__text">{post.text}</p>
+                  ) : null}
+                  {post.where ? (
+                    <div className="pp-updates__kick pp-updates__where">{post.where}</div>
+                  ) : null}
+                  {isBoardCard ? (
+                    <div className="pp-updates__open-hint">OPEN CARD →</div>
+                  ) : null}
                 </div>
               </div>
-              <p className="pp-updates__text">{post.text}</p>
               {footer}
-              {threadPanel}
+              {!isBoardCard ? threadPanel : null}
             </>
           );
+
+          const cardClass = [
+            "card",
+            "fitem",
+            glow ? "fitem--glow" : "",
+            "pp-updates__card",
+            expanded ? "is-expanded" : "",
+            isBoardCard ? "pp-updates__card--board" : "",
+            clickable ? "pp-updates__card--btn" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          const cardStyle = glow
+            ? {
+                border: `1px solid ${glow}`,
+                boxShadow: `0 0 22px -9px ${glow}`,
+              }
+            : undefined;
+
+          const cardProps = {
+            className: cardClass,
+            style: cardStyle,
+            ...(type ? { "data-content-type": type } : {}),
+          };
 
           if (clickable) {
             return (
@@ -444,10 +555,8 @@ export default function UpdatesPanel({
                 key={key}
                 type="button"
                 role="listitem"
-                className={`pp-updates__card pp-updates__card--btn${
-                  expanded ? " is-expanded" : ""
-                }`}
-                onClick={() => onPostClick(post)}
+                {...cardProps}
+                onClick={() => onPostClick?.(post)}
               >
                 {body}
               </button>
@@ -457,14 +566,25 @@ export default function UpdatesPanel({
           return (
             <article
               key={key}
-              role="listitem"
-              className={`pp-updates__card${expanded ? " is-expanded" : ""}`}
+              role={isBoardCard ? "button" : "listitem"}
+              tabIndex={isBoardCard ? 0 : undefined}
+              {...cardProps}
+              onClick={isBoardCard ? () => handleCardActivate(post) : undefined}
+              onKeyDown={isBoardCard ? e => handleCardKeyDown(post, e) : undefined}
             >
               {body}
             </article>
           );
         })}
       </div>
+
+      {boardOverlay ? (
+        <BoardPostOverlay
+          kind={boardOverlay.kind}
+          postId={boardOverlay.postId}
+          onClose={() => setBoardOverlay(null)}
+        />
+      ) : null}
     </section>
   );
 }

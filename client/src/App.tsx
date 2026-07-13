@@ -76,8 +76,8 @@ function AppLayout() {
       style={{ background: "#0a0a0a" }}
     >
       <PullToRefresh />
-      {!profile && <Nav />}
-      {!profile && !adminShell && <MobileBottomNav />}
+      <Nav />
+      {!adminShell && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
           <Switch>
@@ -111,9 +111,9 @@ function AppLayout() {
           </Switch>
         </RouteBoundary>
       </main>
-      {!profile && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
-      {!profile && <Footer />}
-      {!profile && <FloatingInbox />}
+      <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
+      <Footer />
+      <FloatingInbox />
     </div>
   );
 }

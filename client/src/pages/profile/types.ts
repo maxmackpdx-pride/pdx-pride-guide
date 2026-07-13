@@ -53,6 +53,7 @@ export type ProfileBoardPostWire = {
   contentType?: "GIG" | "GIFTING" | "SPOTTED" | "HUB" | string;
   color?: string;
   where?: string;
+  title?: string | null;
   text: string;
   createdAt?: string | null;
   likes?: number;
@@ -148,6 +149,8 @@ export type MemberProfileData = {
   isOwner?: boolean;
   /** Site admin (env list, site_admin_grants, or subAdmin). */
   isAdmin?: boolean;
+  /** Primary site owner — OWNER sticker instead of ADMIN. */
+  isSiteOwner?: boolean;
   /** True when the signed-in viewer is a site admin viewing someone else's profile. */
   viewerIsAdmin?: boolean;
   isFollowing?: boolean;

@@ -1,8 +1,10 @@
 /* Public profile page: Profile.dc.html redesign */
 
 .pp-page {
-  min-height: 100vh;
   width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
   background: var(--ink-900, #0a0a0a);
   color: var(--text-mid);
   --profile-acc: var(--neon-magenta);
@@ -16,8 +18,9 @@
 .app-shell--profile > main {
   padding: 0;
   margin: 0;
-  max-width: none;
+  max-width: 100%;
   width: 100%;
+  overflow-x: clip;
 }
 
 .app-shell--profile .film-grain-overlay {
@@ -1110,11 +1113,28 @@ a.pp-btn {
   .pp-hero__name { font-size: 2rem; }
 }
 
+@media (max-width: 380px) {
+  .pp-stats--reimagined .pp-stats__num {
+    font-size: 17px;
+  }
+
+  .pp-stats--reimagined .pp-stats__label {
+    font-size: 7px;
+    letter-spacing: 0.1em;
+  }
+
+  .pp-stats--reimagined .pp-stats__item {
+    padding: 10px 4px;
+  }
+}
+
 /* ─── Reimagined profile (3a): layout chrome ─── */
 
 .pp-page--reimagined {
-  min-height: 100vh;
   width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
   background: var(--ink-900, #0a0a0a);
   color: var(--text-mid, #c8c8d0);
   --profile-acc: var(--neon-magenta);
@@ -1123,7 +1143,7 @@ a.pp-btn {
 
 .pp-page--loading,
 .pp-page--error {
-  min-height: 100vh;
+  min-height: clamp(280px, 52vh, 520px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1131,17 +1151,20 @@ a.pp-btn {
 }
 
 .pp-page--reimagined .pp-shell {
-  max-width: 1000px;
+  width: 100%;
+  max-width: min(1180px, 100%);
   margin: 0 auto;
-  padding-bottom: 32px;
+  padding-bottom: clamp(24px, 4vw, 48px);
+  box-sizing: border-box;
 }
 
-/* Hide global chrome padding when profile page is mounted */
+/* Profile content spans the main column; panels keep their own horizontal rhythm */
 main:has(.profile-page),
 main:has(.pp-page--reimagined) {
   padding: 0;
-  max-width: none;
+  max-width: 100%;
   width: 100%;
+  overflow-x: clip;
 }
 
 /* Stat strip: 4 equal columns (Followers · Hosting · Attended · Going) */
@@ -1152,7 +1175,9 @@ main:has(.pp-page--reimagined) {
   border-bottom: 1px solid #1c1c22;
   margin: 0;
   padding: 0;
-  max-width: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pp-stats--reimagined .pp-stats__cell {
@@ -1223,8 +1248,11 @@ main:has(.pp-page--reimagined) {
 .pp-split {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 14px 18px 8px;
+  gap: clamp(16px, 2.5vw, 26px);
+  padding: 14px clamp(16px, 3vw, 30px) 8px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .pp-split__left,
@@ -1238,16 +1266,24 @@ main:has(.pp-page--reimagined) {
 @media (min-width: 900px) {
   .pp-split {
     display: grid;
-    grid-template-columns: 1.35fr 1fr;
-    gap: 26px;
-    padding: 14px 30px 8px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: clamp(20px, 2.8vw, 32px);
+  }
+}
+
+@media (min-width: 1280px) {
+  .pp-page--reimagined .pp-shell {
+    max-width: min(1280px, 100%);
   }
 }
 
 /* Close seam */
 .pp-close {
-  padding: 18px 18px 28px;
+  padding: 18px clamp(16px, 3vw, 40px) 28px;
   margin-top: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pp-close__seam {
@@ -1265,7 +1301,7 @@ main:has(.pp-page--reimagined) {
 .pp-close__row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px 16px;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 10px;
@@ -1283,31 +1319,11 @@ main:has(.pp-page--reimagined) {
   color: var(--neon-cyan, #00ffff);
 }
 
-.pp-close__mantra-long {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .pp-close {
-    padding: 14px 30px 28px;
-  }
-  .pp-close__mantra-short {
-    display: none;
-  }
-  .pp-close__mantra-long {
-    display: inline;
-  }
-}
-
 /* Panel spacing rhythm */
 .pp-page--reimagined .hp-panel {
-  padding-left: 18px;
-  padding-right: 18px;
-}
-
-@media (min-width: 900px) {
-  .pp-page--reimagined .hp-panel {
-    padding-left: 30px;
-    padding-right: 30px;
-  }
+  padding-left: clamp(16px, 3vw, 40px);
+  padding-right: clamp(16px, 3vw, 40px);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }

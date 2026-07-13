@@ -23,6 +23,7 @@ export type ProfileBoardPost = {
   board: string;
   color: string;
   where: string;
+  title?: string | null;
   text: string;
   createdAt?: string;
   /** Like target type for POST /api/content/:type/:id/like */
@@ -107,9 +108,11 @@ export type PublicProfileData = {
   isPromoter?: boolean;
   /**
    * Site admin on the public profile. May be absent until the API exposes it;
-   * RoleStickers also checks username allowlist (tucker_pdmax) and roles.
+   * Role stickers also use isSiteOwner for the primary owner badge.
    */
   isAdmin?: boolean;
+  /** Primary site owner — OWNER sticker instead of ADMIN. */
+  isSiteOwner?: boolean;
   roles?: string[];
   accentColor?: string;
   profileBanner?: string | null;
