@@ -292,10 +292,6 @@
   letter-spacing: 0.01em;
 }
 
-.about-v2-manifesto__shout-pink {
-  color: var(--pink, #ff1fa0);
-}
-
 .about-v2-manifesto__glitch {
   color: var(--pink, #ff1fa0);
   display: inline-block;

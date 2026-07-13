@@ -94,7 +94,7 @@ export default function About() {
           </div>
           <div className="about-v2-manifesto__shout">
             <p>
-              <span className="about-v2-manifesto__shout-pink">Fuck Meta.</span>
+              <span className="about-v2-manifesto__glitch">Fuck Meta.</span>
             </p>
             <p>
               Stop censoring our community.
