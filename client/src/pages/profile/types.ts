@@ -4,11 +4,13 @@ export type ProfileEvent = {
   id: number;
   title: string;
   venueName?: string | null;
+  neighborhood?: string | null;
   dayOfWeek?: string | null;
   dateStart?: string | null;
   dateEnd?: string | null;
   admission?: string | null;
   ticketUrl?: string | null;
+  posterImageUrl?: string | null;
 };
 
 export type ProfileGig = {
@@ -19,6 +21,8 @@ export type ProfileGig = {
   status?: string | null;
   createdAt?: string | null;
   description?: string | null;
+  likes?: number;
+  replies?: number;
 };
 
 export type ProfileGifting = {
@@ -27,6 +31,8 @@ export type ProfileGifting = {
   neighborhood?: string | null;
   createdAt?: string | null;
   description?: string | null;
+  likes?: number;
+  replies?: number;
 };
 
 export type ProfileSpotted = {
@@ -36,6 +42,21 @@ export type ProfileSpotted = {
   dayOfWeek?: string | null;
   venueHint?: string | null;
   createdAt?: string | null;
+  likes?: number;
+  replies?: number;
+};
+
+/** Public profile Updates / board cards with engagement counts. */
+export type ProfileBoardPostWire = {
+  id: number;
+  board: string;
+  contentType?: "GIG" | "GIFTING" | "SPOTTED" | "HUB" | string;
+  color?: string;
+  where?: string;
+  text: string;
+  createdAt?: string | null;
+  likes?: number;
+  replies?: number;
 };
 
 export type ProfileVenue = {
@@ -125,6 +146,8 @@ export type MemberProfileData = {
   profilePhotos?: ProfilePhoto[];
   stats?: { events: number; hosting: number; going: number; posts: number; gigs: number; gifting: number; checkIns: number; followers: number };
   isOwner?: boolean;
+  /** Site admin (env list, site_admin_grants, or subAdmin). */
+  isAdmin?: boolean;
   isFollowing?: boolean;
   activity?: {
     hostedEvents?: ProfileEvent[];
@@ -135,6 +158,8 @@ export type MemberProfileData = {
     goingTo?: ProfileEvent[];
     attendedPast?: ProfileEvent[];
   };
+  /** Updates rail posts with live likes / replies when present. */
+  boardPosts?: ProfileBoardPostWire[];
   linkedVenues?: ProfileVenue[];
 };
 

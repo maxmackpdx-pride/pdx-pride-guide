@@ -1,0 +1,23 @@
+.pp-role-stickers {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Name-row stickers: StickerBadge sm, tightened + magenta offset like the mock */
+.pp-role-stickers .pdxSticker {
+  font-size: 0.68rem;
+  padding: 3px 7px 2px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #000;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0 var(--neon-magenta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-role-stickers .pdxSticker:hover {
+    transform: rotate(var(--_rot, -4deg));
+  }
+}

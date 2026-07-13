@@ -586,6 +586,78 @@ function ensureHubFeedPostsSchema() {
 }
 ensureHubFeedPostsSchema();
 
+/** Public content kinds that can be liked on profile Updates / board cards. */
+export const CONTENT_LIKE_TYPES = ["GIG", "GIFTING", "SPOTTED", "HUB"] as const;
+export type ContentLikeType = (typeof CONTENT_LIKE_TYPES)[number];
+
+function ensureContentLikesSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS content_likes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content_type TEXT NOT NULL,
+        content_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT '',
+        UNIQUE(content_type, content_id, user_id)
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS content_likes_content_idx ON content_likes(content_type, content_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS content_likes_user_idx ON content_likes(user_id)`);
+  } catch (e) {
+    console.error("[content_likes] schema migration failed:", e);
+  }
+}
+ensureContentLikesSchema();
+
+function bulkContentLikeCounts(contentType: ContentLikeType, ids: number[]): Map<number, number> {
+  const out = new Map<number, number>();
+  if (!ids.length) return out;
+  const unique = Array.from(new Set(ids.filter(id => Number.isFinite(id) && id > 0)));
+  if (!unique.length) return out;
+  const placeholders = unique.map(() => "?").join(",");
+  const rows = sqlite.prepare(`
+    SELECT content_id AS contentId, COUNT(*) AS cnt
+    FROM content_likes
+    WHERE content_type = ? AND content_id IN (${placeholders})
+    GROUP BY content_id
+  `).all(contentType, ...unique) as Array<{ contentId: number; cnt: number }>;
+  for (const row of rows) out.set(Number(row.contentId), Number(row.cnt) || 0);
+  return out;
+}
+
+function bulkSpottedReplyCounts(ids: number[]): Map<number, number> {
+  const out = new Map<number, number>();
+  if (!ids.length) return out;
+  const unique = Array.from(new Set(ids.filter(id => Number.isFinite(id) && id > 0)));
+  if (!unique.length) return out;
+  const placeholders = unique.map(() => "?").join(",");
+  const rows = sqlite.prepare(`
+    SELECT missed_connection_id AS contentId, COUNT(*) AS cnt
+    FROM missed_connection_threads
+    WHERE missed_connection_id IN (${placeholders})
+    GROUP BY missed_connection_id
+  `).all(...unique) as Array<{ contentId: number; cnt: number }>;
+  for (const row of rows) out.set(Number(row.contentId), Number(row.cnt) || 0);
+  return out;
+}
+
+function bulkGiftingInterestCounts(ids: number[]): Map<number, number> {
+  const out = new Map<number, number>();
+  if (!ids.length) return out;
+  const unique = Array.from(new Set(ids.filter(id => Number.isFinite(id) && id > 0)));
+  if (!unique.length) return out;
+  const placeholders = unique.map(() => "?").join(",");
+  const rows = sqlite.prepare(`
+    SELECT post_id AS contentId, COUNT(*) AS cnt
+    FROM gifting_interests
+    WHERE post_id IN (${placeholders}) AND status IN ('INTERESTED', 'SELECTED')
+    GROUP BY post_id
+  `).all(...unique) as Array<{ contentId: number; cnt: number }>;
+  for (const row of rows) out.set(Number(row.contentId), Number(row.cnt) || 0);
+  return out;
+}
+
 const MAX_EVENT_HOSTS = 3;
 
 function ensureEventHostsSchema() {
@@ -5383,7 +5455,13 @@ export interface IStorage {
   countAdminGiftingFlagged(): number;
   getAdminMetrics(): AdminMetricsSnapshot;
   hasSiteAdminGrant(userId: number): boolean;
+  /** True for env-listed admins, site_admin_grants, or sub_admin flag. */
+  userIsSiteAdmin(user: { id?: number | null; email?: string | null; username?: string | null; subAdmin?: boolean | null } | null | undefined): boolean;
   ensureSiteAdminGrant(userId: number, grantedByUserId: number | null, note?: string | null, createdAt?: string): void;
+  /** Content likes for profile Updates (GIG | GIFTING | SPOTTED | HUB). */
+  countContentLikes(contentType: string, contentId: number): number;
+  hasContentLike(contentType: string, contentId: number, userId: number): boolean;
+  toggleContentLike(contentType: string, contentId: number, userId: number): { liked: boolean; likes: number; error?: string };
   listSiteAdmins(): Array<{
     userId: number;
     username: string;
@@ -5805,7 +5883,8 @@ export const storage: IStorage = {
 
     const hostedEventsAll = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission, e.ticket_url AS ticketUrl
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission, e.ticket_url AS ticketUrl,
+             e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood
       FROM event_hosts eh
       JOIN events e ON e.id = eh.event_id
       WHERE eh.user_id = ? AND e.status = 'LIVE'
@@ -5820,43 +5899,112 @@ export const storage: IStorage = {
     const hostedUpcoming = hostedEventsAll.filter(e => !isPastEvent(e));
     const hostedPast = hostedEventsAll.filter(isPastEvent);
 
-    const gigs = storage.getGigPostsByUser(user.id)
-      .filter(gig => gig.status === "LIVE")
-      .map(gig => ({
-        id: gig.id,
-        title: gig.title,
-        venueText: gig.location || null,
-        compensation: gig.compensation || null,
-        status: gig.status,
-        createdAt: gig.createdAt,
-        description: gig.description,
-      }));
+    const gigRows = storage.getGigPostsByUser(user.id).filter(gig => gig.status === "LIVE");
     const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
-    const gifting = storage.getGiftingPostsByUser(user.id)
-      .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)))
-      .map((post: any) => ({
-        id: post.id,
-        title: post.title,
-        neighborhood: post.neighborhood,
-        createdAt: post.createdAt ?? post.created_at,
-        description: post.description,
-      }));
-    const spotted = storage.getMissedConnectionsByUser(user.id)
-      .filter((post: any) => post.status === "ACTIVE")
-      .map((post: any) => ({
-        id: post.id,
-        title: post.title,
-        body: post.body,
-        dayOfWeek: post.dayOfWeek ?? null,
-        venueHint: post.venueHint ?? null,
-        createdAt: post.createdAt,
-      }));
+    const giftingRows = storage.getGiftingPostsByUser(user.id)
+      .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)));
+    const spottedRows = storage.getMissedConnectionsByUser(user.id)
+      .filter((post: any) => post.status === "ACTIVE");
+    const hubRows = storage.getHubFeedPostsByUser(user.id, 30)
+      .filter((post: any) => post.status === "LIVE" && String(post.audience || "ALL").toUpperCase() === "ALL");
+
+    const gigLikeCounts = bulkContentLikeCounts("GIG", gigRows.map(g => g.id));
+    const giftLikeCounts = bulkContentLikeCounts("GIFTING", giftingRows.map((g: any) => g.id));
+    const spottedLikeCounts = bulkContentLikeCounts("SPOTTED", spottedRows.map((s: any) => s.id));
+    const hubLikeCounts = bulkContentLikeCounts("HUB", hubRows.map((h: any) => h.id));
+    const spottedReplyCounts = bulkSpottedReplyCounts(spottedRows.map((s: any) => s.id));
+    const giftReplyCounts = bulkGiftingInterestCounts(giftingRows.map((g: any) => g.id));
+
+    const gigs = gigRows.map(gig => ({
+      id: gig.id,
+      title: gig.title,
+      venueText: gig.location || null,
+      compensation: gig.compensation || null,
+      status: gig.status,
+      createdAt: gig.createdAt,
+      description: gig.description,
+      likes: gigLikeCounts.get(gig.id) ?? 0,
+      replies: 0,
+    }));
+    const gifting = giftingRows.map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      neighborhood: post.neighborhood,
+      createdAt: post.createdAt ?? post.created_at,
+      description: post.description,
+      likes: giftLikeCounts.get(post.id) ?? 0,
+      replies: giftReplyCounts.get(post.id) ?? 0,
+    }));
+    const spotted = spottedRows.map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      body: post.body,
+      dayOfWeek: post.dayOfWeek ?? null,
+      venueHint: post.venueHint ?? null,
+      createdAt: post.createdAt,
+      likes: spottedLikeCounts.get(post.id) ?? 0,
+      replies: spottedReplyCounts.get(post.id) ?? 0,
+    }));
+
+    // Profile Updates rail: merged board + public hub posts with real engagement.
+    const boardPosts = [
+      ...gigs.map(g => ({
+        id: g.id,
+        board: "Gigs",
+        contentType: "GIG" as const,
+        color: "var(--board-gigs)",
+        where: g.venueText || "Portland",
+        text: g.description || g.title,
+        createdAt: g.createdAt ?? null,
+        likes: g.likes,
+        replies: g.replies,
+      })),
+      ...gifting.map(g => ({
+        id: g.id,
+        board: "Gifting",
+        contentType: "GIFTING" as const,
+        color: "var(--board-gifting)",
+        where: g.neighborhood || "Portland",
+        text: g.description || g.title,
+        createdAt: g.createdAt ?? null,
+        likes: g.likes,
+        replies: g.replies,
+      })),
+      ...spotted.map(s => ({
+        id: s.id,
+        board: "Spotted",
+        contentType: "SPOTTED" as const,
+        color: "var(--board-spotted)",
+        where: s.venueHint || s.dayOfWeek || "Portland",
+        text: s.body || s.title,
+        createdAt: s.createdAt ?? null,
+        likes: s.likes,
+        replies: s.replies,
+      })),
+      ...hubRows.map((h: any) => ({
+        id: h.id,
+        board: "Updates",
+        contentType: "HUB" as const,
+        color: "var(--neon-cyan)",
+        where: "Hub",
+        text: String(h.body || "").trim() || (h.photoUrl ? "Shared a photo" : "Update"),
+        createdAt: h.createdAt ?? h.created_at ?? null,
+        likes: hubLikeCounts.get(h.id) ?? 0,
+        replies: 0,
+      })),
+    ].sort((a, b) => {
+      const ta = a.createdAt ? Date.parse(String(a.createdAt)) : 0;
+      const tb = b.createdAt ? Date.parse(String(b.createdAt)) : 0;
+      return tb - ta;
+    });
 
     const checkIns = storage.getAttendancesByUser(user.id).length;
 
     const attendedAll = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
+             e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood,
+             e.ticket_url AS ticketUrl
       FROM attendances a
       JOIN events e ON e.id = a.event_id
       WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
@@ -5917,15 +6065,17 @@ export const storage: IStorage = {
         events: hostedUpcoming.length + hostedPast.length,
         hosting: hostedUpcoming.length,
         going: goingToUpcoming.length,
-        posts: gigs.length + gifting.length + spotted.length,
+        posts: boardPosts.length,
         gigs: gigs.length,
         gifting: gifting.length,
         checkIns,
         followers: storage.getFollowerCount(user.id),
       },
       isOwner,
+      isAdmin: storage.userIsSiteAdmin(user),
       isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
       activity,
+      boardPosts,
       linkedVenues: storage.getUserLinkedBusinesses(user.id),
     };
   },
@@ -6553,6 +6703,73 @@ export const storage: IStorage = {
   },
   hasSiteAdminGrant(userId) {
     return !!sqlite.prepare("SELECT 1 FROM site_admin_grants WHERE user_id = ?").get(userId);
+  },
+  userIsSiteAdmin(user) {
+    if (!user) return false;
+    if (user.subAdmin) return true;
+    if (isEnvListedSiteAdmin(user)) return true;
+    if (user.id != null && storage.hasSiteAdminGrant(user.id)) return true;
+    return false;
+  },
+  countContentLikes(contentType, contentId) {
+    ensureContentLikesSchema();
+    const type = String(contentType || "").toUpperCase();
+    if (!(CONTENT_LIKE_TYPES as readonly string[]).includes(type)) return 0;
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS cnt FROM content_likes WHERE content_type = ? AND content_id = ?
+    `).get(type, contentId) as { cnt: number } | undefined;
+    return Number(row?.cnt) || 0;
+  },
+  hasContentLike(contentType, contentId, userId) {
+    ensureContentLikesSchema();
+    const type = String(contentType || "").toUpperCase();
+    if (!(CONTENT_LIKE_TYPES as readonly string[]).includes(type)) return false;
+    return !!sqlite.prepare(`
+      SELECT 1 FROM content_likes WHERE content_type = ? AND content_id = ? AND user_id = ?
+    `).get(type, contentId, userId);
+  },
+  toggleContentLike(contentType, contentId, userId) {
+    ensureContentLikesSchema();
+    const type = String(contentType || "").toUpperCase() as ContentLikeType;
+    if (!(CONTENT_LIKE_TYPES as readonly string[]).includes(type)) {
+      return { liked: false, likes: 0, error: "Invalid content type" };
+    }
+    const id = Number(contentId);
+    if (!Number.isFinite(id) || id <= 0) {
+      return { liked: false, likes: 0, error: "Invalid content id" };
+    }
+
+    // Verify the target post exists and is publicly visible enough to engage.
+    let exists = false;
+    if (type === "GIG") {
+      const row = sqlite.prepare(`SELECT id, status FROM gig_posts WHERE id = ?`).get(id) as any;
+      exists = !!row && String(row.status || "").toUpperCase() === "LIVE";
+    } else if (type === "GIFTING") {
+      const row = sqlite.prepare(`SELECT id, status FROM gifting_posts WHERE id = ?`).get(id) as any;
+      const status = String(row?.status || "").toUpperCase();
+      exists = !!row && !["REMOVED", "REJECTED", "PENDING", "EXPIRED"].includes(status);
+    } else if (type === "SPOTTED") {
+      const row = sqlite.prepare(`SELECT id, status FROM missed_connections WHERE id = ?`).get(id) as any;
+      exists = !!row && String(row.status || "").toUpperCase() === "ACTIVE";
+    } else if (type === "HUB") {
+      const row = sqlite.prepare(`SELECT id, status, audience FROM hub_feed_posts WHERE id = ?`).get(id) as any;
+      exists = !!row && row.status === "LIVE" && String(row.audience || "ALL").toUpperCase() === "ALL";
+    }
+    if (!exists) return { liked: false, likes: 0, error: "Not found" };
+
+    const already = storage.hasContentLike(type, id, userId);
+    if (already) {
+      sqlite.prepare(`
+        DELETE FROM content_likes WHERE content_type = ? AND content_id = ? AND user_id = ?
+      `).run(type, id, userId);
+    } else {
+      sqlite.prepare(`
+        INSERT INTO content_likes (content_type, content_id, user_id, created_at)
+        VALUES (?, ?, ?, ?)
+      `).run(type, id, userId, new Date().toISOString());
+    }
+    const likes = storage.countContentLikes(type, id);
+    return { liked: !already, likes };
   },
   ensureSiteAdminGrant(userId, grantedByUserId, note = null, createdAt = new Date().toISOString()) {
     sqlite.prepare(`
