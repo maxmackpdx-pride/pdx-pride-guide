@@ -658,6 +658,75 @@ function bulkGiftingInterestCounts(ids: number[]): Map<number, number> {
   return out;
 }
 
+/** Public content kinds that can carry thread replies on profile Updates. */
+export const CONTENT_REPLY_TYPES = ["GIG", "GIFTING", "SPOTTED", "HUB"] as const;
+export type ContentReplyType = (typeof CONTENT_REPLY_TYPES)[number];
+/** Types that store public reply bodies in content_replies (not private native flows). */
+export const CONTENT_REPLY_THREAD_TYPES = ["GIG", "HUB"] as const;
+export type ContentReplyThreadType = (typeof CONTENT_REPLY_THREAD_TYPES)[number];
+
+function ensureContentRepliesSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS content_replies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content_type TEXT NOT NULL,
+        content_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        body TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT ''
+      )
+    `);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS content_replies_content_idx ON content_replies(content_type, content_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS content_replies_user_idx ON content_replies(user_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS content_replies_created_idx ON content_replies(created_at)`);
+  } catch (e) {
+    console.error("[content_replies] schema migration failed:", e);
+  }
+}
+ensureContentRepliesSchema();
+
+function bulkContentReplyCounts(contentType: ContentReplyThreadType, ids: number[]): Map<number, number> {
+  const out = new Map<number, number>();
+  if (!ids.length) return out;
+  const unique = Array.from(new Set(ids.filter(id => Number.isFinite(id) && id > 0)));
+  if (!unique.length) return out;
+  const placeholders = unique.map(() => "?").join(",");
+  const rows = sqlite.prepare(`
+    SELECT content_id AS contentId, COUNT(*) AS cnt
+    FROM content_replies
+    WHERE content_type = ? AND content_id IN (${placeholders})
+    GROUP BY content_id
+  `).all(contentType, ...unique) as Array<{ contentId: number; cnt: number }>;
+  for (const row of rows) out.set(Number(row.contentId), Number(row.cnt) || 0);
+  return out;
+}
+
+/** True when the target board/hub post is public enough to engage (like / reply). */
+function contentIsPubliclyEngagable(contentType: string, contentId: number): boolean {
+  const type = String(contentType || "").toUpperCase();
+  const id = Number(contentId);
+  if (!Number.isFinite(id) || id <= 0) return false;
+  if (type === "GIG") {
+    const row = sqlite.prepare(`SELECT id, status FROM gig_posts WHERE id = ?`).get(id) as any;
+    return !!row && String(row.status || "").toUpperCase() === "LIVE";
+  }
+  if (type === "GIFTING") {
+    const row = sqlite.prepare(`SELECT id, status FROM gifting_posts WHERE id = ?`).get(id) as any;
+    const status = String(row?.status || "").toUpperCase();
+    return !!row && !["REMOVED", "REJECTED", "PENDING", "EXPIRED"].includes(status);
+  }
+  if (type === "SPOTTED") {
+    const row = sqlite.prepare(`SELECT id, status FROM missed_connections WHERE id = ?`).get(id) as any;
+    return !!row && String(row.status || "").toUpperCase() === "ACTIVE";
+  }
+  if (type === "HUB") {
+    const row = sqlite.prepare(`SELECT id, status, audience FROM hub_feed_posts WHERE id = ?`).get(id) as any;
+    return !!row && row.status === "LIVE" && String(row.audience || "ALL").toUpperCase() === "ALL";
+  }
+  return false;
+}
+
 const MAX_EVENT_HOSTS = 3;
 
 function ensureEventHostsSchema() {
@@ -5462,6 +5531,43 @@ export interface IStorage {
   countContentLikes(contentType: string, contentId: number): number;
   hasContentLike(contentType: string, contentId: number, userId: number): boolean;
   toggleContentLike(contentType: string, contentId: number, userId: number): { liked: boolean; likes: number; error?: string };
+  /** Public thread replies for GIG / HUB. SPOTTED / GIFTING use native private flows for counts only. */
+  countContentReplies(contentType: string, contentId: number): number;
+  listContentReplies(contentType: string, contentId: number, limit?: number): Array<{
+    id: number;
+    body: string;
+    createdAt: string;
+    author: {
+      username: string;
+      displayName: string | null;
+      photoUrl: string | null;
+      avatarChoice: number;
+      avatarRing: string;
+    };
+  }>;
+  createContentReply(contentType: string, contentId: number, userId: number, body: string): {
+    reply?: {
+      id: number;
+      body: string;
+      createdAt: string;
+      author: {
+        username: string;
+        displayName: string | null;
+        photoUrl: string | null;
+        avatarChoice: number;
+        avatarRing: string;
+      };
+    };
+    replies?: number;
+    error?: string;
+  };
+  /** Native count for SPOTTED (threads) / GIFTING (interests); content_replies for GIG / HUB. */
+  getContentReplyMeta(contentType: string, contentId: number): {
+    count: number;
+    mode: "thread" | "native";
+    nativeHref: string | null;
+    error?: string;
+  };
   listSiteAdmins(): Array<{
     userId: number;
     username: string;
@@ -5912,6 +6018,9 @@ export const storage: IStorage = {
     const giftLikeCounts = bulkContentLikeCounts("GIFTING", giftingRows.map((g: any) => g.id));
     const spottedLikeCounts = bulkContentLikeCounts("SPOTTED", spottedRows.map((s: any) => s.id));
     const hubLikeCounts = bulkContentLikeCounts("HUB", hubRows.map((h: any) => h.id));
+    const gigReplyCounts = bulkContentReplyCounts("GIG", gigRows.map(g => g.id));
+    const hubReplyCounts = bulkContentReplyCounts("HUB", hubRows.map((h: any) => h.id));
+    // SPOTTED: private missed-connection threads (bodies never public). GIFTING: interests (not public replies).
     const spottedReplyCounts = bulkSpottedReplyCounts(spottedRows.map((s: any) => s.id));
     const giftReplyCounts = bulkGiftingInterestCounts(giftingRows.map((g: any) => g.id));
 
@@ -5924,7 +6033,7 @@ export const storage: IStorage = {
       createdAt: gig.createdAt,
       description: gig.description,
       likes: gigLikeCounts.get(gig.id) ?? 0,
-      replies: 0,
+      replies: gigReplyCounts.get(gig.id) ?? 0,
     }));
     const gifting = giftingRows.map((post: any) => ({
       id: post.id,
@@ -5990,7 +6099,7 @@ export const storage: IStorage = {
         text: String(h.body || "").trim() || (h.photoUrl ? "Shared a photo" : "Update"),
         createdAt: h.createdAt ?? h.created_at ?? null,
         likes: hubLikeCounts.get(h.id) ?? 0,
-        replies: 0,
+        replies: hubReplyCounts.get(h.id) ?? 0,
       })),
     ].sort((a, b) => {
       const ta = a.createdAt ? Date.parse(String(a.createdAt)) : 0;
@@ -6739,23 +6848,9 @@ export const storage: IStorage = {
       return { liked: false, likes: 0, error: "Invalid content id" };
     }
 
-    // Verify the target post exists and is publicly visible enough to engage.
-    let exists = false;
-    if (type === "GIG") {
-      const row = sqlite.prepare(`SELECT id, status FROM gig_posts WHERE id = ?`).get(id) as any;
-      exists = !!row && String(row.status || "").toUpperCase() === "LIVE";
-    } else if (type === "GIFTING") {
-      const row = sqlite.prepare(`SELECT id, status FROM gifting_posts WHERE id = ?`).get(id) as any;
-      const status = String(row?.status || "").toUpperCase();
-      exists = !!row && !["REMOVED", "REJECTED", "PENDING", "EXPIRED"].includes(status);
-    } else if (type === "SPOTTED") {
-      const row = sqlite.prepare(`SELECT id, status FROM missed_connections WHERE id = ?`).get(id) as any;
-      exists = !!row && String(row.status || "").toUpperCase() === "ACTIVE";
-    } else if (type === "HUB") {
-      const row = sqlite.prepare(`SELECT id, status, audience FROM hub_feed_posts WHERE id = ?`).get(id) as any;
-      exists = !!row && row.status === "LIVE" && String(row.audience || "ALL").toUpperCase() === "ALL";
+    if (!contentIsPubliclyEngagable(type, id)) {
+      return { liked: false, likes: 0, error: "Not found" };
     }
-    if (!exists) return { liked: false, likes: 0, error: "Not found" };
 
     const already = storage.hasContentLike(type, id, userId);
     if (already) {
@@ -6770,6 +6865,141 @@ export const storage: IStorage = {
     }
     const likes = storage.countContentLikes(type, id);
     return { liked: !already, likes };
+  },
+  countContentReplies(contentType, contentId) {
+    ensureContentRepliesSchema();
+    const type = String(contentType || "").toUpperCase();
+    if (!(CONTENT_REPLY_THREAD_TYPES as readonly string[]).includes(type)) return 0;
+    const id = Number(contentId);
+    if (!Number.isFinite(id) || id <= 0) return 0;
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS cnt FROM content_replies WHERE content_type = ? AND content_id = ?
+    `).get(type, id) as { cnt: number } | undefined;
+    return Number(row?.cnt) || 0;
+  },
+  listContentReplies(contentType, contentId, limit = 20) {
+    ensureContentRepliesSchema();
+    const type = String(contentType || "").toUpperCase();
+    if (!(CONTENT_REPLY_THREAD_TYPES as readonly string[]).includes(type)) return [];
+    const id = Number(contentId);
+    if (!Number.isFinite(id) || id <= 0) return [];
+    const take = Math.min(Math.max(Number(limit) || 20, 1), 50);
+    const rows = sqlite.prepare(`
+      SELECT r.id, r.body, r.created_at AS createdAt,
+             u.username AS username,
+             u.display_name AS displayName,
+             u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS avatarRing
+      FROM content_replies r
+      JOIN users u ON u.id = r.user_id
+      WHERE r.content_type = ? AND r.content_id = ?
+        AND u.status = 'active'
+      ORDER BY r.created_at DESC, r.id DESC
+      LIMIT ?
+    `).all(type, id, take) as Array<{
+      id: number;
+      body: string;
+      createdAt: string;
+      username: string;
+      displayName: string | null;
+      photoUrl: string | null;
+      avatarChoice: number | null;
+      avatarRing: string | null;
+    }>;
+    // Newest first in SQL; reverse so thread reads oldest → newest in the UI.
+    return rows.reverse().map(r => ({
+      id: r.id,
+      body: r.body,
+      createdAt: r.createdAt,
+      author: {
+        username: r.username,
+        displayName: r.displayName ?? null,
+        photoUrl: r.photoUrl ?? null,
+        avatarChoice: r.avatarChoice ?? 1,
+        avatarRing: r.avatarRing || "none",
+      },
+    }));
+  },
+  createContentReply(contentType, contentId, userId, body) {
+    ensureContentRepliesSchema();
+    const type = String(contentType || "").toUpperCase();
+    if (!(CONTENT_REPLY_THREAD_TYPES as readonly string[]).includes(type)) {
+      return { error: "Replies for this board use the native flow" };
+    }
+    const id = Number(contentId);
+    if (!Number.isFinite(id) || id <= 0) return { error: "Invalid content id" };
+    if (!contentIsPubliclyEngagable(type, id)) return { error: "Not found" };
+
+    const text = String(body || "").trim().slice(0, 500);
+    if (!text) return { error: "body required" };
+
+    const author = storage.getUserById(userId);
+    if (!author || author.status !== "active") return { error: "Not found" };
+
+    const createdAt = new Date().toISOString();
+    const result = sqlite.prepare(`
+      INSERT INTO content_replies (content_type, content_id, user_id, body, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(type, id, userId, text, createdAt);
+    const replyId = Number(result.lastInsertRowid);
+    const replies = storage.countContentReplies(type, id);
+    return {
+      reply: {
+        id: replyId,
+        body: text,
+        createdAt,
+        author: {
+          username: author.username,
+          displayName: author.displayName ?? null,
+          photoUrl: author.photoUrl ?? null,
+          avatarChoice: author.avatarChoice ?? 1,
+          avatarRing: author.avatarRing || "none",
+        },
+      },
+      replies,
+    };
+  },
+  getContentReplyMeta(contentType, contentId) {
+    const type = String(contentType || "").toUpperCase();
+    const id = Number(contentId);
+    if (!(CONTENT_REPLY_TYPES as readonly string[]).includes(type)) {
+      return { count: 0, mode: "thread" as const, nativeHref: null, error: "Invalid content type" };
+    }
+    if (!Number.isFinite(id) || id <= 0) {
+      return { count: 0, mode: "thread" as const, nativeHref: null, error: "Invalid content id" };
+    }
+    if (!contentIsPubliclyEngagable(type, id)) {
+      return { count: 0, mode: "thread" as const, nativeHref: null, error: "Not found" };
+    }
+    if (type === "GIG" || type === "HUB") {
+      return {
+        count: storage.countContentReplies(type, id),
+        mode: "thread" as const,
+        nativeHref: null,
+      };
+    }
+    if (type === "SPOTTED") {
+      // Private missed-connection DMs: count only, never bodies.
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS cnt FROM missed_connection_threads WHERE missed_connection_id = ?
+      `).get(id) as { cnt: number } | undefined;
+      return {
+        count: Number(row?.cnt) || 0,
+        mode: "native" as const,
+        nativeHref: "/spotted",
+      };
+    }
+    // GIFTING: interest counts are not public reply bodies.
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS cnt FROM gifting_interests
+      WHERE post_id = ? AND status IN ('INTERESTED', 'SELECTED')
+    `).get(id) as { cnt: number } | undefined;
+    return {
+      count: Number(row?.cnt) || 0,
+      mode: "native" as const,
+      nativeHref: `/gifting?post=${id}`,
+    };
   },
   ensureSiteAdminGrant(userId, grantedByUserId, note = null, createdAt = new Date().toISOString()) {
     sqlite.prepare(`
@@ -9854,6 +10084,8 @@ const PERSISTENCE_TABLES = [
   "event_talent",
   "moderation_requests",
   "feedback_reports",
+  "content_likes",
+  "content_replies",
   "express_sessions",
 ] as const;
 

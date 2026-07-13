@@ -643,6 +643,17 @@ export const insertEventTalentSchema = createInsertSchema(eventTalent).omit({ id
 export type InsertEventTalent = z.infer<typeof insertEventTalentSchema>;
 export type EventTalent = typeof eventTalent.$inferSelect;
 
+// Public profile Updates replies for GIG + HUB (SPOTTED / GIFTING use native private flows).
+export const contentReplies = sqliteTable("content_replies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  contentType: text("content_type").notNull(), // GIG | HUB (also accepts GIFTING | SPOTTED if ever used)
+  contentId: integer("content_id").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type ContentReply = typeof contentReplies.$inferSelect;
+
 // Web Push subscriptions
 export const pushSubscriptions = sqliteTable("push_subscriptions", {
   id: integer("id").primaryKey({ autoIncrement: true }),

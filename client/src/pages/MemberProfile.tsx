@@ -23,6 +23,11 @@ import GoingRail from "@/components/profile/GoingRail";
 import PastEventsPanel from "@/components/profile/PastEventsPanel";
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
+import {
+  chipsForEvent,
+  summaryForEvent,
+  type AttendanceSummaryMap,
+} from "@/components/profile/mapAttendancePreviewToChips";
 import MessageModal from "./profile/MessageModal";
 import { profileCssVars } from "@/components/profile/profileHelpers";
 import "./MemberProfile.css";
@@ -59,8 +64,8 @@ export default function MemberProfile() {
     queryKey: ["/api/events/attendance-summaries"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/events/attendance-summaries");
-      if (!res.ok) return {} as Record<string, { count: number }>;
-      return res.json() as Promise<Record<string, { count: number }>>;
+      if (!res.ok) return {} as AttendanceSummaryMap;
+      return res.json() as Promise<AttendanceSummaryMap>;
     },
     staleTime: 30_000,
   });
@@ -208,7 +213,10 @@ export default function MemberProfile() {
             {bigOne && (
               <TheBigOne
                 event={bigOne}
-                goingCount={bigOne.goingCount}
+                goingCount={
+                  summaryForEvent(attendanceSummaries, bigOne.id)?.count ?? bigOne.goingCount
+                }
+                goingAvatars={chipsForEvent(attendanceSummaries, bigOne.id, 4)}
                 isGoing={myEventIds.has(bigOne.id)}
                 onRsvp={() => toggleRsvp(bigOne.id)}
                 onOpen={() => openEvent(bigOne.id)}
@@ -222,6 +230,7 @@ export default function MemberProfile() {
           <div className="pp-split__right">
             <GoingRail
               events={going.upcoming}
+              attendanceSummaries={attendanceSummaries}
               onEventClick={(e) => openEvent(e.id)}
             />
             <UpdatesPanel

@@ -117,3 +117,21 @@
     margin-top: 3px;
   }
 }
+
+/* Mini facepile on Going cards */
+.pp-event-rail__faces {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pp-event-rail__face {
+  display: inline-flex;
+  margin-right: -8px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1.5px #0a0a0a;
+}
+
+.pp-event-rail__face:last-child {
+  margin-right: 0;
+}
