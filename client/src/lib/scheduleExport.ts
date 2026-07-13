@@ -33,7 +33,7 @@ function formatTime(value: string): string {
 }
 
 function makeCard(event: EventListing, accent: string, cardW: number, cardH: number): HTMLElement {
-  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const card = document.createElement("div");
   card.style.cssText = `
     position: relative; width: ${cardW}px; height: ${cardH}px; border-radius: 10px;

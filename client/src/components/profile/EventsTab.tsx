@@ -95,7 +95,7 @@ export default function EventsTab({ data }: Props) {
         venue={e.venueName || undefined}
         when={formatListingWhen(evt)}
         day={listingDay(evt)}
-        image={resolveEventPosterUrl(e.id, e.posterImageUrl)}
+        image={resolveEventPosterUrl(e.id, e.posterImageUrl, e.dayOfWeek)}
         types={types}
         admission={e.admission || undefined}
         age={e.ageRequirement || undefined}
@@ -118,7 +118,7 @@ export default function EventsTab({ data }: Props) {
         venue={e.venueName || undefined}
         when={fmtEventWhen(e.dateStart, e.neighborhood)}
         day={listingDay(evt)}
-        image={resolveEventPosterUrl(e.id, e.posterImageUrl || undefined) || undefined}
+        image={resolveEventPosterUrl(e.id, e.posterImageUrl || undefined, e.dayOfWeek) || undefined}
         types={types}
         admission={e.admission || undefined}
         going={e.goingCount}

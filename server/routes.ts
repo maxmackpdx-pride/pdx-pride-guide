@@ -266,14 +266,18 @@ function isMainAdminUser(user: any) {
     || storage.hasSiteAdminGrant(user.id);
 }
 
+/** Live admin check — never trust sticky session.isAdmin alone (revoke must stick). */
+function userIsAdminNow(user: any): boolean {
+  return !!(user && (isMainAdminUser(user) || user.subAdmin));
+}
+
 function markAdminSessionForUser(req: any, user: any) {
-  if (isMainAdminUser(user)) {
+  if (userIsAdminNow(user)) {
     req.session.isAdmin = true;
     return true;
   }
-  if (user?.subAdmin) {
-    req.session.isAdmin = true;
-    return true;
+  if (req.session?.isAdmin) {
+    delete req.session.isAdmin;
   }
   return false;
 }
@@ -577,9 +581,6 @@ function requireAuth(req: any, res: any, next: any) {
 }
 
 function requireAdmin(req: any, res: any, next: any) {
-  if (req.session?.isAdmin) {
-    return next();
-  }
   const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
   if (markAdminSessionForUser(req, user)) {
     return next();
@@ -596,13 +597,8 @@ function getSessionAdminUser(req: any) {
 }
 
 function sessionIsAdmin(req: any): boolean {
-  if (req.session?.isAdmin) return true;
   const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-  if (user && isMainAdminUser(user)) {
-    req.session.isAdmin = true;
-    return true;
-  }
-  return false;
+  return markAdminSessionForUser(req, user);
 }
 
 function getAdminActorUserId(req: any): number | null {
@@ -838,6 +834,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/events/:id", (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
+    // Public detail must match list: only LIVE. Admins may open HIDDEN for moderation.
+    if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
+      return res.status(404).json({ error: "Not found" });
+    }
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const expanded = expandMultiDayEvents([evt]);
     const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
@@ -863,7 +863,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         : rawType === "PROMOTER_APPLICATION" ? "PROMOTER_APPLICATION"
         : "NEW_EVENT";
       const promoterStatus = user.promoterStatus || "none";
-      const isAdminUser = isMainAdminUser(user) || !!req.session.isAdmin;
+      const isAdminUser = userIsAdminNow(user);
 
       // Standalone promoter application — no event fields needed
       if (type === "PROMOTER_APPLICATION") {

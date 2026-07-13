@@ -33,7 +33,7 @@ export default function ScheduleEventCard({
   totalCols?: number;
   onClick: () => void;
 }) {
-  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const compact = height < 70;
   const colWidthPct = 100 / totalCols;
   const GAP = 3;

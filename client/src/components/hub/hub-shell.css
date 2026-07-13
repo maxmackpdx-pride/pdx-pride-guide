@@ -723,6 +723,14 @@
 
 .app-shell--hub > main {
   flex: 1;
+  /* Clear hub-mobile-bar / site bottom chrome so content is not covered */
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 900px) {
+  .app-shell--hub > main {
+    padding-bottom: 24px;
+  }
 }
 
 @media (min-width: 641px) {

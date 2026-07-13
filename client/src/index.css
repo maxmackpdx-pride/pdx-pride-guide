@@ -2094,7 +2094,7 @@ h2.display,
   }
 
   /* Bar is portaled to <body>, so match from body instead of .app-shell */
-  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main {
+  body:has(.site-hub-mobile-bar) .app-shell main {
     padding-bottom: 104px;
   }
 
@@ -8056,32 +8056,56 @@ footer a:hover { color: #00FFFF !important; }
 .event-modal-overlay {
   position: fixed;
   inset: 0;
-  /* Above the mobile nav bars so the whole card (top + bottom edges) shows and
-     the dimmed backdrop covers the nav too, like the board overlays. */
   z-index: 3000;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  /* The overlay scrolls the whole card as one piece, so the rounded bottom
-     corner lands at the real end of the content. */
   overflow-y: auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 52px) 16px calc(env(safe-area-inset-bottom, 0px) + 76px);
+  padding: calc(env(safe-area-inset-top, 0px) + 40px) 16px calc(env(safe-area-inset-bottom, 0px) + 88px);
   background: rgba(0, 0, 0, 0.88);
 }
 
 .event-modal {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 660px;
-  /* No fixed height / inner scroll: the card is as tall as its content and the
-     overlay scrolls it, so its bottom edge is the true bottom of the card.
-     overflow:hidden only clips the poster/corners to the rounded frame. */
+  max-height: min(92dvh, 920px);
   margin: auto;
   overflow: hidden;
   background: #0d0d0d;
   border: 2px solid var(--event-accent, #222);
   border-radius: 18px;
   box-shadow: 0 0 60px -14px var(--event-accent, transparent);
+}
+
+.event-modal__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.event-modal__sticky-cta {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid #1f1f1f;
+  background: rgba(8, 8, 8, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.event-modal__sticky-cta-btn {
+  flex: 1 1 auto;
+  min-width: 140px;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Rainbow top seam — motion/color from .pdx-rainbow-rule (base.css); calm = static */

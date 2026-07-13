@@ -49,7 +49,7 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
   const [open, setOpen] = useState(false);
   const day = event.dayOfWeek || "";
   const accent = DAY_TEXT_COLORS[day as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
-  const poster = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const cd = useCountdown(eventStartMs(event.dateStart));
 
   // Slideshow: poster (4s) then each extra image (2s), looping.

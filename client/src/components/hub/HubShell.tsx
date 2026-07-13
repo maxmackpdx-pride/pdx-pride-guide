@@ -424,82 +424,40 @@ export default function HubShell({
         </>
       )}
 
-      <nav className="hub-mobile-bar" aria-label="Hub mobile navigation">
-        {mode === "member" ? (
-          <>
-            <button
-              type="button"
-              className={`hub-mobile-tab${memberView === "home" ? " is-active is-cyan" : ""}`}
-              onClick={() => goMember("home")}
-            >
-              <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>Home</span>
-            </button>
-            <button
-              type="button"
-              className={`hub-mobile-tab${inboxNavActive ? " is-active is-cyan" : ""}`}
-              onClick={() => {
-                if (onInboxPage) return;
-                openSheet();
-              }}
-            >
-              <span className="hub-mobile-tab__icon-wrap">
-                <Inbox size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-                {unreadCount > 0 && <i>{unreadCount}</i>}
-              </span>
-              <span>Inbox</span>
-            </button>
-            <button
-              type="button"
-              className={`hub-mobile-tab${memberView === "posts" ? " is-active is-green" : ""}`}
-              onClick={() => goMember("posts")}
-            >
-              <Layers size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>Posts</span>
-            </button>
-            {isAdminUser && (
-              <Link href={adminTabHref} className="hub-mobile-tab is-switch is-pink">
-                <span className="hub-mobile-tab__icon-wrap">
-                  <Shield size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-                  {alertTotal > 0 && <i className="is-blink">{alertTotal}</i>}
-                </span>
-                <span>Admin</span>
-              </Link>
-            )}
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              className={`hub-mobile-tab${adminView === "overview" ? " is-active is-lime" : ""}`}
-              onClick={() => goAdmin("overview")}
-            >
-              <LayoutDashboard size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>Home</span>
-            </button>
-            <button
-              type="button"
-              className={`hub-mobile-tab${adminView === "events" ? " is-active is-orange" : ""}`}
-              onClick={() => goAdmin("events")}
-            >
-              <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>Events</span>
-            </button>
-            <button
-              type="button"
-              className={`hub-mobile-tab${moreOpen || moreViews.includes(adminView) ? " is-active is-more" : ""}`}
-              onClick={() => onMoreOpenChange?.(!moreOpen)}
-            >
-              <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>More</span>
-            </button>
-            <Link href="/dashboard" className="hub-mobile-tab is-switch is-cyan">
-              <UserCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-              <span>Me</span>
-            </Link>
-          </>
-        )}
-      </nav>
+      {/* Member mode: site MobileBottomNav is the single bar (App.tsx).
+          Admin mode keeps this hub bar; App hides the site bar on /admin. */}
+      {mode === "admin" && (
+        <nav className="hub-mobile-bar" aria-label="Hub mobile navigation">
+          <button
+            type="button"
+            className={`hub-mobile-tab${adminView === "overview" ? " is-active is-lime" : ""}`}
+            onClick={() => goAdmin("overview")}
+          >
+            <LayoutDashboard size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Home</span>
+          </button>
+          <button
+            type="button"
+            className={`hub-mobile-tab${adminView === "events" ? " is-active is-orange" : ""}`}
+            onClick={() => goAdmin("events")}
+          >
+            <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Events</span>
+          </button>
+          <button
+            type="button"
+            className={`hub-mobile-tab${moreOpen || moreViews.includes(adminView) ? " is-active is-more" : ""}`}
+            onClick={() => onMoreOpenChange?.(!moreOpen)}
+          >
+            <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>More</span>
+          </button>
+          <Link href="/dashboard" className="hub-mobile-tab is-switch is-cyan">
+            <UserCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Me</span>
+          </Link>
+        </nav>
+      )}
     </div>
   );
 }

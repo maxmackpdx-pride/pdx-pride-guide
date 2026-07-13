@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <rect width="800" height="1000" fill="#050505"/>
+  <rect x="60" y="60" width="680" height="880" fill="none" stroke="#CCFF00" stroke-width="3" opacity="0.5"/>
+  <text x="400" y="440" text-anchor="middle" font-family="Impact, Haettenschweiler, sans-serif" font-size="64" font-weight="900" fill="#CCFF00" letter-spacing="6">POSTER</text>
+  <text x="400" y="520" text-anchor="middle" font-family="Impact, Haettenschweiler, sans-serif" font-size="36" font-weight="900" fill="#fff" letter-spacing="10" opacity="0.7">PENDING</text>
+  <text x="400" y="600" text-anchor="middle" font-family="monospace" font-size="16" fill="#CCFF00" opacity="0.45" letter-spacing="3">FLYER COMING SOON</text>
+  <rect x="0" y="960" width="800" height="8" fill="#FF00CC"/>
+  <rect x="0" y="968" width="800" height="8" fill="#CCFF00"/>
+  <rect x="0" y="976" width="800" height="8" fill="#00FFFF"/>
+  <rect x="0" y="984" width="800" height="8" fill="#FF6600"/>
+</svg>
