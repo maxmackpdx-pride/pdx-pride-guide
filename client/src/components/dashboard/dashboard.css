@@ -207,7 +207,7 @@
 
 .dash-avatar-ring .user-avatar {
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .dash-avatar-fallback {

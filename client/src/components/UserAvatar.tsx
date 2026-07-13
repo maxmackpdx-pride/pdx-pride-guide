@@ -9,7 +9,7 @@ export interface UserAvatarProps {
   size?: number;
   className?: string;
   title?: string;
-  /** Ring shimmer (light-only). Default true when a ring is present. Never on ring=none. */
+  /** Glow shimmer (light-only sweep). Default true when a ring/glow is present. Never on ring=none. */
   shimmer?: boolean;
 }
 

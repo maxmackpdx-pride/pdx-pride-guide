@@ -24,7 +24,7 @@ export interface AvatarRingOption {
 }
 
 export const AVATAR_RING_OPTIONS: AvatarRingOption[] = [
-  { id: "none", label: "No Ring" },
+  { id: "none", label: "No Glow" },
   { id: "rainbow", label: "Rainbow Pride" },
   { id: "progress", label: "Progress Pride" },
   { id: "lesbian", label: "Lesbian" },

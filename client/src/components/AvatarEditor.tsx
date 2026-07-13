@@ -234,7 +234,7 @@ export default function AvatarEditor({
         </div>
       )}
 
-      <label className="avatar-editor__label">OUTER RING (OPTIONAL)</label>
+      <label className="avatar-editor__label">PRIDE GLOW (OPTIONAL)</label>
       <div className="avatar-editor__ring-grid">
         {AVATAR_RING_OPTIONS.map(option => (
           <button
