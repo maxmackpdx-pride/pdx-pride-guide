@@ -154,7 +154,12 @@ export default function Directory() {
         }
         return true;
       })
-      .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+      .sort((a, b) => {
+        // Grand openings / new first, then A–Z by name.
+        const newDiff = (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+        if (newDiff !== 0) return newDiff;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      });
   }, [businesses, activeType, activeNeighborhood, searchQuery]);
 
   const neighborhoodsInUse = useMemo(() => {

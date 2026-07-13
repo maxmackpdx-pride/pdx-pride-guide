@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -300,31 +301,38 @@ export default function PlaceModal({
     { key: "gigs", label: "Gigs", count: gigs.length },
   ];
 
-  return (
+  // Portal to body + overlay-scroll (same idiom as EventModal) so tall venues
+  // like Camp never load clipped off-screen or trapped in a non-scrolling flex box.
+  return createPortal(
     <div
       onClick={onClose}
+      role="presentation"
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 1000,
-        background: "rgba(0,0,0,.82)",
+        zIndex: 3000,
+        background: "rgba(0,0,0,.88)",
         backdropFilter: "blur(2px)",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
-        padding: 20,
+        overflowY: "auto",
+        WebkitOverflowScrolling: "touch",
+        padding: "calc(env(safe-area-inset-top, 0px) + 52px) 16px calc(env(safe-area-inset-bottom, 0px) + 76px)",
         boxSizing: "border-box",
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={place.name}
         style={{
           position: "relative",
           width: "100%",
           maxWidth: 560,
-          maxHeight: "88vh",
-          display: "flex",
-          flexDirection: "column",
+          margin: "0 auto",
+          flex: "none",
           borderRadius: 12,
           background: "linear-gradient(var(--ink-800),var(--ink-800)) padding-box, " + edge + " border-box",
           border: "2px solid transparent",
@@ -388,7 +396,7 @@ export default function PlaceModal({
           <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
         </button>
 
-        <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div>
           <div
             style={{
               position: "relative",
@@ -831,7 +839,8 @@ export default function PlaceModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
