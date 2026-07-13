@@ -2330,6 +2330,122 @@ function seedPdxPahJuly2026Events() {
   });
 }
 
+/** Camp Bar PDX full Pride Week 2026 schedule (Mon Jul 13 – Sun Jul 19).
+ * Venue matches the "Camp Bar PDX" directory listing so events sync to it.
+ * One color poster per day, per the venue's provided art. */
+function seedCampBarPrideWeek2026Events() {
+  const now = new Date().toISOString();
+  const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+  const CAMP = {
+    venueName: "Camp Bar PDX",
+    address: "1125 SW Harvey Milk St",
+    neighborhood: "Downtown",
+    lat: 45.5193,
+    lng: -122.6775,
+    ageRequirement: "21_PLUS",
+    admission: "FREE",
+    ticketUrl: "https://campbarpdx.com",
+    isPublic: true,
+    isPrivate: false,
+    isHouseParty: false,
+    isSexPositive: false,
+    nudityOk: false,
+    status: "LIVE",
+    source: "admin_seeded",
+    isClaimable: true,
+    claimedBy: null,
+    submittedBy: null,
+  };
+  const insert = (row: Record<string, unknown>) => {
+    if (exists.get(row.title)) return;
+    db.insert(events).values({ ...CAMP, ...row, createdAt: now } as any).run();
+  };
+
+  insert({
+    title: "CAMP Monday Happy Hour",
+    description:
+      "Start the week strong at CAMP! Happy Hour 4–7 PM with killer drinks and the best crew in PDX. Low-key vibes, high queer joy. Come as you are, your new Monday tradition starts here.",
+    dateStart: "2026-07-13T16:00:00",
+    dateEnd: "2026-07-13T19:00:00",
+    dayOfWeek: "MON",
+    eventTypes: JSON.stringify(["SOCIAL", "HAPPY HOUR", "DRINKS"]),
+    posterImageUrl: "/posters/camp/camp-mon-yellow.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). Yellow poster.",
+  });
+
+  insert({
+    title: "CAMP Tuesday Happy Hour",
+    description:
+      "Tuesday Happy Hour at CAMP! 4–7 PM. Shake off the day with drink specials, good music, and even better company. Your mid-week reset in the heart of Portland's queer scene.",
+    dateStart: "2026-07-14T16:00:00",
+    dateEnd: "2026-07-14T19:00:00",
+    dayOfWeek: "TUE",
+    eventTypes: JSON.stringify(["SOCIAL", "HAPPY HOUR", "DRINKS"]),
+    posterImageUrl: "/posters/camp/camp-tue-orange.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). Orange poster.",
+  });
+
+  insert({
+    title: "CAMP Happy Hour + Karaoke",
+    description:
+      "Hump Day just got loud! Happy Hour 4–7 PM, then Karaoke 8 PM–Midnight. Dust off those pipes, bring your friends, and belt it out with the CAMP crew. Sign-ups start early.",
+    dateStart: "2026-07-15T16:00:00",
+    dateEnd: "2026-07-16T00:00:00",
+    dayOfWeek: "WED",
+    eventTypes: JSON.stringify(["SOCIAL", "KARAOKE", "HAPPY HOUR"]),
+    posterImageUrl: "/posters/camp/camp-wed-green.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). Green poster.",
+  });
+
+  insert({
+    title: "CAMP Happy Hour + Drag Bingo",
+    description:
+      "Drag Bingo night is HERE! Happy Hour 4–7 PM followed by Drag Bingo with the fabulous Peachy Springs 7–9 PM. Prizes, laughs, fierce looks, and all the Camp energy.",
+    dateStart: "2026-07-16T16:00:00",
+    dateEnd: "2026-07-16T21:00:00",
+    dayOfWeek: "THU",
+    eventTypes: JSON.stringify(["DRAG", "BINGO", "HAPPY HOUR", "SOCIAL"]),
+    posterImageUrl: "/posters/camp/camp-thu-blue.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). Drag Bingo w/ Peachy Springs. Blue poster.",
+  });
+
+  insert({
+    title: "CAMP Pride Pre-Party + RuPaul's Finale",
+    description:
+      "Friday night fever at CAMP! Happy Hour 4–7 PM, then Tuff Pride Horsemeat Disco Pre-Party 7–9 PM plus a live watch of RuPaul's Drag Race All Stars Finale 8–9 PM. Dance, cheer, and get the Pride weekend started right.",
+    dateStart: "2026-07-17T16:00:00",
+    dateEnd: "2026-07-17T21:00:00",
+    dayOfWeek: "FRI",
+    eventTypes: JSON.stringify(["PARTY", "DANCE", "DRAG", "VIEWING"]),
+    posterImageUrl: "/posters/camp/camp-fri-purple.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). Tuff Pride x Horsemeat Disco pre-party + RPDR finale. Purple poster.",
+  });
+
+  insert({
+    title: "CAMP Gaylabration Pre-Party",
+    description:
+      "Saturday Gaylabration Pre-Party! Happy Hour all day plus the main Pre-Party 7–9 PM. High-energy Pride celebration, come dance, laugh, and be your fabulous self at CAMP.",
+    dateStart: "2026-07-18T14:00:00",
+    dateEnd: "2026-07-18T21:00:00",
+    dayOfWeek: "SAT",
+    eventTypes: JSON.stringify(["PARTY", "DANCE", "PRIDE"]),
+    posterImageUrl: "/posters/camp/camp-sat-pink.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). Gaylabration pre-party. Pink poster.",
+  });
+
+  insert({
+    title: "CAMP Sunday: World Cup + Camp House Tea",
+    description:
+      "Sunday Funday Pride Edition! World Cup Final watch party 12–3 PM (with a special Madonna / Shakira halftime show), Live DJ 2–5 PM, and Camp House Tea Pride Edition 4–8 PM. Football, tea, music, and community, the perfect way to wrap the week.",
+    dateStart: "2026-07-19T12:00:00",
+    dateEnd: "2026-07-19T20:00:00",
+    dayOfWeek: "SUN",
+    eventTypes: JSON.stringify(["SPORTS", "TEA DANCE", "DJ", "SOCIAL"]),
+    posterImageUrl: "/posters/camp/camp-sun-cyan.jpg",
+    adminNotes: "Camp Bar PDX Pride Week schedule (venue-provided). World Cup Final + Camp House Tea. Cyan poster.",
+  });
+}
+
 /** Missing Pride Week 2026 listings sourced from WW / PDX Pipeline (see missing-pride-events.json). */
 function seedMissingWweekPrideEvents2026() {
   const now = new Date().toISOString();
@@ -3289,6 +3405,10 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_pdxpah_events_v1")) {
     seedPdxPahJuly2026Events();
     recordBootMigration("seed_pdxpah_events_v1");
+  }
+  if (!hasBootMigration("seed_camp_bar_pride_week_2026_v1")) {
+    seedCampBarPrideWeek2026Events();
+    recordBootMigration("seed_camp_bar_pride_week_2026_v1");
   }
   if (!hasBootMigration("lumbertwink_world_cup_time_v1")) {
     // 3–8pm → 4–9pm for World Cup (confirmed Jul 2026)
