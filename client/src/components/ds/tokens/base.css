@@ -67,12 +67,11 @@ p { margin: 0; }
   animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
 }
 
-/* ── Card top rainbow seam (glowing cards only) ─────────────
-   Same motion as .pdx-rainbow-rule (flow + glow). Applied via
-   ::before so Events / boards / MC / glowing hub-feed cards pick
-   it up without per-component markup. PlaceCard uses an explicit
-   element. NOT on plain hub-feed activity rows (RSVP, check-in,
-   etc.) — only .fitem--glow board cards inside the feed.
+/* ── Card top rainbow seam (clickable cards) ────────────────
+   Events (grid/list/schedule), boards (gigs/gifts/MC), places,
+   and glowing hub-feed board cards. Same motion as .pdx-rainbow-rule.
+   NOT on plain hub-feed activity rows — only .fitem--glow.
+   PlaceCard uses an explicit .pdxPlace__seam element.
    Calm / reduced-motion → static (see effects.css). */
 .pdxBoard,
 .pdxRow,
@@ -80,6 +79,7 @@ p { margin: 0; }
 .event-board-card,
 .board-spotted-card,
 .spotted-card,
+.schedule-event-card,
 .card.fitem.fitem--glow,
 .featured-event-ad {
   position: relative;
@@ -92,6 +92,7 @@ p { margin: 0; }
 .event-board-card::before,
 .board-spotted-card::before,
 .spotted-card::before,
+.schedule-event-card::before,
 .card.fitem.fitem--glow::before,
 .featured-event-ad::before {
   content: "";

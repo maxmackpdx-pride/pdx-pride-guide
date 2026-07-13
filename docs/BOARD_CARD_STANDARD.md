@@ -19,27 +19,30 @@ Not everything in the Scene Feed is a "card." Keep these separate:
   board overlays, and the event modal. Only these carry the border + glow +
   tap-to-open behavior.
 
-## Rainbow top seam (sitewide on glowing cards)
+## Rainbow top seam (clickable cards: events, boards, places)
 
-Every glowing card carries the **same animated rainbow bar** across the top
-edge (flow + soft glow; calm/reduced-motion freezes it). Shared chrome lives in
-`client/src/components/ds/tokens/base.css` + calm rules in `effects.css`.
+**Rule:** Anything that is a **clickable card** — Events, Boards (gigs / gifts /
+missed connections), Places — gets the same animated rainbow bar across the
+top. Plain hub-feed activity rows (RSVP, check-in, text posts) do **not**.
+
+Shared chrome: `client/src/components/ds/tokens/base.css` + calm rules in
+`effects.css` (flow + soft glow; calm/reduced-motion freezes it).
 
 | Surface | Selector / component |
 |---|---|
-| Events grid | `.pdxBoard` (`PosterCard`) |
+| Events grid | `.pdxBoard` (`PosterCard` via ListingCard) |
 | Events list | `.pdxRow` (`EventCard`) |
+| Schedule cells | `.schedule-event-card` |
 | Legacy event board cards | `.event-board-card` |
 | Gigs / Gifting boards | `.board-listing-card` |
-| Missed Connections | `.board-spotted-card` / `.spotted-card` |
-| Hub Scene Feed (glowing board cards only) | `.card.fitem.fitem--glow` — gig / gift / missed-connection posts. Plain activity rows (RSVP, check-in, etc.) do **not** get the seam. |
+| Missed Connections boards | `.board-spotted-card` / `.spotted-card` |
+| Hub feed **board** cards only | `.card.fitem.fitem--glow` (gig / gift / MC) — not plain activity rows |
 | Featured event ad | `.featured-event-ad` |
-| Directory places | `PlaceCard` — explicit `.pdxPlace__seam.pdx-rainbow-rule` |
+| Directory / home places | `PlaceCard` — `.pdxPlace__seam.pdx-rainbow-rule` |
 | Place detail modal | `PlaceModal` — `.pdx-rainbow-rule` on logo well |
 
-When adding a new glowing card, either use one of the selectors above or add
-your root class to the `::before` list in `base.css` (and calm rules in
-`effects.css`). Do not invent a one-off top stripe.
+When adding a new clickable card, add its root class to the `::before` list in
+`base.css` (and calm rules in `effects.css`). Do not invent a one-off top stripe.
 
 ## Directory place cards (related chrome)
 

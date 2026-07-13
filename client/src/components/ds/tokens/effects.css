@@ -213,6 +213,7 @@ html.calm-mode .rainbow-bar::after {
 :root[data-calm="true"] .event-board-card::before,
 :root[data-calm="true"] .board-spotted-card::before,
 :root[data-calm="true"] .spotted-card::before,
+:root[data-calm="true"] .schedule-event-card::before,
 :root[data-calm="true"] .card.fitem.fitem--glow::before,
 :root[data-calm="true"] .featured-event-ad::before,
 html.calm-mode .pdxBoard::before,
@@ -221,6 +222,7 @@ html.calm-mode .board-listing-card::before,
 html.calm-mode .event-board-card::before,
 html.calm-mode .board-spotted-card::before,
 html.calm-mode .spotted-card::before,
+html.calm-mode .schedule-event-card::before,
 html.calm-mode .card.fitem.fitem--glow::before,
 html.calm-mode .featured-event-ad::before {
   background: var(--rainbow-bar);
@@ -248,6 +250,7 @@ html.calm-mode .featured-event-ad::before {
   .event-board-card::before,
   .board-spotted-card::before,
   .spotted-card::before,
+  .schedule-event-card::before,
   .card.fitem.fitem--glow::before,
   .featured-event-ad::before {
     background: var(--rainbow-bar);
