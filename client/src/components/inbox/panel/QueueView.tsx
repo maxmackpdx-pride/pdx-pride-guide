@@ -42,7 +42,8 @@ type QueueRow = {
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
   NEW_EVENT: { label: "EVENT", color: C.cyan },
   SUGGEST: { label: "EVENT", color: C.cyan },
-  CLAIM: { label: "PROMOTER", color: C.purple },
+  CLAIM: { label: "CLAIM", color: C.purple },
+  PROMOTER_APPLICATION: { label: "PROMOTER", color: C.purple },
   PROMOTER: { label: "PROMOTER", color: C.purple },
   PLACE: { label: "PLACE", color: C.orange },
   BUSINESS: { label: "PLACE", color: C.orange },
@@ -591,6 +592,8 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
     }
     const items: QueueRow[] = [];
     for (const s of subs) {
+      // Standalone promoter applications render in the promoter queue (enriched there).
+      if (!completed && s.type === "PROMOTER_APPLICATION") continue;
       const row = mapSubmission(s, completed);
       if (row) items.push(row);
     }
