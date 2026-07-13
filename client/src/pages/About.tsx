@@ -114,7 +114,7 @@ export default function About() {
       <section className="about-v2-stats" aria-label="Guide stats">
         <div className="about-v2-stats__grid">
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--lime">
+            <div className="about-v2-stats__num about-v2-stats__num--lime about-v2-stats__num--pop">
               <CountUpValue
                 key={eventCount > 0 ? "stats-ready" : "stats-pending"}
                 value={eventCount}
@@ -123,17 +123,19 @@ export default function About() {
             <div className="about-v2-stats__label">Events, and counting</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--cyan">
+            <div className="about-v2-stats__num about-v2-stats__num--cyan about-v2-stats__num--pop">
               <CountUpValue value={7} />
             </div>
             <div className="about-v2-stats__label">Days, one guide</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--pink">$0</div>
+            <div className="about-v2-stats__num about-v2-stats__num--pink about-v2-stats__num--pop">
+              $<CountUpValue value={0} />
+            </div>
             <div className="about-v2-stats__label">To browse. Always.</div>
           </div>
           <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--amber">
+            <div className="about-v2-stats__num about-v2-stats__num--amber about-v2-stats__num--pop">
               <CountUpValue value={1} />
             </div>
             <div className="about-v2-stats__label">Guide with all our events — and room for more</div>
@@ -141,339 +143,397 @@ export default function About() {
         </div>
       </section>
 
+      {/* Animated rainbow seam under stat band */}
+      <hr className="pdx-rainbow-rule about-v2-seam" aria-hidden="true" />
+
       {/* MANIFESTO */}
       <section className="about-v2-manifesto">
         <ScrollReveal>
-        <div className="about-v2__inner">
-          <div className="about-v2__kicker">What this actually is</div>
-          <div className="about-v2-manifesto__copy">
-            <p>
-              Pride starts now, it ends never, and this thing is already loaded: parties, community events,
-              weird little gems, places to eat, spots to shop, gigs, gifting, missed connections, and all the
-              real homosexual infrastructure that keeps the scene alive.
-            </p>
-            <p>
-              The family-friendly newspaper roundups are cute. The local moms&apos; Pride lists have their place.
-              But this is for the people who want the whole city, not the sanitized version corporations can
-              sell back to us.
-            </p>
+          <div className="about-v2__inner">
+            <h2 className="about-v2-manifesto__h2">
+              What this <span className="about-v2-manifesto__h2-accent">actually is</span>
+            </h2>
+            <div className="about-v2-manifesto__copy">
+              <p>
+                Pride starts now, it ends never, and this thing is already loaded: parties, community events,
+                weird little gems, places to eat, spots to shop, gigs, gifting, missed connections, and all the
+                real homosexual infrastructure that keeps the scene alive.
+              </p>
+              <p>
+                The family-friendly newspaper roundups are cute. The local moms&apos; Pride lists have their place.
+                But this is for the people who want the whole city, not the sanitized version corporations can
+                sell back to us.
+              </p>
+            </div>
+            <div className="about-v2-manifesto__shout">
+              <p>
+                <span className="about-v2-manifesto__shout-pink">Fuck Meta.</span>
+                <br /><br />
+                Fuck censoring our community.
+                <br />
+                Fuck pretending queer culture only matters once it&apos;s been scrubbed clean.
+                <br /><br />
+                This is raw. This is{" "}
+                <span className="about-v2-manifesto__glitch">ours.</span>
+              </p>
+            </div>
           </div>
-          <div className="about-v2-manifesto__shout">
-            <p>
-              Fuck Meta.
-              <br /><br />
-              Fuck censoring our community.
-              <br />
-              Fuck pretending queer culture only matters once it&apos;s been scrubbed clean.
-              <br /><br />
-              This is raw. This is ours.
-            </p>
-          </div>
-        </div>
         </ScrollReveal>
       </section>
 
       {/* MADE BY TUCKER */}
       <section className="about-v2-creator">
         <ScrollReveal delay={30}>
-        <div className="about-v2__inner">
-          <div className="about-v2-creator__grid">
-            <div className="about-v2-creator__photo">
-              <div className="about-v2-creator__photo-frame">
-                <img
-                  src="/about/tucker-portrait.jpg"
-                  alt="Tucker Max"
-                  width={864}
-                  height={1152}
-                  decoding="async"
-                />
-              </div>
-              <span className="about-v2-creator__hire">Looking for full time employment</span>
-            </div>
-            <div className="about-v2-creator__body">
-              <div className="about-v2__kicker">Who&apos;s behind it</div>
-              <h2 className="about-v2__title">
-                Made by <span className="hl">Tucker Max</span>
-              </h2>
-              <p>
-                Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
-                like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
-                ago I was Oregon State Pet. Today, like many of you, I&apos;m unemployed and looking for work while
-                still dumping everything I have into the projects I care about.
-              </p>
-              <p>
-                I&apos;ve watched so many of you grow, figure out what you like, discover what you don&apos;t,
-                and find your place. I&apos;ve loved every minute of it.
-              </p>
-              <p className="about-v2-creator__thanks">
-                This year got rough. A lot of you showed up for me when I needed it most, donated, and checked
-                in. That&apos;s the only reason year three exists. From the bottom of my heart, thank you. You
-                showed up for me, and I hope this is me showing up for you.
-              </p>
-              <p>
-                I built this because I&apos;m done being tied down to their platforms. Built by a slutty puppy
-                with a cocky attitude, but run by heart and hopefully the community if it takes off.
-              </p>
-              <p>
-                I&apos;m tired of Meta deciding what our community gets to see. I&apos;m tired of the censorship,
-                the labels, and the way they&apos;ve gutted so many of us. So I made something better. Something
-                that works for us, with less bullshit for promoters and the people actually running the show.
-              </p>
-              <div className="about-v2-creator__actions">
-                <a href={IG_URL} target="_blank" rel="noopener noreferrer">
-                  <Button as="span" variant="solid" accent="lime" size="md">
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--lime">Who&apos;s behind it</div>
+            <h2 className="about-v2__title about-v2__title--xl">
+              Made by <span className="hl">Tucker Max</span>
+            </h2>
+
+            <div className="about-v2-creator__grid">
+              <div className="about-v2-creator__photo-col">
+                <div className="about-v2-creator__photo">
+                  <div className="about-v2-creator__photo-frame">
+                    <img
+                      src="/about/tucker-portrait.jpg"
+                      alt="Tucker Max"
+                      width={864}
+                      height={1152}
+                      decoding="async"
+                    />
+                  </div>
+                  <span className="about-v2-creator__hire">Looking for full time employment</span>
+                  <a
+                    href={IG_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-v2-creator__ig-sticker"
+                  >
+                    <svg
+                      width="19"
+                      height="19"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5.5" />
+                      <circle cx="12" cy="12" r="4.2" />
+                      <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
+                    </svg>
                     Follow @tucker_pdmax
+                  </a>
+                </div>
+                <div className="about-v2-creator__credits">
+                  Artist · Yes Coach · Brand promoter
+                  <br />
+                  Digg&apos;n For Bones · Former Oregon State Pet
+                </div>
+                <div className="about-v2-creator__actions">
+                  <a href={IG_URL} target="_blank" rel="noopener noreferrer">
+                    <Button as="span" variant="solid" accent="lime" size="md">
+                      Follow @tucker_pdmax
+                    </Button>
+                  </a>
+                  <Button
+                    type="button"
+                    variant="neon"
+                    accent="pink"
+                    size="md"
+                    onClick={() => setContactModal("message")}
+                  >
+                    Message me
+                  </Button>
+                </div>
+              </div>
+
+              <div className="about-v2-creator__body">
+                <p>
+                  Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
+                  like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
+                  ago I was Oregon State Pet. Today, like many of you, I&apos;m unemployed and looking for work while
+                  still dumping everything I have into the projects I care about.
+                </p>
+                <p>
+                  I&apos;ve watched so many of you grow, figure out what you like, discover what you don&apos;t,
+                  and find your place. I&apos;ve loved every minute of it.
+                </p>
+                <blockquote className="about-v2-creator__pull">
+                  <p>
+                    This year got rough. A lot of you showed up for me when I needed it most, donated, and checked
+                    in. That&apos;s the only reason year three exists. From the bottom of my heart, thank you. You
+                    showed up for me, and I hope this is me showing up for you.
+                  </p>
+                </blockquote>
+                <p>
+                  I built this because I&apos;m done being tied down to their platforms. Built by a slutty puppy
+                  with a cocky attitude, but run by heart and hopefully the community if it takes off.
+                </p>
+                <p>
+                  I&apos;m tired of Meta deciding what our community gets to see. I&apos;m tired of the censorship,
+                  the labels, and the way they&apos;ve gutted so many of us. So I made something better. Something
+                  that works for us, with less bullshit for promoters and the people actually running the show.
+                </p>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* OPEN TO WORK */}
+      <section className="about-v2-work">
+        <ScrollReveal>
+          <div className="about-v2__inner about-v2__inner--work">
+            <div className="about-v2-work__card">
+              <div className="about-v2-work__top">
+                <span className="about-v2-work__badge">
+                  <span className="dot" aria-hidden="true" />
+                  Open to work
+                </span>
+                <span className="about-v2-work__loc">Portland, OR · Full time</span>
+              </div>
+              <h3 className="about-v2-work__headline">
+                Brand builder,{" "}
+                <span className="about-v2-work__headline-cyan">sales leader</span>
+                , and{" "}
+                <span className="about-v2-work__headline-lime">momentum-maker</span>
+                .
+              </h3>
+              <p className="about-v2-work__support">
+                I love people, big ideas, and turning good energy into real results. Still looking for my next
+                thing. If someone comes to mind, send them my way.
+              </p>
+              <div className="about-v2-work__chips" aria-label="Role focus areas">
+                <span className="about-v2-work__chip">Brand &amp; marketing</span>
+                <span className="about-v2-work__chip">Sales leadership</span>
+                <span className="about-v2-work__chip">Events &amp; community</span>
+              </div>
+              <div className="about-v2-work__footer">
+                <span className="about-v2-work__foot-note">
+                  Resume, references, and a good handshake on request.
+                </span>
+                <div className="about-v2-work__ctas">
+                  <Link href="/resume">
+                    <Button as="span" variant="solid" accent="cyan" size="md" arrow>
+                      View resume
+                    </Button>
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="neon"
+                    accent="cyan"
+                    size="md"
+                    onClick={() => setContactModal("message")}
+                  >
+                    Message me
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* PROJECT CARDS */}
+      <section className="about-v2-projects">
+        <ScrollReveal delay={30}>
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--pink">What else I&apos;m making</div>
+            <div className="about-v2-projects__list">
+              <Link href={STANK_EVENT_HREF} className="about-v2-project">
+                <img src="/posters/stank-yes-coach.jpg" alt="" width={120} height={120} />
+                <div>
+                  <div className="about-v2-project__meta">Yes Coach · Stank</div>
+                  <h3 className="about-v2-project__title">Stank: Yes Coach!</h3>
+                  <p className="about-v2-project__desc">Hosted by Tucker Max · Sat, Sanctuary Club · Pride Week 2026</p>
+                </div>
+                <span className="about-v2-project__go">See event →</span>
+              </Link>
+
+              <a
+                className="about-v2-project"
+                href={DIGGN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="/about/diggn-for-bones.jpg" alt="" width={120} height={120} />
+                <div>
+                  <div className="about-v2-project__meta">Podcast · Season 3</div>
+                  <h3 className="about-v2-project__title">Digg&apos;n For Bones</h3>
+                  <p className="about-v2-project__desc">Produced by Tucker Max · new episodes out now on Spotify</p>
+                </div>
+                <span className="about-v2-project__go">Listen →</span>
+              </a>
+
+              <button
+                type="button"
+                className="about-v2-project about-v2-project--button"
+                onClick={() => setContactModal("order")}
+              >
+                <img
+                  src="/about/disco/card-thumb.jpg"
+                  alt="Constrained and Sparkling Bro — shibari disco body sculptures"
+                  width={120}
+                  height={120}
+                />
+                <div>
+                  <div className="about-v2-project__meta">Art · Made to order · $1600 for 18″</div>
+                  <h3 className="about-v2-project__title">Constrained and Sparkling Bro</h3>
+                  <p className="about-v2-project__desc">
+                    Disco bodies in shibari · custom mirror mosaic · ~1 month · 14″ · 18″ · 24″ + bigger
+                  </p>
+                </div>
+                <span className="about-v2-project__go">Order →</span>
+              </button>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* SUPPORT: donate + sponsors merged */}
+      <section className="about-v2-support">
+        <ScrollReveal>
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--lime">Keep it free</div>
+            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>
+              Help keep it free for <span className="hl">everyone else</span>
+            </h2>
+
+            <div className="about-v2-donate about-v2-donate--panel">
+              <div className="about-v2-donate__copy">
+                <h3 className="about-v2-donate__h3">Keep this guide alive</h3>
+                <p>
+                  Servers and domains cost money. Time costs the most. If this pointed you toward one good night,
+                  chip in and it stays free for the next person.
+                </p>
+              </div>
+              <div className="about-v2-donate__cta">
+                <a href={VENMO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-donate">
+                  <Button as="span" variant="solid" accent="lime" size="lg">
+                    Buy me a coffee
                   </Button>
                 </a>
+                <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
+              </div>
+            </div>
+
+            <div className="about-v2-sponsors__grid">
+              <div className="about-v2-sponsors__copy">
+                <div className="about-v2__kicker about-v2__kicker--lime">Sponsors</div>
+                <p>
+                  Sponsors can buy featured posts in the scene feed and/or ads on the site. That is how this
+                  stays free to browse. The bar is simple: you need to be part of the community or already
+                  support what we are building. No scrubbing your brand first. No random corporate Pride
+                  cosplay.
+                </p>
+                <p>
+                  And it does not stop on July 19. After Pride week this becomes a{" "}
+                  <strong className="about-v2-sponsors__strong">year round resource</strong> for the scene, so your
+                  support keeps working long after the parade.
+                </p>
                 <Button
                   type="button"
-                  variant="neon"
-                  accent="pink"
+                  variant="solid"
+                  accent="lime"
                   size="md"
-                  onClick={() => setContactModal("message")}
+                  onClick={() => setContactModal("sponsor")}
                 >
-                  Message me
+                  Pitch a sponsorship
                 </Button>
               </div>
-            </div>
-          </div>
-
-          <div className="about-v2-creator__work">
-            <div className="about-v2-creator__work-inner">
-              <span className="about-v2-creator__work-badge">
-                <span className="dot" aria-hidden="true" />
-                Open to work
-              </span>
-              <div
-                className="about-v2-creator__work-dynamic"
-                aria-label="And yes, I'm still looking for work. I'm a brand builder, sales leader, and momentum-maker who loves people, big ideas, and turning good energy into real results. If something or someone comes to mind, send them my way."
-              >
-                <p className="about-v2-creator__work-line">
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">And yes,</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--md">I&apos;m still</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--lime about-v2-creator__work-word--tilt">looking</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg">for work.</span>
-                </p>
-                <p className="about-v2-creator__work-line">
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">I&apos;m a</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg about-v2-creator__work-word--cyan about-v2-creator__work-word--tilt-alt">brand builder,</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg about-v2-creator__work-word--pink">sales leader,</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">and</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--lime about-v2-creator__work-word--tilt">momentum-maker</span>
-                </p>
-                <p className="about-v2-creator__work-line about-v2-creator__work-line--body">
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--md">who loves</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg about-v2-creator__work-word--pink about-v2-creator__work-word--tilt-alt">people,</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--cyan">big ideas,</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">and turning</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--md about-v2-creator__work-word--lime">good energy</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--lg">into real results.</span>
-                </p>
-                <p className="about-v2-creator__work-line about-v2-creator__work-line--cta">
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--sm">If something or someone comes to mind,</span>{" "}
-                  <span className="about-v2-creator__work-word about-v2-creator__work-word--xl about-v2-creator__work-word--cyan about-v2-creator__work-word--tilt">send them my way.</span>
-                </p>
+              <div className="about-v2-sponsors__checks">
+                {SPONSOR_CHECKS.map(item => (
+                  <div key={item} className="about-v2-sponsors__check">
+                    <span className="mark" aria-hidden="true">✓</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <Link href="/resume">
-              <Button as="span" variant="neon" accent="cyan" size="md">
-                View resume
-              </Button>
-            </Link>
           </div>
-
-          <Link href={STANK_EVENT_HREF} className="about-v2-project">
-            <img src="/posters/stank-yes-coach.jpg" alt="" width={120} height={120} />
-            <div>
-              <div className="about-v2-project__meta">Yes Coach · Stank</div>
-              <h3 className="about-v2-project__title">Stank: Yes Coach!</h3>
-              <p className="about-v2-project__desc">Hosted by Tucker Max · Sat, Sanctuary Club · Pride Week 2026</p>
-            </div>
-            <span className="about-v2-project__go">See event →</span>
-          </Link>
-
-          <a
-            className="about-v2-project"
-            href={DIGGN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src="/about/diggn-for-bones.jpg" alt="" width={120} height={120} />
-            <div>
-              <div className="about-v2-project__meta">Podcast · Season 3</div>
-              <h3 className="about-v2-project__title">Digg&apos;n For Bones</h3>
-              <p className="about-v2-project__desc">Produced by Tucker Max · new episodes out now on Spotify</p>
-            </div>
-            <span className="about-v2-project__go">Listen →</span>
-          </a>
-
-          <button
-            type="button"
-            className="about-v2-project about-v2-project--button"
-            onClick={() => setContactModal("order")}
-          >
-            <img
-              src="/about/disco/card-thumb.jpg"
-              alt="Constrained and Sparkling Bro — shibari disco body sculptures"
-              width={120}
-              height={120}
-            />
-            <div>
-              <div className="about-v2-project__meta">Art · Made to order · $1600 for 18″</div>
-              <h3 className="about-v2-project__title">Constrained and Sparkling Bro</h3>
-              <p className="about-v2-project__desc">
-                Disco bodies in shibari · custom mirror mosaic · ~1 month · 14″ · 18″ · 24″ + bigger
-              </p>
-            </div>
-            <span className="about-v2-project__go">Order →</span>
-          </button>
-        </div>
-        </ScrollReveal>
-      </section>
-
-      {/* KEEP ALIVE */}
-      <section className="about-v2-donate">
-        <ScrollReveal>
-        <div className="about-v2-donate__row">
-          <div>
-            <h2>Keep this guide alive</h2>
-            <p>
-              Servers and domains cost money. Time costs the most. If this pointed you toward one good night,
-              chip in and it stays free for the next person.
-            </p>
-          </div>
-          <div className="about-v2-donate__cta">
-            <a href={VENMO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-donate">
-              <Button as="span" variant="solid" accent="lime" size="lg">
-                Buy me a coffee
-              </Button>
-            </a>
-            <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
-          </div>
-        </div>
-        </ScrollReveal>
-      </section>
-
-      {/* SPONSORS */}
-      <section className="about-v2-sponsors">
-        <ScrollReveal delay={30}>
-        <div className="about-v2__inner">
-          <div className="about-v2-sponsors__grid">
-            <div className="about-v2-sponsors__copy">
-              <div className="about-v2__kicker">Sponsors</div>
-              <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>
-                Help keep it free for <span className="hl">everyone else</span>
-              </h2>
-              <p>
-                Sponsors can buy featured posts in the scene feed and/or ads on the site. That is how this
-                stays free to browse. The bar is simple: you need to be part of the community or already
-                support what we are building. No scrubbing your brand first. No random corporate Pride
-                cosplay.
-              </p>
-              <p>
-                And it does not stop on July 19. After Pride week this becomes a{" "}
-                <strong style={{ color: "#fff" }}>year round resource</strong> for the scene, so your
-                support keeps working long after the parade.
-              </p>
-              <Button
-                type="button"
-                variant="solid"
-                accent="lime"
-                size="md"
-                onClick={() => setContactModal("sponsor")}
-              >
-                Pitch a sponsorship
-              </Button>
-            </div>
-            <div className="about-v2-sponsors__checks">
-              {SPONSOR_CHECKS.map(item => (
-                <div key={item} className="about-v2-sponsors__check">
-                  <span className="mark" aria-hidden="true">✓</span>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
         </ScrollReveal>
       </section>
 
       {/* INFRASTRUCTURE */}
       <section className="about-v2-infra">
         <ScrollReveal>
-        <div className="about-v2__inner">
-          <div className="about-v2__kicker">Necessary homosexual infrastructure</div>
-          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
-            The whole city, <span className="hl">not the sanitized bits</span>
-          </h2>
-          <div className="about-v2-infra__grid">
-            <Link href="/pride-work" className="about-v2-infra__card about-v2-infra__card--cyan">
-              <h3>Gigs</h3>
-              <p>Do you offer a trade, need work, or want to put your talents out there? Check gigs.</p>
-            </Link>
-            <Link href="/gifting" className="about-v2-infra__card about-v2-infra__card--amber">
-              <h3>Gifting</h3>
-              <p>Need something for Pride week or have old Pride gear collecting dust? Hit gifting.</p>
-            </Link>
-            <Link href="/spotted" className="about-v2-infra__card about-v2-infra__card--pink">
-              <h3>Missed connections</h3>
-              <p>Trying to find someone after a Pride event? That&apos;s why missed connections exists.</p>
-            </Link>
-            <Link href="/nude-beaches" className="about-v2-infra__card about-v2-infra__card--lime">
-              <h3>Nude beaches</h3>
-              <p>Want to make new friends at the river or catch a ride there or back? Check out the nude beach section.</p>
-            </Link>
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--cyan">Necessary homosexual infrastructure</div>
+            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
+              The whole city, <span className="hl">not the sanitized bits</span>
+            </h2>
+            <div className="about-v2-infra__grid">
+              <Link href="/pride-work" className="about-v2-infra__card about-v2-infra__card--cyan">
+                <h3>Gigs</h3>
+                <p>Do you offer a trade, need work, or want to put your talents out there? Check gigs.</p>
+              </Link>
+              <Link href="/gifting" className="about-v2-infra__card about-v2-infra__card--amber">
+                <h3>Gifting</h3>
+                <p>Need something for Pride week or have old Pride gear collecting dust? Hit gifting.</p>
+              </Link>
+              <Link href="/spotted" className="about-v2-infra__card about-v2-infra__card--pink">
+                <h3>Missed connections</h3>
+                <p>Trying to find someone after a Pride event? That&apos;s why missed connections exists.</p>
+              </Link>
+              <Link href="/nude-beaches" className="about-v2-infra__card about-v2-infra__card--lime">
+                <h3>Nude beaches</h3>
+                <p>Want to make new friends at the river or catch a ride there or back? Check out the nude beach section.</p>
+              </Link>
+            </div>
           </div>
-        </div>
         </ScrollReveal>
       </section>
 
       {/* VALUES */}
       <section className="about-v2-values">
         <ScrollReveal>
-        <div className="about-v2__inner">
-          <div className="about-v2__kicker">Transparency</div>
-          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>
-            Values &amp; the <span className="hl">rules</span>
-          </h2>
-          <div className="about-v2-values__grid">
-            {VALUES.map(item => (
-              <div key={item.title} className="about-v2-values__item">
-                <span className="mark" aria-hidden="true">✓</span>
-                <span>
-                  <strong>{item.title}</strong> {item.text}
-                </span>
-              </div>
-            ))}
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--pink">Transparency</div>
+            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>
+              Values &amp; the <span className="hl">rules</span>
+            </h2>
+            <div className="about-v2-values__grid">
+              {VALUES.map(item => (
+                <div key={item.title} className="about-v2-values__item">
+                  <span className="mark" aria-hidden="true">✓</span>
+                  <span>
+                    <strong>{item.title}</strong> {item.text}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
         </ScrollReveal>
       </section>
 
       {/* FAQ */}
       <section className="about-v2-faq">
         <ScrollReveal>
-        <div className="about-v2__inner">
-          <div className="about-v2__kicker">FAQ</div>
-          <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
-            Good questions
-          </h2>
-          <div className="about-v2-faq__list">
-            {FAQ.map(item => (
-              <details key={item.q} className="about-v2-faq__item">
-                <summary>
-                  {item.q}
-                  <span className="ico" aria-hidden="true">+</span>
-                </summary>
-                <div className="answer">{item.a}</div>
-              </details>
-            ))}
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--cyan">FAQ</div>
+            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
+              Good questions
+            </h2>
+            <div className="about-v2-faq__list">
+              {FAQ.map(item => (
+                <details key={item.q} className="about-v2-faq__item">
+                  <summary>
+                    {item.q}
+                    <span className="ico" aria-hidden="true">+</span>
+                  </summary>
+                  <div className="answer">{item.a}</div>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
         </ScrollReveal>
       </section>
 
       {/* CLOSE */}
+      <hr className="pdx-rainbow-rule about-v2-seam" aria-hidden="true" />
       <section className="about-v2-close">
         <div className="about-v2-close__row">
           <span>Pride is a protest. Take care of each other.</span>
