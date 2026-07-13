@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
+import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import { prideDayFromDate } from "@shared/prideWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
@@ -3379,6 +3380,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.status(403).json({ error: "Owner only" });
     }
     res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
+  });
+
+  // Consolidated backlog report: every pending admin-queue category + the
+  // Owner Desk (owner only) in one printable page. ?format=json for raw data.
+  app.get("/api/admin/report", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    const includeOwnerDesk = !!(user && storage.isPrimarySiteOwner(user));
+    const data = buildAdminReport(storage, includeOwnerDesk);
+    if (String(req.query.format) === "json") return res.json(data);
+    res.type("html").send(renderAdminReportHtml(data));
   });
 
   app.post("/api/admin/feedback/:id/resolve", requireAdmin, (req, res) => {
