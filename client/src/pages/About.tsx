@@ -314,15 +314,15 @@ export default function About() {
           >
             <img
               src="/about/disco/card-thumb.jpg"
-              alt="Custom shibari disco body sculpture"
+              alt="Constrained and Sparkling Bro — shibari disco body sculptures"
               width={120}
               height={120}
             />
             <div>
-              <div className="about-v2-project__meta">Made to order · $1600 for 18″</div>
-              <h3 className="about-v2-project__title">Shibari Disco Bodies</h3>
+              <div className="about-v2-project__meta">Art · Made to order · $1600 for 18″</div>
+              <h3 className="about-v2-project__title">Constrained and Sparkling Bro</h3>
               <p className="about-v2-project__desc">
-                Custom mirror mosaic · ~1 month · 14″ · 18″ · 24″ + bigger
+                Disco bodies in shibari · custom mirror mosaic · ~1 month · 14″ · 18″ · 24″ + bigger
               </p>
             </div>
             <span className="about-v2-project__go">Order →</span>
