@@ -5308,6 +5308,8 @@ export interface IStorage {
   getEventHosts(eventId: number): any[];
   resolveUserByIdentifier(identifier: string): User | undefined;
   resolveEventPrimaryHostUser(eventId: number): User | undefined;
+  resolveVenueOwnerUser(event: Pick<Event, "venueName" | "address" | "lat" | "lng">): { user: User; businessName: string } | undefined;
+  resolveEventMessageRecipient(eventId: number): { user: User; recipientType: "host" | "venue_owner"; venueName?: string } | undefined;
   isUserEventHost(eventId: number, userId: number): boolean;
   setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
   addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
@@ -6873,6 +6875,35 @@ export const storage: IStorage = {
       }
       return user;
     }
+    return undefined;
+  },
+  resolveVenueOwnerUser(event) {
+    const businesses = storage.getBusinesses().filter(b => b.active && b.ownerId);
+    for (const biz of businesses) {
+      if (!eventMatchesBusiness(event, biz)) continue;
+      const ownerId = Number(biz.ownerId);
+      if (!ownerId) continue;
+      const user = storage.getUserById(ownerId);
+      if (user) return { user, businessName: biz.name };
+    }
+    return undefined;
+  },
+  resolveEventMessageRecipient(eventId) {
+    const evt = storage.getEvent(eventId);
+    if (!evt) return undefined;
+
+    const host = storage.resolveEventPrimaryHostUser(eventId);
+    if (host) return { user: host, recipientType: "host" as const };
+
+    const venueOwner = storage.resolveVenueOwnerUser(evt);
+    if (venueOwner) {
+      return {
+        user: venueOwner.user,
+        recipientType: "venue_owner" as const,
+        venueName: venueOwner.businessName,
+      };
+    }
+
     return undefined;
   },
   getEventHosts(eventId) {

@@ -2965,22 +2965,38 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    const host = storage.resolveEventPrimaryHostUser(evt.id);
-    if (!host) return res.status(400).json({ error: "NO_HOST", ticketUrl: evt.ticketUrl });
+    const recipient = storage.resolveEventMessageRecipient(evt.id);
+    if (!recipient) {
+      const venueWebsite = resolveVenueWebsite(evt.venueName, venueWebsiteIndex());
+      return res.status(400).json({
+        error: "NO_CONTACT",
+        ticketUrl: evt.ticketUrl || null,
+        venueWebsite,
+        venueName: evt.venueName || null,
+      });
+    }
+    const { user: host, recipientType, venueName } = recipient;
     if (host.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
     if (moderationGate(res, "Message to event host", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, host.id, `Event: ${evt.title}`, body, {
+    const subject = recipientType === "venue_owner"
+      ? `Event at ${venueName || evt.venueName}: ${evt.title}`
+      : `Event: ${evt.title}`;
+    const msg = storage.sendMessage(req.session.userId!, host.id, subject, body, {
       contextType: "EVENT_HOST",
       contextId: evt.id,
       contextLabel: evt.title,
     });
     if (!msg?.id) {
-      console.error("[message-host] sendMessage returned no row", { eventId: evt.id, hostId: host.id });
+      console.error("[message-host] sendMessage returned no row", {
+        eventId: evt.id,
+        recipientId: host.id,
+        recipientType,
+      });
       return res.status(500).json({ error: "Could not deliver message" });
     }
-    res.json(msg);
+    res.json({ ...msg, recipientType, venueName: venueName || null });
   });
 
   // ─── PROMOTER AUTH ────────────────────────────────────────────────────────

@@ -87,6 +87,7 @@ function EventModalInner({
   const [showAuth, setShowAuth] = useState(false);
   const [hostDrawer, setHostDrawer] = useState<"closed" | "compose" | "noHost">("closed");
   const [hostMessage, setHostMessage] = useState("");
+  const [noContactUrl, setNoContactUrl] = useState<string | null>(null);
   const [coHostUsername, setCoHostUsername] = useState("");
   const [showAddCoHost, setShowAddCoHost] = useState(false);
   const [showCalPicker, setShowCalPicker] = useState(false);
@@ -184,22 +185,43 @@ function EventModalInner({
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = new Error(payload.error || "Could not send message") as Error & { code?: string };
+        const err = new Error(payload.error || "Could not send message") as Error & {
+          code?: string;
+          ticketUrl?: string | null;
+          venueWebsite?: string | null;
+        };
         err.code = payload.error;
+        err.ticketUrl = payload.ticketUrl;
+        err.venueWebsite = payload.venueWebsite;
         throw err;
       }
-      return payload;
+      return payload as { recipientType?: "host" | "venue_owner"; venueName?: string | null };
     },
-    onSuccess: () => {
-      toast({ title: "Message sent", description: "The host can reply in your inbox." });
+    onSuccess: (data) => {
+      const isVenueOwner = data?.recipientType === "venue_owner";
+      toast({
+        title: "Message sent",
+        description: isVenueOwner
+          ? `The venue owner${data.venueName ? ` at ${data.venueName}` : ""} can reply in your inbox.`
+          : "The host can reply in your inbox.",
+      });
       setHostMessage("");
       setHostDrawer("closed");
+      setNoContactUrl(null);
       queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
     },
-    onError: (err: Error & { code?: string }) => {
-      if (err.code === "NO_HOST") {
+    onError: (err: Error & { code?: string; ticketUrl?: string | null; venueWebsite?: string | null }) => {
+      if (err.code === "NO_CONTACT" || err.code === "NO_HOST") {
+        const fallbackUrl =
+          err.ticketUrl
+          || err.venueWebsite
+          || event.ticketUrl
+          || (event as Event & { venueWebsite?: string | null }).venueWebsite
+          || resolveVenueWebsite(event.venueName)
+          || null;
+        setNoContactUrl(fallbackUrl);
         setHostDrawer("noHost");
         return;
       }
@@ -661,7 +683,14 @@ function EventModalInner({
             </div>
             <button
               type="button"
-              onClick={() => user ? setHostDrawer("compose") : setShowAuth(true)}
+              onClick={() => {
+                if (!user) {
+                  setShowAuth(true);
+                  return;
+                }
+                setNoContactUrl(null);
+                setHostDrawer("compose");
+              }}
               className="btn-neon event-modal__action-btn"
             >
               Message the Host
@@ -736,14 +765,19 @@ function EventModalInner({
 
           {hostDrawer === "noHost" && (
             <div className="event-modal__drawer event-modal__drawer--alert">
-              <p className="event-modal__drawer-title event-modal__drawer-title--alert">No host is attached to this event yet</p>
+              <p className="event-modal__drawer-title event-modal__drawer-title--alert">No one to message here yet</p>
               <p className="event-modal__drawer-copy">
-                This event hasn't been claimed by an organizer. You may find contact info at the link below.
+                No organizer has claimed this event, and we don&apos;t have a venue owner on file for{" "}
+                {event.venueName || "this listing"}. For the latest info, check the event website.
               </p>
-              {event.ticketUrl && (
-                <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
-                  Visit Event Link →
+              {noContactUrl ? (
+                <a href={noContactUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
+                  Visit event website →
                 </a>
+              ) : (
+                <p className="event-modal__drawer-copy" style={{ marginTop: 0 }}>
+                  We couldn&apos;t find an event link for this one yet. Try the venue&apos;s site or socials directly.
+                </p>
               )}
               <button type="button" onClick={() => setHostDrawer("closed")} className="event-modal__btn-ghost">
                 Close
