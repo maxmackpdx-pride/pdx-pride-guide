@@ -4765,8 +4765,9 @@ html.calm-mode .floating-inbox__halo {
    slow rotate + breathe (the old shimmer motion). */
 .user-avatar {
   --avatar-size: 48px;
-  --glow-outset: 32%;
-  --glow-blur: calc(var(--avatar-size) * 0.22);
+  /* 60% less outward than the first pass (was 32% / 0.22× size) */
+  --glow-outset: 13%;
+  --glow-blur: calc(var(--avatar-size) * 0.088);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -4786,21 +4787,22 @@ html.calm-mode .floating-inbox__halo {
   z-index: 0;
   opacity: 0;
   pointer-events: none;
-  filter: blur(var(--glow-blur));
+  /* +20% vibrancy via saturate/brightness on the flag bloom */
+  filter: blur(var(--glow-blur)) saturate(1.2) brightness(1.12);
   transform: translateZ(0);
   will-change: transform, opacity;
 }
 
 .user-avatar[data-ring]:not([data-ring="none"])::before {
-  opacity: 0.72;
+  opacity: 0.86;
   animation:
     pdxaShimmer 5s linear infinite,
     avatar-glow-breathe 2.4s ease-in-out infinite;
 }
 
 @keyframes avatar-glow-breathe {
-  0%, 100% { opacity: 0.48; }
-  50% { opacity: 0.88; }
+  0%, 100% { opacity: 0.58; }
+  50% { opacity: 1; }
 }
 
 .user-avatar__inner {
@@ -4856,11 +4858,11 @@ html.calm-mode .floating-inbox__halo {
   background: conic-gradient(
     from 0deg,
     transparent 0deg 40deg,
-    rgba(255, 255, 255, 0.55) 58deg,
+    rgba(255, 255, 255, 0.66) 58deg,
     transparent 92deg 360deg
   );
-  filter: blur(calc(var(--avatar-size) * 0.12));
-  opacity: 0.65;
+  filter: blur(calc(var(--avatar-size) * 0.048));
+  opacity: 0.78;
   animation: pdxaShimmer 5s linear infinite;
 }
 
@@ -4876,13 +4878,13 @@ html.calm-mode .floating-inbox__halo {
 
 .user-avatar--shimmer:hover::before {
   animation-duration: 2.2s, 1.6s;
-  filter: blur(var(--glow-blur)) brightness(1.15);
+  filter: blur(var(--glow-blur)) saturate(1.28) brightness(1.22);
 }
 
 .user-avatar--shimmer:hover .user-avatar__shimmer {
   animation-duration: 1.9s;
-  filter: blur(calc(var(--avatar-size) * 0.12)) brightness(1.6);
-  opacity: 0.9;
+  filter: blur(calc(var(--avatar-size) * 0.048)) brightness(1.65);
+  opacity: 0.95;
 }
 
 .user-avatar--shimmer:hover .user-avatar__shimmer--chain {
@@ -4922,7 +4924,7 @@ html.calm-mode .floating-inbox__halo {
   }
 
   .user-avatar[data-ring]:not([data-ring="none"])::before {
-    opacity: 0.7;
+    opacity: 0.84;
   }
 }
 
@@ -4932,7 +4934,7 @@ html.calm-mode .user-avatar__shimmer {
 }
 
 html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
-  opacity: 0.62;
+  opacity: 0.74;
 }
 
 .site-dashboard-link--avatar {
