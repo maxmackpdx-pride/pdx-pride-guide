@@ -8,9 +8,11 @@ import type { Folder, QueueFolder, Thread, LineupDecision } from "@/components/i
 import { C, MONO, DISPLAY, BODY } from "@/components/inbox/panel/sheet";
 import ThreadAvatar from "@/components/inbox/ThreadAvatar";
 import PersonalView from "@/components/inbox/panel/PersonalView";
+import type { GroupChatRow } from "@/components/inbox/panel/PersonalView";
 import QueueView from "@/components/inbox/panel/QueueView";
 import PostsView from "@/components/inbox/panel/PostsView";
 import StatsView from "@/components/inbox/panel/StatsView";
+import InboxGroupChat, { type InboxGroupChatTarget } from "@/components/inbox/InboxGroupChat";
 
 type View = "inbox" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
@@ -47,6 +49,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [filterOpen, setFilterOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeGroup, setActiveGroup] = useState<InboxGroupChatTarget | null>(null);
   const [reply, setReply] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -96,6 +99,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
   useEffect(() => {
     setActiveId(null);
+    setActiveGroup(null);
     setReply("");
     if (!open) {
       setView("inbox");
@@ -126,7 +130,12 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
   useEffect(() => {
     setQueueFolder("active");
+    setActiveGroup(null);
   }, [account]);
+
+  useEffect(() => {
+    if (view !== "inbox") setActiveGroup(null);
+  }, [view]);
 
   if (!open || !user) return null;
 
@@ -148,6 +157,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
   // Open the thread in place (no navigation) and mark it read so the badge resets.
   const openThread = (id: string) => {
+    setActiveGroup(null);
     setActiveId(id);
     setReply("");
     void setRead(id, false);
@@ -156,6 +166,21 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     setActiveId(null);
     setReply("");
   };
+  const openGroup = (row: GroupChatRow) => {
+    setActiveId(null);
+    setReply("");
+    setActiveGroup({
+      kind: row.kind,
+      id: row.id,
+      title: row.title,
+      state: row.state,
+      opensAt: row.opensAt,
+      closesAt: row.closesAt,
+      href: row.href,
+    });
+  };
+  const closeGroup = () => setActiveGroup(null);
+  const detailOpen = Boolean(activeThread || activeGroup);
   const send = async () => {
     const body = reply.trim();
     if (!body || !activeId) return;
@@ -226,7 +251,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         </div>
 
         {/* account tabs (inbox only) */}
-        {inboxActive && !activeThread && (
+        {inboxActive && !detailOpen && (
           <div style={{ padding: "14px 20px 0", flex: "none" }}>
             <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 14, padding: 4 }}>
               {visibleAccounts.map(([id, label, color]) => {
@@ -287,7 +312,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         )}
 
         {/* personal toolbar: received/sent/deleted + filter */}
-        {personalActive && !activeThread && (
+        {personalActive && !detailOpen && (
           <div style={{ padding: "12px 20px 0", flex: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
             <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
               {([
@@ -392,7 +417,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         )}
 
         {/* admin/owner queue folder tabs */}
-        {inboxActive && (account === "admin" || account === "owner") && !activeThread && (
+        {inboxActive && (account === "admin" || account === "owner") && !detailOpen && (
           <div style={{ padding: "12px 20px 0", flex: "none" }}>
             <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
               {([
@@ -438,14 +463,16 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           className="inbox-overlay__scroll"
           style={{
             flex: 1,
-            overflowY: activeThread ? "hidden" : "auto",
-            padding: activeThread ? 0 : "14px 16px 12px",
+            overflowY: detailOpen ? "hidden" : "auto",
+            padding: detailOpen ? 0 : "14px 16px 12px",
             minHeight: 0,
-            display: activeThread ? "flex" : undefined,
-            flexDirection: activeThread ? "column" : undefined,
+            display: detailOpen ? "flex" : undefined,
+            flexDirection: detailOpen ? "column" : undefined,
           }}
         >
-          {activeThread ? (
+          {activeGroup ? (
+            <InboxGroupChat target={activeGroup} onBack={closeGroup} />
+          ) : activeThread ? (
             <ThreadDetail
               thread={activeThread}
               reply={reply}
@@ -522,7 +549,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   showTags
                   tintUnread
                   onOpenThread={openThread}
-                  onNavigate={navigateFromSheet}
+                  onOpenGroup={openGroup}
                 />
               )}
               {inboxActive && account === "admin" && <QueueView mode="admin" queueFolder={queueFolder} />}
@@ -534,7 +561,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         </div>
 
         {/* bottom search */}
-        {searchVisible && !activeThread && (
+        {searchVisible && !detailOpen && (
           <div style={{ flex: "none", padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))", borderTop: `1px solid ${C.borderFaint}`, background: C.sheet }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, height: 46, padding: "0 16px", borderRadius: 999, background: C.inset, border: `1px solid ${C.border3}` }}>
               <Search size={17} color={C.faint} />

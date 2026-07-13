@@ -15,7 +15,7 @@ function tagFor(cat: string) {
   return CAT_TAG[cat] || { label: "MESSAGE", color: C.limeSoft };
 }
 
-type GroupChatRow = {
+export type GroupChatRow = {
   kind: "EVENT" | "BEACH";
   id: number | string;
   title: string;
@@ -39,7 +39,7 @@ export default function PersonalView({
   showTags,
   tintUnread,
   onOpenThread,
-  onNavigate,
+  onOpenGroup,
 }: {
   folder: Folder;
   filter: string;
@@ -47,7 +47,8 @@ export default function PersonalView({
   showTags: boolean;
   tintUnread: boolean;
   onOpenThread: (id: string) => void;
-  onNavigate?: (href: string) => void;
+  /** Open event/beach day-room inside the floating inbox (no navigation). */
+  onOpenGroup?: (row: GroupChatRow) => void;
 }) {
   const { threads } = useInboxThreads(null);
 
@@ -84,7 +85,15 @@ export default function PersonalView({
       {groupChats.map((row, i) => (
         <div
           key={`${row.kind}-${row.id}`}
-          onClick={() => onNavigate?.(row.href)}
+          onClick={() => onOpenGroup?.(row)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onOpenGroup?.(row);
+            }
+          }}
           style={{
             borderTop: i > 0 ? `1px solid ${C.border2}` : undefined,
             padding: "14px 16px",

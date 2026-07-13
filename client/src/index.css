@@ -2308,6 +2308,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-sizing: border-box;
   /* Frameless floating panel, Directory-listing surface + border language. */
   background: var(--surface-card);
   border: 2px solid var(--neon-blue);
@@ -2316,6 +2317,246 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   box-shadow: 0 0 46px -8px var(--neon-blue), 0 0 14px -4px var(--neon-blue),
     var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.6));
   animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
+}
+
+/* Group chat thread chrome (lives inside .inbox-overlay, not a side drawer). */
+.inbox-group-chat {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  background: var(--surface-card, #0c0c0f);
+}
+
+.inbox-group-chat__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #1c1c22;
+  flex: none;
+  min-width: 0;
+}
+
+.inbox-group-chat__back {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid #2a2a32;
+  background: #111116;
+  color: #c8c5bc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+
+.inbox-group-chat__back:hover {
+  border-color: var(--neon-cyan, #19e3ff);
+  color: #fff;
+}
+
+.inbox-group-chat__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.inbox-group-chat__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.inbox-group-chat__title {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.inbox-group-chat__live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #39ff14;
+  box-shadow: 0 0 10px #39ff14;
+  flex: none;
+}
+
+.inbox-group-chat__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #8c8980;
+  min-width: 0;
+}
+
+.inbox-group-chat__badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 6px;
+  flex: none;
+}
+
+.inbox-group-chat__pin {
+  padding: 10px 16px;
+  background: rgba(204, 255, 0, 0.06);
+  border-bottom: 1px solid rgba(204, 255, 0, 0.22);
+  border-left: 3px solid var(--neon-yellow, #ccff00);
+  flex: none;
+}
+
+.inbox-group-chat__pin-label {
+  display: block;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon-yellow, #ccff00);
+  margin-bottom: 3px;
+}
+
+.inbox-group-chat__pin-body {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #e6e3da;
+}
+
+.inbox-group-chat__host-hint {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 11px;
+  color: #8c8980;
+  border-bottom: 1px solid #1c1c22;
+  flex: none;
+}
+
+.inbox-group-chat__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inbox-group-chat__empty {
+  margin: auto;
+  text-align: center;
+  color: #666;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  max-width: 28ch;
+  padding: 24px 8px;
+}
+
+.inbox-group-chat__msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 92%;
+}
+
+.inbox-group-chat__msg--mine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.inbox-group-chat__bubble {
+  background: #15151a;
+  border: 1px solid #2a2a32;
+  border-radius: 14px;
+  padding: 8px 12px;
+  min-width: 0;
+}
+
+.inbox-group-chat__msg--mine .inbox-group-chat__bubble {
+  background: rgba(25, 227, 255, 0.1);
+  border-color: rgba(25, 227, 255, 0.35);
+}
+
+.inbox-group-chat__author {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--neon-cyan, #19e3ff);
+  margin-bottom: 2px;
+}
+
+.inbox-group-chat__bubble p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #e6e3da;
+  word-break: break-word;
+}
+
+.inbox-group-chat__composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #1c1c22;
+  flex: none;
+  min-width: 0;
+}
+
+.inbox-group-chat__composer input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #2a2a32;
+  background: #111116;
+  color: #e6e3da;
+  padding: 0 16px;
+  font-size: 14px;
+  outline: none;
+}
+
+.inbox-group-chat__composer input:focus {
+  border-color: var(--neon-cyan, #19e3ff);
+}
+
+.inbox-group-chat__composer input:disabled {
+  opacity: 0.55;
+}
+
+.inbox-group-chat__send {
+  flex: none;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 2px solid var(--neon-cyan, #19e3ff);
+  background: var(--neon-cyan, #19e3ff);
+  color: #000;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.inbox-group-chat__send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 @keyframes inbox-overlay-in {
@@ -2345,22 +2586,41 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   height: 0;
 }
 
-/* Desktop: bottom-right panel, ~30% of viewport, no dimming backdrop. */
+/* Desktop: bottom-right panel, no dimming backdrop.
+   Keep fully on-screen: never wider than viewport, left: auto so right
+   anchor can't shove it off the right edge on mid-width desktops. */
 @media (min-width: 641px) {
   .inbox-sheet-host .inbox-overlay {
-    right: 24px;
+    left: auto;
+    right: max(16px, env(safe-area-inset-right, 0px));
     /* Anchor between the site header and the bottom so the sheet's heading
        switcher is never clipped under the header. */
     top: 116px;
     bottom: 88px;
     height: auto;
-    width: 34vw;
-    min-width: 400px;
-    max-width: 600px;
+    width: min(34vw, calc(100vw - 32px));
+    min-width: min(400px, calc(100vw - 32px));
+    max-width: min(600px, calc(100vw - 32px));
+    /* Contain thread/group chat chrome; no sideways bleed. */
+    max-height: calc(100vh - 116px - 88px);
+    overflow: hidden;
   }
 
   .inbox-sheet-host .inbox-overlay__backdrop {
     display: none;
+  }
+
+  /* Event chat drawer: inset from the right edge so it doesn't sit flush
+     off-screen / under the scrollbar / next to the FAB awkwardly. */
+  .event-chat-panel {
+    top: 72px;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: 24px;
+    width: min(420px, calc(100vw - 32px));
+    border: 2px solid var(--neon-cyan);
+    border-radius: 18px;
+    border-left-width: 2px;
+    box-shadow: 0 0 40px -10px var(--neon-cyan), var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55));
   }
 }
 
@@ -7124,12 +7384,15 @@ footer a:hover { color: #00FFFF !important; }
   right: 0;
   bottom: 0;
   width: min(100%, 420px);
+  max-width: calc(100vw - 16px);
   background: #0a0a0a;
   border-left: 2px solid var(--neon-cyan);
   display: flex;
   flex-direction: column;
   z-index: 73;
   animation: attendance-panel-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .event-chat-panel__head {
