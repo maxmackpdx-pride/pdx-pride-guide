@@ -87,6 +87,8 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   sprouttherapypdx: "Sprout_Therapy_PDX",
   thecenterforcouplessextherapy: "The_Center_for_Couples_and_Sex_Therapy",
   thecenterforcouplesandsextherapy: "The_Center_for_Couples_and_Sex_Therapy",
+  soldbyscott: "Sold_By_Scott",
+  soldxscott: "Sold_By_Scott",
 };
 
 const FALLBACK_BY_TYPE: Record<string, string> = {
