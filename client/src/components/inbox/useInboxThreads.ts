@@ -285,6 +285,15 @@ export function useInboxThreads(activeThreadId: string | null) {
     });
   }, []);
 
+  const unarchive = useCallback((threadId: string) => {
+    setArchivedIds(prev => {
+      const next = new Set(prev);
+      next.delete(threadId);
+      saveArchived(next);
+      return next;
+    });
+  }, []);
+
   const remove = useCallback(async (threadId: string) => {
     const r = await fetch(`/api/messages/thread/${encodeURIComponent(threadId)}`, {
       method: "DELETE",
@@ -334,12 +343,19 @@ export function useInboxThreads(activeThreadId: string | null) {
     toast({ title: decision === "APPROVED" ? "Lineup approved" : "Lineup declined" });
   }, [queryClient, talentRequestId, threads, toast]);
 
+  const deletedCount = useMemo(
+    () => baseThreads.filter((t) => t.archived).length,
+    [baseThreads],
+  );
+
   return {
     threads,
     loading: inboxLoading || sentLoading,
+    deletedCount,
     sendMessage,
     setRead,
     archive,
+    unarchive,
     remove,
     revealSelf,
     resolveLineup,

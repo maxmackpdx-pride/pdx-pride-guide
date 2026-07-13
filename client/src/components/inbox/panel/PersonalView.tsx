@@ -59,8 +59,8 @@ export default function PersonalView({
 
   const q = query.trim().toLowerCase();
   const rows = threads
-    .filter((t) => !t.archived && t.folder === folder)
-    .filter((t) => filter === "all" || t.cat === filter)
+    .filter((t) => (folder === "deleted" ? t.archived : !t.archived && t.folder === folder))
+    .filter((t) => folder === "deleted" || filter === "all" || t.cat === filter)
     .filter(
       (t) =>
         !q ||
@@ -69,6 +69,7 @@ export default function PersonalView({
     );
 
   const showGroups = folder === "inbox" && filter === "all" && !q && groupChats.length > 0;
+  const emptyLabel = folder === "deleted" ? "NO RECENTLY DELETED MESSAGES" : "NO MESSAGES HERE";
 
   const groupStrip = showGroups ? (
     <div
@@ -169,7 +170,7 @@ export default function PersonalView({
             letterSpacing: ".1em",
           }}
         >
-          NO MESSAGES HERE
+          {emptyLabel}
         </div>
       </>
     );

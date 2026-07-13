@@ -49,7 +49,9 @@ import {
 import type { Event } from "@shared/schema";
 import {
   beachVenueLabel,
+  isAllowedBeachCheckinDate,
   isValidBeachId,
+  isValidRiverBratsDepartHour,
   isValidRiverBratsHour,
   pacificTodayDate,
 } from "@shared/riverBrats";
@@ -2402,17 +2404,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const beachId = String(req.body.beachId || "");
       const arrivalHour = Number(req.body.arrivalHour);
+      const departHourRaw = req.body.departHour;
+      const departHour = departHourRaw == null || departHourRaw === "" ? null : Number(departHourRaw);
       if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
       if (!isValidRiverBratsHour(arrivalHour)) return res.status(400).json({ error: "Pick a time between 7am and 9pm" });
+      if (!isValidRiverBratsDepartHour(departHour, arrivalHour)) {
+        return res.status(400).json({ error: "Pick how long you'll stay (leave after you arrive, by 10pm)" });
+      }
       const note = String(req.body.note || "").trim().slice(0, 80) || null;
       if (moderationGate(res, "River Brats check-in", { note: note || "" })) return;
       const calendarDate = String(req.body.date || pacificTodayDate());
+      if (!isAllowedBeachCheckinDate(calendarDate)) {
+        return res.status(400).json({ error: "Pick a day from today through the next 3 days" });
+      }
       const isAnonymous = Boolean(req.body.isAnonymous);
       const row = storage.upsertBeachCheckin({
         ...insertBeachCheckinSchema.parse({
           userId: req.session.userId!,
           beachId,
           arrivalHour,
+          departHour,
           note,
           calendarDate,
         }),
@@ -2438,6 +2449,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const lat = Number(req.body.lat);
     const lng = Number(req.body.lng);
     if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
+    if (date !== pacificTodayDate()) {
+      return res.status(400).json({ error: "You can only confirm presence on the day of your check-in" });
+    }
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       return res.status(400).json({ error: "Location unavailable" });
     }
@@ -3217,7 +3231,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ── Admin: venue claims + new-business submissions + logo requests ──────
   app.get("/api/admin/business-claims", requireAdmin, (req, res) => {
-    res.json(storage.getPendingBusinessClaims());
+    res.json(req.query.recent === "true"
+      ? storage.getRecentResolvedBusinessClaims()
+      : storage.getPendingBusinessClaims());
   });
 
   app.post("/api/admin/business-claims/:id/approve", requireAdmin, (req, res) => {
@@ -3233,7 +3249,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/business-submissions", requireAdmin, (req, res) => {
-    res.json(storage.getPendingBusinessSubmissions());
+    res.json(req.query.recent === "true"
+      ? storage.getRecentResolvedBusinessSubmissions()
+      : storage.getPendingBusinessSubmissions());
   });
 
   app.post("/api/admin/business-submissions/:id/approve", requireAdmin, (req, res) => {
@@ -3250,7 +3268,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/business-logo-requests", requireAdmin, (req, res) => {
-    res.json(storage.getPendingBusinessLogoRequests());
+    res.json(req.query.recent === "true"
+      ? storage.getRecentResolvedBusinessLogoRequests()
+      : storage.getPendingBusinessLogoRequests());
   });
 
   app.post("/api/admin/business-logo-requests/:id/approve", requireAdmin, (req, res) => {
@@ -3406,6 +3426,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
     if (!user || !storage.isPrimarySiteOwner(user)) {
       return res.status(403).json({ error: "Owner only" });
+    }
+    const status = String(req.query.status || "").toUpperCase();
+    if (status === "RESOLVED") {
+      const items = storage.getOwnerDeskItems("RESOLVED")
+        .filter((item) => item.resolvedAt || item.status === "RESOLVED")
+        .sort((a, b) => {
+          const aTs = Date.parse(a.resolvedAt || a.createdAt) || 0;
+          const bTs = Date.parse(b.resolvedAt || b.createdAt) || 0;
+          return bTs - aTs;
+        });
+      return res.json(items);
     }
     res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
   });
@@ -3632,8 +3663,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
-  app.get("/api/admin/missed-connections", requireAdmin, (_req, res) => {
-    res.json(storage.getAdminMissedConnections());
+  app.get("/api/admin/missed-connections", requireAdmin, (req, res) => {
+    res.json(req.query.recent === "true"
+      ? storage.getRecentlyReviewedMissedConnections()
+      : storage.getAdminMissedConnections());
   });
 
   app.post("/api/admin/missed-connections/:id/approve", requireAdmin, (req, res) => {

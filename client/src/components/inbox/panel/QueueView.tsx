@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
+import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
 
 type QueueRowKind =
@@ -33,6 +34,9 @@ type QueueRow = {
   /** Owner-desk contact/sponsor messages: reply target + file links. */
   replyEmail?: string;
   attachments?: string[];
+  outcome?: string;
+  completedAt?: string;
+  readOnly?: boolean;
 };
 
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
@@ -52,8 +56,9 @@ function ts(v: unknown): string {
   return isNaN(d.getTime()) ? String(v) : d.toLocaleString();
 }
 
-function mapSubmission(s: any): QueueRow | null {
-  if (String(s.status).toUpperCase() !== "PENDING") return null;
+function mapSubmission(s: any, completed = false): QueueRow | null {
+  const status = String(s.status).toUpperCase();
+  if (completed ? status === "PENDING" : status !== "PENDING") return null;
   const t = TYPE_TAG[s.type] || { label: String(s.type || "ITEM"), color: C.cyan };
   const fields: Array<[string, string]> = [];
   if (s.venueName) fields.push(["Where", s.venueName + (s.address ? ` · ${s.address}` : "")]);
@@ -70,11 +75,15 @@ function mapSubmission(s: any): QueueRow | null {
     fields,
     note: s.description || "",
     body: s.claimReason || undefined,
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(s.createdAt || "") : undefined,
+    readOnly: completed,
   };
 }
 
-function mapRiverBratsReport(r: any): QueueRow | null {
-  if (String(r.status).toUpperCase() !== "PENDING") return null;
+function mapRiverBratsReport(r: any, completed = false): QueueRow | null {
+  const status = String(r.status).toUpperCase();
+  if (completed ? status !== "RESOLVED" : status !== "PENDING") return null;
   return {
     id: `rb-${r.id}`,
     kind: "river_brats",
@@ -88,11 +97,15 @@ function mapRiverBratsReport(r: any): QueueRow | null {
       ["Reason", String(r.reason || "—")],
     ],
     note: r.details || r.message || "",
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(r.createdAt || r.resolved_at || "") : undefined,
+    readOnly: completed,
   };
 }
 
-function mapGiftingReport(r: any): QueueRow | null {
-  if (String(r.status).toUpperCase() !== "PENDING") return null;
+function mapGiftingReport(r: any, completed = false): QueueRow | null {
+  const status = String(r.status).toUpperCase();
+  if (completed ? status !== "RESOLVED" : status !== "PENDING") return null;
   return {
     id: `gr-${r.id}`,
     kind: "gifting_report",
@@ -103,12 +116,20 @@ function mapGiftingReport(r: any): QueueRow | null {
     meta: String(r.reason || "Flagged gifting post"),
     fields: [["Post", String(r.postTitle || r.postId || "—")]],
     note: r.message || "",
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(r.createdAt || r.resolved_at || "") : undefined,
+    readOnly: completed,
   };
 }
 
-function mapGiftingFlagged(p: any): QueueRow | null {
-  if (TERMINAL_GIFTING.has(String(p.status).toUpperCase())) return null;
-  if (Number(p.reportCount || 0) <= 0) return null;
+function mapGiftingFlagged(p: any, completed = false): QueueRow | null {
+  const status = String(p.status).toUpperCase();
+  if (completed) {
+    if (!TERMINAL_GIFTING.has(status)) return null;
+  } else {
+    if (TERMINAL_GIFTING.has(status)) return null;
+    if (Number(p.reportCount || 0) <= 0) return null;
+  }
   return {
     id: `gp-${p.id}`,
     kind: "gifting_flagged",
@@ -119,11 +140,20 @@ function mapGiftingFlagged(p: any): QueueRow | null {
     meta: `${p.postType || "POST"} · ${p.reportCount} report(s)`,
     fields: [["Status", String(p.status || "—")]],
     note: p.description || "",
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(p.createdAt || p.updated_at || "") : undefined,
+    readOnly: completed,
   };
 }
 
-function mapSpotted(p: any): QueueRow | null {
-  if (String(p.status).toUpperCase() !== "ACTIVE") return null;
+function mapSpotted(p: any, completed = false): QueueRow | null {
+  const status = String(p.status).toUpperCase();
+  const reviewed = Boolean(p.adminReviewed);
+  if (completed) {
+    if (!reviewed && status === "ACTIVE") return null;
+  } else if (status !== "ACTIVE" || reviewed) {
+    return null;
+  }
   return {
     id: `sp-${p.id}`,
     kind: "spotted",
@@ -136,6 +166,9 @@ function mapSpotted(p: any): QueueRow | null {
       : (p.venueHint || "Around town"),
     fields: p.username ? [["Poster", String(p.displayName || p.username)]] : [],
     note: p.body || "",
+    outcome: completed ? (status === "ACTIVE" && reviewed ? "CLEARED" : status) : undefined,
+    completedAt: completed ? String(p.createdAt || "") : undefined,
+    readOnly: completed,
   };
 }
 
@@ -150,8 +183,9 @@ const MODERATION_TAG: Record<string, { label: string; color: string }> = {
 
 /** Shared admin moderation queue (moderation_requests) — reports and
  * notifications that should reach every admin, not just the owner. */
-function mapModerationRequest(m: any): QueueRow | null {
-  if (String(m.status || "").toUpperCase() !== "PENDING") return null;
+function mapModerationRequest(m: any, completed = false): QueueRow | null {
+  const status = String(m.status || "").toUpperCase();
+  if (completed ? status === "PENDING" : status !== "PENDING") return null;
   const type = String(m.type || "");
   const t = MODERATION_TAG[type] || { label: type.replace(/_/g, " ") || "REVIEW", color: C.cyan };
   const fields: Array<[string, string]> = [];
@@ -167,6 +201,9 @@ function mapModerationRequest(m: any): QueueRow | null {
     meta: `${t.label}${m.createdAt ? " · " + ts(m.createdAt) : ""}`,
     fields,
     note: String(m.proof || ""),
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(m.createdAt || "") : undefined,
+    readOnly: completed,
   };
 }
 
@@ -194,7 +231,10 @@ function mapPromoterRequest(r: any): QueueRow {
 
 /** Venue/business claims (business_claims table) — someone claiming a
  * directory listing as its owner. */
-function mapBusinessClaim(r: any): QueueRow {
+function mapBusinessClaim(r: any, completed = false): QueueRow | null {
+  const status = String(r.status || "").toUpperCase();
+  if (completed && status === "PENDING") return null;
+  if (!completed && status !== "PENDING") return null;
   const who = r.displayName || r.username || "Someone";
   const fields: Array<[string, string]> = [["From", who]];
   if (r.email) fields.push(["Email", String(r.email)]);
@@ -208,11 +248,17 @@ function mapBusinessClaim(r: any): QueueRow {
     meta: `Claim by ${who}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
     fields,
     note: String(r.claimReason || ""),
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(r.createdAt || "") : undefined,
+    readOnly: completed,
   };
 }
 
 /** New venue/business submissions (business_submissions table). */
-function mapBusinessSubmission(r: any): QueueRow {
+function mapBusinessSubmission(r: any, completed = false): QueueRow | null {
+  const status = String(r.status || "").toUpperCase();
+  if (completed && status === "PENDING") return null;
+  if (!completed && status !== "PENDING") return null;
   const fields: Array<[string, string]> = [];
   if (r.type) fields.push(["Type", String(r.type)]);
   if (r.address) fields.push(["Where", String(r.address) + (r.neighborhood ? ` · ${r.neighborhood}` : "")]);
@@ -229,11 +275,17 @@ function mapBusinessSubmission(r: any): QueueRow {
     meta: `New venue${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
     fields,
     note: String(r.description || ""),
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(r.createdAt || "") : undefined,
+    readOnly: completed,
   };
 }
 
 /** Business logo update requests (business_logo_requests table). */
-function mapLogoRequest(r: any): QueueRow {
+function mapLogoRequest(r: any, completed = false): QueueRow | null {
+  const status = String(r.status || "").toUpperCase();
+  if (completed && status === "PENDING") return null;
+  if (!completed && status !== "PENDING") return null;
   return {
     id: `logo-${r.id}`,
     kind: "logo_request",
@@ -245,6 +297,9 @@ function mapLogoRequest(r: any): QueueRow {
     fields: [["Venue", String(r.businessName || "—")]],
     note: "",
     attachments: r.imageUrl ? [String(r.imageUrl)] : [],
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(r.createdAt || "") : undefined,
+    readOnly: completed,
   };
 }
 
@@ -260,7 +315,9 @@ const DESK_TAG: Record<string, { label: string; color: string }> = {
 
 /** Owner Desk items come from /api/admin/feedback (owner_desk_items): contact +
  * sponsor messages with full sender details, not moderation reports. */
-function mapOwnerDeskItem(r: any): QueueRow {
+function mapOwnerDeskItem(r: any, completed = false): QueueRow | null {
+  const status = String(r.status || "").toUpperCase();
+  if (completed ? status !== "RESOLVED" : status !== "OPEN") return null;
   const kind = String(r.kind || "contact");
   const meta = r.meta || {};
   const t = DESK_TAG[kind] || { label: String(r.kindLabel || kind).toUpperCase(), color: C.purple };
@@ -285,7 +342,18 @@ function mapOwnerDeskItem(r: any): QueueRow {
     note: String(r.body || ""),
     replyEmail: r.contactEmail ? String(r.contactEmail) : undefined,
     attachments,
+    outcome: completed ? "RESOLVED" : undefined,
+    completedAt: completed ? String(r.resolvedAt || r.createdAt || "") : undefined,
+    readOnly: completed,
   };
+}
+
+function sortCompletedRows(items: QueueRow[]): QueueRow[] {
+  return [...items].sort((a, b) => {
+    const aTs = Date.parse(a.completedAt || "") || 0;
+    const bTs = Date.parse(b.completedAt || "") || 0;
+    return bTs - aTs;
+  });
 }
 
 function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
@@ -303,13 +371,14 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/missed-connections"] });
 }
 
-export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
+export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owner"; queueFolder: QueueFolder }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
   const accent = mode === "admin" ? C.magenta : C.purple;
+  const completed = queueFolder === "completed";
 
   const adminFetch = async (url: string) => {
     const r = await fetch(url, { credentials: "include" });
@@ -318,8 +387,8 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   };
 
   const subsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/submissions"],
-    queryFn: () => adminFetch("/api/admin/submissions"),
+    queryKey: ["/api/admin/submissions", completed ? "all" : "pending"],
+    queryFn: () => adminFetch(completed ? "/api/admin/submissions?all=true" : "/api/admin/submissions"),
     enabled: mode === "admin",
   });
   const giftingQuery = useQuery<{ posts: any[]; reports: any[] }>({
@@ -331,8 +400,8 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
     enabled: mode === "admin",
   });
   const spottedQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/missed-connections"],
-    queryFn: () => apiRequest("GET", "/api/admin/missed-connections").then((r) => {
+    queryKey: ["/api/admin/missed-connections", completed ? "recent" : "pending"],
+    queryFn: () => apiRequest("GET", completed ? "/api/admin/missed-connections?recent=true" : "/api/admin/missed-connections").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
@@ -347,8 +416,8 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
     enabled: mode === "admin",
   });
   const moderationQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/moderation"],
-    queryFn: () => apiRequest("GET", "/api/admin/moderation").then((r) => {
+    queryKey: ["/api/admin/moderation", completed ? "all" : "pending"],
+    queryFn: () => apiRequest("GET", completed ? "/api/admin/moderation?all=true" : "/api/admin/moderation").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
@@ -360,35 +429,35 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "admin" && !completed,
   });
   const claimsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/business-claims"],
-    queryFn: () => apiRequest("GET", "/api/admin/business-claims").then((r) => {
+    queryKey: ["/api/admin/business-claims", completed ? "recent" : "pending"],
+    queryFn: () => apiRequest("GET", completed ? "/api/admin/business-claims?recent=true" : "/api/admin/business-claims").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
     enabled: mode === "admin",
   });
   const bizSubsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/business-submissions"],
-    queryFn: () => apiRequest("GET", "/api/admin/business-submissions").then((r) => {
+    queryKey: ["/api/admin/business-submissions", completed ? "recent" : "pending"],
+    queryFn: () => apiRequest("GET", completed ? "/api/admin/business-submissions?recent=true" : "/api/admin/business-submissions").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
     enabled: mode === "admin",
   });
   const logoQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/business-logo-requests"],
-    queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then((r) => {
+    queryKey: ["/api/admin/business-logo-requests", completed ? "recent" : "pending"],
+    queryFn: () => apiRequest("GET", completed ? "/api/admin/business-logo-requests?recent=true" : "/api/admin/business-logo-requests").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
     enabled: mode === "admin",
   });
   const ownerQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/feedback"],
-    queryFn: () => adminFetch("/api/admin/feedback"),
+    queryKey: ["/api/admin/feedback", completed ? "resolved" : "open"],
+    queryFn: () => adminFetch(completed ? "/api/admin/feedback?status=RESOLVED" : "/api/admin/feedback"),
     enabled: mode === "owner",
   });
 
@@ -514,38 +583,54 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
   });
 
   const rows: QueueRow[] = useMemo(() => {
-    if (mode === "owner") return ownerReports.map(mapOwnerDeskItem);
+    if (mode === "owner") {
+      const items = ownerReports
+        .map((r) => mapOwnerDeskItem(r, completed))
+        .filter((row): row is QueueRow => !!row);
+      return completed ? sortCompletedRows(items) : items;
+    }
     const items: QueueRow[] = [];
     for (const s of subs) {
-      const row = mapSubmission(s);
+      const row = mapSubmission(s, completed);
       if (row) items.push(row);
     }
     for (const r of riverBratsReports) {
-      const row = mapRiverBratsReport(r);
+      const row = mapRiverBratsReport(r, completed);
       if (row) items.push(row);
     }
     for (const r of giftingAdmin?.reports || []) {
-      const row = mapGiftingReport(r);
+      const row = mapGiftingReport(r, completed);
       if (row) items.push(row);
     }
     for (const p of giftingAdmin?.posts || []) {
-      const row = mapGiftingFlagged(p);
+      const row = mapGiftingFlagged(p, completed);
       if (row) items.push(row);
     }
     for (const p of spotted) {
-      const row = mapSpotted(p);
+      const row = mapSpotted(p, completed);
       if (row) items.push(row);
     }
     for (const m of moderationReqs) {
-      const row = mapModerationRequest(m);
+      const row = mapModerationRequest(m, completed);
       if (row) items.push(row);
     }
-    for (const p of promoterReqs) items.push(mapPromoterRequest(p));
-    for (const c of businessClaims) items.push(mapBusinessClaim(c));
-    for (const s of businessSubs) items.push(mapBusinessSubmission(s));
-    for (const l of logoReqs) items.push(mapLogoRequest(l));
-    return items;
-  }, [mode, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, ownerReports]);
+    if (!completed) {
+      for (const p of promoterReqs) items.push(mapPromoterRequest(p));
+    }
+    for (const c of businessClaims) {
+      const row = mapBusinessClaim(c, completed);
+      if (row) items.push(row);
+    }
+    for (const s of businessSubs) {
+      const row = mapBusinessSubmission(s, completed);
+      if (row) items.push(row);
+    }
+    for (const l of logoReqs) {
+      const row = mapLogoRequest(l, completed);
+      if (row) items.push(row);
+    }
+    return completed ? sortCompletedRows(items) : items;
+  }, [mode, completed, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, ownerReports]);
 
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
@@ -555,8 +640,12 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
     || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending;
 
   const kicker = mode === "admin"
-    ? `SHARED QUEUE · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
-    : `OWNER DESK · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`;
+    ? completed
+      ? `RECENTLY COMPLETED · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
+      : `SHARED QUEUE · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
+    : completed
+      ? `RECENTLY DELETED · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
+      : `OWNER DESK · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`;
 
   const btn = (label: string, color: string, onClick: () => void, outline = false) => (
     <button
@@ -624,9 +713,13 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
         <div style={{ textAlign: "center", padding: "44px 20px", color: C.faint2, fontFamily: MONO, fontSize: 11, letterSpacing: ".1em" }}>
           {failedSources.length > 0
             ? "QUEUE COULD NOT LOAD"
-            : mode === "admin"
-              ? "QUEUE IS CLEAR"
-              : "OWNER DESK IS CLEAR"}
+            : completed
+              ? mode === "admin"
+                ? "NO RECENTLY COMPLETED ITEMS"
+                : "NO RECENTLY DELETED ITEMS"
+              : mode === "admin"
+                ? "QUEUE IS CLEAR"
+                : "OWNER DESK IS CLEAR"}
         </div>
       ) : (
         <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
@@ -660,7 +753,10 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                     <div style={{ fontWeight: 600, fontSize: 14.5, color: C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {q.title}
                     </div>
-                    <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>{q.meta}</div>
+                    <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>
+                      {q.meta}
+                      {q.outcome ? ` · ${q.outcome}` : ""}
+                    </div>
                   </div>
                   <span style={{ color: accent, flex: "none", display: "flex", transition: "transform .15s", transform: `rotate(${isOpen ? 180 : 0}deg)` }}>
                     <ChevronDown size={20} strokeWidth={2.4} />
@@ -709,6 +805,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                         ))}
                       </div>
                     )}
+                    {!q.readOnly && (
                     <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
                       {q.kind === "submission" && (
                         <>
@@ -792,6 +889,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
                         </>
                       )}
                     </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -800,7 +898,7 @@ export default function QueueView({ mode }: { mode: "admin" | "owner" }) {
         </div>
       )}
 
-      {mode === "owner" && (
+      {mode === "owner" && !completed && (
         <p style={{ margin: "14px 2px 4px", fontSize: 11.5, color: C.faint, lineHeight: 1.5 }}>
           Contact and sponsorship messages from the site's forms land here. Reply goes to the sender's email; Mark done clears it from the desk.
         </p>

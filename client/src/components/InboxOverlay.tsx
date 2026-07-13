@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxThreads } from "@/components/inbox/useInboxThreads";
-import type { Folder, Thread, LineupDecision } from "@/components/inbox/types";
+import type { Folder, QueueFolder, Thread, LineupDecision } from "@/components/inbox/types";
 import { C, MONO, DISPLAY, BODY } from "@/components/inbox/panel/sheet";
 import ThreadAvatar from "@/components/inbox/ThreadAvatar";
 import PersonalView from "@/components/inbox/panel/PersonalView";
@@ -42,6 +42,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [view, setView] = useState<View>("inbox");
   const [account, setAccount] = useState<Account>("personal");
   const [folder, setFolder] = useState<Folder>("inbox");
+  const [queueFolder, setQueueFolder] = useState<QueueFolder>("active");
   const [filter, setFilter] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -50,7 +51,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const panelRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const { threads, sendMessage, setRead, archive, revealSelf, resolveLineup } = useInboxThreads(activeId);
+  const { threads, sendMessage, setRead, archive, unarchive, deletedCount, revealSelf, resolveLineup } = useInboxThreads(activeId);
   const activeThread = activeId ? threads.find((t) => t.id === activeId) ?? null : null;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const isOwner = Boolean(user?.isPrimaryOwner || user?.isSuperAdmin);
@@ -100,6 +101,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
       setView("inbox");
       setAccount("personal");
       setFolder("inbox");
+      setQueueFolder("active");
       setFilter("all");
       setFilterOpen(false);
       setQuery("");
@@ -116,10 +118,15 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
       setAccount("personal");
     }
     setFolder("inbox");
+    setQueueFolder("active");
     setFilter("all");
     setFilterOpen(false);
     setQuery("");
   }, [open, initialView, initialAccount, isAdmin, isOwner, pendingAdmin.count, pendingAdmin.ownerCount]);
+
+  useEffect(() => {
+    setQueueFolder("active");
+  }, [account]);
 
   if (!open || !user) return null;
 
@@ -134,7 +141,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     admin: pendingAdmin.count || 0,
     owner: isOwner ? pendingAdmin.ownerCount || 0 : 0,
   };
-  const folderCount = (f: Folder) => active.filter((t) => t.folder === f).length;
+  const folderCount = (f: Folder) =>
+    f === "deleted" ? deletedCount : active.filter((t) => t.folder === f).length;
   const catCount = (id: string) => (id === "all" ? active.length : active.filter((t) => t.cat === id).length);
   const activeFilterLabel = (FILTERS.find((f) => f[0] === filter)?.[1] || "All").toUpperCase();
 
@@ -278,11 +286,15 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           </div>
         )}
 
-        {/* personal toolbar: received/sent + filter */}
+        {/* personal toolbar: received/sent/deleted + filter */}
         {personalActive && !activeThread && (
           <div style={{ padding: "12px 20px 0", flex: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
             <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
-              {(["inbox", "sent"] as Folder[]).map((f) => {
+              {([
+                ["inbox", "Received"],
+                ["sent", "Sent"],
+                ["deleted", "Recently deleted"],
+              ] as Array<[Folder, string]>).map(([f, label]) => {
                 const act = folder === f;
                 return (
                   <button
@@ -303,14 +315,16 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                       transition: ".15s",
                       background: act ? C.lime : "transparent",
                       color: act ? "#000" : "#7a7a82",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {f === "inbox" ? "Received" : "Sent"}
+                    {label}
                     <span style={{ fontSize: 9.5, opacity: 0.7, color: act ? "#000" : C.faint }}>{folderCount(f)}</span>
                   </button>
                 );
               })}
             </div>
+            {folder !== "deleted" && (
             <div style={{ position: "relative" }} ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((o) => !o)}
@@ -373,6 +387,49 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                 </div>
               )}
             </div>
+            )}
+          </div>
+        )}
+
+        {/* admin/owner queue folder tabs */}
+        {inboxActive && (account === "admin" || account === "owner") && !activeThread && (
+          <div style={{ padding: "12px 20px 0", flex: "none" }}>
+            <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
+              {([
+                ["active", account === "admin" ? "Active queue" : "Active desk"],
+                ["completed", account === "admin" ? "Recently completed" : "Recently deleted"],
+              ] as Array<[QueueFolder, string]>).map(([f, label]) => {
+                const act = queueFolder === f;
+                const accent = account === "admin" ? C.magenta : C.purple;
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setQueueFolder(f)}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      padding: "7px 13px",
+                      border: "none",
+                      borderRadius: 9,
+                      cursor: "pointer",
+                      fontFamily: MONO,
+                      fontSize: 10.5,
+                      letterSpacing: ".06em",
+                      fontWeight: 600,
+                      transition: ".15s",
+                      background: act ? accent : "transparent",
+                      color: act ? "#000" : "#7a7a82",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -395,8 +452,13 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               onReplyChange={setReply}
               onSend={send}
               onBack={closeThread}
+              readOnly={activeThread.archived}
               onArchive={() => {
                 void archive(activeThread.id);
+                closeThread();
+              }}
+              onUnarchive={() => {
+                unarchive(activeThread.id);
                 closeThread();
               }}
               onReveal={() => revealSelf(activeThread.id)}
@@ -463,8 +525,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   onNavigate={navigateFromSheet}
                 />
               )}
-              {inboxActive && account === "admin" && <QueueView mode="admin" />}
-              {inboxActive && account === "owner" && <QueueView mode="owner" />}
+              {inboxActive && account === "admin" && <QueueView mode="admin" queueFolder={queueFolder} />}
+              {inboxActive && account === "owner" && <QueueView mode="owner" queueFolder={queueFolder} />}
               {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
               {view === "stats" && <StatsView />}
             </>
@@ -503,7 +565,9 @@ type ThreadDetailProps = {
   onReplyChange: (v: string) => void;
   onSend: () => void;
   onBack: () => void;
+  readOnly?: boolean;
   onArchive: () => void;
+  onUnarchive: () => void;
   onReveal: () => void;
   onResolveLineup: (decision: LineupDecision) => void;
 };
@@ -516,7 +580,9 @@ function ThreadDetail({
   onReplyChange,
   onSend,
   onBack,
+  readOnly = false,
   onArchive,
+  onUnarchive,
   onReveal,
   onResolveLineup,
 }: ThreadDetailProps) {
@@ -574,9 +640,15 @@ function ThreadDetail({
             {thread.handle}
           </div>
         </div>
-        <button style={iconBtn} onClick={onArchive} aria-label="Archive thread" title="Archive">
-          <Archive size={16} />
-        </button>
+        {readOnly ? (
+          <button style={iconBtn} onClick={onUnarchive} aria-label="Restore thread" title="Restore">
+            <Archive size={16} />
+          </button>
+        ) : (
+          <button style={iconBtn} onClick={onArchive} aria-label="Archive thread" title="Archive">
+            <Archive size={16} />
+          </button>
+        )}
       </div>
 
       {/* subject */}
@@ -731,66 +803,84 @@ function ThreadDetail({
         ))}
       </div>
 
-      {/* composer */}
-      <div
-        style={{
-          flex: "none",
-          padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
-          borderTop: `1px solid ${C.borderFaint}`,
-          background: C.sheet,
-          display: "flex",
-          alignItems: "flex-end",
-          gap: 10,
-        }}
-      >
-        <textarea
-          value={reply}
-          onChange={(e) => onReplyChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              onSend();
-            }
-          }}
-          placeholder="Write a reply"
-          rows={1}
-          style={{
-            flex: 1,
-            minHeight: 44,
-            maxHeight: 120,
-            resize: "none",
-            padding: "12px 14px",
-            borderRadius: 14,
-            background: C.inset,
-            border: `1px solid ${C.border3}`,
-            color: C.body2,
-            fontFamily: BODY,
-            fontSize: 14,
-            lineHeight: 1.4,
-            outline: "none",
-          }}
-        />
-        <button
-          onClick={onSend}
-          disabled={!reply.trim()}
+      {!readOnly && (
+        <div
           style={{
             flex: "none",
-            height: 44,
-            padding: "0 18px",
-            borderRadius: 14,
-            border: "none",
-            background: reply.trim() ? accent : C.seg,
-            color: reply.trim() ? "#000" : C.faint,
-            fontFamily: MONO,
-            fontSize: 12,
-            letterSpacing: ".08em",
-            fontWeight: 700,
-            cursor: reply.trim() ? "pointer" : "default",
+            padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
+            borderTop: `1px solid ${C.borderFaint}`,
+            background: C.sheet,
+            display: "flex",
+            alignItems: "flex-end",
+            gap: 10,
           }}
         >
-          Send
-        </button>
-      </div>
+          <textarea
+            value={reply}
+            onChange={(e) => onReplyChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSend();
+              }
+            }}
+            placeholder="Write a reply"
+            rows={1}
+            style={{
+              flex: 1,
+              minHeight: 44,
+              maxHeight: 120,
+              resize: "none",
+              padding: "12px 14px",
+              borderRadius: 14,
+              background: C.inset,
+              border: `1px solid ${C.border3}`,
+              color: C.body2,
+              fontFamily: BODY,
+              fontSize: 14,
+              lineHeight: 1.4,
+              outline: "none",
+            }}
+          />
+          <button
+            onClick={onSend}
+            disabled={!reply.trim()}
+            style={{
+              flex: "none",
+              height: 44,
+              padding: "0 18px",
+              borderRadius: 14,
+              border: "none",
+              background: reply.trim() ? accent : C.seg,
+              color: reply.trim() ? "#000" : C.faint,
+              fontFamily: MONO,
+              fontSize: 12,
+              letterSpacing: ".08em",
+              fontWeight: 700,
+              cursor: reply.trim() ? "pointer" : "default",
+            }}
+          >
+            Send
+          </button>
+        </div>
+      )}
+      {readOnly && (
+        <div
+          style={{
+            flex: "none",
+            padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
+            borderTop: `1px solid ${C.borderFaint}`,
+            background: C.sheet,
+            fontFamily: MONO,
+            fontSize: 10.5,
+            letterSpacing: ".08em",
+            color: C.faint,
+            textAlign: "center",
+          }}
+        >
+          Archived thread · tap restore to move back to your inbox
+        </div>
+      )}
     </div>
   );
 }

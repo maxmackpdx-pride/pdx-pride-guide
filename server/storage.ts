@@ -774,6 +774,7 @@ function ensureRiverBratsSchema() {
     // and the verification timestamp.
     try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN presence TEXT NOT NULL DEFAULT 'PLANNED'`); } catch (e) {}
     try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN gps_verified_at TEXT`); } catch (e) {}
+    try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN depart_hour INTEGER`); } catch (e) {}
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS scheduled_prompts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -5353,6 +5354,7 @@ export interface IStorage {
   rejectGiftingPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   rejectMissedConnection(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   getAdminMissedConnections(): any[];
+  getRecentlyReviewedMissedConnections(): any[];
   approveMissedConnection(id: number): { ok?: boolean; error?: string };
   removeMissedConnectionAdmin(id: number): { ok?: boolean; error?: string };
   ensureSiteAdminGigPost(): void;
@@ -5606,6 +5608,7 @@ export interface IStorage {
     meta: Record<string, unknown>;
     status: string;
     createdAt: string;
+    resolvedAt: string | null;
   }>;
   getOwnerDeskCount(): number;
   resolveOwnerDeskItem(id: number, source?: "desk" | "feedback"): void;
@@ -5620,10 +5623,12 @@ export interface IStorage {
   getUserOwnedBusinesses(userId: number): Business[];
   createBusinessClaim(businessId: number, userId: number, claimReason: string): { claim?: BusinessClaim; error?: string };
   getPendingBusinessClaims(): any[];
+  getRecentResolvedBusinessClaims(): any[];
   approveBusinessClaim(id: number, adminName: string): { ok?: boolean; error?: string };
   rejectBusinessClaim(id: number, reason?: string): void;
   createBusinessSubmission(userId: number, data: Omit<InsertBusiness, "active" | "isNew" | "queerOwned" | "queerFriendly"> & { logoImageUrl?: string | null }): BusinessSubmission;
   getPendingBusinessSubmissions(): BusinessSubmission[];
+  getRecentResolvedBusinessSubmissions(): BusinessSubmission[];
   approveBusinessSubmission(id: number, adminName: string, overrideImageUrl?: string): { business?: Business; error?: string };
   rejectBusinessSubmission(id: number, reason?: string): void;
   getPromotersForBusiness(businessId: number): { id: number; username: string; displayName: string | null }[];
@@ -5634,8 +5639,17 @@ export interface IStorage {
   getBusinessBlocks(businessId: number): any[];
   createBusinessLogoRequest(businessId: number, userId: number, imageUrl: string): BusinessLogoRequest;
   getPendingBusinessLogoRequests(): any[];
+  getRecentResolvedBusinessLogoRequests(): any[];
   approveBusinessLogoRequest(id: number, overrideImageUrl?: string): { ok?: boolean; error?: string };
   rejectBusinessLogoRequest(id: number, reason?: string): void;
+}
+
+const RECENT_QUEUE_DAYS = 30;
+
+function recentQueueCutoffIso(days = RECENT_QUEUE_DAYS): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString();
 }
 
 export const storage: IStorage = {
@@ -6362,6 +6376,42 @@ export const storage: IStorage = {
         AND (m.admin_reviewed IS NULL OR m.admin_reviewed = 0)
       ORDER BY m.created_at DESC
     `).all();
+  },
+  getRecentlyReviewedMissedConnections() {
+    archiveExpiredMissedConnections();
+    const cutoff = recentQueueCutoffIso();
+    return sqlite.prepare(`
+      SELECT
+        m.id,
+        m.title,
+        m.body,
+        m.day_of_week AS dayOfWeek,
+        m.venue_hint AS venueHint,
+        m.event_id AS eventId,
+        m.status,
+        m.admin_notes AS adminNotes,
+        m.admin_reviewed AS adminReviewed,
+        m.created_at AS createdAt,
+        m.closes_at AS closesAt,
+        m.user_id AS userId,
+        u.username,
+        u.display_name AS displayName,
+        u.photo_url AS posterPhotoUrl,
+        u.avatar_choice AS avatarChoice,
+        u.avatar_ring AS posterAvatarRing,
+        e.title AS eventTitle,
+        e.venue_name AS eventVenue
+      FROM missed_connections m
+      JOIN users u ON u.id = m.user_id
+      LEFT JOIN events e ON e.id = m.event_id
+      WHERE m.created_at >= ?
+        AND (
+          m.admin_reviewed = 1
+          OR m.status IN ('REJECTED', 'DELETED')
+        )
+      ORDER BY m.created_at DESC
+      LIMIT 60
+    `).all(cutoff);
   },
   adminUpdateGigPost(id, data) {
     const existing = sqlite.prepare(`SELECT id FROM gig_posts WHERE id = ?`).get(id);
@@ -8092,6 +8142,7 @@ export const storage: IStorage = {
         meta,
         status: String(row.status),
         createdAt: String(row.created_at),
+        resolvedAt: row.resolved_at ? String(row.resolved_at) : null,
       };
     };
     const deskRows = (status
@@ -8119,6 +8170,7 @@ export const storage: IStorage = {
       meta: { category: report.category, legacyFeedback: true },
       status: report.status,
       createdAt: report.createdAt,
+      resolvedAt: report.status === "RESOLVED" ? report.createdAt : null,
     }));
 
     const deskIds = new Set(deskRows.map(r => `${r.kind}:${r.title}:${r.createdAt}`));
@@ -8389,6 +8441,24 @@ export const storage: IStorage = {
       };
     });
   },
+  getRecentResolvedBusinessClaims() {
+    const cutoff = recentQueueCutoffIso();
+    const rows = db.select().from(businessClaims).all()
+      .filter((claim) => claim.status !== "PENDING" && claim.createdAt >= cutoff)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 60);
+    return rows.map(claim => {
+      const business = storage.getBusiness(claim.businessId);
+      const user = db.select().from(users).where(eq(users.id, claim.userId)).get();
+      return {
+        ...claim,
+        businessName: business?.name ?? "Unknown venue",
+        username: user?.username ?? null,
+        displayName: user?.displayName ?? null,
+        email: user?.email ?? null,
+      };
+    });
+  },
   approveBusinessClaim(id, adminName) {
     const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
     if (!claim) return { error: "Claim not found" };
@@ -8441,6 +8511,13 @@ export const storage: IStorage = {
   },
   getPendingBusinessSubmissions() {
     return db.select().from(businessSubmissions).where(eq(businessSubmissions.status, "PENDING")).all();
+  },
+  getRecentResolvedBusinessSubmissions() {
+    const cutoff = recentQueueCutoffIso();
+    return db.select().from(businessSubmissions).all()
+      .filter((sub) => sub.status !== "PENDING" && sub.createdAt >= cutoff)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 60);
   },
   approveBusinessSubmission(id, adminName, overrideImageUrl) {
     const sub = db.select().from(businessSubmissions).where(eq(businessSubmissions.id, id)).get();
@@ -8587,6 +8664,17 @@ export const storage: IStorage = {
       return { ...req, businessName: business?.name ?? "Unknown venue" };
     });
   },
+  getRecentResolvedBusinessLogoRequests() {
+    const cutoff = recentQueueCutoffIso();
+    const rows = db.select().from(businessLogoRequests).all()
+      .filter((req) => req.status !== "PENDING" && req.createdAt >= cutoff)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 60);
+    return rows.map(req => {
+      const business = storage.getBusiness(req.businessId);
+      return { ...req, businessName: business?.name ?? "Unknown venue" };
+    });
+  },
   approveBusinessLogoRequest(id, overrideImageUrl) {
     const req = db.select().from(businessLogoRequests).where(eq(businessLogoRequests.id, id)).get();
     if (!req) return { error: "Request not found" };
@@ -8610,7 +8698,7 @@ export const storage: IStorage = {
     storage.expireRiverBratsCheckins();
     const rows = sqlite.prepare(`
       SELECT c.id, c.user_id AS userId, c.beach_id AS beachId, c.arrival_hour AS arrival_hour,
-             c.note, c.calendar_date AS calendarDate, c.is_anonymous AS isAnonymous,
+             c.depart_hour AS depart_hour, c.note, c.calendar_date AS calendarDate, c.is_anonymous AS isAnonymous,
              c.is_active AS isActive, c.expires_at AS expiresAt, c.created_at AS createdAt,
              c.presence, c.gps_verified_at AS gpsVerifiedAt,
              u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice, u.photo_url AS photoUrl
@@ -8664,18 +8752,20 @@ export const storage: IStorage = {
       SELECT id FROM beach_checkins WHERE user_id = ? AND beach_id = ? AND calendar_date = ?
     `).get(data.userId, data.beachId, data.calendarDate) as { id: number } | undefined;
     let saved: BeachCheckin;
+    const departHour = data.departHour ?? null;
     if (existing) {
       // Re-picking an hour must not revoke GPS-verified presence, so
       // presence/gps_verified_at are deliberately absent from this SET.
       sqlite.prepare(`
         UPDATE beach_checkins
-        SET arrival_hour = ?, note = ?, is_anonymous = ?, is_active = 1, expires_at = ?, created_at = ?
+        SET arrival_hour = ?, depart_hour = ?, note = ?, is_anonymous = ?, is_active = 1, expires_at = ?, created_at = ?
         WHERE id = ?
-      `).run(data.arrivalHour, data.note || null, isAnonymous ? 1 : 0, expiresAt, createdAt, existing.id);
+      `).run(data.arrivalHour, departHour, data.note || null, isAnonymous ? 1 : 0, expiresAt, createdAt, existing.id);
       saved = db.select().from(beachCheckins).where(eq(beachCheckins.id, existing.id)).get()!;
     } else {
       saved = db.insert(beachCheckins).values({
         ...data,
+        departHour,
         isAnonymous,
         isActive: true,
         reportCount: 0,
@@ -8830,7 +8920,9 @@ export const storage: IStorage = {
     // stored expires_at, so pre-deploy rows stamped with midnight still gate
     // correctly with zero migration.
     const closesAt = riverBratsChatClosesAtIso(calendarDate);
-    const chatOpen = closesAt > new Date().toISOString();
+    // Day-room only opens on the Pacific calendar date of the check-in (not early).
+    const isToday = calendarDate === pacificTodayDate();
+    const chatOpen = isToday && closesAt > new Date().toISOString();
     const mine = storage.getBeachCheckinByUser(beachId, viewerUserId, calendarDate);
     // Anonymous check-ins are counted in "going" but are never connected to the
     // chat — they can neither read nor post.
@@ -8887,6 +8979,9 @@ export const storage: IStorage = {
     if (!mine) throw new Error("Active check-in required");
     // Anonymous check-ins stay off the chat and cannot post.
     if ((mine as any).is_anonymous) throw new Error("Anonymous check-ins can't post to the chat");
+    if (calendarDate !== pacificTodayDate()) {
+      throw new Error("Beach chat opens on that day");
+    }
     if (riverBratsChatClosesAtIso(calendarDate) <= new Date().toISOString()) {
       throw new Error("Beach chat closed at 10pm");
     }
