@@ -2984,6 +2984,42 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ...msg, notified });
   });
 
+  // Promoter invite: past attendees of their events + their profile followers → inbox.
+  app.get("/api/events/:id/invite-audience", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const userId = req.session.userId!;
+    if (!storage.isUserEventHost(evt.id, userId) && !sessionIsAdmin(req)) {
+      return res.status(403).json({ error: "Only the event host can invite" });
+    }
+    res.json(storage.previewEventInviteAudience(evt.id, userId));
+  });
+
+  app.post("/api/events/:id/invite-audience", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    const user = storage.getUserById(req.session.userId!);
+    if (!user || (!storage.isUserEventHost(evt.id, user.id) && !sessionIsAdmin(req))) {
+      return res.status(403).json({ error: "Only the event host can invite" });
+    }
+    if (evt.status !== "LIVE") {
+      return res.status(400).json({ error: "Event must be live to send invites" });
+    }
+    const includePastAttendees = req.body?.includePastAttendees !== false;
+    const includeFollowers = req.body?.includeFollowers !== false;
+    if (!includePastAttendees && !includeFollowers) {
+      return res.status(400).json({ error: "Pick at least one audience: past attendees or followers" });
+    }
+    const message = req.body?.message != null ? String(req.body.message).trim().slice(0, 800) : "";
+    if (message && moderationGate(res, "Event invite", { body: message })) return;
+    const result = storage.inviteAudienceToEvent(evt.id, user.id, {
+      includePastAttendees,
+      includeFollowers,
+      message: message || null,
+    });
+    res.json(result);
+  });
+
   app.post("/api/events/:id/transfer", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });

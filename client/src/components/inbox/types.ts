@@ -34,6 +34,8 @@ export interface Thread {
   handle: string;
   subject: string;
   contextLabel: string;
+  contextType?: string | null;
+  contextId?: number | null;
   at: string;
   ring: string;
   anonymous: boolean;

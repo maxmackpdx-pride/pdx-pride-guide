@@ -5452,6 +5452,22 @@ export interface IStorage {
   getHostMessages(eventId: number, limit?: number): any[];
   createHostMessage(data: InsertHostMessage): HostMessage;
   notifyAttendeesOfHostUpdate(eventId: number, hostUserId: number, eventTitle: string, body: string): number;
+  getFollowerUserIds(userId: number): number[];
+  getPastAttendeeUserIdsForHost(hostUserId: number): number[];
+  previewEventInviteAudience(eventId: number, hostUserId: number): {
+    pastAttendees: number;
+    followers: number;
+    total: number;
+  };
+  inviteAudienceToEvent(
+    eventId: number,
+    hostUserId: number,
+    opts?: {
+      includePastAttendees?: boolean;
+      includeFollowers?: boolean;
+      message?: string | null;
+    },
+  ): { sent: number; pastAttendees: number; followers: number; skipped: number };
   getEventHosts(eventId: number): any[];
   resolveUserByIdentifier(identifier: string): User | undefined;
   resolveEventPrimaryHostUser(eventId: number): User | undefined;
@@ -7051,6 +7067,114 @@ export const storage: IStorage = {
       sent += 1;
     }
     return sent;
+  },
+  getFollowerUserIds(userId) {
+    const rows = sqlite.prepare(`
+      SELECT follower_user_id AS userId
+      FROM follows
+      WHERE following_user_id = ?
+    `).all(userId) as { userId: number }[];
+    return rows.map(r => Number(r.userId)).filter(id => id > 0);
+  },
+  getPastAttendeeUserIdsForHost(hostUserId) {
+    const user = storage.getUserById(hostUserId);
+    if (!user) return [];
+    // Anyone who RSVP'd (active or past) to any event this user hosts/claimed/submitted.
+    const rows = sqlite.prepare(`
+      SELECT DISTINCT a.user_id AS userId
+      FROM attendances a
+      INNER JOIN events e ON e.id = a.event_id
+      WHERE a.user_id IS NOT NULL
+        AND a.user_id != ?
+        AND (
+          e.id IN (SELECT event_id FROM event_hosts WHERE user_id = ?)
+          OR (e.claimed_by IS NOT NULL AND (
+            LOWER(TRIM(e.claimed_by)) = LOWER(?)
+            OR LOWER(TRIM(e.claimed_by)) = LOWER(?)
+          ))
+          OR (e.submitted_by IS NOT NULL AND (
+            LOWER(TRIM(e.submitted_by)) = LOWER(?)
+            OR LOWER(TRIM(e.submitted_by)) = LOWER(?)
+          ))
+        )
+    `).all(
+      hostUserId,
+      hostUserId,
+      user.username || "",
+      user.email || "",
+      user.username || "",
+      user.email || "",
+    ) as { userId: number }[];
+    return rows.map(r => Number(r.userId)).filter(id => id > 0);
+  },
+  previewEventInviteAudience(eventId, hostUserId) {
+    const past = new Set(storage.getPastAttendeeUserIdsForHost(hostUserId));
+    past.delete(hostUserId);
+    const followers = new Set(storage.getFollowerUserIds(hostUserId));
+    followers.delete(hostUserId);
+    const union = new Set<number>();
+    Array.from(past).forEach(id => union.add(id));
+    Array.from(followers).forEach(id => union.add(id));
+    // Don't invite people who already RSVP'd this specific event (optional nicety)
+    const already = sqlite.prepare(`
+      SELECT DISTINCT user_id AS userId FROM attendances
+      WHERE event_id = ? AND is_active = 1 AND user_id IS NOT NULL
+    `).all(eventId) as { userId: number }[];
+    for (const r of already) union.delete(Number(r.userId));
+    return {
+      pastAttendees: past.size,
+      followers: followers.size,
+      total: union.size,
+    };
+  },
+  inviteAudienceToEvent(eventId, hostUserId, opts = {}) {
+    const evt = storage.getEvent(eventId);
+    if (!evt) return { sent: 0, pastAttendees: 0, followers: 0, skipped: 0 };
+    const includePast = opts.includePastAttendees !== false;
+    const includeFollowers = opts.includeFollowers !== false;
+    const pastSet = new Set(includePast ? storage.getPastAttendeeUserIdsForHost(hostUserId) : []);
+    const followerSet = new Set(includeFollowers ? storage.getFollowerUserIds(hostUserId) : []);
+    pastSet.delete(hostUserId);
+    followerSet.delete(hostUserId);
+
+    const targets = new Set<number>();
+    Array.from(pastSet).forEach(id => targets.add(id));
+    Array.from(followerSet).forEach(id => targets.add(id));
+
+    // Skip current active RSVPs on this event — they're already going.
+    const already = sqlite.prepare(`
+      SELECT DISTINCT user_id AS userId FROM attendances
+      WHERE event_id = ? AND is_active = 1 AND user_id IS NOT NULL
+    `).all(eventId) as { userId: number }[];
+    let skipped = 0;
+    for (const r of already) {
+      const id = Number(r.userId);
+      if (targets.delete(id)) skipped += 1;
+    }
+
+    const note = String(opts.message || "").trim().slice(0, 800);
+    const defaultBody =
+      `You're invited to ${evt.title} at ${evt.venueName}. Open this message to view the event and RSVP.`;
+    const body = note
+      ? `${note}\n\n— ${evt.title} · ${evt.venueName}`
+      : defaultBody;
+    const subject = `You're invited: ${evt.title}`;
+
+    let sent = 0;
+    for (const toUserId of Array.from(targets)) {
+      storage.sendMessage(hostUserId, toUserId, subject, body, {
+        contextType: "EVENT_INVITE",
+        contextId: eventId,
+        contextLabel: evt.title,
+      });
+      sent += 1;
+    }
+    return {
+      sent,
+      pastAttendees: pastSet.size,
+      followers: followerSet.size,
+      skipped,
+    };
   },
   resolveUserByIdentifier(identifier) {
     const raw = String(identifier || "").trim().replace(/^@/, "");

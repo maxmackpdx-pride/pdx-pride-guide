@@ -13,6 +13,9 @@ import QueueView from "@/components/inbox/panel/QueueView";
 import PostsView from "@/components/inbox/panel/PostsView";
 import StatsView from "@/components/inbox/panel/StatsView";
 import InboxGroupChat, { type InboxGroupChatTarget } from "@/components/inbox/InboxGroupChat";
+import { eventIdFromInboxContext } from "@/lib/inboxContext";
+import EventModal from "@/components/EventModal";
+import type { EventListing } from "@shared/multiDayEvents";
 
 type View = "inbox" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
@@ -48,6 +51,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [filter, setFilter] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [openEvent, setOpenEvent] = useState<EventListing | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<InboxGroupChatTarget | null>(null);
   const [reply, setReply] = useState("");
@@ -490,6 +494,16 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               }}
               onReveal={() => revealSelf(activeThread.id)}
               onResolveLineup={(decision) => resolveLineup(activeThread.id, decision)}
+              onOpenEvent={async (eventId) => {
+                try {
+                  const r = await fetch(`/api/events/${eventId}`, { credentials: "include" });
+                  if (!r.ok) return;
+                  const evt = await r.json();
+                  setOpenEvent(evt as EventListing);
+                } catch {
+                  /* ignore */
+                }
+              }}
             />
           ) : (
             <>
@@ -575,6 +589,14 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           </div>
         )}
       </div>
+
+      {openEvent && (
+        <EventModal
+          event={openEvent}
+          onClose={() => setOpenEvent(null)}
+          onEventUpdated={(updated) => setOpenEvent(updated as EventListing)}
+        />
+      )}
     </>
   );
 }
@@ -597,6 +619,7 @@ type ThreadDetailProps = {
   onUnarchive: () => void;
   onReveal: () => void;
   onResolveLineup: (decision: LineupDecision) => void;
+  onOpenEvent?: (eventId: number) => void;
 };
 
 // Full thread view rendered in place inside the floating inbox — no navigation.
@@ -612,10 +635,12 @@ function ThreadDetail({
   onUnarchive,
   onReveal,
   onResolveLineup,
+  onOpenEvent,
 }: ThreadDetailProps) {
   const accent = CAT_ACCENT[thread.cat] ?? C.cyan;
   const showReveal = thread.anonymous && thread.reveal && !thread.reveal.iRevealed;
   const lineupPending = thread.lineup?.status === "PENDING" && thread.lineupRequestId != null;
+  const openEventId = eventIdFromInboxContext(thread.contextType, thread.contextId);
 
   const iconBtn = {
     width: 34,
@@ -692,6 +717,32 @@ function ThreadDetail({
           }}
         >
           {thread.subject}
+        </div>
+      )}
+
+      {/* Event invite / host update → open event card */}
+      {openEventId != null && onOpenEvent && (
+        <div style={{ flex: "none", padding: "10px 16px 0" }}>
+          <button
+            type="button"
+            onClick={() => onOpenEvent(openEventId)}
+            style={{
+              fontFamily: MONO,
+              fontSize: 11,
+              letterSpacing: ".1em",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              padding: "10px 14px",
+              borderRadius: 10,
+              border: `1px solid ${accent}`,
+              background: "transparent",
+              color: accent,
+              cursor: "pointer",
+              width: "100%",
+            }}
+          >
+            Open event card →
+          </button>
         </div>
       )}
 

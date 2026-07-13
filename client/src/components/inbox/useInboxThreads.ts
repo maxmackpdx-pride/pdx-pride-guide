@@ -81,6 +81,8 @@ function buildListThread(row: ApiMessageRow, folder: Folder, userId: number, arc
     handle: handleFromParty(party, anonymous && name === "Anonymous"),
     subject: row.subject || "(no subject)",
     contextLabel: contextLabelOf(row) || "",
+    contextType: contextType || null,
+    contextId: row.contextId ?? row.context_id ?? null,
     at: formatThreadTime(row.createdAt || row.created_at),
     ring: party.avatarRing || "progress",
     anonymous,
@@ -232,6 +234,7 @@ export function useInboxThreads(activeThreadId: string | null) {
         }
       : counterpart?.lineup;
 
+    const head = activePayload.messages[0];
     return baseThreads.map(t => t.id === activeThreadId
       ? {
           ...t,
@@ -242,6 +245,8 @@ export function useInboxThreads(activeThreadId: string | null) {
           reveal,
           lineup,
           lineupRequestId: talentRequestId,
+          contextType: contextType || t.contextType,
+          contextId: head?.contextId ?? head?.context_id ?? t.contextId ?? null,
         }
       : t);
   }, [activeThreadId, activePayload, baseThreads, inbox, sent, talentRequest, talentRequestId, user, userId]);

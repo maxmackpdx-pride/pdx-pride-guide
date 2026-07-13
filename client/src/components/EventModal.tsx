@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useLocation } from "wouter";
@@ -96,12 +96,26 @@ function EventModalInner({
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
   const [editHostUpdate, setEditHostUpdate] = useState("");
+  const [invitePast, setInvitePast] = useState(true);
+  const [inviteFollowers, setInviteFollowers] = useState(true);
+  const [inviteNote, setInviteNote] = useState("");
+  const socialTabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setEditing(false);
     setEventForm(null);
     setEditHostUpdate("");
+    setInvitePast(true);
+    setInviteFollowers(true);
+    setInviteNote("");
   }, [event.id]);
+
+  const jumpToAttendance = () => {
+    setSocialTab("attendance");
+    requestAnimationFrame(() => {
+      socialTabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   const { data: eventHosts = [], refetch: refetchHosts } = useQuery<EventHostProfile[]>({
     queryKey: ["/api/events", event.id, "hosts"],
@@ -114,7 +128,7 @@ function EventModalInner({
   });
 
   const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
-  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
   // Border + glow accent: the day color, or a neutral neon for events with no
   // weekday (so they don't get a stark white frame).
@@ -348,6 +362,49 @@ function EventModalInner({
     },
   });
 
+  const { data: invitePreview } = useQuery<{ pastAttendees: number; followers: number; total: number }>({
+    queryKey: ["/api/events", event.id, "invite-audience"],
+    queryFn: async () => {
+      const r = await fetch(`/api/events/${event.id}/invite-audience`, { credentials: "include" });
+      if (!r.ok) throw new Error("Could not load invite audience");
+      return r.json();
+    },
+    enabled: Boolean(user && canEditEvent),
+    staleTime: 30_000,
+  });
+
+  const inviteAudienceMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/events/${event.id}/invite-audience`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          includePastAttendees: invitePast,
+          includeFollowers: inviteFollowers,
+          message: inviteNote.trim() || undefined,
+        }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || "Could not send invites");
+      return payload as { sent: number; pastAttendees: number; followers: number; skipped: number };
+    },
+    onSuccess: (data) => {
+      toast({
+        title: data.sent > 0 ? "Invites sent" : "No one new to invite",
+        description: data.sent > 0
+          ? `${data.sent} people got an inbox invite to open this event.`
+          : "Everyone eligible already RSVP'd or your lists are empty.",
+      });
+      setInviteNote("");
+      queryClient.invalidateQueries({ queryKey: ["/api/events", event.id, "invite-audience"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not send invites", description: err.message, variant: "destructive" });
+    },
+  });
+
   const addCoHostMutation = useMutation({
     mutationFn: async (data: { username: string; email: string }) => {
       const res = await fetch(`/api/events/${event.id}/hosts`, {
@@ -417,10 +474,6 @@ function EventModalInner({
         {/* Shared animated rainbow top divider (same system as PlaceCard / PlaceModal) */}
         <div className="event-modal__bar pdx-rainbow-rule" aria-hidden="true" />
 
-        <div className="event-modal__poster">
-          <img src={posterUrl} alt={event.title} className="event-modal__poster-img" />
-        </div>
-
         <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
         <button
           type="button"
@@ -441,6 +494,11 @@ function EventModalInner({
         >
           <Link2 size={18} />
         </button>
+
+        <div className="event-modal__scroll">
+        <div className="event-modal__poster">
+          <img src={posterUrl} alt={event.title} className="event-modal__poster-img" />
+        </div>
 
         <div className="event-modal__body">
           {/\bsold\s*out\b/i.test(`${event.title} ${event.description || ""}`) && (
@@ -614,6 +672,63 @@ function EventModalInner({
             isClaimable={event.isClaimable}
           />
 
+          {canEditEvent && (
+            <div
+              className="event-modal__section"
+              style={{ "--section-accent": dayColor } as React.CSSProperties}
+            >
+              <div className="event-modal__section-label">Invite your scene</div>
+              <p style={{ margin: "0 0 12px", fontSize: "0.82rem", color: "var(--text-lo)", lineHeight: 1.45 }}>
+                Inbox invite for people who&apos;ve attended your past events and everyone who follows you.
+                They get a message with a button to open this event card and RSVP.
+              </p>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: "0.85rem", color: "var(--text-hi)", cursor: "pointer" }}>
+                <input type="checkbox" checked={invitePast} onChange={e => setInvitePast(e.target.checked)} />
+                Past attendees of your events
+                {invitePreview != null && (
+                  <span style={{ color: "var(--text-faint)", fontSize: "0.78rem" }}>({invitePreview.pastAttendees})</span>
+                )}
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, fontSize: "0.85rem", color: "var(--text-hi)", cursor: "pointer" }}>
+                <input type="checkbox" checked={inviteFollowers} onChange={e => setInviteFollowers(e.target.checked)} />
+                Your followers
+                {invitePreview != null && (
+                  <span style={{ color: "var(--text-faint)", fontSize: "0.78rem" }}>({invitePreview.followers})</span>
+                )}
+              </label>
+              <textarea
+                value={inviteNote}
+                onChange={e => setInviteNote(e.target.value)}
+                maxLength={800}
+                rows={2}
+                placeholder="Optional note (door time, vibe, ticket link…)"
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  marginBottom: 10,
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #2b2b2b",
+                  background: "#151518",
+                  color: "#fff",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.9rem",
+                  resize: "vertical",
+                }}
+              />
+              <button
+                type="button"
+                className="event-modal__btn-outline event-modal__btn-outline--accent"
+                disabled={inviteAudienceMutation.isPending || (!invitePast && !inviteFollowers)}
+                onClick={() => inviteAudienceMutation.mutate()}
+              >
+                {inviteAudienceMutation.isPending
+                  ? "Sending…"
+                  : `Send invites${invitePreview != null ? ` (~${invitePreview.total})` : ""} →`}
+              </button>
+            </div>
+          )}
+
           <div
             className="event-modal__section event-modal__host-updates"
             style={{ "--section-accent": hostMessages.length > 0 ? dayColor : "var(--ink-border)" } as React.CSSProperties}
@@ -648,11 +763,6 @@ function EventModalInner({
                 <Pencil size={16} aria-hidden="true" />
                 Edit event
               </button>
-            )}
-            {event.ticketUrl && (
-              <a href={event.ticketUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
-                {admissionEventLinkLabel(event.admission)} →
-              </a>
             )}
             <div className="event-link-choice-anchor">
               <button
@@ -698,7 +808,12 @@ function EventModalInner({
             </button>
           </div>
 
-          <div className="event-modal__tabs" role="tablist" aria-label="Event social">
+          <div
+            ref={socialTabsRef}
+            className="event-modal__tabs"
+            role="tablist"
+            aria-label="Event social"
+          >
             <button
               type="button"
               role="tab"
@@ -911,6 +1026,31 @@ function EventModalInner({
           </>
           )}
         </div>
+        </div>
+
+        {!editing && (
+          <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
+            {event.ticketUrl ? (
+              <a
+                href={event.ticketUrl}
+                target="_blank"
+                rel="noopener"
+                className="btn-neon solid event-modal__action-btn event-modal__sticky-cta-btn"
+                data-testid="button-event-tickets-sticky"
+              >
+                {admissionEventLinkLabel(event.admission)} →
+              </a>
+            ) : null}
+            <button
+              type="button"
+              className="btn-neon event-modal__action-btn event-modal__sticky-cta-btn"
+              data-testid="button-ill-be-there-sticky"
+              onClick={jumpToAttendance}
+            >
+              I'll Be There
+            </button>
+          </div>
+        )}
       </div>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>,
