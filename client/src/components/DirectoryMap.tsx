@@ -27,6 +27,7 @@ export const MAP_TYPE_COLORS: Record<string, string> = {
   shop: "#FFD700",
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
+  healthcare: "#00F0C0",
 };
 
 export const MAP_TYPE_LABELS: Record<string, string> = {
@@ -38,6 +39,7 @@ export const MAP_TYPE_LABELS: Record<string, string> = {
   shop: "Shops",
   hotel: "Hotels",
   nonprofit: "Nonprofits",
+  healthcare: "Health & Care",
 };
 
 /** Legend order for the directory map key. */
@@ -50,6 +52,7 @@ export const MAP_KEY_TYPES = [
   "shop",
   "hotel",
   "nonprofit",
+  "healthcare",
 ] as const;
 
 const TYPE_COLORS = MAP_TYPE_COLORS;

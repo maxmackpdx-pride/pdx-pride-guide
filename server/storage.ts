@@ -11,7 +11,7 @@ import {
 
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
-import { formatBoardRejectMessage } from "@shared/boardModeration";
+import { formatBoardRejectMessage, formatProfilePhotoRejectMessage } from "@shared/boardModeration";
 import {
   filterHubFeedItems,
   filterHubFeedPinned,
@@ -3394,6 +3394,240 @@ function runBootMigrationsOnce() {
     } as any).run();
     recordBootMigration("seed_businesses_directory_v8");
   }
+  if (!hasBootMigration("seed_businesses_directory_v9_gay_pages_process_prism")) {
+    const now = new Date().toISOString();
+    const wave: Array<Record<string, unknown>> = [
+      {
+        name: "Process",
+        type: "bar",
+        description:
+          "Underground bar and event space inside the Watershed on SE Milwaukie. Seasonal craft cocktails, strong NA options, and a sound-treated room with a 4-point Danley system. Safer-space community guidelines; hosts ticketed and free nights all week.",
+        address: "5040 SE Milwaukie Ave",
+        neighborhood: "SE Portland",
+        website: "https://www.processpdx.club",
+        instagram: "@process.pdx",
+        lat: 45.4869,
+        lng: -122.6484,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Prism Health",
+        type: "healthcare",
+        description:
+          "Portland LGBTQ+ community health clinic offering primary care, HIV and STI services, gender-affirming care, behavioral health, and specialty programs for queer and trans communities across the metro.",
+        address: "2236 SE Belmont St",
+        neighborhood: "SE Portland",
+        website: "https://www.prismhealth.org",
+        instagram: "@prismhealth",
+        phone: "(503) 445-7699",
+        lat: 45.5165,
+        lng: -122.6430,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "The Automatic Bar",
+        type: "bar",
+        description:
+          "Neighborhood bar on SE Division with a full bar, snacks, and a welcoming queer-friendly room in the Richmond / Clinton pocket.",
+        address: "3652 SE Division St",
+        neighborhood: "SE Portland",
+        website: "https://www.theautomaticbarpdx.com/",
+        phone: "(503) 206-5371",
+        lat: 45.5047,
+        lng: -122.6265,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Montavilla Station",
+        type: "bar",
+        description:
+          "Friendly Montavilla tavern with karaoke, live music, pool, pub food, and late hours. A neighborhood hang listed in the PDX Gay Pages bars directory.",
+        address: "417 SE 80th Ave",
+        neighborhood: "Montavilla",
+        website: "https://montavillastation.com/",
+        phone: "(503) 252-3240",
+        hours: "Daily 11am–2am",
+        lat: 45.5195,
+        lng: -122.5820,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Covert Café",
+        type: "bar",
+        description:
+          "Intimate Montavilla live-music bar with comedy, community nights, and a small-room calendar built around local artists.",
+        address: "803 SE 82nd Ave",
+        neighborhood: "Montavilla",
+        website: "https://www.thecovertcafe.com/",
+        instagram: "@covertcafepdx",
+        phone: "(503) 254-8277",
+        lat: 45.5170,
+        lng: -122.5785,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Hunny Beez",
+        type: "restaurant",
+        description:
+          "American Filipino fusion restaurant and bar near PSU with adobo wings, brunch, happy hour, and late weekend nights.",
+        address: "1434 SW Park Ave",
+        neighborhood: "Downtown",
+        website: "https://hunnybeezpdx.com/",
+        instagram: "@hunnybeezpdx",
+        phone: "(971) 404-6845",
+        hours: "Mon–Wed 11am–10pm, Thu 11am–12am, Fri 11am–2am, Sat 10am–2am, Sun 10am–7pm",
+        lat: 45.5128,
+        lng: -122.6845,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Q Restaurant & Bar",
+        type: "restaurant",
+        description:
+          "Family-owned downtown restaurant with imaginative Pacific Northwest cuisine, lunch and dinner service, and a modern queer-friendly dining room.",
+        address: "828 SW 2nd Ave",
+        neighborhood: "Downtown",
+        website: "https://q-portland.com/",
+        instagram: "@q_portland",
+        phone: "(503) 850-8915",
+        hours: "Tue–Fri lunch and dinner, Sat dinner, closed Sun–Mon",
+        lat: 45.5175,
+        lng: -122.6765,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "GiGi's Cafe",
+        type: "cafe",
+        description:
+          "Hillsdale neighborhood cafe known for waffles, brunch plates, and a friendly daytime room open daily.",
+        address: "6320 SW Capitol Hwy",
+        neighborhood: "SW Portland",
+        website: "https://gigiscafepdx.com/",
+        instagram: "@gigiscafepdx",
+        phone: "(503) 977-2233",
+        hours: "Daily 8am–3pm",
+        lat: 45.4805,
+        lng: -122.7035,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Backstory Books & Yarn",
+        type: "shop",
+        description:
+          "Independent woman-owned bookstore and yarn shop on Hawthorne Boulevard with trade programs and community browsing.",
+        address: "3129 SE Hawthorne Blvd",
+        neighborhood: "SE Hawthorne",
+        website: "https://www.backstorybooksandyarn.com/",
+        instagram: "@BackstoryPDX",
+        phone: "(971) 282-3332",
+        lat: 45.5122,
+        lng: -122.6325,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Bridge City Mentors",
+        type: "nonprofit",
+        description:
+          "Black and LGBTQ-affiliated mentoring and advocacy organization supporting individuals and communities across the Portland metro since 2016.",
+        address: "2636 NE Sandy Blvd Suite E",
+        neighborhood: "NE Portland",
+        website: "https://bridgecitymentors.com/",
+        instagram: "@bridgecitymentors",
+        phone: "(503) 473-3306",
+        lat: 45.5345,
+        lng: -122.6385,
+        queerOwned: true,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Rebel Heart Therapy",
+        type: "healthcare",
+        description:
+          "Queer-staffed, identity-forward therapy practice for LGBTQIA+, poly, kinky, neurodivergent, and nonconforming people in Portland.",
+        address: "1111 NE MLK Blvd",
+        neighborhood: "NE Portland",
+        website: "https://www.rebelheartpdx.com/",
+        instagram: "@rebelheartpdx",
+        lat: 45.5310,
+        lng: -122.6615,
+        queerOwned: true,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Full Spectrum Therapy",
+        type: "healthcare",
+        description:
+          "Portland group therapy practice with clinicians dedicated to LGBTQ+ affirming care, gender-competent counseling, and community support.",
+        address: "1219 SE Lafayette St",
+        neighborhood: "SE Portland",
+        website: "https://www.fullspectrumpdx.com/",
+        instagram: "@fullspectrumtherapy",
+        phone: "(503) 765-5733",
+        lat: 45.5065,
+        lng: -122.6535,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "Sprout Therapy PDX",
+        type: "healthcare",
+        description:
+          "Inclusive counseling for individuals, kids, families, and relationships of any kind, with Portland offices and Oregon telehealth. LGBTQ+ welcoming and insurance-friendly.",
+        address: "6011 NE Oregon St",
+        neighborhood: "NE Portland",
+        website: "https://sprouttherapypdx.com/",
+        instagram: "@sprouttherapypdx",
+        lat: 45.5275,
+        lng: -122.6015,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+      {
+        name: "The Center for Couples & Sex Therapy",
+        type: "healthcare",
+        description:
+          "Sex-positive, gender-affirming therapy for individuals and partners covering desire, communication, identity, and relationship care in Portland and online.",
+        address: "2923 NE Broadway St",
+        neighborhood: "NE Portland",
+        website: "https://www.thecenterportland.com/",
+        instagram: "@thecenterportland",
+        phone: "(503) 941-0856",
+        lat: 45.5350,
+        lng: -122.6355,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: true,
+      },
+    ];
+    for (const entry of wave) {
+      const exists = sqlite.prepare(`SELECT id FROM businesses WHERE lower(name) = lower(?)`).get(entry.name as string);
+      if (exists) continue;
+      db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+    }
+    recordBootMigration("seed_businesses_directory_v9_gay_pages_process_prism");
+  }
   if (!hasBootMigration("seed_business_bowery_bagels_v1")) {
     const now = new Date().toISOString();
     db.insert(businesses).values({
@@ -5304,6 +5538,16 @@ function notifyBoardReject(
   notifyGuideInbox(toUserId, `${boardLabel} post sent back`, body, context);
 }
 
+function notifyProfilePhotoReject(toUserId: number, reasonCode: string, note?: string) {
+  const reason = formatProfilePhotoRejectMessage(reasonCode, note);
+  const body = `Your profile photo was removed because it doesn't fit our public-facing image guidelines.\n\nReason: ${reason}\n\nYou can upload a new photo from your dashboard when ready.`;
+  notifyGuideInbox(toUserId, "Profile photo removed", body, {
+    contextType: "PROFILE_PHOTO",
+    contextId: toUserId,
+    contextLabel: "Profile photo",
+  });
+}
+
 function notifySubmissionOutcome(
   sub: { id: number; title: string; type: string; submitterEmail: string },
   approved: boolean,
@@ -5527,6 +5771,7 @@ export interface IStorage {
   rejectGigPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   rejectGiftingPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   rejectMissedConnection(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  rejectUserProfilePhoto(username: string, reasonCode: string, note?: string): { ok?: boolean; error?: string };
   getAdminMissedConnections(): any[];
   getRecentlyReviewedMissedConnections(): any[];
   approveMissedConnection(id: number): { ok?: boolean; error?: string };
@@ -5634,9 +5879,11 @@ export interface IStorage {
   changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
+  /** Resolve standalone promoter-application rows when the promoter queue is acted on. */
+  resolvePromoterApplicationSubmissions(userId: number, outcome: "approved" | "rejected", adminName?: string, reason?: string): void;
   getAllUsers(): User[];
   // Member profiles + follows
-  getPublicProfile(username: string, viewerUserId?: number | null): any | undefined;
+  getPublicProfile(username: string, viewerUserId?: number | null, viewerIsAdmin?: boolean): any | undefined;
   getPackLinks(userId: number, relation: "packmate" | "handler"): Array<{ id: number; username: string; displayName: string | null; avatarChoice: number; avatarRing: string; photoUrl: string | null }>;
   addPackLink(userId: number, relation: "packmate" | "handler", targetUsername: string): { ok?: boolean; error?: string };
   removePackLink(userId: number, relation: "packmate" | "handler", linkedUserId: number): void;
@@ -6005,7 +6252,7 @@ export const storage: IStorage = {
     `).get(userId) as { count: number } | undefined;
     return row?.count ?? 0;
   },
-  getPublicProfile(username, viewerUserId = null) {
+  getPublicProfile(username, viewerUserId = null, viewerIsAdmin = false) {
     const user = storage.getUserByUsername(username);
     if (!user || user.status !== "active") return undefined;
     const isOwner = viewerUserId != null && viewerUserId === user.id;
@@ -6194,11 +6441,20 @@ export const storage: IStorage = {
       },
       isOwner,
       isAdmin: storage.userIsSiteAdmin(user),
+      viewerIsAdmin: !!viewerIsAdmin && !isOwner,
       isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
       activity,
       boardPosts,
       linkedVenues: storage.getUserLinkedBusinesses(user.id),
     };
+  },
+  rejectUserProfilePhoto(username, reasonCode, note) {
+    const user = storage.getUserByUsername(String(username || "").trim().replace(/^@/, ""));
+    if (!user || user.status !== "active") return { error: "User not found" };
+    if (!user.photoUrl) return { error: "No profile photo" };
+    storage.updateUser(user.id, { photoUrl: null, avatarCrop: null });
+    notifyProfilePhotoReject(user.id, reasonCode, note);
+    return { ok: true };
   },
   getPackLinks(userId, relation) {
     const rows = sqlite.prepare(`
@@ -6525,6 +6781,12 @@ export const storage: IStorage = {
   rejectSubmission(id, reason) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
     db.update(submissions).set({ status: "REJECTED", adminNotes: reason }).where(eq(submissions.id, id)).run();
+    if (sub?.type === "PROMOTER_APPLICATION") {
+      const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+      if (submitter?.promoterStatus === "pending") {
+        db.update(users).set({ promoterStatus: "rejected" }).where(eq(users.id, submitter.id)).run();
+      }
+    }
     if (sub) notifySubmissionOutcome(sub, false, reason);
   },
   getGigPosts(status) {
@@ -6809,8 +7071,11 @@ export const storage: IStorage = {
   getAdminPendingCount() {
     // Must match every category rendered in QueueView mode="admin".
     // Owner Desk items are counted separately via getOwnerDeskCount().
+    // Standalone promoter applications live in the promoter queue only — not double-counted.
+    const pendingSubmissions = this.getSubmissions("PENDING")
+      .filter((s) => s.type !== "PROMOTER_APPLICATION");
     return (
-      this.getSubmissions("PENDING").length
+      pendingSubmissions.length
       + this.getModerationRequests("PENDING").length
       + this.getPendingPromoterRequests().length
       + this.getGiftingReports("PENDING").length
@@ -7438,6 +7703,28 @@ export const storage: IStorage = {
   updatePasswordHash(id, passwordHash) {
     db.update(users).set({ passwordHash }).where(eq(users.id, id)).run();
   },
+  resolvePromoterApplicationSubmissions(userId, outcome, adminName = "admin", reason = "") {
+    const user = storage.getUserById(userId);
+    if (!user?.email) return;
+    const pendingApps = db.select().from(submissions).all()
+      .filter((s: any) => s.submitterEmail === user.email
+        && s.type === "PROMOTER_APPLICATION"
+        && s.status === "PENDING");
+    for (const sub of pendingApps) {
+      if (outcome === "approved") {
+        db.update(submissions).set({
+          status: "APPROVED",
+          approvals: JSON.stringify([adminName]),
+        }).where(eq(submissions.id, sub.id)).run();
+        // Promoter inbox notice is sent by setPromoterStatus — avoid a duplicate "event is live" message.
+      } else {
+        db.update(submissions).set({
+          status: "REJECTED",
+          adminNotes: reason || "Promoter request denied",
+        }).where(eq(submissions.id, sub.id)).run();
+      }
+    }
+  },
   setPromoterStatus(userId, status) {
     db.update(users).set({ promoterStatus: status }).where(eq(users.id, userId)).run();
     if (status === "approved") {
@@ -7472,9 +7759,15 @@ export const storage: IStorage = {
     }
 
     return allUsers.map((u: any) => {
-      const claimSub = db.select().from(submissions).all()
-        .filter((s: any) => s.submitterEmail === u.email && s.type === "CLAIM")
+      const userSubs = db.select().from(submissions).all()
+        .filter((s: any) => s.submitterEmail === u.email && s.status === "PENDING");
+      const claimSub = userSubs
+        .filter((s: any) => s.type === "CLAIM")
         .sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
+      const appSub = userSubs
+        .filter((s: any) => s.type === "PROMOTER_APPLICATION")
+        .sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
+      const detailSub = claimSub || appSub;
       const evt = claimSub?.eventId
         ? db.select().from(events).where(eq(events.id, claimSub.eventId)).get()
         : undefined;
@@ -7487,11 +7780,11 @@ export const storage: IStorage = {
         avatarChoice: u.avatarChoice ?? 1,
         avatarRing: u.avatarRing || "none",
         promoterStatus: u.promoterStatus,
-        submissionId: claimSub?.id ?? null,
+        submissionId: detailSub?.id ?? null,
         eventId: claimSub?.eventId ?? null,
-        claimReason: claimSub?.claimReason ?? null,
-        submitterOrg: claimSub?.submitterOrg ?? null,
-        requestedAt: claimSub?.createdAt ?? u.createdAt,
+        claimReason: detailSub?.claimReason ?? appSub?.description ?? null,
+        submitterOrg: detailSub?.submitterOrg ?? null,
+        requestedAt: detailSub?.createdAt ?? u.createdAt,
         eventTitle: evt?.title ?? null,
       };
     }).sort((a: any, b: any) => String(b.requestedAt).localeCompare(String(a.requestedAt)));

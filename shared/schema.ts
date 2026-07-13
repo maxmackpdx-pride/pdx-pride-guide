@@ -107,7 +107,7 @@ export type GigPost = typeof gigPosts.$inferSelect;
 export const businesses = sqliteTable("businesses", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
-  type: text("type").notNull().default("bar"), // bar|restaurant|cafe|venue|service|shop|hotel
+  type: text("type").notNull().default("bar"), // bar|restaurant|cafe|venue|service|shop|hotel|nonprofit|healthcare
   description: text("description").notNull(),
   address: text("address"),
   neighborhood: text("neighborhood"),

@@ -39,7 +39,7 @@ import {
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
 import { parseHubFeedTab } from "@shared/hubFeed";
-import { BOARD_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
+import { BOARD_REJECT_REASONS, PROFILE_PHOTO_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
 
 import {
   diffSubmissionMerge,
@@ -520,6 +520,15 @@ function parseBoardRejectBody(body: any) {
   const reasonCode = String(body.reasonCode || "").trim().toUpperCase();
   const note = String(body.note || "").trim();
   if (!BOARD_REJECT_REASONS.some(r => r.code === reasonCode)) {
+    throw new Error("Invalid reject reason");
+  }
+  return { reasonCode, note: note || undefined };
+}
+
+function parseProfilePhotoRejectBody(body: any) {
+  const reasonCode = String(body.reasonCode || "").trim().toUpperCase();
+  const note = String(body.note || "").trim();
+  if (!PROFILE_PHOTO_REJECT_REASONS.some(r => r.code === reasonCode)) {
     throw new Error("Invalid reject reason");
   }
   return { reasonCode, note: note || undefined };
@@ -1225,7 +1234,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const memberBusinessSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare"]),
     description: z.string().trim().min(10).max(2000),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
@@ -1296,7 +1305,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const businessOwnerEditSchema = z.object({
     name: z.string().trim().min(2).max(120).optional(),
     address: z.string().trim().max(200).optional().nullable(),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]).optional(),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare"]).optional(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
     queerOwned: z.boolean().optional(),
     queerFriendly: z.boolean().optional(),
@@ -1385,7 +1394,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── New-business submission (gig-flow "this address isn't in the system" branch) ──
   const businessSubmissionSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]).default("bar"),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare"]).default("bar"),
     description: z.string().trim().min(10).max(2000),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
@@ -2211,7 +2220,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Public profile page — no auth required; viewer detected via session.
   app.get("/api/users/:username", (req: any, res) => {
     const username = String(req.params.username || "").trim().replace(/^@/, "");
-    const profile = storage.getPublicProfile(username, req.session?.userId ?? null);
+    const profile = storage.getPublicProfile(username, req.session?.userId ?? null, sessionIsAdmin(req));
     if (!profile) return res.status(404).json({ error: "Not found" });
     res.json(profile);
   });
@@ -3346,7 +3355,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = Number(req.params.userId);
     const user = storage.getUserById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
+    const adminName = getSessionAdminUser(req)?.displayName
+      || getSessionAdminUser(req)?.username
+      || storage.getUserById(req.session.userId!)?.displayName
+      || storage.getUserById(req.session.userId!)?.username
+      || "admin";
     storage.setPromoterStatus(userId, "approved");
+    storage.resolvePromoterApplicationSubmissions(userId, "approved", adminName);
     res.json({ ok: true, promoterStatus: "approved" });
   });
 
@@ -3355,6 +3370,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const user = storage.getUserById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
     storage.setPromoterStatus(userId, "rejected");
+    storage.resolvePromoterApplicationSubmissions(userId, "rejected", "admin", "Promoter request denied");
     res.json({ ok: true, promoterStatus: "rejected" });
   });
 
@@ -3487,6 +3503,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user) return res.status(404).json({ error: "User not found" });
     storage.setPromoterStatus(userId, status);
     res.json({ ok: true, promoterStatus: status });
+  });
+
+  app.post("/api/admin/users/:username/reject-photo", requireAdmin, (req, res) => {
+    try {
+      const username = String(req.params.username || "").trim().replace(/^@/, "");
+      const { reasonCode, note } = parseProfilePhotoRejectBody(req.body);
+      const result = storage.rejectUserProfilePhoto(username, reasonCode, note);
+      if (result.error) return res.status(400).json({ error: result.error });
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   });
 
   app.get("/api/admin/events", requireAdmin, (req, res) => {

@@ -77,6 +77,7 @@ export const TYPE_LABELS: Record<string, string> = {
   shop: "Shops",
   hotel: "Hotels",
   nonprofit: "Nonprofits",
+  healthcare: "Health & Care",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -88,6 +89,7 @@ const TYPE_COLORS: Record<string, string> = {
   shop: "#FFD700",
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
+  healthcare: "#00F0C0",
 };
 
 const NEIGHBORHOODS = [
@@ -455,6 +457,7 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   shop: "shops",
   hotel: "hotels",
   nonprofit: "services",
+  healthcare: "services",
 };
 
 function DirectoryCard({

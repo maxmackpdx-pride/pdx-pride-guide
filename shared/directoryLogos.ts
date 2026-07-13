@@ -62,6 +62,31 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   tinshedgardencafe: "Tin_Shed_Garden_Cafe",
   underu4men: "UnderU4Men",
   werqtogether: "WERQ_Together",
+  // ── 2026 Gay Pages + Process / Prism wave ──
+  process: "Process",
+  processpdx: "Process",
+  processclub: "Process",
+  prismhealth: "Prism_Health",
+  prismhealthnw: "Prism_Health",
+  prism: "Prism_Health",
+  theautomaticbar: "The_Automatic_Bar",
+  automaticbar: "The_Automatic_Bar",
+  montavillastation: "Montavilla_Station",
+  covertcafe: "Covert_Cafe",
+  thecovertcafe: "Covert_Cafe",
+  hunnybeez: "Hunny_Beez",
+  qrestaurantbar: "Q_Restaurant_and_Bar",
+  qrestaurantandbar: "Q_Restaurant_and_Bar",
+  gigiscafe: "Gigis_Cafe",
+  gigiscafepdx: "Gigis_Cafe",
+  backstorybooksandyarn: "Backstory_Books_and_Yarn",
+  backstorybooks: "Backstory_Books_and_Yarn",
+  bridgecitymentors: "Bridge_City_Mentors",
+  rebelhearttherapy: "Rebel_Heart_Therapy",
+  fullspectrumtherapy: "Full_Spectrum_Therapy",
+  sprouttherapypdx: "Sprout_Therapy_PDX",
+  thecenterforcouplessextherapy: "The_Center_for_Couples_and_Sex_Therapy",
+  thecenterforcouplesandsextherapy: "The_Center_for_Couples_and_Sex_Therapy",
 };
 
 const FALLBACK_BY_TYPE: Record<string, string> = {
@@ -73,6 +98,7 @@ const FALLBACK_BY_TYPE: Record<string, string> = {
   shop: "/directory-logos/fallback_shops.png",
   nonprofit: "/directory-logos/fallback_nonprofits.png",
   hotel: "/directory-logos/fallback_venues.png",
+  healthcare: "/directory-logos/fallback_healthcare.png",
 };
 
 export function normalizeDirectoryName(name: string): string {

@@ -70,6 +70,16 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   "ne 30th ave": "https://portlandpride.org/",
   "gay blvd": "https://www.eventbrite.com/e/divapalooza-pdx-pride-2026-tickets-1991334196186",
   "virtual google meet": "https://www.oslcontest.org/calendar",
+  process: "https://www.processpdx.club",
+  "process pdx": "https://www.processpdx.club",
+  "the automatic bar": "https://www.theautomaticbarpdx.com/",
+  "automatic bar": "https://www.theautomaticbarpdx.com/",
+  "montavilla station": "https://montavillastation.com/",
+  "covert cafe": "https://www.thecovertcafe.com/",
+  "covert café": "https://www.thecovertcafe.com/",
+  "hunny beez": "https://hunnybeezpdx.com/",
+  "q restaurant bar": "https://q-portland.com/",
+  "q restaurant and bar": "https://q-portland.com/",
 };
 
 export type VenueWebsiteSource = {
