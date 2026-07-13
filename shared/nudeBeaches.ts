@@ -66,6 +66,15 @@ export type ResourceLink = {
 
 export type RiverLevelTrend = "rising" | "falling" | "steady";
 
+/** One NWS daytime period, keyed by Pacific YYYY-MM-DD. */
+export type DayForecastBrief = {
+  date: string;
+  name: string;
+  shortForecast: string | null;
+  highF: number | null;
+  wind: string | null;
+};
+
 export type RoosterRockLive = {
   riverLevelFt: number | null;
   riverLevelAt: string | null;
@@ -86,6 +95,8 @@ export type RoosterRockLive = {
   waterTempSite: string | null;
   waterClarity: string | null;
   airQuality: string | null;
+  /** Upcoming daytime forecasts (Pacific dates) for plan-ahead UI. */
+  forecastDays?: DayForecastBrief[];
   source: string;
   error?: string;
 };
@@ -311,6 +322,7 @@ export type SauvieIslandLive = {
   weatherSummary: string | null;
   airTempF: number | null;
   wind: string | null;
+  forecastDays?: DayForecastBrief[];
   source: string;
   error?: string;
 };

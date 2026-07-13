@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { NudeBeachTab } from "@shared/nudeBeaches";
+import type { DayForecastBrief, NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import { resolveBeachPosterUrl } from "@shared/eventPoster";
 import {
   RIVER_BRATS_DEPART_HOUR_END,
@@ -17,6 +17,7 @@ import {
 } from "@shared/riverBrats";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/AuthModal";
 import UserAvatar from "@/components/UserAvatar";
 import EventLinkChoiceMenu from "@/components/EventLinkChoiceMenu";
@@ -55,9 +56,17 @@ type Props = {
   autoVerify?: boolean;
   /** From ?chat=1 deep link (Inbox GROUP row) — scroll the chat into view. */
   autoOpenChat?: boolean;
+  /** Jump to Carpool tab for this plan day. */
+  onGoToCarpool?: (date: string) => void;
 };
 
-export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpenChat }: Props) {
+export default function RiverBratsCheckIn({
+  beachId,
+  accent,
+  autoVerify,
+  autoOpenChat,
+  onGoToCarpool,
+}: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -87,6 +96,27 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
         r.json(),
       ),
   });
+
+  const { data: beachesPayload } = useQuery<{ data?: NudeBeachesSnapshot } | NudeBeachesSnapshot>({
+    queryKey: ["/api/nude-beaches"],
+    queryFn: () => apiRequest("GET", "/api/nude-beaches").then(r => r.json()),
+    staleTime: 5 * 60_000,
+  });
+
+  const forecastDays: DayForecastBrief[] = useMemo(() => {
+    const snap =
+      beachesPayload && "data" in beachesPayload && beachesPayload.data
+        ? beachesPayload.data
+        : (beachesPayload as NudeBeachesSnapshot | undefined);
+    if (!snap) return [];
+    const live = beachId === "rooster-rock" ? snap.roosterRock : snap.sauvieIsland;
+    return live?.forecastDays ?? [];
+  }, [beachesPayload, beachId]);
+
+  const dayForecast = useMemo(
+    () => forecastDays.find(d => d.date === selectedDate) ?? null,
+    [forecastDays, selectedDate],
+  );
 
   const mine = user ? rows.find(r => (r.userId ?? r.user_id) === user.id) : undefined;
   const checkedIn = Boolean(mine);
@@ -518,6 +548,34 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
           <p className="rb-checkin__fine">
             Plan up to 7 days ahead. Chat opens 48 hours before that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
           </p>
+
+          {checkedIn && !isViewingToday && (
+            <div className="rb-checkin__plan-next" data-testid="beach-plan-carpool-prompt">
+              <div className="rb-checkin__plan-next-kicker">{dayLabel} forecast</div>
+              {dayForecast ? (
+                <p className="rb-checkin__plan-next-weather">
+                  {dayForecast.highF != null ? (
+                    <strong>{dayForecast.highF}°F</strong>
+                  ) : null}
+                  {dayForecast.highF != null && dayForecast.shortForecast ? " · " : null}
+                  {dayForecast.shortForecast || "Forecast loading…"}
+                  {dayForecast.wind ? ` · Wind ${dayForecast.wind}` : null}
+                </p>
+              ) : (
+                <p className="rb-checkin__plan-next-weather">
+                  Day forecast not loaded yet. Check the conditions panel above, or refresh in a moment.
+                </p>
+              )}
+              <p className="rb-checkin__plan-next-ask">Interested in carpooling that day?</p>
+              <button
+                type="button"
+                className="rb-checkin__plan-next-btn"
+                onClick={() => onGoToCarpool?.(selectedDate)}
+              >
+                Open carpool for {dayLabel}
+              </button>
+            </div>
+          )}
         </section>
 
         <RiverBratsGroupChat

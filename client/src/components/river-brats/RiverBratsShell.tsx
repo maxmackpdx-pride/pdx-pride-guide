@@ -17,6 +17,12 @@ export default function RiverBratsShell({ beachId }: Props) {
   const [shore, setShoreState] = useState<RiverBratsShoreTab>(() =>
     readRiverBratsShore(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("shore") : null),
   );
+  // Carpool day deep-link from plan-ahead check-in CTA (?date=YYYY-MM-DD).
+  const [carpoolDate, setCarpoolDate] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const d = new URLSearchParams(window.location.search).get("date");
+    return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
+  });
   // Deep links: ?verify=1 (arrival push → GPS confirm) and ?chat=1 (Inbox
   // GROUP row → open beach chat). Captured once, then stripped from the URL.
   const [autoVerify] = useState(
@@ -37,13 +43,20 @@ export default function RiverBratsShell({ beachId }: Props) {
   }, []);
 
   const setShore = useCallback(
-    (tab: RiverBratsShoreTab) => {
+    (tab: RiverBratsShoreTab, opts?: { date?: string | null }) => {
       setShoreState(tab);
+      if (opts?.date) setCarpoolDate(opts.date);
       const params = new URLSearchParams(window.location.search);
       if (beachId === "sauvie-island") params.set("tab", "sauvie-island");
       else params.delete("tab");
-      if (tab === "checkin") params.delete("shore");
-      else params.set("shore", tab);
+      if (tab === "checkin") {
+        params.delete("shore");
+        params.delete("date");
+      } else {
+        params.set("shore", tab);
+        if (tab === "carpool" && opts?.date) params.set("date", opts.date);
+        else if (tab !== "carpool") params.delete("date");
+      }
       const qs = params.toString();
       setLocation(qs ? `/nude-beaches?${qs}` : "/nude-beaches");
     },
@@ -94,9 +107,17 @@ export default function RiverBratsShell({ beachId }: Props) {
 
       <div className="river-brats__body">
         {shore === "checkin" && (
-          <RiverBratsCheckIn beachId={beachId} accent={accent} autoVerify={autoVerify} autoOpenChat={autoOpenChat} />
+          <RiverBratsCheckIn
+            beachId={beachId}
+            accent={accent}
+            autoVerify={autoVerify}
+            autoOpenChat={autoOpenChat}
+            onGoToCarpool={date => setShore("carpool", { date })}
+          />
         )}
-        {shore === "carpool" && <RiverBratsCarpool beachId={beachId} accent={accent} />}
+        {shore === "carpool" && (
+          <RiverBratsCarpool beachId={beachId} accent={accent} initialDate={carpoolDate} />
+        )}
         {shore === "spotted" && <RiverBratsSpotted beachId={beachId} />}
       </div>
     </section>

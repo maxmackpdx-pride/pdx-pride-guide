@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import {
@@ -41,9 +41,11 @@ type CarpoolRow = {
 type Props = {
   beachId: NudeBeachTab;
   accent: "cyan" | "orange" | "green";
+  /** Prefill day chip (from plan-ahead check-in carpool CTA). */
+  initialDate?: string | null;
 };
 
-export default function RiverBratsCarpool({ beachId, accent }: Props) {
+export default function RiverBratsCarpool({ beachId, accent, initialDate }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -60,7 +62,20 @@ export default function RiverBratsCarpool({ beachId, accent }: Props) {
 
   const today = pacificTodayDate();
   const dateOptions = useMemo(() => beachCheckinDateOptions(), []);
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (initialDate && /^\d{4}-\d{2}-\d{2}$/.test(initialDate)) return initialDate;
+    return today;
+  });
+
+  useEffect(() => {
+    if (initialDate && dateOptions.includes(initialDate) && initialDate !== selectedDate) {
+      setSelectedDate(initialDate);
+      setComposeOpen(false);
+    }
+    // Only react when parent hands off a new date (plan-ahead CTA).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialDate]);
+
   const isToday = selectedDate === today;
   const dayLabel = formatBeachCheckinDateLabel(selectedDate);
 

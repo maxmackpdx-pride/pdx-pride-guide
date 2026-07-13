@@ -6,6 +6,7 @@ import {
   calendarDayInTimeZone,
   crossingBandFromLevel,
   depthEstimateFromGage,
+  type DayForecastBrief,
   estimateWaterClarity,
   formatSwimStatusLabel,
   normalizeNudeBeachesSnapshot,
@@ -250,6 +251,7 @@ function parseWindParts(windDir?: string | null, windSpeed?: string | null) {
 }
 
 type NwsForecastPeriod = {
+  name?: string;
   startTime?: string;
   endTime?: string;
   isDaytime?: boolean;
@@ -279,6 +281,37 @@ function pickCurrentNwsPeriod(periods?: NwsForecastPeriod[]): NwsForecastPeriod 
   return periods[0] ?? null;
 }
 
+function pacificDateFromIso(iso: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(iso));
+}
+
+/** Daytime NWS periods for plan-ahead "weather for that day" UI. */
+function extractDayForecasts(daily: NwsGridForecast | null): DayForecastBrief[] {
+  const periods = daily?.properties?.periods ?? [];
+  const out: DayForecastBrief[] = [];
+  for (const p of periods) {
+    if (p.isDaytime === false) continue;
+    if (!p.startTime) continue;
+    const date = pacificDateFromIso(p.startTime);
+    if (out.some(x => x.date === date)) continue;
+    const { wind } = parseWindParts(p.windDirection, p.windSpeed);
+    out.push({
+      date,
+      name: p.name || date,
+      shortForecast: p.shortForecast?.replace(/\s+/g, " ").trim() || null,
+      highF: typeof p.temperature === "number" ? p.temperature : null,
+      wind,
+    });
+    if (out.length >= 8) break;
+  }
+  return out;
+}
+
 async function fetchNwsSummary(lat: number, lon: number) {
   try {
     const points = await fetchJson<NwsPoints>(`https://api.weather.gov/points/${lat},${lon}`);
@@ -290,7 +323,8 @@ async function fetchNwsSummary(lat: number, lon: number) {
     ]);
     const now = pickCurrentNwsPeriod(hourly?.properties?.periods);
     const today = pickCurrentNwsPeriod(daily?.properties?.periods);
-    if (!now && !today) return { ...EMPTY_NWS_SUMMARY };
+    const forecastDays = extractDayForecasts(daily);
+    if (!now && !today && !forecastDays.length) return { ...EMPTY_NWS_SUMMARY, forecastDays: [] as DayForecastBrief[] };
 
     const summary = (now?.shortForecast ?? today?.shortForecast)?.replace(/\s+/g, " ").trim() || null;
     const airTempF =
@@ -303,9 +337,9 @@ async function fetchNwsSummary(lat: number, lon: number) {
       now?.windDirection ?? today?.windDirection,
       now?.windSpeed ?? today?.windSpeed,
     );
-    return { summary, airTempF, wind, windFrom, windMph };
+    return { summary, airTempF, wind, windFrom, windMph, forecastDays };
   } catch {
-    return { ...EMPTY_NWS_SUMMARY };
+    return { ...EMPTY_NWS_SUMMARY, forecastDays: [] as DayForecastBrief[] };
   }
 }
 
@@ -504,6 +538,7 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
     waterTempSite: null,
     waterClarity: null,
     airQuality: null,
+    forecastDays: [],
     source: "USGS OGC + NWS + RoosterRockCrossing.com (DART + PurpleAir)",
   };
   const [river, weather, rrcWater, airQuality] = await Promise.all([
@@ -532,6 +567,7 @@ async function fetchRoosterRockLive(): Promise<RoosterRockLive> {
   base.weatherSummary = weather.summary;
   base.airTempF = weather.airTempF;
   base.wind = weather.wind;
+  base.forecastDays = weather.forecastDays ?? [];
   base.waterTempF = rrcWater.waterTempF;
   base.waterTempSite = rrcWater.waterTempSite;
   base.waterClarity = rrcWater.waterClarity ?? estimateWaterClarity(windFrom, windMph);
@@ -554,6 +590,7 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
     weatherSummary: null,
     airTempF: null,
     wind: null,
+    forecastDays: [],
     source: "Swim Guide + NWS + Sauvie Island Parking",
   };
   const [swim, parking, weather] = await Promise.all([
@@ -568,6 +605,7 @@ async function fetchSauvieIslandLive(): Promise<SauvieIslandLive> {
   base.weatherSummary = weather.summary;
   base.airTempF = weather.airTempF;
   base.wind = weather.wind;
+  base.forecastDays = weather.forecastDays ?? [];
   if (!hasSauvieIslandLiveData(base)) {
     base.error = "Live conditions temporarily unavailable";
   }
