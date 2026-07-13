@@ -16,8 +16,10 @@ type SeoEvent = {
   neighborhood?: string | null;
   dateStart?: string | null;
   dateEnd?: string | null;
+  dayOfWeek?: string | null;
   admission?: string | null;
   ticketUrl?: string | null;
+  posterImageUrl?: string | null;
 };
 
 function pacificIso(date?: string | null) {
@@ -45,8 +47,10 @@ export function getLiveEventsForSeo(): SeoEvent[] {
       neighborhood: evt.neighborhood,
       dateStart: evt.dateStart,
       dateEnd: evt.dateEnd,
+      dayOfWeek: evt.dayOfWeek,
       admission: evt.admission,
       ticketUrl: evt.ticketUrl,
+      posterImageUrl: evt.posterImageUrl,
     }))
     .sort((a, b) => String(a.dateStart).localeCompare(String(b.dateStart)));
 }
@@ -78,7 +82,7 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
           ? { "@type": "Offer", price: evt.admission === "FREE" ? "0" : undefined, priceCurrency: "USD" }
           : undefined,
         url: eventUrl(evt.id, evt.title, SITE_URL),
-        image: resolveEventPosterUrl(evt.id, null) || undefined,
+        image: absoluteAssetUrl(resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek)),
       },
     })),
   };
@@ -306,7 +310,7 @@ function buildSingleEventJsonLd(evt: Event) {
       ? { "@type": "Offer", price: evt.admission === "FREE" ? "0" : undefined, priceCurrency: "USD" }
       : undefined,
     url: eventUrl(evt.id, evt.title, SITE_URL),
-    image: absoluteAssetUrl(resolveEventPosterUrl(evt.id, evt.posterImageUrl)),
+    image: absoluteAssetUrl(resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek)),
   };
 }
 
@@ -416,7 +420,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     : routeSeo.description;
   const pageUrl = liveEvent ? eventUrl(liveEvent.id, liveEvent.title, SITE_URL) : canonical;
   const pageImage = liveEvent
-    ? absoluteAssetUrl(resolveEventPosterUrl(liveEvent.id, liveEvent.posterImageUrl))
+    ? absoluteAssetUrl(resolveEventPosterUrl(liveEvent.id, liveEvent.posterImageUrl, liveEvent.dayOfWeek))
     : `${SITE_URL}/og-preview.jpg`;
 
   const jsonLdBlocks = [

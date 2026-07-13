@@ -5863,7 +5863,9 @@ export const storage: IStorage = {
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
     const attendedPast = attendedAll.filter(isPastEvent);
-    const goingToUpcoming = isOwner ? attendedAll.filter(e => !isPastEvent(e)) : [];
+    // Public Going rail: upcoming RSVPs are visible on member profiles.
+    // (Previously owner-only, which left the design's Going panel empty for everyone else.)
+    const goingToUpcoming = attendedAll.filter(e => !isPastEvent(e));
 
     const socialLinksRaw = safeJson(user.socialLinks || "{}");
     const activity: any = {

@@ -134,7 +134,7 @@ export function eventListingToScheduleEvent(
     going,
     blurb: event.description,
     feat: isHeadliner(event, going),
-    posterUrl: resolveEventPosterUrl(event.id, event.posterImageUrl),
+    posterUrl: resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek),
     startMs,
     endMs,
   };

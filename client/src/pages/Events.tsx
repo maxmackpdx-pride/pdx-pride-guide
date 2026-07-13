@@ -179,6 +179,8 @@ export default function Events() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortMode, setSortMode] = useState<SortMode>("start_time");
   const [mapExpanded, setMapExpanded] = useState(false);
+  /** Map stays open by default; visitors can hide it to free vertical space. */
+  const [mapVisible, setMapVisible] = useState(true);
   const [activeTab, setActiveTabState] = useState<"board" | "schedule">(() =>
     readSearchParam("tab").toLowerCase() === "schedule" ? "schedule" : "board",
   );
@@ -252,7 +254,7 @@ export default function Events() {
     shareEvent
       ? {
           url: eventUrl(shareEvent.id, shareEvent.title),
-          image: absoluteShareImage(resolveEventPosterUrl(shareEvent.id, shareEvent.posterImageUrl)),
+          image: absoluteShareImage(resolveEventPosterUrl(shareEvent.id, shareEvent.posterImageUrl, shareEvent.dayOfWeek)),
           imageAlt: shareEvent.title,
           type: "article",
         }
@@ -318,21 +320,41 @@ export default function Events() {
     <div className="zine-page events-page board-page board-page--makeover">
       <EventsHero eventCount={events.length} stats={heroStats} />
 
-      <ScrollReveal>
-        <div className="events-map-row events-map-row--solo">
-          <div className="events-map-row__map">
-            <Suspense fallback={<MapViewFallback variant="events" />}>
-              <MapView
-                events={filtered}
-                expanded={mapExpanded}
-                onExpand={() => setMapExpanded(true)}
-                onCollapse={() => setMapExpanded(false)}
-                onSelect={openEvent}
-              />
-            </Suspense>
+      <div className="events-map-toolbar">
+        <button
+          type="button"
+          className="events-map-toggle"
+          data-testid="button-toggle-events-map"
+          aria-expanded={mapVisible}
+          aria-controls="events-map-panel"
+          onClick={() => {
+            setMapVisible(v => {
+              if (v) setMapExpanded(false);
+              return !v;
+            });
+          }}
+        >
+          {mapVisible ? "Hide map" : "Show map"}
+        </button>
+      </div>
+
+      {mapVisible && (
+        <ScrollReveal>
+          <div id="events-map-panel" className="events-map-row events-map-row--solo">
+            <div className="events-map-row__map">
+              <Suspense fallback={<MapViewFallback variant="events" />}>
+                <MapView
+                  events={filtered}
+                  expanded={mapExpanded}
+                  onExpand={() => setMapExpanded(true)}
+                  onCollapse={() => setMapExpanded(false)}
+                  onSelect={openEvent}
+                />
+              </Suspense>
+            </div>
           </div>
-        </div>
-      </ScrollReveal>
+        </ScrollReveal>
+      )}
 
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
 

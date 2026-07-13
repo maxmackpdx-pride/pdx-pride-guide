@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { useLocation } from "wouter";
@@ -7,6 +7,7 @@ import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import type { Event } from "@shared/schema";
 import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
@@ -100,6 +101,8 @@ function EventModalInner({
   const [inviteFollowers, setInviteFollowers] = useState(true);
   const [inviteNote, setInviteNote] = useState("");
   const socialTabsRef = useRef<HTMLDivElement>(null);
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
 
   useEffect(() => {
     setEditing(false);
@@ -464,9 +467,14 @@ function EventModalInner({
   const modColor = modMode ? modAccent[modMode] : "var(--text-lo)";
 
   return createPortal(
-    <div className="event-modal-overlay" onClick={onClose}>
+    <div className="event-modal-overlay" onClick={handleClose}>
       <div
+        ref={dialogRef}
         className="event-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={event.title}
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
         data-testid="event-modal"
         style={{ "--event-accent": accentColor } as React.CSSProperties}

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 interface AuthModalProps {
   onClose: () => void;
@@ -16,6 +17,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,23 +48,41 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   };
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center",
-      backdropFilter: "blur(4px)",
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff", color: "#000",
-        border: "3px solid #000",
-        boxShadow: "6px 6px 0 #CCFF00",
-        width: "100%", maxWidth: 420, padding: "36px 32px",
-        position: "relative",
-      }}>
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center",
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={handleClose}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={tab === "login" ? "Log in" : "Join"}
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff", color: "#000",
+          border: "3px solid #000",
+          boxShadow: "6px 6px 0 #CCFF00",
+          width: "100%", maxWidth: 420, padding: "36px 32px",
+          position: "relative",
+        }}
+      >
         {/* Close */}
-        <button onClick={onClose} style={{
-          position: "absolute", top: 12, right: 16,
-          background: "none", border: "none", fontSize: "1.4rem", cursor: "pointer", color: "#000",
-        }}>×</button>
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          style={{
+            position: "absolute", top: 12, right: 16,
+            background: "none", border: "none", fontSize: "1.4rem", cursor: "pointer", color: "#000",
+          }}
+        >
+          ×
+        </button>
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "2px solid #000" }}>

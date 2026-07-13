@@ -46,7 +46,7 @@ export function getEventTypeTagsForEvent(event: EventTagSource): EventTypeFilter
   if (event.admission === "DOOR_FEE") tags.push("DOOR FEE");
   if (event.ageRequirement === "21_PLUS") tags.push("21+");
   if (event.ageRequirement === "ALL_AGES") tags.push("ALL AGES");
-  if (event.isPublic) tags.push("PUBLIC");
+  // PUBLIC is the default — omit from card/modal chips (filter chip remains).
   if (event.isHouseParty) tags.push("HOUSE PARTY");
   if (event.isSexPositive) tags.push("SEX POSITIVE");
   if (event.nudityOk) tags.push("NUDITY OK");

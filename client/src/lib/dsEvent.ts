@@ -19,7 +19,7 @@ export function listingTypeTags(event: Event, max = 2): string[] {
 }
 
 export function listingPosterUrl(event: Event): string | undefined {
-  const url = resolveEventPosterUrl(event.id, event.posterImageUrl);
+  const url = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   return url || undefined;
 }
 

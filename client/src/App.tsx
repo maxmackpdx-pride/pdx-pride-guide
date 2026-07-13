@@ -66,8 +66,8 @@ function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
   const profile = isProfilePath(location);
-  // /admin (HubShell) renders its own bottom bar; everywhere else the global
-  // 5-tab footer is the single bar, including the member hub and inbox.
+  // /admin keeps HubShell's own bottom bar. Member hub (/dashboard, /inbox)
+  // uses the global MobileBottomNav only (HubShell member bar removed).
   const adminShell = location.split("?")[0] === "/admin";
 
   return (
