@@ -443,6 +443,8 @@ export const beachCheckins = sqliteTable("beach_checkins", {
   userId: integer("user_id").notNull(),
   beachId: text("beach_id").notNull(),
   arrivalHour: integer("arrival_hour").notNull(),
+  /** Planned leave hour (Pacific wall, 8–22). Optional on legacy rows. */
+  departHour: integer("depart_hour"),
   note: text("note"),
   calendarDate: text("calendar_date").notNull(),
   isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),

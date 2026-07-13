@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
+import { resolveBeachPosterUrl } from "@shared/eventPoster";
 import {
+  RIVER_BRATS_DEPART_HOUR_END,
   RIVER_BRATS_HOUR_END,
   RIVER_BRATS_HOUR_START,
+  beachCheckinDateOptions,
+  defaultDepartHour,
+  formatBeachCheckinDateLabel,
   formatRiverBratsHour,
+  formatRiverBratsWindow,
   pacificCurrentHour,
   pacificTodayDate,
 } from "@shared/riverBrats";
@@ -12,6 +18,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import UserAvatar from "@/components/UserAvatar";
+import EventLinkChoiceMenu from "@/components/EventLinkChoiceMenu";
+import {
+  downloadIcsFileForBeachCheckin,
+  googleCalendarUrlForBeachCheckin,
+} from "@/lib/eventLinks";
 import RiverBratsHourChips from "./RiverBratsHourChips";
 import RiverBratsGroupChat from "./RiverBratsGroupChat";
 
@@ -22,6 +33,7 @@ type CheckinRow = {
   user_id: number;
   userId?: number;
   arrival_hour: number;
+  depart_hour?: number | null;
   note?: string | null;
   username: string;
   displayName?: string | null;
@@ -32,6 +44,7 @@ type CheckinRow = {
   isMine?: boolean;
   presence?: "PLANNED" | "HERE";
   gpsVerifiedAt?: string | null;
+  calendarDate?: string;
 };
 
 type Props = {
@@ -48,7 +61,10 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAuth, setShowAuth] = useState(false);
+  const [showCalPicker, setShowCalPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => pacificTodayDate());
   const [hour, setHour] = useState<number | null>(null);
+  const [departHour, setDepartHour] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [visibility, setVisibility] = useState<CheckinVisibility>("visible");
   const [verifying, setVerifying] = useState(false);
@@ -56,14 +72,17 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   const autoChatRan = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const today = pacificTodayDate();
+  const dateOptions = useMemo(() => beachCheckinDateOptions(), []);
+  const isViewingToday = selectedDate === today;
   const beachShortLabel = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
+  const posterUrl = resolveBeachPosterUrl(beachId);
 
-  const queryKey = ["/api/river-brats/checkins", beachId, today] as const;
+  const queryKey = ["/api/river-brats/checkins", beachId, selectedDate] as const;
 
   const { data: rows = [], isLoading } = useQuery<CheckinRow[]>({
     queryKey,
     queryFn: () =>
-      fetch(`/api/river-brats/checkins?beach=${beachId}&date=${today}`, { credentials: "include" }).then(r =>
+      fetch(`/api/river-brats/checkins?beach=${beachId}&date=${selectedDate}`, { credentials: "include" }).then(r =>
         r.json(),
       ),
   });
@@ -73,37 +92,91 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   // Anonymous check-ins are counted in "going" but never connected to the group
   // chat — they can't read or post, since the chat is not anonymous.
   const isAnon = Boolean(mine?.isAnonymous);
-  const inChat = checkedIn && !isAnon;
+  // Day-room only on the calendar day itself.
+  const inChat = checkedIn && !isAnon && isViewingToday;
   const goingCount = rows.length;
 
+  const departHourOptions = useMemo(() => {
+    const start = (hour ?? mine?.arrival_hour ?? RIVER_BRATS_HOUR_START) + 1;
+    const list: number[] = [];
+    for (let h = start; h <= RIVER_BRATS_DEPART_HOUR_END; h++) list.push(h);
+    return list.length ? list : [RIVER_BRATS_DEPART_HOUR_END];
+  }, [hour, mine?.arrival_hour]);
+
   useEffect(() => {
-    if (!mine) return;
-    setHour(mine.arrival_hour);
-    setNote(mine.note || "");
-    setVisibility(mine.isAnonymous ? "anonymous" : "visible");
-  }, [mine?.id, mine?.arrival_hour, mine?.note, mine?.isAnonymous]);
+    if (isLoading) return;
+    if (mine) {
+      setHour(mine.arrival_hour);
+      setDepartHour(
+        mine.depart_hour != null && mine.depart_hour > mine.arrival_hour
+          ? mine.depart_hour
+          : defaultDepartHour(mine.arrival_hour),
+      );
+      setNote(mine.note || "");
+      setVisibility(mine.isAnonymous ? "anonymous" : "visible");
+      return;
+    }
+    setHour(null);
+    setDepartHour(null);
+    setNote("");
+    setVisibility("visible");
+    setShowCalPicker(false);
+  }, [selectedDate, isLoading, mine?.id, mine?.arrival_hour, mine?.depart_hour, mine?.note, mine?.isAnonymous]);
+
+  // When arrival moves past leave, nudge leave forward.
+  useEffect(() => {
+    if (hour == null) return;
+    if (departHour == null || departHour <= hour) {
+      setDepartHour(defaultDepartHour(hour));
+    }
+  }, [hour]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const calendarPayload = useMemo(() => {
+    if (hour == null || departHour == null) return null;
+    return {
+      id: mine?.id,
+      beachId,
+      calendarDate: selectedDate,
+      arrivalHour: hour,
+      departHour,
+      note: note.trim() || null,
+    };
+  }, [mine?.id, beachId, selectedDate, hour, departHour, note]);
 
   const saveMutation = useMutation({
-    mutationFn: (override?: { arrivalHour?: number }) =>
-      fetch("/api/river-brats/checkins", {
+    mutationFn: (override?: { arrivalHour?: number; departHour?: number }) => {
+      const arrival = override?.arrivalHour ?? hour;
+      const depart = override?.departHour ?? departHour;
+      return fetch("/api/river-brats/checkins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           beachId,
-          arrivalHour: override?.arrivalHour ?? hour,
+          arrivalHour: arrival,
+          departHour: depart,
           note: note.trim() || undefined,
-          date: today,
+          date: selectedDate,
           isAnonymous: visibility === "anonymous",
         }),
       }).then(async r => {
         const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.error || "Could not check in");
         return data;
-      }),
-    onSuccess: () => {
+      });
+    },
+    onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
-      toast({ title: "Checked in", description: "Beach chat is open until 10pm." });
+      const dayLabel = formatBeachCheckinDateLabel(selectedDate);
+      toast({
+        title: "Checked in",
+        description: isViewingToday
+          ? "Beach chat is open until 10pm. Add it to your calendar if you want."
+          : `You're on the ${dayLabel} list. Chat opens that day. Add it to your calendar if you want.`,
+      });
+      if (row?.id) {
+        // Keep local calendar payload id for ICS UID stability after first save.
+      }
     },
     onError: (err: Error) =>
       toast({ title: "Could not check in", description: err.message, variant: "destructive" }),
@@ -112,6 +185,10 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   // "I am here" — grab the device location once, confirm presence server-side.
   // Coordinates go straight to the verify endpoint and are never stored.
   const runGpsVerify = () => {
+    if (!isViewingToday) {
+      toast({ title: "Not today yet", description: "You can confirm you're here on the day of your check-in." });
+      return;
+    }
     if (!navigator.geolocation) {
       toast({ title: "No location on this device", description: "You're still listed with your arrival time." });
       return;
@@ -126,7 +203,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             credentials: "include",
             body: JSON.stringify({
               beachId,
-              date: today,
+              date: selectedDate,
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             }),
@@ -158,10 +235,17 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
 
   const imHere = async () => {
     if (!requireAuth()) return;
+    if (!isViewingToday) {
+      toast({ title: "Not today yet", description: "Switch to Today to confirm you're at the beach." });
+      return;
+    }
     if (!mine) {
       const nowHour = Math.min(RIVER_BRATS_HOUR_END, Math.max(RIVER_BRATS_HOUR_START, pacificCurrentHour()));
+      const leave = defaultDepartHour(nowHour);
       try {
-        await saveMutation.mutateAsync({ arrivalHour: nowHour });
+        await saveMutation.mutateAsync({ arrivalHour: nowHour, departHour: leave });
+        setHour(nowHour);
+        setDepartHour(leave);
       } catch {
         return;
       }
@@ -178,9 +262,11 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/chat"] });
       setHour(null);
+      setDepartHour(null);
       setNote("");
       setVisibility("visible");
-      toast({ title: "Unchecked in", description: "You're off today's beach list and out of the group chat." });
+      setShowCalPicker(false);
+      toast({ title: "Unchecked in", description: "You're off that beach list and out of the group chat." });
     },
     onError: (err: Error) =>
       toast({ title: "Could not uncheck in", description: err.message, variant: "destructive" }),
@@ -198,15 +284,15 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
   };
 
   const iAmHere = mine?.presence === "HERE";
-  const arrivalDue = !!mine && !iAmHere && pacificCurrentHour() >= mine.arrival_hour;
+  const arrivalDue = !!mine && !iAmHere && isViewingToday && pacificCurrentHour() >= mine.arrival_hour;
 
   // ?verify=1 deep link (arrival push): run the GPS confirm once the viewer's
   // check-in is known.
   useEffect(() => {
     if (!autoVerify || autoVerifyRan.current || isLoading || !user) return;
     autoVerifyRan.current = true;
-    if (mine && !iAmHere) runGpsVerify();
-  }, [autoVerify, isLoading, user, mine?.id, iAmHere]);
+    if (mine && !iAmHere && isViewingToday) runGpsVerify();
+  }, [autoVerify, isLoading, user, mine?.id, iAmHere, isViewingToday]);
 
   // ?chat=1 deep link (Inbox GROUP row): bring the inline chat into view once.
   useEffect(() => {
@@ -233,12 +319,39 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
       ? "You (anonymous)"
       : `You · @${user?.username ?? mine?.username ?? "you"}`;
 
+  const dayLabel = formatBeachCheckinDateLabel(selectedDate);
+  const canSave = hour != null && departHour != null && departHour > hour && !saveMutation.isPending;
+
+  const openCalendarForPlan = (payload = calendarPayload) => {
+    if (!payload) return;
+    setShowCalPicker(true);
+  };
+
   return (
     <div className={`rb-checkin rb-checkin--${accent}`} ref={rootRef}>
+      <div className="rb-checkin__hero-card">
+        <img
+          src={posterUrl}
+          alt=""
+          className="rb-checkin__poster"
+          width={160}
+          height={200}
+          decoding="async"
+        />
+        <div className="rb-checkin__hero-copy">
+          <div className="rb-checkin__poster-kicker">Beach day flyer</div>
+          <div className="rb-checkin__poster-title">{beachShortLabel}</div>
+          <p className="rb-checkin__poster-lede">
+            Plan up to 3 days out, say how long you&apos;ll stay, and drop it on your calendar like an event.
+          </p>
+        </div>
+      </div>
+
       <div className="rb-checkin__pulse">
         <span className="rb-checkin__pulse-dot" aria-hidden />
         <span>
-          <strong>{isLoading ? "…" : goingCount}</strong> heading out today · pick when you'll get there
+          <strong>{isLoading ? "…" : goingCount}</strong>{" "}
+          {isViewingToday ? "heading out today" : `planned for ${dayLabel}`} · pick when you&apos;ll get there
         </span>
       </div>
 
@@ -260,8 +373,41 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
 
       <div className="rb-checkin__grid">
         <section className="rb-checkin__form">
-          <div className="rb-checkin__field-label">I'll be there around</div>
+          <div className="rb-checkin__field-label">Day</div>
+          <div className="rb-date-chips" role="group" aria-label="Check-in day">
+            {dateOptions.map(d => (
+              <button
+                key={d}
+                type="button"
+                className={`rb-date-chip${selectedDate === d ? " active" : ""}`}
+                onClick={() => {
+                  setSelectedDate(d);
+                  setShowCalPicker(false);
+                  if (!mine || mine.calendarDate !== d) {
+                    // Don't wipe form when switching days unless clearing a foreign day plan.
+                    if (!user) {
+                      setHour(null);
+                      setDepartHour(null);
+                    }
+                  }
+                }}
+              >
+                {formatBeachCheckinDateLabel(d)}
+              </button>
+            ))}
+          </div>
+
+          <div className="rb-checkin__field-label">I&apos;ll be there around</div>
           <RiverBratsHourChips value={hour ?? mine?.arrival_hour ?? null} onChange={setHour} accent={accent} />
+
+          <div className="rb-checkin__field-label">Staying until about</div>
+          <RiverBratsHourChips
+            value={departHour}
+            onChange={setDepartHour}
+            accent={accent}
+            hours={departHourOptions}
+            aria-label="Leave time"
+          />
 
           <label className="rb-checkin__field-label" htmlFor="rb-checkin-note">
             Optional note
@@ -292,7 +438,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             >
               <span className="rb-checkin__seg-title">Anonymous</span>
               <span className="rb-checkin__seg-hint">
-                Counted in "going" · no name or photo, stays off the group chat
+                Counted in &quot;going&quot; · no name or photo, stays off the group chat
               </span>
             </button>
           </div>
@@ -301,7 +447,7 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             <button
               type="button"
               className={`rb-checkin__primary${checkedIn ? " rb-checkin__primary--update" : ""}`}
-              disabled={hour == null || saveMutation.isPending}
+              disabled={!canSave}
               onClick={() => requireAuth() && saveMutation.mutate(undefined)}
             >
               {saveMutation.isPending
@@ -310,9 +456,42 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
                   ? "Update check-in"
                   : visibility === "anonymous"
                     ? "Check in"
-                    : "Check in · join chat"}
+                    : isViewingToday
+                      ? "Check in · join chat"
+                      : "Check in · plan ahead"}
             </button>
-            {!iAmHere && (
+            {checkedIn && calendarPayload && (
+              <div className="event-link-choice-anchor rb-checkin__cal-wrap">
+                <button
+                  type="button"
+                  className="rb-checkin__withdraw"
+                  data-testid="button-beach-add-to-calendar"
+                  onClick={() => openCalendarForPlan()}
+                >
+                  Add to calendar
+                </button>
+                <EventLinkChoiceMenu
+                  floating
+                  open={showCalPicker}
+                  onClose={() => setShowCalPicker(false)}
+                  title="Add beach day to calendar"
+                  options={[
+                    {
+                      label: "Google Calendar",
+                      hint: "Opens in browser",
+                      onClick: () =>
+                        window.open(googleCalendarUrlForBeachCheckin(calendarPayload), "_blank", "noopener,noreferrer"),
+                    },
+                    {
+                      label: "Apple Calendar / iCal",
+                      hint: "Downloads .ics file",
+                      onClick: () => downloadIcsFileForBeachCheckin(calendarPayload),
+                    },
+                  ]}
+                />
+              </div>
+            )}
+            {isViewingToday && !iAmHere && (
               <button
                 type="button"
                 className="rb-checkin__withdraw"
@@ -335,13 +514,13 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             )}
           </div>
           <p className="rb-checkin__fine">
-            Check-ins and the group chat clear at 10pm. Be kind, keep exact meetup details to DMs.
+            Plan up to 3 days ahead. Chat opens that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
           </p>
         </section>
 
         <RiverBratsGroupChat
           beachId={beachId}
-          date={today}
+          date={selectedDate}
           beachShortLabel={beachShortLabel}
           accent={accent}
           locked={!inChat}
@@ -378,8 +557,8 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
                   </>
                 ) : (
                   <>
-                    Going · {formatRiverBratsHour(mine.arrival_hour)}{" "}
-                    {isAnon ? "· off the chat (anonymous)" : "· in the chat"}
+                    {dayLabel} · {formatRiverBratsWindow(mine.arrival_hour, mine.depart_hour)}{" "}
+                    {isAnon ? "· off the chat (anonymous)" : isViewingToday ? "· in the chat" : "· chat opens that day"}
                   </>
                 )}
               </div>
@@ -394,7 +573,9 @@ export default function RiverBratsCheckIn({ beachId, accent, autoVerify, autoOpe
             </div>
           </div>
         ) : (
-          <div className="rb-checkin__self-placeholder">You haven't checked in yet — pick a time to join.</div>
+          <div className="rb-checkin__self-placeholder">
+            You haven&apos;t checked in for {dayLabel.toLowerCase()} yet — pick a time and how long you&apos;ll stay.
+          </div>
         )}
 
         <div className="rb-checkin__going-stack">

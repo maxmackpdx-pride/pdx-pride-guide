@@ -74,8 +74,8 @@ export default function RiverBratsShell({ beachId }: Props) {
           </span>
         </h2>
         <p className="river-brats__hero-lede">
-          Checking in drops you into today's {beachChatName} group chat. It lives in your Messages and
-          clears at midnight. No addresses, no drama.
+          Check in up to 3 days ahead, say how long you&apos;ll stay, and add it to your calendar.
+          On the day, you drop into the {beachChatName} group chat until 10pm. No addresses, no drama.
         </p>
       </div>
 

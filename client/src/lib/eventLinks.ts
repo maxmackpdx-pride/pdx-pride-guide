@@ -1,4 +1,12 @@
 import type { Event } from "@shared/schema";
+import type { NudeBeachTab } from "@shared/nudeBeaches";
+import { BEACH_MAP_LOCATIONS } from "@shared/nudeBeaches";
+import {
+  beachVenueLabel,
+  defaultDepartHour,
+  formatRiverBratsWindow,
+  riverBratsWallIso,
+} from "@shared/riverBrats";
 import { parsePacificEventTime } from "@/lib/countdown";
 
 function pad(n: number) {
@@ -149,4 +157,56 @@ export function calendarExportSnapshot(
     details: buildEventDetails(event),
     googleUrl: googleCalendarUrl(event),
   };
+}
+
+/** Build an Event-shaped payload so beach check-ins reuse Google/ICS export. */
+export function beachCheckinCalendarEvent(input: {
+  id?: number | string;
+  beachId: NudeBeachTab;
+  calendarDate: string;
+  arrivalHour: number;
+  departHour?: number | null;
+  note?: string | null;
+}): Pick<Event, "id" | "title" | "description" | "dateStart" | "dateEnd" | "address" | "venueName" | "ticketUrl"> {
+  const loc = BEACH_MAP_LOCATIONS[input.beachId];
+  const venue = beachVenueLabel(input.beachId);
+  const depart = input.departHour ?? defaultDepartHour(input.arrivalHour);
+  const window = formatRiverBratsWindow(input.arrivalHour, depart);
+  const lines = [
+    `River Brats check-in · ${window}`,
+    input.note?.trim() || null,
+    `Maps: https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`,
+    "via PDX Pride Guide at prideguidepdx.com/nude-beaches",
+  ].filter(Boolean) as string[];
+  const numericId =
+    typeof input.id === "number"
+      ? input.id
+      : Math.abs(
+          Array.from(String(input.id ?? `${input.beachId}-${input.calendarDate}`)).reduce(
+            (acc, ch) => ((acc << 5) - acc + ch.charCodeAt(0)) | 0,
+            0,
+          ),
+        ) || 1;
+  return {
+    id: numericId,
+    title: `Beach day · ${venue}`,
+    description: lines.join("\n"),
+    dateStart: riverBratsWallIso(input.calendarDate, input.arrivalHour),
+    dateEnd: riverBratsWallIso(input.calendarDate, depart),
+    venueName: loc.label || venue,
+    address: loc.subtitle || null,
+    ticketUrl: null,
+  };
+}
+
+export function googleCalendarUrlForBeachCheckin(
+  input: Parameters<typeof beachCheckinCalendarEvent>[0],
+): string {
+  return googleCalendarUrl(beachCheckinCalendarEvent(input));
+}
+
+export function downloadIcsFileForBeachCheckin(
+  input: Parameters<typeof beachCheckinCalendarEvent>[0],
+): void {
+  downloadIcsFile(beachCheckinCalendarEvent(input));
 }

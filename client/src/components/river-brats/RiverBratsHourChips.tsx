@@ -4,12 +4,21 @@ type Props = {
   value: number | null;
   onChange: (hour: number) => void;
   accent: "cyan" | "orange" | "green";
+  /** Override default 7am–9pm arrival list (e.g. leave-until chips). */
+  hours?: number[];
+  "aria-label"?: string;
 };
 
-export default function RiverBratsHourChips({ value, onChange, accent }: Props) {
+export default function RiverBratsHourChips({
+  value,
+  onChange,
+  accent,
+  hours = RIVER_BRATS_HOURS,
+  "aria-label": ariaLabel = "Arrival time",
+}: Props) {
   return (
-    <div className={`rb-hour-chips rb-hour-chips--${accent}`} role="group" aria-label="Arrival time">
-      {RIVER_BRATS_HOURS.map(hour => (
+    <div className={`rb-hour-chips rb-hour-chips--${accent}`} role="group" aria-label={ariaLabel}>
+      {hours.map(hour => (
         <button
           key={hour}
           type="button"
