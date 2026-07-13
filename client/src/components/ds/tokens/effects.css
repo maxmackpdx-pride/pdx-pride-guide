@@ -206,6 +206,29 @@ html.calm-mode .rainbow-bar::after {
   display: none;
 }
 
+/* Card top seams (pseudo-element rainbow bars on glowing cards) */
+:root[data-calm="true"] .pdxBoard::before,
+:root[data-calm="true"] .pdxRow::before,
+:root[data-calm="true"] .board-listing-card::before,
+:root[data-calm="true"] .event-board-card::before,
+:root[data-calm="true"] .board-spotted-card::before,
+:root[data-calm="true"] .spotted-card::before,
+:root[data-calm="true"] .card.fitem.fitem--glow::before,
+:root[data-calm="true"] .featured-event-ad::before,
+html.calm-mode .pdxBoard::before,
+html.calm-mode .pdxRow::before,
+html.calm-mode .board-listing-card::before,
+html.calm-mode .event-board-card::before,
+html.calm-mode .board-spotted-card::before,
+html.calm-mode .spotted-card::before,
+html.calm-mode .card.fitem.fitem--glow::before,
+html.calm-mode .featured-event-ad::before {
+  background: var(--rainbow-bar);
+  background-size: auto;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
 /* Reduced-motion: same static rainbow (hide frozen glint mid-sweep) */
 @media (prefers-reduced-motion: reduce) {
   .pdx-seam,
@@ -214,6 +237,19 @@ html.calm-mode .rainbow-bar::after {
   .pdxDivider--rainbow .pdxDivider__line,
   .pdxMap__seam,
   .rainbow-bar {
+    background: var(--rainbow-bar);
+    background-size: auto;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+  .pdxBoard::before,
+  .pdxRow::before,
+  .board-listing-card::before,
+  .event-board-card::before,
+  .board-spotted-card::before,
+  .spotted-card::before,
+  .card.fitem.fitem--glow::before,
+  .featured-event-ad::before {
     background: var(--rainbow-bar);
     background-size: auto;
     animation: none !important;

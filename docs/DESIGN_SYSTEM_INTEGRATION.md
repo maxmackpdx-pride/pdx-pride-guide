@@ -53,7 +53,8 @@ git add design-system/
 | `StickerBadge` | Board sticker labels |
 | `PosterCard` | Events **grid** board card (2:3 flyer, day stripe, glow) |
 | `EventCard` | Events **list** row (left day border) |
-| `PlaceCard` | Directory venue card (animated rainbow top seam + category neon edge + glow) |
+| `PlaceCard` | Directory venue card (rainbow top seam + category neon edge + glow) |
+| `PosterCard` / `EventCard` | Events grid/list — rainbow top seam via shared DS card chrome |
 | `SearchInput` | Filter search field |
 | `SectionHeader` | Section kicker + title |
 | `StatCard` / `StatPill` | Admin / hub metrics |
@@ -74,7 +75,8 @@ git add design-system/
 
 ### Cards & home
 - **Events** — `ListingCard` → `PosterCard` (grid) / `EventCard` (list); share, attendance, talent extras preserved
-- **Directory** — `PlaceCard` with linked upcoming events; every card carries the shared animated rainbow seam (`.pdx-rainbow-rule`) across the top edge (same motion as the site header / place modal)
+- **Directory** — `PlaceCard` with linked upcoming events
+- **Rainbow top seam (glowing cards)** — animated bar on Events / boards / MC / **glowing hub-feed cards only** (`.fitem--glow` for gig/gift/MC, not plain feed activity). Also PlaceCard/PlaceModal. Defined in `ds/tokens/base.css` (see `docs/BOARD_CARD_STANDARD.md`)
 - **Dashboard hub** — `StatPill` summary chips
 - **Home** — `Countdown` + `Button` on hero / promo actions (full masthead collage is still custom)
 

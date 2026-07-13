@@ -67,6 +67,55 @@ p { margin: 0; }
   animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
 }
 
+/* ── Card top rainbow seam (glowing cards only) ─────────────
+   Same motion as .pdx-rainbow-rule (flow + glow). Applied via
+   ::before so Events / boards / MC / glowing hub-feed cards pick
+   it up without per-component markup. PlaceCard uses an explicit
+   element. NOT on plain hub-feed activity rows (RSVP, check-in,
+   etc.) — only .fitem--glow board cards inside the feed.
+   Calm / reduced-motion → static (see effects.css). */
+.pdxBoard,
+.pdxRow,
+.board-listing-card,
+.event-board-card,
+.board-spotted-card,
+.spotted-card,
+.card.fitem.fitem--glow,
+.featured-event-ad {
+  position: relative;
+  overflow: hidden;
+}
+
+.pdxBoard::before,
+.pdxRow::before,
+.board-listing-card::before,
+.event-board-card::before,
+.board-spotted-card::before,
+.spotted-card::before,
+.card.fitem.fitem--glow::before,
+.featured-event-ad::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 6;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--neon-cyan),
+    var(--neon-yellow),
+    var(--neon-magenta),
+    var(--neon-orange),
+    var(--neon-cyan)
+  );
+  background-size: 200% 100%;
+  animation:
+    pdxSeamFlow 3.4s linear infinite,
+    pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite;
+}
+
 /* Text stroked in rainbow (headline accent word) */
 .pdx-text-rainbow {
   background: var(--grad-rainbow);

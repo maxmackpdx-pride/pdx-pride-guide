@@ -98,6 +98,8 @@ the day tag.
 ```
 
 Styling essentials:
+- **Top rainbow seam** on every board/list card (shared site chrome — same
+  animated bar as directory cards / hub feed; see `docs/BOARD_CARD_STANDARD.md`).
 - Card: `#0b0b0b` on `#0a0a0a` page, `2px solid #2b2b2b` border, 0–6px radius
   (brutalist), glow `0 0 14px color-mix(in srgb, var(--card-day-color) 18%, transparent)`
   with a slow ~4s pulse; hover lifts 2px and brightens the glow.

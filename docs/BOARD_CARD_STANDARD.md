@@ -19,14 +19,35 @@ Not everything in the Scene Feed is a "card." Keep these separate:
   board overlays, and the event modal. Only these carry the border + glow +
   tap-to-open behavior.
 
+## Rainbow top seam (sitewide on glowing cards)
+
+Every glowing card carries the **same animated rainbow bar** across the top
+edge (flow + soft glow; calm/reduced-motion freezes it). Shared chrome lives in
+`client/src/components/ds/tokens/base.css` + calm rules in `effects.css`.
+
+| Surface | Selector / component |
+|---|---|
+| Events grid | `.pdxBoard` (`PosterCard`) |
+| Events list | `.pdxRow` (`EventCard`) |
+| Legacy event board cards | `.event-board-card` |
+| Gigs / Gifting boards | `.board-listing-card` |
+| Missed Connections | `.board-spotted-card` / `.spotted-card` |
+| Hub Scene Feed (glowing board cards only) | `.card.fitem.fitem--glow` — gig / gift / missed-connection posts. Plain activity rows (RSVP, check-in, etc.) do **not** get the seam. |
+| Featured event ad | `.featured-event-ad` |
+| Directory places | `PlaceCard` — explicit `.pdxPlace__seam.pdx-rainbow-rule` |
+| Place detail modal | `PlaceModal` — `.pdx-rainbow-rule` on logo well |
+
+When adding a new glowing card, either use one of the selectors above or add
+your root class to the `::before` list in `base.css` (and calm rules in
+`effects.css`). Do not invent a one-off top stripe.
+
 ## Directory place cards (related chrome)
 
 Directory venues use `PlaceCard` (`client/src/components/ds/PlaceCard.tsx`), not
 the board-listing card. Anatomy:
 
 - **Top rainbow seam** on *every* place card — `.pdxPlace__seam.pdx-rainbow-rule`
-  (same animated divider system as the site header, place modal, and
-  `.rainbow-bar`: flow + glow + glint; calm/reduced-motion = static).
+  (same system as the table above).
 - **Category neon edge + outer glow** (`--_c` / `--cat-*`); nonprofits use a
   full-spectrum rainbow border instead of a single category color.
 - Logo media well, badges, meta rows, links, upcoming events, share.

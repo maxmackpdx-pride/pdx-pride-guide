@@ -125,9 +125,13 @@ export default function HubFeedCard({ item }: Props) {
     </button>
   ) : null;
 
+  // Rainbow top seam only on glowing board cards in the feed (gig / gift / MC),
+  // not plain activity rows (RSVP, check-in, announcements).
+  const isGlowCard = Boolean(glow) || isSpotted || isBoard;
+
   const body = (
     <div
-      className={`card fitem${item.pinned ? " hub-feed-pin" : ""}`}
+      className={`card fitem${item.pinned ? " hub-feed-pin" : ""}${isGlowCard ? " fitem--glow" : ""}`}
       onClick={isSpotted ? () => setSpottedOpen(true) : isBoard ? () => setBoardOpen(true) : undefined}
       onKeyDown={(isSpotted || isBoard) ? (e) => {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); isSpotted ? setSpottedOpen(true) : setBoardOpen(true); }

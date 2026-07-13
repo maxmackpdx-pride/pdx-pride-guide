@@ -99,6 +99,7 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
 
   return (
     <div
+      className="featured-event-ad"
       style={{
         position: "relative",
         borderRadius: 16,
