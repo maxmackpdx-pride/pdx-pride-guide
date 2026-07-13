@@ -96,6 +96,16 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
     ],
   },
   {
+    id: "content_engagement",
+    label: "Profile Updates likes & public replies (GIG / HUB)",
+    tables: ["content_likes", "content_replies"],
+    apiRoutes: [
+      "POST /api/content/:type/:id/like",
+      "GET /api/content/:type/:id/replies",
+      "POST /api/content/:type/:id/replies",
+    ],
+  },
+  {
     id: "gifting",
     label: "Gifting board & interests",
     tables: ["gifting_posts", "gifting_interests", "gifting_reports"],

@@ -3,6 +3,7 @@ import {
   ProfileEventRailShell,
   ProfileRailHead,
 } from "./ProfileEventRail";
+import { chipsForEvent, type AttendanceSummaryMap } from "./mapAttendancePreviewToChips";
 import type { ProfileEvent } from "./types";
 
 type Props = {
@@ -10,13 +11,20 @@ type Props = {
   onEventClick?: (event: ProfileEvent) => void;
   /** Optional override for the count segment (defaults to "{n} UPCOMING"). */
   countLabel?: string;
+  /** Live attendance summaries for mini facepiles per card. */
+  attendanceSummaries?: AttendanceSummaryMap | null;
 };
 
 /**
  * GOING rail: upcoming RSVPs the member is attending.
  * Mobile: horizontal day-bordered cards. Desktop (≥900px): stacked list rows.
  */
-export default function GoingRail({ events, onEventClick, countLabel }: Props) {
+export default function GoingRail({
+  events,
+  onEventClick,
+  countLabel,
+  attendanceSummaries,
+}: Props) {
   if (!events.length) return null;
 
   const count = countLabel || `${events.length} UPCOMING`;
@@ -26,7 +34,12 @@ export default function GoingRail({ events, onEventClick, countLabel }: Props) {
       <ProfileRailHead label="GOING" countLabel={count} accent="yellow" />
       <ProfileEventRailShell ariaLabel="Upcoming events this member is going to">
         {events.map(event => (
-          <GoingEventCard key={event.id} event={event} onClick={onEventClick} />
+          <GoingEventCard
+            key={event.id}
+            event={event}
+            onClick={onEventClick}
+            goingAvatars={chipsForEvent(attendanceSummaries, event.id, 3)}
+          />
         ))}
       </ProfileEventRailShell>
     </section>

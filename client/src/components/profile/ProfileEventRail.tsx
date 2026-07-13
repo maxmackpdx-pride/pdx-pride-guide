@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { ProfileEvent } from "./types";
+import UserAvatar from "@/components/UserAvatar";
+import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./ProfileEventRail.css";
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
@@ -68,12 +69,35 @@ export function ProfileRailHead({ label, countLabel, accent = "muted" }: Section
   );
 }
 
+function RailFacepile({ avatars }: { avatars: ProfileUserChip[] }) {
+  const shown = avatars.slice(0, 3);
+  if (!shown.length) return null;
+  return (
+    <div className="pp-event-rail__faces" aria-hidden="true">
+      {shown.map((u, i) => (
+        <span key={u.id} className="pp-event-rail__face" style={{ zIndex: shown.length - i }}>
+          <UserAvatar
+            photoUrl={u.photoUrl}
+            avatarChoice={u.avatarChoice}
+            avatarRing={u.avatarRing}
+            displayName={u.displayName}
+            username={u.username}
+            size={22}
+            shimmer={false}
+          />
+        </span>
+      ))}
+    </div>
+  );
+}
+
 type GoingCardProps = {
   event: ProfileEvent;
   onClick?: (event: ProfileEvent) => void;
+  goingAvatars?: ProfileUserChip[];
 };
 
-export function GoingEventCard({ event, onClick }: GoingCardProps) {
+export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardProps) {
   const day = eventDayCssVar(event);
   const when = fmtRailWhen(event);
   const style = { ["--pp-day" as string]: day } as CSSProperties;
@@ -84,6 +108,7 @@ export function GoingEventCard({ event, onClick }: GoingCardProps) {
       {when ? <div className="pp-event-rail__when">{when}</div> : null}
       <div className="display pp-event-rail__title">{event.title}</div>
       {event.venueName ? <div className="pp-event-rail__venue">{event.venueName}</div> : null}
+      <RailFacepile avatars={goingAvatars} />
     </>
   );
 
