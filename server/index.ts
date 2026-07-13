@@ -23,6 +23,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// Short, shareable branded links → full destinations. 302 (temporary) so a
+// target can be changed or retired later without browsers caching it forever.
+// Add a slug here and it becomes prideguidepdx.com/<slug>.
+const SHORT_LINKS: Record<string, string> = {
+  stank: "/events/7/stank-x-yes-coach-pride-weekend?day=SAT",
+};
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const slug = req.path.toLowerCase().replace(/^\/+|\/+$/g, "");
+  const dest = SHORT_LINKS[slug];
+  if (dest) return res.redirect(302, dest);
+  next();
+});
+
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
