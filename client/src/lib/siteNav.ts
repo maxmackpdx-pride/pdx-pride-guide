@@ -12,6 +12,7 @@ export type NavEntry =
 
 /** Primary nav — labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
+  { type: "link", href: "/", label: "Home" },
   { type: "link", href: "/about", label: "About" },
   { type: "link", href: "/events", label: "Events" },
   { type: "link", href: "/directory", label: "Places" },
@@ -69,6 +70,10 @@ export const EVENTS_NAV: NavLinkItem[] = [
 ];
 
 export function navLinkActive(location: string, href: string) {
+  // Home must not match every path (everything starts with "/").
+  if (href === "/") {
+    return location === "/" || location.startsWith("/?");
+  }
   return location === href || location.startsWith(`${href}?`) || location.startsWith(`${href}/`);
 }
 

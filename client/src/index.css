@@ -522,7 +522,7 @@ body::before {
 .site-nav {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: var(--site-nav-gap);
   flex: 1 1 auto;
   min-width: 0;
@@ -538,12 +538,31 @@ body::before {
 }
 
 @media (min-width: 1024px) {
-  .site-nav-scroll {
+  /* Desktop: no logo — nav links flush left; avatar + calm stay on the right */
+  .site-brand--desktop {
+    display: none !important;
+  }
+
+  .site-header-inner {
+    justify-content: flex-start;
+  }
+
+  .site-nav {
+    justify-content: flex-start;
     flex: 1 1 auto;
+  }
+
+  .site-nav-scroll {
+    flex: 0 1 auto;
     flex-wrap: nowrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
     /* Keep overflow visible so absolutely positioned dropdown panels aren't clipped. */
     overflow: visible;
+  }
+
+  .site-header-controls {
+    margin-left: 0;
+    flex: 0 0 auto;
   }
 }
 
@@ -681,6 +700,14 @@ body::before {
   padding-left: clamp(8px, 1vw, 14px);
   border-left: 1px solid #222;
   flex: 0 0 auto;
+}
+
+/* Desktop: push avatar / login to the right edge of the nav row */
+@media (min-width: 1024px) {
+  .site-auth,
+  .site-login-button {
+    margin-left: auto;
+  }
 }
 
 .site-nav-link--notify {
