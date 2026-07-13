@@ -169,11 +169,17 @@ export default function PushNotificationPrompt() {
           {installFirst ? "SAVE AS WEB APP" : "ALLOW NOTIFICATIONS?"}
         </h2>
 
-        <p style={{ color: "#bbb", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: installFirst ? 18 : 20 }}>
+        <p style={{ color: "#bbb", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: installFirst ? 10 : 20 }}>
           {installFirst
             ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
             : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer."}
         </p>
+
+        {installFirst && (
+          <p style={{ color: "#FF00CC", fontSize: "0.86rem", fontStyle: "italic", lineHeight: 1.5, marginBottom: 18 }}>
+            IYKYK — it's the same move as saving Sniffies to your home screen. 😏
+          </p>
+        )}
 
         {installFirst && <InstallSteps />}
 
