@@ -22,6 +22,7 @@ import {
 import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
 import { shareBusinessCard } from "@/lib/shareBusinessImage";
 import VenueFollowButton from "@/components/VenueFollowButton";
+import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 
 type EditableFields = {
   description: string;
@@ -495,7 +496,7 @@ export default function PlaceModal({
 
           <div style={{ padding: "22px 24px 26px" }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
-            {place.isNew && (
+            {isGrandOpeningActive(place.isNew, place.createdAt) && (
               <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
                 Grand Opening
               </Badge>
@@ -518,11 +519,28 @@ export default function PlaceModal({
               fontSize: "1.9rem",
               lineHeight: 1.02,
               color: "var(--text-hi)",
-              margin: "0 0 14px",
+              margin: isGrandOpeningActive(place.isNew, place.createdAt) ? "0 0 4px" : "0 0 14px",
             }}
           >
             {place.name}
           </h2>
+          {isGrandOpeningActive(place.isNew, place.createdAt) && formatGrandOpeningDate(place.createdAt) && (
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
+                textTransform: "uppercase",
+                fontSize: "1.33rem", // ~30% smaller than 1.9rem
+                lineHeight: 1.1,
+                letterSpacing: "0.04em",
+                color: "var(--neon-yellow, #FFEE00)",
+                textShadow: "0 0 12px color-mix(in srgb, var(--neon-yellow, #FFEE00) 55%, transparent)",
+                margin: "0 0 14px",
+              }}
+            >
+              {formatGrandOpeningDate(place.createdAt)}
+            </div>
+          )}
 
           {address && (
             <div style={{ ...rowStyle, marginBottom: 6, flexWrap: "wrap", gap: 10 }}>

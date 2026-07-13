@@ -63,6 +63,14 @@ const CSS = `
 .pdxPlace__opening{ }
 .pdxPlace__name{ font-family:var(--font-display); font-weight:900; text-transform:uppercase;
   font-size:1.4rem; line-height:1.02; letter-spacing:.01em; color:#fff; }
+/* Same display face as name, 30% smaller (0.7 × 1.4rem) */
+.pdxPlace__grandDate{
+  font-family:var(--font-display); font-weight:900; text-transform:uppercase;
+  font-size:0.98rem; line-height:1.1; letter-spacing:.04em;
+  color:var(--neon-yellow,#FFEE00);
+  margin-top:4px;
+  text-shadow:0 0 12px color-mix(in srgb, var(--neon-yellow,#FFEE00) 55%, transparent);
+}
 .pdxPlace__rows{ display:flex; flex-direction:column; gap:5px; }
 .pdxPlace__row{ display:flex; align-items:flex-start; gap:8px;
   font-family:var(--font-body); font-size:.86rem; color:var(--text-lo); }
@@ -152,6 +160,7 @@ export function PlaceCard({
   website,
   instagram,
   grandOpening = false,
+  grandOpeningDate = null,
   events = /** @type {PlaceEvent[]} */ ([]),
   logoUrl,
   fallbackLogoUrl,
@@ -177,6 +186,8 @@ export function PlaceCard({
   website?: string;
   instagram?: string;
   grandOpening?: boolean;
+  /** Formatted date line under the name (e.g. "JUL 13, 2026"). */
+  grandOpeningDate?: string | null;
   events?: Array<{ day?: string; date?: string; title?: string; href?: string }>;
   logoUrl?: string;
   fallbackLogoUrl?: string;
@@ -286,6 +297,9 @@ export function PlaceCard({
         </div>
 
         <div className="pdxPlace__name">{name}</div>
+        {grandOpening && grandOpeningDate && (
+          <div className="pdxPlace__grandDate">{grandOpeningDate}</div>
+        )}
 
         <div className="pdxPlace__rows">
           {address && (

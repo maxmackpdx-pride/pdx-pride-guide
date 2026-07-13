@@ -3661,6 +3661,21 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`UPDATE businesses SET type = 'realestate' WHERE lower(name) = 'sold by scott'`).run();
     recordBootMigration("seed_businesses_directory_v11_type_accents");
   }
+  // Grand Opening tags expire after 60 days from created_at (UI also enforces this).
+  try {
+    const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET is_new = 0
+         WHERE is_new = 1
+           AND created_at IS NOT NULL
+           AND created_at != ''
+           AND created_at < ?`,
+      )
+      .run(cutoff);
+  } catch (e) {
+    console.warn("[businesses] grand opening expiry cleanup failed:", e);
+  }
   if (!hasBootMigration("seed_business_bowery_bagels_v1")) {
     const now = new Date().toISOString();
     db.insert(businesses).values({

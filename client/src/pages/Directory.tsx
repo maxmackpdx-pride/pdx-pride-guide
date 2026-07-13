@@ -13,6 +13,7 @@ import { MapPin, Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
 import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
+import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { dayAccentToken } from "@/lib/dsColors";
@@ -162,8 +163,10 @@ export default function Directory() {
         return true;
       })
       .sort((a, b) => {
-        // Grand openings / new first, then A–Z by name.
-        const newDiff = (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+        // Active grand openings first (isNew within 60 days), then A–Z by name.
+        const aGo = isGrandOpeningActive(a.isNew, a.createdAt) ? 1 : 0;
+        const bGo = isGrandOpeningActive(b.isNew, b.createdAt) ? 1 : 0;
+        const newDiff = bGo - aGo;
         if (newDiff !== 0) return newDiff;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
@@ -177,7 +180,7 @@ export default function Directory() {
   const heroStats = useMemo(() => {
     const thisMonth = pacificTodayDate().slice(0, 7);
     const grandOpeningsThisMonth = businesses.filter(b => {
-      if (!b.isNew) return false;
+      if (!isGrandOpeningActive(b.isNew, b.createdAt)) return false;
       const createdMonth = b.createdAt ? pacificCalendarDate(b.createdAt)?.slice(0, 7) : null;
       return !createdMonth || createdMonth === thisMonth;
     }).length;
@@ -476,6 +479,8 @@ function DirectoryCard({
   const upcomingEvents = biz.upcomingEvents ?? [];
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   const isNonprofit = biz.type === "nonprofit";
+  const grandOpening = isGrandOpeningActive(biz.isNew, biz.createdAt);
+  const grandOpeningDate = grandOpening ? formatGrandOpeningDate(biz.createdAt) : null;
   const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
   const fallbackLogoUrl = directoryFallbackLogo(biz.type);
   return (
@@ -497,7 +502,8 @@ function DirectoryCard({
       description={biz.description || undefined}
       website={biz.website || undefined}
       instagram={biz.instagram || undefined}
-      grandOpening={biz.isNew}
+      grandOpening={grandOpening}
+      grandOpeningDate={grandOpeningDate}
       promoters={biz.promoters}
       businessId={biz.id}
       isFollowing={Boolean(biz.isFollowing)}

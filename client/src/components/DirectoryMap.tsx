@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 
 type Business = {
   id: number;
@@ -14,6 +15,7 @@ type Business = {
   hours?: string | null;
   phone?: string | null;
   isNew?: boolean;
+  createdAt?: string;
   lat: number | null;
   lng: number | null;
 };
@@ -94,6 +96,8 @@ function buildPin(color: string) {
 function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
   const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ");
   const categoryLabel = TYPE_LABELS[biz.type] || biz.type;
+  const grandOpening = isGrandOpeningActive(biz.isNew, biz.createdAt);
+  const grandDate = grandOpening ? formatGrandOpeningDate(biz.createdAt) : null;
 
   return (
     <div
@@ -126,7 +130,7 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
       >
         {categoryLabel}
       </div>
-      {biz.isNew && (
+      {grandOpening && (
         <div
           style={{
             display: "inline-block",
@@ -155,11 +159,28 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
           fontSize: "1.125rem",
           lineHeight: 1.05,
           color: "#fff",
-          marginBottom: 8,
+          marginBottom: grandDate ? 2 : 8,
         }}
       >
         {biz.name}
       </div>
+      {grandDate && (
+        <div
+          style={{
+            fontFamily: "var(--font-display, sans-serif)",
+            fontWeight: 900,
+            textTransform: "uppercase",
+            fontSize: "0.7875rem",
+            lineHeight: 1.1,
+            letterSpacing: "0.04em",
+            color: "#FFEE00",
+            marginBottom: 8,
+            textShadow: "0 0 10px rgba(255, 238, 0, 0.45)",
+          }}
+        >
+          {grandDate}
+        </div>
+      )}
       {address && (
         <div style={{ fontSize: "0.8125rem", color: "var(--text-lo, #aaa)", marginBottom: 6, lineHeight: 1.4 }}>
           {address}
