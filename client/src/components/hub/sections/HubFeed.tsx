@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import BoardLoadingState from "@/components/BoardLoadingState";
@@ -13,15 +13,38 @@ import FeaturedEventAd from "./FeaturedEventAd";
 import HubFeedCard from "./HubFeedCard";
 import HubPost from "./HubPost";
 
-// Stores the Pacific day the ad was dismissed on; it reappears the next day.
-// (New key name so the old "dismissed forever" flag is ignored.)
-const STANK_PROMO_DISMISS_KEY = "hub-promo-stank-dismissed-day";
+// ── Featured event ads ──────────────────────────────────────────────────────
+// Add an entry to FEATURED (title matcher + slideshow) and the matching event
+// auto-features at the top of the feed. Rules:
+//  • The `anchor` (Yes Coach / Stank) shows every other time; the in-between
+//    slots pick a RANDOM one of the other eligible featured events.
+//  • Each ad hides for the rest of the Pacific day when dismissed (X), and
+//    disappears for good once its event has ended (auto-expire).
+// See docs/featured-event-card.md for the full template.
+type FeaturedConfig = {
+  key: string;                       // unique id (drives dismiss key + slides folder)
+  anchor?: boolean;                  // the every-other-slot event (Yes Coach)
+  match: (title: string) => boolean; // how to find the event by title
+  slides: string[];                  // extra slideshow frames after the poster
+};
 
-// Slideshow images that rotate after the poster in the Stank ad (2s each).
-// Add more files to /public/posters/stank-slides/ and list them here.
 const STANK_SLIDES = Array.from({ length: 11 }, (_, i) =>
   `/posters/stank-slides/slide-${String(i + 1).padStart(2, "0")}.jpg`,
 );
+
+const FEATURED: FeaturedConfig[] = [
+  {
+    key: "stank",
+    anchor: true,
+    // "stank" + "yes coach" in any order, tolerating any separators.
+    match: (t) => /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(t) || /\bstank\b/i.test(t),
+    slides: STANK_SLIDES,
+  },
+  // Add more featured events here — they rotate through the non-anchor slots.
+];
+
+const dismissKeyFor = (key: string) => `hub-promo-${key}-dismissed-day`;
+const ROTATION_KEY = "hub-featured-rotation";
 
 function pacificDayKey(ms = Date.now()): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -70,11 +93,15 @@ type Props = {
 export default function HubFeed({ canPostToFeed = false }: Props) {
   const [filter, setFilter] = useState<HubFeedTab>("all");
   const [composing, setComposing] = useState(false);
-  const [dismissedDay, setDismissedDay] = useState(() => {
-    if (typeof window === "undefined") return "";
-    return window.localStorage.getItem(STANK_PROMO_DISMISS_KEY) || "";
-  });
-  const dismissedToday = dismissedDay === pacificDayKey();
+  const [chosenKey, setChosenKey] = useState<string | null>(null);
+  const [dismissTick, setDismissTick] = useState(0);
+
+  const today = pacificDayKey();
+  const isDismissedToday = (key: string) => {
+    try { return window.localStorage.getItem(dismissKeyFor(key)) === today; } catch { return false; }
+  };
+  // Only fetch events if at least one featured ad could still show today.
+  const anyFeaturedPossible = FEATURED.some((f) => !isDismissedToday(f.key));
 
   const feedQuery = useQuery<HubFeedResponse>({
     queryKey: ["/api/hub/feed", filter],
@@ -86,28 +113,47 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
     },
   });
 
-  // Featured promo: find the Stank Yes Coach event to feature at the top.
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => fetch("/api/events", { credentials: "include" }).then((r) => r.json()),
     staleTime: 300_000,
-    enabled: !dismissedToday,
+    enabled: anyFeaturedPossible,
   });
-  // Match "stank" + "yes coach" in any order, tolerating any separators
-  // (spaces, dashes, colons, em-dashes) so a punctuation variant can't hide it.
-  const foundEvent = events.find((e) => {
-    const t = e.title || "";
-    return /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(t) || /\bstank\b/i.test(t);
-  });
-  // Show unless dismissed today or the event has already ended.
-  const stankEvent = foundEvent && !dismissedToday && Date.now() <= eventEndMs(foundEvent)
-    ? foundEvent
-    : undefined;
 
-  const dismissPromo = () => {
-    const day = pacificDayKey();
-    setDismissedDay(day);
-    try { window.localStorage.setItem(STANK_PROMO_DISMISS_KEY, day); } catch { /* ignore */ }
+  // Eligible = has a matching event, not dismissed today, event hasn't ended.
+  const eligibleFeatured = useMemo(() => {
+    const now = Date.now();
+    return FEATURED
+      .map((f) => ({ ...f, event: events.find((e) => f.match(e.title || "")) }))
+      .filter((f) => f.event && !isDismissedToday(f.key) && now <= eventEndMs(f.event));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, dismissTick, today]);
+
+  // Pick once per mount: anchor every other time, otherwise a random other one.
+  useEffect(() => {
+    if (chosenKey || eligibleFeatured.length === 0) return;
+    const anchors = eligibleFeatured.filter((f) => f.anchor);
+    const others = eligibleFeatured.filter((f) => !f.anchor);
+    let n = 0;
+    try {
+      n = Number(window.localStorage.getItem(ROTATION_KEY) || "0") || 0;
+      window.localStorage.setItem(ROTATION_KEY, String(n + 1));
+    } catch { /* ignore */ }
+    const randomOther = () => others[Math.floor(Math.random() * others.length)];
+    const preferAnchor = n % 2 === 0;
+    const pick = preferAnchor
+      ? (anchors[0] ?? randomOther())
+      : (others.length ? randomOther() : anchors[0]);
+    setChosenKey(pick?.key ?? null);
+  }, [eligibleFeatured, chosenKey]);
+
+  const featured = eligibleFeatured.find((f) => f.key === chosenKey) ?? null;
+
+  const dismissFeatured = (key: string) => {
+    try { window.localStorage.setItem(dismissKeyFor(key), pacificDayKey()); } catch { /* ignore */ }
+    // Hide the slot for the rest of this load; it re-rotates on the next visit.
+    setChosenKey("__dismissed__");
+    setDismissTick((t) => t + 1);
   };
 
   const items = feedQuery.data?.items ?? [];
@@ -116,8 +162,12 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const error = feedQuery.isError;
   const hasContent = items.length > 0 || pinned.length > 0;
 
-  const stankAd = stankEvent ? (
-    <FeaturedEventAd event={stankEvent} onDismiss={dismissPromo} slides={STANK_SLIDES} />
+  const featuredAd = featured && featured.event ? (
+    <FeaturedEventAd
+      event={featured.event}
+      slides={featured.slides}
+      onDismiss={() => dismissFeatured(featured.key)}
+    />
   ) : null;
 
   return (
@@ -167,7 +217,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
         ))}
       </div>
 
-      {stankAd}
+      {featuredAd}
 
       {loading && (
         <div className="card hub-empty" style={{ textAlign: "center", padding: "28px 20px" }}>
