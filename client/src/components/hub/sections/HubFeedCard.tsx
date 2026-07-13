@@ -6,7 +6,7 @@ import SpottedDetailModal from "@/components/SpottedDetailModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import { timeAgo } from "@/lib/boardFeed";
 import { eventPath } from "@shared/eventSlug";
-import { hubFeedBadgeColor, type HubFeedItem } from "@shared/hubFeed";
+import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";
 
 type Props = {
   item: HubFeedItem;
@@ -34,6 +34,72 @@ function eventHref(item: HubFeedItem): string | null {
   return eventPath(item.event.id, item.event.title, item.event.dayOfWeek);
 }
 
+function eventRowsForItem(item: HubFeedItem): HubFeedEventEmbed[] {
+  if (item.events?.length) return item.events;
+  if (item.event) return [item.event];
+  return [];
+}
+
+function EventFeedRow({
+  event,
+  showPoster,
+}: {
+  event: HubFeedEventEmbed;
+  showPoster: boolean;
+}) {
+  const href = eventPath(event.id, event.title, event.dayOfWeek);
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 11,
+        marginTop: 12,
+        padding: "12px 14px",
+        background: "var(--ink-900)",
+        border: "1px solid var(--panel-border-2)",
+        borderRadius: 11,
+        textDecoration: "none",
+        color: "inherit",
+      }}
+    >
+      {showPoster && event.poster ? (
+        <UserAvatar
+          photoUrl={event.poster.photoUrl}
+          avatarChoice={event.poster.avatarChoice}
+          avatarRing={event.poster.avatarRing}
+          displayName={event.poster.displayName}
+          username={event.poster.username ?? undefined}
+          logoFit={event.poster.venueLogo}
+          size={34}
+        />
+      ) : null}
+      <span className={`dot ${dayDotClass(event.dayOfWeek)}`} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: 15,
+            color: "#fff",
+            lineHeight: 1.1,
+            textTransform: "uppercase",
+          }}
+        >
+          {event.title}
+        </div>
+        <div className="kick" style={{ letterSpacing: ".05em", marginTop: 4 }}>
+          {event.venueName}
+          {event.goingCount != null && event.goingCount > 0
+            ? ` · ${event.goingCount} going`
+            : ""}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function HubFeedCard({ item }: Props) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [spottedOpen, setSpottedOpen] = useState(false);
@@ -57,45 +123,13 @@ export default function HubFeedCard({ item }: Props) {
   // Gig/gift cards open the real board card as an overlay on top of the feed.
   const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
 
-  const eventBlock = item.event ? (
-    <Link
-      href={eventHref(item) || "/events"}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-        marginTop: 12,
-        padding: "12px 14px",
-        background: "var(--ink-900)",
-        border: "1px solid var(--panel-border-2)",
-        borderRadius: 11,
-        textDecoration: "none",
-        color: "inherit",
-      }}
-    >
-      <span className={`dot ${dayDotClass(item.event.dayOfWeek)}`} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: 15,
-            color: "#fff",
-            lineHeight: 1.1,
-            textTransform: "uppercase",
-          }}
-        >
-          {item.event.title}
-        </div>
-        <div className="kick" style={{ letterSpacing: ".05em", marginTop: 4 }}>
-          {item.event.venueName}
-          {item.event.goingCount != null && item.event.goingCount > 0
-            ? ` · ${item.event.goingCount} going`
-            : ""}
-        </div>
-      </div>
-    </Link>
-  ) : null;
+  const bundledEvents = eventRowsForItem(item);
+  const showPosterOnRows = bundledEvents.length > 1;
+  const eventBlock = bundledEvents.length > 0
+    ? bundledEvents.map((event) => (
+      <EventFeedRow key={event.id} event={event} showPoster={showPosterOnRows} />
+    ))
+    : null;
 
   const beachBlock = item.beachLabel && !item.event ? (
     <div className="kick" style={{ marginTop: 10, letterSpacing: ".08em", color: "var(--panel-cyan)" }}>
@@ -236,6 +270,7 @@ export default function HubFeedCard({ item }: Props) {
           avatarRing={item.author.avatarRing}
           displayName={item.author.displayName}
           username={item.author.username ?? undefined}
+          logoFit={item.author.venueLogo}
           size={44}
         />
         <div style={{ flex: 1, minWidth: 0 }}>

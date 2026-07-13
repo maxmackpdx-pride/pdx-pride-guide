@@ -4860,6 +4860,13 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   background: #111;
 }
 
+.user-avatar--logo .user-avatar__photo {
+  object-fit: contain;
+  padding: 8%;
+  box-sizing: border-box;
+  background: #0a0a0a;
+}
+
 .user-avatar__fallback {
   display: flex;
   align-items: center;

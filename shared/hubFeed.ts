@@ -20,6 +20,8 @@ export type HubFeedAuthor = {
   avatarChoice?: number;
   avatarRing?: string | null;
   anonymous?: boolean;
+  /** Directory venue logo — render contained with padding, not cropped. */
+  venueLogo?: boolean;
 };
 
 export type HubFeedEventEmbed = {
@@ -30,6 +32,8 @@ export type HubFeedEventEmbed = {
   dateStart: string;
   admission: string;
   goingCount?: number;
+  /** Person or venue who posted this event (shown per row in bundled cards). */
+  poster?: HubFeedAuthor | null;
 };
 
 export type HubFeedItem = {
@@ -41,6 +45,8 @@ export type HubFeedItem = {
   createdAt: string;
   author: HubFeedAuthor;
   event?: HubFeedEventEmbed | null;
+  /** Multiple events bundled from the same poster within a short window. */
+  events?: HubFeedEventEmbed[];
   link?: string | null;
   beachId?: string | null;
   beachLabel?: string | null;

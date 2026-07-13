@@ -4528,7 +4528,25 @@ function hubFeedAuthorFromUser(
   };
 }
 
-function hubFeedEventEmbed(evt: any, goingCount?: number): HubFeedEventEmbed {
+function hubFeedResolveBusinessForEvent(
+  evt: Event | Record<string, unknown>,
+  businesses: Business[],
+): Business | null {
+  for (const biz of businesses) {
+    if (eventMatchesBusiness(evt, biz)) return biz;
+  }
+  return null;
+}
+
+function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor {
+  const biz = hubFeedResolveBusinessForEvent(evt, businesses);
+  if (biz?.imageUrl) {
+    return { displayName: String(venueName), photoUrl: biz.imageUrl, venueLogo: true };
+  }
+  return { displayName: String(venueName) };
+}
+
+function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor | null): HubFeedEventEmbed {
   return {
     id: Number(evt.id ?? evt.eventId),
     title: evt.title,
@@ -4537,10 +4555,28 @@ function hubFeedEventEmbed(evt: any, goingCount?: number): HubFeedEventEmbed {
     dateStart: evt.dateStart ?? evt.date_start ?? "",
     admission: evt.admission ?? "FREE",
     goingCount,
+    poster: poster ?? null,
   };
 }
 
-function hubFeedEventAuthor(evt: Event | Record<string, unknown>): HubFeedAuthor {
+function hubFeedEventPoster(evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor | null {
+  const claimedBy = (evt as Event).claimedBy ?? (evt as any).claimed_by;
+  const submittedBy = (evt as Event).submittedBy ?? (evt as any).submitted_by;
+  if (claimedBy) {
+    const u = storage.getUserByUsername(String(claimedBy));
+    if (u) return hubFeedAuthorFromUser(u);
+    return { displayName: String(claimedBy), username: String(claimedBy) };
+  }
+  if (submittedBy) {
+    const u = storage.getUserByUsername(String(submittedBy)) || storage.getUserByEmail(String(submittedBy));
+    if (u) return hubFeedAuthorFromUser(u);
+  }
+  const venueName = (evt as Event).venueName ?? (evt as any).venue_name;
+  if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
+  return null;
+}
+
+function hubFeedEventAuthor(evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor {
   const claimedBy = (evt as Event).claimedBy ?? (evt as any).claimed_by;
   const submittedBy = (evt as Event).submittedBy ?? (evt as any).submitted_by;
   const venueName = (evt as Event).venueName ?? (evt as any).venue_name;
@@ -4553,8 +4589,75 @@ function hubFeedEventAuthor(evt: Event | Record<string, unknown>): HubFeedAuthor
     const u = storage.getUserByUsername(String(submittedBy)) || storage.getUserByEmail(String(submittedBy));
     if (u) return hubFeedAuthorFromUser(u);
   }
-  if (venueName) return { displayName: String(venueName) };
+  if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
   return { displayName: "The scene" };
+}
+
+const HUB_FEED_EVENT_CONDENSE_MS = 2 * 60 * 60 * 1000;
+
+function hubFeedAuthorKey(author: HubFeedAuthor): string {
+  return (author.username || author.displayName || "unknown").toLowerCase();
+}
+
+function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
+  if (cluster.length === 1) return cluster[0];
+  const head = cluster[0];
+  const events = cluster
+    .map((item) => item.event)
+    .filter((e): e is HubFeedEventEmbed => e != null);
+  const count = events.length;
+  return {
+    ...head,
+    id: `event-bundle-${hubFeedAuthorKey(head.author)}-${head.createdAt}`,
+    action: count === 1 ? "Posted a new event" : `Posted ${count} new events`,
+    text: null,
+    events,
+    event: events[0] ?? null,
+  };
+}
+
+function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
+  if (items.length <= 1) return items;
+  const byAuthor = new Map<string, HubFeedItem[]>();
+  for (const item of items) {
+    const key = hubFeedAuthorKey(item.author);
+    if (!byAuthor.has(key)) byAuthor.set(key, []);
+    byAuthor.get(key)!.push(item);
+  }
+  const out: HubFeedItem[] = [];
+  for (const group of byAuthor.values()) {
+    group.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    let cluster: HubFeedItem[] = [];
+    for (const item of group) {
+      if (cluster.length === 0) {
+        cluster.push(item);
+        continue;
+      }
+      const anchor = new Date(cluster[0].createdAt).getTime();
+      const t = new Date(item.createdAt).getTime();
+      if (anchor - t <= HUB_FEED_EVENT_CONDENSE_MS) {
+        cluster.push(item);
+      } else {
+        out.push(bundleHubFeedEventCluster(cluster));
+        cluster = [item];
+      }
+    }
+    if (cluster.length) out.push(bundleHubFeedEventCluster(cluster));
+  }
+  return out;
+}
+
+function canViewerSeeHubFeedRsvp(
+  row: { userId: number; eventId: number },
+  viewerUserId: number | undefined,
+  viewerIsAdmin: boolean,
+): boolean {
+  if (viewerUserId == null) return false;
+  if (viewerIsAdmin) return true;
+  if (row.userId === viewerUserId) return true;
+  if (storage.isUserEventHost(row.eventId, viewerUserId)) return true;
+  if (storage.isFollowing(viewerUserId, row.userId)) return true;
+  return false;
 }
 
 function hubFeedCreatedAt(row: { createdAt?: string | null; created_at?: string | null; dateStart?: string | null; date_start?: string | null }) {
@@ -4618,7 +4721,10 @@ const HUB_FEED_GUIDE_AUTHOR: HubFeedAuthor = {
   avatarRing: "rainbow",
 };
 
-function buildHubFeedPinnedItems(goingCounts: Record<number, { count: number }>): HubFeedItem[] {
+function buildHubFeedPinnedItems(
+  goingCounts: Record<number, { count: number }>,
+  businesses: Business[],
+): HubFeedItem[] {
   const pinned: HubFeedItem[] = [];
   const anchorTime = "2000-01-01T00:00:00.000Z";
 
@@ -4666,8 +4772,12 @@ function buildHubFeedPinnedItems(goingCounts: Record<number, { count: number }>)
         action: "Pride weekend highlight",
         text: stank.description?.slice(0, 280) || null,
         createdAt: anchorTime,
-        author: hubFeedEventAuthor(stank),
-        event: hubFeedEventEmbed(stank, goingCounts[stank.id]?.count),
+        author: hubFeedEventAuthor(stank, businesses),
+        event: hubFeedEventEmbed(
+          stank,
+          goingCounts[stank.id]?.count,
+          hubFeedEventPoster(stank, businesses),
+        ),
         link: null,
         pinned: true,
       });
@@ -8954,7 +9064,8 @@ export const storage: IStorage = {
 
     const pinnedStankId = findSiteOwnerEventId();
     const pinnedGigId = findSiteAdminGigPostId();
-    const pinnedAll = buildHubFeedPinnedItems(goingCounts);
+    const businesses = storage.getBusinesses();
+    const pinnedAll = buildHubFeedPinnedItems(goingCounts, businesses);
     const pinned = filterHubFeedPinned(pinnedAll, tab);
 
     const items: HubFeedItem[] = [];
@@ -8973,22 +9084,25 @@ export const storage: IStorage = {
       ORDER BY created_at DESC
       LIMIT 15
     `).all() as any[];
+    const rawEventItems: HubFeedItem[] = [];
     for (const evt of recentEvents) {
       if (pinnedStankId != null && evt.id === pinnedStankId) continue;
       const createdAt = hubFeedCreatedAt(evt);
       if (!createdAt) continue;
-      items.push({
+      const poster = hubFeedEventPoster(evt, businesses);
+      rawEventItems.push({
         id: `event-${evt.id}`,
         kind: "event",
         badge: "Event",
         action: "Posted a new event",
         text: evt.description?.slice(0, 280) || null,
         createdAt,
-        author: hubFeedEventAuthor(evt),
-        event: hubFeedEventEmbed(evt, goingCounts[evt.id]?.count),
+        author: hubFeedEventAuthor(evt, businesses),
+        event: hubFeedEventEmbed(evt, goingCounts[evt.id]?.count, poster),
         link: null,
       });
     }
+    items.push(...condenseHubFeedEventItems(rawEventItems));
 
     const hostRows = sqlite.prepare(`
       SELECT hm.id, hm.body, hm.created_at AS createdAt, hm.event_id AS eventId,
@@ -9031,6 +9145,7 @@ export const storage: IStorage = {
       LIMIT 25
     `).all() as any[];
     for (const row of rsvpRows) {
+      if (!canViewerSeeHubFeedRsvp(row, viewerUserId, viewerIsAdmin)) continue;
       const viewerRsvped = viewerUserId != null && viewerRsvpEventIds.has(row.eventId);
       const masked = maskAttendanceRow(viewerUserId, viewerRsvped, row);
       const anonymous = Boolean(masked.isAnonymous || masked.masked);

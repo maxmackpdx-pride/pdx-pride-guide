@@ -11,6 +11,8 @@ export interface UserAvatarProps {
   title?: string;
   /** Glow shimmer (light-only sweep). Default true when a ring/glow is present. Never on ring=none. */
   shimmer?: boolean;
+  /** Directory venue logo — contained with padding inside the circle. */
+  logoFit?: boolean;
 }
 
 export default function UserAvatar({
@@ -23,6 +25,7 @@ export default function UserAvatar({
   className = "",
   title,
   shimmer = true,
+  logoFit = false,
 }: UserAvatarProps) {
   const emoji = AVATAR_EMOJI_OPTIONS.find(a => a.id === (avatarChoice || 1)) || AVATAR_EMOJI_OPTIONS[0];
   const initial = (displayName || username || "?").trim().slice(0, 1).toUpperCase();
@@ -32,7 +35,7 @@ export default function UserAvatar({
 
   return (
     <div
-      className={`user-avatar ${showShimmer ? "user-avatar--shimmer" : ""} ${className}`.trim()}
+      className={`user-avatar${showShimmer ? " user-avatar--shimmer" : ""}${logoFit ? " user-avatar--logo" : ""} ${className}`.trim()}
       data-ring={ring}
       style={size !== undefined ? ({ "--avatar-size": `${size}px` } as React.CSSProperties) : undefined}
       title={label}
