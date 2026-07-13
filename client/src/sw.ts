@@ -3,6 +3,7 @@ import { clientsClaim } from "workbox-core";
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { NetworkFirst } from "workbox-strategies";
+import { PUSH_NOTIFICATION_BADGE, PUSH_NOTIFICATION_ICON } from "@shared/pushAssets";
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<string | { url: string; revision: string | null }>;
@@ -34,6 +35,28 @@ self.addEventListener("message", (event) => {
   }
 });
 
+function absoluteAsset(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  return new URL(clean, self.location.origin).href;
+}
+
+async function applyAppBadge(count: number | undefined): Promise<void> {
+  const nav = self.navigator as Navigator & {
+    setAppBadge?: (count: number) => Promise<void>;
+    clearAppBadge?: () => Promise<void>;
+  };
+  try {
+    if (count != null && count > 0 && nav.setAppBadge) {
+      await nav.setAppBadge(count);
+    } else if (nav.clearAppBadge) {
+      await nav.clearAppBadge();
+    }
+  } catch {
+    /* badge API optional */
+  }
+}
+
 // Web Push — always show a user-visible notification (Safari revokes silent pushes).
 // Handles Declarative Web Push (web_push: 8030) and legacy title/body payloads.
 self.addEventListener("push", (event) => {
@@ -41,8 +64,10 @@ self.addEventListener("push", (event) => {
     let title = "PDX Pride Guide";
     let body: string | undefined;
     let url = "/";
-    let icon = "/icons/icon-192.png";
+    let icon = absoluteAsset(PUSH_NOTIFICATION_ICON);
+    let badge = absoluteAsset(PUSH_NOTIFICATION_BADGE);
     let tag = "pdx-pride-guide";
+    let appBadge: number | undefined;
 
     if (event.data) {
       try {
@@ -53,7 +78,9 @@ self.addEventListener("push", (event) => {
             body?: string;
             navigate?: string;
             icon?: string;
+            badge?: string;
             tag?: string;
+            app_badge?: string;
           };
           title?: string;
           body?: string;
@@ -66,13 +93,23 @@ self.addEventListener("push", (event) => {
           title = n.title!;
           body = n.body;
           url = n.navigate || "/";
-          icon = n.icon || icon;
+          icon = n.icon ? absoluteAsset(n.icon) : icon;
+          badge = n.badge ? absoluteAsset(n.badge) : badge;
           tag = n.tag || tag;
+          if (n.app_badge != null) {
+            const parsed = parseInt(String(n.app_badge), 10);
+            if (!Number.isNaN(parsed)) appBadge = parsed;
+          }
         } else {
           title = payload.title || payload.notification?.title || title;
           body = payload.body || payload.notification?.body;
           url = payload.url || payload.notification?.navigate || "/";
-          icon = payload.icon || payload.notification?.icon || icon;
+          icon = payload.icon ? absoluteAsset(payload.icon) : icon;
+          badge = payload.notification?.badge ? absoluteAsset(payload.notification.badge) : badge;
+          if (payload.notification?.app_badge != null) {
+            const parsed = parseInt(String(payload.notification.app_badge), 10);
+            if (!Number.isNaN(parsed)) appBadge = parsed;
+          }
         }
       } catch {
         try {
@@ -87,11 +124,14 @@ self.addEventListener("push", (event) => {
     await self.registration.showNotification(title, {
       body,
       icon,
+      badge,
       tag,
       // Safari/Chromium support renotify; DOM lib typings lag behind.
       renotify: true,
       data: { url },
     } as NotificationOptions);
+
+    await applyAppBadge(appBadge);
   };
 
   event.waitUntil(show());

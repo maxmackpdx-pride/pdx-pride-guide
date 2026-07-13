@@ -162,7 +162,11 @@ export function listenForPushSubscriptionChanges(): void {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+        body: JSON.stringify({
+          endpoint: json.endpoint,
+          keys: json.keys,
+          platform: isIosDevice() ? "ios" : "desktop",
+        }),
       });
     });
   });

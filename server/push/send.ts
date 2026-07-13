@@ -1,4 +1,5 @@
 import webpush from "web-push";
+import { PUSH_NOTIFICATION_BADGE, PUSH_NOTIFICATION_ICON } from "@shared/pushAssets";
 import { ensureVapidConfigured } from "./vapid";
 
 const SITE_ORIGIN = process.env.PUBLIC_SITE_URL || "https://www.prideguidepdx.com";
@@ -23,6 +24,7 @@ export type DeclarativePushPayload = {
     silent?: boolean;
     app_badge?: string;
     icon?: string;
+    badge?: string;
     tag?: string;
     renotify?: boolean;
   };
@@ -53,7 +55,8 @@ export function buildDeclarativePayload(input: {
   const title = (input.title || "PDX Pride Guide").trim().slice(0, 120) || "PDX Pride Guide";
   const body = input.body?.replace(/\s+/g, " ").trim().slice(0, 180) || undefined;
   const navigate = absoluteUrl(input.navigate || "/");
-  const icon = absoluteUrl("/icons/icon-192.png");
+  const icon = absoluteUrl(PUSH_NOTIFICATION_ICON);
+  const badge = absoluteUrl(PUSH_NOTIFICATION_BADGE);
 
   return {
     web_push: 8030,
@@ -66,6 +69,7 @@ export function buildDeclarativePayload(input: {
       dir: "ltr",
       silent: false,
       icon,
+      badge,
       tag: input.tag || "pdx-pride-guide",
       renotify: true,
       ...(input.badge != null && input.badge > 0 ? { app_badge: String(input.badge) } : {}),

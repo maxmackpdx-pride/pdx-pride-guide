@@ -331,7 +331,7 @@ const IOS_STEPS: Step[] = [
 const ANDROID_STEPS: Step[] = [
   { icon: <MenuGlyph />, title: <>Tap the {b("⋮ menu")}</>, sub: "Top-right corner of Chrome." },
   { icon: <InstallGlyph />, title: <>Choose {b("Install app")}</>, sub: "Some phones label it \"Add to Home screen.\"" },
-  { icon: <HomeIcon src="/icons/icon-192.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
 ];
 
 // On-brand, self-contained visual how-to. No screenshots — the exact controls

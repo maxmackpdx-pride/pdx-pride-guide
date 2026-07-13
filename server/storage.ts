@@ -48,6 +48,7 @@ import {
 import crypto from "crypto";
 import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
+import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLogos";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
@@ -4532,16 +4533,29 @@ function hubFeedResolveBusinessForEvent(
   evt: Event | Record<string, unknown>,
   businesses: Business[],
 ): Business | null {
+  const eventLike = {
+    venueName: String((evt as any).venueName ?? (evt as any).venue_name ?? ""),
+    address: ((evt as any).address ?? null) as string | null,
+    lat: ((evt as any).lat ?? null) as number | null,
+    lng: ((evt as any).lng ?? null) as number | null,
+  };
   for (const biz of businesses) {
-    if (eventMatchesBusiness(evt, biz)) return biz;
+    if (eventMatchesBusiness(eventLike, biz)) return biz;
   }
   return null;
 }
 
 function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor {
   const biz = hubFeedResolveBusinessForEvent(evt, businesses);
-  if (biz?.imageUrl) {
-    return { displayName: String(venueName), photoUrl: biz.imageUrl, venueLogo: true };
+  const name = biz?.name || venueName;
+  // Prefer static neon pack (/directory-logos), then DB imageUrl, then type fallback —
+  // same resolution the Directory UI uses (Camp Bar PDX, etc.).
+  const logo =
+    resolveDirectoryLogo(String(name), biz?.imageUrl)
+    || (biz ? directoryFallbackLogo(biz.type) : null)
+    || resolveDirectoryLogo(String(venueName), null);
+  if (logo) {
+    return { displayName: String(venueName || name), photoUrl: logo, venueLogo: true };
   }
   return { displayName: String(venueName) };
 }
@@ -4580,13 +4594,19 @@ function hubFeedEventAuthor(evt: Event | Record<string, unknown>, businesses: Bu
   const claimedBy = (evt as Event).claimedBy ?? (evt as any).claimed_by;
   const submittedBy = (evt as Event).submittedBy ?? (evt as any).submitted_by;
   const venueName = (evt as Event).venueName ?? (evt as any).venue_name;
+  // Prefer directory venue logo for venue-attributed event cards when there is
+  // no real member photo (common for unclaimed or venue-named listings).
   if (claimedBy) {
     const u = storage.getUserByUsername(String(claimedBy));
+    if (u?.photoUrl) return hubFeedAuthorFromUser(u);
+    if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
     if (u) return hubFeedAuthorFromUser(u);
     return { displayName: String(claimedBy), username: String(claimedBy) };
   }
   if (submittedBy) {
     const u = storage.getUserByUsername(String(submittedBy)) || storage.getUserByEmail(String(submittedBy));
+    if (u?.photoUrl) return hubFeedAuthorFromUser(u);
+    if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
     if (u) return hubFeedAuthorFromUser(u);
   }
   if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
@@ -4625,8 +4645,8 @@ function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
     byAuthor.get(key)!.push(item);
   }
   const out: HubFeedItem[] = [];
-  for (const group of byAuthor.values()) {
-    group.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  for (const group of Array.from(byAuthor.values())) {
+    group.sort((a: HubFeedItem, b: HubFeedItem) => String(b.createdAt).localeCompare(String(a.createdAt)));
     let cluster: HubFeedItem[] = [];
     for (const item of group) {
       if (cluster.length === 0) {
@@ -7405,7 +7425,7 @@ export const storage: IStorage = {
   notifyOwnerModeration(subject, body) {
     const owner = resolveSiteOwner();
     if (!owner) return;
-    notifyGuideInbox(owner.id, subject, body, { contextType: "GUIDE_UPDATE" });
+    notifyGuideInbox(owner.id, subject, body, { contextType: "ADMIN_ALERT" });
   },
   sendPortfolioContactMessage({
     kind = "message",
@@ -7463,16 +7483,21 @@ export const storage: IStorage = {
     return true;
   },
   getNotificationPrefs(userId: number): NotificationPrefs {
-    const row = sqlite.prepare(`SELECT notification_prefs, sub_admin FROM users WHERE id = ?`).get(userId) as {
+    const row = sqlite.prepare(`SELECT notification_prefs, sub_admin, email, username FROM users WHERE id = ?`).get(userId) as {
       notification_prefs?: string | null;
       sub_admin?: number;
+      email?: string | null;
+      username?: string | null;
     } | undefined;
     if (!row) return { ...DEFAULT_NOTIFICATION_PREFS };
     let raw: unknown = null;
     if (row.notification_prefs) {
       try { raw = JSON.parse(row.notification_prefs); } catch { raw = null; }
     }
-    return parseNotificationPrefs(raw, Boolean(row.sub_admin));
+    const isAdmin = Boolean(row.sub_admin)
+      || storage.isSiteOwnerUser(row)
+      || storage.hasSiteAdminGrant(userId);
+    return parseNotificationPrefs(raw, isAdmin);
   },
   setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin = false) {
     const current = storage.getNotificationPrefs(userId);

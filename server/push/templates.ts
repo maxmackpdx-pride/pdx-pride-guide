@@ -22,17 +22,29 @@ export function buildPushPayloadForMessage(message: Message, unreadCount: number
     title = label ? `Event: ${label}` : "Event message";
   } else if (ctx === "EVENT_TALENT" || ctx === "EVENT_TALENT_REQUEST") {
     title = ctx === "EVENT_TALENT_REQUEST" ? "Lineup request" : "Lineup update";
+  } else if (ctx === "RIVER_BRATS_CHECKIN") {
+    title = "River Brats check-in";
+  } else if (ctx === "BEACH_CARPOOL") {
+    title = "Carpool message";
+  } else if (ctx === "ADMIN_ALERT") {
+    title = message.subject?.trim() || "Admin alert";
+    return buildDeclarativePayload({
+      title,
+      body: message.body || undefined,
+      navigate: "/dashboard",
+      badge: unreadCount,
+      tag: `msg-${message.id || "new"}`,
+    });
   } else if (ctx === "SUBMISSION" || ctx === "EVENT_CLAIM" || ctx === "PROMOTER" || ctx === "GUIDE_UPDATE") {
     title = message.subject?.trim() || "PDX Pride Guide update";
-    if (ctx === "SUBMISSION" || ctx === "EVENT_CLAIM" || ctx === "PROMOTER") {
-      return buildDeclarativePayload({
-        title,
-        body: message.body || undefined,
-        navigate: ctx === "PROMOTER" ? "/submit" : "/dashboard",
-        badge: unreadCount,
-        tag: `msg-${message.id || "new"}`,
-      });
-    }
+    const navigate = ctx === "PROMOTER" ? "/submit" : "/dashboard";
+    return buildDeclarativePayload({
+      title,
+      body: message.body || undefined,
+      navigate,
+      badge: unreadCount,
+      tag: `msg-${message.id || "new"}`,
+    });
   }
 
   return buildDeclarativePayload({

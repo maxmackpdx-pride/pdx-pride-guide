@@ -2614,10 +2614,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/users/me/notification-prefs", requireAuth, (req, res) => {
     const user = storage.getUserById(req.session.userId!);
+    const isAdmin = Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(req.session.userId!));
     res.json({
       prefs: storage.getNotificationPrefs(req.session.userId!),
       pushConfigured: Boolean(process.env.VAPID_PUBLIC_KEY),
-      isAdmin: Boolean(user?.subAdmin),
+      isAdmin,
     });
   });
 

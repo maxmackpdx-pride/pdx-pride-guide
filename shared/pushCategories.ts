@@ -33,8 +33,13 @@ const ACCOUNT_CONTEXT_TYPES = new Set([
   "GUIDE_UPDATE",
 ]);
 
+const ADMIN_CONTEXT_TYPES = new Set([
+  "ADMIN_ALERT",
+]);
+
 export function pushCategoryForContext(contextType?: string | null): PushCategory {
   const ctx = String(contextType || "THREAD").toUpperCase();
+  if (ADMIN_CONTEXT_TYPES.has(ctx)) return "admin";
   if (MY_EVENTS_CONTEXT_TYPES.has(ctx)) return "my_events";
   if (ACCOUNT_CONTEXT_TYPES.has(ctx)) return "account";
   if (MESSAGE_CONTEXT_TYPES.has(ctx)) return "messages";
