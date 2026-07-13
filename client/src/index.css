@@ -695,14 +695,33 @@ body::before {
 .site-auth {
   display: flex;
   align-items: center;
-  gap: var(--site-nav-gap);
+  gap: 0;
+  /* No left border on the whole cluster — seam sits between Hub and avatar */
   margin-left: clamp(6px, 0.8vw, 12px);
-  padding-left: clamp(8px, 1vw, 14px);
-  border-left: 1px solid #222;
+  padding-left: 0;
+  border-left: 0;
   flex: 0 0 auto;
 }
 
-/* Desktop: push avatar / login to the right edge of the nav row */
+/* Hub: left of the seam (desktop). Hidden on mobile (bottom-nav center tab). */
+.site-auth__hub {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+/* Vertical divider — equal space on both sides so it sits 50% between Hub and avatar */
+.site-auth__seam {
+  flex: 0 0 1px;
+  align-self: center;
+  width: 1px;
+  height: 1.15em;
+  margin-left: clamp(10px, 1.15vw, 18px);
+  margin-right: clamp(10px, 1.15vw, 18px);
+  background: #333;
+}
+
+/* Desktop: push Hub | avatar cluster to the right edge of the nav row */
 @media (min-width: 1024px) {
   .site-auth,
   .site-login-button {
@@ -2098,7 +2117,9 @@ h2.display,
     padding-bottom: 104px;
   }
 
-  .site-auth__hub {
+  /* Phone: Hub lives in the bottom-nav center tab — hide desktop Hub + seam */
+  .site-auth__hub,
+  .site-auth__seam {
     display: none;
   }
 }

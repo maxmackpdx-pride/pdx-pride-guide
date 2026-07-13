@@ -678,6 +678,8 @@ export default function Nav() {
 
             {user && (
               <div className="site-auth site-auth--desktop">
+                {/* Hub sits left of the seam; avatar/menu stays right. Seam is
+                    centered in the gap between them (equal pad both sides). */}
                 <span className="site-auth__hub">
                   <NavLink
                     href="/dashboard"
@@ -692,6 +694,7 @@ export default function Nav() {
                     onClick={closeMenu}
                   />
                 </span>
+                <span className="site-auth__seam" aria-hidden="true" />
                 <ProfileMenu
                   user={user}
                   profileOpen={profileOpen}
