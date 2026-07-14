@@ -671,6 +671,7 @@ export default function Admin() {
         address: editForm.address || null,
         dateStart: editForm.dateStart || "",
         dateEnd: editForm.dateEnd || "",
+        ticketUrl: editForm.ticketUrl || null,
       },
       events.map(ev => ({
         id: ev.id,
@@ -680,10 +681,20 @@ export default function Admin() {
         dateStart: ev.dateStart,
         dateEnd: ev.dateEnd,
         status: ev.status,
+        ticketUrl: ev.ticketUrl,
       })),
-      { excludeEventId: editingId, limit: 6, minScore: 30 },
+      { excludeEventId: editingId, limit: 6, minScore: 32 },
     );
-  }, [editingId, editForm.title, editForm.venueName, editForm.address, editForm.dateStart, editForm.dateEnd, events]);
+  }, [
+    editingId,
+    editForm.title,
+    editForm.venueName,
+    editForm.address,
+    editForm.dateStart,
+    editForm.dateEnd,
+    editForm.ticketUrl,
+    events,
+  ]);
 
   const approveMutation = useMutation({
     mutationFn: ({ id }: { id: number }) =>
