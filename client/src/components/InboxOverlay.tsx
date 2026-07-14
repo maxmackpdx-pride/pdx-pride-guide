@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useInboxThreads } from "@/components/inbox/useInboxThreads";
 import { useAdminGuideThreads } from "@/components/inbox/useAdminGuideThreads";
 import type { Folder, QueueFolder, Thread, LineupDecision } from "@/components/inbox/types";
-import { C, MONO, DISPLAY, BODY } from "@/components/inbox/panel/sheet";
+import { C } from "@/components/inbox/panel/sheet";
 import ThreadAvatar from "@/components/inbox/ThreadAvatar";
 import PersonalView from "@/components/inbox/panel/PersonalView";
 import type { GroupChatRow } from "@/components/inbox/panel/PersonalView";
@@ -18,6 +18,7 @@ import InboxGroupChat, { type InboxGroupChatTarget } from "@/components/inbox/In
 import { eventIdFromInboxContext } from "@/lib/inboxContext";
 import EventModal from "@/components/EventModal";
 import type { EventListing } from "@shared/multiDayEvents";
+import "@/components/inbox/inbox-experiment.css";
 
 type View = "inbox" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
@@ -231,107 +232,51 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     setLocation(href);
   };
 
-  const headStyle = (v: View) => ({
-    background: "none",
-    border: "none",
-    padding: 0,
-    cursor: "pointer",
-    fontFamily: DISPLAY,
-    fontWeight: 800,
-    fontSize: 30,
-    letterSpacing: ".01em",
-    lineHeight: 1,
-    transition: "color .15s",
-    color: view === v ? C.heading : C.dim,
-  });
-
-  const iconBtn = {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    background: C.inset,
-    border: `1px solid ${C.border3}`,
-    color: C.meta,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-  } as const;
-
   return (
     <>
       <div className="inbox-overlay__backdrop" onClick={onClose} aria-hidden="true" />
       <div
-        className="inbox-overlay"
+        className="inbox-overlay inbox-overlay--experiment"
         role="dialog"
         aria-label="Inbox"
         ref={panelRef}
-        style={{ background: C.sheet, border: "2px solid var(--neon-blue)", padding: 0 }}
+        style={{ border: "2px solid var(--neon-blue)", padding: 0 }}
       >
-        {/* grab handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", flex: "none" }}>
-          <div style={{ width: 38, height: 4, borderRadius: 999, background: "#2a2a31" }} />
+        <div className="inbox-exp-handle">
+          <div className="inbox-exp-handle__bar" />
         </div>
 
-        {/* heading switcher */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 0", flex: "none" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <button style={headStyle("inbox")} onClick={() => setView("inbox")}>INBOX</button>
-            <button style={headStyle("posts")} onClick={() => setView("posts")}>POSTS</button>
-            <button style={headStyle("stats")} onClick={() => setView("stats")}>STATS</button>
+        <div className="inbox-exp-head">
+          <div className="inbox-exp-head__tabs">
+            <button type="button" className={`inbox-exp-head__tab${view === "inbox" ? " is-active" : ""}`} onClick={() => setView("inbox")}>INBOX</button>
+            <button type="button" className={`inbox-exp-head__tab${view === "posts" ? " is-active" : ""}`} onClick={() => setView("posts")}>POSTS</button>
+            <button type="button" className={`inbox-exp-head__tab${view === "stats" ? " is-active" : ""}`} onClick={() => setView("stats")}>STATS</button>
           </div>
-          <button style={iconBtn} onClick={onClose} aria-label="Close" title="Close">
+          <button type="button" className="inbox-exp-icon-btn" onClick={onClose} aria-label="Close" title="Close">
             <X size={16} />
           </button>
         </div>
 
         {/* account tabs (inbox only) */}
         {inboxActive && !detailOpen && (
-          <div style={{ padding: "14px 20px 0", flex: "none" }}>
-            <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 14, padding: 4 }}>
+          <div className="inbox-exp-chrome-pad">
+            <div className="inbox-exp-seg-tray">
               {visibleAccounts.map(([id, label, color]) => {
                 const act = account === id;
                 return (
                   <button
                     key={id}
+                    type="button"
+                    className={`inbox-exp-seg-tray__btn${act ? " is-active" : ""}`}
                     onClick={() => setAccount(id)}
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                      padding: "9px 0",
-                      border: "none",
-                      borderRadius: 11,
-                      cursor: "pointer",
-                      fontFamily: MONO,
-                      fontSize: 11,
-                      letterSpacing: ".07em",
-                      fontWeight: 600,
-                      whiteSpace: "nowrap",
-                      transition: ".15s",
-                      background: act ? C.seg : "transparent",
-                      color: act ? C.heading : "#7a7a82",
-                      boxShadow: act ? "0 1px 2px rgba(0,0,0,.4)" : undefined,
-                    }}
                   >
                     {accountUnread[id] > 0 && (
                       <span
                         aria-hidden="true"
+                        className="inbox-exp-seg-tray__badge"
                         style={{
-                          minWidth: act ? 18 : 11,
-                          height: act ? 18 : 11,
-                          padding: act ? "0 5px" : 0,
-                          borderRadius: 999,
                           background: color,
-                          flex: "none",
                           boxShadow: `0 0 12px ${color}, 0 0 4px ${color}`,
-                          fontFamily: MONO,
-                          fontSize: act ? 9 : undefined,
-                          fontWeight: act ? 700 : undefined,
-                          lineHeight: act ? "18px" : undefined,
-                          textAlign: "center",
                           color: act ? "#06060a" : undefined,
                         }}
                       >
@@ -348,8 +293,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
         {/* personal toolbar: received/sent/deleted + filter */}
         {personalActive && !detailOpen && (
-          <div style={{ padding: "12px 20px 0", flex: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-            <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
+          <div className="inbox-exp-chrome-pad inbox-exp-chrome-pad--toolbar">
+            <div className="inbox-exp-seg-tray inbox-exp-seg-tray--compact">
               {([
                 ["inbox", "Received"],
                 ["sent", "Sent"],
@@ -359,88 +304,46 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                 return (
                   <button
                     key={f}
+                    type="button"
+                    className={`inbox-exp-folder-pill${act ? " is-active" : ""}`}
                     onClick={() => setFolder(f)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "7px 13px",
-                      border: "none",
-                      borderRadius: 9,
-                      cursor: "pointer",
-                      fontFamily: MONO,
-                      fontSize: 10.5,
-                      letterSpacing: ".06em",
-                      fontWeight: 600,
-                      transition: ".15s",
-                      background: act ? C.lime : "transparent",
-                      color: act ? "#000" : "#7a7a82",
-                      whiteSpace: "nowrap",
-                    }}
                   >
                     {label}
-                    <span style={{ fontSize: 9.5, opacity: 0.7, color: act ? "#000" : C.faint }}>{folderCount(f)}</span>
+                    <span className="inbox-exp-folder-pill__count">{folderCount(f)}</span>
                   </button>
                 );
               })}
             </div>
             {folder !== "deleted" && (
-            <div style={{ position: "relative" }} ref={filterRef}>
+            <div className="inbox-exp-filter" ref={filterRef}>
               <button
+                type="button"
+                className="inbox-exp-filter__btn"
                 onClick={() => setFilterOpen((o) => !o)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 7,
-                  height: 34,
-                  padding: "0 12px",
-                  borderRadius: 12,
-                  background: C.inset,
-                  border: `1px solid ${C.border3}`,
-                  color: C.body,
-                  fontFamily: MONO,
-                  fontSize: 10,
-                  letterSpacing: ".12em",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
               >
                 <SlidersHorizontal size={13} />
                 {activeFilterLabel}
-                <ChevronDown size={11} style={{ transition: "transform .15s", transform: `rotate(${filterOpen ? 180 : 0}deg)` }} />
+                <ChevronDown size={11} className={`inbox-exp-filter__chev${filterOpen ? " is-open" : ""}`} />
               </button>
               {filterOpen && (
-                <div style={{ position: "absolute", top: 40, right: 0, zIndex: 20, width: 172, background: C.inset, border: `1px solid ${C.seg}`, borderRadius: 16, padding: 6, boxShadow: "0 18px 40px rgba(0,0,0,.55)" }}>
+                <div className="inbox-exp-filter__menu">
                   {FILTERS.map(([id, label, color]) => {
                     const act = filter === id;
                     return (
                       <button
                         key={id}
+                        type="button"
+                        className={`inbox-exp-filter__item${act ? " is-active" : ""}`}
                         onClick={() => {
                           setFilter(id);
                           setFilterOpen(false);
                         }}
-                        style={{
-                          width: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "9px 11px",
-                          border: "none",
-                          borderRadius: 11,
-                          cursor: "pointer",
-                          fontSize: 12.5,
-                          fontFamily: BODY,
-                          transition: ".12s",
-                          background: act ? C.seg : "transparent",
-                          color: act ? C.heading : "#b6b6bc",
-                        }}
                       >
                         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: 999, background: color, flex: "none" }} />
+                          <span className="inbox-exp-filter__dot" style={{ background: color }} />
                           {label}
                         </span>
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: C.faint }}>{catCount(id)}</span>
+                        <span className="inbox-exp-filter__count">{catCount(id)}</span>
                       </button>
                     );
                   })}
@@ -453,18 +356,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
         {/* admin/owner queue folder tabs */}
         {inboxActive && (account === "admin" || account === "owner") && !detailOpen && (
-          <div style={{ padding: "12px 20px 0", flex: "none" }}>
-            <div
-              style={{
-                display: "flex",
-                gap: 4,
-                background: C.inset,
-                border: `1px solid ${C.border2}`,
-                borderRadius: 12,
-                padding: 3,
-                flexWrap: account === "admin" ? "wrap" : undefined,
-              }}
-            >
+          <div className="inbox-exp-chrome-pad inbox-exp-chrome-pad--queue">
+            <div className={`inbox-exp-seg-tray inbox-exp-seg-tray--compact${account === "admin" ? " inbox-exp-seg-tray--wrap" : ""}`}>
               {(account === "admin"
                 ? ([
                     ["active", "Queue"],
@@ -478,55 +371,30 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   ] as Array<[QueueFolder, string]>)
               ).map(([f, label]) => {
                 const act = queueFolder === f;
-                const accent = account === "admin" ? C.magenta : C.purple;
                 const badge =
                   f === "inbox"
                     ? (pendingAdmin.guideUnread || adminGuideUnread || 0)
                     : f === "active"
                       ? (pendingAdmin.queueCount ?? pendingAdmin.count ?? 0)
                       : 0;
+                const pillClass =
+                  account === "admin"
+                    ? "inbox-exp-queue-pill inbox-exp-queue-pill--admin"
+                    : "inbox-exp-queue-pill inbox-exp-queue-pill--owner inbox-exp-queue-pill--owner-desk";
                 return (
                   <button
                     key={f}
+                    type="button"
+                    className={`${pillClass}${act ? " is-active" : ""}`}
                     onClick={() => {
                       setQueueFolder(f);
                       setActiveId(null);
                       setReply("");
                     }}
-                    style={{
-                      flex: account === "admin" ? "1 1 22%" : 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                      padding: "7px 10px",
-                      border: "none",
-                      borderRadius: 9,
-                      cursor: "pointer",
-                      fontFamily: MONO,
-                      fontSize: 10.5,
-                      letterSpacing: ".06em",
-                      fontWeight: 600,
-                      transition: ".15s",
-                      background: act ? accent : "transparent",
-                      color: act ? "#000" : "#7a7a82",
-                      whiteSpace: "nowrap",
-                    }}
                   >
                     {label}
                     {badge > 0 && (
-                      <span
-                        style={{
-                          minWidth: 16,
-                          height: 16,
-                          padding: "0 4px",
-                          borderRadius: 999,
-                          background: act ? "rgba(0,0,0,0.2)" : accent,
-                          color: act ? "#000" : "#000",
-                          fontSize: 9,
-                          lineHeight: "16px",
-                        }}
-                      >
+                      <span className="inbox-exp-queue-pill__badge">
                         {badge > 99 ? "99+" : badge}
                       </span>
                     )}
@@ -554,6 +422,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           ) : activeThread ? (
             <ThreadDetail
               thread={activeThread}
+              isAdminGuide={adminMailActive}
               reply={reply}
               onReplyChange={setReply}
               onSend={send}
@@ -595,23 +464,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               {inboxActive && account === "personal" && isAdmin && (accountUnread.admin || 0) > 0 && (
                 <button
                   type="button"
+                  className="inbox-exp-jump inbox-exp-jump--magenta"
                   onClick={() => setAccount("admin")}
-                  style={{
-                    display: "block",
-                    width: "calc(100% - 4px)",
-                    margin: "0 2px 14px",
-                    padding: "12px 14px",
-                    borderRadius: 14,
-                    border: `1px solid ${C.magenta}`,
-                    background: "rgba(255,31,160,0.08)",
-                    color: C.magenta,
-                    fontFamily: MONO,
-                    fontSize: 10.5,
-                    letterSpacing: ".08em",
-                    fontWeight: 700,
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
                 >
                   {accountUnread.admin} item{accountUnread.admin === 1 ? "" : "s"} in the shared admin inbox →
                 </button>
@@ -619,23 +473,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               {inboxActive && account === "personal" && isOwner && (pendingAdmin.ownerCount || 0) > 0 && (
                 <button
                   type="button"
+                  className="inbox-exp-jump inbox-exp-jump--purple"
                   onClick={() => setAccount("owner")}
-                  style={{
-                    display: "block",
-                    width: "calc(100% - 4px)",
-                    margin: "0 2px 14px",
-                    padding: "12px 14px",
-                    borderRadius: 14,
-                    border: `1px solid ${C.purple}`,
-                    background: "rgba(138,77,255,0.08)",
-                    color: C.purple,
-                    fontFamily: MONO,
-                    fontSize: 10.5,
-                    letterSpacing: ".08em",
-                    fontWeight: 700,
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
                 >
                   {pendingAdmin.ownerCount} item{(pendingAdmin.ownerCount || 0) === 1 ? "" : "s"} on your Owner Desk →
                 </button>
@@ -696,14 +535,14 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
         {/* bottom search */}
         {searchVisible && !detailOpen && (
-          <div style={{ flex: "none", padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))", borderTop: `1px solid ${C.borderFaint}`, background: C.sheet }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, height: 46, padding: "0 16px", borderRadius: 999, background: C.inset, border: `1px solid ${C.border3}` }}>
+          <div className="inbox-exp-search">
+            <div className="inbox-exp-search__field">
               <Search size={17} color={C.faint} />
               <input
+                className="inbox-exp-search__input"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search messages"
-                style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.body2, fontSize: 14, fontFamily: BODY, minWidth: 0 }}
               />
             </div>
           </div>
@@ -731,6 +570,7 @@ const CAT_ACCENT: Record<string, string> = {
 
 type ThreadDetailProps = {
   thread: Thread;
+  isAdminGuide?: boolean;
   reply: string;
   onReplyChange: (v: string) => void;
   onSend: () => void;
@@ -747,6 +587,7 @@ type ThreadDetailProps = {
 // Reading, replying, archiving, and lineup approve/deny all happen here.
 function ThreadDetail({
   thread,
+  isAdminGuide = false,
   reply,
   onReplyChange,
   onSend,
@@ -758,263 +599,93 @@ function ThreadDetail({
   onResolveLineup,
   onOpenEvent,
 }: ThreadDetailProps) {
-  const accent = CAT_ACCENT[thread.cat] ?? C.cyan;
+  const accent = isAdminGuide ? C.magenta : (CAT_ACCENT[thread.cat] ?? C.cyan);
   const showReveal = thread.anonymous && thread.reveal && !thread.reveal.iRevealed;
   const lineupPending = thread.lineup?.status === "PENDING" && thread.lineupRequestId != null;
   const openEventId = eventIdFromInboxContext(thread.contextType, thread.contextId);
-
-  const iconBtn = {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    background: C.inset,
-    border: `1px solid ${C.border3}`,
-    color: C.meta,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    flex: "none" as const,
-  };
+  const canSend = Boolean(reply.trim());
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-      {/* header: back · avatar · name/handle · archive */}
-      <div
-        style={{
-          flex: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "12px 16px",
-          borderBottom: `1px solid ${C.borderFaint}`,
-        }}
-      >
-        <button style={iconBtn} onClick={onBack} aria-label="Back to inbox" title="Back">
+    <div
+      className={`inbox-exp-thread${isAdminGuide ? " inbox-exp-thread--admin" : ""}`}
+      style={!isAdminGuide ? ({ "--inbox-exp-accent": accent } as CSSProperties) : undefined}
+    >
+      <div className="inbox-exp-thread__head">
+        <button type="button" className="inbox-exp-icon-btn" onClick={onBack} aria-label="Back to inbox" title="Back">
           <ChevronLeft size={18} />
         </button>
         <ThreadAvatar party={thread.party} masked={thread.anonymous} size={36} ring={thread.ring} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontFamily: DISPLAY,
-              fontWeight: 800,
-              fontSize: 18,
-              color: C.heading,
-              lineHeight: 1.1,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {thread.name}
-          </div>
-          <div style={{ fontFamily: MONO, fontSize: 11, color: C.meta, letterSpacing: ".04em" }}>
-            {thread.handle}
-          </div>
+        <div className="inbox-exp-thread__identity">
+          <div className="inbox-exp-thread__name">{thread.name}</div>
+          <div className="inbox-exp-thread__handle">{thread.handle}</div>
         </div>
         {readOnly ? (
-          <button style={iconBtn} onClick={onUnarchive} aria-label="Restore thread" title="Restore">
+          <button type="button" className="inbox-exp-icon-btn" onClick={onUnarchive} aria-label="Restore thread" title="Restore">
             <Archive size={16} />
           </button>
         ) : (
-          <button style={iconBtn} onClick={onArchive} aria-label="Archive thread" title="Archive">
+          <button type="button" className="inbox-exp-icon-btn" onClick={onArchive} aria-label="Archive thread" title="Archive">
             <Archive size={16} />
           </button>
         )}
       </div>
 
-      {/* subject */}
-      {thread.subject && (
-        <div
-          style={{
-            flex: "none",
-            padding: "10px 16px 0",
-            fontFamily: DISPLAY,
-            fontWeight: 700,
-            fontSize: 15,
-            color: accent,
-            letterSpacing: ".01em",
-          }}
-        >
-          {thread.subject}
-        </div>
-      )}
+      {thread.subject && <div className="inbox-exp-thread__subject">{thread.subject}</div>}
 
-      {/* Event invite / host update → open event card */}
       {openEventId != null && onOpenEvent && (
-        <div style={{ flex: "none", padding: "10px 16px 0" }}>
-          <button
-            type="button"
-            onClick={() => onOpenEvent(openEventId)}
-            style={{
-              fontFamily: MONO,
-              fontSize: 11,
-              letterSpacing: ".1em",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              padding: "10px 14px",
-              borderRadius: 10,
-              border: `1px solid ${accent}`,
-              background: "transparent",
-              color: accent,
-              cursor: "pointer",
-              width: "100%",
-            }}
-          >
+        <div className="inbox-exp-thread__pad">
+          <button type="button" className="inbox-exp-thread__cta" onClick={() => onOpenEvent(openEventId)}>
             Open event card →
           </button>
         </div>
       )}
 
-      {/* reveal panel (anonymous threads) */}
       {showReveal && (
-        <div
-          style={{
-            flex: "none",
-            margin: "12px 16px 0",
-            padding: "11px 13px",
-            background: C.inset,
-            border: `1px solid ${C.border3}`,
-            borderRadius: 12,
-          }}
-        >
-          <div style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5, marginBottom: 9 }}>
+        <div className="inbox-exp-thread__panel">
+          <div className="inbox-exp-thread__panel-copy">
             This thread is anonymous. Reveal yourself to share who you are.
           </div>
-          <button
-            onClick={onReveal}
-            style={{
-              fontFamily: MONO,
-              fontSize: 11,
-              letterSpacing: ".08em",
-              fontWeight: 600,
-              padding: "8px 14px",
-              borderRadius: 10,
-              border: `1px solid ${C.magenta}`,
-              background: "transparent",
-              color: C.magenta,
-              cursor: "pointer",
-            }}
-          >
+          <button type="button" className="inbox-exp-thread__btn-reveal" onClick={onReveal}>
             Reveal myself
           </button>
         </div>
       )}
 
-      {/* lineup approve / deny */}
       {lineupPending && (
-        <div
-          style={{
-            flex: "none",
-            margin: "12px 16px 0",
-            padding: "11px 13px",
-            background: C.inset,
-            border: `1px solid ${C.cyan}`,
-            borderRadius: 12,
-          }}
-        >
-          <div style={{ fontSize: 12.5, color: C.body, lineHeight: 1.5, marginBottom: 10 }}>
+        <div className="inbox-exp-thread__panel inbox-exp-thread__panel--lineup">
+          <div className="inbox-exp-thread__panel-copy inbox-exp-thread__panel-copy--actions">
             Lineup request{thread.lineup?.role ? ` · ${thread.lineup.role}` : ""}
             {thread.lineup?.eventTitle ? ` for ${thread.lineup.eventTitle}` : ""}
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={() => onResolveLineup("APPROVED")}
-              style={{
-                fontFamily: MONO,
-                fontSize: 11,
-                letterSpacing: ".08em",
-                fontWeight: 600,
-                padding: "8px 14px",
-                borderRadius: 10,
-                border: "none",
-                background: C.lime,
-                color: "#000",
-                cursor: "pointer",
-              }}
-            >
+          <div className="inbox-exp-thread__panel-actions">
+            <button type="button" className="inbox-exp-thread__btn-approve" onClick={() => onResolveLineup("APPROVED")}>
               Approve
             </button>
-            <button
-              onClick={() => onResolveLineup("DENIED")}
-              style={{
-                fontFamily: MONO,
-                fontSize: 11,
-                letterSpacing: ".08em",
-                fontWeight: 600,
-                padding: "8px 14px",
-                borderRadius: 10,
-                border: `1px solid ${C.border3}`,
-                background: "transparent",
-                color: C.body,
-                cursor: "pointer",
-              }}
-            >
+            <button type="button" className="inbox-exp-thread__btn-decline" onClick={() => onResolveLineup("DENIED")}>
               Decline
             </button>
           </div>
         </div>
       )}
 
-      {/* messages */}
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          padding: "14px 16px 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
+      <div className="inbox-exp-thread__messages">
         {thread.messages.map((m) => (
           <div
             key={m.id}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: m.self ? "flex-end" : "flex-start",
-            }}
+            className={`inbox-exp-bubble-wrap${m.self ? " inbox-exp-bubble-wrap--self" : " inbox-exp-bubble-wrap--other"}`}
           >
-            <div
-              style={{
-                maxWidth: "82%",
-                padding: "9px 12px",
-                borderRadius: 14,
-                background: m.self ? accent : C.inset,
-                color: m.self ? "#000" : C.body2,
-                fontSize: 13.5,
-                lineHeight: 1.45,
-                fontFamily: BODY,
-                border: m.self ? "none" : `1px solid ${C.border3}`,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-              }}
-            >
+            <div className={`inbox-exp-bubble${m.self ? " inbox-exp-bubble--self" : " inbox-exp-bubble--other"}`}>
               {m.body}
             </div>
-            <div style={{ fontFamily: MONO, fontSize: 9.5, color: C.faint, marginTop: 3, padding: "0 4px" }}>
-              {m.at}
-            </div>
+            <div className="inbox-exp-bubble__time">{m.at}</div>
           </div>
         ))}
       </div>
 
       {!readOnly && (
-        <div
-          style={{
-            flex: "none",
-            padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
-            borderTop: `1px solid ${C.borderFaint}`,
-            background: C.sheet,
-            display: "flex",
-            alignItems: "flex-end",
-            gap: 10,
-          }}
-        >
+        <div className="inbox-exp-composer">
           <textarea
+            className="inbox-exp-composer__input"
             value={reply}
             onChange={(e) => onReplyChange(e.target.value)}
             onKeyDown={(e) => {
@@ -1025,58 +696,19 @@ function ThreadDetail({
             }}
             placeholder="Write a reply"
             rows={1}
-            style={{
-              flex: 1,
-              minHeight: 44,
-              maxHeight: 120,
-              resize: "none",
-              padding: "12px 14px",
-              borderRadius: 14,
-              background: C.inset,
-              border: `1px solid ${C.border3}`,
-              color: C.body2,
-              fontFamily: BODY,
-              fontSize: 14,
-              lineHeight: 1.4,
-              outline: "none",
-            }}
           />
           <button
+            type="button"
+            className={`inbox-exp-composer__send${canSend ? " is-ready" : ""}`}
             onClick={onSend}
-            disabled={!reply.trim()}
-            style={{
-              flex: "none",
-              height: 44,
-              padding: "0 18px",
-              borderRadius: 14,
-              border: "none",
-              background: reply.trim() ? accent : C.seg,
-              color: reply.trim() ? "#000" : C.faint,
-              fontFamily: MONO,
-              fontSize: 12,
-              letterSpacing: ".08em",
-              fontWeight: 700,
-              cursor: reply.trim() ? "pointer" : "default",
-            }}
+            disabled={!canSend}
           >
             Send
           </button>
         </div>
       )}
       {readOnly && (
-        <div
-          style={{
-            flex: "none",
-            padding: "12px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
-            borderTop: `1px solid ${C.borderFaint}`,
-            background: C.sheet,
-            fontFamily: MONO,
-            fontSize: 10.5,
-            letterSpacing: ".08em",
-            color: C.faint,
-            textAlign: "center",
-          }}
-        >
+        <div className="inbox-exp-thread__readonly">
           Archived thread · tap restore to move back to your inbox
         </div>
       )}

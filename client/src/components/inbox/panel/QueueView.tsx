@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -6,6 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
+import "../inbox-experiment.css";
 
 type QueueRowKind =
   | "submission"
@@ -364,7 +365,7 @@ function mapLogoRequest(r: any, completed = false): QueueRow | null {
 }
 
 const DESK_TAG: Record<string, { label: string; color: string }> = {
-  contact: { label: "MESSAGE", color: C.cyan },
+  contact: { label: "MESSAGE", color: C.purple },
   sponsor: { label: "SPONSOR", color: C.lime },
   bug: { label: "BUG", color: C.red },
   feedback: { label: "FEEDBACK", color: C.orange },
@@ -879,53 +880,49 @@ export default function QueueView({
     </button>
   );
 
-  const renderQueueRow = (q: QueueRow, i: number) => {
+  const renderQueueRow = (q: QueueRow) => {
     const isOpen = !!open[q.id];
     const rejectKey = q.id;
+    const claimNote = (() => {
+      const c = claimFor(q.kind, q.entityId);
+      return c?.assigneeUsername ? ` · claimed by @${c.assigneeUsername}` : "";
+    })();
     return (
-      <div key={q.id} style={{ borderTop: i > 0 ? `1px solid ${C.border2}` : undefined, background: isOpen ? "#101014" : undefined }}>
+      <div key={q.id} className={`inbox-exp-queue-row${isOpen ? " is-open" : ""}`}>
         <div
+          className="inbox-exp-queue-row__head"
           onClick={() => setOpen((p) => ({ ...p, [q.id]: !p[q.id] }))}
-          style={{ padding: 16, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOpen((p) => ({ ...p, [q.id]: !p[q.id] }));
+            }
+          }}
         >
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 9,
-                  letterSpacing: ".08em",
-                  fontWeight: 700,
-                  color: "#06060a",
-                  background: q.tagColor,
-                  padding: "2.5px 7px",
-                  borderRadius: 6,
-                  flex: "none",
-                }}
-              >
+            <div className="inbox-exp-row__foot" style={{ marginTop: 0, marginBottom: 6 }}>
+              <span className="inbox-exp-tag" style={{ background: q.tagColor }}>
                 {q.tag}
               </span>
             </div>
-            <div style={{ fontWeight: 600, fontSize: 14.5, color: C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {q.title}
-            </div>
-            <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>
+            <div className="inbox-exp-queue-row__title">{q.title}</div>
+            <div className="inbox-exp-queue-row__meta">
               {q.meta}
               {q.outcome ? ` · ${q.outcome}` : ""}
-              {(() => {
-                const c = claimFor(q.kind, q.entityId);
-                return c?.assigneeUsername
-                  ? ` · claimed by @${c.assigneeUsername}`
-                  : "";
-              })()}
+              {claimNote}
             </div>
           </div>
-          <span style={{ color: accent, flex: "none", display: "flex", transition: "transform .15s", transform: `rotate(${isOpen ? 180 : 0}deg)` }}>
+          <span
+            className="inbox-exp-queue-row__chev"
+            style={{ "--inbox-exp-chev": accent } as CSSProperties}
+          >
             <ChevronDown size={20} strokeWidth={2.4} />
           </span>
         </div>
         {isOpen && (
-          <div style={{ padding: "0 16px 16px" }} onClick={(e) => e.stopPropagation()}>
+          <div className="inbox-exp-queue-row__detail" onClick={(e) => e.stopPropagation()}>
             {mode === "admin" && !q.readOnly && (
               <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                 {(() => {
@@ -933,7 +930,7 @@ export default function QueueView({
                   const c = claimFor(q.kind, q.entityId);
                   const mine = c && user?.id === c.assigneeUserId;
                   if (!c) {
-                    return btn("CLAIM", C.cyan, () =>
+                    return btn("CLAIM", C.magenta, () =>
                       claimMutation.mutate({ kind: ck, entityId: q.entityId }),
                     );
                   }
@@ -1106,7 +1103,7 @@ export default function QueueView({
                 {q.kind === "owner_desk" && (
                   <>
                     {q.replyEmail
-                      ? btn("REPLY", C.cyan, () => {
+                      ? btn("REPLY", C.purple, () => {
                           window.location.href = `mailto:${q.replyEmail}?subject=${encodeURIComponent(`Re: ${q.title}`)}`;
                         })
                       : null}
@@ -1121,22 +1118,18 @@ export default function QueueView({
     );
   };
 
+  const kickerClass =
+    mode === "admin"
+      ? "inbox-exp-kicker inbox-exp-kicker--magenta"
+      : "inbox-exp-kicker inbox-exp-kicker--purple";
+
+  const queueScopeClass =
+    mode === "admin" ? "inbox-exp-admin" : mode === "owner" ? "inbox-exp-owner" : undefined;
+
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          margin: "0 2px 12px",
-          fontFamily: MONO,
-          fontSize: 10,
-          letterSpacing: ".14em",
-          fontWeight: 600,
-          color: accent,
-        }}
-      >
-        <span style={{ width: 8, height: 8, borderRadius: 999, background: accent, boxShadow: `0 0 8px ${accent}`, flex: "none" }} />
+    <div className={queueScopeClass}>
+      <div className={kickerClass}>
+        <span className="inbox-exp-kicker__ld" aria-hidden />
         {kicker}
       </div>
 
@@ -1248,20 +1241,7 @@ export default function QueueView({
       )}
 
       {failedSources.length > 0 && (
-        <div
-          style={{
-            margin: "0 2px 12px",
-            padding: "12px 14px",
-            borderRadius: 12,
-            border: `1px solid ${C.red}`,
-            background: "rgba(201,57,31,0.1)",
-            fontFamily: MONO,
-            fontSize: 10.5,
-            letterSpacing: ".06em",
-            color: C.red,
-            lineHeight: 1.45,
-          }}
-        >
+        <div className="inbox-exp-alert inbox-exp-alert--error">
           Could not load: {failedSources.join(", ")}. You may need to sign in again as admin, or the server returned an error — not an empty queue.
         </div>
       )}
@@ -1270,49 +1250,29 @@ export default function QueueView({
         visibleBuckets.map((bucket) => {
           const bucketRows = rowsFiltered.filter((r) => bucket.kinds.includes(r.kind));
           return (
-            <div key={bucket.id} style={{ marginBottom: 14 }}>
+            <div key={bucket.id} className="inbox-exp-bucket-block">
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  margin: "0 2px 8px",
-                  fontFamily: MONO,
-                  fontSize: 10,
-                  letterSpacing: ".1em",
-                  fontWeight: 700,
-                  color: bucket.color,
-                }}
+                className="inbox-exp-bucket-head"
+                style={{ "--inbox-exp-bucket-color": bucket.color } as CSSProperties}
               >
-                <span style={{ width: 6, height: 6, borderRadius: 999, background: bucket.color, flex: "none" }} />
+                <span className="inbox-exp-bucket-head__dot" aria-hidden />
                 {bucket.label.toUpperCase()}
-                <span style={{ color: C.faint, fontWeight: 600 }}>· {bucketRows.length}</span>
+                <span className="inbox-exp-bucket-head__count">· {bucketRows.length}</span>
               </div>
               {bucketRows.length === 0 ? (
-                <div
-                  style={{
-                    margin: "0 2px",
-                    padding: "12px 14px",
-                    borderRadius: 14,
-                    border: `1px dashed ${C.border2}`,
-                    color: C.faint2,
-                    fontFamily: MONO,
-                    fontSize: 10.5,
-                    letterSpacing: ".08em",
-                  }}
-                >
+                <div className="inbox-exp-empty inbox-exp-empty--compact">
                   {completed ? "None in recently completed" : "None waiting — queue clear"}
                 </div>
               ) : (
-                <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
-                  {bucketRows.map((q, i) => renderQueueRow(q, i))}
+                <div className="inbox-exp-list">
+                  {bucketRows.map((q) => renderQueueRow(q))}
                 </div>
               )}
             </div>
           );
         })
       ) : rowsFiltered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "44px 20px", color: C.faint2, fontFamily: MONO, fontSize: 11, letterSpacing: ".1em" }}>
+        <div className="inbox-exp-empty">
           {failedSources.length > 0
             ? "QUEUE COULD NOT LOAD"
             : completed
@@ -1320,8 +1280,8 @@ export default function QueueView({
               : "OWNER DESK IS CLEAR"}
         </div>
       ) : (
-        <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
-          {rowsFiltered.map((q, i) => renderQueueRow(q, i))}
+        <div className="inbox-exp-list">
+          {rowsFiltered.map((q) => renderQueueRow(q))}
         </div>
       )}
 
@@ -1330,6 +1290,6 @@ export default function QueueView({
           Contact and sponsorship messages from the site's forms land here. Reply goes to the sender's email; Mark done clears it from the desk.
         </p>
       )}
-    </>
+    </div>
   );
 }

@@ -1,7 +1,9 @@
+import type { CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useInboxThreads } from "../useInboxThreads";
 import type { Folder } from "../types";
-import { C, MONO, DISPLAY } from "./sheet";
+import { C } from "./sheet";
+import "../inbox-experiment.css";
 
 const CAT_TAG: Record<string, { label: string; color: string }> = {
   spotted: { label: "MISSED CONN", color: C.magenta },
@@ -48,7 +50,6 @@ export default function PersonalView({
   showTags: boolean;
   tintUnread: boolean;
   onOpenThread: (id: string) => void;
-  /** Open event/beach day-room inside the floating inbox (no navigation). */
   onOpenGroup?: (row: GroupChatRow) => void;
 }) {
   const { threads } = useInboxThreads(null);
@@ -73,92 +74,39 @@ export default function PersonalView({
   const showGroups = folder === "inbox" && filter === "all" && !q && groupChats.length > 0;
   const emptyLabel = folder === "deleted" ? "NO RECENTLY DELETED MESSAGES" : "NO MESSAGES HERE";
 
+  const openRow = (fn: () => void) => ({
+    role: "button" as const,
+    tabIndex: 0,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fn();
+      }
+    },
+  });
+
   const groupStrip = showGroups ? (
-    <div
-      style={{
-        border: `1px solid ${C.border}`,
-        borderRadius: 22,
-        overflow: "hidden",
-        background: C.list,
-        marginBottom: 12,
-      }}
-    >
-      {groupChats.map((row, i) => (
+    <div className="inbox-exp-list inbox-exp-list--spaced">
+      {groupChats.map((row) => (
         <div
           key={`${row.kind}-${row.id}`}
+          className="inbox-exp-row"
           onClick={() => onOpenGroup?.(row)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onOpenGroup?.(row);
-            }
-          }}
-          style={{
-            borderTop: i > 0 ? `1px solid ${C.border2}` : undefined,
-            padding: "14px 16px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
+          {...openRow(() => onOpenGroup?.(row))}
         >
-          <span
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 999,
-              flex: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: `conic-gradient(from 90deg, ${C.lime}, ${C.cyan}, ${C.magenta}, ${C.lime})`,
-              fontFamily: DISPLAY,
-              fontWeight: 800,
-              fontSize: 15,
-              color: "#0b0b0b",
-            }}
-          >
-            {row.kind === "BEACH" ? "RB" : "GC"}
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-              <span
-                style={{
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: C.heading,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {row.title}
-              </span>
-              {row.state === "OPEN" && (
-                <span style={{ width: 7, height: 7, borderRadius: 999, background: C.green, flex: "none", boxShadow: `0 0 7px ${C.green}` }} />
-              )}
+          <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : "GC"}</span>
+          <div className="inbox-exp-row__body">
+            <div className="inbox-exp-row__top">
+              <div className="inbox-exp-row__id">
+                <span className="inbox-exp-row__name">{row.title}</span>
+                {row.state === "OPEN" && <span className="inbox-exp-dot inbox-exp-dot--live" aria-hidden />}
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 9,
-                  letterSpacing: ".08em",
-                  fontWeight: 600,
-                  color: "#000",
-                  background: C.limeSoft,
-                  padding: "2.5px 6px",
-                  borderRadius: 6,
-                  flex: "none",
-                }}
-              >
+            <div className="inbox-exp-row__foot">
+              <span className="inbox-exp-tag" style={{ background: C.limeSoft }}>
                 GROUP
               </span>
-              <span style={{ fontSize: 13.5, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {groupSub(row)}
-              </span>
+              <span className="inbox-exp-row__preview">{groupSub(row)}</span>
             </div>
           </div>
         </div>
@@ -170,154 +118,55 @@ export default function PersonalView({
     return (
       <>
         {groupStrip}
-        <div
-          style={{
-            textAlign: "center",
-            padding: "48px 20px",
-            color: C.faint2,
-            fontFamily: MONO,
-            fontSize: 11,
-            letterSpacing: ".1em",
-          }}
-        >
-          {emptyLabel}
-        </div>
+        <div className="inbox-exp-empty">{emptyLabel}</div>
       </>
     );
   }
 
   return (
     <>
-    {groupStrip}
-    <div
-      style={{
-        border: `1px solid ${C.border}`,
-        borderRadius: 22,
-        overflow: "hidden",
-        background: C.list,
-      }}
-    >
-      {rows.map((t, i) => {
-        const tag = tagFor(t.cat);
-        const initial = (t.name || "?").trim().charAt(0).toUpperCase();
-        const preview = t.messages[t.messages.length - 1]?.body || t.subject || "";
-        return (
-          <div
-            key={t.id}
-            onClick={() => onOpenThread(t.id)}
-            style={{
-              background: t.unread && tintUnread ? C.borderFaint : "transparent",
-              borderTop: i > 0 ? `1px solid ${C.border2}` : undefined,
-              padding: "16px",
-              cursor: "pointer",
-              transition: ".15s",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
+      {groupStrip}
+      <div className="inbox-exp-list">
+        {rows.map((t) => {
+          const tag = tagFor(t.cat);
+          const initial = (t.name || "?").trim().charAt(0).toUpperCase();
+          const preview = t.messages[t.messages.length - 1]?.body || t.subject || "";
+          const unread = t.unread && tintUnread;
+          return (
+            <div
+              key={t.id}
+              className={`inbox-exp-row${unread ? " inbox-exp-row--unread" : ""}`}
+              onClick={() => onOpenThread(t.id)}
+              {...openRow(() => onOpenThread(t.id))}
+            >
               <div
-                style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 999,
-                  background: t.ring || C.limeSoft,
-                  padding: 2.5,
-                  flex: "none",
-                }}
+                className="inbox-exp-avatar inbox-exp-avatar--lg"
+                style={{ "--inbox-exp-ring": t.ring || C.limeSoft, "--inbox-exp-initial-color": tag.color } as CSSProperties}
               >
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 999,
-                    background: "#17171b",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: DISPLAY,
-                    fontWeight: 800,
-                    fontSize: 18,
-                    color: tag.color,
-                  }}
-                >
-                  {initial}
-                </div>
+                <div className="inbox-exp-avatar__inner">{initial}</div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 8,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        fontSize: 15,
-                        color: C.heading,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {t.name}
-                    </span>
-                    {t.unread && (
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          width: 11,
-                          height: 11,
-                          borderRadius: 999,
-                          background: C.lime,
-                          flex: "none",
-                          boxShadow: `0 0 12px ${C.lime}, 0 0 4px ${C.lime}`,
-                        }}
-                      />
-                    )}
+              <div className="inbox-exp-row__body">
+                <div className="inbox-exp-row__top">
+                  <div className="inbox-exp-row__id">
+                    <span className="inbox-exp-row__name">{t.name}</span>
+                    {t.unread && <span className="inbox-exp-dot" aria-hidden />}
                   </div>
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: C.faint, flex: "none" }}>
-                    {t.at}
-                  </span>
+                  <span className="inbox-exp-row__at">{t.at}</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                {t.subject ? <span className="inbox-exp-row__sub">{t.subject}</span> : null}
+                <div className="inbox-exp-row__foot">
                   {showTags && (
-                    <span
-                      style={{
-                        fontFamily: MONO,
-                        fontSize: 9,
-                        letterSpacing: ".08em",
-                        fontWeight: 600,
-                        color: "#000",
-                        background: tag.color,
-                        padding: "2.5px 6px",
-                        borderRadius: 6,
-                        flex: "none",
-                      }}
-                    >
+                    <span className="inbox-exp-tag" style={{ background: tag.color }}>
                       {tag.label}
                     </span>
                   )}
-                  <span
-                    style={{
-                      fontSize: 13.5,
-                      color: C.muted,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {preview}
-                  </span>
+                  <span className="inbox-exp-row__preview">{preview}</span>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
     </>
   );
 }

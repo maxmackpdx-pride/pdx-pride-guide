@@ -1,5 +1,7 @@
+import type { CSSProperties } from "react";
 import type { Thread } from "../types";
-import { C, MONO, DISPLAY } from "./sheet";
+import { C } from "./sheet";
+import "../inbox-experiment.css";
 
 const CAT_TAG: Record<string, { label: string; color: string }> = {
   spotted: { label: "MISSED CONN", color: C.magenta },
@@ -44,193 +46,75 @@ export default function AdminMessagesView({
 
   if (rows.length === 0) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "48px 20px",
-          color: C.faint2,
-          fontFamily: MONO,
-          fontSize: 11,
-          letterSpacing: ".1em",
-        }}
-      >
+      <div className="inbox-exp-empty">
         {folder === "sent" ? "NO SENT ADMIN MESSAGES" : "NO REPLIES IN ADMIN INBOX"}
       </div>
     );
   }
 
+  const openRow = (id: string) => ({
+    role: "button" as const,
+    tabIndex: 0,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onOpenThread(id);
+      }
+    },
+  });
+
   return (
     <>
-    {folder === "inbox" && onMarkAllRead && unread > 0 && (
-      <div style={{ display: "flex", justifyContent: "flex-end", margin: "0 2px 10px" }}>
-        <button
-          type="button"
-          disabled={markingAllRead}
-          onClick={() => onMarkAllRead()}
-          style={{
-            fontFamily: MONO,
-            fontSize: 10,
-            letterSpacing: ".08em",
-            fontWeight: 700,
-            padding: "7px 12px",
-            borderRadius: 999,
-            border: `1px solid ${C.magenta}`,
-            background: "transparent",
-            color: C.magenta,
-            cursor: markingAllRead ? "wait" : "pointer",
-          }}
-        >
-          {markingAllRead ? "MARKING…" : `MARK ALL READ (${unread})`}
-        </button>
-      </div>
-    )}
-    <div
-      style={{
-        border: `1px solid ${C.border}`,
-        borderRadius: 22,
-        overflow: "hidden",
-        background: C.list,
-      }}
-    >
-      {rows.map((t, i) => {
-        const tag = tagFor(t.cat);
-        const initial = (t.name || "?").trim().charAt(0).toUpperCase();
-        const preview = t.messages[t.messages.length - 1]?.body || t.subject || "";
-        return (
-          <div
-            key={t.id}
-            onClick={() => onOpenThread(t.id)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onOpenThread(t.id);
-              }
-            }}
-            style={{
-              background: t.unread ? C.borderFaint : "transparent",
-              borderTop: i > 0 ? `1px solid ${C.border2}` : undefined,
-              padding: "16px",
-              cursor: "pointer",
-              transition: ".15s",
-            }}
+      {folder === "inbox" && onMarkAllRead && unread > 0 && (
+        <div className="inbox-exp-toolbar">
+          <button
+            type="button"
+            className="inbox-exp-mark-read"
+            disabled={markingAllRead}
+            onClick={() => onMarkAllRead()}
           >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
+            {markingAllRead ? "MARKING…" : `MARK ALL READ (${unread})`}
+          </button>
+        </div>
+      )}
+      <div className="inbox-exp-list">
+        {rows.map((t) => {
+          const tag = tagFor(t.cat);
+          const initial = (t.name || "?").trim().charAt(0).toUpperCase();
+          const preview = t.messages[t.messages.length - 1]?.body || t.subject || "";
+          return (
+            <div
+              key={t.id}
+              className={`inbox-exp-row${t.unread ? " inbox-exp-row--unread-admin" : ""}`}
+              onClick={() => onOpenThread(t.id)}
+              {...openRow(t.id)}
+            >
               <div
-                style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 999,
-                  background: t.ring || C.magenta,
-                  padding: 2.5,
-                  flex: "none",
-                }}
+                className="inbox-exp-avatar inbox-exp-avatar--lg"
+                style={{ "--inbox-exp-ring": t.ring || C.magenta, "--inbox-exp-initial-color": tag.color } as CSSProperties}
               >
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 999,
-                    background: "#17171b",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: DISPLAY,
-                    fontWeight: 800,
-                    fontSize: 18,
-                    color: tag.color,
-                  }}
-                >
-                  {initial}
-                </div>
+                <div className="inbox-exp-avatar__inner">{initial}</div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 8,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        fontSize: 15,
-                        color: C.heading,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {t.name}
-                    </span>
-                    {t.unread && (
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: 999,
-                          background: C.magenta,
-                          flex: "none",
-                          boxShadow: `0 0 8px ${C.magenta}`,
-                        }}
-                      />
-                    )}
+              <div className="inbox-exp-row__body">
+                <div className="inbox-exp-row__top">
+                  <div className="inbox-exp-row__id">
+                    <span className="inbox-exp-row__name">{t.name}</span>
+                    {t.unread && <span className="inbox-exp-dot inbox-exp-dot--magenta" aria-hidden />}
                   </div>
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: C.faint, flex: "none" }}>
-                    {t.at}
-                  </span>
+                  <span className="inbox-exp-row__at">{t.at}</span>
                 </div>
-                <div
-                  style={{
-                    fontSize: 13.5,
-                    color: C.muted,
-                    marginTop: 4,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {t.subject}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                  <span
-                    style={{
-                      fontFamily: MONO,
-                      fontSize: 9,
-                      letterSpacing: ".08em",
-                      fontWeight: 600,
-                      color: "#000",
-                      background: tag.color,
-                      padding: "2.5px 6px",
-                      borderRadius: 6,
-                      flex: "none",
-                    }}
-                  >
+                {t.subject ? <span className="inbox-exp-row__sub">{t.subject}</span> : null}
+                <div className="inbox-exp-row__foot">
+                  <span className="inbox-exp-tag" style={{ background: tag.color }}>
                     {tag.label}
                   </span>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      color: C.faint,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {preview}
-                  </span>
+                  <span className="inbox-exp-row__preview">{preview}</span>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
     </>
   );
 }
