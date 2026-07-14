@@ -15118,6 +15118,7 @@ html.calm-mode .board-detail-modal {
 
 .category-constellation__backdrop {
   position: relative;
+  min-height: clamp(500px, 64vw, 680px);
   border: 1px solid #1c1c22;
   border-radius: 14px;
   overflow: hidden;
@@ -15128,13 +15129,19 @@ html.calm-mode .board-detail-modal {
   position: absolute;
   inset: 0;
   z-index: 0;
-  filter: saturate(1.05);
+  width: 100%;
+  height: 100%;
+  filter: grayscale(1) contrast(1.14) brightness(0.94);
   pointer-events: none;
 }
 
 .category-constellation__map-bg .directory-map,
 .category-constellation__map-bg .directory-map--backdrop,
-.category-constellation__map-bg .leaflet-container {
+.category-constellation__map-bg .leaflet-container,
+.category-constellation__map-bg .leaflet-pane,
+.category-constellation__map-bg .leaflet-map-pane,
+.category-constellation__map-bg .leaflet-tile-pane {
+  width: 100% !important;
   height: 100% !important;
   pointer-events: none;
 }
@@ -15147,7 +15154,7 @@ html.calm-mode .board-detail-modal {
   background:
     radial-gradient(60% 60% at 22% 20%, #ff00cc22, transparent 62%),
     radial-gradient(60% 60% at 82% 74%, #19e3ff22, transparent 62%),
-    linear-gradient(180deg, rgba(5, 5, 5, 0.35), rgba(5, 5, 5, 0.55));
+    linear-gradient(180deg, rgba(5, 5, 5, 0.22), rgba(5, 5, 5, 0.42));
 }
 
 .category-constellation__field {

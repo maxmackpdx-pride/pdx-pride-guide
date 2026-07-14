@@ -83,8 +83,21 @@ function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
   const map = useMap();
   useEffect(() => {
     if (!enabled) return;
-    const timer = window.setTimeout(() => map.invalidateSize(), 200);
-    return () => window.clearTimeout(timer);
+    const refresh = () => {
+      map.invalidateSize({ animate: false });
+    };
+    const timers = [0, 120, 320, 720].map(ms => window.setTimeout(refresh, ms));
+    const container = map.getContainer();
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => refresh())
+        : null;
+    observer?.observe(container);
+    refresh();
+    return () => {
+      timers.forEach(window.clearTimeout);
+      observer?.disconnect();
+    };
   }, [enabled, map]);
   return null;
 }
@@ -326,57 +339,65 @@ export default function DirectoryMap({
   const heightStyle = typeof mapHeight === "number" ? `${mapHeight}px` : mapHeight;
   const fillParent = mapHeight === "100%";
 
+  const mapSurface = (
+    <div
+      className={[
+        fillParent ? "directory-map directory-map--fill" : "directory-map",
+        isBackdrop ? "directory-map--backdrop" : "",
+      ].filter(Boolean).join(" ")}
+      style={{
+        height: heightStyle,
+        minHeight: fillParent ? heightStyle : undefined,
+        width: "100%",
+        position: "relative",
+        flex: fillParent ? "1 1 auto" : undefined,
+      }}
+    >
+      <style>{POPUP_STYLES}</style>
+      <MapContainer
+        center={[45.5231, -122.6765]}
+        zoom={13}
+        style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+        dragging={isInteractive}
+        scrollWheelZoom={isInteractive}
+        doubleClickZoom={isInteractive}
+        boxZoom={isInteractive}
+        keyboard={isInteractive}
+        touchZoom={isInteractive}
+        zoomControl={isInteractive}
+        attributionControl={isInteractive}
+      >
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        />
+        <MapInvalidateSize enabled={isBackdrop} />
+        {mapped.map(biz => {
+          const accent = TYPE_COLORS[biz.type] || "#FF00CC";
+          const rainbow = biz.type === "nonprofit";
+          return (
+            <Marker
+              key={biz.id}
+              position={[biz.lat!, biz.lng!]}
+              icon={rainbow ? buildRainbowPin() : buildPin(accent)}
+            >
+              <Popup className="pdx-dir-popup" maxWidth={280}>
+                <DirectoryPopup biz={biz} accent={accent} />
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </div>
+  );
+
+  if (isBackdrop) {
+    return mapSurface;
+  }
+
   return (
     <div className={showKey ? "directory-map-wrap" : undefined}>
-      <div
-        className={[
-          fillParent ? "directory-map directory-map--fill" : "directory-map",
-          isBackdrop ? "directory-map--backdrop" : "",
-        ].filter(Boolean).join(" ")}
-        style={{
-          height: heightStyle,
-          minHeight: fillParent ? heightStyle : undefined,
-          width: "100%",
-          position: "relative",
-          flex: fillParent ? "1 1 auto" : undefined,
-        }}
-      >
-        <style>{POPUP_STYLES}</style>
-        <MapContainer
-          center={[45.5231, -122.6765]}
-          zoom={13}
-          style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
-          dragging={isInteractive}
-          scrollWheelZoom={isInteractive}
-          doubleClickZoom={isInteractive}
-          boxZoom={isInteractive}
-          keyboard={isInteractive}
-          touchZoom={isInteractive}
-          zoomControl={isInteractive}
-          attributionControl={isInteractive}
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          />
-          <MapInvalidateSize enabled={isBackdrop} />
-          {mapped.map(biz => {
-            const accent = TYPE_COLORS[biz.type] || "#FF00CC";
-            const rainbow = biz.type === "nonprofit";
-            return (
-              <Marker
-                key={biz.id}
-                position={[biz.lat!, biz.lng!]}
-                icon={rainbow ? buildRainbowPin() : buildPin(accent)}
-              >
-                <Popup className="pdx-dir-popup" maxWidth={280}>
-                  <DirectoryPopup biz={biz} accent={accent} />
-                </Popup>
-              </Marker>
-            );
-          })}
-        </MapContainer>
-      </div>
+      {mapSurface}
       {showKey && <DirectoryMapKey />}
     </div>
   );
