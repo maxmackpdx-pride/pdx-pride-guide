@@ -110,7 +110,7 @@
   white-space: nowrap;
 }
 
-/* Cover fade only along the bottom seam (avatar overlap) — keep the photo open above */
+/* Cover scrim: lighter than before, weight toward bottom (avatar seam) — not a full blackout */
 .pp-hero--reimagined .pp-hero__scrim {
   position: absolute;
   left: 0;
@@ -120,22 +120,22 @@
   z-index: 1;
   background: linear-gradient(
     180deg,
-    transparent 0%,
-    transparent 52%,
-    rgba(10, 10, 10, 0.18) 78%,
-    rgba(10, 10, 10, 0.48) 100%
+    rgba(10, 10, 10, 0.08) 0%,
+    rgba(10, 10, 10, 0.2) 38%,
+    rgba(10, 10, 10, 0.52) 72%,
+    rgba(10, 10, 10, 0.7) 100%
   );
   pointer-events: none;
 }
 
-/* Custom cover photos: even lighter — the crop is the point */
+/* Custom cover: same placement, a touch lighter so the photo still reads */
 .pp-hero--reimagined:has(.pp-hero__banner--custom) .pp-hero__scrim {
   background: linear-gradient(
     180deg,
-    transparent 0%,
-    transparent 58%,
-    rgba(10, 10, 10, 0.12) 82%,
-    rgba(10, 10, 10, 0.36) 100%
+    rgba(10, 10, 10, 0.05) 0%,
+    rgba(10, 10, 10, 0.16) 40%,
+    rgba(10, 10, 10, 0.45) 74%,
+    rgba(10, 10, 10, 0.62) 100%
   );
 }
 

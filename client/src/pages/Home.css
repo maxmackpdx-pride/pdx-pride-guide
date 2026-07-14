@@ -1439,21 +1439,21 @@ html.calm-mode .home-boards__card {
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  opacity: 0.72;
+  opacity: 0.62;
   z-index: 0;
   pointer-events: none;
 }
 
-/* Light day wash + soft bottom fade — poster stays the star */
+/* Day-colored gradient over poster — dialed down from full strength, still present */
 .home-up-next__backdrop-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--up-day, var(--day-mon)) 16%, transparent) 0%,
-    rgba(8, 8, 10, 0.22) 48%,
-    rgba(8, 8, 10, 0.52) 100%
+    125deg,
+    color-mix(in srgb, var(--up-day, var(--day-mon)) 24%, rgba(8, 8, 10, 0.72)) 0%,
+    rgba(8, 8, 10, 0.58) 42%,
+    rgba(8, 8, 10, 0.4) 100%
   );
   pointer-events: none;
 }

@@ -138,17 +138,17 @@
   pointer-events: none;
 }
 
-/* Soft day wash + bottom fade — poster reads clearly underneath */
+/* Day color gradient over poster — reduced ~30%, still a real wash */
 .hp-card__banner-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--hp-day, var(--day-sat)) 18%, transparent) 0%,
-    rgba(8, 8, 10, 0.08) 42%,
-    rgba(8, 8, 10, 0.42) 100%
+    160deg,
+    color-mix(in srgb, var(--hp-day, var(--day-sat)) 32%, transparent) 0%,
+    color-mix(in srgb, var(--hp-day, var(--day-sat)) 16%, rgba(8, 8, 10, 0.42)) 45%,
+    rgba(8, 8, 10, 0.64) 100%
   );
 }
 
