@@ -123,7 +123,7 @@ function HubRightRail({
           Who to follow
         </div>
         <p className="kick" style={{ lineHeight: 1.5 }}>
-          Scene-makers and venues you might know. Full follow graph ships soon.
+          Follow graph is not live yet. People in the hub will not show fake accounts.
         </p>
       </div>
     </>
