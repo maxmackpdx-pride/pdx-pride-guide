@@ -39,3 +39,14 @@ if [[ "$SHORT" == "456689a" ]] || git log -1 --format=%s | grep -qi "user-picks 
 fi
 
 echo "predeploy git OK: $SHORT on $BRANCH"
+
+# Admin ops smoke (queue aggregate, claims, bulk preview, guide identity).
+# Skip in pure Railway tarball if node_modules not ready; local/CI ship always runs.
+if [[ -f "script/smoke-admin-ops.mjs" ]] && command -v node >/dev/null 2>&1; then
+  if [[ -d "node_modules" ]] || [[ -n "${CI:-}" ]]; then
+    echo "predeploy: running smoke-admin-ops…"
+    node --import tsx script/smoke-admin-ops.mjs
+  else
+    echo "predeploy: skip smoke-admin-ops (no node_modules yet)"
+  fi
+fi

@@ -251,131 +251,62 @@ export function executeBulkEvents(
   return { ok: true, action: act, applied, skipped, count: applied.length };
 }
 
-/** One payload for floating inbox Admin · Queue (mobile-friendly). */
+/** One payload for floating inbox Admin · Queue (mobile-friendly). Includes raw lists for mappers. */
 export function getAdminQueueAggregate() {
   reclaimStaleAdminQueueClaims();
   const breakdown = storage.getAdminQueueBreakdown();
   const claims = listAdminQueueClaims();
-  const claimKey = (kind: string, id: number) => `${kind}:${id}`;
-  const claimMap = new Map(claims.map((c) => [claimKey(c.queueKind, c.entityId), c]));
-
-  const submissions = storage
-    .getSubmissions("PENDING")
-    .filter((s) => s.type !== "PROMOTER_APPLICATION")
-    .map((s) => ({
-      kind: "submission" as const,
-      id: s.id,
-      title: s.title,
-      meta: `${s.type} · ${s.submitterEmail || ""}`,
-      type: s.type,
-      claim: claimMap.get(claimKey("submission", s.id)) || null,
-    }));
-
-  const promoters = storage.getPendingPromoterRequests().map((p: any) => ({
-    kind: "promoter" as const,
-    id: p.id,
-    title: p.displayName || p.username || "Promoter",
-    meta: `@${p.username || "?"} · promoter`,
-    claim: claimMap.get(claimKey("promoter", p.id)) || null,
-  }));
-
-  const businessClaims = storage.getPendingBusinessClaims().map((c: any) => ({
-    kind: "business_claim" as const,
-    id: c.id,
-    title: c.businessName || c.name || `Claim #${c.id}`,
-    meta: c.claimantUsername || c.email || "claim",
-    claim: claimMap.get(claimKey("business_claim", c.id)) || null,
-  }));
-
-  const businessSubmissions = storage.getPendingBusinessSubmissions().map((s: any) => ({
-    kind: "business_submission" as const,
-    id: s.id,
-    title: s.name || `Venue #${s.id}`,
-    meta: s.type || "venue",
-    claim: claimMap.get(claimKey("business_submission", s.id)) || null,
-  }));
-
-  // Logos are Owner desk only — not returned on shared admin queue aggregate.
-
-  const moderation = storage.getModerationRequests("PENDING").map((m: any) => ({
-    kind: "moderation" as const,
-    id: m.id,
-    title: m.eventTitle || m.type || `Mod #${m.id}`,
-    meta: m.type || "moderation",
-    claim: claimMap.get(claimKey("moderation", m.id)) || null,
-  }));
-
-  const missedConnections = storage.getAdminMissedConnections().map((m: any) => ({
-    kind: "missed_connection" as const,
-    id: m.id,
-    title: m.title || `MC #${m.id}`,
-    meta: m.username || "missed connection",
-    claim: claimMap.get(claimKey("missed_connection", m.id)) || null,
-  }));
-
-  const giftingReports = storage.getGiftingReports("PENDING").map((r: any) => ({
-    kind: "gifting_report" as const,
-    id: r.id,
-    title: r.postTitle || `Gift report #${r.id}`,
-    meta: r.reason || "report",
-    claim: claimMap.get(claimKey("gifting_report", r.id)) || null,
-  }));
 
   const terminal = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
-  const giftingFlagged = storage
-    .getGiftingPosts({ includeInactive: true })
-    .filter((p: any) => !terminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0)
-    .map((p: any) => ({
-      kind: "gifting_flagged" as const,
-      id: p.id,
-      title: p.title || `Gift #${p.id}`,
-      meta: `${p.reportCount || 0} reports`,
-      claim: claimMap.get(claimKey("gifting_flagged", p.id)) || null,
-    }));
-
-  const riverBrats = storage.getRiverBratsReports("PENDING").map((r: any) => ({
-    kind: "river_brats" as const,
-    id: r.id,
-    title: `${r.target_type || "Content"} #${r.target_id}`,
-    meta: r.reason || "report",
-    claim: claimMap.get(claimKey("river_brats", r.id)) || null,
-  }));
-
-  const gigPending = storage
-    .getGigPosts()
-    .filter((g) => String(g.status || "").toUpperCase() === "PENDING")
-    .map((g: any) => ({
-      kind: "gig_pending" as const,
-      id: g.id,
-      title: g.title || `Gig #${g.id}`,
-      meta: g.username ? `@${g.username}` : g.name || "gig",
-      claim: claimMap.get(claimKey("gig_pending", g.id)) || null,
-    }));
+  const submissionsPending = storage
+    .getSubmissions("PENDING")
+    .filter((s) => s.type !== "PROMOTER_APPLICATION");
+  const promoters = storage.getPendingPromoterRequests();
+  const businessClaims = storage.getPendingBusinessClaims();
+  const businessSubmissions = storage.getPendingBusinessSubmissions();
+  const moderation = storage.getModerationRequests("PENDING");
+  const missedConnections = storage.getAdminMissedConnections();
+  const giftingReports = storage.getGiftingReports("PENDING");
+  const giftingPostsAll = storage.getGiftingPosts({ includeInactive: true });
+  const giftingFlagged = giftingPostsAll.filter(
+    (p: any) => !terminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0,
+  );
+  const riverBrats = storage.getRiverBratsReports("PENDING");
+  const gigsAll = storage.getGigPosts();
+  const gigPending = gigsAll.filter((g) => String(g.status || "").toUpperCase() === "PENDING");
 
   return {
     generatedAt: new Date().toISOString(),
     breakdown,
     claims,
-    buckets: {
-      submissions,
+    /** Full entities for QueueView mappers — one round-trip instead of ~10. */
+    raw: {
+      submissions: submissionsPending,
       promoters,
       businessClaims,
       businessSubmissions,
       moderation,
       missedConnections,
       giftingReports,
-      giftingFlagged,
+      giftingPosts: giftingPostsAll,
       riverBrats,
+      gigs: gigsAll,
       gigPending,
     },
-    /** Owner-only surfaces (not shared Admin · Queue). */
+    buckets: {
+      submissions: submissionsPending.length,
+      promoters: promoters.length,
+      businessClaims: businessClaims.length,
+      businessSubmissions: businessSubmissions.length,
+      moderation: moderation.length,
+      missedConnections: missedConnections.length,
+      giftingReports: giftingReports.length,
+      giftingFlagged: giftingFlagged.length,
+      riverBrats: riverBrats.length,
+      gigPending: gigPending.length,
+    },
     ownerOnly: {
-      logoRequests: storage.getPendingBusinessLogoRequests().map((l: any) => ({
-        kind: "logo_request" as const,
-        id: l.id,
-        title: l.businessName || `Logo #${l.id}`,
-        meta: "logo · owner desk",
-      })),
+      logoRequests: storage.getPendingBusinessLogoRequests(),
     },
   };
 }

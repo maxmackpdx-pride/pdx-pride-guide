@@ -6453,6 +6453,7 @@ export interface IStorage {
   getFollowingList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
   getFollowersList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
   discoverPeople(viewerUserId: number, limit?: number): import("../shared/peopleHub").PeopleHubUser[];
+  buildPeopleHubUser(row: any, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser;
   countEventsHostedByUser(userId: number): number;
   purgeQaTestUsers(): { deleted: number; usernames: string[] };
   countActiveMessages(): number;

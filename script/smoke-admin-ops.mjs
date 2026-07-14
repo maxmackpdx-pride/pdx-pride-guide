@@ -25,8 +25,12 @@ assert(breakdown.total === storage.getAdminPendingCount(), "pending matches brea
 
 const agg = getAdminQueueAggregate();
 assert(agg.buckets, "aggregate buckets");
+assert(agg.raw, "aggregate raw for QueueView");
 assert(Array.isArray(agg.claims), "claims array");
+assert(Array.isArray(agg.raw.submissions), "raw.submissions");
+assert(Array.isArray(agg.raw.promoters), "raw.promoters");
 assert("submissions" in agg.buckets && "promoters" in agg.buckets, "bucket keys");
+assert(!("logoRequests" in (agg.buckets || {})), "logos not on shared buckets");
 
 const admins = storage.listSiteAdmins();
 assert(admins.length > 0, "need at least one site admin for claim smoke");

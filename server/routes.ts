@@ -3930,13 +3930,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/business-claims/:id/approve", requireAdmin, (req, res) => {
     const adminName = String(req.body?.adminName || "Admin");
-    const result = storage.approveBusinessClaim(Number(req.params.id), adminName);
+    const id = Number(req.params.id);
+    const result = storage.approveBusinessClaim(id, adminName);
     if ("error" in result) return res.status(400).json({ error: result.error });
+    auditAdmin(req, "approve_business_claim", { type: "business_claim", id });
+    releaseAdminQueueClaim("business_claim", id, getAdminActor(req).id || 0, { force: true });
     res.json(result);
   });
 
   app.post("/api/admin/business-claims/:id/deny", requireAdmin, (req, res) => {
-    storage.rejectBusinessClaim(Number(req.params.id), req.body?.reason);
+    const id = Number(req.params.id);
+    storage.rejectBusinessClaim(id, req.body?.reason);
+    auditAdmin(req, "deny_business_claim", { type: "business_claim", id, detail: { reason: req.body?.reason || null } });
+    releaseAdminQueueClaim("business_claim", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
@@ -3949,13 +3955,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/business-submissions/:id/approve", requireAdmin, (req, res) => {
     const adminName = String(req.body?.adminName || "Admin");
     const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
-    const result = storage.approveBusinessSubmission(Number(req.params.id), adminName, overrideImageUrl);
+    const id = Number(req.params.id);
+    const result = storage.approveBusinessSubmission(id, adminName, overrideImageUrl);
     if ("error" in result) return res.status(400).json({ error: result.error });
+    auditAdmin(req, "approve_business_submission", { type: "business_submission", id });
+    releaseAdminQueueClaim("business_submission", id, getAdminActor(req).id || 0, { force: true });
     res.json(result);
   });
 
   app.post("/api/admin/business-submissions/:id/deny", requireAdmin, (req, res) => {
-    storage.rejectBusinessSubmission(Number(req.params.id), req.body?.reason);
+    const id = Number(req.params.id);
+    storage.rejectBusinessSubmission(id, req.body?.reason);
+    auditAdmin(req, "deny_business_submission", { type: "business_submission", id });
+    releaseAdminQueueClaim("business_submission", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
@@ -3967,13 +3979,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/business-logo-requests/:id/approve", requireAdmin, (req, res) => {
     const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
-    const result = storage.approveBusinessLogoRequest(Number(req.params.id), overrideImageUrl);
+    const id = Number(req.params.id);
+    const result = storage.approveBusinessLogoRequest(id, overrideImageUrl);
     if ("error" in result) return res.status(400).json({ error: result.error });
+    auditAdmin(req, "approve_logo", { type: "logo_request", id });
     res.json(result);
   });
 
   app.post("/api/admin/business-logo-requests/:id/deny", requireAdmin, (req, res) => {
-    storage.rejectBusinessLogoRequest(Number(req.params.id), req.body?.reason);
+    const id = Number(req.params.id);
+    storage.rejectBusinessLogoRequest(id, req.body?.reason);
+    auditAdmin(req, "deny_logo", { type: "logo_request", id });
     res.json({ ok: true });
   });
 
@@ -4468,7 +4484,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/moderation/:id/resolve", requireAdmin, (req, res) => {
     const { status, adminNotes } = req.body;
     if (!["APPROVED", "REJECTED"].includes(status)) return res.status(400).json({ error: "status must be APPROVED or REJECTED" });
-    storage.resolveModerationRequest(Number(req.params.id), status, adminNotes);
+    const id = Number(req.params.id);
+    storage.resolveModerationRequest(id, status, adminNotes);
+    auditAdmin(req, "resolve_moderation", { type: "moderation", id, detail: { status } });
+    releaseAdminQueueClaim("moderation", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
@@ -4494,8 +4513,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/gifting/:id/reject", requireAdmin, (req, res) => {
     try {
       const { reasonCode, note } = parseBoardRejectBody(req.body);
-      const result = storage.rejectGiftingPost(Number(req.params.id), reasonCode, note);
+      const id = Number(req.params.id);
+      const result = storage.rejectGiftingPost(id, reasonCode, note);
       if (result.error) return res.status(400).json({ error: result.error });
+      auditAdmin(req, "reject_gifting", { type: "gifting", id, detail: { reasonCode } });
+      releaseAdminQueueClaim("gifting_flagged", id, getAdminActor(req).id || 0, { force: true });
       res.json({ ok: true });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -4503,7 +4525,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
-    storage.resolveGiftingReport(Number(req.params.id), String(req.body.adminNotes || ""));
+    const id = Number(req.params.id);
+    storage.resolveGiftingReport(id, String(req.body.adminNotes || ""));
+    auditAdmin(req, "resolve_gifting_report", { type: "gifting_report", id });
+    releaseAdminQueueClaim("gifting_report", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
@@ -4512,7 +4537,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/river-brats/reports/:id/resolve", requireAdmin, (req, res) => {
-    storage.resolveRiverBratsReport(Number(req.params.id), String(req.body.adminNotes || ""));
+    const id = Number(req.params.id);
+    storage.resolveRiverBratsReport(id, String(req.body.adminNotes || ""));
+    auditAdmin(req, "resolve_river_brats", { type: "river_brats", id });
+    releaseAdminQueueClaim("river_brats", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
@@ -4534,15 +4562,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/gigs/:id/status", requireAdmin, (req, res) => {
     const status = String(req.body.status || "").trim().toUpperCase();
     if (!["LIVE", "PENDING", "REJECTED", "REMOVED"].includes(status)) return res.status(400).json({ error: "Invalid status" });
-    storage.adminUpdateGigStatus(Number(req.params.id), status);
+    const id = Number(req.params.id);
+    storage.adminUpdateGigStatus(id, status);
+    auditAdmin(req, "gig_status", { type: "gig_pending", id, detail: { status } });
+    if (status === "LIVE" || status === "REJECTED" || status === "REMOVED") {
+      releaseAdminQueueClaim("gig_pending", id, getAdminActor(req).id || 0, { force: true });
+    }
     res.json({ ok: true });
   });
 
   app.post("/api/admin/gigs/:id/reject", requireAdmin, (req, res) => {
     try {
       const { reasonCode, note } = parseBoardRejectBody(req.body);
-      const result = storage.rejectGigPost(Number(req.params.id), reasonCode, note);
+      const id = Number(req.params.id);
+      const result = storage.rejectGigPost(id, reasonCode, note);
       if (result.error) return res.status(400).json({ error: result.error });
+      auditAdmin(req, "reject_gig", { type: "gig_pending", id, detail: { reasonCode } });
+      releaseAdminQueueClaim("gig_pending", id, getAdminActor(req).id || 0, { force: true });
       res.json({ ok: true });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -4556,22 +4592,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/missed-connections/:id/approve", requireAdmin, (req, res) => {
-    const result = storage.approveMissedConnection(Number(req.params.id));
+    const id = Number(req.params.id);
+    const result = storage.approveMissedConnection(id);
     if (result.error) return res.status(404).json({ error: result.error });
+    auditAdmin(req, "clear_missed_connection", { type: "missed_connection", id });
+    releaseAdminQueueClaim("missed_connection", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
   app.delete("/api/admin/missed-connections/:id", requireAdmin, (req, res) => {
-    const result = storage.removeMissedConnectionAdmin(Number(req.params.id));
+    const id = Number(req.params.id);
+    const result = storage.removeMissedConnectionAdmin(id);
     if (result.error) return res.status(404).json({ error: result.error });
+    auditAdmin(req, "remove_missed_connection", { type: "missed_connection", id });
+    releaseAdminQueueClaim("missed_connection", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
   app.post("/api/admin/missed-connections/:id/reject", requireAdmin, (req, res) => {
     try {
       const { reasonCode, note } = parseBoardRejectBody(req.body);
-      const result = storage.rejectMissedConnection(Number(req.params.id), reasonCode, note);
+      const id = Number(req.params.id);
+      const result = storage.rejectMissedConnection(id, reasonCode, note);
       if (result.error) return res.status(400).json({ error: result.error });
+      auditAdmin(req, "reject_missed_connection", { type: "missed_connection", id, detail: { reasonCode } });
+      releaseAdminQueueClaim("missed_connection", id, getAdminActor(req).id || 0, { force: true });
       res.json({ ok: true });
     } catch (e: any) {
       res.status(400).json({ error: e.message });

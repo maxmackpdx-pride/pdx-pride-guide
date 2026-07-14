@@ -417,6 +417,8 @@ function sortCompletedRows(items: QueueRow[]): QueueRow[] {
 }
 
 function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ["/api/admin/queue"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/queue-claims"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
@@ -453,10 +455,11 @@ export default function QueueView({
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
-  /** "all" or a bucket id from ADMIN_QUEUE_BUCKETS — keeps every queue discoverable. */
+  /** "all" | "mine" | bucket id from ADMIN_QUEUE_BUCKETS */
   const [bucketFilter, setBucketFilter] = useState<string>("all");
   const accent = mode === "admin" ? C.magenta : C.purple;
   const completed = queueFolder === "completed";
+  const useAggregate = mode === "admin" && !completed;
 
   const adminFetch = async (url: string) => {
     const r = await fetch(url, { credentials: "include" });
@@ -464,10 +467,33 @@ export default function QueueView({
     return r.json();
   };
 
+  /** Active shared queue: one payload (mobile reliability). */
+  const aggregateQuery = useQuery<{
+    raw: {
+      submissions: any[];
+      promoters: any[];
+      businessClaims: any[];
+      businessSubmissions: any[];
+      moderation: any[];
+      missedConnections: any[];
+      giftingReports: any[];
+      giftingPosts: any[];
+      riverBrats: any[];
+      gigs: any[];
+    };
+    claims: Array<{ queueKind: string; entityId: number; assigneeUsername: string | null; assigneeUserId: number }>;
+  }>({
+    queryKey: ["/api/admin/queue"],
+    queryFn: () => adminFetch("/api/admin/queue"),
+    enabled: useAggregate,
+    refetchInterval: 45_000,
+  });
+
+  // Completed / owner still use per-category endpoints (history + owner desk).
   const subsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/submissions", completed ? "all" : "pending"],
-    queryFn: () => adminFetch(completed ? "/api/admin/submissions?all=true" : "/api/admin/submissions"),
-    enabled: mode === "admin",
+    queryKey: ["/api/admin/submissions", "all"],
+    queryFn: () => adminFetch("/api/admin/submissions?all=true"),
+    enabled: mode === "admin" && completed,
   });
   const giftingQuery = useQuery<{ posts: any[]; reports: any[] }>({
     queryKey: ["/api/admin/gifting"],
@@ -475,15 +501,15 @@ export default function QueueView({
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "admin" && completed,
   });
   const spottedQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/missed-connections", completed ? "recent" : "pending"],
-    queryFn: () => apiRequest("GET", completed ? "/api/admin/missed-connections?recent=true" : "/api/admin/missed-connections").then((r) => {
+    queryKey: ["/api/admin/missed-connections", "recent"],
+    queryFn: () => apiRequest("GET", "/api/admin/missed-connections?recent=true").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "admin" && completed,
   });
   const riverBratsQuery = useQuery<any[]>({
     queryKey: ["/api/admin/river-brats/reports"],
@@ -491,41 +517,41 @@ export default function QueueView({
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "admin" && completed,
   });
   const moderationQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/moderation", completed ? "all" : "pending"],
-    queryFn: () => apiRequest("GET", completed ? "/api/admin/moderation?all=true" : "/api/admin/moderation").then((r) => {
+    queryKey: ["/api/admin/moderation", "all"],
+    queryFn: () => apiRequest("GET", "/api/admin/moderation?all=true").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
-  });
-  const promoterQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/promoter-requests"],
-    queryFn: () => apiRequest("GET", "/api/admin/promoter-requests").then((r) => {
-      if (!r.ok) throw new Error(`${r.status}`);
-      return r.json();
-    }),
-    enabled: mode === "admin" && !completed,
+    enabled: mode === "admin" && completed,
   });
   const claimsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/business-claims", completed ? "recent" : "pending"],
-    queryFn: () => apiRequest("GET", completed ? "/api/admin/business-claims?recent=true" : "/api/admin/business-claims").then((r) => {
+    queryKey: ["/api/admin/business-claims", "recent"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-claims?recent=true").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "admin" && completed,
   });
   const bizSubsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/business-submissions", completed ? "recent" : "pending"],
-    queryFn: () => apiRequest("GET", completed ? "/api/admin/business-submissions?recent=true" : "/api/admin/business-submissions").then((r) => {
+    queryKey: ["/api/admin/business-submissions", "recent"],
+    queryFn: () => apiRequest("GET", "/api/admin/business-submissions?recent=true").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "admin" && completed,
   });
-  // Logos = Owner desk only (not shared Admin · Queue).
+  const gigsQuery = useQuery<any[]>({
+    queryKey: ["/api/admin/gigs"],
+    queryFn: () => apiRequest("GET", "/api/admin/gigs").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
+    enabled: mode === "admin" && completed,
+  });
+  // Logos = Owner desk only.
   const logoQuery = useQuery<any[]>({
     queryKey: ["/api/admin/business-logo-requests", completed ? "recent" : "pending"],
     queryFn: () => apiRequest("GET", completed ? "/api/admin/business-logo-requests?recent=true" : "/api/admin/business-logo-requests").then((r) => {
@@ -534,48 +560,44 @@ export default function QueueView({
     }),
     enabled: mode === "owner",
   });
-  const gigsQuery = useQuery<any[]>({
-    queryKey: ["/api/admin/gigs"],
-    queryFn: () => apiRequest("GET", "/api/admin/gigs").then((r) => {
-      if (!r.ok) throw new Error(`${r.status}`);
-      return r.json();
-    }),
-    enabled: mode === "admin",
-  });
   const ownerQuery = useQuery<any[]>({
     queryKey: ["/api/admin/feedback", completed ? "resolved" : "open"],
     queryFn: () => adminFetch(completed ? "/api/admin/feedback?status=RESOLVED" : "/api/admin/feedback"),
     enabled: mode === "owner",
   });
 
-  const subs = subsQuery.data ?? [];
-  const giftingAdmin = giftingQuery.data;
-  const spotted = spottedQuery.data ?? [];
-  const riverBratsReports = riverBratsQuery.data ?? [];
-  const moderationReqs = moderationQuery.data ?? [];
-  const promoterReqs = promoterQuery.data ?? [];
-  const businessClaims = claimsQuery.data ?? [];
-  const businessSubs = bizSubsQuery.data ?? [];
+  const raw = aggregateQuery.data?.raw;
+  const subs = useAggregate ? (raw?.submissions ?? []) : (subsQuery.data ?? []);
+  const giftingAdmin = useAggregate
+    ? { posts: raw?.giftingPosts ?? [], reports: raw?.giftingReports ?? [] }
+    : giftingQuery.data;
+  const spotted = useAggregate ? (raw?.missedConnections ?? []) : (spottedQuery.data ?? []);
+  const riverBratsReports = useAggregate ? (raw?.riverBrats ?? []) : (riverBratsQuery.data ?? []);
+  const moderationReqs = useAggregate ? (raw?.moderation ?? []) : (moderationQuery.data ?? []);
+  const promoterReqs = useAggregate ? (raw?.promoters ?? []) : [];
+  const businessClaims = useAggregate ? (raw?.businessClaims ?? []) : (claimsQuery.data ?? []);
+  const businessSubs = useAggregate ? (raw?.businessSubmissions ?? []) : (bizSubsQuery.data ?? []);
   const logoReqs = logoQuery.data ?? [];
-  const gigs = gigsQuery.data ?? [];
+  const gigs = useAggregate ? (raw?.gigs ?? []) : (gigsQuery.data ?? []);
   const ownerReports = ownerQuery.data ?? [];
 
   const failedSources = mode === "admin"
-    ? [
-        subsQuery.isError && "submissions",
-        giftingQuery.isError && "gifting",
-        gigsQuery.isError && "pride werk",
-        spottedQuery.isError && "missed connections",
-        riverBratsQuery.isError && "river brats",
-        moderationQuery.isError && "moderation",
-        promoterQuery.isError && "promoters",
-        claimsQuery.isError && "venue claims",
-        bizSubsQuery.isError && "venue submissions",
-      ].filter(Boolean) as string[]
-    : [
+    ? useAggregate
+      ? ([aggregateQuery.isError && "admin queue"].filter(Boolean) as string[])
+      : ([
+          subsQuery.isError && "submissions",
+          giftingQuery.isError && "gifting",
+          gigsQuery.isError && "gig work",
+          spottedQuery.isError && "missed connections",
+          riverBratsQuery.isError && "river brats",
+          moderationQuery.isError && "moderation",
+          claimsQuery.isError && "venue claims",
+          bizSubsQuery.isError && "venue submissions",
+        ].filter(Boolean) as string[])
+    : ([
         ownerQuery.isError && "owner desk",
         logoQuery.isError && "logo requests",
-      ].filter(Boolean) as string[];
+      ].filter(Boolean) as string[]);
 
   const onQueueSuccess = () => invalidateAdminQueue(qc);
   const resolveOwnerDesk = useMutation({
@@ -740,58 +762,9 @@ export default function QueueView({
     return completed ? sortCompletedRows(items) : items;
   }, [mode, completed, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, gigs, ownerReports]);
 
-  const bucketCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: rows.length };
-    for (const b of ADMIN_QUEUE_BUCKETS) {
-      counts[b.id] = rows.filter((r) => b.kinds.includes(r.kind)).length;
-    }
-    return counts;
-  }, [rows]);
-
-  const visibleBuckets = useMemo(() => {
-    if (mode !== "admin") return [];
-    if (bucketFilter === "all") return ADMIN_QUEUE_BUCKETS;
-    return ADMIN_QUEUE_BUCKETS.filter((b) => b.id === bucketFilter);
-  }, [mode, bucketFilter]);
-
-  const claimMutation = useMutation({
-    mutationFn: async ({ kind, entityId, takeover }: { kind: string; entityId: number; takeover?: boolean }) => {
-      const r = await apiRequest("POST", "/api/admin/queue-claims", { kind, entityId, takeover: !!takeover });
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}));
-        throw new Error(err.error || "Claim failed");
-      }
-      return r.json();
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/queue"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/queue-claims"] });
-    },
-  });
-  const releaseClaimMutation = useMutation({
-    mutationFn: async ({ kind, entityId }: { kind: string; entityId: number }) => {
-      const r = await apiRequest("DELETE", `/api/admin/queue-claims/${encodeURIComponent(kind)}/${entityId}`);
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}));
-        throw new Error(err.error || "Release failed");
-      }
-      return r.json();
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/queue"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/queue-claims"] });
-    },
-  });
-
-  const { data: queueClaims = [] } = useQuery<
-    Array<{ queueKind: string; entityId: number; assigneeUsername: string | null; assigneeUserId: number }>
-  >({
-    queryKey: ["/api/admin/queue-claims"],
-    queryFn: () =>
-      fetch("/api/admin/queue-claims", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
-    enabled: mode === "admin" && !completed,
-    refetchInterval: 60_000,
-  });
+  const queueClaims =
+    aggregateQuery.data?.claims
+    ?? [] as Array<{ queueKind: string; entityId: number; assigneeUsername: string | null; assigneeUserId: number }>;
 
   const claimFor = (kind: QueueRowKind, entityId: number) => {
     const mapKind =
@@ -808,6 +781,60 @@ export default function QueueView({
     return kind;
   };
 
+  const rowsFiltered = useMemo(() => {
+    if (bucketFilter !== "mine" || !user?.id) return rows;
+    return rows.filter((r) => {
+      const c = claimFor(r.kind, r.entityId);
+      return c && c.assigneeUserId === user.id;
+    });
+  }, [rows, bucketFilter, user?.id, queueClaims]);
+
+  const bucketCounts = useMemo(() => {
+    const base = rows;
+    const counts: Record<string, number> = {
+      all: base.length,
+      mine: user?.id
+        ? base.filter((r) => {
+            const c = claimFor(r.kind, r.entityId);
+            return c && c.assigneeUserId === user.id;
+          }).length
+        : 0,
+    };
+    for (const b of ADMIN_QUEUE_BUCKETS) {
+      counts[b.id] = base.filter((r) => b.kinds.includes(r.kind)).length;
+    }
+    return counts;
+  }, [rows, user?.id, queueClaims]);
+
+  const visibleBuckets = useMemo(() => {
+    if (mode !== "admin") return [];
+    if (bucketFilter === "all" || bucketFilter === "mine") return ADMIN_QUEUE_BUCKETS;
+    return ADMIN_QUEUE_BUCKETS.filter((b) => b.id === bucketFilter);
+  }, [mode, bucketFilter]);
+
+  const claimMutation = useMutation({
+    mutationFn: async ({ kind, entityId, takeover }: { kind: string; entityId: number; takeover?: boolean }) => {
+      const r = await apiRequest("POST", "/api/admin/queue-claims", { kind, entityId, takeover: !!takeover });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.error || "Claim failed");
+      }
+      return r.json();
+    },
+    onSuccess: () => invalidateAdminQueue(qc),
+  });
+  const releaseClaimMutation = useMutation({
+    mutationFn: async ({ kind, entityId }: { kind: string; entityId: number }) => {
+      const r = await apiRequest("DELETE", `/api/admin/queue-claims/${encodeURIComponent(kind)}/${entityId}`);
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.error || "Release failed");
+      }
+      return r.json();
+    },
+    onSuccess: () => invalidateAdminQueue(qc),
+  });
+
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
     || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending
@@ -817,10 +844,13 @@ export default function QueueView({
     || approveGig.isPending || rejectGig.isPending
     || claimMutation.isPending || releaseClaimMutation.isPending;
 
+  const displayCount = bucketFilter === "mine" || bucketFilter === "all" || mode === "owner"
+    ? rowsFiltered.length
+    : (bucketCounts[bucketFilter] ?? rowsFiltered.length);
   const kicker = mode === "admin"
     ? completed
       ? `RECENTLY COMPLETED · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
-      : `SHARED QUEUE · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
+      : `SHARED QUEUE · ${displayCount} ITEM${displayCount === 1 ? "" : "S"}${bucketFilter === "mine" ? " · MINE" : ""}`
     : completed
       ? `RECENTLY DELETED · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`
       : `OWNER DESK · ${rows.length} ITEM${rows.length === 1 ? "" : "S"}`;
@@ -1131,6 +1161,24 @@ export default function QueueView({
           >
             All · {bucketCounts.all || 0}
           </button>
+          <button
+            type="button"
+            onClick={() => setBucketFilter("mine")}
+            style={{
+              fontFamily: MONO,
+              fontSize: 9.5,
+              letterSpacing: ".06em",
+              fontWeight: 700,
+              padding: "6px 10px",
+              borderRadius: 999,
+              border: `1px solid ${bucketFilter === "mine" ? C.lime : C.border2}`,
+              background: bucketFilter === "mine" ? C.lime : "transparent",
+              color: bucketFilter === "mine" ? "#06060a" : C.meta,
+              cursor: "pointer",
+            }}
+          >
+            Mine · {bucketCounts.mine || 0}
+          </button>
           {ADMIN_QUEUE_BUCKETS.map((b) => {
             const n = bucketCounts[b.id] || 0;
             const act = bucketFilter === b.id;
@@ -1220,7 +1268,7 @@ export default function QueueView({
 
       {mode === "admin" ? (
         visibleBuckets.map((bucket) => {
-          const bucketRows = rows.filter((r) => bucket.kinds.includes(r.kind));
+          const bucketRows = rowsFiltered.filter((r) => bucket.kinds.includes(r.kind));
           return (
             <div key={bucket.id} style={{ marginBottom: 14 }}>
               <div
@@ -1263,7 +1311,7 @@ export default function QueueView({
             </div>
           );
         })
-      ) : rows.length === 0 ? (
+      ) : rowsFiltered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "44px 20px", color: C.faint2, fontFamily: MONO, fontSize: 11, letterSpacing: ".1em" }}>
           {failedSources.length > 0
             ? "QUEUE COULD NOT LOAD"
@@ -1273,7 +1321,7 @@ export default function QueueView({
         </div>
       ) : (
         <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
-          {rows.map((q, i) => renderQueueRow(q, i))}
+          {rowsFiltered.map((q, i) => renderQueueRow(q, i))}
         </div>
       )}
 

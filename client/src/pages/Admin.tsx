@@ -239,6 +239,9 @@ export default function Admin() {
   const [bulkAction, setBulkAction] = useState<"hide" | "claimable_on" | "claimable_off">("hide");
   const [bulkPreview, setBulkPreview] = useState<any>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [adminGlobalSearchQ, setAdminGlobalSearchQ] = useState("");
+  const [adminGlobalSearchResults, setAdminGlobalSearchResults] = useState<any | null>(null);
+  const [adminGlobalSearching, setAdminGlobalSearching] = useState(false);
   const [teamIdentifier, setTeamIdentifier] = useState("");
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -1349,6 +1352,38 @@ export default function Admin() {
     );
   };
 
+  const runAdminGlobalSearch = async () => {
+    const q = adminGlobalSearchQ.trim();
+    if (!q) return;
+    setAdminGlobalSearching(true);
+    try {
+      const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=20`, { credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Search failed");
+      setAdminGlobalSearchResults(data);
+    } catch (err) {
+      toast({ title: "Search failed", description: parseApiError(err, "Could not search"), variant: "destructive" });
+    } finally {
+      setAdminGlobalSearching(false);
+    }
+  };
+
+  const { data: adminActivityLog = [] } = useQuery<
+    Array<{ id: number; action: string; targetLabel?: string | null; actorUsername?: string | null; createdAt: string }>
+  >({
+    queryKey: ["/api/admin/activity", 80],
+    queryFn: () => fetch("/api/admin/activity?limit=80", { credentials: "include" }).then(r => (r.ok ? r.json() : [])),
+    enabled: authenticated && activeTab === "overview",
+  });
+
+  const { data: teamQueueClaims = [] } = useQuery<
+    Array<{ queueKind: string; entityId: number; assigneeUsername: string | null; assigneeDisplayName: string | null; claimedAt: string }>
+  >({
+    queryKey: ["/api/admin/queue-claims"],
+    queryFn: () => fetch("/api/admin/queue-claims", { credentials: "include" }).then(r => (r.ok ? r.json() : [])),
+    enabled: authenticated && activeTab === "team",
+  });
+
   if (authLoading || !sessionReady) {
     return (
       <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
@@ -1637,6 +1672,10 @@ export default function Admin() {
       >
         <div className="admin-panel-body">
           <div className="reveal" style={{ marginBottom: 18 }}>
+            <p className="text-white/35 text-[11px] uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+              Admin
+              {activeTab !== "overview" ? ` · ${viewMeta.title}` : ""}
+            </p>
             <div className="kick" style={{ color: viewMeta.kickerColor || "var(--panel-cyan)" }}>
               {viewMeta.kicker}
             </div>
@@ -1646,9 +1685,63 @@ export default function Admin() {
                 {viewMeta.lede}
               </p>
             )}
+            <div className="flex gap-2 flex-wrap mt-4 items-center">
+              <input
+                type="search"
+                value={adminGlobalSearchQ}
+                onChange={e => setAdminGlobalSearchQ(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && void runAdminGlobalSearch()}
+                placeholder="Search users, events, queue…"
+                className={adminFieldClass}
+                style={{ maxWidth: 320, flex: 1, minWidth: 180 }}
+                data-testid="admin-global-search"
+              />
+              <button
+                type="button"
+                className="display text-xs px-4 py-2 border"
+                style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                disabled={adminGlobalSearching || !adminGlobalSearchQ.trim()}
+                onClick={() => void runAdminGlobalSearch()}
+              >
+                {adminGlobalSearching ? "…" : "SEARCH"}
+              </button>
+            </div>
+            {adminGlobalSearchResults && (
+              <div className="mt-3 p-3 border border-white/10 space-y-2" style={{ background: "#0a0a0c" }}>
+                {(adminGlobalSearchResults.users || []).slice(0, 6).map((u: any) => (
+                  <div key={`u-${u.id}`} className="flex flex-wrap items-center justify-between gap-2 text-sm text-white/80">
+                    <span>@{u.username}{u.displayName ? ` · ${u.displayName}` : ""}</span>
+                    <span className="flex gap-2">
+                      {messageButton(u)}
+                      <a href={`/u/${encodeURIComponent(u.username)}`} target="_blank" rel="noopener noreferrer" className="display text-xs px-2 py-1 border" style={{ borderColor: "#19E3FF", color: "#19E3FF" }}>VIEW PUBLIC</a>
+                    </span>
+                  </div>
+                ))}
+                {(adminGlobalSearchResults.events || []).slice(0, 6).map((ev: any) => (
+                  <div key={`e-${ev.id}`} className="flex flex-wrap items-center justify-between gap-2 text-sm text-white/80">
+                    <span>{ev.title} · {ev.status}</span>
+                    <a href={`/events?event=${ev.id}`} target="_blank" rel="noopener noreferrer" className="display text-xs px-2 py-1 border" style={{ borderColor: "#19E3FF", color: "#19E3FF" }}>VIEW PUBLIC</a>
+                  </div>
+                ))}
+                {(adminGlobalSearchResults.queue || []).slice(0, 6).map((q: any, i: number) => (
+                  <button
+                    key={`q-${q.kind}-${q.id}-${i}`}
+                    type="button"
+                    className="block w-full text-left text-sm text-white/70 hover:text-white"
+                    onClick={() => openSheet({ view: "inbox", account: "admin" })}
+                  >
+                    Queue · {q.kind}: {q.title}
+                  </button>
+                ))}
+                {!adminGlobalSearchResults.users?.length && !adminGlobalSearchResults.events?.length && !adminGlobalSearchResults.queue?.length && (
+                  <p className="text-white/40 text-xs m-0">No matches.</p>
+                )}
+              </div>
+            )}
           </div>
         {/* ── OVERVIEW ── */}
         {activeTab === "overview" && (
+          <>
           <AdminOverview
             pendingCount={pendingCount}
             attentionItems={overviewAttention}
@@ -1671,6 +1764,37 @@ export default function Admin() {
             onSendTestPush={canPush ? () => testPushMutation.mutate() : undefined}
             testPushPending={testPushMutation.isPending}
           />
+          <div className="mt-6 p-4 border border-white/10" style={{ background: "#0d0d0d" }} data-testid="admin-activity-log">
+            <p className="display text-sm mb-3" style={{ color: "#B06BFF" }}>ACTIVITY LOG</p>
+            <p className="text-white/40 text-xs mb-3">
+              Append-only admin actions (approves, denials, claims, guide messages). Open the floating inbox for queue work.
+            </p>
+            {adminActivityLog.length === 0 ? (
+              <p className="text-white/30 text-xs m-0">No recent actions.</p>
+            ) : (
+              <ul className="m-0 p-0 list-none space-y-2 max-h-[360px] overflow-y-auto">
+                {adminActivityLog.map(a => (
+                  <li key={a.id} className="text-sm text-white/75 border-t border-white/10 pt-2">
+                    <span style={{ color: "#19E3FF", fontFamily: "var(--font-mono, monospace)", fontSize: 11 }}>{a.action}</span>
+                    {a.targetLabel ? ` · ${a.targetLabel}` : ""}
+                    <div className="text-white/35 text-xs mt-0.5">
+                      {a.actorUsername ? `@${a.actorUsername}` : "admin"}
+                      {a.createdAt ? ` · ${new Date(a.createdAt).toLocaleString()}` : ""}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              className="display text-xs px-3 py-1 border mt-3"
+              style={{ borderColor: "#FF1FA0", color: "#FF1FA0" }}
+              onClick={() => openSheet({ view: "inbox", account: "admin" })}
+            >
+              OPEN QUEUE
+            </button>
+          </div>
+          </>
         )}
 
         {/* ── MANAGE EVENTS ── */}
@@ -2446,6 +2570,17 @@ export default function Admin() {
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         {messageButton(u)}
+                        {u.username && (
+                          <a
+                            href={`/u/${encodeURIComponent(u.username)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="display text-xs px-3 py-1 border"
+                            style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                          >
+                            VIEW PUBLIC
+                          </a>
+                        )}
                         {u.promoterStatus !== "approved" && (
                           <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
                             className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
@@ -2552,6 +2687,17 @@ export default function Admin() {
                           </div>
                           <div className="flex gap-2 flex-wrap">
                             {messageButton(u)}
+                            {u.username && (
+                              <a
+                                href={`/u/${encodeURIComponent(u.username)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="display text-xs px-3 py-1 border"
+                                style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                              >
+                                VIEW PUBLIC
+                              </a>
+                            )}
                             {!u.isOwner && isApprovedPromoter && (
                               <>
                                 <button
@@ -2678,6 +2824,17 @@ export default function Admin() {
                         <p className="text-white/50 text-xs mt-1">@{claim.username || claim.email}: {claim.claimReason}</p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
+                        {claim.businessId != null && (
+                          <a
+                            href={`/directory?place=${claim.businessId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="display text-xs px-3 py-1 border"
+                            style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                          >
+                            VIEW PUBLIC
+                          </a>
+                        )}
                         <button
                           onClick={() => businessClaimMutation.mutate({ id: claim.id, action: "approve" })}
                           disabled={businessClaimMutation.isPending}
@@ -2874,6 +3031,38 @@ export default function Admin() {
 
         {activeTab === "team" && canManageTeam && (
           <div className="space-y-8">
+            <div className="border border-white/10 p-4" style={{ background: "#0d0d0d" }}>
+              <p className="display text-sm mb-2" style={{ color: "#C8FA3C" }}>QUEUE CLAIMS · WHO HOLDS WHAT</p>
+              <p className="text-white/40 text-xs mb-3">
+                Soft claims from floating inbox Admin · Queue. Anyone can take over; claims auto-expire.
+              </p>
+              {teamQueueClaims.length === 0 ? (
+                <p className="text-white/30 text-xs m-0">No active queue claims.</p>
+              ) : (
+                <ul className="m-0 p-0 list-none space-y-2">
+                  {teamQueueClaims.map(c => (
+                    <li key={`${c.queueKind}-${c.entityId}`} className="text-sm text-white/75 flex flex-wrap gap-2 justify-between border-t border-white/10 pt-2">
+                      <span>
+                        <span style={{ color: "#19E3FF" }}>{c.queueKind}</span>
+                        {` #${c.entityId}`}
+                      </span>
+                      <span className="text-white/45 text-xs">
+                        @{c.assigneeUsername || "?"}
+                        {c.claimedAt ? ` · ${new Date(c.claimedAt).toLocaleString()}` : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <button
+                type="button"
+                className="display text-xs px-3 py-1 border mt-3"
+                style={{ borderColor: "#FF1FA0", color: "#FF1FA0" }}
+                onClick={() => openSheet({ view: "inbox", account: "admin" })}
+              >
+                OPEN QUEUE
+              </button>
+            </div>
             <div>
               <p className="text-white/40 text-sm mb-4">
                 Site admins can open this dashboard while logged into their PDX Pride Guide account (footer Admin Panel link). Owner accounts in Railway env cannot be removed here.
