@@ -100,9 +100,9 @@ export default function HubAdminOverview({
               Owner desk{ownerCount > 0 ? ` (${ownerCount})` : ""}
             </Button>
           )}
-          <Link href="/admin?tab=overview" onClick={onOpenAdminPanel}>
+          <Link href="/admin?tab=events" onClick={onOpenAdminPanel}>
             <Button variant="ghost" accent="cyan" size="sm">
-              Full admin panel →
+              Full admin tools →
             </Button>
           </Link>
         </div>

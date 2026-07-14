@@ -44,11 +44,7 @@ export default function HubSettings({ onLogout }: Props) {
           Notifications
         </div>
         <p style={{ margin: "8px 0 12px", fontSize: 13, color: "var(--board-muted)", lineHeight: 1.5 }}>
-          These save to your account. Same controls as{" "}
-          <Link href="/settings/notifications" style={{ color: "var(--panel-cyan)" }}>
-            full notification settings
-          </Link>
-          .
+          These save to your account — push alerts for messages, events, and account updates.
         </p>
         <div style={{ paddingBottom: 16 }}>
           <DashboardNotificationPrefs isAdmin={isAdmin} />

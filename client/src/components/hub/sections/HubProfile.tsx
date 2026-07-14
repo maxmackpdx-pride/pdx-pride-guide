@@ -123,16 +123,21 @@ export default function HubProfile({ user, stats, postsCount, profileEditor, onE
         ))}
       </div>
 
-      <div className="kick" style={{ marginBottom: 16 }}>
-        Your posts
-      </div>
-      <div className="card" style={{ padding: "32px 20px", textAlign: "center" }}>
-        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
-          {postsCount > 0
-            ? "Your posts will show here."
-            : "You haven't posted yet. Share a photo, update, or check-in from your feed."}
-        </p>
-      </div>
+      {/* Posts live on the public profile; hub Profile is edit-only now. */}
+      {!profileEditor && (
+        <>
+          <div className="kick" style={{ marginBottom: 16 }}>
+            Your posts
+          </div>
+          <div className="card" style={{ padding: "32px 20px", textAlign: "center" }}>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+              {postsCount > 0
+                ? "Your posts will show here."
+                : "You haven't posted yet. Share a photo, update, or check-in from your feed."}
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

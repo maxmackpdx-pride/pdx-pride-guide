@@ -12,12 +12,11 @@ export type HubEventRow = {
   chip?: string;
 };
 
-type EventsTab = "going" | "hosting" | "saved";
+type EventsTab = "going" | "hosting";
 
 const TABS: Array<{ key: EventsTab; label: string }> = [
   { key: "going", label: "Going" },
   { key: "hosting", label: "Hosting" },
-  { key: "saved", label: "Saved" },
 ];
 
 function dayDotClass(day?: string) {
@@ -37,6 +36,7 @@ function dayDotClass(day?: string) {
 type Props = {
   going: HubEventRow[];
   hosting: HubEventRow[];
+  /** Optional for API compat; Saved tab is not shown until bookmarks ship. */
   saved?: HubEventRow[];
   loading?: boolean;
   emptyMessage?: string;
@@ -47,14 +47,13 @@ type Props = {
 export default function HubEvents({
   going,
   hosting,
-  saved = [],
   loading,
   emptyMessage = "No events in this tab yet.",
   editorSlot,
 }: Props) {
   const [tab, setTab] = useState<EventsTab>("going");
 
-  const lists: Record<EventsTab, HubEventRow[]> = { going, hosting, saved };
+  const lists: Record<EventsTab, HubEventRow[]> = { going, hosting };
   const eventList = lists[tab];
 
   return (

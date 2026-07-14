@@ -7673,6 +7673,9 @@ export const storage: IStorage = {
     if (isEnvListedSiteAdmin(user)) return { error: "Owner admins configured in Railway env cannot be removed here" };
     if (!storage.hasSiteAdminGrant(userId)) return { error: "User is not a granted site admin" };
     sqlite.prepare("DELETE FROM site_admin_grants WHERE user_id = ?").run(userId);
+    // Mirror set-sub-admin grant:false — GRANT SUB-ADMIN sets both the grant row and
+    // subAdmin; leaving subAdmin true would keep userIsSiteAdmin / userIsAdminNow true.
+    storage.updateUser(userId, { subAdmin: false });
     return { ok: true };
   },
   resolveModerationRequest(id, status, adminNotes) {

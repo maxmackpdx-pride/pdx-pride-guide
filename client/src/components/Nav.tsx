@@ -173,9 +173,9 @@ function ProfileMenuPanel({
         Inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
       </button>
       <Link
-        href="/settings/notifications"
+        href="/dashboard?section=settings"
         role="menuitem"
-        className={`site-profile-menu__item${location === "/settings/notifications" || location.startsWith("/settings/notifications?") ? " active" : ""}`}
+        className={`site-profile-menu__item${hubSection === "settings" ? " active" : ""}`}
         onClick={onClose}
       >
         Notification settings
@@ -444,7 +444,7 @@ function MobileNotifyMenu({
               </button>
             )}
             <Link
-              href="/settings/notifications"
+              href="/dashboard?section=settings"
               className="site-mobile-notify__foot-btn"
               onClick={close}
             >

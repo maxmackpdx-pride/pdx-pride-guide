@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useTheme } from "@/context/ThemeContext";
 import type { AuthUser } from "@/context/AuthContext";
@@ -158,7 +158,23 @@ export default function HubV2({
   const [, navigate] = useLocation();
   const [searchQ, setSearchQ] = useState("");
 
+  const publicProfilePath = user.username
+    ? `/u/${encodeURIComponent(user.username)}`
+    : null;
+
+  // Profile rail / ?section=profile without edit → real public profile, not HubProfile stub.
+  // Keep HubProfile only for edit deep-link (?edit=profile / onEditProfile).
+  useEffect(() => {
+    if (section === "profile" && !editMode && publicProfilePath) {
+      navigate(publicProfilePath);
+    }
+  }, [section, editMode, publicProfilePath, navigate]);
+
   const handleSectionChange = (next: HubSection) => {
+    if (next === "profile" && !editMode && publicProfilePath) {
+      navigate(publicProfilePath);
+      return;
+    }
     if (HUB_ADMIN_TABLE_SECTIONS.includes(next)) {
       const tab = hubSectionToAdminTab(next);
       if (tab) {
@@ -197,13 +213,13 @@ export default function HubV2({
         />
       )}
       {(section === "feed" || section === "post") && <HubFeed key="feed" canPostToFeed={canPostToFeed} />}
-      {section === "profile" && (
+      {section === "profile" && editMode && (
         <HubProfile
-          key={`profile-${editMode ? "edit" : "view"}`}
+          key="profile-edit"
           user={user}
           stats={stats}
           postsCount={postsCount}
-          profileEditor={editMode ? profileEditor : undefined}
+          profileEditor={profileEditor}
           onEditProfile={onEditProfile}
         />
       )}
