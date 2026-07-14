@@ -40,17 +40,17 @@
   pointer-events: none;
 }
 
-/* Day color gradient over poster — art visible underneath */
+/* Soft day wash + bottom fade for title legibility */
 .pp-past-events__scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--pp-day, #fff) 38%, transparent) 0%,
-    color-mix(in srgb, var(--pp-day, #fff) 14%, rgba(8, 8, 10, 0.5)) 40%,
-    rgba(8, 8, 10, 0.82) 100%
+    180deg,
+    color-mix(in srgb, var(--pp-day, #fff) 14%, transparent) 0%,
+    rgba(8, 8, 10, 0.1) 38%,
+    rgba(8, 8, 10, 0.48) 100%
   );
 }
 

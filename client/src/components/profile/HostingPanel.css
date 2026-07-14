@@ -138,17 +138,17 @@
   pointer-events: none;
 }
 
-/* Day color gradient over poster — art stays readable underneath */
+/* Soft day wash + bottom fade — poster reads clearly underneath */
 .hp-card__banner-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--hp-day, var(--day-sat)) 42%, transparent) 0%,
-    color-mix(in srgb, var(--hp-day, var(--day-sat)) 18%, rgba(8, 8, 10, 0.55)) 45%,
-    rgba(8, 8, 10, 0.78) 100%
+    180deg,
+    color-mix(in srgb, var(--hp-day, var(--day-sat)) 18%, transparent) 0%,
+    rgba(8, 8, 10, 0.08) 42%,
+    rgba(8, 8, 10, 0.42) 100%
   );
 }
 

@@ -110,6 +110,7 @@
   white-space: nowrap;
 }
 
+/* Cover fade only along the bottom seam (avatar overlap) — keep the photo open above */
 .pp-hero--reimagined .pp-hero__scrim {
   position: absolute;
   left: 0;
@@ -117,8 +118,25 @@
   top: 0;
   height: clamp(108px, 22vw, 160px);
   z-index: 1;
-  background: linear-gradient(180deg, rgba(10, 10, 10, 0.12), rgba(10, 10, 10, 0.92));
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 52%,
+    rgba(10, 10, 10, 0.18) 78%,
+    rgba(10, 10, 10, 0.48) 100%
+  );
   pointer-events: none;
+}
+
+/* Custom cover photos: even lighter — the crop is the point */
+.pp-hero--reimagined:has(.pp-hero__banner--custom) .pp-hero__scrim {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 58%,
+    rgba(10, 10, 10, 0.12) 82%,
+    rgba(10, 10, 10, 0.36) 100%
+  );
 }
 
 .pp-hero--reimagined .pp-hero__rainbow {
