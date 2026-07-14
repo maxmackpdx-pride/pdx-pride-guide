@@ -2095,6 +2095,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
       if (username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
       if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+      // Reserved shared guide-admin identity — not a human signup.
+      if (storage.isSystemGuideAccount({ username, email })) {
+        return res.status(400).json({ error: "That username or email is reserved" });
+      }
 
       const existingEmail = storage.getUserByEmail(email);
       if (existingEmail) return res.status(409).json({ error: "Email already registered" });
@@ -2117,6 +2121,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     // Accept username or email
     const user = storage.getUserByEmail(email) || storage.getUserByUsername(email);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    // System guide-admin mailbox cannot be signed into as a person.
+    if (storage.isSystemGuideAccount(user)) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
     if (!verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
     if (isLegacyPasswordHash(user.passwordHash)) {
       storage.updatePasswordHash(user.id, hashPassword(password));
@@ -3989,6 +3997,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const { reasonCode, note } = parseProfilePhotoRejectBody(req.body);
       const result = storage.rejectUserProfilePhoto(username, reasonCode, note);
       if (result.error) return res.status(400).json({ error: result.error });
+      const actor = getSessionAdminUser(req) || (req.session.userId ? storage.getUserById(req.session.userId) : null);
+      storage.logAdminAction({
+        actorUserId: actor?.id ?? null,
+        actorUsername: actor?.username || null,
+        action: "reject_photo",
+        targetType: "user",
+        targetId: username,
+        targetLabel: `@${username}`,
+        detail: { reasonCode, hasNote: Boolean(note) },
+      });
       res.json({ ok: true });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -4010,16 +4028,60 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
     const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
-    const queueCount = storage.getAdminPendingCount();
-    const guideUnread = storage.getGuideAdminUnreadCount();
+    const breakdown = storage.getAdminQueueBreakdown();
+    const queueCount = breakdown.total;
+    const guideUnread = breakdown.guideUnread;
     res.json({
       count: queueCount,
       queueCount,
       guideUnread,
-      /** Badge total for Admin tab: queue items + unreplied guide-inbox messages. */
+      /** Badge total for Admin tab / mobile Queue: queue items + guide-inbox unreplies. */
       adminBadge: queueCount + guideUnread,
       ownerCount,
+      /** Category counts — one mobile-friendly payload for badges and overview. */
+      breakdown,
     });
+  });
+
+  /**
+   * Mobile-first admin pulse: single round-trip for overview cards + queue chips.
+   * Prefer this over hammering many queue endpoints on a phone.
+   */
+  app.get("/api/admin/pulse", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    const breakdown = storage.getAdminQueueBreakdown();
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
+    const metrics = storage.getAdminMetrics();
+    res.json({
+      generatedAt: new Date().toISOString(),
+      queue: breakdown,
+      adminBadge: breakdown.total + breakdown.guideUnread,
+      ownerCount,
+      liveEvents: metrics.liveEvents,
+      pendingSubmissions: metrics.pendingSubmissions,
+      newUsersToday: metrics.newUsersToday,
+      guideUnread: breakdown.guideUnread,
+      guideSentPreview: storage.getGuideAdminSent().slice(0, 5).map((m: any) => ({
+        id: m.id,
+        threadId: m.threadId,
+        subject: m.subject,
+        toUsername: m.to_username || null,
+        createdAt: m.createdAt,
+      })),
+    });
+  });
+
+  /** Unified search for mobile admin search bar → inbox queue or /admin tabs. */
+  app.get("/api/admin/search", requireAdmin, (req, res) => {
+    const q = String(req.query.q || "").trim();
+    const limit = Number(req.query.limit) || 16;
+    res.json(storage.adminGlobalSearch(q, limit));
+  });
+
+  /** Recent admin actions (rejects, DMs, grants) for accountability on mobile/desktop. */
+  app.get("/api/admin/activity", requireAdmin, (req, res) => {
+    const limit = Number(req.query.limit) || 60;
+    res.json(storage.getAdminActionLog(limit));
   });
 
   app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
@@ -4456,7 +4518,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
       { contextType: "ADMIN_MESSAGE" },
     );
     if (!msg) return res.status(500).json({ error: "Could not send message" });
+    const actor = getSessionAdminUser(req) || (req.session.userId ? storage.getUserById(req.session.userId) : null);
+    storage.logAdminAction({
+      actorUserId: actor?.id ?? null,
+      actorUsername: actor?.username || null,
+      action: "admin_message",
+      targetType: "user",
+      targetId: target.id,
+      targetLabel: `@${target.username}`,
+      detail: { threadId: msg.threadId, subject: msg.subject },
+    });
     res.json({ ok: true, message: msg });
+  });
+
+  app.post("/api/admin/messages/mark-all-read", requireAdmin, (_req, res) => {
+    const cleared = storage.markGuideAdminInboxRead();
+    res.json({ ok: true, cleared });
+  });
+
+  app.delete("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
+    const threadId = decodeURIComponent(req.params.threadId || "").trim();
+    if (!threadId) return res.status(400).json({ error: "Thread id required" });
+    const guide = storage.resolveGuideAdminUser();
+    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+    const thread = storage.getThread(threadId);
+    const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
+    if (!visible) return res.status(404).json({ error: "Thread not found" });
+    const cleared = storage.softDeleteGuideAdminThread(threadId);
+    if (cleared === 0) return res.status(404).json({ error: "Nothing to delete" });
+    res.json({ ok: true, cleared });
   });
 
   scheduleMapCoordinateBackfill();

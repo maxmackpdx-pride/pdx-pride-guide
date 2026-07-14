@@ -5635,6 +5635,53 @@ const GUIDE_ADMIN_CONTEXT_TYPES = new Set([
   "ADMIN_MESSAGE",
 ]);
 
+export type AdminActionLogEntry = {
+  id: number;
+  actorUserId: number | null;
+  actorUsername: string | null;
+  action: string;
+  targetType: string | null;
+  targetId: string | null;
+  targetLabel: string | null;
+  detail: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+export type AdminQueueBreakdown = {
+  total: number;
+  submissions: number;
+  moderation: number;
+  promoters: number;
+  businessClaims: number;
+  businessSubmissions: number;
+  logoRequests: number;
+  giftingReports: number;
+  giftingFlagged: number;
+  missedConnections: number;
+  riverBrats: number;
+  pendingGigs: number;
+  guideUnread: number;
+};
+
+function ensureAdminActionLogSchema() {
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS admin_action_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      actor_user_id INTEGER,
+      actor_username TEXT,
+      action TEXT NOT NULL,
+      target_type TEXT,
+      target_id TEXT,
+      target_label TEXT,
+      detail TEXT,
+      created_at TEXT NOT NULL DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_admin_action_log_created ON admin_action_log(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_admin_action_log_action ON admin_action_log(action);
+  `);
+}
+ensureAdminActionLogSchema();
+
 type SiteOwnerRow = {
   id: number;
   email: string;
@@ -6274,6 +6321,25 @@ export interface IStorage {
   resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
   dismissStaleTestModerationRequests(): number;
   getAdminPendingCount(): number;
+  getAdminQueueBreakdown(): AdminQueueBreakdown;
+  logAdminAction(input: {
+    actorUserId?: number | null;
+    actorUsername?: string | null;
+    action: string;
+    targetType?: string | null;
+    targetId?: string | number | null;
+    targetLabel?: string | null;
+    detail?: Record<string, unknown> | null;
+  }): void;
+  getAdminActionLog(limit?: number): AdminActionLogEntry[];
+  adminGlobalSearch(rawQuery: string, limit?: number): {
+    users: Array<{ id: number; username: string; displayName: string | null; email: string; promoterStatus: string }>;
+    events: Array<{ id: number; title: string; venueName: string | null; status: string; dateStart: string | null }>;
+    queue: Array<{ kind: string; id: number; title: string; meta: string }>;
+  };
+  markGuideAdminInboxRead(): number;
+  softDeleteGuideAdminThread(threadId: string): number;
+  isSystemGuideAccount(user: { id?: number | null; username?: string | null; email?: string | null } | null | undefined): boolean;
   countAdminGiftingFlagged(): number;
   getAdminMetrics(): AdminMetricsSnapshot;
   hasSiteAdminGrant(userId: number): boolean;
@@ -6711,7 +6777,8 @@ export const storage: IStorage = {
     }).returning().get();
   },
   getAllUsers() {
-    return db.select().from(users).all();
+    // Hide the shared system guide identity from roster / search surfaces.
+    return db.select().from(users).all().filter((u) => !storage.isSystemGuideAccount(u));
   },
   // ─── Member profiles + follows ─────────────────────────────────────────────
   followUser(followerUserId, followingUserId) {
@@ -7597,24 +7664,210 @@ export const storage: IStorage = {
       .filter((p: any) => !terminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0)
       .length;
   },
-  getAdminPendingCount() {
+  getAdminQueueBreakdown() {
     // Must match every category rendered in QueueView mode="admin".
     // Owner Desk items are counted separately via getOwnerDeskCount().
-    // Standalone promoter applications live in the promoter queue only — not double-counted.
-    const pendingSubmissions = this.getSubmissions("PENDING")
-      .filter((s) => s.type !== "PROMOTER_APPLICATION");
-    return (
-      pendingSubmissions.length
-      + this.getModerationRequests("PENDING").length
-      + this.getPendingPromoterRequests().length
-      + this.getGiftingReports("PENDING").length
-      + this.countAdminGiftingFlagged()
-      + this.getPendingBusinessClaims().length
-      + this.getPendingBusinessSubmissions().length
-      + this.getPendingBusinessLogoRequests().length
-      + this.getAdminMissedConnections().length
-      + this.getRiverBratsReports("PENDING").length
-    );
+    // Guide-admin DMs are under Admin · Inbox (guideUnread), not total.
+    const submissions = this.getSubmissions("PENDING")
+      .filter((s) => s.type !== "PROMOTER_APPLICATION").length;
+    const moderation = this.getModerationRequests("PENDING").length;
+    const promoters = this.getPendingPromoterRequests().length;
+    const giftingReports = this.getGiftingReports("PENDING").length;
+    const giftingFlagged = this.countAdminGiftingFlagged();
+    const businessClaims = this.getPendingBusinessClaims().length;
+    const businessSubmissions = this.getPendingBusinessSubmissions().length;
+    const logoRequests = this.getPendingBusinessLogoRequests().length;
+    const missedConnections = this.getAdminMissedConnections().length;
+    const riverBrats = this.getRiverBratsReports("PENDING").length;
+    const pendingGigs = this.getGigPosts().filter(
+      (g) => String(g.status || "").toUpperCase() === "PENDING",
+    ).length;
+    const total =
+      submissions
+      + moderation
+      + promoters
+      + giftingReports
+      + giftingFlagged
+      + businessClaims
+      + businessSubmissions
+      + logoRequests
+      + missedConnections
+      + riverBrats
+      + pendingGigs;
+    return {
+      total,
+      submissions,
+      moderation,
+      promoters,
+      businessClaims,
+      businessSubmissions,
+      logoRequests,
+      giftingReports,
+      giftingFlagged,
+      missedConnections,
+      riverBrats,
+      pendingGigs,
+      guideUnread: storage.getGuideAdminUnreadCount(),
+    };
+  },
+  getAdminPendingCount() {
+    return storage.getAdminQueueBreakdown().total;
+  },
+  logAdminAction(input) {
+    ensureAdminActionLogSchema();
+    const action = String(input.action || "").trim().slice(0, 80);
+    if (!action) return;
+    try {
+      sqlite.prepare(`
+        INSERT INTO admin_action_log (
+          actor_user_id, actor_username, action, target_type, target_id, target_label, detail, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        input.actorUserId ?? null,
+        (input.actorUsername || null) && String(input.actorUsername).slice(0, 64),
+        action,
+        input.targetType ? String(input.targetType).slice(0, 40) : null,
+        input.targetId != null ? String(input.targetId).slice(0, 80) : null,
+        input.targetLabel ? String(input.targetLabel).slice(0, 200) : null,
+        input.detail ? JSON.stringify(input.detail).slice(0, 4000) : null,
+        new Date().toISOString(),
+      );
+    } catch (err) {
+      console.warn("[admin_action_log] insert failed:", err);
+    }
+  },
+  getAdminActionLog(limit = 80) {
+    ensureAdminActionLogSchema();
+    const take = Math.min(Math.max(Number(limit) || 80, 1), 200);
+    const rows = sqlite.prepare(`
+      SELECT id, actor_user_id AS actorUserId, actor_username AS actorUsername,
+             action, target_type AS targetType, target_id AS targetId,
+             target_label AS targetLabel, detail, created_at AS createdAt
+      FROM admin_action_log
+      ORDER BY id DESC
+      LIMIT ?
+    `).all(take) as Array<Record<string, unknown>>;
+    return rows.map((r) => {
+      let detail: Record<string, unknown> | null = null;
+      if (r.detail) {
+        try {
+          detail = JSON.parse(String(r.detail));
+        } catch {
+          detail = { raw: String(r.detail) };
+        }
+      }
+      return {
+        id: Number(r.id),
+        actorUserId: r.actorUserId != null ? Number(r.actorUserId) : null,
+        actorUsername: (r.actorUsername as string) || null,
+        action: String(r.action || ""),
+        targetType: (r.targetType as string) || null,
+        targetId: (r.targetId as string) || null,
+        targetLabel: (r.targetLabel as string) || null,
+        detail,
+        createdAt: String(r.createdAt || ""),
+      };
+    });
+  },
+  /**
+   * Unified admin search across users, live events, and pending queue subjects.
+   * Powers hub global search → route into floating inbox or admin tabs.
+   */
+  adminGlobalSearch(rawQuery, limit = 20) {
+    const q = String(rawQuery || "").trim().toLowerCase().replace(/^@+/, "");
+    if (!q || q.length < 2) {
+      return { users: [], events: [], queue: [] as Array<{ kind: string; id: number; title: string; meta: string }> };
+    }
+    const take = Math.min(Math.max(Number(limit) || 20, 1), 40);
+
+    const allUsers = (storage.getAllUsers ? storage.getAllUsers() : []) as User[];
+    const users = allUsers
+      .filter((u) => {
+        if (storage.isGuideAdminUserId(u.id)) return false;
+        if (u.status !== "active") return false;
+        const uname = String(u.username || "").toLowerCase();
+        const email = String(u.email || "").toLowerCase();
+        const display = String(u.displayName || "").toLowerCase();
+        return uname.includes(q) || email.includes(q) || display.includes(q);
+      })
+      .slice(0, take)
+      .map((u) => ({
+        id: u.id,
+        username: u.username,
+        displayName: u.displayName,
+        email: u.email,
+        promoterStatus: (u as any).promoterStatus || "none",
+      }));
+
+    const events = (sqlite.prepare(`
+      SELECT id, title, venue_name AS venueName, status, date_start AS dateStart
+      FROM events
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND (
+          LOWER(title) LIKE ?
+          OR LOWER(COALESCE(venue_name, '')) LIKE ?
+          OR CAST(id AS TEXT) = ?
+        )
+      ORDER BY
+        CASE status WHEN 'LIVE' THEN 0 ELSE 1 END,
+        date_start DESC
+      LIMIT ?
+    `).all(`%${q}%`, `%${q}%`, q, take) as Array<Record<string, unknown>>).map((e) => ({
+      id: Number(e.id),
+      title: String(e.title || ""),
+      venueName: (e.venueName as string) || null,
+      status: String(e.status || ""),
+      dateStart: (e.dateStart as string) || null,
+    }));
+
+    const queue: Array<{ kind: string; id: number; title: string; meta: string }> = [];
+    for (const s of storage.getSubmissions("PENDING").slice(0, 80)) {
+      const hay = `${s.title} ${s.submitterEmail} ${s.venueName || ""}`.toLowerCase();
+      if (!hay.includes(q)) continue;
+      queue.push({
+        kind: "submission",
+        id: s.id,
+        title: s.title || "Submission",
+        meta: `${s.type} · ${s.submitterEmail || "unknown"}`,
+      });
+      if (queue.length >= take) break;
+    }
+    if (queue.length < take) {
+      for (const p of storage.getPendingPromoterRequests().slice(0, 40)) {
+        const hay = `${p.username || ""} ${p.displayName || ""} ${p.email || ""}`.toLowerCase();
+        if (!hay.includes(q)) continue;
+        queue.push({
+          kind: "promoter",
+          id: p.id,
+          title: p.displayName || p.username || "Promoter request",
+          meta: `@${p.username || "?"} · promoter request`,
+        });
+        if (queue.length >= take) break;
+      }
+    }
+
+    return { users, events, queue };
+  },
+  markGuideAdminInboxRead() {
+    const guide = resolveGuideAdminUser();
+    if (!guide) return 0;
+    const result = sqlite.prepare(`
+      UPDATE messages SET is_read = 1
+      WHERE to_user_id = ? AND is_read = 0 AND deleted_by_to = 0
+    `).run(guide.id);
+    return result.changes || 0;
+  },
+  softDeleteGuideAdminThread(threadId: string) {
+    const guide = resolveGuideAdminUser();
+    if (!guide) return 0;
+    return storage.softDeleteThread(threadId, guide.id);
+  },
+  isSystemGuideAccount(user: { id?: number | null; username?: string | null; email?: string | null } | null | undefined): boolean {
+    if (!user) return false;
+    if (user.id != null && storage.isGuideAdminUserId(user.id)) return true;
+    const uname = String(user.username || "").trim().toLowerCase().replace(/^@/, "");
+    const email = String(user.email || "").trim().toLowerCase();
+    return uname === GUIDE_ADMIN_USERNAME || email === GUIDE_ADMIN_EMAIL;
   },
   hasSiteAdminGrant(userId) {
     return !!sqlite.prepare("SELECT 1 FROM site_admin_grants WHERE user_id = ?").get(userId);

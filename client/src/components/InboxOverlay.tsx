@@ -653,7 +653,21 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                 />
               )}
               {inboxActive && account === "admin" && (queueFolder === "active" || queueFolder === "completed") && (
-                <QueueView mode="admin" queueFolder={queueFolder} />
+                <QueueView
+                  mode="admin"
+                  queueFolder={queueFolder}
+                  guideUnread={pendingAdmin.guideUnread || adminGuideUnread || 0}
+                  ownerCount={isOwner ? (pendingAdmin.ownerCount || 0) : 0}
+                  onOpenGuideInbox={() => {
+                    setQueueFolder("inbox");
+                    setActiveId(null);
+                  }}
+                  onOpenOwnerDesk={isOwner ? () => {
+                    setAccount("owner");
+                    setQueueFolder("active");
+                    setActiveId(null);
+                  } : undefined}
+                />
               )}
               {inboxActive && account === "owner" && (
                 <QueueView mode="owner" queueFolder={queueFolder === "completed" ? "completed" : "active"} />

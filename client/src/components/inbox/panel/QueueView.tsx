@@ -18,6 +18,7 @@ type QueueRowKind =
   | "business_claim"
   | "business_submission"
   | "logo_request"
+  | "gig_pending"
   | "owner_desk";
 
 type QueueRow = {
@@ -38,6 +39,25 @@ type QueueRow = {
   completedAt?: string;
   readOnly?: boolean;
 };
+
+/** Every admin queue surface — always shown in floating inbox, even at 0. */
+const ADMIN_QUEUE_BUCKETS: Array<{
+  id: string;
+  label: string;
+  kinds: QueueRowKind[];
+  color: string;
+}> = [
+  { id: "events", label: "Events / claims", kinds: ["submission"], color: C.cyan },
+  { id: "promoters", label: "Promoters", kinds: ["promoter_request"], color: C.purple },
+  { id: "venue_claims", label: "Venue claims", kinds: ["business_claim"], color: C.orange },
+  { id: "new_venues", label: "New venues", kinds: ["business_submission"], color: C.orange },
+  { id: "logos", label: "Logos", kinds: ["logo_request"], color: C.limeSoft },
+  { id: "moderation", label: "Moderation", kinds: ["moderation"], color: C.magenta },
+  { id: "spotted", label: "Missed conn", kinds: ["spotted"], color: C.magenta },
+  { id: "gifting", label: "Gifting", kinds: ["gifting_report", "gifting_flagged"], color: C.lime },
+  { id: "river_brats", label: "River Brats", kinds: ["river_brats"], color: C.orange },
+  { id: "gigs", label: "Pride Werk", kinds: ["gig_pending"], color: C.purple },
+];
 
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
   NEW_EVENT: { label: "EVENT", color: C.cyan },
@@ -78,6 +98,33 @@ function mapSubmission(s: any, completed = false): QueueRow | null {
     body: s.claimReason || undefined,
     outcome: completed ? status : undefined,
     completedAt: completed ? String(s.createdAt || "") : undefined,
+    readOnly: completed,
+  };
+}
+
+function mapPendingGig(g: any, completed = false): QueueRow | null {
+  const status = String(g.status || "").toUpperCase();
+  if (completed) {
+    if (!["REJECTED", "REMOVED"].includes(status)) return null;
+  } else if (status !== "PENDING") {
+    return null;
+  }
+  return {
+    id: `gig-${g.id}`,
+    kind: "gig_pending",
+    entityId: g.id,
+    tag: "PRIDE WERK",
+    tagColor: C.purple,
+    title: g.title || "Gig post",
+    meta: `${g.postType || "GIG"}${g.username ? ` · @${g.username}` : g.name ? ` · ${g.name}` : ""}${g.createdAt ? " · " + ts(g.createdAt) : ""}`,
+    fields: [
+      ["Type", String(g.postType || "—")],
+      ["Where", String(g.location || (g.isRemote ? "Remote" : "—"))],
+      ["Comp", String(g.compensation || "—")],
+    ],
+    note: g.description || "",
+    outcome: completed ? status : undefined,
+    completedAt: completed ? String(g.createdAt || "") : undefined,
     readOnly: completed,
   };
 }
@@ -361,6 +408,7 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/river-brats/reports"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/moderation"] });
@@ -372,12 +420,29 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/missed-connections"] });
 }
 
-export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owner"; queueFolder: QueueFolder }) {
+export default function QueueView({
+  mode,
+  queueFolder,
+  guideUnread = 0,
+  ownerCount = 0,
+  onOpenGuideInbox,
+  onOpenOwnerDesk,
+}: {
+  mode: "admin" | "owner";
+  queueFolder: QueueFolder;
+  /** Shared guide-admin message unread — shown as a jump chip into Admin · Inbox. */
+  guideUnread?: number;
+  ownerCount?: number;
+  onOpenGuideInbox?: () => void;
+  onOpenOwnerDesk?: () => void;
+}) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
+  /** "all" or a bucket id from ADMIN_QUEUE_BUCKETS — keeps every queue discoverable. */
+  const [bucketFilter, setBucketFilter] = useState<string>("all");
   const accent = mode === "admin" ? C.magenta : C.purple;
   const completed = queueFolder === "completed";
 
@@ -456,6 +521,14 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
     }),
     enabled: mode === "admin",
   });
+  const gigsQuery = useQuery<any[]>({
+    queryKey: ["/api/admin/gigs"],
+    queryFn: () => apiRequest("GET", "/api/admin/gigs").then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`);
+      return r.json();
+    }),
+    enabled: mode === "admin",
+  });
   const ownerQuery = useQuery<any[]>({
     queryKey: ["/api/admin/feedback", completed ? "resolved" : "open"],
     queryFn: () => adminFetch(completed ? "/api/admin/feedback?status=RESOLVED" : "/api/admin/feedback"),
@@ -471,12 +544,14 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
   const businessClaims = claimsQuery.data ?? [];
   const businessSubs = bizSubsQuery.data ?? [];
   const logoReqs = logoQuery.data ?? [];
+  const gigs = gigsQuery.data ?? [];
   const ownerReports = ownerQuery.data ?? [];
 
   const failedSources = mode === "admin"
     ? [
         subsQuery.isError && "submissions",
         giftingQuery.isError && "gifting",
+        gigsQuery.isError && "pride werk",
         spottedQuery.isError && "missed connections",
         riverBratsQuery.isError && "river brats",
         moderationQuery.isError && "moderation",
@@ -582,6 +657,15 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
     mutationFn: (id: number) => apiRequest("POST", `/api/admin/business-logo-requests/${id}/deny`, {}),
     onSuccess: onQueueSuccess,
   });
+  const approveGig = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/gigs/${id}/status`, { status: "LIVE" }),
+    onSuccess: onQueueSuccess,
+  });
+  const rejectGig = useMutation({
+    mutationFn: ({ id, reasonCode, note }: { id: number; reasonCode: string; note: string }) =>
+      apiRequest("POST", `/api/admin/gigs/${id}/reject`, { reasonCode, note }),
+    onSuccess: onQueueSuccess,
+  });
 
   const rows: QueueRow[] = useMemo(() => {
     if (mode === "owner") {
@@ -632,15 +716,34 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
       const row = mapLogoRequest(l, completed);
       if (row) items.push(row);
     }
+    for (const g of gigs) {
+      const row = mapPendingGig(g, completed);
+      if (row) items.push(row);
+    }
     return completed ? sortCompletedRows(items) : items;
-  }, [mode, completed, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, ownerReports]);
+  }, [mode, completed, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, gigs, ownerReports]);
+
+  const bucketCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: rows.length };
+    for (const b of ADMIN_QUEUE_BUCKETS) {
+      counts[b.id] = rows.filter((r) => b.kinds.includes(r.kind)).length;
+    }
+    return counts;
+  }, [rows]);
+
+  const visibleBuckets = useMemo(() => {
+    if (mode !== "admin") return [];
+    if (bucketFilter === "all") return ADMIN_QUEUE_BUCKETS;
+    return ADMIN_QUEUE_BUCKETS.filter((b) => b.id === bucketFilter);
+  }, [mode, bucketFilter]);
 
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
     || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending
     || resolveModeration.isPending || approvePromoter.isPending || denyPromoter.isPending
     || approveClaim.isPending || denyClaim.isPending || approveBizSub.isPending
-    || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending;
+    || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending
+    || approveGig.isPending || rejectGig.isPending;
 
   const kicker = mode === "admin"
     ? completed
@@ -674,6 +777,199 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
     </button>
   );
 
+  const renderQueueRow = (q: QueueRow, i: number) => {
+    const isOpen = !!open[q.id];
+    const rejectKey = q.id;
+    return (
+      <div key={q.id} style={{ borderTop: i > 0 ? `1px solid ${C.border2}` : undefined, background: isOpen ? "#101014" : undefined }}>
+        <div
+          onClick={() => setOpen((p) => ({ ...p, [q.id]: !p[q.id] }))}
+          style={{ padding: 16, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 9,
+                  letterSpacing: ".08em",
+                  fontWeight: 700,
+                  color: "#06060a",
+                  background: q.tagColor,
+                  padding: "2.5px 7px",
+                  borderRadius: 6,
+                  flex: "none",
+                }}
+              >
+                {q.tag}
+              </span>
+            </div>
+            <div style={{ fontWeight: 600, fontSize: 14.5, color: C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {q.title}
+            </div>
+            <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>
+              {q.meta}
+              {q.outcome ? ` · ${q.outcome}` : ""}
+            </div>
+          </div>
+          <span style={{ color: accent, flex: "none", display: "flex", transition: "transform .15s", transform: `rotate(${isOpen ? 180 : 0}deg)` }}>
+            <ChevronDown size={20} strokeWidth={2.4} />
+          </span>
+        </div>
+        {isOpen && (
+          <div style={{ padding: "0 16px 16px" }} onClick={(e) => e.stopPropagation()}>
+            {q.fields.length > 0 && (
+              <div style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${C.border2}` }}>
+                {q.fields.map(([label, value], fi) => (
+                  <div key={fi} style={{ display: "flex", gap: 10, padding: "9px 12px", background: C.inset2, borderTop: fi > 0 ? `1px solid ${C.divider}` : undefined }}>
+                    <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: C.faint, width: 66, flex: "none", textTransform: "uppercase", paddingTop: 1 }}>
+                      {label}
+                    </span>
+                    <span style={{ fontSize: 13, color: C.body, flex: 1, lineHeight: 1.4 }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {(q.note || q.body) && (
+              <div style={{ marginTop: 10, background: C.inset, borderRadius: 12, padding: "11px 13px", fontSize: 12.5, color: C.muted, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>
+                {q.body || q.note}
+              </div>
+            )}
+            {q.attachments && q.attachments.length > 0 && (
+              <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {q.attachments.map((url, ai) => (
+                  <a
+                    key={ai}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontFamily: MONO,
+                      fontSize: 10,
+                      letterSpacing: ".06em",
+                      color: accent,
+                      border: `1px solid ${C.border2}`,
+                      borderRadius: 8,
+                      padding: "6px 10px",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Attachment {ai + 1} ↗
+                  </a>
+                ))}
+              </div>
+            )}
+            {!q.readOnly && (
+              <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+                {q.kind === "submission" && (
+                  <>
+                    {btn("APPROVE", C.green, () => approveSub.mutate(q.entityId))}
+                    {btn("DECLINE", C.red, () => declineSub.mutate(q.entityId), true)}
+                  </>
+                )}
+                {q.kind === "river_brats" && btn("RESOLVE", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
+                {q.kind === "moderation" && btn("MARK REVIEWED", C.limeSoft, () => resolveModeration.mutate(q.entityId))}
+                {q.kind === "promoter_request" && (
+                  <>
+                    {btn("APPROVE PROMOTER", C.green, () => approvePromoter.mutate(q.entityId))}
+                    {btn("DENY", C.red, () => denyPromoter.mutate(q.entityId), true)}
+                  </>
+                )}
+                {q.kind === "business_claim" && (
+                  <>
+                    {btn("APPROVE CLAIM", C.green, () => approveClaim.mutate(q.entityId))}
+                    {btn("DENY", C.red, () => denyClaim.mutate(q.entityId), true)}
+                  </>
+                )}
+                {q.kind === "business_submission" && (
+                  <>
+                    {btn("APPROVE VENUE", C.green, () => approveBizSub.mutate(q.entityId))}
+                    {btn("DENY", C.red, () => denyBizSub.mutate(q.entityId), true)}
+                  </>
+                )}
+                {q.kind === "logo_request" && (
+                  <>
+                    {btn("APPROVE LOGO", C.green, () => approveLogo.mutate(q.entityId))}
+                    {btn("DENY", C.red, () => denyLogo.mutate(q.entityId), true)}
+                  </>
+                )}
+                {q.kind === "gig_pending" && (
+                  <>
+                    {btn("SET LIVE", C.green, () => approveGig.mutate(q.entityId))}
+                    <div style={{ width: "100%", marginTop: 4 }}>
+                      <AdminBoardReject
+                        compact
+                        reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
+                        note={rejectNotes[rejectKey] || ""}
+                        onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
+                        onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
+                        onReject={() => rejectGig.mutate({
+                          id: q.entityId,
+                          reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
+                          note: rejectNotes[rejectKey] || "",
+                        })}
+                        pending={pending}
+                      />
+                    </div>
+                  </>
+                )}
+                {q.kind === "gifting_report" && btn("RESOLVE REPORT", C.limeSoft, () => resolveGiftingReport.mutate(q.entityId))}
+                {q.kind === "gifting_flagged" && (
+                  <div style={{ width: "100%" }}>
+                    <AdminBoardReject
+                      compact
+                      reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
+                      note={rejectNotes[rejectKey] || ""}
+                      onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
+                      onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
+                      onReject={() => rejectGifting.mutate({
+                        id: q.entityId,
+                        reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
+                        note: rejectNotes[rejectKey] || "",
+                      })}
+                      pending={pending}
+                    />
+                  </div>
+                )}
+                {q.kind === "spotted" && (
+                  <>
+                    {btn("CLEAR FROM QUEUE", C.green, () => approveSpotted.mutate(q.entityId))}
+                    {btn("REMOVE", C.red, () => removeSpotted.mutate(q.entityId), true)}
+                    <div style={{ width: "100%", marginTop: 4 }}>
+                      <AdminBoardReject
+                        compact
+                        reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
+                        note={rejectNotes[rejectKey] || ""}
+                        onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
+                        onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
+                        onReject={() => rejectSpotted.mutate({
+                          id: q.entityId,
+                          reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
+                          note: rejectNotes[rejectKey] || "",
+                        })}
+                        pending={pending}
+                      />
+                    </div>
+                  </>
+                )}
+                {q.kind === "owner_desk" && (
+                  <>
+                    {q.replyEmail
+                      ? btn("REPLY", C.cyan, () => {
+                          window.location.href = `mailto:${q.replyEmail}?subject=${encodeURIComponent(`Re: ${q.title}`)}`;
+                        })
+                      : null}
+                    {btn("MARK DONE", C.green, () => resolveOwnerDesk.mutate(q.entityId), true)}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div
@@ -692,6 +988,95 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
         <span style={{ width: 8, height: 8, borderRadius: 999, background: accent, boxShadow: `0 0 8px ${accent}`, flex: "none" }} />
         {kicker}
       </div>
+
+      {/* Always-visible map of every queue surface (counts stay visible at 0). */}
+      {mode === "admin" && !completed && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "0 2px 14px" }}>
+          <button
+            type="button"
+            onClick={() => setBucketFilter("all")}
+            style={{
+              fontFamily: MONO,
+              fontSize: 9.5,
+              letterSpacing: ".06em",
+              fontWeight: 700,
+              padding: "6px 10px",
+              borderRadius: 999,
+              border: `1px solid ${bucketFilter === "all" ? accent : C.border2}`,
+              background: bucketFilter === "all" ? accent : "transparent",
+              color: bucketFilter === "all" ? "#06060a" : C.meta,
+              cursor: "pointer",
+            }}
+          >
+            All · {bucketCounts.all || 0}
+          </button>
+          {ADMIN_QUEUE_BUCKETS.map((b) => {
+            const n = bucketCounts[b.id] || 0;
+            const act = bucketFilter === b.id;
+            return (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setBucketFilter(b.id)}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 9.5,
+                  letterSpacing: ".06em",
+                  fontWeight: 700,
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  border: `1px solid ${act ? b.color : C.border2}`,
+                  background: act ? b.color : n > 0 ? "rgba(255,255,255,0.03)" : "transparent",
+                  color: act ? "#06060a" : n > 0 ? C.heading : C.faint,
+                  cursor: "pointer",
+                }}
+              >
+                {b.label} · {n}
+              </button>
+            );
+          })}
+          {onOpenGuideInbox && (
+            <button
+              type="button"
+              onClick={onOpenGuideInbox}
+              style={{
+                fontFamily: MONO,
+                fontSize: 9.5,
+                letterSpacing: ".06em",
+                fontWeight: 700,
+                padding: "6px 10px",
+                borderRadius: 999,
+                border: `1px solid ${C.cyan}`,
+                background: guideUnread > 0 ? "rgba(0,255,255,0.08)" : "transparent",
+                color: C.cyan,
+                cursor: "pointer",
+              }}
+            >
+              Guide messages · {guideUnread}
+            </button>
+          )}
+          {onOpenOwnerDesk && (
+            <button
+              type="button"
+              onClick={onOpenOwnerDesk}
+              style={{
+                fontFamily: MONO,
+                fontSize: 9.5,
+                letterSpacing: ".06em",
+                fontWeight: 700,
+                padding: "6px 10px",
+                borderRadius: 999,
+                border: `1px solid ${C.purple}`,
+                background: ownerCount > 0 ? "rgba(138,77,255,0.1)" : "transparent",
+                color: C.purple,
+                cursor: "pointer",
+              }}
+            >
+              Owner desk · {ownerCount}
+            </button>
+          )}
+        </div>
+      )}
 
       {failedSources.length > 0 && (
         <div
@@ -712,192 +1097,62 @@ export default function QueueView({ mode, queueFolder }: { mode: "admin" | "owne
         </div>
       )}
 
-      {rows.length === 0 ? (
+      {mode === "admin" ? (
+        visibleBuckets.map((bucket) => {
+          const bucketRows = rows.filter((r) => bucket.kinds.includes(r.kind));
+          return (
+            <div key={bucket.id} style={{ marginBottom: 14 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  margin: "0 2px 8px",
+                  fontFamily: MONO,
+                  fontSize: 10,
+                  letterSpacing: ".1em",
+                  fontWeight: 700,
+                  color: bucket.color,
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: 999, background: bucket.color, flex: "none" }} />
+                {bucket.label.toUpperCase()}
+                <span style={{ color: C.faint, fontWeight: 600 }}>· {bucketRows.length}</span>
+              </div>
+              {bucketRows.length === 0 ? (
+                <div
+                  style={{
+                    margin: "0 2px",
+                    padding: "12px 14px",
+                    borderRadius: 14,
+                    border: `1px dashed ${C.border2}`,
+                    color: C.faint2,
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    letterSpacing: ".08em",
+                  }}
+                >
+                  {completed ? "None in recently completed" : "None waiting — queue clear"}
+                </div>
+              ) : (
+                <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
+                  {bucketRows.map((q, i) => renderQueueRow(q, i))}
+                </div>
+              )}
+            </div>
+          );
+        })
+      ) : rows.length === 0 ? (
         <div style={{ textAlign: "center", padding: "44px 20px", color: C.faint2, fontFamily: MONO, fontSize: 11, letterSpacing: ".1em" }}>
           {failedSources.length > 0
             ? "QUEUE COULD NOT LOAD"
             : completed
-              ? mode === "admin"
-                ? "NO RECENTLY COMPLETED ITEMS"
-                : "NO RECENTLY DELETED ITEMS"
-              : mode === "admin"
-                ? "QUEUE IS CLEAR"
-                : "OWNER DESK IS CLEAR"}
+              ? "NO RECENTLY DELETED ITEMS"
+              : "OWNER DESK IS CLEAR"}
         </div>
       ) : (
         <div style={{ border: `1px solid ${C.border}`, borderRadius: 22, overflow: "hidden", background: C.list }}>
-          {rows.map((q, i) => {
-            const isOpen = !!open[q.id];
-            const rejectKey = q.id;
-            return (
-              <div key={q.id} style={{ borderTop: i > 0 ? `1px solid ${C.border2}` : undefined, background: isOpen ? "#101014" : undefined }}>
-                <div
-                  onClick={() => setOpen((p) => ({ ...p, [q.id]: !p[q.id] }))}
-                  style={{ padding: 16, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <span
-                        style={{
-                          fontFamily: MONO,
-                          fontSize: 9,
-                          letterSpacing: ".08em",
-                          fontWeight: 700,
-                          color: "#06060a",
-                          background: q.tagColor,
-                          padding: "2.5px 7px",
-                          borderRadius: 6,
-                          flex: "none",
-                        }}
-                      >
-                        {q.tag}
-                      </span>
-                    </div>
-                    <div style={{ fontWeight: 600, fontSize: 14.5, color: C.heading, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {q.title}
-                    </div>
-                    <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>
-                      {q.meta}
-                      {q.outcome ? ` · ${q.outcome}` : ""}
-                    </div>
-                  </div>
-                  <span style={{ color: accent, flex: "none", display: "flex", transition: "transform .15s", transform: `rotate(${isOpen ? 180 : 0}deg)` }}>
-                    <ChevronDown size={20} strokeWidth={2.4} />
-                  </span>
-                </div>
-                {isOpen && (
-                  <div style={{ padding: "0 16px 16px" }} onClick={(e) => e.stopPropagation()}>
-                    {q.fields.length > 0 && (
-                      <div style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${C.border2}` }}>
-                        {q.fields.map(([label, value], fi) => (
-                          <div key={fi} style={{ display: "flex", gap: 10, padding: "9px 12px", background: C.inset2, borderTop: fi > 0 ? `1px solid ${C.divider}` : undefined }}>
-                            <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: C.faint, width: 66, flex: "none", textTransform: "uppercase", paddingTop: 1 }}>
-                              {label}
-                            </span>
-                            <span style={{ fontSize: 13, color: C.body, flex: 1, lineHeight: 1.4 }}>{value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {(q.note || q.body) && (
-                      <div style={{ marginTop: 10, background: C.inset, borderRadius: 12, padding: "11px 13px", fontSize: 12.5, color: C.muted, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>
-                        {q.body || q.note}
-                      </div>
-                    )}
-                    {q.attachments && q.attachments.length > 0 && (
-                      <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
-                        {q.attachments.map((url, ai) => (
-                          <a
-                            key={ai}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              fontFamily: MONO,
-                              fontSize: 10,
-                              letterSpacing: ".06em",
-                              color: accent,
-                              border: `1px solid ${C.border2}`,
-                              borderRadius: 8,
-                              padding: "6px 10px",
-                              textDecoration: "none",
-                            }}
-                          >
-                            Attachment {ai + 1} ↗
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                    {!q.readOnly && (
-                    <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-                      {q.kind === "submission" && (
-                        <>
-                          {btn("APPROVE", C.green, () => approveSub.mutate(q.entityId))}
-                          {btn("DECLINE", C.red, () => declineSub.mutate(q.entityId), true)}
-                        </>
-                      )}
-                      {q.kind === "river_brats" && btn("RESOLVE", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
-                      {q.kind === "moderation" && btn("MARK REVIEWED", C.limeSoft, () => resolveModeration.mutate(q.entityId))}
-                      {q.kind === "promoter_request" && (
-                        <>
-                          {btn("APPROVE PROMOTER", C.green, () => approvePromoter.mutate(q.entityId))}
-                          {btn("DENY", C.red, () => denyPromoter.mutate(q.entityId), true)}
-                        </>
-                      )}
-                      {q.kind === "business_claim" && (
-                        <>
-                          {btn("APPROVE CLAIM", C.green, () => approveClaim.mutate(q.entityId))}
-                          {btn("DENY", C.red, () => denyClaim.mutate(q.entityId), true)}
-                        </>
-                      )}
-                      {q.kind === "business_submission" && (
-                        <>
-                          {btn("APPROVE VENUE", C.green, () => approveBizSub.mutate(q.entityId))}
-                          {btn("DENY", C.red, () => denyBizSub.mutate(q.entityId), true)}
-                        </>
-                      )}
-                      {q.kind === "logo_request" && (
-                        <>
-                          {btn("APPROVE LOGO", C.green, () => approveLogo.mutate(q.entityId))}
-                          {btn("DENY", C.red, () => denyLogo.mutate(q.entityId), true)}
-                        </>
-                      )}
-                      {q.kind === "gifting_report" && btn("RESOLVE REPORT", C.limeSoft, () => resolveGiftingReport.mutate(q.entityId))}
-                      {q.kind === "gifting_flagged" && (
-                        <div style={{ width: "100%" }}>
-                          <AdminBoardReject
-                            compact
-                            reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
-                            note={rejectNotes[rejectKey] || ""}
-                            onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
-                            onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
-                            onReject={() => rejectGifting.mutate({
-                              id: q.entityId,
-                              reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
-                              note: rejectNotes[rejectKey] || "",
-                            })}
-                            pending={pending}
-                          />
-                        </div>
-                      )}
-                      {q.kind === "spotted" && (
-                        <>
-                          {btn("CLEAR FROM QUEUE", C.green, () => approveSpotted.mutate(q.entityId))}
-                          {btn("REMOVE", C.red, () => removeSpotted.mutate(q.entityId), true)}
-                          <div style={{ width: "100%", marginTop: 4 }}>
-                            <AdminBoardReject
-                              compact
-                              reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
-                              note={rejectNotes[rejectKey] || ""}
-                              onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
-                              onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
-                              onReject={() => rejectSpotted.mutate({
-                                id: q.entityId,
-                                reasonCode: rejectReasons[rejectKey] || "OFF_TOPIC",
-                                note: rejectNotes[rejectKey] || "",
-                              })}
-                              pending={pending}
-                            />
-                          </div>
-                        </>
-                      )}
-                      {q.kind === "owner_desk" && (
-                        <>
-                          {q.replyEmail
-                            ? btn("REPLY", C.cyan, () => {
-                                window.location.href = `mailto:${q.replyEmail}?subject=${encodeURIComponent(`Re: ${q.title}`)}`;
-                              })
-                            : null}
-                          {btn("MARK DONE", C.green, () => resolveOwnerDesk.mutate(q.entityId), true)}
-                        </>
-                      )}
-                    </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {rows.map((q, i) => renderQueueRow(q, i))}
         </div>
       )}
 
