@@ -131,6 +131,7 @@ function EventModalInner({
   });
 
   const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
+  const isPastEvent = eventTiming === "past";
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
   // Border + glow accent: the day color, or a neutral neon for events with no
@@ -260,7 +261,7 @@ function EventModalInner({
   const hostUserIds = eventHosts.map(h => h.userId);
   const isHost = Boolean(user && hostUserIds.includes(user.id));
   const canEditEvent = userCanEditEvent(event, user, hostUserIds);
-  const canAddCoHost = isHost && eventHosts.length < 3;
+  const canAddCoHost = isHost && eventHosts.length < 3 && !isPastEvent;
 
   const editEventMutation = useMutation({
     mutationFn: async (data: EventEditFormState) => {
@@ -372,7 +373,7 @@ function EventModalInner({
       if (!r.ok) throw new Error("Could not load invite audience");
       return r.json();
     },
-    enabled: Boolean(user && canEditEvent),
+    enabled: Boolean(user && canEditEvent && !isPastEvent),
     staleTime: 30_000,
   });
 
@@ -698,11 +699,12 @@ function EventModalInner({
             eventId={event.id}
             eventTitle={event.title}
             dayColor={dayColor}
-            mode={isHost || user?.isAdmin ? "manage" : "view"}
+            mode={!isPastEvent && (isHost || user?.isAdmin) ? "manage" : "view"}
             isClaimable={event.isClaimable}
+            hideSelfTag={isPastEvent}
           />
 
-          {canEditEvent && (
+          {canEditEvent && !isPastEvent && (
             <div
               className="event-modal__section"
               style={{ "--section-accent": dayColor } as React.CSSProperties}
@@ -794,34 +796,36 @@ function EventModalInner({
                 Edit event
               </button>
             )}
-            <div className="event-link-choice-anchor">
-              <button
-                type="button"
-                data-testid="button-add-to-calendar"
-                onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
-                className="btn-neon event-modal__action-btn"
-              >
-                Add to Calendar
-              </button>
-              <EventLinkChoiceMenu
-                floating
-                open={showCalPicker}
-                onClose={() => setShowCalPicker(false)}
-                title="Add to calendar"
-                options={[
-                  {
-                    label: "Google Calendar",
-                    hint: "Opens in browser",
-                    onClick: () => window.open(googleCalendarUrl(event), "_blank", "noopener,noreferrer"),
-                  },
-                  {
-                    label: "Apple Calendar / iCal",
-                    hint: "Downloads .ics file",
-                    onClick: () => downloadIcsFile(event),
-                  },
-                ]}
-              />
-            </div>
+            {!isPastEvent && (
+              <div className="event-link-choice-anchor">
+                <button
+                  type="button"
+                  data-testid="button-add-to-calendar"
+                  onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
+                  className="btn-neon event-modal__action-btn"
+                >
+                  Add to Calendar
+                </button>
+                <EventLinkChoiceMenu
+                  floating
+                  open={showCalPicker}
+                  onClose={() => setShowCalPicker(false)}
+                  title="Add to calendar"
+                  options={[
+                    {
+                      label: "Google Calendar",
+                      hint: "Opens in browser",
+                      onClick: () => window.open(googleCalendarUrl(event), "_blank", "noopener,noreferrer"),
+                    },
+                    {
+                      label: "Apple Calendar / iCal",
+                      hint: "Downloads .ics file",
+                      onClick: () => downloadIcsFile(event),
+                    },
+                  ]}
+                />
+              </div>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -851,7 +855,7 @@ function EventModalInner({
               className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
               onClick={() => setSocialTab("attendance")}
             >
-              I'll Be There
+              {isPastEvent ? "Who Was There" : "I'll Be There"}
             </button>
             <button
               type="button"
@@ -870,7 +874,7 @@ function EventModalInner({
             data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
           >
             {socialTab === "attendance" ? (
-              <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} />
+              <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} />
             ) : eventTiming === "upcoming" ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "40px 20px", color: "var(--text-faint)", textAlign: "center" }}>
                 <Lock size={28} style={{ opacity: 0.5 }} />
@@ -1077,7 +1081,7 @@ function EventModalInner({
               data-testid="button-ill-be-there-sticky"
               onClick={jumpToAttendance}
             >
-              I'll Be There
+              {isPastEvent ? "I Was Here" : "I'll Be There"}
             </button>
           </div>
         )}

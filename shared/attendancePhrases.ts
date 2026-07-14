@@ -1,6 +1,7 @@
 export const ATTENDANCE_PHRASE_KEYS = [
   "HEY",
   "ILL_BE_HERE",
+  "I_WAS_HERE",
   "WANT_TO_CHECK_OUT",
   "LOOKING_FOR_SOMEONE",
   "WORKING_THIS",
@@ -14,9 +15,12 @@ export type AttendancePhraseDef = {
   color: string;
 };
 
+export const PAST_EVENT_ATTENDANCE_PHRASE_KEY: AttendancePhraseKey = "I_WAS_HERE";
+
 export const ATTENDANCE_PHRASES: AttendancePhraseDef[] = [
   { key: "HEY", label: "Hey there", color: "#C8FA3C" },
   { key: "ILL_BE_HERE", label: "I'll be there", color: "#19E3FF" },
+  { key: "I_WAS_HERE", label: "I was here", color: "#C8FA3C" },
   { key: "WANT_TO_CHECK_OUT", label: "Checking it out", color: "#FF00CC" },
   { key: "LOOKING_FOR_SOMEONE", label: "Looking for someone", color: "#A24BFF" },
   { key: "WORKING_THIS", label: "I'm Working", color: "#FF6600" },

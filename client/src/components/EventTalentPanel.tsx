@@ -55,6 +55,8 @@ type Props = {
   dayColor?: string;
   mode: "view" | "manage";
   isClaimable?: boolean;
+  /** Hide "I worked this event" self-tag on past events. */
+  hideSelfTag?: boolean;
 };
 
 function groupByRole(rows: EventTalentRow[]) {
@@ -67,7 +69,7 @@ function groupByRole(rows: EventTalentRow[]) {
   return EVENT_TALENT_ROLES.filter(r => map.has(r)).map(role => ({ role, rows: map.get(role)! }));
 }
 
-export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCFF00", mode, isClaimable }: Props) {
+export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCFF00", mode, isClaimable, hideSelfTag = false }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [hostUsername, setHostUsername] = useState("");
@@ -164,7 +166,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
-  const canSelfTag = user && mode === "view";
+  const canSelfTag = user && mode === "view" && !hideSelfTag;
 
   const roleTaken = (role: EventTalentRole) =>
     myRows.some(t => t.role === role && (t.status === "LIVE" || t.status === "PENDING"));

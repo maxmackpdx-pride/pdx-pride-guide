@@ -13,6 +13,7 @@ import { useAttendanceLive } from "@/hooks/useAttendanceLive";
 import {
   ATTENDANCE_PHRASES,
   DEFAULT_ATTENDANCE_PHRASE_KEY,
+  PAST_EVENT_ATTENDANCE_PHRASE_KEY,
   attendancePhraseLabel,
   resolveAttendancePhrase,
   type AttendancePhraseKey,
@@ -54,12 +55,15 @@ export default function AttendanceCluster({
   embedded = false,
   extraPeople = [],
   liveSocket = true,
+  pastEvent = false,
 }: {
   eventId: number;
   embedded?: boolean;
   extraPeople?: ExtraPerson[];
   /** Open attendance websocket for live updates (disable on dense board cards). */
   liveSocket?: boolean;
+  /** Past events: one-tap "I was here" for profile, no RSVP chat or invites. */
+  pastEvent?: boolean;
 }) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
@@ -79,7 +83,7 @@ export default function AttendanceCluster({
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  useAttendanceLive(eventId, liveSocket);
+  useAttendanceLive(eventId, liveSocket && !pastEvent);
 
   const { data: attendees = [] } = useQuery<Attendee[]>({
     queryKey: ["/api/events", eventId, "attendance"],
@@ -94,10 +98,13 @@ export default function AttendanceCluster({
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       setShowForm(false);
-      setShowChat(true);
-      if (variables.isAnonymous) setVisibility("anonymous");
-      else setVisibility("visible");
+      if (!pastEvent) {
+        setShowChat(true);
+        if (variables.isAnonymous) setVisibility("anonymous");
+        else setVisibility("visible");
+      }
     },
   });
 
@@ -106,6 +113,8 @@ export default function AttendanceCluster({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
 
@@ -124,11 +133,22 @@ export default function AttendanceCluster({
 
   const submitVibe = (btnEl?: HTMLElement | null) => {
     const wasGoing = Boolean(myAttendance);
-    if (!wasGoing && btnEl) spawnRsvpSparks(btnEl);
+    if (!wasGoing && btnEl && !pastEvent) spawnRsvpSparks(btnEl);
     mutation.mutate({
-      message: attendancePhraseLabel(selectedPhraseKey),
-      isAnonymous: visibility === "anonymous",
+      message: pastEvent
+        ? attendancePhraseLabel(PAST_EVENT_ATTENDANCE_PHRASE_KEY)
+        : attendancePhraseLabel(selectedPhraseKey),
+      isAnonymous: pastEvent ? false : visibility === "anonymous",
     });
+  };
+
+  const markWasHere = (btnEl?: HTMLElement | null) => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    if (myAttendance) return;
+    submitVibe(btnEl);
   };
 
   useEffect(() => {
@@ -219,52 +239,94 @@ export default function AttendanceCluster({
       <div className="attendance-cluster-head">
         <div className="attendance-cluster-head__title">
           <h3 className="display attendance-cluster-headline">
-            <span>I'll be</span> <span className="attendance-cluster-headline__accent">there</span>
+            {pastEvent ? (
+              <>
+                <span>Who was</span> <span className="attendance-cluster-headline__accent">there</span>
+              </>
+            ) : (
+              <>
+                <span>I'll be</span> <span className="attendance-cluster-headline__accent">there</span>
+              </>
+            )}
           </h3>
-          <span className={`attendance-going-pill${prefersReducedMotion() ? "" : " attendance-badge-pulse"}`}>
+          <span className={`attendance-going-pill${prefersReducedMotion() || pastEvent ? "" : " attendance-badge-pulse"}`}>
             <span className="attendance-going-pill__dot" aria-hidden="true" />
-            {attendees.length} GOING
-            <LiveWave />
+            {attendees.length} {pastEvent ? "WERE THERE" : "GOING"}
+            {!pastEvent && <LiveWave />}
           </span>
         </div>
       </div>
 
       {!showForm && (
         <div className="attendance-cluster-cta">
-          <button
-            data-testid="button-ill-be-there"
-            onClick={() => user ? setShowForm(true) : setShowAuth(true)}
-            className="display attendance-cluster-cta__btn"
-          >
-            {myAttendance ? "Change phrase →" : "I'll be there →"}
-          </button>
-          {myAttendance && myPhrase && (
-            <span className="attendance-cluster-cta__status">
-              ✓ You're going as "{myPhrase.label}"
-            </span>
-          )}
-          {myAttendance && (
+          {pastEvent ? (
+            <>
+              {!myAttendance && (
+                <button
+                  data-testid="button-i-was-here"
+                  type="button"
+                  onClick={e => markWasHere(e.currentTarget)}
+                  disabled={mutation.isPending}
+                  className="display attendance-cluster-cta__btn"
+                >
+                  {mutation.isPending ? "Saving…" : "I was here →"}
+                </button>
+              )}
+              {myAttendance && (
+                <>
+                  <span className="attendance-cluster-cta__status">
+                    ✓ On your profile
+                  </span>
+                  <button
+                    type="button"
+                    data-testid="button-remove-was-here"
+                    onClick={() => removeMutation.mutate()}
+                    disabled={removeMutation.isPending}
+                    className="attendance-cluster-cta__withdraw"
+                  >
+                    {removeMutation.isPending ? "Removing…" : "Remove from profile"}
+                  </button>
+                </>
+              )}
+            </>
+          ) : (
             <>
               <button
-                type="button"
-                data-testid="button-open-event-chat"
-                onClick={() => setShowChat(true)}
-                className="attendance-cluster-cta__chat"
+                data-testid="button-ill-be-there"
+                onClick={() => user ? setShowForm(true) : setShowAuth(true)}
+                className="display attendance-cluster-cta__btn"
               >
-                Open event chat →
+                {myAttendance ? "Change phrase →" : "I'll be there →"}
               </button>
-              <button
-                type="button"
-                data-testid="button-withdraw-rsvp"
-                onClick={() => {
-                  setShowChat(false);
-                  removeMutation.mutate();
-                }}
-                disabled={removeMutation.isPending}
-                className="attendance-cluster-cta__withdraw"
-              >
-                {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
-              </button>
+              {myAttendance && myPhrase && (
+                <span className="attendance-cluster-cta__status">
+                  ✓ You're going as "{myPhrase.label}"
+                </span>
+              )}
+              {myAttendance && (
+                <>
+                  <button
+                    type="button"
+                    data-testid="button-open-event-chat"
+                    onClick={() => setShowChat(true)}
+                    className="attendance-cluster-cta__chat"
+                  >
+                    Open event chat →
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="button-withdraw-rsvp"
+                    onClick={() => {
+                      setShowChat(false);
+                      removeMutation.mutate();
+                    }}
+                    disabled={removeMutation.isPending}
+                    className="attendance-cluster-cta__withdraw"
+                  >
+                    {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
@@ -275,7 +337,7 @@ export default function AttendanceCluster({
         <div className="attendance-avatar-grid">
           {gridPeople.map(p => {
             const isSelf = !!user && p.userId === user?.id;
-            const canMessage = user && myAttendance && p.userId && p.userId !== user.id && !p.masked;
+            const canMessage = !pastEvent && user && myAttendance && p.userId && p.userId !== user.id && !p.masked;
             const profileHref = !p.masked ? memberProfileHref(p.handle) : null;
             return (
               <div
@@ -323,10 +385,13 @@ export default function AttendanceCluster({
 
       {attendees.length === 0 && extraPeople.length === 0 && !showForm && (
         <div style={{ textAlign: "center", padding: "20px 0", color: "var(--text-faint)" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>BE THE FIRST TO SAY YOU'LL BE THERE</p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}>
+            {pastEvent ? "BE THE FIRST TO SAY YOU WERE THERE" : "BE THE FIRST TO SAY YOU'LL BE THERE"}
+          </p>
         </div>
       )}
 
+      {!pastEvent && (
       <AttendanceVibeModal
         open={showForm}
         isMobile={isMobile}
@@ -344,10 +409,11 @@ export default function AttendanceCluster({
       >
         {phrasePicker}
       </AttendanceVibeModal>
-      {showChat && myAttendance && (
+      )}
+      {!pastEvent && showChat && myAttendance && (
         <EventChatPanel eventId={eventId} onClose={() => setShowChat(false)} />
       )}
-      {messageTarget && (
+      {!pastEvent && messageTarget && (
         <div
           data-testid="message-panel-backdrop"
           onClick={() => setMessageTarget(null)}
