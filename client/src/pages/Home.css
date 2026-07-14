@@ -695,11 +695,8 @@ html.calm-mode .home-main-stage .pg-note--spot {
 .home-boards {
   position: relative;
   width: 100%;
-  /* Same page wash as Nude Beaches (Rooster): solid base + soft corner glows */
-  background:
-    radial-gradient(circle at 10% 6%, rgba(255, 102, 0, 0.08), transparent 22rem),
-    radial-gradient(circle at 88% 14%, rgba(255, 31, 160, 0.06), transparent 24rem),
-    #06060a;
+  /* Framed panel (design 1a) — solid ink, no beach/wallpaper wash behind tiles */
+  background: #08080a;
   overflow: hidden;
   color: var(--text-mid, #b9b6ae);
 }
