@@ -30,7 +30,14 @@ const LABELS: Record<keyof NotificationPrefs, { title: string; body: string }> =
   },
 };
 
-export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boolean }) {
+export default function DashboardNotificationPrefs({
+  isAdmin,
+  embedded = false,
+}: {
+  isAdmin: boolean;
+  /** Strip outer card chrome when nested in Hub Settings */
+  embedded?: boolean;
+}) {
   const { toast } = useToast();
   const supported = canUseWebPush();
   const [pushActive, setPushActive] = useState<boolean | null>(null);
@@ -127,45 +134,63 @@ export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boole
 
   const showEnableAsk = pushActive === false;
 
+  const rootClass = embedded ? "hub-settings-prefs" : "dashboard-notification-prefs";
+  const ledeClass = embedded ? "hub-settings-prefs__lede" : "dashboard-notification-prefs__lede";
+
   return (
     <section
       id="notifications"
-      style={{
-        marginBottom: 24,
-        padding: "16px 18px",
-        border: "1px solid #222",
-        background: "#080808",
-      }}
+      className={rootClass}
+      style={
+        embedded
+          ? undefined
+          : {
+              marginBottom: 24,
+              padding: "16px 18px",
+              border: "1px solid #222",
+              background: "#080808",
+            }
+      }
     >
-      <div className="display" style={{ fontSize: "0.9rem", color: "#fff", marginBottom: 6 }}>
-        Notifications
-      </div>
-      <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
+      {!embedded && (
+        <div className="display" style={{ fontSize: "0.9rem", color: "#fff", marginBottom: 6 }}>
+          Notifications
+        </div>
+      )}
+      <p className={ledeClass} style={embedded ? undefined : { margin: "0 0 14px", fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
         {pushActive
           ? "Push is on for this device. Choose which alerts you want below."
           : "Get alerts for inbox messages and host updates during Pride weekend. Preferences are saved to your account."}
       </p>
 
       {showEnableAsk && (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+        <div className={embedded ? "hub-settings-prefs__enable-row" : undefined} style={embedded ? undefined : { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
           <button
             type="button"
+            className={embedded ? "hub-settings-prefs__enable-btn" : undefined}
             disabled={enablePushMutation.isPending}
             onClick={() => enablePushMutation.mutate()}
-            style={{
-              background: "var(--neon-cyan)",
-              color: "#000",
-              border: "none",
-              padding: "8px 14px",
-              cursor: "pointer",
-              fontFamily: "var(--font-display)",
-              fontSize: "0.72rem",
-            }}
+            style={
+              embedded
+                ? undefined
+                : {
+                    background: "var(--neon-cyan)",
+                    color: "#000",
+                    border: "none",
+                    padding: "8px 14px",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-display)",
+                    fontSize: "0.72rem",
+                  }
+            }
           >
             Enable push on this device
           </button>
           {!pushConfigured && (
-            <span style={{ fontSize: "0.72rem", color: "#FF8C00", alignSelf: "center" }}>
+            <span
+              className={embedded ? "hub-settings-prefs__pending" : undefined}
+              style={embedded ? undefined : { fontSize: "0.72rem", color: "#FF8C00", alignSelf: "center" }}
+            >
               Server push keys pending (Railway)
             </span>
           )}
@@ -173,20 +198,25 @@ export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boole
       )}
 
       {pushActive && (
-        <p style={{ margin: "0 0 16px", fontSize: "0.75rem", color: "#6f736c" }}>
+        <p className={embedded ? "hub-settings-prefs__status" : undefined} style={embedded ? undefined : { margin: "0 0 16px", fontSize: "0.75rem", color: "#6f736c" }}>
           Push active on this device.{" "}
           <button
             type="button"
+            className={embedded ? "hub-settings-prefs__status-btn" : undefined}
             onClick={() => void disablePush()}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              color: "#8c8980",
-              textDecoration: "underline",
-              cursor: "pointer",
-              font: "inherit",
-            }}
+            style={
+              embedded
+                ? undefined
+                : {
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    color: "#8c8980",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    font: "inherit",
+                  }
+            }
           >
             Turn off
           </button>
@@ -194,35 +224,50 @@ export default function DashboardNotificationPrefs({ isAdmin }: { isAdmin: boole
       )}
 
       {isLoading ? (
-        <p style={{ fontSize: "0.75rem", color: "#6f736c" }}>Loading preferences…</p>
+        <p className={embedded ? "hub-settings-prefs__loading" : undefined} style={embedded ? undefined : { fontSize: "0.75rem", color: "#6f736c" }}>
+          Loading preferences…
+        </p>
       ) : (
-        <div style={{ display: "grid", gap: 10 }}>
+        <div className={embedded ? "hub-settings-prefs__grid" : undefined} style={embedded ? undefined : { display: "grid", gap: 10 }}>
           {(Object.keys(LABELS) as Array<keyof NotificationPrefs>)
             .filter(key => key !== "admin" || isAdmin)
             .map(key => (
               <label
                 key={key}
-                style={{
-                  display: "flex",
-                  gap: 12,
-                  alignItems: "flex-start",
-                  cursor: "pointer",
-                  padding: "10px 0",
-                  borderTop: "1px solid #151515",
-                }}
+                className={embedded ? "hub-settings-prefs__item" : undefined}
+                style={
+                  embedded
+                    ? undefined
+                    : {
+                        display: "flex",
+                        gap: 12,
+                        alignItems: "flex-start",
+                        cursor: "pointer",
+                        padding: "10px 0",
+                        borderTop: "1px solid #151515",
+                      }
+                }
               >
                 <input
                   type="checkbox"
                   checked={Boolean(prefs[key])}
                   onChange={() => toggle(key)}
                   disabled={saveMutation.isPending}
-                  style={{ marginTop: 3 }}
+                  style={embedded ? undefined : { marginTop: 3 }}
                 />
                 <span>
-                  <span className="display" style={{ display: "block", fontSize: "0.78rem", color: "#fff" }}>
+                  <span
+                    className={embedded ? "hub-settings-prefs__item-title" : "display"}
+                    style={embedded ? undefined : { display: "block", fontSize: "0.78rem", color: "#fff" }}
+                  >
                     {LABELS[key].title}
                   </span>
-                  <span style={{ fontSize: "0.72rem", color: "#8c8980" }}>{LABELS[key].body}</span>
+                  <span
+                    className={embedded ? "hub-settings-prefs__item-body" : undefined}
+                    style={embedded ? undefined : { fontSize: "0.72rem", color: "#8c8980" }}
+                  >
+                    {LABELS[key].body}
+                  </span>
                 </span>
               </label>
             ))}

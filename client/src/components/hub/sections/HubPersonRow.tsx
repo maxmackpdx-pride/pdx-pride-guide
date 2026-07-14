@@ -9,16 +9,17 @@ type Props = {
   showFollow?: boolean;
 };
 
+function followerLabel(count: number): string {
+  return count === 1 ? "1 follower" : `${count} followers`;
+}
+
 export default function HubPersonRow({ person, followPending, onToggleFollow, showFollow = true }: Props) {
   const name = person.displayName?.trim() || person.username;
   const sub = person.subtitle || person.bio;
 
   return (
-    <div className="hub-thread" style={{ cursor: "default" }}>
-      <Link
-        href={`/u/${encodeURIComponent(person.username)}`}
-        style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, textDecoration: "none", color: "inherit" }}
-      >
+    <div className="hub-thread hub-people-row rowin">
+      <Link href={`/u/${encodeURIComponent(person.username)}`} className="hub-thread__link">
         <UserAvatar
           photoUrl={person.photoUrl}
           avatarChoice={person.avatarChoice}
@@ -29,10 +30,21 @@ export default function HubPersonRow({ person, followPending, onToggleFollow, sh
         />
         <div className="hub-thread__body">
           <div className="hub-thread__top">
-            <span className="hub-thread__name">{name}</span>
+            <div className="hub-thread__id">
+              <span className="hub-thread__name">{name}</span>
+              {person.verifiedHost && (
+                <span className="hub-thread__badge" title="Verified host">
+                  Host
+                </span>
+              )}
+            </div>
             <span className="hub-thread__at">@{person.username}</span>
           </div>
-          {sub && <span className="hub-thread__sub">{sub}</span>}
+          {sub ? (
+            <span className="hub-thread__sub">{sub}</span>
+          ) : (
+            <span className="hub-thread__meta">{followerLabel(person.followers)}</span>
+          )}
         </div>
       </Link>
       {showFollow && onToggleFollow && (

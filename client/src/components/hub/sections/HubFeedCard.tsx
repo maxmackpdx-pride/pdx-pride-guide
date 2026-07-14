@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from "react";
+import { useState, type CSSProperties, type MouseEvent } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
@@ -59,6 +59,7 @@ function EventFeedRow({
   return (
     <button
       type="button"
+      className="hub-feed-event"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -66,22 +67,6 @@ function EventFeedRow({
       }}
       disabled={loading}
       aria-label={`Open ${event.title}`}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-        marginTop: 12,
-        width: "100%",
-        padding: "12px 14px",
-        background: "var(--ink-900)",
-        border: "1px solid var(--panel-border-2)",
-        borderRadius: 11,
-        textDecoration: "none",
-        color: "inherit",
-        textAlign: "left",
-        cursor: loading ? "wait" : "pointer",
-        opacity: loading ? 0.75 : 1,
-      }}
     >
       {showPoster && event.poster ? (
         <UserAvatar
@@ -97,20 +82,9 @@ function EventFeedRow({
         />
       ) : null}
       <span className={`dot ${dayDotClass(event.dayOfWeek)}`} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: 15,
-            color: "#fff",
-            lineHeight: 1.1,
-            textTransform: "uppercase",
-          }}
-        >
-          {event.title}
-        </div>
-        <div className="kick" style={{ letterSpacing: ".05em", marginTop: 4 }}>
+      <div className="hub-feed-event__main">
+        <div className="hub-feed-event__title">{event.title}</div>
+        <div className="kick hub-feed-event__meta">
           {event.venueName}
           {event.goingCount != null && event.goingCount > 0
             ? ` · ${event.goingCount} going`
@@ -182,28 +156,14 @@ export default function HubFeedCard({ item }: Props) {
     : null;
 
   const beachBlock = item.beachLabel && !item.event ? (
-    <div className="kick" style={{ marginTop: 10, letterSpacing: ".08em", color: "var(--panel-cyan)" }}>
-      {item.beachLabel}
-    </div>
+    <div className="kick hub-feed-card__beach">{item.beachLabel}</div>
   ) : null;
 
   const ctaBlock = item.ctaAction === "feedback" && item.ctaLabel ? (
     <button
       type="button"
+      className="hub-feed-card__cta"
       onClick={() => setFeedbackOpen(true)}
-      style={{
-        marginTop: 14,
-        fontFamily: "var(--font-mono)",
-        fontSize: 11,
-        letterSpacing: ".12em",
-        textTransform: "uppercase",
-        color: "var(--panel-lime)",
-        border: "1px solid var(--panel-lime)",
-        borderRadius: 8,
-        padding: "9px 16px",
-        background: "transparent",
-        cursor: "pointer",
-      }}
     >
       {item.ctaLabel}
     </button>
@@ -213,107 +173,58 @@ export default function HubFeedCard({ item }: Props) {
   // not plain activity rows (RSVP, check-in, announcements).
   const isGlowCard = Boolean(glow) || isSpotted || isBoard;
 
+  const accentStyle = glow
+    ? ({ "--hub-feed-accent": glow } as CSSProperties)
+    : !glow && !isSpotted
+      ? ({ "--hub-feed-accent": badgeColor } as CSSProperties)
+      : undefined;
+
+  const cardClass = [
+    "card",
+    "fitem",
+    "hub-feed-card",
+    item.pinned ? "hub-feed-card--pin" : "",
+    glow ? "hub-feed-card--accent" : "",
+    (isSpotted || isBoard) ? "hub-feed-card--clickable" : "",
+    isGlowCard ? "fitem--glow" : "",
+  ].filter(Boolean).join(" ");
+
   const body = (
     <div
-      className={`card fitem${item.pinned ? " hub-feed-pin" : ""}${isGlowCard ? " fitem--glow" : ""}`}
+      className={cardClass}
+      style={accentStyle}
       onClick={isSpotted ? () => setSpottedOpen(true) : isBoard ? () => setBoardOpen(true) : undefined}
       onKeyDown={(isSpotted || isBoard) ? (e) => {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); isSpotted ? setSpottedOpen(true) : setBoardOpen(true); }
       } : undefined}
       role={(isSpotted || isBoard) ? "button" : undefined}
       tabIndex={(isSpotted || isBoard) ? 0 : undefined}
-      style={{
-        padding: "16px 18px",
-        borderRadius: 16,
-        ...((isSpotted || isBoard) ? { cursor: "pointer" } : {}),
-        ...(glow
-          ? { border: `1px solid ${glow}`, boxShadow: `0 0 22px -9px ${glow}` }
-          : item.pinned
-            ? { borderColor: "var(--panel-border-2)" }
-            : {}),
-      }}
     >
       {isSpotted ? (
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "var(--panel-magenta)",
-                boxShadow: "0 0 8px var(--panel-magenta)",
-                flex: "none",
-              }}
-            />
-            <span
-              className="kick"
-              style={{
-                fontSize: 10.5,
-                letterSpacing: ".14em",
-                color: "var(--panel-magenta)",
-                textTransform: "uppercase",
-              }}
-            >
+          <div className="hub-feed-mc__head">
+            <span className="hub-feed-mc__dot" />
+            <span className="kick hub-feed-mc__kick">
               Missed Connection{when ? ` · ${when}` : ""}
             </span>
           </div>
           {(item.title || item.text) && (
-            <h3
-              className="display"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 800,
-                fontSize: 27,
-                color: "#fff",
-                lineHeight: 1.02,
-                margin: "11px 0 0",
-              }}
-            >
+            <h3 className="display hub-feed-mc__title">
               {item.title || item.text}
             </h3>
           )}
           {item.text && (
-            <p
-              style={{
-                margin: "10px 0 0",
-                fontSize: 14.5,
-                lineHeight: 1.55,
-                color: "var(--board-text)",
-              }}
-            >
-              {item.text}
-            </p>
+            <p className="hub-feed-mc__body">{item.text}</p>
           )}
           {item.place && (
-            <div
-              className="kick"
-              style={{
-                marginTop: 14,
-                fontSize: 10.5,
-                letterSpacing: ".12em",
-                color: "var(--panel-magenta)",
-                textTransform: "uppercase",
-              }}
-            >
+            <div className="kick hub-feed-mc__place">
               {item.place} · Anonymous
             </div>
           )}
-          <div
-            className="kick"
-            style={{
-              marginTop: 12,
-              fontSize: 10.5,
-              letterSpacing: ".12em",
-              color: "var(--panel-magenta)",
-              textTransform: "uppercase",
-            }}
-          >
-            Reply privately →
-          </div>
+          <div className="kick hub-feed-mc__reply">Reply privately →</div>
         </div>
       ) : (
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+      <div className="hub-feed-card__row">
         <UserAvatar
           photoUrl={item.author.photoUrl}
           avatarChoice={item.author.avatarChoice}
@@ -325,75 +236,27 @@ export default function HubFeedCard({ item }: Props) {
           onClick={stopCardNav}
           size={44}
         />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: 16,
-                  color: "#fff",
-                  textTransform: "uppercase",
-                  lineHeight: 1.1,
-                }}
-              >
-                {item.author.displayName}
-              </div>
-              <div className="kick" style={{ fontSize: 10.5, letterSpacing: ".06em", marginTop: 5 }}>
+        <div className="hub-feed-card__main">
+          <div className="hub-feed-card__head">
+            <div className="hub-feed-card__main">
+              <div className="hub-feed-card__author">{item.author.displayName}</div>
+              <div className="kick hub-feed-card__meta">
                 {item.action}
                 {when ? ` · ${when}` : ""}
               </div>
             </div>
-            <span
-              className="kick"
-              style={{
-                flex: "none",
-                fontSize: 10,
-                letterSpacing: ".1em",
-                color: badgeColor,
-                border: `1px solid ${badgeColor}`,
-                borderRadius: 5,
-                padding: "2px 7px",
-              }}
-            >
+            <span className="kick hub-feed-card__badge" style={{ "--hub-feed-accent": badgeColor } as CSSProperties}>
               {item.badge}
             </span>
           </div>
           {showSubject && (
-            <h4
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 800,
-                fontSize: 19,
-                color: "#fff",
-                textTransform: "uppercase",
-                lineHeight: 1.08,
-                margin: "12px 0 0",
-              }}
-            >
-              {item.title}
-            </h4>
+            <h4 className="hub-feed-card__subject">{item.title}</h4>
           )}
           {item.text && (
-            <p style={{ margin: "12px 0 0", fontSize: 14.5, lineHeight: 1.55, color: "var(--board-text)" }}>
-              {item.text}
-            </p>
+            <p className="hub-feed-card__body">{item.text}</p>
           )}
           {item.photoUrl && (
-            <img
-              src={item.photoUrl}
-              alt=""
-              style={{
-                display: "block",
-                marginTop: 12,
-                maxWidth: "100%",
-                maxHeight: 360,
-                borderRadius: 11,
-                border: "1px solid var(--panel-border-2)",
-                objectFit: "cover",
-              }}
-            />
+            <img src={item.photoUrl} alt="" className="hub-feed-card__photo" />
           )}
           {eventBlock}
           {beachBlock}
@@ -454,7 +317,7 @@ export default function HubFeedCard({ item }: Props) {
   // EventModal in place. Other non-event deep links still navigate.
   if (href && !item.event && !item.events?.length && item.ctaAction !== "feedback") {
     return (
-      <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+      <Link href={href} className="hub-feed-card-link">
         {body}
       </Link>
     );

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
+import FloatingInbox from "@/components/FloatingInbox";
 import InboxOverlay from "@/components/InboxOverlay";
 
 export type InboxSheetOpenOpts = {
@@ -59,6 +60,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   return (
     <InboxSheetContext.Provider value={value}>
       {children}
+      <FloatingInbox />
       {showOverlay && (
         <div className="inbox-sheet-host" aria-hidden={!open}>
           <InboxOverlay

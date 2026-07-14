@@ -6,12 +6,12 @@ import type { AuthUser } from "@/context/AuthContext";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { PeopleHubUser } from "@shared/peopleHub";
 import HubPersonRow from "./sections/HubPersonRow";
-import "./hub-home.css";
+
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import HubV2Shell from "./HubV2Shell";
 import HubFeed from "./sections/HubFeed";
 import HubProfile from "./sections/HubProfile";
-import HubEvents, { type HubEventRow } from "./sections/HubEvents";
+import HubEvents, { type HubEventRow, type HubEventsFocus } from "./sections/HubEvents";
 import HubPeople from "./sections/HubPeople";
 import HubSettings from "./sections/HubSettings";
 import HubAdminOverview from "./sections/HubAdminOverview";
@@ -47,6 +47,8 @@ export type HubV2Props = {
   section: HubSection;
   onSectionChange: (section: HubSection) => void;
   initialPostType?: "text" | "photo";
+  /** Inbox Posts deep-link: `?view=posts&section=events|checkins`. */
+  eventsFocusSection?: HubEventsFocus | null;
 };
 
 function dayDotClass(day?: string) {
@@ -150,9 +152,9 @@ function HubRightRail({
           All your events →
         </button>
       </div>
-      <div className="card" style={{ padding: suggestions.length > 0 ? 0 : 16, overflow: "hidden" }}>
-        <div style={{ padding: suggestions.length > 0 ? "16px 16px 10px" : 0 }}>
-          <div className="kick" style={{ letterSpacing: ".16em", marginBottom: suggestions.length > 0 ? 10 : 14 }}>
+      <div className={`card hub-people-rail${suggestions.length === 0 ? " hub-people-rail--empty" : ""}`}>
+        <div className="hub-people-rail__head">
+          <div className={`kick hub-people-rail__kick${suggestions.length === 0 ? " hub-people-rail__kick--solo" : ""}`}>
             Who to follow
           </div>
           {suggestions.length === 0 && (
@@ -172,12 +174,7 @@ function HubRightRail({
           />
         ))}
         {suggestions.length > 0 && (
-          <button
-            type="button"
-            className="ico"
-            style={{ color: "var(--panel-cyan)", width: "100%", justifyContent: "center", padding: "14px 16px" }}
-            onClick={onGoPeople}
-          >
+          <button type="button" className="ico hub-people-rail__foot" onClick={onGoPeople}>
             See all in People →
           </button>
         )}
@@ -210,6 +207,7 @@ export default function HubV2({
   section,
   onSectionChange,
   initialPostType,
+  eventsFocusSection = null,
 }: HubV2Props) {
   const { calmMode, toggleCalmMode } = useTheme();
   const [, navigate] = useLocation();
@@ -288,6 +286,7 @@ export default function HubV2({
           saved={savedEvents}
           loading={eventsLoading}
           editorSlot={eventsEditorSlot}
+          focusSection={eventsFocusSection}
         />
       )}
       {section === "people" && <HubPeople key="people" />}

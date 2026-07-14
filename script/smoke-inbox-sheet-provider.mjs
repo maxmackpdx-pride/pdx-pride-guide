@@ -51,6 +51,25 @@ async function backdropVisible(page) {
   });
 }
 
+/** Toggle sheet closed/open; FAB can sit under expanded POSTS accordions without z-index fix. */
+async function toggleFab(page) {
+  const fab = page.locator(".floating-inbox__fab");
+  const closeBtn = page.locator(".inbox-overlay .inbox-exp-icon-btn[aria-label='Close']");
+  if (await fab.isVisible().catch(() => false)) {
+    try {
+      await fab.click({ timeout: 5000 });
+      return;
+    } catch {
+      /* fall through */
+    }
+  }
+  if (await closeBtn.isVisible().catch(() => false)) {
+    await closeBtn.click();
+    return;
+  }
+  await fab.click({ force: true });
+}
+
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const context = await browser.newContext();
 const page = await context.newPage();
@@ -63,18 +82,27 @@ try {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
-  const unreadRes = await page
-    .waitForResponse((r) => r.url().includes("/api/messages/unread-count") && r.ok(), { timeout: 15000 })
-    .then((r) => r.json())
-    .catch(() => ({ count: 0 }));
+  const [unreadRes, pendingRes] = await Promise.all([
+    page
+      .waitForResponse((r) => r.url().includes("/api/messages/unread-count") && r.ok(), { timeout: 15000 })
+      .then((r) => r.json())
+      .catch(() => ({ count: 0 })),
+    page
+      .waitForResponse((r) => r.url().includes("/api/admin/pending-count") && r.ok(), { timeout: 15000 })
+      .then((r) => r.json())
+      .catch(() => ({ count: 0, ownerCount: 0 })),
+  ]);
   await page.locator(".floating-inbox__fab").waitFor({ state: "visible", timeout: 10000 });
 
+  const attentionCount =
+    (unreadRes.count || 0) + (pendingRes.count || 0) + (pendingRes.ownerCount || 0);
+  const expectedBadge = attentionCount > 9 ? "9+" : String(attentionCount);
   const fabBadgeClosed = await page.locator(".floating-inbox__fab-badge").isVisible().catch(() => false);
   const fabBadgeText = fabBadgeClosed ? await page.locator(".floating-inbox__fab-badge").innerText() : "";
   record(
-    "Desktop FAB unread badge (after unread-count loads)",
-    unreadRes.count > 0 && fabBadgeClosed && fabBadgeText === String(unreadRes.count > 9 ? "9+" : unreadRes.count),
-    `apiCount=${unreadRes.count} badgeVisible=${fabBadgeClosed} badgeText=${fabBadgeText}`,
+    "Desktop FAB attention badge (unread + admin queue)",
+    attentionCount > 0 && fabBadgeClosed && fabBadgeText === expectedBadge,
+    `attention=${attentionCount} unread=${unreadRes.count} queue=${pendingRes.count || 0} owner=${pendingRes.ownerCount || 0} badgeVisible=${fabBadgeClosed} badgeText=${fabBadgeText}`,
   );
 
   record(
@@ -96,10 +124,10 @@ try {
 
   await page.locator(".inbox-overlay").getByText("POSTS", { exact: true }).click();
   await page.getByText("MY EVENTS").waitFor({ timeout: 5000 });
-  await page.locator(".floating-inbox__fab").click();
+  await toggleFab(page);
   await page.waitForTimeout(300);
   const postsHidden = !(await page.getByText("MY EVENTS").isVisible().catch(() => false));
-  await page.locator(".floating-inbox__fab").click();
+  await toggleFab(page);
   await page.waitForTimeout(300);
   const inboxHeading = await page.locator(".inbox-overlay").getByText("INBOX", { exact: true }).isVisible();
   const postsGone = !(await page.getByText("MY EVENTS").isVisible().catch(() => false));
@@ -117,7 +145,7 @@ try {
     `url=${page.url()} overlays=${await overlayCount(page)}`,
   );
 
-  await page.locator(".site-profile-menu__caret").click({ timeout: 10000 });
+  await page.locator(".site-auth--desktop .site-profile-menu__caret").click({ timeout: 10000 });
   await page.getByRole("menuitem", { name: /Inbox/i }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "02-nav-profile-inbox.png"), fullPage: true });
@@ -129,11 +157,11 @@ try {
 
   await page.goto(`${BASE}/dashboard`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
-  await page.locator(".hub-side__nav").getByRole("button", { name: "Inbox" }).click();
+  await page.locator(".hub-v2-nav").getByRole("button", { name: "Messages" }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "03-hub-sidebar-inbox.png"), fullPage: true });
   record(
-    "Hub sidebar Inbox opens sheet",
+    "Hub sidebar Messages opens sheet",
     page.url().includes("/dashboard") && (await overlayCount(page)) === 1,
     `url=${page.url()} overlays=${await overlayCount(page)}`,
   );
@@ -149,8 +177,8 @@ try {
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
   const fabHiddenMobile = !(await page.locator(".floating-inbox__fab").isVisible().catch(() => false));
-  const mobileBadge = await page.locator(".site-mobile-nav__icon-badge").isVisible().catch(() => false);
-  await page.locator(".site-mobile-nav").getByRole("button", { name: /Inbox/i }).click();
+  const mobileBadge = await page.locator(".hub-mobile-tab__icon-wrap i").isVisible().catch(() => false);
+  await page.locator(".site-hub-mobile-bar").getByRole("button", { name: /Messages/i }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   const mrect = await overlayRect(page);
   const mobileBackdrop = (await page.locator(".inbox-overlay__backdrop").count()) > 0;
@@ -161,20 +189,15 @@ try {
     `fabHidden=${fabHiddenMobile} backdropEl=${mobileBackdrop} rect=${JSON.stringify(mrect)} badge=${mobileBadge}`,
   );
 
-  // Hub mobile inbox
+  // Hub mobile inbox (Hub V2 horizontal nav strip)
   await page.goto(`${BASE}/dashboard`, { waitUntil: "domcontentloaded" });
   await waitAuth(page);
-  await page.locator(".hub-mobile-bar").waitFor({ state: "visible", timeout: 10000 });
-  await page.evaluate(() => {
-    const btn = [...document.querySelectorAll(".hub-mobile-bar button")].find((b) =>
-      b.textContent?.includes("Inbox"),
-    );
-    btn?.click();
-  });
+  await page.locator(".hub-v2-nav").waitFor({ state: "visible", timeout: 10000 });
+  await page.locator(".hub-v2-nav").getByRole("button", { name: "Messages" }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "05-hub-mobile-inbox.png"), fullPage: true });
   record(
-    "Hub mobile Inbox opens sheet",
+    "Hub mobile Messages opens sheet",
     page.url().includes("/dashboard") && (await overlayCount(page)) === 1,
     `url=${page.url()}`,
   );

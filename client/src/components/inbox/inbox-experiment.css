@@ -9,16 +9,30 @@
   --panel-cyan: #19e3ff;
   --panel-magenta: #ff1fa0;
   --panel-purple: #b06bff;
+  --panel-lime: #c8fa3c;
+  --panel-lime-bright: #ccff00;
+  --panel-green: #39ff14;
   --board-text: #e6e3da;
   --board-muted: #999999;
   background: var(--panel-ink) !important;
   border-color: var(--panel-border-2) !important;
   color: var(--board-text);
   font-family: var(--font-body), Inter, sans-serif;
+  padding: 0;
 }
 
 .inbox-overlay--experiment .inbox-overlay__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 14px 16px 12px;
+}
+
+.inbox-overlay--experiment .inbox-overlay__scroll--detail {
+  overflow-y: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* List shell — hub .card */
@@ -468,6 +482,13 @@
   margin-bottom: 14px;
 }
 
+.inbox-exp-queue-footnote {
+  margin: 14px 2px 4px;
+  font-size: 11.5px;
+  color: #6a6a72;
+  line-height: 1.5;
+}
+
 /* ── Sheet chrome ── */
 
 .inbox-exp-handle {
@@ -605,6 +626,21 @@
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
 }
 
+.inbox-exp-seg-tray__badge--personal {
+  background: var(--panel-lime);
+  box-shadow: 0 0 12px var(--panel-lime), 0 0 4px var(--panel-lime);
+}
+
+.inbox-exp-seg-tray__badge--admin {
+  background: var(--panel-magenta);
+  box-shadow: 0 0 12px var(--panel-magenta), 0 0 4px var(--panel-magenta);
+}
+
+.inbox-exp-seg-tray__badge--owner {
+  background: var(--panel-purple);
+  box-shadow: 0 0 12px var(--panel-purple), 0 0 4px var(--panel-purple);
+}
+
 .inbox-exp-seg-tray__btn.is-active .inbox-exp-seg-tray__badge {
   min-width: 18px;
   height: 18px;
@@ -613,6 +649,7 @@
   font-weight: 700;
   line-height: 18px;
   text-align: center;
+  color: var(--panel-ink);
 }
 
 .inbox-exp-folder-pill {
@@ -776,11 +813,41 @@
   color: #fff;
 }
 
+.inbox-exp-filter__item-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .inbox-exp-filter__dot {
   width: 8px;
   height: 8px;
   border-radius: 999px;
   flex: none;
+}
+
+.inbox-exp-filter__dot--all {
+  background: var(--panel-lime-bright);
+}
+
+.inbox-exp-filter__dot--spotted {
+  background: var(--panel-magenta);
+}
+
+.inbox-exp-filter__dot--gigs {
+  background: var(--panel-purple);
+}
+
+.inbox-exp-filter__dot--gifting {
+  background: var(--panel-lime);
+}
+
+.inbox-exp-filter__dot--hosts {
+  background: var(--panel-cyan);
+}
+
+.inbox-exp-filter__dot--checkins {
+  background: var(--panel-green);
 }
 
 .inbox-exp-filter__count {
@@ -1268,13 +1335,185 @@
   cursor: pointer;
 }
 
-/* Group chat alignment under experiment shell */
+/* Group chat — experiment 101 (hub panel register) */
 .inbox-overlay--experiment .inbox-group-chat {
-  background: var(--panel-card);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  background: var(--panel-ink);
+  --inbox-exp-accent: var(--panel-cyan);
+}
+
+.inbox-overlay--experiment .inbox-group-chat--beach {
+  --inbox-exp-accent: #39ff14;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #17171c;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .inbox-overlay--experiment .inbox-group-chat__title {
   font-family: var(--font-display), "Barlow Condensed", sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.1;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  min-width: 0;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__meta-line {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #8a8a92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__badge.inbox-exp-tag--cyan {
+  background: var(--panel-cyan);
+}
+
+.inbox-overlay--experiment .inbox-group-chat__badge.inbox-exp-tag--green {
+  background: #39ff14;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__pin {
+  flex: none;
+  padding: 10px 16px;
+  background: #141418;
+  border-bottom: 1px solid #22222a;
+  border-left: 3px solid var(--inbox-exp-accent);
+}
+
+.inbox-overlay--experiment .inbox-group-chat__pin-label {
+  display: block;
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--inbox-exp-accent);
+  margin-bottom: 4px;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__pin-body {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #d6d6dc;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__host-hint {
+  flex: none;
+  margin: 0;
+  padding: 8px 16px;
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: #6a6a72;
+  border-bottom: 1px solid #17171c;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__empty {
+  margin: auto;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6a6a72;
+  max-width: 28ch;
+  padding: 24px 8px;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__msg--mine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__bubble.inbox-exp-bubble {
+  max-width: 100%;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__bubble.inbox-exp-bubble p {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  word-break: break-word;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__author {
+  display: block;
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--inbox-exp-accent);
+  margin-bottom: 4px;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__composer.inbox-exp-composer {
+  flex: none;
+  min-width: 0;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__composer .inbox-exp-composer__input {
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  resize: none;
+}
+
+.inbox-overlay--experiment .inbox-group-chat__composer .inbox-exp-composer__input:focus {
+  border-color: var(--inbox-exp-accent);
 }
 
 /* ── Stats tab ── */

@@ -2303,6 +2303,17 @@ a.event-host-name.event-host-name--link:hover {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border-primary, #333);
   }
 
+  /* Keep the close FAB above the inbox sheet (z-index 61) so POSTS accordions
+     and other panel chrome cannot steal clicks meant for toggle/close. */
+  .floating-inbox:has(.floating-inbox__fab--open) {
+    z-index: 100;
+    isolation: isolate;
+  }
+
+  .floating-inbox:has(.floating-inbox__fab--open) .floating-inbox__fab {
+    pointer-events: auto;
+  }
+
   .floating-inbox:has(.floating-inbox__fab--open) .floating-inbox__halo {
     opacity: 0.18;
     animation: none;
@@ -2352,6 +2363,18 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
    Shared frameless inbox overlay (floats above the site).
    Base styles + role tabs. Positioning is set per-context below.
    ============================================================ */
+.inbox-sheet-host {
+  position: fixed;
+  inset: 0;
+  z-index: 61;
+  pointer-events: none;
+}
+
+.inbox-sheet-host .inbox-overlay,
+.inbox-sheet-host .inbox-overlay__backdrop {
+  pointer-events: auto;
+}
+
 .inbox-overlay {
   position: fixed;
   z-index: 61;

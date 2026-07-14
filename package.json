@@ -13,7 +13,7 @@
     "verify:deploy": "node script/verify-deploy-bundle.mjs",
     "ship": "npm run predeploy && npm run build && npm run verify:deploy",
     "start": "NODE_ENV=production node dist/index.cjs",
-    "preview:local": "npm run build && LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
+    "preview:local": "npm run build && SESSION_SECRET=dev LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
     "check": "tsc",
     "sync:design-system": "node scripts/sync-design-system.mjs",
     "preview:ds": "NODE_ENV=development tsx server/index.ts",

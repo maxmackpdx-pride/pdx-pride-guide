@@ -9,6 +9,7 @@ import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHeader from "@/components/PageHeader";
 import HubV2 from "@/components/hub/HubV2";
+import type { HubEventsFocus } from "@/components/hub/sections/HubEvents";
 import type { HubEventRow } from "@/components/hub/sections/HubEvents";
 import { parseHubSection, type HubSection } from "@/components/hub/types";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
@@ -38,11 +39,19 @@ function mapEventRow(evt: any, chip?: string): HubEventRow {
   };
 }
 
+const POSTS_LEGACY_SECTIONS = ["events", "gigs", "gifting", "spotted", "checkins"] as const;
+
+function postsFocusFromSearch(params: URLSearchParams): HubEventsFocus | null {
+  const legacy = params.get("section");
+  if (legacy === "events" || legacy === "checkins") return legacy;
+  return null;
+}
+
 function hubSectionFromSearch(params: URLSearchParams): HubSection {
   if (params.get("view") === "posts") return "events";
   if (params.get("edit") === "profile") return "profile";
   const legacy = params.get("section");
-  if (legacy === "events" || legacy === "gigs" || legacy === "gifting" || legacy === "spotted" || legacy === "checkins") {
+  if (legacy && (POSTS_LEGACY_SECTIONS as readonly string[]).includes(legacy)) {
     return "events";
   }
   return parseHubSection(params.get("section"));
@@ -68,12 +77,16 @@ export default function Dashboard() {
   const [pendingEditGigId, setPendingEditGigId] = useState<string | null>(() =>
     typeof window === "undefined" ? null : readSearch().get("editGig"),
   );
+  const [postsFocus, setPostsFocus] = useState<HubEventsFocus | null>(() =>
+    typeof window === "undefined" ? null : postsFocusFromSearch(readSearch()),
+  );
 
   const applySearchParams = (params: URLSearchParams) => {
     setHubSection(hubSectionFromSearch(params));
     setEditMode(params.get("edit") === "profile");
     setPendingEditEventId(params.get("editEvent"));
     setPendingEditGigId(params.get("editGig"));
+    setPostsFocus(postsFocusFromSearch(params));
   };
 
   useEffect(() => {
@@ -109,18 +122,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (hubSection === "events") url.searchParams.set("view", "posts");
-    else url.searchParams.delete("view");
+    if (hubSection === "events") {
+      url.searchParams.set("view", "posts");
+      if (postsFocus) url.searchParams.set("section", postsFocus);
+      else if (!(POSTS_LEGACY_SECTIONS as readonly string[]).includes(url.searchParams.get("section") ?? "")) {
+        url.searchParams.set("section", "events");
+      }
+    } else {
+      url.searchParams.delete("view");
+      if (hubSection !== "feed") url.searchParams.set("section", hubSection);
+      else url.searchParams.delete("section");
+    }
     if (editMode) url.searchParams.set("edit", "profile");
     else url.searchParams.delete("edit");
     if (editingEvent) url.searchParams.set("editEvent", String(editingEvent.id));
     else if (!pendingEditEventId) url.searchParams.delete("editEvent");
     if (editingGig) url.searchParams.set("editGig", String(editingGig.id));
     else if (!pendingEditGigId) url.searchParams.delete("editGig");
-    if (hubSection !== "feed") url.searchParams.set("section", hubSection);
-    else url.searchParams.delete("section");
     window.history.replaceState({}, "", url.toString());
-  }, [hubSection, editMode, editingEvent, editingGig, pendingEditEventId, pendingEditGigId]);
+  }, [hubSection, editMode, editingEvent, editingGig, pendingEditEventId, pendingEditGigId, postsFocus]);
 
   const fetchMine = async (url: string) => {
     const r = await fetch(url, { credentials: "include" });
@@ -531,6 +551,7 @@ export default function Dashboard() {
         errorBanner={errorBanner}
         section={hubSection}
         onSectionChange={setHubSection}
+        eventsFocusSection={hubSection === "events" ? postsFocus : null}
       />
     </div>
   );

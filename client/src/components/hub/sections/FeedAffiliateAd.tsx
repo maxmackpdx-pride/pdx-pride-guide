@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 
 /** Exact affiliate destinations — do not alter path or query. */
 export const FEED_AFFILIATE_URLS = {
@@ -11,59 +11,6 @@ const CB_FRAMES = [
   { src: "/affiliate/feed/cb-handhold.jpg", pos: "top center", ms: 2600 },
   { src: "/affiliate/feed/cb-models.png", pos: "center", ms: 2600 },
 ] as const;
-
-const rowLabel: CSSProperties = {
-  fontFamily: "var(--font-display)",
-  fontWeight: 800,
-  fontSize: 24,
-  letterSpacing: ".01em",
-  textTransform: "uppercase",
-  lineHeight: 1,
-};
-
-const rowCopy: CSSProperties = {
-  marginTop: 6,
-  fontFamily: "var(--font-mono)",
-  fontSize: 10.5,
-  letterSpacing: ".14em",
-  textTransform: "uppercase",
-  color: "var(--board-muted)",
-  lineHeight: 1.5,
-};
-
-const dismissBtn: CSSProperties = {
-  position: "absolute",
-  top: 10,
-  right: 10,
-  zIndex: 3,
-  width: 28,
-  height: 28,
-  borderRadius: 999,
-  border: "none",
-  background: "rgba(0,0,0,0.6)",
-  color: "#fff",
-  fontSize: 15,
-  lineHeight: 1,
-  cursor: "pointer",
-};
-
-const affiliatePill: CSSProperties = {
-  position: "absolute",
-  top: 12,
-  left: 12,
-  zIndex: 2,
-  fontFamily: "var(--font-mono)",
-  fontSize: 9,
-  letterSpacing: ".18em",
-  textTransform: "uppercase",
-  color: "#fff",
-  background: "rgba(0,0,0,.55)",
-  padding: "5px 9px",
-  borderRadius: 3,
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-};
 
 type Brand = "cockblock" | "mrs";
 
@@ -97,109 +44,38 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
 
   return (
     <div
-      className="featured-event-ad"
+      className="featured-event-ad feed-aff feed-aff--cockblock"
       data-testid="feed-affiliate-cockblock"
-      style={{
-        position: "relative",
-        borderRadius: 16,
-        overflow: "hidden",
-        border: "2px solid #FF1F1F",
-        boxShadow: "0 0 40px -14px #FF1F1F",
-        background: "#0d0d0d",
-      }}
     >
-      <button type="button" aria-label="Dismiss" onClick={onDismiss} style={dismissBtn}>
+      <button type="button" className="feed-aff__dismiss" aria-label="Dismiss" onClick={onDismiss}>
         ✕
       </button>
 
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          aspectRatio: "1 / 1",
-          overflow: "hidden",
-          background: "#000",
-        }}
-      >
+      <div className="feed-aff__media">
         {CB_FRAMES.map((f, i) => (
           <img
             key={f.src}
             src={f.src}
             alt=""
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: f.pos,
-              opacity: i === frame ? 1 : 0,
-              transition: "opacity .6s ease",
-            }}
+            className={`feed-aff__slide${i === frame ? " is-active" : ""}`}
+            style={{ objectPosition: f.pos }}
           />
         ))}
-        <div style={affiliatePill}>
-          <span
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 999,
-              background: "#FF1F1F",
-              boxShadow: "0 0 8px #FF1F1F",
-            }}
-          />
+        <div className="feed-aff__pill">
+          <span className="feed-aff__pill-dot feed-aff__pill-dot--cb" />
           Affiliate
         </div>
-        <div
-          style={{
-            position: "absolute",
-            inset: "auto 0 0 0",
-            zIndex: 2,
-            height: "46%",
-            background: "linear-gradient(to top, rgba(0,0,0,.82), transparent)",
-            pointerEvents: "none",
-          }}
-        />
+        <div className="feed-aff__shade" />
         <img
           src="/affiliate/feed/cb-logo-white.png"
           alt="CockBlock"
-          style={{
-            position: "absolute",
-            bottom: 16,
-            left: 16,
-            zIndex: 2,
-            width: 132,
-            height: "auto",
-          }}
+          className="feed-aff__logo"
         />
       </div>
 
-      <div style={{ padding: "16px 18px 14px" }}>
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: 30,
-            letterSpacing: ".01em",
-            textTransform: "uppercase",
-            lineHeight: 1,
-            color: "#FF3B3B",
-            textShadow: "0 0 16px #FF1F1F80",
-          }}
-        >
-          Meet CockBlock Stroke
-        </div>
-        <div
-          style={{
-            marginTop: 7,
-            fontFamily: "var(--font-mono)",
-            fontSize: 10.5,
-            letterSpacing: ".14em",
-            textTransform: "uppercase",
-            color: "var(--board-muted)",
-            lineHeight: 1.5,
-          }}
-        >
+      <div className="feed-aff__body">
+        <div className="feed-aff__title feed-aff__title--cb">Meet CockBlock Stroke</div>
+        <div className="feed-aff__copy">
           The only frot toy for people with a penis · new hand-held design · gay owned
         </div>
       </div>
@@ -208,27 +84,10 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
         href={FEED_AFFILIATE_URLS.cockblock}
         target="_blank"
         rel="noopener noreferrer"
-        style={{
-          display: "block",
-          width: "100%",
-          textAlign: "left",
-          padding: "15px 18px",
-          background: "transparent",
-          border: "none",
-          borderTop: "1px solid #1c1c22",
-          textDecoration: "none",
-        }}
+        className="feed-aff__cta"
       >
-        <div
-          style={{
-            ...rowLabel,
-            color: "#fff",
-            textShadow: "0 0 16px rgba(255,255,255,.4)",
-          }}
-        >
-          10% Off · Code: TUCKERMAX
-        </div>
-        <div style={rowCopy}>cockblocktoys.com · free US &amp; CA shipping</div>
+        <div className="feed-aff__cta-title">10% Off · Code: TUCKERMAX</div>
+        <div className="feed-aff__cta-copy">cockblocktoys.com · free US &amp; CA shipping</div>
       </a>
     </div>
   );
@@ -237,83 +96,28 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
 function MrsLeatherFeedAd({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div
-      className="featured-event-ad"
+      className="featured-event-ad feed-aff feed-aff--mrs"
       data-testid="feed-affiliate-mrs"
-      style={{
-        position: "relative",
-        borderRadius: 16,
-        overflow: "hidden",
-        border: "2px solid #19E3FF",
-        boxShadow: "0 0 40px -14px #19E3FF",
-        background: "#0d0d0d",
-      }}
     >
-      <button type="button" aria-label="Dismiss" onClick={onDismiss} style={dismissBtn}>
+      <button type="button" className="feed-aff__dismiss" aria-label="Dismiss" onClick={onDismiss}>
         ✕
       </button>
 
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          aspectRatio: "1 / 1",
-          overflow: "hidden",
-          background: "#000",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <div className="feed-aff__media feed-aff__media--center">
         <img
           src="/affiliate/feed/mrs-logo.webp"
           alt="Mr. S Leather"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center",
-          }}
+          className="feed-aff__cover"
         />
-        <div style={affiliatePill}>
-          <span
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 999,
-              background: "#19E3FF",
-              boxShadow: "0 0 8px #19E3FF",
-            }}
-          />
+        <div className="feed-aff__pill">
+          <span className="feed-aff__pill-dot feed-aff__pill-dot--mrs" />
           Affiliate
         </div>
       </div>
 
-      <div style={{ padding: "16px 18px 14px" }}>
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: 30,
-            letterSpacing: ".01em",
-            textTransform: "uppercase",
-            lineHeight: 1,
-            color: "#19E3FF",
-            textShadow: "0 0 16px #19E3FF80",
-          }}
-        >
-          Gear Up at Mr S Leather
-        </div>
-        <div
-          style={{
-            marginTop: 7,
-            fontFamily: "var(--font-mono)",
-            fontSize: 10.5,
-            letterSpacing: ".14em",
-            textTransform: "uppercase",
-            color: "var(--board-muted)",
-            lineHeight: 1.5,
-          }}
-        >
+      <div className="feed-aff__body">
+        <div className="feed-aff__title feed-aff__title--mrs">Gear Up at Mr S Leather</div>
+        <div className="feed-aff__copy">
           Leather · rubber · fetish gear · made in San Francisco since 1979
         </div>
       </div>
@@ -322,27 +126,10 @@ function MrsLeatherFeedAd({ onDismiss }: { onDismiss: () => void }) {
         href={FEED_AFFILIATE_URLS.mrs}
         target="_blank"
         rel="noopener noreferrer"
-        style={{
-          display: "block",
-          width: "100%",
-          textAlign: "left",
-          padding: "15px 18px",
-          background: "transparent",
-          border: "none",
-          borderTop: "1px solid #1c1c22",
-          textDecoration: "none",
-        }}
+        className="feed-aff__cta"
       >
-        <div
-          style={{
-            ...rowLabel,
-            color: "#fff",
-            textShadow: "0 0 16px rgba(255,255,255,.4)",
-          }}
-        >
-          Get your gear for Dore &amp; Folsom
-        </div>
-        <div style={rowCopy}>mr-s-leather.com · ships worldwide</div>
+        <div className="feed-aff__cta-title">Get your gear for Dore &amp; Folsom</div>
+        <div className="feed-aff__cta-copy">mr-s-leather.com · ships worldwide</div>
       </a>
     </div>
   );

@@ -736,8 +736,13 @@ function readCookie(req: any, name: string): string | undefined {
   return undefined;
 }
 
+/** HTTPS in production; plain http://127.0.0.1 preview (LOCAL_PREVIEW=1) must not set Secure cookies. */
+function productionSecureCookies(): boolean {
+  return process.env.NODE_ENV === "production" && process.env.LOCAL_PREVIEW !== "1";
+}
+
 function setGoogleOAuthStateCookie(res: any, state: string) {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  const secure = productionSecureCookies() ? "; Secure" : "";
   // append — never replace the session Set-Cookie express-session already queued
   res.append(
     "Set-Cookie",
@@ -746,7 +751,7 @@ function setGoogleOAuthStateCookie(res: any, state: string) {
 }
 
 function clearGoogleOAuthStateCookie(res: any) {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  const secure = productionSecureCookies() ? "; Secure" : "";
   res.append(
     "Set-Cookie",
     `${GOOGLE_OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`,
@@ -959,7 +964,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: productionSecureCookies(),
       httpOnly: true,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days

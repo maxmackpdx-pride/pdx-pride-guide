@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -7,8 +7,6 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import { isValidBeachId, pacificTodayDate } from "@shared/riverBrats";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
-import { C } from "./panel/sheet";
-
 export type InboxGroupChatTarget = {
   kind: "EVENT" | "BEACH";
   id: number | string;
@@ -168,24 +166,29 @@ export default function InboxGroupChat({ target, onBack }: Props) {
       : "Check in on the beach page to unlock this room (visible check-in only).";
 
   const badge = isEvent ? "EVENT GROUP" : "RIVER BRATS";
-  const badgeColor = isEvent ? C.cyan : C.green;
+  const accentStyle = { "--inbox-exp-accent": isEvent ? "#19e3ff" : "#39ff14" } as CSSProperties;
+  const canSend = Boolean(body.trim() && chatOpen && !postMutation.isPending);
 
   return (
-    <div className="inbox-group-chat" data-testid="inbox-group-chat">
+    <div
+      className={`inbox-group-chat inbox-group-chat--${isEvent ? "event" : "beach"}`}
+      data-testid="inbox-group-chat"
+      style={accentStyle}
+    >
       <header className="inbox-group-chat__head">
-        <button type="button" className="inbox-group-chat__back" onClick={onBack} aria-label="Back to inbox">
-          <ChevronLeft size={20} />
+        <button type="button" className="inbox-exp-icon-btn" onClick={onBack} aria-label="Back to inbox" title="Back">
+          <ChevronLeft size={18} />
         </button>
         <div className="inbox-group-chat__titles">
           <div className="inbox-group-chat__title-row">
             <span className="inbox-group-chat__title">{target.title}</span>
-            {windowState === "OPEN" && <span className="inbox-group-chat__live-dot" aria-hidden />}
+            {windowState === "OPEN" && <span className="inbox-exp-dot inbox-exp-dot--live" aria-hidden />}
           </div>
           <div className="inbox-group-chat__meta">
-            <span className="inbox-group-chat__badge" style={{ background: badgeColor }}>
+            <span className={`inbox-exp-tag inbox-group-chat__badge inbox-exp-tag--${isEvent ? "cyan" : "green"}`}>
               {badge}
             </span>
-            <span>{metaLine}</span>
+            <span className="inbox-group-chat__meta-line">{metaLine}</span>
           </div>
         </div>
       </header>
@@ -221,7 +224,11 @@ export default function InboxGroupChat({ target, onBack }: Props) {
                   size={28}
                 />
               )}
-              <div className="inbox-group-chat__bubble">
+              <div
+                className={`inbox-group-chat__bubble inbox-exp-bubble${
+                  msg.isMine ? " inbox-exp-bubble--self" : " inbox-exp-bubble--other"
+                }`}
+              >
                 {!msg.isMine && (
                   <span className="inbox-group-chat__author">
                     {msg.isAnonymous ? "Anonymous" : `@${msg.username || msg.displayName}`}
@@ -233,8 +240,9 @@ export default function InboxGroupChat({ target, onBack }: Props) {
           ))}
         </div>
 
-        <footer className="inbox-group-chat__composer">
+        <footer className="inbox-group-chat__composer inbox-exp-composer">
           <input
+            className="inbox-exp-composer__input"
             value={body}
             onChange={e => setBody(e.target.value)}
             onKeyDown={e => {
@@ -256,8 +264,8 @@ export default function InboxGroupChat({ target, onBack }: Props) {
           />
           <button
             type="button"
-            className="inbox-group-chat__send"
-            disabled={!chatOpen || !body.trim() || postMutation.isPending}
+            className={`inbox-exp-composer__send${canSend ? " is-ready" : ""}`}
+            disabled={!canSend}
             onClick={() => postMutation.mutate(body.trim())}
             data-testid="inbox-group-chat-send"
           >

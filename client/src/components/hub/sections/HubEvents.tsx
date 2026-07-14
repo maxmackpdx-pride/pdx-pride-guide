@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 export type HubEventRow = {
@@ -33,6 +33,8 @@ function dayDotClass(day?: string) {
   return map[key] ?? "";
 }
 
+export type HubEventsFocus = "events" | "checkins";
+
 type Props = {
   going: HubEventRow[];
   hosting: HubEventRow[];
@@ -42,7 +44,15 @@ type Props = {
   emptyMessage?: string;
   editorSlot?: ReactNode;
   onEditEvent?: (id: string | number) => void;
+  /** Deep-link from inbox Posts sheet (`?view=posts&section=…`). */
+  focusSection?: HubEventsFocus | null;
 };
+
+function tabForFocus(focus?: HubEventsFocus | null): EventsTab {
+  if (focus === "events") return "hosting";
+  if (focus === "checkins") return "going";
+  return "going";
+}
 
 export default function HubEvents({
   going,
@@ -50,8 +60,18 @@ export default function HubEvents({
   loading,
   emptyMessage = "No events in this tab yet.",
   editorSlot,
+  focusSection = null,
 }: Props) {
-  const [tab, setTab] = useState<EventsTab>("going");
+  const [tab, setTab] = useState<EventsTab>(() => tabForFocus(focusSection));
+
+  useEffect(() => {
+    if (!focusSection) return;
+    setTab(tabForFocus(focusSection));
+    const id = focusSection === "checkins" ? "checkins" : "events";
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [focusSection]);
 
   const lists: Record<EventsTab, HubEventRow[]> = { going, hosting };
   const eventList = lists[tab];
@@ -65,7 +85,7 @@ export default function HubEvents({
 
       {editorSlot}
 
-      <div style={{ display: "flex", gap: 22, borderBottom: "1px solid var(--panel-border)", margin: "20px 0 22px" }}>
+      <div className="hub-events-tabs">
         {TABS.map((t) => (
           <button key={t.key} type="button" className={`seg${tab === t.key ? " on" : ""}`} onClick={() => setTab(t.key)}>
             {t.label}
@@ -73,56 +93,44 @@ export default function HubEvents({
         ))}
       </div>
 
-      <div style={{ border: "1px solid var(--panel-border)", borderRadius: 12, overflow: "hidden" }}>
+      <div className="hub-events-panel" id={tab === "going" ? "checkins" : "events"}>
         {loading && (
-          <div className="kick" style={{ padding: 24, textAlign: "center" }}>
-            Loading events…
+          <div className="card hub-empty hub-events-empty">
+            <span className="kick">Loading events…</span>
           </div>
         )}
+
         {!loading && eventList.length === 0 && (
-          <div className="kick" style={{ padding: 24, textAlign: "center" }}>
-            {emptyMessage}
+          <div className="card hub-empty hub-events-empty">
+            <span className="kick">{emptyMessage}</span>
           </div>
         )}
-        {!loading &&
-          eventList.map((e) => (
-            <article
-              key={e.id}
-              className="rowin"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 15,
-                padding: "16px 18px",
-                background: "var(--panel-card)",
-                borderBottom: "1px solid var(--panel-border)",
-              }}
-            >
-              <span className={`dot ${dayDotClass(e.dayOfWeek)}`} style={{ flex: "none" }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "#fff", lineHeight: 1.05, textTransform: "uppercase" }}>
-                  {e.title}
-                </div>
-                <div className="kick" style={{ letterSpacing: ".06em", marginTop: 6 }}>
-                  {e.when}
-                  {e.neighborhood ? ` · ${e.neighborhood}` : ""}
-                  {e.chip ? ` · ${e.chip}` : ""}
-                </div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                {e.admission && (
-                  <div className="kick" style={{ letterSpacing: ".1em", color: "var(--panel-cyan)" }}>
-                    {e.admission}
+
+        {!loading && eventList.length > 0 && (
+          <div className="card hub-events-list">
+            {eventList.map((e) => (
+              <article key={e.id} className="hub-thread rowin hub-event-thread">
+                <span className={`hub-event-thread__dot dot ${dayDotClass(e.dayOfWeek)}`} aria-hidden />
+                <div className="hub-thread__body">
+                  <div className="hub-thread__top">
+                    <span className="hub-thread__name">{e.title}</span>
+                    {(e.admission || e.going !== undefined) && (
+                      <div className="hub-event-thread__aside">
+                        {e.admission && <span className="hub-event-thread__admission">{e.admission}</span>}
+                        {e.going !== undefined && <span className="hub-event-thread__going">{e.going} going</span>}
+                      </div>
+                    )}
                   </div>
-                )}
-                {e.going !== undefined && (
-                  <div className="kick" style={{ letterSpacing: ".06em", marginTop: 5 }}>
-                    {e.going} going
-                  </div>
-                )}
-              </div>
-            </article>
-          ))}
+                  <span className="hub-thread__sub">
+                    {e.when}
+                    {e.neighborhood ? ` · ${e.neighborhood}` : ""}
+                    {e.chip ? ` · ${e.chip}` : ""}
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

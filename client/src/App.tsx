@@ -9,7 +9,6 @@ import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
-import FloatingInbox from "./components/FloatingInbox";
 import PullToRefresh from "./components/PullToRefresh";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -114,7 +113,6 @@ function AppLayout() {
       </main>
       <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
       <Footer />
-      <FloatingInbox />
     </div>
   );
 }

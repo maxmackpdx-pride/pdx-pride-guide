@@ -11,7 +11,7 @@ function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       className={`sw${on ? " on" : ""}`}
       onClick={onToggle}
       aria-pressed={on}
-      style={{ border: "none", padding: 0 }}
+      aria-label={on ? "Disable calm mode" : "Enable calm mode"}
     >
       <span className="knob" />
     </button>
@@ -33,32 +33,26 @@ export default function HubSettings({ onLogout }: Props) {
   const isAdmin = Boolean(user?.isAdmin);
 
   return (
-    <div className="reveal">
-      <div className="kick" style={{ color: "var(--panel-cyan)" }}>
-        Make it yours
-      </div>
+    <div className="reveal hub-settings">
+      <div className="kick hub-settings__hero-kick">Make it yours</div>
       <h1 className="h1">Settings</h1>
 
-      <div className="card" style={{ padding: "4px 20px", marginTop: 20 }}>
-        <div className="kick" style={{ letterSpacing: ".16em", padding: "16px 0 4px" }}>
-          Notifications
-        </div>
-        <p style={{ margin: "8px 0 12px", fontSize: 13, color: "var(--board-muted)", lineHeight: 1.5 }}>
+      <div className="card hub-settings__card hub-settings__card--tight">
+        <div className="kick hub-settings__section-kick">Notifications</div>
+        <p className="hub-settings__lede">
           These save to your account — push alerts for messages, events, and account updates.
         </p>
-        <div style={{ paddingBottom: 16 }}>
-          <DashboardNotificationPrefs isAdmin={isAdmin} />
+        <div className="hub-settings__prefs">
+          <DashboardNotificationPrefs isAdmin={isAdmin} embedded />
         </div>
       </div>
 
-      <div className="card" style={{ padding: "4px 20px", marginTop: 16 }}>
-        <div className="kick" style={{ letterSpacing: ".16em", padding: "16px 0 4px" }}>
-          Appearance
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "13px 0", borderTop: "1px solid var(--panel-border)" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 15, color: "#fff" }}>Calm mode</div>
-            <div style={{ fontSize: 12.5, color: "var(--board-muted)", marginTop: 2 }}>
+      <div className="card hub-settings__card hub-settings__card--tight">
+        <div className="kick hub-settings__section-kick">Appearance</div>
+        <div className="hub-settings__row">
+          <div className="hub-settings__row-copy">
+            <div className="hub-settings__row-title">Calm mode</div>
+            <div className="hub-settings__row-desc">
               Silence grain, glitch, and glows. Flag rings stay. Saves on this device.
             </div>
           </div>
@@ -66,21 +60,17 @@ export default function HubSettings({ onLogout }: Props) {
         </div>
       </div>
 
-      <div className="card" style={{ padding: "18px 20px", marginTop: 16 }}>
-        <div className="kick" style={{ letterSpacing: ".16em", marginBottom: 10 }}>
-          Privacy
-        </div>
-        <p style={{ margin: 0, fontSize: 13.5, color: "var(--board-muted)", lineHeight: 1.55 }}>
+      <div className="card hub-settings__card hub-settings__card--comfortable">
+        <div className="kick hub-settings__section-kick hub-settings__section-kick--privacy">Privacy</div>
+        <p className="hub-settings__note">
           Public profile visibility, RSVP visibility, and check-in privacy are not live yet. We removed the
           pretend toggles so nothing looks saved when it is not.
         </p>
       </div>
 
-      <div className="card" style={{ padding: 20, marginTop: 16 }}>
-        <div className="kick" style={{ letterSpacing: ".16em", color: "var(--status-bad)", marginBottom: 14 }}>
-          Account
-        </div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <div className="card hub-settings__card hub-settings__card--roomy">
+        <div className="kick hub-settings__section-kick hub-settings__section-kick--account">Account</div>
+        <div className="hub-settings__actions">
           <Button variant="ghost" accent="cyan" onClick={onLogout}>
             Sign out
           </Button>

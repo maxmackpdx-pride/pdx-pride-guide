@@ -122,8 +122,8 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   if (optionsQuery.isLoading) {
     return (
       <div className="reveal">
-        <div className="card" style={{ padding: 28, textAlign: "center" }}>
-          <p style={{ margin: 0, color: "var(--board-muted)" }}>Loading...</p>
+        <div className="card hub-post__empty">
+          <p className="hub-post__copy">Loading...</p>
         </div>
       </div>
     );
@@ -132,11 +132,9 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   if (!optionsQuery.data?.canPost) {
     return (
       <div className={embedded ? undefined : "reveal"}>
-        <div className="card" style={{ padding: embedded ? "15px 17px" : 24, marginTop: embedded ? 0 : 20 }}>
-          <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 6 }}>
-            Post to the feed
-          </div>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+        <div className={`card hub-post__card${embedded ? " hub-post__card--compact" : ""}`}>
+          <div className="kick hub-post__kick">Post to the feed</div>
+          <p className="hub-post__copy">
             Coming soon for members. Admins, event hosts, and directory venue owners can post now.
           </p>
         </div>
@@ -148,19 +146,15 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
     <div className={embedded ? undefined : "reveal"}>
       {!embedded && (
         <>
-          <div className="kick" style={{ color: "var(--panel-cyan)" }}>
-            Share with the scene
-          </div>
+          <div className="kick hub-post__kick--page">Share with the scene</div>
           <h1 className="h1">Post to the feed</h1>
         </>
       )}
-      <div className="card" style={{ padding: 20, marginTop: embedded ? 0 : 20 }}>
+      <div className={`card hub-post__card${embedded ? " hub-post__card--embedded" : ""}`}>
         {embedded && (
-          <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 12 }}>
-            Post to the feed
-          </div>
+          <div className="kick hub-post__kick">Post to the feed</div>
         )}
-        <div style={{ display: "flex", gap: 22, borderBottom: "1px solid var(--panel-border)", marginBottom: 18 }}>
+        <div className="hub-post__tabs">
           {POST_TYPES.map((pt) => (
             <button
               key={pt.key}
@@ -177,7 +171,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
         </div>
 
         {postType === "photo" && (
-          <div style={{ marginBottom: 16 }}>
+          <div className="hub-post__field">
             <ImageUploader
               endpoint="/api/upload/feed-photo"
               fieldName="photo"
@@ -189,20 +183,17 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
         )}
 
         <textarea
-          className="fin"
+          className="fin hub-post__textarea"
           rows={3}
           placeholder={PROMPTS[postType]}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          style={{ resize: "vertical", marginBottom: 14 }}
           maxLength={1000}
         />
 
-        <div style={{ marginBottom: 16 }}>
-          <div className="kick" style={{ letterSpacing: ".12em", marginBottom: 10 }}>
-            Who sees this
-          </div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <div className="hub-post__audience">
+          <div className="kick hub-post__kick--section">Who sees this</div>
+          <div className="hub-post__audience-btns">
             <button
               type="button"
               className={`seg${audience === "ALL" ? " on" : ""}`}
@@ -224,20 +215,20 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
             </button>
           </div>
           {audience === "RSVPS" && hostedEvents.length === 0 && (
-            <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--board-muted)" }}>
+            <p className="hub-post__copy--hint">
               RSVP-only posts need at least one live event you host.
             </p>
           )}
           {audience === "RSVPS" && hostedEvents.length > 0 && (
-            <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--board-muted)" }}>
+            <p className="hub-post__copy--hint">
               Only members with an active RSVP to {showEventPicker ? "the event you pick" : "your hosted events"} will see this.
             </p>
           )}
         </div>
 
         {showEventPicker && (
-          <div style={{ marginBottom: 16 }}>
-            <label className="kick" style={{ display: "block", letterSpacing: ".1em", marginBottom: 8 }}>
+          <div className="hub-post__field">
+            <label className="kick hub-post__kick--label">
               Limit to one event (optional)
             </label>
             <select
@@ -255,11 +246,11 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span className="kick" style={{ letterSpacing: ".1em" }}>
+        <div className="hub-post__actions">
+          <span className="kick">
             {audience === "ALL" ? "Public to members" : "RSVPs only"}
           </span>
-          <div style={{ flex: 1 }} />
+          <div className="hub-post__actions-spacer" />
           <Button
             variant="neon"
             accent="cyan"
@@ -272,66 +263,44 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
       </div>
 
       {!embedded && (
-      <div className="kick" style={{ margin: "30px 0 16px" }}>
+      <div className="kick hub-post__recent">
         Your recent posts
       </div>
       )}
       {!embedded && mineQuery.isLoading && (
-        <div className="card" style={{ padding: "28px 20px", textAlign: "center" }}>
-          <p style={{ margin: 0, fontSize: 14, color: "var(--board-muted)" }}>Loading...</p>
+        <div className="card hub-post__empty">
+          <p className="hub-post__copy">Loading...</p>
         </div>
       )}
       {!embedded && !mineQuery.isLoading && (mineQuery.data?.length ?? 0) === 0 && (
-        <div className="card" style={{ padding: "28px 20px", textAlign: "center" }}>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+        <div className="card hub-post__empty">
+          <p className="hub-post__copy">
             Nothing posted yet. What you share will show up here and in the scene feed.
           </p>
         </div>
       )}
       {!embedded && (mineQuery.data ?? []).map((post) => (
-        <div key={post.id} className="card" style={{ padding: "16px 18px", marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="kick" style={{ fontSize: 10.5, letterSpacing: ".06em" }}>
+        <div key={post.id} className="card hub-post__mine">
+          <div className="hub-post__mine-row">
+            <div className="hub-feed-card__main">
+              <div className="kick hub-post__mine-meta">
                 {post.postType === "photo" ? "Photo" : "Text"}
                 {" · "}
                 {post.audience === "RSVPS" ? "RSVPs only" : "Everyone"}
                 {post.createdAt ? ` · ${timeAgo(post.createdAt)}` : ""}
               </div>
               {post.body && (
-                <p style={{ margin: "10px 0 0", fontSize: 14.5, lineHeight: 1.55, color: "var(--board-text)" }}>
-                  {post.body}
-                </p>
+                <p className="hub-post__mine-body">{post.body}</p>
               )}
               {post.photoUrl && (
-                <img
-                  src={post.photoUrl}
-                  alt=""
-                  style={{
-                    marginTop: 12,
-                    maxWidth: "100%",
-                    maxHeight: 220,
-                    borderRadius: 10,
-                    border: "1px solid var(--panel-border-2)",
-                    objectFit: "cover",
-                  }}
-                />
+                <img src={post.photoUrl} alt="" className="hub-post__mine-photo" />
               )}
             </div>
             <button
               type="button"
-              className="kick"
+              className="kick hub-post__remove"
               onClick={() => deleteMutation.mutate(post.id)}
               disabled={deleteMutation.isPending}
-              style={{
-                flex: "none",
-                background: "transparent",
-                border: "1px solid var(--panel-border)",
-                borderRadius: 6,
-                padding: "4px 8px",
-                color: "var(--board-muted)",
-                cursor: "pointer",
-              }}
             >
               Remove
             </button>

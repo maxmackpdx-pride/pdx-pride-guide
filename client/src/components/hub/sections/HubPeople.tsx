@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import type { PeopleHubTab, PeopleHubUser } from "@shared/peopleHub";
 import HubPersonRow from "./HubPersonRow";
-import "../hub-home.css";
 
 const TABS: Array<{ key: PeopleHubTab; label: string }> = [
   { key: "following", label: "Following" },
@@ -67,12 +66,10 @@ export default function HubPeople() {
   const emptyCopy = EMPTY_COPY[tab];
 
   return (
-    <div className="reveal">
-      <div className="kick" style={{ color: "var(--panel-cyan)" }}>
-        Your community
-      </div>
+    <div className="reveal hub-people">
+      <div className="kick hub-people-hero-kick">Your community</div>
       <h1 className="h1">People</h1>
-      <div style={{ display: "flex", gap: 22, borderBottom: "1px solid var(--panel-border)", margin: "20px 0 22px" }}>
+      <div className="hub-people-tabs">
         {TABS.map((t) => (
           <button key={t.key} type="button" className={`seg${tab === t.key ? " on" : ""}`} onClick={() => setTab(t.key)}>
             {t.label}
@@ -81,19 +78,19 @@ export default function HubPeople() {
       </div>
 
       {isLoading && (
-        <div className="card" style={{ padding: 28 }}>
+        <div className="card hub-people-list hub-people-loading">
           <BoardLoadingState label="Loading people" />
         </div>
       )}
 
       {isError && (
-        <div className="card hub-empty" role="alert">
+        <div className="card hub-empty hub-people-empty" role="alert">
           Could not load your people list. Try refreshing the page.
         </div>
       )}
 
       {!isLoading && !isError && people.length > 0 && (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="card hub-people-list">
           {people.map((person) => (
             <HubPersonRow
               key={person.id}
@@ -109,23 +106,14 @@ export default function HubPeople() {
       )}
 
       {empty && (
-        <div
-          className="card hub-empty"
-          style={{
-            border: "1px solid var(--panel-border)",
-            borderRadius: 12,
-            textAlign: "center",
-          }}
-        >
-          <div className="kick" style={{ color: "var(--panel-cyan)", marginBottom: 10 }}>
-            {emptyCopy.title}
-          </div>
-          <p style={{ margin: "0 0 18px", color: "var(--board-text)" }}>{emptyCopy.body}</p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/events" className="seg" style={{ textDecoration: "none", padding: "10px 16px", border: "1px solid var(--panel-cyan)", borderRadius: 8, color: "var(--panel-cyan)" }}>
+        <div className="card hub-empty hub-people-empty">
+          <div className="kick hub-people-empty__kick">{emptyCopy.title}</div>
+          <p className="hub-people-empty__copy">{emptyCopy.body}</p>
+          <div className="hub-people-empty__actions">
+            <Link href="/events" className="seg hub-people-empty__cta hub-people-empty__cta--primary">
               Browse events
             </Link>
-            <Link href="/directory" className="seg" style={{ textDecoration: "none", padding: "10px 16px", border: "1px solid var(--panel-border-2)", borderRadius: 99, color: "var(--board-muted)" }}>
+            <Link href="/directory" className="seg hub-people-empty__cta hub-people-empty__cta--ghost">
               Queer directory
             </Link>
           </div>

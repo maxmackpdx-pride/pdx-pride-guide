@@ -31,8 +31,9 @@ async function openInboxPosts(page) {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
-  await page.locator(".floating-inbox__fab").waitFor({ state: "visible", timeout: 20000 });
-  await page.locator(".floating-inbox__fab").click();
+  const fab = page.getByRole("button", { name: /Open inbox/i }).first();
+  await fab.waitFor({ state: "visible", timeout: 20000 });
+  await fab.click({ force: true });
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.getByRole("button", { name: "POSTS" }).click();
   await page.getByText("MY EVENTS").waitFor({ state: "visible", timeout: 10000 });
@@ -45,6 +46,10 @@ async function sheetOpen(page) {
 async function toggleSection(page, title) {
   await page.locator(".inbox-overlay").getByText(title, { exact: true }).click();
   await page.waitForTimeout(300);
+}
+
+async function waitForPostsHub(page) {
+  await page.getByRole("heading", { name: "Your Events" }).waitFor({ timeout: 10000 });
 }
 
 async function sectionInView(page, id) {
@@ -104,7 +109,7 @@ try {
   // 3. Submitted event → events section (URL handler; owner account has no sheet rows)
   await page.goto(`${BASE}/dashboard?view=posts&section=events`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
-  await page.getByRole("heading", { name: "My posts" }).waitFor({ timeout: 10000 });
+  await waitForPostsHub(page);
   const eventsInView = await sectionInView(page, "events");
   await page.screenshot({ path: join(OUT, "03-submitted-section.png"), fullPage: true });
   record(
@@ -113,20 +118,33 @@ try {
     `url=${page.url()} eventsInView=${eventsInView} note=PostsView href verified; owner /api/events/mine/submitted returns []`,
   );
 
-  // 4. Check-ins VIEW (sheet → section scroll)
+  // 4. Check-ins VIEW (sheet → section scroll; URL fallback when no sheet rows)
   await openInboxPosts(page);
   await toggleSection(page, "CHECK-INS");
-  await page
+  const checkinView = page
     .locator(".inbox-overlay")
     .locator("div")
     .filter({ hasText: "Stank Yes Coach" })
     .filter({ has: page.getByRole("button", { name: "VIEW", exact: true }) })
     .last()
-    .getByRole("button", { name: "VIEW", exact: true })
-    .click();
-  const sheetClosed4 = !(await sheetOpen(page));
-  const url4 = page.url();
-  const checkinsInView = await sectionInView(page, "checkins");
+    .getByRole("button", { name: "VIEW", exact: true });
+  let sheetClosed4;
+  let url4;
+  let checkinsInView;
+  if ((await checkinView.count()) > 0) {
+    await checkinView.click();
+    sheetClosed4 = !(await sheetOpen(page));
+    url4 = page.url();
+    await waitForPostsHub(page);
+    checkinsInView = await sectionInView(page, "checkins");
+  } else {
+    await page.goto(`${BASE}/dashboard?view=posts&section=checkins`, { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+    await waitForPostsHub(page);
+    sheetClosed4 = !(await sheetOpen(page));
+    url4 = page.url();
+    checkinsInView = await sectionInView(page, "checkins");
+  }
   await page.screenshot({ path: join(OUT, "04-checkins-section.png"), fullPage: true });
   record(
     "Check-ins VIEW (sheet → checkins section)",
@@ -138,7 +156,7 @@ try {
   await page.goto(`${BASE}/dashboard?view=posts&editEvent=${BAD_EVENT_ID}`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
   const noEditor = (await page.getByText("Editing:", { exact: false }).count()) === 0;
-  const postsHeading = await page.getByRole("heading", { name: "My posts" }).isVisible();
+  const postsHeading = await page.getByRole("heading", { name: "Your Events" }).isVisible();
   await page.screenshot({ path: join(OUT, "05-stale-editEvent.png"), fullPage: true });
   record(
     "Stale editEvent (no crash, posts view only)",

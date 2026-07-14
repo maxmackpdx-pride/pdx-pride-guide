@@ -240,7 +240,6 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         role="dialog"
         aria-label="Inbox"
         ref={panelRef}
-        style={{ border: "2px solid var(--neon-blue)", padding: 0 }}
       >
         <div className="inbox-exp-handle">
           <div className="inbox-exp-handle__bar" />
@@ -261,7 +260,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         {inboxActive && !detailOpen && (
           <div className="inbox-exp-chrome-pad">
             <div className="inbox-exp-seg-tray">
-              {visibleAccounts.map(([id, label, color]) => {
+              {visibleAccounts.map(([id, label]) => {
                 const act = account === id;
                 return (
                   <button
@@ -273,12 +272,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                     {accountUnread[id] > 0 && (
                       <span
                         aria-hidden="true"
-                        className="inbox-exp-seg-tray__badge"
-                        style={{
-                          background: color,
-                          boxShadow: `0 0 12px ${color}, 0 0 4px ${color}`,
-                          color: act ? "#06060a" : undefined,
-                        }}
+                        className={`inbox-exp-seg-tray__badge inbox-exp-seg-tray__badge--${id}`}
                       >
                         {act ? (accountUnread[id] > 99 ? "99+" : accountUnread[id]) : null}
                       </span>
@@ -327,7 +321,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               </button>
               {filterOpen && (
                 <div className="inbox-exp-filter__menu">
-                  {FILTERS.map(([id, label, color]) => {
+                  {FILTERS.map(([id, label]) => {
                     const act = filter === id;
                     return (
                       <button
@@ -339,8 +333,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                           setFilterOpen(false);
                         }}
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span className="inbox-exp-filter__dot" style={{ background: color }} />
+                        <span className="inbox-exp-filter__item-label">
+                          <span className={`inbox-exp-filter__dot inbox-exp-filter__dot--${id}`} />
                           {label}
                         </span>
                         <span className="inbox-exp-filter__count">{catCount(id)}</span>
@@ -407,15 +401,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
         {/* body */}
         <div
-          className="inbox-overlay__scroll"
-          style={{
-            flex: 1,
-            overflowY: detailOpen ? "hidden" : "auto",
-            padding: detailOpen ? 0 : "14px 16px 12px",
-            minHeight: 0,
-            display: detailOpen ? "flex" : undefined,
-            flexDirection: detailOpen ? "column" : undefined,
-          }}
+          className={`inbox-overlay__scroll${detailOpen ? " inbox-overlay__scroll--detail" : ""}`}
         >
           {activeGroup ? (
             <InboxGroupChat target={activeGroup} onBack={closeGroup} />

@@ -6,6 +6,7 @@ import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
 import { PROFILE_PHOTO_RULES_SUMMARY } from "@shared/boardModeration";
 import { formatUsernameChangeDate, usernameChangeEligibility } from "@shared/username";
 
+/** Kept for DashboardEventEditor — event forms still use inline dash styles. */
 const labelStyle: React.CSSProperties = {
   display: "block", fontFamily: "var(--font-display)", fontWeight: 900,
   fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase",
@@ -123,114 +124,163 @@ export default function DashboardProfileEditor({
   const busy = saving || savingExtras;
 
   return (
-    <section className="dash-edit-panel" style={{ borderColor: "#C8FA3C", marginBottom: 24 }}>
-      <h2 className="dash-anton" style={{ fontSize: "1.3rem", color: "#C8FA3C", marginBottom: 24 }}>Edit profile</h2>
-      <label style={labelStyle}>Your avatar</label>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
-        {AVATAR_EMOJI_OPTIONS.map(a => (
-          <button key={a.id} onClick={() => setAvatarChoice(a.id)} title={a.label} style={{
-            width: 52, height: 52, borderRadius: "50%",
-            background: a.bg, border: avatarChoice === a.id ? "3px solid #C8FA3C" : "3px solid #333",
-            fontSize: "1.5rem", cursor: "pointer",
-          }}>{a.emoji}</button>
-        ))}
-      </div>
-      <label id="cover" style={labelStyle}>Cover image</label>
-      <p style={{ margin: "0 0 10px", fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, maxWidth: 560 }}>
-        Upload a wide photo for the banner behind your profile picture. Drag and zoom to position it on your public profile.
-      </p>
-      <CoverEditor
-        coverImageUrl={user.coverImageUrl}
-        coverCrop={user.coverCrop}
-        onSaved={() => void onRefresh()}
-      />
-      <label style={labelStyle}>Profile photo & ring</label>
-      <p style={{ margin: "0 0 10px", fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, maxWidth: 560 }}>
-        {PROFILE_PHOTO_RULES_SUMMARY}
-      </p>
-      <AvatarEditor
-        photoUrl={user.photoUrl}
-        avatarRing={user.avatarRing}
-        avatarCrop={user.avatarCrop}
-        avatarChoice={avatarChoice}
-        displayName={displayName}
-        username={user.username}
-        onSaved={() => void onRefresh()}
-      />
-      <label style={labelStyle}>Username</label>
-      <input
-        style={{
-          ...inputStyle,
-          ...(canChangeUsername ? {} : { color: "var(--text-lo)", cursor: "not-allowed" }),
-        }}
-        value={username}
-        onChange={e => setUsername(e.target.value.replace(/^@/, "").toLowerCase())}
-        readOnly={!canChangeUsername}
-        aria-readonly={!canChangeUsername}
-        maxLength={32}
-        placeholder="your_handle"
-        autoComplete="username"
-      />
-      <p style={{ margin: "6px 0 0", fontSize: "0.78rem", color: "var(--text-lo)", lineHeight: 1.4 }}>
-        {canChangeUsername
-          ? "Your @handle powers your profile link and login. You can change it once every 6 months."
-          : `You can change your username again on ${formatUsernameChangeDate(nextChangeAt)}.`}
-      </p>
-      <label style={labelStyle}>Display name</label>
-      <input style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={40} />
-      <label style={labelStyle}>Bio <span style={{ color: "var(--text-meta)", fontWeight: 400 }}>({bio.length}/160)</span></label>
-      <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
-        value={bio} onChange={e => setBio(e.target.value)} maxLength={160} />
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "0 14px" }}>
-        <div>
-          <label style={labelStyle}>Pronouns</label>
-          <input
-            style={inputStyle}
-            value={pronouns}
-            onChange={e => setPronouns(e.target.value)}
-            maxLength={40}
-            placeholder="they / she"
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Location</label>
-          <input
-            style={inputStyle}
-            value={location}
-            onChange={e => setLocation(e.target.value)}
-            maxLength={80}
-            placeholder="SE Portland, OR"
-          />
+    <section className="hub-v2-profile-editor" aria-label="Profile editor">
+      <div className="hub-v2-profile-editor__block">
+        <label className="hub-v2-profile-editor__label">Your avatar</label>
+        <div className="hub-v2-profile-editor__avatars">
+          {AVATAR_EMOJI_OPTIONS.map(a => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setAvatarChoice(a.id)}
+              title={a.label}
+              className={`hub-v2-profile-editor__avatar-btn${avatarChoice === a.id ? " is-selected" : ""}`}
+              style={{ background: a.bg }}
+            >
+              {a.emoji}
+            </button>
+          ))}
         </div>
       </div>
 
-      <label style={labelStyle}>
-        Social links{" "}
-        <span style={{ color: "var(--text-meta)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>
-         , shown on your public profile at /u/{username || user?.username}
-        </span>
-      </label>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-        {SOCIAL_FIELDS.map(field => (
-          <div key={field.key}>
-            <label style={{ ...labelStyle, marginTop: 0, marginBottom: 4, fontSize: "0.62rem" }}>{field.label}</label>
+      <div id="cover" className="hub-v2-profile-editor__block">
+        <label className="hub-v2-profile-editor__label">Cover image</label>
+        <p className="hub-v2-profile-editor__hint">
+          Upload a wide photo for the banner behind your profile picture. Drag and zoom to position it on your public profile.
+        </p>
+        <CoverEditor
+          coverImageUrl={user.coverImageUrl}
+          coverCrop={user.coverCrop}
+          onSaved={() => void onRefresh()}
+        />
+      </div>
+
+      <div className="hub-v2-profile-editor__block">
+        <label className="hub-v2-profile-editor__label">Profile photo &amp; ring</label>
+        <p className="hub-v2-profile-editor__hint">{PROFILE_PHOTO_RULES_SUMMARY}</p>
+        <AvatarEditor
+          photoUrl={user.photoUrl}
+          avatarRing={user.avatarRing}
+          avatarCrop={user.avatarCrop}
+          avatarChoice={avatarChoice}
+          displayName={displayName}
+          username={user.username}
+          onSaved={() => void onRefresh()}
+        />
+      </div>
+
+      <div className="hub-v2-profile-editor__block">
+        <label className="hub-v2-profile-editor__label" htmlFor="hub-profile-username">
+          Username
+        </label>
+        <input
+          id="hub-profile-username"
+          className="hub-v2-profile-editor__input"
+          value={username}
+          onChange={e => setUsername(e.target.value.replace(/^@/, "").toLowerCase())}
+          readOnly={!canChangeUsername}
+          aria-readonly={!canChangeUsername}
+          maxLength={32}
+          placeholder="your_handle"
+          autoComplete="username"
+        />
+        <p className="hub-v2-profile-editor__hint" style={{ marginTop: 6, marginBottom: 0, fontSize: "0.78rem" }}>
+          {canChangeUsername
+            ? "Your @handle powers your profile link and login. You can change it once every 6 months."
+            : `You can change your username again on ${formatUsernameChangeDate(nextChangeAt)}.`}
+        </p>
+
+        <label className="hub-v2-profile-editor__label" htmlFor="hub-profile-display-name" style={{ marginTop: 16 }}>
+          Display name
+        </label>
+        <input
+          id="hub-profile-display-name"
+          className="hub-v2-profile-editor__input"
+          value={displayName}
+          onChange={e => setDisplayName(e.target.value)}
+          maxLength={40}
+        />
+
+        <label className="hub-v2-profile-editor__label" htmlFor="hub-profile-bio" style={{ marginTop: 16 }}>
+          Bio <span>({bio.length}/160)</span>
+        </label>
+        <textarea
+          id="hub-profile-bio"
+          className="hub-v2-profile-editor__input hub-v2-profile-editor__textarea"
+          value={bio}
+          onChange={e => setBio(e.target.value)}
+          maxLength={160}
+        />
+      </div>
+
+      <div className="hub-v2-profile-editor__block">
+        <div className="hub-v2-profile-editor__grid hub-v2-profile-editor__grid--pair">
+          <div>
+            <label className="hub-v2-profile-editor__label" htmlFor="hub-profile-pronouns">
+              Pronouns
+            </label>
             <input
-              style={inputStyle}
-              value={links[field.key] || ""}
-              onChange={e => setLink(field.key, e.target.value)}
-              maxLength={120}
-              placeholder={field.placeholder}
+              id="hub-profile-pronouns"
+              className="hub-v2-profile-editor__input"
+              value={pronouns}
+              onChange={e => setPronouns(e.target.value)}
+              maxLength={40}
+              placeholder="they / she"
             />
           </div>
-        ))}
+          <div>
+            <label className="hub-v2-profile-editor__label" htmlFor="hub-profile-location">
+              Location
+            </label>
+            <input
+              id="hub-profile-location"
+              className="hub-v2-profile-editor__input"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              maxLength={80}
+              placeholder="SE Portland, OR"
+            />
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: 12, marginTop: 20, alignItems: "center" }}>
-        <button onClick={() => void handleSave()} disabled={busy} className="dash-btn dash-btn-lime active">
-          {busy ? "Saving..." : "Save profile"}
+      <div className="hub-v2-profile-editor__block">
+        <label className="hub-v2-profile-editor__label">
+          Social links{" "}
+          <span>, shown on your public profile at /u/{username || user?.username}</span>
+        </label>
+        <div className="hub-v2-profile-editor__grid">
+          {SOCIAL_FIELDS.map(field => (
+            <div key={field.key}>
+              <label
+                className="hub-v2-profile-editor__label hub-v2-profile-editor__label--sub"
+                htmlFor={`hub-profile-social-${field.key}`}
+              >
+                {field.label}
+              </label>
+              <input
+                id={`hub-profile-social-${field.key}`}
+                className="hub-v2-profile-editor__input"
+                value={links[field.key] || ""}
+                onChange={e => setLink(field.key, e.target.value)}
+                maxLength={120}
+                placeholder={field.placeholder}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="hub-v2-profile-editor__footer">
+        <button
+          type="button"
+          onClick={() => void handleSave()}
+          disabled={busy}
+          className="hub-v2-profile-editor__save"
+        >
+          {busy ? "Saving…" : "Save profile"}
         </button>
-        {saveMsg && <span style={{ color: "#C8FA3C" }}>{saveMsg}</span>}
+        {saveMsg && <span className="hub-v2-profile-editor__msg">{saveMsg}</span>}
       </div>
     </section>
   );

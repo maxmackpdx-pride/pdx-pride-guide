@@ -16,111 +16,65 @@ export default function HubProfile({ user, stats, postsCount, profileEditor, onE
   const isPromoter = user.promoterStatus === "approved";
 
   return (
-    <div className="reveal">
+    <div className="reveal hub-v2-profile">
+      <div className="kick hub-v2-profile__kicker">Behind the scenes</div>
+      <h1 className="h1">Edit profile</h1>
+
       {profileEditor}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <UserAvatar
-          photoUrl={user.photoUrl}
-          avatarChoice={user.avatarChoice}
-          avatarRing={user.avatarRing}
-          displayName={displayName}
-          username={user.username}
-          size={72}
-        />
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h1 className="h1">{displayName}</h1>
-            {(user.isAdmin || isPromoter) && (
-              <span
-                className="kick"
-                style={{
-                  letterSpacing: ".12em",
-                  color: "var(--panel-cyan)",
-                  border: "1px solid var(--panel-cyan)",
-                  padding: "2px 8px",
-                  borderRadius: 5,
-                }}
-              >
-                {user.isAdmin ? "Verified" : "Promoter"}
-              </span>
-            )}
-          </div>
-          <div className="kick" style={{ letterSpacing: ".08em", marginTop: 8 }}>
-            @{user.username}
+      <div className="hub-v2-profile__preview">
+        <div className="kick hub-v2-profile__preview-kicker">At a glance</div>
+
+        <div className="hub-v2-profile__header">
+          <UserAvatar
+            photoUrl={user.photoUrl}
+            avatarChoice={user.avatarChoice}
+            avatarRing={user.avatarRing}
+            displayName={displayName}
+            username={user.username}
+            size={72}
+          />
+          <div>
+            <div className="hub-v2-profile__title-row">
+              <h2 className="h1 hub-v2-profile__preview-name">{displayName}</h2>
+              {(user.isAdmin || isPromoter) && (
+                <span className="kick hub-v2-profile__badge">
+                  {user.isAdmin ? "Verified" : "Promoter"}
+                </span>
+              )}
+            </div>
+            <div className="kick hub-v2-profile__handle">@{user.username}</div>
           </div>
         </div>
-      </div>
 
-      {user.bio && (
-        <p style={{ margin: "20px 0 0", maxWidth: 540, fontSize: 15, lineHeight: 1.6, color: "var(--board-text)" }}>
-          {user.bio}
-        </p>
-      )}
+        {user.bio && <p className="hub-v2-profile__bio">{user.bio}</p>}
 
-      <div style={{ display: "flex", gap: 12, margin: "20px 0 26px", flexWrap: "wrap" }}>
-        <Link
-          href={`/u/${encodeURIComponent(user.username)}`}
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            letterSpacing: ".12em",
-            textTransform: "uppercase",
-            color: "var(--panel-cyan)",
-            border: "1px solid var(--panel-cyan)",
-            borderRadius: 8,
-            padding: "9px 16px",
-          }}
-        >
-          View public profile
-        </Link>
-        <button
-          type="button"
-          onClick={onEditProfile}
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            letterSpacing: ".12em",
-            textTransform: "uppercase",
-            color: "var(--board-muted)",
-            border: "1px solid var(--panel-border-2)",
-            borderRadius: 8,
-            padding: "9px 16px",
-            background: "transparent",
-            cursor: "pointer",
-          }}
-        >
-          Edit on your profile page
-        </button>
-      </div>
-
-      <div
-        className="statwrap"
-        style={{
-          display: "flex",
-          border: "1px solid var(--panel-border)",
-          borderRadius: 12,
-          overflow: "hidden",
-          marginBottom: 30,
-        }}
-      >
-        {stats.map((st, i) => (
-          <div
-            key={st.label}
-            style={{
-              flex: 1,
-              padding: "18px 16px",
-              borderRight: i < stats.length - 1 ? "1px solid var(--panel-border)" : undefined,
-            }}
+        <div className="hub-v2-profile__actions">
+          <Link
+            href={`/u/${encodeURIComponent(user.username)}`}
+            className="hub-v2-profile__btn hub-v2-profile__btn--cyan"
           >
-            <div className="statnum" style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 26, color: "#fff", lineHeight: 0.85 }}>
-              {st.value}
+            View public profile
+          </Link>
+          {!profileEditor && onEditProfile && (
+            <button
+              type="button"
+              onClick={onEditProfile}
+              className="hub-v2-profile__btn hub-v2-profile__btn--ghost"
+            >
+              Edit on your profile page
+            </button>
+          )}
+        </div>
+
+        <div className="statwrap hub-v2-profile__stats">
+          {stats.map(st => (
+            <div key={st.label} className="hub-v2-profile__stat">
+              <div className="statnum hub-v2-profile__stat-num">{st.value}</div>
+              <div className="kick hub-v2-profile__stat-label">{st.label}</div>
             </div>
-            <div className="kick" style={{ letterSpacing: ".12em", marginTop: 8 }}>
-              {st.label}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Posts live on the public profile; hub Profile is edit-only now. */}
@@ -129,8 +83,8 @@ export default function HubProfile({ user, stats, postsCount, profileEditor, onE
           <div className="kick" style={{ marginBottom: 16 }}>
             Your posts
           </div>
-          <div className="card" style={{ padding: "32px 20px", textAlign: "center" }}>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--board-muted)" }}>
+          <div className="card hub-v2-profile__empty">
+            <p>
               {postsCount > 0
                 ? "Your posts will show here."
                 : "You haven't posted yet. Share a photo, update, or check-in from your feed."}

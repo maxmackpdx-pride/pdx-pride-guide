@@ -1286,7 +1286,7 @@ export default function QueueView({
       )}
 
       {mode === "owner" && !completed && (
-        <p style={{ margin: "14px 2px 4px", fontSize: 11.5, color: C.faint, lineHeight: 1.5 }}>
+        <p className="inbox-exp-queue-footnote">
           Contact and sponsorship messages from the site's forms land here. Reply goes to the sender's email; Mark done clears it from the desk.
         </p>
       )}
