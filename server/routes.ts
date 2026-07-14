@@ -737,6 +737,43 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
+  // 1200×630 branded social cards (replace raw flyer/logo in og:image)
+  app.get("/api/og/event/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
+      const { renderEventOgCard } = await import("./ogCards");
+      const buf = await renderEventOgCard(id);
+      if (!buf) return res.status(404).json({ error: "Event not found" });
+      res.set({
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+      });
+      return res.send(buf);
+    } catch (err) {
+      console.error("GET /api/og/event failed:", err);
+      return res.status(500).json({ error: "Could not render card" });
+    }
+  });
+
+  app.get("/api/og/place/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
+      const { renderPlaceOgCard } = await import("./ogCards");
+      const buf = await renderPlaceOgCard(id);
+      if (!buf) return res.status(404).json({ error: "Place not found" });
+      res.set({
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+      });
+      return res.send(buf);
+    } catch (err) {
+      console.error("GET /api/og/place failed:", err);
+      return res.status(500).json({ error: "Could not render card" });
+    }
+  });
+
   attendanceHub = initAttendanceWs(httpServer);
   storage.syncSiteOwnerPortfolio();
 

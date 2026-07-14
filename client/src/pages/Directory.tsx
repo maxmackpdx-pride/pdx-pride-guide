@@ -251,9 +251,6 @@ export default function Directory() {
   }, [businesses, routePlaceId, setLocation]);
 
   const placeSeo = selectedPlace;
-  const placeLogo = placeSeo
-    ? resolveDirectoryLogo(placeSeo.name, placeSeo.imageUrl)
-    : null;
   usePageSeo(
     placeSeo
       ? `${placeSeo.name} | Queer Portland Directory | PDX Pride Guide`
@@ -271,11 +268,7 @@ export default function Directory() {
     placeSeo
       ? {
           url: placeUrl(placeSeo.id, placeSeo.name),
-          image: placeLogo
-            ? placeLogo.startsWith("http")
-              ? placeLogo
-              : `https://www.prideguidepdx.com${placeLogo}`
-            : undefined,
+          image: `https://www.prideguidepdx.com/api/og/place/${placeSeo.id}`,
           imageAlt: placeSeo.name,
           type: "article",
         }

@@ -398,7 +398,16 @@ function replaceMeta(html: string, attr: "name" | "property", key: string, conte
 
 function applySocialMeta(
   html: string,
-  opts: { title: string; description: string; url: string; image: string; imageAlt: string; type?: string },
+  opts: {
+    title: string;
+    description: string;
+    url: string;
+    image: string;
+    imageAlt: string;
+    type?: string;
+    imageWidth?: number;
+    imageHeight?: number;
+  },
 ) {
   let out = replaceTitle(html, opts.title);
   out = replaceMeta(out, "name", "description", opts.description);
@@ -406,7 +415,12 @@ function applySocialMeta(
   out = replaceMeta(out, "property", "og:description", opts.description);
   out = replaceMeta(out, "property", "og:url", opts.url);
   out = replaceMeta(out, "property", "og:image", opts.image);
+  out = replaceMeta(out, "property", "og:image:secure_url", opts.image);
+  if (opts.imageWidth) out = replaceMeta(out, "property", "og:image:width", String(opts.imageWidth));
+  if (opts.imageHeight) out = replaceMeta(out, "property", "og:image:height", String(opts.imageHeight));
+  out = replaceMeta(out, "property", "og:image:alt", opts.imageAlt);
   out = replaceMeta(out, "property", "og:type", opts.type || "website");
+  out = replaceMeta(out, "name", "twitter:card", "summary_large_image");
   out = replaceMeta(out, "name", "twitter:title", opts.title);
   out = replaceMeta(out, "name", "twitter:description", opts.description);
   out = replaceMeta(out, "name", "twitter:image", opts.image);
@@ -459,11 +473,13 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const placeLogo = livePlace
     ? resolveDirectoryLogo(livePlace.name, livePlace.imageUrl)
     : null;
+  // Branded 1200×630 cards replace raw flyer/logo as the social share image
   const pageImage = liveEvent
-    ? absoluteAssetUrl(resolveEventPosterUrl(liveEvent.id, liveEvent.posterImageUrl, liveEvent.dayOfWeek))
+    ? `${SITE_URL}/api/og/event/${liveEvent.id}`
     : livePlace
-      ? absoluteAssetUrl(placeLogo)
+      ? `${SITE_URL}/api/og/place/${livePlace.id}`
       : `${SITE_URL}/og-preview.jpg`;
+  const pageImageIsCard = !!(liveEvent || livePlace);
 
   const jsonLdBlocks = [
     buildWebSiteJsonLd(),
@@ -509,6 +525,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? livePlace.name
         : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
     type: liveEvent || livePlace ? "article" : "website",
+    imageWidth: pageImageIsCard ? 1200 : 1024,
+    imageHeight: pageImageIsCard ? 630 : 578,
   });
 
   if (!out.includes("pdx-pride-guide:event-count")) {

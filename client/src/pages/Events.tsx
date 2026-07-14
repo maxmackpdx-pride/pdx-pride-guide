@@ -24,7 +24,6 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
-import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { List, Grid } from "lucide-react";
 import { lazyWithReload } from "@/lib/lazyWithReload";
@@ -120,10 +119,9 @@ function filterLiveEvents(
     });
 }
 
-function absoluteShareImage(path?: string | null) {
-  if (!path) return "https://www.prideguidepdx.com/og-preview.jpg";
-  if (path.startsWith("http")) return path;
-  return `https://www.prideguidepdx.com${path.startsWith("/") ? path : `/${path}`}`;
+/** Branded 1200×630 card (replaces raw flyer as social preview image). */
+function eventOgCardImage(eventId: number) {
+  return `https://www.prideguidepdx.com/api/og/event/${eventId}`;
 }
 
 function truncateSeo(text: string, max = 160) {
@@ -256,7 +254,7 @@ export default function Events() {
     shareEvent
       ? {
           url: eventUrl(shareEvent.id, shareEvent.title),
-          image: absoluteShareImage(resolveEventPosterUrl(shareEvent.id, shareEvent.posterImageUrl, shareEvent.dayOfWeek)),
+          image: eventOgCardImage(shareEvent.id),
           imageAlt: shareEvent.title,
           type: "article",
         }
