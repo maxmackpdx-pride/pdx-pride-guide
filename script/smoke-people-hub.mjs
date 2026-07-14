@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
+import { smokeLogin } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output-people");
@@ -14,10 +15,12 @@ function record(name, ok, detail) {
 }
 
 async function ensureSession(request) {
-  const login = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: "tucker@test.com", password: "smoketest" },
-  });
-  if (login.ok()) return "login";
+  try {
+    await smokeLogin(request, BASE);
+    return "login";
+  } catch {
+    /* fall through to register */
+  }
 
   const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
   const register = await request.post(`${BASE}/api/auth/register`, {

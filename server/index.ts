@@ -40,14 +40,22 @@ app.use((req, res, next) => {
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// Rate limiting
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
+// Rate limiting (skipped in development so local smoke suites can hammer login/API safely)
+const rateLimitSkipDev = () => process.env.NODE_ENV === "development";
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: rateLimitSkipDev,
+});
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many auth attempts. Try again in a few minutes." },
+  skip: rateLimitSkipDev,
 });
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
@@ -59,6 +67,7 @@ const contactLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many messages sent. Try again in a few minutes." },
+  skip: rateLimitSkipDev,
 });
 app.use("/api/contact/message", contactLimiter);
 const analyticsLimiter = rateLimit({
@@ -67,6 +76,7 @@ const analyticsLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many analytics events." },
+  skip: rateLimitSkipDev,
 });
 app.use("/api/analytics/pageview", analyticsLimiter);
 // Admin JSON routes rely on requireAdmin session checks; avoid a separate strict

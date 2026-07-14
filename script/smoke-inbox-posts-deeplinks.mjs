@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
+import { smokeLogin } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output");
@@ -21,10 +22,7 @@ function record(name, ok, detail) {
 }
 
 async function login(page) {
-  const res = await page.request.post(`${BASE}/api/auth/login`, {
-    data: { email: "tucker@test.com", password: "smoketest" },
-  });
-  if (!res.ok()) throw new Error(`Login failed: ${res.status()} ${await res.text()}`);
+  await smokeLogin(page.request, BASE);
 }
 
 async function openInboxPosts(page) {
@@ -33,10 +31,18 @@ async function openInboxPosts(page) {
   await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
   const fab = page.getByRole("button", { name: /Open inbox/i }).first();
   await fab.waitFor({ state: "visible", timeout: 20000 });
-  await fab.click({ force: true });
+  await fab.click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.getByRole("button", { name: "POSTS" }).click();
   await page.getByText("MY EVENTS").waitFor({ state: "visible", timeout: 10000 });
+  await page
+    .waitForResponse((r) => r.url().includes("/api/events/mine/claimed") && r.ok(), { timeout: 15000 })
+    .catch(() => {});
+  await page
+    .waitForResponse((r) => r.url().includes("/api/events/mine/submitted") && r.ok(), { timeout: 15000 })
+    .catch(() => {});
+  const editBtn = page.locator(".inbox-overlay").getByRole("button", { name: "EDIT" }).first();
+  await editBtn.waitFor({ state: "visible", timeout: 15000 });
 }
 
 async function sheetOpen(page) {
@@ -71,7 +77,7 @@ try {
 
   // 1. Claimed event EDIT (sheet → editor)
   await openInboxPosts(page);
-  await page.locator(".inbox-overlay").getByRole("button", { name: "EDIT" }).first().click();
+  await page.locator(".inbox-overlay").getByRole("button", { name: "EDIT" }).first().click({ timeout: 15000 });
   const sheetClosed1 = !(await sheetOpen(page));
   const url1 = page.url();
   await page.getByText(`Editing: ${CLAIMED_EVENT_TITLE}`, { exact: false }).waitFor({ timeout: 10000 });

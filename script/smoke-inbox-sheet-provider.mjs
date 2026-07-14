@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
+import { smokeLogin } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output-phase3");
@@ -15,10 +16,7 @@ function record(name, ok, detail) {
 }
 
 async function login(page) {
-  const res = await page.request.post(`${BASE}/api/auth/login`, {
-    data: { email: "tucker@test.com", password: "smoketest" },
-  });
-  if (!res.ok()) throw new Error(`Login failed: ${res.status()} ${await res.text()}`);
+  await smokeLogin(page.request, BASE);
 }
 
 async function waitAuth(page) {
