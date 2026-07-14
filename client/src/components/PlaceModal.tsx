@@ -22,7 +22,8 @@ import {
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
 import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
-import { shareBusinessCard } from "@/lib/shareBusinessImage";
+import { placePath } from "@shared/placeSlug";
+import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import "./PlaceModal.css";
@@ -316,22 +317,14 @@ export default function PlaceModal({
   const handleShare = async () => {
     setSharing(true);
     try {
-      const result = await shareBusinessCard({
-        name: place.name,
-        categoryLabel,
-        accentColor: isNonprofit ? "venues" : category,
-        description: displayed.description,
-        address: place.address,
-        neighborhood: place.neighborhood,
-        hours: displayed.hours,
-        phone: displayed.phone,
-        logoUrl: logoUrl || fallbackLogoUrl,
+      const result = await sharePageLink(placePath(place.id, place.name), place.name);
+      toast({
+        title: result === "shared" ? "Shared" : "Link copied to clipboard",
+        description: result === "copied" ? placePath(place.id, place.name) : undefined,
       });
-      if (result === "copied") toast({ title: "Image copied", description: "Card image copied to your clipboard and downloaded." });
-      else if (result === "downloaded") toast({ title: "Image downloaded", description: "Share it on your socials." });
     } catch (err) {
       if ((err as DOMException)?.name !== "AbortError") {
-        toast({ title: "Could not create share image", variant: "destructive" });
+        toast({ title: "Could not share link", variant: "destructive" });
       }
     } finally {
       setSharing(false);

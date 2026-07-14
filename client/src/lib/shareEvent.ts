@@ -1,5 +1,5 @@
-/** Copy link or invoke native Web Share — does not change OG/social images. */
-export async function shareEventLink(url: string, title: string): Promise<"shared" | "copied"> {
+/** Copy link or invoke native Web Share — shares a URL, never a card image. */
+export async function sharePageLink(url: string, title: string): Promise<"shared" | "copied"> {
   const absolute = url.startsWith("http") ? url : `${window.location.origin}${url.startsWith("/") ? url : `/${url}`}`;
   if (typeof navigator.share === "function") {
     try {
@@ -12,3 +12,6 @@ export async function shareEventLink(url: string, title: string): Promise<"share
   await navigator.clipboard.writeText(absolute);
   return "copied";
 }
+
+/** @deprecated Prefer sharePageLink — same behavior for event URLs. */
+export const shareEventLink = sharePageLink;

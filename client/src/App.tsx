@@ -100,6 +100,7 @@ function AppLayout() {
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/inbox" component={Inbox} />
             <Route path="/spotted" component={MissedConnections} />
+            <Route path="/directory/:id/:slug?" component={Directory} />
             <Route path="/directory" component={Directory} />
             <Route path="/nude-beaches" component={NudeBeaches} />
             <Route path="/design-preview" component={DesignSystemSandbox} />

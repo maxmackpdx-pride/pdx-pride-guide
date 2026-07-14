@@ -1,6 +1,7 @@
 import type React from "react";
-import { useState, useMemo, Suspense, useEffect, useRef } from "react";
+import { useState, useMemo, Suspense, useEffect, useRef, useCallback } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRoute, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
@@ -11,6 +12,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin, Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
+import { placePath, placeUrl } from "@shared/placeSlug";
 import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
 import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
@@ -170,10 +172,9 @@ function directoryMergePayload(form: DirectoryFormState) {
 }
 
 export default function Directory() {
-  usePageSeo(
-    "Queer Portland Directory | PDX Pride Guide",
-    "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
-  );
+  const [routeMatch, routeParams] = useRoute("/directory/:id/:slug?");
+  const [, setLocation] = useLocation();
+  const routePlaceId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -189,7 +190,7 @@ export default function Directory() {
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
-  const [showGrid, setShowGrid] = useState(directoryHasDeepLink);
+  const [showGrid, setShowGrid] = useState(directoryHasDeepLink || Boolean(routePlaceId));
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
   const [mobileMapOpen, setMobileMapOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -201,12 +202,71 @@ export default function Directory() {
     refetchOnMount: "always",
   });
 
+  const openPlace = useCallback(
+    (biz: Business) => {
+      setSelectedPlace(biz);
+      setShowGrid(true);
+      setLocation(placePath(biz.id, biz.name));
+    },
+    [setLocation],
+  );
+
+  const closePlace = useCallback(() => {
+    setSelectedPlace(null);
+    const params = new URLSearchParams();
+    if (activeType !== "ALL") params.set("type", activeType);
+    if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    const next = params.toString();
+    setLocation(next ? `/directory?${next}` : "/directory");
+  }, [setLocation, activeType, searchQuery]);
+
+  // Deep link: /directory/:id/:slug or legacy ?place=
   useEffect(() => {
-    const placeId = Number(new URLSearchParams(window.location.search).get("place"));
-    if (!placeId || !businesses.length) return;
+    if (!businesses.length) return;
+    const queryPlaceId = Number(new URLSearchParams(window.location.search).get("place"));
+    const placeId = routePlaceId || (Number.isFinite(queryPlaceId) && queryPlaceId > 0 ? queryPlaceId : null);
+    if (!placeId) return;
     const match = businesses.find(b => b.id === placeId);
-    if (match) setSelectedPlace(match);
-  }, [businesses]);
+    if (!match) return;
+    setSelectedPlace(match);
+    setShowGrid(true);
+    // Canonicalize legacy ?place= to /directory/:id/:slug
+    if (!routePlaceId) {
+      setLocation(placePath(match.id, match.name));
+    }
+  }, [businesses, routePlaceId, setLocation]);
+
+  const placeSeo = selectedPlace;
+  const placeLogo = placeSeo
+    ? resolveDirectoryLogo(placeSeo.name, placeSeo.imageUrl)
+    : null;
+  usePageSeo(
+    placeSeo
+      ? `${placeSeo.name} | Queer Portland Directory | PDX Pride Guide`
+      : "Queer Portland Directory | PDX Pride Guide",
+    placeSeo
+      ? [
+          placeSeo.neighborhood,
+          TYPE_LABELS[placeSeo.type] || placeSeo.type,
+          placeSeo.description,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+          .slice(0, 160) || `${placeSeo.name} on PDX Pride Guide.`
+      : "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
+    placeSeo
+      ? {
+          url: placeUrl(placeSeo.id, placeSeo.name),
+          image: placeLogo
+            ? placeLogo.startsWith("http")
+              ? placeLogo
+              : `https://www.prideguidepdx.com${placeLogo}`
+            : undefined,
+          imageAlt: placeSeo.name,
+          type: "article",
+        }
+      : undefined,
+  );
 
   const categoryCounts = useMemo(() => {
     return businesses.reduce<Record<string, number>>((acc, b) => {
@@ -751,7 +811,7 @@ export default function Directory() {
                       <DirectoryCard
                         key={biz.id}
                         biz={biz}
-                        onClick={() => setSelectedPlace(biz)}
+                        onClick={() => openPlace(biz)}
                         onRequireAuth={() => setShowAuth(true)}
                       />
                     ))}
@@ -776,7 +836,7 @@ export default function Directory() {
       )}
 
       {selectedPlace && (
-        <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} onRequireAuth={() => setShowAuth(true)} />
+        <PlaceModal place={selectedPlace} onClose={closePlace} onRequireAuth={() => setShowAuth(true)} />
       )}
 
       <BoardCloseSeam

@@ -2,8 +2,10 @@ import { buildGoogleAnalyticsHead } from "./gaSnippet";
 import { storage } from "./storage";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { eventUrl } from "@shared/eventSlug";
+import { placeUrl } from "@shared/placeSlug";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
+import { resolveDirectoryLogo } from "@shared/directoryLogos";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.prideguidepdx.com").replace(/\/$/, "");
 
@@ -269,11 +271,23 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Dashboard | PDX Pride Guide",
     description: "Your PDX Pride Guide profile, submissions, gigs, gifting, and event check-ins.",
   },
+  "/directory": {
+    title: "Queer Portland Directory | PDX Pride Guide",
+    description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
+  },
 };
 
 function parseEventIdFromPath(requestPath: string): number | null {
   const path = (requestPath.split("?")[0] || "/").trim();
   const match = path.match(/^\/events\/(\d+)(?:\/[^/]*)?$/);
+  if (!match) return null;
+  const id = Number(match[1]);
+  return Number.isFinite(id) ? id : null;
+}
+
+function parsePlaceIdFromPath(requestPath: string): number | null {
+  const path = (requestPath.split("?")[0] || "/").trim();
+  const match = path.match(/^\/directory\/(\d+)(?:\/[^/]*)?$/);
   if (!match) return null;
   const id = Number(match[1]);
   return Number.isFinite(id) ? id : null;
@@ -407,31 +421,70 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const eventId = parseEventIdFromPath(requestPath);
   const dbEvent = eventId != null ? storage.getEvent(eventId) : null;
   const liveEvent = dbEvent?.status === "LIVE" ? dbEvent : null;
+  const placeId = parsePlaceIdFromPath(requestPath);
+  const place = placeId != null ? storage.getBusiness(placeId) : null;
+  const livePlace = place && place.active !== false ? place : null;
 
-  const routeSeo = ROUTE_SEO[pathKey] || ROUTE_SEO["/"];
+  // Directory place paths map to /directory SEO base when no place id
+  const routeKey =
+    pathKey.startsWith("/directory/") && !livePlace
+      ? "/directory"
+      : pathKey.startsWith("/directory/")
+        ? "/directory"
+        : pathKey;
+  const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
+
   const pageTitle = liveEvent
     ? `${liveEvent.title} | Portland Pride 2026 | PDX Pride Guide`
-    : routeSeo.title;
+    : livePlace
+      ? `${livePlace.name} | Queer Portland Directory | PDX Pride Guide`
+      : routeSeo.title;
   const pageDescription = liveEvent
     ? truncateText(
         `${liveEvent.venueName || "Portland"}${liveEvent.neighborhood ? ` · ${liveEvent.neighborhood}` : ""}. ${liveEvent.description || ""}`,
         160,
       )
-    : routeSeo.description;
-  const pageUrl = liveEvent ? eventUrl(liveEvent.id, liveEvent.title, SITE_URL) : canonical;
+    : livePlace
+      ? truncateText(
+          [livePlace.neighborhood, livePlace.type, livePlace.description].filter(Boolean).join(" · ") ||
+            `${livePlace.name} on PDX Pride Guide.`,
+          160,
+        )
+      : routeSeo.description;
+  const pageUrl = liveEvent
+    ? eventUrl(liveEvent.id, liveEvent.title, SITE_URL)
+    : livePlace
+      ? placeUrl(livePlace.id, livePlace.name, SITE_URL)
+      : canonical;
+  const placeLogo = livePlace
+    ? resolveDirectoryLogo(livePlace.name, livePlace.imageUrl)
+    : null;
   const pageImage = liveEvent
     ? absoluteAssetUrl(resolveEventPosterUrl(liveEvent.id, liveEvent.posterImageUrl, liveEvent.dayOfWeek))
-    : `${SITE_URL}/og-preview.jpg`;
+    : livePlace
+      ? absoluteAssetUrl(placeLogo)
+      : `${SITE_URL}/og-preview.jpg`;
 
   const jsonLdBlocks = [
     buildWebSiteJsonLd(),
     buildFaqJsonLd(),
     liveEvent ? buildSingleEventJsonLd(liveEvent) : buildEventsJsonLd(events),
-  ];
+    livePlace
+      ? {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: livePlace.name,
+          description: livePlace.description || undefined,
+          address: livePlace.address || undefined,
+          url: placeUrl(livePlace.id, livePlace.name, SITE_URL),
+          image: absoluteAssetUrl(placeLogo),
+        }
+      : null,
+  ].filter(Boolean);
   const jsonLdScripts = jsonLdBlocks.map(block => `<script type="application/ld+json">${JSON.stringify(block)}</script>`).join("\n    ");
 
   const headExtras = [
-    `<link rel="canonical" href="${canonical}" />`,
+    `<link rel="canonical" href="${pageUrl}" />`,
     buildSeoHeadExtras(events.length),
     process.env.GOOGLE_SITE_VERIFICATION
       ? `<meta name="google-site-verification" content="${escapeHtml(process.env.GOOGLE_SITE_VERIFICATION)}" />`
@@ -450,8 +503,12 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     description: pageDescription,
     url: pageUrl,
     image: pageImage,
-    imageAlt: liveEvent ? liveEvent.title : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
-    type: liveEvent ? "article" : "website",
+    imageAlt: liveEvent
+      ? liveEvent.title
+      : livePlace
+        ? livePlace.name
+        : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
+    type: liveEvent || livePlace ? "article" : "website",
   });
 
   if (!out.includes("pdx-pride-guide:event-count")) {

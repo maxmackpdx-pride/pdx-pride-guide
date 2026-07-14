@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { Badge } from "./Badge";
 import { Share2 } from "lucide-react";
 import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
-import { shareBusinessCard } from "@/lib/shareBusinessImage";
+import { placePath } from "@shared/placeSlug";
+import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 
 /* PlaceCard = directory card from Queer Directory redesign mockup:
@@ -222,12 +223,10 @@ export function PlaceCard({
 
   const handleShare = async (e) => {
     e.stopPropagation();
+    if (businessId == null) return;
     setSharing(true);
     try {
-      await shareBusinessCard({
-        name, categoryLabel: categoryLabel || category, accentColor: isNonprofit ? "venues" : category,
-        description, address, hours, phone, logoUrl: logoUrl || fallbackLogoUrl,
-      });
+      await sharePageLink(placePath(businessId, name), name);
     } catch (err) {
       if (err?.name !== "AbortError") console.error(err);
     } finally {
