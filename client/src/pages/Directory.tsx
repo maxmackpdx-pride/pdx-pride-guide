@@ -29,7 +29,8 @@ import CategoryConstellation from "@/components/CategoryConstellation";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
-const DIRECTORY_MAP_HEIGHT = 380;
+/** Browse layout map — 50% taller than prior 380px baseline. */
+const DIRECTORY_MAP_HEIGHT = 570;
 
 export type DirectoryEventSummary = {
   id: number;
@@ -190,7 +191,8 @@ export default function Directory() {
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
-  const [showGrid, setShowGrid] = useState(directoryHasDeepLink || Boolean(routePlaceId));
+  // Lazy init — function form so routePlaceId is actually evaluated (Boolean(fn) was a bug).
+  const [showGrid, setShowGrid] = useState(() => directoryHasDeepLink() || Boolean(routePlaceId));
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
   const [mobileMapOpen, setMobileMapOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -202,37 +204,49 @@ export default function Directory() {
     refetchOnMount: "always",
   });
 
-  const openPlace = useCallback(
-    (biz: Business) => {
-      setSelectedPlace(biz);
-      setShowGrid(true);
-      setLocation(placePath(biz.id, biz.name));
-    },
-    [setLocation],
-  );
-
-  const closePlace = useCallback(() => {
-    setSelectedPlace(null);
+  /** Keep type/q on the place URL so remount from /directory → /directory/:id doesn't wipe filters. */
+  const directoryQuerySuffix = useCallback(() => {
     const params = new URLSearchParams();
     if (activeType !== "ALL") params.set("type", activeType);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     const next = params.toString();
-    setLocation(next ? `/directory?${next}` : "/directory");
-  }, [setLocation, activeType, searchQuery]);
+    return next ? `?${next}` : "";
+  }, [activeType, searchQuery]);
 
-  // Deep link: /directory/:id/:slug or legacy ?place=
+  const openPlace = useCallback(
+    (biz: Business) => {
+      setSelectedPlace(biz);
+      setShowGrid(true);
+      setLocation(`${placePath(biz.id, biz.name)}${directoryQuerySuffix()}`);
+    },
+    [setLocation, directoryQuerySuffix],
+  );
+
+  const closePlace = useCallback(() => {
+    setSelectedPlace(null);
+    setLocation(`/directory${directoryQuerySuffix()}`);
+  }, [setLocation, directoryQuerySuffix]);
+
+  // Deep link: /directory/:id/:slug or legacy ?place= — open when present, clear when gone (browser back).
   useEffect(() => {
     if (!businesses.length) return;
     const queryPlaceId = Number(new URLSearchParams(window.location.search).get("place"));
     const placeId = routePlaceId || (Number.isFinite(queryPlaceId) && queryPlaceId > 0 ? queryPlaceId : null);
-    if (!placeId) return;
+    if (!placeId) {
+      setSelectedPlace(null);
+      return;
+    }
     const match = businesses.find(b => b.id === placeId);
-    if (!match) return;
+    if (!match) {
+      setSelectedPlace(null);
+      return;
+    }
     setSelectedPlace(match);
     setShowGrid(true);
-    // Canonicalize legacy ?place= to /directory/:id/:slug
+    // Canonicalize legacy ?place= to /directory/:id/:slug (keep type/q query).
     if (!routePlaceId) {
-      setLocation(placePath(match.id, match.name));
+      const qs = window.location.search || "";
+      setLocation(`${placePath(match.id, match.name)}${qs}`);
     }
   }, [businesses, routePlaceId, setLocation]);
 
@@ -674,6 +688,16 @@ export default function Directory() {
             background: "#000", borderBottom: "1px solid #1a1a1a",
             position: "sticky", top: "var(--site-header-height)", zIndex: 50,
           }}>
+            <div className="directory-filter-bar__top">
+              <button
+                type="button"
+                className="directory-back-city"
+                onClick={handleBackToCategories}
+                data-testid="directory-back-city"
+              >
+                ← Back to City View
+              </button>
+            </div>
             <div className="events-filter-row" style={{ flexWrap: "wrap", rowGap: 8 }}>
               <FilterChip
                 selected={activeType === "ALL" && !grandOpeningOnly}
@@ -740,16 +764,6 @@ export default function Directory() {
 
           <div ref={gridRef} className="directory-browse-layout">
             <div className="directory-browse-layout__main">
-              <ScrollReveal>
-                <button
-                  type="button"
-                  className="directory-back-categories"
-                  onClick={handleBackToCategories}
-                >
-                  ← Back to categories
-                </button>
-              </ScrollReveal>
-
               <ScrollReveal>
                 <div className="events-count-row">
                   <div className="events-count-banner">
