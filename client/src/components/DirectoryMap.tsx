@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
@@ -77,6 +78,16 @@ export const MAP_KEY_TYPES = [
 
 const TYPE_COLORS = MAP_TYPE_COLORS;
 const TYPE_LABELS = MAP_TYPE_LABELS;
+
+function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!enabled) return;
+    const timer = window.setTimeout(() => map.invalidateSize(), 200);
+    return () => window.clearTimeout(timer);
+  }, [enabled, map]);
+  return null;
+}
 
 function buildRainbowPin() {
   return divIcon({
@@ -292,20 +303,36 @@ export default function DirectoryMap({
   businesses,
   height = 380,
   showKey = false,
+  interactive = true,
+  showMarkers = true,
+  backdrop = false,
 }: {
   businesses: Business[];
   height?: number | string;
   /** When true, render the pin color key under the map (Directory page). */
   showKey?: boolean;
+  /** When false, disable pan/zoom and hide controls (category explorer backdrop). */
+  interactive?: boolean;
+  /** When false, render tiles only (no place pins). */
+  showMarkers?: boolean;
+  /** Non-interactive full-bleed layer for the category bubble explorer. */
+  backdrop?: boolean;
 }) {
-  const mapped = businesses.filter(b => b.lat != null && b.lng != null);
-  const heightStyle = typeof height === "number" ? `${height}px` : height;
-  const fillParent = height === "100%";
+  const isBackdrop = backdrop;
+  const isInteractive = interactive && !isBackdrop;
+  const renderMarkers = showMarkers && !isBackdrop;
+  const mapped = renderMarkers ? businesses.filter(b => b.lat != null && b.lng != null) : [];
+  const mapHeight = isBackdrop ? "100%" : height;
+  const heightStyle = typeof mapHeight === "number" ? `${mapHeight}px` : mapHeight;
+  const fillParent = mapHeight === "100%";
 
   return (
     <div className={showKey ? "directory-map-wrap" : undefined}>
       <div
-        className={fillParent ? "directory-map directory-map--fill" : "directory-map"}
+        className={[
+          fillParent ? "directory-map directory-map--fill" : "directory-map",
+          isBackdrop ? "directory-map--backdrop" : "",
+        ].filter(Boolean).join(" ")}
         style={{
           height: heightStyle,
           minHeight: fillParent ? heightStyle : undefined,
@@ -319,12 +346,20 @@ export default function DirectoryMap({
           center={[45.5231, -122.6765]}
           zoom={13}
           style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
-          scrollWheelZoom={false}
+          dragging={isInteractive}
+          scrollWheelZoom={isInteractive}
+          doubleClickZoom={isInteractive}
+          boxZoom={isInteractive}
+          keyboard={isInteractive}
+          touchZoom={isInteractive}
+          zoomControl={isInteractive}
+          attributionControl={isInteractive}
         >
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
           />
+          <MapInvalidateSize enabled={isBackdrop} />
           {mapped.map(biz => {
             const accent = TYPE_COLORS[biz.type] || "#FF00CC";
             const rainbow = biz.type === "nonprofit";

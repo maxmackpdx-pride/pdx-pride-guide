@@ -15120,17 +15120,38 @@ html.calm-mode .board-detail-modal {
   border: 1px solid #1c1c22;
   border-radius: 14px;
   overflow: hidden;
+  background: #0a0a0a;
+}
+
+.category-constellation__map-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: saturate(1.05);
+  pointer-events: none;
+}
+
+.category-constellation__map-bg .directory-map,
+.category-constellation__map-bg .directory-map--backdrop,
+.category-constellation__map-bg .leaflet-container {
+  height: 100% !important;
+  pointer-events: none;
+}
+
+.category-constellation__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, #ffffff08 0 1px, transparent 1px 48px),
-    repeating-linear-gradient(90deg, #ffffff08 0 1px, transparent 1px 48px),
-    linear-gradient(120deg, transparent 46%, #ffffff0d 47% 48%, transparent 49%),
-    radial-gradient(60% 60% at 22% 20%, #ff00cc1a, transparent 62%),
-    radial-gradient(60% 60% at 82% 74%, #19e3ff1a, transparent 62%),
-    #08080b;
+    radial-gradient(60% 60% at 22% 20%, #ff00cc22, transparent 62%),
+    radial-gradient(60% 60% at 82% 74%, #19e3ff22, transparent 62%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.35), rgba(5, 5, 5, 0.55));
 }
 
 .category-constellation__field {
   position: relative;
+  z-index: 2;
   width: 100%;
   height: clamp(500px, 64vw, 680px);
 }

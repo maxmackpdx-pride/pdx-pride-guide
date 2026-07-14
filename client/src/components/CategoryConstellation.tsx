@@ -1,4 +1,8 @@
+import { Suspense } from "react";
 import CountUpValue from "@/components/CountUpValue";
+import { lazyWithReload } from "@/lib/lazyWithReload";
+
+const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
 const RAINBOW_RING =
   "conic-gradient(from 0deg,#FF6600,#FFEE00,#39FF14,#00FFFF,#8800FF,#FF00CC,#FF6600)";
@@ -149,6 +153,12 @@ export default function CategoryConstellation({
       </div>
 
       <div className="category-constellation__backdrop">
+        <div className="category-constellation__map-bg" aria-hidden>
+          <Suspense fallback={null}>
+            <DirectoryMap businesses={[]} backdrop />
+          </Suspense>
+        </div>
+        <div className="category-constellation__scrim" aria-hidden />
         <div className="category-constellation__field">
           {orbs.map(orb => {
             const numColor = orb.rainbow ? "#ffffff" : orbNumColor(orb.key, orb.color);
