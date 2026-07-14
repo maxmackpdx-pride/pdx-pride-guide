@@ -6185,7 +6185,12 @@ export interface IStorage {
   getUserLinkedBusinesses(userId: number): { id: number; name: string; type: string; address: string | null }[];
   // Business ownership: claims, new-business submissions, blocklist, logo requests
   getUserOwnedBusinesses(userId: number): Business[];
-  createBusinessClaim(businessId: number, userId: number, claimReason: string): { claim?: BusinessClaim; error?: string };
+  createBusinessClaim(
+    businessId: number,
+    userId: number,
+    claimReason: string,
+    opts?: { mergePayload?: Record<string, unknown> },
+  ): { claim?: BusinessClaim; error?: string };
   getPendingBusinessClaims(): any[];
   getRecentResolvedBusinessClaims(): any[];
   approveBusinessClaim(id: number, adminName: string): { ok?: boolean; error?: string };
@@ -9396,7 +9401,7 @@ export const storage: IStorage = {
   getUserOwnedBusinesses(userId) {
     return db.select().from(businesses).where(eq(businesses.ownerId, userId)).all().filter(b => b.active);
   },
-  createBusinessClaim(businessId, userId, claimReason) {
+  createBusinessClaim(businessId, userId, claimReason, opts) {
     ensureBusinessClaimsSchema();
     const business = storage.getBusiness(businessId);
     if (!business) return { error: "Business not found" };
@@ -9405,8 +9410,11 @@ export const storage: IStorage = {
       .where(eq(businessClaims.businessId, businessId)).all()
       .find(c => c.userId === userId && c.status === "PENDING");
     if (existingPending) return { error: "You already have a pending claim on this venue." };
+    const adminNotes = opts?.mergePayload
+      ? JSON.stringify({ mergePayload: opts.mergePayload })
+      : null;
     const claim = db.insert(businessClaims).values({
-      businessId, userId, claimReason, status: "PENDING", createdAt: new Date().toISOString(),
+      businessId, userId, claimReason, status: "PENDING", adminNotes, createdAt: new Date().toISOString(),
     }).returning().get();
     return { claim };
   },
@@ -9446,7 +9454,19 @@ export const storage: IStorage = {
     const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
     if (!claim) return { error: "Claim not found" };
     if (claim.status !== "PENDING") return { error: "Claim already resolved" };
-    db.update(businesses).set({ ownerId: claim.userId }).where(eq(businesses.id, claim.businessId)).run();
+    let mergePatch: Record<string, unknown> = {};
+    if (claim.adminNotes) {
+      try {
+        const parsed = JSON.parse(claim.adminNotes);
+        if (parsed?.mergePayload && typeof parsed.mergePayload === "object") {
+          mergePatch = parsed.mergePayload;
+        }
+      } catch {
+        // claimReason-only claims have no merge payload
+      }
+    }
+    const ownerPatch: Record<string, unknown> = { ownerId: claim.userId, ...mergePatch };
+    db.update(businesses).set(ownerPatch as any).where(eq(businesses.id, claim.businessId)).run();
     db.update(businessClaims).set({
       status: "APPROVED",
       adminNotes: `Approved by ${adminName}`,

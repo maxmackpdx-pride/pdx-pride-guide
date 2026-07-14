@@ -51,6 +51,12 @@ import {
   findSubmissionMatches,
   submissionHasStrongDuplicate,
 } from "@shared/submissionMatch";
+import {
+  buildDirectoryMergePatch,
+  directoryHasStrongDuplicate,
+  findDirectoryMatches,
+  type DirectoryMergePayload,
+} from "@shared/directoryMatch";
 import type { Event } from "@shared/schema";
 import {
   beachVenueLabel,
@@ -213,6 +219,24 @@ function enrichSubmissionForAdmin(sub: any) {
     submitterProfile: user ? adminUserSummary(user) : null,
     potentialMatches: enrichSubmissionMatches(sub),
   };
+}
+
+function directoryMatchPool() {
+  return storage.getBusinesses().filter(b => b.active);
+}
+
+function enrichDirectoryMatches(listing: {
+  name: string;
+  type?: string | null;
+  address?: string | null;
+  neighborhood?: string | null;
+}) {
+  const pool = directoryMatchPool();
+  const matches = findDirectoryMatches(listing, pool);
+  return matches.map(match => ({
+    ...match,
+    business: pool.find(biz => biz.id === match.businessId) ?? null,
+  }));
 }
 
 function enrichModerationForAdmin(req: any) {
@@ -1291,9 +1315,41 @@ export function registerRoutes(httpServer: Server, app: Express) {
     queerFriendly: z.boolean().optional().default(true),
   });
 
+  const directorySubmitSchema = memberBusinessSchema.extend({
+    confirmDistinct: z.boolean().optional().default(false),
+  });
+
+  const directoryMatchPreviewSchema = z.object({
+    name: z.string().trim().min(2).max(120),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate"]).optional(),
+    address: z.string().trim().max(200).optional().nullable(),
+    neighborhood: z.string().trim().max(80).optional().nullable(),
+  });
+
+  app.post("/api/directory/matches", requireAuth, (req, res) => {
+    try {
+      const data = directoryMatchPreviewSchema.parse(req.body ?? {});
+      res.json({ potentialMatches: enrichDirectoryMatches(data) });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Invalid match preview" });
+    }
+  });
+
   app.post("/api/directory", requireAuth, async (req, res) => {
     try {
-      const data = memberBusinessSchema.parse(req.body);
+      const data = directorySubmitSchema.parse(req.body);
+      const potentialMatches = enrichDirectoryMatches(data);
+      const strongDuplicate = directoryHasStrongDuplicate(potentialMatches);
+
+      if (strongDuplicate && !data.confirmDistinct) {
+        return res.json({
+          ok: false,
+          heldForReview: true,
+          heldReason: `Possible duplicate of "${strongDuplicate.name}"`,
+          potentialMatches,
+        });
+      }
+
       const withCoords = await fillFieldsMapCoordinates({
         venueName: data.name,
         address: data.address ?? undefined,
@@ -1325,7 +1381,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         requesterEmail: actor?.email || null,
         proof: [biz.neighborhood, biz.address, biz.description].filter(Boolean).join(" · ").slice(0, 500),
       } as any);
-      res.status(201).json(biz);
+      res.status(201).json({ ...biz, potentialMatches });
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Invalid directory listing" });
     }
@@ -1421,11 +1477,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!claimReason || claimReason.length < 10) {
       return res.status(400).json({ error: "Tell us how you're connected to this venue (10+ characters)." });
     }
-    const result = storage.createBusinessClaim(id, req.session.userId!, claimReason);
+    const pendingMerge = !!req.body?.pendingMerge;
+    const rawMerge = req.body?.mergePayload;
+    const mergePayload = pendingMerge && rawMerge && typeof rawMerge === "object"
+      ? buildDirectoryMergePatch(rawMerge as DirectoryMergePayload)
+      : undefined;
+    const result = storage.createBusinessClaim(id, req.session.userId!, claimReason, {
+      mergePayload: mergePayload && Object.keys(mergePayload).length ? mergePayload : undefined,
+    });
     if ("error" in result) return res.status(400).json({ error: result.error });
     const user = storage.getUserById(req.session.userId!);
     const eligible = user?.promoterStatus === "approved" || isMainAdminUser(user);
-    if (eligible && result.claim) {
+    if (eligible && result.claim && !pendingMerge) {
       const approval = storage.approveBusinessClaim(result.claim.id, user?.username || "system");
       return res.json({ ok: true, autoApproved: true, ...approval });
     }

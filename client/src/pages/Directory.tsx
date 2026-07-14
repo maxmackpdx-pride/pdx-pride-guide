@@ -132,6 +132,38 @@ const blankDirectoryForm = () => ({
   queerFriendly: true,
 });
 
+type DirectoryFormState = ReturnType<typeof blankDirectoryForm>;
+
+type DirectoryMatchPreview = {
+  businessId: number;
+  name: string;
+  type: string;
+  address: string | null;
+  neighborhood: string | null;
+  confidence: string;
+  reasons: string[];
+};
+
+type DirectorySubmitResult = {
+  title: string;
+  desc: string;
+  heldForReview?: boolean;
+  potentialMatches?: DirectoryMatchPreview[];
+};
+
+function directoryMergePayload(form: DirectoryFormState) {
+  return {
+    description: form.description,
+    hours: form.hours || null,
+    phone: form.phone || null,
+    website: form.website || null,
+    instagram: form.instagram || null,
+    neighborhood: form.neighborhood || null,
+    queerOwned: form.queerOwned,
+    queerFriendly: form.queerFriendly,
+  };
+}
+
 export default function Directory() {
   usePageSeo(
     "Queer Portland Directory | PDX Pride Guide",
@@ -143,6 +175,8 @@ export default function Directory() {
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
   const [form, setForm] = useState(blankDirectoryForm);
+  const [submitResult, setSubmitResult] = useState<DirectorySubmitResult | null>(null);
+  const [claimingBusinessId, setClaimingBusinessId] = useState<number | null>(null);
   const [activeType, setActiveType] = useState(() => {
     const t = new URLSearchParams(window.location.search).get("type");
     return t && t in TYPE_LABELS ? t : "ALL";
@@ -266,15 +300,84 @@ export default function Directory() {
   );
 
   const createMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/directory", form),
-    onSuccess: () => {
+    mutationFn: async (opts?: { confirmDistinct?: boolean }) => {
+      const r = await apiRequest("POST", "/api/directory", {
+        ...form,
+        confirmDistinct: opts?.confirmDistinct ?? false,
+      });
+      const payload = await r.json();
+      if (!r.ok) throw new Error(payload.error || "Could not add place");
+      return payload;
+    },
+    onSuccess: (payload) => {
+      const heldForReview = !!payload.heldForReview;
+      const potentialMatches: DirectoryMatchPreview[] | undefined = Array.isArray(payload.potentialMatches)
+        ? payload.potentialMatches.slice(0, 5).map((match: DirectoryMatchPreview) => ({
+          businessId: match.businessId,
+          name: match.name,
+          type: match.type,
+          address: match.address,
+          neighborhood: match.neighborhood,
+          confidence: match.confidence,
+          reasons: match.reasons ?? [],
+        }))
+        : undefined;
+
+      if (heldForReview) {
+        const reason = payload.heldReason
+          ? `${payload.heldReason}. Request ownership to merge your updates, or confirm this is a different place.`
+          : "We found a similar place already in the directory. Request ownership to merge your updates, or confirm this is a different place.";
+        setSubmitResult({
+          title: "Possible duplicate",
+          desc: reason,
+          heldForReview: true,
+          potentialMatches,
+        });
+        toast({ title: "Similar place found", description: "Review the matches below before publishing." });
+        return;
+      }
+
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
-      toast({ title: "Added to directory", description: "Your place is live on the map and listings." });
+      const hasMatches = potentialMatches && potentialMatches.length > 0;
       setForm(blankDirectoryForm());
-      setFormOpen(false);
+      setSubmitResult({
+        title: "Added to directory",
+        desc: hasMatches
+          ? "Your place is live on the map and listings. We also spotted similar listings you may want to double-check."
+          : "Your place is live on the map and listings.",
+        potentialMatches: hasMatches ? potentialMatches : undefined,
+      });
+      toast({ title: "Added to directory", description: "Your place is live on the map and listings." });
     },
     onError: (err: Error) => {
       toast({ title: "Could not add place", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const claimMatchMutation = useMutation({
+    mutationFn: async ({ businessId, claimReason }: { businessId: number; claimReason: string }) => {
+      const r = await apiRequest("POST", `/api/directory/${businessId}/claim`, {
+        claimReason,
+        pendingMerge: true,
+        mergePayload: directoryMergePayload(form),
+      });
+      const payload = await r.json();
+      if (!r.ok) throw new Error(payload.error || "Could not submit ownership request");
+      return payload;
+    },
+    onSuccess: () => {
+      setClaimingBusinessId(null);
+      setForm(blankDirectoryForm());
+      setSubmitResult(null);
+      setFormOpen(false);
+      toast({
+        title: "Ownership request sent",
+        description: "An admin will review your claim and proposed updates before they go live.",
+      });
+    },
+    onError: (err: Error) => {
+      setClaimingBusinessId(null);
+      toast({ title: "Could not submit request", description: err.message, variant: "destructive" });
     },
   });
 
@@ -283,8 +386,31 @@ export default function Directory() {
       setShowAuth(true);
       return;
     }
+    setForm(blankDirectoryForm());
+    setSubmitResult(null);
+    setClaimingBusinessId(null);
     setFormOpen(true);
     window.setTimeout(() => document.getElementById("directory-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
+  };
+
+  const resetDirectoryForm = () => {
+    setForm(blankDirectoryForm());
+    setSubmitResult(null);
+    setClaimingBusinessId(null);
+  };
+
+  const requestOwnershipForMatch = (match: DirectoryMatchPreview) => {
+    const reason = window.prompt(
+      `Tell us how you're connected to ${match.name} (e.g. "I own/manage this venue"):`,
+      "",
+    );
+    if (reason == null) return;
+    if (reason.trim().length < 10) {
+      toast({ title: "Add a short reason", description: "At least 10 characters so admins can verify your connection.", variant: "destructive" });
+      return;
+    }
+    setClaimingBusinessId(match.businessId);
+    claimMatchMutation.mutate({ businessId: match.businessId, claimReason: reason.trim() });
   };
 
   useEffect(() => {
@@ -301,7 +427,17 @@ export default function Directory() {
       toast({ title: "Add a description", variant: "destructive" });
       return;
     }
-    createMutation.mutate();
+    setSubmitResult(null);
+    createMutation.mutate({});
+  };
+
+  const publishDespiteMatches = () => {
+    createMutation.mutate({ confirmDistinct: true });
+  };
+
+  const finishDirectorySubmit = () => {
+    resetDirectoryForm();
+    setFormOpen(false);
   };
 
   return (
@@ -316,7 +452,69 @@ export default function Directory() {
               <X size={18} />
             </button>
             <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. Goes live immediately. Keep it accurate and community-rooted.</p>
+            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. New listings go live immediately unless we spot a likely duplicate. Keep it accurate and community-rooted.</p>
+            {submitResult ? (
+              <div className="submit-success">
+                <div className="submit-success__title">{submitResult.title}</div>
+                <p className="submit-success__body" style={{ marginBottom: submitResult.potentialMatches?.length ? 16 : 22 }}>
+                  {submitResult.desc}
+                </p>
+                {submitResult.potentialMatches && submitResult.potentialMatches.length > 0 && (
+                  <div style={{ border: "1px solid #444", background: "var(--ink-850)", padding: 14, marginBottom: 22, borderRadius: 3 }}>
+                    <p style={{ color: "var(--neon-orange)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>
+                      Similar places in the guide
+                    </p>
+                    <ul style={{ margin: "0 0 14px", paddingLeft: 18, color: "#aaa", fontSize: "0.85rem", lineHeight: 1.5 }}>
+                      {submitResult.potentialMatches.map(match => (
+                        <li key={match.businessId} style={{ marginBottom: 10 }}>
+                          <span>
+                            {match.name}
+                            {match.neighborhood ? ` · ${match.neighborhood}` : ""}
+                            {match.address ? ` · ${match.address}` : ""}
+                            {match.confidence === "high" ? " (likely duplicate)" : ""}
+                          </span>
+                          {submitResult.heldForReview && (
+                            <button
+                              type="button"
+                              className="btn-neon"
+                              style={{ display: "block", marginTop: 6, fontSize: "0.78rem" }}
+                              disabled={claimMatchMutation.isPending && claimingBusinessId === match.businessId}
+                              onClick={() => requestOwnershipForMatch(match)}
+                            >
+                              {claimMatchMutation.isPending && claimingBusinessId === match.businessId
+                                ? "Submitting…"
+                                : "Request ownership & merge updates →"}
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    {submitResult.heldForReview && (
+                      <button
+                        type="button"
+                        className="btn-neon solid"
+                        disabled={createMutation.isPending}
+                        onClick={publishDespiteMatches}
+                        style={{ width: "100%", justifyContent: "center" }}
+                      >
+                        {createMutation.isPending ? "Publishing…" : "This is a different place, publish anyway →"}
+                      </button>
+                    )}
+                  </div>
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {!submitResult.heldForReview && (
+                    <button type="button" className="btn-neon solid" onClick={openAddForm} style={{ width: "100%", justifyContent: "center" }}>
+                      Add another place →
+                    </button>
+                  )}
+                  <button type="button" onClick={finishDirectorySubmit} className="submit-hub-link">
+                    {submitResult.heldForReview ? "Close" : "Back to directory"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+            <>
             <div className="gifting-form-grid">
               <label className="span">
                 Place name *
@@ -376,6 +574,8 @@ export default function Directory() {
             <button type="button" className="btn-neon solid" disabled={createMutation.isPending} onClick={submitDirectoryForm}>
               {createMutation.isPending ? "Adding…" : "Add to directory →"}
             </button>
+            </>
+            )}
           </section>
         </ScrollReveal>
       )}
