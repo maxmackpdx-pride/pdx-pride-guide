@@ -7,7 +7,6 @@ import {
   isMissedConnectionLinkable,
   missedConnectionClosesAt,
   parsePacificDateTime,
-  pacificCalendarDate,
 } from "@shared/missedConnections";
 
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
@@ -2903,21 +2902,9 @@ function prunePostPrideWeekEvents() {
 
   for (const row of spanRows) {
     const endClock = row.date_end.includes("T") ? row.date_end.split("T")[1] : "23:59:59";
-    const newEnd = `2026-07-19T${endClock}`;
-    // Skip clip that would invert the range (start later on Sun than clipped end clock).
-    const startRow = sqlite
-      .prepare(`SELECT date_start AS dateStart FROM events WHERE id = ?`)
-      .get(row.id) as { dateStart: string } | undefined;
-    if (startRow?.dateStart) {
-      const startMs = new Date(startRow.dateStart).getTime();
-      const endMs = new Date(newEnd).getTime();
-      if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs <= startMs) {
-        // Safe fallback: end of Pride Sunday.
-        sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run("2026-07-19T23:59:59", row.id);
-        continue;
-      }
-    }
-    sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run(newEnd, row.id);
+    sqlite
+      .prepare(`UPDATE events SET date_end = ? WHERE id = ?`)
+      .run(`2026-07-19T${endClock}`, row.id);
   }
 
   // Any remaining LIVE row with a post-Pride start (race / re-seed) is removed.
@@ -5038,23 +5025,21 @@ function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unkno
   const biz = hubFeedResolveBusinessForEvent(evt, businesses);
   const name = biz?.name || venueName;
   // Prefer static neon pack (/directory-logos), then DB imageUrl, then type fallback —
-  // same resolution the Directory UI uses (Camp Bar PDX, Darcelle XV, etc.).
+  // same resolution the Directory UI uses (Camp Bar PDX, etc.).
   const logo =
     resolveDirectoryLogo(String(name), biz?.imageUrl)
-    || resolveDirectoryLogo(String(venueName), biz?.imageUrl)
     || (biz ? directoryFallbackLogo(biz.type) : null)
     || resolveDirectoryLogo(String(venueName), null);
   const businessId = biz?.id ?? null;
-  const displayName = String(biz?.name || venueName || name);
   if (logo) {
     return {
-      displayName,
+      displayName: String(venueName || name),
       photoUrl: logo,
       venueLogo: true,
       businessId,
     };
   }
-  return { displayName, venueLogo: !!biz, businessId };
+  return { displayName: String(venueName), venueLogo: !!biz, businessId };
 }
 
 function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor | null): HubFeedEventEmbed {
@@ -5110,18 +5095,16 @@ function hubFeedEventAuthor(evt: Event | Record<string, unknown>, businesses: Bu
   return { displayName: "The scene" };
 }
 
+/** Same-venue same-window window for bundling multi-night drops. */
+const HUB_FEED_EVENT_CONDENSE_MS = 2 * 60 * 60 * 1000;
+
 function hubFeedAuthorKey(author: HubFeedAuthor): string {
   return (author.username || author.displayName || "unknown").toLowerCase();
 }
 
-/** Align with directory name normalize so Slaughter's / Slaughters condense together. */
 function hubFeedNormalizeVenueKey(name: string | null | undefined): string {
   return String(name || "")
     .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[''`]/g, "")
-    .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
     .replace(/\s+/g, " ");
@@ -5158,16 +5141,6 @@ function hubFeedEventActivityAt(evt: {
   return created;
 }
 
-/** Pacific calendar day YYYY-MM-DD for same-day venue consolidations. */
-function hubFeedPacificDayKey(iso: string | null | undefined): string {
-  if (!iso) return "unknown";
-  const day = pacificCalendarDate(iso);
-  if (day) return day;
-  const ms = parsePacificDateTime(iso) ?? Date.parse(iso);
-  if (!Number.isFinite(ms)) return "unknown";
-  return new Date(ms).toISOString().slice(0, 10);
-}
-
 function hubFeedEventCondenseKey(item: HubFeedItem): string {
   const venue =
     item.event?.venueName
@@ -5175,49 +5148,38 @@ function hubFeedEventCondenseKey(item: HubFeedItem): string {
     || (item.author.venueLogo ? item.author.displayName : "")
     || "";
   const venueKey = hubFeedNormalizeVenueKey(venue);
-  const day = hubFeedPacificDayKey(item.event?.dateStart || item.createdAt);
-  if (venueKey) return `venue:${venueKey}:day:${day}`;
-  return `author:${hubFeedAuthorKey(item.author)}:day:${day}`;
+  if (venueKey) return `venue:${venueKey}`;
+  return `author:${hubFeedAuthorKey(item.author)}`;
 }
 
 function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
   if (cluster.length === 1) return cluster[0];
-  // Chronological by party start within the day
+  // Newest activity first in the bundle
   const ordered = [...cluster].sort((a, b) =>
-    String(a.event?.dateStart || a.createdAt).localeCompare(String(b.event?.dateStart || b.createdAt)),
+    String(b.createdAt).localeCompare(String(a.createdAt)),
   );
   const head = ordered[0];
-  // Prefer a venue author that already has a logo
-  const authorWithLogo =
-    ordered.find(i => i.author.venueLogo && i.author.photoUrl)?.author
-    || ordered.find(i => i.author.venueLogo)?.author
-    || head.author;
   const events = ordered
     .map((item) => item.event)
     .filter((e): e is HubFeedEventEmbed => e != null);
   const count = events.length;
-  // venueLogo only — member photo must not flip copy to "Listed a party"
-  const isVenueCard = !!authorWithLogo.venueLogo;
-  const action = isVenueCard
+  const venueAuthor = head.author.venueLogo;
+  const action = venueAuthor
     ? (count === 1 ? "Listed a party" : `Listed ${count} parties`)
     : (count === 1 ? "Posted a new event" : `Posted ${count} new events`);
-  const badge = isVenueCard ? "Event" : (head.badge === "Submitted" ? "Submitted" : "Event");
   return {
     ...head,
-    author: authorWithLogo,
-    id: `event-bundle-${hubFeedEventCondenseKey(head)}`,
-    badge,
+    id: `event-bundle-${hubFeedEventCondenseKey(head)}-${head.createdAt}`,
     action,
     text: null,
     events,
     event: events[0] ?? null,
-    createdAt: head.createdAt,
   };
 }
 
 function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
   if (items.length <= 1) return items;
-  // One card per venue per Pacific calendar day (all that night’s parties together).
+  // Group by venue (not poster) so same-club multi-night drops merge.
   const byKey = new Map<string, HubFeedItem[]>();
   for (const item of items) {
     const key = hubFeedEventCondenseKey(item);
@@ -5226,7 +5188,23 @@ function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
   }
   const out: HubFeedItem[] = [];
   for (const group of Array.from(byKey.values())) {
-    out.push(bundleHubFeedEventCluster(group));
+    group.sort((a: HubFeedItem, b: HubFeedItem) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    let cluster: HubFeedItem[] = [];
+    for (const item of group) {
+      if (cluster.length === 0) {
+        cluster.push(item);
+        continue;
+      }
+      const anchor = new Date(cluster[0].createdAt).getTime();
+      const t = new Date(item.createdAt).getTime();
+      if (Number.isFinite(anchor) && Number.isFinite(t) && Math.abs(anchor - t) <= HUB_FEED_EVENT_CONDENSE_MS) {
+        cluster.push(item);
+      } else {
+        out.push(bundleHubFeedEventCluster(cluster));
+        cluster = [item];
+      }
+    }
+    if (cluster.length) out.push(bundleHubFeedEventCluster(cluster));
   }
   return out;
 }
@@ -5289,8 +5267,7 @@ function hubFeedPostToItem(row: any, goingCounts: Record<number, { count: number
     author: hubFeedAuthorFromUser({
       displayName: row.displayName,
       username: row.username,
-      // Never fall back to the post image as a face
-      photoUrl: row.authorPhotoUrl ?? null,
+      photoUrl: row.authorPhotoUrl ?? row.photoUrl,
       avatarChoice: row.avatarChoice,
       avatarRing: row.avatarRing,
     }),
@@ -10261,17 +10238,8 @@ export const storage: IStorage = {
   },
   getHubFeedPostsByUser(userId, limit = 20) {
     ensureHubFeedPostsSchema();
-    // Alias snake_case columns so HubPost UI + profile mappers get camelCase.
     const rows = sqlite.prepare(`
-      SELECT id,
-             user_id AS userId,
-             post_type AS postType,
-             body,
-             photo_url AS photoUrl,
-             audience,
-             event_id AS eventId,
-             status,
-             created_at AS createdAt
+      SELECT *
       FROM hub_feed_posts
       WHERE user_id = ? AND status = 'LIVE'
       ORDER BY created_at DESC
@@ -10325,14 +10293,12 @@ export const storage: IStorage = {
 
     const items: HubFeedItem[] = [];
 
-    // Venue parties on the guide + user-submitted. Skip long-ended past nights
-    // so the feed isn't full of old "before" listings. Same venue + same day
-    // collapses into one card with all events.
+    // Venue parties we listed on the guide + every user-submitted event.
+    // Order by party date when available so bulk seed timestamps don't clump.
     const recentEvents = sqlite.prepare(`
       SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
-             date_start AS dateStart, date_end AS dateEnd, admission, created_at AS createdAt,
-             claimed_by AS claimedBy, submitted_by AS submittedBy, source,
-             address, lat, lng
+             date_start AS dateStart, admission, created_at AS createdAt,
+             claimed_by AS claimedBy, submitted_by AS submittedBy, source
       FROM events
       WHERE status = 'LIVE'
         AND (
@@ -10340,44 +10306,27 @@ export const storage: IStorage = {
           OR TRIM(COALESCE(submitted_by, '')) != ''
           OR TRIM(COALESCE(claimed_by, '')) != ''
           OR datetime(created_at) >= datetime('now', '-60 days')
-          OR date(date_start) >= date('now', '-3 days')
-        )
-        AND (
-          -- Age out ended parties; also age claimed/submitted with null date_end via date_start
-          (date_end IS NOT NULL AND datetime(date_end) >= datetime('now', '-1 day'))
-          OR (date_end IS NULL AND (
-            date_start IS NULL
-            OR date(date_start) >= date('now', '-3 days')
-          ))
+          OR date(date_start) >= date('now', '-14 days')
         )
       ORDER BY COALESCE(date_start, created_at) DESC
-      LIMIT 100
+      LIMIT 80
     `).all() as any[];
     const rawEventItems: HubFeedItem[] = [];
     for (const evt of recentEvents) {
       if (pinnedStankId != null && evt.id === pinnedStankId) continue;
       const activityAt = hubFeedEventActivityAt(evt);
       if (!activityAt) continue;
+      const poster = hubFeedEventPoster(evt, businesses);
+      // Prefer venue voice for guide-listed parties so the card reads as a
+      // venue status update; keep member poster on each row when known.
+      const author = hubFeedEventAuthor(evt, businesses);
       const venueBiz = hubFeedResolveBusinessForEvent(evt, businesses);
       const isUserSubmitted =
         evt.source === "user_submitted" || !!(evt.submittedBy && String(evt.submittedBy).trim());
-      // Venue parties always speak as the venue (logo avatar). User submissions
-      // keep the member as author when they have a photo; otherwise venue logo.
-      let feedAuthor: HubFeedAuthor;
-      if (!isUserSubmitted && (venueBiz || evt.venueName)) {
-        feedAuthor = hubFeedVenueAuthor(String(evt.venueName || venueBiz?.name || ""), evt, businesses);
-      } else {
-        feedAuthor = hubFeedEventAuthor(evt, businesses);
-        // Still attach venue logo when author has no photo
-        if (!feedAuthor.photoUrl && (venueBiz || evt.venueName)) {
-          const v = hubFeedVenueAuthor(String(evt.venueName || venueBiz?.name || ""), evt, businesses);
-          if (v.photoUrl) {
-            feedAuthor = { ...feedAuthor, photoUrl: v.photoUrl, venueLogo: true, businessId: v.businessId ?? feedAuthor.businessId };
-          }
-        }
-      }
-      const poster = hubFeedEventPoster(evt, businesses);
-      // venueLogo only — a member photo must not flip copy to "Listed a party"
+      const feedAuthor =
+        !isUserSubmitted && venueBiz
+          ? hubFeedVenueAuthor(String(evt.venueName || venueBiz.name), evt, businesses)
+          : author;
       const action = isUserSubmitted
         ? "Submitted a new event"
         : feedAuthor.venueLogo
@@ -10388,7 +10337,7 @@ export const storage: IStorage = {
         kind: "event",
         badge: isUserSubmitted ? "Submitted" : "Event",
         action,
-        text: null,
+        text: evt.description?.slice(0, 280) || null,
         createdAt: activityAt,
         author: feedAuthor,
         event: hubFeedEventEmbed(evt, goingCounts[evt.id]?.count, poster),
