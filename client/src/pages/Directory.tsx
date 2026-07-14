@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useMemo, Suspense, useEffect } from "react";
+import { useState, useMemo, Suspense, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -23,6 +23,7 @@ import {
 } from "@/lib/directoryLogos";
 import PlaceModal from "@/components/PlaceModal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
+import CategoryConstellation from "@/components/CategoryConstellation";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
@@ -85,7 +86,7 @@ export const TYPE_LABELS: Record<string, string> = {
 };
 
 /** Solid pin / accent hex (gradients live on PlaceCard edges). */
-const TYPE_COLORS: Record<string, string> = {
+export const TYPE_COLORS: Record<string, string> = {
   bar: "#FF00CC",
   restaurant: "#FF6600",
   cafe: "#39FF14",
@@ -104,6 +105,16 @@ const NEIGHBORHOODS = [
 ];
 
 const FORM_NEIGHBORHOODS = NEIGHBORHOODS.filter(n => n !== "ALL");
+
+function directoryHasDeepLink(): boolean {
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get("type");
+  return Boolean(
+    (type && type in TYPE_LABELS) ||
+    params.get("place") ||
+    params.get("q"),
+  );
+}
 
 const blankDirectoryForm = () => ({
   name: "",
@@ -137,6 +148,9 @@ export default function Directory() {
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
+  const [showGrid, setShowGrid] = useState(directoryHasDeepLink);
+  const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
@@ -152,10 +166,23 @@ export default function Directory() {
     if (match) setSelectedPlace(match);
   }, [businesses]);
 
+  const categoryCounts = useMemo(() => {
+    return businesses.reduce<Record<string, number>>((acc, b) => {
+      acc[b.type] = (acc[b.type] ?? 0) + 1;
+      return acc;
+    }, {});
+  }, [businesses]);
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
+    const thisMonth = pacificTodayDate().slice(0, 7);
     return businesses
       .filter(b => {
+        if (grandOpeningOnly) {
+          if (!isGrandOpeningActive(b.grandOpeningDate)) return false;
+          const openMonth = b.grandOpeningDate?.slice(0, 7);
+          if (openMonth && openMonth !== thisMonth) return false;
+        }
         if (activeType !== "ALL" && b.type !== activeType) return false;
         if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
         if (q) {
@@ -172,27 +199,63 @@ export default function Directory() {
         if (newDiff !== 0) return newDiff;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
-  }, [businesses, activeType, activeNeighborhood, searchQuery]);
+  }, [businesses, activeType, activeNeighborhood, searchQuery, grandOpeningOnly]);
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(businesses.map(b => b.neighborhood).filter(Boolean));
     return NEIGHBORHOODS.filter(n => n === "ALL" || seen.has(n));
   }, [businesses]);
 
-  const heroStats = useMemo(() => {
+  const grandOpeningsThisMonth = useMemo(() => {
     const thisMonth = pacificTodayDate().slice(0, 7);
-    const grandOpeningsThisMonth = businesses.filter(b => {
+    return businesses.filter(b => {
       if (!isGrandOpeningActive(b.grandOpeningDate)) return false;
       const openMonth = b.grandOpeningDate?.slice(0, 7);
       return !openMonth || openMonth === thisMonth;
     }).length;
+  }, [businesses]);
+
+  const heroStats = useMemo(() => {
     const hostingPrideEvents = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
     return [
       { num: businesses.length, label: "Total places", color: "#ff1fa0" },
       { num: grandOpeningsThisMonth, label: "Total grand openings this month", color: "#ccff00" },
       { num: hostingPrideEvents, label: "Total hosting Pride events", color: "#19e3ff" },
     ];
-  }, [businesses]);
+  }, [businesses, grandOpeningsThisMonth]);
+
+  const revealGrid = () => {
+    setShowGrid(true);
+    window.setTimeout(() => {
+      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
+  const handleSelectCategory = (key: string) => {
+    setGrandOpeningOnly(false);
+    setActiveType(key);
+    revealGrid();
+  };
+
+  const handleSelectGrandOpening = () => {
+    setGrandOpeningOnly(true);
+    setActiveType("ALL");
+    revealGrid();
+  };
+
+  const handleViewAll = () => {
+    setGrandOpeningOnly(false);
+    setActiveType("ALL");
+    revealGrid();
+  };
+
+  const handleBackToCategories = () => {
+    setShowGrid(false);
+    setGrandOpeningOnly(false);
+    window.setTimeout(() => {
+      document.querySelector(".category-constellation")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 20);
+  };
 
   const createMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory", form),
@@ -309,129 +372,174 @@ export default function Directory() {
         </ScrollReveal>
       )}
 
-      {/* Map + pin color key */}
-      {!isLoading && (
-        <ScrollReveal>
-          <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
-            <DirectoryMap businesses={filtered} showKey />
-          </Suspense>
-        </ScrollReveal>
-      )}
-
-      {/* Filter bar */}
-      <ScrollReveal delay={30}>
-      <div className="zine-filter-bar" style={{
-        background: "#000", borderBottom: "1px solid #1a1a1a",
-        position: "sticky", top: "var(--site-header-height)", zIndex: 50,
-      }}>
-        <div className="events-filter-row" style={{ flexWrap: "wrap", rowGap: 8 }}>
-          <FilterChip
-            selected={activeType === "ALL"}
-            fill={activeType === "ALL"}
-            accent={dayAccentToken("ALL")}
-            onToggle={() => setActiveType("ALL")}
-          >
-            ALL
-          </FilterChip>
-          {Object.entries(TYPE_LABELS).map(([key, label]) => {
-            const selected = activeType === key;
-            return (
-              <FilterChip
-                key={key}
-                selected={selected}
-                fill={selected}
-                accent={TYPE_COLORS[key]}
-                onToggle={() => setActiveType(key)}
-              >
-                {label}
-              </FilterChip>
-            );
-          })}
-          <div style={{ flex: 1, minWidth: 12 }} />
-          <div className="events-filter-search">
-            <SearchInput
-              id="directory-search"
-              label={undefined}
-              placeholder="Search the directory..."
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onClear={() => setSearchQuery("")}
-              data-testid="directory-search"
-              size="sm"
-            />
-          </div>
-        </div>
-
-        <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
-          {neighborhoodsInUse.map(n => {
-            const selected = activeNeighborhood === n;
-            return (
-              <FilterChip
-                key={n}
-                selected={selected}
-                fill={selected}
-                accent={n === "ALL" ? dayAccentToken("ALL") : "lime"}
-                onToggle={() => setActiveNeighborhood(n)}
-                style={{ fontSize: "0.7rem" }}
-              >
-                {n}
-              </FilterChip>
-            );
-          })}
-        </div>
-      </div>
-      </ScrollReveal>
-
-      <div className="zine-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
-        <ScrollReveal>
-          <div className="events-count-row">
-            <div className="events-count-banner">
-              <MapPin size={13} />
-              <span>
-                {isLoading ? "Loading…" : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`}
-              </span>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        {isLoading ? (
+      {!showGrid && (
+        isLoading ? (
           <BoardLoadingState label="Loading directory" />
         ) : isError ? (
           <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
-        ) : filtered.length === 0 ? (
-          <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">Nothing matches</p>
-            <p className="board-copy-sm">
-              {businesses.length === 0
-                ? "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."
-                : "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."}
-            </p>
-            <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
-              <Plus size={16} /> Add your business
-            </button>
-          </div>
         ) : (
-          <ScrollReveal delay={50}>
-            <div className="directory-grid">
-              {filtered.map(biz => (
-                <DirectoryCard
-                  key={biz.id}
-                  biz={biz}
-                  onClick={() => setSelectedPlace(biz)}
-                  onRequireAuth={() => setShowAuth(true)}
-                />
-              ))}
-            </div>
+          <ScrollReveal>
+            <CategoryConstellation
+              counts={categoryCounts}
+              grandOpeningCount={grandOpeningsThisMonth}
+              totalPlaces={businesses.length}
+              typeLabels={TYPE_LABELS}
+              typeColors={TYPE_COLORS}
+              onSelectCategory={handleSelectCategory}
+              onSelectGrandOpening={handleSelectGrandOpening}
+              onViewAll={handleViewAll}
+            />
           </ScrollReveal>
-        )}
-      </div>
+        )
+      )}
+
+      {showGrid && (
+        <>
+          {/* Map + pin color key */}
+          {!isLoading && (
+            <ScrollReveal>
+              <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
+                <DirectoryMap businesses={filtered} showKey />
+              </Suspense>
+            </ScrollReveal>
+          )}
+
+          {/* Filter bar */}
+          <ScrollReveal delay={30}>
+          <div className="zine-filter-bar" style={{
+            background: "#000", borderBottom: "1px solid #1a1a1a",
+            position: "sticky", top: "var(--site-header-height)", zIndex: 50,
+          }}>
+            <div className="events-filter-row" style={{ flexWrap: "wrap", rowGap: 8 }}>
+              <FilterChip
+                selected={activeType === "ALL" && !grandOpeningOnly}
+                fill={activeType === "ALL" && !grandOpeningOnly}
+                accent={dayAccentToken("ALL")}
+                onToggle={() => {
+                  setGrandOpeningOnly(false);
+                  setActiveType("ALL");
+                }}
+              >
+                ALL
+              </FilterChip>
+              {Object.entries(TYPE_LABELS).map(([key, label]) => {
+                const selected = activeType === key && !grandOpeningOnly;
+                return (
+                  <FilterChip
+                    key={key}
+                    selected={selected}
+                    fill={selected}
+                    accent={TYPE_COLORS[key]}
+                    onToggle={() => {
+                      setGrandOpeningOnly(false);
+                      setActiveType(key);
+                    }}
+                  >
+                    {label}
+                  </FilterChip>
+                );
+              })}
+              <div style={{ flex: 1, minWidth: 12 }} />
+              <div className="events-filter-search">
+                <SearchInput
+                  id="directory-search"
+                  label={undefined}
+                  placeholder="Search the directory..."
+                  value={searchQuery}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                  onClear={() => setSearchQuery("")}
+                  data-testid="directory-search"
+                  size="sm"
+                />
+              </div>
+            </div>
+
+            <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
+              {neighborhoodsInUse.map(n => {
+                const selected = activeNeighborhood === n;
+                return (
+                  <FilterChip
+                    key={n}
+                    selected={selected}
+                    fill={selected}
+                    accent={n === "ALL" ? dayAccentToken("ALL") : "lime"}
+                    onToggle={() => setActiveNeighborhood(n)}
+                    style={{ fontSize: "0.7rem" }}
+                  >
+                    {n}
+                  </FilterChip>
+                );
+              })}
+            </div>
+          </div>
+          </ScrollReveal>
+
+          <div
+            ref={gridRef}
+            className="zine-content"
+            style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}
+          >
+            <ScrollReveal>
+              <button
+                type="button"
+                className="directory-back-categories"
+                onClick={handleBackToCategories}
+              >
+                ← Back to categories
+              </button>
+            </ScrollReveal>
+
+            <ScrollReveal>
+              <div className="events-count-row">
+                <div className="events-count-banner">
+                  <MapPin size={13} />
+                  <span>
+                    {isLoading ? "Loading…" : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`}
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {isLoading ? (
+              <BoardLoadingState label="Loading directory" />
+            ) : isError ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
+            ) : filtered.length === 0 ? (
+              <div className="board-empty board-empty--prototype">
+                <p className="display section-heading">Nothing matches</p>
+                <p className="board-copy-sm">
+                  {businesses.length === 0
+                    ? "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."
+                    : "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."}
+                </p>
+                <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
+                  <Plus size={16} /> Add your business
+                </button>
+              </div>
+            ) : (
+              <ScrollReveal delay={50}>
+                <div className="directory-grid">
+                  {filtered.map(biz => (
+                    <DirectoryCard
+                      key={biz.id}
+                      biz={biz}
+                      onClick={() => setSelectedPlace(biz)}
+                      onRequireAuth={() => setShowAuth(true)}
+                    />
+                  ))}
+                </div>
+              </ScrollReveal>
+            )}
+          </div>
+        </>
+      )}
 
       {selectedPlace && (
         <PlaceModal place={selectedPlace} onClose={() => setSelectedPlace(null)} onRequireAuth={() => setShowAuth(true)} />
       )}
 
       <BoardCloseSeam
-        line="Show up. Spend queer. Keep them alive."
+        line="Keep us healthy."
         url="prideguidepdx.com/directory"
       />
     </div>

@@ -15075,6 +15075,205 @@ html.calm-mode .board-detail-modal {
     #06060a;
 }
 
+/* ── Directory category constellation explorer ── */
+@keyframes floatOrb {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, calc(-50% - 15px)); }
+}
+@keyframes glowPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.22); }
+}
+@keyframes hueSpin {
+  to { filter: hue-rotate(360deg); }
+}
+
+.category-constellation {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(30px, 4vw, 56px) clamp(16px, 3vw, 44px);
+}
+
+.category-constellation__header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.category-constellation__title {
+  margin: 0;
+  line-height: 1;
+}
+
+.category-constellation__kicker {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #19e3ff;
+}
+
+.category-constellation__backdrop {
+  position: relative;
+  border: 1px solid #1c1c22;
+  border-radius: 14px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(0deg, #ffffff08 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, #ffffff08 0 1px, transparent 1px 48px),
+    linear-gradient(120deg, transparent 46%, #ffffff0d 47% 48%, transparent 49%),
+    radial-gradient(60% 60% at 22% 20%, #ff00cc1a, transparent 62%),
+    radial-gradient(60% 60% at 82% 74%, #19e3ff1a, transparent 62%),
+    #08080b;
+}
+
+.category-constellation__field {
+  position: relative;
+  width: 100%;
+  height: clamp(500px, 64vw, 680px);
+}
+
+.category-constellation__orb {
+  position: absolute;
+  border: 0;
+  border-radius: 50%;
+  padding: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease;
+}
+
+.category-constellation__orb:hover {
+  transform: translate(-50%, calc(-50% - 4px));
+}
+
+.category-constellation__orb:focus-visible {
+  outline: 2px solid #00ffff;
+  outline-offset: 3px;
+}
+
+.category-constellation__orb-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.category-constellation__orb-count {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.category-constellation__orb-label {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 5px;
+  padding: 0 8px;
+  color: #f4f1ea;
+}
+
+.category-constellation__hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 132px;
+  height: 132px;
+  border: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: #ffffff;
+  box-shadow: 0 0 26px rgba(255, 255, 255, 0.4), 4px 4px 0 rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.category-constellation__hub:hover {
+  transform: translate(-50%, calc(-50% - 4px));
+}
+
+.category-constellation__hub:focus-visible {
+  outline: 2px solid #00ffff;
+  outline-offset: 3px;
+}
+
+.category-constellation__hub-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, #ffffff22, transparent 42%),
+    #0b0b0b;
+  color: #fff;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.category-constellation__hub-label {
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+
+.category-constellation__hub-count {
+  font-size: 36px;
+  line-height: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.directory-back-categories {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #19e3ff;
+  cursor: pointer;
+}
+
+.directory-back-categories:hover {
+  color: #7ff7ff;
+}
+
+.directory-back-categories:focus-visible {
+  outline: 2px solid #00ffff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-constellation__orb {
+    animation: none !important;
+  }
+}
+
+html.calm-mode .category-constellation__orb {
+  animation: none !important;
+}
+
 .gigs-page.board-page--makeover {
   background:
     radial-gradient(circle at 12% 8%, rgba(176, 107, 255, 0.07), transparent 22rem),
