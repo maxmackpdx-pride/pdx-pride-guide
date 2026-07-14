@@ -231,6 +231,11 @@ export default function Admin() {
   const [eventSearch, setEventSearch] = useState("");
   const [eventStatusFilter, setEventStatusFilter] = useState<EventStatusFilter>("all");
   const [eventSort, setEventSort] = useState<EventSort>("day_time");
+  /** Bulk catalog ops: dry-run preview then confirm (server caps batch size). */
+  const [bulkEventIds, setBulkEventIds] = useState<number[]>([]);
+  const [bulkAction, setBulkAction] = useState<"hide" | "claimable_on" | "claimable_off">("hide");
+  const [bulkPreview, setBulkPreview] = useState<any>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [teamIdentifier, setTeamIdentifier] = useState("");
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -1667,6 +1672,98 @@ export default function Admin() {
                 </button>
               ))}
             </div>
+            {bulkEventIds.length > 0 && (
+              <div
+                className="mb-4 p-3 border border-[#FF00CC]/40 flex flex-wrap items-center gap-3"
+                style={{ background: "rgba(255,0,204,0.06)" }}
+                data-testid="admin-bulk-events-toolbar"
+              >
+                <span className="display text-xs text-[#FF00CC]">{bulkEventIds.length} selected</span>
+                <select
+                  value={bulkAction}
+                  onChange={e => {
+                    setBulkAction(e.target.value as typeof bulkAction);
+                    setBulkPreview(null);
+                  }}
+                  className={adminFieldClass}
+                  style={{ maxWidth: 180 }}
+                >
+                  <option value="hide">Hide (HIDDEN)</option>
+                  <option value="claimable_on">Claimable on</option>
+                  <option value="claimable_off">Claimable off</option>
+                </select>
+                <button
+                  type="button"
+                  disabled={bulkBusy}
+                  className="display text-xs px-3 py-1 border"
+                  style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                  onClick={async () => {
+                    setBulkBusy(true);
+                    try {
+                      const res = await apiRequest("POST", "/api/admin/events/bulk/preview", {
+                        ids: bulkEventIds,
+                        action: bulkAction,
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error || "Preview failed");
+                      setBulkPreview(data);
+                      toast({ title: "Bulk preview ready", description: data.impact });
+                    } catch (err) {
+                      toast({ title: "Preview failed", description: parseApiError(err, "Bulk preview failed"), variant: "destructive" });
+                    } finally {
+                      setBulkBusy(false);
+                    }
+                  }}
+                >
+                  PREVIEW
+                </button>
+                <button
+                  type="button"
+                  disabled={bulkBusy || !bulkPreview}
+                  className="display text-xs px-3 py-1 border"
+                  style={{ borderColor: "#C8FA3C", color: "#C8FA3C", opacity: bulkPreview ? 1 : 0.4 }}
+                  onClick={async () => {
+                    setBulkBusy(true);
+                    try {
+                      const res = await apiRequest("POST", "/api/admin/events/bulk/execute", {
+                        ids: bulkEventIds,
+                        action: bulkAction,
+                        confirm: true,
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error || "Bulk failed");
+                      toast({
+                        title: `Updated ${data.count || 0} events`,
+                        description: data.skipped?.length ? `${data.skipped.length} skipped` : undefined,
+                      });
+                      setBulkEventIds([]);
+                      setBulkPreview(null);
+                      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+                      queryClient.invalidateQueries({ queryKey: ["/api/admin/activity"] });
+                    } catch (err) {
+                      toast({ title: "Bulk failed", description: parseApiError(err, "Bulk execute failed"), variant: "destructive" });
+                    } finally {
+                      setBulkBusy(false);
+                    }
+                  }}
+                >
+                  CONFIRM
+                </button>
+                <button
+                  type="button"
+                  className="display text-xs px-3 py-1 border border-white/20 text-white/50"
+                  onClick={() => {
+                    setBulkEventIds([]);
+                    setBulkPreview(null);
+                  }}
+                >
+                  CLEAR
+                </button>
+                {bulkPreview?.impact && (
+                  <p className="text-white/45 text-xs w-full m-0">{bulkPreview.impact}</p>
+                )}
+              </div>
+            )}
             {eventsError ? (
               <AdminLoadError label="events" onRetry={() => refetchEvents()} />
             ) : eventsLoading ? (
@@ -1691,6 +1788,19 @@ export default function Admin() {
                     {/* Row */}
                     <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={bulkEventIds.includes(ev.id)}
+                          onChange={() => {
+                            setBulkEventIds(prev =>
+                              prev.includes(ev.id) ? prev.filter(id => id !== ev.id) : [...prev, ev.id],
+                            );
+                            setBulkPreview(null);
+                          }}
+                          aria-label={`Select ${ev.title}`}
+                          className="flex-shrink-0"
+                          data-testid={`admin-event-select-${ev.id}`}
+                        />
                         <div
                           className="flex-shrink-0 border border-white/15 bg-black/50 overflow-hidden"
                           style={{ width: 48, height: 64 }}
@@ -1745,6 +1855,16 @@ export default function Admin() {
                         >
                           {ev.status}
                         </Badge>
+                        <a
+                          href={`/events?event=${ev.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="display text-xs px-3 py-1 border transition-all"
+                          style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                          data-testid={`admin-event-public-${ev.id}`}
+                        >
+                          VIEW PUBLIC
+                        </a>
                         {ev.source === "user_submitted" && (
                           <span className="sticker text-xs" style={{ color: "#00FFFF", borderColor: "#00FFFF" }}>
                             COMMUNITY

@@ -240,6 +240,40 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
     });
   }, []);
 
+  const markAllRead = useCallback(async () => {
+    const r = await fetch("/api/admin/messages/mark-all-read", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!r.ok) {
+      toast({ title: "Could not mark all read", variant: "destructive" });
+      throw new Error("mark all failed");
+    }
+    await refreshAdminGuideQueries(queryClient);
+  }, [queryClient, toast]);
+
+  const remove = useCallback(
+    async (threadId: string) => {
+      const r = await fetch(`/api/admin/messages/thread/${encodeURIComponent(threadId)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!r.ok) {
+        toast({ title: "Delete failed", variant: "destructive" });
+        throw new Error("Delete failed");
+      }
+      setArchivedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(threadId);
+        saveArchived(next);
+        return next;
+      });
+      await refreshAdminGuideQueries(queryClient);
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/messages/thread", threadId] });
+    },
+    [queryClient, toast],
+  );
+
   const unreadCount = useMemo(
     () => baseThreads.filter((t) => t.folder === "inbox" && t.unread && !t.archived).length,
     [baseThreads],
@@ -253,5 +287,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
     setRead,
     archive,
     unarchive,
+    markAllRead,
+    remove,
   };
 }

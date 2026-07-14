@@ -737,13 +737,68 @@ export default function QueueView({
     return ADMIN_QUEUE_BUCKETS.filter((b) => b.id === bucketFilter);
   }, [mode, bucketFilter]);
 
+  const claimMutation = useMutation({
+    mutationFn: async ({ kind, entityId, takeover }: { kind: string; entityId: number; takeover?: boolean }) => {
+      const r = await apiRequest("POST", "/api/admin/queue-claims", { kind, entityId, takeover: !!takeover });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.error || "Claim failed");
+      }
+      return r.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/queue"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/queue-claims"] });
+    },
+  });
+  const releaseClaimMutation = useMutation({
+    mutationFn: async ({ kind, entityId }: { kind: string; entityId: number }) => {
+      const r = await apiRequest("DELETE", `/api/admin/queue-claims/${encodeURIComponent(kind)}/${entityId}`);
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.error || "Release failed");
+      }
+      return r.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/queue"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/queue-claims"] });
+    },
+  });
+
+  const { data: queueClaims = [] } = useQuery<
+    Array<{ queueKind: string; entityId: number; assigneeUsername: string | null; assigneeUserId: number }>
+  >({
+    queryKey: ["/api/admin/queue-claims"],
+    queryFn: () =>
+      fetch("/api/admin/queue-claims", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
+    enabled: mode === "admin" && !completed,
+    refetchInterval: 60_000,
+  });
+
+  const claimFor = (kind: QueueRowKind, entityId: number) => {
+    const mapKind =
+      kind === "promoter_request" ? "promoter"
+        : kind === "spotted" ? "missed_connection"
+          : kind === "gig_pending" ? "gig_pending"
+            : kind;
+    return queueClaims.find((c) => c.queueKind === mapKind && c.entityId === entityId);
+  };
+
+  const claimKindFor = (kind: QueueRowKind) => {
+    if (kind === "promoter_request") return "promoter";
+    if (kind === "spotted") return "missed_connection";
+    return kind;
+  };
+
   const pending = approveSub.isPending || declineSub.isPending || resolveRiverBrats.isPending
     || resolveGiftingReport.isPending || rejectGifting.isPending || approveSpotted.isPending
     || removeSpotted.isPending || rejectSpotted.isPending || resolveOwnerDesk.isPending
     || resolveModeration.isPending || approvePromoter.isPending || denyPromoter.isPending
     || approveClaim.isPending || denyClaim.isPending || approveBizSub.isPending
     || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending
-    || approveGig.isPending || rejectGig.isPending;
+    || approveGig.isPending || rejectGig.isPending
+    || claimMutation.isPending || releaseClaimMutation.isPending;
 
   const kicker = mode === "admin"
     ? completed
@@ -810,6 +865,12 @@ export default function QueueView({
             <div style={{ fontSize: 12, color: C.meta, marginTop: 3 }}>
               {q.meta}
               {q.outcome ? ` · ${q.outcome}` : ""}
+              {(() => {
+                const c = claimFor(q.kind, q.entityId);
+                return c?.assigneeUsername
+                  ? ` · claimed by @${c.assigneeUsername}`
+                  : "";
+              })()}
             </div>
           </div>
           <span style={{ color: accent, flex: "none", display: "flex", transition: "transform .15s", transform: `rotate(${isOpen ? 180 : 0}deg)` }}>
@@ -818,6 +879,30 @@ export default function QueueView({
         </div>
         {isOpen && (
           <div style={{ padding: "0 16px 16px" }} onClick={(e) => e.stopPropagation()}>
+            {mode === "admin" && !q.readOnly && (
+              <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                {(() => {
+                  const ck = claimKindFor(q.kind);
+                  const c = claimFor(q.kind, q.entityId);
+                  const mine = c && user?.id === c.assigneeUserId;
+                  if (!c) {
+                    return btn("CLAIM", C.cyan, () =>
+                      claimMutation.mutate({ kind: ck, entityId: q.entityId }),
+                    );
+                  }
+                  if (mine) {
+                    return btn("RELEASE", C.limeSoft, () =>
+                      releaseClaimMutation.mutate({ kind: ck, entityId: q.entityId }),
+                      true,
+                    );
+                  }
+                  return btn("TAKE OVER", C.orange, () =>
+                    claimMutation.mutate({ kind: ck, entityId: q.entityId, takeover: true }),
+                    true,
+                  );
+                })()}
+              </div>
+            )}
             {q.fields.length > 0 && (
               <div style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${C.border2}` }}>
                 {q.fields.map(([label, value], fi) => (

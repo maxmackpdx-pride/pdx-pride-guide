@@ -74,8 +74,11 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     setRead: setAdminGuideRead,
     archive: archiveAdminGuide,
     unarchive: unarchiveAdminGuide,
+    markAllRead: markAllAdminGuideRead,
+    remove: removeAdminGuideThread,
     unreadCount: adminGuideUnread,
   } = useAdminGuideThreads(adminMailActive ? activeId : null, isAdmin);
+  const [markingGuideAllRead, setMarkingGuideAllRead] = useState(false);
 
   const activeThread = activeId
     ? (adminMailActive
@@ -557,8 +560,12 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               onBack={closeThread}
               readOnly={activeThread.archived}
               onArchive={() => {
-                if (adminMailActive) archiveAdminGuide(activeThread.id);
-                else void archive(activeThread.id);
+                if (adminMailActive) {
+                  archiveAdminGuide(activeThread.id);
+                  void removeAdminGuideThread(activeThread.id).catch(() => {
+                    /* local archive still applied */
+                  });
+                } else void archive(activeThread.id);
                 closeThread();
               }}
               onUnarchive={() => {
@@ -650,6 +657,15 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   folder={queueFolder}
                   query={query}
                   onOpenThread={openThread}
+                  markingAllRead={markingGuideAllRead}
+                  onMarkAllRead={
+                    queueFolder === "inbox"
+                      ? () => {
+                          setMarkingGuideAllRead(true);
+                          void markAllAdminGuideRead().finally(() => setMarkingGuideAllRead(false));
+                        }
+                      : undefined
+                  }
                 />
               )}
               {inboxActive && account === "admin" && (queueFolder === "active" || queueFolder === "completed") && (

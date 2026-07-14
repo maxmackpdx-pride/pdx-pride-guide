@@ -19,11 +19,15 @@ export default function AdminMessagesView({
   folder,
   query,
   onOpenThread,
+  onMarkAllRead,
+  markingAllRead,
 }: {
   threads: Thread[];
   folder: "inbox" | "sent";
   query: string;
   onOpenThread: (id: string) => void;
+  onMarkAllRead?: () => void;
+  markingAllRead?: boolean;
 }) {
   const q = query.trim().toLowerCase();
   const rows = threads
@@ -35,6 +39,8 @@ export default function AdminMessagesView({
         (t.subject || "").toLowerCase().includes(q) ||
         (t.handle || "").toLowerCase().includes(q),
     );
+
+  const unread = rows.filter((t) => t.unread).length;
 
   if (rows.length === 0) {
     return (
@@ -54,6 +60,30 @@ export default function AdminMessagesView({
   }
 
   return (
+    <>
+    {folder === "inbox" && onMarkAllRead && unread > 0 && (
+      <div style={{ display: "flex", justifyContent: "flex-end", margin: "0 2px 10px" }}>
+        <button
+          type="button"
+          disabled={markingAllRead}
+          onClick={() => onMarkAllRead()}
+          style={{
+            fontFamily: MONO,
+            fontSize: 10,
+            letterSpacing: ".08em",
+            fontWeight: 700,
+            padding: "7px 12px",
+            borderRadius: 999,
+            border: `1px solid ${C.magenta}`,
+            background: "transparent",
+            color: C.magenta,
+            cursor: markingAllRead ? "wait" : "pointer",
+          }}
+        >
+          {markingAllRead ? "MARKING…" : `MARK ALL READ (${unread})`}
+        </button>
+      </div>
+    )}
     <div
       style={{
         border: `1px solid ${C.border}`,
@@ -201,5 +231,6 @@ export default function AdminMessagesView({
         );
       })}
     </div>
+    </>
   );
 }

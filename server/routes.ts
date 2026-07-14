@@ -9,6 +9,17 @@ import {
   PRIDE_WEEK_END_DATE,
 } from "@shared/prideWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
+import {
+  adminSearchForViewer,
+  checkAdminMessageRateLimit,
+  claimAdminQueueItem,
+  executeBulkEvents,
+  getAdminQueueAggregate,
+  listAdminQueueClaims,
+  previewBulkEvents,
+  publicPreviewLinks,
+  releaseAdminQueueClaim,
+} from "./adminOps";
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
 import { startPromptScheduler } from "./scheduler";
@@ -814,6 +825,39 @@ function getAdminActorUserId(req: any): number | null {
     if (u) return u.id;
   }
   return null;
+}
+
+/** Acting admin for audit logs (session user preferred over env fallback). */
+function getAdminActor(req: any): { id: number | null; username: string | null } {
+  const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+  if (sessionUser && storage.userIsSiteAdmin(sessionUser)) {
+    return { id: sessionUser.id, username: sessionUser.username || null };
+  }
+  const main = getSessionAdminUser(req);
+  if (main) return { id: main.id, username: main.username || null };
+  return { id: getAdminActorUserId(req), username: null };
+}
+
+function auditAdmin(
+  req: any,
+  action: string,
+  target?: {
+    type?: string | null;
+    id?: string | number | null;
+    label?: string | null;
+    detail?: Record<string, unknown> | null;
+  },
+) {
+  const actor = getAdminActor(req);
+  storage.logAdminAction({
+    actorUserId: actor.id,
+    actorUsername: actor.username,
+    action,
+    targetType: target?.type ?? null,
+    targetId: target?.id ?? null,
+    targetLabel: target?.label ?? null,
+    detail: target?.detail ?? null,
+  });
 }
 
 let attendanceHub: ReturnType<typeof initAttendanceWs> | null = null;
@@ -3736,12 +3780,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
       if (created) void fillEventMapCoordinates(created.id);
     }
+    auditAdmin(req, "approve_submission", {
+      type: "submission",
+      id: sub.id,
+      label: sub.title,
+      detail: { status: sub.status, submissionType: sub.type },
+    });
+    releaseAdminQueueClaim("submission", Number(req.params.id), getAdminActor(req).id || 0, { force: true });
     res.json(sub);
   });
 
   app.post("/api/admin/submissions/:id/reject", requireAdmin, (req, res) => {
     const { reason } = req.body;
-    storage.rejectSubmission(Number(req.params.id), reason || "");
+    const id = Number(req.params.id);
+    storage.rejectSubmission(id, reason || "");
+    auditAdmin(req, "reject_submission", {
+      type: "submission",
+      id,
+      label: `submission #${id}`,
+      detail: { reason: reason || null },
+    });
+    releaseAdminQueueClaim("submission", id, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true });
   });
 
@@ -3821,6 +3880,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
       || "admin";
     storage.setPromoterStatus(userId, "approved");
     storage.resolvePromoterApplicationSubmissions(userId, "approved", adminName);
+    auditAdmin(req, "approve_promoter", {
+      type: "promoter",
+      id: userId,
+      label: `@${user.username}`,
+    });
+    releaseAdminQueueClaim("promoter", userId, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true, promoterStatus: "approved" });
   });
 
@@ -3830,6 +3895,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user) return res.status(404).json({ error: "User not found" });
     storage.setPromoterStatus(userId, "rejected");
     storage.resolvePromoterApplicationSubmissions(userId, "rejected", "admin", "Promoter request denied");
+    auditAdmin(req, "deny_promoter", {
+      type: "promoter",
+      id: userId,
+      label: `@${user.username}`,
+    });
+    releaseAdminQueueClaim("promoter", userId, getAdminActor(req).id || 0, { force: true });
     res.json({ ok: true, promoterStatus: "rejected" });
   });
 
@@ -3997,14 +4068,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const { reasonCode, note } = parseProfilePhotoRejectBody(req.body);
       const result = storage.rejectUserProfilePhoto(username, reasonCode, note);
       if (result.error) return res.status(400).json({ error: result.error });
-      const actor = getSessionAdminUser(req) || (req.session.userId ? storage.getUserById(req.session.userId) : null);
-      storage.logAdminAction({
-        actorUserId: actor?.id ?? null,
-        actorUsername: actor?.username || null,
-        action: "reject_photo",
-        targetType: "user",
-        targetId: username,
-        targetLabel: `@${username}`,
+      auditAdmin(req, "reject_photo", {
+        type: "user",
+        id: username,
+        label: `@${username}`,
         detail: { reasonCode, hasNote: Boolean(note) },
       });
       res.json({ ok: true });
@@ -4071,17 +4138,101 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
-  /** Unified search for mobile admin search bar → inbox queue or /admin tabs. */
+  /** Unified search for admin tools → floating inbox Queue or /admin tabs. */
   app.get("/api/admin/search", requireAdmin, (req, res) => {
     const q = String(req.query.q || "").trim();
     const limit = Number(req.query.limit) || 16;
-    res.json(storage.adminGlobalSearch(q, limit));
+    const viewer = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    res.json(adminSearchForViewer(q, viewer ?? null, limit));
   });
 
   /** Recent admin actions (rejects, DMs, grants) for accountability on mobile/desktop. */
   app.get("/api/admin/activity", requireAdmin, (req, res) => {
     const limit = Number(req.query.limit) || 60;
     res.json(storage.getAdminActionLog(limit));
+  });
+
+  /**
+   * Single payload for floating inbox Admin · Queue (all buckets + soft claims).
+   * Prefer this over 10 parallel list endpoints on mobile admin.
+   */
+  app.get("/api/admin/queue", requireAdmin, (_req, res) => {
+    try {
+      res.json(getAdminQueueAggregate());
+    } catch (err) {
+      console.error("[admin/queue]", err);
+      res.status(500).json({ error: "Could not load admin queue" });
+    }
+  });
+
+  app.get("/api/admin/queue-claims", requireAdmin, (_req, res) => {
+    res.json(listAdminQueueClaims());
+  });
+
+  app.post("/api/admin/queue-claims", requireAdmin, (req, res) => {
+    const actor = getAdminActor(req);
+    if (!actor.id) return res.status(401).json({ error: "No admin actor" });
+    const kind = String(req.body?.kind || req.body?.queueKind || "").trim();
+    const entityId = Number(req.body?.entityId ?? req.body?.id);
+    const takeover = Boolean(req.body?.takeover);
+    const result = claimAdminQueueItem(kind, entityId, actor.id, { takeover });
+    if (result.error) return res.status(400).json({ error: result.error });
+    auditAdmin(req, takeover ? "queue_takeover" : "queue_claim", {
+      type: kind,
+      id: entityId,
+      label: `${kind} #${entityId}`,
+    });
+    res.json(result);
+  });
+
+  app.delete("/api/admin/queue-claims/:kind/:entityId", requireAdmin, (req, res) => {
+    const actor = getAdminActor(req);
+    if (!actor.id) return res.status(401).json({ error: "No admin actor" });
+    const result = releaseAdminQueueClaim(
+      String(req.params.kind || ""),
+      Number(req.params.entityId),
+      actor.id,
+      { force: Boolean(req.query.force === "1" || req.body?.force) },
+    );
+    if (result.error) return res.status(400).json({ error: result.error });
+    auditAdmin(req, "queue_release", {
+      type: String(req.params.kind),
+      id: req.params.entityId,
+    });
+    res.json({ ok: true });
+  });
+
+  /** Dry-run bulk event actions (no writes). */
+  app.post("/api/admin/events/bulk/preview", requireAdmin, (req, res) => {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : [];
+    const action = String(req.body?.action || "");
+    const result = previewBulkEvents(ids, action);
+    if ("error" in result && result.error) return res.status(400).json(result);
+    res.json(result);
+  });
+
+  /** Execute bulk event actions (guarded: hide / claimable only, max batch). */
+  app.post("/api/admin/events/bulk/execute", requireAdmin, (req, res) => {
+    if (!req.body?.confirm) {
+      return res.status(400).json({ error: "confirm: true required — use preview first" });
+    }
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : [];
+    const action = String(req.body?.action || "");
+    const reason = String(req.body?.reason || "").trim().slice(0, 300);
+    const actor = getAdminActor(req);
+    const result = executeBulkEvents(ids, action, actor, reason);
+    if ("error" in result && result.error) return res.status(400).json(result);
+    res.json(result);
+  });
+
+  /** Public URLs for admin "view as public" (no admin session required on the target). */
+  app.get("/api/admin/preview-links", requireAdmin, (req, res) => {
+    const eventId = req.query.eventId != null ? Number(req.query.eventId) : null;
+    const businessId = req.query.businessId != null ? Number(req.query.businessId) : null;
+    const username = req.query.username != null ? String(req.query.username) : null;
+    res.json({
+      links: publicPreviewLinks({ eventId, businessId, username }),
+    });
   });
 
   app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
@@ -4469,6 +4620,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/messages/thread/:threadId/reply", requireAdmin, (req, res) => {
+    const actor = getAdminActor(req);
+    if (actor.id) {
+      const rate = checkAdminMessageRateLimit(actor.id);
+      if (!rate.ok) return res.status(429).json({ error: rate.error });
+    }
     const guide = storage.resolveGuideAdminUser();
     if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
     const thread = storage.getThread(req.params.threadId);
@@ -4487,6 +4643,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
       contextLabel: first.contextLabel || null,
     });
     if (!msg) return res.status(500).json({ error: "Could not send reply" });
+    auditAdmin(req, "guide_reply", {
+      type: "thread",
+      id: req.params.threadId,
+      label: first.subject || "Reply",
+    });
     res.json(msg);
   });
 
@@ -4500,6 +4661,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   /** Compose a new message as the shared guide-admin profile (Admin MESSAGE buttons). */
   app.post("/api/admin/messages", requireAdmin, (req, res) => {
+    const actor = getAdminActor(req);
+    if (actor.id) {
+      const rate = checkAdminMessageRateLimit(actor.id);
+      if (!rate.ok) return res.status(429).json({ error: rate.error });
+    }
     const username = String(req.body?.username || "").trim().replace(/^@/, "");
     const body = String(req.body?.body || "").trim();
     const subject = String(req.body?.subject || "").trim().slice(0, 120);
@@ -4518,14 +4684,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       { contextType: "ADMIN_MESSAGE" },
     );
     if (!msg) return res.status(500).json({ error: "Could not send message" });
-    const actor = getSessionAdminUser(req) || (req.session.userId ? storage.getUserById(req.session.userId) : null);
-    storage.logAdminAction({
-      actorUserId: actor?.id ?? null,
-      actorUsername: actor?.username || null,
-      action: "admin_message",
-      targetType: "user",
-      targetId: target.id,
-      targetLabel: `@${target.username}`,
+    auditAdmin(req, "admin_message", {
+      type: "user",
+      id: target.id,
+      label: `@${target.username}`,
       detail: { threadId: msg.threadId, subject: msg.subject },
     });
     res.json({ ok: true, message: msg });
