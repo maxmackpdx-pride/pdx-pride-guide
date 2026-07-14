@@ -1,9 +1,15 @@
 import type { Event } from "./schema";
 import { pacificCalendarDate, pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
-import { PRIDE_WEEK_DAYS } from "./prideWeek";
+import { PRIDE_WEEK_DAYS, PRIDE_WEEK_END_DATE, PRIDE_WEEK_START_DATE } from "./prideWeek";
 
 const PACIFIC_TZ = "America/Los_Angeles";
 const PRIDE_LISTING_DAYS = new Set<string>(PRIDE_WEEK_DAYS);
+
+/** No board listings after Pride Sunday (hard product cap). */
+function isWithinPrideWeekCalendar(dayKey: string | null | undefined): boolean {
+  if (!dayKey) return false;
+  return dayKey >= PRIDE_WEEK_START_DATE && dayKey <= PRIDE_WEEK_END_DATE;
+}
 
 export type EventListing = Event & { listingInstanceKey?: string };
 
@@ -150,6 +156,10 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
   const expanded: EventListing[] = [];
 
   for (const event of events) {
+    // Drop whole rows that start after Pride week (OSLC Aug, etc.).
+    const startKey = pacificCalendarDate(event.dateStart);
+    if (startKey && startKey > PRIDE_WEEK_END_DATE) continue;
+
     if (!isMultiDayFestival(event.dateStart, event.dateEnd)) {
       expanded.push({
         ...event,
@@ -162,6 +172,9 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
     let emitted = 0;
 
     for (const dayKey of calendarDays) {
+      // Never emit Mon Jul 20+ even if date_end spills past Pride Sunday.
+      if (!isWithinPrideWeekCalendar(dayKey)) continue;
+
       const dayOfWeek = dayOfWeekForCalendarDay(dayKey);
       if (!PRIDE_LISTING_DAYS.has(dayOfWeek)) continue;
 
@@ -183,10 +196,13 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
     }
 
     if (emitted === 0) {
-      expanded.push({
-        ...event,
-        dayOfWeek: event.dayOfWeek || primaryDayOfWeek(event.dateStart),
-      });
+      // Only fall back if the primary start is still within Pride week.
+      if (startKey && startKey <= PRIDE_WEEK_END_DATE) {
+        expanded.push({
+          ...event,
+          dayOfWeek: event.dayOfWeek || primaryDayOfWeek(event.dateStart),
+        });
+      }
     }
   }
 

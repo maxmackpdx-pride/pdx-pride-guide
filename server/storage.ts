@@ -1426,7 +1426,8 @@ function seedData() {
       address: "SW 3rd Ave & SW Morrison St, Portland, OR 97204",
       neighborhood: "Downtown",
       lat: 45.520091, lng: -122.677007,
-      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-20T20:00:00",
+      // Cap through Pride Sunday only — never expand onto Mon Jul 20.
+      dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-19T20:00:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
       eventTypes: JSON.stringify(["BAR", "OFFICIAL", "OUTDOOR", "MULTI-DAY"]),
@@ -2473,35 +2474,7 @@ function seedPdxPahJuly2026Events() {
     adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Wed Jul 15 7pm session.",
   });
 
-  insert({
-    title: "Oregon State Leather Contest 2026",
-    description:
-      "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
-    venueName: "Oregon State Leather Contest",
-    address: "Portland, OR",
-    neighborhood: "Portland",
-    lat: null,
-    lng: null,
-    dateStart: "2026-08-07T19:00:00",
-    dateEnd: "2026-08-09T23:00:00",
-    dayOfWeek: "FRI",
-    ageRequirement: "21_PLUS",
-    eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
-    admission: "TICKETED",
-    ticketUrl: "https://www.oslcontest.org",
-    isPublic: true,
-    isPrivate: false,
-    isHouseParty: false,
-    isSexPositive: true,
-    nudityOk: false,
-    posterImageUrl: "/posters/oslc-leather-contest-2026.png",
-    status: "LIVE",
-    source: "admin_seeded",
-    isClaimable: true,
-    claimedBy: null,
-    submittedBy: null,
-    adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Apps close Jul 19.",
-  });
+  // Oregon State Leather Contest (Aug 7–9) intentionally not seeded — post-Pride week cap.
 }
 
 /** Camp Bar PDX full Pride Week 2026 schedule (Mon Jul 13 – Sun Jul 19).
@@ -2900,89 +2873,47 @@ function hardDeleteEventIds(ids: number[]) {
   sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
 }
 
-/** Pride-week listings that legitimately run into Mon Jul 20 or later — never prune these. */
-const POST_PRIDE_PRUNE_ALLOWLIST = new Set([
-  "Midtown Beer Garden Pride",
-  "Oregon State Leather Contest 2026",
-]);
-
-/** Remove stray post-Pride listings — never hard-delete allowlisted community events. */
+/**
+ * Hard cap: no live listings after Pride Sunday Jul 19, 2026.
+ * Runs every boot so seeds/restores cannot bring post-Pride nights back.
+ * Multi-day events that spill past Jul 19 are clipped (not deleted).
+ */
 function prunePostPrideWeekEvents() {
-  const allowlist = Array.from(POST_PRIDE_PRUNE_ALLOWLIST);
-  const postRows = sqlite
-    .prepare(`
-      SELECT id, title FROM events
-      WHERE date_start >= '2026-07-20'
-        AND title NOT IN (${allowlist.map(() => "?").join(",")})
-    `)
-    .all(...allowlist) as Array<{ id: number; title: string }>;
-  hardDeleteEventIds(postRows.map((r) => r.id));
+  // Anything whose start calendar day is after Jul 19 is hard-deleted.
+  const byStart = sqlite
+    .prepare(`SELECT id FROM events WHERE date_start >= '2026-07-20'`)
+    .all() as Array<{ id: number }>;
+  hardDeleteEventIds(byStart.map(r => r.id));
 
-  const spanAllow = allowlist;
+  // Clip multi-day spans so they do not expand onto Mon Jul 20+ (e.g. Midtown).
+  // Overnight parties that end before noon Mon can keep early-morning end times
+  // under Jul 20T — but festival-style ends on Mon afternoon get cut to Jul 19.
   const spanRows = sqlite
     .prepare(`
       SELECT id, date_end FROM events
       WHERE date_start < '2026-07-20'
         AND date_end >= '2026-07-20T12:00:00'
-        AND title NOT IN (${spanAllow.map(() => "?").join(",")})
     `)
-    .all(...spanAllow) as Array<{ id: number; date_end: string }>;
+    .all() as Array<{ id: number; date_end: string }>;
 
   for (const row of spanRows) {
     const endClock = row.date_end.includes("T") ? row.date_end.split("T")[1] : "23:59:59";
-    sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run(`2026-07-19T${endClock}`, row.id);
+    sqlite
+      .prepare(`UPDATE events SET date_end = ? WHERE id = ?`)
+      .run(`2026-07-19T${endClock}`, row.id);
   }
+
+  // Any remaining LIVE row with a post-Pride start (race / re-seed) is removed.
+  sqlite
+    .prepare(
+      `UPDATE events SET status = 'REMOVED', admin_notes = COALESCE(admin_notes || ' | ', '') || 'Auto-removed: after Pride week end 2026-07-19' WHERE date_start >= '2026-07-20' AND status != 'REMOVED'`,
+    )
+    .run();
 }
 
-/** Undo accidental deletions from the first prune_post_pride_week_v1 boot pass. */
+/** No-op: post-Pride restores are intentionally dead so events stop reappearing. */
 function restorePrunedPrideEvents() {
-  const now = new Date().toISOString();
-
-  sqlite.prepare(`
-    UPDATE events SET
-      date_end = '2026-07-20T20:00:00',
-      admin_notes = COALESCE(admin_notes || ' | ', '') || 'Restored Mon Jul 20 hours after post-prune rollback'
-    WHERE title = 'Midtown Beer Garden Pride'
-      AND date_end < '2026-07-20T12:00:00'
-  `).run();
-
-  const leatherExists = sqlite
-    .prepare("SELECT id FROM events WHERE title = 'Oregon State Leather Contest 2026' LIMIT 1")
-    .get() as { id: number } | undefined;
-  if (!leatherExists) {
-    db.insert(events)
-      .values({
-        title: "Oregon State Leather Contest 2026",
-        description:
-          "Oregon State Leather Contest returns August 7–9, 2026. Applications open June 1 through July 19 at oslcontest.org. Contestants welcome from across Oregon's leather community.",
-        venueName: "Oregon State Leather Contest",
-        address: "Portland, OR",
-        neighborhood: "Portland",
-        lat: null,
-        lng: null,
-        dateStart: "2026-08-07T19:00:00",
-        dateEnd: "2026-08-09T23:00:00",
-        dayOfWeek: "FRI",
-        ageRequirement: "21_PLUS",
-        eventTypes: JSON.stringify(["LEATHER", "COMMUNITY", "COMPETITION"]),
-        admission: "TICKETED",
-        ticketUrl: "https://www.oslcontest.org",
-        isPublic: true,
-        isPrivate: false,
-        isHouseParty: false,
-        isSexPositive: true,
-        nudityOk: false,
-        posterImageUrl: "/posters/oslc-leather-contest-2026.png",
-        status: "LIVE",
-        source: "admin_seeded",
-        isClaimable: true,
-        claimedBy: null,
-        submittedBy: null,
-        adminNotes: "Restored after post-prune rollback. From PDX PAH Barking Chain July 2026 newsletter.",
-        createdAt: now,
-      } as any)
-      .run();
-  }
+  /* intentionally empty — restore used to re-insert OSLC (Aug) + Midtown Mon hours */
 }
 
 /** Hard-delete unverified Checking-Portland batch rows (and Purple Rain duplicate). */
@@ -4940,9 +4871,27 @@ function runBootMigrationsOnce() {
     prunePostPrideWeekEvents();
     recordBootMigration("prune_post_pride_week_v1");
   }
+  // Keep migration id for install history, but never re-seed post-Pride events.
   if (!hasBootMigration("restore_pruned_pride_events_v1")) {
-    restorePrunedPrideEvents();
     recordBootMigration("restore_pruned_pride_events_v1");
+  }
+
+  // Permanent: wipe post-Jul-19 listings on every boot (seeds keep trying to revive them).
+  prunePostPrideWeekEvents();
+  if (!hasBootMigration("prune_post_pride_week_permanent_v2")) {
+    // One-shot title wipe for known revivals (OSLC Aug contest).
+    const oscl = sqlite
+      .prepare(
+        `SELECT id FROM events WHERE title = 'Oregon State Leather Contest 2026' OR title LIKE 'Oregon State Leather%'`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(oscl.map(r => r.id));
+    sqlite
+      .prepare(
+        `UPDATE events SET date_end = '2026-07-19T20:00:00' WHERE title = 'Midtown Beer Garden Pride' AND date_end >= '2026-07-20'`,
+      )
+      .run();
+    recordBootMigration("prune_post_pride_week_permanent_v2");
   }
   // Iced Tea Pride closing party: flyer + merc tickets confirm 3pm–10pm (was wrongly 9pm–10pm).
   // Source: icedteapdx IG https://www.instagram.com/p/DaZjSntlIFV/ + merctickets.com/events/185486634
