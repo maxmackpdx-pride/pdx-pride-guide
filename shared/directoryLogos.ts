@@ -133,13 +133,16 @@ export function resolveDirectoryLogo(
 ): string | null {
   const norm = normalizeDirectoryName(name);
   let stem = STEM_BY_NORMALIZED[norm];
-  // Prefix / contains fallbacks (e.g. "Darcelle XV Plaza" → darcelle…)
-  if (!stem && norm.length >= 5) {
+  // Safe prefix only (venue name starts with a known stem). Never substring /
+  // reverse-prefix — those false-match ("Not Darcelle", "Night Hawks").
+  // Prefer longest key so "campbarpdx" wins over "camp" if both ever applied.
+  if (!stem && norm.length >= 6) {
+    let bestKey = "";
     for (const [key, value] of Object.entries(STEM_BY_NORMALIZED)) {
-      if (key.length < 5) continue;
-      if (norm.startsWith(key) || key.startsWith(norm) || norm.includes(key)) {
+      if (key.length < 6) continue;
+      if (norm.startsWith(key) && key.length > bestKey.length) {
+        bestKey = key;
         stem = value;
-        break;
       }
     }
   }
