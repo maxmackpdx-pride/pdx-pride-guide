@@ -257,6 +257,8 @@ export default function HubV2({
       isPrimaryOwner={isPrimaryOwner}
       canPostToFeed={canPostToFeed}
       canManageTeam={canManageTeam}
+      chromeMode="member"
+      pendingCount={pendingCount}
       calmMode={calmMode}
       onToggleCalm={toggleCalmMode}
       onLogout={onLogout}

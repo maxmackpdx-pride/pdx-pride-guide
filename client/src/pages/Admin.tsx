@@ -19,8 +19,11 @@ import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import { type BoardRejectTarget, type OwnerDeskItem } from "@/components/admin/admin-queue-types";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
 import { type AdminView } from "@/components/admin/AdminShell";
-import HubShell, { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
+import HubV2Shell from "@/components/hub/HubV2Shell";
+import { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
+import type { HubSection } from "@/components/hub/types";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
+import { useTheme } from "@/context/ThemeContext";
 import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
@@ -219,7 +222,7 @@ export default function Admin() {
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
-  const [moreOpen, setMoreOpen] = useState(false);
+
 
   const [boardRejectReasons, setBoardRejectReasons] = useState<Record<string, string>>({});
   const [boardRejectNotes, setBoardRejectNotes] = useState<Record<string, string>>({});
@@ -1461,7 +1464,6 @@ export default function Admin() {
 
   const setAdminTab = (tab: AdminTab) => {
     setActiveTab(tab);
-    setMoreOpen(false);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.replaceState({}, "", url.toString());
@@ -1519,43 +1521,60 @@ export default function Admin() {
 
   const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
   const pushOk = !!pushStatus?.configured;
+  const { calmMode, toggleCalmMode } = useTheme();
+
+  /** Map /admin tabs → hub sections so member/admin share one left rail. */
+  const hubSectionFromTab = (tab: AdminTab): HubSection => {
+    const map: Record<string, HubSection> = {
+      overview: "admin",
+      events: "tbl-events",
+      users: "tbl-users",
+      gigs: "tbl-werk",
+      promoters: "tbl-promoters",
+      "venue-claims": "tbl-claims",
+      team: "tbl-team",
+    };
+    return map[tab] || "admin";
+  };
+
+  const tabFromHubSection = (section: HubSection): AdminTab | null => {
+    if (section === "admin") return "overview";
+    const map: Partial<Record<HubSection, AdminTab>> = {
+      "tbl-events": "events",
+      "tbl-users": "users",
+      "tbl-werk": "gigs",
+      "tbl-promoters": "promoters",
+      "tbl-claims": "venue-claims",
+      "tbl-team": "team",
+    };
+    return map[section] ?? null;
+  };
 
   return (
-    <div className="dash-page">
-      <HubShell
-        mode="admin"
-        adminView={activeTab as AdminViewKey}
-        onAdminNavigate={(view) => setAdminTab(view as AdminTab)}
-        isAdminUser
-        isSuperAdmin={isSuperAdmin}
+    <div className="dash-page hub-admin-unified">
+      <HubV2Shell
+        section={hubSectionFromTab(activeTab)}
+        onSectionChange={(section) => {
+          const tab = tabFromHubSection(section);
+          if (tab) {
+            setAdminTab(tab);
+            return;
+          }
+          // Member sections → leave admin tools for member hub
+          if (section === "feed" || section === "profile" || section === "events" || section === "people" || section === "settings") {
+            navigate(section === "feed" ? "/dashboard" : `/dashboard?section=${section}`);
+          }
+        }}
+        isAdmin
         isPrimaryOwner={isPrimaryOwner}
         canManageTeam={canManageTeam}
-        canViewUsers={canViewUsers}
-        canManageCatalog={canManageCatalog}
-        canPush={canPush}
-        userName={adminName}
-        userHandle={user?.username}
-        photoUrl={user?.photoUrl}
-        avatarChoice={user?.avatarChoice}
-        avatarRing={user?.avatarRing}
+        chromeMode="admin"
         pendingCount={pendingCount}
-        ownerCount={ownerCount}
-        navCounts={{
-          team: teamAdmins.length,
-          events: events.length,
-          users: userCount,
-          gigs: gigs.length,
-          promoters: approvedPromoterCount || pendingPromoters.length || undefined,
-          "venue-claims": venueClaimsPendingCount || undefined,
-        }}
-        moreOpen={moreOpen}
-        onMoreOpenChange={setMoreOpen}
-        kicker={viewMeta.kicker}
-        kickerColor={viewMeta.kickerColor}
-        title={viewMeta.title}
-        lede={viewMeta.lede}
+        calmMode={calmMode}
+        onToggleCalm={toggleCalmMode}
         onLogout={async () => { await logout(); navigate("/"); }}
-        topRight={(
+        rightRail={null}
+        mainToolbar={(
           <button type="button" className="hub-ghost-btn" onClick={refreshAdminData}>
             <RefreshCw size={12} aria-hidden />
             Refresh all
@@ -1584,6 +1603,17 @@ export default function Admin() {
         ) : null}
       >
         <div className="admin-panel-body">
+          <div className="reveal" style={{ marginBottom: 18 }}>
+            <div className="kick" style={{ color: viewMeta.kickerColor || "var(--panel-cyan)" }}>
+              {viewMeta.kicker}
+            </div>
+            <h1 className="h1">{viewMeta.title}</h1>
+            {viewMeta.lede && (
+              <p style={{ margin: "10px 0 0", fontSize: 14, color: "var(--board-muted)", maxWidth: 560, lineHeight: 1.5 }}>
+                {viewMeta.lede}
+              </p>
+            )}
+          </div>
         {/* ── OVERVIEW ── */}
         {activeTab === "overview" && (
           <AdminOverview
@@ -2901,7 +2931,7 @@ export default function Admin() {
         )}
 
         </div>
-      </HubShell>
+      </HubV2Shell>
 
       {messageTarget && (
         <div
