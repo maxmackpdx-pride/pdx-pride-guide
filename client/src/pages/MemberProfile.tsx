@@ -153,17 +153,6 @@ export default function MemberProfile() {
     }
   }, [profileUrl, toast]);
 
-  // Must stay above early returns (React #310: hooks order).
-  // Hosted past → HOST/MC; attended-only → WENT; host wins on shared ids.
-  const hostingPast = data?.events?.hosting?.past ?? [];
-  const goingPast = data?.events?.going?.past ?? [];
-  const stashEvents = useMemo(() => {
-    const byId = new Map<number, (typeof goingPast)[0] & { stashRole: "MC" | "WENT" }>();
-    for (const e of goingPast) byId.set(e.id, { ...e, stashRole: "WENT" });
-    for (const e of hostingPast) byId.set(e.id, { ...e, stashRole: "MC" });
-    return Array.from(byId.values());
-  }, [goingPast, hostingPast]);
-
   if (!routeMatch || isLoading) {
     return (
       <div className="pp-page pp-page--loading">
@@ -200,6 +189,12 @@ export default function MemberProfile() {
   const going = data.events?.going ?? { upcoming: [], past: [] };
   const bigOne = pickTheBigOne(data);
   const posts = data.boardPosts ?? [];
+  // Plain compute (not useMemo) so hooks order can never break after early returns.
+  // Hosted past → HOST/MC; attended-only → WENT; host wins on shared ids.
+  const stashById = new Map<number, (typeof going.past)[0] & { stashRole: "MC" | "WENT" }>();
+  for (const e of going.past) stashById.set(e.id, { ...e, stashRole: "WENT" });
+  for (const e of hosting.past) stashById.set(e.id, { ...e, stashRole: "MC" });
+  const stashEvents = Array.from(stashById.values());
 
   return (
     <div
