@@ -19,7 +19,7 @@ import ProfileStatStrip from "@/components/profile/ProfileStatStrip";
 import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
-import PastEventsPanel from "@/components/profile/PastEventsPanel";
+import FlyerStash from "@/components/profile/FlyerStash";
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
 import {
@@ -247,8 +247,8 @@ export default function MemberProfile() {
                 onOpen={() => openEvent(bigOne.id)}
               />
             )}
-            <PastEventsPanel
-              events={going.past}
+            <FlyerStash
+              events={going.past.map((e) => ({ ...e, stashRole: "WENT" as const }))}
               onEventClick={(e) => openEvent(e.id)}
             />
           </div>
