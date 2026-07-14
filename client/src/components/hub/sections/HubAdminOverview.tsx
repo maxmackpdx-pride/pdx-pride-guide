@@ -78,12 +78,11 @@ export default function HubAdminOverview({
         { key: "promoters", label: "Promoters", n: q.promoters },
         { key: "claims", label: "Venue claims", n: q.businessClaims },
         { key: "venues", label: "New venues", n: q.businessSubmissions },
-        { key: "logos", label: "Logos", n: q.logoRequests },
         { key: "mod", label: "Moderation", n: q.moderation },
         { key: "mc", label: "Missed conn", n: q.missedConnections },
         { key: "gift", label: "Gifting", n: q.giftingReports + q.giftingFlagged },
         { key: "rb", label: "River Brats", n: q.riverBrats },
-        { key: "gigs", label: "Pride Werk", n: q.pendingGigs },
+        { key: "gigs", label: "Gig Work", n: q.pendingGigs },
       ]
     : [];
 
@@ -277,7 +276,7 @@ export default function HubAdminOverview({
             <Button variant="ghost" accent="cyan" size="sm">Venue claims</Button>
           </Link>
           <Link href="/admin?tab=gigs">
-            <Button variant="ghost" accent="cyan" size="sm">Pride Werk</Button>
+            <Button variant="ghost" accent="cyan" size="sm">Gig Work</Button>
           </Link>
           <Link href="/admin?tab=team">
             <Button variant="ghost" accent="cyan" size="sm">My team</Button>

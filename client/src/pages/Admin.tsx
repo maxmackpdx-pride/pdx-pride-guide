@@ -851,7 +851,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
       setEditingGigId(null);
       setGigEditForm({});
-      toast({ title: "Gig post updated", description: "Changes are live on Pride Werk." });
+      toast({ title: "Gig post updated", description: "Changes are live on Gig Work." });
     },
     onError: () => {
       toast({ title: "Error", description: "Could not save gig post.", variant: "destructive" });
@@ -2181,7 +2181,7 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── PRIDE WERK / GIGS ── */}
+        {/* ── GIG WORK ── */}
         {activeTab === "gigs" && canManageCatalog && (
           <div>
             <p className="text-white/40 text-sm mb-6">

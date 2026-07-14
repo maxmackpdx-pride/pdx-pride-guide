@@ -41,6 +41,11 @@ type QueueRow = {
 };
 
 /** Every admin queue surface — always shown in floating inbox, even at 0. */
+/**
+ * Shared Admin · Queue buckets only.
+ * Logos are Owner desk only (not shared keyholder queue).
+ * Missed conn / River Brats / Gig Work = reports & flags → resolve or reject-with-reason.
+ */
 const ADMIN_QUEUE_BUCKETS: Array<{
   id: string;
   label: string;
@@ -51,12 +56,11 @@ const ADMIN_QUEUE_BUCKETS: Array<{
   { id: "promoters", label: "Promoters", kinds: ["promoter_request"], color: C.purple },
   { id: "venue_claims", label: "Venue claims", kinds: ["business_claim"], color: C.orange },
   { id: "new_venues", label: "New venues", kinds: ["business_submission"], color: C.orange },
-  { id: "logos", label: "Logos", kinds: ["logo_request"], color: C.limeSoft },
   { id: "moderation", label: "Moderation", kinds: ["moderation"], color: C.magenta },
   { id: "spotted", label: "Missed conn", kinds: ["spotted"], color: C.magenta },
   { id: "gifting", label: "Gifting", kinds: ["gifting_report", "gifting_flagged"], color: C.lime },
   { id: "river_brats", label: "River Brats", kinds: ["river_brats"], color: C.orange },
-  { id: "gigs", label: "Pride Werk", kinds: ["gig_pending"], color: C.purple },
+  { id: "gigs", label: "Gig Work", kinds: ["gig_pending"], color: C.purple },
 ];
 
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
@@ -75,6 +79,12 @@ function ts(v: unknown): string {
   if (!v) return "";
   const d = new Date(String(v));
   return isNaN(d.getTime()) ? String(v) : d.toLocaleString();
+}
+
+function formatRejectNote(reasonCode: string, note: string) {
+  const base = String(reasonCode || "OFF_TOPIC").trim();
+  const extra = String(note || "").trim();
+  return extra ? `${base}: ${extra}` : base;
 }
 
 function mapSubmission(s: any, completed = false): QueueRow | null {
@@ -113,16 +123,16 @@ function mapPendingGig(g: any, completed = false): QueueRow | null {
     id: `gig-${g.id}`,
     kind: "gig_pending",
     entityId: g.id,
-    tag: "PRIDE WERK",
+    tag: "GIG WORK",
     tagColor: C.purple,
     title: g.title || "Gig post",
-    meta: `${g.postType || "GIG"}${g.username ? ` · @${g.username}` : g.name ? ` · ${g.name}` : ""}${g.createdAt ? " · " + ts(g.createdAt) : ""}`,
+    meta: `Needs review · ${g.postType || "GIG"}${g.username ? ` · @${g.username}` : g.name ? ` · ${g.name}` : ""}${g.createdAt ? " · " + ts(g.createdAt) : ""}`,
     fields: [
       ["Type", String(g.postType || "—")],
       ["Where", String(g.location || (g.isRemote ? "Remote" : "—"))],
       ["Comp", String(g.compensation || "—")],
     ],
-    note: g.description || "",
+    note: g.description || g.adminNotes || "",
     outcome: completed ? status : undefined,
     completedAt: completed ? String(g.createdAt || "") : undefined,
     readOnly: completed,
@@ -139,7 +149,7 @@ function mapRiverBratsReport(r: any, completed = false): QueueRow | null {
     tag: "RIVER BRATS",
     tagColor: C.orange,
     title: `${r.target_type || "Content"} #${r.target_id}`,
-    meta: `${r.reason || "Reported"}${r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
+    meta: `Report · ${r.reason || "Flagged"}${r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
     fields: [
       ["Target", `${r.target_type || "—"} #${r.target_id ?? "—"}`],
       ["Reason", String(r.reason || "—")],
@@ -209,9 +219,11 @@ function mapSpotted(p: any, completed = false): QueueRow | null {
     tag: "MISSED CONN",
     tagColor: C.magenta,
     title: p.title || `Missed connection #${p.id}`,
-    meta: p.eventTitle
-      ? `${p.eventTitle}${p.venueHint ? ` · ${p.venueHint}` : ""}`
-      : (p.venueHint || "Around town"),
+    meta: `Report / review · ${
+      p.eventTitle
+        ? `${p.eventTitle}${p.venueHint ? ` · ${p.venueHint}` : ""}`
+        : (p.venueHint || "Around town")
+    }`,
     fields: p.username ? [["Poster", String(p.displayName || p.username)]] : [],
     note: p.body || "",
     outcome: completed ? (status === "ACTIVE" && reviewed ? "CLEARED" : status) : undefined,
@@ -513,13 +525,14 @@ export default function QueueView({
     }),
     enabled: mode === "admin",
   });
+  // Logos = Owner desk only (not shared Admin · Queue).
   const logoQuery = useQuery<any[]>({
     queryKey: ["/api/admin/business-logo-requests", completed ? "recent" : "pending"],
     queryFn: () => apiRequest("GET", completed ? "/api/admin/business-logo-requests?recent=true" : "/api/admin/business-logo-requests").then((r) => {
       if (!r.ok) throw new Error(`${r.status}`);
       return r.json();
     }),
-    enabled: mode === "admin",
+    enabled: mode === "owner",
   });
   const gigsQuery = useQuery<any[]>({
     queryKey: ["/api/admin/gigs"],
@@ -558,11 +571,11 @@ export default function QueueView({
         promoterQuery.isError && "promoters",
         claimsQuery.isError && "venue claims",
         bizSubsQuery.isError && "venue submissions",
-        logoQuery.isError && "logo requests",
       ].filter(Boolean) as string[]
-    : ownerQuery.isError
-      ? ["owner desk"]
-      : [];
+    : [
+        ownerQuery.isError && "owner desk",
+        logoQuery.isError && "logo requests",
+      ].filter(Boolean) as string[];
 
   const onQueueSuccess = () => invalidateAdminQueue(qc);
   const resolveOwnerDesk = useMutation({
@@ -669,9 +682,16 @@ export default function QueueView({
 
   const rows: QueueRow[] = useMemo(() => {
     if (mode === "owner") {
-      const items = ownerReports
-        .map((r) => mapOwnerDeskItem(r, completed))
-        .filter((row): row is QueueRow => !!row);
+      const items: QueueRow[] = [];
+      for (const r of ownerReports) {
+        const row = mapOwnerDeskItem(r, completed);
+        if (row) items.push(row);
+      }
+      // Logo requests are Owner inbox only.
+      for (const l of logoReqs) {
+        const row = mapLogoRequest(l, completed);
+        if (row) items.push(row);
+      }
       return completed ? sortCompletedRows(items) : items;
     }
     const items: QueueRow[] = [];
@@ -712,10 +732,7 @@ export default function QueueView({
       const row = mapBusinessSubmission(s, completed);
       if (row) items.push(row);
     }
-    for (const l of logoReqs) {
-      const row = mapLogoRequest(l, completed);
-      if (row) items.push(row);
-    }
+    // Logos intentionally omitted from shared admin queue (Owner only).
     for (const g of gigs) {
       const row = mapPendingGig(g, completed);
       if (row) items.push(row);
@@ -952,7 +969,27 @@ export default function QueueView({
                     {btn("DECLINE", C.red, () => declineSub.mutate(q.entityId), true)}
                   </>
                 )}
-                {q.kind === "river_brats" && btn("RESOLVE", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
+                {q.kind === "river_brats" && (
+                  <>
+                    {btn("RESOLVE REPORT", C.limeSoft, () => resolveRiverBrats.mutate(q.entityId))}
+                    <div style={{ width: "100%", marginTop: 4 }}>
+                      <AdminBoardReject
+                        compact
+                        reasonCode={rejectReasons[rejectKey] || "OFF_TOPIC"}
+                        note={rejectNotes[rejectKey] || ""}
+                        onReasonChange={(code) => setRejectReasons((p) => ({ ...p, [rejectKey]: code }))}
+                        onNoteChange={(note) => setRejectNotes((p) => ({ ...p, [rejectKey]: note }))}
+                        onReject={() => {
+                          // Resolve report with board reason noted; no separate post-delete API on RB yet.
+                          void apiRequest("POST", `/api/admin/river-brats/reports/${q.entityId}/resolve`, {
+                            adminNotes: formatRejectNote(rejectReasons[rejectKey] || "OFF_TOPIC", rejectNotes[rejectKey] || ""),
+                          }).then(() => onQueueSuccess());
+                        }}
+                        pending={pending}
+                      />
+                    </div>
+                  </>
+                )}
                 {q.kind === "moderation" && btn("MARK REVIEWED", C.limeSoft, () => resolveModeration.mutate(q.entityId))}
                 {q.kind === "promoter_request" && (
                   <>
@@ -1018,8 +1055,7 @@ export default function QueueView({
                 )}
                 {q.kind === "spotted" && (
                   <>
-                    {btn("CLEAR FROM QUEUE", C.green, () => approveSpotted.mutate(q.entityId))}
-                    {btn("REMOVE", C.red, () => removeSpotted.mutate(q.entityId), true)}
+                    {btn("RESOLVE / CLEAR", C.green, () => approveSpotted.mutate(q.entityId))}
                     <div style={{ width: "100%", marginTop: 4 }}>
                       <AdminBoardReject
                         compact

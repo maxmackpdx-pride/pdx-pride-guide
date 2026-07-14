@@ -11,7 +11,7 @@ export function inboxContextBadge(contextType?: string | null): string | null {
   if (ctx === "EVENT_INVITE") return "EVENT INVITE";
   if (ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE") return "HOST UPDATE";
   if (ctx === "GIFTING") return "GIFTING";
-  if (ctx === "GIG") return "PRIDE WERK";
+  if (ctx === "GIG") return "GIG WORK";
   if (ctx === "RIVER_BRATS_CHECKIN" || ctx === "BEACH_CARPOOL") return "RIVER BRATS";
   return null;
 }

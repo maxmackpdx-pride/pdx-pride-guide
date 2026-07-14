@@ -56,10 +56,10 @@ export const ADMIN_VIEW_META: Record<
     lede: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",
   },
   gigs: {
-    title: "Pride Werk",
+    title: "Gig Work",
     kicker: "The gig board",
     kickerColor: "var(--amber, #ffb020)",
-    lede: "Live Pride Werk posts. Take down spam, keep the board useful for workers and hosts.",
+    lede: "Live Gig Work posts. Take down spam, keep the board useful for workers and hosts.",
   },
   promoters: {
     title: "Promoters",
@@ -72,7 +72,7 @@ export const ADMIN_VIEW_META: Record<
     title: "Venue claims",
     kicker: "The directory",
     kickerColor: "var(--cyan, #00ffff)",
-    lede: "Business-owner claims on existing venues, new-business submissions, and logo change requests.",
+    lede: "Business-owner claims on existing venues and new-business submissions. Logo requests go to the Owner desk.",
   },
   team: {
     title: "My team",

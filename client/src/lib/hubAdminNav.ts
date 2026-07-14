@@ -12,7 +12,7 @@ export const HUB_ADMIN_NAV: HubAdminNavItem[] = [
   { section: "tbl-events", label: "All Events" },
   // "All Users" is primary-owner only; folder itself is owner-gated in nav.
   { section: "tbl-users", label: "All Users", teamOnly: true },
-  { section: "tbl-werk", label: "Pride Werk" },
+  { section: "tbl-werk", label: "Gig Work" },
   { section: "tbl-promoters", label: "Promoters" },
   { section: "tbl-claims", label: "Venue Claims" },
   { section: "tbl-team", label: "My Team", teamOnly: true },

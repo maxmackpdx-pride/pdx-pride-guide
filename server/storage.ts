@@ -7554,7 +7554,7 @@ export const storage: IStorage = {
     const adminNotes = formatBoardRejectMessage(reasonCode, note);
     sqlite.prepare(`UPDATE gig_posts SET status = 'REJECTED', admin_notes = ? WHERE id = ?`).run(adminNotes, id);
     if (row.user_id) {
-      notifyBoardReject(row.user_id, "Pride Werk", row.title, reasonCode, note, {
+      notifyBoardReject(row.user_id, "Gig Work", row.title, reasonCode, note, {
         contextType: "GIG",
         contextId: id,
         contextLabel: row.title,
@@ -7752,8 +7752,8 @@ export const storage: IStorage = {
       .length;
   },
   getAdminQueueBreakdown() {
-    // Must match every category rendered in QueueView mode="admin".
-    // Owner Desk items are counted separately via getOwnerDeskCount().
+    // Must match shared Admin · Queue buckets (QueueView mode="admin").
+    // Logos are Owner desk only — not in shared total.
     // Guide-admin DMs are under Admin · Inbox (guideUnread), not total.
     const submissions = this.getSubmissions("PENDING")
       .filter((s) => s.type !== "PROMOTER_APPLICATION").length;
@@ -7766,6 +7766,7 @@ export const storage: IStorage = {
     const logoRequests = this.getPendingBusinessLogoRequests().length;
     const missedConnections = this.getAdminMissedConnections().length;
     const riverBrats = this.getRiverBratsReports("PENDING").length;
+    // Gig Work queue: posts held for review (pending / auto-held).
     const pendingGigs = this.getGigPosts().filter(
       (g) => String(g.status || "").toUpperCase() === "PENDING",
     ).length;
@@ -7777,7 +7778,6 @@ export const storage: IStorage = {
       + giftingFlagged
       + businessClaims
       + businessSubmissions
-      + logoRequests
       + missedConnections
       + riverBrats
       + pendingGigs;
@@ -7788,6 +7788,7 @@ export const storage: IStorage = {
       promoters,
       businessClaims,
       businessSubmissions,
+      /** Owner desk only — not part of shared `total`. */
       logoRequests,
       giftingReports,
       giftingFlagged,
@@ -10005,7 +10006,9 @@ export const storage: IStorage = {
     );
   },
   getOwnerDeskCount() {
-    return storage.getOwnerDeskItems("OPEN").length;
+    // Contact/sponsor desk + logo requests (owner-only queue items).
+    return storage.getOwnerDeskItems("OPEN").length
+      + storage.getPendingBusinessLogoRequests().length;
   },
   getAdminMetrics() {
     const counts = getTableCounts();

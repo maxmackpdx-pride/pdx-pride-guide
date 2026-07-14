@@ -295,13 +295,7 @@ export function getAdminQueueAggregate() {
     claim: claimMap.get(claimKey("business_submission", s.id)) || null,
   }));
 
-  const logoRequests = storage.getPendingBusinessLogoRequests().map((l: any) => ({
-    kind: "logo_request" as const,
-    id: l.id,
-    title: l.businessName || `Logo #${l.id}`,
-    meta: "logo",
-    claim: claimMap.get(claimKey("logo_request", l.id)) || null,
-  }));
+  // Logos are Owner desk only — not returned on shared admin queue aggregate.
 
   const moderation = storage.getModerationRequests("PENDING").map((m: any) => ({
     kind: "moderation" as const,
@@ -367,13 +361,21 @@ export function getAdminQueueAggregate() {
       promoters,
       businessClaims,
       businessSubmissions,
-      logoRequests,
       moderation,
       missedConnections,
       giftingReports,
       giftingFlagged,
       riverBrats,
       gigPending,
+    },
+    /** Owner-only surfaces (not shared Admin · Queue). */
+    ownerOnly: {
+      logoRequests: storage.getPendingBusinessLogoRequests().map((l: any) => ({
+        kind: "logo_request" as const,
+        id: l.id,
+        title: l.businessName || `Logo #${l.id}`,
+        meta: "logo · owner desk",
+      })),
     },
   };
 }
