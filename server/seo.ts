@@ -418,6 +418,8 @@ function applySocialMeta(
     type?: string;
     imageWidth?: number;
     imageHeight?: number;
+    /** When set, overrides shell default (index.html hardcodes image/jpeg for og-preview.jpg). */
+    imageType?: string;
   },
 ) {
   let out = replaceTitle(html, opts.title);
@@ -427,6 +429,7 @@ function applySocialMeta(
   out = replaceMeta(out, "property", "og:url", opts.url);
   out = replaceMeta(out, "property", "og:image", opts.image);
   out = replaceMeta(out, "property", "og:image:secure_url", opts.image);
+  if (opts.imageType) out = replaceMeta(out, "property", "og:image:type", opts.imageType);
   if (opts.imageWidth) out = replaceMeta(out, "property", "og:image:width", String(opts.imageWidth));
   if (opts.imageHeight) out = replaceMeta(out, "property", "og:image:height", String(opts.imageHeight));
   out = replaceMeta(out, "property", "og:image:alt", opts.imageAlt);
@@ -506,7 +509,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     : livePlace
       ? `${SITE_URL}/api/og/place/${livePlace.id}`
       : liveProfile
-        ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}`
+        // v= query busts crawler caches after OG renderer fixes (remote Google avatars, etc.)
+        ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}?v=2`
         : `${SITE_URL}/og-preview.jpg`;
   const pageImageIsCard = !!(liveEvent || livePlace || liveProfile);
 
@@ -556,6 +560,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? `${liveProfile.displayName || liveProfile.username} on PDX Pride Guide`
           : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
     type: liveEvent || livePlace || liveProfile ? "profile" : "website",
+    // Dynamic OG cards are PNG; shell default is jpeg for og-preview.jpg
+    imageType: pageImageIsCard ? "image/png" : "image/jpeg",
     imageWidth: pageImageIsCard ? 1200 : 1024,
     imageHeight: pageImageIsCard ? 630 : 578,
   });

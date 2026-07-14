@@ -91,6 +91,67 @@ async function loadImageBuffer(localPath: string | null): Promise<Buffer | null>
   }
 }
 
+/**
+ * Prefer a larger Google avatar than the OAuth default (s96-c is tiny for 1200×630).
+ * Other remote hosts left as-is.
+ */
+export function preferLargeAvatarUrl(url: string): string {
+  const raw = String(url || "").trim();
+  if (!raw) return raw;
+  // Google profile photos: ...=s96-c → s720-c for OG quality
+  if (/googleusercontent\.com/i.test(raw)) {
+    if (/=s\d+/i.test(raw)) return raw.replace(/=s\d+(-[a-z0-9]+)*/gi, "=s720-c");
+    return `${raw}${raw.includes("?") ? "&" : ""}=s720-c`;
+  }
+  return raw;
+}
+
+async function fetchRemoteImage(url: string): Promise<Buffer | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "PDXPrideGuide-OG/1.0 (+https://www.prideguidepdx.com)",
+        Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+      },
+      redirect: "follow",
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      console.warn(`[og] remote avatar HTTP ${res.status} for ${url.slice(0, 120)}`);
+      return null;
+    }
+    const ctype = String(res.headers.get("content-type") || "");
+    if (ctype && !ctype.startsWith("image/")) {
+      console.warn(`[og] remote avatar non-image content-type ${ctype}`);
+      return null;
+    }
+    const ab = await res.arrayBuffer();
+    if (!ab.byteLength || ab.byteLength > 8 * 1024 * 1024) return null;
+    return Buffer.from(ab);
+  } catch (err) {
+    console.warn("[og] remote avatar fetch failed:", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
+
+/** Load avatar from local uploads OR remote HTTPS (Google login photos, etc.). */
+async function loadAvatarBuffer(photoUrl: string | null | undefined): Promise<Buffer | null> {
+  if (!photoUrl) return null;
+  const local = resolveLocalAsset(photoUrl);
+  if (local) return loadImageBuffer(local);
+
+  if (!/^https:\/\//i.test(photoUrl)) return null;
+  const preferred = preferLargeAvatarUrl(photoUrl);
+  const big = await fetchRemoteImage(preferred);
+  if (big) return big;
+  // Fall back to original URL if size rewrite failed
+  if (preferred !== photoUrl) return fetchRemoteImage(photoUrl);
+  return null;
+}
+
 /** Flyer panel: cover-fit into a fixed box. */
 async function fitCover(buf: Buffer, width: number, height: number): Promise<Buffer> {
   return sharp(buf)
@@ -139,8 +200,11 @@ export function ogPlaceCardUrl(placeId: number): string {
   return `${SITE_URL}/api/og/place/${placeId}`;
 }
 
+/** Bump when profile card layout/fetch logic changes so scrapers re-pull (not sticky cache). */
+const PROFILE_OG_VERSION = "2";
+
 export function ogProfileCardUrl(username: string): string {
-  return `${SITE_URL}/api/og/profile/${encodeURIComponent(username.replace(/^@/, "").trim())}`;
+  return `${SITE_URL}/api/og/profile/${encodeURIComponent(username.replace(/^@/, "").trim())}?v=${PROFILE_OG_VERSION}`;
 }
 
 /** Conic stops matching client avatar ring CSS (for rectangular edge glow). */
@@ -309,9 +373,8 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
   if (!user || String(user.status || "").toLowerCase() !== "active") return null;
 
   const ring = normalizeAvatarRing(user.avatarRing);
-  const photoRel = user.photoUrl || null;
-  const local = resolveLocalAsset(photoRel);
-  const raw = await loadImageBuffer(local);
+  // Local /uploads photos OR remote (Google Sign-In avatars — previously skipped → monogram fallback)
+  const raw = await loadAvatarBuffer(user.photoUrl || null);
 
   let photoBuf: Buffer | null = null;
   if (raw) {

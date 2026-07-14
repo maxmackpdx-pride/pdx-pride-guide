@@ -44,7 +44,7 @@ export default function MemberProfile() {
     username
       ? {
           url: `https://www.prideguidepdx.com/u/${encodeURIComponent(username)}`,
-          image: `https://www.prideguidepdx.com/api/og/profile/${encodeURIComponent(username)}`,
+          image: `https://www.prideguidepdx.com/api/og/profile/${encodeURIComponent(username)}?v=2`,
           imageAlt: `@${username} on PDX Pride Guide`,
           type: "article",
         }
