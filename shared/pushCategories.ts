@@ -32,6 +32,8 @@ const ACCOUNT_CONTEXT_TYPES = new Set([
   "EVENT_CLAIM",
   "PROMOTER",
   "GUIDE_UPDATE",
+  "PROFILE_PHOTO",
+  "ADMIN_MESSAGE",
 ]);
 
 const ADMIN_CONTEXT_TYPES = new Set([

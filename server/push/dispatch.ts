@@ -19,6 +19,48 @@ function withinRateLimit(userId: number): boolean {
   return true;
 }
 
+async function pushToUser(userId: number, message: Message): Promise<number> {
+  const category = pushCategoryForContext(message.contextType);
+  const prefs = storage.getNotificationPrefs(userId);
+  if (!prefs[category]) {
+    console.log(`[push] skip user=${userId} category=${category} disabled`);
+    return 0;
+  }
+  if (!withinRateLimit(userId)) {
+    console.warn(`[push] skip user=${userId} rate limited`);
+    return 0;
+  }
+
+  const unreadCount = storage.getUnreadCount(userId);
+  const payload = buildPushPayloadForMessage(message, unreadCount);
+  const subs = storage.getActivePushSubscriptions(userId);
+  if (subs.length === 0) {
+    console.log(`[push] skip user=${userId} no active subscriptions`);
+    return 0;
+  }
+
+  console.log(
+    `[push] dispatch user=${userId} devices=${subs.length} ctx=${message.contextType || "THREAD"} title=${JSON.stringify(payload.notification.title)}`,
+  );
+
+  let sent = 0;
+  await Promise.all(subs.map(async (sub) => {
+    const result = await sendPushToSubscription(sub, payload);
+    if (result.ok) {
+      storage.touchPushSubscription(sub.id);
+      sent += 1;
+      console.log(`[push] ok user=${userId} sub=${sub.id} status=${result.statusCode ?? 201}`);
+      return;
+    }
+    console.warn(
+      `[push] send failed user=${userId} sub=${sub.id} status=${result.statusCode ?? "unknown"} err=${result.error || "n/a"}`,
+    );
+    if (result.gone) storage.deactivatePushSubscription(sub.id);
+  }));
+  console.log(`[push] done user=${userId} sent=${sent}/${subs.length} ctx=${message.contextType || "THREAD"}`);
+  return sent;
+}
+
 export async function dispatchPushForMessage(message: Message): Promise<void> {
   if (!message?.toUserId || message.fromUserId === message.toUserId) {
     console.log(`[push] skip self-message or missing recipient id=${message?.id}`);
@@ -29,44 +71,21 @@ export async function dispatchPushForMessage(message: Message): Promise<void> {
     return;
   }
 
-  const category = pushCategoryForContext(message.contextType);
-  const prefs = storage.getNotificationPrefs(message.toUserId);
-  if (!prefs[category]) {
-    console.log(`[push] skip user=${message.toUserId} category=${category} disabled`);
-    return;
-  }
-  if (!withinRateLimit(message.toUserId)) {
-    console.warn(`[push] skip user=${message.toUserId} rate limited`);
-    return;
-  }
-
-  const unreadCount = storage.getUnreadCount(message.toUserId);
-  const payload = buildPushPayloadForMessage(message, unreadCount);
-  const subs = storage.getActivePushSubscriptions(message.toUserId);
-  if (subs.length === 0) {
-    console.log(`[push] skip user=${message.toUserId} no active subscriptions`);
-    return;
-  }
-
-  console.log(
-    `[push] dispatch user=${message.toUserId} devices=${subs.length} ctx=${message.contextType || "THREAD"} title=${JSON.stringify(payload.notification.title)}`,
-  );
-
-  let sent = 0;
-  await Promise.all(subs.map(async (sub) => {
-    const result = await sendPushToSubscription(sub, payload);
-    if (result.ok) {
-      storage.touchPushSubscription(sub.id);
-      sent += 1;
-      console.log(`[push] ok user=${message.toUserId} sub=${sub.id} status=${result.statusCode ?? 201}`);
+  // Replies to the shared guide-admin identity fan out to every site admin.
+  if (storage.isGuideAdminUserId(message.toUserId)) {
+    const admins = storage.listSiteAdmins();
+    const targets = admins
+      .map((a) => a.userId)
+      .filter((id) => id && id !== message.fromUserId);
+    if (targets.length === 0) {
+      console.log("[push] guide-admin message — no site admins to notify");
       return;
     }
-    console.warn(
-      `[push] send failed user=${message.toUserId} sub=${sub.id} status=${result.statusCode ?? "unknown"} err=${result.error || "n/a"}`,
-    );
-    if (result.gone) storage.deactivatePushSubscription(sub.id);
-  }));
-  console.log(`[push] done user=${message.toUserId} sent=${sent}/${subs.length} ctx=${message.contextType || "THREAD"}`);
+    await Promise.all(targets.map((userId) => pushToUser(userId, message)));
+    return;
+  }
+
+  await pushToUser(message.toUserId, message);
 }
 
 export function schedulePushForMessage(message: Message): void {

@@ -3119,6 +3119,7 @@ function seedBusinessesDirectory() {
 function runBootMigrationsOnce() {
   ensureBootMigrationsTable();
   seedData();
+  migrateGuideAdminMessagesOnce();
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
     recordBootMigration("verified_event_overrides_v1");
@@ -5616,6 +5617,24 @@ export const SITE_OWNER_EMAIL = (
   || "hello.tuckercasey@gmail.com"
 ).trim().toLowerCase();
 
+/** Shared non-personal sender for admin rejects / guide notices. Replies land in Admin inbox. */
+export const GUIDE_ADMIN_USERNAME = "prideguidepdx";
+export const GUIDE_ADMIN_EMAIL = "admin@prideguidepdx.com";
+export const GUIDE_ADMIN_DISPLAY_NAME = "PDX Pride Guide";
+export const GUIDE_ADMIN_PHOTO_URL = "/brand/pdx-pride-guide-avatar.jpg";
+
+/** Message context types that always send as the shared guide-admin identity. */
+const GUIDE_ADMIN_CONTEXT_TYPES = new Set([
+  "GUIDE_UPDATE",
+  "PROFILE_PHOTO",
+  "SUBMISSION",
+  "PROMOTER",
+  "EVENT_CLAIM",
+  "ADMIN_ALERT",
+  "EVENT_TALENT",
+  "ADMIN_MESSAGE",
+]);
+
 type SiteOwnerRow = {
   id: number;
   email: string;
@@ -5673,6 +5692,98 @@ function resolveSiteOwner(): SiteOwnerRow | undefined {
   if (byEmail) return byEmail;
   const byUsername = candidates.find(c => c.username === SITE_ADMIN_GIG_OWNER_USERNAME);
   return byUsername || candidates[0];
+}
+
+/**
+ * Shared site identity for admin-originated member messages (photo reject, queue
+ * outcomes, manual admin DMs). Not a login for humans — replies go here so they
+ * show under floating inbox → Admin → Inbox / Sent for every keyholder.
+ */
+function ensureGuideAdminUser(): User {
+  const byUsername = storage.getUserByUsername(GUIDE_ADMIN_USERNAME);
+  if (byUsername) {
+    const patch: Record<string, unknown> = {};
+    if (byUsername.displayName !== GUIDE_ADMIN_DISPLAY_NAME) patch.displayName = GUIDE_ADMIN_DISPLAY_NAME;
+    if (byUsername.photoUrl !== GUIDE_ADMIN_PHOTO_URL) patch.photoUrl = GUIDE_ADMIN_PHOTO_URL;
+    if ((byUsername as any).avatarRing !== "rainbow") patch.avatarRing = "rainbow";
+    if (byUsername.status !== "active") patch.status = "active";
+    if (Object.keys(patch).length) storage.updateUser(byUsername.id, patch as any);
+    return { ...byUsername, ...patch } as User;
+  }
+  const byEmail = storage.getUserByEmail(GUIDE_ADMIN_EMAIL);
+  if (byEmail) {
+    storage.updateUser(byEmail.id, {
+      username: GUIDE_ADMIN_USERNAME,
+      displayName: GUIDE_ADMIN_DISPLAY_NAME,
+      photoUrl: GUIDE_ADMIN_PHOTO_URL,
+      avatarRing: "rainbow",
+      status: "active",
+    } as any);
+    return storage.getUserById(byEmail.id)!;
+  }
+  const randomPw = crypto.randomBytes(32).toString("hex");
+  const created = storage.createUser({
+    username: GUIDE_ADMIN_USERNAME,
+    email: GUIDE_ADMIN_EMAIL,
+    passwordHash: randomPw,
+    displayName: GUIDE_ADMIN_DISPLAY_NAME,
+  });
+  storage.updateUser(created.id, {
+    photoUrl: GUIDE_ADMIN_PHOTO_URL,
+    avatarRing: "rainbow",
+    displayName: GUIDE_ADMIN_DISPLAY_NAME,
+  } as any);
+  return storage.getUserById(created.id) || created;
+}
+
+function resolveGuideAdminUser(): User | undefined {
+  try {
+    const user = ensureGuideAdminUser();
+    // Stamp brand photo after create (createUser doesn't take photoUrl).
+    if (user.photoUrl !== GUIDE_ADMIN_PHOTO_URL || (user as any).avatarRing !== "rainbow") {
+      storage.updateUser(user.id, {
+        photoUrl: GUIDE_ADMIN_PHOTO_URL,
+        avatarRing: "rainbow",
+        displayName: GUIDE_ADMIN_DISPLAY_NAME,
+      } as any);
+      return storage.getUserById(user.id);
+    }
+    return user;
+  } catch (err) {
+    console.error("[guide_admin] ensure failed:", err);
+    return undefined;
+  }
+}
+
+function isGuideAdminUserId(userId: number | null | undefined): boolean {
+  if (!userId) return false;
+  const guide = resolveGuideAdminUser();
+  return !!guide && guide.id === userId;
+}
+
+/** Move legacy owner-sent guide notices onto the shared admin identity. */
+function migrateGuideAdminMessagesOnce() {
+  if (hasBootMigration("guide_admin_sender_v1")) return;
+  const guide = resolveGuideAdminUser();
+  const owner = resolveSiteOwner();
+  if (!guide) {
+    recordBootMigration("guide_admin_sender_v1");
+    return;
+  }
+  if (owner && owner.id !== guide.id) {
+    const types = Array.from(GUIDE_ADMIN_CONTEXT_TYPES).map(t => `'${t}'`).join(",");
+    try {
+      sqlite.prepare(`
+        UPDATE messages
+        SET from_user_id = ?
+        WHERE from_user_id = ?
+          AND context_type IN (${types})
+      `).run(guide.id, owner.id);
+    } catch (err) {
+      console.warn("[guide_admin] migrate messages failed:", err);
+    }
+  }
+  recordBootMigration("guide_admin_sender_v1");
 }
 
 function isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean {
@@ -5841,10 +5952,38 @@ function notifyGuideInbox(
   body: string,
   opts?: { contextType?: string; contextId?: number | null; contextLabel?: string | null },
 ) {
-  const sender = resolveSiteOwner();
-  if (!sender) return;
+  const sender = resolveGuideAdminUser();
+  if (!sender) {
+    // Fallback: never leave the member without a notice if guide identity can't be created.
+    const owner = resolveSiteOwner();
+    if (!owner) return;
+    storage.sendMessage(owner.id, toUserId, subject, body, {
+      contextType: opts?.contextType || "GUIDE_UPDATE",
+      contextId: opts?.contextId ?? null,
+      contextLabel: opts?.contextLabel || null,
+    });
+    return;
+  }
+  if (sender.id === toUserId) return;
   storage.sendMessage(sender.id, toUserId, subject, body, {
     contextType: opts?.contextType || "GUIDE_UPDATE",
+    contextId: opts?.contextId ?? null,
+    contextLabel: opts?.contextLabel || null,
+  });
+}
+
+/** Outbound admin DM / reject note as the shared guide-admin profile. */
+function sendAsGuideAdmin(
+  toUserId: number,
+  subject: string,
+  body: string,
+  opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null },
+): Message | undefined {
+  const sender = resolveGuideAdminUser();
+  if (!sender || sender.id === toUserId) return undefined;
+  return storage.sendMessage(sender.id, toUserId, subject, body, {
+    threadId: opts?.threadId,
+    contextType: opts?.contextType || "ADMIN_MESSAGE",
     contextId: opts?.contextId ?? null,
     contextLabel: opts?.contextLabel || null,
   });
@@ -6296,6 +6435,19 @@ export interface IStorage {
   getSentMessages(userId: number): Message[];
   getUnreadCount(userId: number): number;
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
+  /** Shared non-personal admin identity used for rejects / admin DMs. */
+  resolveGuideAdminUser(): User | undefined;
+  isGuideAdminUserId(userId: number | null | undefined): boolean;
+  getGuideAdminInbox(): Message[];
+  getGuideAdminSent(): Message[];
+  getGuideAdminUnreadCount(): number;
+  /** Send or reply as the shared guide-admin profile (not the acting admin). */
+  sendAsGuideAdmin(
+    toUserId: number,
+    subject: string,
+    body: string,
+    opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null },
+  ): Message | undefined;
   /** Drop a content-moderation alert into the site owner's guide inbox. */
   notifyOwnerModeration(subject: string, body: string): void;
   /** Public "Message me" / sponsorship pitch / custom order form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
@@ -8684,13 +8836,23 @@ export const storage: IStorage = {
     }
     sqlite.prepare(`DELETE FROM event_talent WHERE id = ?`).run(talentId);
     const evt = db.select().from(events).where(eq(events.id, row.eventId)).get();
-    storage.sendMessage(
-      approverUserId,
-      row.userId,
-      `Lineup request declined`,
-      `Your ${row.role} listing request for "${evt?.title || "the event"}" was not approved.`,
-      { contextType: "EVENT_TALENT", contextId: row.eventId, contextLabel: evt?.title || null },
-    );
+    // Admin denials come from the shared guide profile so replies hit admin inbox.
+    if (opts?.isAdmin) {
+      notifyGuideInbox(
+        row.userId,
+        `Lineup request declined`,
+        `Your ${row.role} listing request for "${evt?.title || "the event"}" was not approved.`,
+        { contextType: "EVENT_TALENT", contextId: row.eventId, contextLabel: evt?.title || null },
+      );
+    } else {
+      storage.sendMessage(
+        approverUserId,
+        row.userId,
+        `Lineup request declined`,
+        `Your ${row.role} listing request for "${evt?.title || "the event"}" was not approved.`,
+        { contextType: "EVENT_TALENT", contextId: row.eventId, contextLabel: evt?.title || null },
+      );
+    }
     return { ok: true };
   },
   removeEventTalent(talentId, userId, opts) {
@@ -8715,7 +8877,10 @@ export const storage: IStorage = {
   // Messages
   getInbox(userId) {
     return sqlite.prepare(`
-      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
+      SELECT m.*,
+             u.username AS from_username, u.display_name AS from_display_name,
+             u.photo_url AS from_photo_url, u.avatar_choice AS from_avatar_choice,
+             u.avatar_ring AS from_avatar_ring
       FROM messages m
       LEFT JOIN users u ON u.id = m.from_user_id
       INNER JOIN (
@@ -8730,7 +8895,10 @@ export const storage: IStorage = {
   },
   getSentMessages(userId) {
     return sqlite.prepare(`
-      SELECT m.*, u.username AS to_username, u.display_name AS to_display_name
+      SELECT m.*,
+             u.username AS to_username, u.display_name AS to_display_name,
+             u.photo_url AS to_photo_url, u.avatar_choice AS to_avatar_choice,
+             u.avatar_ring AS to_avatar_ring
       FROM messages m
       LEFT JOIN users u ON u.id = m.to_user_id
       INNER JOIN (
@@ -8762,6 +8930,30 @@ export const storage: IStorage = {
     } as any).returning().get();
     schedulePushForMessage(created);
     return created;
+  },
+  resolveGuideAdminUser() {
+    return resolveGuideAdminUser();
+  },
+  isGuideAdminUserId(userId) {
+    return isGuideAdminUserId(userId);
+  },
+  getGuideAdminInbox() {
+    const guide = resolveGuideAdminUser();
+    if (!guide) return [];
+    return storage.getInbox(guide.id);
+  },
+  getGuideAdminSent() {
+    const guide = resolveGuideAdminUser();
+    if (!guide) return [];
+    return storage.getSentMessages(guide.id);
+  },
+  getGuideAdminUnreadCount() {
+    const guide = resolveGuideAdminUser();
+    if (!guide) return 0;
+    return storage.getUnreadCount(guide.id);
+  },
+  sendAsGuideAdmin(toUserId, subject, body, opts) {
+    return sendAsGuideAdmin(toUserId, subject, body, opts);
   },
   notifyOwnerModeration(subject, body) {
     const owner = resolveSiteOwner();
@@ -8901,7 +9093,10 @@ export const storage: IStorage = {
   },
   getThread(threadId) {
     return sqlite.prepare(`
-      SELECT m.*, u.username AS from_username, u.display_name AS from_display_name
+      SELECT m.*,
+             u.username AS from_username, u.display_name AS from_display_name,
+             u.photo_url AS from_photo_url, u.avatar_choice AS from_avatar_choice,
+             u.avatar_ring AS from_avatar_ring
       FROM messages m
       LEFT JOIN users u ON u.id = m.from_user_id
       WHERE m.thread_id = ? ORDER BY m.created_at ASC

@@ -4010,7 +4010,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
     const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
-    res.json({ count: storage.getAdminPendingCount(), ownerCount });
+    const queueCount = storage.getAdminPendingCount();
+    const guideUnread = storage.getGuideAdminUnreadCount();
+    res.json({
+      count: queueCount,
+      queueCount,
+      guideUnread,
+      /** Badge total for Admin tab: queue items + unreplied guide-inbox messages. */
+      adminBadge: queueCount + guideUnread,
+      ownerCount,
+    });
   });
 
   app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
@@ -4192,18 +4201,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if ((user.promoterStatus || "none") !== "approved") {
         storage.setPromoterStatus(user.id, "approved");
       }
-      if (actorId) {
-        try {
-          storage.sendMessage(
-            actorId,
-            user.id,
-            `You now host: ${evt.title}`,
-            `An admin assigned you as the promoter for "${evt.title}". Open your dashboard to manage the event and post host updates.`,
-            { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
-          );
-        } catch (notifyErr) {
-          console.error("[admin] assign host notify failed:", notifyErr);
-        }
+      try {
+        storage.sendAsGuideAdmin(
+          user.id,
+          `You now host: ${evt.title}`,
+          `An admin assigned you as the promoter for "${evt.title}". Open your dashboard to manage the event and post host updates.`,
+          { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
+        );
+      } catch (notifyErr) {
+        console.error("[admin] assign host notify failed:", notifyErr);
       }
       const fresh = storage.getEvent(evt.id);
       res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
@@ -4368,7 +4374,89 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/inbox", requireAdmin, (req, res) => {
     const pendingSubs = storage.getSubmissions("PENDING").length;
     const pendingMod = storage.getModerationRequests("PENDING").length;
-    res.json({ pendingSubmissions: pendingSubs, pendingModeration: pendingMod, total: pendingSubs + pendingMod });
+    const guideUnread = storage.getGuideAdminUnreadCount();
+    res.json({
+      pendingSubmissions: pendingSubs,
+      pendingModeration: pendingMod,
+      total: pendingSubs + pendingMod,
+      guideUnread,
+    });
+  });
+
+  // Shared guide-admin mailbox (floating inbox → Admin → Inbox / Sent).
+  // Outbound rejects and admin DMs send as @prideguidepdx so replies land here for all keyholders.
+  app.get("/api/admin/messages/inbox", requireAdmin, (_req, res) => {
+    res.json(storage.getGuideAdminInbox());
+  });
+
+  app.get("/api/admin/messages/sent", requireAdmin, (_req, res) => {
+    res.json(storage.getGuideAdminSent());
+  });
+
+  app.get("/api/admin/messages/unread-count", requireAdmin, (_req, res) => {
+    res.json({ count: storage.getGuideAdminUnreadCount() });
+  });
+
+  app.get("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
+    const guide = storage.resolveGuideAdminUser();
+    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+    const thread = storage.getThread(req.params.threadId);
+    const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
+    if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
+    res.json({ messages: thread, guideUserId: guide.id });
+  });
+
+  app.post("/api/admin/messages/thread/:threadId/reply", requireAdmin, (req, res) => {
+    const guide = storage.resolveGuideAdminUser();
+    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+    const thread = storage.getThread(req.params.threadId);
+    const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
+    if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
+    const first = thread[0] as any;
+    const last = thread[thread.length - 1] as any;
+    const toUserId = last.fromUserId === guide.id ? last.toUserId : last.fromUserId;
+    const body = String(req.body?.body || "").trim();
+    if (!body) return res.status(400).json({ error: "body required" });
+    if (moderationGate(res, "Admin guide reply", { body })) return;
+    const msg = storage.sendAsGuideAdmin(toUserId, first.subject || "Reply", body, {
+      threadId: req.params.threadId,
+      contextType: first.contextType || "ADMIN_MESSAGE",
+      contextId: first.contextId ?? null,
+      contextLabel: first.contextLabel || null,
+    });
+    if (!msg) return res.status(500).json({ error: "Could not send reply" });
+    res.json(msg);
+  });
+
+  app.put("/api/admin/messages/:id/read", requireAdmin, (req, res) => {
+    const guide = storage.resolveGuideAdminUser();
+    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+    const ok = storage.markReadForUser(Number(req.params.id), guide.id);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  /** Compose a new message as the shared guide-admin profile (Admin MESSAGE buttons). */
+  app.post("/api/admin/messages", requireAdmin, (req, res) => {
+    const username = String(req.body?.username || "").trim().replace(/^@/, "");
+    const body = String(req.body?.body || "").trim();
+    const subject = String(req.body?.subject || "").trim().slice(0, 120);
+    if (!username) return res.status(400).json({ error: "username required" });
+    if (!body) return res.status(400).json({ error: "body required" });
+    const target = storage.getUserByUsername(username);
+    if (!target || target.status !== "active") return res.status(404).json({ error: "User not found" });
+    if (storage.isGuideAdminUserId(target.id)) {
+      return res.status(400).json({ error: "Cannot message the guide admin identity" });
+    }
+    if (moderationGate(res, "Admin guide message", { subject: subject || "Admin message", body })) return;
+    const msg = storage.sendAsGuideAdmin(
+      target.id,
+      subject || `Message from PDX Pride Guide`,
+      body,
+      { contextType: "ADMIN_MESSAGE" },
+    );
+    if (!msg) return res.status(500).json({ error: "Could not send message" });
+    res.json({ ok: true, message: msg });
   });
 
   scheduleMapCoordinateBackfill();

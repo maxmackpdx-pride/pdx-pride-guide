@@ -4,11 +4,13 @@ import { useLocation } from "wouter";
 import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxThreads } from "@/components/inbox/useInboxThreads";
+import { useAdminGuideThreads } from "@/components/inbox/useAdminGuideThreads";
 import type { Folder, QueueFolder, Thread, LineupDecision } from "@/components/inbox/types";
 import { C, MONO, DISPLAY, BODY } from "@/components/inbox/panel/sheet";
 import ThreadAvatar from "@/components/inbox/ThreadAvatar";
 import PersonalView from "@/components/inbox/panel/PersonalView";
 import type { GroupChatRow } from "@/components/inbox/panel/PersonalView";
+import AdminMessagesView from "@/components/inbox/panel/AdminMessagesView";
 import QueueView from "@/components/inbox/panel/QueueView";
 import PostsView from "@/components/inbox/panel/PostsView";
 import StatsView from "@/components/inbox/panel/StatsView";
@@ -59,16 +61,39 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const panelRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const { threads, sendMessage, setRead, archive, unarchive, deletedCount, revealSelf, resolveLineup } = useInboxThreads(activeId);
-  const activeThread = activeId ? threads.find((t) => t.id === activeId) ?? null : null;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const isOwner = Boolean(user?.isPrimaryOwner || user?.isSuperAdmin);
+  const adminMailActive = isAdmin && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent");
 
-  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
+  const { threads, sendMessage, setRead, archive, unarchive, deletedCount, revealSelf, resolveLineup } = useInboxThreads(
+    adminMailActive ? null : activeId,
+  );
+  const {
+    threads: adminThreads,
+    sendMessage: sendAdminGuideMessage,
+    setRead: setAdminGuideRead,
+    archive: archiveAdminGuide,
+    unarchive: unarchiveAdminGuide,
+    unreadCount: adminGuideUnread,
+  } = useAdminGuideThreads(adminMailActive ? activeId : null, isAdmin);
+
+  const activeThread = activeId
+    ? (adminMailActive
+        ? adminThreads.find((t) => t.id === activeId)
+        : threads.find((t) => t.id === activeId)) ?? null
+    : null;
+
+  const { data: pendingAdmin = { count: 0, queueCount: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 } } = useQuery<{
+    count: number;
+    queueCount?: number;
+    ownerCount?: number;
+    guideUnread?: number;
+    adminBadge?: number;
+  }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
       fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
-        r.ok ? r.json() : { count: 0, ownerCount: 0 },
+        r.ok ? r.json() : { count: 0, queueCount: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 },
       ),
     enabled: isAdmin,
     refetchInterval: 90_000,
@@ -152,7 +177,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const active = threads.filter((t) => !t.archived);
   const accountUnread: Record<Account, number> = {
     personal: active.filter((t) => t.folder === "inbox" && t.unread).length,
-    admin: pendingAdmin.count || 0,
+    admin: pendingAdmin.adminBadge ?? ((pendingAdmin.count || 0) + (pendingAdmin.guideUnread || adminGuideUnread || 0)),
     owner: isOwner ? pendingAdmin.ownerCount || 0 : 0,
   };
   const folderCount = (f: Folder) =>
@@ -165,7 +190,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     setActiveGroup(null);
     setActiveId(id);
     setReply("");
-    void setRead(id, false);
+    if (adminMailActive) void setAdminGuideRead(id);
+    else void setRead(id, false);
   };
   const closeThread = () => {
     setActiveId(null);
@@ -191,7 +217,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     if (!body || !activeId) return;
     setReply("");
     try {
-      await sendMessage(activeId, body);
+      if (adminMailActive) await sendAdminGuideMessage(activeId, body);
+      else await sendMessage(activeId, body);
     } catch {
       setReply(body);
     }
@@ -424,24 +451,52 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         {/* admin/owner queue folder tabs */}
         {inboxActive && (account === "admin" || account === "owner") && !detailOpen && (
           <div style={{ padding: "12px 20px 0", flex: "none" }}>
-            <div style={{ display: "flex", gap: 4, background: C.inset, border: `1px solid ${C.border2}`, borderRadius: 12, padding: 3 }}>
-              {([
-                ["active", account === "admin" ? "Active queue" : "Active desk"],
-                ["completed", account === "admin" ? "Recently completed" : "Recently deleted"],
-              ] as Array<[QueueFolder, string]>).map(([f, label]) => {
+            <div
+              style={{
+                display: "flex",
+                gap: 4,
+                background: C.inset,
+                border: `1px solid ${C.border2}`,
+                borderRadius: 12,
+                padding: 3,
+                flexWrap: account === "admin" ? "wrap" : undefined,
+              }}
+            >
+              {(account === "admin"
+                ? ([
+                    ["active", "Queue"],
+                    ["inbox", "Inbox"],
+                    ["sent", "Sent"],
+                    ["completed", "Done"],
+                  ] as Array<[QueueFolder, string]>)
+                : ([
+                    ["active", "Active desk"],
+                    ["completed", "Recently deleted"],
+                  ] as Array<[QueueFolder, string]>)
+              ).map(([f, label]) => {
                 const act = queueFolder === f;
                 const accent = account === "admin" ? C.magenta : C.purple;
+                const badge =
+                  f === "inbox"
+                    ? (pendingAdmin.guideUnread || adminGuideUnread || 0)
+                    : f === "active"
+                      ? (pendingAdmin.queueCount ?? pendingAdmin.count ?? 0)
+                      : 0;
                 return (
                   <button
                     key={f}
-                    onClick={() => setQueueFolder(f)}
+                    onClick={() => {
+                      setQueueFolder(f);
+                      setActiveId(null);
+                      setReply("");
+                    }}
                     style={{
-                      flex: 1,
+                      flex: account === "admin" ? "1 1 22%" : 1,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: 6,
-                      padding: "7px 13px",
+                      padding: "7px 10px",
                       border: "none",
                       borderRadius: 9,
                       cursor: "pointer",
@@ -456,6 +511,22 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                     }}
                   >
                     {label}
+                    {badge > 0 && (
+                      <span
+                        style={{
+                          minWidth: 16,
+                          height: 16,
+                          padding: "0 4px",
+                          borderRadius: 999,
+                          background: act ? "rgba(0,0,0,0.2)" : accent,
+                          color: act ? "#000" : "#000",
+                          fontSize: 9,
+                          lineHeight: "16px",
+                        }}
+                      >
+                        {badge > 99 ? "99+" : badge}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -486,15 +557,21 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               onBack={closeThread}
               readOnly={activeThread.archived}
               onArchive={() => {
-                void archive(activeThread.id);
+                if (adminMailActive) archiveAdminGuide(activeThread.id);
+                else void archive(activeThread.id);
                 closeThread();
               }}
               onUnarchive={() => {
-                unarchive(activeThread.id);
+                if (adminMailActive) unarchiveAdminGuide(activeThread.id);
+                else unarchive(activeThread.id);
                 closeThread();
               }}
-              onReveal={() => revealSelf(activeThread.id)}
-              onResolveLineup={(decision) => resolveLineup(activeThread.id, decision)}
+              onReveal={() => {
+                if (!adminMailActive) revealSelf(activeThread.id);
+              }}
+              onResolveLineup={(decision) => {
+                if (!adminMailActive) resolveLineup(activeThread.id, decision);
+              }}
               onOpenEvent={async (eventId) => {
                 try {
                   const r = await fetch(`/api/events/${eventId}`, { credentials: "include" });
@@ -508,7 +585,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
             />
           ) : (
             <>
-              {inboxActive && account === "personal" && isAdmin && (pendingAdmin.count || 0) > 0 && (
+              {inboxActive && account === "personal" && isAdmin && (accountUnread.admin || 0) > 0 && (
                 <button
                   type="button"
                   onClick={() => setAccount("admin")}
@@ -529,7 +606,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                     cursor: "pointer",
                   }}
                 >
-                  {pendingAdmin.count} item{pendingAdmin.count === 1 ? "" : "s"} waiting in the shared admin queue →
+                  {accountUnread.admin} item{accountUnread.admin === 1 ? "" : "s"} in the shared admin inbox →
                 </button>
               )}
               {inboxActive && account === "personal" && isOwner && (pendingAdmin.ownerCount || 0) > 0 && (
@@ -567,8 +644,20 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   onOpenGroup={openGroup}
                 />
               )}
-              {inboxActive && account === "admin" && <QueueView mode="admin" queueFolder={queueFolder} />}
-              {inboxActive && account === "owner" && <QueueView mode="owner" queueFolder={queueFolder} />}
+              {inboxActive && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent") && (
+                <AdminMessagesView
+                  threads={adminThreads}
+                  folder={queueFolder}
+                  query={query}
+                  onOpenThread={openThread}
+                />
+              )}
+              {inboxActive && account === "admin" && (queueFolder === "active" || queueFolder === "completed") && (
+                <QueueView mode="admin" queueFolder={queueFolder} />
+              )}
+              {inboxActive && account === "owner" && (
+                <QueueView mode="owner" queueFolder={queueFolder === "completed" ? "completed" : "active"} />
+              )}
               {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
               {view === "stats" && <StatsView />}
             </>

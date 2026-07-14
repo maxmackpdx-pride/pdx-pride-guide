@@ -24,6 +24,17 @@ export function categoryFromContext(contextType?: string | null): Category {
   ) {
     return "checkins";
   }
+  // Shared admin / guide notices (photo reject, queue outcomes, admin DMs).
+  if (
+    ctx === "GUIDE_UPDATE"
+    || ctx === "PROFILE_PHOTO"
+    || ctx === "ADMIN_MESSAGE"
+    || ctx === "ADMIN_ALERT"
+    || ctx === "SUBMISSION"
+    || ctx === "PROMOTER"
+  ) {
+    return "hosts";
+  }
   // Generic DMs / guide updates — neutral host bucket is wrong; keep hosts only
   // for true event-host traffic above. Fallback = hosts for unknown legacy rows
   // that were already event-adjacent, but GIFTING is handled explicitly.

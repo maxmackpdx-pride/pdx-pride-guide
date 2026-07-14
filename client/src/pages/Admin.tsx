@@ -1274,8 +1274,15 @@ export default function Admin() {
     if (!body) return;
     setMessageSending(true);
     try {
-      await apiRequest("POST", `/api/users/${encodeURIComponent(messageTarget.username)}/message`, { body });
-      toast({ title: "Message sent", description: `@${messageTarget.username} will see it in their inbox.` });
+      // Shared guide-admin sender so replies land in floating inbox → Admin → Inbox (not personal).
+      await apiRequest("POST", "/api/admin/messages", {
+        username: messageTarget.username,
+        body,
+      });
+      toast({
+        title: "Message sent",
+        description: `Sent as PDX Pride Guide. @${messageTarget.username} can reply to the shared admin inbox.`,
+      });
       setMessageTarget(null);
       setMessageBody("");
     } catch (err) {

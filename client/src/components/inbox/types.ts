@@ -2,7 +2,8 @@ import type { InboxPartyAvatar } from "@/lib/inboxAvatar";
 
 export type Category = "spotted" | "gigs" | "gifting" | "hosts" | "checkins";
 export type Folder = "inbox" | "sent" | "deleted";
-export type QueueFolder = "active" | "completed";
+/** Admin account sub-views: moderation queue + shared guide-admin mailboxes. */
+export type QueueFolder = "active" | "completed" | "inbox" | "sent";
 export type LineupDecision = "APPROVED" | "DENIED";
 
 export interface ThreadMessage {
