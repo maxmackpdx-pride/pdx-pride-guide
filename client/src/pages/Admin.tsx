@@ -223,6 +223,9 @@ export default function Admin() {
   const [allUsersFilter, setAllUsersFilter] = useState("");
   const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
   const [fixUsernameValue, setFixUsernameValue] = useState("");
+  const [messageTarget, setMessageTarget] = useState<{ username: string; displayName?: string | null } | null>(null);
+  const [messageBody, setMessageBody] = useState("");
+  const [messageSending, setMessageSending] = useState(false);
 
 
   useEffect(() => {
@@ -1088,14 +1091,71 @@ export default function Admin() {
     return pills;
   }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, venueClaimsPendingCount]);
 
-  const approvedPromoters = useMemo(
-    () => allUsers.filter(u => u.promoterStatus === "approved" && !u.isOwner),
-    [allUsers],
+  // Site admins (owner + sub-admin + team grants) appear alongside approved promoters.
+  const siteAdminUserIds = useMemo(
+    () => new Set(teamAdmins.map(m => m.userId)),
+    [teamAdmins],
   );
+  const approvedPromoters = useMemo(() => {
+    const rows = allUsers.filter(
+      u =>
+        u.promoterStatus === "approved"
+        || u.isOwner
+        || u.subAdmin
+        || siteAdminUserIds.has(u.id),
+    );
+    // Admins first, then alpha by username
+    return [...rows].sort((a, b) => {
+      const aAdmin = a.isOwner || a.subAdmin || siteAdminUserIds.has(a.id) ? 0 : 1;
+      const bAdmin = b.isOwner || b.subAdmin || siteAdminUserIds.has(b.id) ? 0 : 1;
+      if (aAdmin !== bAdmin) return aAdmin - bAdmin;
+      return String(a.username || "").localeCompare(String(b.username || ""));
+    });
+  }, [allUsers, siteAdminUserIds]);
   const pendingPromoterUsers = useMemo(
     () => allUsers.filter(u => u.promoterStatus === "pending"),
     [allUsers],
   );
+
+  const openMessageTo = (target: { username?: string | null; displayName?: string | null }) => {
+    const uname = String(target.username || "").trim().replace(/^@/, "");
+    if (!uname || uname === user?.username) return;
+    setMessageTarget({ username: uname, displayName: target.displayName });
+    setMessageBody("");
+  };
+
+  const sendAdminMessage = async () => {
+    if (!messageTarget || messageSending) return;
+    const body = messageBody.trim();
+    if (!body) return;
+    setMessageSending(true);
+    try {
+      await apiRequest("POST", `/api/users/${encodeURIComponent(messageTarget.username)}/message`, { body });
+      toast({ title: "Message sent", description: `@${messageTarget.username} will see it in their inbox.` });
+      setMessageTarget(null);
+      setMessageBody("");
+    } catch (err) {
+      toast({ title: "Could not send", description: parseApiError(err, "Message failed"), variant: "destructive" });
+    } finally {
+      setMessageSending(false);
+    }
+  };
+
+  const messageButton = (target: { username?: string | null; displayName?: string | null }) => {
+    const uname = String(target.username || "").trim().replace(/^@/, "");
+    if (!uname || uname === user?.username) return null;
+    return (
+      <button
+        type="button"
+        onClick={() => openMessageTo(target)}
+        className="display text-xs px-3 py-1 border"
+        style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+        data-testid={`admin-message-${uname}`}
+      >
+        MESSAGE
+      </button>
+    );
+  };
 
   if (authLoading || !sessionReady) {
     return (
@@ -1921,8 +1981,8 @@ export default function Admin() {
         {activeTab === "promoters" && (
           <div className="space-y-8">
             <p className="text-white/40 text-sm">
-              Approved promoters ({approvedPromoterCount}) · pending ({pendingPromoterUsers.length || pendingPromoters.length}).
-              Manage status below, or search any account to grant access.
+              Promoters &amp; admins ({approvedPromoterCount}) · pending ({pendingPromoterUsers.length || pendingPromoters.length}).
+              Site admins are listed here too. Message anyone next to their name, or search to grant promoter status.
             </p>
 
             {usersError || promotersError ? (
@@ -1937,16 +1997,19 @@ export default function Admin() {
               <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : (
               <>
-                {/* Approved promoters */}
+                {/* Approved promoters + site admins */}
                 <div>
                   <p className="display text-sm mb-3" style={{ color: "#CCFF00" }}>
-                    APPROVED PROMOTERS · {approvedPromoters.length}
+                    PROMOTERS &amp; ADMINS · {approvedPromoters.length}
                   </p>
                   {approvedPromoters.length === 0 ? (
-                    <p className="text-white/30 text-sm">No approved promoters yet. Search below to grant status.</p>
+                    <p className="text-white/30 text-sm">No approved promoters or admins yet. Search below to grant status.</p>
                   ) : (
                     <div className="space-y-2">
-                      {approvedPromoters.map(u => (
+                      {approvedPromoters.map(u => {
+                        const isAdminRow = u.isOwner || u.subAdmin || siteAdminUserIds.has(u.id);
+                        const isApprovedPromoter = u.promoterStatus === "approved";
+                        return (
                         <div
                           key={u.id}
                           className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap"
@@ -1954,31 +2017,50 @@ export default function Admin() {
                         >
                           <div className="min-w-0 flex-1">
                             <AdminUserIdentity profile={u} showEmail size={40} />
-                            <p className="text-xs mt-2 ml-[52px]" style={{ color: "#CCFF00" }}>
-                              promoter: approved
-                              {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
+                            <p className="text-xs mt-2 ml-[52px]" style={{ color: isApprovedPromoter ? "#CCFF00" : "#C8FA3C" }}>
+                              {isApprovedPromoter ? "promoter: approved" : "promoter: none"}
+                              {u.isOwner && <span style={{ color: "#C8FA3C" }}> · SITE ADMIN</span>}
+                              {u.subAdmin && !u.isOwner && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
+                              {isAdminRow && !u.isOwner && !u.subAdmin && (
+                                <span style={{ color: "#C8FA3C" }}> · SITE ADMIN</span>
+                              )}
                               {u.createdAt && (
                                 <span className="text-white/35"> · joined {new Date(u.createdAt).toLocaleDateString()}</span>
                               )}
                             </p>
                           </div>
                           <div className="flex gap-2 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
-                              className="display text-xs px-3 py-1 border"
-                              style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
-                            >
-                              SET PENDING
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
-                              className="display text-xs px-3 py-1 border border-white/30 text-white/40"
-                            >
-                              REVOKE
-                            </button>
-                            {isSuperAdmin && (
+                            {messageButton(u)}
+                            {!u.isOwner && isApprovedPromoter && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
+                                  className="display text-xs px-3 py-1 border"
+                                  style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
+                                >
+                                  SET PENDING
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
+                                  className="display text-xs px-3 py-1 border border-white/30 text-white/40"
+                                >
+                                  REVOKE
+                                </button>
+                              </>
+                            )}
+                            {!u.isOwner && !isApprovedPromoter && (
+                              <button
+                                type="button"
+                                onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
+                                className="display text-xs px-3 py-1 border"
+                                style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                              >
+                                GRANT PROMOTER
+                              </button>
+                            )}
+                            {isSuperAdmin && !u.isOwner && (
                               <button
                                 type="button"
                                 onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
@@ -1990,7 +2072,8 @@ export default function Admin() {
                             )}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -2025,6 +2108,7 @@ export default function Admin() {
                             </p>
                           </div>
                           <div className="flex gap-2 flex-wrap">
+                            {messageButton(u)}
                             <button
                               type="button"
                               onClick={() => approvePromoterMutation.mutate(uid)}
@@ -2084,6 +2168,7 @@ export default function Admin() {
                         </p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
+                        {messageButton(u)}
                         {u.promoterStatus !== "approved" && (
                           <button onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
                             className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
@@ -2424,17 +2509,20 @@ export default function Admin() {
                         {new Date(member.grantedAt).toLocaleString()}
                       </p>
                     </div>
-                    {!member.protected && (
-                      <button
-                        type="button"
-                        onClick={() => revokeAdminMutation.mutate(member.userId)}
-                        disabled={revokeAdminMutation.isPending}
-                        className="display text-xs px-4 py-2 border-2"
-                        style={{ borderColor: "#FF2400", color: "#FF2400" }}
-                      >
-                        REMOVE
-                      </button>
-                    )}
+                    <div className="flex gap-2 flex-wrap">
+                      {messageButton(member)}
+                      {!member.protected && (
+                        <button
+                          type="button"
+                          onClick={() => revokeAdminMutation.mutate(member.userId)}
+                          disabled={revokeAdminMutation.isPending}
+                          className="display text-xs px-4 py-2 border-2"
+                          style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                        >
+                          REMOVE
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -2444,6 +2532,58 @@ export default function Admin() {
 
         </div>
       </HubShell>
+
+      {messageTarget && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.8)" }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Message @${messageTarget.username}`}
+          onClick={() => !messageSending && setMessageTarget(null)}
+        >
+          <div
+            className="w-full max-w-md border border-white/15 p-5"
+            style={{ background: "#0d0d0d" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="display text-sm" style={{ color: "#19E3FF" }}>SEND MESSAGE</p>
+            <h2 className="text-white text-lg mt-1 mb-3">
+              @{messageTarget.username}
+              {messageTarget.displayName ? (
+                <span className="text-white/40 text-sm font-normal"> · {messageTarget.displayName}</span>
+              ) : null}
+            </h2>
+            <textarea
+              value={messageBody}
+              onChange={e => setMessageBody(e.target.value)}
+              rows={5}
+              placeholder="Write a note… lands in their Hub inbox."
+              className="w-full bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end mt-4">
+              <button
+                type="button"
+                className="display text-xs px-4 py-2 border border-white/25 text-white/50"
+                onClick={() => setMessageTarget(null)}
+                disabled={messageSending}
+              >
+                CANCEL
+              </button>
+              <button
+                type="button"
+                className="display text-xs px-4 py-2 border"
+                style={{ borderColor: "#19E3FF", color: "#000", background: "#19E3FF" }}
+                onClick={() => void sendAdminMessage()}
+                disabled={messageSending || !messageBody.trim()}
+              >
+                {messageSending ? "SENDING…" : "SEND"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
