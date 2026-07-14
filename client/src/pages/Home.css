@@ -695,7 +695,11 @@ html.calm-mode .home-main-stage .pg-note--spot {
 .home-boards {
   position: relative;
   width: 100%;
-  background: #0a0a0a;
+  /* Same page wash as Nude Beaches (Rooster): solid base + soft corner glows */
+  background:
+    radial-gradient(circle at 10% 6%, rgba(255, 102, 0, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(255, 31, 160, 0.06), transparent 24rem),
+    #06060a;
   overflow: hidden;
   color: var(--text-mid, #b9b6ae);
 }
@@ -1536,11 +1540,17 @@ html.calm-mode .home-boards__card {
   background: var(--neon-yellow, #ccff00);
 }
 
-/* Boards utility cards — solid section so tiles read off the page */
+/*
+ * Community Boards — match design mockup (PDX Pride Homepage.html 1a):
+ * framed solid panel #08080a + #1a1a22 tiles. No beach wash / no neon glow.
+ * Does not touch hero rainbow animation or beach widget.
+ */
 .home-main-stage .home-boards {
   background: #08080a;
+  border: 1px solid #17171c;
+  border-radius: 14px;
+  padding: 36px;
   margin-bottom: 56px;
-  padding: 8px 0 4px;
 }
 
 .home-main-stage .home-boards__inner {
@@ -1575,42 +1585,39 @@ html.calm-mode .home-boards__card {
   gap: 18px;
 }
 
-/* Board teaser cards — clearly lifted off the section (readable, low glow) */
+/* Design tokens: panel-magenta / panel-lime / panel-purple (softened neons) */
 .home-boards__utility {
-  --util-acc: var(--neon-cyan, #00ffff);
+  --util-acc: #19e3ff;
   text-decoration: none;
   display: block;
   padding: 22px;
   border-radius: 10px;
-  /* Lighter panel than section #08080a so tiles separate without neon wash */
   background: #1a1a22;
   border: 1px solid #34343e;
   border-top: 3px solid var(--util-acc);
   box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.75);
   transition:
     transform 0.18s var(--ease-out, ease-out),
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .home-boards__utility:hover {
   transform: translateY(-2px);
   background: #1e1e28;
-  border-color: color-mix(in srgb, var(--util-acc) 40%, #3a3a44);
   box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.85);
 }
 
 .home-boards__utility--magenta {
-  --util-acc: var(--panel-magenta, var(--neon-magenta, #ff00cc));
+  --util-acc: #ff1fa0; /* --panel-magenta */
 }
 
 .home-boards__utility--lime {
-  --util-acc: var(--panel-lime, var(--neon-yellow, #ccff00));
+  --util-acc: #c8fa3c; /* --panel-lime */
 }
 
 .home-boards__utility--purple {
-  --util-acc: var(--panel-purple, var(--neon-violet, #8800ff));
+  --util-acc: #b06bff; /* --panel-purple */
 }
 
 .home-boards__utility-name {
@@ -1625,20 +1632,20 @@ html.calm-mode .home-boards__card {
 }
 
 .home-boards__utility--magenta .home-boards__utility-name {
-  color: var(--panel-magenta, var(--neon-magenta, #ff00cc));
+  color: #ff1fa0;
 }
 
 .home-boards__utility--lime .home-boards__utility-name {
-  color: var(--panel-lime, var(--neon-yellow, #ccff00));
+  color: #c8fa3c;
 }
 
 .home-boards__utility--purple .home-boards__utility-name {
-  color: var(--panel-purple, var(--neon-violet, #aa66ff));
+  color: #b06bff;
 }
 
 .home-boards__utility-desc {
   font-size: 14px;
-  color: #f0eee8;
+  color: #f4f1ea; /* --board-text */
   margin: 0 0 14px;
   line-height: 1.45;
 }
@@ -1648,7 +1655,7 @@ html.calm-mode .home-boards__card {
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #b5b2a8;
+  color: var(--text-lo, #8a8a8a);
 }
 
 /* Directory + beaches row */
