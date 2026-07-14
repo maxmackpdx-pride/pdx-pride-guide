@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
-import { Link, useLocation } from "wouter";
-import { ChevronLeft, Inbox } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useLocation } from "wouter";
+import { ChevronDown, ChevronLeft, ChevronUp, Inbox } from "lucide-react";
+import { Link } from "wouter";
 import type { HubSection } from "./types";
 import { hubAdminNavItems } from "@/lib/hubAdminNav";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -69,8 +71,8 @@ export type HubV2ShellProps = {
 
 /**
  * Single hub frame for member + admin.
- * Same left rail, same type, same “Return to Pride Guide”.
- * MEMBER | ADMIN only swaps which nav list is shown — not a second website.
+ * Desktop: left rail with optional Return link + MEMBER | ADMIN.
+ * Mobile: bottom drawer above site nav (no Return link); slides open/closed.
  */
 export default function HubV2Shell({
   section,
@@ -88,6 +90,7 @@ export default function HubV2Shell({
 }: HubV2ShellProps) {
   const [location, navigate] = useLocation();
   const { openSheet } = useInboxSheet();
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const memberNav = MEMBER_NAV.filter((item) => !item.posterOnly || canPostToFeed);
   const adminNav = hubAdminNavItems(canManageTeam);
 
@@ -97,10 +100,8 @@ export default function HubV2Shell({
     || section.startsWith("tbl-")
     || location.startsWith("/admin");
 
-  /** Force member hub — leave /admin tools and clear ?section=admin. */
   const goMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Navigate first so /admin unmounts; then parent can reset section to feed.
     navigate("/dashboard");
     onSectionChange("feed");
     if (typeof window !== "undefined" && window.location.pathname === "/dashboard") {
@@ -113,110 +114,167 @@ export default function HubV2Shell({
     navigate("/admin?tab=overview");
   };
 
+  const pickSection = (next: HubSection) => {
+    onSectionChange(next);
+    setMobileDrawerOpen(false);
+  };
+
+  const openPersonalInbox = () => {
+    if (location === "/inbox" || location.startsWith("/inbox?")) return;
+    openSheet({ view: "inbox", account: "personal" });
+    setMobileDrawerOpen(false);
+  };
+
+  const openAdminInbox = () => {
+    openSheet({ view: "inbox", account: "admin" });
+    setMobileDrawerOpen(false);
+  };
+
+  const activeSectionLabel = (() => {
+    if (isAdminChrome) {
+      return adminNav.find((item) => item.section === section)?.label ?? "Admin";
+    }
+    return memberNav.find((item) => item.key === section)?.label ?? "Feed";
+  })();
+
+  useEffect(() => {
+    setMobileDrawerOpen(false);
+  }, [section, isAdminChrome]);
+
+  useEffect(() => {
+    document.body.classList.toggle("hub-v2-drawer-open", mobileDrawerOpen);
+    return () => document.body.classList.remove("hub-v2-drawer-open");
+  }, [mobileDrawerOpen]);
+
   const showRight = rightRail != null;
+
+  const modeToggle = isAdmin ? (
+    <div className="hub-v2-mode" role="group" aria-label="Hub mode">
+      <button
+        type="button"
+        onClick={goMemberMode}
+        className={`hub-v2-mode-btn${!isAdminChrome ? " is-active is-member" : ""}`}
+        aria-pressed={!isAdminChrome}
+      >
+        Member
+      </button>
+      <button
+        type="button"
+        onClick={goAdminMode}
+        className={`hub-v2-mode-btn${isAdminChrome ? " is-active is-admin" : ""}`}
+        aria-pressed={isAdminChrome}
+      >
+        Admin
+      </button>
+    </div>
+  ) : null;
+
+  const navButtons = (
+    <nav className="hub-v2-nav" aria-label={isAdminChrome ? "Admin sections" : "Member sections"}>
+      {!isAdminChrome && (
+        <>
+          {memberNav.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => pickSection(item.key)}
+              className={`navi${section === item.key ? " on" : ""}`}
+            >
+              {item.icon}
+              <span style={{ flex: 1 }}>{item.label}</span>
+            </button>
+          ))}
+          <button type="button" className="navi" onClick={openPersonalInbox}>
+            <Inbox size={18} strokeWidth={2.2} aria-hidden />
+            <span style={{ flex: 1 }}>Messages</span>
+            {pendingCount > 0 && isAdmin && (
+              <span className="hub-v2-pill">{pendingCount > 99 ? "99+" : pendingCount}</span>
+            )}
+          </button>
+        </>
+      )}
+
+      {isAdminChrome && (
+        <>
+          {adminNav.map((item) => (
+            <button
+              key={item.section}
+              type="button"
+              onClick={() => pickSection(item.section)}
+              className={`navi${section === item.section ? " on" : ""}`}
+            >
+              {ADMIN_ICONS[item.section] ?? <HubIconAdmin size={18} />}
+              <span style={{ flex: 1 }}>{item.label}</span>
+            </button>
+          ))}
+          <button type="button" className="navi" onClick={openAdminInbox}>
+            <Inbox size={18} strokeWidth={2.2} aria-hidden />
+            <span style={{ flex: 1 }}>Queue & messages</span>
+            {pendingCount > 0 && (
+              <span className="hub-v2-pill hub-v2-pill--pink">
+                {pendingCount > 99 ? "99+" : pendingCount}
+              </span>
+            )}
+          </button>
+        </>
+      )}
+    </nav>
+  );
+
+  const mobileDrawer =
+    typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className={`hub-v2-drawer${mobileDrawerOpen ? " is-open" : ""}`}
+            data-hub-drawer
+          >
+            <button
+              type="button"
+              className="hub-v2-drawer__handle"
+              aria-expanded={mobileDrawerOpen}
+              aria-controls="hub-v2-drawer-panel"
+              onClick={() => setMobileDrawerOpen((open) => !open)}
+            >
+              <div className="hub-v2-drawer__handle-top">
+                {modeToggle ?? <span className="hub-v2-drawer__solo-label">Your hub</span>}
+                <span className="hub-v2-drawer__section">{activeSectionLabel}</span>
+              </div>
+              {mobileDrawerOpen ? (
+                <ChevronDown size={18} strokeWidth={2.4} aria-hidden />
+              ) : (
+                <ChevronUp size={18} strokeWidth={2.4} aria-hidden />
+              )}
+            </button>
+            <div id="hub-v2-drawer-panel" className="hub-v2-drawer__panel">
+              <div className="hub-v2-kicker hub-v2-kicker--drawer">
+                {isAdminChrome ? "Admin" : "Your hub"}
+              </div>
+              {navButtons}
+              {sideExtra && <div className="hub-v2-side-extra hub-v2-side-extra--drawer">{sideExtra}</div>}
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
     <div
-      className={`hub-root hub-root--unified${calmMode ? " calm-mode" : ""}${isAdminChrome ? " hub-root--admin" : ""}`}
-      style={{
-        minHeight: "100vh",
-        background: "var(--panel-ink)",
-        color: "var(--board-text)",
-        fontFamily: "var(--font-body)",
-      }}
+      className={`hub-root hub-root--unified${calmMode ? " calm-mode" : ""}${isAdminChrome ? " hub-root--admin" : ""}${mobileDrawerOpen ? " hub-root--drawer-open" : ""}`}
     >
       <div className="hub-v2-rainbow" aria-hidden="true" />
 
       <div className={showRight ? "grid3" : "grid2"}>
-        <aside className="lrail hs hub-v2-lrail" aria-label="Hub navigation">
+        <aside className="lrail hs hub-v2-lrail hub-v2-lrail--desktop" aria-label="Hub navigation">
           <Link href="/" className="hub-v2-home" aria-label="Return to Pride Guide home">
             <ChevronLeft size={15} strokeWidth={2.4} aria-hidden />
             <span>Return to Pride Guide</span>
           </Link>
 
-          {isAdmin && (
-            <div className="hub-v2-mode" role="group" aria-label="Hub mode">
-              <button
-                type="button"
-                onClick={goMemberMode}
-                className={`hub-v2-mode-btn${!isAdminChrome ? " is-active is-member" : ""}`}
-                aria-pressed={!isAdminChrome}
-              >
-                Member
-              </button>
-              <button
-                type="button"
-                onClick={goAdminMode}
-                className={`hub-v2-mode-btn${isAdminChrome ? " is-active is-admin" : ""}`}
-                aria-pressed={isAdminChrome}
-              >
-                Admin
-              </button>
-            </div>
-          )}
+          {modeToggle}
 
           <div className="hub-v2-kicker">{isAdminChrome ? "Admin" : "Your hub"}</div>
 
-          <nav className="hub-v2-nav" aria-label={isAdminChrome ? "Admin sections" : "Member sections"}>
-            {!isAdminChrome && (
-              <>
-                {memberNav.map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => onSectionChange(item.key)}
-                    className={`navi${section === item.key ? " on" : ""}`}
-                  >
-                    {item.icon}
-                    <span style={{ flex: 1 }}>{item.label}</span>
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className="navi"
-                  onClick={() => {
-                    if (location === "/inbox" || location.startsWith("/inbox?")) return;
-                    openSheet({ view: "inbox", account: "personal" });
-                  }}
-                >
-                  <Inbox size={18} strokeWidth={2.2} aria-hidden />
-                  <span style={{ flex: 1 }}>Messages</span>
-                  {pendingCount > 0 && isAdmin && (
-                    <span className="hub-v2-pill">{pendingCount > 99 ? "99+" : pendingCount}</span>
-                  )}
-                </button>
-              </>
-            )}
-
-            {isAdminChrome && (
-              <>
-                {adminNav.map((item) => (
-                  <button
-                    key={item.section}
-                    type="button"
-                    onClick={() => onSectionChange(item.section)}
-                    className={`navi${section === item.section ? " on" : ""}`}
-                  >
-                    {ADMIN_ICONS[item.section] ?? <HubIconAdmin size={18} />}
-                    <span style={{ flex: 1 }}>{item.label}</span>
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className="navi"
-                  onClick={() => openSheet({ view: "inbox", account: "admin" })}
-                >
-                  <Inbox size={18} strokeWidth={2.2} aria-hidden />
-                  <span style={{ flex: 1 }}>Queue & messages</span>
-                  {pendingCount > 0 && (
-                    <span className="hub-v2-pill hub-v2-pill--pink">
-                      {pendingCount > 99 ? "99+" : pendingCount}
-                    </span>
-                  )}
-                </button>
-              </>
-            )}
-          </nav>
+          {navButtons}
 
           <div className="hub-v2-spacer" />
 
@@ -234,6 +292,8 @@ export default function HubV2Shell({
           </aside>
         )}
       </div>
+
+      {mobileDrawer}
     </div>
   );
 }

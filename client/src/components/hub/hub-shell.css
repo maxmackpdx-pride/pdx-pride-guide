@@ -722,14 +722,21 @@
 }
 
 .app-shell--hub > main {
-  flex: 1;
-  /* Clear hub-mobile-bar / site bottom chrome so content is not covered */
-  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Drawer + bottom nav clearance handled inside hub-v2 grid padding */
+  padding-bottom: 0;
 }
 
 @media (min-width: 900px) {
   .app-shell--hub > main {
     padding-bottom: 24px;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell--hub > main {
+    padding-bottom: 0;
   }
 }
 

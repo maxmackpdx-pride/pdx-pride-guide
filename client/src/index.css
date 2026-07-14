@@ -129,6 +129,10 @@ body::before {
   opacity: 0.65;
 }
 
+:root {
+  --site-mobile-nav-height: 72px;
+}
+
 #root {
   position: relative;
   z-index: 1;
@@ -2142,8 +2146,16 @@ a.event-host-name.event-host-name--link:hover {
   }
 
   /* Bar is portaled to <body>, so match from body instead of .app-shell */
-  body:has(.site-hub-mobile-bar) .app-shell main {
-    padding-bottom: 104px;
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main {
+    padding-bottom: calc(var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) .site-footer {
+    padding-bottom: calc(var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) .site-footer__legal {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   /* Phone: Hub lives in the bottom-nav center tab — hide desktop Hub + seam */
@@ -10694,11 +10706,22 @@ html.calm-mode .footer-coffee__btn:hover {
      flap to its content instead. */
   .site-footer__flap {
     flex: 0 0 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .site-footer__flap .pdxFlap {
+    gap: 6px;
   }
 
   .site-footer__legal {
     justify-content: flex-start;
     text-align: left;
+  }
+
+  .site-footer__bottom {
+    margin-top: 14px;
+    gap: 10px;
   }
 }
 

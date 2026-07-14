@@ -108,20 +108,12 @@
       .rrail{display:none}
     }
     @media(max-width:720px){
-      .grid3,.grid2{grid-template-columns:1fr;padding:14px 14px 80px}
-      /* Keep left rail as a horizontal scroll strip so admin/member don't feel like different apps */
-      .lrail.hub-v2-lrail{
-        display:flex;position:relative;top:0;max-height:none;overflow-x:auto;overflow-y:hidden;
-        flex-direction:row;flex-wrap:nowrap;align-items:center;gap:6px;
-        padding:8px 4px 12px;margin:0 -4px 8px;
-        border-bottom:1px solid var(--panel-border);
+      .hub-root--unified{min-height:0 !important}
+      .grid3,.grid2{
+        grid-template-columns:1fr;
+        padding:14px 14px calc(var(--hub-mobile-drawer-collapsed, 52px) + var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 12px);
       }
-      .hub-v2-home{display:none}
-      .hub-v2-mode{flex:none;margin:0 4px 0 0;min-width:140px}
-      .hub-v2-kicker{display:none}
-      .hub-v2-nav{display:flex;flex-direction:row;flex-wrap:nowrap;gap:4px;flex:1}
-      .hub-v2-nav .navi{flex:none;padding:8px 12px;white-space:nowrap}
-      .hub-v2-spacer,.hub-v2-side-extra{display:none}
+      .hub-v2-lrail--desktop{display:none !important}
       .h1{font-size:30px}
     }
     .hub-v2-mobile-admin{display:none;margin-bottom:14px}
@@ -138,6 +130,7 @@
       color:var(--board-muted);text-decoration:none;padding:4px 8px 12px;margin-bottom:4px;
     }
     .hub-v2-home:hover{color:#fff}
+    @media(max-width:720px){.hub-v2-home{display:none}}
     .hub-v2-mode{
       display:flex;gap:4px;padding:4px;margin:0 0 12px;
       background:#111;border:1px solid var(--panel-border-2);border-radius:11px;
@@ -171,6 +164,7 @@
     .hub-v2-lrail{max-height:calc(100vh - 24px);top:12px;overflow:auto}
     /* Admin tools page reuses hub shell — body sits in same main column */
     .hub-root--admin .admin-panel-body{padding-top:4px}
+    .hub-root--unified{min-height:100vh}
     .hub-root--unified .dash-page{background:transparent;min-height:0}
     .hub-admin-folder__mobile-trigger{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:1px solid var(--panel-border-2);border-radius:11px;background:var(--panel-card);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
     .hub-admin-folder__mobile-trigger:hover{border-color:var(--panel-cyan)}
@@ -469,3 +463,53 @@
     .hub-settings-prefs__item input{margin-top:3px;accent-color:var(--panel-cyan);flex:none}
     .hub-settings-prefs__item-title{display:block;font-family:var(--font-display);font-weight:700;font-size:13px;color:#fff;letter-spacing:.02em}
     .hub-settings-prefs__item-body{font-size:12px;color:var(--board-muted);line-height:1.45}
+
+    /* Mobile hub drawer — sits above site bottom nav */
+    :root{
+      --site-mobile-nav-height:72px;
+      --hub-mobile-drawer-collapsed:52px;
+    }
+    .hub-v2-drawer{
+      display:none;
+    }
+    @media(max-width:720px){
+      .hub-v2-drawer{
+        display:flex;flex-direction:column;
+        position:fixed;left:0;right:0;z-index:78;
+        bottom:calc(var(--site-mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+        max-height:min(62vh, 420px);
+        background:var(--panel-band);
+        border-top:1px solid var(--panel-border-2);
+        box-shadow:0 -12px 32px rgba(0,0,0,.55);
+        transition:transform .22s ease;
+      }
+      .hub-v2-drawer__handle{
+        display:flex;align-items:center;justify-content:space-between;gap:10px;
+        width:100%;padding:8px 12px 10px;border:none;border-bottom:1px solid var(--panel-border);
+        background:var(--panel-card);color:#fff;cursor:pointer;text-align:left;
+      }
+      .hub-v2-drawer__handle-top{
+        display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex:1;min-width:0;
+      }
+      .hub-v2-drawer__handle .hub-v2-mode{margin:0;width:100%;max-width:280px}
+      .hub-v2-drawer__solo-label{
+        font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#666;
+      }
+      .hub-v2-drawer__section{
+        font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:.06em;
+        text-transform:uppercase;color:var(--panel-cyan);
+      }
+      .hub-v2-drawer__panel{
+        display:none;overflow-y:auto;padding:6px 10px 12px;-webkit-overflow-scrolling:touch;
+      }
+      .hub-v2-drawer.is-open .hub-v2-drawer__panel{display:block}
+      .hub-v2-drawer .hub-v2-nav{flex-direction:column;gap:2px}
+      .hub-v2-drawer .hub-v2-nav .navi{padding:10px 12px}
+      .hub-v2-kicker--drawer{padding:4px 4px 8px}
+      .hub-v2-side-extra--drawer{margin-top:8px}
+      body.hub-v2-drawer-open{overflow:hidden}
+      .hub-root--drawer-open .hub-v2-main{pointer-events:none}
+    }
+    @media(min-width:721px){
+      .hub-v2-drawer{display:none !important}
+    }
