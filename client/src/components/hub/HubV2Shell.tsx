@@ -101,16 +101,19 @@ export default function HubV2Shell({
   const goMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
     setMobileDrawerOpen(false);
-    navigate("/dashboard");
-    onSectionChange("feed");
-    if (typeof window !== "undefined") {
-      window.history.replaceState({}, "", "/dashboard");
+    // One navigation only — never stack navigate + onSectionChange + replaceState
+    // (that could thrash history when leaving /admin).
+    if (isAdminChrome) {
+      navigate("/dashboard");
+      return;
     }
+    onSectionChange("feed");
   };
 
   const goAdminMode = (e: React.MouseEvent) => {
     e.preventDefault();
     setMobileDrawerOpen(false);
+    if (isAdminChrome) return;
     navigate("/admin?tab=overview");
   };
 

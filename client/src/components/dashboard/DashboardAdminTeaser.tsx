@@ -26,7 +26,7 @@ export default function DashboardAdminTeaser({ enabled }: { enabled: boolean }) 
           in the shared review queue
         </p>
       </div>
-      <Link href="/dashboard?section=admin" className="dash-btn dash-btn-admin-cta">
+      <Link href="/admin?tab=overview" className="dash-btn dash-btn-admin-cta">
         OPEN ADMIN →
       </Link>
     </section>

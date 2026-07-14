@@ -134,7 +134,7 @@ export default function MemberHubHome({
               )}
             </p>
           </div>
-          <Link href="/dashboard?section=admin">
+          <Link href="/admin?tab=overview">
             <Button accent="pink" variant="solid" size="sm" arrow>
               Open admin
             </Button>

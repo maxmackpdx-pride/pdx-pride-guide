@@ -357,14 +357,8 @@ export default function Admin() {
     syncAdminTabFromUrl();
   }, [authenticated, syncAdminTabFromUrl]);
 
-  useEffect(() => {
-    if (!authenticated) return;
-    const tab = new URLSearchParams(window.location.search).get("tab");
-    const effectiveTab = tab === "queue" || tab === "inbox" || tab === "analytics" || tab === "stats" ? "overview" : tab || "overview";
-    if (effectiveTab === "overview") {
-      navigate("/dashboard?section=admin");
-    }
-  }, [authenticated, navigate]);
+  // Stay on /admin for overview — never bounce to /dashboard?section=admin.
+  // That path + HubV2's admin→/admin redirect caused a history.pushState storm.
 
   useEffect(() => {
     if (!authenticated) return;

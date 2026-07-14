@@ -23,9 +23,9 @@ export function hubAdminNavItems(canManageTeam: boolean): HubAdminNavItem[] {
 }
 
 export function hubAdminHref(section: HubSection): string {
-  if (section === "admin") return "/dashboard?section=admin";
+  if (section === "admin") return "/admin?tab=overview";
   const tab = hubSectionToAdminTab(section);
-  return tab ? `/admin?tab=${encodeURIComponent(tab)}` : "/admin";
+  return tab ? `/admin?tab=${encodeURIComponent(tab)}` : "/admin?tab=overview";
 }
 
 export function isHubAdminSection(section: HubSection): boolean {

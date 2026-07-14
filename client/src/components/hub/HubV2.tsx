@@ -225,12 +225,13 @@ export default function HubV2({
     }
   }, [section, editMode, publicProfilePath, navigate]);
 
-  // Admin is a separate page (/admin) — never keep admin tools inside member hub.
+  // Legacy deep-links (?section=admin / tbl-*) → real /admin page once.
+  // Do not reverse-bounce from Admin back here or history.pushState will thrash.
   useEffect(() => {
-    if (section === "admin" || HUB_ADMIN_TABLE_SECTIONS.includes(section)) {
-      const tab = section === "admin" ? "overview" : hubSectionToAdminTab(section);
-      navigate(tab ? `/admin?tab=${encodeURIComponent(tab)}` : "/admin?tab=overview");
-    }
+    if (section !== "admin" && !HUB_ADMIN_TABLE_SECTIONS.includes(section)) return;
+    const tab = section === "admin" ? "overview" : hubSectionToAdminTab(section);
+    const target = tab ? `/admin?tab=${encodeURIComponent(tab)}` : "/admin?tab=overview";
+    navigate(target, { replace: true });
   }, [section, navigate]);
 
   const handleSectionChange = (next: HubSection) => {
