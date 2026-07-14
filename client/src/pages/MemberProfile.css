@@ -1141,6 +1141,20 @@ a.pp-btn {
   --profile-acc-t: var(--neon-magenta);
 }
 
+/* Cover flush under nav seam — no dead band between rainbow divider and banner */
+.pp-page--reimagined .pp-hero.pp-hero--reimagined {
+  min-height: 0;
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
+.pp-page--reimagined .pp-hero.pp-hero--reimagined .pp-hero__banner,
+.pp-page--reimagined .pp-hero.pp-hero--reimagined .pp-hero__banner-fallback,
+.pp-page--reimagined .pp-hero.pp-hero--reimagined .pp-hero__banner--custom {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
 .pp-page--loading,
 .pp-page--error {
   min-height: clamp(280px, 52vh, 520px);
