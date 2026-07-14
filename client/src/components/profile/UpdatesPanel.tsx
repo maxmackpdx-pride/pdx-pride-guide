@@ -180,6 +180,13 @@ export default function UpdatesPanel({
     if (!stillThere) setExpandedKey(null);
   }, [posts, expandedKey, likeKey]);
 
+  // Must stay above any early return (React #310 hooks order).
+  const openBoardCard = useCallback((post: UpdatesPost) => {
+    const type = contentTypeForPost(post);
+    if (!isBoardOverlayType(type)) return;
+    setBoardOverlay({ kind: boardOverlayKind(type), postId: post.id });
+  }, []);
+
   if (!posts.length) return null;
 
   const handleLike = async (post: UpdatesPost, e: MouseEvent) => {
@@ -206,12 +213,6 @@ export default function UpdatesPanel({
       setPending(p => ({ ...p, [key]: false }));
     }
   };
-
-  const openBoardCard = useCallback((post: UpdatesPost) => {
-    const type = contentTypeForPost(post);
-    if (!isBoardOverlayType(type)) return;
-    setBoardOverlay({ kind: boardOverlayKind(type), postId: post.id });
-  }, []);
 
   const handleToggleThread = async (post: UpdatesPost, e: MouseEvent) => {
     e.stopPropagation();
