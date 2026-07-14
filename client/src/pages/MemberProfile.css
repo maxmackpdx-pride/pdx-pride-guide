@@ -178,6 +178,8 @@
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  outline: none;
+  box-shadow: none;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
@@ -186,9 +188,10 @@
   opacity: 0.94;
 }
 
+.pp-hero__avatar-link:focus,
 .pp-hero__avatar-link:focus-visible {
-  outline: 2px solid var(--profile-acc);
-  outline-offset: 4px;
+  outline: none;
+  box-shadow: none;
 }
 
 .pp-hero__avatar--promo {
