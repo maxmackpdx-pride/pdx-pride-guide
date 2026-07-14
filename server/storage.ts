@@ -5050,6 +5050,75 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("scrub_locker_room_excluded_months_v1");
   }
+
+  // Catalog cleanup: LIVE exact title+start duplicates + leftover Midtown HIDDEN twin.
+  if (!hasBootMigration("dedupe_pid_night1_midtown_hidden_v1")) {
+    // Pride in Demand Night 1: two LIVE rows same title + start (admin_seeded + user_submitted).
+    // Keep the lowest id; hide the rest with a clear note.
+    const pidKeeper = sqlite
+      .prepare(
+        `SELECT MIN(id) AS id FROM events
+         WHERE status = 'LIVE'
+           AND title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+           AND substr(date_start, 1, 16) = '2026-07-17T21:00'`,
+      )
+      .get() as { id: number | null } | undefined;
+    if (pidKeeper?.id != null) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET status = 'HIDDEN',
+               admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                 'Hidden: duplicate LIVE Pride in Demand Night 1 — keeper id ' || ?
+           WHERE status = 'LIVE'
+             AND title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+             AND substr(date_start, 1, 16) = '2026-07-17T21:00'
+             AND id != ?`,
+        )
+        .run(String(pidKeeper.id), pidKeeper.id);
+      // Clarify the keeper note (was mixed "old Friday" / "consolidated" copy).
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET admin_notes = COALESCE(NULLIF(trim(admin_notes), '') || ' | ', '') ||
+             'Canonical LIVE Pride in Demand Night 1 (Fri Jul 17). Twin LIVE rows deduped 2026-07-14.'
+           WHERE id = ?`,
+        )
+        .run(pidKeeper.id);
+    }
+
+    // Midtown: LIVE multi-day listing is the public one; older HIDDEN twin is a leftover.
+    sqlite
+      .prepare(
+        `UPDATE events
+         SET admin_notes = COALESCE(NULLIF(trim(admin_notes), '') || ' | ', '') ||
+           'Duplicate leftover of LIVE Midtown Beer Garden Pride multi-day listing — not a missing public event.'
+         WHERE status = 'HIDDEN' AND title = 'Midtown Beer Garden Pride'`,
+      )
+      .run();
+
+    // If any extra LIVE Midtown rows ever exist, keep the lowest LIVE id only.
+    const midtownKeeper = sqlite
+      .prepare(
+        `SELECT MIN(id) AS id FROM events WHERE status = 'LIVE' AND title = 'Midtown Beer Garden Pride'`,
+      )
+      .get() as { id: number | null } | undefined;
+    if (midtownKeeper?.id != null) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET status = 'HIDDEN',
+               admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                 'Hidden: duplicate Midtown Beer Garden Pride — LIVE keeper id ' || ?
+           WHERE status = 'LIVE'
+             AND title = 'Midtown Beer Garden Pride'
+             AND id != ?`,
+        )
+        .run(String(midtownKeeper.id), midtownKeeper.id);
+    }
+
+    recordBootMigration("dedupe_pid_night1_midtown_hidden_v1");
+  }
 }
 
 function parseEnvAdminLists() {
