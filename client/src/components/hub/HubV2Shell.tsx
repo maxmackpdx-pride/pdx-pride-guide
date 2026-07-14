@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Inbox } from "lucide-react";
 import type { HubSection } from "./types";
-import { hubAdminHref, hubAdminNavItems } from "@/lib/hubAdminNav";
+import { hubAdminNavItems } from "@/lib/hubAdminNav";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import {
   HubIconAdmin,
@@ -86,7 +86,7 @@ export default function HubV2Shell({
   sideExtra,
   mainToolbar,
 }: HubV2ShellProps) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const { openSheet } = useInboxSheet();
   const memberNav = MEMBER_NAV.filter((item) => !item.posterOnly || canPostToFeed);
   const adminNav = hubAdminNavItems(canManageTeam);
@@ -94,12 +94,24 @@ export default function HubV2Shell({
   const isAdminChrome =
     chromeMode === "admin"
     || section === "admin"
-    || section.startsWith("tbl-");
+    || section.startsWith("tbl-")
+    || location.startsWith("/admin");
 
-  const adminTabHref = (() => {
-    if (section.startsWith("tbl-") || section === "admin") return hubAdminHref(section);
-    return "/admin?tab=overview";
-  })();
+  /** Force member hub — leave /admin tools and clear ?section=admin. */
+  const goMemberMode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Navigate first so /admin unmounts; then parent can reset section to feed.
+    navigate("/dashboard");
+    onSectionChange("feed");
+    if (typeof window !== "undefined" && window.location.pathname === "/dashboard") {
+      window.history.replaceState({}, "", "/dashboard");
+    }
+  };
+
+  const goAdminMode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/admin?tab=overview");
+  };
 
   const showRight = rightRail != null;
 
@@ -124,18 +136,22 @@ export default function HubV2Shell({
 
           {isAdmin && (
             <div className="hub-v2-mode" role="group" aria-label="Hub mode">
-              <Link
-                href="/dashboard"
+              <button
+                type="button"
+                onClick={goMemberMode}
                 className={`hub-v2-mode-btn${!isAdminChrome ? " is-active is-member" : ""}`}
+                aria-pressed={!isAdminChrome}
               >
                 Member
-              </Link>
-              <Link
-                href={adminTabHref}
+              </button>
+              <button
+                type="button"
+                onClick={goAdminMode}
                 className={`hub-v2-mode-btn${isAdminChrome ? " is-active is-admin" : ""}`}
+                aria-pressed={isAdminChrome}
               >
                 Admin
-              </Link>
+              </button>
             </div>
           )}
 
