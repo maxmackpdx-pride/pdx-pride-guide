@@ -253,6 +253,10 @@ export async function renderEventOgCard(eventId: number): Promise<Buffer | null>
     .toBuffer();
 }
 
+/**
+ * Directory place share card: logo only, centered on dark 1200×630.
+ * No title / copy column — just the neon logo.
+ */
 export async function renderPlaceOgCard(placeId: number): Promise<Buffer | null> {
   const place = storage.getBusiness(placeId) as any;
   if (!place || place.active === false) return null;
@@ -263,7 +267,8 @@ export async function renderPlaceOgCard(placeId: number): Promise<Buffer | null>
   const local = resolveLocalAsset(logoRel);
   const raw = await loadImageBuffer(local);
 
-  const logoBox = 360;
+  // Large centered logo (leave margin so it doesn't touch the frame edge)
+  const logoBox = 420;
   let logoBuf: Buffer | null = null;
   if (raw) {
     try {
@@ -273,32 +278,19 @@ export async function renderPlaceOgCard(placeId: number): Promise<Buffer | null>
     }
   }
 
-  const titleLines = wrapTitle(String(place.name || "Place"), 22, 3);
-  const sub = [place.neighborhood, place.type].filter(Boolean).join(" · ");
-  const titleSvg = titleLines
-    .map(
-      (line, i) =>
-        `<text x="640" y="${220 + i * 52}" fill="#FFFFFF" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="46" letter-spacing="0.02em">${escapeXml(line.toUpperCase())}</text>`,
-    )
-    .join("\n");
-
   const svg = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
   ${baseDefs()}
   <rect width="${W}" height="${H}" fill="#0a0a0a"/>
   ${rainbowBarSvg()}
-  <rect x="48" y="48" width="440" height="534" rx="16" fill="#0c0c0f" stroke="#1c1c22" stroke-width="2"/>
-  <text x="640" y="100" fill="#FF00CC" font-family="ui-monospace, Menlo, monospace" font-size="18" letter-spacing="0.22em">QUEER PORTLAND DIRECTORY</text>
-  ${titleSvg}
-  ${sub ? `<text x="640" y="${220 + titleLines.length * 52 + 28}" fill="#19E3FF" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="0.1em">${escapeXml(String(sub).toUpperCase())}</text>` : ""}
-  <text x="640" y="${H - 48}" fill="#888888" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.16em">PRIDEGUIDEPDX.COM/DIRECTORY</text>
+  <rect x="0" y="8" width="${W}" height="${H - 8}" fill="#0c0c0f"/>
 </svg>`);
 
   const base = await sharp(svg).png().toBuffer();
   if (!logoBuf) return base;
 
-  const logoLeft = 48 + Math.round((440 - logoBox) / 2);
-  const logoTop = 48 + Math.round((534 - logoBox) / 2);
+  const logoLeft = Math.round((W - logoBox) / 2);
+  const logoTop = Math.round((H - logoBox) / 2) + 2; // slight shift under rainbow bar
 
   return sharp(base)
     .composite([{ input: logoBuf, left: logoLeft, top: logoTop }])
