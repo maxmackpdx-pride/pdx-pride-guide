@@ -65,7 +65,8 @@ export const ADMIN_VIEW_META: Record<
     title: "Promoters",
     kicker: "The scene makers",
     kickerColor: "var(--pink, #ff00cc)",
-    lede: "Pending applications and approved hosts who can claim and edit events.",
+    // Keep lede short so Manual Promoter Override sits high on the page
+    lede: "Grant status, clear the queue, message hosts.",
   },
   "venue-claims": {
     title: "Venue claims",

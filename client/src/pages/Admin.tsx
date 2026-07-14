@@ -2030,38 +2030,55 @@ export default function Admin() {
 
         {/* ── TEAM ── */}
         {activeTab === "promoters" && (
-          <div className="space-y-8">
-            <p className="text-white/40 text-sm mb-4">
-              Promoters &amp; admins ({approvedPromoterCount}) · pending ({pendingPromoterUsers.length || pendingPromoters.length}).
-              Site admins are listed here too. Use search at the top to grant promoter status.
-            </p>
-
-            {/* Manual override first — search any account to grant / revoke */}
-            <div className="mb-8 p-4 border border-white/10" style={{ background: "#111" }}>
-              <p className="display text-sm mb-2" style={{ color: "#FF6600" }}>MANUAL PROMOTER OVERRIDE</p>
-              <p className="text-white/40 text-xs mb-4">
-                Search by username (with or without @), email, or display name. Owner-admin access required.
+          <div className="space-y-6">
+            {/*
+              First thing in the page body (under HubShell title). Sticky so it
+              stays at the top while scrolling approved/pending lists.
+            */}
+            <div
+              className="admin-promoter-override"
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 30,
+                marginTop: -4,
+                marginBottom: 8,
+                padding: "16px 18px",
+                border: "1.5px solid rgba(255, 102, 0, 0.45)",
+                borderRadius: 10,
+                background: "#0a0a0c",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.55)",
+              }}
+            >
+              <p className="display text-sm mb-1" style={{ color: "#FF6600", letterSpacing: "0.08em" }}>
+                MANUAL PROMOTER OVERRIDE
               </p>
-              <div className="flex gap-2 mb-4">
+              <p className="text-white/45 text-xs mb-3">
+                Search any user by username, email, or display name to manually set their promoter status.
+                Use @username or plain username.
+              </p>
+              <div className="flex gap-2 flex-wrap">
                 <input
-                  className="flex-1 bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
+                  className="flex-1 min-w-[200px] bg-black border border-white/20 px-3 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FF6600]"
                   placeholder="@username, email, or name..."
                   value={userSearchQ}
                   onChange={e => setUserSearchQ(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleUserSearch()}
+                  onKeyDown={e => e.key === "Enter" && void handleUserSearch()}
                   data-testid="promoter-override-search"
+                  autoFocus
                 />
                 <button
                   type="button"
                   onClick={() => void handleUserSearch()}
                   disabled={userSearching || !userSearchQ.trim()}
-                  className="display text-xs px-4 py-2 border border-white/30 text-white/60 flex items-center gap-2 hover:border-white/60 disabled:opacity-40"
+                  className="display text-xs px-5 py-2.5 border flex items-center gap-2 disabled:opacity-40"
+                  style={{ borderColor: "#FF6600", color: "#000", background: "#FF6600" }}
                 >
                   <Search size={12} /> {userSearching ? "..." : "SEARCH"}
                 </button>
               </div>
               {userSearchResults.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-4 max-h-[40vh] overflow-y-auto">
                   {userSearchResults.map(u => (
                     <div key={u.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
                       <div className="min-w-0 flex-1">
@@ -2128,6 +2145,10 @@ export default function Admin() {
                 </div>
               )}
             </div>
+
+            <p className="text-white/35 text-xs">
+              Lists below · {approvedPromoterCount} promoters &amp; admins · {pendingPromoterUsers.length || pendingPromoters.length} pending
+            </p>
 
             {usersError || promotersError ? (
               <AdminLoadError
