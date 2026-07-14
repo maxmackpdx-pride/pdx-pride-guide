@@ -666,6 +666,95 @@ function googleRedirectUri(_req: any) {
   return process.env.GOOGLE_REDIRECT_URI || "https://www.prideguidepdx.com/api/auth/google/callback";
 }
 
+const GOOGLE_OAUTH_STATE_MAX_MS = 15 * 60 * 1000;
+const GOOGLE_OAUTH_STATE_COOKIE = "pdx_g_oauth";
+
+function sessionSecret(): string {
+  return process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? "" : "pdxpride_secret_dev_only");
+}
+
+function hmacSign(payload: string): string {
+  return crypto.createHmac("sha256", sessionSecret()).update(payload).digest("base64url");
+}
+
+function safeEqualStr(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
+
+/** Stateless OAuth CSRF token — survives mobile browsers that drop the session cookie mid Google hop. */
+function createGoogleOAuthState(linkUserId?: number): string {
+  const body = Buffer.from(JSON.stringify({
+    n: crypto.randomBytes(16).toString("hex"),
+    t: Date.now(),
+    ...(linkUserId ? { l: linkUserId } : {}),
+  })).toString("base64url");
+  return `${body}.${hmacSign(body)}`;
+}
+
+function parseGoogleOAuthState(state: string): { linkUserId?: number } | null {
+  if (!state || !sessionSecret()) return null;
+  const dot = state.lastIndexOf(".");
+  if (dot <= 0) return null;
+  const body = state.slice(0, dot);
+  const sig = state.slice(dot + 1);
+  if (!sig || !safeEqualStr(sig, hmacSign(body))) return null;
+  try {
+    const data = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as {
+      n?: string;
+      t?: number;
+      l?: number;
+    };
+    if (!data.n || typeof data.t !== "number") return null;
+    if (Date.now() - data.t > GOOGLE_OAUTH_STATE_MAX_MS || data.t > Date.now() + 60_000) return null;
+    return typeof data.l === "number" ? { linkUserId: data.l } : {};
+  } catch {
+    return null;
+  }
+}
+
+function readCookie(req: any, name: string): string | undefined {
+  const header = String(req.headers?.cookie || "");
+  if (!header) return undefined;
+  for (const part of header.split(";")) {
+    const [k, ...rest] = part.trim().split("=");
+    if (k === name) return decodeURIComponent(rest.join("="));
+  }
+  return undefined;
+}
+
+function setGoogleOAuthStateCookie(res: any, state: string) {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  // append — never replace the session Set-Cookie express-session already queued
+  res.append(
+    "Set-Cookie",
+    `${GOOGLE_OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(GOOGLE_OAUTH_STATE_MAX_MS / 1000)}${secure}`,
+  );
+}
+
+function clearGoogleOAuthStateCookie(res: any) {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  res.append(
+    "Set-Cookie",
+    `${GOOGLE_OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`,
+  );
+}
+
+function googleOAuthErrorPage(message: string): string {
+  const safe = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Google sign-in</title>
+<style>body{font-family:system-ui,sans-serif;background:#06060a;color:#f4f1ea;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
+.card{max-width:420px;background:#0c0c0f;border:1.5px solid #1c1c22;border-radius:14px;padding:28px}
+h1{font-size:1.25rem;margin:0 0 10px}p{color:#c8c4bb;line-height:1.5;margin:0 0 18px}
+a{display:inline-block;background:#c8fa3c;color:#06060a;font-weight:800;text-decoration:none;padding:12px 16px;border-radius:8px;margin-right:10px;margin-top:6px}
+a.sec{background:transparent;color:#19e3ff;border:1px solid #19e3ff}</style></head>
+<body><div class="card"><h1>Google sign-in didn’t finish</h1><p>${safe}</p>
+<a href="/api/auth/google">Try Google again</a>
+<a class="sec" href="/">Back home</a></div></body></html>`;
+}
+
 function makeUsername(email: string) {
   const base = email
     .split("@")[0]
@@ -2048,10 +2137,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/auth/google", (req, res) => {
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    if (!clientId) return res.status(500).send("Google sign-in is not configured.");
-    const state = crypto.randomBytes(24).toString("hex");
+    if (!clientId) return res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
+    if (!sessionSecret()) return res.status(500).send(googleOAuthErrorPage("Server session secret is missing."));
+
+    const linkUserId = req.query.link === "1" && req.session.userId ? req.session.userId : undefined;
+    // HMAC-signed state: works even when Android Chrome / in-app browsers drop the session cookie on the Google hop.
+    const state = createGoogleOAuthState(linkUserId);
     req.session.googleOAuthState = state;
-    req.session.googleOAuthLinkUserId = req.query.link === "1" && req.session.userId ? req.session.userId : undefined;
+    req.session.googleOAuthLinkUserId = linkUserId;
+
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: googleRedirectUri(req),
@@ -2060,12 +2154,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
       state,
       prompt: "select_account",
     });
+
+    const finishRedirect = () => {
+      setGoogleOAuthStateCookie(res, state);
+      res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    };
+
     req.session.save((err) => {
       if (err) {
         console.error("Google OAuth session save failed:", err);
-        return res.status(500).send("Could not start Google Sign-In.");
+        // Still proceed: signed state + cookie do not require the session to survive.
       }
-      res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+      finishRedirect();
     });
   });
 
@@ -2075,11 +2175,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
       const code = String(req.query.code || "");
       const state = String(req.query.state || "");
-      if (!clientId || !clientSecret) return res.status(500).send("Google sign-in is not configured.");
-      if (!code || !state || state !== req.session.googleOAuthState) {
-        return res.status(400).send("Invalid Google sign-in state.");
+      if (!clientId || !clientSecret) {
+        return res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
       }
+      if (!code) {
+        return res.status(400).send(googleOAuthErrorPage("Google did not return an authorization code. Try again from the browser (not an in-app browser if possible)."));
+      }
+
+      const cookieState = readCookie(req, GOOGLE_OAUTH_STATE_COOKIE);
+      const sessionState = req.session?.googleOAuthState;
+      // Prefer HMAC validation (stateless). Session/cookie equality is a fallback for older in-flight logins.
+      const signed = parseGoogleOAuthState(state);
+      const stateOk = Boolean(
+        signed
+        || (sessionState && state === sessionState)
+        || (cookieState && state === cookieState),
+      );
+      if (!stateOk) {
+        console.warn("Google OAuth state mismatch", {
+          hasSessionState: Boolean(sessionState),
+          hasCookieState: Boolean(cookieState),
+          hasSignedState: Boolean(signed),
+          ua: String(req.headers["user-agent"] || "").slice(0, 120),
+        });
+        clearGoogleOAuthStateCookie(res);
+        return res.status(400).send(googleOAuthErrorPage(
+          "That sign-in step expired or this browser dropped the login cookie (common in Instagram/TikTok in-app browsers and some Android WebViews). Open prideguidepdx.com in Chrome or your system browser and try Google again.",
+        ));
+      }
+
       req.session.googleOAuthState = undefined;
+      clearGoogleOAuthStateCookie(res);
 
       const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
@@ -2095,15 +2221,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!tokenRes.ok) {
         const text = await tokenRes.text();
         console.error("Google token exchange failed:", text);
-        return res.status(401).send("Google sign-in failed.");
+        return res.status(401).send(googleOAuthErrorPage("Google token exchange failed. Try again in a minute."));
       }
       const token = await tokenRes.json() as { access_token?: string };
-      if (!token.access_token) return res.status(401).send("Google sign-in failed.");
+      if (!token.access_token) {
+        return res.status(401).send(googleOAuthErrorPage("Google token exchange failed. Try again."));
+      }
 
       const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
         headers: { Authorization: `Bearer ${token.access_token}` },
       });
-      if (!profileRes.ok) return res.status(401).send("Google profile lookup failed.");
+      if (!profileRes.ok) {
+        return res.status(401).send(googleOAuthErrorPage("Could not load your Google profile."));
+      }
       const profile = await profileRes.json() as {
         email?: string;
         email_verified?: boolean;
@@ -2112,31 +2242,59 @@ export function registerRoutes(httpServer: Server, app: Express) {
         picture?: string;
       };
       if (!profile.email || profile.email_verified === false) {
-        return res.status(401).send("Google email must be verified.");
+        return res.status(401).send(googleOAuthErrorPage("Your Google email must be verified to sign in."));
       }
-      if (!profile.sub) return res.status(401).send("Google profile lookup failed.");
+      if (!profile.sub) {
+        return res.status(401).send(googleOAuthErrorPage("Could not load your Google profile."));
+      }
 
-      const linkUserId = req.session.googleOAuthLinkUserId;
+      const linkUserId = signed?.linkUserId ?? req.session.googleOAuthLinkUserId;
       req.session.googleOAuthLinkUserId = undefined;
 
+      const establishSession = (userId: number, redirectTo: string) => {
+        const finish = () => {
+          req.session.userId = userId;
+          const user = storage.getUserById(userId);
+          if (user) {
+            maybeSyncSiteOwnerPortfolio(user);
+            markAdminSessionForUser(req, user);
+          }
+          req.session.save((saveErr) => {
+            if (saveErr) {
+              console.error("Google sign-in session save failed:", saveErr);
+              return res.status(500).send(googleOAuthErrorPage("Signed in with Google, but saving your session failed. Try again."));
+            }
+            res.redirect(redirectTo);
+          });
+        };
+        // Fresh session id after OAuth (matches password login) — cleaner cookies on mobile Chrome.
+        if (typeof req.session.regenerate === "function") {
+          return req.session.regenerate((err) => {
+            if (err) {
+              console.error("Google OAuth session regenerate failed:", err);
+              return finish();
+            }
+            finish();
+          });
+        }
+        finish();
+      };
+
       if (linkUserId) {
-        if (req.session.userId !== linkUserId) return res.status(401).send("Google link session expired.");
+        if (req.session.userId && req.session.userId !== linkUserId) {
+          return res.status(401).send(googleOAuthErrorPage("Google link session expired. Log in again, then link Google from settings."));
+        }
         const existingGoogleUser = storage.getUserByGoogleId(profile.sub);
         if (existingGoogleUser && existingGoogleUser.id !== linkUserId) {
-          return res.status(409).send("That Google account is already linked to another PDX Pride Guide profile.");
+          return res.status(409).send(googleOAuthErrorPage("That Google account is already linked to another PDX Pride Guide profile."));
         }
         const linkedUser = storage.getUserById(linkUserId);
-        if (!linkedUser) return res.status(401).send("Google link session expired.");
+        if (!linkedUser) {
+          return res.status(401).send(googleOAuthErrorPage("Google link session expired. Log in again, then retry linking."));
+        }
         storage.linkGoogleToUser(linkUserId, profile.sub);
         if (!linkedUser.photoUrl && profile.picture) storage.updateUser(linkUserId, { photoUrl: profile.picture });
-        markAdminSessionForUser(req, linkedUser);
-        return req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("Google link session save failed:", saveErr);
-            return res.status(500).send("Google sign-in failed.");
-          }
-          res.redirect("/dashboard?google=linked");
-        });
+        return establishSession(linkUserId, "/dashboard?google=linked");
       }
 
       let user = storage.getUserByGoogleId(profile.sub) || storage.getUserByEmail(profile.email);
@@ -2156,19 +2314,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
         }
       }
 
-      req.session.userId = user.id;
-      maybeSyncSiteOwnerPortfolio(user);
-      markAdminSessionForUser(req, user);
-      req.session.save((saveErr) => {
-        if (saveErr) {
-          console.error("Google sign-in session save failed:", saveErr);
-          return res.status(500).send("Google sign-in failed.");
-        }
-        res.redirect("/dashboard");
-      });
+      establishSession(user.id, "/dashboard");
     } catch (e) {
       console.error("Google sign-in error:", e);
-      res.status(500).send("Google sign-in failed.");
+      res.status(500).send(googleOAuthErrorPage("Something went wrong during Google sign-in. Try again."));
     }
   });
 

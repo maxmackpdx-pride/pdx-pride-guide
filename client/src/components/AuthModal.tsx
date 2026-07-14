@@ -98,12 +98,23 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           ))}
         </div>
 
+        {/* Google CTA is outside <form> so Android Chrome does not treat it as a submit / swallow the nav. */}
+        <a
+          href="/api/auth/google"
+          style={googleButtonStyle}
+          data-testid="auth-google"
+          onClick={(e) => {
+            // Full top-level navigation (not SPA). Helps Android Chrome + Custom Tabs complete OAuth.
+            e.preventDefault();
+            window.location.assign("/api/auth/google");
+          }}
+        >
+          {tab === "login" ? "CONTINUE WITH GOOGLE" : "JOIN WITH GOOGLE"}
+        </a>
+        <div style={dividerStyle}><span>OR</span></div>
+
         {tab === "login" ? (
           <form onSubmit={handleLogin}>
-            <a href="/api/auth/google" style={googleButtonStyle}>
-              CONTINUE WITH GOOGLE
-            </a>
-            <div style={dividerStyle}><span>OR</span></div>
             <label style={labelStyle}>Username or Email</label>
             <input style={inputStyle} type="text" value={email} onChange={e => setEmail(e.target.value)} required placeholder="username or you@example.com" autoComplete="username" />
             <label style={labelStyle}>Password</label>
@@ -121,10 +132,6 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           </form>
         ) : (
           <form onSubmit={handleRegister}>
-            <a href="/api/auth/google" style={googleButtonStyle}>
-              JOIN WITH GOOGLE
-            </a>
-            <div style={dividerStyle}><span>OR</span></div>
             <label style={labelStyle}>Username</label>
             <input style={inputStyle} type="text" value={username} onChange={e => setUsername(e.target.value)} required placeholder="queerbabe99" minLength={3} />
             <label style={labelStyle}>Display Name <span style={{ color: "#aaa", fontWeight: 400 }}>(optional)</span></label>
