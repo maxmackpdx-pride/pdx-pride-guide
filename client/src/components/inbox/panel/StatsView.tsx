@@ -114,8 +114,8 @@ function HBars({ rows }: { rows: ReturnType<typeof hbars> }) {
 
 export default function StatsView() {
   const { user } = useAuth();
-  // Full stats for primary owner; other admins only get snapshot / community / page views / uniques.
-  const fullStats = !!(user?.isPrimaryOwner);
+  // Full stats for owner + peers (canViewUsers); limited admins get snapshot / community / page views / uniques.
+  const fullStats = !!(user?.canViewUsers || user?.isPrimaryOwner);
 
   const { data: m } = useQuery<Metrics>({
     queryKey: ["/api/admin/metrics"],

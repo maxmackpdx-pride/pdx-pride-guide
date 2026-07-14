@@ -79,7 +79,7 @@ export default function HubV2Shell({
             </button>
           ))}
 
-          {isAdmin && isPrimaryOwner && (
+          {isAdmin && canManageTeam && (
             <HubAdminFolder
               variant="rail"
               canManageTeam={canManageTeam}
@@ -90,7 +90,7 @@ export default function HubV2Shell({
         </aside>
 
         <main style={{ minWidth: 0 }}>
-          {isAdmin && isPrimaryOwner && (
+          {isAdmin && canManageTeam && (
             <div className="hub-v2-mobile-admin" aria-label="Hub admin access">
               <HubAdminFolder
                 variant="mobile"

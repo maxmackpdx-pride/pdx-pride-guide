@@ -5618,6 +5618,29 @@ function isPrimarySiteOwner(user: { id?: number | null } | null | undefined): bo
   return !!owner && owner.id === user.id;
 }
 
+/**
+ * Owner-level admin peers (e.g. @brohoejams): same site-admin powers as primary owner
+ * except Owner Desk items stay primary-only.
+ * Comma-separated usernames via OWNER_ADMIN_PEER_USERNAMES, default brohoejams.
+ */
+const OWNER_ADMIN_PEER_USERNAMES: string[] = (
+  process.env.OWNER_ADMIN_PEER_USERNAMES || "brohoejams"
+)
+  .split(",")
+  .map(s => s.trim().toLowerCase().replace(/^@/, ""))
+  .filter(Boolean);
+
+function isOwnerAdminPeer(user: { username?: string | null } | null | undefined): boolean {
+  const uname = String(user?.username || "").trim().toLowerCase().replace(/^@/, "");
+  if (!uname) return false;
+  return OWNER_ADMIN_PEER_USERNAMES.includes(uname);
+}
+
+/** Primary owner OR designated peer — full admin tools except Owner Desk. */
+function hasOwnerAdminAccess(user: { id?: number | null; username?: string | null } | null | undefined): boolean {
+  return isPrimarySiteOwner(user) || isOwnerAdminPeer(user);
+}
+
 function ownerIdentitySets(candidates: SiteOwnerRow[]) {
   return {
     userIds: Array.from(new Set(candidates.map(c => c.id))),
@@ -6031,6 +6054,9 @@ export interface IStorage {
   syncSiteOwnerPortfolio(): void;
   isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
   isPrimarySiteOwner(user: { id?: number | null } | null | undefined): boolean;
+  isOwnerAdminPeer(user: { username?: string | null } | null | undefined): boolean;
+  /** Primary owner or peer (e.g. brohoejams) — full admin tools except Owner Desk. */
+  hasOwnerAdminAccess(user: { id?: number | null; username?: string | null } | null | undefined): boolean;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
   createPromoter(data: InsertPromoter): Promoter;
@@ -7320,6 +7346,12 @@ export const storage: IStorage = {
   isPrimarySiteOwner(user) {
     return isPrimarySiteOwner(user);
   },
+  isOwnerAdminPeer(user) {
+    return isOwnerAdminPeer(user);
+  },
+  hasOwnerAdminAccess(user) {
+    return hasOwnerAdminAccess(user);
+  },
   getPromoterByEmail(email) {
     return db.select().from(promoters).where(eq(promoters.email, email)).get();
   },
@@ -7371,6 +7403,8 @@ export const storage: IStorage = {
     if (user.subAdmin) return true;
     if (isEnvListedSiteAdmin(user)) return true;
     if (user.id != null && storage.hasSiteAdminGrant(user.id)) return true;
+    // Owner peers (e.g. brohoejams) get full admin access without a separate grant.
+    if (hasOwnerAdminAccess(user)) return true;
     return false;
   },
   countContentLikes(contentType, contentId) {

@@ -180,7 +180,7 @@ function ProfileMenuPanel({
       >
         Notification settings
       </Link>
-      {isAdmin && isPrimaryOwner && (
+      {isAdmin && canManageTeam && (
         <HubAdminFolder
           variant="menu"
           canManageTeam={canManageTeam}
