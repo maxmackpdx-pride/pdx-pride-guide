@@ -421,6 +421,17 @@ a.pp-btn {
   pointer-events: auto;
 }
 
+/* Share menu portaled to body — hero isolation was trapping clicks under later sections */
+.pp-share-pop--portal {
+  position: fixed;
+  top: auto;
+  left: auto;
+  z-index: 4000;
+  width: min(230px, calc(100vw - 24px));
+  padding: 8px;
+  pointer-events: auto;
+}
+
 .pp-accent-pop { width: min(300px, calc(100vw - 24px)); }
 .pp-share-pop { width: 230px; padding: 8px; z-index: 60; }
 

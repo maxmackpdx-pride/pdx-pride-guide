@@ -29,6 +29,7 @@ import {
 } from "@/components/profile/mapAttendancePreviewToChips";
 import MessageModal from "./profile/MessageModal";
 import { profileCssVars } from "@/components/profile/profileHelpers";
+import { copyTextToClipboard } from "@/lib/copyText";
 import "./MemberProfile.css";
 
 export default function MemberProfile() {
@@ -157,11 +158,12 @@ export default function MemberProfile() {
       : `https://prideguidepdx.com/u/${username}`;
 
   const onCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(profileUrl);
+    const ok = await copyTextToClipboard(profileUrl);
+    if (ok) {
       setCopied(true);
+      toast({ title: "Link copied" });
       window.setTimeout(() => setCopied(false), 1800);
-    } catch {
+    } else {
       toast({ title: "Could not copy link", variant: "destructive" });
     }
   }, [profileUrl, toast]);

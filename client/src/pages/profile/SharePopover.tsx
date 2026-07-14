@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { copyTextToClipboard } from "@/lib/copyText";
 
 function CopyIcon() {
   return (
@@ -37,13 +38,11 @@ export default function SharePopover({
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(profileUrl);
-    } catch {
-      /* clipboard unavailable, still show confirmation for visual feedback */
+    const ok = await copyTextToClipboard(profileUrl);
+    if (ok) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
   };
 
   const shareToInstagram = async () => {

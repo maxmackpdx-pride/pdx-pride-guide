@@ -220,6 +220,7 @@ export default function ProfileHero({
                 onMessage={!isOwner ? onMessage : undefined}
                 profileUrl={profileUrl}
                 displayName={displayName}
+                anchorRef={shareRef}
               />
             </div>
           </div>
