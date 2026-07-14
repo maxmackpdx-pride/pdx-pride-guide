@@ -15274,6 +15274,120 @@ html.calm-mode .category-constellation__orb {
   animation: none !important;
 }
 
+/* Directory category browse: places left, map right on desktop */
+.directory-browse-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 44px);
+  align-items: stretch;
+}
+
+.directory-browse-layout__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.directory-browse-layout__map-desktop {
+  display: none;
+}
+
+.directory-browse-layout__map-mobile {
+  margin-bottom: 22px;
+}
+
+.directory-browse-layout__map-mobile .directory-map-wrap,
+.directory-browse-layout__map-desktop .directory-map-wrap {
+  border: 1px solid #1c1c22;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.directory-map-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.directory-map-toggle {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ccff00;
+  background: #000;
+  border: 1.5px solid #ccff00;
+  padding: 7px 12px 6px;
+  cursor: pointer;
+}
+
+.directory-map-toggle:hover {
+  background: rgba(204, 255, 0, 0.12);
+}
+
+.directory-map-toggle:focus-visible {
+  outline: 2px solid #ccff00;
+  outline-offset: 2px;
+}
+
+.directory-grid--browse {
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .directory-browse-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: clamp(20px, 2.5vw, 32px);
+  }
+
+  .directory-browse-layout__main {
+    flex: 1 1 58%;
+    min-width: 0;
+  }
+
+  .directory-browse-layout__map-desktop {
+    display: block;
+    flex: 0 0 min(38%, 420px);
+    position: sticky;
+    top: calc(var(--site-header-height, 96px) + 104px);
+    align-self: flex-start;
+  }
+
+  .directory-browse-layout__map-desktop .directory-map,
+  .directory-browse-layout__map-mobile .directory-map {
+    height: 380px;
+  }
+
+  .directory-browse-layout__map-desktop .directory-map-key {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .directory-map-toolbar {
+    display: none;
+  }
+
+  .directory-grid--browse {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 899px) {
+  .directory-grid--browse {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .directory-grid--browse {
+    grid-template-columns: 1fr;
+  }
+}
+
 .gigs-page.board-page--makeover {
   background:
     radial-gradient(circle at 12% 8%, rgba(176, 107, 255, 0.07), transparent 22rem),

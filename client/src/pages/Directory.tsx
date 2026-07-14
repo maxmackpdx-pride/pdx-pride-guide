@@ -27,6 +27,8 @@ import CategoryConstellation from "@/components/CategoryConstellation";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
+const DIRECTORY_MAP_HEIGHT = 380;
+
 export type DirectoryEventSummary = {
   id: number;
   title: string;
@@ -150,6 +152,7 @@ export default function Directory() {
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
   const [showGrid, setShowGrid] = useState(directoryHasDeepLink);
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
+  const [mobileMapOpen, setMobileMapOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
 
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
@@ -252,10 +255,15 @@ export default function Directory() {
   const handleBackToCategories = () => {
     setShowGrid(false);
     setGrandOpeningOnly(false);
+    setMobileMapOpen(false);
     window.setTimeout(() => {
       document.querySelector(".category-constellation")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 20);
   };
+
+  const directoryMapFallback = (
+    <div style={{ height: DIRECTORY_MAP_HEIGHT, background: "#0a0a0a" }} aria-hidden />
+  );
 
   const createMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory", form),
@@ -395,15 +403,6 @@ export default function Directory() {
 
       {showGrid && (
         <>
-          {/* Map + pin color key */}
-          {!isLoading && (
-            <ScrollReveal>
-              <Suspense fallback={<div style={{ height: 380, background: "#0a0a0a" }} />}>
-                <DirectoryMap businesses={filtered} showKey />
-              </Suspense>
-            </ScrollReveal>
-          )}
-
           {/* Filter bar */}
           <ScrollReveal delay={30}>
           <div className="zine-filter-bar" style={{
@@ -474,61 +473,98 @@ export default function Directory() {
           </div>
           </ScrollReveal>
 
-          <div
-            ref={gridRef}
-            className="zine-content"
-            style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}
-          >
-            <ScrollReveal>
-              <button
-                type="button"
-                className="directory-back-categories"
-                onClick={handleBackToCategories}
-              >
-                ← Back to categories
-              </button>
-            </ScrollReveal>
-
-            <ScrollReveal>
-              <div className="events-count-row">
-                <div className="events-count-banner">
-                  <MapPin size={13} />
-                  <span>
-                    {isLoading ? "Loading…" : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`}
-                  </span>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {isLoading ? (
-              <BoardLoadingState label="Loading directory" />
-            ) : isError ? (
-              <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
-            ) : filtered.length === 0 ? (
-              <div className="board-empty board-empty--prototype">
-                <p className="display section-heading">Nothing matches</p>
-                <p className="board-copy-sm">
-                  {businesses.length === 0
-                    ? "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."
-                    : "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."}
-                </p>
-                <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
-                  <Plus size={16} /> Add your business
+          <div ref={gridRef} className="directory-browse-layout">
+            <div className="directory-browse-layout__main">
+              <ScrollReveal>
+                <button
+                  type="button"
+                  className="directory-back-categories"
+                  onClick={handleBackToCategories}
+                >
+                  ← Back to categories
                 </button>
-              </div>
-            ) : (
-              <ScrollReveal delay={50}>
-                <div className="directory-grid">
-                  {filtered.map(biz => (
-                    <DirectoryCard
-                      key={biz.id}
-                      biz={biz}
-                      onClick={() => setSelectedPlace(biz)}
-                      onRequireAuth={() => setShowAuth(true)}
-                    />
-                  ))}
+              </ScrollReveal>
+
+              <ScrollReveal>
+                <div className="events-count-row">
+                  <div className="events-count-banner">
+                    <MapPin size={13} />
+                    <span>
+                      {isLoading ? "Loading…" : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`}
+                    </span>
+                  </div>
                 </div>
               </ScrollReveal>
+
+              <div className="directory-map-toolbar">
+                <button
+                  type="button"
+                  className="directory-map-toggle"
+                  data-testid="button-toggle-directory-map"
+                  aria-expanded={mobileMapOpen}
+                  aria-controls="directory-map-mobile"
+                  onClick={() => setMobileMapOpen(open => !open)}
+                >
+                  {mobileMapOpen ? "Hide map" : "Show map"}
+                </button>
+              </div>
+
+              {mobileMapOpen && !isLoading && (
+                <ScrollReveal>
+                  <div id="directory-map-mobile" className="directory-browse-layout__map-mobile">
+                    <Suspense fallback={directoryMapFallback}>
+                      <DirectoryMap
+                        businesses={filtered}
+                        height={DIRECTORY_MAP_HEIGHT}
+                        showKey
+                      />
+                    </Suspense>
+                  </div>
+                </ScrollReveal>
+              )}
+
+              {isLoading ? (
+                <BoardLoadingState label="Loading directory" />
+              ) : isError ? (
+                <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
+              ) : filtered.length === 0 ? (
+                <div className="board-empty board-empty--prototype">
+                  <p className="display section-heading">Nothing matches</p>
+                  <p className="board-copy-sm">
+                    {businesses.length === 0
+                      ? "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."
+                      : "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."}
+                  </p>
+                  <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
+                    <Plus size={16} /> Add your business
+                  </button>
+                </div>
+              ) : (
+                <ScrollReveal delay={50}>
+                  <div className="directory-grid directory-grid--browse">
+                    {filtered.map(biz => (
+                      <DirectoryCard
+                        key={biz.id}
+                        biz={biz}
+                        onClick={() => setSelectedPlace(biz)}
+                        onRequireAuth={() => setShowAuth(true)}
+                      />
+                    ))}
+                  </div>
+                </ScrollReveal>
+              )}
+            </div>
+
+            {!isLoading && (
+              <aside className="directory-browse-layout__map-desktop" aria-label="Directory map">
+                <Suspense fallback={directoryMapFallback}>
+                  <DirectoryMap
+                    businesses={filtered}
+                    height={DIRECTORY_MAP_HEIGHT}
+                    showKey
+                  />
+                </Suspense>
+              </aside>
             )}
           </div>
         </>
