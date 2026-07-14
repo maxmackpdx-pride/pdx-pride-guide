@@ -1147,6 +1147,7 @@ h2.display,
   z-index: var(--hero-layer-bg);
 }
 
+/* Legacy unused panel class — points at the single active skyline collage */
 .home-hero-bg-collage {
   position: absolute;
   top: -8%;
@@ -1156,7 +1157,7 @@ h2.display,
   z-index: var(--hero-layer-bg);
   background-image: url("/home-hero-collage.jpg");
   background-size: cover;
-  background-position: center 22%;
+  background-position: center center;
   background-repeat: no-repeat;
   opacity: 0.48;
   mix-blend-mode: screen;
@@ -1207,9 +1208,10 @@ h2.display,
   bottom: -8%;
   left: 0;
   right: 0;
-  background-image: url("/home-hero-collage-pride.jpg");
+  /* Same skyline collage as desktop — no alternate pride crop */
+  background-image: url("/home-hero-collage.jpg");
   background-size: cover;
-  background-position: 30% center;
+  background-position: center center;
   background-repeat: no-repeat;
   opacity: 0.9;
   transform: translateY(var(--parallax-y, 0px));
