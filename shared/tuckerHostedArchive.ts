@@ -220,11 +220,11 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "sunny-sides-2025",
     title: "Sunny Sides",
     description:
-      "Morning jack-off party for sides — Yes Coach Productions × Stumptown Strokes at Sanctuary. Hands, bodies, lube, and slow simmers. No penetration.",
+      "Brunchtime jack-off party for sides — Yes Coach Productions × Stumptown Strokes at Sanctuary. Hands, bodies, lube, and slow simmers. No penetration. Doors close 11:30AM.",
     venueName: "Sanctuary Club",
     start: "2025-07-06T11:00:00-0700",
     end: "2025-07-06T14:00:00-0700",
-    poster: "/posters/tucker-archive/yes-coach-apr-2025.jpg",
+    poster: "/posters/tucker-archive/sunny-sides-2025.jpg",
     eventTypes: ["PARTY", "LEATHER"],
   }),
   archiveRow({
@@ -256,7 +256,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "yes-coach-apr-2025",
     title: "Yes Coach!",
     description:
-      "Steamy athletic fetish party — sporty meets sexy. Athletic gear required for entry; team uniform contest. Hosted by Tucker Max at Sanctuary.",
+      "Athletic fetish party at Sanctuary — sporty meets sexy. Featuring Greg McKeon and Starkey. Hosted by Tucker Max. 6PM–11PM.",
     venueName: "Sanctuary Club",
     start: "2025-04-06T18:00:00-0700",
     end: "2025-04-06T23:00:00-0700",
@@ -338,11 +338,12 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     id: -900_017,
     slug: "fairy-dust-2024",
     title: "Fairy Dust",
-    description: "Fantasy-forward play party at Sanctuary. Hosted by Tucker Max.",
+    description:
+      "Fantasy-forward play party at Sanctuary — wings, firelight, and forest magic. Tucker Max presents. Water-based lube only.",
     venueName: "Sanctuary Club",
     start: "2024-08-04T18:00:00-0700",
     end: "2024-08-05T00:00:00-0700",
-    poster: "/posters/tucker-archive/fairy-dust-2024.png",
+    poster: "/posters/tucker-archive/fairy-dust-2024.jpg",
     eventTypes: ["PARTY", "LEATHER"],
   }),
   archiveRow({
@@ -404,18 +405,6 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     end: "2024-04-08T00:00:00-0700",
     poster: "/posters/tucker-archive/yes-coach-teams-2024.jpeg",
     eventTypes: ["PARTY", "SPORTS", "LEATHER"],
-  }),
-  archiveRow({
-    id: -900_023,
-    slug: "fairy-dust-july-2025",
-    title: "Fairy Dust",
-    description:
-      "Fantasy-forward play party at Sanctuary — wings, firelight, and forest magic. Tucker Max presents. Water-based lube only.",
-    venueName: "Sanctuary Club",
-    start: "2025-07-07T18:00:00-0700",
-    end: "2025-07-08T00:00:00-0700",
-    poster: "/posters/tucker-archive/fairy-dust-july7.jpg",
-    eventTypes: ["PARTY", "LEATHER"],
   }),
   archiveRow({
     id: -900_024,
