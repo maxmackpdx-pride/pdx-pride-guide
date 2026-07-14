@@ -189,6 +189,14 @@ export default function MemberProfile() {
   const going = data.events?.going ?? { upcoming: [], past: [] };
   const bigOne = pickTheBigOne(data);
   const posts = data.boardPosts ?? [];
+  // Hosted past → HOST/MC. Attended-only past → WENT. Host wins when both lists share an id
+  // (Tucker archive is almost all hosted; tagging those WENT is wrong).
+  const stashEvents = useMemo(() => {
+    const byId = new Map<number, (typeof going.past)[0] & { stashRole: "MC" | "WENT" }>();
+    for (const e of going.past) byId.set(e.id, { ...e, stashRole: "WENT" });
+    for (const e of hosting.past) byId.set(e.id, { ...e, stashRole: "MC" });
+    return Array.from(byId.values());
+  }, [going.past, hosting.past]);
 
   return (
     <div
@@ -269,7 +277,7 @@ export default function MemberProfile() {
 
         {/* Full shell width (not locked in the left split column) */}
         <FlyerStash
-          events={going.past.map((e) => ({ ...e, stashRole: "WENT" as const }))}
+          events={stashEvents}
           onEventClick={(e) => openEvent(e.id)}
         />
 
