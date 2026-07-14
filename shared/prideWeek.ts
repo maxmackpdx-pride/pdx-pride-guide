@@ -33,6 +33,27 @@ export const PRIDE_WEEK_DAY_OPTIONS: ReadonlyArray<{
 export const PRIDE_WEEK_START_DATE = PRIDE_WEEK_DAY_OPTIONS[0].date;
 export const PRIDE_WEEK_END_DATE = PRIDE_WEEK_DAY_OPTIONS[PRIDE_WEEK_DAY_OPTIONS.length - 1].date;
 
+/**
+ * After Pride Sunday 6pm Pacific, users may add / show events past Jul 19.
+ * Until then, post-Pride listings are suppressed (seeds + board expansion).
+ */
+export const POST_PRIDE_EVENTS_OPEN_AT = "2026-07-19T18:00:00-07:00";
+
+export function postPrideEventsOpenAtMs(): number {
+  return new Date(POST_PRIDE_EVENTS_OPEN_AT).getTime();
+}
+
+/** True while the calendar is still locked to Pride Week only. */
+export function isPostPrideListingCapActive(nowMs: number = Date.now()): boolean {
+  return nowMs < postPrideEventsOpenAtMs();
+}
+
+/** Calendar day (YYYY-MM-DD) is after Pride Sunday. */
+export function isAfterPrideWeekCalendarDay(dayKey: string | null | undefined): boolean {
+  if (!dayKey) return false;
+  return dayKey > PRIDE_WEEK_END_DATE;
+}
+
 export const DAY_COLORS: Record<string, string> = Object.fromEntries(
   PRIDE_WEEK_DAY_OPTIONS.map((d) => [d.value, d.color]),
 );

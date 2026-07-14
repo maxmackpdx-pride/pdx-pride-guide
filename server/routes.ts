@@ -3,7 +3,11 @@ import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
-import { prideDayFromDate } from "@shared/prideWeek";
+import {
+  isPostPrideListingCapActive,
+  prideDayFromDate,
+  PRIDE_WEEK_END_DATE,
+} from "@shared/prideWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
@@ -40,6 +44,7 @@ import {
   generalSpottedClosesAt,
   isMissedConnectionPostable,
   missedConnectionClosesAt,
+  pacificCalendarDate,
   pacificDayOfWeek,
 } from "@shared/missedConnections";
 import { isEventTalentRole } from "@shared/eventTalent";
@@ -250,6 +255,13 @@ function enrichModerationForAdmin(req: any) {
 function validateEventDates(dateStart?: string, dateEnd?: string): string | null {
   if (!dateStart || !dateEnd) return null;
   if (new Date(dateEnd) <= new Date(dateStart)) return "End date must be after start date";
+  // Until Jul 19 6pm Pacific, keep the board focused on Pride week only.
+  if (isPostPrideListingCapActive()) {
+    const startDay = pacificCalendarDate(dateStart);
+    if (startDay && startDay > PRIDE_WEEK_END_DATE) {
+      return "Post–Pride week events open Sunday July 19 at 6pm Pacific. Until then, list nights through July 19 only.";
+    }
+  }
   return null;
 }
 

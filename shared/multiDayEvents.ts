@@ -1,11 +1,16 @@
 import type { Event } from "./schema";
 import { pacificCalendarDate, pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
-import { PRIDE_WEEK_DAYS, PRIDE_WEEK_END_DATE, PRIDE_WEEK_START_DATE } from "./prideWeek";
+import {
+  isPostPrideListingCapActive,
+  PRIDE_WEEK_DAYS,
+  PRIDE_WEEK_END_DATE,
+  PRIDE_WEEK_START_DATE,
+} from "./prideWeek";
 
 const PACIFIC_TZ = "America/Los_Angeles";
 const PRIDE_LISTING_DAYS = new Set<string>(PRIDE_WEEK_DAYS);
 
-/** No board listings after Pride Sunday (hard product cap). */
+/** During the Pride-week lock, only emit board days inside the week. */
 function isWithinPrideWeekCalendar(dayKey: string | null | undefined): boolean {
   if (!dayKey) return false;
   return dayKey >= PRIDE_WEEK_START_DATE && dayKey <= PRIDE_WEEK_END_DATE;
@@ -154,11 +159,13 @@ function primaryDayOfWeek(dateStart: string): string {
 /** Split true multi-day festivals into one listing per Pride day; keep overnights as one row. */
 export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing[] {
   const expanded: EventListing[] = [];
+  // Until Jul 19 6pm Pacific: no board days after Pride Sunday.
+  // After that unlock, post-Pride nights expand/list normally.
+  const prideCap = isPostPrideListingCapActive();
 
   for (const event of events) {
-    // Drop whole rows that start after Pride week (OSLC Aug, etc.).
     const startKey = pacificCalendarDate(event.dateStart);
-    if (startKey && startKey > PRIDE_WEEK_END_DATE) continue;
+    if (prideCap && startKey && startKey > PRIDE_WEEK_END_DATE) continue;
 
     if (!isMultiDayFestival(event.dateStart, event.dateEnd)) {
       expanded.push({
@@ -172,11 +179,11 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
     let emitted = 0;
 
     for (const dayKey of calendarDays) {
-      // Never emit Mon Jul 20+ even if date_end spills past Pride Sunday.
-      if (!isWithinPrideWeekCalendar(dayKey)) continue;
+      if (prideCap && !isWithinPrideWeekCalendar(dayKey)) continue;
 
       const dayOfWeek = dayOfWeekForCalendarDay(dayKey);
-      if (!PRIDE_LISTING_DAYS.has(dayOfWeek)) continue;
+      // During Pride lock, only Pride weekday codes. After unlock, any day is fine.
+      if (prideCap && !PRIDE_LISTING_DAYS.has(dayOfWeek)) continue;
 
       const identity = eventDayIdentity({ ...event, dayOfWeek });
       const alreadyListed = events.some(
@@ -189,15 +196,14 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
         ...event,
         dateStart,
         dateEnd,
-        dayOfWeek,
+        dayOfWeek: dayOfWeek || primaryDayOfWeek(dateStart),
         listingInstanceKey: `${event.id}:${dayKey}`,
       });
       emitted += 1;
     }
 
     if (emitted === 0) {
-      // Only fall back if the primary start is still within Pride week.
-      if (startKey && startKey <= PRIDE_WEEK_END_DATE) {
+      if (!prideCap || (startKey && startKey <= PRIDE_WEEK_END_DATE)) {
         expanded.push({
           ...event,
           dayOfWeek: event.dayOfWeek || primaryDayOfWeek(event.dateStart),

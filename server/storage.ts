@@ -67,6 +67,7 @@ import { haversineMeters } from "@shared/geo";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 import { mergeTuckerHostedArchivePast } from "@shared/tuckerHostedArchive";
+import { isPostPrideListingCapActive } from "@shared/prideWeek";
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
  * fields on top of the raw gig_posts columns. */
@@ -2874,11 +2875,14 @@ function hardDeleteEventIds(ids: number[]) {
 }
 
 /**
- * Hard cap: no live listings after Pride Sunday Jul 19, 2026.
- * Runs every boot so seeds/restores cannot bring post-Pride nights back.
- * Multi-day events that spill past Jul 19 are clipped (not deleted).
+ * Until Jul 19 2026 6pm Pacific: no live listings after Pride Sunday.
+ * Runs every boot so seeds cannot revive post-Pride nights early.
+ * After the unlock, this is a no-op — post-Pride events stay.
+ * Multi-day events that spill past Jul 19 are clipped (not deleted) while locked.
  */
 function prunePostPrideWeekEvents() {
+  if (!isPostPrideListingCapActive()) return;
+
   // Anything whose start calendar day is after Jul 19 is hard-deleted.
   const byStart = sqlite
     .prepare(`SELECT id FROM events WHERE date_start >= '2026-07-20'`)
@@ -2906,7 +2910,7 @@ function prunePostPrideWeekEvents() {
   // Any remaining LIVE row with a post-Pride start (race / re-seed) is removed.
   sqlite
     .prepare(
-      `UPDATE events SET status = 'REMOVED', admin_notes = COALESCE(admin_notes || ' | ', '') || 'Auto-removed: after Pride week end 2026-07-19' WHERE date_start >= '2026-07-20' AND status != 'REMOVED'`,
+      `UPDATE events SET status = 'REMOVED', admin_notes = COALESCE(admin_notes || ' | ', '') || 'Auto-removed: after Pride week end 2026-07-19 (locked until Jul 19 6pm PT)' WHERE date_start >= '2026-07-20' AND status != 'REMOVED'`,
     )
     .run();
 }
