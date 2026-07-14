@@ -21,17 +21,17 @@ const TABS: Array<{ key: EventsTab; label: string }> = [
 ];
 
 function dayDotClass(day?: string) {
+  const key = String(day || "").trim().toUpperCase().slice(0, 3);
   const map: Record<string, string> = {
+    MON: "d-mon",
+    TUE: "d-tue",
+    WED: "d-wed",
     THU: "d-thu",
     FRI: "d-fri",
     SAT: "d-sat",
     SUN: "d-sun",
-    Thu: "d-thu",
-    Fri: "d-fri",
-    Sat: "d-sat",
-    Sun: "d-sun",
   };
-  return day ? map[day] ?? "" : "";
+  return map[key] ?? "";
 }
 
 type Props = {

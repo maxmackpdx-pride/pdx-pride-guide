@@ -21,20 +21,17 @@ type Props = {
 };
 
 function dayDotClass(day?: string | null) {
+  const key = String(day || "").trim().toUpperCase().slice(0, 3);
   const map: Record<string, string> = {
+    MON: "d-mon",
+    TUE: "d-tue",
+    WED: "d-wed",
     THU: "d-thu",
     FRI: "d-fri",
     SAT: "d-sat",
     SUN: "d-sun",
-    MON: "d-mon",
-    TUE: "d-tue",
-    WED: "d-wed",
-    Thu: "d-thu",
-    Fri: "d-fri",
-    Sat: "d-sat",
-    Sun: "d-sun",
   };
-  return day ? map[day] ?? "" : "";
+  return map[key] ?? "";
 }
 
 function eventHref(item: HubFeedItem): string | null {

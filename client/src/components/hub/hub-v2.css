@@ -46,6 +46,7 @@
     .ico{color:var(--board-muted);transition:color .15s;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em}
     .ico:hover{color:#fff}
     .dot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block}
+    .d-mon{background:var(--day-mon)}.d-tue{background:var(--day-tue)}.d-wed{background:var(--day-wed)}
     .d-thu{background:var(--day-thu)}.d-fri{background:var(--day-fri)}.d-sat{background:var(--day-sat)}.d-sun{background:var(--day-sun)}
     .sw{position:relative;width:42px;height:24px;border-radius:99px;background:#17171e;border:1px solid var(--panel-border-2);cursor:pointer;flex:none;transition:.18s}
     .sw.on{background:var(--panel-cyan);border-color:var(--panel-cyan)}

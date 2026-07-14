@@ -16,6 +16,10 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   ccslaughters: "CC_Slaughters",
   coffeebeer: "Coffee_Beer",
   darcellexvshowplace: "Darcelle_XV_Showplace",
+  darcellexv: "Darcelle_XV_Showplace",
+  darcelle: "Darcelle_XV_Showplace",
+  darcellexvplaza: "Darcelle_XV_Showplace",
+  darcelleplaza: "Darcelle_XV_Showplace",
   eagleportland: "Eagle_Portland",
   eitheror: "Either_Or",
   escapebargrill: "Escape_Bar_and_Grill",
@@ -127,7 +131,18 @@ export function resolveDirectoryLogo(
   name: string,
   imageUrl?: string | null,
 ): string | null {
-  const stem = STEM_BY_NORMALIZED[normalizeDirectoryName(name)];
+  const norm = normalizeDirectoryName(name);
+  let stem = STEM_BY_NORMALIZED[norm];
+  // Prefix / contains fallbacks (e.g. "Darcelle XV Plaza" → darcelle…)
+  if (!stem && norm.length >= 5) {
+    for (const [key, value] of Object.entries(STEM_BY_NORMALIZED)) {
+      if (key.length < 5) continue;
+      if (norm.startsWith(key) || key.startsWith(norm) || norm.includes(key)) {
+        stem = value;
+        break;
+      }
+    }
+  }
   if (stem) return `/directory-logos/${stem}.png`;
   if (imageUrl && imageUrl.trim()) return imageUrl.trim();
   return null;
