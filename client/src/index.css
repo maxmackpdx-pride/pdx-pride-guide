@@ -5400,8 +5400,9 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   --avatar-size: clamp(51px, 5.75vw, 60px); /* +15% vs 44/5vw/52 */
 }
 
+/* No yellow "active profile" box on the nav avatar (own profile or not) */
 .site-profile-menu--active .site-profile-menu__avatar-link .user-avatar {
-  box-shadow: 0 0 0 2px var(--neon-yellow), 0 0 14px rgba(204, 255, 0, 0.35);
+  box-shadow: none;
 }
 
 .site-profile-menu__caret {
@@ -5462,7 +5463,7 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 }
 
 .site-profile-menu--active .site-profile-menu__trigger .user-avatar {
-  box-shadow: 0 0 0 2px var(--neon-yellow), 0 0 14px rgba(204, 255, 0, 0.35);
+  box-shadow: none;
 }
 
 .site-profile-menu__notify-dot {
