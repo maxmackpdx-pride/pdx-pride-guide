@@ -123,6 +123,25 @@ export function formatCustomSpottedVenue(eventLabel: string, location?: string):
 
 export const MISSED_CONNECTION_ANON_LABEL = "Anonymous";
 
+/**
+ * Standard: some directory categories never surface Missed Connections. A
+ * healthcare provider (clinic, therapist, PrEP, etc.) is not a venue where a
+ * "spotted you here" post belongs. This Set is the single source of truth —
+ * add a category here to hide the Missed Connections tab on every surface.
+ */
+export const MISSED_CONNECTIONS_HIDDEN_CATEGORIES: ReadonlySet<string> = new Set([
+  "healthcare",
+]);
+
+/** True when any of the given category/type values should hide Missed Connections. */
+export function categoryHidesMissedConnections(
+  ...categories: Array<string | null | undefined>
+): boolean {
+  return categories.some(
+    (c) => !!c && MISSED_CONNECTIONS_HIDDEN_CATEGORIES.has(c.toLowerCase()),
+  );
+}
+
 /** Posts not tied to a calendar event expire 7 days after creation. */
 export function generalSpottedClosesAt(now = Date.now()): string {
   return new Date(now + POST_WINDOW_MS).toISOString();

@@ -26,6 +26,7 @@ import { placePath } from "@shared/placeSlug";
 import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
+import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import "./PlaceModal.css";
 
 type EditableFields = {
@@ -341,10 +342,15 @@ export default function PlaceModal({
     textTransform: "uppercase", color: "var(--text-lo)",
   };
 
+  // Standard: healthcare (and any category in MISSED_CONNECTIONS_HIDDEN_CATEGORIES)
+  // never surfaces Missed Connections in the directory.
+  const hideMissed = categoryHidesMissedConnections(place.type, category);
   const tabs: Array<{ key: ModalTab; label: string; count: number }> = [
     { key: "events", label: "Events", count: upcomingEvents.length },
     { key: "past", label: "Past", count: pastEvents.length },
-    { key: "missed", label: "Missed Connections", count: spotted.length },
+    ...(hideMissed
+      ? []
+      : [{ key: "missed" as ModalTab, label: "Missed Connections", count: spotted.length }]),
     { key: "gigs", label: "Gigs", count: gigs.length },
   ];
 
