@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
-import { ChevronDown, ChevronLeft, ChevronUp, Inbox } from "lucide-react";
+import { ChevronLeft, Inbox } from "lucide-react";
 import { Link } from "wouter";
 import type { HubSection } from "./types";
 import { hubAdminNavItems } from "@/lib/hubAdminNav";
@@ -133,13 +133,6 @@ export default function HubV2Shell({
     setMobileDrawerOpen(false);
   };
 
-  const activeSectionLabel = (() => {
-    if (isAdminChrome) {
-      return adminNav.find((item) => item.section === section)?.label ?? "Admin";
-    }
-    return memberNav.find((item) => item.key === section)?.label ?? "Feed";
-  })();
-
   useEffect(() => {
     setMobileDrawerOpen(false);
   }, [section, isAdminChrome]);
@@ -227,35 +220,39 @@ export default function HubV2Shell({
   const mobileDrawer =
     typeof document !== "undefined"
       ? createPortal(
-          <div
-            className={`hub-v2-drawer${mobileDrawerOpen ? " is-open" : ""}`}
-            data-hub-drawer
-          >
-            <button
-              type="button"
-              className="hub-v2-drawer__handle"
-              aria-expanded={mobileDrawerOpen}
-              aria-controls="hub-v2-drawer-panel"
-              onClick={() => setMobileDrawerOpen((open) => !open)}
+          <>
+            {mobileDrawerOpen && (
+              <button
+                type="button"
+                className="hub-v2-drawer-backdrop"
+                aria-label="Close hub menu"
+                onClick={() => setMobileDrawerOpen(false)}
+              />
+            )}
+            <div
+              className={`hub-v2-drawer${mobileDrawerOpen ? " is-open" : ""}`}
+              data-hub-drawer
             >
-              <div className="hub-v2-drawer__handle-top">
-                {modeToggle ?? <span className="hub-v2-drawer__solo-label">Your hub</span>}
-                <span className="hub-v2-drawer__section">{activeSectionLabel}</span>
+              <div id="hub-v2-drawer-panel" className="hub-v2-drawer__sheet" role="dialog" aria-label="Hub menu" aria-hidden={!mobileDrawerOpen}>
+                {modeToggle}
+                <div className="hub-v2-kicker hub-v2-kicker--drawer">
+                  {isAdminChrome ? "Admin" : "Your hub"}
+                </div>
+                {navButtons}
+                {sideExtra && <div className="hub-v2-side-extra hub-v2-side-extra--drawer">{sideExtra}</div>}
               </div>
-              {mobileDrawerOpen ? (
-                <ChevronDown size={18} strokeWidth={2.4} aria-hidden />
-              ) : (
-                <ChevronUp size={18} strokeWidth={2.4} aria-hidden />
-              )}
-            </button>
-            <div id="hub-v2-drawer-panel" className="hub-v2-drawer__panel">
-              <div className="hub-v2-kicker hub-v2-kicker--drawer">
-                {isAdminChrome ? "Admin" : "Your hub"}
-              </div>
-              {navButtons}
-              {sideExtra && <div className="hub-v2-side-extra hub-v2-side-extra--drawer">{sideExtra}</div>}
+              <button
+                type="button"
+                className="hub-v2-drawer__grab"
+                aria-expanded={mobileDrawerOpen}
+                aria-controls="hub-v2-drawer-panel"
+                aria-label={mobileDrawerOpen ? "Close hub menu" : "Open hub menu"}
+                onClick={() => setMobileDrawerOpen((open) => !open)}
+              >
+                <span className="hub-v2-drawer__pill" aria-hidden />
+              </button>
             </div>
-          </div>,
+          </>,
           document.body,
         )
       : null;
