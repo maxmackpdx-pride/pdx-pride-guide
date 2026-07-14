@@ -63,7 +63,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const filterRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
-  const isOwner = Boolean(user?.isPrimaryOwner || user?.isSuperAdmin);
+  /** Owner desk is primary owner only (@tucker_pdmax), not other admins/super-admins. */
+  const isOwner = Boolean(user?.isPrimaryOwner);
   const adminMailActive = isAdmin && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent");
 
   const { threads, sendMessage, setRead, archive, unarchive, deletedCount, revealSelf, resolveLineup } = useInboxThreads(

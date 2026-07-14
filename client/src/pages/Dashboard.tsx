@@ -217,8 +217,8 @@ export default function Dashboard() {
     refetchInterval: 90_000,
   });
   const pendingCount = pendingAdmin.count || 0;
-  const ownerCount = pendingAdmin.ownerCount || 0;
   const isPrimaryOwner = Boolean(user?.isPrimaryOwner);
+  const ownerCount = isPrimaryOwner ? (pendingAdmin.ownerCount || 0) : 0;
 
   const dashboardQueryErrors = [
     myGigsQuery.isError && "gigs",
