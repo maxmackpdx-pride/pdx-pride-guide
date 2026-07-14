@@ -6458,7 +6458,10 @@ export const storage: IStorage = {
       WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
-    const attendedPast = attendedAll.filter(isPastEvent);
+    const attendedPastLive = attendedAll.filter(isPastEvent);
+    // Host nights Tucker archived are nights he ran and was there — surface in
+    // both hosting.past and attended past without inventing fake RSVP rows.
+    const attendedPast = mergeTuckerHostedArchivePast(user.username, attendedPastLive);
     // Public Going rail: upcoming RSVPs are visible on member profiles.
     // (Previously owner-only, which left the design's Going panel empty for everyone else.)
     const goingToUpcoming = attendedAll.filter(e => !isPastEvent(e));

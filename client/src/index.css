@@ -147,9 +147,12 @@ body::before {
     #050505;
 }
 
+/* Absolute (not fixed): fixed grain lives inside main (z-index 2) and paints
+   over the site footer (z-index 1) while you scroll — Places and every other
+   zine page looked noisy under the footer. Absolute keeps texture on-page. */
 .zine-page::before {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
@@ -158,13 +161,6 @@ body::before {
     linear-gradient(135deg, rgba(255,255,255,0.035), transparent 28%, rgba(255,255,255,0.025) 58%, transparent);
   background-size: 32px 32px, 100% 100%;
   opacity: 0.23;
-}
-
-/* Schedule: the shared zine texture is `position: fixed`, which pins it to the
-   viewport and reads as a parallax layer as the long grid + footer scroll past.
-   Anchor it to the page instead so it scrolls with the content. */
-.schedule-page.zine-page::before {
-  position: absolute;
 }
 
 /* Responsive site header */
@@ -237,6 +233,13 @@ body::before {
   max-width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
+}
+
+/* Solid black under the pre-footer rainbow so page grain never shows through */
+.site-pre-footer-rainbow {
+  position: relative;
+  background: #000;
+  flex-shrink: 0;
 }
 
 .home-page {
@@ -3378,9 +3381,10 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   position: relative;
 }
 
+/* Absolute, not fixed — same footer bleed as zine-page (Places, Gigs, Gifting, etc.) */
 .board-page::after {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
@@ -10363,13 +10367,15 @@ html.calm-mode .board-detail-backdrop {
 
 
 /* ═══════════════════════════════════════════════════════════
-   SITE FOOTER — compact horizontal spread + black wallpaper
+   SITE FOOTER — solid black (no grain / wallpaper bleed)
    ═══════════════════════════════════════════════════════════ */
 
 .site-footer {
   position: relative;
-  background: #06060a;
+  isolation: isolate;
+  background: #000;
   border-top: 1px solid #1c1c22;
+  background-image: none;
 }
 
 .site-footer__inner {

@@ -6,6 +6,11 @@
   50% { transform: rotate(3deg) translateY(-6px); }
 }
 
+@keyframes aboutPgStickerFloat {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(-2deg) translateY(-5px); }
+}
+
 @keyframes aboutWordGlitch {
   0%, 92%, 100% { text-shadow: none; transform: none; }
   93% { text-shadow: -2px 0 var(--cyan, #19e3ff), 2px 0 var(--pink, #ff1fa0); transform: translateX(1px); }
@@ -364,11 +369,19 @@
   white-space: normal;
 }
 
-.about-v2-creator__ig-sticker {
+.about-v2-creator__stickers {
   position: absolute;
   left: 16px;
   bottom: 16px;
   z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.about-v2-creator__pg-sticker,
+.about-v2-creator__ig-sticker {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -379,14 +392,31 @@
   font-size: 0.9rem;
   color: #000;
   text-decoration: none;
-  background: var(--pink, #ff1fa0);
-  border: 2px solid var(--lime, #ccff00);
   border-radius: 4px;
   padding: 10px 15px 8px;
+  transition: box-shadow 0.15s ease;
+}
+
+.about-v2-creator__pg-sticker {
+  background: var(--lime, #ccff00);
+  border: 2px solid var(--pink, #ff1fa0);
+  transform: rotate(-2deg);
+  box-shadow: 4px 4px 0 rgba(255, 31, 160, 0.45);
+  animation: aboutPgStickerFloat 3.4s ease-in-out infinite;
+}
+
+.about-v2-creator__pg-sticker:hover {
+  box-shadow: 6px 6px 0 rgba(255, 31, 160, 0.65);
+  color: #000;
+  text-decoration: none;
+}
+
+.about-v2-creator__ig-sticker {
+  background: var(--pink, #ff1fa0);
+  border: 2px solid var(--lime, #ccff00);
   transform: rotate(3deg);
   box-shadow: 4px 4px 0 rgba(204, 255, 0, 0.5);
   animation: aboutStickerFloat 3.2s ease-in-out infinite;
-  transition: box-shadow 0.15s ease;
 }
 
 .about-v2-creator__ig-sticker:hover {
@@ -1131,9 +1161,14 @@ button.about-v2-project--button:focus-visible {
   .about-v2-work__badge .dot,
   .about-v2-stats__num--pop,
   .about-v2-work__card,
+  .about-v2-creator__pg-sticker,
   .about-v2-creator__ig-sticker,
   .about-v2-manifesto__glitch {
     animation: none !important;
+  }
+
+  .about-v2-creator__pg-sticker {
+    transform: rotate(-2deg);
   }
 
   .about-v2-creator__ig-sticker {
@@ -1159,9 +1194,14 @@ html.calm-mode .about-v2-work__badge .dot {
 
 html.calm-mode .about-v2-stats__num--pop,
 html.calm-mode .about-v2-work__card,
+html.calm-mode .about-v2-creator__pg-sticker,
 html.calm-mode .about-v2-creator__ig-sticker,
 html.calm-mode .about-v2-manifesto__glitch {
   animation: none !important;
+}
+
+html.calm-mode .about-v2-creator__pg-sticker {
+  transform: rotate(-2deg);
 }
 
 html.calm-mode .about-v2-creator__ig-sticker {

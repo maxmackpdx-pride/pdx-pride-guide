@@ -1,12 +1,13 @@
 /** Profile accent + banner allowlists (shared by client and server). */
 
+/** Must match server allowlist in profileTheme.ts (PUT /api/users/me). */
 export const PROFILE_ACCENT_COLORS = [
   "#FF00CC",
   "#00FFFF",
   "#CCFF00",
   "#FF6600",
   "#8800FF",
-  "#39FF14",
+  "#00EE44", // neon-green — must match profileTheme (not day-sat #39FF14)
   "#0044FF",
   "#FF2400",
 ] as const;
@@ -30,18 +31,25 @@ export function isValidProfileAccent(hex: unknown): hex is ProfileAccentColor {
   return typeof hex === "string" && PROFILE_ACCENT_COLORS.includes(hex.toUpperCase() as ProfileAccentColor);
 }
 
+/**
+ * Solid / gradient banner presets only (day-flyer aesthetic, no photo collages).
+ * `path: null` = CSS accent gradient. Custom upload uses coverImageUrl separately.
+ * Legacy collage/sticker/social paths remain accepted so existing profiles still load.
+ */
 export const PROFILE_BANNERS = [
-  { key: "accent", label: "Accent color", path: null },
-  { key: "collage", label: "Neon collage", path: "/sandbox-ds/banners/hero-collage.png" },
-  { key: "stickers", label: "Sticker wall", path: "/sandbox-ds/banners/banner-stickers.png" },
-  { key: "social", label: "Pride Guide", path: "/sandbox-ds/banners/banner-social.png" },
+  { key: "accent", label: "Accent gradient", path: null },
 ] as const;
 
-export const DEFAULT_PROFILE_BANNER = "/sandbox-ds/banners/hero-collage.png";
+/** Legacy image paths still accepted by validators / old profile rows. */
+export const LEGACY_PROFILE_BANNER_PATHS = [
+  "/sandbox-ds/banners/hero-collage.png",
+  "/sandbox-ds/banners/banner-stickers.png",
+  "/sandbox-ds/banners/banner-social.png",
+] as const;
 
-const BANNER_PATHS: Set<string> = new Set(
-  PROFILE_BANNERS.flatMap(b => (b.path ? [b.path] : [])),
-);
+export const DEFAULT_PROFILE_BANNER = null;
+
+const BANNER_PATHS: Set<string> = new Set(LEGACY_PROFILE_BANNER_PATHS);
 
 export function isValidProfileBanner(path: unknown): path is string | null {
   if (path === null || path === "") return true;

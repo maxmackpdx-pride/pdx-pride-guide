@@ -403,7 +403,7 @@ a.pp-btn {
   box-shadow: 0 20px 44px -14px #000;
 }
 
-.pp-accent-pop { width: 246px; }
+.pp-accent-pop { width: min(280px, calc(100vw - 32px)); }
 .pp-share-pop { width: 230px; padding: 8px; z-index: 60; }
 
 .pp-accent-pop__head {
@@ -460,9 +460,52 @@ a.pp-btn {
   cursor: pointer;
   background-size: cover;
   background-position: center;
+  flex: 0 0 auto;
 }
 
-.pp-accent-pop__banner.is-on { border-color: #fff; }
+.pp-accent-pop__banner.is-on {
+  border-color: #fff;
+  box-shadow: 0 0 0 1px #fff, 0 0 12px -2px rgba(255, 255, 255, 0.35);
+}
+
+.pp-accent-pop__swatch.is-pending {
+  opacity: 0.75;
+}
+
+.pp-accent-pop__swatch:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.pp-accent-pop__hint {
+  margin: -4px 0 10px;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--text-lo, #888);
+}
+
+.pp-accent-pop__upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 2px;
+  padding: 10px 12px 9px;
+  box-sizing: border-box;
+  border: 1px dashed color-mix(in srgb, var(--profile-acc, #ff00cc) 45%, #444);
+  border-radius: 4px;
+  color: var(--profile-acc-t, var(--profile-acc, #ff00cc));
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pp-accent-pop__upload:hover {
+  background: color-mix(in srgb, var(--profile-acc, #ff00cc) 12%, transparent);
+  border-style: solid;
+}
 
 .pp-share-pop__item {
   width: 100%;

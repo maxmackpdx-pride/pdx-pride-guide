@@ -26,7 +26,8 @@ type Props = {
   onMessage?: () => void;
   onAccentToggle: () => void;
   onAccent: (hex: string) => void;
-  onBanner: (path: string | null) => void;
+  /** Solid day-flyer banner: sets accent + accent-gradient, clears custom cover. */
+  onSolidBanner: (hex: string) => void;
 };
 
 function buildMetaLine(data: PublicProfileData, memberYear: number | null): string {
@@ -70,10 +71,11 @@ export default function ProfileHero({
   onMessage,
   onAccentToggle,
   onAccent,
-  onBanner,
+  onSolidBanner,
 }: Props) {
   const accentRef = useRef<HTMLDivElement>(null);
   const shareRef = useRef<HTMLDivElement>(null);
+  const hasCustomCover = !!data.coverImageUrl;
   const isPromoter = !!(data.isPromoter || data.verifiedHost);
   const displayName = data.displayName || data.username;
   const memberYear =
@@ -149,7 +151,8 @@ export default function ProfileHero({
             </div>
           </div>
 
-          <div className="pp-hero__actions pp-hero__actions--desktop">
+          {/* Single action row — no second copy under the avatar/bio */}
+          <div className="pp-hero__actions">
             {!isOwner && (
               <>
                 <button
@@ -192,10 +195,11 @@ export default function ProfileHero({
                   open={accentOpen}
                   accent={accent}
                   banner={banner}
+                  hasCustomCover={hasCustomCover}
                   isOwner={isOwner}
                   onClose={onAccentToggle}
                   onAccent={onAccent}
-                  onBanner={onBanner}
+                  onSolidBanner={onSolidBanner}
                 />
               </div>
             )}
@@ -221,73 +225,6 @@ export default function ProfileHero({
         </div>
 
         {data.bio ? <p className="pp-hero__bio">{data.bio}</p> : null}
-
-        {/* Mobile action row: Follow + Message full-width under bio */}
-        <div className="pp-hero__actions pp-hero__actions--mobile">
-          {!isOwner && (
-            <>
-              <button
-                type="button"
-                className={`pp-btn pp-btn--follow${isFollowing ? " is-on" : ""}`}
-                onClick={onFollow}
-                disabled={followPending}
-              >
-                {isFollowing && (
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                )}
-                {isFollowing ? "Following" : "Follow"}
-              </button>
-              {onMessage && (
-                <button type="button" className="pp-btn pp-btn--message" onClick={onMessage}>
-                  Message
-                </button>
-              )}
-            </>
-          )}
-          {isOwner && (
-            <Link href="/dashboard?edit=profile" className="pp-btn pp-btn--outline display">
-              Edit profile
-            </Link>
-          )}
-          {isOwner && (
-            <div className="pp-hero__picker-wrap">
-              <button type="button" className="pp-btn pp-btn--accent-swatch" onClick={onAccentToggle} aria-label="Profile accent">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="13.5" cy="6.5" r="1.3" /><circle cx="17" cy="10" r="1.3" /><circle cx="8" cy="7" r="1.3" /><circle cx="6.5" cy="12" r="1.3" />
-                  <path d="M12 2a10 10 0 1 0 0 20 2 2 0 0 0 2-2 2 2 0 0 1 2-2h2a4 4 0 0 0 4-4 10 10 0 0 0-10-10z" />
-                </svg>
-              </button>
-              <AccentPicker
-                open={accentOpen}
-                accent={accent}
-                banner={banner}
-                isOwner={isOwner}
-                onClose={onAccentToggle}
-                onAccent={onAccent}
-                onBanner={onBanner}
-              />
-            </div>
-          )}
-          <div className="pp-hero__picker-wrap">
-            <button type="button" className="pp-btn pp-btn--outline" onClick={onShareToggle}>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="M16 6l-4-4-4 4" /><path d="M12 2v13" />
-              </svg>
-              Share
-            </button>
-            <SharePopover
-              open={shareOpen}
-              copied={copied}
-              onClose={onShareToggle}
-              onCopy={onCopy}
-              onMessage={!isOwner ? onMessage : undefined}
-              profileUrl={profileUrl}
-              displayName={displayName}
-            />
-          </div>
-        </div>
       </div>
     </section>
   );

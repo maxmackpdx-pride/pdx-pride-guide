@@ -13,7 +13,6 @@ import type { MemberProfileData } from "./profile/types";
 import {
   normalizePublicProfile,
   pickTheBigOne,
-  bannerPathToThemeKey,
 } from "@/components/profile/normalizePublicProfile";
 import ProfileHero from "@/components/profile/ProfileHero";
 import ProfileStatStrip from "@/components/profile/ProfileStatStrip";
@@ -96,14 +95,34 @@ export default function MemberProfile() {
   const patchMutation = useMutation({
     mutationFn: async (patch: Record<string, unknown>) => {
       const res = await apiRequest("PUT", "/api/users/me", patch);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error || `HTTP ${res.status}`);
+      }
       return true;
+    },
+    onMutate: async (patch) => {
+      // Optimistic accent / banner so the picker + hero update immediately
+      await queryClient.cancelQueries({ queryKey: ["profile", username] });
+      const prev = queryClient.getQueryData<MemberProfileData>(["profile", username]);
+      if (prev) {
+        queryClient.setQueryData<MemberProfileData>(["profile", username], {
+          ...prev,
+          ...(typeof patch.accentColor === "string" ? { accentColor: patch.accentColor } : {}),
+          ...(typeof patch.banner === "string" ? { banner: patch.banner as MemberProfileData["banner"] } : {}),
+          ...(patch.coverImageUrl === null ? { coverImageUrl: null, coverCrop: null } : {}),
+        });
+      }
+      return { prev };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", username] });
       toast({ title: "Saved", duration: 1500 });
     },
-    onError: (err) => {
+    onError: (err, _patch, ctx) => {
+      if (ctx?.prev) {
+        queryClient.setQueryData(["profile", username], ctx.prev);
+      }
       toast({ title: parseApiError(err, "Could not save"), variant: "destructive" });
     },
   });
@@ -194,8 +213,14 @@ export default function MemberProfile() {
           onMessage={!isOwner ? () => setMsgOpen(true) : undefined}
           onAccentToggle={() => setAccentOpen(v => !v)}
           onAccent={(hex) => patchMutation.mutate({ accentColor: hex })}
-          onBanner={(path) =>
-            patchMutation.mutate({ banner: bannerPathToThemeKey(path) })
+          onSolidBanner={(hex) =>
+            patchMutation.mutate({
+              accentColor: hex,
+              banner: "accent-gradient",
+              // Solid theme replaces custom cover so the day-flyer gradient shows
+              coverImageUrl: null,
+              coverCrop: null,
+            })
           }
         />
 

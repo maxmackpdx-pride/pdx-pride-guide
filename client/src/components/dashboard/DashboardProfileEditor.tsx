@@ -135,7 +135,7 @@ export default function DashboardProfileEditor({
           }}>{a.emoji}</button>
         ))}
       </div>
-      <label style={labelStyle}>Cover image</label>
+      <label id="cover" style={labelStyle}>Cover image</label>
       <p style={{ margin: "0 0 10px", fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, maxWidth: 560 }}>
         Upload a wide photo for the banner behind your profile picture. Drag and zoom to position it on your public profile.
       </p>

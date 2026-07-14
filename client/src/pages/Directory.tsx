@@ -36,6 +36,9 @@ export type DirectoryEventSummary = {
   dateEnd: string;
   dayOfWeek: string | null;
   listingInstanceKey?: string;
+  posterImageUrl?: string | null;
+  hostDisplayName?: string | null;
+  hostUsername?: string | null;
 };
 
 export type Business = {
@@ -64,6 +67,8 @@ export type Business = {
   isFollowing?: boolean;
   followerCount?: number;
   upcomingEvents?: DirectoryEventSummary[];
+  /** Past nights at this venue (incl. Tucker archive for Sanctuary / Eagle). */
+  pastEvents?: DirectoryEventSummary[];
   canEditVenue?: boolean;
   promoters?: DirectoryPromoter[];
   spotted?: DirectorySpotted[];

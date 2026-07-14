@@ -1,12 +1,17 @@
-import { useState } from "react";
-import { PROFILE_ACCENT_COLORS, PROFILE_BANNERS, type ProfileBanner } from "@shared/profileTheme";
+import { useState, type CSSProperties } from "react";
+import { PROFILE_ACCENT_COLORS, type ProfileBanner } from "@shared/profileTheme";
+import { Link } from "wouter";
 
-const BANNER_LABELS: Record<ProfileBanner, string> = {
-  "accent-gradient": "Accent color",
-  "neon-collage": "Neon collage",
-  "sticker-wall": "Sticker wall",
-  "pride-guide-social": "Pride Guide",
-};
+function solidBannerStyle(hex: string): CSSProperties {
+  return {
+    background: [
+      `radial-gradient(ellipse 55% 70% at 50% 48%, color-mix(in srgb, ${hex} 18%, transparent), transparent 72%)`,
+      `repeating-linear-gradient(-45deg, transparent, transparent 5px, color-mix(in srgb, ${hex} 22%, transparent) 5px, color-mix(in srgb, ${hex} 22%, transparent) 6px)`,
+      `radial-gradient(120% 110% at 15% -10%, color-mix(in srgb, ${hex} 55%, transparent), transparent 58%)`,
+      `linear-gradient(160deg, color-mix(in srgb, ${hex} 28%, #0b0b0b), #060300 85%)`,
+    ].join(", "),
+  };
+}
 
 export default function AccentBannerPopover({
   accentColor,
@@ -17,20 +22,26 @@ export default function AccentBannerPopover({
   accentColor: string | null | undefined;
   banner: ProfileBanner | undefined;
   onClose: () => void;
-  onSave: (patch: { accentColor?: string; banner?: ProfileBanner }) => void;
+  onSave: (patch: { accentColor?: string; banner?: ProfileBanner; coverImageUrl?: null; coverCrop?: null }) => void;
 }) {
   const [saving, setSaving] = useState(false);
   const currentAccent = (accentColor || "#FF00CC").toUpperCase();
   const currentBanner = banner || "accent-gradient";
+  const solidOn = currentBanner === "accent-gradient";
 
   const pickAccent = async (hex: string) => {
     setSaving(true);
     await onSave({ accentColor: hex });
     setSaving(false);
   };
-  const pickBanner = async (b: ProfileBanner) => {
+  const pickSolid = async (hex: string) => {
     setSaving(true);
-    await onSave({ banner: b });
+    await onSave({
+      accentColor: hex,
+      banner: "accent-gradient",
+      coverImageUrl: null,
+      coverCrop: null,
+    });
     setSaving(false);
   };
 
@@ -58,17 +69,22 @@ export default function AccentBannerPopover({
 
       <div className="mp-popover__label">Banner</div>
       <div className="mp-banner-row">
-        {PROFILE_BANNERS.map(b => (
+        {PROFILE_ACCENT_COLORS.map(hex => (
           <button
-            key={b}
+            key={`b-${hex}`}
             type="button"
-            className={`mp-banner-swatch mp-banner-swatch--${b}${currentBanner === b ? " mp-banner-swatch--on" : ""}`}
-            title={BANNER_LABELS[b]}
+            className={`mp-banner-swatch${solidOn && currentAccent === hex ? " mp-banner-swatch--on" : ""}`}
+            style={solidBannerStyle(hex)}
+            title={`${hex} gradient`}
             disabled={saving}
-            onClick={() => void pickBanner(b)}
+            onClick={() => void pickSolid(hex)}
           />
         ))}
       </div>
+
+      <Link href="/dashboard?edit=profile#cover" className="mp-popover__upload" onClick={onClose}>
+        Upload your own
+      </Link>
     </div>
   );
 }

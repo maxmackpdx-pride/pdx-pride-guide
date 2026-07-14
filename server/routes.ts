@@ -33,7 +33,7 @@ import {
   fillFieldsMapCoordinates,
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
-import { attachUpcomingEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
+import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
 import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
 import { readGaMeasurementId } from "./gaSnippet";
@@ -1267,7 +1267,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       queerOwned: queerOwned === "true" ? true : undefined,
     });
     const liveEvents = storage.getEvents({ status: "LIVE" });
-    const withEvents = attachUpcomingEventsToBusinesses(businesses, liveEvents);
+    // Upcoming Pride nights + past (LIVE past + Tucker archive for Sanctuary/Eagle)
+    const withEvents = attachEventsToBusinesses(businesses, liveEvents);
     const withPromoters = attachPromotersToBusinesses(withEvents, id => storage.getPromotersForBusiness(id));
     const missedConnections = storage.getMissedConnections("ACTIVE");
     const gigs = storage.getGigPosts("LIVE");

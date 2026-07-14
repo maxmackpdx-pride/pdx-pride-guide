@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -9,11 +9,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ds";
 import { Share2 } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
   TYPE_LABELS,
   TYPE_TO_DS_CATEGORY,
   formatDirectoryEventWhen,
   type Business,
+  type DirectoryEventSummary,
 } from "@/pages/Directory";
 import {
   directoryFallbackLogo,
@@ -23,6 +25,7 @@ import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks
 import { shareBusinessCard } from "@/lib/shareBusinessImage";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
+import "./PlaceModal.css";
 
 type EditableFields = {
   description: string;
@@ -147,7 +150,29 @@ const BLANK_OWNER_FIELDS: OwnerEditableFields = {
   ...BLANK_FIELDS, name: "", address: "", type: "bar", neighborhood: "", queerOwned: false, queerFriendly: true,
 };
 
-type ModalTab = "events" | "missed" | "gigs";
+type ModalTab = "events" | "past" | "missed" | "gigs";
+
+const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
+
+function dayCodeFromEvent(ev: DirectoryEventSummary): string {
+  const raw = (ev.dayOfWeek || "").trim().toUpperCase().slice(0, 3);
+  if (DAY_CODES.has(raw)) return raw;
+  if (ev.dateStart) {
+    const d = new Date(ev.dateStart);
+    if (!Number.isNaN(d.getTime())) {
+      return ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][d.getDay()];
+    }
+  }
+  return "FRI";
+}
+
+function formatPastWhen(ev: DirectoryEventSummary): string {
+  if (!ev.dateStart) return "Past";
+  const d = new Date(ev.dateStart);
+  if (Number.isNaN(d.getTime())) return "Past";
+  const mon = d.toLocaleString([], { month: "short" }).toUpperCase();
+  return `${mon} ${d.getFullYear()}`;
+}
 
 export default function PlaceModal({
   place,
@@ -166,6 +191,13 @@ export default function PlaceModal({
   const [savedOverrides, setSavedOverrides] = useState<Partial<Business> | null>(null);
   const [tab, setTab] = useState<ModalTab>("events");
   const [sharing, setSharing] = useState(false);
+
+  // Fresh tab when opening a different place
+  useEffect(() => {
+    setTab("events");
+    setEditing(false);
+    setSavedOverrides(null);
+  }, [place?.id]);
 
   const saveMutation = useMutation({
     mutationFn: (fields: EditableFields | OwnerEditableFields) => {
@@ -216,6 +248,7 @@ export default function PlaceModal({
   const categoryLabel = TYPE_LABELS[place.type] || place.type;
   const address = [place.address, place.neighborhood].filter(Boolean).join(" · ") || undefined;
   const upcomingEvents = place.upcomingEvents ?? [];
+  const pastEvents = place.pastEvents ?? [];
   const spotted = place.spotted ?? [];
   const gigs = place.gigs ?? [];
   const promoters = place.promoters ?? [];
@@ -317,6 +350,7 @@ export default function PlaceModal({
 
   const tabs: Array<{ key: ModalTab; label: string; count: number }> = [
     { key: "events", label: "Events", count: upcomingEvents.length },
+    { key: "past", label: "Past", count: pastEvents.length },
     { key: "missed", label: "Missed Connections", count: spotted.length },
     { key: "gigs", label: "Gigs", count: gigs.length },
   ];
@@ -843,6 +877,71 @@ export default function PlaceModal({
                       </Link>
                     );
                   })}
+                </div>
+              )
+            )}
+
+            {tab === "past" && (
+              pastEvents.length === 0 ? (
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>
+                  No past events matched to this venue yet.
+                </p>
+              ) : (
+                <div className="place-modal-past">
+                  <p className="place-modal-past__hint">
+                    Swipe for past nights · does not grow the card
+                  </p>
+                  <div
+                    className="place-modal-past__rail"
+                    role="list"
+                    aria-label={`Past events at ${place.name}`}
+                  >
+                    {pastEvents.map((ev) => {
+                      const code = dayCodeFromEvent(ev);
+                      const dayVar = `var(--day-${code.toLowerCase()})`;
+                      const poster = resolveEventPosterUrl(
+                        ev.id,
+                        ev.posterImageUrl,
+                        ev.dayOfWeek,
+                      );
+                      return (
+                        <Link
+                          key={ev.listingInstanceKey ?? ev.id}
+                          href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
+                          onClick={onClose}
+                          role="listitem"
+                          className="place-modal-past__card"
+                          style={{ ["--pm-day" as string]: dayVar }}
+                        >
+                          <div className="place-modal-past__banner">
+                            {poster ? (
+                              <img
+                                className="place-modal-past__poster"
+                                src={poster}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            ) : null}
+                            <div className="place-modal-past__scrim" aria-hidden="true" />
+                            <span className="place-modal-past__when">{formatPastWhen(ev)}</span>
+                          </div>
+                          <div className="place-modal-past__body">
+                            <div className="place-modal-past__title">{ev.title}</div>
+                            {ev.hostDisplayName ? (
+                              <div className="place-modal-past__host">
+                                Host · {ev.hostDisplayName}
+                              </div>
+                            ) : (
+                              <div className="place-modal-past__host place-modal-past__host--muted">
+                                Ended
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               )
             )}

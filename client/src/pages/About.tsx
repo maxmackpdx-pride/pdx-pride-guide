@@ -14,6 +14,7 @@ import "./About.css";
 
 const VENMO_URL = "https://venmo.com/tucker_pdmax";
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
+const PROFILE_URL = "/u/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
 const COCKBLOCK_URL = "https://cockblocktoys.com/tucker060";
 const MR_S_LEATHER_URL = "https://www.mr-s-leather.com/?acc=TUCKERMAX";
@@ -205,29 +206,48 @@ export default function About() {
                     />
                   </div>
                   <span className="about-v2-creator__hire">Looking for full time employment</span>
-                  <a
-                    href={IG_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="about-v2-creator__ig-sticker"
-                  >
-                    <svg
-                      width="19"
-                      height="19"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
+                  <div className="about-v2-creator__stickers">
+                    <Link href={PROFILE_URL} className="about-v2-creator__pg-sticker">
+                      <svg
+                        width="19"
+                        height="19"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                      </svg>
+                      Follow Me On Pride Guide
+                    </Link>
+                    <a
+                      href={IG_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="about-v2-creator__ig-sticker"
                     >
-                      <rect x="2" y="2" width="20" height="20" rx="5.5" />
-                      <circle cx="12" cy="12" r="4.2" />
-                      <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
-                    </svg>
-                    Follow @tucker_pdmax
-                  </a>
+                      <svg
+                        width="19"
+                        height="19"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <rect x="2" y="2" width="20" height="20" rx="5.5" />
+                        <circle cx="12" cy="12" r="4.2" />
+                        <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
+                      </svg>
+                      Follow @tucker_pdmax
+                    </a>
+                  </div>
                 </div>
                 <div className="about-v2-creator__credits">
                   Artist · Yes Coach · Brand promoter
