@@ -2,11 +2,16 @@
  * Profile-only hosted past events for @tucker_pdmax.
  * Sources: yescoachparty.com, pdxsanctuary.com, Eagle Locker Room series.
  * Negative IDs — never in LIVE feeds; merged only in getPublicProfile hosting.past.
+ *
+ * Flyer-confirmed @brohoejams (Bro Hoe) DJ + Host credits are also merged into
+ * his profile hosting.past (subset of this archive).
  */
 import type { Event } from "./schema";
 import { pacificCalendarDate, pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
 
 export const TUCKER_HOSTED_ARCHIVE_USERNAME = "tucker_pdmax";
+/** Production username for DJ/host Bro Hoe. */
+export const BROHOE_ARCHIVE_USERNAME = "brohoejams";
 
 export type TuckerHostedArchiveRow = {
   id: number;
@@ -207,7 +212,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "stank-pride-2025",
     title: "Stank × Yes Coach — Portland Pride",
     description:
-      "STANK x YES COACH — Portland's dirtiest Pride after-hours party. Gear-heavy crossover with sweaty bodies, jockstraps, sneakers, dark beats, and raw cruising energy at Sanctuary. Prizes from Mr-S Leather, Cellblock 13, and Fuck Water. Hosted by Tucker Max and Spencer Stanks.",
+      "STANK x YES COACH — Portland's dirtiest Pride after-hours party. Gear-heavy crossover with sweaty bodies, jockstraps, sneakers, dark beats, and raw cruising energy at Sanctuary. Prizes from Mr-S Leather, Cellblock 13, and Fuck Water. Hosted by Tucker Max and Spencer Stanks. DJs include Bro Hoe.",
     venueName: "Sanctuary Club",
     start: "2025-07-19T22:00:00-0700",
     end: "2025-07-20T04:00:00-0700",
@@ -471,7 +476,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "sanctuary-overtime-2026",
     title: "Sanctuary Overtime",
     description:
-      "Construction-site chaos at Sanctuary — overtime energy, hard hats, and after-hours play. Yes Coach Productions. Hosted by Tucker Max with Detour Dan.",
+      "Construction-site chaos at Sanctuary — overtime energy, hard hats, and after-hours play. Yes Coach Productions. Hosted by Tucker Max with Detour Dan. Music by DJ Bro Hoe.",
     venueName: "Sanctuary Club",
     start: "2026-05-03T18:00:00-0700",
     end: "2026-05-03T23:00:00-0700",
@@ -639,42 +644,104 @@ export type ProfileHostedEventWire = {
   neighborhood?: string | null;
 };
 
+/**
+ * Flyer-confirmed archive nights where @brohoejams is DJ + Host.
+ * Locker Room series (every last Friday) + Stank 2025, Camp Honey, Cozy,
+ * Hyde Feb 2026 (hosted by Bro Hoe), Sanctuary Overtime.
+ * Fairy Dust excluded — flyer only has DJ placeholders.
+ */
+const BROHOE_ARCHIVE_ONE_OFF_SLUGS = new Set([
+  "stank-pride-2025",
+  "camp-honey-2025",
+  "cozy-2026",
+  "hyde-feb-2026",
+  "sanctuary-overtime-2026",
+]);
+
+export function isBroHoeArchiveCredit(row: Pick<TuckerHostedArchiveRow, "slug">): boolean {
+  if (row.slug.startsWith("locker-room-")) return true;
+  return BROHOE_ARCHIVE_ONE_OFF_SLUGS.has(row.slug);
+}
+
+export function getBroHoeArchiveCreditRows(): TuckerHostedArchiveRow[] {
+  return TUCKER_HOSTED_ARCHIVE_ROWS.filter(isBroHoeArchiveCredit);
+}
+
+function archiveRowToWire(row: TuckerHostedArchiveRow): ProfileHostedEventWire {
+  return {
+    id: row.id,
+    title: row.title,
+    venueName: row.venueName,
+    dayOfWeek: row.dayOfWeek,
+    dateStart: row.dateStart,
+    dateEnd: row.dateEnd,
+    admission: row.admission,
+    ticketUrl: row.ticketUrl,
+    posterImageUrl: row.posterImageUrl,
+    neighborhood: row.neighborhood,
+  };
+}
+
+function sortPastByDateDesc(rows: ProfileHostedEventWire[]): ProfileHostedEventWire[] {
+  return [...rows].sort((a, b) => {
+    const ta = parsePacificDateTime(a.dateStart) ?? 0;
+    const tb = parsePacificDateTime(b.dateStart) ?? 0;
+    return tb - ta;
+  });
+}
+
+/**
+ * Merge profile-archive past nights into hosting.past / attended past.
+ * - @tucker_pdmax: full Yes Coach / Locker Room archive
+ * - @brohoejams: flyer-confirmed DJ + Host subset only
+ */
 export function mergeTuckerHostedArchivePast(
   username: string,
   livePast: ProfileHostedEventWire[],
 ): ProfileHostedEventWire[] {
-  if (username.trim().toLowerCase() !== TUCKER_HOSTED_ARCHIVE_USERNAME) return livePast;
+  const key = username.trim().toLowerCase();
+  const fullArchive = key === TUCKER_HOSTED_ARCHIVE_USERNAME;
+  const brohoeArchive = key === BROHOE_ARCHIVE_USERNAME;
+  if (!fullArchive && !brohoeArchive) return livePast;
+
+  const candidateRows = fullArchive
+    ? TUCKER_HOSTED_ARCHIVE_ROWS
+    : getBroHoeArchiveCreditRows();
 
   const seenSlug = new Set<string>();
   const archiveWire: ProfileHostedEventWire[] = [];
   const mergedSoFar: ProfileHostedEventWire[] = [...livePast];
 
-  for (const row of TUCKER_HOSTED_ARCHIVE_ROWS) {
+  for (const row of candidateRows) {
     if (seenSlug.has(row.slug)) continue;
     if (archiveDuplicatesMergedPast(row, mergedSoFar)) continue;
     seenSlug.add(row.slug);
 
-    const wire: ProfileHostedEventWire = {
-      id: row.id,
-      title: row.title,
-      venueName: row.venueName,
-      dayOfWeek: row.dayOfWeek,
-      dateStart: row.dateStart,
-      dateEnd: row.dateEnd,
-      admission: row.admission,
-      ticketUrl: row.ticketUrl,
-      posterImageUrl: row.posterImageUrl,
-      neighborhood: row.neighborhood,
-    };
+    const wire = archiveRowToWire(row);
     archiveWire.push(wire);
     mergedSoFar.push(wire);
   }
 
-  const merged = [...livePast, ...archiveWire];
-  merged.sort((a, b) => {
-    const ta = parsePacificDateTime(a.dateStart) ?? 0;
-    const tb = parsePacificDateTime(b.dateStart) ?? 0;
-    return tb - ta;
-  });
-  return merged;
+  return sortPastByDateDesc([...livePast, ...archiveWire]);
+}
+
+/** Synthetic host/talent for archive event detail (negative IDs not in event_* tables). */
+export type ArchiveSyntheticCredit = {
+  username: string;
+  role: "PRIMARY" | "COHOST" | "DJ";
+};
+
+export function getArchiveSyntheticCredits(eventId: number): ArchiveSyntheticCredit[] {
+  const row = getTuckerHostedArchiveRow(eventId);
+  if (!row) return [];
+  const credits: ArchiveSyntheticCredit[] = [
+    { username: TUCKER_HOSTED_ARCHIVE_USERNAME, role: "PRIMARY" },
+  ];
+  if (isBroHoeArchiveCredit(row)) {
+    // Hyde Feb 2026 flyer: hosted by Bro Hoe — still list Tucker as series primary,
+    // Bro Hoe as COHOST + DJ (matches "DJ and Host" on every flyer-found credit).
+    credits.push({ username: BROHOE_ARCHIVE_USERNAME, role: "COHOST" });
+    credits.push({ username: BROHOE_ARCHIVE_USERNAME, role: "DJ" });
+  }
+  return credits;
 }

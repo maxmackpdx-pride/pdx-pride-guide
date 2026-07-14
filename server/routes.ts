@@ -22,6 +22,7 @@ import { z } from "zod";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
+  getArchiveSyntheticCredits,
   getTuckerHostedArchiveRow,
   isTuckerHostedArchiveId,
   tuckerHostedArchiveAsEvent,
@@ -3159,7 +3160,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/events/:id/hosts", (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
+    const eventId = Number(req.params.id);
+    if (isTuckerHostedArchiveId(eventId)) {
+      const credits = getArchiveSyntheticCredits(eventId).filter(c => c.role === "PRIMARY" || c.role === "COHOST");
+      const hosts = credits
+        .map((c, i) => {
+          const user = storage.getUserByUsername(c.username);
+          if (!user) return null;
+          return {
+            id: -(eventId * 10 + i + 1),
+            eventId,
+            userId: user.id,
+            role: c.role,
+            addedByUserId: null,
+            createdAt: "",
+            username: user.username,
+            displayName: user.displayName,
+            photoUrl: user.photoUrl,
+            avatarChoice: user.avatarChoice ?? 1,
+            avatarRing: user.avatarRing || "none",
+          };
+        })
+        .filter(Boolean);
+      return res.json(hosts);
+    }
+    const evt = storage.getEvent(eventId);
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
     res.json(storage.getEventHosts(evt.id));
   });
@@ -3178,7 +3203,32 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/events/:id/talent", (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
+    const eventId = Number(req.params.id);
+    if (isTuckerHostedArchiveId(eventId)) {
+      const credits = getArchiveSyntheticCredits(eventId).filter(c => c.role === "DJ");
+      const talent = credits
+        .map((c, i) => {
+          const user = storage.getUserByUsername(c.username);
+          if (!user) return null;
+          return {
+            id: -(eventId * 10 + i + 50),
+            eventId,
+            userId: user.id,
+            role: "DJ",
+            status: "LIVE",
+            addedByUserId: null,
+            createdAt: "",
+            username: user.username,
+            displayName: user.displayName,
+            photoUrl: user.photoUrl,
+            avatarChoice: user.avatarChoice ?? 1,
+            avatarRing: user.avatarRing || "none",
+          };
+        })
+        .filter(Boolean);
+      return res.json(talent);
+    }
+    const evt = storage.getEvent(eventId);
     if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
     const userId = req.session?.userId;
     const isAdmin = sessionIsAdmin(req);

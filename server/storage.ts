@@ -3805,6 +3805,57 @@ function runBootMigrationsOnce() {
     recordBootMigration("fix_brohoejams_displayname_v2");
   }
 
+  // Flyer-confirmed live events: add @brohoejams as DJ + COHOST (idempotent).
+  // Archive nights (Locker Room series, Stank 2025, Cozy, Camp Honey, Hyde, Overtime)
+  // are credited via mergeTuckerHostedArchivePast — not rows in event_*.
+  if (!hasBootMigration("credit_brohoejams_flyer_events_v1")) {
+    ensureEventHostsSchema();
+    ensureEventTalentSchema();
+    const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
+    const tucker = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'tucker_pdmax'`).get() as { id: number } | undefined;
+    if (brohoe) {
+      const now = new Date().toISOString();
+      const liveMatches = sqlite.prepare(`
+        SELECT id, title FROM events
+        WHERE status = 'LIVE'
+          AND (
+            (LOWER(title) LIKE '%stank%' AND (LOWER(title) LIKE '%coach%' OR LOWER(title) LIKE '%yes%'))
+            OR LOWER(title) LIKE '%locker room%'
+            OR LOWER(title) LIKE '%camp honey%'
+            OR (LOWER(title) = 'cozy' OR LOWER(title) LIKE 'cozy %' OR LOWER(title) LIKE '% cozy')
+            OR (LOWER(title) LIKE '%hyde%' AND LOWER(title) NOT LIKE '%hyde park%')
+            OR LOWER(title) LIKE '%overtime%'
+          )
+      `).all() as Array<{ id: number; title: string }>;
+      for (const evt of liveMatches) {
+        const hostExists = sqlite.prepare(
+          `SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`,
+        ).get(evt.id, brohoe.id);
+        if (!hostExists) {
+          const hostCount = (sqlite.prepare(
+            `SELECT COUNT(*) AS c FROM event_hosts WHERE event_id = ?`,
+          ).get(evt.id) as { c: number }).c;
+          if (hostCount < 3) {
+            sqlite.prepare(`
+              INSERT INTO event_hosts (event_id, user_id, role, added_by_user_id, created_at)
+              VALUES (?, ?, 'COHOST', ?, ?)
+            `).run(evt.id, brohoe.id, tucker?.id ?? null, now);
+          }
+        }
+        const talentExists = sqlite.prepare(
+          `SELECT id FROM event_talent WHERE event_id = ? AND user_id = ? AND role = 'DJ' AND status IN ('LIVE', 'PENDING')`,
+        ).get(evt.id, brohoe.id);
+        if (!talentExists) {
+          sqlite.prepare(`
+            INSERT INTO event_talent (event_id, user_id, role, status, added_by_user_id, created_at)
+            VALUES (?, ?, 'DJ', 'LIVE', ?, ?)
+          `).run(evt.id, brohoe.id, tucker?.id ?? null, now);
+        }
+      }
+    }
+    recordBootMigration("credit_brohoejams_flyer_events_v1");
+  }
+
   // syncOwnerDisplayName mistakenly renamed granted admins to Tucker_PDmaX — undo + fix Sugar Pill.
   if (!hasBootMigration("fix_owner_displayname_clobber_v1")) {
     const ownerDisplay = (
@@ -6426,7 +6477,6 @@ export const storage: IStorage = {
       WHERE eh.user_id = ? AND e.status = 'LIVE'
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
-    if (hostedEventsAll.length > 0 && !roles.includes("Party Host")) roles.push("Party Host");
     const nowMs = Date.now();
     const isPastEvent = (e: { dateEnd: string }) => {
       const endMs = parsePacificDateTime(e.dateEnd);
@@ -6434,7 +6484,19 @@ export const storage: IStorage = {
     };
     const hostedUpcoming = hostedEventsAll.filter(e => !isPastEvent(e));
     const hostedPastRaw = hostedEventsAll.filter(isPastEvent);
+    // Full archive for @tucker_pdmax; flyer-credit subset (DJ+Host) for @brohoejams.
     const hostedPast = mergeTuckerHostedArchivePast(user.username, hostedPastRaw);
+    if ((hostedUpcoming.length + hostedPast.length) > 0 && !roles.includes("Party Host")) {
+      roles.push("Party Host");
+    }
+    // Archive flyer DJ credits for Bro Hoe even when nights aren't in event_talent.
+    if (
+      user.username.trim().toLowerCase() === "brohoejams" &&
+      hostedPast.some(e => e.id < 0) &&
+      !roles.includes("DJ")
+    ) {
+      roles.push("DJ");
+    }
 
     const gigRows = storage.getGigPostsByUser(user.id).filter(gig => gig.status === "LIVE");
     const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
