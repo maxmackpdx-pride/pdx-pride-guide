@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import CountUpValue from "@/components/CountUpValue";
 import { useAuth } from "@/context/AuthContext";
+import { sharePageLink } from "@/lib/shareEvent";
 import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
 
 type Props = {
@@ -13,6 +15,22 @@ type Props = {
  */
 export default function HomeHero({ eventCount }: Props) {
   const { user } = useAuth();
+  const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
+
+  const shareSite = async () => {
+    const who = (user?.displayName || user?.username || "").trim();
+    const title = "The PDX Pride Guide";
+    const text = who
+      ? `${who} wants you to check out The PDX Pride Guide`
+      : "Check out The PDX Pride Guide";
+    try {
+      const result = await sharePageLink("/", title, text);
+      setShareState(result);
+      window.setTimeout(() => setShareState("idle"), 1800);
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  };
 
   return (
     <section className="home-hero" aria-label="Portland Pride Guide hero">
@@ -36,6 +54,41 @@ export default function HomeHero({ eventCount }: Props) {
 
       {/* Film grain (SVG fractal noise tile) */}
       <div className="home-hero__grain" aria-hidden />
+
+      {/* Mobile-only site share — top right of first panel */}
+      <button
+        type="button"
+        className="home-hero__share"
+        onClick={() => void shareSite()}
+        aria-label={shareState === "copied" ? "Link copied" : "Share this site"}
+        data-testid="home-hero-share"
+      >
+        {shareState === "copied" ? (
+          <span className="home-hero__share-label">Copied</span>
+        ) : shareState === "shared" ? (
+          <span className="home-hero__share-label">Sent</span>
+        ) : (
+          <>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M12 16V4M12 4l-4 4M12 4l4 4"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="home-hero__share-label">Share</span>
+          </>
+        )}
+      </button>
 
       <div className="home-hero__inner">
         <div className="home-hero__kicker">

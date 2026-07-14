@@ -39,6 +39,50 @@
   background: #050505;
 }
 
+/* Mobile-only site share — top right of hero panel */
+.home-hero__share {
+  display: none;
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  z-index: 5;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(6, 6, 10, 0.55);
+  color: var(--text-hi, #fff);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.home-hero__share:hover,
+.home-hero__share:focus-visible {
+  border-color: var(--panel-lime, #c8fa3c);
+  color: var(--panel-lime, #c8fa3c);
+  outline: none;
+}
+
+.home-hero__share-label {
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .home-hero__share {
+    display: inline-flex;
+  }
+}
+
 /* z-0 wallpaper */
 .home-hero__bg {
   position: absolute;
