@@ -2902,9 +2902,20 @@ function prunePostPrideWeekEvents() {
 
   for (const row of spanRows) {
     const endClock = row.date_end.includes("T") ? row.date_end.split("T")[1] : "23:59:59";
-    sqlite
-      .prepare(`UPDATE events SET date_end = ? WHERE id = ?`)
-      .run(`2026-07-19T${endClock}`, row.id);
+    const newEnd = `2026-07-19T${endClock}`;
+    // Avoid inverted ranges (start later on Sun than clipped Mon-afternoon clock).
+    const startRow = sqlite
+      .prepare(`SELECT date_start AS dateStart FROM events WHERE id = ?`)
+      .get(row.id) as { dateStart: string } | undefined;
+    if (startRow?.dateStart) {
+      const startMs = new Date(startRow.dateStart).getTime();
+      const endMs = new Date(newEnd).getTime();
+      if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs <= startMs) {
+        sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run("2026-07-19T23:59:59", row.id);
+        continue;
+      }
+    }
+    sqlite.prepare(`UPDATE events SET date_end = ? WHERE id = ?`).run(newEnd, row.id);
   }
 
   // Any remaining LIVE row with a post-Pride start (race / re-seed) is removed.
