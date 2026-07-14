@@ -252,17 +252,42 @@ function enrichModerationForAdmin(req: any) {
   };
 }
 
-function validateEventDates(dateStart?: string, dateEnd?: string): string | null {
-  if (!dateStart || !dateEnd) return null;
-  if (new Date(dateEnd) <= new Date(dateStart)) return "End date must be after start date";
-  // Until Jul 19 6pm Pacific, keep the board focused on Pride week only.
-  if (isPostPrideListingCapActive()) {
-    const startDay = pacificCalendarDate(dateStart);
+/**
+ * Validate event dates for create/edit.
+ * Merges patch with existing so a partial dateStart-only update still hits the Pride cap.
+ */
+function validateEventDates(
+  dateStart?: string | null,
+  dateEnd?: string | null,
+  existing?: { dateStart?: string | null; dateEnd?: string | null },
+): string | null {
+  const start = (dateStart ?? existing?.dateStart ?? undefined) || undefined;
+  const end = (dateEnd ?? existing?.dateEnd ?? undefined) || undefined;
+
+  // Until Jul 19 6pm Pacific, block starts after Pride Sunday (even if only dateStart is patched).
+  if (isPostPrideListingCapActive() && start) {
+    const startDay = pacificCalendarDate(start);
     if (startDay && startDay > PRIDE_WEEK_END_DATE) {
       return "Post–Pride week events open Sunday July 19 at 6pm Pacific. Until then, list nights through July 19 only.";
     }
   }
+
+  if (start && end) {
+    const startMs = new Date(start).getTime();
+    const endMs = new Date(end).getTime();
+    if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs <= startMs) {
+      return "End date must be after start date";
+    }
+  }
   return null;
+}
+
+/** Public board: hide events whose start day is after Pride week while the cap is active. */
+function isPublicEventVisibleUnderPrideCap(evt: { dateStart?: string | null }): boolean {
+  if (!isPostPrideListingCapActive()) return true;
+  const startDay = pacificCalendarDate(evt.dateStart || "");
+  if (startDay && startDay > PRIDE_WEEK_END_DATE) return false;
+  return true;
 }
 
 /**
@@ -882,6 +907,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const websites = venueWebsiteIndex();
     const evts = storage.getEvents({ status: "LIVE" }).filter(evt =>
       evt.isClaimable && !evt.claimedBy && !pendingClaimIds.has(evt.id)
+      && isPublicEventVisibleUnderPrideCap(evt)
     );
     res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
   });
@@ -930,11 +956,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
       return res.status(404).json({ error: "Not found" });
     }
+    // Public detail must match list: suppress post-Pride starts while the lock is active.
+    if (!sessionIsAdmin(req) && !isPublicEventVisibleUnderPrideCap(evt)) {
+      return res.status(404).json({ error: "Not found" });
+    }
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const expanded = expandMultiDayEvents([evt]);
     const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
-    // Always return a sliced listing so the detail shape matches the list shape.
-    const listing = (day ? expanded.find(e => e.dayOfWeek === day) : undefined) || expanded[0] || evt;
+    // Prefer expanded listing; do not fall back to raw post-Pride rows for public.
+    const listing =
+      (day ? expanded.find(e => e.dayOfWeek === day) : undefined)
+      || expanded[0]
+      || (sessionIsAdmin(req) ? evt : null);
+    if (!listing) return res.status(404).json({ error: "Not found" });
     res.json(publicEvent(listing, pendingClaimIds, venueWebsiteIndex()));
   });
 
@@ -1121,7 +1155,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
       patch.eventTypes = JSON.stringify(patch.eventTypes);
     }
-    const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
+    const dateErr = validateEventDates(
+      patch.dateStart as string | undefined,
+      patch.dateEnd as string | undefined,
+      evt,
+    );
     if (dateErr) return res.status(400).json({ error: dateErr });
     syncDayOfWeek(patch, evt);
     const updated = storage.updateEvent(Number(req.params.id), patch);
@@ -3784,7 +3822,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
       patch.eventTypes = JSON.stringify(patch.eventTypes);
     }
-    const dateErr = validateEventDates(patch.dateStart as string, patch.dateEnd as string);
+    const dateErr = validateEventDates(
+      patch.dateStart as string | undefined,
+      patch.dateEnd as string | undefined,
+      evt,
+    );
     if (dateErr) return res.status(400).json({ error: dateErr });
     syncDayOfWeek(patch, evt);
     const updated = storage.updateEvent(Number(req.params.id), patch);
