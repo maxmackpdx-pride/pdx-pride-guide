@@ -66,11 +66,9 @@ function statusLine(event: ProfileEvent, past: boolean): string {
   const adm = admissionChrome(event.admission);
   if (past) {
     if (typeof count === "number" && count > 0) {
-      if (event.admission === "TICKETED") return `SOLD OUT · ${count}`;
-      return `${count} WENT`;
+      return `ENDED · ${count} WENT`;
     }
-    if (event.admission === "TICKETED") return "SOLD OUT";
-    return adm || "PAST SHOW";
+    return "ENDED";
   }
   const parts: string[] = [];
   if (typeof count === "number" && count > 0) parts.push(`${count} GOING`);
