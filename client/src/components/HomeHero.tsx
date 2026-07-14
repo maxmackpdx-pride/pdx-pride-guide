@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
-import HeroVideoOverlay from "@/components/HeroVideoOverlay";
 import { useAuth } from "@/context/AuthContext";
 import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
 
@@ -9,7 +8,7 @@ type Props = {
   eventCount: number;
 };
 
-/** Full-bleed zine hero — skyline collage + film-grain video + light title wash. */
+/** Full-bleed zine hero — skyline wallpaper + light title wash (this morning stack). */
 export default function HomeHero({ eventCount }: Props) {
   const { user } = useAuth();
 
@@ -18,11 +17,9 @@ export default function HomeHero({ eventCount }: Props) {
       <img
         className="home-hero__bg"
         src={heroWallpaper}
-        alt="Neon Portland skyline over the river with Mt. Hood and glowing roses"
+        alt=""
         decoding="async"
       />
-      {/* Animated film-grain WebM — above wallpaper, under scrim + all text */}
-      <HeroVideoOverlay layers={["filmGrain"]} className="home-hero__film-grain-video" />
       {/* Soft title wash only — no full-bleed black scrims (they buried the wallpaper) */}
       <div className="home-hero__scrim home-hero__scrim--title" aria-hidden />
 
@@ -34,7 +31,6 @@ export default function HomeHero({ eventCount }: Props) {
 
         <h1 className="home-hero__title">
           <span className="home-hero__word">PDX</span>
-          {/* Flowing rainbow — same treatment as boards “each other” (this morning) */}
           <span className="home-hero__word home-hero__word--pride">PRIDE</span>
           <span className="home-hero__word">GUIDE</span>
         </h1>

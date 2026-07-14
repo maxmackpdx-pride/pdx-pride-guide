@@ -59,7 +59,6 @@
 
 /* Light left wash for title legibility — wallpaper stays visible */
 .home-hero__scrim--title {
-  z-index: 3;
   background: linear-gradient(
     100deg,
     rgba(5, 5, 8, 0.55) 0%,
@@ -67,19 +66,6 @@
     rgba(5, 5, 8, 0.08) 52%,
     transparent 72%
   );
-}
-
-/* Film-grain WebM: above wallpaper, under scrim + all text */
-.home-hero .hero-video-overlays.home-hero__film-grain-video {
-  z-index: 2;
-  display: block;
-  pointer-events: none;
-}
-
-.home-hero .home-hero__film-grain-video .hero-video-overlay {
-  /* Transparent grain — don't mud the skyline */
-  opacity: 0.22;
-  mix-blend-mode: overlay;
 }
 
 /* Legacy class names kept so old CSS doesn't break if referenced */
@@ -1168,8 +1154,7 @@ html.calm-mode .home-boards__card {
   );
 }
 
-/* Kill legacy heavy overlays if any markup still references them.
-   Do NOT hide .hero-video-overlays / film-grain video — that's intentional. */
+/* Kill legacy heavy overlays if any markup still references them */
 .home-main-stage .home-hero__scrim--angle,
 .home-main-stage .home-hero__scrim--bottom,
 .home-main-stage .home-hero__scrim--top,
@@ -1178,16 +1163,11 @@ html.calm-mode .home-boards__card {
   display: none;
 }
 
-.home-main-stage .home-hero .hero-video-overlays.home-hero__film-grain-video {
-  display: block;
-  z-index: 2;
-}
-
 .home-main-stage .home-hero__inner {
   max-width: 940px;
   margin: 0;
   padding: 52px 64px;
-  z-index: 5;
+  z-index: 4;
 }
 
 .home-main-stage .home-hero__kicker {
