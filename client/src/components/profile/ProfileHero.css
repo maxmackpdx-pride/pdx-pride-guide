@@ -166,8 +166,8 @@
 .pp-hero--reimagined .pp-hero__avatar {
   flex: none;
   /* Room for flag glow outside the photo circle */
-  padding: 10px;
-  margin: -10px;
+  padding: 5px;
+  margin: -5px;
 }
 
 .pp-hero--reimagined .pp-hero__meta {

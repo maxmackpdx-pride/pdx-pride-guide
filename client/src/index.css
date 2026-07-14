@@ -5117,9 +5117,10 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
    photo (and hover zoom) always paint on top of the bloom. */
 .user-avatar {
   --avatar-size: 55px; /* base 48px +15% */
-  /* 60% less outward than the first pass (was 32% / 0.22× size) */
-  --glow-outset: 13%;
-  --glow-blur: calc(var(--avatar-size) * 0.088);
+  /* Tight halo — half the previous outward reach */
+  --glow-outset: 6.5%;
+  --glow-blur: calc(var(--avatar-size) * 0.044);
+  --glow-shimmer-blur: calc(var(--avatar-size) * 0.024);
   --avatar-outline: 2px;
   position: relative;
   display: inline-flex;
@@ -5243,7 +5244,7 @@ a.user-avatar.user-avatar--link:focus-visible {
     rgba(255, 255, 255, 0.66) 58deg,
     transparent 92deg 360deg
   );
-  filter: blur(calc(var(--avatar-size) * 0.048));
+  filter: blur(var(--glow-shimmer-blur));
   opacity: 0.78;
   animation: pdxaShimmer 5s linear infinite;
   /* Keep highlight in the halo ring; never paint across the face */
@@ -5276,7 +5277,7 @@ a.user-avatar.user-avatar--link:focus-visible {
 
 .user-avatar--shimmer:hover .user-avatar__shimmer {
   animation-duration: 1.9s;
-  filter: blur(calc(var(--avatar-size) * 0.048)) brightness(1.65);
+  filter: blur(var(--glow-shimmer-blur)) brightness(1.65);
   opacity: 0.95;
 }
 
