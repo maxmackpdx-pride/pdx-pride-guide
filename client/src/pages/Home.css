@@ -30,7 +30,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 60% center;
+  /* Bias left so skyline sits behind the title; stickers stay on the right */
+  object-position: 28% center;
   display: block;
   z-index: 0;
 }
@@ -1118,14 +1119,15 @@ html.calm-mode .home-boards__card {
 }
 
 .home-main-stage .home-hero__bg {
-  object-position: center;
-  filter: saturate(1.08) contrast(1.04);
+  object-position: 28% center;
+  filter: saturate(1.12) contrast(1.05) brightness(1.02);
 }
 
 .home-main-stage .home-hero__scrim--angle {
+  /* Keep title legible without muddying the collage wallpaper */
   background:
-    linear-gradient(100deg, rgba(6, 6, 8, 0.94) 0%, rgba(6, 6, 8, 0.8) 40%, rgba(6, 6, 8, 0.34) 68%, rgba(6, 6, 8, 0.06) 100%),
-    linear-gradient(to top, rgba(6, 6, 8, 0.7), transparent 50%);
+    linear-gradient(100deg, rgba(6, 6, 8, 0.88) 0%, rgba(6, 6, 8, 0.62) 36%, rgba(6, 6, 8, 0.22) 62%, rgba(6, 6, 8, 0.04) 100%),
+    linear-gradient(to top, rgba(6, 6, 8, 0.55), transparent 48%);
 }
 
 .home-main-stage .home-hero__aurora {
