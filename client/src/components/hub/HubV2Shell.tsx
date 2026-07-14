@@ -92,6 +92,7 @@ export default function HubV2Shell({
   const [location, navigate] = useLocation();
   const { openSheet } = useInboxSheet();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [drawerBounceHint, setDrawerBounceHint] = useState(false);
   const memberNav = MEMBER_NAV.filter((item) => !item.posterOnly || canPostToFeed);
   const adminNav = hubAdminNavItems(canManageTeam);
 
@@ -100,6 +101,7 @@ export default function HubV2Shell({
 
   const goMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setMobileDrawerOpen(false);
     // One navigation only — never stack navigate + onSectionChange + replaceState
     // (that could thrash history when leaving /admin).
@@ -107,7 +109,9 @@ export default function HubV2Shell({
       navigate("/dashboard");
       return;
     }
-    onSectionChange("feed");
+    if (section !== "feed") {
+      onSectionChange("feed");
+    }
   };
 
   const goAdminMode = (e: React.MouseEvent) => {
@@ -136,6 +140,19 @@ export default function HubV2Shell({
   useEffect(() => {
     setMobileDrawerOpen(false);
   }, [section, isAdminChrome]);
+
+  // Mobile peek: bounce drawer ~4% open once when entering hub routes.
+  useEffect(() => {
+    const isHubRoute = location === "/dashboard" || location.startsWith("/admin");
+    if (!isHubRoute) return;
+    const mq = window.matchMedia("(max-width: 720px)");
+    if (!mq.matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    setDrawerBounceHint(true);
+    const t = window.setTimeout(() => setDrawerBounceHint(false), 920);
+    return () => window.clearTimeout(t);
+  }, [location]);
 
   useEffect(() => {
     document.body.classList.toggle("hub-v2-drawer-open", mobileDrawerOpen);
@@ -230,7 +247,7 @@ export default function HubV2Shell({
               />
             )}
             <div
-              className={`hub-v2-drawer${mobileDrawerOpen ? " is-open" : ""}`}
+              className={`hub-v2-drawer${mobileDrawerOpen ? " is-open" : ""}${drawerBounceHint ? " is-bounce-hint" : ""}`}
               data-hub-drawer
             >
               <div id="hub-v2-drawer-panel" className="hub-v2-drawer__sheet" role="dialog" aria-label="Hub menu" aria-hidden={!mobileDrawerOpen}>
@@ -249,7 +266,11 @@ export default function HubV2Shell({
                 aria-label={mobileDrawerOpen ? "Close hub menu" : "Open hub menu"}
                 onClick={() => setMobileDrawerOpen((open) => !open)}
               >
-                <span className="hub-v2-drawer__pill" aria-hidden />
+                <span className="hub-v2-drawer__grip" aria-hidden>
+                  <span />
+                  <span />
+                  <span />
+                </span>
               </button>
             </div>
           </>,
