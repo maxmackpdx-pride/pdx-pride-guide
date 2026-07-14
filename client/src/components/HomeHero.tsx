@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import { Button } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
 import { useAuth } from "@/context/AuthContext";
 import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
@@ -8,7 +7,10 @@ type Props = {
   eventCount: number;
 };
 
-/** Full-bleed zine hero — skyline wallpaper + light title wash (this morning stack). */
+/**
+ * Full-bleed home hero (above the ticker): skyline wallpaper, aurora orbs,
+ * left-weighted scrim, film grain, wordmark + count-up + CTAs.
+ */
 export default function HomeHero({ eventCount }: Props) {
   const { user } = useAuth();
 
@@ -20,8 +22,20 @@ export default function HomeHero({ eventCount }: Props) {
         alt=""
         decoding="async"
       />
-      {/* Soft title wash only — no full-bleed black scrims (they buried the wallpaper) */}
+
+      {/* Aurora orbs — signature glow; silenced on reduced-motion / calm */}
+      <div className="home-hero__aurora" aria-hidden>
+        <span className="home-hero__orb home-hero__orb--magenta" />
+        <span className="home-hero__orb home-hero__orb--cyan" />
+        <span className="home-hero__orb home-hero__orb--violet" />
+      </div>
+
+      {/* Legibility scrims: left-weighted + bottom fade */}
       <div className="home-hero__scrim home-hero__scrim--title" aria-hidden />
+      <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden />
+
+      {/* Film grain (SVG fractal noise tile) */}
+      <div className="home-hero__grain" aria-hidden />
 
       <div className="home-hero__inner">
         <div className="home-hero__kicker">
@@ -44,8 +58,7 @@ export default function HomeHero({ eventCount }: Props) {
           <div className="home-hero__stat-label">Total events</div>
           <div className="home-hero__stat-row">
             <span className="home-hero__stat-num" data-testid="home-events-count">
-              {/* No remount key — remounting when data arrives re-ran the climb twice */}
-              <CountUpValue value={eventCount} />
+              <CountUpValue value={eventCount} duration={1400} />
             </span>
             <span className="home-hero__stat-meta">
               and counting
@@ -56,26 +69,19 @@ export default function HomeHero({ eventCount }: Props) {
         </div>
 
         <div className="home-hero__cta">
-          <Link href="/events" data-testid="hero-cta-events">
-            <Button as="span" variant="solid" accent="lime" size="lg" arrow>
-              View all events
-            </Button>
+          <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
+            View all events →
           </Link>
-          <Link href="/schedule" data-testid="hero-cta-schedule">
-            <Button as="span" variant="neon" accent="cyan" size="lg" arrow>
-              Browse schedule
-            </Button>
+          <Link href="/schedule" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-schedule">
+            Browse schedule →
           </Link>
           {user && (
-            <Link href="/dashboard" data-testid="hero-cta-account">
-              <Button as="span" variant="neon" accent="cyan" size="lg">
-                Your Hub
-              </Button>
+            <Link href="/dashboard" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-account">
+              Your Hub →
             </Link>
           )}
         </div>
       </div>
-
     </section>
   );
 }
