@@ -179,7 +179,8 @@ export default function Dashboard() {
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
   const canPostToFeed = Boolean(isAdmin || user?.promoterStatus === "approved");
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
-  const canManageTeam = Boolean(user?.canManageTeam || adminSession?.canManageTeam || isSuperAdmin);
+  // Owner + owner peers only (do NOT grant via isSuperAdmin alone).
+  const canManageTeam = Boolean(user?.canManageTeam || adminSession?.canManageTeam);
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],

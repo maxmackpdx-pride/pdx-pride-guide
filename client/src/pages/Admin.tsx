@@ -237,10 +237,11 @@ export default function Admin() {
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
           if (user.isPrimaryOwner) setIsPrimaryOwner(true);
-          if (user.canManageTeam || user.isPrimaryOwner) setCanManageTeam(true);
-          if (user.canViewUsers || user.isPrimaryOwner) setCanViewUsers(true);
-          if (user.canPush || user.isPrimaryOwner || user.isSuperAdmin) setCanPush(true);
-          if (user.canManageCatalog || user.isPrimaryOwner || user.isSuperAdmin) setCanManageCatalog(true);
+          // Trust server flags only — no OR-with-isSuperAdmin (that reopened team tools).
+          if (user.canManageTeam) setCanManageTeam(true);
+          if (user.canViewUsers) setCanViewUsers(true);
+          if (user.canPush) setCanPush(true);
+          if (user.canManageCatalog) setCanManageCatalog(true);
         }
         if (!cancelled) setSessionReady(true);
         return;
@@ -254,10 +255,10 @@ export default function Admin() {
           if (data.username) setAdminName(data.username);
           if (data.isSuperAdmin) setIsSuperAdmin(true);
           if (data.isPrimaryOwner) setIsPrimaryOwner(true);
-          if (data.canManageTeam || data.isPrimaryOwner) setCanManageTeam(true);
-          if (data.canViewUsers || data.isPrimaryOwner) setCanViewUsers(true);
-          if (data.canPush || data.isPrimaryOwner || data.isSuperAdmin) setCanPush(true);
-          if (data.canManageCatalog || data.isPrimaryOwner || data.isSuperAdmin) setCanManageCatalog(true);
+          if (data.canManageTeam) setCanManageTeam(true);
+          if (data.canViewUsers) setCanViewUsers(true);
+          if (data.canPush) setCanPush(true);
+          if (data.canManageCatalog) setCanManageCatalog(true);
         }
       } catch {
         // fall through to legacy login gate
@@ -380,11 +381,18 @@ export default function Admin() {
         if (me?.username) setAdminName(me.username);
         if (me?.isSuperAdmin) setIsSuperAdmin(true);
         if (me?.isPrimaryOwner) setIsPrimaryOwner(true);
-        if (me?.canManageTeam || me?.isSuperAdmin) setCanManageTeam(true);
+        // Owner peers (e.g. brohoejams) get canManageTeam; plain super admins do not.
+        if (me?.canManageTeam) setCanManageTeam(true);
+        if (me?.canViewUsers) setCanViewUsers(true);
+        if (me?.canPush) setCanPush(true);
+        if (me?.canManageCatalog) setCanManageCatalog(true);
       } catch {
         if (data?.isSuperAdmin) setIsSuperAdmin(true);
         if (data?.isPrimaryOwner) setIsPrimaryOwner(true);
-        if (data?.canManageTeam || data?.isSuperAdmin) setCanManageTeam(true);
+        if (data?.canManageTeam) setCanManageTeam(true);
+        if (data?.canViewUsers) setCanViewUsers(true);
+        if (data?.canPush) setCanPush(true);
+        if (data?.canManageCatalog) setCanManageCatalog(true);
       }
       setAuthenticated(true);
       setPasswordError(false);

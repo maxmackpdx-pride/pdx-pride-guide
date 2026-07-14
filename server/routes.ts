@@ -3891,7 +3891,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
-  app.get("/api/admin/users/new-today", requireAdmin, (_req, res) => {
+  app.get("/api/admin/users/new-today", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
+      return res.status(403).json({ error: "Owner admin only" });
+    }
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const rows = sqlite.prepare(`
       SELECT id, username, display_name AS displayName, email, created_at AS createdAt, avatar_choice AS avatarChoice, photo_url AS photoUrl
