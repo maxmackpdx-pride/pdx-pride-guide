@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
-import { smokeLogin } from "./smoke-auth.mjs";
+import { smokeLogin, prepareSmokeContext, waitForAppStable } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output");
@@ -28,7 +28,7 @@ async function login(page) {
 async function openInboxPosts(page) {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
-  await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
+  await waitForAppStable(page);
   const fab = page.getByRole("button", { name: /Open inbox/i }).first();
   await fab.waitFor({ state: "visible", timeout: 20000 });
   await fab.click();
@@ -69,6 +69,7 @@ async function sectionInView(page, id) {
 
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const context = await browser.newContext();
+await prepareSmokeContext(context);
 const page = await context.newPage();
 page.on("pageerror", (err) => errors.push(err.message));
 

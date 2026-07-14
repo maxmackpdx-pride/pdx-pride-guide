@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
-import { smokeLogin } from "./smoke-auth.mjs";
+import { smokeLogin, prepareSmokeContext } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output-people");
@@ -49,6 +49,7 @@ function hasPeopleShape(list) {
 
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const context = await browser.newContext();
+await prepareSmokeContext(context);
 const page = await context.newPage();
 
 try {

@@ -42,7 +42,10 @@ window.addEventListener("load", resetPageScroll, { once: true });
 document.querySelector("[data-crawler-feed]")?.remove();
 
 captureInstallPrompt();
-if (import.meta.env.PROD) {
+const localPreview =
+  typeof window !== "undefined"
+  && (window as Window & { __PDX_LOCAL_PREVIEW__?: number }).__PDX_LOCAL_PREVIEW__ === 1;
+if (import.meta.env.PROD && !localPreview) {
   void registerServiceWorker().then(() => listenForPushSubscriptionChanges());
 }
 

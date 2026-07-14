@@ -1,7 +1,7 @@
 import { chromium, request as playwrightRequest } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
-import { smokeLogin } from "./smoke-auth.mjs";
+import { smokeLogin, prepareSmokeContext, waitForAppStable } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output-admin-queue");
@@ -65,19 +65,27 @@ async function seedPromoterApplication(api) {
 async function openAdminQueue(page) {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
-  await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
+  await waitForAppStable(page);
   await page.locator(".floating-inbox__fab").waitFor({ state: "visible", timeout: 20000 });
   await page.locator(".floating-inbox__fab").click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
+  await page
+    .waitForResponse((r) => r.url().includes("/api/admin/pending-count") && r.ok(), { timeout: 15000 })
+    .catch(() => {});
   const adminTab = page.locator(".inbox-overlay").getByRole("button", { name: /^Admin/i });
   if (await adminTab.isVisible().catch(() => false)) {
-    await adminTab.click();
+    const alreadyActive = await adminTab.evaluate((el) => el.classList.contains("is-active")).catch(() => false);
+    if (!alreadyActive) await adminTab.click();
   }
-  await page.locator(".inbox-overlay").getByText(/SHARED QUEUE/i).waitFor({ timeout: 10000 });
+  await page
+    .waitForResponse((r) => r.url().includes("/api/admin/queue") && r.ok(), { timeout: 15000 })
+    .catch(() => {});
+  await page.locator(".inbox-overlay").getByText(/SHARED QUEUE/i).waitFor({ timeout: 15000 });
 }
 
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const context = await browser.newContext();
+await prepareSmokeContext(context);
 const seedApi = await playwrightRequest.newContext();
 const page = await context.newPage();
 page.on("pageerror", (err) => errors.push(err.message));

@@ -17,7 +17,13 @@ export function serveStatic(app: Express) {
     const requestPath = (req.originalUrl || req.url || req.path || "/").split("?")[0] || "/";
     // Read from disk each request so a deploy never serves a stale bundle hash
     // from an in-memory snapshot taken at process startup.
-    const baseIndexHtml = fs.readFileSync(indexPath, "utf8");
+    let baseIndexHtml = fs.readFileSync(indexPath, "utf8");
+    if (process.env.LOCAL_PREVIEW === "1") {
+      baseIndexHtml = baseIndexHtml.replace(
+        "<head>",
+        '<head><script>window.__PDX_LOCAL_PREVIEW__=1</script>',
+      );
+    }
     res.set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 

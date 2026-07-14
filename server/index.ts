@@ -40,8 +40,9 @@ app.use((req, res, next) => {
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// Rate limiting (skipped in development so local smoke suites can hammer login/API safely)
-const rateLimitSkipDev = () => process.env.NODE_ENV === "development";
+// Rate limiting (skipped for local dev + preview:local smoke so repeated runs do not 429)
+const rateLimitSkipDev = () =>
+  process.env.NODE_ENV === "development" || process.env.LOCAL_PREVIEW === "1";
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,

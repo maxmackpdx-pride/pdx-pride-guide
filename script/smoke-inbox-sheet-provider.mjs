@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 import { join } from "path";
-import { smokeLogin } from "./smoke-auth.mjs";
+import { smokeLogin, prepareSmokeContext, waitForAppStable } from "./smoke-auth.mjs";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
 const OUT = join(process.cwd(), "script", "smoke-output-phase3");
@@ -17,10 +17,6 @@ function record(name, ok, detail) {
 
 async function login(page) {
   await smokeLogin(page.request, BASE);
-}
-
-async function waitAuth(page) {
-  await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
 }
 
 async function overlayCount(page) {
@@ -70,6 +66,7 @@ async function toggleFab(page) {
 
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const context = await browser.newContext();
+await prepareSmokeContext(context);
 const page = await context.newPage();
 page.on("pageerror", (err) => errors.push(err.message));
 
@@ -79,27 +76,34 @@ try {
   // Desktop
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
-  await waitAuth(page);
-  const [unreadRes, pendingRes] = await Promise.all([
-    page
-      .waitForResponse((r) => r.url().includes("/api/messages/unread-count") && r.ok(), { timeout: 15000 })
-      .then((r) => r.json())
-      .catch(() => ({ count: 0 })),
-    page
-      .waitForResponse((r) => r.url().includes("/api/admin/pending-count") && r.ok(), { timeout: 15000 })
-      .then((r) => r.json())
-      .catch(() => ({ count: 0, ownerCount: 0 })),
-  ]);
+  await waitForAppStable(page);
   await page.locator(".floating-inbox__fab").waitFor({ state: "visible", timeout: 10000 });
+  const unreadRes = await page.request.get(`${BASE}/api/messages/unread-count`).then((r) => r.json());
+  const pendingRes = await page.request.get(`${BASE}/api/admin/pending-count`).then((r) => r.json());
 
   const attentionCount =
     (unreadRes.count || 0) + (pendingRes.count || 0) + (pendingRes.ownerCount || 0);
   const expectedBadge = attentionCount > 9 ? "9+" : String(attentionCount);
+  await page
+    .waitForFunction(
+      ({ expected, show }) => {
+        const el = document.querySelector(".floating-inbox__fab-badge");
+        const visible = Boolean(el && el.checkVisibility());
+        if (!show) return !visible;
+        return visible && el.textContent?.trim() === expected;
+      },
+      { expected: expectedBadge, show: attentionCount > 0 },
+      { timeout: 10000 },
+    )
+    .catch(() => {});
   const fabBadgeClosed = await page.locator(".floating-inbox__fab-badge").isVisible().catch(() => false);
   const fabBadgeText = fabBadgeClosed ? await page.locator(".floating-inbox__fab-badge").innerText() : "";
+  const badgeOk = attentionCount > 0
+    ? fabBadgeClosed && fabBadgeText === expectedBadge
+    : !fabBadgeClosed;
   record(
     "Desktop FAB attention badge (unread + admin queue)",
-    attentionCount > 0 && fabBadgeClosed && fabBadgeText === expectedBadge,
+    badgeOk,
     `attention=${attentionCount} unread=${unreadRes.count} queue=${pendingRes.count || 0} owner=${pendingRes.ownerCount || 0} badgeVisible=${fabBadgeClosed} badgeText=${fabBadgeText}`,
   );
 
@@ -136,7 +140,7 @@ try {
   );
 
   await page.goto(`${BASE}/events`, { waitUntil: "domcontentloaded" });
-  await waitAuth(page);
+  await waitForAppStable(page);
   record(
     "Route change auto-dismisses sheet",
     (await overlayCount(page)) === 0,
@@ -154,7 +158,7 @@ try {
   );
 
   await page.goto(`${BASE}/dashboard`, { waitUntil: "domcontentloaded" });
-  await waitAuth(page);
+  await waitForAppStable(page);
   await page.locator(".hub-v2-nav").getByRole("button", { name: "Messages" }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "03-hub-sidebar-inbox.png"), fullPage: true });
@@ -173,7 +177,7 @@ try {
   // Mobile site bottom nav
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
-  await waitAuth(page);
+  await waitForAppStable(page);
   const fabHiddenMobile = !(await page.locator(".floating-inbox__fab").isVisible().catch(() => false));
   const mobileBadge = await page.locator(".hub-mobile-tab__icon-wrap i").isVisible().catch(() => false);
   await page.locator(".site-hub-mobile-bar").getByRole("button", { name: /Messages/i }).click();
@@ -189,7 +193,7 @@ try {
 
   // Hub mobile inbox (Hub V2 horizontal nav strip)
   await page.goto(`${BASE}/dashboard`, { waitUntil: "domcontentloaded" });
-  await waitAuth(page);
+  await waitForAppStable(page);
   await page.locator(".hub-v2-nav").waitFor({ state: "visible", timeout: 10000 });
   await page.locator(".hub-v2-nav").getByRole("button", { name: "Messages" }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
