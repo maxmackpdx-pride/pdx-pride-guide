@@ -200,7 +200,7 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
             lineHeight: 1.5,
           }}
         >
-          The only frot toy for gay men · new hand-held design · gay owned
+          The only frot toy for people with a penis · new hand-held design · gay owned
         </div>
       </div>
 
