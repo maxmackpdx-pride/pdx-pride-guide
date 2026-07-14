@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import EventModal from "@/components/EventModal";
@@ -43,10 +44,101 @@ type Props = {
   onDismiss: () => void;
   /** Extra images that rotate after the poster (2s each). */
   slides?: string[];
+  /**
+   * Optional easter-egg game URL. When set, clicking the slideshow or countdown
+   * opens it full-screen (e.g. Stank Secret Story).
+   */
+  easterEggUrl?: string | null;
 };
 
-export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props) {
+function EasterEggOverlay({
+  src,
+  title,
+  onClose,
+}: {
+  src: string;
+  title: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 10000,
+        background: "#050a05",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <button
+        type="button"
+        aria-label="Close secret story"
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          top: "max(12px, env(safe-area-inset-top))",
+          right: "max(12px, env(safe-area-inset-right))",
+          zIndex: 10001,
+          width: 44,
+          height: 44,
+          borderRadius: 999,
+          border: "2px solid #5bff5b",
+          background: "rgba(0,0,0,0.85)",
+          color: "#5bff5b",
+          fontSize: 22,
+          lineHeight: 1,
+          cursor: "pointer",
+          boxShadow: "0 0 24px rgba(91,255,91,0.35)",
+          fontFamily: "var(--font-display, system-ui)",
+          fontWeight: 800,
+        }}
+      >
+        ✕
+      </button>
+      <iframe
+        src={src}
+        title={title}
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "100%",
+          border: "none",
+          background: "#050a05",
+        }}
+        allow="autoplay; fullscreen"
+      />
+    </div>,
+    document.body,
+  );
+}
+
+export default function FeaturedEventAd({
+  event,
+  onDismiss,
+  slides = [],
+  easterEggUrl = null,
+}: Props) {
   const [open, setOpen] = useState(false);
+  const [eggOpen, setEggOpen] = useState(false);
   const day = event.dayOfWeek || "";
   const accent = DAY_TEXT_COLORS[day as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
   const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
@@ -68,6 +160,10 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
     );
     return () => window.clearTimeout(t);
   }, [frame, frames]);
+
+  const openEgg = () => {
+    if (easterEggUrl) setEggOpen(true);
+  };
 
   const rowLabel: React.CSSProperties = {
     fontFamily: "var(--font-display)",
@@ -112,7 +208,10 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
       <button
         type="button"
         aria-label="Dismiss"
-        onClick={onDismiss}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDismiss();
+        }}
         style={{
           position: "absolute",
           top: 10,
@@ -134,12 +233,33 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
 
       {frames.length > 0 && (
         // Full-width, top-anchored slideshow: never crop left/right; crop the bottom.
-        <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", background: "#000" }}>
+        <div
+          role={easterEggUrl ? "button" : undefined}
+          tabIndex={easterEggUrl ? 0 : undefined}
+          aria-label={easterEggUrl ? "Open secret story" : undefined}
+          onClick={openEgg}
+          onKeyDown={(e) => {
+            if (!easterEggUrl) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openEgg();
+            }
+          }}
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "1 / 1",
+            overflow: "hidden",
+            background: "#000",
+            cursor: easterEggUrl ? "pointer" : "default",
+          }}
+        >
           {frames.map((f, i) => (
             <img
               key={f.src}
               src={f.src}
               alt={i === 0 ? event.title : ""}
+              draggable={false}
               style={{
                 position: "absolute",
                 inset: 0,
@@ -149,14 +269,32 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
                 objectPosition: "top center",
                 opacity: i === frame ? 1 : 0,
                 transition: "opacity .6s ease",
+                pointerEvents: "none",
               }}
             />
           ))}
         </div>
       )}
 
-      {/* Countdown */}
-      <div style={{ padding: "16px 18px 14px" }}>
+      {/* Countdown — easter egg hit target when secret URL is set */}
+      <div
+        role={easterEggUrl ? "button" : undefined}
+        tabIndex={easterEggUrl ? 0 : undefined}
+        aria-label={easterEggUrl ? "Open secret story" : undefined}
+        onClick={openEgg}
+        onKeyDown={(e) => {
+          if (!easterEggUrl) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openEgg();
+          }
+        }}
+        style={{
+          padding: "16px 18px 14px",
+          cursor: easterEggUrl ? "pointer" : "default",
+          userSelect: "none",
+        }}
+      >
         <div style={{ ...rowLabel, color: CYAN, fontSize: 30, ...glow(CYAN) }}>
           {cd.done
             ? "Live now"
@@ -178,6 +316,13 @@ export default function FeaturedEventAd({ event, onDismiss, slides = [] }: Props
       </button>
 
       {open && <EventModal event={event} onClose={() => setOpen(false)} />}
+      {eggOpen && easterEggUrl && (
+        <EasterEggOverlay
+          src={easterEggUrl}
+          title="Stank secret story"
+          onClose={() => setEggOpen(false)}
+        />
+      )}
     </div>
   );
 }

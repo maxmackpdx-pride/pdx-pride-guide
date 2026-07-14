@@ -26,6 +26,8 @@ type FeaturedConfig = {
   anchor?: boolean;                  // the every-other-slot event (Yes Coach)
   match: (title: string) => boolean; // how to find the event by title
   slides: string[];                  // extra slideshow frames after the poster
+  /** Full-screen easter egg (slideshow/countdown click). */
+  easterEggUrl?: string;
 };
 
 const STANK_SLIDES = Array.from({ length: 11 }, (_, i) =>
@@ -39,6 +41,7 @@ const FEATURED: FeaturedConfig[] = [
     // "stank" + "yes coach" in any order, tolerating any separators.
     match: (t) => /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(t) || /\bstank\b/i.test(t),
     slides: STANK_SLIDES,
+    easterEggUrl: "/easter-eggs/stank-secret-story.html",
   },
   // Add more featured events here — they rotate through the non-anchor slots.
 ];
@@ -207,6 +210,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
     <FeaturedEventAd
       event={featured.event}
       slides={featured.slides}
+      easterEggUrl={featured.easterEggUrl}
       onDismiss={() => dismissFeatured(featured.key)}
     />
   ) : null;
