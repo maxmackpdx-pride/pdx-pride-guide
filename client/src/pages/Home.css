@@ -6,6 +6,19 @@
   background: var(--ink-900);
   overflow-x: clip;
   color: var(--text-mid);
+  /* Loop-safe rainbow for PRIDE / “each other” — starts & ends on cyan */
+  --home-title-rainbow: linear-gradient(
+    90deg,
+    #00ffff 0%,
+    #39ff14 12%,
+    #ccff00 24%,
+    #ffee00 36%,
+    #ff6600 48%,
+    #ff00cc 60%,
+    #8800ff 72%,
+    #0044ff 86%,
+    #00ffff 100%
+  );
 }
 
 .home-main-stage .pg-block {
@@ -172,36 +185,24 @@
   filter: none;
 }
 
-/* PRIDE uses GlitchWord (neon rainbow fill + black ink outline) — not plain
-   background-clip text, which reads muddy over the skyline. */
+/* Flowing rainbow title words (PRIDE, boards “each other”) */
 .home-hero__word--pride {
   font-size: 0.77em;
-  color: transparent;
+  filter: none; /* filter on this ancestor breaks background-clip:text in Chrome */
   text-shadow: none;
-  /* filter on this ancestor breaks Chrome background-clip:text — never set filter */
-  filter: none;
+  background-image: var(--home-title-rainbow);
+  background-size: 200% 100%;
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: homeTitleRainbowFlow 7s linear infinite;
 }
 
-.home-hero__word--pride .glitch-word {
-  display: block;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  line-height: inherit;
-}
-
-.home-hero__word--pride .glitch-word__gradient,
-.home-hero__word--pride .glitch-word__outline,
-.home-hero__word--pride .glitch-word::before,
-.home-hero__word--pride .glitch-word::after {
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  line-height: inherit;
+@keyframes homeTitleRainbowFlow {
+  from { background-position: 0% center; }
+  to { background-position: 200% center; }
 }
 
 .home-hero__tagline {
@@ -820,17 +821,31 @@ html.calm-mode .home-main-stage .pg-note--spot {
   color: #fff;
 }
 
+/* Same loop-safe sliding rainbow as hero PRIDE */
 .home-boards__title-grad {
-  background: var(
-    --grad-rainbow,
-    linear-gradient(100deg, #00ffff 0%, #39ff14 24%, #ccff00 44%, #ff6600 68%, #ff00cc 100%)
+  filter: none;
+  background-image: var(
+    --home-title-rainbow,
+    linear-gradient(
+      90deg,
+      #00ffff 0%,
+      #39ff14 12%,
+      #ccff00 24%,
+      #ffee00 36%,
+      #ff6600 48%,
+      #ff00cc 60%,
+      #8800ff 72%,
+      #0044ff 86%,
+      #00ffff 100%
+    )
   );
-  background-size: 220% auto;
+  background-size: 200% 100%;
+  background-repeat: repeat;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  animation: homeBoardsShimmer 9s linear infinite;
+  animation: homeTitleRainbowFlow 7s linear infinite;
 }
 
 .home-boards__sub {
@@ -1199,12 +1214,18 @@ html.calm-mode .home-boards__card {
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 0, 0, 0.45);
 }
 
-/* PRIDE rainbow lives on GlitchWord — do not re-apply clip-text here (muddy) */
+/* PRIDE — loop-safe sliding rainbow (no magenta|cyan hard cut) */
 .home-main-stage .home-hero__word--pride {
-  background: none;
+  filter: none;
+  background-image: var(--home-title-rainbow);
+  background-size: 200% 100%;
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  animation: none;
+  animation: homeTitleRainbowFlow 7s linear infinite;
+  text-shadow: none;
 }
 
 .home-main-stage .home-hero__tagline {
@@ -1535,9 +1556,9 @@ html.calm-mode .home-boards__card {
   background: var(--neon-yellow, #ccff00);
 }
 
-/* Boards utility cards */
+/* Boards utility cards — keep section on solid ink so cards can contrast */
 .home-main-stage .home-boards {
-  background: transparent;
+  background: #0a0a0a;
   margin-bottom: 56px;
 }
 
@@ -1573,31 +1594,51 @@ html.calm-mode .home-boards__card {
   gap: 18px;
 }
 
+/* Elevated panels — must read above the near-black page (not same ink as wallpaper) */
 .home-boards__utility {
+  --util-acc: var(--neon-cyan, #00ffff);
   text-decoration: none;
-  background: var(--panel-card, #0f0f12);
-  border: 1px solid var(--panel-border, rgba(255, 255, 255, 0.12));
-  border-top: 3px solid var(--panel-accent, var(--neon-cyan));
-  border-radius: 10px;
-  padding: 22px;
   display: block;
-  transition: transform 0.18s var(--ease-out, ease-out);
+  padding: 22px;
+  border-radius: 10px;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--util-acc) 14%, #14141a) 0%,
+      #121218 42%,
+      #0e0e14 100%
+    );
+  border: 2px solid color-mix(in srgb, var(--util-acc) 32%, #2a2a32);
+  border-top: 3px solid var(--util-acc);
+  box-shadow:
+    0 10px 28px -14px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 24px -12px color-mix(in srgb, var(--util-acc) 35%, transparent);
+  transition:
+    transform 0.18s var(--ease-out, ease-out),
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .home-boards__utility:hover {
   transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--util-acc) 55%, #3a3a44);
+  box-shadow:
+    0 14px 36px -14px rgba(0, 0, 0, 0.9),
+    0 0 0 1px color-mix(in srgb, var(--util-acc) 22%, transparent),
+    0 0 32px -8px color-mix(in srgb, var(--util-acc) 45%, transparent);
 }
 
 .home-boards__utility--magenta {
-  border-top-color: var(--panel-magenta, var(--neon-magenta));
+  --util-acc: var(--panel-magenta, var(--neon-magenta, #ff00cc));
 }
 
 .home-boards__utility--lime {
-  border-top-color: var(--panel-lime, var(--neon-yellow));
+  --util-acc: var(--panel-lime, var(--neon-yellow, #ccff00));
 }
 
 .home-boards__utility--purple {
-  border-top-color: var(--panel-purple, var(--neon-violet));
+  --util-acc: var(--panel-purple, var(--neon-violet, #8800ff));
 }
 
 .home-boards__utility-name {
@@ -1607,23 +1648,25 @@ html.calm-mode .home-boards__card {
   text-transform: uppercase;
   line-height: 1;
   margin-bottom: 10px;
+  color: var(--util-acc);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--util-acc) 40%, transparent);
 }
 
 .home-boards__utility--magenta .home-boards__utility-name {
-  color: var(--panel-magenta, var(--neon-magenta));
+  color: var(--panel-magenta, var(--neon-magenta, #ff00cc));
 }
 
 .home-boards__utility--lime .home-boards__utility-name {
-  color: var(--panel-lime, var(--neon-yellow));
+  color: var(--panel-lime, var(--neon-yellow, #ccff00));
 }
 
 .home-boards__utility--purple .home-boards__utility-name {
-  color: var(--panel-purple, var(--neon-violet));
+  color: var(--panel-purple, var(--neon-violet, #aa66ff));
 }
 
 .home-boards__utility-desc {
   font-size: 14px;
-  color: var(--board-text, var(--text-body));
+  color: var(--text-body, #e6e2d9);
   margin: 0 0 14px;
   line-height: 1.45;
 }
@@ -1633,7 +1676,7 @@ html.calm-mode .home-boards__card {
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-lo);
+  color: var(--text-lo, #8c8980);
 }
 
 /* Directory + beaches row */
@@ -1919,10 +1962,16 @@ html.calm-mode .home-boards__card {
 @media (prefers-reduced-motion: reduce) {
   .home-main-stage .home-hero__aurora,
   .home-main-stage .home-hero__word--pride,
+  .home-boards__title-grad,
   .home-body__seam,
   .home-up-next__dot,
   .home-beach-widget__live-dot {
     animation: none !important;
+  }
+
+  .home-main-stage .home-hero__word--pride,
+  .home-boards__title-grad {
+    background-position: 0% center;
   }
 }
 

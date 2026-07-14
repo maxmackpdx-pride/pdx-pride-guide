@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
-import GlitchWord from "@/components/GlitchWord";
 import HeroVideoOverlay from "@/components/HeroVideoOverlay";
 import { useAuth } from "@/context/AuthContext";
 import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
@@ -35,9 +34,8 @@ export default function HomeHero({ eventCount }: Props) {
 
         <h1 className="home-hero__title">
           <span className="home-hero__word">PDX</span>
-          <span className="home-hero__word home-hero__word--pride">
-            <GlitchWord text="PRIDE" />
-          </span>
+          {/* Flowing rainbow — same treatment as boards “each other” (this morning) */}
+          <span className="home-hero__word home-hero__word--pride">PRIDE</span>
           <span className="home-hero__word">GUIDE</span>
         </h1>
 
