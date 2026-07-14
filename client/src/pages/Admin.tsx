@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { findSubmissionMatches, type SubmissionMatchCandidate } from "@shared/submissionMatch";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
   Shield, CheckCircle, XCircle, Eye, EyeOff, Lock,
@@ -142,6 +143,26 @@ interface AdminUser extends AdminUserProfile {
 
 type AdminTab = AdminView;
 type EventStatusFilter = "all" | "LIVE" | "HIDDEN" | "unclaimed" | "missing_flyer" | "user_submitted" | "has_checkins";
+type EventSort =
+  | "day_time"
+  | "start_asc"
+  | "start_desc"
+  | "title_az"
+  | "venue_az"
+  | "unclaimed_first"
+  | "missing_flyer_first"
+  | "id_desc";
+
+const EVENT_SORT_OPTIONS: Array<{ key: EventSort; label: string }> = [
+  { key: "day_time", label: "Day · start time" },
+  { key: "start_asc", label: "Start soonest" },
+  { key: "start_desc", label: "Start latest" },
+  { key: "title_az", label: "Title A–Z" },
+  { key: "venue_az", label: "Venue A–Z" },
+  { key: "unclaimed_first", label: "Unclaimed first" },
+  { key: "missing_flyer_first", label: "Missing flyer first" },
+  { key: "id_desc", label: "Newest id first" },
+];
 
 const ADMIN_VIEWS: AdminTab[] = ["overview", "events", "gigs", "promoters", "venue-claims", "users", "team"];
 
@@ -209,6 +230,7 @@ export default function Admin() {
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
   const [eventSearch, setEventSearch] = useState("");
   const [eventStatusFilter, setEventStatusFilter] = useState<EventStatusFilter>("all");
+  const [eventSort, setEventSort] = useState<EventSort>("day_time");
   const [teamIdentifier, setTeamIdentifier] = useState("");
   const [teamNote, setTeamNote] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -595,13 +617,73 @@ export default function Admin() {
       const haystack = `${ev.title} ${ev.venueName} ${ev.dayOfWeek} ${ev.status} ${ev.neighborhood || ""} ${ev.claimedBy || ""}`.toLowerCase();
       return haystack.includes(eventSearchQuery);
     });
-    return filtered.sort((a, b) => {
-      const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;
-      const dayB = DAY_SORT_ORDER[b.dayOfWeek ?? ""] ?? 99;
-      if (dayA !== dayB) return dayA - dayB;
-      return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+
+    const startMs = (ev: AdminEvent) => {
+      const t = new Date(ev.dateStart).getTime();
+      return Number.isFinite(t) ? t : 0;
+    };
+    const missingFlyer = (ev: AdminEvent) => (isMissingEventFlyer(ev.posterImageUrl) ? 0 : 1);
+    const unclaimed = (ev: AdminEvent) => (ev.claimedBy ? 1 : 0);
+
+    return [...filtered].sort((a, b) => {
+      switch (eventSort) {
+        case "start_asc":
+          return startMs(a) - startMs(b);
+        case "start_desc":
+          return startMs(b) - startMs(a);
+        case "title_az":
+          return String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" });
+        case "venue_az":
+          return String(a.venueName || "").localeCompare(String(b.venueName || ""), undefined, { sensitivity: "base" });
+        case "unclaimed_first": {
+          const u = unclaimed(a) - unclaimed(b);
+          if (u !== 0) return u;
+          return startMs(a) - startMs(b);
+        }
+        case "missing_flyer_first": {
+          const m = missingFlyer(a) - missingFlyer(b);
+          if (m !== 0) return m;
+          return startMs(a) - startMs(b);
+        }
+        case "id_desc":
+          return (b.id || 0) - (a.id || 0);
+        case "day_time":
+        default: {
+          const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;
+          const dayB = DAY_SORT_ORDER[b.dayOfWeek ?? ""] ?? 99;
+          if (dayA !== dayB) return dayA - dayB;
+          return startMs(a) - startMs(b);
+        }
+      }
     });
-  }, [events, eventStatusFilter, eventSearch, attendanceSummaries]);
+  }, [events, eventStatusFilter, eventSearch, eventSort, attendanceSummaries]);
+
+  /** Possible duplicates for the open edit form (same engine as submit queue). */
+  const editDuplicateMatches = useMemo((): SubmissionMatchCandidate[] => {
+    if (editingId == null) return [];
+    const title = String(editForm.title || "").trim();
+    const venueName = String(editForm.venueName || "").trim();
+    if (!title && !venueName) return [];
+    return findSubmissionMatches(
+      {
+        title,
+        venueName,
+        address: editForm.address || null,
+        dateStart: editForm.dateStart || "",
+        dateEnd: editForm.dateEnd || "",
+      },
+      events.map(ev => ({
+        id: ev.id,
+        title: ev.title,
+        venueName: ev.venueName,
+        address: ev.address,
+        dateStart: ev.dateStart,
+        dateEnd: ev.dateEnd,
+        status: ev.status,
+      })),
+      { excludeEventId: editingId, limit: 6, minScore: 30 },
+    );
+  }, [editingId, editForm.title, editForm.venueName, editForm.address, editForm.dateStart, editForm.dateEnd, events]);
 
   const approveMutation = useMutation({
     mutationFn: ({ id }: { id: number }) =>
@@ -1511,7 +1593,7 @@ export default function Admin() {
             <p className="text-white/40 text-sm mb-4">
               {events.length} events total · assign unclaimed listings to promoters from each row · edit opens full fields.
             </p>
-            <div className="flex flex-wrap gap-3 mb-4">
+            <div className="flex flex-wrap gap-3 mb-4 items-end">
               <div className="relative flex-1 min-w-[220px] max-w-md">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
                 <input
@@ -1521,7 +1603,24 @@ export default function Admin() {
                   placeholder="Search title, venue, day, status..."
                   className={adminFieldClass}
                   style={{ paddingLeft: 34 }}
+                  data-testid="admin-events-search"
                 />
+              </div>
+              <div className="min-w-[200px]">
+                <label className="display text-[10px] text-white/40 block mb-1" htmlFor="admin-events-sort">
+                  SORT BY
+                </label>
+                <select
+                  id="admin-events-sort"
+                  value={eventSort}
+                  onChange={e => setEventSort(e.target.value as EventSort)}
+                  className={adminFieldClass}
+                  data-testid="admin-events-sort"
+                >
+                  {EVENT_SORT_OPTIONS.map(opt => (
+                    <option key={opt.key} value={opt.key}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mb-6">
@@ -1563,6 +1662,7 @@ export default function Admin() {
                 <p className="text-white/35 text-xs mb-2">
                   Showing {filteredEvents.length} of {events.length} events
                   {unclaimedCount > 0 ? ` · ${unclaimedCount} unclaimed` : ""}
+                  {" · "}sorted: {EVENT_SORT_OPTIONS.find(o => o.key === eventSort)?.label || eventSort}
                 </p>
                 {filteredEvents.map(ev => {
                   const assignDraft = assignHostByEvent[ev.id] ?? "";
@@ -1706,6 +1806,61 @@ export default function Admin() {
                     {/* Inline edit form */}
                     {editingId === ev.id && (
                       <form onSubmit={handleEditSave} className="border-t border-white/10 p-5 space-y-4" style={{ background: "#0d0d0d" }}>
+                        {editDuplicateMatches.length > 0 && (
+                          <div
+                            className="p-4 border space-y-2"
+                            style={{ borderColor: "rgba(255, 102, 0, 0.55)", background: "rgba(255, 102, 0, 0.08)" }}
+                            data-testid="admin-edit-duplicates"
+                          >
+                            <p className="display text-xs" style={{ color: "#FF6600", letterSpacing: "0.1em" }}>
+                              POSSIBLE DUPLICATES · {editDuplicateMatches.length}
+                            </p>
+                            <p className="text-white/45 text-xs">
+                              Same matcher as submit queue. High confidence usually means same night / venue.
+                            </p>
+                            <ul className="space-y-2">
+                              {editDuplicateMatches.map(m => {
+                                const confColor =
+                                  m.confidence === "high" ? "#FF4D4D"
+                                    : m.confidence === "medium" ? "#FF6600"
+                                      : "#C8C4BB";
+                                return (
+                                  <li
+                                    key={m.eventId}
+                                    className="flex flex-wrap items-center justify-between gap-2 text-sm border border-white/10 px-3 py-2"
+                                    style={{ background: "#0a0a0c" }}
+                                  >
+                                    <div className="min-w-0">
+                                      <div className="text-white font-medium truncate">{m.title}</div>
+                                      <div className="text-white/40 text-xs">
+                                        {m.venueName}
+                                        {m.dateStart ? ` · ${String(m.dateStart).slice(0, 16).replace("T", " ")}` : ""}
+                                        {m.status ? ` · ${m.status}` : ""}
+                                        {m.reasons?.length ? ` · ${m.reasons.slice(0, 2).join(", ")}` : ""}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                      <span className="display text-[10px] px-2 py-0.5 border" style={{ borderColor: confColor, color: confColor }}>
+                                        {m.confidence.toUpperCase()} · {m.score}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="display text-[10px] px-2 py-1 border border-white/25 text-white/60 hover:border-[#00FFFF] hover:text-[#00FFFF]"
+                                        onClick={() => {
+                                          const other = events.find(x => x.id === m.eventId);
+                                          if (other) startEdit(other);
+                                          else toast({ title: "Not in list", description: `Event #${m.eventId} not in current catalog page.`, variant: "destructive" });
+                                        }}
+                                      >
+                                        OPEN #{m.eventId}
+                                      </button>
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="display text-xs text-white/40 block mb-1">TITLE</label>
