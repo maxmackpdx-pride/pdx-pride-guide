@@ -293,6 +293,17 @@ function parsePlaceIdFromPath(requestPath: string): number | null {
   return Number.isFinite(id) ? id : null;
 }
 
+function parseProfileUsernameFromPath(requestPath: string): string | null {
+  const path = (requestPath.split("?")[0] || "/").trim();
+  const match = path.match(/^\/u\/([^/]+)\/?$/);
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]).replace(/^@/, "").trim() || null;
+  } catch {
+    return match[1].replace(/^@/, "").trim() || null;
+  }
+}
+
 function absoluteAssetUrl(pathOrUrl?: string | null) {
   if (!pathOrUrl) return `${SITE_URL}/og-preview.jpg`;
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -438,6 +449,10 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const placeId = parsePlaceIdFromPath(requestPath);
   const place = placeId != null ? storage.getBusiness(placeId) : null;
   const livePlace = place && place.active !== false ? place : null;
+  const profileUsername = parseProfileUsernameFromPath(requestPath);
+  const profileUser = profileUsername ? storage.getUserByUsername(profileUsername) : null;
+  const liveProfile =
+    profileUser && String(profileUser.status || "").toLowerCase() === "active" ? profileUser : null;
 
   // Directory place paths map to /directory SEO base when no place id
   const routeKey =
@@ -445,14 +460,18 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       ? "/directory"
       : pathKey.startsWith("/directory/")
         ? "/directory"
-        : pathKey;
+        : pathKey.startsWith("/u/")
+          ? "/dashboard"
+          : pathKey;
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 
   const pageTitle = liveEvent
     ? `${liveEvent.title} | Portland Pride 2026 | PDX Pride Guide`
     : livePlace
       ? `${livePlace.name} | Queer Portland Directory | PDX Pride Guide`
-      : routeSeo.title;
+      : liveProfile
+        ? `${liveProfile.displayName || liveProfile.username} (@${liveProfile.username}) | PDX Pride Guide`
+        : routeSeo.title;
   const pageDescription = liveEvent
     ? truncateText(
         `${liveEvent.venueName || "Portland"}${liveEvent.neighborhood ? ` · ${liveEvent.neighborhood}` : ""}. ${liveEvent.description || ""}`,
@@ -464,22 +483,32 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
             `${livePlace.name} on PDX Pride Guide.`,
           160,
         )
-      : routeSeo.description;
+      : liveProfile
+        ? truncateText(
+            liveProfile.bio
+              || `${liveProfile.displayName || liveProfile.username} on PDX Pride Guide — Portland Pride member profile.`,
+            160,
+          )
+        : routeSeo.description;
   const pageUrl = liveEvent
     ? eventUrl(liveEvent.id, liveEvent.title, SITE_URL)
     : livePlace
       ? placeUrl(livePlace.id, livePlace.name, SITE_URL)
-      : canonical;
+      : liveProfile
+        ? `${SITE_URL}/u/${encodeURIComponent(liveProfile.username)}`
+        : canonical;
   const placeLogo = livePlace
     ? resolveDirectoryLogo(livePlace.name, livePlace.imageUrl)
     : null;
-  // Branded 1200×630 cards replace raw flyer/logo as the social share image
+  // Branded 1200×630 cards replace raw flyer/logo/avatar as the social share image
   const pageImage = liveEvent
     ? `${SITE_URL}/api/og/event/${liveEvent.id}`
     : livePlace
       ? `${SITE_URL}/api/og/place/${livePlace.id}`
-      : `${SITE_URL}/og-preview.jpg`;
-  const pageImageIsCard = !!(liveEvent || livePlace);
+      : liveProfile
+        ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}`
+        : `${SITE_URL}/og-preview.jpg`;
+  const pageImageIsCard = !!(liveEvent || livePlace || liveProfile);
 
   const jsonLdBlocks = [
     buildWebSiteJsonLd(),
@@ -523,8 +552,10 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       ? liveEvent.title
       : livePlace
         ? livePlace.name
-        : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
-    type: liveEvent || livePlace ? "article" : "website",
+        : liveProfile
+          ? `${liveProfile.displayName || liveProfile.username} on PDX Pride Guide`
+          : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
+    type: liveEvent || livePlace || liveProfile ? "profile" : "website",
     imageWidth: pageImageIsCard ? 1200 : 1024,
     imageHeight: pageImageIsCard ? 630 : 578,
   });

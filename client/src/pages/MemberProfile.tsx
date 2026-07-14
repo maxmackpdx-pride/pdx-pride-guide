@@ -35,7 +35,20 @@ export default function MemberProfile() {
   const [routeMatch, routeParams] = useRoute("/u/:username");
   const username = routeParams?.username || "";
   const { toast } = useToast();
-  usePageSeo(`@${username} · Profile`, `Pride Guide member profile for @${username}`);
+  usePageSeo(
+    username ? `@${username} · Profile | PDX Pride Guide` : "Profile | PDX Pride Guide",
+    username
+      ? `Pride Guide member profile for @${username}.`
+      : "Pride Guide member profile.",
+    username
+      ? {
+          url: `https://www.prideguidepdx.com/u/${encodeURIComponent(username)}`,
+          image: `https://www.prideguidepdx.com/api/og/profile/${encodeURIComponent(username)}`,
+          imageAlt: `@${username} on PDX Pride Guide`,
+          type: "article",
+        }
+      : undefined,
+  );
 
   const [msgOpen, setMsgOpen] = useState(false);
   const [accentOpen, setAccentOpen] = useState(false);

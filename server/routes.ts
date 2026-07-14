@@ -774,6 +774,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  app.get("/api/og/profile/:username", async (req, res) => {
+    try {
+      const username = String(req.params.username || "").trim().replace(/^@/, "");
+      if (!username) return res.status(400).json({ error: "Invalid username" });
+      const { renderProfileOgCard } = await import("./ogCards");
+      const buf = await renderProfileOgCard(username);
+      if (!buf) return res.status(404).json({ error: "Profile not found" });
+      res.set({
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=1800, stale-while-revalidate=86400",
+      });
+      return res.send(buf);
+    } catch (err) {
+      console.error("GET /api/og/profile failed:", err);
+      return res.status(500).json({ error: "Could not render card" });
+    }
+  });
+
   attendanceHub = initAttendanceWs(httpServer);
   storage.syncSiteOwnerPortfolio();
 

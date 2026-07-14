@@ -1,12 +1,16 @@
 /**
- * Dynamic 1200×630 social share cards (events + directory places).
- * Replaces raw flyer/logo (or generic og-preview) in og:image / twitter:image.
+ * Dynamic 1200×630 social share cards (events, places, profiles).
+ * Replaces raw flyer/logo/avatar (or generic og-preview) in og:image / twitter:image.
+ *
+ * Profile cards: full-bleed rectangular photo — pride ring glows around the
+ * outer edge of the image (inward), not a circular crop.
  */
 import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLogos";
+import { normalizeAvatarRing, type AvatarRingId } from "@shared/avatarRings";
 import { storage } from "./storage";
 import {
   getTuckerHostedArchiveRow,
@@ -133,6 +137,42 @@ export function ogEventCardUrl(eventId: number): string {
 
 export function ogPlaceCardUrl(placeId: number): string {
   return `${SITE_URL}/api/og/place/${placeId}`;
+}
+
+export function ogProfileCardUrl(username: string): string {
+  return `${SITE_URL}/api/og/profile/${encodeURIComponent(username.replace(/^@/, "").trim())}`;
+}
+
+/** Conic stops matching client avatar ring CSS (for rectangular edge glow). */
+const RING_STOPS: Record<AvatarRingId, string[]> = {
+  none: ["#19e3ff", "#ff00cc", "#ccff00", "#19e3ff"],
+  rainbow: ["#E40303", "#FF8C00", "#FFED00", "#008026", "#24408E", "#732982", "#E40303"],
+  progress: ["#E40303", "#FF8C00", "#FFED00", "#008026", "#24408E", "#FFFFFF", "#F6A9B8", "#55CDFC", "#784F17", "#E40303"],
+  lesbian: ["#D52D00", "#FF9A56", "#FFFFFF", "#D362A4", "#A30262", "#D52D00"],
+  "gay-men": ["#078D70", "#26CEAA", "#FFFFFF", "#98E8C1", "#5BCEFA", "#078D70"],
+  bisexual: ["#D60270", "#D60270", "#9B4F96", "#0038A8", "#0038A8", "#D60270"],
+  transgender: ["#5BCEFA", "#F5A9B8", "#FFFFFF", "#F5A9B8", "#5BCEFA", "#5BCEFA"],
+  nonbinary: ["#FCF434", "#FFFFFF", "#9C59D1", "#333333", "#FCF434"],
+  pansexual: ["#FF218C", "#FFD800", "#21B1FF", "#FF218C"],
+  genderfluid: ["#FF76A4", "#FFFFFF", "#C011D7", "#333333", "#2F3CBE", "#FF76A4"],
+  genderqueer: ["#B57EDC", "#FFFFFF", "#4A8123", "#B57EDC"],
+  intersex: ["#FFD800", "#FFD800", "#79007F", "#FFD800"],
+  asexual: ["#A3A3A3", "#FFFFFF", "#810081", "#C060C0", "#A3A3A3"],
+  aromantic: ["#3DA542", "#FFFFFF", "#ABABAB", "#5ecf66", "#3DA542"],
+  agender: ["#BABABA", "#FFFFFF", "#B4F8C8", "#FFFFFF", "#BABABA"],
+  leather: ["#444444", "#FFFFFF", "#0000FF", "#6688ff", "#444444"],
+  bear: ["#623818", "#FEEF9C", "#a06030", "#FEEF9C", "#623818"],
+  chain: ["#8a919c", "#dfe5ee", "#5f6670", "#c8d0dc", "#8a919c"],
+};
+
+function ringGradientStops(ring: AvatarRingId): string {
+  const stops = RING_STOPS[ring] || RING_STOPS.progress;
+  return stops
+    .map((c, i) => {
+      const pct = Math.round((i / (stops.length - 1)) * 100);
+      return `<stop offset="${pct}%" stop-color="${c}"/>`;
+    })
+    .join("");
 }
 
 export async function renderEventOgCard(eventId: number): Promise<Buffer | null> {
@@ -262,6 +302,89 @@ export async function renderPlaceOgCard(placeId: number): Promise<Buffer | null>
 
   return sharp(base)
     .composite([{ input: logoBuf, left: logoLeft, top: logoTop }])
+    .png()
+    .toBuffer();
+}
+
+/**
+ * Profile share card: full-bleed rectangular avatar (not circular).
+ * Pride ring is a soft glow around the outer edge of the 1200×630 image, bleeding inward.
+ */
+export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer | null> {
+  const username = String(usernameRaw || "").trim().replace(/^@/, "");
+  if (!username) return null;
+  const user = storage.getUserByUsername(username) as any;
+  if (!user || String(user.status || "").toLowerCase() !== "active") return null;
+
+  const ring = normalizeAvatarRing(user.avatarRing);
+  const photoRel = user.photoUrl || null;
+  const local = resolveLocalAsset(photoRel);
+  const raw = await loadImageBuffer(local);
+
+  let photoBuf: Buffer | null = null;
+  if (raw) {
+    try {
+      photoBuf = await fitCover(raw, W, H);
+    } catch {
+      photoBuf = null;
+    }
+  }
+
+  const display = String(user.displayName || user.username || username).trim();
+  const handle = `@${user.username || username}`;
+  const accent = String(user.accentColor || "#FF00CC").trim() || "#FF00CC";
+
+  // Edge ring: thick outer stroke + blurred inward glow (rect frame, not circle)
+  const edgeGlow = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      ${ringGradientStops(ring)}
+    </linearGradient>
+    <!-- Inward vignette so glow reads on the face edge -->
+    <radialGradient id="inward" cx="50%" cy="50%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.45"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="softer" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+  </defs>
+  <!-- Outer soft bloom (inward from edges) -->
+  <rect x="8" y="8" width="${W - 16}" height="${H - 16}" fill="none" stroke="url(#ring)" stroke-width="64" filter="url(#softer)" opacity="0.85"/>
+  <rect x="10" y="10" width="${W - 20}" height="${H - 20}" fill="none" stroke="url(#ring)" stroke-width="28" filter="url(#soft)" opacity="0.95"/>
+  <!-- Crisp inner edge band -->
+  <rect x="14" y="14" width="${W - 28}" height="${H - 28}" fill="none" stroke="url(#ring)" stroke-width="10" opacity="0.95"/>
+  <rect x="18" y="18" width="${W - 36}" height="${H - 36}" fill="none" stroke="url(#ring)" stroke-width="3" opacity="0.7"/>
+  <!-- Darken center slightly so edge glow wins -->
+  <rect width="${W}" height="${H}" fill="url(#inward)"/>
+  <!-- Bottom name plate -->
+  <rect x="0" y="${H - 120}" width="${W}" height="120" fill="#060608" fill-opacity="0.72"/>
+  <text x="48" y="${H - 68}" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">PDX PRIDE GUIDE · MEMBER</text>
+  <text x="48" y="${H - 28}" fill="#FFFFFF" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="42" letter-spacing="0.02em">${escapeXml(display.toUpperCase())}</text>
+  <text x="${W - 48}" y="${H - 32}" fill="${escapeXml(accent)}" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.08em" text-anchor="end">${escapeXml(handle)}</text>
+</svg>`);
+
+  if (photoBuf) {
+    return sharp(photoBuf)
+      .composite([{ input: await sharp(edgeGlow).png().toBuffer(), top: 0, left: 0 }])
+      .png()
+      .toBuffer();
+  }
+
+  // No photo: solid dark field with monogram + same edge glow
+  const initial = (display.replace(/[^a-zA-Z0-9]/g, "").slice(0, 1) || "?").toUpperCase();
+  const fallback = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${W}" height="${H}" fill="#121218"/>
+  <text x="50%" y="48%" fill="${escapeXml(accent)}" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="220" text-anchor="middle" dominant-baseline="middle">${escapeXml(initial)}</text>
+</svg>`);
+
+  return sharp(await sharp(fallback).png().toBuffer())
+    .composite([{ input: await sharp(edgeGlow).png().toBuffer(), top: 0, left: 0 }])
     .png()
     .toBuffer();
 }
