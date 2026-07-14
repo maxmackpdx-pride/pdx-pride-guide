@@ -21,6 +21,7 @@
   overflow: hidden;
   width: 100%;
   min-height: 780px;
+  /* Fallback only while image loads — never a permanent cover */
   background: #050505;
 }
 
@@ -30,8 +31,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Bias left so skyline sits behind the title; stickers stay on the right */
-  object-position: 28% center;
+  /* Full art: skyline left for title, sticker collage right */
+  object-position: center center;
   display: block;
   z-index: 0;
 }
@@ -43,22 +44,22 @@
   z-index: 1;
 }
 
-.home-hero__scrim--angle {
+/* Light left wash for title legibility — wallpaper stays visible */
+.home-hero__scrim--title {
   background: linear-gradient(
-    105deg,
-    rgba(5, 5, 8, 0.95) 0%,
-    rgba(5, 5, 8, 0.82) 32%,
-    rgba(5, 5, 8, 0.34) 58%,
-    transparent 86%
+    100deg,
+    rgba(5, 5, 8, 0.55) 0%,
+    rgba(5, 5, 8, 0.28) 28%,
+    rgba(5, 5, 8, 0.08) 52%,
+    transparent 72%
   );
 }
 
-.home-hero__scrim--bottom {
-  background: linear-gradient(to top, rgba(5, 5, 8, 0.80), rgba(5, 5, 8, 0.15) 42%, transparent 66%);
-}
-
+/* Legacy class names kept so old CSS doesn't break if referenced */
+.home-hero__scrim--angle,
+.home-hero__scrim--bottom,
 .home-hero__scrim--top {
-  background: linear-gradient(to bottom, rgba(5, 5, 8, 0.62), transparent 20%);
+  background: none;
 }
 
 .home-hero__halftone {
@@ -1115,65 +1116,32 @@ html.calm-mode .home-boards__card {
   min-height: 660px;
   display: flex;
   align-items: center;
-  background: var(--ink-1000, #0a0a0a);
+  /* Transparent so wallpaper never sits under a solid slab */
+  background: transparent;
 }
 
 .home-main-stage .home-hero__bg {
-  object-position: 28% center;
-  filter: saturate(1.12) contrast(1.05) brightness(1.02);
+  object-position: center center;
+  filter: saturate(1.1) contrast(1.04) brightness(1.03);
 }
 
-.home-main-stage .home-hero__scrim--angle {
-  /* Keep title legible without muddying the collage wallpaper */
-  background:
-    linear-gradient(100deg, rgba(6, 6, 8, 0.88) 0%, rgba(6, 6, 8, 0.62) 36%, rgba(6, 6, 8, 0.22) 62%, rgba(6, 6, 8, 0.04) 100%),
-    linear-gradient(to top, rgba(6, 6, 8, 0.55), transparent 48%);
+.home-main-stage .home-hero__scrim--title {
+  background: linear-gradient(
+    100deg,
+    rgba(6, 6, 8, 0.58) 0%,
+    rgba(6, 6, 8, 0.3) 30%,
+    rgba(6, 6, 8, 0.1) 54%,
+    transparent 74%
+  );
 }
 
-.home-main-stage .home-hero__aurora {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 1;
-  mix-blend-mode: screen;
-}
-
-.home-main-stage .home-hero__aurora--magenta {
-  width: 420px;
-  height: 420px;
-  top: -80px;
-  left: 8%;
-  background: var(--neon-magenta, #ff00cc);
-  animation: homeAurora1 14s ease-in-out infinite;
-}
-
-.home-main-stage .home-hero__aurora--cyan {
-  width: 380px;
-  height: 380px;
-  bottom: -120px;
-  left: 34%;
-  background: var(--neon-cyan, #00ffff);
-  animation: homeAurora2 18s ease-in-out infinite;
-}
-
-.home-main-stage .home-hero__aurora--violet {
-  width: 340px;
-  height: 340px;
-  top: 20%;
-  left: 56%;
-  background: var(--neon-violet, #8800ff);
-  animation: homeAurora3 16s ease-in-out infinite;
-}
-
+/* Kill legacy heavy overlays if any markup still references them */
+.home-main-stage .home-hero__scrim--angle,
+.home-main-stage .home-hero__scrim--bottom,
+.home-main-stage .home-hero__scrim--top,
+.home-main-stage .home-hero__aurora,
 .home-main-stage .home-hero__grain {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  opacity: 0.12;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  display: none;
 }
 
 .home-main-stage .home-hero__inner {
@@ -1204,7 +1172,7 @@ html.calm-mode .home-boards__card {
 
 .home-main-stage .home-hero__word {
   color: #fff;
-  text-shadow: none;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 0, 0, 0.45);
 }
 
 .home-main-stage .home-hero__word--pride {

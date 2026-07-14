@@ -18,13 +18,10 @@ export default function HomeHero({ eventCount }: Props) {
         className="home-hero__bg"
         src={heroWallpaper}
         alt=""
+        decoding="async"
       />
-      <div className="home-hero__aurora home-hero__aurora--magenta" aria-hidden />
-      <div className="home-hero__aurora home-hero__aurora--cyan" aria-hidden />
-      <div className="home-hero__aurora home-hero__aurora--violet" aria-hidden />
-      <div className="home-hero__scrim home-hero__scrim--angle" aria-hidden />
-      <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden />
-      <div className="home-hero__grain" aria-hidden />
+      {/* Soft title wash only — no full-bleed black scrims (they buried the wallpaper) */}
+      <div className="home-hero__scrim home-hero__scrim--title" aria-hidden />
 
       <div className="home-hero__inner">
         <div className="home-hero__kicker">
