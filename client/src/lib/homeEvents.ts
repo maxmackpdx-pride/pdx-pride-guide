@@ -110,16 +110,33 @@ export function pickMarqueeItems(events: EventListing[], limit = 21): string[] {
   return shuffleArray(HOME_MARQUEE_FALLBACK).slice(0, Math.min(limit, HOME_MARQUEE_FALLBACK.length));
 }
 
-/** First N Monday (Jul 13) listings, earliest start first — home Up Next row. */
-export function eventsForMonday(events: EventListing[], limit = 4): EventListing[] {
-  return events
-    .filter(e => e.dayOfWeek === "MON" || pacificCalendarDate(e.dateStart) === PRIDE_WEEK_START_DATE)
+/**
+ * Next N events that haven't ended yet (live + upcoming), earliest start first.
+ * Home Up Next row — advances as Pride Week moves, not frozen on Monday openers.
+ */
+export function eventsUpNext(
+  events: EventListing[],
+  limit = 4,
+  nowMs: number = Date.now(),
+): EventListing[] {
+  const upcoming = events
+    .filter(e => {
+      const endMs = parsePacificDateTime(e.dateEnd) ?? parsePacificDateTime(e.dateStart);
+      if (endMs == null) return false;
+      // Still open or starts soon — drop nights that already closed.
+      return endMs >= nowMs;
+    })
     .sort((a, b) => {
       const aMs = parsePacificDateTime(a.dateStart) ?? 0;
       const bMs = parsePacificDateTime(b.dateStart) ?? 0;
       return aMs - bMs;
-    })
-    .slice(0, limit);
+    });
+  return uniqueByEventId(upcoming).slice(0, limit);
+}
+
+/** @deprecated Use eventsUpNext — Monday-only openers no longer make sense mid-week. */
+export function eventsForMonday(events: EventListing[], limit = 4): EventListing[] {
+  return eventsUpNext(events, limit);
 }
 
 /** "Mon, Jul 13 · 6:30 PM" for Up Next cards. */

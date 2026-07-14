@@ -24,13 +24,13 @@ export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
   if (events.length === 0) return null;
 
   return (
-    <section className="home-up-next" aria-label="Up next on Monday">
+    <section className="home-up-next" aria-label="Up next">
       <div className="home-up-next__head">
         <div className="home-up-next__kicker">
           <span className="home-up-next__dot" aria-hidden />
           Up next
         </div>
-        <span className="home-up-next__lede">Week opens Monday. First doors of Pride Week 2026:</span>
+        <span className="home-up-next__lede">Coming up next on the Pride Guide:</span>
       </div>
       <div className="home-up-next__grid">
         {events.map(event => {
