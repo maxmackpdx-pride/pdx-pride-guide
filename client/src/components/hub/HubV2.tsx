@@ -225,9 +225,21 @@ export default function HubV2({
     }
   }, [section, editMode, publicProfilePath, navigate]);
 
+  // Admin is a separate page (/admin) — never keep admin tools inside member hub.
+  useEffect(() => {
+    if (section === "admin" || HUB_ADMIN_TABLE_SECTIONS.includes(section)) {
+      const tab = section === "admin" ? "overview" : hubSectionToAdminTab(section);
+      navigate(tab ? `/admin?tab=${encodeURIComponent(tab)}` : "/admin?tab=overview");
+    }
+  }, [section, navigate]);
+
   const handleSectionChange = (next: HubSection) => {
     if (next === "profile" && !editMode && publicProfilePath) {
       navigate(publicProfilePath);
+      return;
+    }
+    if (next === "admin") {
+      navigate("/admin?tab=overview");
       return;
     }
     if (HUB_ADMIN_TABLE_SECTIONS.includes(next)) {
@@ -291,17 +303,7 @@ export default function HubV2({
       )}
       {section === "people" && <HubPeople key="people" />}
       {section === "settings" && <HubSettings key="settings" onLogout={onLogout} />}
-      {section === "admin" && isAdmin && (
-        <HubAdminOverview
-          key="admin"
-          pendingCount={pendingCount}
-          ownerCount={ownerCount}
-          isPrimaryOwner={isPrimaryOwner}
-        />
-      )}
-      {tableMeta && isAdmin && (
-        <HubAdminTable key={section} section={section} {...tableMeta} />
-      )}
+      {/* Admin overview / tables only on /admin — not mixed into member hub. */}
     </>
   );
 

@@ -70,9 +70,10 @@ export type HubV2ShellProps = {
 };
 
 /**
- * Single hub frame for member + admin.
- * Desktop: left rail with optional Return link + MEMBER | ADMIN.
- * Mobile: bottom drawer above site nav (no Return link); slides open/closed.
+ * Shared look for member hub and admin tools, but modes stay separate:
+ * - Member = /dashboard only (member nav only)
+ * - Admin = /admin only (admin nav only)
+ * Desktop: left rail. Mobile: bottom drawer. Never mix rails by section alone.
  */
 export default function HubV2Shell({
   section,
@@ -94,23 +95,22 @@ export default function HubV2Shell({
   const memberNav = MEMBER_NAV.filter((item) => !item.posterOnly || canPostToFeed);
   const adminNav = hubAdminNavItems(canManageTeam);
 
-  const isAdminChrome =
-    chromeMode === "admin"
-    || section === "admin"
-    || section.startsWith("tbl-")
-    || location.startsWith("/admin");
+  // Route / chromeMode only — do not flip the rail when section is "admin" on /dashboard.
+  const isAdminChrome = chromeMode === "admin" || location.startsWith("/admin");
 
   const goMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
+    setMobileDrawerOpen(false);
     navigate("/dashboard");
     onSectionChange("feed");
-    if (typeof window !== "undefined" && window.location.pathname === "/dashboard") {
+    if (typeof window !== "undefined") {
       window.history.replaceState({}, "", "/dashboard");
     }
   };
 
   const goAdminMode = (e: React.MouseEvent) => {
     e.preventDefault();
+    setMobileDrawerOpen(false);
     navigate("/admin?tab=overview");
   };
 
