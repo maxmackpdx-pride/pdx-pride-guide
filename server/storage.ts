@@ -64,6 +64,7 @@ import {
 import { getEventChatWindow, CHAT_RETENTION_DAYS } from "@shared/eventChatWindow";
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { haversineMeters } from "@shared/geo";
+import { isGuideSystemUsername } from "@shared/peopleHub";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 import { mergeTuckerHostedArchivePast } from "@shared/tuckerHostedArchive";
@@ -6443,11 +6444,15 @@ export interface IStorage {
   followUser(followerUserId: number, followingUserId: number): void;
   unfollowUser(followerUserId: number, followingUserId: number): void;
   getFollowerCount(userId: number): number;
+  getFollowingCount(userId: number): number;
   isFollowing(followerUserId: number, followingUserId: number): boolean;
   followBusiness(followerUserId: number, businessId: number): void;
   unfollowBusiness(followerUserId: number, businessId: number): void;
   isFollowingBusiness(followerUserId: number, businessId: number): boolean;
   getBusinessFollowerCount(businessId: number): number;
+  getFollowingList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
+  getFollowersList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
+  discoverPeople(viewerUserId: number, limit?: number): import("../shared/peopleHub").PeopleHubUser[];
   countEventsHostedByUser(userId: number): number;
   purgeQaTestUsers(): { deleted: number; usernames: string[] };
   countActiveMessages(): number;
@@ -6794,6 +6799,10 @@ export const storage: IStorage = {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE following_user_id = ?`).get(userId) as { count: number } | undefined;
     return row?.count ?? 0;
   },
+  getFollowingCount(userId) {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE follower_user_id = ?`).get(userId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
   isFollowing(followerUserId, followingUserId) {
     return !!sqlite.prepare(`SELECT 1 FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).get(followerUserId, followingUserId);
   },
@@ -6812,6 +6821,84 @@ export const storage: IStorage = {
   getBusinessFollowerCount(businessId) {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM business_follows WHERE business_id = ?`).get(businessId) as { count: number } | undefined;
     return row?.count ?? 0;
+  },
+  getFollowingList(userId, viewerUserId) {
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+             u.location, u.promoter_status AS promoterStatus
+      FROM follows f
+      JOIN users u ON u.id = f.following_user_id
+      WHERE f.follower_user_id = ? AND u.status = 'active'
+      ORDER BY f.created_at DESC
+    `).all(userId) as any[];
+    return rows
+      .filter((row) => !isGuideSystemUsername(row.username))
+      .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+  },
+  getFollowersList(userId, viewerUserId) {
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+             u.location, u.promoter_status AS promoterStatus
+      FROM follows f
+      JOIN users u ON u.id = f.follower_user_id
+      WHERE f.following_user_id = ? AND u.status = 'active'
+      ORDER BY f.created_at DESC
+    `).all(userId) as any[];
+    return rows
+      .filter((row) => !isGuideSystemUsername(row.username))
+      .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+  },
+  discoverPeople(viewerUserId, limit = 24) {
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+             u.location, u.promoter_status AS promoterStatus
+      FROM users u
+      WHERE u.status = 'active'
+        AND u.id != ?
+        AND u.id NOT IN (
+          SELECT following_user_id FROM follows WHERE follower_user_id = ?
+        )
+        AND (
+          u.promoter_status = 'approved'
+          OR EXISTS (
+            SELECT 1 FROM event_hosts eh
+            JOIN events e ON e.id = eh.event_id
+            WHERE eh.user_id = u.id AND e.status = 'LIVE'
+          )
+        )
+      ORDER BY
+        (SELECT COUNT(*) FROM follows WHERE following_user_id = u.id) DESC,
+        u.created_at DESC
+      LIMIT ?
+    `).all(viewerUserId, viewerUserId, limit) as any[];
+    return rows
+      .filter((row) => !isGuideSystemUsername(row.username))
+      .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+  },
+  buildPeopleHubUser(row, viewerUserId) {
+    const hosting = storage.countEventsHostedByUser(row.id);
+    const verifiedHost = row.promoterStatus === "approved";
+    const subtitleParts: string[] = [];
+    if (verifiedHost) subtitleParts.push("Verified host");
+    else if (hosting > 0) subtitleParts.push(hosting === 1 ? "1 event" : `${hosting} events`);
+    if (row.location?.trim()) subtitleParts.push(String(row.location).trim());
+    const bioSnippet = row.bio?.trim() ? String(row.bio).trim().slice(0, 120) : null;
+    return {
+      id: row.id,
+      username: row.username,
+      displayName: row.displayName ?? null,
+      photoUrl: row.photoUrl ?? null,
+      avatarChoice: row.avatarChoice ?? 1,
+      avatarRing: row.avatarRing || "none",
+      bio: bioSnippet,
+      verifiedHost,
+      followers: storage.getFollowerCount(row.id),
+      isFollowing: viewerUserId != null ? storage.isFollowing(viewerUserId, row.id) : false,
+      subtitle: subtitleParts.length > 0 ? subtitleParts.join(" · ") : null,
+    };
   },
   countEventsHostedByUser(userId) {
     const row = sqlite.prepare(`

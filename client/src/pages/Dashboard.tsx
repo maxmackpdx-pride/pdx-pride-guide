@@ -158,6 +158,11 @@ export default function Dashboard() {
     queryFn: () => fetchMine("/api/events/mine/check-ins"),
     enabled: !!user,
   });
+  const followStatsQuery = useQuery<{ followers: number; following: number }>({
+    queryKey: ["/api/users/me/follow-stats"],
+    queryFn: () => fetchMine("/api/users/me/follow-stats"),
+    enabled: !!user,
+  });
 
   const myGigs = myGigsQuery.data ?? [];
   const myEvents = myEventsQuery.data ?? [];
@@ -510,6 +515,7 @@ export default function Dashboard() {
         ownerCount={ownerCount}
         isPrimaryOwner={isPrimaryOwner}
         postsCount={postsCount}
+        followStats={followStatsQuery.data}
         goingEvents={goingEvents}
         hostingEvents={hostingEvents}
         savedEvents={[]}

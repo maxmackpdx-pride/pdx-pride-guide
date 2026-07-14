@@ -2727,6 +2727,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ followers: storage.getFollowerCount(target.id), isFollowing: false });
   });
 
+  app.get("/api/users/me/follow-stats", requireAuth, (req, res) => {
+    const userId = req.session.userId!;
+    res.json({
+      followers: storage.getFollowerCount(userId),
+      following: storage.getFollowingCount(userId),
+    });
+  });
+
+  app.get("/api/users/me/people/:tab", requireAuth, (req, res) => {
+    const tab = String(req.params.tab || "").trim();
+    const userId = req.session.userId!;
+    if (tab === "following") return res.json(storage.getFollowingList(userId, userId));
+    if (tab === "followers") return res.json(storage.getFollowersList(userId, userId));
+    if (tab === "discover") return res.json(storage.discoverPeople(userId));
+    return res.status(400).json({ error: "Invalid tab" });
+  });
+
   app.post("/api/users/:username/message", requireAuth, (req, res) => {
     const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
     if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });

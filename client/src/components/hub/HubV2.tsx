@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/context/ThemeContext";
 import type { AuthUser } from "@/context/AuthContext";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { PeopleHubUser } from "@shared/peopleHub";
+import HubPersonRow from "./sections/HubPersonRow";
+import "./hub-home.css";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import HubV2Shell from "./HubV2Shell";
 import HubFeed from "./sections/HubFeed";
@@ -28,6 +33,7 @@ export type HubV2Props = {
   isPrimaryOwner?: boolean;
   postsCount?: number;
   profileStats?: Array<{ value: string | number; label: string }>;
+  followStats?: { followers: number; following: number };
   goingEvents?: HubEventRow[];
   hostingEvents?: HubEventRow[];
   savedEvents?: HubEventRow[];
@@ -60,6 +66,7 @@ function dayDotClass(day?: string) {
 function HubRightRail({
   upcoming,
   onGoEvents,
+  onGoPeople,
   isAdmin,
   isPrimaryOwner,
   pendingCount,
@@ -67,11 +74,36 @@ function HubRightRail({
 }: {
   upcoming: HubEventRow[];
   onGoEvents: () => void;
+  onGoPeople: () => void;
   isAdmin?: boolean;
   isPrimaryOwner?: boolean;
   pendingCount?: number;
   ownerCount?: number;
 }) {
+  const [pendingUsername, setPendingUsername] = useState<string | null>(null);
+
+  const { data: suggestions = [] } = useQuery<PeopleHubUser[]>({
+    queryKey: ["/api/users/me/people", "discover", "rail"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/users/me/people/discover");
+      const list = (await res.json()) as PeopleHubUser[];
+      return list.slice(0, 3);
+    },
+  });
+
+  const followMutation = useMutation({
+    mutationFn: async ({ username, isFollowing }: { username: string; isFollowing: boolean }) => {
+      setPendingUsername(username);
+      const method = isFollowing ? "DELETE" : "POST";
+      await apiRequest(method, `/api/users/${encodeURIComponent(username)}/follow`);
+    },
+    onSettled: () => {
+      setPendingUsername(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me/people"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me/follow-stats"] });
+    },
+  });
+
   return (
     <>
       {isAdmin && (
@@ -118,13 +150,37 @@ function HubRightRail({
           All your events →
         </button>
       </div>
-      <div className="card" style={{ padding: 16 }}>
-        <div className="kick" style={{ letterSpacing: ".16em", marginBottom: 14 }}>
-          Who to follow
+      <div className="card" style={{ padding: suggestions.length > 0 ? 0 : 16, overflow: "hidden" }}>
+        <div style={{ padding: suggestions.length > 0 ? "16px 16px 10px" : 0 }}>
+          <div className="kick" style={{ letterSpacing: ".16em", marginBottom: suggestions.length > 0 ? 10 : 14 }}>
+            Who to follow
+          </div>
+          {suggestions.length === 0 && (
+            <p className="kick" style={{ lineHeight: 1.5, margin: 0 }}>
+              Hosts and scene-makers show up here as more profiles go live.
+            </p>
+          )}
         </div>
-        <p className="kick" style={{ lineHeight: 1.5 }}>
-          Follow graph is not live yet. People in the hub will not show fake accounts.
-        </p>
+        {suggestions.map((person) => (
+          <HubPersonRow
+            key={person.id}
+            person={person}
+            followPending={pendingUsername === person.username}
+            onToggleFollow={() =>
+              followMutation.mutate({ username: person.username, isFollowing: person.isFollowing })
+            }
+          />
+        ))}
+        {suggestions.length > 0 && (
+          <button
+            type="button"
+            className="ico"
+            style={{ color: "var(--panel-cyan)", width: "100%", justifyContent: "center", padding: "14px 16px" }}
+            onClick={onGoPeople}
+          >
+            See all in People →
+          </button>
+        )}
       </div>
     </>
   );
@@ -140,6 +196,7 @@ export default function HubV2({
   isPrimaryOwner = false,
   postsCount = 0,
   profileStats,
+  followStats,
   goingEvents = [],
   hostingEvents = [],
   savedEvents = [],
@@ -193,8 +250,8 @@ export default function HubV2({
   const stats =
     profileStats ??
     [
-      { value: "—", label: "Followers" },
-      { value: "—", label: "Following" },
+      { value: followStats?.followers ?? "—", label: "Followers" },
+      { value: followStats?.following ?? "—", label: "Following" },
       { value: hostingEvents.length + goingEvents.length, label: "Events" },
       { value: postsCount, label: "Posts" },
     ];
@@ -268,6 +325,7 @@ export default function HubV2({
         <HubRightRail
           upcoming={upcoming}
           onGoEvents={() => handleSectionChange("events")}
+          onGoPeople={() => handleSectionChange("people")}
           isAdmin={isAdmin}
           isPrimaryOwner={isPrimaryOwner}
           pendingCount={pendingCount}
