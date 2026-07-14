@@ -231,13 +231,62 @@ export default function FeaturedEventAd({
         ✕
       </button>
 
-      {frames.length > 0 && (
-        // Full-width, top-anchored slideshow: never crop left/right; crop the bottom.
+      {/* Easter egg hit zone = slideshow + countdown ONLY. Tickets/RSVP stay outside. */}
+      <div
+        className="featured-event-ad__egg-zone"
+        style={{ position: "relative", zIndex: 1 }}
+      >
+        {frames.length > 0 && (
+          // Full-width, top-anchored slideshow: never crop left/right; crop the bottom.
+          <div
+            role={easterEggUrl ? "button" : undefined}
+            tabIndex={easterEggUrl ? 0 : undefined}
+            aria-label={easterEggUrl ? "Open secret story" : undefined}
+            onClick={easterEggUrl ? openEgg : undefined}
+            onKeyDown={(e) => {
+              if (!easterEggUrl) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openEgg();
+              }
+            }}
+            style={{
+              position: "relative",
+              width: "100%",
+              aspectRatio: "1 / 1",
+              overflow: "hidden",
+              background: "#000",
+              cursor: easterEggUrl ? "pointer" : "default",
+            }}
+          >
+            {frames.map((f, i) => (
+              <img
+                key={f.src}
+                src={f.src}
+                alt={i === 0 ? event.title : ""}
+                draggable={false}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "top center",
+                  opacity: i === frame ? 1 : 0,
+                  transition: "opacity .6s ease",
+                  pointerEvents: "none",
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Countdown — easter egg hit target when secret URL is set */}
         <div
           role={easterEggUrl ? "button" : undefined}
           tabIndex={easterEggUrl ? 0 : undefined}
           aria-label={easterEggUrl ? "Open secret story" : undefined}
-          onClick={openEgg}
+          onClick={easterEggUrl ? openEgg : undefined}
           onKeyDown={(e) => {
             if (!easterEggUrl) return;
             if (e.key === "Enter" || e.key === " ") {
@@ -246,74 +295,47 @@ export default function FeaturedEventAd({
             }
           }}
           style={{
-            position: "relative",
-            width: "100%",
-            aspectRatio: "1 / 1",
-            overflow: "hidden",
-            background: "#000",
+            padding: "16px 18px 14px",
             cursor: easterEggUrl ? "pointer" : "default",
+            userSelect: "none",
           }}
         >
-          {frames.map((f, i) => (
-            <img
-              key={f.src}
-              src={f.src}
-              alt={i === 0 ? event.title : ""}
-              draggable={false}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "top center",
-                opacity: i === frame ? 1 : 0,
-                transition: "opacity .6s ease",
-                pointerEvents: "none",
-              }}
-            />
-          ))}
+          <div style={{ ...rowLabel, color: CYAN, fontSize: 30, ...glow(CYAN) }}>
+            {cd.done
+              ? "Live now"
+              : `${cd.days > 0 ? `${cd.days}d ` : ""}${pad(cd.hours)}:${pad(cd.minutes)}:${pad(cd.seconds)}`}
+          </div>
+          <div style={rowCopy}>{cd.done ? "It's on" : "Kickoff in"}</div>
         </div>
-      )}
-
-      {/* Countdown — easter egg hit target when secret URL is set */}
-      <div
-        role={easterEggUrl ? "button" : undefined}
-        tabIndex={easterEggUrl ? 0 : undefined}
-        aria-label={easterEggUrl ? "Open secret story" : undefined}
-        onClick={openEgg}
-        onKeyDown={(e) => {
-          if (!easterEggUrl) return;
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openEgg();
-          }
-        }}
-        style={{
-          padding: "16px 18px 14px",
-          cursor: easterEggUrl ? "pointer" : "default",
-          userSelect: "none",
-        }}
-      >
-        <div style={{ ...rowLabel, color: CYAN, fontSize: 30, ...glow(CYAN) }}>
-          {cd.done
-            ? "Live now"
-            : `${cd.days > 0 ? `${cd.days}d ` : ""}${pad(cd.hours)}:${pad(cd.minutes)}:${pad(cd.seconds)}`}
-        </div>
-        <div style={rowCopy}>{cd.done ? "It's on" : "Kickoff in"}</div>
       </div>
 
-      {event.ticketUrl && (
-        <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" style={rowBase}>
-          <div style={{ ...rowLabel, color: GREEN, ...glow(GREEN) }}>Buy tickets</div>
-          <div style={rowCopy}>Available now</div>
-        </a>
-      )}
+      {/* Ticket + RSVP sit outside the egg zone — always receive their own taps. */}
+      <div className="featured-event-ad__actions" style={{ position: "relative", zIndex: 2 }}>
+        {event.ticketUrl && (
+          <a
+            href={event.ticketUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={rowBase}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ ...rowLabel, color: GREEN, ...glow(GREEN) }}>Buy tickets</div>
+            <div style={rowCopy}>Available now</div>
+          </a>
+        )}
 
-      <button type="button" onClick={() => setOpen(true)} style={rowBase}>
-        <div style={{ ...rowLabel, color: ORANGE, ...glow(ORANGE) }}>RSVP</div>
-        <div style={rowCopy}>Secure your spot</div>
-      </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
+          style={rowBase}
+        >
+          <div style={{ ...rowLabel, color: ORANGE, ...glow(ORANGE) }}>RSVP</div>
+          <div style={rowCopy}>Secure your spot</div>
+        </button>
+      </div>
 
       {open && <EventModal event={event} onClose={() => setOpen(false)} />}
       {eggOpen && easterEggUrl && (
