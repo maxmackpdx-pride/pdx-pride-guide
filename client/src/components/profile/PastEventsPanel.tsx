@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { eventDayCssVar, eventYear, ProfileRailHead } from "./ProfileEventRail";
 import type { ProfileEvent } from "./types";
 import "./PastEventsPanel.css";
@@ -13,6 +14,7 @@ type Props = {
 /**
  * Past Events grid: attended events with year badge, title, and venue.
  * Day color drives the top seam via --day-* tokens.
+ * Event poster sits behind the day-colored gradient scrim.
  */
 export default function PastEventsPanel({ events, onEventClick, countLabel }: Props) {
   if (!events.length) return null;
@@ -28,10 +30,19 @@ export default function PastEventsPanel({ events, onEventClick, countLabel }: Pr
           const year = eventYear(event);
           const style = { ["--pp-day" as string]: day } as CSSProperties;
           const clickable = typeof onEventClick === "function";
+          const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
 
           const inner = (
             <>
-              {year ? <span className="pp-past-events__year">{year}</span> : <span className="pp-past-events__year pp-past-events__year--empty" />}
+              {poster && (
+                <img className="pp-past-events__poster" src={poster} alt="" decoding="async" loading="lazy" />
+              )}
+              <div className="pp-past-events__scrim" aria-hidden="true" />
+              {year ? (
+                <span className="pp-past-events__year">{year}</span>
+              ) : (
+                <span className="pp-past-events__year pp-past-events__year--empty" />
+              )}
               <div className="pp-past-events__body">
                 <div className="display pp-past-events__title">{event.title}</div>
                 {event.venueName ? (

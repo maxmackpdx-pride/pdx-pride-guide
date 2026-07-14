@@ -1419,16 +1419,17 @@ html.calm-mode .home-boards__card {
   overflow: hidden;
   background: var(--ink-800, #0b0b0b);
   border: 2px solid var(--border-default);
-  border-left: 4px solid var(--day-mon, #8800ff);
+  border-left: 4px solid var(--up-day, var(--day-mon, #8800ff));
   border-radius: 6px;
   padding: 18px;
   text-decoration: none;
   color: inherit;
-  transition: background 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .home-up-next__card:hover {
-  background: var(--surface-card-hover, #111);
+  border-color: color-mix(in srgb, var(--up-day, var(--day-mon)) 40%, var(--border-default));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--up-day, var(--day-mon)) 22%, transparent);
 }
 
 .home-up-next__backdrop {
@@ -1437,16 +1438,23 @@ html.calm-mode .home-boards__card {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.32;
+  object-position: center top;
+  opacity: 0.55;
   z-index: 0;
   pointer-events: none;
 }
 
+/* Day-colored gradient over poster so art stays visible */
 .home-up-next__backdrop-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(125deg, rgba(10, 10, 12, 0.95) 35%, rgba(10, 10, 12, 0.55));
+  background: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--up-day, var(--day-mon)) 28%, rgba(8, 8, 10, 0.88)) 0%,
+    rgba(8, 8, 10, 0.72) 42%,
+    rgba(8, 8, 10, 0.45) 100%
+  );
   pointer-events: none;
 }
 
@@ -1460,8 +1468,9 @@ html.calm-mode .home-boards__card {
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--day-mon-text, #aa66ff);
+  color: var(--up-day, var(--day-mon-text, #aa66ff));
   margin-bottom: 10px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
 }
 
 .home-up-next__title {
@@ -1472,12 +1481,14 @@ html.calm-mode .home-boards__card {
   text-transform: uppercase;
   color: #fff;
   margin-bottom: 8px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75);
 }
 
 .home-up-next__venue {
   font-size: 13px;
-  color: var(--text-lo);
+  color: rgba(255, 255, 255, 0.78);
   margin-bottom: 14px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
 }
 
 .home-up-next__foot {

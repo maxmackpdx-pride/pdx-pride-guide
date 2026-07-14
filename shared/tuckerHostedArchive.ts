@@ -31,25 +31,23 @@ const LOCKER_ROOM_POSTER = "/posters/tucker-archive/locker-room-dec-2025.png";
 const LOCKER_ROOM_DESC =
   "The Locker Room: Athletic Gear Night — every last Friday at The Eagle Portland, 9PM–close. Hosted by Tucker Max, music by DJ Bro Hoe, $5 cover. Jocks, singlets, compression gear encouraged. Stripping contest with cash prizes. 835 N Lombard St, Portland.";
 
-/** Last Friday of each month, Feb 2025 through Jun 2026 (series start per Tucker). */
+/**
+ * Locker Room last-Friday series.
+ * Excluded months (any year): January, February, July, September.
+ * Also exclude June 2026 specifically.
+ */
 const LOCKER_ROOM_DATES = [
-  "2025-02-28",
   "2025-03-28",
   "2025-04-25",
   "2025-05-30",
   "2025-06-27",
-  "2025-07-25",
   "2025-08-29",
-  "2025-09-26",
   "2025-10-31",
   "2025-11-28",
   "2025-12-26",
-  "2026-01-30",
-  "2026-02-27",
   "2026-03-27",
   "2026-04-24",
   "2026-05-29",
-  "2026-06-26",
 ] as const;
 
 function pacificOffsetForDate(ymd: string): string {

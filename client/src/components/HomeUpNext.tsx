@@ -1,16 +1,10 @@
 import { Link } from "wouter";
 import type { EventListing } from "@shared/multiDayEvents";
 import { formatUpNextWhen } from "@/lib/homeEvents";
-import { listingTypeTags } from "@/lib/dsEvent";
+import { listingDay, listingPosterUrl, listingTypeTags } from "@/lib/dsEvent";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
 import AuthModal from "@/components/AuthModal";
-import pridePostersWall from "@/assets/home/pride-posters-wall.jpg";
-import heroCollage from "@/assets/home/hero-collage.png";
-import bannerSocial from "@/assets/home/banner-social.png";
-import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
-
-const BACKDROPS = [pridePostersWall, heroCollage, bannerSocial, heroWallpaper];
 
 type Props = {
   events: EventListing[];
@@ -39,19 +33,25 @@ export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
         <span className="home-up-next__lede">Week opens Monday. First doors of Pride Week 2026:</span>
       </div>
       <div className="home-up-next__grid">
-        {events.map((event, i) => {
+        {events.map(event => {
           const tags = listingTypeTags(event, 1);
           const tag = tags[0] || "Event";
           const rsvped = myEventIds.has(event.id);
           const href = `/events/${event.id}`;
-          const backdrop = BACKDROPS[i % BACKDROPS.length];
+          const poster = listingPosterUrl(event);
+          const day = listingDay(event).toLowerCase();
           const locationLine = [event.venueName, event.neighborhood].filter(Boolean).join(" · ") || "Portland";
 
           return (
-            <Link key={event.id} href={href} className="home-up-next__card">
-              {posterBackdrop && (
+            <Link
+              key={event.id}
+              href={href}
+              className="home-up-next__card"
+              style={{ ["--up-day" as string]: `var(--day-${day})` }}
+            >
+              {posterBackdrop && poster && (
                 <>
-                  <img className="home-up-next__backdrop" src={backdrop} alt="" decoding="async" loading="lazy" />
+                  <img className="home-up-next__backdrop" src={poster} alt="" decoding="async" loading="lazy" />
                   <div className="home-up-next__backdrop-scrim" aria-hidden />
                 </>
               )}

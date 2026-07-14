@@ -1,9 +1,8 @@
-import { useState, type CSSProperties, type KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import { admissionDisplayLabel } from "@shared/admission";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./HostingPanel.css";
-
-type Tab = "next" | "past";
 
 type Props = {
   upcoming: ProfileEvent[];
@@ -93,6 +92,7 @@ function HostingCard({
   const when = past ? fmtPastWhen(event) : fmtUpcomingWhen(event);
   const status = statusLine(event, past);
   const interactive = typeof onEventClick === "function";
+  const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
 
   const style = { "--hp-day": color } as CSSProperties;
 
@@ -119,6 +119,10 @@ function HostingCard({
       aria-label={event.title}
     >
       <div className="hp-card__banner">
+        {poster && (
+          <img className="hp-card__poster" src={poster} alt="" decoding="async" loading="lazy" />
+        )}
+        <div className="hp-card__banner-scrim" aria-hidden="true" />
         <span className="hp-card__day">{past ? "PAST" : code}</span>
       </div>
       <div className="hp-card__body">
@@ -131,29 +135,57 @@ function HostingCard({
   );
 }
 
+function HostingRail({
+  label,
+  events,
+  past,
+  emptyCopy,
+  onEventClick,
+}: {
+  label: string;
+  events: ProfileEvent[];
+  past: boolean;
+  emptyCopy: string;
+  onEventClick?: (event: ProfileEvent) => void;
+}) {
+  return (
+    <div className="hp-section">
+      <div className="hp-section__label display" id={`hp-label-${past ? "past" : "next"}`}>
+        {label}
+      </div>
+      <div
+        className="hp-rail"
+        role="list"
+        aria-labelledby={`hp-label-${past ? "past" : "next"}`}
+      >
+        {events.length > 0 ? (
+          events.map(event => (
+            <div key={event.id} role="listitem">
+              <HostingCard event={event} past={past} onEventClick={onEventClick} />
+            </div>
+          ))
+        ) : (
+          <p className="hp-empty">{emptyCopy}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function HostingPanel({ upcoming, past, displayName, onEventClick }: Props) {
   const hasUpcoming = upcoming.length > 0;
   const hasPast = past.length > 0;
 
-  // null = follow data-driven default until the user picks a tab.
-  // Default UP NEXT; if nothing upcoming but past exists, open PAST EVENTS.
-  const [tabOverride, setTabOverride] = useState<Tab | null>(null);
-  const tab: Tab = tabOverride ?? (hasUpcoming || !hasPast ? "next" : "past");
-
   if (!hasUpcoming && !hasPast) return null;
 
-  const list = tab === "next" ? upcoming : past;
-  const isPast = tab === "past";
   const firstName = (displayName || "").trim().split(/\s+/)[0] || null;
 
-  const emptyCopy =
-    tab === "next"
-      ? firstName
-        ? `Nothing up next for ${firstName} yet. New nights land here first.`
-        : "Nothing up next yet. New nights land here first."
-      : firstName
-        ? `No past shows on ${firstName}'s ledger yet. First one's always special.`
-        : "No past shows on the ledger yet. First one's always special.";
+  const emptyNext = firstName
+    ? `Nothing up next for ${firstName} yet. New nights land here first.`
+    : "Nothing up next yet. New nights land here first.";
+  const emptyPast = firstName
+    ? `No past shows on ${firstName}'s ledger yet. First one's always special.`
+    : "No past shows on the ledger yet. First one's always special.";
 
   return (
     <section className="hp-panel" aria-label="Hosting">
@@ -165,50 +197,26 @@ export default function HostingPanel({ upcoming, past, displayName, onEventClick
         <span className="hp-panel__badge">PROMOTER</span>
       </div>
 
-      <div className="hp-tabs" role="tablist" aria-label="Hosting events">
-        <button
-          type="button"
-          role="tab"
-          id="hp-tab-next"
-          aria-selected={tab === "next"}
-          aria-controls="hp-rail"
-          className={`hp-tabs__btn display${tab === "next" ? " is-on" : ""}`}
-          onClick={() => setTabOverride("next")}
-        >
-          UP NEXT
-        </button>
-        <button
-          type="button"
-          role="tab"
-          id="hp-tab-past"
-          aria-selected={tab === "past"}
-          aria-controls="hp-rail"
-          className={`hp-tabs__btn display${tab === "past" ? " is-on" : ""}`}
-          onClick={() => setTabOverride("past")}
-        >
-          PAST EVENTS
-        </button>
-      </div>
+      {/* Stacked: Up Next first, past events directly under it */}
+      {(hasUpcoming || !hasPast) && (
+        <HostingRail
+          label="UP NEXT"
+          events={upcoming}
+          past={false}
+          emptyCopy={emptyNext}
+          onEventClick={onEventClick}
+        />
+      )}
 
-      <div
-        className="hp-rail"
-        id="hp-rail"
-        role="tabpanel"
-        aria-labelledby={tab === "next" ? "hp-tab-next" : "hp-tab-past"}
-      >
-        {list.length > 0 ? (
-          list.map(event => (
-            <HostingCard
-              key={event.id}
-              event={event}
-              past={isPast}
-              onEventClick={onEventClick}
-            />
-          ))
-        ) : (
-          <p className="hp-empty">{emptyCopy}</p>
-        )}
-      </div>
+      {hasPast && (
+        <HostingRail
+          label="PAST EVENTS"
+          events={past}
+          past={true}
+          emptyCopy={emptyPast}
+          onEventClick={onEventClick}
+        />
+      )}
     </section>
   );
 }

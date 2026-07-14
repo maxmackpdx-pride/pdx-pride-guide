@@ -4965,6 +4965,20 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("fix_iced_tea_pride_2026_time_v1");
   }
+
+  // Locker Room series: drop Jan/Feb/Jul/Sep (any year) and June 2026 from live events.
+  // Archive dates are filtered in shared/tuckerHostedArchive.ts — this cleans any seeded/live rows.
+  if (!hasBootMigration("scrub_locker_room_excluded_months_v1")) {
+    sqlite.prepare(`
+      DELETE FROM events
+      WHERE LOWER(title) LIKE '%locker room%'
+        AND (
+          substr(date_start, 6, 2) IN ('01', '02', '07', '09')
+          OR date_start LIKE '2026-06%'
+        )
+    `).run();
+    recordBootMigration("scrub_locker_room_excluded_months_v1");
+  }
 }
 
 function parseEnvAdminLists() {
