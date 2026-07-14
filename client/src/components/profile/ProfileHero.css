@@ -21,7 +21,8 @@
 }
 
 .pp-hero--reimagined .pp-hero__banner,
-.pp-hero--reimagined .pp-hero__banner-fallback {
+.pp-hero--reimagined .pp-hero__banner-fallback,
+.pp-hero--reimagined .pp-hero__banner--custom {
   position: relative;
   inset: auto;
   display: block;
@@ -31,6 +32,18 @@
   object-fit: cover;
   object-position: center;
   z-index: 0;
+}
+
+.pp-hero--reimagined .pp-hero__banner--custom {
+  overflow: hidden;
+}
+
+.pp-hero--reimagined .pp-hero__banner-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .pp-hero--reimagined .pp-hero__banner-dots {
@@ -312,6 +325,7 @@
 @media (min-width: 900px) {
   .pp-hero--reimagined .pp-hero__banner,
   .pp-hero--reimagined .pp-hero__banner-fallback,
+  .pp-hero--reimagined .pp-hero__banner--custom,
   .pp-hero--reimagined .pp-hero__scrim {
     height: clamp(180px, 18vw, 260px);
   }

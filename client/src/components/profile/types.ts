@@ -116,6 +116,8 @@ export type PublicProfileData = {
   roles?: string[];
   accentColor?: string;
   profileBanner?: string | null;
+  coverImageUrl?: string | null;
+  coverCrop?: string | null;
   talents?: string[];
   standFor?: string[];
   affiliatedVenues?: ProfileVenue[];

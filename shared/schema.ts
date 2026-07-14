@@ -274,6 +274,8 @@ export const users = sqliteTable("users", {
   marquee: text("marquee"), // JSON {items:string[],speed:number,color:string} | null — promoter-only ticker
   accentColor: text("accent_color"), // hex from the fixed neon allowlist, or null for the site default
   banner: text("banner"), // 'accent-gradient' | 'neon-collage' | 'sticker-wall' | 'pride-guide-social'
+  coverImageUrl: text("cover_image_url"),
+  coverCrop: text("cover_crop"),
   pup: text("pup"), // JSON {name,hood,role,lookingFor} | null — member-only, opt-in pup identity
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),

@@ -178,6 +178,8 @@ export function normalizePublicProfile(
     roles: api.roles,
     accentColor: api.accentColor || "#FF00CC",
     profileBanner: resolveProfileBannerSrc(api.banner),
+    coverImageUrl: api.coverImageUrl ?? null,
+    coverCrop: api.coverCrop ?? null,
     talents: api.talents,
     standFor: api.standFor,
     affiliatedVenues: api.affiliatedVenues,

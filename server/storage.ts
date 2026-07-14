@@ -66,6 +66,7 @@ import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { haversineMeters } from "@shared/geo";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
+import { mergeTuckerHostedArchivePast } from "@shared/tuckerHostedArchive";
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
  * fields on top of the raw gig_posts columns. */
@@ -487,6 +488,8 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN affiliated_venue_ids TEXT`); } c
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN marquee TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN accent_color TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN banner TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_image_url TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_crop TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN pup TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN username_changed_at TEXT`); } catch(e) {}
 try { sqlite.exec(`
@@ -5978,7 +5981,7 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): User | undefined;
   createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'accentColor' | 'banner' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
   changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
@@ -6387,7 +6390,8 @@ export const storage: IStorage = {
       return endMs != null && endMs < nowMs;
     };
     const hostedUpcoming = hostedEventsAll.filter(e => !isPastEvent(e));
-    const hostedPast = hostedEventsAll.filter(isPastEvent);
+    const hostedPastRaw = hostedEventsAll.filter(isPastEvent);
+    const hostedPast = mergeTuckerHostedArchivePast(user.username, hostedPastRaw);
 
     const gigRows = storage.getGigPostsByUser(user.id).filter(gig => gig.status === "LIVE");
     const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
@@ -6526,6 +6530,8 @@ export const storage: IStorage = {
       ownedBusiness: ownedBusinesses[0] || null,
       accentColor: user.accentColor || null,
       banner: user.banner || DEFAULT_PROFILE_BANNER,
+      coverImageUrl: user.coverImageUrl || null,
+      coverCrop: user.coverCrop || null,
       marquee: verifiedHost ? safeJsonOrNull(user.marquee) : null,
       pup: !verifiedHost ? safeJsonOrNull(user.pup) : null,
       packmates: !verifiedHost ? storage.getPackLinks(user.id, "packmate") : [],

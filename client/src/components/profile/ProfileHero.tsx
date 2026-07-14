@@ -5,6 +5,7 @@ import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
 import RoleStickers from "./RoleStickers";
 import AdminProfilePhotoReject from "@/components/admin/AdminProfilePhotoReject";
+import { coverCropToImgStyle } from "@/lib/coverCrop";
 import type { PublicProfileData } from "./types";
 import "./ProfileHero.css";
 
@@ -95,7 +96,16 @@ export default function ProfileHero({
 
   return (
     <section className="pp-hero pp-hero--reimagined">
-      {banner ? (
+      {data.coverImageUrl ? (
+        <div className="pp-hero__banner pp-hero__banner--custom">
+          <img
+            className="pp-hero__banner-img"
+            src={data.coverImageUrl}
+            alt=""
+            style={coverCropToImgStyle(data.coverCrop)}
+          />
+        </div>
+      ) : banner ? (
         <img className="pp-hero__banner" src={banner} alt="" />
       ) : (
         <div className="pp-hero__banner-fallback" aria-hidden="true">

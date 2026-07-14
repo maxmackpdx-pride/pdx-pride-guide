@@ -15,8 +15,8 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
     id: "profile",
     label: "Profile settings & avatars",
     tables: ["users"],
-    uploadRoutes: ["/api/upload/avatar"],
-    apiRoutes: ["PUT /api/users/me", "POST /api/upload/avatar"],
+    uploadRoutes: ["/api/upload/avatar", "/api/upload/cover"],
+    apiRoutes: ["PUT /api/users/me", "POST /api/upload/avatar", "POST /api/upload/cover"],
   },
   {
     id: "push_notifications",

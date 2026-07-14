@@ -17,6 +17,11 @@ import {
 import { z } from "zod";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import {
+  getTuckerHostedArchiveRow,
+  isTuckerHostedArchiveId,
+  tuckerHostedArchiveAsEvent,
+} from "@shared/tuckerHostedArchive";
 import { buildVenueWebsiteIndex, resolveVenueWebsite } from "@shared/venueLinks";
 import {
   enrichEventForMap,
@@ -302,7 +307,9 @@ function authUserResponse(req: any, user: any) {
     id: user.id, username: user.username, email: user.email,
     displayName: user.displayName, avatarChoice: user.avatarChoice,
     avatarRing: user.avatarRing || "none", avatarCrop: user.avatarCrop || null,
-    bio: user.bio, photoUrl: user.photoUrl, googleLinked: !!user.googleId,
+    bio: user.bio, photoUrl: user.photoUrl,
+    coverImageUrl: user.coverImageUrl || null, coverCrop: user.coverCrop || null,
+    googleLinked: !!user.googleId,
     promoterStatus: user.promoterStatus || "none",
     pronouns: user.pronouns || null,
     location: user.location || null,
@@ -379,6 +386,29 @@ function sanitizeProfilePhotos(input: unknown): string | null {
       caption: String(entry.caption || "").replace(/[<>]/g, "").trim().slice(0, 60),
     }));
   return JSON.stringify(clean);
+}
+
+function sanitizeCoverImageUrl(input: unknown): string | null | false {
+  if (input === null || input === "") return null;
+  if (typeof input !== "string") return false;
+  const trimmed = input.trim().slice(0, 300);
+  if (!trimmed) return null;
+  if (!trimmed.startsWith("/uploads/") && !trimmed.startsWith("https://")) return false;
+  return trimmed;
+}
+
+function sanitizeCoverCrop(input: unknown): string | null {
+  if (input === null || input === "") return null;
+  if (typeof input !== "string") return null;
+  try {
+    const parsed = JSON.parse(input);
+    const offsetX = Math.max(0, Math.min(1, Number(parsed.offsetX ?? 0.5)));
+    const offsetY = Math.max(0, Math.min(1, Number(parsed.offsetY ?? 0.5)));
+    const scale = Math.max(1, Math.min(3, Number(parsed.scale ?? 1) || 1));
+    return JSON.stringify({ offsetX, offsetY, scale });
+  } catch {
+    return null;
+  }
 }
 
 function sanitizeTalents(input: unknown): string | null {
@@ -696,6 +726,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ url });
   });
 
+  // Profile cover image upload (full image; client stores crop/position metadata separately)
+  app.post("/api/upload/cover", requireAuth, upload.single("cover"), async (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "No file or invalid type" });
+    const url = `/uploads/${req.file.filename}`;
+    res.json({ url });
+  });
+
   app.post("/api/upload/gifting", requireAuth, upload.array("photos", 2), (req: any, res: any) => {
     const files = Array.isArray(req.files) ? req.files : [];
     if (!files.length) return res.status(400).json({ error: "Upload 1 or 2 image files (jpg/png/gif/webp, max 8MB each)" });
@@ -843,7 +880,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/events/:id", (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
+    const eventId = Number(req.params.id);
+    if (isTuckerHostedArchiveId(eventId)) {
+      const row = getTuckerHostedArchiveRow(eventId);
+      if (!row) return res.status(404).json({ error: "Not found" });
+      const archiveEvt = tuckerHostedArchiveAsEvent(row);
+      const listing = expandMultiDayEvents([archiveEvt])[0] || archiveEvt;
+      return res.json(publicEvent(listing, new Set(), venueWebsiteIndex()));
+    }
+    const evt = storage.getEvent(eventId);
     if (!evt) return res.status(404).json({ error: "Not found" });
     // Public detail must match list: only LIVE. Admins may open HIDDEN for moderation.
     if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
@@ -1980,7 +2025,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Update own profile
   app.put("/api/users/me", requireAuth, (req, res) => {
     const {
-      username, displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, pronouns, location,
+      username, displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, coverImageUrl, coverCrop,
+      pronouns, location,
       socialLinks, profileEmbeds, profilePhotos, talents, standFor, affiliatedVenueIds, marquee, accentColor, banner, pup,
     } = req.body;
     const moderated: Record<string, string | null | undefined> = {
@@ -2025,6 +2071,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (avatarCrop !== undefined) patch.avatarCrop = avatarCrop || null;
     if (bio !== undefined) patch.bio = bio;
     if (photoUrl !== undefined) patch.photoUrl = photoUrl || null;
+    if (coverImageUrl !== undefined) {
+      const cleanCover = sanitizeCoverImageUrl(coverImageUrl);
+      if (cleanCover === false) {
+        return res.status(400).json({ error: "Invalid cover image URL" });
+      }
+      patch.coverImageUrl = cleanCover;
+    }
+    if (coverCrop !== undefined) patch.coverCrop = sanitizeCoverCrop(coverCrop);
     if (pronouns !== undefined) patch.pronouns = pronouns ? String(pronouns).replace(/[<>]/g, "").trim().slice(0, 40) : null;
     if (location !== undefined) patch.location = location ? String(location).replace(/[<>]/g, "").trim().slice(0, 80) : null;
     if (socialLinks !== undefined) patch.socialLinks = sanitizeSocialLinks(socialLinks);

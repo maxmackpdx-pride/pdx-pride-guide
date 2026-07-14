@@ -11,6 +11,8 @@ export interface AuthUser {
   avatarCrop?: string | null;
   bio: string | null;
   photoUrl: string | null;
+  coverImageUrl?: string | null;
+  coverCrop?: string | null;
   googleLinked: boolean;
   promoterStatus?: "none" | "pending" | "approved" | "rejected";
   isAdmin?: boolean;

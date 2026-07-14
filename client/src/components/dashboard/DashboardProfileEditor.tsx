@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AvatarEditor from "@/components/AvatarEditor";
+import CoverEditor from "@/components/CoverEditor";
 import { useToast } from "@/hooks/use-toast";
 import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
 import { PROFILE_PHOTO_RULES_SUMMARY } from "@shared/boardModeration";
@@ -134,6 +135,15 @@ export default function DashboardProfileEditor({
           }}>{a.emoji}</button>
         ))}
       </div>
+      <label style={labelStyle}>Cover image</label>
+      <p style={{ margin: "0 0 10px", fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, maxWidth: 560 }}>
+        Upload a wide photo for the banner behind your profile picture. Drag and zoom to position it on your public profile.
+      </p>
+      <CoverEditor
+        coverImageUrl={user.coverImageUrl}
+        coverCrop={user.coverCrop}
+        onSaved={() => void onRefresh()}
+      />
       <label style={labelStyle}>Profile photo & ring</label>
       <p style={{ margin: "0 0 10px", fontSize: "0.82rem", color: "var(--text-meta)", lineHeight: 1.5, maxWidth: 560 }}>
         {PROFILE_PHOTO_RULES_SUMMARY}
