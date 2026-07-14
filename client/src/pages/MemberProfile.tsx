@@ -247,10 +247,6 @@ export default function MemberProfile() {
                 onOpen={() => openEvent(bigOne.id)}
               />
             )}
-            <FlyerStash
-              events={going.past.map((e) => ({ ...e, stashRole: "WENT" as const }))}
-              onEventClick={(e) => openEvent(e.id)}
-            />
           </div>
           <div className="pp-split__right">
             <GoingRail
@@ -270,6 +266,12 @@ export default function MemberProfile() {
             />
           </div>
         </div>
+
+        {/* Full shell width (not locked in the left split column) */}
+        <FlyerStash
+          events={going.past.map((e) => ({ ...e, stashRole: "WENT" as const }))}
+          onEventClick={(e) => openEvent(e.id)}
+        />
 
         <ProfileFooter username={data.username} />
       </div>

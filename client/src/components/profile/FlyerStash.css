@@ -14,8 +14,8 @@
 .flyer-stash {
   width: 100%;
   min-width: 0;
-  margin-top: 28px;
-  margin-bottom: 8px;
+  margin-top: 32px;
+  margin-bottom: 12px;
 }
 
 .flyer-stash__head {
@@ -57,9 +57,10 @@
 
 .flyer-stash__grid {
   display: grid;
-  grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 24px;
   align-items: stretch;
+  width: 100%;
 }
 
 /* ── Collector panel ── */
@@ -240,7 +241,8 @@
   border: 1px solid #1c1c22;
   border-radius: 12px;
   overflow: hidden;
-  min-height: 380px;
+  min-height: 420px;
+  width: 100%;
 }
 
 .flyer-stash__stage-dots {
@@ -468,6 +470,33 @@
   color: #777;
   min-width: 52px;
   text-align: center;
+}
+
+/* Desktop: use the full profile shell width */
+@media (min-width: 900px) {
+  .flyer-stash {
+    margin-top: 36px;
+  }
+
+  .flyer-stash__grid {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .flyer-stash__stage {
+    min-height: 440px;
+  }
+
+  .flyer-stash__card {
+    width: 158px;
+    height: 224px;
+    margin-left: -79px;
+    margin-top: -112px;
+  }
+
+  .flyer-stash__card-title {
+    font-size: 20px;
+  }
 }
 
 @media (max-width: 820px) {
