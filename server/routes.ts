@@ -3908,14 +3908,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!caller || !storage.hasOwnerAdminAccess(caller)) {
       return res.status(403).json({ error: "Owner admin only" });
     }
-    const q = String(req.query.q || "").trim().toLowerCase();
+    // Strip leading @ so "@brohoejams" matches username brohoejams
+    const q = String(req.query.q || "").trim().toLowerCase().replace(/^@+/, "");
     if (!q) return res.json([]);
     const all = storage.getAllUsers ? storage.getAllUsers() : [];
-    const matches = all.filter((u: any) =>
-      u.username?.toLowerCase().includes(q) ||
-      u.email?.toLowerCase().includes(q) ||
-      u.displayName?.toLowerCase().includes(q)
-    ).slice(0, 10).map(adminUserSummary);
+    const matches = all
+      .filter((u: any) => {
+        const uname = String(u.username || "").toLowerCase().replace(/^@+/, "");
+        const email = String(u.email || "").toLowerCase();
+        const display = String(u.displayName || "").toLowerCase();
+        return uname.includes(q) || email.includes(q) || display.includes(q) || uname === q;
+      })
+      .slice(0, 25)
+      .map(adminUserSummary);
     res.json(matches);
   });
 

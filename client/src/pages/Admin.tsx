@@ -952,11 +952,62 @@ export default function Admin() {
   });
 
   async function handleUserSearch() {
-    if (!userSearchQ.trim()) return;
+    const raw = userSearchQ.trim();
+    if (!raw) return;
+    // "@user" must match username "user" — server and client both strip leading @
+    const q = raw.toLowerCase().replace(/^@+/, "");
     setUserSearching(true);
     try {
-      const r = await apiRequest("GET", `/api/admin/users/search?q=${encodeURIComponent(userSearchQ)}`);
-      setUserSearchResults(await r.json());
+      // Prefer API (full user table). Fall back to already-loaded allUsers if request fails.
+      try {
+        const r = await apiRequest("GET", `/api/admin/users/search?q=${encodeURIComponent(q)}`);
+        const data = await r.json();
+        if (!r.ok) {
+          throw new Error(data?.error || data?.message || "Search failed");
+        }
+        const rows = Array.isArray(data) ? data : [];
+        setUserSearchResults(rows);
+        if (rows.length === 0) {
+          toast({ title: "No users found", description: `Nothing matched “${raw}”. Try username without @, email, or display name.` });
+        }
+        return;
+      } catch (apiErr) {
+        // Client-side fallback when list is already loaded (owner-admin promoters tab)
+        if (allUsers.length > 0) {
+          const local = allUsers
+            .filter(u => {
+              const uname = String(u.username || "").toLowerCase().replace(/^@+/, "");
+              const email = String(u.email || "").toLowerCase();
+              const display = String(u.displayName || "").toLowerCase();
+              return uname.includes(q) || email.includes(q) || display.includes(q);
+            })
+            .slice(0, 25)
+            .map(u => ({
+              id: u.id,
+              username: u.username,
+              displayName: u.displayName,
+              email: u.email,
+              photoUrl: u.photoUrl,
+              avatarChoice: u.avatarChoice,
+              avatarRing: u.avatarRing,
+              promoterStatus: u.promoterStatus,
+              subAdmin: u.subAdmin,
+            }));
+          setUserSearchResults(local as typeof userSearchResults);
+          if (local.length === 0) {
+            toast({ title: "No users found", description: `Nothing matched “${raw}”.` });
+          }
+          return;
+        }
+        throw apiErr;
+      }
+    } catch (err) {
+      setUserSearchResults([]);
+      toast({
+        title: "Search failed",
+        description: parseApiError(err, "Could not search users. Owner-admin access is required."),
+        variant: "destructive",
+      });
     } finally {
       setUserSearching(false);
     }
@@ -1980,10 +2031,103 @@ export default function Admin() {
         {/* ── TEAM ── */}
         {activeTab === "promoters" && (
           <div className="space-y-8">
-            <p className="text-white/40 text-sm">
+            <p className="text-white/40 text-sm mb-4">
               Promoters &amp; admins ({approvedPromoterCount}) · pending ({pendingPromoterUsers.length || pendingPromoters.length}).
-              Site admins are listed here too. Message anyone next to their name, or search to grant promoter status.
+              Site admins are listed here too. Use search at the top to grant promoter status.
             </p>
+
+            {/* Manual override first — search any account to grant / revoke */}
+            <div className="mb-8 p-4 border border-white/10" style={{ background: "#111" }}>
+              <p className="display text-sm mb-2" style={{ color: "#FF6600" }}>MANUAL PROMOTER OVERRIDE</p>
+              <p className="text-white/40 text-xs mb-4">
+                Search by username (with or without @), email, or display name. Owner-admin access required.
+              </p>
+              <div className="flex gap-2 mb-4">
+                <input
+                  className="flex-1 bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
+                  placeholder="@username, email, or name..."
+                  value={userSearchQ}
+                  onChange={e => setUserSearchQ(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleUserSearch()}
+                  data-testid="promoter-override-search"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleUserSearch()}
+                  disabled={userSearching || !userSearchQ.trim()}
+                  className="display text-xs px-4 py-2 border border-white/30 text-white/60 flex items-center gap-2 hover:border-white/60 disabled:opacity-40"
+                >
+                  <Search size={12} /> {userSearching ? "..." : "SEARCH"}
+                </button>
+              </div>
+              {userSearchResults.length > 0 && (
+                <div className="space-y-2">
+                  {userSearchResults.map(u => (
+                    <div key={u.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
+                      <div className="min-w-0 flex-1">
+                        <AdminUserIdentity profile={u} showEmail size={40} />
+                        <p className="text-xs mt-2 ml-[52px]" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                          promoter: {u.promoterStatus || "none"}
+                          {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {messageButton(u)}
+                        {u.promoterStatus !== "approved" && (
+                          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
+                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
+                        )}
+                        {u.promoterStatus !== "pending" && (
+                          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
+                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#00FFFF", color: "#00FFFF" }}>SET PENDING</button>
+                        )}
+                        {u.promoterStatus !== "none" && u.promoterStatus !== null && (
+                          <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
+                            className="display text-xs px-3 py-1 border border-white/30 text-white/40">RESET</button>
+                        )}
+                        {isSuperAdmin && (
+                          <button type="button" onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
+                            className="display text-xs px-3 py-1 border"
+                            style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}>
+                            {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
+                          </button>
+                        )}
+                        {isSuperAdmin && (
+                          <button type="button" onClick={() => {
+                              if (u.id == null) return;
+                              const current = u.username || "";
+                              setFixUsernameTarget({ id: u.id, current });
+                              setFixUsernameValue(current);
+                            }}
+                            className="display text-xs px-3 py-1 border border-white/20 text-white/40">
+                            FIX USERNAME
+                          </button>
+                        )}
+                      </div>
+                      {fixUsernameTarget?.id === u.id && (
+                        <div className="flex gap-2 mt-2 items-center w-full">
+                          <input
+                            value={fixUsernameValue}
+                            onChange={e => setFixUsernameValue(e.target.value)}
+                            placeholder="new username"
+                            className="display text-xs px-2 py-1 border border-white/20 bg-black text-white"
+                            style={{ width: 160 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setUsernameMutation.mutate({ userId: u.id, username: fixUsernameValue })}
+                            disabled={!fixUsernameValue.trim() || setUsernameMutation.isPending}
+                            className="display text-xs px-3 py-1 border"
+                            style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                          >SAVE</button>
+                          <button type="button" onClick={() => setFixUsernameTarget(null)} className="display text-xs px-2 py-1 text-white/40">CANCEL</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {usersError || promotersError ? (
               <AdminLoadError
@@ -2003,7 +2147,7 @@ export default function Admin() {
                     PROMOTERS &amp; ADMINS · {approvedPromoters.length}
                   </p>
                   {approvedPromoters.length === 0 ? (
-                    <p className="text-white/30 text-sm">No approved promoters or admins yet. Search below to grant status.</p>
+                    <p className="text-white/30 text-sm">No approved promoters or admins yet. Use search above to grant status.</p>
                   ) : (
                     <div className="space-y-2">
                       {approvedPromoters.map(u => {
@@ -2135,94 +2279,6 @@ export default function Admin() {
                 </div>
               </>
             )}
-
-            {/* Manual user override */}
-            <div className="pt-4 border-t border-white/10">
-              <p className="display text-sm mb-3" style={{ color: "#FF6600" }}>MANUAL PROMOTER OVERRIDE</p>
-              <p className="text-white/40 text-xs mb-4">Search any user by username, email, or display name to manually set their promoter status.</p>
-              <div className="flex gap-2 mb-4">
-                <input
-                  className="flex-1 bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
-                  placeholder="Search by username, email, or name..."
-                  value={userSearchQ}
-                  onChange={e => setUserSearchQ(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleUserSearch()}
-                />
-                <button
-                  onClick={handleUserSearch}
-                  disabled={userSearching}
-                  className="display text-xs px-4 py-2 border border-white/30 text-white/60 flex items-center gap-2 hover:border-white/60"
-                >
-                  <Search size={12} /> {userSearching ? "..." : "SEARCH"}
-                </button>
-              </div>
-              {userSearchResults.length > 0 && (
-                <div className="space-y-2">
-                  {userSearchResults.map(u => (
-                    <div key={u.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
-                      <div className="min-w-0 flex-1">
-                        <AdminUserIdentity profile={u} showEmail size={40} />
-                        <p className="text-xs mt-2 ml-[52px]" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
-                          promoter: {u.promoterStatus || "none"}
-                          {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
-                        </p>
-                      </div>
-                      <div className="flex gap-2 flex-wrap">
-                        {messageButton(u)}
-                        {u.promoterStatus !== "approved" && (
-                          <button onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
-                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
-                        )}
-                        {u.promoterStatus !== "pending" && (
-                          <button onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
-                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#00FFFF", color: "#00FFFF" }}>SET PENDING</button>
-                        )}
-                        {u.promoterStatus !== "none" && u.promoterStatus !== null && (
-                          <button onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
-                            className="display text-xs px-3 py-1 border border-white/30 text-white/40">RESET</button>
-                        )}
-                        {isSuperAdmin && (
-                          <button onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
-                            className="display text-xs px-3 py-1 border"
-                            style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}>
-                            {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
-                          </button>
-                        )}
-                        {isSuperAdmin && (
-                          <button onClick={() => {
-                              if (u.id == null) return;
-                              const current = u.username || "";
-                              setFixUsernameTarget({ id: u.id, current });
-                              setFixUsernameValue(current);
-                            }}
-                            className="display text-xs px-3 py-1 border border-white/20 text-white/40">
-                            FIX USERNAME
-                          </button>
-                        )}
-                      </div>
-                      {fixUsernameTarget?.id === u.id && (
-                        <div className="flex gap-2 mt-2 items-center">
-                          <input
-                            value={fixUsernameValue}
-                            onChange={e => setFixUsernameValue(e.target.value)}
-                            placeholder="new username"
-                            className="display text-xs px-2 py-1 border border-white/20 bg-black text-white"
-                            style={{ width: 160 }}
-                          />
-                          <button
-                            onClick={() => setUsernameMutation.mutate({ userId: u.id, username: fixUsernameValue })}
-                            disabled={!fixUsernameValue.trim() || setUsernameMutation.isPending}
-                            className="display text-xs px-3 py-1 border"
-                            style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
-                          >SAVE</button>
-                          <button onClick={() => setFixUsernameTarget(null)} className="display text-xs px-2 py-1 text-white/40">CANCEL</button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         )}
 
