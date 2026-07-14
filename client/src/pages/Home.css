@@ -1574,7 +1574,7 @@ html.calm-mode .home-boards__card {
   gap: 18px;
 }
 
-/* Elevated panels — must read above the near-black page (not same ink as wallpaper) */
+/* Board teaser cards — soft accent, readable body (no heavy neon glow) */
 .home-boards__utility {
   --util-acc: var(--neon-cyan, #00ffff);
   text-decoration: none;
@@ -1584,16 +1584,13 @@ html.calm-mode .home-boards__card {
   background:
     linear-gradient(
       165deg,
-      color-mix(in srgb, var(--util-acc) 14%, #14141a) 0%,
-      #121218 42%,
-      #0e0e14 100%
+      color-mix(in srgb, var(--util-acc) 8%, #16161c) 0%,
+      #121218 48%,
+      #0f0f14 100%
     );
-  border: 2px solid color-mix(in srgb, var(--util-acc) 32%, #2a2a32);
+  border: 1px solid color-mix(in srgb, var(--util-acc) 22%, #2a2a32);
   border-top: 3px solid var(--util-acc);
-  box-shadow:
-    0 10px 28px -14px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 0 24px -12px color-mix(in srgb, var(--util-acc) 35%, transparent);
+  box-shadow: 0 8px 22px -14px rgba(0, 0, 0, 0.8);
   transition:
     transform 0.18s var(--ease-out, ease-out),
     border-color 0.18s ease,
@@ -1601,12 +1598,9 @@ html.calm-mode .home-boards__card {
 }
 
 .home-boards__utility:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--util-acc) 55%, #3a3a44);
-  box-shadow:
-    0 14px 36px -14px rgba(0, 0, 0, 0.9),
-    0 0 0 1px color-mix(in srgb, var(--util-acc) 22%, transparent),
-    0 0 32px -8px color-mix(in srgb, var(--util-acc) 45%, transparent);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--util-acc) 38%, #3a3a44);
+  box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.88);
 }
 
 .home-boards__utility--magenta {
@@ -1629,7 +1623,7 @@ html.calm-mode .home-boards__card {
   line-height: 1;
   margin-bottom: 10px;
   color: var(--util-acc);
-  text-shadow: 0 0 18px color-mix(in srgb, var(--util-acc) 40%, transparent);
+  text-shadow: none;
 }
 
 .home-boards__utility--magenta .home-boards__utility-name {
@@ -1646,7 +1640,7 @@ html.calm-mode .home-boards__card {
 
 .home-boards__utility-desc {
   font-size: 14px;
-  color: var(--text-body, #e6e2d9);
+  color: #e8e6e0;
   margin: 0 0 14px;
   line-height: 1.45;
 }
@@ -1656,7 +1650,7 @@ html.calm-mode .home-boards__card {
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-lo, #8c8980);
+  color: #a8a59c;
 }
 
 /* Directory + beaches row */
