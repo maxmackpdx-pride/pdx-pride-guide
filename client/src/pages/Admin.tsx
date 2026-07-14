@@ -253,7 +253,12 @@ export default function Admin() {
   const [allUsersFilter, setAllUsersFilter] = useState("");
   const [fixUsernameTarget, setFixUsernameTarget] = useState<{ id: number; current: string } | null>(null);
   const [fixUsernameValue, setFixUsernameValue] = useState("");
-  const [messageTarget, setMessageTarget] = useState<{ username: string; displayName?: string | null } | null>(null);
+  const [messageTarget, setMessageTarget] = useState<{
+    username: string;
+    displayName?: string | null;
+    /** guide = shared PDX Pride Guide; personal = owner’s own inbox (Tucker). */
+    as: "guide" | "personal";
+  } | null>(null);
   const [messageBody, setMessageBody] = useState("");
   const [messageSending, setMessageSending] = useState(false);
 
@@ -1269,10 +1274,13 @@ export default function Admin() {
     [allUsers],
   );
 
-  const openMessageTo = (target: { username?: string | null; displayName?: string | null }) => {
+  const openMessageTo = (
+    target: { username?: string | null; displayName?: string | null },
+    as: "guide" | "personal" = "guide",
+  ) => {
     const uname = String(target.username || "").trim().replace(/^@/, "");
     if (!uname || uname === user?.username) return;
-    setMessageTarget({ username: uname, displayName: target.displayName });
+    setMessageTarget({ username: uname, displayName: target.displayName, as });
     setMessageBody("");
   };
 
@@ -1282,15 +1290,24 @@ export default function Admin() {
     if (!body) return;
     setMessageSending(true);
     try {
-      // Shared guide-admin sender so replies land in floating inbox → Admin → Inbox (not personal).
-      await apiRequest("POST", "/api/admin/messages", {
-        username: messageTarget.username,
-        body,
-      });
-      toast({
-        title: "Message sent",
-        description: `Sent as PDX Pride Guide. @${messageTarget.username} can reply to the shared admin inbox.`,
-      });
+      if (messageTarget.as === "personal") {
+        // Owner personal DM — replies land in Personal inbox, not shared admin.
+        await apiRequest("POST", `/api/users/${encodeURIComponent(messageTarget.username)}/message`, { body });
+        toast({
+          title: "Message sent",
+          description: `Sent as you. @${messageTarget.username} replies go to your personal inbox.`,
+        });
+      } else {
+        // Shared guide-admin sender — replies land in floating inbox → Admin → Inbox.
+        await apiRequest("POST", "/api/admin/messages", {
+          username: messageTarget.username,
+          body,
+        });
+        toast({
+          title: "Message sent",
+          description: `Sent as PDX Pride Guide. @${messageTarget.username} can reply to the shared admin inbox.`,
+        });
+      }
       setMessageTarget(null);
       setMessageBody("");
     } catch (err) {
@@ -1300,19 +1317,35 @@ export default function Admin() {
     }
   };
 
+  /** Guide MESSAGE for all admins; primary owner also gets personal “Message from Tucker”. */
   const messageButton = (target: { username?: string | null; displayName?: string | null }) => {
     const uname = String(target.username || "").trim().replace(/^@/, "");
     if (!uname || uname === user?.username) return null;
     return (
-      <button
-        type="button"
-        onClick={() => openMessageTo(target)}
-        className="display text-xs px-3 py-1 border"
-        style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
-        data-testid={`admin-message-${uname}`}
-      >
-        MESSAGE
-      </button>
+      <span className="inline-flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => openMessageTo(target, "guide")}
+          className="display text-xs px-3 py-1 border"
+          style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+          data-testid={`admin-message-${uname}`}
+          title="Send as PDX Pride Guide — replies go to shared Admin inbox"
+        >
+          MESSAGE
+        </button>
+        {isPrimaryOwner && (
+          <button
+            type="button"
+            onClick={() => openMessageTo(target, "personal")}
+            className="display text-xs px-3 py-1 border"
+            style={{ borderColor: "#C8FA3C", color: "#C8FA3C" }}
+            data-testid={`admin-message-personal-${uname}`}
+            title="Send as yourself — replies go to your personal inbox"
+          >
+            MESSAGE FROM TUCKER
+          </button>
+        )}
+      </span>
     );
   };
 
@@ -2939,7 +2972,11 @@ export default function Admin() {
           style={{ background: "rgba(0,0,0,0.8)" }}
           role="dialog"
           aria-modal="true"
-          aria-label={`Message @${messageTarget.username}`}
+          aria-label={
+            messageTarget.as === "personal"
+              ? `Message @${messageTarget.username} as yourself`
+              : `Message @${messageTarget.username} as PDX Pride Guide`
+          }
           onClick={() => !messageSending && setMessageTarget(null)}
         >
           <div
@@ -2947,13 +2984,23 @@ export default function Admin() {
             style={{ background: "#0d0d0d" }}
             onClick={e => e.stopPropagation()}
           >
-            <p className="display text-sm" style={{ color: "#19E3FF" }}>SEND MESSAGE</p>
-            <h2 className="text-white text-lg mt-1 mb-3">
+            <p
+              className="display text-sm"
+              style={{ color: messageTarget.as === "personal" ? "#C8FA3C" : "#19E3FF" }}
+            >
+              {messageTarget.as === "personal" ? "MESSAGE FROM TUCKER" : "MESSAGE AS PDX PRIDE GUIDE"}
+            </p>
+            <h2 className="text-white text-lg mt-1 mb-1">
               @{messageTarget.username}
               {messageTarget.displayName ? (
                 <span className="text-white/40 text-sm font-normal"> · {messageTarget.displayName}</span>
               ) : null}
             </h2>
+            <p className="text-white/40 text-xs mb-3">
+              {messageTarget.as === "personal"
+                ? "Sends from your personal account. Their reply lands in your Personal inbox."
+                : "Sends as PDX Pride Guide. Their reply lands in shared Admin · Inbox."}
+            </p>
             <textarea
               value={messageBody}
               onChange={e => setMessageBody(e.target.value)}
@@ -2974,11 +3021,19 @@ export default function Admin() {
               <button
                 type="button"
                 className="display text-xs px-4 py-2 border"
-                style={{ borderColor: "#19E3FF", color: "#000", background: "#19E3FF" }}
+                style={
+                  messageTarget.as === "personal"
+                    ? { borderColor: "#C8FA3C", color: "#000", background: "#C8FA3C" }
+                    : { borderColor: "#19E3FF", color: "#000", background: "#19E3FF" }
+                }
                 onClick={() => void sendAdminMessage()}
                 disabled={messageSending || !messageBody.trim()}
               >
-                {messageSending ? "SENDING…" : "SEND"}
+                {messageSending
+                  ? "SENDING…"
+                  : messageTarget.as === "personal"
+                    ? "SEND AS TUCKER"
+                    : "SEND AS GUIDE"}
               </button>
             </div>
           </div>
