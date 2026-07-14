@@ -5095,23 +5095,82 @@ function hubFeedEventAuthor(evt: Event | Record<string, unknown>, businesses: Bu
   return { displayName: "The scene" };
 }
 
+/** Same-venue same-window window for bundling multi-night drops. */
 const HUB_FEED_EVENT_CONDENSE_MS = 2 * 60 * 60 * 1000;
 
 function hubFeedAuthorKey(author: HubFeedAuthor): string {
   return (author.username || author.displayName || "unknown").toLowerCase();
 }
 
+function hubFeedNormalizeVenueKey(name: string | null | undefined): string {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+/**
+ * Feed sort/time for event cards.
+ * Bulk-seeded venue parties share one created_at second — that piles the whole
+ * guide into "just now". Prefer the party date_start so the feed spreads across
+ * the week. User submissions keep their real listing timestamp.
+ */
+function hubFeedEventActivityAt(evt: {
+  source?: string | null;
+  submittedBy?: string | null;
+  claimedBy?: string | null;
+  createdAt?: string | null;
+  dateStart?: string | null;
+}): string {
+  const created = hubFeedCreatedAt(evt);
+  const start = typeof evt.dateStart === "string" ? evt.dateStart : "";
+  const isUserOrigin =
+    evt.source === "user_submitted"
+    || !!(evt.submittedBy && String(evt.submittedBy).trim())
+    || !!(evt.claimedBy && String(evt.claimedBy).trim() && evt.source === "user_submitted");
+
+  if (isUserOrigin && created) return created;
+
+  // Venue / guide-listed parties: activity time = party start (spread by night).
+  if (start) {
+    const startMs = parsePacificDateTime(start);
+    if (startMs != null) return new Date(startMs).toISOString();
+    return start;
+  }
+  return created;
+}
+
+function hubFeedEventCondenseKey(item: HubFeedItem): string {
+  const venue =
+    item.event?.venueName
+    || item.events?.[0]?.venueName
+    || (item.author.venueLogo ? item.author.displayName : "")
+    || "";
+  const venueKey = hubFeedNormalizeVenueKey(venue);
+  if (venueKey) return `venue:${venueKey}`;
+  return `author:${hubFeedAuthorKey(item.author)}`;
+}
+
 function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
   if (cluster.length === 1) return cluster[0];
-  const head = cluster[0];
-  const events = cluster
+  // Newest activity first in the bundle
+  const ordered = [...cluster].sort((a, b) =>
+    String(b.createdAt).localeCompare(String(a.createdAt)),
+  );
+  const head = ordered[0];
+  const events = ordered
     .map((item) => item.event)
     .filter((e): e is HubFeedEventEmbed => e != null);
   const count = events.length;
+  const venueAuthor = head.author.venueLogo;
+  const action = venueAuthor
+    ? (count === 1 ? "Listed a party" : `Listed ${count} parties`)
+    : (count === 1 ? "Posted a new event" : `Posted ${count} new events`);
   return {
     ...head,
-    id: `event-bundle-${hubFeedAuthorKey(head.author)}-${head.createdAt}`,
-    action: count === 1 ? "Posted a new event" : `Posted ${count} new events`,
+    id: `event-bundle-${hubFeedEventCondenseKey(head)}-${head.createdAt}`,
+    action,
     text: null,
     events,
     event: events[0] ?? null,
@@ -5120,14 +5179,15 @@ function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
 
 function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
   if (items.length <= 1) return items;
-  const byAuthor = new Map<string, HubFeedItem[]>();
+  // Group by venue (not poster) so same-club multi-night drops merge.
+  const byKey = new Map<string, HubFeedItem[]>();
   for (const item of items) {
-    const key = hubFeedAuthorKey(item.author);
-    if (!byAuthor.has(key)) byAuthor.set(key, []);
-    byAuthor.get(key)!.push(item);
+    const key = hubFeedEventCondenseKey(item);
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key)!.push(item);
   }
   const out: HubFeedItem[] = [];
-  for (const group of Array.from(byAuthor.values())) {
+  for (const group of Array.from(byKey.values())) {
     group.sort((a: HubFeedItem, b: HubFeedItem) => String(b.createdAt).localeCompare(String(a.createdAt)));
     let cluster: HubFeedItem[] = [];
     for (const item of group) {
@@ -5137,7 +5197,7 @@ function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
       }
       const anchor = new Date(cluster[0].createdAt).getTime();
       const t = new Date(item.createdAt).getTime();
-      if (anchor - t <= HUB_FEED_EVENT_CONDENSE_MS) {
+      if (Number.isFinite(anchor) && Number.isFinite(t) && Math.abs(anchor - t) <= HUB_FEED_EVENT_CONDENSE_MS) {
         cluster.push(item);
       } else {
         out.push(bundleHubFeedEventCluster(cluster));
@@ -10233,6 +10293,8 @@ export const storage: IStorage = {
 
     const items: HubFeedItem[] = [];
 
+    // Venue parties we listed on the guide + every user-submitted event.
+    // Order by party date when available so bulk seed timestamps don't clump.
     const recentEvents = sqlite.prepare(`
       SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
              date_start AS dateStart, admission, created_at AS createdAt,
@@ -10241,26 +10303,43 @@ export const storage: IStorage = {
       WHERE status = 'LIVE'
         AND (
           source = 'user_submitted'
+          OR TRIM(COALESCE(submitted_by, '')) != ''
           OR TRIM(COALESCE(claimed_by, '')) != ''
-          OR datetime(created_at) >= datetime('now', '-45 days')
+          OR datetime(created_at) >= datetime('now', '-60 days')
+          OR date(date_start) >= date('now', '-14 days')
         )
-      ORDER BY created_at DESC
-      LIMIT 15
+      ORDER BY COALESCE(date_start, created_at) DESC
+      LIMIT 80
     `).all() as any[];
     const rawEventItems: HubFeedItem[] = [];
     for (const evt of recentEvents) {
       if (pinnedStankId != null && evt.id === pinnedStankId) continue;
-      const createdAt = hubFeedCreatedAt(evt);
-      if (!createdAt) continue;
+      const activityAt = hubFeedEventActivityAt(evt);
+      if (!activityAt) continue;
       const poster = hubFeedEventPoster(evt, businesses);
+      // Prefer venue voice for guide-listed parties so the card reads as a
+      // venue status update; keep member poster on each row when known.
+      const author = hubFeedEventAuthor(evt, businesses);
+      const venueBiz = hubFeedResolveBusinessForEvent(evt, businesses);
+      const isUserSubmitted =
+        evt.source === "user_submitted" || !!(evt.submittedBy && String(evt.submittedBy).trim());
+      const feedAuthor =
+        !isUserSubmitted && venueBiz
+          ? hubFeedVenueAuthor(String(evt.venueName || venueBiz.name), evt, businesses)
+          : author;
+      const action = isUserSubmitted
+        ? "Submitted a new event"
+        : feedAuthor.venueLogo
+          ? "Listed a party"
+          : "Posted a new event";
       rawEventItems.push({
         id: `event-${evt.id}`,
         kind: "event",
-        badge: "Event",
-        action: "Posted a new event",
+        badge: isUserSubmitted ? "Submitted" : "Event",
+        action,
         text: evt.description?.slice(0, 280) || null,
-        createdAt,
-        author: hubFeedEventAuthor(evt, businesses),
+        createdAt: activityAt,
+        author: feedAuthor,
         event: hubFeedEventEmbed(evt, goingCounts[evt.id]?.count, poster),
         link: null,
       });

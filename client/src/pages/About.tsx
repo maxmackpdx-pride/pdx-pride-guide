@@ -103,45 +103,34 @@ export default function About() {
 
   return (
     <div className="about-v2">
-      {/* OPENING — manifesto is the About lead (not the poster-wall stats hero) */}
-      <section className="about-v2-manifesto about-v2-manifesto--open" aria-labelledby="about-manifesto-title">
-        <div className="about-v2__inner about-v2-manifesto__open-inner">
-          <h1 id="about-manifesto-title" className="about-v2-manifesto__h1">
-            What this actually is
-          </h1>
-          <div className="about-v2-manifesto__copy">
-            <p>
-              Pride starts now, it ends never, and this thing is already loaded: parties,
-              community events, weird little gems, places to eat, spots to shop, gigs,
-              gifting, missed connections, and all the real homosexual infrastructure that
-              keeps the scene alive.
-            </p>
-            <p>
-              The family-friendly newspaper roundups are cute. The local moms&apos; Pride
-              lists have their place. But this is for the people who want the whole city, not
-              the sanitized version corporations can sell back to us.
-            </p>
-          </div>
-          <div className="about-v2-manifesto__shout">
-            <p>
-              <span className="about-v2-manifesto__glitch">Fuck Meta.</span>
-            </p>
-            <p>
-              Stop censoring our community.
-              <br />
-              Stop pretending queer culture only matters once it&apos;s been scrubbed clean.
-            </p>
-            <p>
-              This app is really gay. This app really is{" "}
-              <span className="about-v2-manifesto__glitch">ours.</span>
-            </p>
-          </div>
-          <div className="about-v2-manifesto__actions">
-            <Link href="/events">
-              <Button as="span" variant="neon" accent="cyan" size="lg">
-                Browse the {eventCount || "list"}
-              </Button>
-            </Link>
+      {/* HERO — poster wall + big event counter title */}
+      <section className="about-v2-hero">
+        <div className="about-v2-hero__scrim" aria-hidden="true" />
+        <div className="about-v2-hero__inner">
+          <div>
+            <div className="about-v2-hero__kicker">
+              <span className="about-v2-hero__dot" aria-hidden="true" />
+              About · Portland Pride 2026
+            </div>
+            <h1 className="about-v2-hero__h1">
+              <span className="about-v2-hero__stat" data-testid="about-events-count">
+                <CountUpValue
+                  key={eventCount > 0 ? "events-ready" : "events-pending"}
+                  value={eventCount}
+                />{" "}
+                events.
+              </span>
+              <span className="about-v2-hero__lede">
+                And approximately zero interest in being a sanitized corporate Pride pamphlet.
+              </span>
+            </h1>
+            <div className="about-v2-hero__actions">
+              <Link href="/events">
+                <Button as="span" variant="neon" accent="cyan" size="lg">
+                  Browse the {eventCount || "list"}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -150,10 +139,7 @@ export default function About() {
       <section className="about-v2-stats" aria-label="Guide stats">
         <div className="about-v2-stats__grid">
           <div className="about-v2-stats__cell">
-            <div
-              className="about-v2-stats__num about-v2-stats__num--lime about-v2-stats__num--pop"
-              data-testid="about-events-count"
-            >
+            <div className="about-v2-stats__num about-v2-stats__num--lime about-v2-stats__num--pop">
               <CountUpValue
                 key={eventCount > 0 ? "stats-ready" : "stats-pending"}
                 value={eventCount}
@@ -183,6 +169,44 @@ export default function About() {
       </section>
 
       <hr className="pdx-rainbow-rule about-v2-seam" aria-hidden="true" />
+
+      {/* MANIFESTO */}
+      <section className="about-v2-manifesto" aria-labelledby="about-manifesto-title">
+        <ScrollReveal>
+          <div className="about-v2__inner">
+            <h2 id="about-manifesto-title" className="about-v2-manifesto__h2">
+              What this <span className="about-v2-manifesto__h2-accent">actually is</span>
+            </h2>
+            <div className="about-v2-manifesto__copy">
+              <p>
+                Pride starts now, it ends never, and this thing is already loaded: parties,
+                community events, weird little gems, places to eat, spots to shop, gigs,
+                gifting, missed connections, and all the real homosexual infrastructure that
+                keeps the scene alive.
+              </p>
+              <p>
+                The family-friendly newspaper roundups are cute. The local moms&apos; Pride
+                lists have their place. But this is for the people who want the whole city, not
+                the sanitized version corporations can sell back to us.
+              </p>
+            </div>
+            <div className="about-v2-manifesto__shout">
+              <p>
+                <span className="about-v2-manifesto__glitch">Fuck Meta.</span>
+              </p>
+              <p>
+                Stop censoring our community.
+                <br />
+                Stop pretending queer culture only matters once it&apos;s been scrubbed clean.
+              </p>
+              <p>
+                This app is really gay. This app really is{" "}
+                <span className="about-v2-manifesto__glitch">ours.</span>
+              </p>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
 
       {/* MADE BY TUCKER */}
       <section className="about-v2-creator">
