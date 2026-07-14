@@ -93,6 +93,7 @@ export const TYPE_LABELS: Record<string, string> = {
   nonprofit: "Nonprofits",
   healthcare: "Health & Care",
   realestate: "Real Estate",
+  group: "Clubs & Groups",
 };
 
 /** Solid pin / accent hex (gradients live on PlaceCard edges). */
@@ -107,6 +108,7 @@ export const TYPE_COLORS: Record<string, string> = {
   nonprofit: "#FFFFFF",
   healthcare: "#FF00CC", // pink pole of pink→white neon
   realestate: "#1A4DFF", // neon navy pole of navy→white neon
+  group: "#CCFF00",
 };
 
 const NEIGHBORHOODS = [
@@ -524,7 +526,7 @@ export default function Directory() {
               <X size={18} />
             </button>
             <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots. New listings go live immediately unless we spot a likely duplicate. Keep it accurate and community-rooted.</p>
+            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots — including Clubs &amp; Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and community-rooted. Owners can claim a listing to manage it.</p>
             {submitResult ? (
               <div className="submit-success">
                 <div className="submit-success__title">{submitResult.title}</div>
@@ -883,6 +885,7 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   nonprofit: "services",
   healthcare: "healthcare",
   realestate: "realestate",
+  group: "services",
 };
 
 function DirectoryCard({

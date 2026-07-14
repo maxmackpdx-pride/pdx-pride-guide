@@ -41,7 +41,7 @@ const gigSchema = z.object({
 
 const newBusinessSubmissionSchema = z.object({
   name: z.string().trim().min(2, "Name required"),
-  type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel"]),
+  type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]),
   description: z.string().trim().min(10, "Description must be at least 10 characters"),
   address: z.string().trim().max(200).optional(),
   neighborhood: z.string().trim().max(80).optional(),

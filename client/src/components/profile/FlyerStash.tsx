@@ -42,7 +42,7 @@ const TAG: Record<string, { bg: string; fg: string }> = {
 const WORK: Record<StashRole, WorkMeta> = {
   DJ: { label: "DJ SET", color: "#19e3ff", xp: 70, ladder: ["BEDROOM DJ", "OPENER", "RESIDENT DJ", "HEADLINE DJ", "PDX SOUND LEGEND"] },
   DRAG: { label: "DRAG", color: "#FF00CC", xp: 70, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
-  MC: { label: "HOST / MC", color: "#CCFF00", xp: 60, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PDX HOST LEGEND"] },
+  MC: { label: "HOST / MC", color: "#CCFF00", xp: 60, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PARTY PUP"] },
   GOGO: { label: "GO-GO", color: "#FF6600", xp: 55, ladder: ["FRESH FEET", "GO-GO", "BOX STAR", "HEADLINE DANCER", "PDX GO-GO LEGEND"] },
   PHOTO: { label: "PHOTOG", color: "#b06bff", xp: 45, ladder: ["SHUTTERBUG", "EVENT PHOTOG", "SCENE SHOOTER", "STAFF LENS", "PDX LENS LEGEND"] },
   BAR: { label: "BAR", color: "#FFB23D", xp: 40, ladder: ["BACK BAR", "BARTENDER", "HEAD POUR", "BAR BOSS", "PDX BAR LEGEND"] },
@@ -106,11 +106,12 @@ function formatShortDate(iso?: string | null): string {
 }
 
 function normalizeAdmission(raw?: string | null): string {
-  const a = String(raw || "FREE").toUpperCase();
-  if (a.includes("TICKET") || a.includes("PAID") || a === "COVER") return "TICKETED";
+  const a = String(raw || "").toUpperCase();
+  if (!a) return "TICKETED";
+  if (a.includes("TICKET") || a.includes("PAID") || a === "COVER" || a.includes("DOOR") || a === "DOOR_FEE") return "TICKETED";
   if (a.includes("DONAT")) return "DONATION";
   if (a.includes("FREE") || a.includes("NO COVER") || a === "NC") return "FREE";
-  return TAG[a] ? a : "FREE";
+  return TAG[a] ? a : "TICKETED";
 }
 
 function normalizeRole(raw?: string | null): StashRole {
@@ -420,12 +421,6 @@ export default function FlyerStash({
                   <div className="flyer-stash__card-title">{f.title}</div>
                   <div className="flyer-stash__card-foot">
                     <div className="flyer-stash__card-venue">{f.venue}</div>
-                    <span
-                      className="flyer-stash__card-tag"
-                      style={{ background: f.tagBg, color: f.tagFg, borderColor: f.tagFg }}
-                    >
-                      {f.admission}
-                    </span>
                   </div>
                 </div>
               </button>

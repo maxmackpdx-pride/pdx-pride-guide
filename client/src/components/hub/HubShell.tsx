@@ -93,6 +93,9 @@ type Props = {
   isSuperAdmin?: boolean;
   isPrimaryOwner?: boolean;
   canManageTeam?: boolean;
+  canViewUsers?: boolean;
+  canManageCatalog?: boolean;
+  canPush?: boolean;
   userName: string;
   userHandle?: string;
   photoUrl?: string | null;
@@ -130,10 +133,12 @@ const ADMIN_MORE_NAV: Array<{
   label: string;
   icon: typeof Home;
   teamOnly?: boolean;
+  usersOnly?: boolean;
+  catalogOnly?: boolean;
 }> = [
-  { key: "events", label: "All events", icon: CalendarDays },
-  { key: "users", label: "All users", icon: UserCircle },
-  { key: "gigs", label: "Pride Werk", icon: Briefcase },
+  { key: "events", label: "All events", icon: CalendarDays, catalogOnly: true },
+  { key: "users", label: "All users", icon: UserCircle, usersOnly: true },
+  { key: "gigs", label: "Pride Werk", icon: Briefcase, catalogOnly: true },
   { key: "promoters", label: "Promoters", icon: Users },
   { key: "venue-claims", label: "Venue claims", icon: Store },
   { key: "team", label: "My team", icon: Users, teamOnly: true },
@@ -158,6 +163,8 @@ export default function HubShell({
   isSuperAdmin = false,
   isPrimaryOwner = false,
   canManageTeam = false,
+  canViewUsers = false,
+  canManageCatalog = false,
   userName,
   userHandle,
   photoUrl,
@@ -185,8 +192,18 @@ export default function HubShell({
   const inboxNavActive = sheetOpen || onInboxPage || memberView === "inbox";
   const adminTabHref = `/admin?tab=${encodeURIComponent(adminView)}`;
   const alertTotal = pendingCount + (isPrimaryOwner ? ownerCount : 0);
-  const moreViews = MORE_VIEWS.filter(v => v !== "team" || canManageTeam);
-  const moreNav = ADMIN_MORE_NAV.filter(item => !item.teamOnly || canManageTeam);
+  const moreViews = MORE_VIEWS.filter(v => {
+    if (v === "team") return canManageTeam;
+    if (v === "users") return canViewUsers;
+    if (v === "events" || v === "gigs") return canManageCatalog;
+    return true;
+  });
+  const moreNav = ADMIN_MORE_NAV.filter(item => {
+    if (item.teamOnly) return canManageTeam;
+    if (item.usersOnly) return canViewUsers;
+    if (item.catalogOnly) return canManageCatalog;
+    return true;
+  });
 
   const roleLabel = isPrimaryOwner
     ? "Owner"

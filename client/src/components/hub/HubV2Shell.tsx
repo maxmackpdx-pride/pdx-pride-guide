@@ -30,6 +30,7 @@ export type HubV2ShellProps = {
   section: HubSection;
   onSectionChange: (section: HubSection) => void;
   isAdmin: boolean;
+  isPrimaryOwner?: boolean;
   canPostToFeed?: boolean;
   canManageTeam?: boolean;
   children: ReactNode;
@@ -45,6 +46,7 @@ export default function HubV2Shell({
   section,
   onSectionChange,
   isAdmin,
+  isPrimaryOwner = false,
   canPostToFeed = false,
   canManageTeam = false,
   children,
@@ -77,7 +79,7 @@ export default function HubV2Shell({
             </button>
           ))}
 
-          {isAdmin && (
+          {isAdmin && isPrimaryOwner && (
             <HubAdminFolder
               variant="rail"
               canManageTeam={canManageTeam}
@@ -88,7 +90,7 @@ export default function HubV2Shell({
         </aside>
 
         <main style={{ minWidth: 0 }}>
-          {isAdmin && (
+          {isAdmin && isPrimaryOwner && (
             <div className="hub-v2-mobile-admin" aria-label="Hub admin access">
               <HubAdminFolder
                 variant="mobile"

@@ -3805,6 +3805,62 @@ function runBootMigrationsOnce() {
     recordBootMigration("fix_brohoejams_displayname_v2");
   }
 
+  // Sanctuary events were never free — door fee / ticketed only.
+  if (!hasBootMigration("sanctuary_never_free_v1")) {
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'DOOR_FEE'
+      WHERE status = 'LIVE'
+        AND UPPER(COALESCE(admission, '')) IN ('FREE', '')
+        AND (
+          LOWER(venue_name) LIKE '%sanctuary%'
+          OR LOWER(title) LIKE '%yes coach%'
+          OR LOWER(title) LIKE '%stank%'
+        )
+    `).run();
+    recordBootMigration("sanctuary_never_free_v1");
+  }
+
+  // Clubs & Groups directory section (claimable like other businesses).
+  if (!hasBootMigration("seed_directory_clubs_groups_v1")) {
+    const now = new Date().toISOString();
+    const clubs = [
+      {
+        name: "The Imperial Sovereign Rose Court of Oregon",
+        type: "group",
+        description:
+          "Portland's Imperial Sovereign Rose Court — the oldest continuously operating court system organization in the world. Coronations, fundraisers, and community service for LGBTQ+ causes across Oregon.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://rosecourt.org",
+        instagram: "@rosecourtpdx",
+        queerOwned: true,
+        queerFriendly: true,
+      },
+      {
+        name: "Pink Ponies",
+        type: "group",
+        description:
+          "Portland queer social and party collective — Western nights, fundraisers, and scene-building collabs (including Yes Coach × Pink Ponies). Community first, boots optional.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: "@pinkponiespdx",
+        queerOwned: true,
+        queerFriendly: true,
+      },
+    ];
+    for (const entry of clubs) {
+      const exists = sqlite.prepare(
+        `SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`,
+      ).get(entry.name) as { id: number } | undefined;
+      if (!exists) {
+        db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+      }
+    }
+    recordBootMigration("seed_directory_clubs_groups_v1");
+  }
+
   // Flyer-confirmed live events: add @brohoejams as DJ + COHOST (idempotent).
   // Archive nights (Locker Room series, Stank 2025, Cozy, Camp Honey, Hyde, Overtime)
   // are credited via mergeTuckerHostedArchivePast — not rows in event_*.

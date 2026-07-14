@@ -383,7 +383,11 @@ function authUserResponse(req: any, user: any) {
     isAdmin,
     isSuperAdmin: isMainAdminUser(user),
     isPrimaryOwner: storage.isPrimarySiteOwner(user),
-    canManageTeam: isMainAdminUser(user),
+    // Only the primary owner can manage admin seats / team tools.
+    canManageTeam: storage.isPrimarySiteOwner(user),
+    canViewUsers: storage.isPrimarySiteOwner(user),
+    canPush: storage.isPrimarySiteOwner(user) || isMainAdminUser(user),
+    canManageCatalog: storage.isPrimarySiteOwner(user) || isMainAdminUser(user),
     subAdmin: !!user.subAdmin,
     usernameChangedAt: user.usernameChangedAt || null,
   };
@@ -1410,7 +1414,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const memberBusinessSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate"]),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]),
     description: z.string().trim().min(10).max(2000),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
@@ -1428,7 +1432,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const directoryMatchPreviewSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate"]).optional(),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]).optional(),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
   });
@@ -1513,7 +1517,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const businessOwnerEditSchema = z.object({
     name: z.string().trim().min(2).max(120).optional(),
     address: z.string().trim().max(200).optional().nullable(),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate"]).optional(),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]).optional(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
     queerOwned: z.boolean().optional(),
     queerFriendly: z.boolean().optional(),
@@ -1609,7 +1613,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── New-business submission (gig-flow "this address isn't in the system" branch) ──
   const businessSubmissionSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate"]).default("bar"),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]).default("bar"),
     description: z.string().trim().min(10).max(2000),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
@@ -3000,6 +3004,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/push-status", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !(storage.isPrimarySiteOwner(caller) || isMainAdminUser(caller))) {
+      return res.status(403).json({ error: "Primary or super admin only" });
+    }
     const userId = req.session.userId!;
     res.json({
       configured: isPushConfigured(),
@@ -3009,6 +3017,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/push/test", requireAdmin, async (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !(storage.isPrimarySiteOwner(caller) || isMainAdminUser(caller))) {
+      return res.status(403).json({ error: "Primary or super admin only" });
+    }
     if (!isPushConfigured()) return res.status(503).json({ error: "VAPID keys not configured on server" });
     const userId = req.session.userId!;
     const subs = storage.getActivePushSubscriptions(userId);
@@ -3493,34 +3505,45 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const mainUser = getSessionAdminUser(req);
     const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
     const resolved = mainUser ? syncOwnerDisplayName(mainUser) : sessionUser;
+    const primaryOwner = resolved ? storage.isPrimarySiteOwner(resolved) : false;
+    const superAdmin = !!mainUser;
     res.json({
       isAdmin: true,
       username: resolved?.displayName || resolved?.username || ADMIN_USERNAME,
       email: resolved?.email || null,
-      isSuperAdmin: !!mainUser,
-      isPrimaryOwner: resolved ? storage.isPrimarySiteOwner(resolved) : false,
-      canManageTeam: !!mainUser,
+      isSuperAdmin: superAdmin,
+      isPrimaryOwner: primaryOwner,
+      canManageTeam: primaryOwner,
+      canViewUsers: primaryOwner,
+      canPush: primaryOwner || superAdmin,
+      canManageCatalog: primaryOwner || superAdmin,
     });
   });
 
   app.get("/api/admin/team", requireAdmin, (req, res) => {
-    const caller = getSessionAdminUser(req);
-    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+    if (!sessionUser || !storage.isPrimarySiteOwner(sessionUser)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     res.json(storage.listSiteAdmins());
   });
 
   app.post("/api/admin/team", requireAdmin, (req, res) => {
-    const caller = getSessionAdminUser(req);
-    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+    if (!sessionUser || !storage.isPrimarySiteOwner(sessionUser)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const { identifier, note } = req.body || {};
-    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), caller?.id ?? null, note);
+    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), sessionUser.id, note);
     if (result.error) return res.status(400).json({ error: result.error });
     res.json(result.admin);
   });
 
   app.delete("/api/admin/team/:userId", requireAdmin, (req, res) => {
-    const caller = getSessionAdminUser(req);
-    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+    if (!sessionUser || !storage.isPrimarySiteOwner(sessionUser)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const result = storage.revokeSiteAdmin(Number(req.params.userId));
     if (result.error) return res.status(400).json({ error: result.error });
     res.json({ ok: true });
@@ -3704,6 +3727,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/users", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const q = String(req.query.q || "").trim().toLowerCase();
     const all = storage.getAllUsers ? storage.getAllUsers() : [];
     const filtered = q
@@ -3722,6 +3749,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/admin/users/search", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const q = String(req.query.q || "").trim().toLowerCase();
     if (!q) return res.json([]);
     const all = storage.getAllUsers ? storage.getAllUsers() : [];
@@ -3735,12 +3766,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/users/:userId/set-sub-admin", requireAdmin, (req, res) => {
     const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const userId = Number(req.params.userId);
     const { grant } = req.body as { grant: boolean };
     const target = storage.getUserById(userId);
     if (!target) return res.status(404).json({ error: "User not found" });
-    if (isMainAdminUser(target)) return res.status(400).json({ error: "Cannot modify super admin" });
+    if (isMainAdminUser(target) && !grant) {
+      return res.status(400).json({ error: "Cannot demote env/super admin here" });
+    }
+    if (storage.isPrimarySiteOwner(target)) {
+      return res.status(400).json({ error: "Cannot modify primary owner" });
+    }
     storage.updateUser(userId, { subAdmin: grant });
     const now = new Date().toISOString();
     if (grant) {
@@ -3753,7 +3791,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/users/:userId/set-username", requireAdmin, (req, res) => {
     const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const userId = Number(req.params.userId);
     const { username } = req.body as { username: string };
     if (!username || username.trim().length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
@@ -3767,7 +3807,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true, username: clean });
   });
 
+  // Manual promoter role grant/revoke is owner-only. Queue approve/deny stays open to all admins.
   app.post("/api/admin/users/:userId/set-promoter-status", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     const userId = Number(req.params.userId);
     const { status } = req.body as { status: string };
     const allowed = ["none", "pending", "approved", "rejected"];
@@ -3794,7 +3839,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(getAdminEventCatalog().map(enrichEventForAdmin));
   });
 
-  app.get("/api/admin/persistence", requireAdmin, (_req, res) => {
+  app.get("/api/admin/persistence", requireAdmin, (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
     res.json(getPersistenceAudit(getTableCounts()));
   });
 
@@ -3875,8 +3924,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Owner Desk (owner only) in one printable page. ?format=json for raw data.
   app.get("/api/admin/report", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    const includeOwnerDesk = !!(user && storage.isPrimarySiteOwner(user));
-    const data = buildAdminReport(storage, includeOwnerDesk);
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Primary owner only" });
+    }
+    const data = buildAdminReport(storage, true);
     if (String(req.query.format) === "json") return res.json(data);
     res.type("html").send(renderAdminReportHtml(data));
   });

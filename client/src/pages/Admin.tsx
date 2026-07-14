@@ -170,12 +170,16 @@ function adminTabFromQuery(
   search: string,
   canAccessOwner: boolean,
   canManageTeam: boolean,
+  canViewUsers = false,
+  canManageCatalog = false,
 ): AdminTab | null {
   let tab = new URLSearchParams(search).get("tab");
   if (tab === "queue") tab = "inbox";
   if (tab === "analytics") tab = "stats";
   if (tab === "owner" && !canAccessOwner) tab = "overview";
   if (tab === "team" && !canManageTeam) tab = "overview";
+  if (tab === "users" && !canViewUsers) tab = "overview";
+  if ((tab === "events" || tab === "gigs") && !canManageCatalog) tab = "overview";
   if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) return tab as AdminTab;
   return null;
 }
@@ -210,6 +214,9 @@ export default function Admin() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isPrimaryOwner, setIsPrimaryOwner] = useState(false);
   const [canManageTeam, setCanManageTeam] = useState(false);
+  const [canViewUsers, setCanViewUsers] = useState(false);
+  const [canPush, setCanPush] = useState(false);
+  const [canManageCatalog, setCanManageCatalog] = useState(false);
   const [userSearchQ, setUserSearchQ] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<Array<AdminUserProfile & { id: number; promoterStatus: string | null; subAdmin: boolean }>>([]);
   const [userSearching, setUserSearching] = useState(false);
@@ -230,7 +237,10 @@ export default function Admin() {
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
           if (user.isPrimaryOwner) setIsPrimaryOwner(true);
-          if (user.canManageTeam || user.isSuperAdmin) setCanManageTeam(true);
+          if (user.canManageTeam || user.isPrimaryOwner) setCanManageTeam(true);
+          if (user.canViewUsers || user.isPrimaryOwner) setCanViewUsers(true);
+          if (user.canPush || user.isPrimaryOwner || user.isSuperAdmin) setCanPush(true);
+          if (user.canManageCatalog || user.isPrimaryOwner || user.isSuperAdmin) setCanManageCatalog(true);
         }
         if (!cancelled) setSessionReady(true);
         return;
@@ -244,7 +254,10 @@ export default function Admin() {
           if (data.username) setAdminName(data.username);
           if (data.isSuperAdmin) setIsSuperAdmin(true);
           if (data.isPrimaryOwner) setIsPrimaryOwner(true);
-          if (data.canManageTeam || data.isSuperAdmin) setCanManageTeam(true);
+          if (data.canManageTeam || data.isPrimaryOwner) setCanManageTeam(true);
+          if (data.canViewUsers || data.isPrimaryOwner) setCanViewUsers(true);
+          if (data.canPush || data.isPrimaryOwner || data.isSuperAdmin) setCanPush(true);
+          if (data.canManageCatalog || data.isPrimaryOwner || data.isSuperAdmin) setCanManageCatalog(true);
         }
       } catch {
         // fall through to legacy login gate
@@ -277,15 +290,25 @@ export default function Admin() {
       openSheet(sheetOpts);
       return;
     }
-    const tab = adminTabFromQuery(window.location.search, isPrimaryOwner, canManageTeam);
+    const tab = adminTabFromQuery(
+      window.location.search,
+      isPrimaryOwner,
+      canManageTeam,
+      canViewUsers,
+      canManageCatalog,
+    );
     if (!tab) return;
     setActiveTab(tab);
-    if (rawTab === "team" && !canManageTeam) {
+    if (
+      (rawTab === "team" && !canManageTeam)
+      || (rawTab === "users" && !canViewUsers)
+      || ((rawTab === "events" || rawTab === "gigs") && !canManageCatalog)
+    ) {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", "overview");
       window.history.replaceState({}, "", url.toString());
     }
-  }, [isPrimaryOwner, canManageTeam, openSheet]);
+  }, [isPrimaryOwner, canManageTeam, canViewUsers, canManageCatalog, openSheet]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -462,7 +485,7 @@ export default function Admin() {
   }>({
     queryKey: ["/api/admin/push-status"],
     queryFn: () => apiRequest("GET", "/api/admin/push-status").then(r => r.json()),
-    enabled: authenticated,
+    enabled: authenticated && canPush,
     refetchInterval: 120_000,
   });
 
@@ -526,14 +549,14 @@ export default function Admin() {
   const { data: newUsersToday = [] } = useQuery<{ id: number; username: string; displayName: string | null; email: string; createdAt: string; photoUrl: string | null }[]>({
     queryKey: ["/api/admin/users/new-today"],
     queryFn: () => apiRequest("GET", "/api/admin/users/new-today").then(r => r.json()),
-    enabled: authenticated && activeTab === "users",
+    enabled: authenticated && canViewUsers && activeTab === "users",
     staleTime: 60_000,
   });
 
   const { data: allUsers = [], isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useQuery<AdminUser[]>({
     queryKey: ["/api/admin/users"],
     queryFn: () => apiRequest("GET", "/api/admin/users").then(r => r.json()),
-    enabled: authenticated,
+    enabled: authenticated && canViewUsers,
     staleTime: 0,
     refetchOnMount: "always",
   });
@@ -1283,6 +1306,9 @@ export default function Admin() {
         isSuperAdmin={isSuperAdmin}
         isPrimaryOwner={isPrimaryOwner}
         canManageTeam={canManageTeam}
+        canViewUsers={canViewUsers}
+        canManageCatalog={canManageCatalog}
+        canPush={canPush}
         userName={adminName}
         userHandle={user?.username}
         photoUrl={user?.photoUrl}
@@ -1311,7 +1337,7 @@ export default function Admin() {
             Refresh all
           </button>
         )}
-        sideExtra={(
+        sideExtra={canPush ? (
           <>
             <div className="hub-push-status">
               <span className={`dot${pushOk ? "" : " is-bad"}`} />
@@ -1331,7 +1357,7 @@ export default function Admin() {
               {testPushMutation.isPending ? "Sending…" : "Send test push"}
             </button>
           </>
-        )}
+        ) : null}
       >
         <div className="admin-panel-body">
         {/* ── OVERVIEW ── */}
@@ -1353,15 +1379,15 @@ export default function Admin() {
               openAdminSheet({ view: "inbox", account: "admin" });
             }}
             onMetricClick={handleOverviewMetricClick}
-            pushStatus={pushStatus}
-            onRefreshPush={() => refetchPushStatus()}
-            onSendTestPush={() => testPushMutation.mutate()}
+            pushStatus={canPush ? pushStatus : null}
+            onRefreshPush={canPush ? () => refetchPushStatus() : undefined}
+            onSendTestPush={canPush ? () => testPushMutation.mutate() : undefined}
             testPushPending={testPushMutation.isPending}
           />
         )}
 
         {/* ── MANAGE EVENTS ── */}
-        {activeTab === "events" && (
+        {activeTab === "events" && canManageCatalog && (
           <div>
             <p className="text-white/40 text-sm mb-4">
               {events.length} events total · assign unclaimed listings to promoters from each row · edit opens full fields.
@@ -1714,7 +1740,7 @@ export default function Admin() {
         )}
 
         {/* ── PRIDE WERK / GIGS ── */}
-        {activeTab === "gigs" && (
+        {activeTab === "gigs" && canManageCatalog && (
           <div>
             <p className="text-white/40 text-sm mb-6">
               Edit gig board posts, including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
@@ -2219,7 +2245,7 @@ export default function Admin() {
           </div>
         )}
 
-        {activeTab === "users" && (
+        {activeTab === "users" && canViewUsers && (
           <div>
             {newUsersToday.length > 0 && (
               <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #C8FA3C33", background: "#0a0f00" }}>

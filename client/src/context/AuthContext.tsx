@@ -19,6 +19,9 @@ export interface AuthUser {
   isSuperAdmin?: boolean;
   isPrimaryOwner?: boolean;
   canManageTeam?: boolean;
+  canViewUsers?: boolean;
+  canPush?: boolean;
+  canManageCatalog?: boolean;
   subAdmin?: boolean;
   usernameChangedAt?: string | null;
 }

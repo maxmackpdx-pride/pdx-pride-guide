@@ -114,6 +114,7 @@ function ProfileMenuPanel({
   logout,
   isAdmin,
   canManageTeam,
+  isPrimaryOwner,
 }: {
   user: AuthUser;
   profilePath: string;
@@ -126,6 +127,7 @@ function ProfileMenuPanel({
   logout: () => void;
   isAdmin: boolean;
   canManageTeam: boolean;
+  isPrimaryOwner: boolean;
 }) {
   const hubSection = hubActive
     ? parseHubSection(new URLSearchParams(window.location.search).get("section"))
@@ -178,7 +180,7 @@ function ProfileMenuPanel({
       >
         Notification settings
       </Link>
-      {isAdmin && (
+      {isAdmin && isPrimaryOwner && (
         <HubAdminFolder
           variant="menu"
           canManageTeam={canManageTeam}
@@ -217,6 +219,7 @@ function ProfileMenu({
   onMenuClose,
   isAdmin,
   canManageTeam,
+  isPrimaryOwner,
 }: {
   user: AuthUser;
   profileOpen: boolean;
@@ -232,6 +235,7 @@ function ProfileMenu({
   onMenuClose: () => void;
   isAdmin: boolean;
   canManageTeam: boolean;
+  isPrimaryOwner: boolean;
 }) {
   const closeAll = () => {
     setProfileOpen(false);
@@ -286,6 +290,7 @@ function ProfileMenu({
           logout={logout}
           isAdmin={isAdmin}
           canManageTeam={canManageTeam}
+          isPrimaryOwner={isPrimaryOwner}
         />
       )}
     </div>
@@ -548,7 +553,8 @@ export default function Nav() {
   });
 
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
-  const canManageTeam = Boolean(user?.canManageTeam);
+  const canManageTeam = Boolean(user?.canManageTeam || user?.isPrimaryOwner);
+  const isPrimaryOwner = Boolean(user?.isPrimaryOwner);
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
@@ -630,6 +636,7 @@ export default function Nav() {
                 onMenuClose={closeMenu}
                 isAdmin={isAdmin}
                 canManageTeam={canManageTeam}
+                isPrimaryOwner={isPrimaryOwner}
               />
             ) : (
               <button
@@ -710,6 +717,7 @@ export default function Nav() {
                   onMenuClose={closeMenu}
                   isAdmin={isAdmin}
                   canManageTeam={canManageTeam}
+                  isPrimaryOwner={isPrimaryOwner}
                 />
               </div>
             )}

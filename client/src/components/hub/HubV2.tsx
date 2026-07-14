@@ -238,6 +238,7 @@ export default function HubV2({
       section={section}
       onSectionChange={handleSectionChange}
       isAdmin={isAdmin}
+      isPrimaryOwner={isPrimaryOwner}
       canPostToFeed={canPostToFeed}
       canManageTeam={canManageTeam}
       calmMode={calmMode}
