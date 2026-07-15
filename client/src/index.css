@@ -12501,10 +12501,11 @@ html.calm-mode .schedule-now-line {
 }
 
 .directory-page {
-  --dir-gm: 60;
+  /* Quieter category glow so place glass stays charcoal (see Directory.css) */
+  --dir-gm: 28;
   background:
-    radial-gradient(90% 60% at 12% -8%, rgba(255, 0, 204, 0.10), transparent 55%),
-    radial-gradient(78% 55% at 100% -2%, rgba(0, 255, 255, 0.09), transparent 55%),
+    radial-gradient(90% 60% at 12% -8%, rgba(255, 0, 204, 0.07), transparent 55%),
+    radial-gradient(78% 55% at 100% -2%, rgba(0, 255, 255, 0.06), transparent 55%),
     #0a0a0a;
 }
 
@@ -15505,9 +15506,10 @@ html.calm-mode .category-constellation__orb {
     align-self: flex-start;
   }
 
+  /* Match DIRECTORY_MAP_HEIGHT (741) — ~30% taller than prior 570 */
   .directory-browse-layout__map-desktop .directory-map,
   .directory-browse-layout__map-mobile .directory-map {
-    height: 380px;
+    height: 741px;
   }
 
   .directory-browse-layout__map-desktop .directory-map-key {

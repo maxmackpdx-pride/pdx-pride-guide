@@ -30,8 +30,8 @@ import "./Directory.css";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
-/** Browse layout map — 50% taller than prior 380px baseline. */
-const DIRECTORY_MAP_HEIGHT = 570;
+/** Browse layout map — desktop sticky map; ~30% taller than prior 570px. */
+const DIRECTORY_MAP_HEIGHT = 741;
 
 export type DirectoryEventSummary = {
   id: number;

@@ -380,6 +380,7 @@ export default function PlaceModal({
         role="dialog"
         aria-modal="true"
         aria-label={place.name}
+        className="place-modal-panel"
         style={{
           position: "relative",
           width: "100%",
@@ -387,9 +388,19 @@ export default function PlaceModal({
           margin: "0 auto",
           flex: "none",
           borderRadius: 12,
-          background: "linear-gradient(var(--ink-800),var(--ink-800)) padding-box, " + edge + " border-box",
+          /* Neutral dark-mode glass — neon stays on edge only */
+          background:
+            "linear-gradient(rgba(255,255,255,0.05), transparent 42%) padding-box, " +
+            "linear-gradient(rgba(8,8,12,0.88), rgba(8,8,12,0.88)) padding-box, " +
+            edge +
+            " border-box",
           border: "2px solid transparent",
-          boxShadow: `0 30px 70px -18px rgba(0,0,0,.9), 0 0 42px -6px color-mix(in srgb, ${accent} 55%, transparent)`,
+          boxShadow:
+            "0 30px 70px -18px rgba(0,0,0,.9), " +
+            "inset 0 1px 0 rgba(255,255,255,0.05), " +
+            `0 0 28px -10px color-mix(in srgb, ${accent} 18%, transparent)`,
+          backdropFilter: "blur(18px) saturate(1.02)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.02)",
           overflow: "hidden",
         }}
       >
@@ -472,8 +483,8 @@ export default function PlaceModal({
               display: "grid",
               placeItems: "center",
               padding: 22,
-              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 17%, var(--ink-1000)), var(--ink-1000) 72%)`,
-              borderBottom: `1px solid color-mix(in srgb, ${accent} 26%, transparent)`,
+              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 6%, #060608), #060608 74%)`,
+              borderBottom: `1px solid color-mix(in srgb, ${accent} 18%, rgba(255,255,255,0.06))`,
               overflow: "hidden",
             }}
           >
