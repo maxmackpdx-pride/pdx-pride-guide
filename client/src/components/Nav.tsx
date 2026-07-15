@@ -185,6 +185,7 @@ function ProfileMenuPanel({
         <HubAdminFolder
           variant="menu"
           canManageTeam={canManageTeam}
+          isPrimaryOwner={isPrimaryOwner}
           currentSection={hubSection}
           onClose={onClose}
           defaultOpen={hubActive}
@@ -470,6 +471,7 @@ export default function Nav() {
   const { user, logout } = useAuth();
   const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
+  const [authDefaultTab, setAuthDefaultTab] = useState<"login" | "register">("login");
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
@@ -479,6 +481,21 @@ export default function Nav() {
   const mobileProfileRef = useRef<HTMLDivElement>(null);
   const navScrollRef = useRef<HTMLDivElement>(null);
   const fetching = useIsFetching();
+
+  // Deep link: /?auth=register (or join/signup) opens Join modal.
+  // Used by Stank secret story when closed from a direct visit.
+  useEffect(() => {
+    if (user) return;
+    const params = new URLSearchParams(window.location.search);
+    const auth = (params.get("auth") || "").toLowerCase();
+    if (auth !== "register" && auth !== "join" && auth !== "signup") return;
+    setAuthDefaultTab("register");
+    setShowAuth(true);
+    params.delete("auth");
+    const qs = params.toString();
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`;
+    window.history.replaceState(null, "", next);
+  }, [user, location]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -769,7 +786,15 @@ export default function Nav() {
         />
       </header>
 
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      {showAuth && (
+        <AuthModal
+          onClose={() => {
+            setShowAuth(false);
+            setAuthDefaultTab("login");
+          }}
+          defaultTab={authDefaultTab}
+        />
+      )}
     </>
   );
 }
