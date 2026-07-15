@@ -111,7 +111,7 @@
       .hub-root--unified{min-height:0 !important}
       .grid3,.grid2{
         grid-template-columns:1fr;
-        padding:14px 14px calc(var(--hub-mobile-drawer-collapsed, 28px) + var(--site-mobile-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 10px);
+        padding:14px 14px calc(var(--hub-mobile-drawer-collapsed, 36px) + var(--site-mobile-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 10px);
       }
       .hub-v2-lrail--desktop{display:none !important}
       .h1{font-size:30px}
@@ -668,8 +668,8 @@
     }
     @media(max-width:720px){
       :root{
-        /* Slim peek — glowing pill only, not a second solid toolbar over the nav */
-        --hub-mobile-drawer-collapsed:28px;
+        /* Solid grab strip height (room for glowing pill + padding) */
+        --hub-mobile-drawer-collapsed:36px;
       }
       /* Portaled to body — re-declare hub tokens so mode tabs render correctly */
       .hub-v2-drawer{
@@ -684,7 +684,7 @@
          * Pre-measure seed: 100% of drawer minus grab strip so the pill is never
          * fully translated off-screen before JS sets the exact sheet px.
          */
-        --drawer-collapse:calc(100% - var(--hub-mobile-drawer-collapsed, 28px));
+        --drawer-collapse:calc(100% - var(--hub-mobile-drawer-collapsed, 36px));
         --drawer-y:var(--drawer-collapse);
       }
       .hub-v2-drawer-backdrop{
@@ -721,7 +721,7 @@
       .hub-v2-drawer.calm-mode{
         transition:transform .01s linear;
       }
-      /* Transparent peek — single glowing pill floats just above the 5-tab bar */
+      /* Solid strip + cyan border; glowing pill sits on top (still above nav, z < nav) */
       .hub-v2-drawer__grab{
         pointer-events:auto;
         position:relative;
@@ -729,14 +729,19 @@
         width:100%;
         height:var(--hub-mobile-drawer-collapsed);
         min-height:var(--hub-mobile-drawer-collapsed);
-        padding:0;margin:0;border:none;
-        background:transparent;
-        box-shadow:none;
+        padding:0;margin:0;
+        border:none;
+        border-top:1px solid rgba(25,227,255,.55);
+        border-bottom:1px solid rgba(25,227,255,.28);
+        background:#0a0a0f;
+        box-shadow:
+          0 -6px 18px rgba(0,0,0,.45),
+          inset 0 1px 0 rgba(25,227,255,.12);
         cursor:grab;touch-action:none;
         -webkit-user-select:none;user-select:none;
       }
       .hub-v2-drawer__grab:active{cursor:grabbing}
-      /* Glowing cyan pill (preferred over 3-line bars) */
+      /* Glowing cyan pill */
       .hub-v2-drawer__grip{
         display:block;width:48px;height:5px;border-radius:99px;flex:none;
         background:var(--hub-cyan, var(--panel-cyan, #19e3ff));
