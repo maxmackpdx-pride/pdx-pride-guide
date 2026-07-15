@@ -5348,16 +5348,15 @@ function hubFeedEventActivityAt(evt: {
   createdAt?: string | null;
   dateStart?: string | null;
 }): string {
+  // News-feed order is chronological by when the event was listed/posted — NOT
+  // by the (often future) party date. Sorting by party start floats every
+  // upcoming party to the top and buries real-time posts, host updates, and
+  // RSVPs beneath the whole week's catalog. Prefer the created/listed time for
+  // all events; only fall back to the party date when no created time exists.
   const created = hubFeedCreatedAt(evt);
+  if (created) return created;
+
   const start = typeof evt.dateStart === "string" ? evt.dateStart : "";
-  const isUserOrigin =
-    evt.source === "user_submitted"
-    || !!(evt.submittedBy && String(evt.submittedBy).trim())
-    || !!(evt.claimedBy && String(evt.claimedBy).trim() && evt.source === "user_submitted");
-
-  if (isUserOrigin && created) return created;
-
-  // Venue / guide-listed parties: activity time = party start (spread by night).
   if (start) {
     const startMs = parsePacificDateTime(start);
     if (startMs != null) return new Date(startMs).toISOString();
