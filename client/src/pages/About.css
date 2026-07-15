@@ -739,6 +739,11 @@ button.about-v2-project--button:focus-visible {
   flex-direction: column;
   gap: 10px;
   align-items: flex-start;
+  max-width: 100%;
+}
+
+.about-v2-donate__cta .tip-support__btns {
+  max-width: 100%;
 }
 
 .about-v2-donate__note {

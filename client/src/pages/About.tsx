@@ -10,9 +10,9 @@ import type { Event } from "@shared/schema";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
 import EventModal from "@/components/EventModal";
 import ScrollReveal from "@/components/ScrollReveal";
+import TipSupport from "@/components/TipSupport";
 import "./About.css";
 
-const VENMO_URL = "https://venmo.com/tucker_pdmax";
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const PROFILE_URL = "/u/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
@@ -443,16 +443,12 @@ export default function About() {
                 <h3 className="about-v2-donate__h3">Keep this guide alive</h3>
                 <p>
                   Servers and domains cost money. Time costs the most. If this pointed you toward one good night,
-                  chip in and it stays free for the next person.
+                  chip in and it stays free for the next person. Venmo is one tap. Card and Apple Pay use a secure
+                  Stripe checkout when it is turned on.
                 </p>
               </div>
               <div className="about-v2-donate__cta">
-                <a href={VENMO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-donate">
-                  <Button as="span" variant="solid" accent="lime" size="lg">
-                    Buy me a coffee
-                  </Button>
-                </a>
-                <span className="about-v2-donate__note">@tucker_pdmax on Venmo · better yet, hire me.</span>
+                <TipSupport variant="about" />
               </div>
             </div>
 

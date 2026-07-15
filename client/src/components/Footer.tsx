@@ -4,6 +4,7 @@ import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
 import PushNotificationToggle from "./PushNotificationToggle";
 import SplitFlapSignoff from "./SplitFlapSignoff";
+import TipSupport from "./TipSupport";
 
 type FooterLink = [href: string, label: string];
 
@@ -87,18 +88,7 @@ export default function Footer() {
           </nav>
 
           <div className="site-footer__support">
-            <p className="site-footer__coffee-note">Free forever, but not free to run.</p>
-            <a
-              href="https://venmo.com/tucker_pdmax"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="site-footer__coffee-btn"
-              data-testid="footer-buy-coffee"
-              aria-label="Buy me a coffee on Venmo @tucker_pdmax"
-            >
-              BUY ME A COFFEE
-            </a>
-            <p className="site-footer__coffee-handle">Venmo @tucker_pdmax</p>
+            <TipSupport variant="footer" />
           </div>
         </div>
 

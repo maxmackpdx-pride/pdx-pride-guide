@@ -72,6 +72,7 @@ import {
 import { isEventTalentRole } from "@shared/eventTalent";
 import { parseHubFeedTab } from "@shared/hubFeed";
 import { BOARD_REJECT_REASONS, PROFILE_PHOTO_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
+import { buildTipLinks } from "@shared/tipSupport";
 
 import {
   diffSubmissionMerge,
@@ -930,6 +931,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionSecrets();
 
   // Lightweight probe for Railway healthchecks — must not hit the DB.
+  // Public tip links (Venmo + optional Stripe Payment Link for Apple Pay / cards).
+  // Set STRIPE_PAYMENT_LINK (or TIP_STRIPE_URL) on Railway after creating a Payment Link.
+  app.get("/api/site/tip-links", (_req, res) => {
+    const stripe =
+      process.env.STRIPE_PAYMENT_LINK?.trim() ||
+      process.env.TIP_STRIPE_URL?.trim() ||
+      process.env.VITE_STRIPE_PAYMENT_LINK?.trim() ||
+      null;
+    const venmoHandle =
+      process.env.VENMO_HANDLE?.trim() ||
+      process.env.TIP_VENMO_HANDLE?.trim() ||
+      null;
+    res.setHeader("Cache-Control", "public, max-age=60");
+    res.json(buildTipLinks({ stripePaymentLink: stripe, venmoHandle }));
+  });
+
   app.get("/api/health", (_req, res) => {
     res.json({
       ok: true,
