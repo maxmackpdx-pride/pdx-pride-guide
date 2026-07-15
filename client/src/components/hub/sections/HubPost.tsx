@@ -8,10 +8,12 @@ import type { HubFeedPost } from "@shared/schema";
 
 type PostType = "text" | "photo";
 type Audience = "ALL" | "RSVPS";
+type PostAs = "self" | "event" | "venue";
 
 type PostOptions = {
   canPost: boolean;
   hostedEvents: Array<{ id: number; title: string; venueName: string; dayOfWeek?: string | null }>;
+  ownedVenues?: Array<{ id: number; name: string; type?: string | null; logoUrl?: string | null }>;
 };
 
 const POST_TYPES: Array<{ key: PostType; label: string }> = [
@@ -38,6 +40,9 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   const [photoUrl, setPhotoUrl] = useState("");
   const [audience, setAudience] = useState<Audience>("ALL");
   const [eventId, setEventId] = useState<number | "">("");
+  const [postAs, setPostAs] = useState<PostAs>("self");
+  const [identityEventId, setIdentityEventId] = useState<number | "">("");
+  const [venueId, setVenueId] = useState<number | "">("");
 
   const optionsQuery = useQuery<PostOptions>({
     queryKey: ["/api/hub/feed/post-options"],
@@ -59,17 +64,29 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   });
 
   const hostedEvents = optionsQuery.data?.hostedEvents ?? [];
-  const showEventPicker = audience === "RSVPS" && hostedEvents.length > 1;
+  const ownedVenues = optionsQuery.data?.ownedVenues ?? [];
+  const canPostAsEvent = hostedEvents.length > 0;
+  const canPostAsVenue = ownedVenues.length > 0;
+  // Only show the RSVP-target picker when posting as yourself; posting as an
+  // event already carries its own event, which doubles as the RSVP target.
+  const showEventPicker = postAs === "self" && audience === "RSVPS" && hostedEvents.length > 1;
 
   const createMutation = useMutation({
     mutationFn: async () => {
       const payload: Record<string, unknown> = {
         postType,
         audience,
+        postAs,
         body: body.trim() || undefined,
         photoUrl: photoUrl || undefined,
       };
-      if (audience === "RSVPS" && eventId !== "") payload.eventId = eventId;
+      if (postAs === "event" && identityEventId !== "") {
+        // The identity event doubles as the RSVP target when audience is RSVPS.
+        payload.eventId = identityEventId;
+      } else if (audience === "RSVPS" && eventId !== "") {
+        payload.eventId = eventId;
+      }
+      if (postAs === "venue" && venueId !== "") payload.businessId = venueId;
       const r = await fetch("/api/hub/feed/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,6 +102,9 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
       setPhotoUrl("");
       setAudience("ALL");
       setEventId("");
+      setPostAs("self");
+      setIdentityEventId("");
+      setVenueId("");
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/posts/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
       toast({ title: "Posted to the scene feed" });
@@ -114,10 +134,16 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
     },
   });
 
+  const identityChosen =
+    postAs === "self"
+    || (postAs === "event" && identityEventId !== "")
+    || (postAs === "venue" && venueId !== "");
+
   const canSubmit =
-    postType === "text"
+    identityChosen &&
+    (postType === "text"
       ? body.trim().length > 0
-      : !!photoUrl;
+      : !!photoUrl);
 
   if (optionsQuery.isLoading) {
     return (
@@ -190,6 +216,78 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
           onChange={(e) => setBody(e.target.value)}
           maxLength={1000}
         />
+
+        {(canPostAsEvent || canPostAsVenue) && (
+          <div className="hub-post__audience">
+            <div className="kick hub-post__kick--section">Post as</div>
+            <div className="hub-post__audience-btns">
+              <button
+                type="button"
+                className={`seg${postAs === "self" ? " on" : ""}`}
+                onClick={() => { setPostAs("self"); setIdentityEventId(""); setVenueId(""); }}
+              >
+                Yourself
+              </button>
+              {canPostAsEvent && (
+                <button
+                  type="button"
+                  className={`seg${postAs === "event" ? " on" : ""}`}
+                  onClick={() => {
+                    setPostAs("event");
+                    setVenueId("");
+                    if (hostedEvents.length === 1) setIdentityEventId(hostedEvents[0].id);
+                  }}
+                >
+                  An event
+                </button>
+              )}
+              {canPostAsVenue && (
+                <button
+                  type="button"
+                  className={`seg${postAs === "venue" ? " on" : ""}`}
+                  onClick={() => {
+                    setPostAs("venue");
+                    setIdentityEventId("");
+                    if (ownedVenues.length === 1) setVenueId(ownedVenues[0].id);
+                  }}
+                >
+                  A venue
+                </button>
+              )}
+            </div>
+            {postAs === "event" && hostedEvents.length > 1 && (
+              <select
+                className="fin"
+                value={identityEventId}
+                onChange={(e) => setIdentityEventId(e.target.value ? Number(e.target.value) : "")}
+              >
+                <option value="">Pick an event…</option>
+                {hostedEvents.map((evt) => (
+                  <option key={evt.id} value={evt.id}>{evt.title} · {evt.venueName}</option>
+                ))}
+              </select>
+            )}
+            {postAs === "venue" && ownedVenues.length > 1 && (
+              <select
+                className="fin"
+                value={venueId}
+                onChange={(e) => setVenueId(e.target.value ? Number(e.target.value) : "")}
+              >
+                <option value="">Pick a venue…</option>
+                {ownedVenues.map((biz) => (
+                  <option key={biz.id} value={biz.id}>{biz.name}</option>
+                ))}
+              </select>
+            )}
+            <p className="hub-post__copy--hint">
+              {postAs === "self"
+                ? "Shows your profile as the poster."
+                : postAs === "event"
+                  ? "Shows the event as the poster — your name appears as the co-host who posted."
+                  : "Shows the venue as the poster — your name appears as who posted."}
+            </p>
+          </div>
+        )}
 
         <div className="hub-post__audience">
           <div className="kick hub-post__kick--section">Who sees this</div>

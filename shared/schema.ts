@@ -627,6 +627,8 @@ export const hubFeedPosts = sqliteTable("hub_feed_posts", {
   photoUrl: text("photo_url"),
   audience: text("audience").notNull().default("ALL"), // ALL | RSVPS
   eventId: integer("event_id"),
+  postAs: text("post_as").notNull().default("self"), // self | event | venue
+  businessId: integer("business_id"), // set when postAs = venue
   status: text("status").notNull().default("LIVE"), // LIVE | REMOVED
   createdAt: text("created_at").notNull().default(""),
 });

@@ -46,6 +46,9 @@ export type HubFeedItem = {
   text?: string | null;
   createdAt: string;
   author: HubFeedAuthor;
+  /** Real person behind an event/venue post — shown as a "posted by" sub-line
+   *  so co-hosts posting under a shared identity are still attributable. */
+  postedBy?: HubFeedAuthor | null;
   event?: HubFeedEventEmbed | null;
   /** Multiple events bundled from the same poster within a short window. */
   events?: HubFeedEventEmbed[];

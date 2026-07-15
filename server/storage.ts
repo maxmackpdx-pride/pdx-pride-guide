@@ -612,6 +612,16 @@ function ensureHubFeedPostsSchema() {
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS hub_feed_posts_user_idx ON hub_feed_posts(user_id)`);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS hub_feed_posts_created_idx ON hub_feed_posts(created_at)`);
+    // "Post as" identity — added after launch, so backfill onto existing tables.
+    const cols = new Set(
+      (sqlite.prepare(`PRAGMA table_info(hub_feed_posts)`).all() as { name: string }[]).map((c) => c.name),
+    );
+    if (!cols.has("post_as")) {
+      sqlite.exec(`ALTER TABLE hub_feed_posts ADD COLUMN post_as TEXT NOT NULL DEFAULT 'self'`);
+    }
+    if (!cols.has("business_id")) {
+      sqlite.exec(`ALTER TABLE hub_feed_posts ADD COLUMN business_id INTEGER`);
+    }
   } catch (e) {
     console.error("[hub_feed_posts] schema migration failed:", e);
   }
@@ -5267,6 +5277,17 @@ function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unkno
   return { displayName: String(venueName), venueLogo: !!biz, businessId };
 }
 
+/** Feed author for a directory venue posting under its own name. */
+function hubFeedBusinessAuthor(biz: Business): HubFeedAuthor {
+  const logo = resolveDirectoryLogo(String(biz.name), biz.imageUrl) || directoryFallbackLogo(biz.type) || null;
+  return {
+    displayName: biz.name,
+    photoUrl: logo,
+    venueLogo: true,
+    businessId: biz.id,
+  };
+}
+
 function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor | null): HubFeedEventEmbed {
   return {
     id: Number(evt.id ?? evt.eventId),
@@ -5466,10 +5487,17 @@ function canViewerSeeHubFeedPost(
   return posterHostedIds.some((id) => viewerRsvpEventIds.has(id));
 }
 
-function hubFeedPostToItem(row: any, goingCounts: Record<number, { count: number }>): HubFeedItem {
+function hubFeedPostToItem(
+  row: any,
+  goingCounts: Record<number, { count: number }>,
+  businesses: Business[] = [],
+): HubFeedItem {
   const postType = row.postType ?? row.post_type;
   const audience = row.audience ?? "ALL";
   const eventId = row.eventId ?? row.event_id ?? null;
+  const postAs = row.postAs ?? row.post_as ?? "self";
+  const businessId = row.businessId ?? row.business_id ?? null;
+
   let eventEmbed: HubFeedEventEmbed | null = null;
   if (eventId != null) {
     const evt = storage.getEvent(Number(eventId));
@@ -5477,6 +5505,35 @@ function hubFeedPostToItem(row: any, goingCounts: Record<number, { count: number
       eventEmbed = hubFeedEventEmbed(evt, goingCounts[evt.id]?.count);
     }
   }
+
+  // The real person is always the account that posted — used as the primary
+  // author for "self" posts, and as the "posted by" sub-line for event/venue
+  // posts so co-hosts stay attributable.
+  const personAuthor = hubFeedAuthorFromUser({
+    displayName: row.displayName,
+    username: row.username,
+    photoUrl: row.authorPhotoUrl ?? row.photoUrl,
+    avatarChoice: row.avatarChoice,
+    avatarRing: row.avatarRing,
+  });
+
+  let author = personAuthor;
+  let postedBy: HubFeedAuthor | null = null;
+
+  if (postAs === "venue" && businessId != null) {
+    const biz = businesses.find((b) => b.id === Number(businessId)) || storage.getBusiness(Number(businessId));
+    if (biz) {
+      author = hubFeedBusinessAuthor(biz);
+      postedBy = personAuthor;
+    }
+  } else if (postAs === "event" && eventId != null) {
+    const evt = storage.getEvent(Number(eventId));
+    if (evt) {
+      author = hubFeedVenueAuthor(String(evt.venueName || ""), evt, businesses);
+      postedBy = personAuthor;
+    }
+  }
+
   const action = audience === "RSVPS"
     ? (eventEmbed ? `Shared with RSVPs for ${eventEmbed.title}` : "Shared with their RSVPs")
     : "Shared with the scene";
@@ -5488,13 +5545,8 @@ function hubFeedPostToItem(row: any, goingCounts: Record<number, { count: number
     text: row.body ?? null,
     photoUrl: row.photoUrl ?? row.photo_url ?? null,
     createdAt: row.createdAt ?? row.created_at ?? "",
-    author: hubFeedAuthorFromUser({
-      displayName: row.displayName,
-      username: row.username,
-      photoUrl: row.authorPhotoUrl ?? row.photoUrl,
-      avatarChoice: row.avatarChoice,
-      avatarRing: row.avatarRing,
-    }),
+    author,
+    postedBy,
     event: eventEmbed,
     link: null,
   };
@@ -11716,7 +11768,8 @@ export const storage: IStorage = {
     ensureHubFeedPostsSchema();
     const feedPostRows = sqlite.prepare(`
       SELECT p.id, p.user_id AS userId, p.post_type AS postType, p.body, p.photo_url AS photoUrl,
-             p.audience, p.event_id AS eventId, p.status, p.created_at AS createdAt,
+             p.audience, p.event_id AS eventId, p.post_as AS postAs, p.business_id AS businessId,
+             p.status, p.created_at AS createdAt,
              u.display_name AS displayName, u.username, u.photo_url AS authorPhotoUrl,
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM hub_feed_posts p
@@ -11733,7 +11786,7 @@ export const storage: IStorage = {
         hostedCache.set(row.userId, hosted);
       }
       if (!canViewerSeeHubFeedPost(row, viewerUserId, viewerRsvpEventIds, viewerIsAdmin, hosted)) continue;
-      items.push(hubFeedPostToItem(row, goingCounts));
+      items.push(hubFeedPostToItem(row, goingCounts, businesses));
     }
 
     const sorted = items

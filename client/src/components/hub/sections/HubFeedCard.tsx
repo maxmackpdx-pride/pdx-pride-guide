@@ -244,6 +244,23 @@ export default function HubFeedCard({ item }: Props) {
                 {item.action}
                 {when ? ` · ${when}` : ""}
               </div>
+              {item.postedBy && (
+                <div className="hub-feed-card__postedby">
+                  <UserAvatar
+                    photoUrl={item.postedBy.photoUrl}
+                    avatarChoice={item.postedBy.avatarChoice}
+                    avatarRing={item.postedBy.avatarRing}
+                    displayName={item.postedBy.displayName}
+                    username={item.postedBy.username ?? undefined}
+                    href={avatarHrefFor(item.postedBy)}
+                    onClick={stopCardNav}
+                    size={20}
+                  />
+                  <span className="kick hub-feed-card__postedby-name">
+                    Posted by {item.postedBy.displayName}
+                  </span>
+                </div>
+              )}
             </div>
             <span className="kick hub-feed-card__badge" style={{ "--hub-feed-accent": badgeColor } as CSSProperties}>
               {item.badge}

@@ -457,6 +457,8 @@
     .hub-feed-card__head{display:flex;align-items:flex-start;gap:10px}
     .hub-feed-card__author{font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;text-transform:uppercase;line-height:1.1}
     .hub-feed-card__meta{font-size:10.5px;letter-spacing:.06em;margin-top:5px}
+    .hub-feed-card__postedby{display:flex;align-items:center;gap:6px;margin-top:7px}
+    .hub-feed-card__postedby-name{font-size:10.5px;letter-spacing:.05em;color:var(--text-lo,#8c8980);margin:0}
     .hub-feed-card__badge{flex:none;font-size:10px;letter-spacing:.1em;color:var(--hub-feed-accent);border:1px solid var(--hub-feed-accent);border-radius:5px;padding:2px 7px}
     .hub-feed-card__subject{font-family:var(--font-display);font-weight:800;font-size:19px;color:#fff;text-transform:uppercase;line-height:1.08;margin:12px 0 0}
     .hub-feed-card__body{margin:12px 0 0;font-size:14.5px;line-height:1.55;color:var(--board-text)}

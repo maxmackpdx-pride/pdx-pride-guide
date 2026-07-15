@@ -2673,7 +2673,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!evt) return null;
       return { id: evt.id, title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek };
     }).filter(Boolean);
-    res.json({ canPost, hostedEvents });
+    const ownedVenues = storage.getUserOwnedBusinesses(userId).map((biz) => ({
+      id: biz.id,
+      name: biz.name,
+      type: biz.type,
+      logoUrl: biz.imageUrl ?? null,
+    }));
+    res.json({ canPost, hostedEvents, ownedVenues });
   });
 
   app.get("/api/hub/feed/posts/mine", requireAuth, (req, res) => {
@@ -2704,6 +2710,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.status(400).json({ error: "audience must be ALL or RSVPS" });
     }
 
+    // "Post as" identity: yourself, an upcoming event you host, or a venue you own.
+    const postAs = String(req.body.postAs || "self").trim().toLowerCase();
+    if (postAs !== "self" && postAs !== "event" && postAs !== "venue") {
+      return res.status(400).json({ error: "postAs must be self, event, or venue" });
+    }
+    let businessId: number | null = null;
+    if (postAs === "venue") {
+      businessId = Number(req.body.businessId);
+      if (!Number.isInteger(businessId) || businessId <= 0) {
+        return res.status(400).json({ error: "Posting as a venue needs a valid venue" });
+      }
+      const owns = storage.getUserOwnedBusinesses(userId).some((b) => b.id === businessId);
+      if (!owns && !isAdmin) {
+        return res.status(403).json({ error: "You can only post as a venue you own" });
+      }
+    }
+
     const body = req.body.body != null ? String(req.body.body).trim().slice(0, 1000) : "";
     const photoUrl = req.body.photoUrl != null ? String(req.body.photoUrl).trim() : "";
 
@@ -2717,15 +2740,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!body && !photoUrl) return res.status(400).json({ error: "Photo posts need an image" });
     }
 
+    // eventId drives both the "post as event" identity and RSVP targeting; a
+    // host may use it for either. Posting as an event requires one.
     let eventId: number | null = null;
     if (req.body.eventId != null && req.body.eventId !== "") {
       eventId = Number(req.body.eventId);
       if (!Number.isInteger(eventId) || eventId <= 0) {
         return res.status(400).json({ error: "Invalid event" });
       }
-      if (!storage.isUserEventHost(eventId, userId)) {
-        return res.status(403).json({ error: "You can only target RSVPs for events you host" });
+      if (!storage.isUserEventHost(eventId, userId) && !isAdmin) {
+        return res.status(403).json({ error: "You can only post as or target events you host" });
       }
+    }
+    if (postAs === "event" && eventId == null) {
+      return res.status(400).json({ error: "Posting as an event needs a valid event" });
     }
 
     if (audience === "RSVPS") {
@@ -2733,11 +2761,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (hosted.length === 0) {
         return res.status(400).json({ error: "RSVP-only posts require at least one live hosted event" });
       }
-      if (eventId != null && !hosted.includes(eventId)) {
+      if (eventId != null && !hosted.includes(eventId) && !isAdmin) {
         return res.status(400).json({ error: "That event is not in your hosted list" });
       }
-    } else if (eventId != null) {
-      return res.status(400).json({ error: "eventId is only valid for RSVP audience" });
+    } else if (eventId != null && postAs !== "event") {
+      // For a public post, an event is only valid as the "post as" identity.
+      return res.status(400).json({ error: "eventId is only valid for RSVP audience or posting as that event" });
     }
 
     if (moderationGate(res, "Scene feed post", { body: body || null })) return;
@@ -2749,6 +2778,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       photoUrl: photoUrl || null,
       audience,
       eventId,
+      postAs,
+      businessId,
     });
     res.json(post);
   });
