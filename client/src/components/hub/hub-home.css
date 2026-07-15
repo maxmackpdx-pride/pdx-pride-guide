@@ -89,18 +89,18 @@
   text-decoration: none;
 }
 
-/* Admin keys banner */
+/* Admin keys banner (feed → drawer/rail via HubV2 sideExtra) */
 .hub-keys {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 16px 20px;
-  border: 1px solid var(--neon-magenta, #ff00cc);
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 31, 160, 0.45);
   border-radius: 14px;
-  background: rgba(255, 0, 204, 0.08);
-  margin-bottom: 22px;
+  background: rgba(255, 31, 160, 0.08);
+  margin-bottom: 0;
 }
 
 .hub-keys__kicker {
@@ -109,7 +109,7 @@
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--panel-magenta, var(--neon-magenta, #ff00cc));
   margin: 0 0 5px;
 }
 

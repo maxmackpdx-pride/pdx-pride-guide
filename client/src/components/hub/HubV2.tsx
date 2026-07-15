@@ -16,6 +16,7 @@ import HubPeople from "./sections/HubPeople";
 import HubSettings from "./sections/HubSettings";
 import HubAdminOverview from "./sections/HubAdminOverview";
 import HubAdminKeys from "./sections/HubAdminKeys";
+import HubWeatherForecast from "./sections/HubWeatherForecast";
 import HubAdminTable, { getAdminTableMeta } from "./sections/HubAdminTable";
 import {
   HUB_ADMIN_TABLE_SECTIONS,
@@ -69,18 +70,10 @@ function HubRightRail({
   upcoming,
   onGoEvents,
   onGoPeople,
-  isAdmin,
-  isPrimaryOwner,
-  pendingCount,
-  ownerCount,
 }: {
   upcoming: HubEventRow[];
   onGoEvents: () => void;
   onGoPeople: () => void;
-  isAdmin?: boolean;
-  isPrimaryOwner?: boolean;
-  pendingCount?: number;
-  ownerCount?: number;
 }) {
   const [pendingUsername, setPendingUsername] = useState<string | null>(null);
 
@@ -108,14 +101,6 @@ function HubRightRail({
 
   return (
     <>
-      {isAdmin && (
-        <HubAdminKeys
-          compact
-          pendingCount={pendingCount ?? 0}
-          ownerCount={ownerCount ?? 0}
-          isPrimaryOwner={isPrimaryOwner}
-        />
-      )}
       <div className="card" style={{ padding: 16 }}>
         <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 14 }}>
           Your next moves
@@ -273,14 +258,12 @@ export default function HubV2({
     <>
       <PwaInstallBanner />
       {errorBanner}
-      {isAdmin && (section === "feed" || section === "post") && (
-        <HubAdminKeys
-          pendingCount={pendingCount}
-          ownerCount={ownerCount}
-          isPrimaryOwner={isPrimaryOwner}
-        />
+      {(section === "feed" || section === "post") && (
+        <>
+          <HubWeatherForecast />
+          <HubFeed key="feed" canPostToFeed={canPostToFeed} />
+        </>
       )}
-      {(section === "feed" || section === "post") && <HubFeed key="feed" canPostToFeed={canPostToFeed} />}
       {section === "profile" && editMode && (
         <HubProfile
           key="profile-edit"
@@ -308,6 +291,14 @@ export default function HubV2({
     </>
   );
 
+  const keysExtra = isAdmin ? (
+    <HubAdminKeys
+      pendingCount={pendingCount}
+      ownerCount={ownerCount}
+      isPrimaryOwner={isPrimaryOwner}
+    />
+  ) : null;
+
   return (
     <HubV2Shell
       section={section}
@@ -323,15 +314,12 @@ export default function HubV2({
       onLogout={onLogout}
       searchValue={searchQ}
       onSearchChange={setSearchQ}
+      sideExtra={keysExtra}
       rightRail={
         <HubRightRail
           upcoming={upcoming}
           onGoEvents={() => handleSectionChange("events")}
           onGoPeople={() => handleSectionChange("people")}
-          isAdmin={isAdmin}
-          isPrimaryOwner={isPrimaryOwner}
-          pendingCount={pendingCount}
-          ownerCount={ownerCount}
         />
       }
     >

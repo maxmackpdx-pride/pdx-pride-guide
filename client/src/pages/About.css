@@ -841,15 +841,22 @@ button.about-v2-project--button:focus-visible {
   letter-spacing: 0.03em;
   font-size: 0.95rem;
   line-height: 1;
-  color: #000;
-  background: var(--lime, #ccff00);
-  border: 2px solid #000;
-  border-radius: 4px;
-  padding: 7px 11px 5px;
-  box-shadow: 4px 4px 0 0 #9702c1;
-  transform: rotate(-3deg);
-  -webkit-text-stroke: 0.75px #000;
+  /* Red fill + hard black outline on the letters */
+  color: #ff1f1f;
+  -webkit-text-stroke: 1.5px #000;
   paint-order: stroke fill;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000,
+     0    0   0 #000;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 4px 2px;
+  box-shadow: none;
+  transform: rotate(-3deg);
   white-space: nowrap;
 }
 
@@ -862,7 +869,15 @@ button.about-v2-project--button:focus-visible {
 }
 
 .about-v2-partners__code {
-  color: #8c8980;
+  color: #ff1f1f;
+  font-weight: 800;
+  -webkit-text-stroke: 0.85px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    -0.5px -0.5px 0 #000,
+     0.5px -0.5px 0 #000,
+    -0.5px  0.5px 0 #000,
+     0.5px  0.5px 0 #000;
 }
 
 .about-v2-sponsors__grid {

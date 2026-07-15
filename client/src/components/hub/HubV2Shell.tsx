@@ -132,14 +132,19 @@ export default function HubV2Shell({
     el.style.setProperty("--drawer-y", `${px}px`);
   }, []);
 
+  /**
+   * Closed offset + drag clamp = sheet height only (grab is outside the measurement).
+   * CSS seeds --drawer-collapse to calc(100% - grab) so the pill peeks pre-measure;
+   * once measured we overwrite with exact sheet px so closed rest and clamp match.
+   */
   const measureDrawerCollapse = useCallback(() => {
     const sheet = sheetRef.current;
     const drawer = drawerRef.current;
     if (!sheet || !drawer) return;
-    const h = sheet.offsetHeight;
-    if (h <= 0) return;
-    collapseHRef.current = h;
-    drawer.style.setProperty("--drawer-collapse", `${h}px`);
+    const sheetH = sheet.offsetHeight;
+    if (sheetH <= 0) return; // keep CSS seed until layout is ready
+    collapseHRef.current = sheetH;
+    drawer.style.setProperty("--drawer-collapse", `${sheetH}px`);
   }, []);
 
   const goMemberMode = (e: React.MouseEvent) => {
@@ -482,7 +487,8 @@ export default function HubV2Shell({
                 onClick={toggleMobileDrawer}
               >
                 <span className="hub-v2-drawer__grip" aria-hidden />
-                {isHubRoute && (
+                {/* Pill always; label only during hub bounce (closed) or while open — never inflate the peek */}
+                {isHubRoute && (mobileDrawerOpen || drawerBounceHint) && (
                   <span className="hub-v2-drawer__hint">
                     {mobileDrawerOpen ? "SWIPE DOWN TO CLOSE" : "SWIPE UP FOR MENU"}
                   </span>
