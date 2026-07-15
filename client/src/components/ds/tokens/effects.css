@@ -173,7 +173,21 @@ html.calm-mode .pdxRow {
    Colors flow L→R; soft glow pulses; traveling highlight uses pdxSeamGlint. */
 @keyframes pdxSeamGlint { 0% { transform: translateX(-165%); } 60% { transform: translateX(150%); } 100% { transform: translateX(150%); } }
 @keyframes pdxSeamFlow { from { background-position: 200% 0; } to { background-position: 0% 0; } }
-@keyframes pdxSeamGlow { 0%,100% { box-shadow: 0 0 6px rgba(0,255,255,.28); } 50% { box-shadow: 0 0 18px rgba(255,0,204,.5); } }
+/* ~20% more opaque + softer downward bloom so the bar reads as glass edge light */
+@keyframes pdxSeamGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(0, 255, 255, 0.34),
+      0 4px 14px 2px rgba(0, 255, 255, 0.30),
+      0 10px 22px 4px rgba(255, 238, 0, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 0, 204, 0.60),
+      0 6px 18px 3px rgba(255, 0, 204, 0.38),
+      0 12px 28px 6px rgba(0, 255, 255, 0.20);
+  }
+}
 
 /* Calm mode: rainbow dividers stay visible but static (no flow, glint, glow) */
 :root[data-calm="true"] .pdx-seam,
@@ -197,13 +211,30 @@ html.calm-mode .rainbow-bar {
 :root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after,
 :root[data-calm="true"] .pdxMap__seam::after,
 :root[data-calm="true"] .rainbow-bar::after,
+:root[data-calm="true"] .pdx-seam::before,
+:root[data-calm="true"] .pdx-rainbow-rule::before,
+:root[data-calm="true"] .pdxSeam::before,
 html.calm-mode .pdx-seam::after,
 html.calm-mode .pdx-rainbow-rule::after,
 html.calm-mode .pdxSeam::after,
 html.calm-mode .pdxDivider--rainbow .pdxDivider__line::after,
 html.calm-mode .pdxMap__seam::after,
-html.calm-mode .rainbow-bar::after {
+html.calm-mode .rainbow-bar::after,
+html.calm-mode .pdx-seam::before,
+html.calm-mode .pdx-rainbow-rule::before,
+html.calm-mode .pdxSeam::before {
   display: none;
+}
+
+/* Calm: keep a soft static bloom under the hard bar (no motion) */
+:root[data-calm="true"] .pdx-rainbow-rule,
+:root[data-calm="true"] .pdx-seam,
+html.calm-mode .pdx-rainbow-rule,
+html.calm-mode .pdx-seam {
+  filter: none;
+  box-shadow:
+    0 0 10px rgba(0, 255, 255, 0.28),
+    0 6px 16px 3px rgba(255, 0, 204, 0.18);
 }
 
 /* Card top seams (pseudo-element rainbow bars on glowing cards) */
@@ -263,8 +294,18 @@ html.calm-mode .featured-event-ad::before {
   .pdxSeam::after,
   .pdxDivider--rainbow .pdxDivider__line::after,
   .pdxMap__seam::after,
-  .rainbow-bar::after {
+  .rainbow-bar::after,
+  .pdx-seam::before,
+  .pdx-rainbow-rule::before,
+  .pdxSeam::before {
     display: none;
+  }
+  .pdx-rainbow-rule,
+  .pdx-seam {
+    filter: none;
+    box-shadow:
+      0 0 10px rgba(0, 255, 255, 0.28),
+      0 6px 16px 3px rgba(255, 0, 204, 0.18);
   }
 }
 

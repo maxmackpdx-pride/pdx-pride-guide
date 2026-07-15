@@ -27,10 +27,11 @@ const CSS = `
   border:2px solid transparent; padding:16px; display:flex; flex-direction:column; gap:12px;
   transition:filter .16s ease, box-shadow .16s ease;
 }
-/* Shared animated rainbow seam (same system as PlaceModal / site header) */
+/* Shared animated rainbow seam (same system as PlaceModal / site header).
+   overflow visible so soft bloom can feather into glass; body clips to outline. */
 .pdxPlace__seam.pdx-rainbow-rule{
-  position:absolute; left:0; right:0; top:0; height:3px; margin:0; z-index:3;
-  border-radius:0; pointer-events:none;
+  position:absolute; left:0; right:0; top:0; height:3px; margin:0; z-index:4;
+  border-radius:0; pointer-events:none; overflow:visible;
 }
 .pdxPlace--clickable{ cursor:pointer; }
 .pdxPlace--clickable:hover{ transform:translateY(-6px); }

@@ -44,26 +44,58 @@ p { margin: 0; }
 
 /* Rainbow rule / bar, the section divider (cyan > yellow > magenta > orange).
    Animated: colors flow left to right, a white glint sweeps across, a soft
-   rainbow glow pulses. Silenced + flattened to a static bar by calm mode and
-   reduced-motion (see effects.css). */
+   rainbow glow pulses. Soft blurred bloom under the hard bar so it sits in
+   glass card chrome (parent overflow clips to card outline).
+   Silenced + flattened by calm mode / reduced-motion (see effects.css). */
 .pdx-rainbow-rule,
 .pdx-seam {
   position: relative;
   height: 3px;
   border: 0;
-  overflow: hidden;
+  /* visible so edge bloom can feather downward; card shell clips it */
+  overflow: visible;
+  /* hard bar ~20% stronger presence */
+  opacity: 1;
+  filter: saturate(1.12) brightness(1.06);
   background: linear-gradient(90deg,
     var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
   background-size: 200% 100%;
   animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
+  z-index: 3;
+}
+/* Soft rainbow bloom — blurred edges under the hard seam (glass integration) */
+.pdx-rainbow-rule::before,
+.pdx-seam::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 18px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--neon-cyan),
+    var(--neon-yellow),
+    var(--neon-magenta),
+    var(--neon-orange),
+    var(--neon-cyan)
+  );
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite;
+  filter: blur(11px);
+  opacity: 0.72;
+  transform: translateY(1px);
 }
 .pdx-rainbow-rule::after,
 .pdx-seam::after {
   content: "";
   position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
   transform: translateX(-165%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.98), transparent);
   mix-blend-mode: screen; pointer-events: none;
+  opacity: 1;
   animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
 }
 
@@ -103,6 +135,8 @@ p { margin: 0; }
   height: 3px;
   z-index: 6;
   pointer-events: none;
+  /* hard bar + soft glass bloom (blur via multi-stop shadow, clipped by card) */
+  filter: saturate(1.12) brightness(1.06);
   background: linear-gradient(
     90deg,
     var(--neon-cyan),
