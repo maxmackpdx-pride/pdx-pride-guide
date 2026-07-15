@@ -10,8 +10,8 @@ type Props = {
 };
 
 /**
- * Venmo + optional Stripe (card / Apple Pay / Google Pay) tip CTAs.
- * Stripe appears only when STRIPE_PAYMENT_LINK is set on the server.
+ * Direct Venmo tip (pay composer) + optional Stripe (card / Apple Pay).
+ * Venmo never needs Stripe or a special merchant setup.
  */
 export default function TipSupport({ variant = "about", className = "" }: Props) {
   const { venmoUrl, venmoHandle, stripePaymentLink, applePayReady } = useTipLinks();
@@ -29,9 +29,9 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
             rel="noopener noreferrer"
             className="site-footer__coffee-btn"
             data-testid="footer-buy-coffee-venmo"
-            aria-label={`Tip on Venmo @${venmoHandle}`}
+            aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
           >
-            Venmo tip
+            Buy me a coffee
           </a>
           {applePayReady && stripePaymentLink ? (
             <a
@@ -47,8 +47,8 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
           ) : null}
         </div>
         <p className="site-footer__coffee-handle">
-          Venmo @{venmoHandle}
-          {applePayReady ? " · Apple Pay & cards via Stripe" : ""}
+          Opens Venmo · @{venmoHandle}
+          {applePayReady ? " · or Apple Pay via Stripe" : ""}
         </p>
       </div>
     );
@@ -57,9 +57,14 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
   if (variant === "compact") {
     return (
       <div className={`tip-support tip-support--compact${className ? ` ${className}` : ""}`}>
-        <a href={venmoUrl} target="_blank" rel="noopener noreferrer">
+        <a
+          href={venmoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
+        >
           <Button as="span" variant="solid" accent="lime" size="sm">
-            Venmo
+            Coffee · Venmo
           </Button>
         </a>
         {applePayReady && stripePaymentLink ? (
@@ -73,13 +78,18 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
     );
   }
 
-  // about (default)
   return (
     <div className={`tip-support tip-support--about${className ? ` ${className}` : ""}`}>
       <div className="tip-support__btns">
-        <a href={venmoUrl} target="_blank" rel="noopener noreferrer" data-testid="link-donate-venmo">
+        <a
+          href={venmoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-testid="link-donate-venmo"
+          aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
+        >
           <Button as="span" variant="solid" accent="lime" size="lg">
-            Venmo · Buy me a coffee
+            Buy me a coffee · Venmo
           </Button>
         </a>
         {applePayReady && stripePaymentLink ? (
@@ -96,12 +106,12 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
         ) : null}
       </div>
       <p className="tip-support__note about-v2-donate__note">
-        @{venmoHandle} on Venmo
+        One tap opens Venmo to pay @{venmoHandle} (note: Pride Guide).
         {applePayReady
-          ? " · Card, Apple Pay, and Google Pay open in a secure Stripe checkout"
-          : " · Card / Apple Pay link can be turned on with a Stripe Payment Link"}
-        {" · "}
-        better yet, hire me.
+          ? " Card / Apple Pay uses Stripe when you prefer that."
+          : " Apple Pay later = Stripe Payment Link (optional)."}
+        {" "}
+        Better yet, hire me.
       </p>
     </div>
   );
