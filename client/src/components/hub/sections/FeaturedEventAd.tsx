@@ -174,15 +174,32 @@ function EasterEggOverlay({
         flexDirection: "column",
       }}
     >
+      {/* Close — top LEFT */}
+      <div
+        style={{
+          position: "fixed",
+          top: "max(12px, env(safe-area-inset-top))",
+          left: "max(12px, env(safe-area-inset-left))",
+          zIndex: 10001,
+        }}
+      >
+        <button
+          type="button"
+          aria-label="Close secret story"
+          onClick={onClose}
+          style={{ ...chromeBtn, fontSize: 22 }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Mute — stays top RIGHT */}
       <div
         style={{
           position: "fixed",
           top: "max(12px, env(safe-area-inset-top))",
           right: "max(12px, env(safe-area-inset-right))",
           zIndex: 10001,
-          display: "flex",
-          gap: 10,
-          alignItems: "center",
         }}
       >
         {audioSrc && (
@@ -196,14 +213,6 @@ function EasterEggOverlay({
             {muted ? "🔇" : "🔊"}
           </button>
         )}
-        <button
-          type="button"
-          aria-label="Close secret story"
-          onClick={onClose}
-          style={{ ...chromeBtn, fontSize: 22 }}
-        >
-          ✕
-        </button>
       </div>
 
       {needsTap && audioSrc && (
