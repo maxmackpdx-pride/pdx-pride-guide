@@ -5,6 +5,8 @@ export type HubAdminNavItem = {
   section: HubSection;
   label: string;
   teamOnly?: boolean;
+  /** Primary owner only (Ad Manager). */
+  ownerOnly?: boolean;
 };
 
 export const HUB_ADMIN_NAV: HubAdminNavItem[] = [
@@ -16,10 +18,18 @@ export const HUB_ADMIN_NAV: HubAdminNavItem[] = [
   { section: "tbl-promoters", label: "Promoters" },
   { section: "tbl-claims", label: "Venue Claims" },
   { section: "tbl-team", label: "My Team", teamOnly: true },
+  { section: "tbl-ads", label: "Ads", ownerOnly: true },
 ];
 
-export function hubAdminNavItems(canManageTeam: boolean): HubAdminNavItem[] {
-  return HUB_ADMIN_NAV.filter((item) => !item.teamOnly || canManageTeam);
+export function hubAdminNavItems(
+  canManageTeam: boolean,
+  isPrimaryOwner = false,
+): HubAdminNavItem[] {
+  return HUB_ADMIN_NAV.filter((item) => {
+    if (item.ownerOnly && !isPrimaryOwner) return false;
+    if (item.teamOnly && !canManageTeam) return false;
+    return true;
+  });
 }
 
 export function hubAdminHref(section: HubSection): string {

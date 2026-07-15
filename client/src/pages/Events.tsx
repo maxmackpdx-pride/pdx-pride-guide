@@ -12,6 +12,8 @@ import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
+import PosterAdCard from "@/components/ads/PosterAdCard";
+import type { AdServePayload } from "@/lib/adTypes";
 import EventsHero from "@/components/EventsHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -289,8 +291,25 @@ export default function Events() {
     [events, activeDay, activeFilters, searchQuery, sortMode],
   );
 
+  const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
+    queryKey: ["/api/ads/serve", "grid"],
+    queryFn: async () => {
+      const r = await fetch("/api/ads/serve?surface=grid", { credentials: "include" });
+      if (!r.ok) return { ads: [] };
+      return r.json();
+    },
+    staleTime: 60_000,
+  });
+  const posterServeReady = posterServeQuery.isFetched || posterServeQuery.isError;
+
   /** Grid-only: scatter affiliate poster cards among real events (not list view). */
-  const gridItems = useMemo(() => scatterAffiliateCards(filtered), [filtered]);
+  const gridItems = useMemo(() => {
+    // While serve loads, show events only so we do not flash legacy brands then swap.
+    if (!posterServeReady) {
+      return filtered.map((event) => ({ kind: "event" as const, event }));
+    }
+    return scatterAffiliateCards(filtered, posterServeQuery.data?.ads ?? []);
+  }, [filtered, posterServeReady, posterServeQuery.data?.ads]);
 
   const heroStats = useMemo(() => {
     const parseTags = (raw: string) => {
@@ -531,10 +550,14 @@ export default function Events() {
                     key={item.key}
                     className="ds-listing-card ds-listing-card--grid"
                   >
-                    <AffiliatePosterCard
-                      brand={item.brand}
-                      style={{ height: "100%" }}
-                    />
+                    {item.ad ? (
+                      <PosterAdCard ad={item.ad} style={{ height: "100%" }} />
+                    ) : (
+                      <AffiliatePosterCard
+                        brand={item.brand}
+                        style={{ height: "100%" }}
+                      />
+                    )}
                   </div>
                 );
               }

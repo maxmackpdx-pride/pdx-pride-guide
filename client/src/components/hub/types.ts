@@ -11,7 +11,8 @@ export type HubSection =
   | "tbl-werk"
   | "tbl-promoters"
   | "tbl-claims"
-  | "tbl-team";
+  | "tbl-team"
+  | "tbl-ads";
 
 export const HUB_SECTIONS: HubSection[] = [
   "feed",
@@ -27,6 +28,7 @@ export const HUB_SECTIONS: HubSection[] = [
   "tbl-promoters",
   "tbl-claims",
   "tbl-team",
+  "tbl-ads",
 ];
 
 export const HUB_ADMIN_TABLE_SECTIONS: HubSection[] = [
@@ -36,6 +38,7 @@ export const HUB_ADMIN_TABLE_SECTIONS: HubSection[] = [
   "tbl-promoters",
   "tbl-claims",
   "tbl-team",
+  "tbl-ads",
 ];
 
 export function hubSectionToAdminTab(section: HubSection): string | null {
@@ -46,6 +49,7 @@ export function hubSectionToAdminTab(section: HubSection): string | null {
     "tbl-promoters": "promoters",
     "tbl-claims": "venue-claims",
     "tbl-team": "team",
+    "tbl-ads": "ads",
   };
   return map[section] ?? null;
 }

@@ -21,11 +21,13 @@ const ADMIN_ICONS: Partial<Record<HubSection, ReactNode>> = {
   "tbl-promoters": <HubIconPeople size={16} />,
   "tbl-claims": <HubIconClaims size={16} />,
   "tbl-team": <HubIconPeople size={16} />,
+  "tbl-ads": <HubIconAdmin size={16} />,
 };
 
 type Props = {
   variant: "rail" | "menu" | "mobile";
   canManageTeam?: boolean;
+  isPrimaryOwner?: boolean;
   currentSection?: HubSection;
   onNavigate?: (section: HubSection) => void;
   onClose?: () => void;
@@ -35,12 +37,13 @@ type Props = {
 export default function HubAdminFolder({
   variant,
   canManageTeam = false,
+  isPrimaryOwner = false,
   currentSection,
   onNavigate,
   onClose,
   defaultOpen = false,
 }: Props) {
-  const items = hubAdminNavItems(canManageTeam);
+  const items = hubAdminNavItems(canManageTeam, isPrimaryOwner);
   const adminActive = currentSection ? items.some((item) => item.section === currentSection) : false;
   const [open, setOpen] = useState(defaultOpen || adminActive);
 

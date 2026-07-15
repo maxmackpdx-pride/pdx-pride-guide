@@ -80,6 +80,15 @@ const analyticsLimiter = rateLimit({
   skip: rateLimitSkipDev,
 });
 app.use("/api/analytics/pageview", analyticsLimiter);
+const adsTrackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 400,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many ad events." },
+  skip: rateLimitSkipDev,
+});
+app.use("/api/ads", adsTrackLimiter);
 // Admin JSON routes rely on requireAdmin session checks; avoid a separate strict
 // cap — the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
 app.use("/api", limiter);

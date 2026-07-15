@@ -10,8 +10,11 @@ import {
 import type { EventListing } from "@shared/multiDayEvents";
 import FeaturedEventAd from "./FeaturedEventAd";
 import FeedAffiliateAd from "./FeedAffiliateAd";
+import FeedAdCard from "@/components/ads/FeedAdCard";
+import type { AdServePayload } from "@/lib/adTypes";
 import HubFeedCard from "./HubFeedCard";
 import HubPost from "./HubPost";
+import { useAuth } from "@/context/AuthContext";
 
 // ── Featured event ads ──────────────────────────────────────────────────────
 // Add an entry to FEATURED (title matcher + slideshow) and the matching event
@@ -99,6 +102,7 @@ type PostOptions = {
 };
 
 export default function HubFeed({ canPostToFeed = false }: Props) {
+  const { user } = useAuth();
   const [filter, setFilter] = useState<HubFeedTab>("all");
   const [chosenKey, setChosenKey] = useState<string | null>(null);
   const [dismissTick, setDismissTick] = useState(0);
@@ -180,19 +184,64 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const error = feedQuery.isError;
   const hasContent = items.length > 0 || pinned.length > 0;
 
-  /** Inline affiliate slots at ~40% (CockBlock) and ~80% (Mr-S). Not sticky. */
+  // Audience is derived server-side from the session cookie (do not spoof via query).
+  const serveQuery = useQuery<{ ads: AdServePayload[] }>({
+    queryKey: ["/api/ads/serve", "feed", filter, user?.id ?? "guest"],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        surface: "feed",
+        tab: filter,
+      });
+      const r = await fetch(`/api/ads/serve?${params}`, { credentials: "include" });
+      if (!r.ok) return { ads: [] };
+      return r.json();
+    },
+    staleTime: 60_000,
+  });
+  const servedFeedAds = serveQuery.data;
+  // Wait for serve to settle before legacy fallback so we do not flash hard-coded cards then swap.
+  const serveReady = serveQuery.isFetched || serveQuery.isError;
+
+  /** Inline affiliate slots. Prefer served ads; fall back to hard-coded brands. */
   type FeedRow =
     | { kind: "post"; item: (typeof items)[number] }
-    | { kind: "affiliate"; brand: "cockblock" | "mrs"; key: string };
+    | { kind: "affiliate"; brand: "cockblock" | "mrs"; key: string; ad?: AdServePayload };
 
   const feedRows = useMemo((): FeedRow[] => {
-    const rows: FeedRow[] = items.map(item => ({ kind: "post", item }));
+    const rows: FeedRow[] = items.map((item) => ({ kind: "post", item }));
     if (rows.length === 0) return rows;
 
+    const feedAds = (servedFeedAds?.ads || []).filter((a) => a.format === "feed");
+    if (feedAds.length > 0) {
+      // Insert by scroll depth (highest first so lower indices stay valid), else weight order mid-pack.
+      const sorted = [...feedAds].sort((a, b) => {
+        const da = a.scrollDepths?.[0] ?? 50;
+        const db = b.scrollDepths?.[0] ?? 50;
+        return db - da || b.weight - a.weight;
+      });
+      for (const ad of sorted) {
+        if (ad.pinTop) {
+          rows.unshift({ kind: "affiliate", brand: "cockblock", key: `feed-ad-${ad.id}`, ad });
+          continue;
+        }
+        const depth = (ad.scrollDepths?.[0] ?? 40) / 100;
+        const idx = Math.min(rows.length, Math.max(0, Math.floor(items.length * depth)));
+        rows.splice(idx, 0, {
+          kind: "affiliate",
+          brand: "cockblock",
+          key: `feed-ad-${ad.id}`,
+          ad,
+        });
+      }
+      return rows;
+    }
+
+    // Still loading serve: posts only (no legacy flash / double track).
+    if (!serveReady) return rows;
+
+    // Legacy fallback when serve is empty or failed.
     const idx40 = Math.floor(items.length * 0.4);
     const idx80 = Math.floor(items.length * 0.8);
-
-    // Insert 80% first so the 40% index is not shifted by the later splice.
     rows.splice(Math.min(idx80, rows.length), 0, {
       kind: "affiliate",
       brand: "mrs",
@@ -204,7 +253,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       key: "feed-aff-cockblock",
     });
     return rows;
-  }, [items]);
+  }, [items, servedFeedAds?.ads, serveReady]);
 
   const featuredAd = featured && featured.event ? (
     <FeaturedEventAd
@@ -280,7 +329,11 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
         <div className="hub-feed-stack">
           {feedRows.map((row) =>
             row.kind === "affiliate" ? (
-              <FeedAffiliateAd key={row.key} brand={row.brand} />
+              row.ad ? (
+                <FeedAdCard key={row.key} ad={row.ad} />
+              ) : (
+                <FeedAffiliateAd key={row.key} brand={row.brand} />
+              )
             ) : (
               <HubFeedCard key={row.item.id} item={row.item} />
             ),

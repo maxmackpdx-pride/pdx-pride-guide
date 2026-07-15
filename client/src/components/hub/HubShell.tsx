@@ -31,7 +31,8 @@ export type AdminViewKey =
   | "gigs"
   | "promoters"
   | "venue-claims"
-  | "team";
+  | "team"
+  | "ads";
 
 export const ADMIN_VIEW_META: Record<
   AdminViewKey,
@@ -79,6 +80,12 @@ export const ADMIN_VIEW_META: Record<
     kicker: "Keyholders",
     kickerColor: "var(--lime, #ccff00)",
     lede: "Site admins can open this panel while logged into their own account. Grant it to people you trust with the queues.",
+  },
+  ads: {
+    title: "Ad Manager",
+    kicker: "Owner only",
+    kickerColor: "var(--cyan, #19e3ff)",
+    lede: "Build affiliate and house ads, set placement rules, track what is live. Never visible to the public.",
   },
 };
 

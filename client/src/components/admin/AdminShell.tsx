@@ -22,7 +22,8 @@ export type AdminView =
   | "gigs"
   | "promoters"
   | "venue-claims"
-  | "team";
+  | "team"
+  | "ads";
 
 export type AdminNavItem = {
   key: AdminView;
@@ -45,6 +46,7 @@ const VIEW_TITLES: Record<AdminView, string> = {
   promoters: "Promoters",
   "venue-claims": "Venue claims",
   team: "My team",
+  ads: "Ad Manager",
 };
 
 const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
@@ -55,6 +57,7 @@ const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
   promoters: { label: "The scene makers", color: "var(--pink, #ff00cc)" },
   "venue-claims": { label: "The directory", color: "var(--cyan, #00ffff)" },
   team: { label: "Keyholders", color: "var(--lime, #ccff00)" },
+  ads: { label: "Owner only", color: "var(--cyan, #19e3ff)" },
 };
 
 const VIEW_LEDES: Record<AdminView, string> = {
@@ -65,6 +68,7 @@ const VIEW_LEDES: Record<AdminView, string> = {
   promoters: "Pending applications and approved hosts who can claim and edit events.",
   "venue-claims": "Business-owner claims on existing venues, new-business submissions, and logo change requests.",
   team: "Site admins can open this panel while logged into their own account. Grant it to people you trust with the queues.",
+  ads: "Build affiliate and house ads, set placement rules, track what is live.",
 };
 
 const SIDEBAR_ICON = 15;
@@ -81,6 +85,7 @@ function makeIcons(size: number): Record<AdminView | "more", ReactNode> {
     promoters: <Users {...p} />,
     "venue-claims": <Store {...p} />,
     team: <Users {...p} />,
+    ads: <LayoutDashboard {...p} />,
     more: <MoreHorizontal {...p} />,
   };
 }

@@ -47,6 +47,7 @@ import {
 } from "./mapCoordinateSync";
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
+import { registerAdRoutes } from "./adsRoutes";
 import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
 import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
@@ -4837,6 +4838,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const cleared = storage.softDeleteGuideAdminThread(threadId);
     if (cleared === 0) return res.status(404).json({ error: "Nothing to delete" });
     res.json({ ok: true, cleared });
+  });
+
+  // Owner-only Ad Manager + public serve/track
+  registerAdRoutes(app, {
+    db: sqlite,
+    requireAdmin,
+    isPrimaryOwner: (user) => storage.isPrimarySiteOwner(user),
+    getUserById: (id) => storage.getUserById(id),
+    uploadSingle: upload.single("asset"),
+    auditAdmin,
   });
 
   scheduleMapCoordinateBackfill();

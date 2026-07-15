@@ -675,3 +675,72 @@ export const pushSubscriptions = sqliteTable("push_subscriptions", {
   lastUsedAt: text("last_used_at"),
 });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+
+// ─── Ad Manager (owner-only affiliate / house ads) ───────────────────────────
+export const ads = sqliteTable("ads", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  format: text("format").notNull(), // feed | poster
+  business: text("business").notNull().default(""),
+  pillLabel: text("pill_label").notNull().default("Affiliate"),
+  title: text("title").notNull().default(""),
+  body: text("body").notNull().default(""),
+  ctaTitle: text("cta_title").notNull().default(""),
+  ctaCopy: text("cta_copy").notNull().default(""),
+  logoText: text("logo_text").notNull().default(""),
+  logoImg: text("logo_img"),
+  tag1: text("tag1").notNull().default(""),
+  tag2: text("tag2").notNull().default(""),
+  destUrl: text("dest_url").notNull().default(""),
+  primaryColor: text("primary_color").notNull().default("#ff1f1f"),
+  secondaryColor: text("secondary_color").notNull().default("#ffffff"),
+  mediaMode: text("media_mode").notNull().default("single"), // single | slideshow
+  singleSrc: text("single_src"),
+  slides: text("slides").notNull().default("[]"), // JSON string[]
+  slideAuto: integer("slide_auto", { mode: "boolean" }).notNull().default(true),
+  slideMs: integer("slide_ms").notNull().default(2600),
+  slideArrows: integer("slide_arrows", { mode: "boolean" }).notNull().default(false),
+  placeAll: integer("place_all", { mode: "boolean" }).notNull().default(true),
+  placeFollowing: integer("place_following", { mode: "boolean" }).notNull().default(true),
+  placeEvents: integer("place_events", { mode: "boolean" }).notNull().default(true),
+  placeSpotted: integer("place_spotted", { mode: "boolean" }).notNull().default(false),
+  cadence: integer("cadence").notNull().default(0),
+  pinTop: integer("pin_top", { mode: "boolean" }).notNull().default(false),
+  scrollDepths: text("scroll_depths").notNull().default("[]"), // JSON number[] e.g. [40]
+  audience: text("audience").notNull().default("everyone"), // everyone | members | guests
+  dismissible: integer("dismissible", { mode: "boolean" }).notNull().default(true),
+  maxImpr: integer("max_impr").notNull().default(0),
+  maxPerDay: integer("max_per_day").notNull().default(5),
+  minEvents: integer("min_events").notNull().default(2),
+  scatterPct: integer("scatter_pct").notNull().default(45),
+  onePerDay: integer("one_per_day", { mode: "boolean" }).notNull().default(true),
+  neverFirst: integer("never_first", { mode: "boolean" }).notNull().default(true),
+  noAdjacent: integer("no_adjacent", { mode: "boolean" }).notNull().default(true),
+  weight: integer("weight").notNull().default(1),
+  freqCap: integer("freq_cap").notNull().default(0),
+  startDate: text("start_date"),
+  endDate: text("end_date"),
+  days: text("days").notNull().default("[]"), // JSON Pride day codes
+  status: text("status").notNull().default("scheduled"), // live | scheduled | paused | ended
+  impressions: integer("impressions").notNull().default(0),
+  clicks: integer("clicks").notNull().default(0),
+  contact: text("contact").notNull().default(""),
+  billing: text("billing").notNull().default(""),
+  templateKey: text("template_key"), // cockblock | mrs | yes-coach | custom | null
+  source: text("source").notNull().default("custom"), // template | custom | manual
+  ownerId: integer("owner_id"),
+  createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(""),
+});
+
+export type Ad = typeof ads.$inferSelect;
+export type InsertAd = typeof ads.$inferInsert;
+
+export const adEvents = sqliteTable("ad_events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  adId: integer("ad_id").notNull(),
+  type: text("type").notNull(), // impression | click
+  ts: text("ts").notNull().default(""),
+  sessionId: text("session_id"),
+  surface: text("surface"),
+});
+export type AdEvent = typeof adEvents.$inferSelect;

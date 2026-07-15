@@ -94,9 +94,17 @@ function HBars({ rows }: { rows: ReturnType<typeof hbars> }) {
   );
 }
 
+type AdStatsSummary = {
+  liveCount: number;
+  impressions: number;
+  clicks: number;
+  avgCtr: number;
+};
+
 export default function StatsView() {
   const { user } = useAuth();
   const fullStats = !!(user?.canViewUsers || user?.isPrimaryOwner);
+  const isOwner = !!user?.isPrimaryOwner;
 
   const { data: m } = useQuery<Metrics>({
     queryKey: ["/api/admin/metrics"],
@@ -106,6 +114,13 @@ export default function StatsView() {
   const { data: places = [] } = useQuery<unknown[]>({
     queryKey: ["/api/directory"],
     queryFn: () => fetch("/api/directory", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
+  });
+
+  const { data: adStats } = useQuery<AdStatsSummary>({
+    queryKey: ["/api/admin/ads/stats"],
+    queryFn: () =>
+      fetch("/api/admin/ads/stats", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+    enabled: isOwner,
   });
 
   if (!m) {
@@ -194,6 +209,24 @@ export default function StatsView() {
           </div>
         ))}
       </div>
+
+      {isOwner && adStats && (
+        <>
+          <div className="inbox-exp-stats-title">ADS</div>
+          <p className="inbox-exp-stats-copy">
+            Owner-only rollup from Ad Manager.{" "}
+            <a href="/admin?tab=ads" style={{ color: C.cyan }}>
+              Open Ad Manager
+            </a>
+          </p>
+          <div className="inbox-exp-stats-grid">
+            <Tile value={adStats.liveCount} label="LIVE ADS" />
+            <Tile value={adStats.impressions} label="IMPRESSIONS" />
+            <Tile value={adStats.clicks} label="CLICKS" />
+            <Tile value={`${adStats.avgCtr.toFixed(2)}%`} label="AVG CTR" />
+          </div>
+        </>
+      )}
 
       <div className="inbox-exp-stats-title">THE COMMUNITY</div>
       <div className="inbox-exp-stats-grid">

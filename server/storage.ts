@@ -52,6 +52,7 @@ import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLo
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
+import { ensureAdsTables, seedAdsIfNeeded } from "./ads";
 import {
   pacificMidnightIso,
   pacificTodayDate,
@@ -85,6 +86,7 @@ export const sqlite = new Database(DB_PATH);
 const db = drizzle(sqlite);
 
 ensureAnalyticsTable(sqlite);
+ensureAdsTables(sqlite);
 
 // Initialize tables
 sqlite.exec(`
@@ -3121,6 +3123,10 @@ function runBootMigrationsOnce() {
   ensureBootMigrationsTable();
   seedData();
   migrateGuideAdminMessagesOnce();
+  if (!hasBootMigration("seed_ads_v1")) {
+    seedAdsIfNeeded(sqlite);
+    recordBootMigration("seed_ads_v1");
+  }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
     recordBootMigration("verified_event_overrides_v1");
@@ -11559,6 +11565,8 @@ const PERSISTENCE_TABLES = [
   "content_likes",
   "content_replies",
   "express_sessions",
+  "ads",
+  "ad_events",
 ] as const;
 
 export function getTableCounts(): Record<string, number> {

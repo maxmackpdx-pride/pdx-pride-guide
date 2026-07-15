@@ -21,6 +21,7 @@ import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/Adm
 import { type AdminView } from "@/components/admin/AdminShell";
 import HubV2Shell from "@/components/hub/HubV2Shell";
 import { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
+import AdManager from "@/components/admin/ads/AdManager";
 import type { HubSection } from "@/components/hub/types";
 import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
 import { useTheme } from "@/context/ThemeContext";
@@ -167,7 +168,7 @@ const EVENT_SORT_OPTIONS: Array<{ key: EventSort; label: string }> = [
   { key: "id_desc", label: "Newest id first" },
 ];
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "events", "gigs", "promoters", "venue-claims", "users", "team"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "events", "gigs", "promoters", "venue-claims", "users", "team", "ads"];
 
 function inboxSheetOptsFromLegacyTab(rawTab: string | null): InboxSheetOpenOpts | null {
   if (!rawTab) return null;
@@ -198,6 +199,7 @@ function adminTabFromQuery(
   canManageTeam: boolean,
   canViewUsers = false,
   canManageCatalog = false,
+  isPrimaryOwner = false,
 ): AdminTab | null {
   let tab = new URLSearchParams(search).get("tab");
   if (tab === "queue") tab = "inbox";
@@ -206,6 +208,7 @@ function adminTabFromQuery(
   if (tab === "team" && !canManageTeam) tab = "overview";
   if (tab === "users" && !canViewUsers) tab = "overview";
   if ((tab === "events" || tab === "gigs") && !canManageCatalog) tab = "overview";
+  if (tab === "ads" && !isPrimaryOwner) tab = "overview";
   if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) return tab as AdminTab;
   return null;
 }
@@ -343,6 +346,7 @@ export default function Admin() {
       canManageTeam,
       canViewUsers,
       canManageCatalog,
+      isPrimaryOwner,
     );
     if (!tab) return;
     setActiveTab(tab);
@@ -350,6 +354,7 @@ export default function Admin() {
       (rawTab === "team" && !canManageTeam)
       || (rawTab === "users" && !canViewUsers)
       || ((rawTab === "events" || rawTab === "gigs") && !canManageCatalog)
+      || (rawTab === "ads" && !isPrimaryOwner)
     ) {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", "overview");
@@ -1715,6 +1720,7 @@ export default function Admin() {
       promoters: "tbl-promoters",
       "venue-claims": "tbl-claims",
       team: "tbl-team",
+      ads: "tbl-ads",
     };
     return map[tab] || "admin";
   };
@@ -1728,6 +1734,7 @@ export default function Admin() {
       "tbl-promoters": "promoters",
       "tbl-claims": "venue-claims",
       "tbl-team": "team",
+      "tbl-ads": "ads",
     };
     return map[section] ?? null;
   };
@@ -3491,6 +3498,8 @@ export default function Admin() {
             )}
           </div>
         )}
+
+        {activeTab === "ads" && isPrimaryOwner && <AdManager />}
 
         </div>
       </HubV2Shell>

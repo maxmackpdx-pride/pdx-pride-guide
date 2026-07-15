@@ -50,6 +50,7 @@ const ADMIN_ICONS: Partial<Record<HubSection, ReactNode>> = {
   "tbl-promoters": <HubIconPeople size={18} />,
   "tbl-claims": <HubIconClaims size={18} />,
   "tbl-team": <HubIconPeople size={18} />,
+  "tbl-ads": <HubIconAdmin size={18} />,
 };
 
 export type HubChromeMode = "member" | "admin";
@@ -88,6 +89,7 @@ export default function HubV2Shell({
   section,
   onSectionChange,
   isAdmin,
+  isPrimaryOwner = false,
   canPostToFeed = false,
   canManageTeam = false,
   chromeMode,
@@ -112,7 +114,7 @@ export default function HubV2Shell({
   const dragActiveRef = useRef(false);
   const drawerOpenRef = useRef(false);
   const memberNav = MEMBER_NAV.filter((item) => !item.posterOnly || canPostToFeed);
-  const adminNav = hubAdminNavItems(canManageTeam);
+  const adminNav = hubAdminNavItems(canManageTeam, isPrimaryOwner);
 
   // Route / chromeMode only — do not flip the rail when section is "admin" on /dashboard.
   const isAdminChrome = chromeMode === "admin" || location.startsWith("/admin");
