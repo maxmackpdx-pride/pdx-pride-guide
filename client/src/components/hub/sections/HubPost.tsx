@@ -255,7 +255,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
                 </button>
               )}
             </div>
-            {postAs === "event" && hostedEvents.length > 1 && (
+            {postAs === "event" && (
               <select
                 className="fin"
                 value={identityEventId}
@@ -263,11 +263,13 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
               >
                 <option value="">Pick an event…</option>
                 {hostedEvents.map((evt) => (
-                  <option key={evt.id} value={evt.id}>{evt.title} · {evt.venueName}</option>
+                  <option key={evt.id} value={evt.id}>
+                    {evt.title}{evt.dayOfWeek ? ` · ${evt.dayOfWeek}` : ""} · {evt.venueName}
+                  </option>
                 ))}
               </select>
             )}
-            {postAs === "venue" && ownedVenues.length > 1 && (
+            {postAs === "venue" && (
               <select
                 className="fin"
                 value={venueId}
