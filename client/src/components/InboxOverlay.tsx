@@ -111,15 +111,30 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Close on outside press — but never on the same gesture that opened the
+  // sheet (FAB / Messages tab). Also ignore the floating FAB itself so open
+  // can toggle cleanly without an instant close.
   useEffect(() => {
     if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!panelRef.current?.contains(e.target as Node)) onClose();
+    let armed = false;
+    const armTimer = window.setTimeout(() => {
+      armed = true;
+    }, 280);
+    const onDown = (e: PointerEvent | MouseEvent) => {
+      if (!armed) return;
+      const t = e.target;
+      if (!(t instanceof Node)) return;
+      if (panelRef.current?.contains(t)) return;
+      if (t instanceof Element) {
+        if (t.closest(".floating-inbox")) return;
+        if (t.closest("[data-inbox-open-trigger]")) return;
+      }
+      onClose();
     };
-    const t = window.setTimeout(() => document.addEventListener("mousedown", onDown), 0);
+    document.addEventListener("pointerdown", onDown, true);
     return () => {
-      window.clearTimeout(t);
-      document.removeEventListener("mousedown", onDown);
+      window.clearTimeout(armTimer);
+      document.removeEventListener("pointerdown", onDown, true);
     };
   }, [open, onClose]);
 

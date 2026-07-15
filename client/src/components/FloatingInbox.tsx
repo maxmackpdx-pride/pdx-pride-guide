@@ -78,7 +78,8 @@ export default function FloatingInbox() {
         startY: event.clientY,
         startBottom: bottomPx,
       };
-      event.currentTarget.setPointerCapture(event.pointerId);
+      // Capture only after a real drag starts — capturing on down can swallow
+      // the open gesture on some browsers / trackpads.
     },
     [bottomPx],
   );
@@ -93,6 +94,11 @@ export default function FloatingInbox() {
     if (!drag.moved) {
       drag.moved = true;
       setDragging(true);
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        /* ignore */
+      }
     }
 
     setBottomPx(clampFloatingInboxBottom(drag.startBottom + deltaY));
@@ -104,7 +110,13 @@ export default function FloatingInbox() {
       const wasDrag = drag.moved;
 
       finishDrag(event.pointerId);
-      event.currentTarget.releasePointerCapture(event.pointerId);
+      try {
+        if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        /* ignore */
+      }
 
       if (!wasDrag) {
         toggleSheet();
@@ -116,7 +128,13 @@ export default function FloatingInbox() {
   const onPointerCancel = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
       finishDrag(event.pointerId);
-      event.currentTarget.releasePointerCapture(event.pointerId);
+      try {
+        if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        /* ignore */
+      }
     },
     [finishDrag],
   );
@@ -149,6 +167,7 @@ export default function FloatingInbox() {
       <span className="floating-inbox__halo" aria-hidden />
       <button
         type="button"
+        data-inbox-open-trigger="fab"
         className={`floating-inbox__fab${open ? " floating-inbox__fab--open" : ""}${dragging ? " floating-inbox__fab--dragging" : ""}`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

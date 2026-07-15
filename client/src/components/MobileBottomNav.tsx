@@ -206,6 +206,7 @@ export default function MobileBottomNav() {
         <button
           type="button"
           className={tabClass(Boolean(user && open), "cyan")}
+          data-inbox-open-trigger="messages"
           onClick={handleMessages}
           aria-expanded={user ? open : undefined}
           aria-label={

@@ -2244,7 +2244,8 @@ a.event-host-name.event-host-name--link:hover {
     display: block;
     position: fixed;
     right: 24px;
-    z-index: 60;
+    /* Above site header (100) / hub chrome so the FAB is always tappable */
+    z-index: 120;
     width: 60px;
     height: 60px;
   }
@@ -2317,10 +2318,10 @@ a.event-host-name.event-host-name--link:hover {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border-primary, #333);
   }
 
-  /* Keep the close FAB above the inbox sheet (z-index 61) so POSTS accordions
-     and other panel chrome cannot steal clicks meant for toggle/close. */
+  /* Keep the close FAB above the inbox sheet so panel chrome cannot steal
+     clicks meant for toggle/close. */
   .floating-inbox:has(.floating-inbox__fab--open) {
-    z-index: 100;
+    z-index: 130;
     isolation: isolate;
   }
 
@@ -2380,7 +2381,8 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .inbox-sheet-host {
   position: fixed;
   inset: 0;
-  z-index: 61;
+  /* Above sticky site header (100); below full-screen gates (20k+) */
+  z-index: 125;
   pointer-events: none;
 }
 
@@ -2391,7 +2393,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 
 .inbox-overlay {
   position: fixed;
-  z-index: 61;
+  z-index: 125;
   display: flex;
   flex-direction: column;
   overflow: hidden;
