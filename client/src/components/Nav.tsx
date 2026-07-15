@@ -16,6 +16,7 @@ import type { AuthUser } from "@/context/AuthContext";
 import type { ApiMessageRow } from "@/components/inbox/types";
 import HubAdminFolder from "@/components/hub/HubAdminFolder";
 import { parseHubSection } from "@/components/hub/types";
+import { dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 
 type NavItem = { href: string; label: string };
 
@@ -251,7 +252,10 @@ function ProfileMenu({
           aria-label={`Open profile menu: ${user.displayName || user.username}`}
           aria-expanded={profileOpen}
           aria-haspopup="menu"
-          onClick={() => setProfileOpen((open) => !open)}
+          onClick={() => {
+            dismissMobileNavOverlays("profile");
+            setProfileOpen((open) => !open);
+          }}
         >
           <UserAvatar
             photoUrl={user.photoUrl}
@@ -272,7 +276,10 @@ function ProfileMenu({
               ? `Profile menu: ${user.displayName || user.username}, ${unreadCount} unread`
               : `Profile menu: ${user.displayName || user.username}`
           }
-          onClick={() => setProfileOpen(open => !open)}
+          onClick={() => {
+            dismissMobileNavOverlays("profile");
+            setProfileOpen((open) => !open);
+          }}
         >
           <ChevronDown size={16} strokeWidth={2.4} aria-hidden="true" />
         </button>
@@ -390,6 +397,7 @@ function MobileNotifyMenu({
         }
         onClick={() => {
           onCloseOthers();
+          dismissMobileNavOverlays("notify");
           setOpen(v => !v);
         }}
       >
@@ -600,6 +608,7 @@ export default function Nav() {
                 href="/"
                 className={`hub-mtop__mode-btn${homeActive ? " is-active is-member" : ""}`}
                 aria-current={homeActive ? "page" : undefined}
+                onClick={() => dismissMobileNavOverlays()}
               >
                 Home
               </Link>
@@ -607,6 +616,7 @@ export default function Nav() {
                 href="/about"
                 className={`hub-mtop__mode-btn${aboutActive ? " is-active is-member" : ""}`}
                 aria-current={aboutActive ? "page" : undefined}
+                onClick={() => dismissMobileNavOverlays()}
               >
                 About
               </Link>
@@ -617,7 +627,10 @@ export default function Nav() {
                 unreadCount={unreadCount}
                 adminPending={adminPending}
                 openSheet={openSheet}
-                onCloseOthers={() => setMobileProfileOpen(false)}
+                onCloseOthers={() => {
+                  setMobileProfileOpen(false);
+                  dismissMobileNavOverlays("notify");
+                }}
               />
             )}
             {user ? (

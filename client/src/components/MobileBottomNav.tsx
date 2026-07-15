@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { CalendarDays, Home, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
+import {
+  MOBILE_NAV_DISMISS,
+  dismissMobileNavOverlays,
+  type MobileNavDismissDetail,
+} from "@/lib/mobileNavDismiss";
 import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import AuthModal from "./AuthModal";
 
@@ -23,11 +28,26 @@ function tabClass(active: boolean, accent: "cyan" | "green" | "lime" | "orange" 
 export default function MobileBottomNav() {
   const [location] = useLocation();
   const { user } = useAuth();
-  const { open, toggleSheet } = useInboxSheet();
+  const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
   const [boardsOpen, setBoardsOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+
+  const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
+    if (except !== "events") setEventsOpen(false);
+    if (except !== "boards") setBoardsOpen(false);
+    if (except !== "inbox") closeSheet();
+  }, [closeSheet]);
+
+  useEffect(() => {
+    const onDismiss = (event: Event) => {
+      const except = (event as CustomEvent<MobileNavDismissDetail>).detail?.except;
+      closeLocalSheets(except);
+    };
+    window.addEventListener(MOBILE_NAV_DISMISS, onDismiss);
+    return () => window.removeEventListener(MOBILE_NAV_DISMISS, onDismiss);
+  }, [closeLocalSheets]);
 
   useEffect(() => {
     setBoardsOpen(false);
@@ -39,12 +59,44 @@ export default function MobileBottomNav() {
   const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
   const hubActive = navLinkActive(location, "/dashboard");
 
+  const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
+    closeLocalSheets(except);
+    dismissMobileNavOverlays(except);
+  };
+
+  const handleEvents = () => {
+    if (eventsOpen) {
+      setEventsOpen(false);
+      return;
+    }
+    dismissExcept("events");
+    setEventsOpen(true);
+  };
+
+  const handleBoards = () => {
+    if (boardsOpen) {
+      setBoardsOpen(false);
+      return;
+    }
+    dismissExcept("boards");
+    setBoardsOpen(true);
+  };
+
   const handleMessages = () => {
     if (!user) {
       setShowAuth(true);
       return;
     }
-    toggleSheet();
+    if (open) {
+      closeSheet();
+      return;
+    }
+    dismissExcept("inbox");
+    openSheet();
+  };
+
+  const handleNavLink = () => {
+    dismissExcept();
   };
 
   // Portaled to <body>: position:fixed breaks on iOS Safari when any ancestor
@@ -95,6 +147,7 @@ export default function MobileBottomNav() {
           className={tabClass(placesActive, "cyan")}
           aria-label="Places"
           aria-current={placesActive ? "page" : undefined}
+          onClick={handleNavLink}
         >
           <MapPin size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
           <span>Places</span>
@@ -106,7 +159,7 @@ export default function MobileBottomNav() {
           aria-expanded={eventsOpen}
           aria-haspopup="dialog"
           aria-label="Events"
-          onClick={() => setEventsOpen(o => !o)}
+          onClick={handleEvents}
         >
           <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
           <span>Events</span>
@@ -118,6 +171,7 @@ export default function MobileBottomNav() {
             className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center`}
             aria-label="Hub"
             aria-current={hubActive ? "page" : undefined}
+            onClick={handleNavLink}
           >
             <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
             <span>Hub</span>
@@ -127,7 +181,10 @@ export default function MobileBottomNav() {
             type="button"
             className={`${tabClass(false, "cyan")} hub-mobile-tab--center`}
             aria-label="Hub"
-            onClick={() => setShowAuth(true)}
+            onClick={() => {
+              dismissExcept();
+              setShowAuth(true);
+            }}
           >
             <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
             <span>Hub</span>
@@ -140,7 +197,7 @@ export default function MobileBottomNav() {
           aria-expanded={boardsOpen}
           aria-haspopup="dialog"
           aria-label="Boards"
-          onClick={() => setBoardsOpen(o => !o)}
+          onClick={handleBoards}
         >
           <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
           <span>Boards</span>

@@ -16,6 +16,11 @@ import {
   HubIconSettings,
   HubIconWerk,
 } from "./hubIcons";
+import {
+  MOBILE_NAV_DISMISS,
+  dismissMobileNavOverlays,
+  type MobileNavDismissDetail,
+} from "@/lib/mobileNavDismiss";
 import "./hub-v2.css";
 
 type NavItem = {
@@ -184,6 +189,23 @@ export default function HubV2Shell({
     return () => document.body.classList.remove("hub-v2-drawer-open");
   }, [mobileDrawerOpen]);
 
+  useEffect(() => {
+    const onDismiss = (event: Event) => {
+      const except = (event as CustomEvent<MobileNavDismissDetail>).detail?.except;
+      if (except !== "hub-drawer") setMobileDrawerOpen(false);
+    };
+    window.addEventListener(MOBILE_NAV_DISMISS, onDismiss);
+    return () => window.removeEventListener(MOBILE_NAV_DISMISS, onDismiss);
+  }, []);
+
+  const toggleMobileDrawer = () => {
+    setMobileDrawerOpen((open) => {
+      if (open) return false;
+      dismissMobileNavOverlays("hub-drawer");
+      return true;
+    });
+  };
+
   const showRight = rightRail != null;
 
   const renderModeToggle = (
@@ -299,7 +321,7 @@ export default function HubV2Shell({
                 aria-expanded={mobileDrawerOpen}
                 aria-controls="hub-v2-drawer-panel"
                 aria-label={mobileDrawerOpen ? "Close hub menu" : "Open hub menu"}
-                onClick={() => setMobileDrawerOpen((open) => !open)}
+                onClick={toggleMobileDrawer}
               >
                 <span className="hub-v2-drawer__grip" aria-hidden>
                   <span />
