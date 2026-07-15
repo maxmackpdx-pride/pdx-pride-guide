@@ -52,6 +52,7 @@ import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLo
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
 import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
+import { ensureAdsTables, seedAdsIfNeeded } from "./ads";
 import {
   pacificMidnightIso,
   pacificTodayDate,
@@ -85,6 +86,7 @@ export const sqlite = new Database(DB_PATH);
 const db = drizzle(sqlite);
 
 ensureAnalyticsTable(sqlite);
+ensureAdsTables(sqlite);
 
 // Initialize tables
 sqlite.exec(`
@@ -3100,7 +3102,7 @@ function seedBusinessesDirectory() {
     { name: "Friendship Kitchen", type: "restaurant", description: "Wife-and-wife owned Vietnamese restaurant serving Impossible egg rolls, shaken beef or tofu, pho, and lemongrass chicken skewers.", address: null, neighborhood: "Portland", website: null, instagram: null, queerOwned: true, queerFriendly: true },
     { name: "Chelo", type: "restaurant", description: "Chef Luna Contreras's vegetable-driven multifaceted Mexican fare inspired by street food. Shrimp-and-huitlacoche quesadillas, local mushroom empanadas.", address: null, neighborhood: "Portland", website: null, instagram: "@cheloportland", queerOwned: true, queerFriendly: true },
     // ── Cafes & Coffee ────────────────────────────────────────────────────
-    { name: "Either/Or", type: "cafe", description: "LGBTQ+-owned coffee bar known for creative coffee cocktails and zero-proof mocktails. A queer-welcoming neighborhood anchor in N Portland.", address: "4003 N Williams Ave", neighborhood: "N Portland", website: "https://eitherorpdx.com", instagram: "@eitherorpdx", queerOwned: true, queerFriendly: true },
+    { name: "Either/Or", type: "cafe", description: "Coffee bar known for creative coffee cocktails and zero-proof mocktails. A queer-friendly neighborhood cafe on N Williams (no longer queer-owned after a change in ownership).", address: "4003 N Williams Ave", neighborhood: "N Portland", website: "https://eitherorpdx.com", instagram: "@eitherorpdx", queerOwned: false, queerFriendly: true },
     { name: "Tin Shed Garden Cafe", type: "cafe", description: "Eco-friendly, dog-friendly breakfast and brunch cafe run by Christie Griffin and Janette Kaden since 2002. Featured on Food Network and in the New York Times.", address: "1438 NE Alberta St", neighborhood: "NE Alberta", website: null, instagram: "@tinshedgardencafe", queerOwned: true, queerFriendly: true },
     { name: "Speed-o Cappuccino", type: "cafe", description: "LGBTQ+, sex worker, and Latinx-owned coffee cart with espresso drinks, a vegan burger, and fruit tamales. Cheeky, community-rooted, and iconic.", address: null, neighborhood: "Portland", website: null, instagram: "@speedocappuccino", queerOwned: true, queerFriendly: true },
     { name: "Coffee Beer", type: "cafe", description: "Queer-owned vegan coffee shop run by artist Phillip Stewart. Vegan handhelds like Phatt Dawgs and Higher Taste burritos. Home to senior pug mascot A$AP Douglas.", address: null, neighborhood: "Portland", website: null, instagram: null, queerOwned: true, queerFriendly: true },
@@ -3121,6 +3123,10 @@ function runBootMigrationsOnce() {
   ensureBootMigrationsTable();
   seedData();
   migrateGuideAdminMessagesOnce();
+  if (!hasBootMigration("seed_ads_v1")) {
+    seedAdsIfNeeded(sqlite);
+    recordBootMigration("seed_ads_v1");
+  }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
     recordBootMigration("verified_event_overrides_v1");
@@ -5120,6 +5126,20 @@ function runBootMigrationsOnce() {
     }
 
     recordBootMigration("dedupe_pid_night1_midtown_hidden_v1");
+  }
+
+  // Community correction: Either/Or was sold; no longer queer-owned (still queer-friendly).
+  if (!hasBootMigration("either_or_not_queer_owned_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET queer_owned = 0,
+             queer_friendly = 1,
+             description = 'Coffee bar known for creative coffee cocktails and zero-proof mocktails. A queer-friendly neighborhood cafe on N Williams (no longer queer-owned after a change in ownership).'
+         WHERE name = 'Either/Or'`,
+      )
+      .run();
+    recordBootMigration("either_or_not_queer_owned_v1");
   }
 }
 
@@ -11545,6 +11565,8 @@ const PERSISTENCE_TABLES = [
   "content_likes",
   "content_replies",
   "express_sessions",
+  "ads",
+  "ad_events",
 ] as const;
 
 export function getTableCounts(): Record<string, number> {
