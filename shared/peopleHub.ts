@@ -22,6 +22,26 @@ export type PeopleHubUser = {
   subtitle: string | null;
 };
 
+/** Directory venue followed via business_follows (Places follow button). */
+export type HubFollowedPlace = {
+  id: number;
+  name: string;
+  type: string;
+  neighborhood: string | null;
+  imageUrl: string | null;
+  isFollowing: boolean;
+  followerCount: number;
+};
+
+/**
+ * Following tab payload: people (user follows) + places (venue follows).
+ * Followers / discover tabs still return PeopleHubUser[].
+ */
+export type PeopleFollowingPayload = {
+  people: PeopleHubUser[];
+  places: HubFollowedPlace[];
+};
+
 export type PeopleHubTab = "following" | "followers" | "discover";
 
 export type FollowStats = {

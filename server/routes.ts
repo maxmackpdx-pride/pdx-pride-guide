@@ -2743,7 +2743,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/users/me/people/:tab", requireAuth, (req, res) => {
     const tab = String(req.params.tab || "").trim();
     const userId = req.session.userId!;
-    if (tab === "following") return res.json(storage.getFollowingList(userId, userId));
+    // Following includes both people (follows) and places (business_follows).
+    // Venue "Follow me" used to write only business_follows, so Hub People looked empty.
+    if (tab === "following") {
+      return res.json({
+        people: storage.getFollowingList(userId, userId),
+        places: storage.getFollowedBusinessesList(userId),
+      });
+    }
     if (tab === "followers") return res.json(storage.getFollowersList(userId, userId));
     if (tab === "discover") return res.json(storage.discoverPeople(userId));
     return res.status(400).json({ error: "Invalid tab" });
@@ -3996,6 +4003,60 @@ export function registerRoutes(httpServer: Server, app: Express) {
     storage.rejectBusinessLogoRequest(id, req.body?.reason);
     auditAdmin(req, "deny_logo", { type: "logo_request", id });
     res.json({ ok: true });
+  });
+
+  // Full directory roster + assign/unassign venue owners (same idea as event host assign)
+  app.get("/api/admin/directory", requireAdmin, (req, res) => {
+    res.json(storage.getAdminDirectoryBusinesses());
+  });
+
+  app.post("/api/admin/directory/:id/owner", requireAdmin, (req, res) => {
+    try {
+      const businessId = Number(req.params.id);
+      const username = String(req.body.username || "").trim().replace(/^@/, "");
+      if (!username) return res.status(400).json({ error: "username required" });
+      const user = resolveUserByUsername(username);
+      if (!user) return res.status(404).json({ error: "No account found with that username" });
+      if (user.status !== "active") return res.status(400).json({ error: "User account is not active" });
+      const result = storage.assignBusinessOwner(businessId, user.id);
+      if (result.error) return res.status(400).json({ error: result.error });
+      auditAdmin(req, "assign_business_owner", {
+        type: "business",
+        id: businessId,
+        detail: { userId: user.id, username: user.username },
+      });
+      try {
+        const name = result.business?.name || "your venue";
+        storage.sendAsGuideAdmin(
+          user.id,
+          `You now own: ${name}`,
+          `An admin assigned you as the owner of "${name}" in the Queer Directory. Open your Hub to manage the listing.`,
+          { contextType: "GUIDE_UPDATE", contextLabel: name },
+        );
+      } catch (notifyErr) {
+        console.error("[admin] assign venue owner notify failed:", notifyErr);
+      }
+      const enriched = storage.getAdminDirectoryBusinesses().find((b) => b.id === businessId);
+      res.json(enriched || result.business);
+    } catch (err) {
+      console.error("[admin] assign venue owner failed:", err);
+      res.status(500).json({ error: "Could not assign venue owner" });
+    }
+  });
+
+  app.delete("/api/admin/directory/:id/owner", requireAdmin, (req, res) => {
+    const businessId = Number(req.params.id);
+    const before = storage.getBusiness(businessId);
+    if (!before) return res.status(404).json({ error: "Venue not found" });
+    const result = storage.clearBusinessOwner(businessId);
+    if (result.error) return res.status(400).json({ error: result.error });
+    auditAdmin(req, "unassign_business_owner", {
+      type: "business",
+      id: businessId,
+      detail: { previousOwnerId: before.ownerId ?? null },
+    });
+    const enriched = storage.getAdminDirectoryBusinesses().find((b) => b.id === businessId);
+    res.json(enriched || result.business);
   });
 
   app.get("/api/admin/users", requireAdmin, (req, res) => {

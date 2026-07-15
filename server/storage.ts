@@ -6401,6 +6401,9 @@ export interface IStorage {
     grantedAt: string;
     grantedByUsername: string | null;
     note: string | null;
+    /** Latest admin-panel or promoter-host activity for team roster. */
+    lastActivityAt: string | null;
+    lastActivityLabel: string | null;
   }>;
   grantSiteAdminByIdentifier(identifier: string, grantedByUserId: number | null, note?: string): { admin?: any; error?: string };
   revokeSiteAdmin(userId: number): { ok?: boolean; error?: string };
@@ -6450,6 +6453,8 @@ export interface IStorage {
   unfollowBusiness(followerUserId: number, businessId: number): void;
   isFollowingBusiness(followerUserId: number, businessId: number): boolean;
   getBusinessFollowerCount(businessId: number): number;
+  /** Active directory venues this user follows (business_follows). */
+  getFollowedBusinessesList(userId: number): import("../shared/peopleHub").HubFollowedPlace[];
   getFollowingList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
   getFollowersList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
   discoverPeople(viewerUserId: number, limit?: number): import("../shared/peopleHub").PeopleHubUser[];
@@ -6686,6 +6691,20 @@ export interface IStorage {
   getUserLinkedBusinesses(userId: number): { id: number; name: string; type: string; address: string | null }[];
   // Business ownership: claims, new-business submissions, blocklist, logo requests
   getUserOwnedBusinesses(userId: number): Business[];
+  /** Admin directory roster with owner profiles for venue-claims assign UI. */
+  getAdminDirectoryBusinesses(): Array<Business & {
+    ownerProfile: {
+      id: number;
+      username: string;
+      displayName: string | null;
+      email: string;
+      photoUrl: string | null;
+      avatarChoice: number;
+      avatarRing: string;
+    } | null;
+  }>;
+  assignBusinessOwner(businessId: number, userId: number): { ok?: boolean; error?: string; business?: Business };
+  clearBusinessOwner(businessId: number): { ok?: boolean; error?: string; business?: Business };
   createBusinessClaim(
     businessId: number,
     userId: number,
@@ -6822,6 +6841,32 @@ export const storage: IStorage = {
   getBusinessFollowerCount(businessId) {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM business_follows WHERE business_id = ?`).get(businessId) as { count: number } | undefined;
     return row?.count ?? 0;
+  },
+  getFollowedBusinessesList(userId) {
+    const rows = sqlite.prepare(`
+      SELECT b.id, b.name, b.type, b.neighborhood, b.image_url AS imageUrl,
+             bf.created_at AS followedAt
+      FROM business_follows bf
+      JOIN businesses b ON b.id = bf.business_id
+      WHERE bf.follower_user_id = ? AND b.active = 1
+      ORDER BY bf.created_at DESC
+    `).all(userId) as Array<{
+      id: number;
+      name: string;
+      type: string;
+      neighborhood: string | null;
+      imageUrl: string | null;
+      followedAt: string;
+    }>;
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      type: row.type || "venue",
+      neighborhood: row.neighborhood ?? null,
+      imageUrl: row.imageUrl ?? null,
+      isFollowing: true,
+      followerCount: storage.getBusinessFollowerCount(row.id),
+    }));
   },
   getFollowingList(userId, viewerUserId) {
     const rows = sqlite.prepare(`
@@ -8159,6 +8204,7 @@ export const storage: IStorage = {
     `).run(userId, grantedByUserId, note, createdAt);
   },
   listSiteAdmins() {
+    ensureAdminActionLogSchema();
     const seen = new Set<number>();
     const admins: Array<{
       userId: number;
@@ -8173,6 +8219,8 @@ export const storage: IStorage = {
       grantedAt: string;
       grantedByUsername: string | null;
       note: string | null;
+      lastActivityAt: string | null;
+      lastActivityLabel: string | null;
     }> = [];
     const pushUser = (user: User, source: "env" | "granted", grantRow?: any) => {
       if (!user || seen.has(user.id)) return;
@@ -8194,6 +8242,8 @@ export const storage: IStorage = {
         grantedAt: grantRow?.created_at || user.createdAt,
         grantedByUsername: grantedBy?.username || null,
         note: grantRow?.note || null,
+        lastActivityAt: null,
+        lastActivityLabel: null,
       });
     };
     const { emails, usernames } = parseEnvAdminLists();
@@ -8212,6 +8262,89 @@ export const storage: IStorage = {
       const user = storage.getUserById(row.user_id);
       if (user) pushUser(user, "granted", row);
     }
+
+    // Last admin / promoter activity for the team roster (one line each).
+    const humanize = (action: string) => {
+      const map: Record<string, string> = {
+        approve_submission: "Approved a submission",
+        reject_submission: "Rejected a submission",
+        approve_promoter: "Approved a promoter",
+        deny_promoter: "Denied a promoter",
+        approve_business_claim: "Approved a venue claim",
+        deny_business_claim: "Denied a venue claim",
+        approve_business_submission: "Approved a new venue",
+        deny_business_submission: "Denied a new venue",
+        approve_logo: "Approved a logo",
+        deny_logo: "Denied a logo",
+        queue_claim: "Claimed a queue item",
+        queue_takeover: "Took over a queue item",
+        queue_release: "Released a queue claim",
+        assign_host: "Assigned an event host",
+        guide_reply: "Replied as guide",
+        admin_message: "Sent a guide message",
+        resolve_moderation: "Resolved moderation",
+        reject_gifting: "Rejected gifting post",
+        resolve_gifting_report: "Resolved gifting report",
+        gig_status: "Updated a gig",
+        reject_gig: "Rejected a gig",
+      };
+      return map[action] || action.replace(/_/g, " ");
+    };
+
+    for (const admin of admins) {
+      const candidates: Array<{ at: string; label: string }> = [];
+      try {
+        const action = sqlite.prepare(`
+          SELECT action, created_at AS createdAt
+          FROM admin_action_log
+          WHERE actor_user_id = ?
+          ORDER BY id DESC
+          LIMIT 1
+        `).get(admin.userId) as { action: string; createdAt: string } | undefined;
+        if (action?.createdAt) {
+          candidates.push({ at: action.createdAt, label: humanize(String(action.action || "")) });
+        }
+      } catch {
+        /* log table may be empty on fresh DBs */
+      }
+      try {
+        const claim = sqlite.prepare(`
+          SELECT queue_kind AS queueKind, claimed_at AS claimedAt
+          FROM admin_queue_claims
+          WHERE assignee_user_id = ?
+          ORDER BY claimed_at DESC
+          LIMIT 1
+        `).get(admin.userId) as { queueKind: string; claimedAt: string } | undefined;
+        if (claim?.claimedAt) {
+          candidates.push({
+            at: claim.claimedAt,
+            label: `Holding queue: ${String(claim.queueKind || "item").replace(/_/g, " ")}`,
+          });
+        }
+      } catch {
+        /* queue claims table may not exist yet */
+      }
+      try {
+        const host = sqlite.prepare(`
+          SELECT created_at AS createdAt
+          FROM event_hosts
+          WHERE user_id = ?
+          ORDER BY created_at DESC
+          LIMIT 1
+        `).get(admin.userId) as { createdAt: string } | undefined;
+        if (host?.createdAt) {
+          candidates.push({ at: host.createdAt, label: "Event host credit" });
+        }
+      } catch {
+        /* ignore */
+      }
+      candidates.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+      if (candidates[0]) {
+        admin.lastActivityAt = candidates[0].at;
+        admin.lastActivityLabel = candidates[0].label;
+      }
+    }
+
     return admins.sort((a, b) => a.username.localeCompare(b.username));
   },
   grantSiteAdminByIdentifier(identifier, grantedByUserId, note) {
@@ -10241,6 +10374,44 @@ export const storage: IStorage = {
   },
   getUserOwnedBusinesses(userId) {
     return db.select().from(businesses).where(eq(businesses.ownerId, userId)).all().filter(b => b.active);
+  },
+  getAdminDirectoryBusinesses() {
+    const rows = storage.getBusinesses()
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+    return rows.map((biz) => {
+      const owner = biz.ownerId ? storage.getUserById(biz.ownerId) : null;
+      return {
+        ...biz,
+        ownerProfile: owner
+          ? {
+              id: owner.id,
+              username: owner.username,
+              displayName: owner.displayName ?? null,
+              email: owner.email,
+              photoUrl: owner.photoUrl ?? null,
+              avatarChoice: owner.avatarChoice ?? 1,
+              avatarRing: owner.avatarRing || "none",
+            }
+          : null,
+      };
+    });
+  },
+  assignBusinessOwner(businessId, userId) {
+    const business = storage.getBusiness(businessId);
+    if (!business) return { error: "Venue not found" };
+    const user = storage.getUserById(userId);
+    if (!user || user.status !== "active") return { error: "User not found" };
+    db.update(businesses).set({ ownerId: userId } as any).where(eq(businesses.id, businessId)).run();
+    const fresh = storage.getBusiness(businessId);
+    return { ok: true, business: fresh };
+  },
+  clearBusinessOwner(businessId) {
+    const business = storage.getBusiness(businessId);
+    if (!business) return { error: "Venue not found" };
+    db.update(businesses).set({ ownerId: null } as any).where(eq(businesses.id, businessId)).run();
+    const fresh = storage.getBusiness(businessId);
+    return { ok: true, business: fresh };
   },
   createBusinessClaim(businessId, userId, claimReason, opts) {
     ensureBusinessClaimsSchema();

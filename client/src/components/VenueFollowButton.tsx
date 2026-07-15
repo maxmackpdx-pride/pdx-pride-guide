@@ -40,6 +40,9 @@ export default function VenueFollowButton({
     onSuccess: (data) => {
       setFollowing(data.isFollowing);
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      // Hub People → Following includes places (business_follows)
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me/people"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me/follow-stats"] });
       toast({ title: data.isFollowing ? "Following venue" : "Unfollowed", duration: 1800 });
     },
     onError: (err: Error) => {

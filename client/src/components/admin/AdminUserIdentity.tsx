@@ -26,9 +26,10 @@ export default function AdminUserIdentity({
   if (!profile?.username && !profile?.email && !profile?.displayName) return null;
 
   const label = profile.displayName || profile.username || profile.email || "User";
+  const hasBoth = !!(profile.displayName && profile.username);
 
   return (
-    <div className={`flex items-center gap-3 min-w-0 ${className}`.trim()}>
+    <div className={`flex items-center gap-3 min-w-0 w-full ${className}`.trim()}>
       <UserAvatar
         photoUrl={profile.photoUrl}
         avatarChoice={profile.avatarChoice}
@@ -37,13 +38,24 @@ export default function AdminUserIdentity({
         username={profile.username}
         size={size}
       />
-      <div className="min-w-0">
-        <p className="text-white text-sm font-medium truncate">
-          {profile.username ? `@${profile.username}` : label}
-          {profile.displayName && profile.username ? ` · ${profile.displayName}` : ""}
-        </p>
+      {/* min-w-0 + flex-1 so names aren't crushed by sibling action buttons on mobile */}
+      <div className="min-w-0 flex-1 overflow-hidden">
+        {hasBoth ? (
+          <>
+            <p className="text-white text-sm font-semibold leading-tight break-words">
+              {profile.displayName}
+            </p>
+            <p className="text-white/70 text-xs mt-0.5 leading-tight break-all">
+              @{profile.username}
+            </p>
+          </>
+        ) : (
+          <p className="text-white text-sm font-medium leading-tight break-words">
+            {profile.username ? `@${profile.username}` : label}
+          </p>
+        )}
         {showEmail && profile.email && (
-          <p className="text-white/40 text-xs mt-0.5 truncate break-all">{profile.email}</p>
+          <p className="text-white/40 text-xs mt-0.5 break-all">{profile.email}</p>
         )}
       </div>
     </div>

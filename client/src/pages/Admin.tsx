@@ -184,6 +184,8 @@ interface SiteAdminMember extends AdminUserProfile {
   grantedAt: string;
   grantedByUsername: string | null;
   note: string | null;
+  lastActivityAt?: string | null;
+  lastActivityLabel?: string | null;
 }
 
 const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
@@ -229,6 +231,9 @@ export default function Admin() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<AdminEvent>>({});
   const [assignHostByEvent, setAssignHostByEvent] = useState<Record<number, string>>({});
+  const [assignOwnerByBusiness, setAssignOwnerByBusiness] = useState<Record<number, string>>({});
+  const [directoryFilter, setDirectoryFilter] = useState("");
+  const [directoryOwnerFilter, setDirectoryOwnerFilter] = useState<"all" | "owned" | "unowned">("all");
   const [editingGigId, setEditingGigId] = useState<number | null>(null);
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
   const [eventSearch, setEventSearch] = useState("");
@@ -259,7 +264,7 @@ export default function Admin() {
   const [messageTarget, setMessageTarget] = useState<{
     username: string;
     displayName?: string | null;
-    /** guide = shared PDX Pride Guide; personal = owner’s own inbox (Tucker). */
+    /** guide = shared PDX Pride Guide inbox; personal = logged-in admin’s own inbox. */
     as: "guide" | "personal";
   } | null>(null);
   const [messageBody, setMessageBody] = useState("");
@@ -588,6 +593,39 @@ export default function Admin() {
     queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then(r => r.json()),
     enabled: authenticated,
   });
+
+  type AdminDirectoryBusiness = {
+    id: number;
+    name: string;
+    type: string;
+    neighborhood: string | null;
+    address: string | null;
+    active: boolean;
+    ownerId: number | null;
+    ownerProfile: AdminUserProfile | null;
+  };
+
+  const {
+    data: adminDirectory = [],
+    isLoading: adminDirectoryLoading,
+    isError: adminDirectoryError,
+    refetch: refetchAdminDirectory,
+  } = useQuery<AdminDirectoryBusiness[]>({
+    queryKey: ["/api/admin/directory"],
+    queryFn: () => apiRequest("GET", "/api/admin/directory").then(r => r.json()),
+    enabled: authenticated && activeTab === "venue-claims",
+  });
+
+  const filteredAdminDirectory = useMemo(() => {
+    const q = directoryFilter.trim().toLowerCase();
+    return adminDirectory.filter((biz) => {
+      if (directoryOwnerFilter === "owned" && !biz.ownerId) return false;
+      if (directoryOwnerFilter === "unowned" && biz.ownerId) return false;
+      if (!q) return true;
+      const hay = `${biz.name} ${biz.type} ${biz.neighborhood || ""} ${biz.address || ""} ${biz.ownerProfile?.username || ""} ${biz.ownerProfile?.displayName || ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [adminDirectory, directoryFilter, directoryOwnerFilter]);
 
   const { data: newUsersToday = [] } = useQuery<{ id: number; username: string; displayName: string | null; email: string; createdAt: string; photoUrl: string | null }[]>({
     queryKey: ["/api/admin/users/new-today"],
@@ -1026,6 +1064,7 @@ export default function Admin() {
       apiRequest("POST", `/api/admin/business-claims/${id}/${action}`, { adminName }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/business-claims"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/directory"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
       toast({ title: "Venue claim updated" });
     },
@@ -1037,6 +1076,7 @@ export default function Admin() {
       apiRequest("POST", `/api/admin/business-submissions/${id}/${action}`, { adminName }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/business-submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/directory"] });
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
       toast({ title: "New venue submission updated" });
     },
@@ -1052,6 +1092,51 @@ export default function Admin() {
       toast({ title: "Logo request updated" });
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const assignVenueOwnerMutation = useMutation({
+    mutationFn: async ({ id, username }: { id: number; username: string }) => {
+      const res = await apiRequest("POST", `/api/admin/directory/${id}/owner`, { username });
+      return res.json() as Promise<AdminDirectoryBusiness>;
+    },
+    onSuccess: (updated, vars) => {
+      if (updated?.id) {
+        queryClient.setQueryData<AdminDirectoryBusiness[]>(["/api/admin/directory"], (old) =>
+          old?.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)),
+        );
+      }
+      void queryClient.refetchQueries({ queryKey: ["/api/admin/directory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      setAssignOwnerByBusiness((prev) => {
+        const next = { ...prev };
+        delete next[vars.id];
+        return next;
+      });
+      toast({ title: "Owner assigned", description: "They now own this directory venue and were notified." });
+    },
+    onError: (err) => {
+      toast({ title: "Error", description: parseApiError(err, "Could not assign owner."), variant: "destructive" });
+    },
+  });
+
+  const unassignVenueOwnerMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/directory/${id}/owner`);
+      return res.json() as Promise<AdminDirectoryBusiness>;
+    },
+    onSuccess: (updated) => {
+      if (updated?.id) {
+        queryClient.setQueryData<AdminDirectoryBusiness[]>(["/api/admin/directory"], (old) =>
+          old?.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)),
+        );
+      }
+      void queryClient.refetchQueries({ queryKey: ["/api/admin/directory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
+      toast({ title: "Owner removed", description: "Venue is unassigned and open for claims again." });
+    },
+    onError: (err) => {
+      toast({ title: "Error", description: parseApiError(err, "Could not remove owner."), variant: "destructive" });
+    },
   });
 
   async function handleUserSearch() {
@@ -1138,6 +1223,10 @@ export default function Admin() {
 
   const setAssignHostForEvent = (eventId: number, username: string) => {
     setAssignHostByEvent(prev => ({ ...prev, [eventId]: username }));
+  };
+
+  const setAssignOwnerForBusiness = (businessId: number, username: string) => {
+    setAssignOwnerByBusiness(prev => ({ ...prev, [businessId]: username }));
   };
 
   const handleEditSave = (e: React.FormEvent) => {
@@ -1271,6 +1360,15 @@ export default function Admin() {
     [allUsers],
   );
 
+  /** Display name of the admin currently logged in (never hardcode Tucker). */
+  const signedInAdminLabel = useMemo(() => {
+    const display = String(user?.displayName || "").trim();
+    if (display) return display;
+    const uname = String(user?.username || "").trim().replace(/^@/, "");
+    if (uname) return uname;
+    return "You";
+  }, [user?.displayName, user?.username]);
+
   const openMessageTo = (
     target: { username?: string | null; displayName?: string | null },
     as: "guide" | "personal" = "guide",
@@ -1288,11 +1386,11 @@ export default function Admin() {
     setMessageSending(true);
     try {
       if (messageTarget.as === "personal") {
-        // Owner personal DM — replies land in Personal inbox, not shared admin.
+        // Logged-in admin’s personal DM — replies land in *their* Personal inbox only.
         await apiRequest("POST", `/api/users/${encodeURIComponent(messageTarget.username)}/message`, { body });
         toast({
           title: "Message sent",
-          description: `Sent as you. @${messageTarget.username} replies go to your personal inbox.`,
+          description: `Sent as ${signedInAdminLabel}. @${messageTarget.username} replies go to your personal inbox.`,
         });
       } else {
         // Shared guide-admin sender — replies land in floating inbox → Admin → Inbox.
@@ -1314,36 +1412,57 @@ export default function Admin() {
     }
   };
 
-  /** Guide MESSAGE for all admins; primary owner also gets personal “Message from Tucker”. */
+  /** Guide MESSAGE (shared admin inbox). */
   const messageButton = (target: { username?: string | null; displayName?: string | null }) => {
     const uname = String(target.username || "").trim().replace(/^@/, "");
     if (!uname || uname === user?.username) return null;
     return (
-      <span className="inline-flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => openMessageTo(target, "guide")}
-          className="display text-xs px-3 py-1 border"
-          style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
-          data-testid={`admin-message-${uname}`}
-          title="Send as PDX Pride Guide — replies go to shared Admin inbox"
-        >
-          MESSAGE
-        </button>
-        {isPrimaryOwner && (
-          <button
-            type="button"
-            onClick={() => openMessageTo(target, "personal")}
-            className="display text-xs px-3 py-1 border"
-            style={{ borderColor: "#C8FA3C", color: "#C8FA3C" }}
-            data-testid={`admin-message-personal-${uname}`}
-            title="Send as yourself — replies go to your personal inbox"
-          >
-            MESSAGE FROM TUCKER
-          </button>
-        )}
-      </span>
+      <button
+        type="button"
+        onClick={() => openMessageTo(target, "guide")}
+        className="display text-xs px-3 py-1 border"
+        style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+        data-testid={`admin-message-${uname}`}
+        title="Send as PDX Pride Guide — replies go to shared Admin inbox"
+      >
+        MESSAGE
+      </button>
     );
+  };
+
+  /**
+   * Personal DM from the *logged-in* admin (Promoters, My Team, etc.).
+   * Label uses their name so no one appears to message “as Tucker”.
+   */
+  const personalMessageButton = (target: { username?: string | null; displayName?: string | null }) => {
+    const uname = String(target.username || "").trim().replace(/^@/, "");
+    if (!uname || uname === user?.username) return null;
+    return (
+      <button
+        type="button"
+        onClick={() => openMessageTo(target, "personal")}
+        className="display text-xs px-3 py-1 border"
+        style={{ borderColor: "#C8FA3C", color: "#C8FA3C" }}
+        data-testid={`admin-message-personal-${uname}`}
+        title={`Send as ${signedInAdminLabel} — replies go to your personal inbox`}
+      >
+        MESSAGE FROM {signedInAdminLabel.toUpperCase()}
+      </button>
+    );
+  };
+
+  const formatTeamActivityLine = (member: SiteAdminMember) => {
+    if (!member.lastActivityAt || !member.lastActivityLabel) return null;
+    const when = new Date(member.lastActivityAt);
+    const whenLabel = Number.isNaN(when.getTime())
+      ? member.lastActivityAt
+      : when.toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+    return `${member.lastActivityLabel} · ${whenLabel}`;
   };
 
   const runAdminGlobalSearch = async () => {
@@ -1522,6 +1641,7 @@ export default function Admin() {
     refetchBusinessClaims();
     refetchBusinessSubmissions();
     refetchBusinessLogoRequests();
+    refetchAdminDirectory();
   };
 
   const setAdminTab = (tab: AdminTab) => {
@@ -2564,6 +2684,7 @@ export default function Admin() {
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         {messageButton(u)}
+                        {personalMessageButton(u)}
                         {u.username && (
                           <a
                             href={`/u/${encodeURIComponent(u.username)}`}
@@ -2681,6 +2802,7 @@ export default function Admin() {
                           </div>
                           <div className="flex gap-2 flex-wrap">
                             {messageButton(u)}
+                            {personalMessageButton(u)}
                             {u.username && (
                               <a
                                 href={`/u/${encodeURIComponent(u.username)}`}
@@ -2770,6 +2892,7 @@ export default function Admin() {
                           </div>
                           <div className="flex gap-2 flex-wrap">
                             {messageButton(u)}
+                            {personalMessageButton(u)}
                             <button
                               type="button"
                               onClick={() => approvePromoterMutation.mutate(uid)}
@@ -2916,6 +3039,206 @@ export default function Admin() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="display text-sm mb-2" style={{ color: "#C8FA3C" }}>
+                FULL DIRECTORY ({adminDirectory.length})
+              </p>
+              <p className="text-white/40 text-xs mb-3">
+                Every place in the Queer Directory. Assign a member as owner the same way you assign event hosts —
+                they get listing control and a guide inbox notice.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-3 items-center">
+                <input
+                  className="flex-1 min-w-[200px] max-w-md bg-black border border-white/20 px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/50"
+                  placeholder="Filter by name, type, neighborhood, owner…"
+                  value={directoryFilter}
+                  onChange={(e) => setDirectoryFilter(e.target.value)}
+                />
+                <div className="flex gap-1 flex-wrap">
+                  {(
+                    [
+                      ["all", "All"],
+                      ["unowned", "Unowned"],
+                      ["owned", "Owned"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setDirectoryOwnerFilter(key)}
+                      className="display text-[10px] px-3 py-1.5 border"
+                      style={{
+                        borderColor: directoryOwnerFilter === key ? "#C8FA3C" : "#333",
+                        color: directoryOwnerFilter === key ? "#C8FA3C" : "#666",
+                        background: "transparent",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {adminDirectoryError ? (
+                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load directory.</p>
+              ) : adminDirectoryLoading ? (
+                <p className="text-white/30 text-xs">Loading directory…</p>
+              ) : filteredAdminDirectory.length === 0 ? (
+                <p className="text-white/30 text-xs">No venues match this filter.</p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-white/35 text-xs mb-1">
+                    Showing {filteredAdminDirectory.length} of {adminDirectory.length}
+                    {" · "}
+                    {adminDirectory.filter((b) => !b.ownerId).length} unowned
+                  </p>
+                  {filteredAdminDirectory.map((biz) => {
+                    const assignDraft = assignOwnerByBusiness[biz.id] ?? "";
+                    return (
+                      <div key={biz.id} className="border border-white/10" style={{ background: "#111" }}>
+                        <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-white text-sm font-semibold">{biz.name}</p>
+                            <p className="text-white/40 text-xs mt-0.5">
+                              {biz.type}
+                              {biz.neighborhood ? ` · ${biz.neighborhood}` : ""}
+                              {biz.address ? ` · ${biz.address}` : ""}
+                            </p>
+                            {!biz.ownerId && (
+                              <Badge variant="outline" color="orange" size="sm" className="mt-2">
+                                UNOWNED
+                              </Badge>
+                            )}
+                          </div>
+                          <a
+                            href={`/directory?place=${biz.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="display text-xs px-3 py-1 border transition-all"
+                            style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                          >
+                            VIEW PUBLIC
+                          </a>
+                        </div>
+
+                        {!biz.ownerId ? (
+                          <div
+                            className="border-t border-white/10 px-4 py-3 flex flex-wrap items-center gap-2"
+                            style={{ background: "rgba(200, 250, 60, 0.05)" }}
+                          >
+                            <span className="display text-[10px] text-white/45 shrink-0">ASSIGN OWNER</span>
+                            <div className="flex-1 min-w-[200px] max-w-sm">
+                              <UsernameAutocomplete
+                                value={assignDraft}
+                                onChange={(val) => setAssignOwnerForBusiness(biz.id, val)}
+                                placeholder="@username"
+                                inputStyle={{
+                                  width: "100%",
+                                  padding: "8px 12px",
+                                  fontSize: 14,
+                                  color: "#fff",
+                                  background: "#000",
+                                  border: "1px solid rgba(255,255,255,0.2)",
+                                }}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              accent="cyan"
+                              disabled={
+                                !assignDraft.trim() ||
+                                (assignVenueOwnerMutation.isPending &&
+                                  assignVenueOwnerMutation.variables?.id === biz.id)
+                              }
+                              onClick={() =>
+                                assignVenueOwnerMutation.mutate({ id: biz.id, username: assignDraft })
+                              }
+                            >
+                              {assignVenueOwnerMutation.isPending &&
+                              assignVenueOwnerMutation.variables?.id === biz.id
+                                ? "ASSIGNING..."
+                                : "ASSIGN"}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            className="border-t border-white/10 px-4 py-2 flex items-center gap-3 flex-wrap"
+                            style={{ background: "#0a0a0a" }}
+                          >
+                            <span className="text-white/35 text-[10px] uppercase tracking-wide">Owner</span>
+                            {biz.ownerProfile ? (
+                              <AdminUserIdentity profile={biz.ownerProfile} size={28} />
+                            ) : (
+                              <span className="text-sm" style={{ color: "#CCFF00" }}>
+                                user #{biz.ownerId}
+                              </span>
+                            )}
+                            <div className="flex-1 min-w-[160px] max-w-xs">
+                              <UsernameAutocomplete
+                                value={assignDraft}
+                                onChange={(val) => setAssignOwnerForBusiness(biz.id, val)}
+                                placeholder="Reassign @username"
+                                inputStyle={{
+                                  width: "100%",
+                                  padding: "6px 10px",
+                                  fontSize: 13,
+                                  color: "#fff",
+                                  background: "#000",
+                                  border: "1px solid rgba(255,255,255,0.15)",
+                                }}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              accent="cyan"
+                              disabled={
+                                !assignDraft.trim() ||
+                                (assignVenueOwnerMutation.isPending &&
+                                  assignVenueOwnerMutation.variables?.id === biz.id)
+                              }
+                              onClick={() =>
+                                assignVenueOwnerMutation.mutate({ id: biz.id, username: assignDraft })
+                              }
+                            >
+                              REASSIGN
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              accent="pink"
+                              disabled={
+                                unassignVenueOwnerMutation.isPending &&
+                                unassignVenueOwnerMutation.variables === biz.id
+                              }
+                              onClick={() => {
+                                const who =
+                                  biz.ownerProfile?.username ||
+                                  biz.ownerProfile?.displayName ||
+                                  String(biz.ownerId);
+                                if (
+                                  window.confirm(
+                                    `Remove @${who} as owner of "${biz.name}"? It will be unowned again.`,
+                                  )
+                                ) {
+                                  unassignVenueOwnerMutation.mutate(biz.id);
+                                }
+                              }}
+                            >
+                              {unassignVenueOwnerMutation.isPending &&
+                              unassignVenueOwnerMutation.variables === biz.id
+                                ? "REMOVING..."
+                                : "UNASSIGN"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -3109,24 +3432,46 @@ export default function Admin() {
               <p className="text-white/30">No site admins yet. Add someone who already has a registered account.</p>
             ) : (
               <div className="space-y-3">
-                {teamAdmins.map(member => (
-                  <div key={member.userId} className="p-4 border border-white/10 flex items-start justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
-                    <div className="min-w-0 flex-1">
+                {teamAdmins.map(member => {
+                  const activityLine = formatTeamActivityLine(member);
+                  return (
+                  <div
+                    key={member.userId}
+                    className="p-4 border border-white/10 flex flex-col gap-3"
+                    style={{ background: "#0d0d0d" }}
+                  >
+                    {/* Stack identity + actions so mobile never clips @username / display name */}
+                    <div className="min-w-0 w-full">
                       <AdminUserIdentity profile={{ ...member, id: member.userId }} showEmail size={44} />
-                      <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
+                      <div className="flex flex-wrap items-center gap-2 mt-2 pl-[56px]">
                         {member.protected && (
-                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>SITE ADMIN</span>
+                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>
+                            SITE ADMIN
+                          </span>
+                        )}
+                        {!member.protected && member.note && (
+                          <span className="text-white/45 text-[11px] leading-snug">{member.note}</span>
                         )}
                       </div>
-                      {member.note && <p className="text-white/55 text-sm mt-2">{member.note}</p>}
-                      <p className="text-white/30 text-xs mt-2">
-                        {member.protected ? "Protected via Railway env" : `Granted${member.grantedByUsername ? ` by @${member.grantedByUsername}` : ""}`}
+                      {activityLine && (
+                        <p
+                          className="pl-[56px] mt-2 text-[11px] leading-snug"
+                          style={{ color: "#19E3FF" }}
+                          title="Last admin or promoter activity"
+                        >
+                          {activityLine}
+                        </p>
+                      )}
+                      <p className="pl-[56px] text-white/30 text-[11px] mt-1.5 leading-snug">
+                        {member.protected
+                          ? "Protected via Railway env"
+                          : `Granted${member.grantedByUsername ? ` by @${member.grantedByUsername}` : ""}`}
                         {" · "}
                         {new Date(member.grantedAt).toLocaleString()}
                       </p>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {messageButton(member)}
+                    <div className="flex gap-2 flex-wrap items-center">
+                      {personalMessageButton(member)}
                       {!member.protected && (
                         <button
                           type="button"
@@ -3140,7 +3485,8 @@ export default function Admin() {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -3157,7 +3503,7 @@ export default function Admin() {
           aria-modal="true"
           aria-label={
             messageTarget.as === "personal"
-              ? `Message @${messageTarget.username} as yourself`
+              ? `Message @${messageTarget.username} as ${signedInAdminLabel}`
               : `Message @${messageTarget.username} as PDX Pride Guide`
           }
           onClick={() => !messageSending && setMessageTarget(null)}
@@ -3171,7 +3517,9 @@ export default function Admin() {
               className="display text-sm"
               style={{ color: messageTarget.as === "personal" ? "#C8FA3C" : "#19E3FF" }}
             >
-              {messageTarget.as === "personal" ? "MESSAGE FROM TUCKER" : "MESSAGE AS PDX PRIDE GUIDE"}
+              {messageTarget.as === "personal"
+                ? `MESSAGE FROM ${signedInAdminLabel.toUpperCase()}`
+                : "MESSAGE AS PDX PRIDE GUIDE"}
             </p>
             <h2 className="text-white text-lg mt-1 mb-1">
               @{messageTarget.username}
@@ -3181,7 +3529,7 @@ export default function Admin() {
             </h2>
             <p className="text-white/40 text-xs mb-3">
               {messageTarget.as === "personal"
-                ? "Sends from your personal account. Their reply lands in your Personal inbox."
+                ? `Sends from your personal account (${signedInAdminLabel}). Their reply lands in your Personal inbox — not shared admin.`
                 : "Sends as PDX Pride Guide. Their reply lands in shared Admin · Inbox."}
             </p>
             <textarea
@@ -3215,7 +3563,7 @@ export default function Admin() {
                 {messageSending
                   ? "SENDING…"
                   : messageTarget.as === "personal"
-                    ? "SEND AS TUCKER"
+                    ? `SEND AS ${signedInAdminLabel.toUpperCase()}`
                     : "SEND AS GUIDE"}
               </button>
             </div>

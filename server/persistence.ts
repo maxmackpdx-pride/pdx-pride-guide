@@ -68,6 +68,8 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
       "POST /api/admin/business-claims/:id/approve",
       "POST /api/admin/business-submissions/:id/approve",
       "POST /api/admin/business-logo-requests/:id/approve",
+      "POST /api/admin/directory/:id/owner",
+      "DELETE /api/admin/directory/:id/owner",
     ],
   },
   {
