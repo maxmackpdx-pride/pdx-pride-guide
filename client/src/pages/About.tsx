@@ -27,7 +27,7 @@ function isYesCoachEvent(title: string): boolean {
 
 const VALUES = [
   { title: "Free to browse.", text: "No paywall, no popup begging for your email." },
-  { title: "Sponsors can buy in.", text: "Featured feed posts and ads are on the table — only for businesses that are part of this community or already show up for us." },
+  { title: "Sponsors can buy in.", text: "Featured feed posts and ads are on the table, only for businesses that are part of this community or already show up for us." },
   { title: "Post with a free account.", text: "That is how spam stays out and names stay on." },
   { title: "Your data is not for sale.", text: "Not now, not later, not for a nice offer." },
   { title: "We moderate the clearly over the line stuff.", text: "The rest of the community runs free." },
@@ -163,7 +163,7 @@ export default function About() {
             <div className="about-v2-stats__num about-v2-stats__num--amber about-v2-stats__num--pop">
               <CountUpValue value={1} />
             </div>
-            <div className="about-v2-stats__label">Guide with all our events — and room for more</div>
+            <div className="about-v2-stats__label">Guide with all our events, and room for more</div>
           </div>
         </div>
       </section>
@@ -284,7 +284,7 @@ export default function About() {
                 <p>
                   Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
                   like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
-                  ago I was Oregon State Pet. Right now I&apos;m between full-time gigs — unemployed, not idle —
+                  ago I was Oregon State Pet. Right now I&apos;m between full-time gigs. Unemployed, not idle,
                   pouring everything I have into this and the projects I care about. If you&apos;ve got a role
                   that deserves that kind of energy, I&apos;m available, and whoever brings me on gets all of it.
                 </p>
@@ -294,7 +294,7 @@ export default function About() {
                 </p>
                 <blockquote className="about-v2-creator__pull">
                   <p>
-                    This community shows up for each other — donating, checking in, keeping the scene alive.
+                    This community shows up for each other. Donating, checking in, keeping the scene alive.
                     That&apos;s what makes it worth protecting. Year three is me showing up for you.
                   </p>
                 </blockquote>
@@ -333,7 +333,7 @@ export default function About() {
                 .
               </h3>
               <p className="about-v2-work__support">
-                Looking for partners who want to build with the community — brand work, events, platforms,
+                Looking for partners who want to build with the community: brand work, events, platforms,
                 and joint projects that move real people. If you&apos;ve got a pitch or a half-formed idea,
                 send it.
               </p>
@@ -410,7 +410,7 @@ export default function About() {
               >
                 <img
                   src="/about/disco/card-thumb.jpg"
-                  alt="Constrained and Sparkling Bro — shibari disco body sculptures"
+                  alt="Constrained and Sparkling Bro, shibari disco body sculptures"
                   width={120}
                   height={120}
                 />
