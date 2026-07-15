@@ -152,7 +152,7 @@ export default function HubV2Shell({
   const goMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setMobileDrawerOpen(false);
+    closeMobileDrawer();
     // One navigation only — never stack navigate + onSectionChange + replaceState
     // (that could thrash history when leaving /admin).
     if (isAdminChrome) {
@@ -167,7 +167,7 @@ export default function HubV2Shell({
   const goAdminMode = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setMobileDrawerOpen(false);
+    closeMobileDrawer();
     if (isAdminChrome) return;
     navigate("/admin?tab=overview");
   };
@@ -190,22 +190,24 @@ export default function HubV2Shell({
 
   const pickSection = (next: HubSection) => {
     onSectionChange(next);
-    setMobileDrawerOpen(false);
+    closeMobileDrawer();
   };
 
   const openPersonalInbox = () => {
     if (location === "/inbox" || location.startsWith("/inbox?")) return;
     openSheet({ view: "inbox", account: "personal" });
-    setMobileDrawerOpen(false);
+    closeMobileDrawer();
   };
 
   const openAdminInbox = () => {
     openSheet({ view: "inbox", account: "admin" });
-    setMobileDrawerOpen(false);
+    closeMobileDrawer();
   };
 
   useEffect(() => {
-    setMobileDrawerOpen(false);
+    closeMobileDrawer();
+    // closeMobileDrawer is stable enough for section/route changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, isAdminChrome]);
 
   useEffect(() => {
@@ -230,20 +232,89 @@ export default function HubV2Shell({
     return () => window.clearTimeout(t);
   }, [location, isHubRoute, calmMode]);
 
+  const setDragging = useCallback((on: boolean) => {
+    drawerRef.current?.classList.toggle("is-dragging", on);
+    setDrawerDragging(on);
+  }, []);
+
+  /** Fully close: clear drag + snap closed so leftover --drawer-y never leaves the sheet covering the tab bar. */
+  const closeMobileDrawer = useCallback(() => {
+    dragActiveRef.current = false;
+    setDragging(false);
+    setMobileDrawerOpen(false);
+    measureDrawerCollapse();
+    const h = collapseHRef.current;
+    if (h > 0) setDrawerY(h);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (dragActiveRef.current) return;
+        setDrawerY(null);
+        measureDrawerCollapse();
+      });
+    });
+  }, [setDragging, setDrawerY, measureDrawerCollapse]);
+
+  const setMobileDrawerOpenSafe = useCallback((open: boolean) => {
+    if (!open) {
+      closeMobileDrawer();
+      return;
+    }
+    setMobileDrawerOpen((prev) => {
+      if (!prev) dismissMobileNavOverlays("hub-drawer");
+      return true;
+    });
+  }, [closeMobileDrawer]);
+
+  /**
+   * Background scroll lock without body { overflow:hidden } alone.
+   * That pattern leaves iOS Safari's position:fixed bottom nav below the
+   * visual viewport after unlock ("stuck off screen"). Instead: block
+   * touchmove on the page while allowing the drawer sheet + bottom tabs.
+   */
   useEffect(() => {
     const lock = mobileDrawerOpen || drawerDragging;
     document.body.classList.toggle("hub-v2-drawer-open", lock);
-    return () => document.body.classList.remove("hub-v2-drawer-open");
+    if (!lock) {
+      // Unlock path: class already toggled off; re-pin the site tab bar.
+      const nav = document.querySelector(".site-hub-mobile-bar, .hub-mobile-bar");
+      if (nav instanceof HTMLElement) {
+        nav.style.transform = "translateZ(0)";
+        void nav.offsetHeight;
+        nav.style.removeProperty("transform");
+      }
+      return;
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.target as Element | null;
+      if (!t) return;
+      // Let the sheet scroll; let the 5-tab bar stay interactive.
+      if (t.closest?.(".hub-v2-drawer__sheet")) return;
+      if (t.closest?.(".site-hub-mobile-bar, .hub-mobile-bar")) return;
+      if (t.closest?.(".hub-v2-drawer__grab")) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      document.removeEventListener("touchmove", onTouchMove);
+      document.body.classList.remove("hub-v2-drawer-open");
+      const nav = document.querySelector(".site-hub-mobile-bar, .hub-mobile-bar");
+      if (nav instanceof HTMLElement) {
+        nav.style.transform = "translateZ(0)";
+        void nav.offsetHeight;
+        nav.style.removeProperty("transform");
+      }
+    };
   }, [mobileDrawerOpen, drawerDragging]);
 
   useEffect(() => {
     const onDismiss = (event: Event) => {
       const except = (event as CustomEvent<MobileNavDismissDetail>).detail?.except;
-      if (except !== "hub-drawer") setMobileDrawerOpen(false);
+      if (except !== "hub-drawer") closeMobileDrawer();
     };
     window.addEventListener(MOBILE_NAV_DISMISS, onDismiss);
     return () => window.removeEventListener(MOBILE_NAV_DISMISS, onDismiss);
-  }, []);
+  }, [closeMobileDrawer]);
 
   // Measure sheet height for drag clamp (mount + resize + content changes).
   useEffect(() => {
@@ -268,23 +339,15 @@ export default function HubV2Shell({
     requestAnimationFrame(() => measureDrawerCollapse());
   }, [mobileDrawerOpen, drawerDragging, measureDrawerCollapse]);
 
-  const setMobileDrawerOpenSafe = useCallback((open: boolean) => {
-    setMobileDrawerOpen((prev) => {
-      if (open && !prev) dismissMobileNavOverlays("hub-drawer");
-      return open;
-    });
-  }, []);
-
-  const setDragging = useCallback((on: boolean) => {
-    drawerRef.current?.classList.toggle("is-dragging", on);
-    setDrawerDragging(on);
-  }, []);
-
   /** Snap to open/closed: drop is-dragging, commit open state, then clear inline --drawer-y so CSS rest wins and transition runs from the finger. */
   const finishDrawerGesture = useCallback(
     (open: boolean) => {
       setDragging(false);
-      setMobileDrawerOpenSafe(open);
+      if (!open) {
+        closeMobileDrawer();
+        return;
+      }
+      setMobileDrawerOpenSafe(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (dragActiveRef.current) return;
@@ -292,7 +355,7 @@ export default function HubV2Shell({
         });
       });
     },
-    [setDragging, setMobileDrawerOpenSafe, setDrawerY],
+    [setDragging, setMobileDrawerOpenSafe, setDrawerY, closeMobileDrawer],
   );
 
   const toggleMobileDrawer = () => {
@@ -300,11 +363,12 @@ export default function HubV2Shell({
       dragMovedRef.current = false;
       return;
     }
-    setMobileDrawerOpen((open) => {
-      if (open) return false;
-      dismissMobileNavOverlays("hub-drawer");
-      return true;
-    });
+    if (mobileDrawerOpen) {
+      closeMobileDrawer();
+      return;
+    }
+    dismissMobileNavOverlays("hub-drawer");
+    setMobileDrawerOpen(true);
   };
 
   const onGrabPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
@@ -462,7 +526,7 @@ export default function HubV2Shell({
                 type="button"
                 className="hub-v2-drawer-backdrop"
                 aria-label="Close hub menu"
-                onClick={() => setMobileDrawerOpenSafe(false)}
+                onClick={() => closeMobileDrawer()}
               />
             )}
             <div

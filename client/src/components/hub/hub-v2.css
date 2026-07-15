@@ -807,7 +807,21 @@
       }
       .hub-v2-kicker--drawer{padding:0 2px 10px;color:#888}
       .hub-v2-side-extra--drawer{margin-top:10px}
-      body.hub-v2-drawer-open{overflow:hidden}
+      /*
+       * Do NOT use overflow:hidden alone on body — iOS Safari detaches the
+       * position:fixed 5-tab bar and leaves it below the visual viewport after
+       * the drawer closes. Scroll is blocked via touchmove in HubV2Shell.
+       */
+      body.hub-v2-drawer-open{
+        overscroll-behavior:none;
+      }
+      /* Always pin the site tab bar to the real bottom, even while drawer is open */
+      .site-hub-mobile-bar.hub-mobile-bar{
+        position:fixed !important;
+        left:0;right:0;bottom:0 !important;
+        z-index:80;
+        transform:none !important;
+      }
       /* Silence pill bounce under calm / reduced motion */
       .hub-v2-drawer.calm-mode.is-bounce-hint .hub-v2-drawer__grip,
       .calm-mode .hub-v2-drawer.is-bounce-hint .hub-v2-drawer__grip{
