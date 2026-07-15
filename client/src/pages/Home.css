@@ -366,6 +366,19 @@
   border-color: #7dfbff;
 }
 
+.home-hero__btn--river {
+  color: var(--neon-orange, #ff6600);
+  background: transparent;
+  border: 2px solid var(--neon-orange, #ff6600);
+  box-shadow: 0 0 16px rgba(255, 102, 0, 0.32);
+}
+
+.home-hero__btn--river:hover {
+  color: #ff9933;
+  border-color: #ff9933;
+  box-shadow: 0 0 20px rgba(255, 102, 0, 0.42);
+}
+
 @keyframes homeHeroBlink {
   50% { opacity: 0.28; }
 }

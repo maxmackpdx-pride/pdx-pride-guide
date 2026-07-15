@@ -125,8 +125,8 @@ export default function HomeHero({ eventCount }: Props) {
           <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
             View all events →
           </Link>
-          <Link href="/schedule" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-schedule">
-            Browse schedule →
+          <Link href="/schedule" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-schedule">
+            Headed To The River? →
           </Link>
           {user && (
             <Link href="/dashboard" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-account">
