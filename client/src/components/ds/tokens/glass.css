@@ -1,0 +1,314 @@
+/* ============================================================
+   PDX Pride Guide — lite sitewide dark glass
+   Surfaces only: background / edge / depth / blur.
+   Does NOT change wireframe (layout, padding, gaps, radii as
+   structural sizes) or fonts/type scales.
+   Neon borders, rainbow seams, solid CTAs stay.
+   ============================================================ */
+
+:root {
+  --pdx-glass-fill: color-mix(in srgb, #0c0c12 76%, transparent);
+  --pdx-glass-fill-hot: color-mix(in srgb, #14141c 82%, transparent);
+  --pdx-glass-fill-dense: color-mix(in srgb, #0a0a0e 86%, transparent);
+  --pdx-glass-edge: rgba(255, 255, 255, 0.10);
+  --pdx-glass-edge-hi: rgba(255, 255, 255, 0.14);
+  --pdx-glass-blur: 12px;
+  --pdx-glass-blur-sm: 10px;
+  --pdx-glass-sat: 1.12;
+  --pdx-glass-specular: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.015) 30%,
+    transparent 55%
+  );
+  --pdx-glass-shadow:
+    0 8px 24px -12px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Shared mixin-like utility (opt-in for one-offs) */
+.pdx-glass {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill);
+  border-color: var(--pdx-glass-edge);
+  box-shadow: var(--pdx-glass-shadow);
+  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+}
+
+/* ── Large islands / form panels ─────────────────────────── */
+.gifting-form-panel--makeover,
+.board-path-card,
+.board-empty,
+.board-empty--prototype,
+.gigs-page .board-how--makeover .board-step--makeover,
+.gifting-page .board-how--makeover .board-step--makeover,
+.missed-page .board-how--makeover .board-step--makeover {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  box-shadow:
+    var(--pdx-glass-shadow),
+    0 0 28px -16px color-mix(in srgb, currentColor 0%, transparent) !important;
+}
+
+/* Keep makeover form lime edge glow; glass fill only */
+.gifting-form-panel--makeover {
+  box-shadow:
+    var(--pdx-glass-shadow),
+    0 0 28px -14px #ccff00 !important;
+}
+
+/* Path cards: keep left accent; glass the fill */
+.board-path-card {
+  border-color: color-mix(in srgb, #1c1c22 70%, var(--pdx-glass-edge));
+}
+
+/* Empty states */
+.board-empty,
+.board-empty--prototype {
+  border-color: var(--pdx-glass-edge);
+}
+
+/* ── Board listing / spotted cards (lite) ────────────────── */
+.board-listing-card,
+.board-listing-card--makeover,
+.spotted-card {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  box-shadow: var(--pdx-glass-shadow);
+}
+
+.board-listing-card--makeover:hover,
+.board-listing-card--makeover.is-expanded,
+.board-listing-card:hover,
+.board-listing-card.is-expanded {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill-hot) !important;
+}
+
+.spotted-card:hover {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill-hot) !important;
+}
+
+/* ── Events poster + list rows (very lite — keep day glow) ─ */
+.pdxBoard {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.05), transparent 32%),
+    var(--pdx-glass-fill) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
+}
+
+.pdxRow {
+  background: var(--pdx-glass-fill) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
+}
+
+a.pdxRow:hover,
+.ds-listing-card--list:hover .pdxRow {
+  background: var(--pdx-glass-fill-hot) !important;
+}
+
+/* ── Sticky filter chrome (events / boards / directory shell) */
+.zine-filter-bar {
+  background:
+    var(--pdx-glass-specular),
+    color-mix(in srgb, #050508 80%, transparent) !important;
+  border-bottom-color: var(--pdx-glass-edge) !important;
+  backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
+}
+
+/* ── Stats bands ─────────────────────────────────────────── */
+.board-stats-bar,
+.board-stats-band {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill-dense) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+}
+
+/* ── Beaches live tiles + logistics ──────────────────────── */
+.nude-live-card,
+.nb-log-fee,
+.nb-log {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  border-color: color-mix(in srgb, #24242c 60%, var(--pdx-glass-edge)) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  box-shadow: var(--pdx-glass-shadow);
+}
+
+/* River Brats panels + cards */
+.rb-panel,
+.rb-compose,
+.rb-card,
+.rb-checkin__hero-card,
+.rb-checkin__pulse {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  border-color: var(--pdx-glass-edge) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  box-shadow: var(--pdx-glass-shadow);
+}
+
+/* ── Schedule / tools ────────────────────────────────────── */
+.schedule-page .sch-toolbar,
+.schedule-page .sch-pop,
+.sch-toolbar,
+.sch-pop {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill-dense) !important;
+  backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
+  border-color: var(--pdx-glass-edge);
+}
+
+/* ── About dark panels (not white mission paper / photo panels) ─ */
+.about-v2-donate--panel {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  border-color: var(--pdx-glass-edge);
+  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  box-shadow: var(--pdx-glass-shadow);
+}
+
+/* ── Submit success + empty utility ──────────────────────── */
+.submit-success {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  box-shadow: var(--pdx-glass-shadow);
+}
+
+/* ── Hub feed glowing board items (not plain rows) ───────── */
+.card.fitem.fitem--glow,
+.fitem--glow {
+  background:
+    var(--pdx-glass-specular),
+    var(--pdx-glass-fill) !important;
+  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+}
+
+/* ── Fallbacks: no blur / calm ───────────────────────────── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .gifting-form-panel--makeover,
+  .board-path-card,
+  .board-empty,
+  .board-empty--prototype,
+  .board-listing-card,
+  .board-listing-card--makeover,
+  .spotted-card,
+  .pdxBoard,
+  .pdxRow,
+  .zine-filter-bar,
+  .board-stats-bar,
+  .board-stats-band,
+  .nude-live-card,
+  .nb-log,
+  .nb-log-fee,
+  .rb-panel,
+  .rb-compose,
+  .rb-card,
+  .rb-checkin__hero-card,
+  .rb-checkin__pulse,
+  .schedule-page .sch-toolbar,
+  .schedule-page .sch-pop,
+  .sch-toolbar,
+  .sch-pop,
+  .about-v2-donate--panel,
+  .submit-success,
+  .card.fitem.fitem--glow,
+  .fitem--glow {
+    background: #121218 !important;
+  }
+}
+
+html.calm-mode .gifting-form-panel--makeover,
+html.calm-mode .board-path-card,
+html.calm-mode .board-empty,
+html.calm-mode .board-empty--prototype,
+html.calm-mode .board-listing-card,
+html.calm-mode .board-listing-card--makeover,
+html.calm-mode .spotted-card,
+html.calm-mode .pdxBoard,
+html.calm-mode .pdxRow,
+html.calm-mode .zine-filter-bar,
+html.calm-mode .board-stats-bar,
+html.calm-mode .board-stats-band,
+html.calm-mode .nude-live-card,
+html.calm-mode .nb-log,
+html.calm-mode .nb-log-fee,
+html.calm-mode .rb-panel,
+html.calm-mode .rb-compose,
+html.calm-mode .rb-card,
+html.calm-mode .rb-checkin__hero-card,
+html.calm-mode .rb-checkin__pulse,
+html.calm-mode .sch-toolbar,
+html.calm-mode .sch-pop,
+html.calm-mode .about-v2-donate--panel,
+html.calm-mode .submit-success,
+html.calm-mode .card.fitem.fitem--glow,
+html.calm-mode .fitem--glow,
+:root[data-calm="true"] .gifting-form-panel--makeover,
+:root[data-calm="true"] .board-path-card,
+:root[data-calm="true"] .board-empty,
+:root[data-calm="true"] .board-empty--prototype,
+:root[data-calm="true"] .board-listing-card,
+:root[data-calm="true"] .board-listing-card--makeover,
+:root[data-calm="true"] .spotted-card,
+:root[data-calm="true"] .pdxBoard,
+:root[data-calm="true"] .pdxRow,
+:root[data-calm="true"] .zine-filter-bar,
+:root[data-calm="true"] .board-stats-bar,
+:root[data-calm="true"] .board-stats-band,
+:root[data-calm="true"] .nude-live-card,
+:root[data-calm="true"] .nb-log,
+:root[data-calm="true"] .nb-log-fee,
+:root[data-calm="true"] .rb-panel,
+:root[data-calm="true"] .rb-compose,
+:root[data-calm="true"] .rb-card,
+:root[data-calm="true"] .rb-checkin__hero-card,
+:root[data-calm="true"] .rb-checkin__pulse,
+:root[data-calm="true"] .sch-toolbar,
+:root[data-calm="true"] .sch-pop,
+:root[data-calm="true"] .about-v2-donate--panel,
+:root[data-calm="true"] .submit-success,
+:root[data-calm="true"] .card.fitem.fitem--glow,
+:root[data-calm="true"] .fitem--glow {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #121218 !important;
+}
+
+/* Steps makeover calm: keep dark but solid */
+html.calm-mode .gigs-page .board-how--makeover .board-step--makeover,
+html.calm-mode .gifting-page .board-how--makeover .board-step--makeover,
+html.calm-mode .missed-page .board-how--makeover .board-step--makeover,
+:root[data-calm="true"] .gigs-page .board-how--makeover .board-step--makeover,
+:root[data-calm="true"] .gifting-page .board-how--makeover .board-step--makeover,
+:root[data-calm="true"] .missed-page .board-how--makeover .board-step--makeover {
+  background: #0c0c0f !important;
+}
