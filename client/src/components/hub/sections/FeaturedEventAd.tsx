@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -8,6 +8,8 @@ import type { Event } from "@shared/schema";
 const CYAN = "#19E3FF";
 const GREEN = "#5CE600";
 const ORANGE = "#FF8C00";
+/** Loops under the Stank secret story until the overlay closes. */
+const STANK_EGG_AUDIO = "/easter-eggs/stank-secret-story.m4a";
 const glow = (c: string): React.CSSProperties => ({ textShadow: `0 0 16px ${c}80` });
 
 function eventStartMs(dateStart: string): number {
@@ -55,11 +57,18 @@ function EasterEggOverlay({
   src,
   title,
   onClose,
+  audioSrc = STANK_EGG_AUDIO,
 }: {
   src: string;
   title: string;
   onClose: () => void;
+  audioSrc?: string | null;
 }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [muted, setMuted] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false);
+
+  // Scroll lock + Escape to close
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -73,7 +82,83 @@ function EasterEggOverlay({
     };
   }, [onClose]);
 
+  // Audio: try autoplay (open was a user gesture), loop, hard-stop on unmount/close
+  useEffect(() => {
+    if (!audioSrc) return;
+    const audio = new Audio(audioSrc);
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = 0.85;
+    audioRef.current = audio;
+
+    const tryPlay = () => {
+      void audio.play().then(
+        () => setNeedsTap(false),
+        () => setNeedsTap(true),
+      );
+    };
+    tryPlay();
+
+    return () => {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      audioRef.current = null;
+    };
+  }, [audioSrc]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.muted = muted;
+    if (!muted && needsTap) {
+      void audio.play().then(
+        () => setNeedsTap(false),
+        () => { /* still blocked */ },
+      );
+    }
+  }, [muted, needsTap]);
+
+  const unlockAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    void audio.play().then(
+      () => setNeedsTap(false),
+      () => { /* ignore */ },
+    );
+  };
+
+  const toggleMute = () => {
+    setMuted((m) => {
+      const next = !m;
+      const audio = audioRef.current;
+      if (audio) {
+        audio.muted = next;
+        if (!next) void audio.play().catch(() => setNeedsTap(true));
+      }
+      return next;
+    });
+  };
+
   if (typeof document === "undefined") return null;
+
+  const chromeBtn: React.CSSProperties = {
+    width: 44,
+    height: 44,
+    borderRadius: 999,
+    border: "2px solid #5bff5b",
+    background: "rgba(0,0,0,0.85)",
+    color: "#5bff5b",
+    fontSize: 18,
+    lineHeight: 1,
+    cursor: "pointer",
+    boxShadow: "0 0 24px rgba(91,255,91,0.35)",
+    fontFamily: "var(--font-display, system-ui)",
+    fontWeight: 800,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
 
   return createPortal(
     <div
@@ -89,31 +174,65 @@ function EasterEggOverlay({
         flexDirection: "column",
       }}
     >
-      <button
-        type="button"
-        aria-label="Close secret story"
-        onClick={onClose}
+      <div
         style={{
           position: "fixed",
           top: "max(12px, env(safe-area-inset-top))",
           right: "max(12px, env(safe-area-inset-right))",
           zIndex: 10001,
-          width: 44,
-          height: 44,
-          borderRadius: 999,
-          border: "2px solid #5bff5b",
-          background: "rgba(0,0,0,0.85)",
-          color: "#5bff5b",
-          fontSize: 22,
-          lineHeight: 1,
-          cursor: "pointer",
-          boxShadow: "0 0 24px rgba(91,255,91,0.35)",
-          fontFamily: "var(--font-display, system-ui)",
-          fontWeight: 800,
+          display: "flex",
+          gap: 10,
+          alignItems: "center",
         }}
       >
-        ✕
-      </button>
+        {audioSrc && (
+          <button
+            type="button"
+            aria-label={muted ? "Unmute secret story audio" : "Mute secret story audio"}
+            onClick={toggleMute}
+            style={chromeBtn}
+            title={muted ? "Unmute" : "Mute"}
+          >
+            {muted ? "🔇" : "🔊"}
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label="Close secret story"
+          onClick={onClose}
+          style={{ ...chromeBtn, fontSize: 22 }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {needsTap && audioSrc && (
+        <button
+          type="button"
+          onClick={unlockAudio}
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: "max(24px, env(safe-area-inset-bottom))",
+            transform: "translateX(-50%)",
+            zIndex: 10001,
+            border: "2px solid #5bff5b",
+            background: "rgba(0,0,0,0.9)",
+            color: "#5bff5b",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: 11,
+            letterSpacing: ".12em",
+            textTransform: "uppercase",
+            padding: "12px 18px",
+            borderRadius: 999,
+            cursor: "pointer",
+            boxShadow: "0 0 24px rgba(91,255,91,0.35)",
+          }}
+        >
+          Tap for sound
+        </button>
+      )}
+
       <iframe
         src={src}
         title={title}
