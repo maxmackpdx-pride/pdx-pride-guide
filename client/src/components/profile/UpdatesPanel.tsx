@@ -340,22 +340,31 @@ export default function UpdatesPanel({
               {canLike ? (
                 <button
                   type="button"
-                  className="pp-updates__stat pp-updates__stat--likes pp-updates__like-btn"
+                  className={`pp-updates__engage pp-updates__engage--like${likes > 0 ? " has-count" : ""}`}
                   onClick={e => handleLike(post, e)}
                   disabled={!!pending[key]}
                   aria-label={`Like this post (${likes})`}
                 >
-                  ♥ {likes}
+                  <span className="pp-updates__engage-ico" aria-hidden="true">
+                    ♥
+                  </span>
+                  <span className="pp-updates__engage-n">{likes}</span>
+                  <span className="pp-updates__engage-lbl">LIKE</span>
                 </button>
               ) : (
-                <span className="pp-updates__stat pp-updates__stat--likes">♥ {likes}</span>
+                <span className="pp-updates__engage pp-updates__engage--like is-static">
+                  <span className="pp-updates__engage-ico" aria-hidden="true">
+                    ♥
+                  </span>
+                  <span className="pp-updates__engage-n">{likes}</span>
+                </span>
               )}
               {canThread ? (
                 <button
                   type="button"
-                  className={`pp-updates__stat pp-updates__stat--replies pp-updates__reply-btn${
+                  className={`pp-updates__engage pp-updates__engage--reply${
                     expanded ? " is-open" : ""
-                  }`}
+                  }${replies > 0 ? " has-count" : ""}`}
                   onClick={e => handleToggleThread(post, e)}
                   aria-expanded={expanded}
                   aria-controls={`pp-updates-thread-${key}`}
@@ -367,10 +376,21 @@ export default function UpdatesPanel({
                         : `Show replies (${replies})`
                   }
                 >
-                  💬 {replies}
+                  <span className="pp-updates__engage-ico" aria-hidden="true">
+                    💬
+                  </span>
+                  <span className="pp-updates__engage-n">{replies}</span>
+                  <span className="pp-updates__engage-lbl">
+                    {isBoardCard ? "OPEN" : expanded ? "HIDE" : "REPLY"}
+                  </span>
                 </button>
               ) : (
-                <span className="pp-updates__stat pp-updates__stat--replies">💬 {replies}</span>
+                <span className="pp-updates__engage pp-updates__engage--reply is-static">
+                  <span className="pp-updates__engage-ico" aria-hidden="true">
+                    💬
+                  </span>
+                  <span className="pp-updates__engage-n">{replies}</span>
+                </span>
               )}
             </div>
           );

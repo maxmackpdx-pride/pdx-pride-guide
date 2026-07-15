@@ -206,12 +206,108 @@
 .pp-updates__footer {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   border-top: 1px solid var(--panel-border, #1c1c22);
   padding-top: 12px;
   margin-top: 14px;
 }
 
+/* Pill engagement controls — same family as DM reaction chips */
+.pp-updates__engage {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 11px 4px 9px;
+  border-radius: 999px;
+  border: 1px solid #2a2a34;
+  background: #141418;
+  color: #c8c8d0;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease,
+    transform 0.1s ease;
+}
+
+.pp-updates__engage:hover:not(:disabled):not(.is-static) {
+  border-color: #3a3a48;
+  transform: translateY(-1px);
+}
+
+.pp-updates__engage:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.pp-updates__engage.is-static {
+  cursor: default;
+}
+
+.pp-updates__engage-ico {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pp-updates__engage-n {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #9a9aa4;
+  min-width: 0.75em;
+}
+
+.pp-updates__engage-lbl {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a7a84;
+}
+
+.pp-updates__engage--like .pp-updates__engage-ico {
+  color: var(--neon-magenta, #ff1fa0);
+}
+
+.pp-updates__engage--like.has-count {
+  border-color: rgba(255, 31, 160, 0.4);
+  background: rgba(255, 31, 160, 0.08);
+}
+
+.pp-updates__engage--like.has-count .pp-updates__engage-n,
+.pp-updates__engage--like.has-count .pp-updates__engage-lbl {
+  color: #f4a0d4;
+}
+
+.pp-updates__engage--like:hover:not(:disabled):not(.is-static) {
+  border-color: rgba(255, 31, 160, 0.55);
+  background: rgba(255, 31, 160, 0.12);
+}
+
+.pp-updates__engage--reply .pp-updates__engage-ico {
+  font-size: 12px;
+}
+
+.pp-updates__engage--reply.has-count {
+  border-color: rgba(25, 227, 255, 0.28);
+  background: rgba(25, 227, 255, 0.06);
+}
+
+.pp-updates__engage--reply.is-open {
+  border-color: rgba(25, 227, 255, 0.55);
+  background: rgba(25, 227, 255, 0.12);
+  color: #e6fbff;
+}
+
+.pp-updates__engage--reply.is-open .pp-updates__engage-n,
+.pp-updates__engage--reply.is-open .pp-updates__engage-lbl {
+  color: var(--neon-cyan, #19e3ff);
+}
+
+/* Back-compat if older class names linger */
 .pp-updates__stat {
   display: inline-flex;
   align-items: center;
@@ -219,53 +315,6 @@
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
   font-size: 9px;
   letter-spacing: 0.08em;
-}
-
-.pp-updates__stat--likes {
-  color: var(--neon-magenta);
-}
-
-.pp-updates__like-btn {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-}
-
-.pp-updates__like-btn:hover:not(:disabled) {
-  filter: brightness(1.15);
-}
-
-.pp-updates__like-btn:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
-.pp-updates__stat--replies {
-  color: var(--text-lo, #888);
-}
-
-.pp-updates__reply-btn {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-}
-
-.pp-updates__reply-btn:hover {
-  filter: brightness(1.15);
-}
-
-.pp-updates__reply-btn.is-open {
-  color: var(--neon-cyan);
 }
 
 .pp-updates__thread {

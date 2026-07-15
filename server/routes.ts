@@ -3494,6 +3494,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  // Long-press DM reactions: 👍 👎 😂 😢 ❤️ 💔 GAY!
+  app.post("/api/messages/:id/reactions", requireAuth, (req: any, res) => {
+    const messageId = Number(req.params.id);
+    const emoji = String(req.body?.emoji || req.body?.code || "").trim();
+    if (!emoji) return res.status(400).json({ error: "emoji required" });
+    const result = storage.toggleMessageReaction(messageId, req.session.userId!, emoji);
+    if (result.error) {
+      const status = result.error === "Invalid reaction" ? 400 : 404;
+      return res.status(status).json({ error: result.error });
+    }
+    res.json({ reactions: result.reactions });
+  });
+
   app.get("/api/messages/thread/:threadId", requireAuth, (req, res) => {
     const thread = storage.getThreadForViewer(req.params.threadId, req.session.userId!);
     const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
@@ -5081,10 +5094,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
     const guide = storage.resolveGuideAdminUser();
     if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const thread = storage.getThread(req.params.threadId);
+    const thread = storage.getThreadForViewer(req.params.threadId, guide.id);
     const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
     if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
     res.json({ messages: thread, guideUserId: guide.id });
+  });
+
+  /** React on guide-admin DMs as the shared guide identity. */
+  app.post("/api/admin/messages/:id/reactions", requireAdmin, (req: any, res) => {
+    const guide = storage.resolveGuideAdminUser();
+    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+    const messageId = Number(req.params.id);
+    const emoji = String(req.body?.emoji || req.body?.code || "").trim();
+    if (!emoji) return res.status(400).json({ error: "emoji required" });
+    const result = storage.toggleMessageReaction(messageId, guide.id, emoji);
+    if (result.error) {
+      const status = result.error === "Invalid reaction" ? 400 : 404;
+      return res.status(status).json({ error: result.error });
+    }
+    res.json({ reactions: result.reactions });
   });
 
   app.post("/api/admin/messages/thread/:threadId/reply", requireAdmin, (req, res) => {

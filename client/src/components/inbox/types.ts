@@ -1,4 +1,5 @@
 import type { InboxPartyAvatar } from "@/lib/inboxAvatar";
+import type { MessageReactionCode } from "@shared/messageReactions";
 
 export type Category = "spotted" | "gigs" | "gifting" | "hosts" | "checkins";
 export type Folder = "inbox" | "sent" | "deleted";
@@ -6,12 +7,20 @@ export type Folder = "inbox" | "sent" | "deleted";
 export type QueueFolder = "active" | "completed" | "inbox" | "sent";
 export type LineupDecision = "APPROVED" | "DENIED";
 
+/** Aggregated emoji reaction chip on a DM bubble. */
+export interface ThreadMessageReaction {
+  code: MessageReactionCode | string;
+  count: number;
+  mine: boolean;
+}
+
 export interface ThreadMessage {
   id: string;
   body: string;
   at: string;
   self: boolean;
   party?: InboxPartyAvatar;
+  reactions?: ThreadMessageReaction[];
 }
 
 export interface ThreadReveal {
@@ -77,4 +86,5 @@ export type ApiMessageRow = {
   to_avatar_choice?: number | null;
   to_avatar_ring?: string | null;
   masked?: boolean;
+  reactions?: ThreadMessageReaction[];
 };

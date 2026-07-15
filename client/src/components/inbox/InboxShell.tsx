@@ -17,7 +17,9 @@ import {
   SearchIcon,
   TrashIcon,
 } from "./icons";
+import { LongPressReactable } from "./MessageReactions";
 import "./inbox.css";
+import "./message-reactions.css";
 
 /* ---- Tweaks (were DC editor props; here they are component props) ---- */
 export interface InboxProps {
@@ -77,8 +79,17 @@ export function InboxShell({
   compact = false,
 }: InboxShellProps) {
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
-  const { threads, loading, sendMessage, setRead, archive, remove, revealSelf, resolveLineup } =
-    useInboxThreads(activeId);
+  const {
+    threads,
+    loading,
+    sendMessage,
+    toggleReaction,
+    setRead,
+    archive,
+    remove,
+    revealSelf,
+    resolveLineup,
+  } = useInboxThreads(activeId);
 
   const [folder, setFolder] = useState<Folder>("inbox");
   const [cat, setCat] = useState<string>("all");
@@ -376,7 +387,20 @@ export function InboxShell({
             letterSpacing: ".04em",
           };
         }
-        return { id: m.id, body: m.body, at: m.at, senderLabel, party: m.party, ring, showAvatar, wrapStyle, bubbleStyle, metaStyle };
+        return {
+          id: m.id,
+          body: m.body,
+          at: m.at,
+          self: m.self,
+          reactions: m.reactions,
+          senderLabel,
+          party: m.party,
+          ring,
+          showAvatar,
+          wrapStyle,
+          bubbleStyle,
+          metaStyle,
+        };
       })
     : [];
 
@@ -1083,12 +1107,24 @@ export function InboxShell({
                 {messages.map((m) => (
                   <div key={m.id} style={m.wrapStyle}>
                     {m.showAvatar && <ThreadAvatar party={m.party} masked={amasked} size={28} ring={m.ring} />}
-                    <div style={m.bubbleStyle}>
-                      <div style={m.metaStyle}>
-                        {m.senderLabel} · {m.at}
+                    <LongPressReactable
+                      messageId={m.id}
+                      self={m.self}
+                      reactions={m.reactions}
+                      onToggle={async (code) => {
+                        if (!at) return;
+                        await toggleReaction(at.id, m.id, code);
+                      }}
+                    >
+                      <div style={m.bubbleStyle}>
+                        <div style={m.metaStyle}>
+                          {m.senderLabel} · {m.at}
+                        </div>
+                        <div style={{ fontSize: "0.9rem", color: "var(--text-mid)", lineHeight: 1.5 }}>
+                          {m.body}
+                        </div>
                       </div>
-                      <div style={{ fontSize: "0.9rem", color: "var(--text-mid)", lineHeight: 1.5 }}>{m.body}</div>
-                    </div>
+                    </LongPressReactable>
                   </div>
                 ))}
               </div>

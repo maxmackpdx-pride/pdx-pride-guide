@@ -15,10 +15,13 @@ import QueueView from "@/components/inbox/panel/QueueView";
 import PostsView from "@/components/inbox/panel/PostsView";
 import StatsView from "@/components/inbox/panel/StatsView";
 import InboxGroupChat, { type InboxGroupChatTarget } from "@/components/inbox/InboxGroupChat";
+import { MessageBubbleWithReactions } from "@/components/inbox/MessageReactions";
 import { eventIdFromInboxContext } from "@/lib/inboxContext";
 import EventModal from "@/components/EventModal";
 import type { EventListing } from "@shared/multiDayEvents";
+import type { MessageReactionCode } from "@shared/messageReactions";
 import "@/components/inbox/inbox-experiment.css";
+import "@/components/inbox/message-reactions.css";
 
 type View = "inbox" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
@@ -67,12 +70,21 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const isOwner = Boolean(user?.isPrimaryOwner);
   const adminMailActive = isAdmin && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent");
 
-  const { threads, sendMessage, setRead, archive, unarchive, deletedCount, revealSelf, resolveLineup } = useInboxThreads(
-    adminMailActive ? null : activeId,
-  );
+  const {
+    threads,
+    sendMessage,
+    toggleReaction,
+    setRead,
+    archive,
+    unarchive,
+    deletedCount,
+    revealSelf,
+    resolveLineup,
+  } = useInboxThreads(adminMailActive ? null : activeId);
   const {
     threads: adminThreads,
     sendMessage: sendAdminGuideMessage,
+    toggleReaction: toggleAdminGuideReaction,
     setRead: setAdminGuideRead,
     archive: archiveAdminGuide,
     unarchive: unarchiveAdminGuide,
@@ -431,6 +443,13 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               onSend={send}
               onBack={closeThread}
               readOnly={activeThread.archived}
+              onReact={async (messageId, code) => {
+                if (adminMailActive) {
+                  await toggleAdminGuideReaction(activeThread.id, messageId, code);
+                } else {
+                  await toggleReaction(activeThread.id, messageId, code);
+                }
+              }}
               onArchive={() => {
                 if (adminMailActive) {
                   archiveAdminGuide(activeThread.id);
@@ -584,6 +603,7 @@ type ThreadDetailProps = {
   onReveal: () => void;
   onResolveLineup: (decision: LineupDecision) => void;
   onOpenEvent?: (eventId: number) => void;
+  onReact?: (messageId: string, code: MessageReactionCode) => void | Promise<void>;
 };
 
 // Full thread view rendered in place inside the floating inbox — no navigation.
@@ -601,6 +621,7 @@ function ThreadDetail({
   onReveal,
   onResolveLineup,
   onOpenEvent,
+  onReact,
 }: ThreadDetailProps) {
   const accent = isAdminGuide ? C.magenta : (CAT_ACCENT[thread.cat] ?? C.cyan);
   const showReveal = thread.anonymous && thread.reveal && !thread.reveal.iRevealed;
@@ -673,15 +694,19 @@ function ThreadDetail({
 
       <div className="inbox-exp-thread__messages">
         {thread.messages.map((m) => (
-          <div
+          <MessageBubbleWithReactions
             key={m.id}
-            className={`inbox-exp-bubble-wrap${m.self ? " inbox-exp-bubble-wrap--self" : " inbox-exp-bubble-wrap--other"}`}
-          >
-            <div className={`inbox-exp-bubble${m.self ? " inbox-exp-bubble--self" : " inbox-exp-bubble--other"}`}>
-              {m.body}
-            </div>
-            <div className="inbox-exp-bubble__time">{m.at}</div>
-          </div>
+            messageId={m.id}
+            body={m.body}
+            self={m.self}
+            reactions={m.reactions}
+            disabled={readOnly || !onReact}
+            timeLabel={m.at}
+            onToggle={async (code) => {
+              if (!onReact) return;
+              await onReact(m.id, code);
+            }}
+          />
         ))}
       </div>
 

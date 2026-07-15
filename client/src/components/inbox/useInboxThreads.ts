@@ -220,6 +220,7 @@ export function useInboxThreads(activeThreadId: string | null) {
         at: formatThreadTime(m.createdAt || m.created_at),
         self,
         party,
+        reactions: Array.isArray(m.reactions) ? m.reactions : [],
       };
     });
     const party = counterpart?.party ?? partyForRow(activePayload.messages[0], folder, userId);
@@ -265,6 +266,39 @@ export function useInboxThreads(activeThreadId: string | null) {
     await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", threadId] });
     await refreshInboxQueries(queryClient);
   }, [queryClient, toast]);
+
+  const toggleReaction = useCallback(
+    async (threadId: string, messageId: string | number, emoji: string) => {
+      const r = await fetch(`/api/messages/${encodeURIComponent(String(messageId))}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ emoji }),
+      });
+      if (!r.ok) {
+        toast({ title: "Could not react", variant: "destructive" });
+        throw new Error("Reaction failed");
+      }
+      const data = (await r.json()) as { reactions?: ThreadMessage["reactions"] };
+      // Optimistic: patch active thread cache so chips update immediately.
+      queryClient.setQueryData(
+        ["/api/messages/thread", threadId],
+        (prev: { messages?: ApiMessageRow[] } | undefined) => {
+          if (!prev?.messages) return prev;
+          return {
+            ...prev,
+            messages: prev.messages.map((m) =>
+              String(m.id) === String(messageId)
+                ? { ...m, reactions: data.reactions || [] }
+                : m,
+            ),
+          };
+        },
+      );
+      return data.reactions || [];
+    },
+    [queryClient, toast],
+  );
 
   const setRead = useCallback(async (threadId: string, unread: boolean) => {
     const thread = threads.find(t => t.id === threadId);
@@ -358,6 +392,7 @@ export function useInboxThreads(activeThreadId: string | null) {
     loading: inboxLoading || sentLoading,
     deletedCount,
     sendMessage,
+    toggleReaction,
     setRead,
     archive,
     unarchive,

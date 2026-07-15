@@ -33,12 +33,13 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
   {
     id: "inbox",
     label: "Inbox & mail threads",
-    tables: ["messages"],
+    tables: ["messages", "message_reactions"],
     apiRoutes: [
       "GET /api/inbox",
       "GET /api/inbox/sent",
       "POST /api/inbox/:threadId/reply",
       "DELETE /api/inbox/:threadId",
+      "POST /api/messages/:id/reactions",
     ],
   },
   {

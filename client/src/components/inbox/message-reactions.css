@@ -1,0 +1,194 @@
+/* Message long-press reactions — matches inbox-exp bubble chrome */
+
+.msg-rxn-wrap {
+  position: relative;
+  touch-action: pan-y;
+}
+
+.inbox-exp-bubble.is-reacting {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 1px rgba(200, 250, 60, 0.35), 0 8px 22px -12px rgba(0, 0, 0, 0.65);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.msg-rxn__tray {
+  position: absolute;
+  z-index: 30;
+  bottom: calc(100% + 6px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 6px;
+  border-radius: 999px;
+  background: #121218;
+  border: 1px solid #2a2a34;
+  box-shadow:
+    0 10px 28px -10px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: msgRxnPop 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+  max-width: min(92vw, 340px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.msg-rxn-wrap--self .msg-rxn__tray,
+.msg-rxn-wrap.inbox-exp-bubble-wrap--self .msg-rxn__tray {
+  right: 0;
+}
+
+.msg-rxn-wrap--other .msg-rxn__tray,
+.msg-rxn-wrap.inbox-exp-bubble-wrap--other .msg-rxn__tray {
+  left: 0;
+}
+
+.msg-rxn__tray::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes msgRxnPop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.msg-rxn__opt {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease, transform 0.12s ease;
+  color: #f4f1ea;
+}
+
+.msg-rxn__opt:hover:not(:disabled),
+.msg-rxn__opt:focus-visible {
+  background: #1e1e28;
+  transform: scale(1.12);
+  outline: none;
+}
+
+.msg-rxn__opt.is-mine {
+  background: rgba(200, 250, 60, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(200, 250, 60, 0.45);
+}
+
+.msg-rxn__opt--gay {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  min-width: 44px;
+  color: #ff4fd8;
+  text-shadow: 0 0 10px rgba(255, 79, 216, 0.45);
+}
+
+.msg-rxn__opt--gay.is-mine {
+  background: rgba(255, 79, 216, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 79, 216, 0.55);
+}
+
+.msg-rxn__opt:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.msg-rxn__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+  max-width: 88%;
+}
+
+.msg-rxn-wrap--self .msg-rxn__chips,
+.inbox-exp-bubble-wrap--self .msg-rxn__chips {
+  justify-content: flex-end;
+}
+
+.msg-rxn-wrap--other .msg-rxn__chips,
+.inbox-exp-bubble-wrap--other .msg-rxn__chips {
+  justify-content: flex-start;
+}
+
+.msg-rxn__chip {
+  appearance: none;
+  border: 1px solid #2a2a34;
+  background: #141418;
+  color: #e6e6ea;
+  border-radius: 999px;
+  min-height: 24px;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.1s ease;
+}
+
+.msg-rxn__chip:hover:not(:disabled) {
+  border-color: #3a3a48;
+  transform: translateY(-1px);
+}
+
+.msg-rxn__chip.is-mine {
+  border-color: rgba(200, 250, 60, 0.55);
+  background: rgba(200, 250, 60, 0.12);
+  color: #f4f1ea;
+}
+
+.msg-rxn__chip--gay {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ff4fd8;
+}
+
+.msg-rxn__chip--gay.is-mine {
+  border-color: rgba(255, 79, 216, 0.55);
+  background: rgba(255, 79, 216, 0.14);
+}
+
+.msg-rxn__chip-n {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  color: #9a9aa4;
+  letter-spacing: 0.04em;
+}
+
+.msg-rxn__chip.is-mine .msg-rxn__chip-n {
+  color: #c8fa3c;
+}
+
+.msg-rxn__chip:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .msg-rxn__tray {
+    animation: none;
+  }
+  .inbox-exp-bubble.is-reacting {
+    transform: none;
+  }
+}

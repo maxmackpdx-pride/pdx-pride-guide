@@ -172,6 +172,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
         at: formatThreadTime(m.createdAt || m.created_at),
         self,
         party,
+        reactions: Array.isArray(m.reactions) ? m.reactions : [],
       };
     });
     const party = counterpart?.party ?? partyForRow(activePayload.messages[0], folder);
@@ -205,6 +206,38 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
       }
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/messages/thread", threadId] });
       await refreshAdminGuideQueries(queryClient);
+    },
+    [queryClient, toast],
+  );
+
+  const toggleReaction = useCallback(
+    async (threadId: string, messageId: string | number, emoji: string) => {
+      const r = await fetch(`/api/admin/messages/${encodeURIComponent(String(messageId))}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ emoji }),
+      });
+      if (!r.ok) {
+        toast({ title: "Could not react", variant: "destructive" });
+        throw new Error("Reaction failed");
+      }
+      const data = (await r.json()) as { reactions?: ThreadMessage["reactions"] };
+      queryClient.setQueryData(
+        ["/api/admin/messages/thread", threadId],
+        (prev: { messages?: ApiMessageRow[] } | undefined) => {
+          if (!prev?.messages) return prev;
+          return {
+            ...prev,
+            messages: prev.messages.map((m) =>
+              String(m.id) === String(messageId)
+                ? { ...m, reactions: data.reactions || [] }
+                : m,
+            ),
+          };
+        },
+      );
+      return data.reactions || [];
     },
     [queryClient, toast],
   );
@@ -284,6 +317,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
     loading: inboxLoading || sentLoading,
     unreadCount,
     sendMessage,
+    toggleReaction,
     setRead,
     archive,
     unarchive,
