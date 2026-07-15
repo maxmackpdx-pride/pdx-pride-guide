@@ -24,13 +24,33 @@ export interface AuthUser {
   canManageCatalog?: boolean;
   subAdmin?: boolean;
   usernameChangedAt?: string | null;
+  communityStandardsVersion?: string | null;
+  communityStandardsAgreedAt?: string | null;
+  communityStandardsDeclinedAt?: string | null;
+  accountStatus?: string | null;
+  suspendReasonCode?: string | null;
+  suspendReasonLabel?: string | null;
+  suspendNote?: string | null;
+  suspendUntil?: string | null;
+  suspendedAt?: string | null;
 }
+
+export type RegisterOptions = {
+  agreedToCommunityStandards?: boolean;
+  communityStandardsVersion?: string;
+};
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, displayName?: string) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+    displayName?: string,
+    options?: RegisterOptions,
+  ) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -66,11 +86,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await refreshUser();
   };
 
-  const register = async (username: string, email: string, password: string, displayName?: string) => {
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+    displayName?: string,
+    options?: RegisterOptions,
+  ) => {
     const res = await fetch("/api/auth/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ username, email, password, displayName }),
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+        displayName,
+        agreedToCommunityStandards: options?.agreedToCommunityStandards === true,
+        communityStandardsVersion: options?.communityStandardsVersion,
+      }),
     });
     if (!res.ok) throw new Error((await res.json()).error || "Registration failed");
     await refreshUser();

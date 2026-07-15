@@ -51,6 +51,8 @@ import NudeBeaches from "./pages/NudeBeaches";
 import DesignSystemSandbox from "./pages/DesignSystemSandbox";
 import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/not-found";
+import CommunityStandardsGate from "./components/CommunityStandardsGate";
+import SuspendedAccountGate from "./components/SuspendedAccountGate";
 
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
@@ -123,6 +125,8 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <PushNotificationPrompt />
+          <SuspendedAccountGate />
+          <CommunityStandardsGate />
           <Router>
             <InboxSheetProvider>
               <ScrollToTop />

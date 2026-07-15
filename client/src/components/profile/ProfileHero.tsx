@@ -5,6 +5,9 @@ import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
 import RoleStickers from "./RoleStickers";
 import AdminProfilePhotoReject from "@/components/admin/AdminProfilePhotoReject";
+import AdminProfileModeration from "@/components/admin/AdminProfileModeration";
+import ReportAccount from "@/components/profile/ReportAccount";
+import { useAuth } from "@/context/AuthContext";
 import { coverCropToImgStyle } from "@/lib/coverCrop";
 import type { PublicProfileData } from "./types";
 import "./ProfileHero.css";
@@ -73,11 +76,13 @@ export default function ProfileHero({
   onAccent,
   onSolidBanner,
 }: Props) {
+  const { user: viewer } = useAuth();
   const accentRef = useRef<HTMLDivElement>(null);
   const shareRef = useRef<HTMLDivElement>(null);
   const hasCustomCover = !!data.coverImageUrl;
   const isPromoter = !!(data.isPromoter || data.verifiedHost);
   const displayName = data.displayName || data.username;
+  const canDeleteAccount = !!viewer?.isPrimaryOwner;
   const memberYear =
     data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
       ? new Date(data.memberSince).getFullYear()
@@ -129,6 +134,17 @@ export default function ProfileHero({
             )}
             {data.viewerIsAdmin && !isOwner && data.photoUrl ? (
               <AdminProfilePhotoReject username={data.username} />
+            ) : null}
+            {data.viewerIsAdmin && !isOwner ? (
+              <AdminProfileModeration
+                username={data.username}
+                accountStatus={(data as any).accountStatus}
+                shadowBanned={!!(data as any).shadowBanned}
+                canDeleteAccount={canDeleteAccount}
+              />
+            ) : null}
+            {!isOwner && viewer && !data.viewerIsAdmin ? (
+              <ReportAccount username={data.username} />
             ) : null}
           </div>
 

@@ -240,6 +240,11 @@ const MODERATION_TAG: Record<string, { label: string; color: string }> = {
   REMOVE: { label: "REMOVE REQ", color: C.red },
   FLAG: { label: "FLAGGED", color: C.red },
   FLAGGED_BY_OWNER: { label: "OWNER FLAG", color: C.red },
+  ACCOUNT_REPORT: { label: "USER REPORT", color: C.red },
+  ACCOUNT_SUSPEND: { label: "SUSPEND", color: C.orange },
+  ACCOUNT_SHADOWBAN: { label: "SHADOW BAN", color: C.purple },
+  ACCOUNT_DELETE: { label: "DELETE", color: C.red },
+  SUSPEND_APPEAL: { label: "APPEAL", color: C.cyan },
 };
 
 /** Shared admin moderation queue (moderation_requests) — reports and

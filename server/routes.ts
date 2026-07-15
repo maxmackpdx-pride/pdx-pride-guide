@@ -48,6 +48,14 @@ import {
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
+import {
+  COMMUNITY_STANDARDS_VERSION,
+  COMMUNITY_STANDARDS_DECLINE_URL,
+} from "@shared/communityStandards";
+import {
+  accountModReasonLabel,
+  untilIsoFromHours,
+} from "@shared/accountModeration";
 import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
 import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
@@ -197,6 +205,19 @@ function adminUserSummary(user: any) {
     status: user.status || "active",
     createdAt: user.createdAt || "",
     isOwner: isMainAdminUser(user),
+    communityStandardsVersion: user.communityStandardsVersion || null,
+    communityStandardsAgreedAt: user.communityStandardsAgreedAt || null,
+    communityStandardsDeclinedAt: user.communityStandardsDeclinedAt || null,
+    accountStatus: user.status || "active",
+    suspendReasonCode: user.suspendReasonCode || null,
+    suspendReasonLabel: user.suspendReasonLabel || null,
+    suspendNote: user.suspendNote || null,
+    suspendUntil: user.suspendUntil || null,
+    suspendedAt: user.suspendedAt || null,
+    shadowBanned: !!user.shadowBanned,
+    shadowBanReasonCode: user.shadowBanReasonCode || null,
+    shadowBanReasonLabel: user.shadowBanReasonLabel || null,
+    shadowBanUntil: user.shadowBanUntil || null,
   };
 }
 
@@ -407,6 +428,15 @@ function authUserResponse(req: any, user: any) {
     canManageCatalog: storage.hasOwnerAdminAccess(user) || isMainAdminUser(user),
     subAdmin: !!user.subAdmin,
     usernameChangedAt: user.usernameChangedAt || null,
+    communityStandardsVersion: user.communityStandardsVersion || null,
+    communityStandardsAgreedAt: user.communityStandardsAgreedAt || null,
+    communityStandardsDeclinedAt: user.communityStandardsDeclinedAt || null,
+    accountStatus: user.status || "active",
+    suspendReasonCode: user.suspendReasonCode || null,
+    suspendReasonLabel: user.suspendReasonLabel || null,
+    suspendNote: user.suspendNote || null,
+    suspendUntil: user.suspendUntil || null,
+    suspendedAt: user.suspendedAt || null,
   };
 }
 
@@ -794,6 +824,28 @@ function maybeSyncSiteOwnerPortfolio(user: { id?: number; email?: string | null;
 function requireAuth(req: any, res: any, next: any) {
   if (!req.session?.userId) {
     return res.status(401).json({ error: "Not authenticated" });
+  }
+  let user = storage.getUserById(req.session.userId);
+  if (!user || user.status === "deleted") {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  user = storage.clearExpiredAccountModeration(user.id) || user;
+  // Suspended accounts may only hit auth/status/appeal endpoints.
+  if (user.status === "suspended") {
+    const path = String(req.path || req.url || "");
+    const allowed =
+      path.includes("/auth/me") ||
+      path.includes("/auth/logout") ||
+      path.includes("/auth/suspension-appeal") ||
+      path.includes("/auth/community-standards");
+    if (!allowed && req.method !== "GET") {
+      return res.status(403).json({
+        error: "Account suspended",
+        suspended: true,
+        suspendReasonLabel: user.suspendReasonLabel || null,
+        suspendUntil: user.suspendUntil || null,
+      });
+    }
   }
   next();
 }
@@ -2139,12 +2191,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ─── USER AUTH ────────────────────────────────────────────────────────────
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { username, email, password, displayName } = req.body;
+      const { username, email, password, displayName, agreedToCommunityStandards, communityStandardsVersion } = req.body;
       if (!username || !email || !password) {
         return res.status(400).json({ error: "username, email, and password are required" });
       }
       if (username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
       if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+      if (!agreedToCommunityStandards) {
+        return res.status(400).json({ error: "You must agree to the Community Standards and legal terms to join" });
+      }
       // Reserved shared guide-admin identity — not a human signup.
       if (storage.isSystemGuideAccount({ username, email })) {
         return res.status(400).json({ error: "That username or email is reserved" });
@@ -2156,13 +2211,54 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const existingUsername = storage.getUserByUsername(username);
       if (existingUsername) return res.status(409).json({ error: "Username already taken" });
 
-      const user = storage.createUser({ username, email, passwordHash: password, displayName });
+      const version =
+        typeof communityStandardsVersion === "string" && communityStandardsVersion
+          ? communityStandardsVersion
+          : COMMUNITY_STANDARDS_VERSION;
+      const now = new Date().toISOString();
+      const user = storage.createUser({
+        username,
+        email,
+        passwordHash: password,
+        displayName,
+        communityStandardsVersion: version,
+        communityStandardsAgreedAt: now,
+      });
       maybeSyncSiteOwnerPortfolio(user);
       req.session.userId = user.id;
       res.json(authUserResponse(req, user));
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
+  });
+
+  app.post("/api/auth/community-standards/agree", requireAuth, (req, res) => {
+    const userId = req.session.userId!;
+    const version =
+      typeof req.body?.version === "string" && req.body.version
+        ? req.body.version
+        : COMMUNITY_STANDARDS_VERSION;
+    storage.setCommunityStandardsAgreement(userId, { agreed: true, version });
+    const user = storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(authUserResponse(req, user));
+  });
+
+  app.post("/api/auth/community-standards/decline", (req, res) => {
+    const userId = req.session?.userId;
+    const version =
+      typeof req.body?.version === "string" && req.body.version
+        ? req.body.version
+        : COMMUNITY_STANDARDS_VERSION;
+    if (userId) {
+      storage.setCommunityStandardsAgreement(userId, { agreed: false, version });
+    }
+    const payload = { ok: true, redirectUrl: COMMUNITY_STANDARDS_DECLINE_URL };
+    if (typeof req.session?.destroy === "function") {
+      req.session.destroy(() => res.json(payload));
+      return;
+    }
+    res.json(payload);
   });
 
   app.post("/api/auth/login", (req, res) => {
@@ -2180,9 +2276,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       storage.updatePasswordHash(user.id, hashPassword(password));
     }
     const finishLogin = () => {
-      req.session.userId = user.id;
-      maybeSyncSiteOwnerPortfolio(user);
-      res.json(authUserResponse(req, user));
+      if (user.status === "deleted") {
+        return res.status(403).json({ error: "This account has been removed" });
+      }
+      // Timed suspend/shadow auto-lift on login
+      const refreshed = storage.clearExpiredAccountModeration(user.id) || user;
+      if (refreshed.status === "deleted") {
+        return res.status(403).json({ error: "This account has been removed" });
+      }
+      req.session.userId = refreshed.id;
+      maybeSyncSiteOwnerPortfolio(refreshed);
+      res.json(authUserResponse(req, refreshed));
     };
     if (typeof req.session.regenerate === "function") {
       return req.session.regenerate(err => {
@@ -2389,8 +2493,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/auth/me", (req, res) => {
     if (!req.session?.userId) return res.status(401).json({ error: "Not authenticated" });
-    const user = storage.getUserById(req.session.userId);
+    let user = storage.getUserById(req.session.userId);
     if (!user) return res.status(401).json({ error: "Not authenticated" });
+    if (user.status === "deleted") {
+      req.session.destroy(() => {});
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    user = storage.clearExpiredAccountModeration(user.id) || user;
     res.json(authUserResponse(req, user));
   });
 
@@ -4160,6 +4269,200 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user) return res.status(404).json({ error: "User not found" });
     storage.setPromoterStatus(userId, status);
     res.json({ ok: true, promoterStatus: status });
+  });
+
+  app.post("/api/admin/users/:username/moderate", requireAdmin, (req, res) => {
+    const actorId = req.session.userId;
+    if (!actorId) return res.status(401).json({ error: "Not authenticated" });
+    const actor = storage.getUserById(actorId);
+    if (!actor) return res.status(401).json({ error: "Not authenticated" });
+
+    const username = String(req.params.username || "").trim().replace(/^@/, "");
+    const target = storage.getUserByUsername(username);
+    if (!target) return res.status(404).json({ error: "User not found" });
+    if (target.id === actorId) return res.status(400).json({ error: "Cannot moderate your own account" });
+    if (storage.isPrimarySiteOwner(target) && !storage.isPrimarySiteOwner(actor)) {
+      return res.status(403).json({ error: "Cannot moderate the primary owner" });
+    }
+
+    const action = String(req.body?.action || "").toLowerCase();
+    const allowed = ["suspend", "unsuspend", "shadowban", "unshadowban", "delete"];
+    if (!allowed.includes(action)) {
+      return res.status(400).json({ error: "action must be suspend, unsuspend, shadowban, unshadowban, or delete" });
+    }
+    // Full account delete is primary-owner only.
+    if (action === "delete" && !storage.isPrimarySiteOwner(actor)) {
+      return res.status(403).json({ error: "Only the site owner can fully delete an account" });
+    }
+
+    const reasonCode = String(req.body?.reasonCode || "OTHER").trim();
+    const reasonLabel =
+      typeof req.body?.reasonLabel === "string" && req.body.reasonLabel.trim()
+        ? req.body.reasonLabel.trim().slice(0, 160)
+        : accountModReasonLabel(reasonCode);
+    const note = typeof req.body?.note === "string" ? req.body.note : "";
+    let until: string | null = null;
+    if (req.body?.until) {
+      until = String(req.body.until);
+    } else if (req.body?.durationHours != null && req.body.durationHours !== "") {
+      until = untilIsoFromHours(Number(req.body.durationHours));
+    }
+
+    if ((action === "suspend" || action === "shadowban" || action === "delete") && !reasonCode) {
+      return res.status(400).json({ error: "reasonCode required" });
+    }
+
+    const updated = storage.applyAccountModeration({
+      targetUserId: target.id,
+      actorUserId: actorId,
+      action: action as any,
+      reasonCode,
+      reasonLabel,
+      note,
+      until,
+    });
+    if (!updated) return res.status(500).json({ error: "Could not update user" });
+
+    // Shared admin queue + owner inbox for restricting actions
+    if (action === "suspend" || action === "shadowban" || action === "delete") {
+      const type =
+        action === "suspend"
+          ? "ACCOUNT_SUSPEND"
+          : action === "shadowban"
+            ? "ACCOUNT_SHADOWBAN"
+            : "ACCOUNT_DELETE";
+      const untilLine = until ? `Until: ${until}` : "Until: indefinite";
+      const proof = [
+        `Action: ${action}`,
+        `By: @${actor.username} (${actor.displayName || "admin"})`,
+        `Reason: ${reasonLabel} (${reasonCode})`,
+        untilLine,
+        note.trim() ? `Note: ${note.trim()}` : null,
+        `Profile: /u/${encodeURIComponent(target.username)}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+      storage.createModerationRequest({
+        type,
+        eventId: 0,
+        eventTitle: `@${target.username}`,
+        requesterName: actor.displayName || actor.username,
+        requesterEmail: actor.email,
+        proof,
+      });
+      // Duplicate into owner personal inbox + Owner Desk.
+      const ownerUser =
+        storage.getAllUsers().find((u) => storage.isPrimarySiteOwner(u)) || null;
+      if (ownerUser) {
+        storage.sendAsGuideAdmin(
+          ownerUser.id,
+          `${action.toUpperCase()}: @${target.username}`,
+          proof,
+          {
+            contextType: "ADMIN_ALERT",
+            contextId: target.id,
+            contextLabel: `@${target.username}`,
+          },
+        );
+      }
+      storage.createOwnerDeskItem({
+        kind: "account_moderation",
+        title: `${action}: @${target.username}`,
+        summary: reasonLabel,
+        body: proof,
+        contactName: actor.displayName || actor.username,
+        contactEmail: actor.email,
+        pageUrl: `/u/${encodeURIComponent(target.username)}`,
+        severity: action === "delete" ? "critical" : "high",
+        metaJson: {
+          action,
+          targetUserId: target.id,
+          targetUsername: target.username,
+          reasonCode,
+          until,
+          actorUserId: actor.id,
+        },
+      });
+    }
+
+    auditAdmin(req, `account_${action}`, {
+      type: "user",
+      id: target.id,
+      label: `@${target.username}`,
+      detail: { reasonCode, until, hasNote: Boolean(note) },
+    });
+
+    res.json({ ok: true, user: adminUserSummary(updated) });
+  });
+
+  /** Member report of another account → admin moderation queue */
+  app.post("/api/users/:username/report", requireAuth, (req, res) => {
+    const reporterId = req.session.userId!;
+    const reporter = storage.getUserById(reporterId);
+    if (!reporter) return res.status(401).json({ error: "Not authenticated" });
+    const username = String(req.params.username || "").trim().replace(/^@/, "");
+    const target = storage.getUserByUsername(username);
+    if (!target || target.status === "deleted") {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (target.id === reporterId) {
+      return res.status(400).json({ error: "Cannot report yourself" });
+    }
+    const reasonCode = String(req.body?.reasonCode || "OTHER").trim();
+    const reasonLabel = accountModReasonLabel(reasonCode);
+    const note = String(req.body?.note || "").trim().slice(0, 1000);
+    const proof = [
+      `Report against @${target.username}`,
+      `From: @${reporter.username}`,
+      `Reason: ${reasonLabel} (${reasonCode})`,
+      note ? `Details: ${note}` : null,
+      `Profile: /u/${encodeURIComponent(target.username)}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const row = storage.createModerationRequest({
+      type: "ACCOUNT_REPORT",
+      eventId: 0,
+      eventTitle: `@${target.username}`,
+      requesterName: reporter.displayName || reporter.username,
+      requesterEmail: reporter.email,
+      proof,
+    });
+    res.json({ ok: true, reportId: row.id });
+  });
+
+  app.post("/api/auth/suspension-appeal", requireAuth, (req, res) => {
+    let user = storage.getUserById(req.session.userId!);
+    if (!user) return res.status(401).json({ error: "Not authenticated" });
+    user = storage.clearExpiredAccountModeration(user.id) || user;
+    if (user.status !== "suspended") {
+      return res.status(400).json({ error: "Your account is not suspended" });
+    }
+    const body = String(req.body?.body || "").trim().slice(0, 2000);
+    if (body.length < 20) {
+      return res.status(400).json({ error: "Appeal must be at least 20 characters" });
+    }
+    const proof = [
+      `Suspension appeal from @${user.username}`,
+      `Suspend reason: ${user.suspendReasonLabel || user.suspendReasonCode || "n/a"}`,
+      user.suspendUntil ? `Until: ${user.suspendUntil}` : "Until: indefinite",
+      user.suspendNote ? `Admin note: ${user.suspendNote}` : null,
+      "",
+      "Appeal:",
+      body,
+    ]
+      .filter((x) => x !== null)
+      .join("\n");
+    // Appeals go to shared Admin queue (moderation), not Owner Desk only.
+    const row = storage.createModerationRequest({
+      type: "SUSPEND_APPEAL",
+      eventId: 0,
+      eventTitle: `@${user.username}`,
+      requesterName: user.displayName || user.username,
+      requesterEmail: user.email,
+      proof,
+    });
+    res.json({ ok: true, appealId: row.id });
   });
 
   app.post("/api/admin/users/:username/reject-photo", requireAdmin, (req, res) => {

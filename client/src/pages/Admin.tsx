@@ -143,6 +143,15 @@ interface AdminUser extends AdminUserProfile {
   status: string;
   createdAt: string;
   isOwner: boolean;
+  communityStandardsVersion?: string | null;
+  communityStandardsAgreedAt?: string | null;
+  communityStandardsDeclinedAt?: string | null;
+  accountStatus?: string | null;
+  suspendReasonLabel?: string | null;
+  suspendUntil?: string | null;
+  shadowBanned?: boolean;
+  shadowBanReasonLabel?: string | null;
+  shadowBanUntil?: string | null;
 }
 
 type AdminTab = AdminView;
@@ -3342,6 +3351,44 @@ export default function Admin() {
                         <span className="text-white/35">status: {u.status}</span>
                         {u.createdAt && (
                           <span className="text-white/35">joined {new Date(u.createdAt).toLocaleString()}</span>
+                        )}
+                        {u.communityStandardsAgreedAt ? (
+                          <span style={{ color: "#C8FA3C" }}>
+                            standards: agreed
+                            {u.communityStandardsVersion ? ` (v${u.communityStandardsVersion})` : ""}
+                            {" · "}
+                            {new Date(u.communityStandardsAgreedAt).toLocaleString()}
+                          </span>
+                        ) : u.communityStandardsDeclinedAt ? (
+                          <span style={{ color: "#FF8C00" }}>
+                            standards: declined
+                            {u.communityStandardsVersion ? ` (v${u.communityStandardsVersion})` : ""}
+                            {" · "}
+                            {new Date(u.communityStandardsDeclinedAt).toLocaleString()}
+                          </span>
+                        ) : (
+                          <span style={{ color: "#FF2400" }}>standards: not agreed</span>
+                        )}
+                        {(u.accountStatus === "suspended" || u.status === "suspended") && (
+                          <span style={{ color: "#FF8C00" }}>
+                            suspended
+                            {u.suspendReasonLabel ? `: ${u.suspendReasonLabel}` : ""}
+                            {u.suspendUntil
+                              ? ` until ${new Date(u.suspendUntil).toLocaleString()}`
+                              : " (no end)"}
+                          </span>
+                        )}
+                        {u.shadowBanned && (
+                          <span style={{ color: "#B06BFF" }}>
+                            shadow ban
+                            {u.shadowBanReasonLabel ? `: ${u.shadowBanReasonLabel}` : ""}
+                            {u.shadowBanUntil
+                              ? ` until ${new Date(u.shadowBanUntil).toLocaleString()}`
+                              : " (no end)"}
+                          </span>
+                        )}
+                        {(u.accountStatus === "deleted" || u.status === "deleted") && (
+                          <span style={{ color: "#FF2400" }}>deleted</span>
                         )}
                       </div>
                     </div>

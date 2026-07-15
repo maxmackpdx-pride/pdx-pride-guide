@@ -496,6 +496,22 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_image_url TEXT`); } catch(
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_crop TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN pup TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN username_changed_at TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN community_standards_version TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN community_standards_agreed_at TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN community_standards_declined_at TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN suspend_reason_code TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN suspend_reason_label TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN suspend_note TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN suspend_until TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN suspended_at TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN suspended_by_user_id INTEGER`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_banned INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_ban_reason_code TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_ban_reason_label TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_ban_note TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_ban_until TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_banned_at TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN shadow_banned_by_user_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS pack_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -6448,7 +6464,26 @@ export interface IStorage {
   getUserByEmail(email: string): User | undefined;
   getUserByUsername(username: string): User | undefined;
   getUserByGoogleId(googleId: string): User | undefined;
-  createUser(data: { username: string; email: string; passwordHash: string; displayName?: string; googleId?: string }): User;
+  createUser(data: {
+    username: string;
+    email: string;
+    passwordHash: string;
+    displayName?: string;
+    googleId?: string;
+    communityStandardsVersion?: string | null;
+    communityStandardsAgreedAt?: string | null;
+  }): User;
+  setCommunityStandardsAgreement(userId: number, opts: { agreed: boolean; version: string }): void;
+  applyAccountModeration(opts: {
+    targetUserId: number;
+    actorUserId: number;
+    action: "suspend" | "unsuspend" | "shadowban" | "unshadowban" | "delete";
+    reasonCode?: string | null;
+    reasonLabel?: string | null;
+    note?: string | null;
+    until?: string | null;
+  }): User | null;
+  clearExpiredAccountModeration(userId: number): User | null;
   linkGoogleToUser(id: number, googleId: string): void;
   updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
   changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
@@ -6976,9 +7011,24 @@ export const storage: IStorage = {
     return row?.count ?? 0;
   },
   getPublicProfile(username, viewerUserId = null, viewerIsAdmin = false) {
-    const user = storage.getUserByUsername(username);
-    if (!user || user.status !== "active") return undefined;
+    let user = storage.getUserByUsername(username);
+    if (!user) return undefined;
+    // Auto-lift timed suspend/shadow so profile status stays accurate.
+    if (user.status === "suspended" || user.shadowBanned) {
+      user = storage.clearExpiredAccountModeration(user.id) || user;
+    }
+    if (user.status === "deleted") return undefined;
+    if (user.status === "suspended") {
+      // Suspended profiles are not public; owner/admin can still open for moderation.
+      const isOwner = viewerUserId != null && viewerUserId === user.id;
+      if (!isOwner && !viewerIsAdmin) return undefined;
+    }
     const isOwner = viewerUserId != null && viewerUserId === user.id;
+    // Shadow ban: hidden from everyone except self + admins.
+    if (user.shadowBanned && !isOwner && !viewerIsAdmin) {
+      const untilOk = !user.shadowBanUntil || Date.parse(user.shadowBanUntil) > Date.now();
+      if (untilOk) return undefined;
+    }
     const verifiedHost = user.promoterStatus === "approved";
 
     const talentByEvent = storage.getEventTalentByUser(user.id);
@@ -7189,11 +7239,26 @@ export const storage: IStorage = {
       activity,
       boardPosts,
       linkedVenues: storage.getUserLinkedBusinesses(user.id),
+      // Admin-only moderation surface (also useful if owner is viewing own suspend state via gate)
+      accountStatus: user.status || "active",
+      suspendReasonCode: user.suspendReasonCode || null,
+      suspendReasonLabel: user.suspendReasonLabel || null,
+      suspendNote: user.suspendNote || null,
+      suspendUntil: user.suspendUntil || null,
+      suspendedAt: user.suspendedAt || null,
+      ...(viewerIsAdmin
+        ? {
+            shadowBanned: !!user.shadowBanned,
+            shadowBanReasonCode: user.shadowBanReasonCode || null,
+            shadowBanReasonLabel: user.shadowBanReasonLabel || null,
+            shadowBanUntil: user.shadowBanUntil || null,
+          }
+        : {}),
     };
   },
   rejectUserProfilePhoto(username, reasonCode, note) {
     const user = storage.getUserByUsername(String(username || "").trim().replace(/^@/, ""));
-    if (!user || user.status !== "active") return { error: "User not found" };
+    if (!user || user.status === "deleted") return { error: "User not found" };
     if (!user.photoUrl) return { error: "No profile photo" };
     storage.updateUser(user.id, { photoUrl: null, avatarCrop: null });
     notifyProfilePhotoReject(user.id, reasonCode, note);
@@ -8693,7 +8758,23 @@ export const storage: IStorage = {
   getUserByGoogleId(googleId) {
     return db.select().from(users).where(eq(users.googleId, googleId)).get();
   },
-  createUser({ username, email, passwordHash, displayName, googleId }) {
+  createUser({
+    username,
+    email,
+    passwordHash,
+    displayName,
+    googleId,
+    communityStandardsVersion,
+    communityStandardsAgreedAt,
+  }: {
+    username: string;
+    email: string;
+    passwordHash: string;
+    displayName?: string;
+    googleId?: string;
+    communityStandardsVersion?: string | null;
+    communityStandardsAgreedAt?: string | null;
+  }) {
     const hashed = hashPassword(passwordHash);
     return db.insert(users).values({
       username, email, passwordHash: hashed,
@@ -8701,6 +8782,8 @@ export const storage: IStorage = {
       googleId: googleId || null,
       avatarChoice: 1,
       status: "active",
+      communityStandardsVersion: communityStandardsVersion || null,
+      communityStandardsAgreedAt: communityStandardsAgreedAt || null,
       createdAt: new Date().toISOString(),
     }).returning().get();
   },
@@ -8709,6 +8792,146 @@ export const storage: IStorage = {
   },
   updateUser(id, data) {
     db.update(users).set(data).where(eq(users.id, id)).run();
+  },
+  setCommunityStandardsAgreement(userId, { agreed, version }) {
+    const now = new Date().toISOString();
+    if (agreed) {
+      db.update(users)
+        .set({
+          communityStandardsVersion: version,
+          communityStandardsAgreedAt: now,
+          communityStandardsDeclinedAt: null,
+        } as any)
+        .where(eq(users.id, userId))
+        .run();
+    } else {
+      db.update(users)
+        .set({
+          communityStandardsVersion: version,
+          communityStandardsAgreedAt: null,
+          communityStandardsDeclinedAt: now,
+        } as any)
+        .where(eq(users.id, userId))
+        .run();
+    }
+  },
+  clearExpiredAccountModeration(userId) {
+    const user = storage.getUserById(userId);
+    if (!user) return null;
+    const now = Date.now();
+    const patch: Record<string, unknown> = {};
+    if (user.status === "suspended" && user.suspendUntil) {
+      const t = Date.parse(user.suspendUntil);
+      if (Number.isFinite(t) && t <= now) {
+        patch.status = "active";
+        patch.suspendReasonCode = null;
+        patch.suspendReasonLabel = null;
+        patch.suspendNote = null;
+        patch.suspendUntil = null;
+        patch.suspendedAt = null;
+        patch.suspendedByUserId = null;
+      }
+    }
+    if (user.shadowBanned && user.shadowBanUntil) {
+      const t = Date.parse(user.shadowBanUntil);
+      if (Number.isFinite(t) && t <= now) {
+        patch.shadowBanned = false;
+        patch.shadowBanReasonCode = null;
+        patch.shadowBanReasonLabel = null;
+        patch.shadowBanNote = null;
+        patch.shadowBanUntil = null;
+        patch.shadowBannedAt = null;
+        patch.shadowBannedByUserId = null;
+      }
+    }
+    if (Object.keys(patch).length === 0) return user;
+    db.update(users).set(patch as any).where(eq(users.id, userId)).run();
+    return storage.getUserById(userId) || null;
+  },
+  applyAccountModeration({
+    targetUserId,
+    actorUserId,
+    action,
+    reasonCode,
+    reasonLabel,
+    note,
+    until,
+  }) {
+    const target = storage.getUserById(targetUserId);
+    if (!target) return null;
+    const now = new Date().toISOString();
+    const noteTrim = (note || "").trim().slice(0, 500) || null;
+    if (action === "suspend") {
+      db.update(users)
+        .set({
+          status: "suspended",
+          suspendReasonCode: reasonCode || "OTHER",
+          suspendReasonLabel: reasonLabel || "Community standards",
+          suspendNote: noteTrim,
+          suspendUntil: until || null,
+          suspendedAt: now,
+          suspendedByUserId: actorUserId,
+        } as any)
+        .where(eq(users.id, targetUserId))
+        .run();
+    } else if (action === "unsuspend") {
+      db.update(users)
+        .set({
+          status: "active",
+          suspendReasonCode: null,
+          suspendReasonLabel: null,
+          suspendNote: null,
+          suspendUntil: null,
+          suspendedAt: null,
+          suspendedByUserId: null,
+        } as any)
+        .where(eq(users.id, targetUserId))
+        .run();
+    } else if (action === "shadowban") {
+      db.update(users)
+        .set({
+          shadowBanned: true,
+          shadowBanReasonCode: reasonCode || "OTHER",
+          shadowBanReasonLabel: reasonLabel || "Community standards",
+          shadowBanNote: noteTrim,
+          shadowBanUntil: until || null,
+          shadowBannedAt: now,
+          shadowBannedByUserId: actorUserId,
+        } as any)
+        .where(eq(users.id, targetUserId))
+        .run();
+    } else if (action === "unshadowban") {
+      db.update(users)
+        .set({
+          shadowBanned: false,
+          shadowBanReasonCode: null,
+          shadowBanReasonLabel: null,
+          shadowBanNote: null,
+          shadowBanUntil: null,
+          shadowBannedAt: null,
+          shadowBannedByUserId: null,
+        } as any)
+        .where(eq(users.id, targetUserId))
+        .run();
+    } else if (action === "delete") {
+      db.update(users)
+        .set({
+          status: "deleted",
+          suspendReasonCode: reasonCode || "OTHER",
+          suspendReasonLabel: reasonLabel || "Account removed",
+          suspendNote: noteTrim,
+          suspendUntil: null,
+          suspendedAt: now,
+          suspendedByUserId: actorUserId,
+          // Scrub public surface
+          photoUrl: null,
+          bio: null,
+          displayName: target.displayName ? "Removed account" : null,
+        } as any)
+        .where(eq(users.id, targetUserId))
+        .run();
+    }
+    return storage.getUserById(targetUserId) || null;
   },
   changeUsername(userId, rawUsername) {
     const user = storage.getUserById(userId);
@@ -10098,6 +10321,8 @@ export const storage: IStorage = {
         feedback: "Feedback",
         keyholder: "Keyholder",
         escalation: "Escalation",
+        suspend_appeal: "Suspension appeal",
+        account_moderation: "Account moderation",
       };
       return labels[kind] || kind;
     };

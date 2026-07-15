@@ -1,6 +1,11 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
+import { CommunityStandardsSignupBlock } from "@/components/CommunityStandardsGate";
+import {
+  COMMUNITY_STANDARDS_VERSION,
+  GUEST_STANDARDS_STORAGE_KEY,
+} from "@shared/communityStandards";
 
 interface AuthModalProps {
   onClose: () => void;
@@ -14,6 +19,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [agreedStandards, setAgreedStandards] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
@@ -38,9 +44,21 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
       setError("Passwords do not match.");
       return;
     }
+    if (!agreedStandards) {
+      setError("You must agree to the Community Standards and legal terms to join.");
+      return;
+    }
     setLoading(true);
     try {
-      await register(username, email, password, displayName || undefined);
+      await register(username, email, password, displayName || undefined, {
+        agreedToCommunityStandards: true,
+        communityStandardsVersion: COMMUNITY_STANDARDS_VERSION,
+      });
+      try {
+        localStorage.setItem(GUEST_STANDARDS_STORAGE_KEY, COMMUNITY_STANDARDS_VERSION);
+      } catch {
+        /* ignore */
+      }
       onClose();
     } catch (err: any) {
       setError(err.message);
@@ -69,6 +87,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           boxShadow: "6px 6px 0 #CCFF00",
           width: "100%", maxWidth: 420, padding: "36px 32px",
           position: "relative",
+          maxHeight: "92vh",
+          overflowY: "auto",
         }}
       >
         {/* Close */}
@@ -142,8 +162,12 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min 6 characters" minLength={6} />
             <label style={labelStyle}>Enter Password Again</label>
             <input style={inputStyle} type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="Repeat password" minLength={6} />
+            <CommunityStandardsSignupBlock
+              agreed={agreedStandards}
+              onAgreedChange={setAgreedStandards}
+            />
             {error && <div style={errorStyle}>{error}</div>}
-            <button type="submit" disabled={loading} style={submitStyle}>
+            <button type="submit" disabled={loading || !agreedStandards} style={submitStyle}>
               {loading ? "JOINING..." : "JOIN THE GUIDE →"}
             </button>
             <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "var(--text-meta)" }}>

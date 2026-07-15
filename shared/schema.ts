@@ -282,6 +282,24 @@ export const users = sqliteTable("users", {
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
   subAdmin: integer("sub_admin", { mode: "boolean" }).default(false),
   usernameChangedAt: text("username_changed_at"),
+  /** COMMUNITY_STANDARDS_VERSION the user last agreed to (null = never). */
+  communityStandardsVersion: text("community_standards_version"),
+  communityStandardsAgreedAt: text("community_standards_agreed_at"),
+  communityStandardsDeclinedAt: text("community_standards_declined_at"),
+  // Account moderation (status: active | suspended | deleted)
+  suspendReasonCode: text("suspend_reason_code"),
+  suspendReasonLabel: text("suspend_reason_label"),
+  suspendNote: text("suspend_note"),
+  suspendUntil: text("suspend_until"),
+  suspendedAt: text("suspended_at"),
+  suspendedByUserId: integer("suspended_by_user_id"),
+  shadowBanned: integer("shadow_banned", { mode: "boolean" }).default(false),
+  shadowBanReasonCode: text("shadow_ban_reason_code"),
+  shadowBanReasonLabel: text("shadow_ban_reason_label"),
+  shadowBanNote: text("shadow_ban_note"),
+  shadowBanUntil: text("shadow_ban_until"),
+  shadowBannedAt: text("shadow_banned_at"),
+  shadowBannedByUserId: integer("shadow_banned_by_user_id"),
   createdAt: text("created_at").notNull().default(""),
 });
 

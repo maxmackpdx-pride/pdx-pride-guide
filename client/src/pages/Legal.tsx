@@ -6,60 +6,18 @@ import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Shield, FileText, Lock, Users } from "lucide-react";
-
-const SECTIONS = [
-  {
-    icon: <FileText size={18} />,
-    tone: "cyan",
-    title: "Terms of use",
-    bullets: [
-      "PDX Pride Guide is a free community directory for Portland Pride Week and related queer events.",
-      "Listings are submitted by promoters and community members; accuracy is not guaranteed. Verify details with official venues and organizers.",
-      "Do not use this site to harass, spam, scrape personal data, or post misleading or harmful content.",
-      "We may remove listings or accounts that violate community standards or applicable law.",
-    ],
-  },
-  {
-    icon: <Lock size={18} />,
-    tone: "lime",
-    title: "Privacy",
-    bullets: [
-      "We do not sell your personal data.",
-      "Account info (email, username, profile fields) is used to run the site: submissions, messaging, RSVPs, and moderation.",
-      "Messages and inbox threads are private between participants; hosts and admins only see what the product surfaces for support or review.",
-      "Optional Google sign-in shares your verified email and basic profile with us for authentication only.",
-      "Use the contact form for privacy questions or removal requests.",
-    ],
-  },
-  {
-    icon: <Users size={18} />,
-    tone: "magenta",
-    title: "Community guidelines",
-    bullets: [
-      "Be honest in event submissions and claims. Only claim listings you represent.",
-      "Sex-positive, leather, and adult-themed events are welcome when tagged accurately.",
-      "Gifting and Missed Connections posts must follow posted community rules; no restricted items or harassment.",
-      "Pride Werk gig posts should use real contact info and describe paid or volunteer work clearly.",
-    ],
-  },
-  {
-    icon: <Shield size={18} />,
-    tone: "orange",
-    title: "Disclaimer",
-    bullets: [
-      "PDX Pride Guide is independently run and is not affiliated with Pride Northwest unless a listing says otherwise.",
-      "Event times, prices, and policies can change. Always confirm with the organizer.",
-      "This site is provided as-is without warranties; use at your own discretion.",
-    ],
-  },
-] as const;
+import {
+  COMMUNITY_STANDARDS_BLOCKS,
+  COMMUNITY_STANDARDS_VERSION,
+  LEGAL_SUMMARY_BLOCKS,
+} from "@shared/communityStandards";
 
 export default function Legal() {
   const [contactOpen, setContactOpen] = useState(false);
 
   usePageSeo(
     "Legal | PDX Pride Guide",
-    "Terms of use, privacy policy, and community guidelines for PDX Pride Guide.",
+    "Terms of use, privacy policy, and Community Standards for PDX Pride Guide.",
   );
 
   return (
@@ -68,38 +26,146 @@ export default function Legal() {
         flush
         kicker="Legal"
         titleLine1="TERMS &"
-        titleLine2="PRIVACY"
+        titleLine2="STANDARDS"
         accent="cyan"
-        lede="How PDX Pride Guide works, what we collect, and how we expect the community to show up."
+        lede="How PDX Pride Guide works, what we collect, and the Community Standards everyone agrees to."
         bgImage="/motifs/hero-about.png"
         bgPosition="40% center"
         actions={
           <>
-            <Link href="/about"><Button as="span" variant="solid">About the guide</Button></Link>
-            <Button type="button" accent="cyan" onClick={() => setContactOpen(true)}>Contact</Button>
+            <Link href="/about">
+              <Button as="span" variant="solid">
+                About the guide
+              </Button>
+            </Link>
+            <Button type="button" accent="cyan" onClick={() => setContactOpen(true)}>
+              Contact
+            </Button>
           </>
         }
       />
 
       <ScrollReveal>
         <section className="about-mission board-how diag" style={{ paddingTop: 48 }}>
-          <span className="board-sticker board-sticker--cyan">Last updated June 2026</span>
+          <span className="board-sticker board-sticker--cyan">
+            Community Standards v{COMMUNITY_STANDARDS_VERSION}
+          </span>
           <h2 className="display section-heading">LEGAL & COMMUNITY</h2>
           <p className="board-copy">
-            Plain-language policies for a community-run Pride directory. Not legal advice. Just how we operate.
+            Plain-language policies for a community-run Pride directory. Not legal advice. Just how we
+            operate. Everyone who uses the site is asked to agree to these standards.
           </p>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <section className="board-how" style={{ paddingTop: 8, paddingBottom: 24 }}>
+          <h2 className="display section-heading" style={{ fontSize: "1.5rem" }}>
+            COMMUNITY STANDARDS
+          </h2>
+          <div style={{ maxWidth: 720, display: "flex", flexDirection: "column", gap: 28 }}>
+            {COMMUNITY_STANDARDS_BLOCKS.map((block) => (
+              <article
+                key={block.heading}
+                className="about-mission-card about-mission-card--magenta"
+                style={{ padding: "20px 22px" }}
+              >
+                <div className="about-mission-card__icon" aria-hidden="true">
+                  <Users size={18} />
+                </div>
+                <h3 className="display panel-heading">{block.heading}</h3>
+                {block.paragraphs?.map((p) => (
+                  <p
+                    key={p.slice(0, 40)}
+                    className="board-copy"
+                    style={{ marginBottom: 10, fontSize: "0.95rem" }}
+                  >
+                    {p}
+                  </p>
+                ))}
+                {block.bullets && block.bullets.length > 0 && (
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingLeft: 18,
+                      color: "var(--text-meta)",
+                      fontSize: "0.92rem",
+                      lineHeight: 1.65,
+                    }}
+                  >
+                    {block.bullets.map((item) => (
+                      <li key={item} style={{ marginBottom: 8 }}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <section className="about-mission board-how" style={{ paddingTop: 8, paddingBottom: 48 }}>
+          <h2 className="display section-heading" style={{ fontSize: "1.5rem" }}>
+            TERMS & PRIVACY
+          </h2>
           <div className="about-mission-grid">
-            {SECTIONS.map(section => (
-              <article key={section.title} className={`about-mission-card about-mission-card--${section.tone}`}>
-                <div className="about-mission-card__icon" aria-hidden="true">{section.icon}</div>
-                <h3 className="display panel-heading">{section.title}</h3>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "var(--text-meta)", fontSize: "0.92rem", lineHeight: 1.65 }}>
-                  {section.bullets.map(item => (
-                    <li key={item} style={{ marginBottom: 8 }}>{item}</li>
+            {LEGAL_SUMMARY_BLOCKS.map((section) => (
+              <article
+                key={section.heading}
+                className={`about-mission-card about-mission-card--${
+                  section.heading.startsWith("Privacy") ? "lime" : "cyan"
+                }`}
+              >
+                <div className="about-mission-card__icon" aria-hidden="true">
+                  {section.heading.startsWith("Privacy") ? <Lock size={18} /> : <FileText size={18} />}
+                </div>
+                <h3 className="display panel-heading">{section.heading}</h3>
+                <ul
+                  style={{
+                    margin: 0,
+                    paddingLeft: 18,
+                    color: "var(--text-meta)",
+                    fontSize: "0.92rem",
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {section.bullets?.map((item) => (
+                    <li key={item} style={{ marginBottom: 8 }}>
+                      {item}
+                    </li>
                   ))}
                 </ul>
               </article>
             ))}
+            <article className="about-mission-card about-mission-card--orange">
+              <div className="about-mission-card__icon" aria-hidden="true">
+                <Shield size={18} />
+              </div>
+              <h3 className="display panel-heading">Disclaimer</h3>
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: 18,
+                  color: "var(--text-meta)",
+                  fontSize: "0.92rem",
+                  lineHeight: 1.65,
+                }}
+              >
+                <li style={{ marginBottom: 8 }}>
+                  PDX Pride Guide is independently run and is not affiliated with Pride Northwest unless a
+                  listing says otherwise.
+                </li>
+                <li style={{ marginBottom: 8 }}>
+                  Event times, prices, and policies can change. Always confirm with the organizer.
+                </li>
+                <li style={{ marginBottom: 8 }}>
+                  This site is provided as-is without warranties; use at your own discretion.
+                </li>
+              </ul>
+            </article>
           </div>
         </section>
       </ScrollReveal>
@@ -111,11 +177,19 @@ export default function Legal() {
             <button
               type="button"
               onClick={() => setContactOpen(true)}
-              style={{ color: "var(--neon-cyan)", background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer", textDecoration: "underline" }}
+              style={{
+                color: "var(--neon-cyan)",
+                background: "none",
+                border: "none",
+                padding: 0,
+                font: "inherit",
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
             >
               Use the contact form
-            </button>
-            {" "}or hit the feedback button in the site footer.
+            </button>{" "}
+            or hit the feedback button in the site footer.
           </p>
         </section>
       </ScrollReveal>
