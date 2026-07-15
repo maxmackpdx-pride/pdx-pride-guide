@@ -229,7 +229,7 @@ export default function About() {
                       decoding="async"
                     />
                   </div>
-                  <span className="about-v2-creator__hire">Looking for full time employment</span>
+                  <span className="about-v2-creator__hire">Available for hire · full time</span>
                   <div className="about-v2-creator__stickers">
                     <Link href={PROFILE_URL} className="about-v2-creator__pg-sticker">
                       <svg
@@ -284,8 +284,9 @@ export default function About() {
                 <p>
                   Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
                   like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
-                  ago I was Oregon State Pet. Today, like many of you, I&apos;m unemployed and looking for work while
-                  still dumping everything I have into the projects I care about.
+                  ago I was Oregon State Pet. Right now I&apos;m between full-time gigs — unemployed, not idle —
+                  pouring everything I have into this and the projects I care about. If you&apos;ve got a role
+                  that deserves that kind of energy, I&apos;m available, and whoever brings me on gets all of it.
                 </p>
                 <p>
                   I&apos;ve watched so many of you grow, figure out what you like, discover what you don&apos;t,
@@ -451,7 +452,7 @@ export default function About() {
                     Buy me a coffee
                   </Button>
                 </a>
-                <span className="about-v2-donate__note">@tucker_pdmax on Venmo · P.S. still looking for work.</span>
+                <span className="about-v2-donate__note">@tucker_pdmax on Venmo · better yet, hire me.</span>
               </div>
             </div>
 
