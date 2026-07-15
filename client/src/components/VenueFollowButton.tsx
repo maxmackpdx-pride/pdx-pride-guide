@@ -81,7 +81,11 @@ export default function VenueFollowButton({
         padding: isCard ? "0 10px" : "0 14px",
         borderRadius: 999,
         border: `1.5px solid ${following ? accent : "color-mix(in srgb, " + accent + " 55%, #444)"}`,
-        background: following ? `color-mix(in srgb, ${accent} 18%, transparent)` : "rgba(0,0,0,.55)",
+        background: following
+          ? `color-mix(in srgb, ${accent} 16%, rgba(6,6,10,0.88))`
+          : "rgba(6,6,10,0.82)",
+        backdropFilter: isCard ? undefined : "blur(10px) saturate(1.02)",
+        WebkitBackdropFilter: isCard ? undefined : "blur(10px) saturate(1.02)",
         color: following ? "#fff" : accent,
         fontFamily: "var(--font-display)",
         fontWeight: 800,
@@ -90,7 +94,8 @@ export default function VenueFollowButton({
         textTransform: "uppercase",
         cursor: mutation.isPending ? "default" : "pointer",
         opacity: mutation.isPending ? 0.7 : 1,
-        zIndex: 4,
+        zIndex: isCard ? 4 : 6,
+        boxShadow: isCard ? undefined : "0 4px 14px -6px rgba(0,0,0,.75)",
       }}
     >
       {following ? "Following" : "Follow me"}

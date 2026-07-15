@@ -52,18 +52,17 @@ p { margin: 0; }
   position: relative;
   height: 3px;
   border: 0;
-  /* visible so edge bloom can feather downward; card shell clips it */
+  /* visible so a short bloom can feather under the hard bar; parent clips */
   overflow: visible;
-  /* hard bar ~20% stronger presence */
+  /* hard bar ~20% stronger presence — no filter (filter expands into a fog band) */
   opacity: 1;
-  filter: saturate(1.12) brightness(1.06);
   background: linear-gradient(90deg,
     var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
   background-size: 200% 100%;
   animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
   z-index: 3;
 }
-/* Soft rainbow bloom — blurred edges under the hard seam (glass integration) */
+/* Soft glass edge under the hard seam — short + tight so it does not become a fog bar */
 .pdx-rainbow-rule::before,
 .pdx-seam::before {
   content: "";
@@ -71,7 +70,7 @@ p { margin: 0; }
   left: 0;
   right: 0;
   top: 0;
-  height: 18px;
+  height: 10px;
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(
@@ -84,9 +83,9 @@ p { margin: 0; }
   );
   background-size: 200% 100%;
   animation: pdxSeamFlow 3.4s linear infinite;
-  filter: blur(11px);
-  opacity: 0.72;
-  transform: translateY(1px);
+  filter: blur(6px);
+  opacity: 0.48;
+  transform: translateY(0);
 }
 .pdx-rainbow-rule::after,
 .pdx-seam::after {
@@ -135,8 +134,7 @@ p { margin: 0; }
   height: 3px;
   z-index: 6;
   pointer-events: none;
-  /* hard bar + soft glass bloom (blur via multi-stop shadow, clipped by card) */
-  filter: saturate(1.12) brightness(1.06);
+  /* hard bar + tight glow (filter removed — it bloated into a fog band) */
   background: linear-gradient(
     90deg,
     var(--neon-cyan),

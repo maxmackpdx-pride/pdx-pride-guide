@@ -404,20 +404,23 @@ export default function PlaceModal({
           overflow: "hidden",
         }}
       >
+        {/* Actions sit below the rainbow seam so they never ride the bloom */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
           style={{
             position: "absolute",
-            top: 12,
+            top: 18,
             right: 12,
-            zIndex: 4,
+            zIndex: 6,
             width: 34,
             height: 34,
             borderRadius: "50%",
-            border: "none",
-            background: "rgba(0,0,0,.55)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(6,6,10,0.82)",
+            backdropFilter: "blur(10px) saturate(1.02)",
+            WebkitBackdropFilter: "blur(10px) saturate(1.02)",
             color: "var(--text-hi)",
             fontSize: 16,
             lineHeight: 1,
@@ -425,6 +428,7 @@ export default function PlaceModal({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            boxShadow: "0 4px 14px -6px rgba(0,0,0,.75)",
           }}
         >
           ✕
@@ -433,9 +437,9 @@ export default function PlaceModal({
         <div
           style={{
             position: "absolute",
-            top: 12,
+            top: 18,
             right: 54,
-            zIndex: 4,
+            zIndex: 6,
             display: "flex",
             alignItems: "center",
             gap: 8,
@@ -458,7 +462,9 @@ export default function PlaceModal({
               padding: "0 12px",
               borderRadius: 999,
               border: `1px solid ${accent}`,
-              background: "rgba(0,0,0,.55)",
+              background: "rgba(6,6,10,0.82)",
+              backdropFilter: "blur(10px) saturate(1.02)",
+              WebkitBackdropFilter: "blur(10px) saturate(1.02)",
               color: accent,
               fontSize: 12,
               fontFamily: "var(--font-display)",
@@ -469,6 +475,7 @@ export default function PlaceModal({
               alignItems: "center",
               gap: 6,
               opacity: sharing ? 0.6 : 1,
+              boxShadow: "0 4px 14px -6px rgba(0,0,0,.75)",
             }}
           >
             <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
@@ -482,9 +489,9 @@ export default function PlaceModal({
               height: 172,
               display: "grid",
               placeItems: "center",
-              padding: 22,
-              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 6%, #060608), #060608 74%)`,
-              borderBottom: `1px solid color-mix(in srgb, ${accent} 18%, rgba(255,255,255,0.06))`,
+              padding: "28px 22px 22px",
+              background: `radial-gradient(125% 130% at 50% 0%, rgba(255,255,255,0.03), #060608 74%)`,
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
               overflow: "hidden",
             }}
           >
