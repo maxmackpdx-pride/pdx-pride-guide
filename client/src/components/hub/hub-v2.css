@@ -545,22 +545,25 @@
       .calm-mode .hub-next-rsvp__dot{animation:none !important}
     }
 
-    /* Mobile hub drawer — grab bar when closed; sheet slides up when open */
+    /* Mobile hub drawer — grab peeks when closed; whole sheet drags open/closed */
     .hub-v2-drawer,
     .hub-v2-drawer-backdrop{
       display:none;
     }
     @media(max-width:720px){
       :root{
-        --hub-mobile-drawer-collapsed:27px;
+        /* Grab = pill + mono hint; keeps page padding clear of the handle */
+        --hub-mobile-drawer-collapsed:52px;
       }
       /* Portaled to body — re-declare hub tokens so mode tabs render correctly */
       .hub-v2-drawer{
         --panel-cyan:#19e3ff;
+        --hub-cyan:#19e3ff;
         --panel-magenta:#ff1fa0;
         --panel-border-2:#24242c;
         --board-text:#e6e3da;
         --board-muted:#999999;
+        --drawer-y:var(--drawer-collapse, 100%);
       }
       .hub-v2-drawer-backdrop{
         display:block;
@@ -580,61 +583,62 @@
         display:flex;flex-direction:column;justify-content:flex-end;
         position:fixed;left:0;right:0;z-index:78;pointer-events:none;
         bottom:calc(var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px));
+        transform:translateY(var(--drawer-y, var(--drawer-collapse, 100%)));
+        transition:transform .46s cubic-bezier(.22,1,.36,1);
+        will-change:transform;
+      }
+      .hub-v2-drawer.is-open{
+        --drawer-y:0px;
+      }
+      .hub-v2-drawer.is-dragging{
+        transition:none;
+      }
+      .hub-root.calm-mode ~ * .hub-v2-drawer,
+      .hub-v2-drawer.calm-mode{
+        transition:transform .01s linear;
       }
       .hub-v2-drawer__grab{
         pointer-events:auto;
-        display:flex;align-items:center;justify-content:center;
-        width:100%;height:var(--hub-mobile-drawer-collapsed);
-        padding:0;border:none;border-top:2px solid var(--panel-cyan);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+        width:100%;min-height:var(--hub-mobile-drawer-collapsed);
+        padding:10px 0 8px;border:none;border-top:2px solid var(--hub-cyan, var(--panel-cyan));
         background:#0a0a0f;
         box-shadow:0 -4px 16px rgba(0,0,0,.45);
-        cursor:pointer;
+        cursor:grab;touch-action:none;
+        -webkit-user-select:none;user-select:none;
       }
+      .hub-v2-drawer__grab:active{cursor:grabbing}
+      /* Single cyan pill handle (replaces 3-bar decoration) */
       .hub-v2-drawer__grip{
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-        transition:transform .2s ease;
+        display:block;width:46px;height:5px;border-radius:99px;flex:none;
+        background:var(--hub-cyan, var(--panel-cyan, #19e3ff));
+        box-shadow:0 0 12px var(--hub-cyan, var(--panel-cyan, #19e3ff));
       }
-      .hub-v2-drawer__grip span{
-        display:block;width:40px;height:3px;border-radius:99px;
-        background:rgba(255,255,255,.5);
-        transition:background .2s ease, width .2s ease;
-      }
-      .hub-v2-drawer.is-open .hub-v2-drawer__grip span{
-        background:var(--panel-cyan,#19e3ff);
-      }
-      .hub-v2-drawer.is-open .hub-v2-drawer__grip span:nth-child(2){width:44px}
-      @keyframes hubDrawerPeek{
-        0%,100%{transform:translateY(100%)}
-        38%,52%{transform:translateY(96%)}
-      }
-      .hub-v2-drawer.is-bounce-hint:not(.is-open) .hub-v2-drawer__sheet{
-        visibility:visible;opacity:1;
-        animation:hubDrawerPeek .88s cubic-bezier(.34,1.2,.64,1) both;
-      }
-      .hub-v2-drawer.is-bounce-hint:not(.is-open) .hub-v2-drawer__grip{
-        animation:hubDrawerGripNudge .88s cubic-bezier(.34,1.2,.64,1) both;
+      .hub-v2-drawer__hint{
+        font-family:var(--font-mono, ui-monospace, monospace);
+        font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+        color:rgba(255,255,255,.42);line-height:1;
       }
       @keyframes hubDrawerGripNudge{
         0%,100%{transform:translateY(0)}
-        38%,52%{transform:translateY(-3px)}
+        38%,52%{transform:translateY(-4px)}
+      }
+      /* Hub-route entry bounce on the pill only (gated via .is-bounce-hint from isHubRoute) */
+      .hub-v2-drawer.is-bounce-hint:not(.is-open):not(.is-dragging) .hub-v2-drawer__grip{
+        animation:hubDrawerGripNudge .88s cubic-bezier(.34,1.2,.64,1) both;
       }
       .hub-v2-drawer__sheet{
-        pointer-events:auto;
+        pointer-events:none;
         overflow-y:auto;-webkit-overflow-scrolling:touch;
         max-height:min(58vh, 400px);
         padding:12px 14px 10px;
         background:#0c0c12;
         border-top:1px solid var(--panel-border-2);
         box-shadow:0 -16px 40px rgba(0,0,0,.65);
-        transform:translateY(100%);
-        opacity:0;
-        visibility:hidden;
-        transition:transform .28s cubic-bezier(.32,.72,0,1),opacity .2s ease,visibility .28s;
       }
-      .hub-v2-drawer.is-open .hub-v2-drawer__sheet{
-        transform:translateY(0);
-        opacity:1;
-        visibility:visible;
+      .hub-v2-drawer.is-open .hub-v2-drawer__sheet,
+      .hub-v2-drawer.is-dragging .hub-v2-drawer__sheet{
+        pointer-events:auto;
       }
       .hub-v2-drawer__sheet .hub-v2-mode{margin:0 0 12px;background:#16161c}
       .hub-v2-drawer__sheet .hub-v2-mode-btn{position:relative;z-index:1}
@@ -651,9 +655,18 @@
       .hub-v2-kicker--drawer{padding:0 2px 10px;color:#888}
       .hub-v2-side-extra--drawer{margin-top:10px}
       body.hub-v2-drawer-open{overflow:hidden}
+      /* Silence pill bounce under calm / reduced motion */
+      .hub-v2-drawer.calm-mode.is-bounce-hint .hub-v2-drawer__grip,
+      .calm-mode .hub-v2-drawer.is-bounce-hint .hub-v2-drawer__grip{
+        animation:none !important;
+      }
       @media (prefers-reduced-motion: reduce){
-        .hub-v2-drawer.is-bounce-hint:not(.is-open) .hub-v2-drawer__sheet,
-        .hub-v2-drawer.is-bounce-hint:not(.is-open) .hub-v2-drawer__grip{animation:none !important}
+        .hub-v2-drawer{
+          transition:transform .01s linear;
+        }
+        .hub-v2-drawer.is-bounce-hint:not(.is-open) .hub-v2-drawer__grip{
+          animation:none !important;
+        }
       }
     }
     @media(min-width:721px){
