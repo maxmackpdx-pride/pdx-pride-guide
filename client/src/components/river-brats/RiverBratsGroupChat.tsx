@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Lock, MessageCircle } from "lucide-react";
+import { Lock, MapPin, MessageCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
@@ -65,6 +65,8 @@ type Props = {
   /** Checked in but anonymous — counted in going, never connected to the chat. */
   anonymous?: boolean;
   goingCount: number;
+  /** GPS-verified on the sand right now (not the same as chat going count). */
+  onLocationCount?: number;
   headerAvatars: AvatarPreview[];
 };
 
@@ -77,6 +79,7 @@ export default function RiverBratsGroupChat({
   checkedIn,
   anonymous = false,
   goingCount,
+  onLocationCount = 0,
   headerAvatars,
 }: Props) {
   const [body, setBody] = useState("");
@@ -119,8 +122,8 @@ export default function RiverBratsGroupChat({
   });
 
   const chatStatus = checkedIn
-    ? `${goingCount} here · ${countdown ?? `open until ${RIVER_BRATS_CHAT_CLOSES_AT}`}`
-    : `${goingCount} talking · locked`;
+    ? `${goingCount} going · ${countdown ?? `open until ${RIVER_BRATS_CHAT_CLOSES_AT}`}`
+    : `${goingCount} going · locked until you check in`;
 
   return (
     <section
@@ -147,7 +150,24 @@ export default function RiverBratsGroupChat({
           ))}
         </div>
         <div className="rb-group-chat__titles">
-          <div className="rb-group-chat__title">{beachShortLabel} · Today</div>
+          <div className="rb-group-chat__title-row">
+            <div className="rb-group-chat__title">{beachShortLabel} · Today</div>
+            {onLocationCount > 0 && (
+              <span
+                className="rb-on-site rb-on-site--chat"
+                title="GPS-verified at the beach right now"
+                role="status"
+                aria-label={
+                  onLocationCount === 1
+                    ? "1 person on location"
+                    : `${onLocationCount} people on location`
+                }
+              >
+                <MapPin size={10} strokeWidth={2.5} aria-hidden />
+                <span className="rb-on-site__n">{onLocationCount > 9 ? "9+" : onLocationCount}</span>
+              </span>
+            )}
+          </div>
           <div className="rb-group-chat__status">{chatStatus}</div>
         </div>
         <span className="rb-group-chat__messages-pill">
@@ -158,7 +178,9 @@ export default function RiverBratsGroupChat({
 
       <MaybeAdultGate gated={checkedIn}>
       <div className="rb-group-chat__thread" ref={listRef}>
-        <div className="rb-group-chat__day-marker">Opens 48h early · clears at 10pm</div>
+        <div className="rb-group-chat__day-marker">
+          Chat opens 48h early (calendar) · clears 10pm · on-site is separate
+        </div>
         {isLoading && !locked && <p className="rb-group-chat__empty">Loading chat…</p>}
         {!isLoading && messages.length === 0 && !locked && (
           <p className="rb-group-chat__empty">

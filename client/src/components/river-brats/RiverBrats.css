@@ -813,12 +813,17 @@ html.calm-mode .rb-dm-panel {
 .rb-checkin__pulse {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   margin: 18px 0 16px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
   letter-spacing: 0.06em;
   color: #b8b4ab;
+}
+
+.rb-checkin__pulse-copy {
+  min-width: 0;
 }
 
 .rb-checkin__pulse-dot {
@@ -833,6 +838,69 @@ html.calm-mode .rb-dm-panel {
 
 @keyframes rb-pulse-blink {
   50% { opacity: 0.45; }
+}
+
+/* Compact GPS “on location” pill — pops in only when someone is verified HERE */
+.rb-on-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  min-height: 22px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(204, 255, 0, 0.55);
+  background: rgba(204, 255, 0, 0.14);
+  color: var(--neon-yellow, #ccff00);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  box-shadow: 0 0 10px rgba(204, 255, 0, 0.22);
+  animation: rb-on-site-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+.rb-on-site__n {
+  color: #f4f1ea;
+  min-width: 0.6em;
+}
+
+.rb-on-site__lbl {
+  color: #c8fa3c;
+  opacity: 0.9;
+}
+
+.rb-on-site--stack {
+  margin-left: 8px;
+}
+
+.rb-on-site--chat {
+  min-height: 20px;
+  padding: 1px 7px 1px 5px;
+  font-size: 9.5px;
+}
+
+.rb-on-site--chat .rb-on-site__lbl {
+  display: none;
+}
+
+@keyframes rb-on-site-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rb-on-site {
+    animation: none;
+  }
 }
 
 .rb-checkin__grid {
@@ -1100,6 +1168,13 @@ html.calm-mode .rb-dm-panel {
   flex: 1;
 }
 
+.rb-group-chat__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .rb-group-chat__title {
   font-family: var(--font-display), sans-serif;
   font-weight: 800;
@@ -1110,6 +1185,7 @@ html.calm-mode .rb-dm-panel {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .rb-group-chat__status {

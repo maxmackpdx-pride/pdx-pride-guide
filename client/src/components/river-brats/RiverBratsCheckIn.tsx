@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { MapPin } from "lucide-react";
 import type { DayForecastBrief, NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import { resolveBeachPosterUrl } from "@shared/eventPoster";
 import {
@@ -28,6 +29,31 @@ import {
 } from "@/lib/eventLinks";
 import RiverBratsHourChips from "./RiverBratsHourChips";
 import RiverBratsGroupChat from "./RiverBratsGroupChat";
+
+/** Compact “people GPS-verified on site” chip — only renders when count > 0. */
+function OnLocationPill({
+  count,
+  className = "",
+}: {
+  count: number;
+  className?: string;
+}) {
+  if (count <= 0) return null;
+  const label =
+    count === 1 ? "1 on location" : `${count > 9 ? "9+" : count} on location`;
+  return (
+    <span
+      className={`rb-on-site${className ? ` ${className}` : ""}`}
+      title="GPS-verified at the beach right now"
+      role="status"
+      aria-label={label}
+    >
+      <MapPin size={11} strokeWidth={2.4} aria-hidden />
+      <span className="rb-on-site__n">{count > 9 ? "9+" : count}</span>
+      <span className="rb-on-site__lbl">on site</span>
+    </span>
+  );
+}
 
 type CheckinVisibility = "visible" | "anonymous";
 
@@ -96,6 +122,8 @@ export default function RiverBratsCheckIn({
       fetch(`/api/river-brats/checkins?beach=${beachId}&date=${selectedDate}`, { credentials: "include" }).then(r =>
         r.json(),
       ),
+    // Beach day: poll so the small on-location pill pops when someone verifies.
+    refetchInterval: selectedDate === pacificTodayDate() ? 20_000 : false,
   });
 
   const { data: beachesPayload } = useQuery<{ data?: NudeBeachesSnapshot } | NudeBeachesSnapshot>({
@@ -128,6 +156,11 @@ export default function RiverBratsCheckIn({
   const chatWindowOpen = isRiverBratsChatOpen(selectedDate);
   const inChat = checkedIn && !isAnon && chatWindowOpen;
   const goingCount = rows.length;
+  /** GPS-verified “I'm here” — independent of chat window (chat is 48h calendar). */
+  const onLocationCount = useMemo(
+    () => rows.filter(r => r.presence === "HERE").length,
+    [rows],
+  );
 
   const departHourOptions = useMemo(() => {
     const start = (hour ?? mine?.arrival_hour ?? RIVER_BRATS_HOUR_START) + 1;
@@ -384,10 +417,12 @@ export default function RiverBratsCheckIn({
 
       <div className="rb-checkin__pulse">
         <span className="rb-checkin__pulse-dot" aria-hidden />
-        <span>
+        <span className="rb-checkin__pulse-copy">
           <strong>{isLoading ? "…" : goingCount}</strong>{" "}
-          {isViewingToday ? "heading out today" : `planned for ${dayLabel}`} · pick when you&apos;ll get there
+          {isViewingToday ? "heading out today" : `planned for ${dayLabel}`}
+          {isViewingToday ? " · pick when you&apos;ll get there" : " · chat opens 48h before that day"}
         </span>
+        {isViewingToday && <OnLocationPill count={onLocationCount} />}
       </div>
 
       {arrivalDue && (
@@ -590,6 +625,7 @@ export default function RiverBratsCheckIn({
           checkedIn={inChat}
           anonymous={isAnon}
           goingCount={goingCount}
+          onLocationCount={onLocationCount}
           headerAvatars={headerAvatars}
         />
       </div>
@@ -663,6 +699,7 @@ export default function RiverBratsCheckIn({
             </span>
           ))}
           <span className="rb-checkin__going-count">{goingCount} going</span>
+          <OnLocationPill count={onLocationCount} className="rb-on-site--stack" />
         </div>
       </div>
 
