@@ -21,6 +21,7 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
+import HubNextRsvpTile from "./HubNextRsvpTile";
 import "./hub-v2.css";
 
 type NavItem = {
@@ -361,6 +362,7 @@ export default function HubV2Shell({
 
         <main className="hub-v2-main" style={{ minWidth: 0 }}>
           {mainToolbar && <div className="hub-v2-main-toolbar">{mainToolbar}</div>}
+          {!isAdminChrome && <HubNextRsvpTile />}
           {children}
         </main>
 

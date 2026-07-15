@@ -466,6 +466,85 @@
     .hub-settings-prefs__item-title{display:block;font-family:var(--font-display);font-weight:700;font-size:13px;color:#fff;letter-spacing:.02em}
     .hub-settings-prefs__item-body{font-size:12px;color:var(--board-muted);line-height:1.45}
 
+    /* Mobile: next RSVP poster tile at top of member hub */
+    .hub-next-rsvp{display:none}
+    @media(max-width:720px){
+      .hub-next-rsvp{
+        display:block;
+        margin:0 0 18px;
+      }
+      .hub-next-rsvp__head{margin-bottom:10px}
+      .hub-next-rsvp__kicker{
+        display:inline-flex;align-items:center;gap:8px;
+        font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;
+        text-transform:uppercase;color:var(--panel-cyan,#19e3ff);
+      }
+      .hub-next-rsvp__dot{
+        width:7px;height:7px;border-radius:50%;
+        background:var(--panel-cyan,#19e3ff);
+        box-shadow:0 0 8px var(--panel-cyan,#19e3ff);
+        animation:pdxBlink 1.8s var(--ease-inout) infinite;
+      }
+      .hub-next-rsvp__card{
+        position:relative;overflow:hidden;display:block;
+        background:var(--panel-card,#0c0c0f);
+        border:1px solid var(--panel-border-2,#24242c);
+        border-left:4px solid var(--hub-rsvp-day,var(--day-fri,#ff8c00));
+        border-radius:12px;padding:16px 16px 14px;
+        text-decoration:none;color:inherit;
+        transition:border-color .15s ease,box-shadow .15s ease;
+      }
+      .hub-next-rsvp__card:hover{
+        border-color:color-mix(in srgb,var(--hub-rsvp-day,var(--day-fri)) 38%,var(--panel-border-2));
+        box-shadow:0 8px 24px -14px rgba(0,0,0,.75);
+      }
+      .hub-next-rsvp__backdrop{
+        position:absolute;inset:0;width:100%;height:100%;
+        object-fit:cover;object-position:center top;
+        opacity:.58;z-index:0;pointer-events:none;
+      }
+      .hub-next-rsvp__backdrop-scrim{
+        position:absolute;inset:0;z-index:1;pointer-events:none;
+        background:linear-gradient(
+          125deg,
+          color-mix(in srgb,var(--hub-rsvp-day,var(--day-fri)) 22%,rgba(8,8,10,.78)) 0%,
+          rgba(8,8,10,.62) 42%,
+          rgba(8,8,10,.44) 100%
+        );
+      }
+      .hub-next-rsvp__body{position:relative;z-index:2}
+      .hub-next-rsvp__when{
+        font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+        text-transform:uppercase;color:var(--board-muted,#999);
+      }
+      .hub-next-rsvp__title{
+        margin-top:8px;font-family:var(--font-display);font-weight:800;
+        font-size:20px;line-height:1.05;letter-spacing:.02em;
+        text-transform:uppercase;color:#fff;
+      }
+      .hub-next-rsvp__venue{
+        margin-top:6px;font-family:var(--font-mono);font-size:11px;
+        letter-spacing:.06em;text-transform:uppercase;color:var(--board-muted,#999);
+      }
+      .hub-next-rsvp__foot{
+        display:flex;align-items:center;justify-content:space-between;
+        gap:10px;margin-top:14px;
+      }
+      .hub-next-rsvp__tag{
+        font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+        text-transform:uppercase;padding:4px 8px;border-radius:5px;border:1px solid;
+      }
+      .hub-next-rsvp__tag--donation{color:var(--panel-lime,#c8fa3c);border-color:var(--panel-lime,#c8fa3c)}
+      .hub-next-rsvp__tag--ticketed{color:var(--panel-magenta,#ff1fa0);border-color:var(--panel-magenta,#ff1fa0)}
+      .hub-next-rsvp__tag--door{color:var(--panel-cyan,#19e3ff);border-color:var(--panel-cyan,#19e3ff)}
+      .hub-next-rsvp__going{
+        font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;
+        text-transform:uppercase;color:#000;background:var(--panel-cyan,#19e3ff);
+        padding:7px 12px;border-radius:8px;font-weight:700;flex:none;
+      }
+      .calm-mode .hub-next-rsvp__dot{animation:none !important}
+    }
+
     /* Mobile hub drawer — grab bar when closed; sheet slides up when open */
     .hub-v2-drawer,
     .hub-v2-drawer-backdrop{

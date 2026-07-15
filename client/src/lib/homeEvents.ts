@@ -134,6 +134,29 @@ export function eventsUpNext(
   return uniqueByEventId(upcoming).slice(0, limit);
 }
 
+/** Earliest live/upcoming listing the member has RSVP'd to. */
+export function nextRsvpEvent(
+  events: EventListing[],
+  rsvpEventIds: Iterable<number>,
+  nowMs: number = Date.now(),
+): EventListing | null {
+  const ids = new Set(rsvpEventIds);
+  if (ids.size === 0) return null;
+  const upcoming = events
+    .filter(e => ids.has(e.id))
+    .filter(e => {
+      const endMs = parsePacificDateTime(e.dateEnd) ?? parsePacificDateTime(e.dateStart);
+      if (endMs == null) return false;
+      return endMs >= nowMs;
+    })
+    .sort((a, b) => {
+      const aMs = parsePacificDateTime(a.dateStart) ?? 0;
+      const bMs = parsePacificDateTime(b.dateStart) ?? 0;
+      return aMs - bMs;
+    });
+  return uniqueByEventId(upcoming)[0] ?? null;
+}
+
 /** @deprecated Use eventsUpNext — Monday-only openers no longer make sense mid-week. */
 export function eventsForMonday(events: EventListing[], limit = 4): EventListing[] {
   return eventsUpNext(events, limit);
