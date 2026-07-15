@@ -24,8 +24,12 @@ function RouteBoundary({ children }: { children: ReactNode }) {
 function ScrollToTop() {
   const [location] = useLocation();
   useEffect(() => {
+    // Path change + double rAF so layout/zoom chrome settle before we pin top-left.
     resetPageScroll();
-    requestAnimationFrame(resetPageScroll);
+    requestAnimationFrame(() => {
+      resetPageScroll();
+      requestAnimationFrame(resetPageScroll);
+    });
   }, [location]);
   return null;
 }

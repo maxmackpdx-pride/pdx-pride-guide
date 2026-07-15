@@ -97,12 +97,15 @@
 
 * { box-sizing: border-box; }
 
-/* No overflow clipping on html/body: iOS Safari detaches position:fixed
-   descendants (the mobile bottom nav) when the scroll root clips.
-   Horizontal overflow is contained by #root/.app-shell instead. */
+/* Avoid overflow:hidden on the scroll root — iOS Safari can detach
+   position:fixed (mobile bottom nav). overflow-x: clip still contains
+   sideways bleed without creating a classic overflow scrollport. */
 html {
   width: 100%;
-  scrollbar-gutter: stable;
+  max-width: 100%;
+  overflow-x: clip;
+  /* both-edges keeps the page visually centered when a classic scrollbar shows */
+  scrollbar-gutter: stable both-edges;
 }
 
 body {
@@ -111,6 +114,8 @@ body {
   font-family: var(--font-body);
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -142,6 +147,8 @@ body::before {
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
+  /* Prevent zoomed layouts from leaving #root wider than the viewport */
+  box-sizing: border-box;
 }
 
 .zine-page {
@@ -9118,6 +9125,7 @@ footer a:hover { color: #00FFFF !important; }
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
+  box-sizing: border-box;
 }
 
 .app-shell > main {

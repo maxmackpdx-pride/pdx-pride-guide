@@ -2,7 +2,10 @@ import { createRoot } from "react-dom/client";
 import ErrorBoundary from "./components/ErrorBoundary";
 import App from "./App";
 
-import { resetPageScroll } from "./lib/resetPageScroll";
+import {
+  installScrollRecenterListeners,
+  resetPageScroll,
+} from "./lib/resetPageScroll";
 import { captureInstallPrompt, registerServiceWorker } from "./lib/pwa";
 import { listenForPushSubscriptionChanges } from "./lib/pushNotifications";
 import "./fonts.css";
@@ -37,7 +40,11 @@ if (typeof window !== "undefined") {
 
 resetPageScroll();
 requestAnimationFrame(resetPageScroll);
-window.addEventListener("load", resetPageScroll, { once: true });
+window.addEventListener("load", () => {
+  resetPageScroll();
+  requestAnimationFrame(resetPageScroll);
+}, { once: true });
+installScrollRecenterListeners();
 
 document.querySelector("[data-crawler-feed]")?.remove();
 
