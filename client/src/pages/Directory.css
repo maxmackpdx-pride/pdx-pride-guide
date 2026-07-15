@@ -1,0 +1,249 @@
+/* ============================================================
+   Directory — dark liquid glass (parity with home islands).
+   Neon category borders, rainbow seams, and glows stay.
+   Glass is fill / edge / depth only.
+   ============================================================ */
+
+.directory-page {
+  --dir-glass-fill: color-mix(in srgb, #0c0c12 76%, transparent);
+  --dir-glass-fill-hot: color-mix(in srgb, #14141c 82%, transparent);
+  --dir-glass-card: color-mix(in srgb, #0b0b0d 80%, transparent);
+  --dir-glass-edge: rgba(255, 255, 255, 0.10);
+  --dir-glass-edge-hi: rgba(255, 255, 255, 0.16);
+  --dir-glass-blur: 14px;
+  --dir-glass-blur-card: 10px;
+  --dir-glass-sat: 1.25;
+  --dir-glass-specular: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 28%,
+    transparent 55%
+  );
+  --dir-glass-shadow:
+    0 8px 28px -12px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Sticky type / neighborhood filter chrome */
+.directory-page .zine-filter-bar {
+  background:
+    var(--dir-glass-specular),
+    color-mix(in srgb, #050508 78%, transparent) !important;
+  border-bottom: 1px solid var(--dir-glass-edge) !important;
+  box-shadow:
+    0 10px 28px -18px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+/* Place cards — keep neon gradient edge via padding-box / border-box */
+.directory-page .pdxPlace__body {
+  background:
+    var(--dir-glass-specular) padding-box,
+    linear-gradient(var(--dir-glass-card), var(--dir-glass-card)) padding-box,
+    var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
+  box-shadow:
+    var(--dir-glass-shadow),
+    0 0 20px -8px color-mix(in srgb, var(--_c, var(--pink)) 22%, transparent);
+  backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
+  -webkit-backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
+}
+
+.directory-page .pdxPlace--clickable:hover .pdxPlace__body {
+  background:
+    var(--dir-glass-specular) padding-box,
+    linear-gradient(var(--dir-glass-fill-hot), var(--dir-glass-fill-hot)) padding-box,
+    var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
+  box-shadow:
+    0 20px 44px -20px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 28px -6px color-mix(in srgb, var(--_c, var(--pink)) 32%, transparent);
+}
+
+/* Map island (desktop sticky + mobile expand) */
+.directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+.directory-page .directory-browse-layout__map-desktop .directory-map-wrap {
+  background:
+    var(--dir-glass-specular),
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 0, 204, 0.06), transparent 55%),
+    var(--dir-glass-fill);
+  border: 1px solid var(--dir-glass-edge);
+  border-radius: 12px;
+  box-shadow: var(--dir-glass-shadow);
+  backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
+  -webkit-backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
+}
+
+.directory-page .directory-map-key {
+  background:
+    var(--dir-glass-specular),
+    color-mix(in srgb, #0a0a0e 72%, transparent);
+  border-top: 1px solid var(--dir-glass-edge);
+  border-radius: 0 0 12px 12px;
+  margin-top: 0;
+}
+
+/* Add-place form panel — keep lime neon edge, glass the fill */
+.directory-page .gifting-form-panel--makeover.directory-form-panel,
+.directory-page .directory-form-panel {
+  background:
+    var(--dir-glass-specular),
+    radial-gradient(120% 80% at 0% 0%, rgba(255, 0, 204, 0.07), transparent 50%),
+    var(--dir-glass-fill);
+  /* border stays #ccff00 from makeover */
+  box-shadow:
+    var(--dir-glass-shadow),
+    0 0 30px -14px #ccff00;
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+/* Legacy directory-card shells (if any remain) */
+.directory-page .directory-card {
+  background:
+    var(--dir-glass-specular),
+    var(--dir-glass-card);
+  border-color: var(--dir-glass-edge);
+  box-shadow: var(--dir-glass-shadow);
+  backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
+  -webkit-backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
+}
+
+.directory-page .directory-card:hover {
+  border-color: var(--card-accent, #ff00cc);
+  box-shadow:
+    var(--dir-glass-shadow),
+    0 0 18px color-mix(in srgb, var(--card-accent, #ff00cc) 30%, transparent);
+}
+
+/* Empty / error islands */
+.directory-page .board-empty {
+  background:
+    var(--dir-glass-specular),
+    var(--dir-glass-fill);
+  border: 1px solid var(--dir-glass-edge);
+  border-radius: 12px;
+  box-shadow: var(--dir-glass-shadow);
+  backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
+  -webkit-backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
+}
+
+/* Count banner — light glass chip */
+.directory-page .events-count-banner {
+  background:
+    var(--dir-glass-specular),
+    color-mix(in srgb, #0c0c12 70%, transparent);
+  border: 1px solid var(--dir-glass-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+}
+
+/* City-view constellation frame + center hub */
+.directory-page .category-constellation__backdrop {
+  background:
+    var(--dir-glass-specular),
+    color-mix(in srgb, #0a0a0a 70%, transparent);
+  border: 1px solid var(--dir-glass-edge);
+  border-radius: 14px;
+  box-shadow: var(--dir-glass-shadow);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+}
+
+.directory-page .category-constellation__hub-inner {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.14), transparent 42%),
+    var(--dir-glass-specular),
+    color-mix(in srgb, #0b0b0b 72%, transparent);
+  border: 1px solid var(--dir-glass-edge-hi);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+}
+
+/* ── Fallbacks: no blur / calm ── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .directory-page .zine-filter-bar {
+    background: #050508 !important;
+  }
+
+  .directory-page .pdxPlace__body {
+    background:
+      linear-gradient(#121218, #121218) padding-box,
+      var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
+  }
+
+  .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+  .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
+  .directory-page .directory-form-panel,
+  .directory-page .board-empty,
+  .directory-page .events-count-banner,
+  .directory-page .directory-card,
+  .directory-page .category-constellation__backdrop {
+    background: #121218;
+  }
+
+  .directory-page .category-constellation__hub-inner {
+    background: #0b0b0b;
+  }
+}
+
+html.calm-mode .directory-page .zine-filter-bar,
+html.calm-mode .directory-page .pdxPlace__body,
+html.calm-mode .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+html.calm-mode .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
+html.calm-mode .directory-page .directory-form-panel,
+html.calm-mode .directory-page .board-empty,
+html.calm-mode .directory-page .events-count-banner,
+html.calm-mode .directory-page .directory-card,
+html.calm-mode .directory-page .category-constellation__backdrop,
+html.calm-mode .directory-page .category-constellation__hub-inner,
+:root[data-calm="true"] .directory-page .zine-filter-bar,
+:root[data-calm="true"] .directory-page .pdxPlace__body,
+:root[data-calm="true"] .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+:root[data-calm="true"] .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
+:root[data-calm="true"] .directory-page .directory-form-panel,
+:root[data-calm="true"] .directory-page .board-empty,
+:root[data-calm="true"] .directory-page .events-count-banner,
+:root[data-calm="true"] .directory-page .directory-card,
+:root[data-calm="true"] .directory-page .category-constellation__backdrop,
+:root[data-calm="true"] .directory-page .category-constellation__hub-inner {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.calm-mode .directory-page .zine-filter-bar,
+:root[data-calm="true"] .directory-page .zine-filter-bar {
+  background: #050508 !important;
+}
+
+html.calm-mode .directory-page .pdxPlace__body,
+:root[data-calm="true"] .directory-page .pdxPlace__body {
+  background:
+    linear-gradient(#121218, #121218) padding-box,
+    var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
+}
+
+html.calm-mode .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+html.calm-mode .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
+html.calm-mode .directory-page .directory-form-panel,
+html.calm-mode .directory-page .board-empty,
+html.calm-mode .directory-page .events-count-banner,
+html.calm-mode .directory-page .directory-card,
+html.calm-mode .directory-page .category-constellation__backdrop,
+:root[data-calm="true"] .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+:root[data-calm="true"] .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
+:root[data-calm="true"] .directory-page .directory-form-panel,
+:root[data-calm="true"] .directory-page .board-empty,
+:root[data-calm="true"] .directory-page .events-count-banner,
+:root[data-calm="true"] .directory-page .directory-card,
+:root[data-calm="true"] .directory-page .category-constellation__backdrop {
+  background: #121218;
+}
+
+html.calm-mode .directory-page .category-constellation__hub-inner,
+:root[data-calm="true"] .directory-page .category-constellation__hub-inner {
+  background: #0b0b0b;
+}

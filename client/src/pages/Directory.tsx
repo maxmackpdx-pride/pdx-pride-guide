@@ -26,6 +26,7 @@ import {
 import PlaceModal from "@/components/PlaceModal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import CategoryConstellation from "@/components/CategoryConstellation";
+import "./Directory.css";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
