@@ -98,6 +98,8 @@ export default function HubV2Shell({
 
   // Route / chromeMode only — do not flip the rail when section is "admin" on /dashboard.
   const isAdminChrome = chromeMode === "admin" || location.startsWith("/admin");
+  const routeMenuMode: HubChromeMode = isAdminChrome ? "admin" : "member";
+  const [drawerMenuMode, setDrawerMenuMode] = useState<HubChromeMode>(routeMenuMode);
 
   const goMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -116,9 +118,26 @@ export default function HubV2Shell({
 
   const goAdminMode = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setMobileDrawerOpen(false);
     if (isAdminChrome) return;
     navigate("/admin?tab=overview");
+  };
+
+  // Mobile drawer: mode tabs switch the menu only — navigate when a section is picked.
+  const goDrawerMemberMode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDrawerMenuMode("member");
+    if (isAdminChrome) {
+      navigate("/dashboard");
+    }
+  };
+
+  const goDrawerAdminMode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDrawerMenuMode("admin");
   };
 
   const pickSection = (next: HubSection) => {
@@ -141,6 +160,12 @@ export default function HubV2Shell({
     setMobileDrawerOpen(false);
   }, [section, isAdminChrome]);
 
+  useEffect(() => {
+    if (!mobileDrawerOpen) {
+      setDrawerMenuMode(routeMenuMode);
+    }
+  }, [mobileDrawerOpen, routeMenuMode]);
+
   // Mobile peek: bounce drawer ~4% open once when entering hub routes.
   useEffect(() => {
     const isHubRoute = location === "/dashboard" || location.startsWith("/admin");
@@ -161,30 +186,35 @@ export default function HubV2Shell({
 
   const showRight = rightRail != null;
 
-  const modeToggle = isAdmin ? (
-    <div className="hub-v2-mode" role="group" aria-label="Hub mode">
-      <button
-        type="button"
-        onClick={goMemberMode}
-        className={`hub-v2-mode-btn${!isAdminChrome ? " is-active is-member" : ""}`}
-        aria-pressed={!isAdminChrome}
-      >
-        Member
-      </button>
-      <button
-        type="button"
-        onClick={goAdminMode}
-        className={`hub-v2-mode-btn${isAdminChrome ? " is-active is-admin" : ""}`}
-        aria-pressed={isAdminChrome}
-      >
-        Admin
-      </button>
-    </div>
-  ) : null;
+  const renderModeToggle = (
+    menuMode: HubChromeMode,
+    onMember: (e: React.MouseEvent) => void,
+    onAdmin: (e: React.MouseEvent) => void,
+  ) =>
+    isAdmin ? (
+      <div className="hub-v2-mode" role="group" aria-label="Hub mode">
+        <button
+          type="button"
+          onClick={onMember}
+          className={`hub-v2-mode-btn${menuMode === "member" ? " is-active is-member" : ""}`}
+          aria-pressed={menuMode === "member"}
+        >
+          Member
+        </button>
+        <button
+          type="button"
+          onClick={onAdmin}
+          className={`hub-v2-mode-btn${menuMode === "admin" ? " is-active is-admin" : ""}`}
+          aria-pressed={menuMode === "admin"}
+        >
+          Admin
+        </button>
+      </div>
+    ) : null;
 
-  const navButtons = (
-    <nav className="hub-v2-nav" aria-label={isAdminChrome ? "Admin sections" : "Member sections"}>
-      {!isAdminChrome && (
+  const renderNav = (menuMode: HubChromeMode) => (
+    <nav className="hub-v2-nav" aria-label={menuMode === "admin" ? "Admin sections" : "Member sections"}>
+      {menuMode === "member" && (
         <>
           {memberNav.map((item) => (
             <button
@@ -207,7 +237,7 @@ export default function HubV2Shell({
         </>
       )}
 
-      {isAdminChrome && (
+      {menuMode === "admin" && (
         <>
           {adminNav.map((item) => (
             <button
@@ -234,6 +264,11 @@ export default function HubV2Shell({
     </nav>
   );
 
+  const desktopModeToggle = renderModeToggle(routeMenuMode, goMemberMode, goAdminMode);
+  const drawerModeToggle = renderModeToggle(drawerMenuMode, goDrawerMemberMode, goDrawerAdminMode);
+  const desktopNav = renderNav(routeMenuMode);
+  const drawerNav = renderNav(drawerMenuMode);
+
   const mobileDrawer =
     typeof document !== "undefined"
       ? createPortal(
@@ -251,11 +286,11 @@ export default function HubV2Shell({
               data-hub-drawer
             >
               <div id="hub-v2-drawer-panel" className="hub-v2-drawer__sheet" role="dialog" aria-label="Hub menu" aria-hidden={!mobileDrawerOpen}>
-                {modeToggle}
+                {drawerModeToggle}
                 <div className="hub-v2-kicker hub-v2-kicker--drawer">
-                  {isAdminChrome ? "Admin" : "Your hub"}
+                  {drawerMenuMode === "admin" ? "Admin" : "Your hub"}
                 </div>
-                {navButtons}
+                {drawerNav}
                 {sideExtra && <div className="hub-v2-side-extra hub-v2-side-extra--drawer">{sideExtra}</div>}
               </div>
               <button
@@ -291,11 +326,11 @@ export default function HubV2Shell({
             <span>Return to Pride Guide</span>
           </Link>
 
-          {modeToggle}
+          {desktopModeToggle}
 
-          <div className="hub-v2-kicker">{isAdminChrome ? "Admin" : "Your hub"}</div>
+          <div className="hub-v2-kicker">{routeMenuMode === "admin" ? "Admin" : "Your hub"}</div>
 
-          {navButtons}
+          {desktopNav}
 
           <div className="hub-v2-spacer" />
 
