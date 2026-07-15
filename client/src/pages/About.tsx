@@ -313,7 +313,7 @@ export default function About() {
         </ScrollReveal>
       </section>
 
-      {/* OPEN TO WORK */}
+      {/* OPEN FOR BUSINESS + COLLABORATIVE PROJECTS */}
       <section className="about-v2-work">
         <ScrollReveal>
           <div className="about-v2__inner about-v2__inner--work">
@@ -321,29 +321,30 @@ export default function About() {
               <div className="about-v2-work__top">
                 <span className="about-v2-work__badge">
                   <span className="dot" aria-hidden="true" />
-                  Open to work
+                  Open for business
                 </span>
-                <span className="about-v2-work__loc">Portland, OR · Full time</span>
+                <span className="about-v2-work__loc">Portland, OR · Collabs welcome</span>
               </div>
               <h3 className="about-v2-work__headline">
-                Brand builder,{" "}
-                <span className="about-v2-work__headline-cyan">sales leader</span>
-                , and{" "}
-                <span className="about-v2-work__headline-lime">momentum-maker</span>
+                Open for{" "}
+                <span className="about-v2-work__headline-cyan">business</span>
+                {" "}and{" "}
+                <span className="about-v2-work__headline-lime">collaborative projects</span>
                 .
               </h3>
               <p className="about-v2-work__support">
-                I love people, big ideas, and turning good energy into real results. Still looking for my next
-                thing. If someone comes to mind, send them my way.
+                Looking for partners who want to build with the community — brand work, events, platforms,
+                and joint projects that move real people. If you&apos;ve got a pitch or a half-formed idea,
+                send it.
               </p>
-              <div className="about-v2-work__chips" aria-label="Role focus areas">
+              <div className="about-v2-work__chips" aria-label="Collaboration focus areas">
                 <span className="about-v2-work__chip">Brand &amp; marketing</span>
-                <span className="about-v2-work__chip">Sales leadership</span>
                 <span className="about-v2-work__chip">Events &amp; community</span>
+                <span className="about-v2-work__chip">Collaborative projects</span>
               </div>
               <div className="about-v2-work__footer">
                 <span className="about-v2-work__foot-note">
-                  Resume, references, and a good handshake on request.
+                  Business inquiries, collabs, and a good handshake on request.
                 </span>
                 <div className="about-v2-work__ctas">
                   <Link href="/resume">
@@ -358,7 +359,7 @@ export default function About() {
                     size="md"
                     onClick={() => setContactModal("message")}
                   >
-                    Message me
+                    Pitch me
                   </Button>
                 </div>
               </div>

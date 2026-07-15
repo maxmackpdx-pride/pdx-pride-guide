@@ -6,7 +6,8 @@ import PortfolioContactModal from "@/components/PortfolioContactModal";
 import "./Resume.css";
 
 const MARQUEE = [
-  "Open to work",
+  "Open for business",
+  "Collaborative projects",
   "12+ Years in Sales",
   "Top 10 Nationwide",
   "Event Producer",
@@ -233,13 +234,13 @@ export default function Resume() {
               </Button>
               <span className="resume-open-badge">
                 <span className="resume-open-badge__dot" aria-hidden="true" />
-                Open to work
+                Open for business
               </span>
             </div>
           </div>
           <div className="resume-hero__mark" aria-hidden="true">
             <div className="resume-tm">TM</div>
-            <span className="resume-hire-sticker">Hire me</span>
+            <span className="resume-hire-sticker">Let&apos;s collab</span>
           </div>
         </div>
       </header>
