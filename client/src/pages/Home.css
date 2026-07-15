@@ -80,6 +80,16 @@
 @media (max-width: 900px) {
   .home-hero__share {
     display: inline-flex;
+    top: max(32px, calc(env(safe-area-inset-top, 0px) + 20px));
+    min-height: 41px;
+    padding: 7px 12px;
+    font-size: 0.86rem;
+    gap: 6px;
+  }
+
+  .home-hero__share svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -367,16 +377,16 @@
 }
 
 .home-hero__btn--river {
-  color: var(--neon-orange, #ff6600);
-  background: transparent;
-  border: 2px solid var(--neon-orange, #ff6600);
-  box-shadow: 0 0 16px rgba(255, 102, 0, 0.32);
+  color: #000;
+  background: var(--neon-orange, #ff6600);
+  border: none;
+  box-shadow: 4px 4px 0 rgba(255, 102, 0, 0.38), 0 0 18px rgba(255, 102, 0, 0.35);
 }
 
 .home-hero__btn--river:hover {
-  color: #ff9933;
-  border-color: #ff9933;
-  box-shadow: 0 0 20px rgba(255, 102, 0, 0.42);
+  color: #000;
+  filter: brightness(1.06);
+  box-shadow: 4px 4px 0 rgba(255, 102, 0, 0.45), 0 0 22px rgba(255, 102, 0, 0.42);
 }
 
 @keyframes homeHeroBlink {
