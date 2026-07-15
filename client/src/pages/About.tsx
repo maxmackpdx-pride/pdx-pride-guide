@@ -299,8 +299,9 @@ export default function About() {
                   </p>
                 </blockquote>
                 <p>
-                  I built this because I&apos;m done being tied down to their platforms. Built by a slutty puppy
-                  with a cocky attitude, but run by heart and hopefully the community if it takes off.
+                  I built this because I&apos;m done being tied down to their platforms. Not an engineer. One
+                  person, every tool I could get my hands on, and a stupid number of hours. Built by a slutty
+                  puppy with a cocky attitude, but run by heart and hopefully the community if it takes off.
                 </p>
                 <p>
                   I&apos;m tired of Meta deciding what our community gets to see. I&apos;m tired of the censorship,
