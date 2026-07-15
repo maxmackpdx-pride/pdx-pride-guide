@@ -138,14 +138,15 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
   },
 };
 
-/** Points of interest dropped on the beach map. `marker: "rainbow"` swaps the
- *  accent-colored pin for a Pride ring (queer hangout areas); everything else
- *  uses the beach's accent color. */
+/** Points of interest dropped on the beach map.
+ *  - `rainbow` — Pride ring (queer hangout areas)
+ *  - `red` — out-of-bounds / do-not-go warning pin
+ *  - default — beach accent color */
 export type BeachPoi = {
   lat: number;
   lng: number;
   title: string;
-  marker?: "accent" | "rainbow";
+  marker?: "accent" | "rainbow" | "red";
 };
 
 export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
@@ -201,6 +202,17 @@ export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
       lat: 45.54978,
       lng: -122.20488,
       title: "Worth the hike. The distance is the whole point — it keeps this end for those in the know.",
+    },
+    {
+      lat: 45.55445,
+      lng: -122.18733,
+      title: "That's beyond our borders. You must never go there, Simba.",
+      marker: "red",
+    },
+    {
+      lat: 45.55356,
+      lng: -122.20114,
+      title: "Does anyone know what's here?",
     },
   ],
   "sauvie-island": [

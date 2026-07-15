@@ -52,14 +52,21 @@ function buildPin(color: string) {
 
 const RAINBOW_RING =
   "conic-gradient(#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#5e5ce6,#ff2d92,#ff3b30)";
+const DANGER_RED = "#ff1f1f";
 
 /** Smaller solid dot for points of interest so they read as secondary to the
- *  beach anchor. Rainbow variant marks the queer hangout areas. */
-function buildPoiPin(color: string, rainbow: boolean) {
-  const ring = rainbow ? RAINBOW_RING : color;
+ *  beach anchor. Rainbow = queer hangouts; red = out-of-bounds warning. */
+function buildPoiPin(color: string, variant: "accent" | "rainbow" | "red" = "accent") {
+  const ring = variant === "rainbow" ? RAINBOW_RING : variant === "red" ? DANGER_RED : color;
+  const glow =
+    variant === "rainbow"
+      ? "rgba(255,255,255,0.5)"
+      : variant === "red"
+        ? `${DANGER_RED}cc`
+        : color + "cc";
   return divIcon({
     className: "",
-    html: `<div style="width:15px;height:15px;border-radius:50%;background:${ring};border:2px solid #050505;box-shadow:0 0 8px ${rainbow ? "rgba(255,255,255,0.5)" : color + "cc"},0 2px 5px rgba(0,0,0,0.85);"></div>`,
+    html: `<div style="width:15px;height:15px;border-radius:50%;background:${ring};border:2px solid #050505;box-shadow:0 0 8px ${glow},0 2px 5px rgba(0,0,0,0.85);"></div>`,
     iconSize: [15, 15],
     iconAnchor: [7.5, 7.5],
     popupAnchor: [0, -10],
@@ -220,17 +227,21 @@ export default function NudeBeachesMap({ tab, height }: Props) {
               />
             </Popup>
           </Marker>
-          {(BEACH_POIS[tab] ?? []).map((poi, i) => (
-            <Marker
-              key={`${poi.lat},${poi.lng},${i}`}
-              position={[poi.lat, poi.lng]}
-              icon={buildPoiPin(location.pinColor, poi.marker === "rainbow")}
-            >
-              <Popup className="pdx-beach-popup" maxWidth={260}>
-                <PoiPopup title={poi.title} accent={location.pinColor} />
-              </Popup>
-            </Marker>
-          ))}
+          {(BEACH_POIS[tab] ?? []).map((poi, i) => {
+            const variant = poi.marker === "rainbow" || poi.marker === "red" ? poi.marker : "accent";
+            const popupAccent = variant === "red" ? DANGER_RED : location.pinColor;
+            return (
+              <Marker
+                key={`${poi.lat},${poi.lng},${i}`}
+                position={[poi.lat, poi.lng]}
+                icon={buildPoiPin(location.pinColor, variant)}
+              >
+                <Popup className="pdx-beach-popup" maxWidth={260}>
+                  <PoiPopup title={poi.title} accent={popupAccent} />
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </div>
     </div>
