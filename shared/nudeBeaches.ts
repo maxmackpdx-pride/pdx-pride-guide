@@ -156,6 +156,12 @@ export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
       lng: -122.22716,
       title: "The shortcut to Sand Island. Insider move, fewer steps, same payoff.",
     },
+    {
+      lat: 45.54846,
+      lng: -122.22653,
+      title:
+        "Naked Guy In A Chair — not sure if it's the same guy or they work shifts. Maybe a trap door behind the sign to a house. Head this way to skip Sand Island for a quieter day.",
+    },
     { lat: 45.54975, lng: -122.22741, title: "Turn right here. Trust us — left is a whole different weekend." },
     {
       lat: 45.55144,
