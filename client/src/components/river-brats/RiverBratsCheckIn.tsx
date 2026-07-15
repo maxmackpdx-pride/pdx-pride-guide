@@ -116,15 +116,28 @@ export default function RiverBratsCheckIn({
 
   const queryKey = ["/api/river-brats/checkins", beachId, selectedDate] as const;
 
-  const { data: rows = [], isLoading } = useQuery<CheckinRow[]>({
+  const { data: checkinData, isLoading } = useQuery<CheckinRow[]>({
     queryKey,
-    queryFn: () =>
-      fetch(`/api/river-brats/checkins?beach=${beachId}&date=${selectedDate}`, { credentials: "include" }).then(r =>
-        r.json(),
-      ),
+    queryFn: async () => {
+      const r = await fetch(
+        `/api/river-brats/checkins?beach=${encodeURIComponent(beachId)}&date=${encodeURIComponent(selectedDate)}`,
+        { credentials: "include" },
+      );
+      const body = await r.json().catch(() => null);
+      if (!r.ok) {
+        throw new Error(
+          body && typeof body === "object" && "error" in body
+            ? String((body as { error: unknown }).error)
+            : "Could not load check-ins",
+        );
+      }
+      // Guard: error payloads are objects — never feed them to .filter/.map
+      return Array.isArray(body) ? (body as CheckinRow[]) : [];
+    },
     // Beach day: poll so the small on-location pill pops when someone verifies.
     refetchInterval: selectedDate === pacificTodayDate() ? 20_000 : false,
   });
+  const rows: CheckinRow[] = Array.isArray(checkinData) ? checkinData : [];
 
   const { data: beachesPayload } = useQuery<{ data?: NudeBeachesSnapshot } | NudeBeachesSnapshot>({
     queryKey: ["/api/nude-beaches"],

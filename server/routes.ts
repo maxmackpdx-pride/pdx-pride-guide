@@ -3119,7 +3119,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const beachId = String(req.query.beach || "");
     const date = String(req.query.date || pacificTodayDate());
     if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-    res.json(storage.getBeachCheckins(beachId, date, req.session?.userId));
+    try {
+      const rows = storage.getBeachCheckins(beachId, date, req.session?.userId);
+      // Always JSON-array so clients never .filter an error object
+      res.json(Array.isArray(rows) ? rows : []);
+    } catch (e: any) {
+      console.error("[river-brats/checkins]", e?.message || e);
+      res.status(500).json({ error: "Could not load check-ins" });
+    }
   });
 
   app.post("/api/river-brats/checkins", requireAuth, (req, res) => {

@@ -82,20 +82,37 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
 
   const queryKey = ["/api/river-brats/carpool", beachId, selectedDate] as const;
 
-  const { data: rows = [], isLoading } = useQuery<CarpoolRow[]>({
+  const { data: carpoolData, isLoading } = useQuery<CarpoolRow[]>({
     queryKey,
-    queryFn: () =>
-      fetch(`/api/river-brats/carpool?beach=${beachId}&date=${selectedDate}`, { credentials: "include" }).then(r =>
-        r.json(),
-      ),
+    queryFn: async () => {
+      const r = await fetch(
+        `/api/river-brats/carpool?beach=${encodeURIComponent(beachId)}&date=${encodeURIComponent(selectedDate)}`,
+        { credentials: "include" },
+      );
+      const body = await r.json().catch(() => null);
+      if (!r.ok) {
+        throw new Error(
+          body && typeof body === "object" && "error" in body
+            ? String((body as { error: unknown }).error)
+            : "Could not load carpool posts",
+        );
+      }
+      return Array.isArray(body) ? (body as CarpoolRow[]) : [];
+    },
   });
+  const rows: CarpoolRow[] = Array.isArray(carpoolData) ? carpoolData : [];
 
-  const { data: requests = [] } = useQuery<any[]>({
+  const { data: requestData } = useQuery<any[]>({
     queryKey: ["/api/river-brats/carpool", activePostId, "requests"],
-    queryFn: () =>
-      fetch(`/api/river-brats/carpool/${activePostId}/requests`, { credentials: "include" }).then(r => r.json()),
+    queryFn: async () => {
+      const r = await fetch(`/api/river-brats/carpool/${activePostId}/requests`, { credentials: "include" });
+      const body = await r.json().catch(() => null);
+      if (!r.ok) return [];
+      return Array.isArray(body) ? body : [];
+    },
     enabled: !!activePostId && !!user,
   });
+  const requests: any[] = Array.isArray(requestData) ? requestData : [];
 
   const createMutation = useMutation({
     mutationFn: () =>
