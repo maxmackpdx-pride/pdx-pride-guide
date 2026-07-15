@@ -295,7 +295,7 @@ export default function About() {
                 <blockquote className="about-v2-creator__pull">
                   <p>
                     This community keeps each other going: donating, checking in, keeping the scene alive.
-                    You showed up for me, and this is me showing up for you.
+                    You showed up for me, and I hope this is me doing something for you.
                   </p>
                 </blockquote>
                 <p>
