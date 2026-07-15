@@ -294,9 +294,8 @@ export default function About() {
                 </p>
                 <blockquote className="about-v2-creator__pull">
                   <p>
-                    This year got rough. A lot of you showed up for me when I needed it most, donated, and checked
-                    in. That&apos;s the only reason year three exists. From the bottom of my heart, thank you. You
-                    showed up for me, and I hope this is me showing up for you.
+                    This community shows up for each other — donating, checking in, keeping the scene alive.
+                    That&apos;s what makes it worth protecting. Year three is me showing up for you.
                   </p>
                 </blockquote>
                 <p>
