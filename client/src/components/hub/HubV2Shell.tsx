@@ -486,7 +486,11 @@ export default function HubV2Shell({
                 onPointerDown={onGrabPointerDown}
                 onClick={toggleMobileDrawer}
               >
-                <span className="hub-v2-drawer__grip" aria-hidden />
+                <span className="hub-v2-drawer__grip" aria-hidden>
+                  <span />
+                  <span />
+                  <span />
+                </span>
                 {/* Pill always; label only during hub bounce (closed) or while open — never inflate the peek */}
                 {isHubRoute && (mobileDrawerOpen || drawerBounceHint) && (
                   <span className="hub-v2-drawer__hint">

@@ -80,7 +80,7 @@
 @media (max-width: 900px) {
   .home-hero__share {
     display: inline-flex;
-    top: max(32px, calc(env(safe-area-inset-top, 0px) + 20px));
+    top: max(58px, calc(env(safe-area-inset-top, 0px) + 46px));
     min-height: 41px;
     padding: 7px 12px;
     font-size: 0.86rem;
