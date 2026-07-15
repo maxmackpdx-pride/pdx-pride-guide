@@ -15488,17 +15488,18 @@ html.calm-mode .category-constellation__orb {
   .directory-browse-layout {
     flex-direction: row;
     align-items: flex-start;
-    gap: clamp(20px, 2.5vw, 32px);
+    gap: clamp(16px, 2vw, 28px);
   }
 
   .directory-browse-layout__main {
-    flex: 1 1 58%;
+    flex: 1 1 auto;
     min-width: 0;
   }
 
+  /* ~25% wider than prior min(38%, 420px) → min(47.5%, 525px) */
   .directory-browse-layout__map-desktop {
     display: block;
-    flex: 0 0 min(38%, 420px);
+    flex: 0 0 min(47.5%, 525px);
     position: sticky;
     top: calc(var(--site-header-height, 96px) + 104px);
     align-self: flex-start;
@@ -15518,8 +15519,18 @@ html.calm-mode .category-constellation__orb {
     display: none;
   }
 
+  /* Mid desktop: 2 cols until main column has room for 3 */
   .directory-grid--browse {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+/* Wide desktop: 3 place cards left of the map */
+@media (min-width: 1180px) {
+  .directory-grid--browse {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
   }
 }
 
