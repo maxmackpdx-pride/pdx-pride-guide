@@ -5,27 +5,27 @@
    ============================================================ */
 
 .directory-page {
-  /* Soften outer neon glow so glass reads dark, not category-tinted */
-  --dir-gm: 28;
-  /* Neutral dark-mode glass — same opacity, no hue pull from neon */
-  --dir-glass-fill: rgba(8, 8, 12, 0.78);
-  --dir-glass-fill-hot: rgba(14, 14, 18, 0.84);
-  --dir-glass-card: rgba(7, 7, 10, 0.80);
-  --dir-glass-edge: rgba(255, 255, 255, 0.09);
-  --dir-glass-edge-hi: rgba(255, 255, 255, 0.14);
+  /* Match home island glass tokens */
+  --dir-gm: 32;
+  --dir-glass-fill: color-mix(in srgb, #0c0c12 74%, transparent);
+  --dir-glass-fill-hot: color-mix(in srgb, #14141c 80%, transparent);
+  --dir-glass-edge: rgba(255, 255, 255, 0.10);
+  --dir-glass-edge-hi: rgba(255, 255, 255, 0.16);
   --dir-glass-blur: 14px;
-  --dir-glass-blur-card: 12px;
-  /* Low saturate so backdrop blur does not amplify neon */
-  --dir-glass-sat: 1.02;
+  --dir-glass-blur-card: 14px;
+  --dir-glass-sat: 1.15;
+  /* Light category wash over dark glass (uses card --_c) */
+  --dir-glass-tint: color-mix(in srgb, var(--_c, var(--pink)) 10%, transparent);
+  --dir-glass-tint-hot: color-mix(in srgb, var(--_c, var(--pink)) 14%, transparent);
   --dir-glass-specular: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.055) 0%,
-    rgba(255, 255, 255, 0.015) 30%,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 28%,
     transparent 55%
   );
   --dir-glass-shadow:
-    0 10px 28px -14px rgba(0, 0, 0, 0.82),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 8px 28px -12px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Sticky type / neighborhood filter chrome */
@@ -37,59 +37,82 @@
   box-shadow:
     0 10px 28px -18px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
+  -webkit-backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
 }
 
-/* Place cards — neon only on edge/glow; fill is neutral dark glass */
+/*
+ * Place cards = home utility islands:
+ * dark glass + specular + light category tint + neon border + rainbow seam
+ */
 .directory-page .pdxPlace__body {
   background:
     var(--dir-glass-specular) padding-box,
-    linear-gradient(var(--dir-glass-card), var(--dir-glass-card)) padding-box,
+    radial-gradient(
+      120% 90% at 50% 0%,
+      var(--dir-glass-tint),
+      transparent 58%
+    ) padding-box,
+    linear-gradient(var(--dir-glass-fill), var(--dir-glass-fill)) padding-box,
     var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
-  /* Depth only — no accent-tinted fill glow */
-  box-shadow: var(--dir-glass-shadow);
+  box-shadow:
+    var(--dir-glass-shadow),
+    0 0 18px color-mix(in srgb, var(--_c, var(--pink)) 12%, transparent);
   backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
   -webkit-backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
-  /* Kill hover saturate that pinks/cyans the whole glass */
   filter: none;
+  transition:
+    transform 0.18s var(--ease-out, ease-out),
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .directory-page .pdxPlace--clickable:hover .pdxPlace__body {
   background:
     var(--dir-glass-specular) padding-box,
+    radial-gradient(
+      120% 90% at 50% 0%,
+      var(--dir-glass-tint-hot),
+      transparent 58%
+    ) padding-box,
     linear-gradient(var(--dir-glass-fill-hot), var(--dir-glass-fill-hot)) padding-box,
     var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
   box-shadow:
-    0 18px 40px -18px rgba(0, 0, 0, 0.88),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    0 12px 32px -14px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 26px color-mix(in srgb, var(--_c, var(--pink)) 18%, transparent);
   filter: none;
 }
 
-/* Outer neon frame: keep, but quieter so glass stays charcoal */
+/* Outer neon frame — home-level soft accent glow, not a neon wash */
 .directory-page .pdxPlace__glow {
   box-shadow:
-    0 0 18px -4px color-mix(in srgb, var(--_c, var(--pink)) calc(var(--dir-gm, 28) * 0.9%), transparent),
-    0 0 40px -16px color-mix(in srgb, var(--_c, var(--pink)) calc(var(--dir-gm, 28) * 0.55%), transparent);
+    0 0 18px -2px color-mix(in srgb, var(--_c, var(--pink)) calc(var(--dir-gm, 32) * 1%), transparent),
+    0 0 48px -14px color-mix(in srgb, var(--_c, var(--pink)) calc(var(--dir-gm, 32) * 0.65%), transparent);
 }
 
-/* Logo well: dark glass, barely accent-tinted (was heavily neon-washed) */
+/* Logo well: dark glass with light category wash (matches island body) */
 .directory-page .pdxPlace__media {
   background:
     radial-gradient(
       125% 120% at 50% 12%,
-      color-mix(in srgb, var(--_c, var(--pink)) 5%, #060608),
-      #060608 74%
+      color-mix(in srgb, var(--_c, var(--pink)) 11%, #08080c),
+      color-mix(in srgb, #08080c 88%, transparent) 72%
     );
-  border-color: color-mix(in srgb, var(--_c, var(--pink)) 20%, rgba(255, 255, 255, 0.06));
+  border-color: color-mix(in srgb, var(--_c, var(--pink)) 28%, var(--dir-glass-edge));
 }
 
 .directory-page .pdxPlace__logo {
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--_c, var(--pink)) 22%, transparent));
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--_c, var(--pink)) 28%, transparent));
 }
 
 .directory-page .pdxPlace__logo--fallback {
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--_c, var(--pink)) 28%, transparent));
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--_c, var(--pink)) 34%, transparent));
+}
+
+/* Rainbow seam stays the card top edge (animated) — ensure bloom sits in glass */
+.directory-page .pdxPlace__seam.pdx-rainbow-rule {
+  z-index: 5;
 }
 
 /* Map island (desktop sticky + mobile expand) — neutral glass, no magenta wash */
@@ -132,9 +155,16 @@
 .directory-page .directory-card {
   background:
     var(--dir-glass-specular),
-    var(--dir-glass-card);
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in srgb, var(--card-accent, #ff00cc) 10%, transparent),
+      transparent 58%
+    ),
+    var(--dir-glass-fill);
   border-color: var(--dir-glass-edge);
-  box-shadow: var(--dir-glass-shadow);
+  box-shadow:
+    var(--dir-glass-shadow),
+    0 0 18px color-mix(in srgb, var(--card-accent, #ff00cc) 12%, transparent);
   backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
   -webkit-backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
 }
@@ -200,6 +230,11 @@
 
   .directory-page .pdxPlace__body {
     background:
+      radial-gradient(
+        120% 90% at 50% 0%,
+        color-mix(in srgb, var(--_c, var(--pink)) 10%, transparent),
+        transparent 58%
+      ) padding-box,
       linear-gradient(#121218, #121218) padding-box,
       var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
   }
@@ -251,6 +286,11 @@ html.calm-mode .directory-page .zine-filter-bar,
 html.calm-mode .directory-page .pdxPlace__body,
 :root[data-calm="true"] .directory-page .pdxPlace__body {
   background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in srgb, var(--_c, var(--pink)) 8%, transparent),
+      transparent 58%
+    ) padding-box,
     linear-gradient(#121218, #121218) padding-box,
     var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
 }

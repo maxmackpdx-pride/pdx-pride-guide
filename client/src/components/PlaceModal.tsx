@@ -388,19 +388,20 @@ export default function PlaceModal({
           margin: "0 auto",
           flex: "none",
           borderRadius: 12,
-          /* Neutral dark-mode glass — neon stays on edge only */
+          /* Dark glass island + light category tint (matches directory cards / home) */
           background:
-            "linear-gradient(rgba(255,255,255,0.05), transparent 42%) padding-box, " +
-            "linear-gradient(rgba(8,8,12,0.88), rgba(8,8,12,0.88)) padding-box, " +
+            "linear-gradient(rgba(255,255,255,0.07), rgba(255,255,255,0.02) 28%, transparent 55%) padding-box, " +
+            `radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, ${accent} 10%, transparent), transparent 58%) padding-box, ` +
+            "linear-gradient(color-mix(in srgb, #0c0c12 74%, transparent), color-mix(in srgb, #0c0c12 74%, transparent)) padding-box, " +
             edge +
             " border-box",
           border: "2px solid transparent",
           boxShadow:
             "0 30px 70px -18px rgba(0,0,0,.9), " +
-            "inset 0 1px 0 rgba(255,255,255,0.05), " +
-            `0 0 28px -10px color-mix(in srgb, ${accent} 18%, transparent)`,
-          backdropFilter: "blur(18px) saturate(1.02)",
-          WebkitBackdropFilter: "blur(18px) saturate(1.02)",
+            "inset 0 1px 0 rgba(255,255,255,0.06), " +
+            `0 0 22px color-mix(in srgb, ${accent} 12%, transparent)`,
+          backdropFilter: "blur(14px) saturate(1.15)",
+          WebkitBackdropFilter: "blur(14px) saturate(1.15)",
           overflow: "hidden",
         }}
       >
@@ -490,8 +491,8 @@ export default function PlaceModal({
               display: "grid",
               placeItems: "center",
               padding: "28px 22px 22px",
-              background: `radial-gradient(125% 130% at 50% 0%, rgba(255,255,255,0.03), #060608 74%)`,
-              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 11%, #08080c), #08080c 74%)`,
+              borderBottom: `1px solid color-mix(in srgb, ${accent} 22%, rgba(255,255,255,0.08))`,
               overflow: "hidden",
             }}
           >
