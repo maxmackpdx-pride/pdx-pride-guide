@@ -6,6 +6,7 @@ import logoWordmark from "@assets/logo-wordmark.png";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import AuthModal from "./AuthModal";
+import StankTicketGate from "./StankTicketGate";
 import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
 import { Divider } from "@/components/ds";
@@ -472,6 +473,8 @@ export default function Nav() {
   const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<"login" | "register">("login");
+  /** Ticket gate only when arriving from direct secret-story close (?from=stank-egg). */
+  const [showStankTicketGate, setShowStankTicketGate] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
@@ -483,15 +486,22 @@ export default function Nav() {
   const fetching = useIsFetching();
 
   // Deep link: /?auth=register (or join/signup) opens Join modal.
-  // Used by Stank secret story when closed from a direct visit.
+  // Direct secret-story exit uses /?auth=register&from=stank-egg → ticket gate first.
   useEffect(() => {
     if (user) return;
     const params = new URLSearchParams(window.location.search);
     const auth = (params.get("auth") || "").toLowerCase();
     if (auth !== "register" && auth !== "join" && auth !== "signup") return;
+    const from = (params.get("from") || "").toLowerCase();
+    const viaStankEgg = from === "stank-egg" || from === "stank";
     setAuthDefaultTab("register");
-    setShowAuth(true);
+    if (viaStankEgg) {
+      setShowStankTicketGate(true);
+    } else {
+      setShowAuth(true);
+    }
     params.delete("auth");
+    params.delete("from");
     const qs = params.toString();
     const next = `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`;
     window.history.replaceState(null, "", next);
@@ -785,6 +795,17 @@ export default function Nav() {
           className="site-header-rainbow-seam"
         />
       </header>
+
+      {showStankTicketGate && (
+        <StankTicketGate
+          onContinue={() => {
+            setShowStankTicketGate(false);
+            setAuthDefaultTab("register");
+            setShowAuth(true);
+          }}
+          onClose={() => setShowStankTicketGate(false)}
+        />
+      )}
 
       {showAuth && (
         <AuthModal
