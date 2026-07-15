@@ -51,6 +51,7 @@ import { registerAdRoutes } from "./adsRoutes";
 import {
   COMMUNITY_STANDARDS_VERSION,
   COMMUNITY_STANDARDS_DECLINE_URL,
+  COMMUNITY_STANDARDS_GATE_ENABLED,
 } from "@shared/communityStandards";
 import {
   accountModReasonLabel,
@@ -2197,7 +2198,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
       if (username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
       if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
-      if (!agreedToCommunityStandards) {
+      if (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedToCommunityStandards) {
         return res.status(400).json({ error: "You must agree to the Community Standards and legal terms to join" });
       }
       // Reserved shared guide-admin identity — not a human signup.
@@ -2221,8 +2222,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
         email,
         passwordHash: password,
         displayName,
-        communityStandardsVersion: version,
-        communityStandardsAgreedAt: now,
+        ...(COMMUNITY_STANDARDS_GATE_ENABLED
+          ? {
+              communityStandardsVersion: version,
+              communityStandardsAgreedAt: now,
+            }
+          : {}),
       });
       maybeSyncSiteOwnerPortfolio(user);
       req.session.userId = user.id;
@@ -3487,6 +3492,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const ok = storage.markReadForUser(Number(req.params.id), req.session.userId!);
     if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ ok: true });
+  });
+
+  // Toggle a long-press reaction on a DM bubble (👍 👎 😂 😢 ❤️ 💔 GAY!).
+  app.post("/api/messages/:id/reactions", requireAuth, (req: any, res) => {
+    const messageId = Number(req.params.id);
+    const emoji = String(req.body?.emoji || req.body?.code || "").trim();
+    if (!emoji) return res.status(400).json({ error: "emoji required" });
+    const result = storage.toggleMessageReaction(messageId, req.session.userId!, emoji);
+    if (result.error) {
+      const status = result.error === "Invalid reaction" ? 400 : 404;
+      return res.status(status).json({ error: result.error });
+    }
+    res.json({ reactions: result.reactions });
   });
 
   app.get("/api/messages/thread/:threadId", requireAuth, (req, res) => {
@@ -5076,10 +5094,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
     const guide = storage.resolveGuideAdminUser();
     if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const thread = storage.getThread(req.params.threadId);
+    const thread = storage.getThreadForViewer(req.params.threadId, guide.id);
     const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
     if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
     res.json({ messages: thread, guideUserId: guide.id });
+  });
+
+  /** React on a guide-admin DM as the shared guide identity. */
+  app.post("/api/admin/messages/:id/reactions", requireAdmin, (req: any, res) => {
+    const guide = storage.resolveGuideAdminUser();
+    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+    const messageId = Number(req.params.id);
+    const emoji = String(req.body?.emoji || req.body?.code || "").trim();
+    if (!emoji) return res.status(400).json({ error: "emoji required" });
+    const result = storage.toggleMessageReaction(messageId, guide.id, emoji);
+    if (result.error) {
+      const status = result.error === "Invalid reaction" ? 400 : 404;
+      return res.status(status).json({ error: result.error });
+    }
+    res.json({ reactions: result.reactions });
   });
 
   app.post("/api/admin/messages/thread/:threadId/reply", requireAdmin, (req, res) => {

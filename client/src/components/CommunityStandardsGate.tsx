@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   COMMUNITY_STANDARDS_BLOCKS,
   COMMUNITY_STANDARDS_DECLINE_URL,
+  COMMUNITY_STANDARDS_GATE_ENABLED,
   COMMUNITY_STANDARDS_VERSION,
   GUEST_STANDARDS_STORAGE_KEY,
   LEGAL_SUMMARY_BLOCKS,
@@ -82,6 +83,7 @@ export default function CommunityStandardsGate() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!COMMUNITY_STANDARDS_GATE_ENABLED) return;
     try {
       const v = localStorage.getItem(GUEST_STANDARDS_STORAGE_KEY);
       setGuestOk(v === COMMUNITY_STANDARDS_VERSION);
@@ -90,20 +92,14 @@ export default function CommunityStandardsGate() {
     }
   }, []);
 
-  const needsGate = (() => {
-    if (loading) return false;
-    if (user) return !userHasCurrentCommunityStandards(user);
-    return !guestOk;
-  })();
-
-  const markGuestAgree = () => {
+  const markGuestAgree = useCallback(() => {
     try {
       localStorage.setItem(GUEST_STANDARDS_STORAGE_KEY, COMMUNITY_STANDARDS_VERSION);
     } catch {
       /* ignore */
     }
     setGuestOk(true);
-  };
+  }, []);
 
   const onAgree = useCallback(async () => {
     setError("");
@@ -130,7 +126,7 @@ export default function CommunityStandardsGate() {
     } finally {
       setBusy(false);
     }
-  }, [user, refreshUser]);
+  }, [user, refreshUser, markGuestAgree]);
 
   const onDecline = useCallback(async () => {
     setBusy(true);
@@ -148,6 +144,15 @@ export default function CommunityStandardsGate() {
       window.location.assign(COMMUNITY_STANDARDS_DECLINE_URL);
     }
   }, [user, logout]);
+
+  // Feature flag off: never show the full-screen agreement modal.
+  if (!COMMUNITY_STANDARDS_GATE_ENABLED) return null;
+
+  const needsGate = (() => {
+    if (loading) return false;
+    if (user) return !userHasCurrentCommunityStandards(user);
+    return !guestOk;
+  })();
 
   if (!needsGate) return null;
 

@@ -5,6 +5,12 @@
 
 export const COMMUNITY_STANDARDS_VERSION = "2026-07-15";
 
+/**
+ * Sitewide agreement popup + signup checkbox.
+ * Set true when ready to re-enable the mandatory Community Standards gate.
+ */
+export const COMMUNITY_STANDARDS_GATE_ENABLED = false;
+
 /** Where users who decline are sent (Portland-area drug / public health support). */
 export const COMMUNITY_STANDARDS_DECLINE_URL = "https://www.savelivesoregon.org/";
 
