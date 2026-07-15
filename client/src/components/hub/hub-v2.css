@@ -111,7 +111,7 @@
       .hub-root--unified{min-height:0 !important}
       .grid3,.grid2{
         grid-template-columns:1fr;
-        padding:14px 14px calc(var(--hub-mobile-drawer-collapsed, 18px) + var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 10px);
+        padding:14px 14px calc(var(--hub-mobile-drawer-collapsed, 28px) + var(--site-mobile-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 10px);
       }
       .hub-v2-lrail--desktop{display:none !important}
       .h1{font-size:30px}
@@ -668,8 +668,8 @@
     }
     @media(max-width:720px){
       :root{
-        /* Grab strip peeks above the 5-tab bar — must read as a control */
-        --hub-mobile-drawer-collapsed:44px;
+        /* Slim peek — glowing pill only, not a second solid toolbar over the nav */
+        --hub-mobile-drawer-collapsed:28px;
       }
       /* Portaled to body — re-declare hub tokens so mode tabs render correctly */
       .hub-v2-drawer{
@@ -684,13 +684,14 @@
          * Pre-measure seed: 100% of drawer minus grab strip so the pill is never
          * fully translated off-screen before JS sets the exact sheet px.
          */
-        --drawer-collapse:calc(100% - var(--hub-mobile-drawer-collapsed, 44px));
+        --drawer-collapse:calc(100% - var(--hub-mobile-drawer-collapsed, 28px));
         --drawer-y:var(--drawer-collapse);
       }
       .hub-v2-drawer-backdrop{
         display:block;
-        position:fixed;left:0;right:0;top:0;z-index:81;
-        bottom:calc(var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px));
+        position:fixed;left:0;right:0;top:0;z-index:77;
+        /* Stop above the 5-tab bar so nav stays tappable while menu is open */
+        bottom:calc(var(--site-mobile-nav-height, 80px) + env(safe-area-inset-bottom, 0px));
         margin:0;padding:0;border:none;
         background:rgba(0,0,0,.62);
         -webkit-backdrop-filter:blur(2px);
@@ -703,8 +704,9 @@
       }
       .hub-v2-drawer{
         display:flex;flex-direction:column;justify-content:flex-end;
-        position:fixed;left:0;right:0;z-index:82;pointer-events:none;
-        bottom:calc(var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px));
+        /* Below site nav (z 80) so closed grab never steals tab taps */
+        position:fixed;left:0;right:0;z-index:78;pointer-events:none;
+        bottom:calc(var(--site-mobile-nav-height, 80px) + env(safe-area-inset-bottom, 0px));
         transform:translateY(var(--drawer-y));
         transition:transform .46s cubic-bezier(.22,1,.36,1);
         will-change:transform;
@@ -719,34 +721,34 @@
       .hub-v2-drawer.calm-mode{
         transition:transform .01s linear;
       }
-      /* Solid peek strip — sits above site nav (z-index 82 > bar 80) */
+      /* Transparent peek — single glowing pill floats just above the 5-tab bar */
       .hub-v2-drawer__grab{
         pointer-events:auto;
         position:relative;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
         width:100%;
         height:var(--hub-mobile-drawer-collapsed);
         min-height:var(--hub-mobile-drawer-collapsed);
-        padding:8px 0 6px;margin:0;
-        border:none;border-top:2px solid var(--hub-cyan, var(--panel-cyan, #19e3ff));
-        background:#0a0a0f;
-        box-shadow:0 -4px 20px rgba(0,0,0,.55);
+        padding:0;margin:0;border:none;
+        background:transparent;
+        box-shadow:none;
         cursor:grab;touch-action:none;
         -webkit-user-select:none;user-select:none;
       }
       .hub-v2-drawer__grab:active{cursor:grabbing}
+      /* Glowing cyan pill (preferred over 3-line bars) */
       .hub-v2-drawer__grip{
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-        flex:none;
-      }
-      .hub-v2-drawer__grip span{
-        display:block;width:38px;height:3px;border-radius:99px;
-        background:rgba(255,255,255,.52);
-      }
-      .hub-v2-drawer.is-open .hub-v2-drawer__grip span{
+        display:block;width:48px;height:5px;border-radius:99px;flex:none;
         background:var(--hub-cyan, var(--panel-cyan, #19e3ff));
+        box-shadow:
+          0 0 10px var(--hub-cyan, var(--panel-cyan, #19e3ff)),
+          0 0 22px rgba(25,227,255,.55);
       }
-      .hub-v2-drawer.is-open .hub-v2-drawer__grip span:nth-child(2){width:42px}
+      .hub-v2-drawer.is-open .hub-v2-drawer__grip{
+        box-shadow:
+          0 0 12px var(--hub-cyan, var(--panel-cyan, #19e3ff)),
+          0 0 28px rgba(25,227,255,.7);
+      }
       /* Absolute so the label never inflates the peek strip */
       .hub-v2-drawer__hint{
         position:absolute;left:50%;

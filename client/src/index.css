@@ -130,7 +130,9 @@ body::before {
 }
 
 :root {
-  --site-mobile-nav-height: 72px;
+  /* Matches .hub-mobile-bar: pad 9+10 + tab min-height 58 ≈ 77; pad to 80 so
+     overlays/drawers sit fully above the bar and never cover tab hits. */
+  --site-mobile-nav-height: 80px;
 }
 
 #root {
