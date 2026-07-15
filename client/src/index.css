@@ -2481,6 +2481,57 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   flex: none;
 }
 
+.inbox-group-chat__countdown {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  flex: none;
+  padding: 10px 16px;
+  border-bottom: 1px solid #1c1c22;
+  background: linear-gradient(90deg, rgba(25, 227, 255, 0.08), transparent 70%);
+}
+
+.inbox-group-chat__countdown-label {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8c8980;
+}
+
+.inbox-group-chat__countdown-value {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--neon-cyan, #19e3ff);
+  text-shadow: 0 0 14px rgba(25, 227, 255, 0.35);
+  font-variant-numeric: tabular-nums;
+}
+
+.inbox-group-chat--beach .inbox-group-chat__countdown-value {
+  color: var(--neon-green, #39ff14);
+  text-shadow: 0 0 14px rgba(57, 255, 20, 0.35);
+}
+
+.inbox-group-chat__countdown-wall {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: #666;
+}
+
+.inbox-group-chat__meta-line--countdown {
+  color: var(--neon-cyan, #19e3ff) !important;
+  font-weight: 700;
+}
+
+.inbox-group-chat--beach .inbox-group-chat__meta-line--countdown {
+  color: var(--neon-green, #39ff14) !important;
+}
+
 .inbox-group-chat__meta {
   display: flex;
   align-items: center;

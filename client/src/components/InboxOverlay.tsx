@@ -228,6 +228,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
       opensAt: row.opensAt,
       closesAt: row.closesAt,
       href: row.href,
+      calendarDate: row.calendarDate,
     });
   };
   const closeGroup = () => setActiveGroup(null);

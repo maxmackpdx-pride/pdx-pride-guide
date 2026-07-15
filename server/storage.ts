@@ -728,6 +728,83 @@ function ensureContentRepliesSchema() {
 }
 ensureContentRepliesSchema();
 
+/** DM message emoji reactions (long-press on bubbles). */
+function ensureMessageReactionsSchema() {
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS message_reactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        message_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        emoji TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT '',
+        UNIQUE(message_id, user_id, emoji)
+      )
+    `);
+    sqlite.exec(
+      `CREATE INDEX IF NOT EXISTS message_reactions_message_idx ON message_reactions(message_id)`,
+    );
+    sqlite.exec(
+      `CREATE INDEX IF NOT EXISTS message_reactions_user_idx ON message_reactions(user_id)`,
+    );
+  } catch (e) {
+    console.error("[message_reactions] schema migration failed:", e);
+  }
+}
+ensureMessageReactionsSchema();
+
+const VALID_MESSAGE_REACTION_CODES = new Set([
+  "thumbsup",
+  "thumbsdown",
+  "laugh",
+  "cry",
+  "heart",
+  "heartbreak",
+  "gay",
+]);
+
+/** Aggregate reaction chips for a set of DM message ids (viewer-aware). */
+function bulkMessageReactionSummaries(
+  messageIds: number[],
+  viewerUserId: number,
+): Map<number, Array<{ code: string; count: number; mine: boolean }>> {
+  ensureMessageReactionsSchema();
+  const out = new Map<number, Array<{ code: string; count: number; mine: boolean }>>();
+  if (!messageIds.length) return out;
+  const unique = Array.from(new Set(messageIds.filter((id) => Number.isFinite(id) && id > 0)));
+  if (!unique.length) return out;
+  const placeholders = unique.map(() => "?").join(",");
+  const rows = sqlite
+    .prepare(
+      `
+    SELECT message_id AS messageId, emoji AS code, COUNT(*) AS cnt,
+           SUM(CASE WHEN user_id = ? THEN 1 ELSE 0 END) AS mineCnt
+    FROM message_reactions
+    WHERE message_id IN (${placeholders})
+    GROUP BY message_id, emoji
+    ORDER BY message_id ASC, MIN(created_at) ASC
+  `,
+    )
+    .all(viewerUserId, ...unique) as Array<{
+    messageId: number;
+    code: string;
+    cnt: number;
+    mineCnt: number;
+  }>;
+  for (const row of rows) {
+    const mid = Number(row.messageId);
+    if (!VALID_MESSAGE_REACTION_CODES.has(String(row.code))) continue;
+    const list = out.get(mid) || [];
+    list.push({
+      code: String(row.code),
+      count: Number(row.cnt) || 0,
+      mine: Number(row.mineCnt) > 0,
+    });
+    out.set(mid, list);
+  }
+  return out;
+}
+
 function bulkContentReplyCounts(contentType: ContentReplyThreadType, ids: number[]): Map<number, number> {
   const out = new Map<number, number>();
   if (!ids.length) return out;
@@ -6617,6 +6694,15 @@ export interface IStorage {
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
   getUnreadCount(userId: number): number;
+  /** Toggle a DM reaction. Viewer must be a participant on the message. */
+  toggleMessageReaction(
+    messageId: number,
+    userId: number,
+    emoji: string,
+  ): {
+    reactions: Array<{ code: string; count: number; mine: boolean }>;
+    error?: string;
+  };
   sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
   /** Shared non-personal admin identity used for rejects / admin DMs. */
   resolveGuideAdminUser(): User | undefined;
@@ -10097,7 +10183,7 @@ export const storage: IStorage = {
     `).all(threadId) as any[];
     const mcThread = storage.getMissedConnectionThread(threadId);
     const bothRevealed = !mcThread || Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
-    return thread.map(raw => {
+    const mapped = thread.map(raw => {
       const m = mapMessageRow(raw as Record<string, unknown>);
       if (m.contextType !== "MISSED_CONNECTION" || bothRevealed) return m;
       const isSelf = m.fromUserId === viewerUserId;
@@ -10109,6 +10195,70 @@ export const storage: IStorage = {
         masked: !isSelf,
       };
     });
+    const reactionMap = bulkMessageReactionSummaries(
+      mapped.map((m: any) => Number(m.id)).filter((id: number) => Number.isFinite(id) && id > 0),
+      viewerUserId,
+    );
+    return mapped.map((m: any) => ({
+      ...m,
+      reactions: reactionMap.get(Number(m.id)) || [],
+    }));
+  },
+  toggleMessageReaction(messageId, userId, emoji) {
+    ensureMessageReactionsSchema();
+    const id = Number(messageId);
+    if (!Number.isFinite(id) || id <= 0) {
+      return { reactions: [], error: "Invalid message" };
+    }
+    const code = String(emoji || "").trim().toLowerCase();
+    if (!VALID_MESSAGE_REACTION_CODES.has(code)) {
+      return { reactions: [], error: "Invalid reaction" };
+    }
+    const row = sqlite
+      .prepare(
+        `SELECT id, from_user_id AS fromUserId, to_user_id AS toUserId,
+                deleted_by_from AS deletedByFrom, deleted_by_to AS deletedByTo
+         FROM messages WHERE id = ?`,
+      )
+      .get(id) as
+      | {
+          id: number;
+          fromUserId: number;
+          toUserId: number;
+          deletedByFrom: number;
+          deletedByTo: number;
+        }
+      | undefined;
+    if (!row) return { reactions: [], error: "Not found" };
+    const isParticipant = row.fromUserId === userId || row.toUserId === userId;
+    if (!isParticipant) return { reactions: [], error: "Not found" };
+    // Soft-deleted for this viewer: treat as missing.
+    if (row.fromUserId === userId && row.deletedByFrom) {
+      return { reactions: [], error: "Not found" };
+    }
+    if (row.toUserId === userId && row.deletedByTo) {
+      return { reactions: [], error: "Not found" };
+    }
+
+    const existing = sqlite
+      .prepare(
+        `SELECT id FROM message_reactions WHERE message_id = ? AND user_id = ? AND emoji = ?`,
+      )
+      .get(id, userId, code);
+    if (existing) {
+      sqlite
+        .prepare(`DELETE FROM message_reactions WHERE message_id = ? AND user_id = ? AND emoji = ?`)
+        .run(id, userId, code);
+    } else {
+      sqlite
+        .prepare(
+          `INSERT INTO message_reactions (message_id, user_id, emoji, created_at)
+           VALUES (?, ?, ?, ?)`,
+        )
+        .run(id, userId, code, new Date().toISOString());
+    }
+    const reactions = bulkMessageReactionSummaries([id], userId).get(id) || [];
+    return { reactions };
   },
   updateMissedConnection(id, userId, data) {
     const before = db.select().from(missedConnections).where(eq(missedConnections.id, id)).get();
@@ -11223,25 +11373,28 @@ export const storage: IStorage = {
         href: `/events/${eventId}?chat=1`,
       });
     }
-    // Beach rooms: active non-anon check-in while chat is in the open window
-    // (opens 48h before that beach day, closes 10pm Pacific that day).
+    // Beach rooms: active non-anon check-in while the day-room window is not
+    // over (BEFORE or OPEN). Opens 48h before beach day; closes 10pm that day.
+    // BEFORE rows still list so the floating inbox can show a countdown.
     const beachRows = sqlite.prepare(`
       SELECT beach_id AS beachId, calendar_date AS calendarDate FROM beach_checkins
       WHERE user_id = ? AND is_active = 1
         AND COALESCE(is_anonymous, 0) = 0
     `).all(userId) as Array<{ beachId: string; calendarDate: string }>;
     for (const { beachId, calendarDate } of beachRows) {
-      if (!isRiverBratsChatOpen(calendarDate, now)) continue;
       const opensAt = riverBratsChatOpensAtIso(calendarDate);
       const closesAt = riverBratsChatClosesAtIso(calendarDate);
       if (closesAt <= nowIso) continue;
+      const opensMs = new Date(opensAt).getTime();
+      const state: "BEFORE" | "OPEN" = now < opensMs ? "BEFORE" : "OPEN";
       out.push({
         kind: "BEACH",
         id: beachId,
         title: beachVenueLabel(beachId as any),
-        state: "OPEN",
+        state,
         opensAt,
         closesAt,
+        calendarDate,
         href: `/nude-beaches?tab=${beachId}&chat=1&date=${calendarDate}`,
       });
     }
@@ -11841,6 +11994,7 @@ const PERSISTENCE_TABLES = [
   "feedback_reports",
   "content_likes",
   "content_replies",
+  "message_reactions",
   "express_sessions",
   "ads",
   "ad_events",

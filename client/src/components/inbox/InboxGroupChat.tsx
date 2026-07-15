@@ -1,12 +1,18 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
+import {
+  formatClosesIn,
+  formatOpensAtWall,
+  formatOpensIn,
+} from "@/lib/chatCountdown";
 import { isValidBeachId, pacificTodayDate } from "@shared/riverBrats";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
+
 export type InboxGroupChatTarget = {
   kind: "EVENT" | "BEACH";
   id: number | string;
@@ -15,6 +21,7 @@ export type InboxGroupChatTarget = {
   opensAt?: string | null;
   closesAt?: string | null;
   href?: string;
+  calendarDate?: string;
 };
 
 type ChatMessage = {
@@ -43,26 +50,9 @@ type EventChatPayload = {
 type BeachChatPayload = {
   messages: ChatMessage[];
   expiresAt: string | null;
+  opensAt?: string | null;
   chatOpen: boolean;
 };
-
-function formatCountdown(expiresAt: string | null | undefined): string | null {
-  if (!expiresAt) return null;
-  const ms = new Date(expiresAt).getTime() - Date.now();
-  if (ms <= 0) return "Chat closed";
-  const totalMin = Math.ceil(ms / 60_000);
-  const hours = Math.floor(totalMin / 60);
-  const mins = totalMin % 60;
-  if (hours > 0) return `${hours}h ${mins}m left`;
-  return `${mins}m left`;
-}
-
-function formatOpensAt(opensAt: string | null | undefined): string | null {
-  if (!opensAt) return null;
-  const d = new Date(opensAt);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
-}
 
 type Props = {
   target: InboxGroupChatTarget;
@@ -80,7 +70,7 @@ export default function InboxGroupChat({ target, onBack }: Props) {
   const isEvent = target.kind === "EVENT";
   const eventId = isEvent ? Number(target.id) : null;
   const beachId = !isEvent && isValidBeachId(String(target.id)) ? (String(target.id) as NudeBeachTab) : null;
-  const beachDate = pacificTodayDate();
+  const beachDate = target.calendarDate || pacificTodayDate();
 
   const eventQuery = useQuery<EventChatPayload>({
     queryKey: ["/api/events", eventId, "chat"],
@@ -101,22 +91,35 @@ export default function InboxGroupChat({ target, onBack }: Props) {
   const isLoading = isEvent ? eventQuery.isLoading : beachQuery.isLoading;
   const messages = data?.messages ?? [];
   const expiresAt = data?.expiresAt ?? target.closesAt ?? null;
+  const opensAt =
+    (isEvent ? eventQuery.data?.opensAt : beachQuery.data?.opensAt) ?? target.opensAt ?? null;
   const chatOpen = Boolean(data?.chatOpen);
-  const windowState =
-    isEvent
-      ? (eventQuery.data?.windowState ?? (chatOpen ? "OPEN" : "CLOSED"))
-      : chatOpen
-        ? "OPEN"
-        : "CLOSED";
+  const windowState: "BEFORE" | "OPEN" | "CLOSED" = (() => {
+    if (isEvent) {
+      return eventQuery.data?.windowState
+        ?? target.state
+        ?? (chatOpen ? "OPEN" : "CLOSED");
+    }
+    if (chatOpen) return "OPEN";
+    if (opensAt && Date.now() < new Date(opensAt).getTime()) return "BEFORE";
+    if (target.state === "BEFORE") return "BEFORE";
+    return "CLOSED";
+  })();
   const pinned = isEvent ? eventQuery.data?.pinned ?? null : null;
   const isHost = isEvent ? Boolean(eventQuery.data?.isHost) : false;
-  const countdown = useMemo(() => formatCountdown(expiresAt), [expiresAt, tick]);
-  const opensAtLabel = formatOpensAt(isEvent ? eventQuery.data?.opensAt ?? target.opensAt : null);
+  // tick forces re-render for live countdown
+  void tick;
+  const now = Date.now();
+  const opensIn = formatOpensIn(opensAt, now);
+  const closesIn = formatClosesIn(expiresAt, now);
+  const opensWall = formatOpensAtWall(opensAt);
 
   useEffect(() => {
-    const id = window.setInterval(() => setTick(t => t + 1), 30_000);
+    // 1s while waiting to open (fun countdown); slower while open.
+    const ms = windowState === "BEFORE" ? 1000 : 30_000;
+    const id = window.setInterval(() => setTick((t) => t + 1), ms);
     return () => window.clearInterval(id);
-  }, []);
+  }, [windowState]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -145,25 +148,33 @@ export default function InboxGroupChat({ target, onBack }: Props) {
     },
   });
 
-  const metaLine = isEvent
-    ? windowState === "BEFORE"
-      ? opensAtLabel
-        ? `Opens ${opensAtLabel}`
-        : "Opens 48h before doors"
+  const metaLine =
+    windowState === "BEFORE"
+      ? opensIn
+        ? opensIn
+        : opensWall
+          ? `Opens ${opensWall}`
+          : isEvent
+            ? "Opens 48h before doors"
+            : "Opens 48h before beach day"
       : windowState === "OPEN"
-        ? countdown ?? "Open now"
-        : "Chat closed"
-    : countdown ?? (chatOpen ? "Open until 10pm" : "Chat closed or locked");
+        ? closesIn ?? (isEvent ? "Open now" : "Open until 10pm")
+        : isEvent
+          ? "Chat closed"
+          : "Chat closed or locked";
 
-  const emptyCopy = isEvent
-    ? windowState === "BEFORE"
-      ? "You're on the list. The room opens 48 hours before doors."
+  const emptyCopy =
+    windowState === "BEFORE"
+      ? isEvent
+        ? `You're on the list. Room opens 48 hours before doors${opensIn ? ` · ${opensIn}` : ""}.`
+        : `You're checked in. Beach chat opens 48h early${opensIn ? ` · ${opensIn}` : ""}.`
       : windowState === "OPEN"
-        ? "You're checked in. Say hi. Everyone going can see this."
-        : "This chat has closed."
-    : chatOpen
-      ? "You're checked in. Say hi. Others heading out can see this until 10pm."
-      : "Check in on the beach page to unlock this room (visible check-in only).";
+        ? isEvent
+          ? "You're checked in. Say hi. Everyone going can see this."
+          : "You're checked in. Say hi. Others heading out can see this until 10pm."
+        : isEvent
+          ? "This chat has closed."
+          : "Check in on the beach page to unlock this room (visible check-in only).";
 
   const badge = isEvent ? "EVENT GROUP" : "RIVER BRATS";
   const accentStyle = { "--inbox-exp-accent": isEvent ? "#19e3ff" : "#39ff14" } as CSSProperties;
@@ -188,10 +199,27 @@ export default function InboxGroupChat({ target, onBack }: Props) {
             <span className={`inbox-exp-tag inbox-group-chat__badge inbox-exp-tag--${isEvent ? "cyan" : "green"}`}>
               {badge}
             </span>
-            <span className="inbox-group-chat__meta-line">{metaLine}</span>
+            <span
+              className={`inbox-group-chat__meta-line${windowState === "BEFORE" ? " inbox-group-chat__meta-line--countdown" : ""}`}
+              aria-live="polite"
+            >
+              {metaLine}
+            </span>
           </div>
         </div>
       </header>
+
+      {windowState === "BEFORE" && (
+        <div className="inbox-group-chat__countdown" role="status" aria-live="polite">
+          <span className="inbox-group-chat__countdown-label">Opens in</span>
+          <span className="inbox-group-chat__countdown-value">
+            {(opensIn || "soon").replace(/^Opens in\s+/i, "")}
+          </span>
+          {opensWall ? (
+            <span className="inbox-group-chat__countdown-wall">{opensWall}</span>
+          ) : null}
+        </div>
+      )}
 
       <AdultContentGate onDecline={onBack}>
         {pinned && (

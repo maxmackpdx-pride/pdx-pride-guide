@@ -161,6 +161,25 @@
   letter-spacing: 0.04em;
 }
 
+/* Live pre-open countdown on GROUP rows (event / River Brats) */
+.inbox-exp-row__countdown {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--panel-cyan, #19e3ff);
+  flex: none;
+  white-space: nowrap;
+  max-width: 46%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inbox-exp-row--waiting {
+  background: rgba(25, 227, 255, 0.04);
+}
+
 .inbox-exp-row__sub {
   display: block;
   font-size: 13px;

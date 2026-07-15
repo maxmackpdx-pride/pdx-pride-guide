@@ -1,5 +1,10 @@
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  formatClosesIn,
+  formatOpensAtWall,
+  formatOpensIn,
+} from "@/lib/chatCountdown";
 import { useInboxThreads } from "../useInboxThreads";
 import type { Folder } from "../types";
 import { C } from "./sheet";
@@ -26,12 +31,18 @@ export type GroupChatRow = {
   opensAt: string | null;
   closesAt: string;
   href: string;
+  calendarDate?: string;
 };
 
-function groupSub(row: GroupChatRow): string {
+function groupSub(row: GroupChatRow, now: number): string {
   if (row.state === "BEFORE" && row.opensAt) {
-    return `Opens ${new Date(row.opensAt).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}`;
+    const live = formatOpensIn(row.opensAt, now);
+    if (live) return live;
+    const wall = formatOpensAtWall(row.opensAt);
+    return wall ? `Opens ${wall}` : "Opens soon";
   }
+  const left = formatClosesIn(row.closesAt, now);
+  if (left && left !== "Chat closed") return `Open · ${left}`;
   return `Open now · until ${new Date(row.closesAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
 }
 
@@ -53,12 +64,21 @@ export default function PersonalView({
   onOpenGroup?: (row: GroupChatRow) => void;
 }) {
   const { threads } = useInboxThreads(null);
+  const [now, setNow] = useState(() => Date.now());
 
+  // Tick while any group chat is waiting to open so the countdown stays fun.
   const { data: groupChats = [] } = useQuery<GroupChatRow[]>({
     queryKey: ["/api/chats/mine"],
     queryFn: () => fetch("/api/chats/mine", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
-    refetchInterval: 60_000,
+    refetchInterval: 30_000,
   });
+
+  const hasPreOpen = groupChats.some((g) => g.state === "BEFORE" && g.opensAt);
+  useEffect(() => {
+    if (!hasPreOpen) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [hasPreOpen]);
 
   const q = query.trim().toLowerCase();
   const rows = threads
@@ -87,30 +107,41 @@ export default function PersonalView({
 
   const groupStrip = showGroups ? (
     <div className="inbox-exp-list inbox-exp-list--spaced">
-      {groupChats.map((row) => (
-        <div
-          key={`${row.kind}-${row.id}`}
-          className="inbox-exp-row"
-          onClick={() => onOpenGroup?.(row)}
-          {...openRow(() => onOpenGroup?.(row))}
-        >
-          <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : "GC"}</span>
-          <div className="inbox-exp-row__body">
-            <div className="inbox-exp-row__top">
-              <div className="inbox-exp-row__id">
-                <span className="inbox-exp-row__name">{row.title}</span>
-                {row.state === "OPEN" && <span className="inbox-exp-dot inbox-exp-dot--live" aria-hidden />}
+      {groupChats.map((row) => {
+        const waiting = row.state === "BEFORE";
+        return (
+          <div
+            key={`${row.kind}-${row.id}-${row.calendarDate || ""}`}
+            className={`inbox-exp-row${waiting ? " inbox-exp-row--waiting" : ""}`}
+            onClick={() => onOpenGroup?.(row)}
+            {...openRow(() => onOpenGroup?.(row))}
+          >
+            <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : "GC"}</span>
+            <div className="inbox-exp-row__body">
+              <div className="inbox-exp-row__top">
+                <div className="inbox-exp-row__id">
+                  <span className="inbox-exp-row__name">{row.title}</span>
+                  {row.state === "OPEN" && <span className="inbox-exp-dot inbox-exp-dot--live" aria-hidden />}
+                </div>
+                {waiting && (
+                  <span className="inbox-exp-row__countdown" aria-live="polite">
+                    {formatOpensIn(row.opensAt, now) || "Soon"}
+                  </span>
+                )}
+              </div>
+              <div className="inbox-exp-row__foot">
+                <span
+                  className="inbox-exp-tag"
+                  style={{ background: waiting ? C.cyan : C.limeSoft }}
+                >
+                  {waiting ? "SOON" : "GROUP"}
+                </span>
+                <span className="inbox-exp-row__preview">{groupSub(row, now)}</span>
               </div>
             </div>
-            <div className="inbox-exp-row__foot">
-              <span className="inbox-exp-tag" style={{ background: C.limeSoft }}>
-                GROUP
-              </span>
-              <span className="inbox-exp-row__preview">{groupSub(row)}</span>
-            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   ) : null;
 
