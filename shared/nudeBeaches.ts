@@ -177,6 +177,11 @@ export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
     },
     { lat: 45.55338, lng: -122.21663, title: "Very hot sand. Sandals aren't a fashion statement here — they're survival gear." },
     {
+      lat: 45.55049,
+      lng: -122.21691,
+      title: "Every trail leads to water except the one behind you.",
+    },
+    {
       lat: 45.55521,
       lng: -122.21643,
       title: "Prime photo real estate, especially at golden hour. Your feed will thank you.",
