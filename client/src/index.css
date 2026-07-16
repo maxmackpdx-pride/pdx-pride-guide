@@ -2861,8 +2861,13 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   .inbox-sheet-host .inbox-overlay {
     left: 8px;
     right: 8px;
-    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-    height: min(80vh, 700px);
+    /* Clear the bottom nav AND the hub drawer grab pill (plus a gap) so the
+       search / reply bar sits fully above them, not tucked underneath. */
+    bottom: calc(
+      var(--site-mobile-nav-height, 88px) + var(--hub-mobile-drawer-collapsed, 36px)
+      + 14px + env(safe-area-inset-bottom, 0px)
+    );
+    height: min(74vh, 660px);
   }
 }
 
