@@ -164,7 +164,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
         <div className="nb-hub__kicker">Parking permits</div>
         <p className="nb-hub__summary">
           {live.parkingNote ||
-            "Mandatory on summer weekends through Labor Day. Check live sold-out dates on SauvieIslandParking.com."}
+            "Mandatory on summer weekends through Labor Day. Buy a daily day pass online — seasonal sold-out is not the same as day passes gone."}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
           Sauvie Island Parking →

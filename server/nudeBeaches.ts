@@ -436,37 +436,75 @@ async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStat
   }
 }
 
+/**
+ * Parse Sauvie parking portal copy carefully.
+ * Official site often says the **seasonal** beaches permit is SOLD OUT while
+ * **daily / day** permits ($10) remain for sale — do not treat that as "parking sold out."
+ */
+function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parkingNote" | "parkingStatusLabel"> {
+  const seasonSoldOut =
+    /seasonal[^.<>]{0,160}sold\s*out|sold\s*out[^.<>]{0,80}seasonal|seasonal sauvie island beaches permits[^.<>]{0,200}sold\s*out|were available starting[^.]{0,80}are\s+now\s+sold\s*out/i.test(
+      html,
+    );
+  // Day-pass inventory is date-specific; only flag fully sold-out if copy
+  // ties "sold out" to daily permits without seasonal context.
+  const dailySoldOut =
+    /daily\s+permits?[^.<>]{0,120}sold\s*out|day\s+pass(?:es)?[^.<>]{0,80}sold\s*out|sold\s*out[^.<>]{0,80}daily\s+permit/i.test(
+      html,
+    ) && !seasonSoldOut;
+
+  const dailyMentioned =
+    /daily\s+permit|daily\s+permits?\s+cost\s*\$?\s*10|day\s*pass/i.test(html);
+  const buyNow = /buy\s+my\s+beaches\s+permit|buy\s+permit|available\s+as\s+of|more\s+permits/i.test(html);
+
+  if (dailySoldOut) {
+    return {
+      parkingNote:
+        "Daily beaches day-passes look sold out on the portal for some dates — check SauvieIslandParking.com for your day (releases often hit Friday 4pm).",
+      parkingStatusLabel: "SOLD OUT",
+    };
+  }
+
+  if (seasonSoldOut) {
+    return {
+      parkingNote:
+        "2026 seasonal beaches permits are sold out — daily $10 day passes are still sold online for weekends/holidays (buy before you go; they go fast).",
+      parkingStatusLabel: "DAY PASS",
+    };
+  }
+
+  if (dailyMentioned || buyNow || /available/i.test(html)) {
+    return {
+      parkingNote:
+        "Daily beaches permits ($10) appear available on SauvieIslandParking.com for permit-required days — confirm your date before you drive out.",
+      parkingStatusLabel: "OPEN",
+    };
+  }
+
+  if (html.length < 800) {
+    return {
+      parkingNote:
+        "Permit portal loads dynamically — open SauvieIslandParking.com. Seasonal passes may be sold out; day passes are sold separately.",
+      parkingStatusLabel: "CHECK",
+    };
+  }
+
+  return {
+    parkingNote:
+      "Weekends/holidays through Labor Day need a Sauvie beaches permit. Seasonal passes may be sold out — buy a daily day pass online before you go.",
+    parkingStatusLabel: "CHECK",
+  };
+}
+
 async function fetchParkingSnapshot(): Promise<Pick<SauvieIslandLive, "parkingNote" | "parkingStatusLabel">> {
   const fallback = {
-    parkingNote: "Could not reach Sauvie Island Parking — use the permit link to check sold-out dates before you go.",
+    parkingNote:
+      "Could not reach the parking portal — buy a daily beaches day pass at SauvieIslandParking.com if you need a weekend/holiday permit (seasonal passes may already be sold out).",
     parkingStatusLabel: "CHECK" as const,
   };
   try {
     const html = await fetchText(SAUVIE_ISLAND_PARKING_URL);
-    const soldOut = /sold\s*out/i.test(html);
-    const available = /available/i.test(html);
-    if (soldOut) {
-      return {
-        parkingNote: "At least one permit date appears sold out on SauvieIslandParking.com — verify before you drive out.",
-        parkingStatusLabel: "SOLD OUT",
-      };
-    }
-    if (available) {
-      return {
-        parkingNote: "Permit inventory appears open on SauvieIslandParking.com — confirm your date before you go.",
-        parkingStatusLabel: "OPEN",
-      };
-    }
-    if (html.length < 800) {
-      return {
-        parkingNote: "Permit portal loads dynamically — open SauvieIslandParking.com to check live sold-out dates.",
-        parkingStatusLabel: "CHECK",
-      };
-    }
-    return {
-      parkingNote: "Buy and check permit availability at SauvieIslandParking.com for weekends and holidays through Labor Day.",
-      parkingStatusLabel: "CHECK",
-    };
+    return interpretSauvieParkingHtml(html);
   } catch {
     return fallback;
   }

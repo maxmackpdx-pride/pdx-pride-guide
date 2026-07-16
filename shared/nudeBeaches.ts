@@ -339,7 +339,11 @@ export type SauvieIslandLive = {
   lastSampleAt: string | null;
   swimSummary: string | null;
   parkingNote: string | null;
-  /** Short live read from SauvieIslandParking.com scrape: SOLD OUT, OPEN, or CHECK. */
+  /**
+   * Short live read from the parking portal scrape:
+   * OPEN | DAY PASS (seasonal sold out, dailies available) | SOLD OUT (day inventory) | CHECK.
+   * Never treat "seasonal sold out" alone as full parking sold-out.
+   */
   parkingStatusLabel: string | null;
   parkingHref: string;
   weatherSummary: string | null;
@@ -451,7 +455,7 @@ export const SAUVIE_ISLAND_CHECKLIST: SauvieChecklistItem[] = [
   {
     step: "Check permit status",
     detail:
-      "Weekends and holidays through Labor Day require a permit. Sold-out dates update in real time on the official portal.",
+      "Weekends and holidays through Labor Day need a beaches permit. Seasonal passes may be sold out — buy a daily $10 day pass online for your date (not the same as season sold-out).",
     href: SAUVIE_ISLAND_PARKING_URL,
     linkLabel: "Sauvie Island Parking",
   },
@@ -473,5 +477,5 @@ export const SAUVIE_ISLAND_RULES = [
   "Alcohol is strictly prohibited on all beaches in the Sauvie Island Wildlife Area.",
   "Day-use hours are 4 a.m. to 10 p.m. in the wildlife area.",
   "Collins Beach is partly clothing-optional — wild, sandy, and on the island's western shore.",
-  "Parking permits are required on busy days through Labor Day — verify before you drive out.",
+  "Parking permits are required on busy days through Labor Day — daily day passes are sold online; seasonal sold-out does not mean no parking.",
 ];

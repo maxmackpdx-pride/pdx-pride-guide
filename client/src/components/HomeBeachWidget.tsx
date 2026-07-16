@@ -19,7 +19,8 @@ type Props = {
 };
 
 function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
-  if (label === "OPEN") return "good";
+  // DAY PASS = seasonal sold out but daily permits still sold — treat as open-ish.
+  if (label === "OPEN" || label === "DAY PASS") return "good";
   if (label === "SOLD OUT") return "warn";
   return "neutral";
 }
