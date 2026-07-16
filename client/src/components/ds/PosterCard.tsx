@@ -216,9 +216,10 @@ export function PosterCard({
           </a>
         )}
         {when && <div className="pdxBoard__when">{when}</div>}
-        {showDetailsLink && (detailsHref
-          ? <a className="pdxBoard__link" href={detailsHref} onClick={stop}>Event details &rarr;</a>
-          : <span className="pdxBoard__link">Event details &rarr;</span>)}
+        {/* Only render when it navigates — dead "Event details" spans on board cards do nothing (card click opens modal). */}
+        {showDetailsLink && detailsHref ? (
+          <a className="pdxBoard__link" href={detailsHref} onClick={stop}>Event details &rarr;</a>
+        ) : null}
 
         {(going != null || onRsvp) && (
           <div className="pdxBoard__foot">

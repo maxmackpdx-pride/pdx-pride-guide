@@ -189,6 +189,7 @@ export default function ListingCard({
           age={event.ageRequirement as "ALL_AGES" | "18_PLUS" | "21_PLUS" | undefined}
           going={showAttendance ? attendanceSummary!.count : undefined}
           showLink={false}
+          showDetailsLink={false}
           style={{ cursor: "pointer", height: "100%" }}
           {...claimProps}
         />
