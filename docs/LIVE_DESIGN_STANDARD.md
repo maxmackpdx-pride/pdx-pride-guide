@@ -45,6 +45,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Primary CTA | `.pdx-glass-btn--solid` or `.pdxBtn--solid` | Tickets, Shop Now, filled actions |
 | Default glass CTA | `.pdx-glass-btn` / `.pdxBtn` | Secondary glass controls |
 | Map frame | `--map-frame-shadow`, mapTheme | Events / directory / beach maps |
+| Map key / legend | `.map-legend` / `.directory-map-key` / `.pdxLegend` → **neutral deep-glass** (`--glass-card-neutral-*`) | All maps; pin swatches unchanged; no lime/cyan panel bloom |
 | Claim sticker | `.pdxBoard__claim-tag` / `.event-card-meta-tag--claim` | Unclaimed listings only |
 | Rainbow top seam | `.pdx-rainbow-rule` / card `::before` | Clickable cards (see board standard) |
 

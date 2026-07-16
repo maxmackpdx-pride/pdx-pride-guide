@@ -1549,24 +1549,13 @@ h2.display,
   font-size: 0.455rem;
 }
 
-/* Day legend — OLED glass panel (same chrome as directory map key); swatches unchanged */
+/* Day legend — panel chrome from glass.css (.map-legend = neutral deep-glass); layout only here */
 .map-legend {
   position: absolute;
   bottom: 28px;
   right: 12px;
   z-index: 1000;
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
-    radial-gradient(90% 80% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 60%),
-    #08080c;
   padding: 12px 14px 13px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  box-shadow:
-    0 0 0 1px #000,
-    0 18px 40px -16px rgba(0, 0, 0, 0.92),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -10px 28px -14px rgba(0, 0, 0, 0.75);
   outline: none;
   pointer-events: none;
 }
@@ -1607,6 +1596,7 @@ h2.display,
   white-space: nowrap;
 }
 
+/* Home strip: horizontal layout only — keep shared glass chrome (no cyan bloom) */
 .map-legend--home {
   left: 50%;
   right: auto;
@@ -1615,8 +1605,6 @@ h2.display,
   width: max-content;
   max-width: calc(100% - 24px);
   padding: 7px 14px;
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 14px rgba(0, 255, 255, 0.2);
 }
 
 .map-legend--home .map-legend-items {
@@ -3193,13 +3181,11 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   color: #000;
 }
 
-/* Events map legend — readable panel, not oversized (SoT: compact lime box) */
+/* Events map legend — layout only; glass chrome from .map-legend (no lime bloom) */
 .events-map-panel .map-legend {
   padding: 12px 14px;
   bottom: 16px;
   right: 14px;
-  border-width: 2px;
-  box-shadow: 0 0 16px -4px var(--lime, #ccff00);
 }
 
 .events-map-panel .map-legend-items {
@@ -3238,7 +3224,6 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
     right: 10px;
     max-width: 150px;
     padding: 7px 10px;
-    border-width: 1.5px;
   }
 
   .events-map-panel .map-legend-items {
@@ -12134,11 +12119,11 @@ html.calm-mode .torn-divider {
   filter: grayscale(1) !important;
 }
 
-html.calm-mode .home-map-all-events,
-html.calm-mode .map-legend--home {
+html.calm-mode .home-map-all-events {
   box-shadow: none !important;
   border-color: #333 !important;
 }
+/* Map keys keep neutral glass tokens under calm (no cyan/lime bloom to strip) */
 
 html.calm-mode .map-exit-button {
   border-color: #444 !important;
@@ -13010,22 +12995,11 @@ html.calm-mode .schedule-now-line {
   overflow: hidden;
 }
 
-/* Pin color legend — OLED glass panel (ref: soft black well); keep ring-pin swatches */
+/* Directory map key — layout only; glass chrome from glass.css .directory-map-key */
 .directory-map-key {
   max-width: 1200px;
   margin: 12px auto 16px;
   padding: 18px 22px 20px;
-  border-radius: 20px;
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 52%),
-    radial-gradient(90% 80% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 58%),
-    #08080c;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow:
-    0 0 0 1px #000,
-    0 20px 44px -18px rgba(0, 0, 0, 0.92),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -12px 32px -16px rgba(0, 0, 0, 0.75);
 }
 
 .directory-map-key__title {

@@ -83,20 +83,9 @@
   -webkit-backdrop-filter: none;
 }
 
-/* MAP KEY panel — OLED glass well (matches sitewide map-key chrome) */
+/* MAP KEY — spacing only; neutral deep-glass from glass.css (.directory-map-key) */
 .directory-page .directory-map-key {
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 52%),
-    radial-gradient(90% 80% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 58%),
-    #08080c;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 20px;
   margin: 12px 0 0;
-  box-shadow:
-    0 0 0 1px #000,
-    0 20px 44px -18px rgba(0, 0, 0, 0.92),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -12px 32px -16px rgba(0, 0, 0, 0.75);
 }
 
 /* Add-place form panel — keep lime neon edge, neutral dark glass fill */

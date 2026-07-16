@@ -1,19 +1,9 @@
 // @ts-nocheck
 import React from "react";
 
-/* MapLegend = day-color key. OLED glass panel chrome; ring-pin dots unchanged. */
+/* MapLegend — layout + pin dots only. Panel chrome = glass.css .pdxLegend (neutral deep-glass). */
 const CSS = `
 .pdxLegend{
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.05), transparent 55%),
-    radial-gradient(90% 80% at 50% 100%, rgba(0,0,0,.55), transparent 60%),
-    #08080c;
-  border:1px solid rgba(255,255,255,.07); border-radius:16px;
-  box-shadow:
-    0 0 0 1px #000,
-    0 18px 40px -16px rgba(0,0,0,.92),
-    inset 0 1px 0 rgba(255,255,255,.07),
-    inset 0 -10px 28px -14px rgba(0,0,0,.75);
   padding:12px 16px; display:flex; flex-direction:column; gap:9px;
 }
 .pdxLegend__row{ display:flex; align-items:center; gap:11px;

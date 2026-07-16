@@ -315,6 +315,69 @@
   background: var(--glass-sheen-specular);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   Map key / legend panels — neutral deep-glass on ALL maps
+   (events, home, directory, DS MapLegend). Pin shapes/colors
+   stay in component CSS; this is panel chrome only.
+   docs/LIVE_DESIGN_STANDARD.md
+   ═══════════════════════════════════════════════════════════ */
+.pdx-map-key,
+.map-legend,
+.directory-map-key,
+.pdxLegend {
+  --c: var(--glass-neutral-c2, #b8b8c2);
+  /* Do not set position here — .map-legend is absolute over the map */
+  overflow: hidden;
+  background: var(--glass-card-neutral-bg);
+  border: var(--glass-card-neutral-border);
+  border-radius: var(--glass-card-radius, 14px);
+  box-shadow: var(--glass-card-neutral-shadow);
+  backdrop-filter: blur(var(--glass-card-blur));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+}
+
+/* Non-overlay keys need a containing block for sheen */
+.pdx-map-key,
+.directory-map-key,
+.pdxLegend {
+  position: relative;
+}
+
+/* Corner sheen layer */
+.pdx-map-key::after,
+.map-legend::after,
+.directory-map-key::after,
+.pdxLegend::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--glass-sheen);
+}
+
+/* Content above sheen */
+.pdx-map-key > *,
+.map-legend > *,
+.directory-map-key > *,
+.pdxLegend > * {
+  position: relative;
+  z-index: 1;
+}
+
+html.calm-mode .pdx-map-key,
+html.calm-mode .map-legend,
+html.calm-mode .directory-map-key,
+html.calm-mode .pdxLegend,
+:root[data-calm="true"] .pdx-map-key,
+:root[data-calm="true"] .map-legend,
+:root[data-calm="true"] .directory-map-key,
+:root[data-calm="true"] .pdxLegend {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 /* Thin edge-masked refract bar (alias presentation; same palette as rainbow rule) */
 .pdx-refract-seam,
 .dir-refract {
