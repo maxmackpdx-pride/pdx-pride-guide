@@ -97,6 +97,37 @@ export function isMissedConnectionPostable(
 
 export type MissedConnectionEventTiming = "upcoming" | "live" | "past";
 
+/**
+ * Schedule phase from doors/end only — not the 7-day missed-connection post window.
+ * Use this for the Events board (main grid vs PAST tab), tickets, RSVP labels, etc.
+ */
+export function getEventScheduleTiming(
+  dateStart?: string | null,
+  dateEnd?: string | null,
+  now = Date.now(),
+): MissedConnectionEventTiming {
+  const start = parsePacificDateTime(dateStart);
+  if (start == null) return "past";
+  if (now < start) return "upcoming";
+  const end = parsePacificDateTime(dateEnd) ?? start;
+  if (now < end) return "live";
+  return "past";
+}
+
+/** True once the event's scheduled end has passed (falls back to start). */
+export function isEventSchedulePast(
+  dateStart?: string | null,
+  dateEnd?: string | null,
+  now = Date.now(),
+): boolean {
+  return getEventScheduleTiming(dateStart, dateEnd, now) === "past";
+}
+
+/**
+ * Missed-connection board timing: "live" while the post window is open
+ * (through 7 days after the event ends). Prefer getEventScheduleTiming /
+ * isEventSchedulePast for grid visibility and door times.
+ */
 export function getEventTiming(
   dateStart?: string | null,
   dateEnd?: string | null,

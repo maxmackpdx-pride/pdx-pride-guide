@@ -37,15 +37,16 @@ import { dayAccentToken } from "@/lib/dsColors";
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
 import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
-import { getEventTiming } from "@shared/missedConnections";
+import { isEventSchedulePast } from "@shared/missedConnections";
 import "./Events.css";
 
 const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
 /** MON/TUE fills are too dark for black pill text — flip to white. */
 const DARK_FILL_DAYS = new Set(["MON", "TUE"]);
 
+/** Board PAST = scheduled end has passed (not the 7-day MC post window). */
 function isPastListing(e: EventListing): boolean {
-  return getEventTiming(e.dateStart, e.dateEnd) === "past";
+  return isEventSchedulePast(e.dateStart, e.dateEnd);
 }
 
 type SortMode =

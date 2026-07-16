@@ -31,7 +31,7 @@ import {
 } from "@/lib/eventEditForm";
 import { admissionEventLinkLabel } from "@shared/admission";
 import { resolveVenueWebsite } from "@shared/venueLinks";
-import { getEventTiming } from "@shared/missedConnections";
+import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
 
 type EventHostProfile = {
@@ -130,7 +130,7 @@ function EventModalInner({
     queryFn: () => fetch(`/api/events/${event.id}/talent`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
 
-  const eventTiming = getEventTiming(event.dateStart, event.dateEnd);
+  const eventTiming = getEventScheduleTiming(event.dateStart, event.dateEnd);
   const isPastEvent = eventTiming === "past";
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
