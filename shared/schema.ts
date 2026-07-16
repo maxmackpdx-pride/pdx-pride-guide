@@ -272,6 +272,7 @@ export const users = sqliteTable("users", {
   standFor: text("stand_for"), // JSON string[] — promoter-only "what we stand for" checklist
   affiliatedVenueIds: text("affiliated_venue_ids"), // JSON number[] — "Resident at" venues (business ids)
   marquee: text("marquee"), // JSON {items:string[],speed:number,color:string} | null — promoter-only ticker
+  top8: text("top8"), // JSON [{k:"u"|"b",id:number}] | null — MySpace-style Top 8 (people + venues)
   accentColor: text("accent_color"), // hex from the fixed neon allowlist, or null for the site default
   banner: text("banner"), // 'accent-gradient' | 'neon-collage' | 'sticker-wall' | 'pride-guide-social'
   coverImageUrl: text("cover_image_url"),

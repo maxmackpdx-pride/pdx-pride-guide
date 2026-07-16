@@ -17,6 +17,8 @@ import {
 import ProfileHero from "@/components/profile/ProfileHero";
 import ProfileStatStrip from "@/components/profile/ProfileStatStrip";
 import { Marquee } from "@/components/ds";
+import ProfileTop8 from "@/components/profile/ProfileTop8";
+import Top8Editor from "@/components/profile/Top8Editor";
 import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
@@ -55,6 +57,7 @@ export default function MemberProfile() {
   const [msgOpen, setMsgOpen] = useState(false);
   const [accentOpen, setAccentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [top8Open, setTop8Open] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
@@ -273,6 +276,12 @@ export default function MemberProfile() {
 
         <div className="pp-split">
           <div className="pp-split__left">
+            <ProfileTop8
+              entries={data.top8 ?? []}
+              isOwner={isOwner}
+              displayName={data.displayName || data.username}
+              onEdit={() => setTop8Open(true)}
+            />
             {bigOne && (
               <TheBigOne
                 event={bigOne}
@@ -331,6 +340,17 @@ export default function MemberProfile() {
       )}
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+
+      {top8Open && isOwner && (
+        <Top8Editor
+          current={data.top8 ?? []}
+          onClose={() => setTop8Open(false)}
+          onSave={(refs) => {
+            patchMutation.mutate({ top8: refs });
+            setTop8Open(false);
+          }}
+        />
+      )}
     </div>
   );
 }

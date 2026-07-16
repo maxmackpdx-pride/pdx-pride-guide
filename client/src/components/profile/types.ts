@@ -94,6 +94,10 @@ export type ProfilePup = {
   lookingFor: string;
 };
 
+export type ProfileTop8Entry =
+  | { kind: "user"; id: number; username: string; displayName: string; photoUrl: string | null; avatarChoice?: number; avatarRing?: string | null }
+  | { kind: "place"; id: number; name: string; logoUrl: string | null };
+
 export type PublicProfileData = {
   username: string;
   displayName: string | null;
@@ -123,6 +127,7 @@ export type PublicProfileData = {
   affiliatedVenues?: ProfileVenue[];
   businessPlace?: ProfileBusiness | null;
   marquee?: ProfileMarquee;
+  top8?: ProfileTop8Entry[];
   media?: ProfileMedia | null;
   socialLinks?: Record<string, string> | string | null;
   boardPosts?: ProfileBoardPost[];

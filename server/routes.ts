@@ -2530,12 +2530,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const q = String(req.query.q || "").trim().replace(/^@/, "").toLowerCase();
     if (!q || q.length < 2) return res.json([]);
     const rows = sqlite.prepare(`
-      SELECT username, display_name AS displayName, photo_url AS photoUrl, avatar_choice AS avatarChoice
+      SELECT id, username, display_name AS displayName, photo_url AS photoUrl,
+             avatar_choice AS avatarChoice, avatar_ring AS avatarRing
       FROM users
       WHERE LOWER(username) LIKE ? OR LOWER(display_name) LIKE ?
       ORDER BY username COLLATE NOCASE
       LIMIT 8
-    `).all(`${q}%`, `${q}%`) as { username: string; displayName: string | null; photoUrl: string | null; avatarChoice: string | null }[];
+    `).all(`${q}%`, `${q}%`) as { id: number; username: string; displayName: string | null; photoUrl: string | null; avatarChoice: string | null; avatarRing: string | null }[];
     res.json(rows);
   });
 
@@ -2545,6 +2546,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       username, displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, coverImageUrl, coverCrop,
       pronouns, location,
       socialLinks, profileEmbeds, profilePhotos, talents, standFor, affiliatedVenueIds, marquee, accentColor, banner, pup,
+      top8,
     } = req.body;
     const moderated: Record<string, string | null | undefined> = {
       displayName: typeof displayName === "string" ? displayName : undefined,
@@ -2611,6 +2613,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (accentColor !== undefined) patch.accentColor = accentColor;
     if (banner !== undefined) patch.banner = banner;
     if (pup !== undefined) patch.pup = sanitizePup(pup);
+    // Top 8: up to 8 ordered refs to real people (k:"u") or venues (k:"b").
+    if (top8 !== undefined) {
+      const arr = Array.isArray(top8) ? top8 : [];
+      const clean: { k: "u" | "b"; id: number }[] = [];
+      const seen = new Set<string>();
+      for (const e of arr) {
+        const k = e?.k === "b" ? "b" : e?.k === "u" ? "u" : null;
+        const id = Number(e?.id);
+        if (!k || !Number.isInteger(id) || id <= 0) continue;
+        const key = `${k}:${id}`;
+        if (seen.has(key)) continue;
+        const exists = k === "u" ? !!storage.getUserById(id) : !!storage.getBusiness(id);
+        if (!exists) continue;
+        seen.add(key);
+        clean.push({ k, id });
+        if (clean.length >= 8) break;
+      }
+      patch.top8 = JSON.stringify(clean);
+    }
     storage.updateUser(req.session.userId!, patch as any);
     const updated = storage.getUserById(req.session.userId!);
     res.json(authUserResponse(req, updated));

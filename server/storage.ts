@@ -490,6 +490,7 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN talents TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN stand_for TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN affiliated_venue_ids TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN marquee TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN top8 TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN accent_color TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN banner TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_image_url TEXT`); } catch(e) {}
@@ -5365,6 +5366,45 @@ function hubFeedBusinessAuthor(biz: Business): HubFeedAuthor {
   };
 }
 
+/** Resolve a stored Top 8 (JSON [{k:"u"|"b",id}]) into display tiles, dropping dead refs. */
+function resolveProfileTop8(raw: string | null | undefined): any[] {
+  let list: any[] = [];
+  try {
+    const parsed = JSON.parse(raw || "[]");
+    if (Array.isArray(parsed)) list = parsed;
+  } catch { /* ignore malformed */ }
+  const out: any[] = [];
+  for (const entry of list.slice(0, 8)) {
+    const id = Number(entry?.id);
+    if (!Number.isInteger(id) || id <= 0) continue;
+    if (entry.k === "u") {
+      const u = storage.getUserById(id);
+      if (u && String(u.status || "").toUpperCase() !== "SUSPENDED") {
+        out.push({
+          kind: "user",
+          id: u.id,
+          username: u.username,
+          displayName: u.displayName || u.username,
+          photoUrl: u.photoUrl || null,
+          avatarChoice: u.avatarChoice,
+          avatarRing: u.avatarRing,
+        });
+      }
+    } else if (entry.k === "b") {
+      const b = storage.getBusiness(id);
+      if (b) {
+        out.push({
+          kind: "place",
+          id: b.id,
+          name: b.name,
+          logoUrl: resolveDirectoryLogo(String(b.name), b.imageUrl) || directoryFallbackLogo(b.type) || null,
+        });
+      }
+    }
+  }
+  return out;
+}
+
 function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor | null): HubFeedEventEmbed {
   return {
     id: Number(evt.id ?? evt.eventId),
@@ -6613,7 +6653,7 @@ export interface IStorage {
   }): User | null;
   clearExpiredAccountModeration(userId: number): User | null;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'top8' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
   changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
@@ -7351,6 +7391,7 @@ export const storage: IStorage = {
       coverImageUrl: user.coverImageUrl || null,
       coverCrop: user.coverCrop || null,
       marquee: verifiedHost ? safeJsonOrNull(user.marquee) : null,
+      top8: resolveProfileTop8(user.top8),
       pup: !verifiedHost ? safeJsonOrNull(user.pup) : null,
       packmates: !verifiedHost ? storage.getPackLinks(user.id, "packmate") : [],
       handlers: !verifiedHost ? storage.getPackLinks(user.id, "handler") : [],

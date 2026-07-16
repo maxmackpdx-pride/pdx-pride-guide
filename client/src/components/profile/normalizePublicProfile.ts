@@ -199,6 +199,7 @@ export function normalizePublicProfile(
         }
       : null,
     marquee: api.marquee ?? undefined,
+    top8: Array.isArray(api.top8) ? api.top8 : [],
     media: api.media
       ? {
           title: api.media.title,

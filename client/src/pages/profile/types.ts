@@ -100,6 +100,10 @@ export type ProfileMediaData = {
 };
 
 export type ProfileMarquee = { items: string[]; speed: number; color: string };
+
+export type ProfileTop8Entry =
+  | { kind: "user"; id: number; username: string; displayName: string; photoUrl: string | null; avatarChoice?: number; avatarRing?: string | null }
+  | { kind: "place"; id: number; name: string; logoUrl: string | null };
 export type ProfilePup = { name: string; hood: string; role: string; lookingFor: string };
 
 export type OwnedBusiness = {
@@ -140,6 +144,7 @@ export type MemberProfileData = {
   coverImageUrl?: string | null;
   coverCrop?: string | null;
   marquee?: ProfileMarquee | null;
+  top8?: ProfileTop8Entry[];
   pup?: ProfilePup | null;
   packmates?: PackLinkUser[];
   handlers?: PackLinkUser[];
