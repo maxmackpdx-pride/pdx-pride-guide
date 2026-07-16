@@ -371,7 +371,7 @@ export function seedAdsIfNeeded(db: Database) {
       tag1: "",
       tag2: "",
       dest_url: "https://www.mr-s-leather.com/?acc=TUCKERMAX",
-      primary_color: "#ff0033",
+      primary_color: "#19e3ff",
       secondary_color: "#ffffff",
       media_mode: "single",
       single_src: "/affiliate/feed/mrs-logo.webp",
@@ -425,8 +425,8 @@ export function seedAdsIfNeeded(db: Database) {
       tag1: "Toys & Play",
       tag2: "Gay-Owned",
       dest_url: "https://cockblocktoys.com/tucker060",
-      primary_color: "#ff0033",
-      secondary_color: "#39ff14",
+      primary_color: "#ff1f1f",
+      secondary_color: "#ffffff",
       media_mode: "slideshow",
       single_src: null,
       slides: JSON.stringify(["/affiliate/cb1.jpg", "/affiliate/cb2.png", "/affiliate/cb3.png"]),
@@ -479,8 +479,8 @@ export function seedAdsIfNeeded(db: Database) {
       tag1: "Leather & Gear",
       tag2: "Ships Worldwide",
       dest_url: "https://www.mr-s-leather.com/?acc=TUCKERMAX",
-      primary_color: "#ff0033",
-      secondary_color: "#c8fa3c",
+      primary_color: "#19e3ff",
+      secondary_color: "#ffffff",
       media_mode: "single",
       single_src: "/affiliate/mrs.webp",
       slides: "[]",
@@ -518,6 +518,9 @@ export function seedAdsIfNeeded(db: Database) {
       owner_id: null,
     });
   }
+
+  // Re-align seeded template chrome with live deep-glass refresh (idempotent).
+  syncLiveAffiliateTemplates(db);
 
   if (!exists.get("yes-coach")) {
     insertSeed(db, {
@@ -571,6 +574,85 @@ export function seedAdsIfNeeded(db: Database) {
       source: "manual",
       owner_id: null,
     });
+  }
+}
+
+/**
+ * Keep known affiliate template rows on the post-refresh chrome
+ * (cyan Mr S, red CockBlock, correct media + CTA mapping).
+ * Only updates template_key rows so custom ads stay as-authored.
+ */
+function syncLiveAffiliateTemplates(db: Database) {
+  const now = new Date().toISOString();
+  const updates: Array<{ key: string; fields: Record<string, string | number> }> = [
+    {
+      key: "cockblock-feed",
+      fields: {
+        primary_color: "#ff1f1f",
+        secondary_color: "#ffffff",
+        cta_title: "10% Off · Code: TUCKERMAX",
+        cta_copy: "cockblocktoys.com · free US & CA shipping",
+        logo_img: "/affiliate/feed/cb-logo-white.png",
+        slides: JSON.stringify([
+          "/affiliate/feed/cb-social.png",
+          "/affiliate/feed/cb-handhold.jpg",
+          "/affiliate/feed/cb-models.png",
+        ]),
+        media_mode: "slideshow",
+      },
+    },
+    {
+      key: "mrs-feed",
+      fields: {
+        primary_color: "#19e3ff",
+        secondary_color: "#ffffff",
+        title: "Gear Up at Mr S Leather",
+        body: "Leather · rubber · fetish gear · made in San Francisco since 1979",
+        cta_title: "Get your gear for Dore & Folsom",
+        cta_copy: "mr-s-leather.com · ships worldwide",
+        logo_img: "/affiliate/feed/mrs-logo.webp",
+        single_src: "/affiliate/feed/mrs-logo.webp",
+        media_mode: "single",
+        slides: "[]",
+      },
+    },
+    {
+      key: "cockblock-poster",
+      fields: {
+        primary_color: "#ff1f1f",
+        secondary_color: "#ffffff",
+        cta_title: "Code TUCKERMAX for 10% off",
+        cta_copy: "Shop Now →",
+        tag1: "Toys & Play",
+        tag2: "Gay-Owned",
+        media_mode: "slideshow",
+        slides: JSON.stringify(["/affiliate/cb1.jpg", "/affiliate/cb2.png", "/affiliate/cb3.png"]),
+      },
+    },
+    {
+      key: "mrs-poster",
+      fields: {
+        primary_color: "#19e3ff",
+        secondary_color: "#ffffff",
+        cta_title: "Shop the link, support the guide",
+        cta_copy: "Shop Now →",
+        tag1: "Leather & Gear",
+        tag2: "Ships Worldwide",
+        media_mode: "single",
+        single_src: "/affiliate/mrs.webp",
+        slides: "[]",
+      },
+    },
+  ];
+
+  for (const u of updates) {
+    const cols = Object.keys(u.fields);
+    if (cols.length === 0) continue;
+    const sets = cols.map((c) => `${c} = ?`).join(", ");
+    const vals = cols.map((c) => u.fields[c]);
+    db.prepare(
+      `UPDATE ads SET ${sets}, updated_at = ? WHERE template_key = ? AND source = 'template'`,
+    ).run(...vals, now, u.key);
   }
 }
 

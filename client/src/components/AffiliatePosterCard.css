@@ -45,6 +45,17 @@
   --_day: #19e3ff;
 }
 
+/* Custom partners — accent comes from inline --c (builder primaryColor) */
+.pdxBoard--affiliate-custom .pdxBoard__affChip {
+  color: #050506;
+}
+
+.pdxBoard--affiliate-custom .pdxBoard__affShop,
+.pdxBoard--affiliate-custom .pdxBoard__affShop.pdx-glass-btn,
+.pdxBoard--affiliate-custom .pdxBoard__affShop.pdx-glass-btn--solid {
+  color: #050506;
+}
+
 .pdxBoard--affiliate:hover {
   border-color: color-mix(in srgb, var(--c) 70%, #101014);
   filter: brightness(1.06) saturate(1.06);
@@ -326,6 +337,8 @@
   --feed-aff-primary: #19e3ff;
   --c: #19e3ff;
 }
+
+/* Custom feed: --c / --feed-aff-primary set inline from primaryColor */
 
 .feed-aff > .pdx-glass-sheen,
 .feed-aff > .pdx-glass-sheen--specular {

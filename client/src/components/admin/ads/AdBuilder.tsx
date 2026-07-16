@@ -2,14 +2,24 @@ import { useMemo, useState } from "react";
 import FeedAdCard from "@/components/ads/FeedAdCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
 import {
+  AD_BRAND_PRIMARY,
   emptyAdDraft,
   templateDraft,
   type AdDraft,
   type AdFormat,
+  type AdTemplateKey,
 } from "@/lib/adTypes";
 import { PRIDE_WEEK_DAYS } from "@shared/prideWeek";
 
-const SWATCHES = ["#c8fa3c", "#19e3ff", "#ff1fa0", "#ff1f1f", "#ff8c00", "#b06bff"];
+const SWATCHES = [
+  AD_BRAND_PRIMARY.cockblock,
+  AD_BRAND_PRIMARY.mrs,
+  AD_BRAND_PRIMARY.custom,
+  "#ff1fa0",
+  "#ff8c00",
+  "#b06bff",
+  "#c8fa3c",
+];
 
 const DAY_COLORS: Record<string, string> = {
   MON: "#8800FF",
@@ -20,6 +30,65 @@ const DAY_COLORS: Record<string, string> = {
   SAT: "#39FF14",
   SUN: "#FF6600",
 };
+
+type TemplatePick =
+  | { kind: "template"; key: AdTemplateKey }
+  | { kind: "custom"; format: AdFormat };
+
+const TEMPLATE_BUTTONS: Array<{
+  pick: TemplatePick;
+  name: string;
+  sub: string;
+  accent: string;
+}> = [
+  {
+    pick: { kind: "template", key: "cockblock-feed" },
+    name: "Feed · CockBlock",
+    sub: "Slideshow · red glass",
+    accent: AD_BRAND_PRIMARY.cockblock,
+  },
+  {
+    pick: { kind: "template", key: "mrs-feed" },
+    name: "Feed · Mr. S",
+    sub: "Logo well · cyan glass",
+    accent: AD_BRAND_PRIMARY.mrs,
+  },
+  {
+    pick: { kind: "template", key: "cockblock-poster" },
+    name: "Grid · CockBlock",
+    sub: "Poster card · red",
+    accent: AD_BRAND_PRIMARY.cockblock,
+  },
+  {
+    pick: { kind: "template", key: "mrs-poster" },
+    name: "Grid · Mr. S",
+    sub: "Poster card · cyan",
+    accent: AD_BRAND_PRIMARY.mrs,
+  },
+  {
+    pick: { kind: "custom", format: "feed" },
+    name: "Feed · Custom",
+    sub: "Your brand · feed slot",
+    accent: AD_BRAND_PRIMARY.custom,
+  },
+  {
+    pick: { kind: "custom", format: "poster" },
+    name: "Grid · Custom",
+    sub: "Your brand · poster card",
+    accent: AD_BRAND_PRIMARY.custom,
+  },
+];
+
+function isTemplateSelected(draft: AdDraft, pick: TemplatePick): boolean {
+  if (pick.kind === "template") {
+    return draft.templateKey === pick.key && draft.format === (pick.key.includes("poster") ? "poster" : "feed");
+  }
+  return (
+    draft.source === "custom" &&
+    draft.format === pick.format &&
+    !draft.templateKey
+  );
+}
 
 type Props = {
   onSaved: () => void;
@@ -37,43 +106,48 @@ export default function AdBuilder({ onSaved }: Props) {
     setDraft((d) => ({ ...d, [key]: value }));
   };
 
-  const pickTemplate = (format: AdFormat, template: "cockblock" | "new") => {
-    if (format === "feed") {
-      setDraft(template === "cockblock" ? templateDraft("cockblock-feed") : emptyAdDraft("feed"));
-      if (template === "new") {
-        setDraft((d) => ({
-          ...d,
-          business: "New business",
-          title: "Your headline",
-          body: "Short body copy for the feed card.",
-          ctaTitle: "Shop now",
-          ctaCopy: "your-site.com",
-          primaryColor: "#ff1f1f",
-        }));
-      }
+  const pickTemplate = (pick: TemplatePick) => {
+    if (pick.kind === "template") {
+      setDraft(templateDraft(pick.key));
       return;
     }
-    if (template === "cockblock") {
-      setDraft(templateDraft("cockblock-poster"));
-    } else {
+    if (pick.format === "feed") {
       setDraft({
-        ...templateDraft("mrs-poster"),
-        business: "New business",
-        title: "New business",
-        body: "Poster-style grid ad that looks like an event card.",
-        tag1: "Partner",
-        tag2: "Local",
+        ...emptyAdDraft("feed"),
+        business: "New partner",
+        title: "Your headline",
+        body: "Short body copy for the feed card — keep it to one or two lines.",
+        ctaTitle: "Shop now",
+        ctaCopy: "your-site.com · ships nationwide",
+        pillLabel: "Partner",
+        primaryColor: AD_BRAND_PRIMARY.custom,
+        logoText: "LOGO",
         destUrl: "https://example.com",
-        primaryColor: "#39ff14",
-        mediaMode: "single",
-        singleSrc: null,
-        slides: [],
-        templateKey: null,
         source: "custom",
-        contact: "",
-        billing: "",
+        templateKey: null,
       });
+      return;
     }
+    setDraft({
+      ...emptyAdDraft("poster"),
+      business: "New partner",
+      title: "New partner",
+      body: "One-line pitch that sits under the title on the poster card.",
+      ctaTitle: "Support the guide",
+      ctaCopy: "Shop Now →",
+      tag1: "Partner",
+      tag2: "Local",
+      pillLabel: "Affiliate",
+      destUrl: "https://example.com",
+      primaryColor: AD_BRAND_PRIMARY.custom,
+      mediaMode: "single",
+      singleSrc: null,
+      slides: [],
+      templateKey: null,
+      source: "custom",
+      contact: "",
+      billing: "",
+    });
   };
 
   const toggleDay = (day: string) => {
@@ -114,6 +188,28 @@ export default function AdBuilder({ onSaved }: Props) {
     }
   };
 
+  const onPosterImageFile = async (file: File | null) => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("asset", file);
+    try {
+      const r = await fetch("/api/admin/upload/ad-asset", {
+        method: "POST",
+        credentials: "include",
+        body: fd,
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Upload failed");
+      if (draft.mediaMode === "slideshow") {
+        set("slides", [...draft.slides, data.url]);
+      } else {
+        set("singleSrc", data.url);
+      }
+    } catch (e: any) {
+      setStatus({ kind: "err", msg: e?.message || "Image upload failed" });
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     setStatus({ kind: "", msg: "" });
@@ -143,46 +239,42 @@ export default function AdBuilder({ onSaved }: Props) {
   const previewLabel = useMemo(
     () =>
       draft.format === "poster"
-        ? "Live preview · events-grid slot"
-        : "Live preview · in-feed slot",
+        ? "Live preview · events-grid poster (same component as the board)"
+        : "Live preview · hub news feed (same component as the feed)",
     [draft.format],
   );
+
+  const isPoster = draft.format === "poster";
 
   return (
     <div className="ad-mgr__builder">
       <div className="ad-mgr__form">
         <section className="ad-mgr__card">
-          <h3 className="ad-mgr__kicker">01 · Start from the template</h3>
+          <h3 className="ad-mgr__kicker">01 · Start from a live template</h3>
           <p className="ad-mgr__help">
-            Two ad formats. <strong className="cb">CockBlock</strong> is the news-feed slideshow
-            card. <strong className="nb">New business</strong> is the events-grid poster ad that
-            looks like an event card. Copy, colors, media and rules all stay editable.
+            Templates match the ads already on the <strong className="cb">events grid</strong> and{" "}
+            <strong className="nb">news feed</strong> after the deep-glass refresh. Edit copy, color, and media —
+            the preview uses the same components the site renders.
           </p>
-          <div className="ad-mgr__template-row">
-            <button
-              type="button"
-              className={`ad-mgr__template-btn${draft.format === "feed" ? " is-selected" : ""}`}
-              style={{ ["--tmpl-accent" as string]: "#ff1f1f" }}
-              onClick={() => pickTemplate("feed", "cockblock")}
-            >
-              <span className="ad-mgr__template-bar" />
-              <span>
-                <div className="ad-mgr__template-name">News Feed Ad</div>
-                <div className="ad-mgr__template-sub">CockBlock template · slideshow</div>
-              </span>
-            </button>
-            <button
-              type="button"
-              className={`ad-mgr__template-btn${draft.format === "poster" ? " is-selected" : ""}`}
-              style={{ ["--tmpl-accent" as string]: "#39ff14" }}
-              onClick={() => pickTemplate("poster", "new")}
-            >
-              <span className="ad-mgr__template-bar" />
-              <span>
-                <div className="ad-mgr__template-name">Event Grid Ad</div>
-                <div className="ad-mgr__template-sub">New business · poster card</div>
-              </span>
-            </button>
+          <div className="ad-mgr__template-row ad-mgr__template-row--3">
+            {TEMPLATE_BUTTONS.map((btn) => {
+              const selected = isTemplateSelected(draft, btn.pick);
+              return (
+                <button
+                  key={btn.name}
+                  type="button"
+                  className={`ad-mgr__template-btn${selected ? " is-selected" : ""}`}
+                  style={{ ["--tmpl-accent" as string]: btn.accent }}
+                  onClick={() => pickTemplate(btn.pick)}
+                >
+                  <span className="ad-mgr__template-bar" />
+                  <span>
+                    <div className="ad-mgr__template-name">{btn.name}</div>
+                    <div className="ad-mgr__template-sub">{btn.sub}</div>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -194,7 +286,7 @@ export default function AdBuilder({ onSaved }: Props) {
               <input type="text" value={draft.business} onChange={(e) => set("business", e.target.value)} />
             </div>
             <div className="ad-mgr__field">
-              <label>Badge label</label>
+              <label>Badge / pill label</label>
               <input type="text" value={draft.pillLabel} onChange={(e) => set("pillLabel", e.target.value)} />
             </div>
             <div className="ad-mgr__field ad-mgr__field--full">
@@ -206,19 +298,29 @@ export default function AdBuilder({ onSaved }: Props) {
               <textarea value={draft.body} onChange={(e) => set("body", e.target.value)} />
             </div>
             <div className="ad-mgr__field">
-              <label>CTA title</label>
+              <label>{isPoster ? "Meta line (under body)" : "CTA title (footer big line)"}</label>
               <input type="text" value={draft.ctaTitle} onChange={(e) => set("ctaTitle", e.target.value)} />
+              <span className="ad-mgr__field-hint">
+                {isPoster
+                  ? "e.g. “Code TUCKERMAX for 10% off” or “Shop the link, support the guide”"
+                  : "e.g. “10% Off · Code: TUCKERMAX”"}
+              </span>
             </div>
             <div className="ad-mgr__field">
-              <label>CTA sub-line</label>
+              <label>{isPoster ? "Shop button label" : "CTA sub-line"}</label>
               <input type="text" value={draft.ctaCopy} onChange={(e) => set("ctaCopy", e.target.value)} />
+              <span className="ad-mgr__field-hint">
+                {isPoster
+                  ? "Solid brand button — usually “Shop Now →”"
+                  : "e.g. “cockblocktoys.com · free US & CA shipping”"}
+              </span>
             </div>
             <div className="ad-mgr__field">
               <label>Logo / wordmark text</label>
               <input type="text" value={draft.logoText} onChange={(e) => set("logoText", e.target.value)} />
             </div>
             <div className="ad-mgr__field">
-              <label>Logo PNG upload</label>
+              <label>Logo PNG upload (feed overlay)</label>
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp,image/gif"
@@ -234,7 +336,7 @@ export default function AdBuilder({ onSaved }: Props) {
               <label>Destination URL</label>
               <input type="url" value={draft.destUrl} onChange={(e) => set("destUrl", e.target.value)} />
             </div>
-            {draft.format === "poster" && (
+            {isPoster && (
               <>
                 <div className="ad-mgr__field">
                   <label>Tag 1 (filled)</label>
@@ -251,6 +353,11 @@ export default function AdBuilder({ onSaved }: Props) {
 
         <section className="ad-mgr__card">
           <h3 className="ad-mgr__kicker">03 · Color & glow</h3>
+          <p className="ad-mgr__help" style={{ marginTop: 0 }}>
+            Primary drives the glass edge, chip, and Shop Now fill — same as live cards (CockBlock{" "}
+            <span style={{ color: AD_BRAND_PRIMARY.cockblock }}>#ff1f1f</span>, Mr. S{" "}
+            <span style={{ color: AD_BRAND_PRIMARY.mrs }}>#19e3ff</span>).
+          </p>
           <div className="ad-mgr__grid2">
             <div className="ad-mgr__field">
               <label>Primary (glow)</label>
@@ -300,6 +407,14 @@ export default function AdBuilder({ onSaved }: Props) {
             >
               Slideshow
             </button>
+          </div>
+          <div className="ad-mgr__field" style={{ marginTop: 10 }}>
+            <label>Upload image</label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={(e) => onPosterImageFile(e.target.files?.[0] || null)}
+            />
           </div>
           {draft.mediaMode === "single" ? (
             <div className="ad-mgr__field">
@@ -397,7 +512,17 @@ export default function AdBuilder({ onSaved }: Props) {
                   </button>
                 </div>
               </div>
-              <label style={{ display: "block", margin: "10px 0 8px", color: "#8a8a96", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "ui-monospace, monospace" }}>
+              <label
+                style={{
+                  display: "block",
+                  margin: "10px 0 8px",
+                  color: "#8a8a96",
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  fontFamily: "ui-monospace, monospace",
+                }}
+              >
                 Scroll depth %
               </label>
               <div className="ad-mgr__toggle-row">
@@ -541,7 +666,17 @@ export default function AdBuilder({ onSaved }: Props) {
             </div>
           </div>
 
-          <label style={{ display: "block", margin: "14px 0 8px", color: "#8a8a96", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "ui-monospace, monospace" }}>
+          <label
+            style={{
+              display: "block",
+              margin: "14px 0 8px",
+              color: "#8a8a96",
+              fontSize: 10,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              fontFamily: "ui-monospace, monospace",
+            }}
+          >
             Target Pride days (none = all week)
           </label>
           <div className="ad-mgr__days">
@@ -553,7 +688,7 @@ export default function AdBuilder({ onSaved }: Props) {
                   key={day}
                   type="button"
                   className={`ad-mgr__day${on ? " is-on" : ""}`}
-                  style={on ? { background: color, color: day === "WED" || day === "THU" ? "#06060a" : "#06060a" } : { color }}
+                  style={on ? { background: color, color: "#06060a" } : { color }}
                   onClick={() => toggleDay(day)}
                 >
                   {day}
@@ -579,13 +714,24 @@ export default function AdBuilder({ onSaved }: Props) {
 
       <aside className="ad-mgr__preview">
         <div className="ad-mgr__preview-label">{previewLabel}</div>
-        <div className="ad-mgr__preview-panel">
-          {draft.format === "poster" ? (
-            <PosterAdCard ad={draft} preview />
+        <div
+          className={`ad-mgr__preview-panel${isPoster ? " ad-mgr__preview-panel--poster" : " ad-mgr__preview-panel--feed"}`}
+        >
+          {isPoster ? (
+            <div className="ad-mgr__preview-poster-wrap">
+              <PosterAdCard ad={draft} preview />
+            </div>
           ) : (
-            <FeedAdCard ad={draft} preview />
+            <div className="ad-mgr__preview-feed-wrap">
+              <FeedAdCard ad={draft} preview />
+            </div>
           )}
         </div>
+        <p className="ad-mgr__preview-note">
+          {isPoster
+            ? "Poster uses the same PosterAdCard as /events — 2:3 media well, brand chip, solid Shop Now."
+            : "Feed uses the same FeedAdCard as the hub — media, title, and footer CTA row."}
+        </p>
       </aside>
     </div>
   );

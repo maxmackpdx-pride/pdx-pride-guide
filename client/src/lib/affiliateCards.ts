@@ -33,21 +33,75 @@ export const AFFILIATE_LINKS = {
   cockblock: "https://cockblocktoys.com/tucker060",
 } as const;
 
-export function brandFromAd(ad: AdServePayload): AffiliateBrand {
+type AdBrandHint = {
+  templateKey?: string | null;
+  business?: string | null;
+  title?: string | null;
+  logoText?: string | null;
+  destUrl?: string | null;
+  primaryColor?: string | null;
+  pillLabel?: string | null;
+};
+
+/** Known partner brand from template / name / URL (null = custom partner). */
+export function knownBrandFromAd(ad: AdBrandHint): AffiliateBrand | null {
   const key = (ad.templateKey || "").toLowerCase();
   if (key.includes("mrs")) return "mrs";
   if (key.includes("cockblock") || key.includes("cb")) return "cockblock";
-  const biz = (ad.business || ad.title || ad.logoText || "").toLowerCase();
-  if (biz.includes("mr") && biz.includes("leather")) return "mrs";
+  const biz = `${ad.business || ""} ${ad.title || ""} ${ad.logoText || ""} ${ad.pillLabel || ""}`.toLowerCase();
+  if (/\bmr\.?\s*s\b/.test(biz) || (biz.includes("mr") && biz.includes("leather"))) return "mrs";
   if (biz.includes("cockblock") || biz.includes("cock block")) return "cockblock";
   const url = (ad.destUrl || "").toLowerCase();
   if (url.includes("mr-s-leather") || url.includes("mrsleather") || url.includes("mr-s")) return "mrs";
   if (url.includes("cockblock")) return "cockblock";
-  return "cockblock";
+  return null;
+}
+
+export function brandFromAd(ad: AdServePayload | AdBrandHint): AffiliateBrand {
+  return knownBrandFromAd(ad) ?? "cockblock";
 }
 
 export function accentForAffiliateBrand(brand: AffiliateBrand): string {
   return AFFILIATE_BRAND_ACCENT[brand];
+}
+
+/**
+ * Chrome for data-driven ads: known brands pin to live refresh accents unless
+ * primaryColor is set (builder WYSIWYG). Custom ads always use primaryColor.
+ */
+export function resolveAdChrome(ad: AdBrandHint): {
+  brand: AffiliateBrand | "custom";
+  accent: string;
+  posterBrandClass: string;
+  feedBrandClass: string;
+} {
+  const known = knownBrandFromAd(ad);
+  const primary = (ad.primaryColor || "").trim();
+  if (known === "mrs") {
+    const accent = primary || AFFILIATE_BRAND_ACCENT.mrs;
+    return {
+      brand: "mrs",
+      accent,
+      posterBrandClass: "pdxBoard--affiliate-mrs",
+      feedBrandClass: "feed-aff--mrs",
+    };
+  }
+  if (known === "cockblock") {
+    const accent = primary || AFFILIATE_BRAND_ACCENT.cockblock;
+    return {
+      brand: "cockblock",
+      accent,
+      posterBrandClass: "pdxBoard--affiliate-cb",
+      feedBrandClass: "feed-aff--cockblock",
+    };
+  }
+  const accent = primary || "#39ff14";
+  return {
+    brand: "custom",
+    accent,
+    posterBrandClass: "pdxBoard--affiliate-custom",
+    feedBrandClass: "feed-aff--custom",
+  };
 }
 
 /**

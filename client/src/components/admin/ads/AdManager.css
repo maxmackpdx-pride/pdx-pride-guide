@@ -169,10 +169,27 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+.ad-mgr__template-row--3 {
+  grid-template-columns: 1fr 1fr;
+}
+@media (min-width: 720px) {
+  .ad-mgr__template-row--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
 @media (max-width: 560px) {
-  .ad-mgr__template-row {
+  .ad-mgr__template-row,
+  .ad-mgr__template-row--3 {
     grid-template-columns: 1fr;
   }
+}
+
+.ad-mgr__field-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #6e6e78;
 }
 
 .ad-mgr__template-btn {
@@ -375,6 +392,45 @@
   background-image: radial-gradient(circle, #c8fa3c22 1px, transparent 1px);
   background-size: 14px 14px;
   min-height: 280px;
+}
+
+/* Match live events grid card width (~1 col of poster grid) */
+.ad-mgr__preview-panel--poster {
+  display: flex;
+  justify-content: center;
+  padding: 22px 16px 28px;
+  background-color: #060608;
+  background-image: radial-gradient(circle, #19e3ff14 1px, transparent 1px);
+}
+.ad-mgr__preview-poster-wrap {
+  width: min(100%, 280px);
+}
+.ad-mgr__preview-poster-wrap .pdxBoard {
+  width: 100%;
+}
+/* Cover media like the live events grid (not letterboxed contain) */
+.ad-mgr__preview-poster-wrap .pdxBoard__img {
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Match hub feed column width */
+.ad-mgr__preview-panel--feed {
+  padding: 16px;
+  background-color: #08080a;
+  background-image: radial-gradient(circle, #ff1f1f14 1px, transparent 1px);
+}
+.ad-mgr__preview-feed-wrap {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.ad-mgr__preview-note {
+  margin: 10px 2px 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #6e6e78;
 }
 
 /* Live tracker */

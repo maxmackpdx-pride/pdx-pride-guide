@@ -1,11 +1,13 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import type { AdDraft, AdServePayload } from "@/lib/adTypes";
 import { trackAdClick, trackAdImpression } from "@/lib/adTracking";
 import {
   accentForAffiliateBrand,
-  brandFromAd,
+  resolveAdChrome,
   type AffiliateBrand,
 } from "@/lib/affiliateCards";
+/** Injects base .pdxBoard layout/chrome (same as event grid cards). */
+import "@/components/ds/PosterCard";
 import "@/components/AffiliatePosterCard.css";
 
 type AdLike = AdDraft | AdServePayload;
@@ -15,9 +17,13 @@ type Props = {
   preview?: boolean;
   className?: string;
   style?: CSSProperties;
-  /** Force brand accent when known (CockBlock red · Mr S cyan). */
+  /** Force brand when known (legacy scatter without payload). */
   brand?: AffiliateBrand;
 };
+
+function isCodeMeta(text: string) {
+  return /code|tucker|%|\boff\b/i.test(text);
+}
 
 function Slides({ slides, ms }: { slides: string[]; ms: number }) {
   const [i, setI] = useState(0);
@@ -50,8 +56,8 @@ function Slides({ slides, ms }: { slides: string[]; ms: number }) {
 
 /**
  * Data-driven events-grid poster ad.
- * Same deep-glass chrome as event grid cards; brand accent:
- *   CockBlock → red · Mr. S → cyan.
+ * Same deep-glass chrome as event grid cards / AffiliatePosterCard.
+ * Brand: CockBlock red · Mr. S cyan · custom = primaryColor.
  */
 export default function PosterAdCard({
   ad,
@@ -60,9 +66,16 @@ export default function PosterAdCard({
   style,
   brand: brandProp,
 }: Props) {
-  const brand = brandProp ?? brandFromAd(ad as AdServePayload);
-  const accent = accentForAffiliateBrand(brand);
-  const brandClass = brand === "mrs" ? "pdxBoard--affiliate-mrs" : "pdxBoard--affiliate-cb";
+  const chrome = resolveAdChrome(ad);
+  const brandClass = brandProp
+    ? brandProp === "mrs"
+      ? "pdxBoard--affiliate-mrs"
+      : "pdxBoard--affiliate-cb"
+    : chrome.posterBrandClass;
+  const accent = brandProp
+    ? ad.primaryColor?.trim() || accentForAffiliateBrand(brandProp)
+    : chrome.accent;
+
   const slides =
     ad.mediaMode === "slideshow" && ad.slides?.length
       ? ad.slides
@@ -75,26 +88,31 @@ export default function PosterAdCard({
     trackAdImpression(ad.id, "grid");
   }, [ad.id, preview]);
 
-  const onClick = () => {
-    if (!preview && ad.id) trackAdClick(ad.id, "grid");
+  const onClick = (e: MouseEvent) => {
+    if (preview) {
+      e.preventDefault();
+      return;
+    }
+    if (ad.id) trackAdClick(ad.id, "grid");
   };
 
   return (
     <a
       className={`pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim()}
-      href={ad.destUrl || "#"}
-      target={ad.destUrl?.startsWith("http") ? "_blank" : undefined}
-      rel={ad.destUrl?.startsWith("http") ? "noopener noreferrer" : undefined}
+      href={preview ? undefined : ad.destUrl || "#"}
+      target={!preview && ad.destUrl?.startsWith("http") ? "_blank" : undefined}
+      rel={!preview && ad.destUrl?.startsWith("http") ? "noopener noreferrer" : undefined}
       style={
         {
           ["--ac" as string]: accent,
           ["--c" as string]: accent,
           ["--_day" as string]: accent,
+          cursor: preview ? "default" : undefined,
           ...style,
         } as CSSProperties
       }
       data-testid={ad.id ? `poster-ad-${ad.id}` : "poster-ad-preview"}
-      data-affiliate-brand={brand}
+      data-affiliate-brand={brandProp ?? chrome.brand}
       aria-label={`Affiliate: ${ad.business || ad.title}. ${ad.ctaTitle || ""}`}
       onClick={onClick}
     >
@@ -138,7 +156,11 @@ export default function PosterAdCard({
         <h3 className="pdxBoard__title">{ad.title || ad.business || "Ad"}</h3>
         {ad.body ? <div className="pdxBoard__venue">{ad.body}</div> : null}
         {ad.ctaTitle ? (
-          <div className="pdxBoard__affMeta pdxBoard__affMeta--code">{ad.ctaTitle}</div>
+          <div
+            className={`pdxBoard__affMeta${isCodeMeta(ad.ctaTitle) ? " pdxBoard__affMeta--code" : ""}`}
+          >
+            {ad.ctaTitle}
+          </div>
         ) : null}
 
         <div className="pdxBoard__foot">
@@ -146,7 +168,9 @@ export default function PosterAdCard({
             <span className="dot" aria-hidden="true" />
             Ad
           </span>
-          <span className="pdxBoard__affShop pdx-glass-btn pdx-glass-btn--solid">{ad.ctaCopy || "Shop Now →"}</span>
+          <span className="pdxBoard__affShop pdx-glass-btn pdx-glass-btn--solid">
+            {ad.ctaCopy || "Shop Now →"}
+          </span>
         </div>
       </div>
     </a>
