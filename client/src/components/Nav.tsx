@@ -18,6 +18,7 @@ import type { ApiMessageRow } from "@/components/inbox/types";
 import HubAdminFolder from "@/components/hub/HubAdminFolder";
 import { parseHubSection } from "@/components/hub/types";
 import { dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
+import { isLocalDemo, LOCAL_DEMO_PROFILE_PATH } from "@/lib/localDemo";
 
 type NavItem = { href: string; label: string };
 
@@ -607,8 +608,15 @@ export default function Nav() {
     setOpenDropdown(null);
   };
   const hubActive = location === "/dashboard" || location.startsWith("/dashboard?");
-  const profilePath = user ? `/u/${encodeURIComponent(user.username)}` : "";
-  const profileActive = Boolean(user && (location === profilePath || location.startsWith(`${profilePath}/`)));
+  const localDemo = isLocalDemo();
+  const profilePath = user
+    ? `/u/${encodeURIComponent(user.username)}`
+    : localDemo
+      ? LOCAL_DEMO_PROFILE_PATH
+      : "";
+  const profileActive = Boolean(
+    profilePath && (location === profilePath || location.startsWith(`${profilePath}/`)),
+  );
   const homeActive = location === "/";
   const aboutActive = navLinkActive(location, "/about");
 
@@ -678,6 +686,23 @@ export default function Nav() {
                 canManageTeam={canManageTeam}
                 isPrimaryOwner={isPrimaryOwner}
               />
+            ) : localDemo ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Link
+                  href="/dashboard"
+                  className={`hub-mtop__mode-btn${hubActive ? " is-active is-member" : ""}`}
+                  onClick={() => dismissMobileNavOverlays()}
+                >
+                  Hub
+                </Link>
+                <Link
+                  href={LOCAL_DEMO_PROFILE_PATH}
+                  className={`hub-mtop__mode-btn${profileActive ? " is-active is-member" : ""}`}
+                  onClick={() => dismissMobileNavOverlays()}
+                >
+                  Profile
+                </Link>
+              </div>
             ) : (
               <button
                 type="button"
@@ -762,7 +787,36 @@ export default function Nav() {
               </div>
             )}
 
-            {!user && (
+            {/* Local demo guest: Hub + public Tucker profile without a session */}
+            {!user && localDemo && (
+              <div className="site-auth site-auth--desktop site-auth--local-demo">
+                <span className="site-auth__hub">
+                  <NavLink
+                    href="/dashboard"
+                    label="Hub"
+                    active={hubActive}
+                    onClick={closeMenu}
+                  />
+                </span>
+                <span className="site-auth__seam" aria-hidden="true" />
+                <NavLink
+                  href={LOCAL_DEMO_PROFILE_PATH}
+                  label="@tucker_pdmax"
+                  active={profileActive}
+                  onClick={closeMenu}
+                />
+                <button
+                  type="button"
+                  onClick={() => { setShowAuth(true); setMenuOpen(false); }}
+                  className="site-login-button"
+                  style={{ marginLeft: 10 }}
+                >
+                  Join
+                </button>
+              </div>
+            )}
+
+            {!user && !localDemo && (
               <button
                 onClick={() => { setShowAuth(true); setMenuOpen(false); }}
                 className="site-login-button"

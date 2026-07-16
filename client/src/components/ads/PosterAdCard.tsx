@@ -1,6 +1,11 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import type { AdDraft, AdServePayload } from "@/lib/adTypes";
 import { trackAdClick, trackAdImpression } from "@/lib/adTracking";
+import {
+  accentForAffiliateBrand,
+  brandFromAd,
+  type AffiliateBrand,
+} from "@/lib/affiliateCards";
 import "@/components/AffiliatePosterCard.css";
 
 type AdLike = AdDraft | AdServePayload;
@@ -10,6 +15,8 @@ type Props = {
   preview?: boolean;
   className?: string;
   style?: CSSProperties;
+  /** Force brand accent when known (CockBlock red · Mr S cyan). */
+  brand?: AffiliateBrand;
 };
 
 function Slides({ slides, ms }: { slides: string[]; ms: number }) {
@@ -42,10 +49,20 @@ function Slides({ slides, ms }: { slides: string[]; ms: number }) {
 }
 
 /**
- * Data-driven events-grid poster ad. Reuses .pdxBoard* affiliate styles.
+ * Data-driven events-grid poster ad.
+ * Same deep-glass chrome as event grid cards; brand accent:
+ *   CockBlock → red · Mr. S → cyan.
  */
-export default function PosterAdCard({ ad, preview = false, className = "", style }: Props) {
-  const accent = ad.primaryColor || "#FF0033";
+export default function PosterAdCard({
+  ad,
+  preview = false,
+  className = "",
+  style,
+  brand: brandProp,
+}: Props) {
+  const brand = brandProp ?? brandFromAd(ad as AdServePayload);
+  const accent = accentForAffiliateBrand(brand);
+  const brandClass = brand === "mrs" ? "pdxBoard--affiliate-mrs" : "pdxBoard--affiliate-cb";
   const slides =
     ad.mediaMode === "slideshow" && ad.slides?.length
       ? ad.slides
@@ -64,16 +81,28 @@ export default function PosterAdCard({ ad, preview = false, className = "", styl
 
   return (
     <a
-      className={`pdxBoard pdxBoard--affiliate ${className}`.trim()}
+      className={`pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim()}
       href={ad.destUrl || "#"}
       target={ad.destUrl?.startsWith("http") ? "_blank" : undefined}
       rel={ad.destUrl?.startsWith("http") ? "noopener noreferrer" : undefined}
-      style={{ ["--ac" as string]: accent, ...style }}
+      style={
+        {
+          ["--ac" as string]: accent,
+          ["--c" as string]: accent,
+          ["--_day" as string]: accent,
+          ...style,
+        } as CSSProperties
+      }
       data-testid={ad.id ? `poster-ad-${ad.id}` : "poster-ad-preview"}
+      data-affiliate-brand={brand}
       aria-label={`Affiliate: ${ad.business || ad.title}. ${ad.ctaTitle || ""}`}
       onClick={onClick}
     >
-      <div className="pdxBoard__poster">
+      <span className="pdx-glass-sheen" aria-hidden="true" />
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+
+      <div className="pdxBoard__poster pdx-poster-well">
+        <span className="pdx-poster-well__scan" aria-hidden="true" />
         {slides.length > 1 ? (
           <Slides slides={slides} ms={ad.slideMs || 3200} />
         ) : slides[0] ? (
@@ -88,13 +117,14 @@ export default function PosterAdCard({ ad, preview = false, className = "", styl
               color: accent,
               fontWeight: 900,
               letterSpacing: "0.12em",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             {ad.logoText || "LOGO"}
           </div>
         )}
         <span className="pdxBoard__affChip">{ad.pillLabel || "Affiliate"}</span>
-        <span className="pdxBoard__stripe" />
       </div>
 
       <div className="pdxBoard__meta">
@@ -116,7 +146,7 @@ export default function PosterAdCard({ ad, preview = false, className = "", styl
             <span className="dot" aria-hidden="true" />
             Ad
           </span>
-          <span className="pdxBoard__affShop">{ad.ctaCopy || "Shop Now →"}</span>
+          <span className="pdxBoard__affShop pdx-glass-btn">{ad.ctaCopy || "Shop Now →"}</span>
         </div>
       </div>
     </a>

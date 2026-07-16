@@ -1,31 +1,124 @@
+/*
+ * Nude beaches hub — stacked top-rim islands (SoT: 10-islands.png)
+ *
+ * Right column = discrete cards (Live / River / Parking), NOT one outer shell
+ * with flat inner sections. Neon lives on the TOP rim only; sides stay quiet
+ * charcoal. Orange #FF6600 default · cyan #19E3FF river · green #39FF14 Sauvie.
+ */
+
 .nb-hub {
+  --nb-accent: #ff6600;
+  --nb-rim: var(--nb-accent, #ff6600);
+  --c: var(--nb-rim);
+  /* Top-rim island shadow stack — short bloom above top edge, no full-perimeter neon */
+  --nb-island-shadow:
+    0 0 0 1px #000,
+    0 18px 36px -20px rgba(0, 0, 0, 0.92),
+    0 -2px 16px -4px color-mix(in srgb, var(--nb-rim) 48%, transparent),
+    0 0 10px -6px color-mix(in srgb, var(--nb-rim) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--nb-rim) 62%, rgba(255, 255, 255, 0.1)),
+    inset 0 12px 22px -16px color-mix(in srgb, var(--nb-rim) 20%, transparent);
+  --nb-island-border: 1px solid #2a2a32;
+  --nb-island-bg:
+    radial-gradient(
+      90% 70% at 50% 46%,
+      #000 0%,
+      #000 40%,
+      #030304 72%,
+      color-mix(in srgb, var(--nb-rim) 4%, #050408) 100%
+    ),
+    radial-gradient(
+      120% 55% at 50% -8%,
+      color-mix(in srgb, var(--nb-rim) 14%, transparent),
+      transparent 52%
+    );
+
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 12px;
   height: 100%;
   min-height: 380px;
-  background: #0a0a0a;
-  border: 2px solid #2b2b2b;
-  border-radius: 12px;
+  /* Transparent stack — chrome lives on each island, not the wrapper */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 2px 2px 4px;
   overflow-x: hidden;
   overflow-y: auto;
-  box-shadow: 0 12px 44px -14px rgba(0, 0, 0, 0.6);
-  padding: 14px 14px 20px;
   scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
+}
+
+.nb-hub--rooster {
+  --nb-accent: #ff6600;
+  --nb-rim: #ff6600;
+  --c: #ff6600;
+}
+
+.nb-hub--sauvie {
+  --nb-accent: #39ff14;
+  --nb-rim: #39ff14;
+  --c: #39ff14;
 }
 
 .nb-hub--loading {
   align-items: center;
   justify-content: center;
   color: #8a8a8a;
+  min-height: 200px;
+  /* Loading itself is one quiet island */
+  --nb-rim: #4a4a52;
+  background: var(--nb-island-bg);
+  border: var(--nb-island-border);
+  border-top-color: color-mix(in srgb, var(--nb-rim) 55%, #2a2a32);
+  border-radius: 12px;
+  box-shadow: var(--nb-island-shadow);
+  padding: 24px 16px;
 }
 
+/*
+ * Each section = discrete top-rim island card.
+ */
 .nb-hub__section {
-  border: 1px solid #24242c;
-  background: #0d0d10;
-  border-radius: 10px;
-  padding: 14px 16px;
+  --c: var(--nb-rim, var(--nb-accent, #ff6600));
+  position: relative;
+  flex-shrink: 0;
+  border: var(--nb-island-border);
+  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent)) 68%, #2a2a32);
+  border-radius: 12px;
+  background: var(--nb-island-bg);
+  box-shadow: var(--nb-island-shadow);
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+  padding: 14px 14px 16px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Corner sheen — top-left glass highlight only */
+.nb-hub__section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    133deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.02) 14%,
+    transparent 36%
+  );
+  opacity: 0.85;
+}
+
+.nb-hub__section > * {
+  position: relative;
+  z-index: 1;
 }
 
 .nb-hub__section + .nb-hub__section {
@@ -95,12 +188,8 @@
 }
 
 .nb-hub--sauvie .nb-hub__weather-value {
-  color: var(--neon-green, #00EE44);
-  text-shadow: 0 0 22px rgba(0, 238, 68, 0.35);
-}
-
-.nb-hub--sauvie > .nb-hub__section {
-  border-top: 3px solid var(--neon-green, #00EE44);
+  color: #39ff14;
+  text-shadow: 0 0 22px rgba(57, 255, 20, 0.35);
 }
 
 .nb-hub--sauvie .nb-hub__level-value {
@@ -140,79 +229,92 @@
 
 .nb-hub__weather-stat--water .nb-hub__weather-stat-value {
   color: var(--neon-cyan, #19e3ff);
-  text-shadow: 0 0 16px rgba(25, 227, 255, 0.28);
+  text-shadow: 0 0 10px rgba(25, 227, 255, 0.16);
 }
 
+/* Live / weather island — accent top rim (orange or green) */
 .nb-hub--rooster .nb-hub__section--pulse {
+  --nb-rim: #ff6600;
+  --c: #ff6600;
   --dc: #ff6600;
-  border-top: 3px solid #ff6600;
-  animation: nbHubPulse 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation: none;
 }
 
+.nb-hub--sauvie .nb-hub__section {
+  --nb-rim: #39ff14;
+  --c: #39ff14;
+}
+
+/* River level island — cyan top rim (text values already cyan) */
 .nb-hub__level {
+  --nb-rim: #19e3ff;
+  --c: #19e3ff;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-top: 3px solid #333;
-  padding-bottom: 4px;
+  border-top-color: color-mix(in srgb, #19e3ff 70%, #2a2a32);
+}
+
+.nb-hub__level--good {
+  --nb-rim: #19e3ff;
+  border-top-color: color-mix(in srgb, #19e3ff 70%, #2a2a32);
+}
+
+.nb-hub__level--bad {
+  --nb-rim: #ff8c00;
+  --c: #ff8c00;
+  border-top-color: color-mix(in srgb, #ff8c00 70%, #2a2a32);
 }
 
 @keyframes nbHubPulse {
   0%, 100% {
-    box-shadow: 0 0 14px color-mix(in srgb, var(--dc, #19e3ff) 18%, transparent);
+    filter: brightness(1);
   }
   50% {
-    box-shadow: 0 0 24px color-mix(in srgb, var(--dc, #19e3ff) 32%, transparent);
+    filter: brightness(1.06) saturate(1.05);
   }
 }
 
-.nb-hub:not(.nb-hub--sauvie) .nb-hub__swim {
-  border-top: 3px solid var(--neon-cyan, #19e3ff);
+/* Swim / water quality island (Sauvie) — green rim; status can recolor */
+.nb-hub__swim {
+  --nb-rim: #39ff14;
+  --c: #39ff14;
 }
 
-.nb-hub--sauvie .nb-hub__swim {
-  border-top: 3px solid var(--neon-green, #00ee44);
+.nb-hub__section--water.nb-hub__swim--pass,
+.nb-hub__swim--pass {
+  --nb-rim: #39ff14;
+  --c: #39ff14;
+  --dc: #39ff14;
+  border-top-color: color-mix(in srgb, #39ff14 70%, #2a2a32);
 }
 
-.nb-hub__section--water.nb-hub__swim--pass {
-  border-top-color: var(--neon-green, #00EE44);
-}
-
-.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--pass,
-.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--unknown {
-  --dc: var(--neon-green, #00EE44);
-  border-top-color: var(--neon-green, #00EE44);
-}
-
-.nb-hub__swim--fail,
-.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--fail {
+.nb-hub__swim--fail {
+  --nb-rim: #ff4d4d;
+  --c: #ff4d4d;
   --dc: #ff4d4d;
-  border-top-color: #ff4d4d;
+  border-top-color: color-mix(in srgb, #ff4d4d 70%, #2a2a32);
 }
 
-.nb-hub__swim--warning,
-.nb-hub--sauvie > .nb-hub__section.nb-hub__swim--warning {
+.nb-hub__swim--warning {
+  --nb-rim: #ffb347;
+  --c: #ffb347;
   --dc: #ffb347;
-  border-top-color: #ffb347;
+  border-top-color: color-mix(in srgb, #ffb347 70%, #2a2a32);
 }
 
 .nb-hub__swim--unknown {
-  --dc: #19e3ff;
-  border-top-color: #19e3ff;
+  --nb-rim: #39ff14;
+  --c: #39ff14;
+  --dc: #39ff14;
+  border-top-color: color-mix(in srgb, #39ff14 55%, #2a2a32);
 }
 
-.nb-hub__swim-value--pass { color: var(--neon-green, #00EE44); text-shadow: 0 0 22px rgba(0, 238, 68, 0.35); }
-.nb-hub__swim-value--fail { color: #ff4d4d; text-shadow: 0 0 22px rgba(255, 77, 77, 0.35); }
-.nb-hub__swim-value--warning { color: #ffb347; text-shadow: 0 0 22px rgba(255, 179, 71, 0.35); }
-.nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: 0 0 22px rgba(25, 227, 255, 0.35); }
-
-.nb-hub__level--good {
-  border-top-color: #ff6600;
-}
-
-.nb-hub__level--bad {
-  border-top-color: #ff8c00;
-}
+/* Soften value text glows */
+.nb-hub__swim-value--pass { color: #39ff14; text-shadow: 0 0 12px rgba(57, 255, 20, 0.22); }
+.nb-hub__swim-value--fail { color: #ff4d4d; text-shadow: 0 0 12px rgba(255, 77, 77, 0.22); }
+.nb-hub__swim-value--warning { color: #ffb347; text-shadow: 0 0 12px rgba(255, 179, 71, 0.22); }
+.nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: none; }
 
 html.calm-mode .nb-hub__section--pulse {
   animation: none;
@@ -251,7 +353,7 @@ html.calm-mode .nb-hub__section--pulse {
 }
 
 .nb-hub--rooster .nb-hub__level .nb-hub__level-value {
-  color: var(--neon-cyan, #19e3ff);
+  color: #19e3ff;
   text-shadow: 0 0 22px rgba(25, 227, 255, 0.35);
 }
 
@@ -334,4 +436,18 @@ html.calm-mode .nb-hub__section--pulse {
   .nb-hub__weather-main {
     grid-column: 1 / -1;
   }
+}
+
+/* Calm: solid OLED slab, freeze bloom intensity */
+html.calm-mode .nb-hub__section {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  --nb-island-shadow:
+    0 0 0 1px #000,
+    0 18px 36px -20px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 color-mix(in srgb, var(--nb-rim) 40%, rgba(255, 255, 255, 0.08));
+}
+
+html.calm-mode .nb-hub__section::before {
+  opacity: 0.45;
 }

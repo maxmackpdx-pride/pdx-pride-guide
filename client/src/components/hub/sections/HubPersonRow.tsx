@@ -7,15 +7,67 @@ type Props = {
   followPending?: boolean;
   onToggleFollow?: () => void;
   showFollow?: boolean;
+  /** Compact right-rail layout: HOST + @handle, verified sub, solid Follow. */
+  rail?: boolean;
 };
 
 function followerLabel(count: number): string {
   return count === 1 ? "1 follower" : `${count} followers`;
 }
 
-export default function HubPersonRow({ person, followPending, onToggleFollow, showFollow = true }: Props) {
+export default function HubPersonRow({
+  person,
+  followPending,
+  onToggleFollow,
+  showFollow = true,
+  rail = false,
+}: Props) {
   const name = person.displayName?.trim() || person.username;
   const sub = person.subtitle || person.bio;
+
+  if (rail) {
+    return (
+      <div className="hub-thread hub-people-row hub-people-row--rail rowin">
+        <Link href={`/u/${encodeURIComponent(person.username)}`} className="hub-thread__link hub-thread__link--rail">
+          <UserAvatar
+            photoUrl={person.photoUrl}
+            avatarChoice={person.avatarChoice}
+            avatarRing={person.avatarRing}
+            displayName={person.displayName}
+            username={person.username}
+            size={44}
+          />
+          <div className="hub-thread__body">
+            <div className="hub-people-row__rail-id">
+              {person.verifiedHost && (
+                <span className="hub-thread__badge" title="Verified host">
+                  Host
+                </span>
+              )}
+              <span className="hub-people-row__handle">@{person.username}</span>
+            </div>
+            <span className="hub-thread__sub">
+              {sub || (person.verifiedHost ? "Verified host" : followerLabel(person.followers))}
+            </span>
+          </div>
+        </Link>
+        {showFollow && onToggleFollow && (
+          <button
+            type="button"
+            className={`foll hub-people-row__foll${person.isFollowing ? " on" : ""}`}
+            disabled={followPending}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleFollow();
+            }}
+          >
+            {person.isFollowing ? "Following" : "Follow"}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="hub-thread hub-people-row rowin">

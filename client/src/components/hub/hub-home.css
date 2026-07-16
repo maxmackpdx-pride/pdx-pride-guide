@@ -89,18 +89,39 @@
   text-decoration: none;
 }
 
-/* Admin keys banner (feed → drawer/rail via HubV2 sideExtra) */
+/* Admin keys banner (desktop rail + mobile admin drawer)
+   Deep-glass §2.13: MAGENTA outline/bloom (never hub cyan).
+   Re-declare glass recipes on this node so --c = magenta wins. */
 .hub-keys {
+  --c: var(--panel-magenta, var(--neon-magenta, #ff1fa0));
+  --glass-card-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 8%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 20%, transparent), transparent 56%);
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 65%, #101014);
+  --glass-card-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 28px -6px color-mix(in srgb, var(--c) 70%, transparent),
+    0 0 14px -4px color-mix(in srgb, var(--c) 55%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
   padding: 16px 18px;
-  border: 1px solid rgba(255, 31, 160, 0.45);
   border-radius: 14px;
-  background: rgba(255, 31, 160, 0.08);
   margin-bottom: 0;
+  position: relative;
+  background:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 12%, transparent 34%),
+    var(--glass-card-bg);
+  /* Explicit magenta rim — do not use inherited cyan --glass-card-border from hub root */
+  border: 1px solid color-mix(in srgb, var(--c) 70%, #101014) !important;
+  box-shadow: var(--glass-card-shadow) !important;
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
 }
 
 .hub-keys__kicker {
@@ -128,6 +149,81 @@
 
 .hub-keys__n--purple {
   color: var(--neon-violet, #8800ff);
+}
+
+/* Magenta glass primary CTA (Admin queue) — §1.5 glass-btn, no brutal offset */
+.hub-keys .pdxBtn--solid,
+.hub-keys .pdxBtn--neon {
+  --_c: var(--c, var(--panel-magenta, #ff1fa0));
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
+    var(--_c) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.35) !important;
+  transform: none;
+}
+
+.hub-keys .pdxBtn--solid:hover,
+.hub-keys .pdxBtn--neon:hover {
+  filter: brightness(1.08);
+  transform: none;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.35) !important;
+}
+
+.hub-keys .pdxBtn--solid:active,
+.hub-keys .pdxBtn--neon:active {
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -4px 10px -4px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Outlined glass secondary (Owner desk) */
+.hub-keys .pdxBtn--ghost {
+  --_c: var(--panel-purple, #b06bff);
+  color: var(--_c) !important;
+  background: linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--_c) 16%, transparent),
+      color-mix(in srgb, var(--_c) 2%, transparent) 46%
+    ),
+    rgba(255, 255, 255, 0.015) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.5) !important;
+  transform: none;
+}
+
+.hub-keys .pdxBtn--ghost:hover {
+  color: var(--_c) !important;
+  border-color: color-mix(in srgb, var(--_c) 75%, transparent) !important;
+  filter: brightness(1.08);
+  transform: none;
+}
+
+/* Compact rail/drawer keys — same magenta glass, column stack unchanged */
+.hub-keys--compact {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Calm: solid slab, no blur/bloom */
+html.calm-mode .hub-keys,
+:root[data-calm="true"] .hub-keys {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 0 0 2px #000, 0 12px 28px -16px rgba(0, 0, 0, 0.9);
+  background: #050506;
+  border-color: color-mix(in srgb, var(--c, #ff1fa0) 40%, #101014);
 }
 
 /* Home two-col: inbox | weather stack */

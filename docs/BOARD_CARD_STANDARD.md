@@ -6,6 +6,12 @@ behaves like the others: a colored card on its own board page, a matching card
 in the hub feed, and a tap-to-open overlay that shows the real, interactive
 card on top of the feed (close = back to your exact scroll spot).
 
+**Surface chrome (fill / edge / bloom / CTA):** superseded by the **deep-glass /
+OLED-neon** standard in `docs/handoffs/deep-glass-2026-07-16/` and
+`client/src/components/ds/tokens/glass.css`. This doc still owns structure
+(board triad, feed vs glowing cards, `?post=`, overlay behavior, accents as
+semantic colors). Pixel values for slabs/rings/sheen/buttons come from deep-glass.
+
 ## Feed posts vs. glowing cards (important distinction)
 
 Not everything in the Scene Feed is a "card." Keep these separate:

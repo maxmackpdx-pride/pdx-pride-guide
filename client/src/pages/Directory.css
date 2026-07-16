@@ -1,22 +1,24 @@
 /* ============================================================
-   Directory — dark liquid glass (parity with home islands).
-   Neon category borders, rainbow seams, and glows stay.
-   Glass is fill / edge / depth only.
+   Directory — deep-glass card chrome (Agent 3) + page surfaces.
+   Place cards: OLED slab / black ring / always-on bloom / poster-well
+   (see PlaceCard.tsx). Non-card surfaces still use dir-glass-* until
+   their agents migrate.
    ============================================================ */
 
 .directory-page {
-  /* Match home island glass tokens */
-  --dir-gm: 32;
+  /* Deep-glass always-on bloom (overrides quieter index.css page value).
+     Calm zeros explicitly so we do not fight glass.css root zeroing. */
+  --dir-gm: 60;
   --dir-glass-fill: color-mix(in srgb, #0c0c12 74%, transparent);
   --dir-glass-fill-hot: color-mix(in srgb, #14141c 80%, transparent);
   --dir-glass-edge: rgba(255, 255, 255, 0.10);
   --dir-glass-edge-hi: rgba(255, 255, 255, 0.16);
   --dir-glass-blur: 14px;
-  --dir-glass-blur-card: 14px;
-  --dir-glass-sat: 1.15;
-  /* Light category wash over dark glass (uses card --_c) */
-  --dir-glass-tint: color-mix(in srgb, var(--_c, var(--pink)) 10%, transparent);
-  --dir-glass-tint-hot: color-mix(in srgb, var(--_c, var(--pink)) 14%, transparent);
+  --dir-glass-blur-card: 12px;
+  --dir-glass-sat: 1.12;
+  /* Light category wash over dark glass (uses card --c / --_c) */
+  --dir-glass-tint: color-mix(in srgb, var(--c, var(--_c, var(--pink))) 10%, transparent);
+  --dir-glass-tint-hot: color-mix(in srgb, var(--c, var(--_c, var(--pink))) 14%, transparent);
   --dir-glass-specular: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.07) 0%,
@@ -42,99 +44,59 @@
 }
 
 /*
- * Place cards = home utility islands:
- * dark glass + specular + light category tint + neon border + rainbow seam
+ * Place cards — SoT from Directory cards redesign / Card System.html.
+ * Full chrome lives in PlaceCard.tsx; page only wires --c and must not
+ * reintroduce boxed poster-well or lite-glass fills.
  */
-.directory-page .pdxPlace__body {
-  background:
-    var(--dir-glass-specular) padding-box,
-    radial-gradient(
-      120% 90% at 50% 0%,
-      var(--dir-glass-tint),
-      transparent 58%
-    ) padding-box,
-    linear-gradient(var(--dir-glass-fill), var(--dir-glass-fill)) padding-box,
-    var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
-  box-shadow:
-    var(--dir-glass-shadow),
-    0 0 18px color-mix(in srgb, var(--_c, var(--pink)) 12%, transparent);
-  backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
-  -webkit-backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
-  filter: none;
-  transition:
-    transform 0.18s var(--ease-out, ease-out),
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+.directory-page .pdxPlace {
+  --c: var(--_c, var(--pink));
+  --dir-gm: 60;
 }
 
-.directory-page .pdxPlace--clickable:hover .pdxPlace__body {
-  background:
-    var(--dir-glass-specular) padding-box,
-    radial-gradient(
-      120% 90% at 50% 0%,
-      var(--dir-glass-tint-hot),
-      transparent 58%
-    ) padding-box,
-    linear-gradient(var(--dir-glass-fill-hot), var(--dir-glass-fill-hot)) padding-box,
-    var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
-  box-shadow:
-    0 12px 32px -14px rgba(0, 0, 0, 0.85),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 26px color-mix(in srgb, var(--_c, var(--pink)) 18%, transparent);
-  filter: none;
+.directory-page .pdxPlace--clickable:hover {
+  transform: translateY(-6px) !important;
 }
 
-/* Outer neon frame — home-level soft accent glow, not a neon wash */
-.directory-page .pdxPlace__glow {
-  box-shadow:
-    0 0 18px -2px color-mix(in srgb, var(--_c, var(--pink)) calc(var(--dir-gm, 32) * 1%), transparent),
-    0 0 48px -14px color-mix(in srgb, var(--_c, var(--pink)) calc(var(--dir-gm, 32) * 0.65%), transparent);
+.directory-page .pdxPlace__sheen {
+  z-index: 2;
 }
 
-/* Logo well: dark glass with light category wash (matches island body) */
-.directory-page .pdxPlace__media {
-  background:
-    radial-gradient(
-      125% 120% at 50% 12%,
-      color-mix(in srgb, var(--_c, var(--pink)) 11%, #08080c),
-      color-mix(in srgb, #08080c 88%, transparent) 72%
-    );
-  border-color: color-mix(in srgb, var(--_c, var(--pink)) 28%, var(--dir-glass-edge));
-}
-
-.directory-page .pdxPlace__logo {
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--_c, var(--pink)) 28%, transparent));
-}
-
-.directory-page .pdxPlace__logo--fallback {
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--_c, var(--pink)) 34%, transparent));
-}
-
-/* Rainbow seam stays the card top edge (animated) — ensure bloom sits in glass */
-.directory-page .pdxPlace__seam.pdx-rainbow-rule {
+.directory-page .pdxPlace__seam {
   z-index: 5;
 }
 
-/* Map island (desktop sticky + mobile expand) — neutral glass, no magenta wash */
-.directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-.directory-page .directory-browse-layout__map-desktop .directory-map-wrap {
+/* Reassert little-card OLED + soft bloom if any legacy glass override fights PlaceCard */
+.directory-page .pdxPlace__body {
   background:
-    var(--dir-glass-specular),
-    var(--dir-glass-fill);
-  border: 1px solid var(--dir-glass-edge);
-  border-radius: 12px;
-  box-shadow: var(--dir-glass-shadow);
-  backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
-  -webkit-backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
+    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%),
+    radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%) !important;
 }
 
+/* Map island — debossed well (shared --map-frame-shadow) */
+.directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
+.directory-page .directory-browse-layout__map-desktop .directory-map-wrap {
+  background: var(--map-surface-bg, #06060a);
+  border: 1px solid #000;
+  border-radius: 16px;
+  box-shadow: var(--map-frame-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* MAP KEY panel — OLED glass well (matches sitewide map-key chrome) */
 .directory-page .directory-map-key {
   background:
-    var(--dir-glass-specular),
-    color-mix(in srgb, #0a0a0e 72%, transparent);
-  border-top: 1px solid var(--dir-glass-edge);
-  border-radius: 0 0 12px 12px;
-  margin-top: 0;
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 52%),
+    radial-gradient(90% 80% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 58%),
+    #08080c;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  margin: 12px 0 0;
+  box-shadow:
+    0 0 0 1px #000,
+    0 20px 44px -18px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -12px 32px -16px rgba(0, 0, 0, 0.75);
 }
 
 /* Add-place form panel — keep lime neon edge, neutral dark glass fill */
@@ -228,15 +190,12 @@
     background: #050508 !important;
   }
 
+  /* Solid OLED slab when backdrop-filter unsupported — keep edge + black ring */
   .directory-page .pdxPlace__body {
     background:
-      radial-gradient(
-        120% 90% at 50% 0%,
-        color-mix(in srgb, var(--_c, var(--pink)) 10%, transparent),
-        transparent 58%
-      ) padding-box,
-      linear-gradient(#121218, #121218) padding-box,
-      var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
+      radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 6%, #050408) 100%) padding-box,
+      radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 18%, transparent), transparent 56%) padding-box,
+      var(--_edge, linear-gradient(var(--c, var(--_c, var(--pink))), var(--c, var(--_c, var(--pink))))) border-box;
   }
 
   .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
@@ -283,16 +242,20 @@ html.calm-mode .directory-page .zine-filter-bar,
   background: #050508 !important;
 }
 
+/* Calm: zero bloom multiplier on the page (and thus cards); keep OLED fill + edge */
+html.calm-mode .directory-page,
+:root[data-calm="true"] .directory-page {
+  --dir-gm: 0;
+}
+
 html.calm-mode .directory-page .pdxPlace__body,
 :root[data-calm="true"] .directory-page .pdxPlace__body {
   background:
-    radial-gradient(
-      120% 90% at 50% 0%,
-      color-mix(in srgb, var(--_c, var(--pink)) 8%, transparent),
-      transparent 58%
-    ) padding-box,
-    linear-gradient(#121218, #121218) padding-box,
-    var(--_edge, linear-gradient(var(--_c, var(--pink)), var(--_c, var(--pink)))) border-box;
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 6%, #050408) 100%) padding-box,
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 18%, transparent), transparent 56%) padding-box,
+    var(--_edge, linear-gradient(var(--c, var(--_c, var(--pink))), var(--c, var(--_c, var(--pink))))) border-box;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 html.calm-mode .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,

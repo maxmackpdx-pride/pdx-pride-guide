@@ -81,7 +81,7 @@ export default function HubAdminFolder({
         {open && createPortal(
           <>
             <div className="hub-more-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
-            <div className="hub-more-sheet hub-admin-folder__sheet" role="dialog" aria-label="Admin folder">
+            <div className="hub-more-sheet hub-admin-folder__sheet pdx-edge-deboss" role="dialog" aria-label="Admin folder">
               <h3>Admin folder</h3>
               {items.map((item) => (
                 <button

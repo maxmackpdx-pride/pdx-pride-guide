@@ -1,3 +1,6 @@
+/* TipSupport — deep-glass CTAs (surface only; payment logic untouched)
+   Buy me a coffee matches Pitch a sponsorship (solid lime glass). */
+
 .tip-support__btns {
   display: flex;
   flex-wrap: wrap;
@@ -13,13 +16,135 @@
   gap: 8px;
 }
 
-.tip-support__btn--stripe-footer {
-  background: var(--neon-cyan, #19e3ff) !important;
-  box-shadow: 4px 4px 0 0 #1a3a6b !important;
+/* Shared glass button chrome for about / compact / footer tips */
+.tip-support__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-decoration: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.tip-support__btn--stripe-footer:hover {
-  box-shadow: 6px 6px 0 0 #1a3a6b !important;
+.tip-support__btn--lg {
+  padding: 14px 24px;
+  font-size: 0.95rem;
+}
+
+.tip-support__btn--sm {
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+/*
+ * Buy me a coffee = same solid lime glass as .support-sponsors__pitch
+ * (never orange/magenta gradient; never cyan).
+ */
+.tip-support__btn--lime-glass,
+.tip-support__btn--coffee-grad {
+  --c: var(--lime, #ccff00);
+  position: relative;
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--lime, #ccff00) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+  text-shadow: none;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Cyan glass (Stripe / Apple Pay secondary) — unchanged secondary */
+.tip-support__btn--cyan-glass {
+  --c: var(--neon-cyan, #19e3ff);
+  color: #050506 !important;
+  background: var(--glass-btn-bg) !important;
+  border: var(--glass-btn-border) !important;
+  box-shadow: var(--glass-btn-shadow) !important;
+}
+
+.tip-support__btn--lime-glass:hover,
+.tip-support__btn--coffee-grad:hover,
+.tip-support__btn--cyan-glass:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.tip-support__btn--lime-glass:hover,
+.tip-support__btn--coffee-grad:hover {
+  color: #050506 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+}
+
+.tip-support__btn--cyan-glass:hover {
+  color: #050506 !important;
+}
+
+.tip-support__btn--lime-glass:active,
+.tip-support__btn--coffee-grad:active,
+.tip-support__btn--cyan-glass:active {
+  transform: translateY(1px);
+  filter: brightness(0.98);
+}
+
+.tip-support__btn--lime-glass:focus-visible,
+.tip-support__btn--coffee-grad:focus-visible {
+  outline: 2px solid var(--lime, #ccff00);
+  outline-offset: 3px;
+}
+
+.tip-support__btn--cyan-glass:focus-visible {
+  outline: 2px solid var(--neon-cyan, #19e3ff);
+  outline-offset: 3px;
+}
+
+/* Footer: full-width + same lime glass as pitch */
+.tip-support--footer .site-footer__coffee-btn.tip-support__btn--lime-glass,
+.tip-support--footer .site-footer__coffee-btn.tip-support__btn--coffee-grad {
+  width: 100%;
+  max-width: 260px;
+  padding: 12px 16px 11px;
+  font-weight: 900;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  border-radius: 10px;
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--lime, #ccff00) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+}
+
+.tip-support--footer .site-footer__coffee-btn.tip-support__btn--stripe-footer {
+  --c: var(--neon-cyan, #19e3ff);
+  color: #050506 !important;
+  background: var(--glass-btn-bg) !important;
+  border: var(--glass-btn-border) !important;
+  box-shadow: var(--glass-btn-shadow) !important;
+  text-shadow: none;
+}
+
+.tip-support--footer .site-footer__coffee-btn.tip-support__btn--stripe-footer:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: var(--glass-btn-shadow) !important;
+  color: #050506 !important;
 }
 
 .tip-support__note {
@@ -46,5 +171,21 @@
 @media (max-width: 640px) {
   .tip-support__btns--footer {
     max-width: none;
+  }
+}
+
+/* Calm: drop outer bloom, keep lime fill */
+html.calm-mode .tip-support__btn--lime-glass,
+html.calm-mode .tip-support__btn--coffee-grad,
+html.calm-mode .tip-support__btn--cyan-glass,
+:root[data-calm="true"] .tip-support__btn--lime-glass,
+:root[data-calm="true"] .tip-support__btn--coffee-grad,
+:root[data-calm="true"] .tip-support__btn--cyan-glass {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tip-support__btn {
+    transition: none;
   }
 }

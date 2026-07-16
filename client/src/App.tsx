@@ -2,7 +2,7 @@ import { Switch, Route, Router, Redirect, useLocation } from "wouter";
 import { useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
-import { resetPageScroll } from "./lib/resetPageScroll";
+import { scheduleScrollReset } from "./lib/resetPageScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
@@ -23,14 +23,11 @@ function RouteBoundary({ children }: { children: ReactNode }) {
 
 function ScrollToTop() {
   const [location] = useLocation();
+  // Pathname only — query changes (filters, ?q=) must not yank scroll to top
+  const pathname = location.split("?")[0] || location;
   useEffect(() => {
-    // Path change + double rAF so layout/zoom chrome settle before we pin top-left.
-    resetPageScroll();
-    requestAnimationFrame(() => {
-      resetPageScroll();
-      requestAnimationFrame(resetPageScroll);
-    });
-  }, [location]);
+    scheduleScrollReset();
+  }, [pathname]);
   return null;
 }
 import Home from "./pages/Home";

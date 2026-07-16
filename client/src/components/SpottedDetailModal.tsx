@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ds";
+import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 
 /**
  * The Missed Connections detail card — the same overlay you get when you tap a
  * post on the board. Shared so the hub feed can open the identical card instead
  * of bouncing to the board page. Self-contained: owns the private-reply flow.
+ *
+ * Deep-glass SoT §2.4: --glass-card with magenta accent (#FF00CC) + quote motif.
  */
 export type SpottedDetailModalProps = {
   postId: number;
@@ -20,6 +23,8 @@ export type SpottedDetailModalProps = {
   kindColor: string;
   onClose: () => void;
 };
+
+const MC_GLASS = "#FF00CC";
 
 export default function SpottedDetailModal({
   postId,
@@ -54,34 +59,40 @@ export default function SpottedDetailModal({
     onError: (err: Error) => toast({ title: "Could not send reply", description: err.message, variant: "destructive" }),
   });
 
+  const glassVars = {
+    "--listing-accent": MC_GLASS,
+    "--spotted-accent": MC_GLASS,
+    "--c": MC_GLASS,
+    "--_c": MC_GLASS,
+  } as CSSProperties;
+
   // Portal to <body> so the fixed-position overlay escapes any transformed
   // ancestor (e.g. the feed's ScrollReveal wrappers) and centers on the viewport.
   return createPortal(
     <div className="board-detail-backdrop" onClick={onClose}>
       <div
-        className="board-detail-modal board-detail-modal--spotted"
+        className="board-detail-modal board-detail-modal--spotted board-detail-modal--glass"
         onClick={e => e.stopPropagation()}
-        style={{ "--listing-accent": "#ff1fa0" } as React.CSSProperties}
+        style={glassVars}
       >
-        <button type="button" className="gifting-close" onClick={onClose} aria-label="Close">
+        <BoardGlassMotif variant="quote-pair" />
+        <button type="button" className="gifting-close" onClick={onClose} aria-label="Close" style={{ position: "relative", zIndex: 3 }}>
           <X size={18} />
         </button>
-        <span className="board-detail-modal__quote" aria-hidden="true">&rdquo;</span>
-        <div className="board-detail-modal__tags">
-          <span className="board-detail-modal__kind" style={{ color: kindColor }}>
-            {kindLabel}
+        <div className="board-detail-modal__meta" style={{ position: "relative", zIndex: 1 }}>
+          <span className="board-detail-modal__live-dot" aria-hidden="true" />
+          <span className="board-detail-modal__meta-line" style={{ color: kindColor || MC_GLASS }}>
+            Missed Connection · {kindLabel}
+            {place ? ` · ${place}` : ""}
           </span>
         </div>
-        <h3 className="display section-heading" style={{ marginTop: 12 }}>
-          {title || body.slice(0, 80)}
+        <h3 className="display section-heading board-detail-modal__quote-title" style={{ position: "relative", zIndex: 1 }}>
+          “{title || body.slice(0, 80)}”
         </h3>
-        <p className="board-copy-sm" style={{ marginTop: 12, lineHeight: 1.62, whiteSpace: "pre-line" }}>
+        <p className="board-copy-sm board-detail-modal__body" style={{ position: "relative", zIndex: 1 }}>
           {body}
         </p>
-        <div className="board-section-kicker board-section-kicker--magenta" style={{ marginTop: 14, fontSize: 11 }}>
-          {place} · Anonymous
-        </div>
-        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #1c1c22" }}>
+        <div className="board-detail-modal__actions" style={{ position: "relative", zIndex: 1 }}>
           <textarea
             className="board-text-field"
             value={replyBody}
@@ -89,18 +100,26 @@ export default function SpottedDetailModal({
             rows={3}
             placeholder="Was this you, or were you there? Reply privately. Kind and specific goes far."
           />
-          <Button
-            variant="solid"
-            accent="magenta"
-            size="lg"
-            arrow
-            block
-            style={{ marginTop: 12 }}
-            disabled={!replyBody.trim() || replyMutation.isPending}
-            onClick={() => replyMutation.mutate()}
-          >
-            {replyMutation.isPending ? "Sending…" : "Send private reply"}
-          </Button>
+          <div className="board-detail-modal__cta-row">
+            <Button
+              variant="solid"
+              accent="magenta"
+              size="md"
+              disabled={!replyBody.trim() || replyMutation.isPending}
+              onClick={() => replyMutation.mutate()}
+            >
+              {replyMutation.isPending ? "Sending…" : "This is me"}
+            </Button>
+            <Button
+              variant="outline"
+              accent="magenta"
+              size="md"
+              disabled={!replyBody.trim() || replyMutation.isPending}
+              onClick={() => replyMutation.mutate()}
+            >
+              Reply anonymously
+            </Button>
+          </div>
           <p className="board-copy-sm" style={{ marginTop: 12, color: "#6a675f", fontSize: "0.72rem" }}>
             Replies open a private, anonymous inbox thread. Reveal your profile only when you are both ready.
           </p>

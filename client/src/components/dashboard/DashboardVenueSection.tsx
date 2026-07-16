@@ -1,9 +1,11 @@
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ImageUploader from "@/components/ImageUploader";
 import DashboardDrawer, { DashboardItemRow } from "./DashboardDrawer";
+import "./DashboardVenueSection.css";
 
 const CYAN = "#19E3FF";
 
@@ -55,66 +57,87 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
+  const cardStyle = { "--c": CYAN } as CSSProperties;
+
   return (
-    <div style={{ border: "1px solid var(--dash-border, #262626)", borderRadius: 8, padding: 16, marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-        <div>
+    <div className="dvs-work-card" style={cardStyle}>
+      <span className="dvs-work-card__seam pdx-refract-seam" aria-hidden="true" />
+      <span className="dvs-work-card__sheen" aria-hidden="true" />
+
+      <div className="dvs-work-card__head">
+        <div className="dvs-work-card__copy">
           <div className="dash-item-title">{business.name}</div>
           <div className="dash-item-meta">{business.address || "No address on file"}</div>
         </div>
-        <button type="button" className="dash-mini-btn" style={{ color: CYAN }} onClick={() => setExpanded(v => !v)}>
+        <button
+          type="button"
+          className={`dvs-glass-btn${expanded ? " dvs-glass-btn--outline" : ""}`}
+          onClick={() => setExpanded(v => !v)}
+        >
           {expanded ? "Hide details" : "Manage venue"}
         </button>
       </div>
 
       {expanded && (
-        <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 18 }}>
+        <div className="dvs-work-card__body">
           <div>
-            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginBottom: 8 }}>UPCOMING EVENTS AT THIS VENUE</p>
+            <p className="dvs-section-label">Upcoming events at this venue</p>
             {upcomingEvents.length === 0 ? (
-              <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>No upcoming events matched to this venue yet.</p>
+              <p className="dvs-empty">No upcoming events matched to this venue yet.</p>
             ) : (
               upcomingEvents.map(evt => (
-                <DashboardItemRow key={evt.id} color={CYAN} title={evt.title} meta={evt.dayOfWeek || ""} />
+                <div key={evt.id} className="dvs-project-row">
+                  <span className="dvs-project-row__seam pdx-refract-seam" aria-hidden="true" />
+                  <span className="dvs-project-row__sheen" aria-hidden="true" />
+                  <div className="dvs-project-row__inner">
+                    <DashboardItemRow color={CYAN} title={evt.title} meta={evt.dayOfWeek || ""} />
+                  </div>
+                </div>
               ))
             )}
           </div>
 
           <div>
-            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginBottom: 8 }}>PROMOTERS AT THIS VENUE</p>
+            <p className="dvs-section-label">Promoters at this venue</p>
             {promotersLoading ? (
-              <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>Loading…</p>
+              <p className="dvs-empty">Loading…</p>
             ) : promoters.length === 0 ? (
-              <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>No promoters linked to this venue yet.</p>
+              <p className="dvs-empty">No promoters linked to this venue yet.</p>
             ) : (
               promoters.map(p => (
-                <DashboardItemRow
-                  key={p.id}
-                  color={CYAN}
-                  title={p.displayName || p.username}
-                  meta={`@${p.username}`}
-                  actions={
-                    <button
-                      type="button"
-                      className="dash-mini-btn"
-                      style={{ color: "#FF2400" }}
-                      disabled={blockMutation.isPending}
-                      onClick={() => {
-                        const ok = window.confirm(`Block @${p.username} from posting events at ${business.name}? Their existing events here will be flagged for admin review.`);
-                        if (ok) blockMutation.mutate(p.id);
-                      }}
-                    >
-                      Block
-                    </button>
-                  }
-                />
+                <div key={p.id} className="dvs-project-row">
+                  <span className="dvs-project-row__seam pdx-refract-seam" aria-hidden="true" />
+                  <span className="dvs-project-row__sheen" aria-hidden="true" />
+                  <div className="dvs-project-row__inner">
+                    <DashboardItemRow
+                      color={CYAN}
+                      title={p.displayName || p.username}
+                      meta={`@${p.username}`}
+                      actions={
+                        <button
+                          type="button"
+                          className="dvs-glass-btn dvs-glass-btn--danger"
+                          disabled={blockMutation.isPending}
+                          onClick={() => {
+                            const ok = window.confirm(
+                              `Block @${p.username} from posting events at ${business.name}? Their existing events here will be flagged for admin review.`,
+                            );
+                            if (ok) blockMutation.mutate(p.id);
+                          }}
+                        >
+                          Block
+                        </button>
+                      }
+                    />
+                  </div>
+                </div>
               ))
             )}
           </div>
 
           <div>
-            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginBottom: 8 }}>LOGO</p>
-            <p style={{ fontSize: 12, color: "var(--dash-muted)", marginBottom: 8 }}>
+            <p className="dvs-section-label">Logo</p>
+            <p className="dvs-section-note">
               Logo changes go to the site admin for conversion before going live. Your current logo stays up until then.
             </p>
             <ImageUploader
@@ -127,8 +150,8 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
             {logoCandidate && (
               <button
                 type="button"
-                className="dash-mini-btn"
-                style={{ color: CYAN, marginTop: 8 }}
+                className="dvs-glass-btn"
+                style={{ marginTop: 8 }}
                 disabled={logoRequestMutation.isPending}
                 onClick={() => logoRequestMutation.mutate(logoCandidate)}
               >

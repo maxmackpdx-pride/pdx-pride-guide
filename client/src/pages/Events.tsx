@@ -37,11 +37,16 @@ import { dayAccentToken } from "@/lib/dsColors";
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
 import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { getEventTiming } from "@shared/missedConnections";
 import "./Events.css";
 
 const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
 /** MON/TUE fills are too dark for black pill text — flip to white. */
 const DARK_FILL_DAYS = new Set(["MON", "TUE"]);
+
+function isPastListing(e: EventListing): boolean {
+  return getEventTiming(e.dateStart, e.dateEnd) === "past";
+}
 
 type SortMode =
   | "start_time"
@@ -91,14 +96,18 @@ function sortEvents(events: EventListing[], sortMode: SortMode): EventListing[] 
   }
 }
 
-function filterLiveEvents(
+function filterBoardEvents(
   events: EventListing[],
   activeDay: string,
   activeFilters: string[],
   searchQuery: string,
+  pastView: boolean,
 ) {
   return events
     .filter(e => {
+      // Live board = upcoming + happening now. Past board = ended only.
+      const past = isPastListing(e);
+      if (pastView ? !past : past) return false;
       if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
       if (activeFilters.length > 0) {
         const admissionFilters = activeFilters
@@ -173,6 +182,8 @@ export default function Events() {
   const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
   const [activeDay, setActiveDay] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  /** Past events live in their own board view (chip next to day categories). */
+  const [pastView, setPastView] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => {
     if (typeof window === "undefined") return "";
     return new URLSearchParams(window.location.search).get("q")?.trim() || "";
@@ -286,9 +297,13 @@ export default function Events() {
     });
   }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
 
+  const liveEvents = useMemo(() => events.filter(e => !isPastListing(e)), [events]);
+  const pastEvents = useMemo(() => events.filter(isPastListing), [events]);
+  const poolEvents = pastView ? pastEvents : liveEvents;
+
   const filtered = useMemo(
-    () => sortEvents(filterLiveEvents(events, activeDay, activeFilters, searchQuery), sortMode),
-    [events, activeDay, activeFilters, searchQuery, sortMode],
+    () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView), sortMode),
+    [events, activeDay, activeFilters, searchQuery, sortMode, pastView],
   );
 
   const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
@@ -322,25 +337,26 @@ export default function Events() {
     };
     const isDanceParty = (e: EventListing) =>
       parseTags(e.eventTypes).some(tag => tag.trim().toUpperCase().replace(/[\s-]+/g, "_").includes("DANCE"));
+    // Hero counts track the live board (upcoming + now), not ended listings.
     const unclaimedIds = new Set(
-      events.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
+      liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
     return [
-      { num: events.length, label: "Total events", color: "#19e3ff" },
+      { num: liveEvents.length, label: "Total events", color: "#19e3ff" },
       { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
-      { num: events.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
+      { num: liveEvents.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
     ];
-  }, [events]);
+  }, [liveEvents]);
 
   const hasActiveFilters =
-    activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0;
+    activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
 
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <EventsHero eventCount={events.length} stats={heroStats} />
+      <EventsHero eventCount={liveEvents.length} stats={heroStats} />
 
       <div className="events-map-toolbar">
         <button
@@ -396,29 +412,35 @@ export default function Events() {
               <div className="board-active-feed__head">
                 <div className="board-active-feed__kicker board-active-feed__kicker--cyan">The board</div>
                 <div className="board-active-feed__head-row">
-                  <h2 className="display section-heading board-active-feed__title">Live listings</h2>
+                  <h2 className="display section-heading board-active-feed__title">
+                    {pastView ? "Past events" : "Live listings"}
+                  </h2>
                   <span className="board-active-feed__count" data-testid="events-count">
                     {isLoading ? (
                       "Loading…"
-                    ) : hasActiveFilters && filtered.length !== events.length ? (
+                    ) : hasActiveFilters && filtered.length !== poolEvents.length ? (
                       <>
                         <CountUpValue value={filtered.length} /> of{" "}
                         <CountUpValue
-                          key={events.length > 0 ? "total-ready" : "total-pending"}
-                          value={events.length}
+                          key={`${pastView ? "past" : "live"}-${poolEvents.length}`}
+                          value={poolEvents.length}
                         />{" "}
                         showing
                       </>
                     ) : (
                       <>
                         <CountUpValue
-                          key={events.length > 0 ? "total-ready" : "total-pending"}
-                          value={events.length}
+                          key={`${pastView ? "past" : "live"}-${poolEvents.length}`}
+                          value={poolEvents.length}
                         />{" "}
-                        event{events.length === 1 ? "" : "s"}
+                        event{poolEvents.length === 1 ? "" : "s"}
+                        {pastView ? " past" : ""}
                       </>
                     )}
                     {activeDay !== "ALL" ? ` · ${activeDay}` : ""}
+                    {pastEvents.length > 0 && !pastView ? (
+                      <span className="events-past-hint"> · {pastEvents.length} past</span>
+                    ) : null}
                   </span>
                 </div>
               </div>
@@ -440,6 +462,18 @@ export default function Events() {
                       </FilterChip>
                     );
                   })}
+                  <div className="events-filter-divider" aria-hidden="true" />
+                  <FilterChip
+                    selected={pastView}
+                    fill={pastView}
+                    accent="var(--text-meta, #8c8980)"
+                    onToggle={() => setPastView(v => !v)}
+                    data-testid="filter-past-events"
+                    className="events-filter-chip--past"
+                    style={pastView ? { color: "var(--text-hi)" } : undefined}
+                  >
+                    PAST{pastEvents.length > 0 ? ` · ${pastEvents.length}` : ""}
+                  </FilterChip>
                   <div className="events-filter-divider" />
                   {EVENT_TYPE_FILTERS.map(f => (
                     <EventTypeTag
@@ -453,7 +487,7 @@ export default function Events() {
                   ))}
                   <div className="events-filter-search">
                     <SearchInput
-                      placeholder="Search events..."
+                      placeholder={pastView ? "Search past events..." : "Search events..."}
                       value={searchQuery}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                       onClear={() => setSearchQuery("")}
@@ -500,11 +534,16 @@ export default function Events() {
                     </button>
                   </div>
                 </div>
-                {(activeFilters.length > 0 || searchQuery.trim()) && (
+                {(activeFilters.length > 0 || searchQuery.trim() || pastView) && (
                   <button
                     type="button"
                     className="events-clear-filters"
-                    onClick={() => { setActiveFilters([]); setSearchQuery(""); }}
+                    onClick={() => {
+                      setActiveFilters([]);
+                      setSearchQuery("");
+                      setPastView(false);
+                      setActiveDay("ALL");
+                    }}
                   >
                     Clear filters ×
                   </button>
@@ -528,16 +567,27 @@ export default function Events() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">Nothing matches</p>
-            <p className="board-copy-sm">Try a broader day or filter. Search by venue, neighborhood, or title.</p>
+            <p className="display section-heading">
+              {pastView ? "No past events match" : "Nothing matches"}
+            </p>
+            <p className="board-copy-sm">
+              {pastView
+                ? "Try another day filter or search. Switch off PAST to return to live listings."
+                : "Try a broader day or filter. Search by venue, neighborhood, or title. Past events live under PAST."}
+            </p>
             <Button
               type="button"
               variant="neon"
               accent="cyan"
-              onClick={() => { setActiveDay("ALL"); setActiveFilters([]); setSearchQuery(""); }}
+              onClick={() => {
+                setActiveDay("ALL");
+                setActiveFilters([]);
+                setSearchQuery("");
+                setPastView(false);
+              }}
               style={{ marginTop: 16 }}
             >
-              Clear filters
+              {pastView ? "Back to live listings" : "Clear filters"}
             </Button>
           </div>
         ) : viewMode === "grid" ? (
@@ -551,7 +601,11 @@ export default function Events() {
                     className="ds-listing-card ds-listing-card--grid"
                   >
                     {item.ad ? (
-                      <PosterAdCard ad={item.ad} style={{ height: "100%" }} />
+                      <PosterAdCard
+                        ad={item.ad}
+                        brand={item.brand}
+                        style={{ height: "100%" }}
+                      />
                     ) : (
                       <AffiliatePosterCard
                         brand={item.brand}

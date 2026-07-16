@@ -2,41 +2,72 @@
 import React from "react";
 
 /* PosterCard, the canonical event "board card" (source: EVENTS_GUIDE.md).
-   Vertical poster card: a 2:3 flyer with a thin day-color stripe along its
-   bottom edge, then a meta block (white day tag + outline type tags + meta
-   tag, title, venue, when-line, details link), then an optional attendance
-   footer. The card carries the day color as an ambient glow that slow-pulses.
-   Day colors are DATA: pass `day` (MON..SUN); calm mode flattens them. */
+   Deep-glass / OLED-neon (docs/handoffs/deep-glass-2026-07-16/ §2.1):
+   --glass-card with --c = day color; sheen; rainbow top seam (base ::before /
+   pdx-rainbow-rule engine); poster in --poster-well (radial + 4px day floor +
+   scanline); primary CTAs = .pdx-glass-btn. Claim keeps brutal sticker.
+   Layout / spacing / type scale unchanged. Entrance: pgDirCardIn. */
 const CSS = `
 .pdxBoard{
+  /* Day color drives ALL glass chrome (--c rebinds recipes in glass.css) */
   --_day: var(--day-fri);
+  --c: var(--_day);
+  --dc: var(--_day);
   position:relative; display:flex; flex-direction:column;
-  background:linear-gradient(160deg,rgba(255,255,255,.045),transparent 30%),var(--surface-card);
-  border:2px solid var(--border-default); border-radius:var(--radius-md);
+  background:var(--glass-card-bg);
+  border:var(--glass-card-border); border-radius:var(--radius-md);
   overflow:hidden; text-decoration:none; color:inherit; cursor:pointer;
-  box-shadow:none;
-  transition:transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out),
-             border-color var(--dur-base) var(--ease-out);
+  box-shadow:var(--glass-card-shadow);
+  backdrop-filter:blur(var(--glass-card-blur));
+  -webkit-backdrop-filter:blur(var(--glass-card-blur));
+  /* Entrance fill-mode backwards only — so hover transform works after entry.
+     No infinite box-shadow pulse at rest (dense grids + scroll = paint thrash). */
+  animation: pgDirCardIn .55s var(--ease-out,ease) backwards;
+  animation-delay:calc(var(--i, 0) * 40ms);
+  transition:transform var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out),
+             border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
 .pdxBoard:hover,
-a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color:color-mix(in srgb,var(--_day) 40%,var(--border-default));
-  box-shadow:0 0 28px color-mix(in srgb, var(--_day) 40%, transparent); }
+a.pdxBoard:hover{
+  transform:translateY(-4px) !important;
+  text-decoration:none;
+  filter:brightness(1.06) saturate(1.08);
+  border-color:color-mix(in srgb,var(--_day) 70%,#101014);
+  animation-play-state:paused;
+}
 
-.pdxBoard__poster{ position:relative; aspect-ratio:2/3; background:linear-gradient(135deg,#0a0a0a,#151515);
-  overflow:hidden; }
+/* Top-left diagonal sheen (::before is reserved for base rainbow seam) */
+.pdxBoard::after{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  pointer-events:none; z-index:2; background:var(--glass-sheen);
+}
+/* Bottom-right specular sheen (second layer) */
+.pdxBoard__sheenSpec{
+  position:absolute; inset:0; border-radius:inherit;
+  pointer-events:none; z-index:2; background:var(--glass-sheen-specular);
+}
+
+/* --poster-well: radial accent well + scanline; 4px day floor via stripe */
+.pdxBoard__poster{ position:relative; aspect-ratio:2/3;
+  background:var(--poster-well-bg); overflow:hidden; }
+.pdxBoard__scan{
+  position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.35;
+  background:var(--poster-well-scan);
+}
 /* Full flyer on the card face — never crop art/type off the edges */
-.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; }
+.pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; z-index:0; }
 .pdxBoard__ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  padding:20px; text-align:center; }
+  padding:20px; text-align:center; z-index:0; }
 .pdxBoard__phTitle{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;
   line-height:.95; color:rgba(255,255,255,.42); font-size:1.5rem; }
-.pdxBoard__stripe{ position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--_day); }
+/* Day-color floor (poster-well border-bottom:4px solid var(--c)) */
+.pdxBoard__stripe{ position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--c,var(--_day)); z-index:2; }
 .pdxBoard__linkchip{ position:absolute; top:9px; right:9px; width:28px; height:28px; border-radius:999px;
   display:flex; align-items:center; justify-content:center; background:rgba(5,5,7,.72);
-  border:1px solid rgba(255,255,255,.16); color:#fff; backdrop-filter:blur(4px); }
+  border:1px solid rgba(255,255,255,.16); color:#fff; backdrop-filter:blur(4px); z-index:3; }
 .pdxBoard__linkchip svg{ width:13px; height:13px; }
 
-.pdxBoard__meta{ padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
+.pdxBoard__meta{ position:relative; z-index:1; padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
 .pdxBoard__tags{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
 .pdxTag{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.6rem;
   letter-spacing:.08em; text-transform:uppercase; padding:0 6px; border-radius:2px; line-height:1.05; }
@@ -52,16 +83,22 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 .pdxBoard__venue--link:hover{ text-decoration:underline; color:#7af0ff; }
 .pdxBoard__address{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); line-height:1.35; }
 .pdxBoard__when{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); }
-.pdxBoard__ticket{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
-  letter-spacing:.08em; text-transform:uppercase; color:#000; background:var(--neon-lime,#39FF14);
-  border-radius:2px; padding:5px 10px 4px; text-decoration:none; display:inline-flex; width:fit-content;
-  margin-top:2px; }
-.pdxBoard__ticket:hover{ filter:brightness(1.08); text-decoration:none; color:#000; }
+/* Primary CTA → solid glass button */
+.pdxBoard__ticket.pdx-glass-btn,
+.pdxBoard__ticket{
+  font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
+  letter-spacing:.08em; text-transform:uppercase; color:#050506;
+  background:var(--glass-btn-solid-bg,var(--c)); border:var(--glass-btn-solid-border,2px solid #000);
+  box-shadow:var(--glass-btn-solid-shadow);
+  border-radius:9px; padding:5px 10px 4px; text-decoration:none; display:inline-flex; width:fit-content;
+  margin-top:2px; cursor:pointer;
+}
+.pdxBoard__ticket:hover{ filter:brightness(1.06); text-decoration:none; color:#050506; }
 .pdxBoard__link{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.8rem;
   letter-spacing:.05em; text-transform:uppercase; color:var(--_dayt,var(--_day)); margin-top:2px;
   display:inline-flex; align-items:center; gap:5px; }
 
-/* Bottom claim CTA — sticker style (matches EventTagsRow claim tags) */
+/* Bottom claim CTA — sticker style (intentional brutal offset; keep) */
 .pdxBoard__claim{ margin-top:auto; padding-top:10px; display:flex; }
 .pdxBoard__claim-tag{
   font-family:var(--font-display); font-weight:700; font-size:.62rem;
@@ -84,17 +121,33 @@ a.pdxBoard:hover{ transform:translateY(-2px); text-decoration:none; border-color
 .pdxBoard__going .dot{ width:6px; height:6px; border-radius:999px; background:var(--neon-yellow);
   animation:pdxBlink 1.6s var(--ease-inout) infinite; }
 @keyframes pdxBlink{ 50%{ opacity:.35; } }
-.pdxBoard__rsvp{ font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
-  letter-spacing:.06em; text-transform:uppercase; color:#000; background:var(--neon-yellow);
-  border:0; border-radius:2px; padding:5px 12px 4px; cursor:pointer; white-space:nowrap;
-  flex-shrink:0; min-width:max-content; }
-.pdxBoard__rsvp:hover{ filter:brightness(1.08); }
+/* RSVP primary CTA → solid glass button */
+.pdxBoard__rsvp.pdx-glass-btn,
+.pdxBoard__rsvp{
+  font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
+  letter-spacing:.06em; text-transform:uppercase; color:#050506;
+  background:var(--glass-btn-solid-bg,var(--c)); border:var(--glass-btn-solid-border,2px solid #000);
+  box-shadow:var(--glass-btn-solid-shadow);
+  border-radius:9px; padding:5px 12px 4px; cursor:pointer; white-space:nowrap;
+  flex-shrink:0; min-width:max-content;
+}
+.pdxBoard__rsvp:hover{ filter:brightness(1.06); }
+
+/* Calm: solid slab, no blur / pulse (bloom already zeroed via --dir-gm) */
+html.calm-mode .pdxBoard,
+:root[data-calm="true"] .pdxBoard{
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+  animation:none !important;
+}
 `;
-if (typeof document !== "undefined" && !document.getElementById("pdx-board-css")) {
-  const s = document.createElement("style");
-  s.id = "pdx-board-css";
+if (typeof document !== "undefined") {
+  let s = document.getElementById("pdx-board-css");
+  if (!s) {
+    s = document.createElement("style");
+    s.id = "pdx-board-css";
+    document.head.appendChild(s);
+  }
   s.textContent = CSS;
-  document.head.appendChild(s);
 }
 
 const DAY_BASE = { MON:"var(--day-mon)", TUE:"var(--day-tue)", WED:"var(--day-wed)",
@@ -124,9 +177,11 @@ export function PosterCard({
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   const showClaim = claimPending || claimable;
   return (
-    <Tag className={`pdxBoard ${className}`} href={cardHref}
-      style={{ "--_day": base, "--_dayt": dayt, ...style }} {...rest}>
+    <Tag className={`pdxBoard pdx-glass-rebind ${className}`} href={cardHref}
+      style={{ "--_day": base, "--c": base, "--dc": base, "--_dayt": dayt, ...style }} {...rest}>
+      <span className="pdxBoard__sheenSpec" aria-hidden="true" />
       <div className="pdxBoard__poster">
+        <span className="pdxBoard__scan" aria-hidden="true" />
         {image
           ? <img className="pdxBoard__img" src={image} alt="" />
           : <div className="pdxBoard__ph"><span className="pdxBoard__phTitle">{title}</span></div>}
@@ -151,7 +206,7 @@ export function PosterCard({
           : <div className="pdxBoard__venue">{venue}</div>)}
         {address && <div className="pdxBoard__address">{address}</div>}
         {ticketHref && (
-          <a className="pdxBoard__ticket" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
+          <a className="pdxBoard__ticket pdx-glass-btn pdx-glass-btn--solid" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
             {ticketLabel} →
           </a>
         )}
@@ -165,7 +220,7 @@ export function PosterCard({
             {going != null
               ? <span className="pdxBoard__going"><span className="dot" />{going} Going</span>
               : <span />}
-            {onRsvp && <button type="button" className="pdxBoard__rsvp"
+            {onRsvp && <button type="button" className="pdxBoard__rsvp pdx-glass-btn pdx-glass-btn--solid"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRsvp(); }}>I'll be there</button>}
           </div>
         )}

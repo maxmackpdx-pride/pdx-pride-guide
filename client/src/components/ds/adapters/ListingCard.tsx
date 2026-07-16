@@ -19,7 +19,7 @@ import {
 } from "@/lib/dsEvent";
 import { admissionEventLinkLabel } from "@shared/admission";
 import { resolveVenueWebsite } from "@shared/venueLinks";
-import { Link2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shareEventLink } from "@/lib/shareEvent";
 
@@ -45,7 +45,7 @@ function eventCardA11yProps(onClick: () => void) {
   };
 }
 
-function EventShareLink({ href, title }: { href: string; title: string }) {
+function EventShareButton({ href, title }: { href: string; title: string }) {
   const { toast } = useToast();
   return (
     <button
@@ -59,13 +59,13 @@ function EventShareLink({ href, title }: { href: string; title: string }) {
           toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
         } catch (err) {
           if ((err as DOMException)?.name !== "AbortError") {
-            toast({ title: "Could not share link", variant: "destructive" });
+            toast({ title: "Could not share", variant: "destructive" });
           }
         }
       }}
       className="ds-listing-share"
     >
-      <Link2 size={14} />
+      <Share2 size={14} strokeWidth={2.3} aria-hidden />
     </button>
   );
 }
@@ -137,9 +137,10 @@ export default function ListingCard({
         <div
           className="ds-listing-card ds-listing-card--list"
           data-testid={`event-card-${event.id}`}
+          style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
           {...eventCardA11yProps(onClick)}
         >
-          <EventShareLink href={shareHref} title={event.title} />
+          <EventShareButton href={shareHref} title={event.title} />
           <DsEventRow
             title={event.title}
             venue={event.venueName}
@@ -169,9 +170,10 @@ export default function ListingCard({
       <div
         className="ds-listing-card ds-listing-card--grid"
         data-testid={`event-card-${event.id}`}
+        style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
         {...eventCardA11yProps(onClick)}
       >
-        <EventShareLink href={shareHref} title={event.title} />
+        <EventShareButton href={shareHref} title={event.title} />
         <PosterCard
           title={event.title}
           venue={event.venueName}

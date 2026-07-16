@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import type { AffiliateBrand } from "@/lib/affiliateCards";
-import { AFFILIATE_ACCENT, AFFILIATE_LINKS } from "@/lib/affiliateCards";
+import { accentForAffiliateBrand, AFFILIATE_LINKS } from "@/lib/affiliateCards";
 import "./AffiliatePosterCard.css";
 
 const CB_SLIDES = [
@@ -53,28 +53,41 @@ function CockBlockSlides() {
 
 /**
  * Affiliate placement that reuses the PosterCard / .pdxBoard visual system
- * but is clearly marked as an ad (not a real event).
+ * (same glass as event grid cards). CockBlock = red · Mr. S = cyan.
  */
 export default function AffiliatePosterCard({ brand, className = "", style }: Props) {
   const isMrs = brand === "mrs";
   const href = isMrs ? AFFILIATE_LINKS.mrs : AFFILIATE_LINKS.cockblock;
   const brandClass = isMrs ? "pdxBoard--affiliate-mrs" : "pdxBoard--affiliate-cb";
+  const accent = accentForAffiliateBrand(brand);
 
   return (
     <a
-      className={`pdxBoard pdxBoard--affiliate ${brandClass} ${className}`.trim()}
+      className={`pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim()}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      style={{ ["--ac" as string]: AFFILIATE_ACCENT, ...style }}
+      style={
+        {
+          ["--ac" as string]: accent,
+          ["--c" as string]: accent,
+          ["--_day" as string]: accent,
+          ...style,
+        } as CSSProperties
+      }
       data-testid={`affiliate-card-${brand}`}
+      data-affiliate-brand={brand}
       aria-label={
         isMrs
           ? "Affiliate: Mr. S Leather. Shop the link, support the guide."
           : "Affiliate: CockBlock Toys. Code TUCKERMAX for 10% off."
       }
     >
-      <div className="pdxBoard__poster">
+      <span className="pdx-glass-sheen" aria-hidden="true" />
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+
+      <div className="pdxBoard__poster pdx-poster-well">
+        <span className="pdx-poster-well__scan" aria-hidden="true" />
         {isMrs ? (
           <img
             className="pdxBoard__img"
@@ -85,7 +98,6 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
           <CockBlockSlides />
         )}
         <span className="pdxBoard__affChip">Affiliate</span>
-        <span className="pdxBoard__stripe" />
       </div>
 
       <div className="pdxBoard__meta">
@@ -126,7 +138,7 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
             <span className="dot" aria-hidden="true" />
             Ad
           </span>
-          <span className="pdxBoard__affShop">Shop Now →</span>
+          <span className="pdxBoard__affShop pdx-glass-btn">Shop Now →</span>
         </div>
       </div>
     </a>

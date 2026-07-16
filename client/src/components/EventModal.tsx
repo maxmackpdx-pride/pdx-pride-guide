@@ -20,7 +20,7 @@ import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from 
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink } from "@/lib/shareEvent";
-import { Link2, Lock, Pencil } from "lucide-react";
+import { Lock, Pencil, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
 import {
@@ -478,10 +478,16 @@ function EventModalInner({
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
         data-testid="event-modal"
-        style={{ "--event-accent": accentColor } as React.CSSProperties}
+        style={{
+          "--event-accent": accentColor,
+          "--c": accentColor,
+        } as React.CSSProperties}
       >
-        {/* Shared animated rainbow top divider (same system as PlaceCard / PlaceModal) */}
+        {/* Shared animated rainbow top seam (§6: pdx-rainbow-rule, not a second engine) */}
         <div className="event-modal__bar pdx-rainbow-rule" aria-hidden="true" />
+        {/* Deep-glass corner sheen (tokens: --glass-sheen / --glass-sheen-specular) */}
+        <span className="event-modal__sheen pdx-glass-sheen" aria-hidden="true" />
+        <span className="event-modal__sheen event-modal__sheen--specular pdx-glass-sheen--specular" aria-hidden="true" />
 
         <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
         <button
@@ -496,17 +502,18 @@ function EventModalInner({
               toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
             } catch (err) {
               if ((err as DOMException)?.name !== "AbortError") {
-                toast({ title: "Could not share link", variant: "destructive" });
+                toast({ title: "Could not share", variant: "destructive" });
               }
             }
           }}
         >
-          <Link2 size={18} />
+          <Share2 size={18} strokeWidth={2.3} aria-hidden />
         </button>
 
         <div className="event-modal__scroll">
-        <div className="event-modal__poster">
+        <div className="event-modal__poster pdx-poster-well">
           <img src={posterUrl} alt={event.title} className="event-modal__poster-img" />
+          <span className="pdx-poster-well__scan" aria-hidden="true" />
         </div>
 
         <div className="event-modal__body">
@@ -588,20 +595,75 @@ function EventModalInner({
             )}
           </div>
 
-          <EventTagsRow
-            event={event}
-            size="sm"
-            showJsonTypes
-            onClaimClick={() => (user ? claimEvent(event.id) : setShowAuth(true))}
-            className="event-modal__tags"
-          />
+          {/* Flags = day + policy chips; Tags = JSON types — open-event SoT */}
+          {(() => {
+            const flagsRow = (
+              <EventTagsRow
+                event={event}
+                size="md"
+                showFlags
+                showJsonTypes={false}
+                onClaimClick={() => (user ? claimEvent(event.id) : setShowAuth(true))}
+                className="event-modal__tags"
+              />
+            );
+            // Always show Flags when day or policy tags exist (row nulls if empty)
+            if (!event.dayOfWeek && !event.admission && !event.ageRequirement && !event.isHouseParty && !event.isSexPositive && !event.nudityOk && !event.isClaimable) {
+              return null;
+            }
+            return (
+              <div className="event-modal__block">
+                <div className="event-modal__kicker">Flags</div>
+                {flagsRow}
+              </div>
+            );
+          })()}
+
+          {(() => {
+            let types: string[] = [];
+            try {
+              const parsed = JSON.parse(event.eventTypes || "[]");
+              types = Array.isArray(parsed) ? parsed.map(String) : [];
+            } catch {
+              types = [];
+            }
+            if (types.length === 0) return null;
+            return (
+              <div className="event-modal__block">
+                <div className="event-modal__kicker">Tags</div>
+                <EventTagsRow
+                  event={event}
+                  size="md"
+                  showFlags={false}
+                  showJsonTypes
+                  showClaim={false}
+                  className="event-modal__tags event-modal__tags--types"
+                />
+              </div>
+            );
+          })()}
 
           {event.description && (
-            <p className="event-modal__description">{event.description}</p>
+            <div className="event-modal__block">
+              <div className="event-modal__kicker">About</div>
+              <p className="event-modal__description">{event.description}</p>
+            </div>
+          )}
+
+          {event.ticketUrl && !isPastEvent && (
+            <a
+              href={event.ticketUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
+              data-testid="button-event-tickets-mid"
+            >
+              {admissionEventLinkLabel(event.admission)}
+            </a>
           )}
 
           {eventHosts.length > 0 && (
-            <div className="event-modal__section event-hosts-panel" style={{ "--section-accent": dayColor } as React.CSSProperties}>
+            <div className="event-modal__section event-modal__glass-panel event-hosts-panel" style={{ "--section-accent": dayColor } as React.CSSProperties}>
               <div className="event-modal__section-label event-hosts-label">
                 {eventHosts.length === 1 ? "Host" : "Hosts"}
               </div>
@@ -762,7 +824,7 @@ function EventModalInner({
           )}
 
           <div
-            className="event-modal__section event-modal__host-updates"
+            className="event-modal__section event-modal__glass-panel event-modal__host-updates"
             style={{ "--section-accent": hostMessages.length > 0 ? dayColor : "var(--ink-border)" } as React.CSSProperties}
           >
             <div className="event-modal__section-label">Latest from host</div>
@@ -790,7 +852,7 @@ function EventModalInner({
                 type="button"
                 data-testid="button-edit-event"
                 onClick={startEditing}
-                className="btn-neon event-modal__action-btn event-modal__action-btn--edit"
+                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__action-btn--edit"
               >
                 <Pencil size={16} aria-hidden="true" />
                 Edit event
@@ -802,7 +864,7 @@ function EventModalInner({
                   type="button"
                   data-testid="button-add-to-calendar"
                   onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
-                  className="btn-neon event-modal__action-btn"
+                  className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn"
                 >
                   Add to Calendar
                 </button>
@@ -836,7 +898,7 @@ function EventModalInner({
                 setNoContactUrl(null);
                 setHostDrawer("compose");
               }}
-              className="btn-neon event-modal__action-btn"
+              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn"
             >
               Message the Host
             </button>
@@ -902,7 +964,8 @@ function EventModalInner({
                   type="button"
                   onClick={() => hostMutation.mutate(hostMessage)}
                   disabled={!hostMessage.trim() || hostMutation.isPending}
-                  className="event-modal__btn-solid event-modal__btn-solid--cyan"
+                  className="pdx-glass-btn pdx-glass-btn--solid event-modal__btn-solid"
+                  style={{ "--c": "var(--neon-cyan, #19e3ff)" } as React.CSSProperties}
                 >
                   {hostMutation.isPending ? "Sending…" : "Send"}
                 </button>
@@ -921,7 +984,7 @@ function EventModalInner({
                 {event.venueName || "this listing"}. For the latest info, check the event website.
               </p>
               {noContactUrl ? (
-                <a href={noContactUrl} target="_blank" rel="noopener" className="btn-neon solid event-modal__action-btn">
+                <a href={noContactUrl} target="_blank" rel="noopener" className="pdx-glass-btn event-modal__action-btn">
                   Visit event website →
                 </a>
               ) : (
@@ -1069,7 +1132,7 @@ function EventModalInner({
                 href={event.ticketUrl}
                 target="_blank"
                 rel="noopener"
-                className="btn-neon solid event-modal__action-btn event-modal__sticky-cta-btn"
+                className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--primary"
                 data-testid="button-event-tickets-sticky"
               >
                 {admissionEventLinkLabel(event.admission)} →
@@ -1077,7 +1140,7 @@ function EventModalInner({
             ) : null}
             <button
               type="button"
-              className="btn-neon event-modal__action-btn event-modal__sticky-cta-btn"
+              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary"
               data-testid="button-ill-be-there-sticky"
               onClick={jumpToAttendance}
             >

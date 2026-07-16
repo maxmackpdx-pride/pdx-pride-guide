@@ -16,6 +16,10 @@ import { BoardFilterChip } from "@/components/BoardActiveSection";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
+import PromoterIntake, {
+  type PromoterIntakeAction,
+  type PromoterIntakeActionKey,
+} from "@/components/promoter/PromoterIntake";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
@@ -222,7 +226,7 @@ export default function Submit() {
       title: "Submit an event",
       forWho: "You're running it.",
       outcome: "Put your event on the guide.",
-      accent: "var(--panel-lime, #c8fa3c)",
+      accent: "var(--neon-yellow, #ccff00)",
       chip: submitChip,
     },
     {
@@ -246,10 +250,29 @@ export default function Submit() {
       title: "Spotted an event",
       forWho: "Not yours, the guide is missing it.",
       outcome: "Tip us and we will chase it down.",
-      accent: "var(--panel-magenta, #ff1fa0)",
+      accent: "var(--neon-magenta, #ff00cc)",
       chip: suggestChip,
     },
   ];
+
+  /** Deep-glass intake rows — every status chip is the same solid glass pill.
+   *  "Goes live now" always lime fill; other chips use the row accent (cyan / purple / magenta). */
+  const intakeActions: PromoterIntakeAction[] = paths.map((path) => {
+    const goesLive = /goes live/i.test(path.chip.label);
+    return {
+      key: path.key as PromoterIntakeActionKey,
+      title: path.title,
+      forWho: path.forWho,
+      outcome: path.outcome,
+      accent: path.accent,
+      badge: {
+        label: path.chip.label,
+        variant: "solid",
+        // Claim row is cyan; "goes live" chip still lime per design
+        accent: goesLive ? "var(--neon-yellow, #ccff00)" : path.accent,
+      },
+    };
+  });
 
   // Promoter application mutation (standalone "apply" path only)
   const applyMutation = useMutation({
@@ -479,17 +502,6 @@ export default function Submit() {
         {mode === "landing" && (
           <div className="submit-stack submit-stack--makeover">
 
-            {isApproved && (
-              <div className="submit-banner submit-banner--verified">
-                <span className="submit-banner__dot" aria-hidden="true" />
-                <div>
-                  <div className="submit-banner__title">Verified promoter</div>
-                  <p className="submit-banner__body">
-                    You are verified. Everything you submit or claim goes live the moment you hit send. No review queue.
-                  </p>
-                </div>
-              </div>
-            )}
             {!isApproved && promoterStatus === "pending" && (
               <div className="submit-banner submit-banner--pending">
                 <span className="submit-banner__dot" aria-hidden="true" />
@@ -515,34 +527,12 @@ export default function Submit() {
               </div>
             )}
 
-            <div className="submit-paths">
-              <div className="submit-paths__kicker">Pick one</div>
-              <h2 className="submit-paths__title">What are you here to do?</h2>
-              <div className="submit-path-list" role="list">
-                {paths.map((path, i) => (
-                  <button
-                    key={path.key}
-                    type="button"
-                    className="submit-path-row"
-                    style={{ borderLeftColor: path.accent }}
-                    onClick={() => goMode(path.key)}
-                    role="listitem"
-                  >
-                    <span className="submit-path-row__num" style={{ color: path.accent }} aria-hidden="true">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="submit-path-row__text">
-                      <span className="submit-path-row__title">{path.title}</span>
-                      <span className="submit-path-row__desc">
-                        <strong>{path.forWho}</strong> {path.outcome}
-                      </span>
-                      <StatusChipEl chip={path.chip} />
-                    </span>
-                    <span className="submit-path-row__arrow" aria-hidden="true">→</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <PromoterIntake
+              isVerified={isApproved}
+              actions={intakeActions}
+              onSelect={(key) => goMode(key)}
+              showSectionHead={false}
+            />
 
             {!isApproved && (
               <div className="submit-clarifier">

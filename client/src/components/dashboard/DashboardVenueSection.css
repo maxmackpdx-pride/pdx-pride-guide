@@ -1,0 +1,162 @@
+/* DashboardVenueSection — work card + project-row deep-glass
+   Surface only. Tokens: glass.css §1.1 / §1.1b / §1.2 / §1.3 / §1.5
+   Layout / type scale: unchanged. */
+
+.dvs-work-card {
+  --c: var(--neon-cyan, #19e3ff);
+  position: relative;
+  overflow: visible;
+  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--glass-card-bg);
+  border: var(--glass-card-border);
+  box-shadow: var(--glass-card-shadow);
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+}
+
+.dvs-work-card__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--glass-sheen);
+}
+
+.dvs-work-card__head {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dvs-work-card__copy {
+  min-width: 0;
+}
+
+.dvs-work-card__body {
+  position: relative;
+  z-index: 3;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Expanded rows — neutral glass + sheen + seam (project-row chrome) */
+.dvs-project-row {
+  --c: var(--glass-neutral-c2, #b8b8c2);
+  position: relative;
+  overflow: visible;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: var(--glass-card-neutral-bg);
+  border: var(--glass-card-neutral-border);
+  box-shadow: var(--glass-card-neutral-shadow);
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+}
+
+.dvs-project-row:last-child {
+  margin-bottom: 0;
+}
+
+.dvs-project-row__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--glass-sheen);
+}
+
+.dvs-project-row__inner {
+  position: relative;
+  z-index: 3;
+  padding: 0 12px;
+}
+
+/* Kill the double hairline from .dash-item when nested in a glass row */
+.dvs-project-row__inner .dash-item {
+  border-bottom: none;
+}
+
+/* Glass buttons — same recipe as View resume / Pitch me (§1.5) */
+.dvs-glass-btn {
+  --c: var(--neon-cyan, #19e3ff);
+  position: relative;
+  z-index: 3;
+  font-family: "Inter", var(--font-body), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #050506;
+  background: var(--glass-btn-bg);
+  border: var(--glass-btn-border);
+  box-shadow: var(--glass-btn-shadow);
+}
+
+.dvs-glass-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dvs-glass-btn--outline {
+  color: var(--c);
+  background: var(--glass-btn-outline-bg);
+  border: var(--glass-btn-outline-border);
+  box-shadow: var(--glass-btn-outline-shadow);
+}
+
+.dvs-glass-btn--danger {
+  --c: #ff2400;
+  color: var(--c);
+  background: var(--glass-btn-outline-bg);
+  border: var(--glass-btn-outline-border);
+  box-shadow: var(--glass-btn-outline-shadow);
+}
+
+.dvs-section-label {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dash-muted, #8c8980);
+  margin: 0 0 8px;
+}
+
+.dvs-section-note {
+  font-size: 12px;
+  color: var(--dash-muted, #8c8980);
+  margin: 0 0 8px;
+}
+
+.dvs-empty {
+  font-size: 13px;
+  color: var(--dash-muted, #8c8980);
+  margin: 0;
+}
+
+html.calm-mode .dvs-work-card,
+html.calm-mode .dvs-project-row,
+:root[data-calm="true"] .dvs-work-card,
+:root[data-calm="true"] .dvs-project-row {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dvs-work-card,
+  .dvs-project-row {
+    transition: none;
+  }
+}

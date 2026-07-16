@@ -35,7 +35,7 @@ export default function DashboardDrawer({
   return (
     <article
       id={id}
-      className={`dash-drawer ${open ? "open" : ""}`}
+      className={`dash-drawer pdx-edge-deboss ${open ? "open" : ""}`}
       style={{ ["--drawer-color" as string]: color }}
     >
       <button

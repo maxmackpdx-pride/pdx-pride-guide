@@ -3,6 +3,13 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
+import {
+  MAP_PIN_SIZE,
+  MAP_SURFACE_BG,
+  LIVE_MAP_CHROME_CSS,
+  mapPinHtml,
+  mapPinMultiHtml,
+} from "@/components/ds/mapTheme";
 
 type Business = {
   id: number;
@@ -79,6 +86,8 @@ export const MAP_KEY_TYPES = [
 const TYPE_COLORS = MAP_TYPE_COLORS;
 const TYPE_LABELS = MAP_TYPE_LABELS;
 
+const PIN_HALF = MAP_PIN_SIZE / 2;
+
 function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
   const map = useMap();
   useEffect(() => {
@@ -104,17 +113,20 @@ function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
 
 function buildRainbowPin() {
   return divIcon({
-    html: `<div style="width:20px;height:20px;border-radius:50%;background:conic-gradient(#FF2400,#FF6600,#FFEE00,#39FF14,#00FFFF,#0044FF,#8800FF,#FF00CC,#FF2400);box-shadow:0 0 10px rgba(255,255,255,0.7),0 2px 6px rgba(0,0,0,0.8);border:2px solid #000;"></div>`,
-    iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -14], className: "",
+    html: mapPinMultiHtml(),
+    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+    iconAnchor: [PIN_HALF, PIN_HALF],
+    popupAnchor: [0, -PIN_HALF - 4],
+    className: "",
   });
 }
 function buildPin(color: string) {
   return divIcon({
     className: "",
-    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #000;box-shadow:0 0 8px ${color}99"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -10],
+    html: mapPinHtml(color),
+    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+    iconAnchor: [PIN_HALF, PIN_HALF],
+    popupAnchor: [0, -PIN_HALF - 4],
   });
 }
 
@@ -128,8 +140,10 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
     <div
       className="pdx-dir-popup__card"
       style={{
-        border: `2px solid ${accent}`,
-        boxShadow: `0 0 24px -14px ${accent}99`,
+        border: "1px solid #000",
+        boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+        outline: `1px solid ${accent}`,
+        outlineOffset: -2,
         background: "#050505",
         color: "#fff",
         padding: "14px 16px",
@@ -147,8 +161,10 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
           letterSpacing: "0.06em",
           textTransform: "uppercase",
           color: accent,
-          border: `2px solid ${accent}`,
+          border: "1px solid #000",
           borderRadius: 3,
+          outline: `1px solid ${accent}`,
+          outlineOffset: -2,
           padding: "4px 7px 3px",
           marginBottom: 10,
         }}
@@ -167,10 +183,12 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             color: "#CCFF00",
-            border: "2px solid #CCFF00",
+            border: "1px solid #000",
             borderRadius: 3,
+            outline: "1px solid #CCFF00",
+            outlineOffset: -2,
             padding: "4px 7px 3px",
-            boxShadow: "0 0 16px -2px #CCFF00",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,.75)",
           }}
         >
           Grand Opening
@@ -200,7 +218,6 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
             letterSpacing: "0.04em",
             color: "#FFEE00",
             marginBottom: 8,
-            textShadow: "0 0 10px rgba(255, 238, 0, 0.45)",
           }}
         >
           {grandDate}
@@ -283,7 +300,6 @@ export function DirectoryMapKey({ className = "" }: { className?: string }) {
         {MAP_KEY_TYPES.map(type => {
           const isNonprofit = type === "nonprofit";
           const color = MAP_TYPE_COLORS[type];
-          const swatch = MAP_TYPE_SWATCH[type] || color;
           const label = MAP_TYPE_LABELS[type];
           return (
             <li key={type} className="directory-map-key__item">
@@ -297,8 +313,11 @@ export function DirectoryMapKey({ className = "" }: { className?: string }) {
                   isNonprofit
                     ? undefined
                     : {
-                        background: swatch,
-                        boxShadow: `0 0 8px ${color}99`,
+                        background: "#000",
+                        border: `3px solid ${color}`,
+                        boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+                        width: 14,
+                        height: 14,
                       }
                 }
                 aria-hidden="true"
@@ -343,7 +362,7 @@ export default function DirectoryMap({
     <div
       className={[
         fillParent ? "directory-map directory-map--fill" : "directory-map",
-        isBackdrop ? "directory-map--backdrop" : "",
+        isBackdrop ? "directory-map--backdrop" : "pdx-map-live pdx-map-surface pdx-map-surface--neutral",
       ].filter(Boolean).join(" ")}
       style={{
         height: heightStyle,
@@ -353,11 +372,17 @@ export default function DirectoryMap({
         flex: fillParent ? "1 1 auto" : undefined,
       }}
     >
-      <style>{POPUP_STYLES}</style>
+      <style>{POPUP_STYLES}{!isBackdrop ? LIVE_MAP_CHROME_CSS : ""}</style>
+      {!isBackdrop && (
+        <>
+          <div className="pdx-map-live__vignette" aria-hidden="true" />
+          <div className="pdx-map-live__shaft" aria-hidden="true" />
+        </>
+      )}
       <MapContainer
         center={[45.5231, -122.6765]}
         zoom={13}
-        style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+        style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
         dragging={isInteractive}
         scrollWheelZoom={isInteractive}
         doubleClickZoom={isInteractive}

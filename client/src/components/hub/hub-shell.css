@@ -62,6 +62,10 @@
   border: 1px solid #2b2b2b;
   border-radius: 11px;
   margin-bottom: 12px;
+  /* Segmented Member/Admin track — inset pill wells (§2.8) */
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(0, 0, 0, 0.45);
 }
 
 .hub-side__mode-btn {
@@ -84,11 +88,17 @@
 .hub-side__mode-btn.is-active.is-member {
   background: var(--hub-cyan);
   color: #000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .hub-side__mode-btn.is-active.is-admin {
   background: var(--hub-pink);
   color: #000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .hub-side__kicker {
@@ -373,6 +383,9 @@
   border: 1px solid #2b2b2b;
   border-radius: 9px;
   flex: none;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 
 .hub-mtop__mode-btn {
@@ -393,11 +406,17 @@
 .hub-mtop__mode-btn.is-active.is-member {
   background: var(--hub-cyan);
   color: #000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 .hub-mtop__mode-btn.is-active.is-admin {
   background: var(--hub-pink);
   color: #000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 /* Notification bell */
@@ -532,7 +551,7 @@
   min-width: 0;
 }
 
-/* More sheet */
+/* More sheet / folder sheet — deep-glass deboss + half-strength cyan glow (§2.8) */
 .hub-more-backdrop {
   position: fixed;
   inset: 0;
@@ -546,11 +565,17 @@
   right: 0;
   bottom: 0;
   z-index: 50;
-  background: #080808;
-  border-top: 2px solid #2b2b2b;
+  background: #050506;
+  border: 1px solid color-mix(in srgb, var(--neon-cyan, #19e3ff) 28%, #1a1a22);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
   padding: 18px 16px calc(90px + env(safe-area-inset-bottom));
   max-height: 70vh;
   overflow-y: auto;
+  box-shadow:
+    var(--edge-deboss, inset 0 0 34px -10px rgba(0, 0, 0, 0.95), inset 0 2px 3px rgba(0, 0, 0, 0.6)),
+    0 0 22px -10px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent),
+    0 -16px 40px rgba(0, 0, 0, 0.65);
 }
 
 .hub-more-sheet h3 {
@@ -594,7 +619,7 @@
   color: #666;
 }
 
-/* Mobile bar */
+/* Mobile bar — floating dock + neon active chips (design Mobile Bar live demo) */
 .hub-mobile-bar {
   display: none;
   position: fixed;
@@ -602,12 +627,65 @@
   right: 0;
   bottom: 0;
   z-index: 80;
-  background: var(--hub-ink);
-  border-top: 2px solid var(--hub-border);
-  padding: 9px 10px calc(10px + env(safe-area-inset-bottom));
-  justify-content: space-around;
+  /* Transparent rail; dock chip holds the chrome */
+  background: transparent;
+  border-top: none;
+  padding: 10px 10px calc(8px + env(safe-area-inset-bottom));
+  justify-content: center;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.hub-mobile-bar__dock {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
   gap: 6px;
   align-items: stretch;
+  justify-content: space-around;
+  padding: 8px 8px;
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 55%),
+    rgba(8, 8, 10, 0.94);
+  /* Opaque black rim only — no cyan edge/glow on the dock shell */
+  border: 1px solid #000;
+  box-shadow:
+    0 0 0 1px #000,
+    0 -4px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  outline: none;
+}
+
+/*
+ * Site-wide bottom nav must NOT show a floating cyan pull — that was a
+ * decorative always-on bar. Hub drawer grip lives on .hub-v2-drawer__grip only.
+ * Keep .pull-handle / .hub-mobile-bar__pull for HubShell admin mobile bar if present.
+ */
+.site-hub-mobile-bar .hub-mobile-bar__pull {
+  display: none !important;
+}
+
+.pull-handle,
+.hub-mobile-bar__pull {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 42px;
+  height: 4px;
+  margin-left: -21px;
+  border-radius: 99px;
+  flex: none;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--hub-cyan, var(--neon-cyan, #19e3ff));
+  box-shadow:
+    0 0 10px var(--hub-cyan, var(--neon-cyan, #19e3ff)),
+    0 0 22px rgba(25, 227, 255, 0.55);
+  animation: pullHandle 2.4s ease-in-out infinite;
 }
 
 .hub-mobile-tab {
@@ -617,20 +695,27 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 58px;
-  background: transparent;
-  border: none;
-  border-radius: 12px;
-  color: #777;
+  min-height: 56px;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.02);
+  /* Always thin black outline — active keeps color via fill/text/glow only */
+  border: 1px solid #000;
+  border-radius: 14px;
+  color: #6e6e76;
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.05em;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 8px 4px;
+  padding: 8px 2px;
   position: relative;
   cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
 }
 
 .hub-mobile-tab__icon-wrap {
@@ -638,39 +723,74 @@
   display: inline-flex;
 }
 
+/* Active chips — thin black outline kept; color via fill, text, soft neon only */
 .hub-mobile-tab.is-active.is-cyan {
-  background: var(--hub-cyan);
-  color: #000;
+  color: var(--hub-cyan, #19e3ff);
+  background: color-mix(in srgb, var(--hub-cyan, #19e3ff) 18%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 18px -2px color-mix(in srgb, var(--hub-cyan, #19e3ff) 70%, transparent),
+    0 0 36px -8px color-mix(in srgb, var(--hub-cyan, #19e3ff) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-green {
-  background: var(--hub-green);
-  color: #000;
+  color: var(--hub-green, #39ff14);
+  background: color-mix(in srgb, var(--hub-green, #39ff14) 16%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 18px -2px color-mix(in srgb, var(--hub-green, #39ff14) 70%, transparent),
+    0 0 36px -8px color-mix(in srgb, var(--hub-green, #39ff14) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-lime {
-  background: var(--hub-lime);
-  color: #000;
+  color: var(--hub-lime, #ccff00);
+  background: color-mix(in srgb, var(--hub-lime, #ccff00) 16%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 20px -2px color-mix(in srgb, var(--hub-lime, #ccff00) 75%, transparent),
+    0 0 40px -8px color-mix(in srgb, var(--hub-lime, #ccff00) 50%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-orange {
-  background: var(--neon-orange, #ff6600);
-  color: #000;
+  color: var(--neon-orange, #ff6600);
+  background: color-mix(in srgb, var(--neon-orange, #ff6600) 16%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 20px -2px color-mix(in srgb, var(--neon-orange, #ff6600) 75%, transparent),
+    0 0 40px -8px color-mix(in srgb, var(--neon-orange, #ff6600) 50%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-pink {
-  background: var(--hub-pink);
-  color: #000;
+  color: var(--hub-pink, #ff00cc);
+  background: color-mix(in srgb, var(--hub-pink, #ff00cc) 16%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 20px -2px color-mix(in srgb, var(--hub-pink, #ff00cc) 75%, transparent),
+    0 0 40px -8px color-mix(in srgb, var(--hub-pink, #ff00cc) 50%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-purple {
-  background: #8800ff;
-  color: #fff;
+  color: #c08cff;
+  background: color-mix(in srgb, #8800ff 18%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 18px -2px color-mix(in srgb, #8800ff 65%, transparent),
+    0 0 36px -8px color-mix(in srgb, #8800ff 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-more {
-  background: rgba(255, 255, 255, 0.1);
   color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #000;
+  box-shadow:
+    0 0 14px -6px rgba(255, 255, 255, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-switch.is-pink {
@@ -803,5 +923,110 @@
 
   .hub-main__top {
     margin-bottom: 24px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Deep-glass navigation (§2.8 / Agent 8)
+   Drawer + folder: --edge-deboss + half-strength cyan glow.
+   Mobile grip: pullHandle. Segmented toggles keep inset pills.
+   Zero layout change — surface/edge/glow only.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Desktop hub rail = drawer surface */
+.hub-side,
+.hub-root .hub-v2-lrail.hub-v2-lrail--desktop {
+  background: #050506;
+  border-color: color-mix(in srgb, var(--neon-cyan, #19e3ff) 22%, #1c1c22);
+  box-shadow:
+    var(--edge-deboss, inset 0 0 34px -10px rgba(0, 0, 0, 0.95), inset 0 2px 3px rgba(0, 0, 0, 0.6)),
+    0 0 22px -10px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent);
+}
+
+/* Hub v2 mobile drawer sheet */
+@media (max-width: 720px) {
+  .hub-v2-drawer .hub-v2-drawer__sheet {
+    background: #050506;
+    border-top: 1px solid color-mix(in srgb, var(--neon-cyan, #19e3ff) 28%, #24242c);
+    box-shadow:
+      var(--edge-deboss, inset 0 0 34px -10px rgba(0, 0, 0, 0.95), inset 0 2px 3px rgba(0, 0, 0, 0.6)),
+      0 0 22px -10px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent),
+      0 -16px 40px rgba(0, 0, 0, 0.65);
+  }
+
+  /* Pull-handle breath on the glowing cyan grip above the tab bar */
+  .hub-v2-drawer .hub-v2-drawer__grip {
+    background: var(--hub-cyan, var(--panel-cyan, #19e3ff));
+    box-shadow:
+      0 0 10px var(--hub-cyan, var(--panel-cyan, #19e3ff)),
+      0 0 22px rgba(25, 227, 255, 0.55);
+    animation: pullHandle 2.4s ease-in-out infinite;
+  }
+
+  .hub-v2-drawer.is-open .hub-v2-drawer__grip {
+    box-shadow:
+      0 0 12px var(--hub-cyan, var(--panel-cyan, #19e3ff)),
+      0 0 28px rgba(25, 227, 255, 0.7);
+  }
+
+  /* Entry bounce still wins over the resting breath */
+  .hub-v2-drawer.is-bounce-hint:not(.is-open):not(.is-dragging) .hub-v2-drawer__grip {
+    animation: hubDrawerGripNudge 0.88s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  }
+
+  .hub-v2-drawer.calm-mode .hub-v2-drawer__grip,
+  .calm-mode .hub-v2-drawer .hub-v2-drawer__grip,
+  :root[data-calm="true"] .hub-v2-drawer .hub-v2-drawer__grip {
+    animation: none !important;
+  }
+}
+
+/* Hub v2 Member/Admin segmented toggle — inset track + raised active pill */
+.hub-root .hub-v2-mode,
+.hub-v2-drawer .hub-v2-mode {
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.hub-root .hub-v2-mode-btn.is-active,
+.hub-v2-drawer .hub-v2-mode-btn.is-active {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* Dashboard collapsible drawers — reinforce token class */
+.dash-drawer.pdx-edge-deboss {
+  background: #050506;
+  border-color: color-mix(in srgb, var(--neon-cyan, #19e3ff) 22%, rgba(255, 255, 255, 0.1));
+  box-shadow:
+    var(--edge-deboss, inset 0 0 34px -10px rgba(0, 0, 0, 0.95), inset 0 2px 3px rgba(0, 0, 0, 0.6)),
+    0 0 22px -10px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent);
+}
+
+.dash-drawer.pdx-edge-deboss.open {
+  border-color: var(--drawer-color, var(--dash-cyan, var(--neon-cyan, #19e3ff)));
+}
+
+/* Calm / reduced-motion: freeze pull handle */
+:root[data-calm="true"] .pull-handle,
+:root[data-calm="true"] .hub-mobile-bar__pull,
+html.calm-mode .pull-handle,
+html.calm-mode .hub-mobile-bar__pull {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-calm="true"] .hub-mobile-tab.is-active,
+html.calm-mode .hub-mobile-tab.is-active {
+  box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pull-handle,
+  .hub-mobile-bar__pull,
+  .hub-v2-drawer .hub-v2-drawer__grip {
+    animation: none !important;
   }
 }

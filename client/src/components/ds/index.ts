@@ -16,3 +16,32 @@ export { SectionHeader } from "./SectionHeader";
 export { StatCard } from "./StatCard";
 export { StatPill } from "./StatPill";
 export { StickerBadge } from "./StickerBadge";
+
+/** Deep-glass SoT helpers (docs/handoffs/deep-glass-2026-07-16/) */
+export {
+  glass,
+  glassNeutral,
+  glassGrey,
+  glassSheenPrimary,
+  glassSheenSpecular,
+  glassBtn,
+  glassBtnOutline,
+  glassStyle,
+  glassNeutralStyle,
+  glassBtnStyle,
+  glassBtnOutlineStyle,
+} from "./glass";
+export {
+  mapFrameStyle,
+  mapPinStyle,
+  mapPinMultiStyle,
+  mapPinHtml,
+  mapPinMultiHtml,
+  mapChipStyle,
+  mapThemeVars,
+  MAP_SURFACE_BG,
+  MAP_PIN_SIZE,
+  mapGridBackground,
+  mapFrameShadow,
+  LIVE_MAP_CHROME_CSS,
+} from "./mapTheme";

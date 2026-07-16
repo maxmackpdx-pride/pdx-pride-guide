@@ -588,10 +588,11 @@ html.calm-mode .home-hero__grain {
   align-self: stretch;
   /* Floor height so the grid row doesn't collapse before lists measure */
   min-height: 360px;
-  border: 2px solid var(--border-default);
-  border-radius: 6px;
+  border: 1px solid #000;
+  border-radius: 16px;
   overflow: hidden;
-  background: #0a0a0a;
+  background: var(--map-surface-bg, #06060a);
+  box-shadow: var(--map-frame-shadow);
 }
 
 /* Absolute fill so Leaflet gets a real height when the grid row stretches
@@ -1597,27 +1598,22 @@ html.calm-mode .home-boards__card {
   gap: 18px;
 }
 
-/* Design tokens: panel-magenta / panel-lime / panel-purple (softened neons) */
+/*
+ * Utility islands = deep-glass left-accent (same chrome as InfrastructureGrid §2.11).
+ * Surface from glass.css (.pdx-glass-card + .pdx-glass-card--left-accent); --c set inline.
+ * Layout (3-col, padding, type) unchanged.
+ */
 .home-boards__utility {
-  --util-acc: #19e3ff;
+  /* --c set by modifier / inline; --util-acc aliases for legacy selectors */
+  --util-acc: var(--c, #19e3ff);
   text-decoration: none;
   display: block;
   padding: 22px;
-  border-radius: 10px;
-  background:
-    var(--home-glass-specular),
-    var(--home-glass-fill);
-  border: 1px solid var(--home-glass-edge);
-  border-top: 3px solid var(--util-acc);
-  box-shadow:
-    var(--home-glass-shadow),
-    0 0 18px color-mix(in srgb, var(--util-acc) 12%, transparent);
-  backdrop-filter: blur(var(--home-glass-blur)) saturate(var(--home-glass-sat));
-  -webkit-backdrop-filter: blur(var(--home-glass-blur)) saturate(var(--home-glass-sat));
+  border-radius: var(--glass-card-radius, 14px);
+  /* glass fill / edge / bloom come from .pdx-glass-card; left bar from --left-accent */
   transition:
     transform 0.18s var(--ease-out, ease-out),
-    background 0.18s ease,
-    border-color 0.18s ease,
+    filter 0.18s ease,
     box-shadow 0.18s ease;
 }
 
@@ -1645,25 +1641,26 @@ a.home-boards__utility:active * {
   text-decoration-line: none !important;
 }
 
-/* Re-assert title colors so inherit doesn't wash them out */
+/* Re-assert title colors so inherit doesn't wash them out — no title glow */
 a.home-boards__utility:hover .home-boards__utility-name,
 a.home-boards__utility:focus .home-boards__utility-name {
-  color: var(--util-acc) !important;
+  color: var(--c, var(--util-acc)) !important;
+  text-shadow: none !important;
 }
 
 a.home-boards__utility--magenta:hover .home-boards__utility-name,
 a.home-boards__utility--magenta:focus .home-boards__utility-name {
-  color: #ff1fa0 !important;
+  color: #ff00cc !important;
 }
 
 a.home-boards__utility--lime:hover .home-boards__utility-name,
 a.home-boards__utility--lime:focus .home-boards__utility-name {
-  color: #c8fa3c !important;
+  color: #ccff00 !important;
 }
 
 a.home-boards__utility--purple:hover .home-boards__utility-name,
 a.home-boards__utility--purple:focus .home-boards__utility-name {
-  color: #b06bff !important;
+  color: #6e3dff !important;
 }
 
 a.home-boards__utility:hover .home-boards__utility-desc,
@@ -1678,54 +1675,54 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
 
 .home-boards__utility:hover {
   transform: translateY(-2px);
-  background:
-    var(--home-glass-specular),
-    var(--home-glass-fill-hot);
-  border-color: color-mix(in srgb, var(--util-acc) 35%, var(--home-glass-edge-hi));
-  border-top-color: var(--util-acc);
-  box-shadow:
-    0 12px 32px -14px rgba(0, 0, 0, 0.85),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 28px color-mix(in srgb, var(--util-acc) 22%, transparent);
+  filter: brightness(1.06) saturate(1.06);
   text-decoration: none !important;
 }
 
+/* SoT §2.11 board accents */
 .home-boards__utility--magenta {
-  --util-acc: #ff1fa0; /* --panel-magenta */
+  --util-acc: #ff00cc;
+  --c: #ff00cc;
 }
 
 .home-boards__utility--lime {
-  --util-acc: #c8fa3c; /* --panel-lime */
+  --util-acc: #ccff00;
+  --c: #ccff00;
 }
 
 .home-boards__utility--purple {
-  --util-acc: #b06bff; /* --panel-purple */
+  --util-acc: #6e3dff;
+  --c: #6e3dff;
 }
 
 .home-boards__utility-name {
+  position: relative;
+  z-index: 3;
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 26px;
   text-transform: uppercase;
   line-height: 1;
   margin-bottom: 10px;
-  color: var(--util-acc);
-  text-shadow: none;
+  color: var(--c, var(--util-acc));
+  text-shadow: none; /* no title glow */
 }
 
 .home-boards__utility--magenta .home-boards__utility-name {
-  color: #ff1fa0;
+  color: #ff00cc;
 }
 
 .home-boards__utility--lime .home-boards__utility-name {
-  color: #c8fa3c;
+  color: #ccff00;
 }
 
 .home-boards__utility--purple .home-boards__utility-name {
-  color: #b06bff;
+  color: #6e3dff;
 }
 
 .home-boards__utility-desc {
+  position: relative;
+  z-index: 3;
   font-size: 14px;
   color: #f4f1ea; /* --board-text */
   margin: 0 0 14px;
@@ -1733,6 +1730,8 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
 }
 
 .home-boards__utility-mantra {
+  position: relative;
+  z-index: 3;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.1em;
@@ -1750,7 +1749,7 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
   }
 
   .home-boards__utility {
-    background: #14141c;
+    background: #050506;
   }
 
   .home-directory-teaser,
@@ -1781,7 +1780,8 @@ html.calm-mode .home-beach-widget,
 
 html.calm-mode .home-boards__utility,
 :root[data-calm="true"] .home-boards__utility {
-  background: #14141c;
+  background: #050506;
+  filter: none;
 }
 
 html.calm-mode .home-directory-teaser,

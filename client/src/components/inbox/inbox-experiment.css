@@ -1,7 +1,19 @@
+/* Pull shell + FAB deep-glass surfaces (loaded with floating overlay module). */
+@import "./inbox.css";
+
 /* Experiment design 101 — inbox list skin (hub panel register)
-   Scoped to floating inbox lists only. Bucket filter chips on admin queue stay legacy. */
+   Scoped to floating inbox lists only. Bucket filter chips on admin queue stay legacy.
+
+   Deep-glass card shell + dark-blue → bright-blue neon gradient edge.
+   Search pill + row layout unchanged. */
 
 .inbox-overlay--experiment {
+  /* Dark navy neon → electric blue neon */
+  --inbox-blue-deep: #061a66;
+  --inbox-blue-mid: #0a2a9c;
+  --inbox-blue: #1a4dff;
+  --inbox-blue-bright: #3d7cff;
+  --c: var(--inbox-blue);
   --panel-ink: #06060a;
   --panel-card: #0c0c0f;
   --panel-border: #1c1c22;
@@ -14,11 +26,127 @@
   --panel-green: #39ff14;
   --board-text: #e6e3da;
   --board-muted: #999999;
-  background: var(--panel-ink) !important;
-  border-color: var(--panel-border-2) !important;
+  /* OLED glass fill (new card recipe) tinted deep→bright blue */
+  --glass-card-bg:
+    radial-gradient(
+      90% 70% at 50% 46%,
+      #000 0%,
+      #000 34%,
+      #030304 68%,
+      color-mix(in srgb, var(--inbox-blue-deep) 14%, #050408) 100%
+    ),
+    radial-gradient(
+      120% 90% at 8% 0%,
+      color-mix(in srgb, var(--inbox-blue-deep) 22%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      110% 80% at 100% 100%,
+      color-mix(in srgb, var(--inbox-blue) 16%, transparent),
+      transparent 55%
+    );
+  /* Gradient rim: dark blue → mid → bright blue (border-image needs solid fallback) */
+  border: 1.5px solid transparent !important;
+  background:
+    var(--glass-card-bg) padding-box,
+    linear-gradient(
+      145deg,
+      var(--inbox-blue-deep) 0%,
+      var(--inbox-blue-mid) 38%,
+      var(--inbox-blue) 72%,
+      var(--inbox-blue-bright) 100%
+    ) border-box !important;
+  /* Black ring + dual-tone blue bloom (deep outer, bright inner) */
+  box-shadow:
+    0 0 0 2px #000,
+    0 28px 56px -20px rgba(0, 0, 0, 0.95),
+    0 0 36px -8px color-mix(in srgb, var(--inbox-blue-deep) 70%, transparent),
+    0 0 22px -4px color-mix(in srgb, var(--inbox-blue) 55%, transparent),
+    0 0 10px -2px color-mix(in srgb, var(--inbox-blue-bright) 40%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--inbox-blue-bright) 35%, rgba(255, 255, 255, 0.1)),
+    inset 0 0 34px -24px color-mix(in srgb, var(--inbox-blue-deep) 35%, transparent) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--board-text);
   font-family: var(--font-body), Inter, sans-serif;
   padding: 0;
+  isolation: isolate;
+}
+
+/* Dual sheen — corner light + blue-tinted specular (glass card) */
+.inbox-overlay--experiment::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 6;
+  background:
+    linear-gradient(
+      133deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.03) 12%,
+      transparent 34%
+    ),
+    radial-gradient(
+      70% 55% at 108% 112%,
+      rgba(255, 255, 255, 0.08),
+      color-mix(in srgb, var(--inbox-blue) 14%, transparent) 40%,
+      transparent 70%
+    );
+}
+
+/* Soft animated gradient edge pulse (calm freezes) */
+.inbox-overlay--experiment::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  padding: 1.5px;
+  background: linear-gradient(
+    125deg,
+    var(--inbox-blue-deep),
+    var(--inbox-blue-mid),
+    var(--inbox-blue),
+    var(--inbox-blue-bright),
+    var(--inbox-blue-mid),
+    var(--inbox-blue-deep)
+  );
+  background-size: 220% 220%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.85;
+  animation: inboxBlueEdgeShift 7s linear infinite;
+}
+
+@keyframes inboxBlueEdgeShift {
+  0% { background-position: 0% 40%; }
+  100% { background-position: 100% 60%; }
+}
+
+html.calm-mode .inbox-overlay--experiment,
+:root[data-calm="true"] .inbox-overlay--experiment {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.calm-mode .inbox-overlay--experiment::before,
+:root[data-calm="true"] .inbox-overlay--experiment::before {
+  opacity: 0.35;
+}
+
+html.calm-mode .inbox-overlay--experiment::after,
+:root[data-calm="true"] .inbox-overlay--experiment::after {
+  animation: none !important;
+  opacity: 0.55;
 }
 
 .inbox-overlay--experiment .inbox-overlay__scroll {

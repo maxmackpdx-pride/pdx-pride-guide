@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -11,8 +11,11 @@ import { GigListingCard, type GigPost } from "@/pages/PrideWork";
  * card (Say Hi / Raise Hand / owner actions) without navigating away, so
  * closing returns you to your exact scroll spot. Portaled to <body> so the
  * fixed overlay escapes the feed's transformed wrappers.
+ *
+ * Deep-glass SoT §2.4: same --glass-card recipe as board cards; accent keyed
+ * to the post (Gifting #CCFF00 / Gigs #6E3DFF).
  */
-const GIG_ACCENT = { POSTING_GIG: "#b06bff", LOOKING_FOR_WORK: "#19e3ff" } as const;
+const GIG_ACCENT = { POSTING_GIG: "#6E3DFF", LOOKING_FOR_WORK: "#6E3DFF" } as const;
 
 type Props = {
   kind: "gig" | "gifting";
@@ -51,9 +54,9 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     if (!query.isLoading && query.data && !post) onClose();
   }, [query.isLoading, query.data, post, onClose]);
 
-  let card: React.ReactNode = null;
+  let card: ReactNode = null;
   // Accent tints the panel border + glow, matching the board card's color.
-  let accent = "#ff1fa0";
+  let accent = "#FF00CC";
   if (post && kind === "gifting") {
     accent = cardAccent(post as GiftingPost);
     card = (
@@ -82,34 +85,36 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     );
   }
 
+  const panelStyle = {
+    width: "100%",
+    maxWidth: 560,
+    maxHeight: "90vh",
+    overflow: "auto",
+    position: "relative",
+    borderRadius: 14,
+    "--listing-accent": accent,
+    "--c": accent,
+    "--_c": accent,
+  } as CSSProperties;
+
   return createPortal(
     <div className="board-detail-backdrop" onClick={onClose}>
       <div
-        className="board-post-overlay"
+        className="board-post-overlay board-post-overlay--glass"
         onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxWidth: 560,
-          maxHeight: "90vh",
-          overflow: "auto",
-          position: "relative",
-          background: "#0c0c0f",
-          border: `2px solid ${accent}`,
-          borderRadius: 14,
-          boxShadow: `0 0 50px -10px ${accent}`,
-        }}
+        style={panelStyle}
       >
         <button
           type="button"
           className="gifting-close"
           onClick={onClose}
           aria-label="Close"
-          style={{ position: "absolute", top: 10, right: 10, zIndex: 2 }}
+          style={{ position: "absolute", top: 10, right: 10, zIndex: 3 }}
         >
           <X size={18} />
         </button>
         {card ?? (
-          <div className="board-listing-card board-listing-card--makeover" style={{ padding: 28, textAlign: "center" }}>
+          <div className="board-listing-card board-listing-card--makeover" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
             <p className="board-copy-sm">Loading…</p>
           </div>
         )}

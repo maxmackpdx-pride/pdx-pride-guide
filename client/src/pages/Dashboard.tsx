@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -15,6 +15,11 @@ import { parseHubSection, type HubSection } from "@/components/hub/types";
 import DashboardProfileEditor from "@/components/dashboard/DashboardProfileEditor";
 import { DashboardEventEditForm, DashboardGigEditForm } from "@/components/dashboard/DashboardEventEditor";
 import { editFormToApiPayload, eventToEditForm } from "@/lib/eventEditForm";
+import {
+  getLocalDemoHubUser,
+  isLocalDemo,
+  LOCAL_DEMO_PROFILE_PATH,
+} from "@/lib/localDemo";
 import "@/components/dashboard/dashboard.css";
 
 function mapCheckInRow(check: any): HubEventRow {
@@ -375,6 +380,77 @@ export default function Dashboard() {
   }
 
   if (!user) {
+    // Local demo: unlock Hub chrome with a shell user so layout can be reviewed.
+    // Mutations still require a real session.
+    if (isLocalDemo()) {
+      const demoUser = getLocalDemoHubUser();
+      return (
+        <div className="dash-page hub-nested">
+          <HubV2
+            user={demoUser}
+            isAdmin
+            canPostToFeed={false}
+            canManageTeam={false}
+            pendingCount={0}
+            ownerCount={0}
+            isPrimaryOwner
+            postsCount={0}
+            followStats={{ followers: 0, following: 0 }}
+            /* Empty → HubRightRail falls back to local demo next-moves / who-to-follow */
+            goingEvents={[]}
+            hostingEvents={[]}
+            savedEvents={[]}
+            eventsLoading={false}
+            onLogout={() => setShowAuth(true)}
+            errorBanner={
+              <div
+                role="status"
+                style={{
+                  marginBottom: 18,
+                  padding: "14px 16px",
+                  border: "1px solid color-mix(in srgb, #19e3ff 45%, #1c1c22)",
+                  background: "rgba(25, 227, 255, 0.08)",
+                  borderRadius: 12,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <p
+                  className="dash-mono"
+                  style={{
+                    margin: 0,
+                    fontSize: 11,
+                    color: "#e6e3da",
+                    textTransform: "none",
+                    letterSpacing: "0.04em",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <strong style={{ color: "#19e3ff" }}>Local demo hub</strong>
+                  {" — "}
+                  chrome only. Feed, posts, and admin tools need a real login.{" "}
+                  <Link href={LOCAL_DEMO_PROFILE_PATH} style={{ color: "#ccff00" }}>
+                    Open @{demoUser.username} profile →
+                  </Link>
+                </p>
+                <button type="button" className="dash-btn dash-btn-lime" onClick={() => setShowAuth(true)}>
+                  Log in for real hub
+                </button>
+              </div>
+            }
+            section={hubSection}
+            onSectionChange={setHubSection}
+            onEditProfile={() => setShowAuth(true)}
+            eventsFocusSection={hubSection === "events" ? postsFocus : null}
+          />
+          {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+        </div>
+      );
+    }
+
     return (
       <div className="zine-page dash-page board-page">
         <PageHeader

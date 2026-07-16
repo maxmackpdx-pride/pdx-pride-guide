@@ -596,7 +596,10 @@ export function InboxShell({
 
   if (loading) {
     return (
-      <div className="inbox-shell-root" style={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column", background: "var(--grad-nightglow)" }}>
+      <div
+        className="inbox-shell-root inbox-shell-root--deep-glass"
+        style={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column" }}
+      >
         <div className="inbox-shell-loading">Loading messages…</div>
       </div>
     );
@@ -605,13 +608,12 @@ export function InboxShell({
   /* ---- Render ---- */
   return (
     <div
-      className="inbox-shell-root"
+      className="inbox-shell-root inbox-shell-root--deep-glass"
       style={{
         height: "100%",
         minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        background: "var(--grad-nightglow)",
         color: "var(--text-body)",
         fontFamily: "var(--font-body)",
         overflow: "hidden",

@@ -11,11 +11,15 @@ import {
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
 import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
+import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 26;
 
-function tabClass(active: boolean, accent: "cyan" | "green" | "lime" | "orange" | "more") {
+function tabClass(
+  active: boolean,
+  accent: "cyan" | "green" | "lime" | "orange" | "pink" | "more",
+) {
   return `hub-mobile-tab${active ? ` is-active is-${accent}` : ""}`;
 }
 
@@ -82,8 +86,11 @@ export default function MobileBottomNav() {
     setBoardsOpen(true);
   };
 
+  const localDemo = isLocalDemo();
+
   const handleMessages = () => {
-    if (!user) {
+    // Local demo: open guest glass inbox without forcing login first.
+    if (!user && !localDemo) {
       setShowAuth(true);
       return;
     }
@@ -142,85 +149,88 @@ export default function MobileBottomNav() {
       )}
 
       <nav className="hub-mobile-bar site-hub-mobile-bar" aria-label="Site mobile navigation">
-        <Link
-          href="/directory"
-          className={tabClass(placesActive, "cyan")}
-          aria-label="Places"
-          aria-current={placesActive ? "page" : undefined}
-          onClick={handleNavLink}
-        >
-          <MapPin size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-          <span>Places</span>
-        </Link>
-
-        <button
-          type="button"
-          className={tabClass(eventsActive || eventsOpen, "orange")}
-          aria-expanded={eventsOpen}
-          aria-haspopup="dialog"
-          aria-label="Events"
-          onClick={handleEvents}
-        >
-          <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-          <span>Events</span>
-        </button>
-
-        {user ? (
+        <div className="hub-mobile-bar__dock">
+          {/* No decorative pull on the site-wide dock — hub drawer grip is only on /dashboard */}
           <Link
-            href="/dashboard"
-            className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center`}
-            aria-label="Hub"
-            aria-current={hubActive ? "page" : undefined}
+            href="/directory"
+            className={tabClass(placesActive, "cyan")}
+            aria-label="Places"
+            aria-current={placesActive ? "page" : undefined}
             onClick={handleNavLink}
           >
-            <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Hub</span>
+            <MapPin size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Places</span>
           </Link>
-        ) : (
+
           <button
             type="button"
-            className={`${tabClass(false, "cyan")} hub-mobile-tab--center`}
-            aria-label="Hub"
-            onClick={() => {
-              dismissExcept();
-              setShowAuth(true);
-            }}
+            className={tabClass(eventsActive || eventsOpen, "orange")}
+            aria-expanded={eventsOpen}
+            aria-haspopup="dialog"
+            aria-label="Events"
+            onClick={handleEvents}
           >
-            <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Hub</span>
+            <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Events</span>
           </button>
-        )}
 
-        <button
-          type="button"
-          className={tabClass(boardsActive || boardsOpen, "more")}
-          aria-expanded={boardsOpen}
-          aria-haspopup="dialog"
-          aria-label="Boards"
-          onClick={handleBoards}
-        >
-          <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-          <span>Boards</span>
-        </button>
+          {user || localDemo ? (
+            <Link
+              href="/dashboard"
+              className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center`}
+              aria-label="Hub"
+              aria-current={hubActive ? "page" : undefined}
+              onClick={handleNavLink}
+            >
+              <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Hub</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className={`${tabClass(false, "cyan")} hub-mobile-tab--center`}
+              aria-label="Hub"
+              onClick={() => {
+                dismissExcept();
+                setShowAuth(true);
+              }}
+            >
+              <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <span>Hub</span>
+            </button>
+          )}
 
-        <button
-          type="button"
-          className={tabClass(Boolean(user && open), "cyan")}
-          data-inbox-open-trigger="messages"
-          onClick={handleMessages}
-          aria-expanded={user ? open : undefined}
-          aria-label={
-            attentionCount > 0
-              ? `Messages, ${attentionCount} need attention`
-              : "Messages"
-          }
-        >
-          <span className="hub-mobile-tab__icon-wrap">
-            <MessageCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            {user && attentionCount > 0 && <i>{attentionCount > 9 ? "9+" : attentionCount}</i>}
-          </span>
-          <span>Messages</span>
-        </button>
+          <button
+            type="button"
+            className={tabClass(boardsActive || boardsOpen, "lime")}
+            aria-expanded={boardsOpen}
+            aria-haspopup="dialog"
+            aria-label="Boards"
+            onClick={handleBoards}
+          >
+            <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <span>Boards</span>
+          </button>
+
+          <button
+            type="button"
+            className={tabClass(Boolean((user || localDemo) && open), "pink")}
+            data-inbox-open-trigger="messages"
+            onClick={handleMessages}
+            aria-expanded={user || localDemo ? open : undefined}
+            aria-label={
+              attentionCount > 0
+                ? `Messages, ${attentionCount} need attention`
+                : "Messages"
+            }
+          >
+            <span className="hub-mobile-tab__icon-wrap">
+              <MessageCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              {user && attentionCount > 0 && <i>{attentionCount > 9 ? "9+" : attentionCount}</i>}
+            </span>
+            <span>Messages</span>
+          </button>
+        </div>
       </nav>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

@@ -7,122 +7,235 @@ import { placePath } from "@shared/placeSlug";
 import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 
-/* PlaceCard = directory card from Queer Directory redesign mockup:
-   animated rainbow seam across the top, neon glow frame, logo media well,
-   badges, meta rows, links, upcoming events. */
+/* PlaceCard = directory card — Card System.html "DIRECTORY CARDS" SoT
+   (Directory cards redesign.zip). OLED glass(c) by category, dual sheen,
+   thin dir-refract seam, soft logo orb (not boxed poster floor), neon logo,
+   6px hover lift. Nonprofit keeps rainbow --_edge. */
 const CSS = `
+/* Little directory cards — SoT: 03-directory-cards / design image
+   OLED near-black slab, soft category bloom, solid cat chip, neon logo.
+   Follow/Share only on hover so resting state matches the clean design. */
 .pdxPlace{
   position:relative; display:inline-block; width:100%; break-inside:avoid;
-  margin:0 0 22px; border-radius:9px; cursor:default;
-  animation:pgDirCardIn .55s var(--ease-out,ease) both;
+  margin:0 0 22px; border-radius:16px; cursor:default;
+  animation:pgDirCardIn .55s var(--ease-out,ease) backwards;
+  --c: var(--_c, var(--pink));
+  --dir-gm: 60;
 }
+/* Soft outer neon cloud (always-on) — pink/cyan halo around the little card */
 .pdxPlace__glow{
-  position:absolute; inset:-2px; border-radius:11px; pointer-events:none; z-index:0;
-  box-shadow:0 0 24px -2px color-mix(in srgb, var(--_c,var(--pink)) calc(var(--dir-gm,60) * 1%), transparent),
-             0 0 62px -14px color-mix(in srgb, var(--_c,var(--pink)) calc(var(--dir-gm,60) * .7%), transparent);
+  position:absolute; inset:-6px; border-radius:20px; pointer-events:none; z-index:0;
+  box-shadow:
+    0 0 18px -2px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.15%), transparent),
+    0 0 42px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .95%), transparent),
+    0 0 78px -12px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .55%), transparent);
 }
+/* Master OLED glass slab */
 .pdxPlace__body{
-  position:relative; z-index:1; border-radius:9px; overflow:hidden;
-  background:linear-gradient(#0b0b0d,#0b0b0d) padding-box, var(--_edge,linear-gradient(var(--_c,var(--pink)),var(--_c,var(--pink)))) border-box;
-  border:2px solid transparent; padding:16px; display:flex; flex-direction:column; gap:12px;
-  transition:filter .16s ease, box-shadow .16s ease;
+  position:relative; z-index:1; border-radius:16px; overflow:hidden;
+  background:
+    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%),
+    radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%);
+  border:1.5px solid color-mix(in srgb, var(--c) 62%, #14141a);
+  box-shadow:
+    0 0 0 1px #000,
+    0 28px 56px -22px rgba(0,0,0,.92),
+    0 0 22px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.1%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 48%, rgba(255,255,255,.1)),
+    inset 0 0 28px -20px color-mix(in srgb, var(--c) 28%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding:18px 16px 16px;
+  display:flex; flex-direction:column; gap:12px;
+  transition:filter .16s ease, box-shadow .16s ease, border-color .16s ease;
 }
-/* Shared animated rainbow seam (same system as PlaceModal / site header).
-   overflow visible so soft bloom can feather into glass; body clips to outline. */
-.pdxPlace__seam.pdx-rainbow-rule{
-  position:absolute; left:0; right:0; top:0; height:3px; margin:0; z-index:4;
+/* Rainbow / specialty edge (nonprofit, healthcare, realestate) */
+.pdxPlace--edge .pdxPlace__body{
+  background:
+    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%) padding-box,
+    radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%) padding-box,
+    var(--_edge, linear-gradient(var(--c), var(--c))) border-box;
+  border:2px solid transparent;
+}
+/* Dual sheen — quiet so type stays readable */
+.pdxPlace__sheen{
+  position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2;
+  background:
+    linear-gradient(133deg, rgba(255,255,255,.12), rgba(255,255,255,.02) 14%, transparent 36%),
+    radial-gradient(70% 55% at 108% 112%, rgba(255,255,255,.08), color-mix(in srgb, var(--c) 10%, transparent) 34%, transparent 66%);
+}
+/* Very thin top refract — design reads as soft edge glow, not a thick bar */
+.pdxPlace__seam{
+  position:absolute; top:0; left:10px; right:10px; height:1.5px; margin:0; z-index:5;
   border-radius:0; pointer-events:none; overflow:visible;
+  background:linear-gradient(90deg,#ff2d5e,#ff9500,#ffee00,#39ff14,#00ffff,#3a6bff,#8800ff,#ff00cc,#ff2d5e);
+  background-size:200% 100%;
+  opacity:.55; filter:blur(.35px);
+  animation:dirRefract 7s linear infinite;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);
+  mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);
 }
-.pdxPlace--clickable{ cursor:pointer; }
-.pdxPlace--clickable:hover{ transform:translateY(-6px); }
+.pdxPlace__seam.pdx-rainbow-rule{
+  height:1.5px; left:10px; right:10px;
+  box-shadow:none !important;
+}
+.pdxPlace--clickable{ cursor:pointer; transition:transform .16s ease; }
+.pdxPlace--clickable:hover{ transform:translateY(-6px) !important; }
 .pdxPlace--clickable:hover .pdxPlace__body{
-  filter:brightness(1.08) saturate(1.08);
-  box-shadow:0 20px 44px -20px rgba(0,0,0,.85);
+  filter:brightness(1.06) saturate(1.08);
+  border-color:color-mix(in srgb, var(--c) 78%, #14141a);
+  box-shadow:
+    0 0 0 1px #000,
+    0 28px 56px -22px rgba(0,0,0,.92),
+    0 0 32px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.4%), transparent),
+    0 0 14px -2px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.2%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255,255,255,.12)),
+    inset 0 0 28px -18px color-mix(in srgb, var(--c) 36%, transparent),
+    0 20px 44px -20px rgba(0,0,0,.85);
 }
+.pdxPlace--clickable:hover .pdxPlace__glow{
+  box-shadow:
+    0 0 24px -2px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.4%), transparent),
+    0 0 56px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.1%), transparent),
+    0 0 90px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .7%), transparent);
+}
+/* Logo well — soft category orb under neon mark */
 .pdxPlace__media{
-  /* Taller well + real inset so crop-filled neon logos (tight alpha) don't
-     clip their glow edges. Flex + explicit max-height beats % height vs padding. */
-  position:relative; height:168px; border-radius:6px; overflow:hidden;
+  position:relative; height:148px; border-radius:0; overflow:visible;
   box-sizing:border-box;
-  background:radial-gradient(125% 120% at 50% 12%, color-mix(in srgb, var(--_c,var(--pink)) 13%, #050506), #050506 72%);
-  border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 34%, transparent);
+  background:transparent;
+  border:none;
   display:flex; align-items:center; justify-content:center;
-  padding:20px 22px;
+  padding:14px 12px 8px; margin-bottom:0;
+}
+.pdxPlace__mediaGlow{
+  position:absolute; left:50%; top:52%; width:86%; height:92%;
+  transform:translate(-50%,-50%); border-radius:50%;
+  background:radial-gradient(ellipse closest-side,
+    color-mix(in srgb, var(--c) 38%, transparent),
+    color-mix(in srgb, var(--c) 12%, transparent) 48%,
+    transparent 72%);
+  filter:blur(24px); z-index:2; pointer-events:none;
 }
 .pdxPlace__mediaScan{
-  position:absolute; inset:0; pointer-events:none; opacity:.5;
-  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
+  position:absolute; inset:0; pointer-events:none; opacity:.1; z-index:1;
+  background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.16) 3px 4px);
 }
 .pdxPlace__logo{
-  position:relative; z-index:1;
-  max-width:100%; max-height:128px; width:auto; height:auto;
+  position:relative; z-index:3;
+  max-width:100%; max-height:108px; width:auto; height:auto;
   object-fit:contain; object-position:center;
-  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--_c,var(--pink)) 42%, transparent));
+  mix-blend-mode:screen;
+  filter:contrast(1.35) brightness(1.08) drop-shadow(0 0 16px color-mix(in srgb, var(--c) 55%, transparent));
 }
-.pdxPlace__logo--fallback{ max-width:58%; max-height:96px;
-  filter:drop-shadow(0 0 12px color-mix(in srgb, var(--_c,var(--pink)) 55%, transparent)); }
-.pdxPlace__badges{ display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+.pdxPlace__logo--fallback{
+  max-width:58%; max-height:96px; mix-blend-mode:normal;
+  filter:drop-shadow(0 0 14px color-mix(in srgb, var(--c) 55%, transparent));
+}
+/* Solid category chip — filled accent, black type */
+.pdxPlace__cat .pdxBadge,
+.pdxPlace__cat [class*="Badge"],
+.pdxPlace__cat > *{
+  background:var(--c) !important;
+  color:#050506 !important;
+  border:none !important;
+  box-shadow:none !important;
+  font-weight:800 !important;
+  letter-spacing:.05em;
+  border-radius:6px !important;
+  padding:5px 10px !important;
+}
+.pdxPlace__badges{ display:flex; flex-wrap:wrap; gap:7px; align-items:center; position:relative; z-index:1; }
 .pdxPlace__opening{ }
 .pdxPlace__name{ font-family:var(--font-display); font-weight:900; text-transform:uppercase;
-  font-size:1.4rem; line-height:1.02; letter-spacing:.01em; color:#fff; }
-/* Same display face as name, 30% smaller (0.7 × 1.4rem) */
+  font-size:1.38rem; line-height:1.02; letter-spacing:.01em; color:#fff; position:relative; z-index:1; }
 .pdxPlace__grandDate{
   font-family:var(--font-display); font-weight:900; text-transform:uppercase;
   font-size:0.98rem; line-height:1.1; letter-spacing:.04em;
   color:var(--neon-yellow,#FFEE00);
   margin-top:4px;
   text-shadow:0 0 12px color-mix(in srgb, var(--neon-yellow,#FFEE00) 55%, transparent);
+  position:relative; z-index:1;
 }
-.pdxPlace__rows{ display:flex; flex-direction:column; gap:5px; }
+.pdxPlace__rows{ display:flex; flex-direction:column; gap:6px; position:relative; z-index:1; }
 .pdxPlace__row{ display:flex; align-items:flex-start; gap:8px;
-  font-family:var(--font-body); font-size:.86rem; color:var(--text-lo); }
-.pdxPlace__row svg{ width:14px; height:14px; margin-top:2px; flex:none; opacity:.9;
-  stroke:var(--_c,var(--pink)); }
-.pdxPlace__desc{ margin:0; font-family:var(--font-body); font-size:.9rem; line-height:1.5; color:var(--text-mid); }
-.pdxPlace__links{ display:flex; flex-wrap:wrap; gap:14px; margin-top:2px; }
+  font-family:var(--font-body); font-size:.86rem; color:#c4c0b6; line-height:1.4; }
+.pdxPlace__row svg{ width:14px; height:14px; margin-top:2px; flex:none; opacity:1;
+  stroke:var(--c); color:var(--c); }
+/* Body copy — soft grey, not bright white */
+.pdxPlace__desc{ margin:0; font-family:var(--font-body); font-size:.9rem; line-height:1.5;
+  color:#8e8a82; position:relative; z-index:1; }
+.pdxPlace__links{ display:flex; flex-wrap:wrap; gap:14px; margin-top:2px; position:relative; z-index:1; }
 .pdxPlace__link{ display:inline-flex; align-items:center; gap:6px;
   font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.86rem;
-  color:var(--_c,var(--pink)); text-decoration:none; }
+  color:var(--c); text-decoration:none; }
 .pdxPlace__link:hover{ text-decoration:underline; text-underline-offset:3px; }
 .pdxPlace__link svg{ width:15px; height:15px; }
-.pdxPlace__events{ margin-top:2px; padding-top:12px; border-top:1px solid #242424; }
+.pdxPlace__events{ margin-top:2px; padding-top:12px; border-top:1px solid #1e1e24; position:relative; z-index:1; }
 .pdxPlace__eventsHead{ display:flex; align-items:center; gap:8px; margin-bottom:9px;
   font-family:var(--font-display); font-weight:700; font-size:.78rem; letter-spacing:.06em;
-  text-transform:uppercase; color:var(--text-mid); }
+  text-transform:uppercase; color:#8e8a82; }
 .pdxPlace__eventsHead svg{ width:14px; height:14px; }
 .pdxPlace__event{ padding:7px 0 7px 12px; border-left:3px solid var(--_ec,var(--cyan)); }
 .pdxPlace__eventDate{ font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.84rem;
   color:var(--_ec,var(--cyan)); }
 .pdxPlace__eventTitle{ font-family:var(--font-body); font-size:.84rem; color:#fff; }
-.pdxPlace__promoters{ margin-top:2px; padding-top:12px; border-top:1px solid #242424;
-  font-family:var(--font-body); font-size:.82rem; color:var(--text-lo); }
+.pdxPlace__promoters{ margin-top:2px; padding-top:12px; border-top:1px solid #1e1e24;
+  font-family:var(--font-body); font-size:.82rem; color:#8e8a82; position:relative; z-index:1; }
 .pdxPlace__promotersLabel{ font-family:var(--font-display); font-weight:700; font-size:.72rem;
-  letter-spacing:.06em; text-transform:uppercase; color:var(--text-mid); margin-bottom:6px; }
+  letter-spacing:.06em; text-transform:uppercase; color:#8e8a82; margin-bottom:6px; }
 .pdxPlace__promoterChips{ display:flex; flex-wrap:wrap; gap:6px; }
 .pdxPlace__promoterChip{ padding:3px 9px; border-radius:99px; font-size:.78rem;
-  border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 45%, transparent); color:var(--_c,var(--pink)); }
+  border:1px solid color-mix(in srgb, var(--c) 45%, transparent); color:var(--c); }
 .pdxPlace__row a{ color:inherit; text-decoration:none; }
 .pdxPlace__row a:hover{ text-decoration:underline; text-underline-offset:2px; }
+/* Actions hidden at rest — design little cards are clean; show on hover/focus */
 .pdxPlace__actions{
   position:absolute; top:10px; right:10px; z-index:4;
   display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;
   max-width:calc(100% - 20px);
+  opacity:0; pointer-events:none;
+  transition:opacity .16s ease;
+}
+.pdxPlace:hover .pdxPlace__actions,
+.pdxPlace:focus-within .pdxPlace__actions{
+  opacity:1; pointer-events:auto;
 }
 .pdxPlace__share{
   display:flex; align-items:center; gap:5px;
   padding:6px 11px; border-radius:999px; cursor:pointer;
-  background:rgba(0,0,0,.55); border:1px solid color-mix(in srgb, var(--_c,var(--pink)) 60%, transparent);
-  color:var(--_c,var(--pink)); font-family:var(--font-display); font-weight:700;
+  background:rgba(0,0,0,.72); border:1px solid color-mix(in srgb, var(--c) 60%, transparent);
+  color:var(--c); font-family:var(--font-display); font-weight:700;
   font-size:.68rem; letter-spacing:.04em; text-transform:uppercase;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 }
 .pdxPlace__share:disabled{ opacity:.6; cursor:default; }
 @keyframes pgDirCardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+html.calm-mode .pdxPlace,
+:root[data-calm="true"] .pdxPlace{ --dir-gm:0; animation:none !important; }
+html.calm-mode .pdxPlace__seam,
+:root[data-calm="true"] .pdxPlace__seam{
+  animation:none !important; filter:none;
+  background:color-mix(in srgb, var(--c) 55%, #2a2a32);
+  background-size:auto; -webkit-mask:none; mask:none; opacity:.9;
+}
+html.calm-mode .pdxPlace__body,
+:root[data-calm="true"] .pdxPlace__body{
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+html.calm-mode .pdxPlace__actions,
+:root[data-calm="true"] .pdxPlace__actions{
+  opacity:1; pointer-events:auto;
+}
 `;
-if (typeof document !== "undefined" && !document.getElementById("pdx-place-css")) {
-  const s = document.createElement("style");
-  s.id = "pdx-place-css";
+if (typeof document !== "undefined") {
+  let s = document.getElementById("pdx-place-css");
+  if (!s) {
+    s = document.createElement("style");
+    s.id = "pdx-place-css";
+    document.head.appendChild(s);
+  }
   s.textContent = CSS;
-  document.head.appendChild(s);
 }
 
 const CAT_COLOR = {
@@ -235,15 +348,18 @@ export function PlaceCard({
     }
   };
 
+  const useSpecialEdge = isNonprofit || isHealthcare || isRealEstate;
+
   return (
     <article
-      className={`pdxPlace ${className}`}
-      style={{ "--_c": accent, "--_edge": edge, ...(style || {}) }}
+      className={`pdxPlace pdx-glass-rebind${useSpecialEdge ? " pdxPlace--edge" : ""}${className ? ` ${className}` : ""}`}
+      style={{ "--_c": accent, "--c": accent, "--_edge": edge, ...(style || {}) }}
       {...rest}
     >
       <div className="pdxPlace__glow" aria-hidden="true" />
       <div className="pdxPlace__body">
-        <div className="pdxPlace__seam pdx-rainbow-rule" aria-hidden="true" />
+        <div className="pdxPlace__sheen" aria-hidden="true" />
+        <div className="pdxPlace__seam dir-refract" aria-hidden="true" />
         <div className="pdxPlace__actions">
           {businessId != null && (
             <VenueFollowButton
@@ -259,6 +375,7 @@ export function PlaceCard({
           </button>
         </div>
         <div className="pdxPlace__media">
+          <div className="pdxPlace__mediaGlow" aria-hidden="true" />
           <div className="pdxPlace__mediaScan" aria-hidden="true" />
           {showLogo && (
             <img

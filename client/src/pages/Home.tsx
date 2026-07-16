@@ -132,21 +132,36 @@ export default function Home() {
           </div>
 
           <div className="home-boards__utility-grid">
-            <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__utility home-boards__utility--magenta" data-testid="home-board-spotted">
+            <Link
+              href={COMMUNITY_LINKS.spotted.href}
+              className="home-boards__utility home-boards__utility--magenta pdx-glass-card pdx-glass-card--left-accent"
+              style={{ ["--c" as string]: "#FF00CC" }}
+              data-testid="home-board-spotted"
+            >
               <div className="home-boards__utility-name">Missed Connections</div>
               <p className="home-boards__utility-desc">
                 Anonymous missed connections. Say the thing you didn&apos;t get to say.
               </p>
               <div className="home-boards__utility-mantra">Stay kind · stay anonymous · reveal when ready</div>
             </Link>
-            <Link href={COMMUNITY_LINKS.gifting.href} className="home-boards__utility home-boards__utility--lime" data-testid="home-board-gifting">
+            <Link
+              href={COMMUNITY_LINKS.gifting.href}
+              className="home-boards__utility home-boards__utility--lime pdx-glass-card pdx-glass-card--left-accent"
+              style={{ ["--c" as string]: "#CCFF00" }}
+              data-testid="home-board-gifting"
+            >
               <div className="home-boards__utility-name">Gifting</div>
               <p className="home-boards__utility-desc">
                 A free board. Give what you can, take what you need. No money changes hands.
               </p>
               <div className="home-boards__utility-mantra">Keep it free · keep it kind · keep it moving</div>
             </Link>
-            <Link href={COMMUNITY_LINKS.gigs.href} className="home-boards__utility home-boards__utility--purple" data-testid="home-board-gigs">
+            <Link
+              href={COMMUNITY_LINKS.gigs.href}
+              className="home-boards__utility home-boards__utility--purple pdx-glass-card pdx-glass-card--left-accent"
+              style={{ ["--c" as string]: "#6E3DFF" }}
+              data-testid="home-board-gigs"
+            >
               <div className="home-boards__utility-name">Gig Board</div>
               <p className="home-boards__utility-desc">
                 Two-way work board. Performers, hosts, crew. Get paid, get help.

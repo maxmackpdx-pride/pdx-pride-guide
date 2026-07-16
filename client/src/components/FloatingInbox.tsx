@@ -10,6 +10,7 @@ import {
   writeFloatingInboxBottom,
 } from "@/lib/floatingInboxPosition";
 import { pickFloatingInboxNeon } from "@/lib/floatingInboxNeon";
+import { isLocalDemo } from "@/lib/localDemo";
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -18,6 +19,8 @@ const DRAG_THRESHOLD_PX = 8;
  * InboxSheetProvider. Drag vertically to reposition; default sits 30% up from
  * the bottom edge. Hidden on mobile (bottom nav owns inbox there) and on /inbox
  * (full shell page).
+ * Local demo (localhost / Vite): FAB is always shown so chrome can be demoed
+ * without a session; the sheet prompts to sign in for real threads.
  */
 export default function FloatingInbox() {
   const { user } = useAuth();
@@ -27,6 +30,7 @@ export default function FloatingInbox() {
   const [bottomPx, setBottomPx] = useState(() => readFloatingInboxBottom());
   const [dragging, setDragging] = useState(false);
   const [neon, setNeon] = useState(() => pickFloatingInboxNeon());
+  const localDemo = isLocalDemo();
 
   const dragRef = useRef({
     active: false,
@@ -139,7 +143,8 @@ export default function FloatingInbox() {
     [finishDrag],
   );
 
-  if (!user || onInboxPage) return null;
+  // Production: members only. Local demo: always show FAB (guest opens glass shell).
+  if ((!user && !localDemo) || onInboxPage) return null;
 
   const anchorStyle = {
     bottom: `${bottomPx}px`,
@@ -149,7 +154,8 @@ export default function FloatingInbox() {
 
   // Pulse only when something needs attention (unread DMs and/or admin/owner queue).
   // Idle FAB keeps a soft static neon — no perpetual "you've got mail" throb.
-  const needsAttention = !open && attentionCount > 0;
+  // Local guest: soft attention so the demo FAB is easy to spot.
+  const needsAttention = !open && (attentionCount > 0 || (localDemo && !user));
 
   return (
     <div

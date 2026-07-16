@@ -3,8 +3,17 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon, latLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { BEACH_MAP_LOCATIONS, BEACH_POIS, type NudeBeachTab } from "@shared/nudeBeaches";
+import {
+  MAP_PIN_SIZE,
+  MAP_SURFACE_BG,
+  LIVE_MAP_CHROME_CSS,
+  mapPinHtml,
+  mapPinMultiHtml,
+} from "@/components/ds/mapTheme";
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
+const PIN_HALF = MAP_PIN_SIZE / 2;
 
 const POPUP_STYLES = `
   .pdx-beach-popup .leaflet-popup-content-wrapper {
@@ -26,50 +35,42 @@ const POPUP_STYLES = `
     z-index: 1;
   }
   .pdx-beach-popup .leaflet-popup-close-button:hover { color: #fff !important; }
-  .nude-beaches-map .leaflet-control-attribution {
-    background: rgba(0,0,0,0.65) !important;
-    color: var(--text-faint, #8a8a8a) !important;
-    font-size: 9px !important;
-  }
-  .nude-beaches-map .leaflet-control-attribution a { color: var(--text-meta, #aaa) !important; }
-  .nude-beaches-map .leaflet-control-zoom a {
-    background: #111 !important;
-    color: #CCFF00 !important;
-    border-color: #333 !important;
-  }
-  .nude-beaches-map .leaflet-control-zoom a:hover { background: #222 !important; }
 `;
 
 function buildPin(color: string) {
   return divIcon({
     className: "",
-    html: `<div style="width:18px;height:18px;border-radius:50%;background:transparent;border:3px solid ${color};box-shadow:0 0 10px ${color},0 0 18px ${color}99,0 2px 6px rgba(0,0,0,0.8);"></div>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-    popupAnchor: [0, -12],
+    html: mapPinHtml(color),
+    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+    iconAnchor: [PIN_HALF, PIN_HALF],
+    popupAnchor: [0, -PIN_HALF - 4],
   });
 }
 
-const RAINBOW_RING =
-  "conic-gradient(#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#5e5ce6,#ff2d92,#ff3b30)";
 const DANGER_RED = "#ff1f1f";
 
 /** Smaller solid dot for points of interest so they read as secondary to the
  *  beach anchor. Rainbow = queer hangouts; red = out-of-bounds warning. */
 function buildPoiPin(color: string, variant: "accent" | "rainbow" | "red" = "accent") {
-  const ring = variant === "rainbow" ? RAINBOW_RING : variant === "red" ? DANGER_RED : color;
-  const glow =
-    variant === "rainbow"
-      ? "rgba(255,255,255,0.5)"
-      : variant === "red"
-        ? `${DANGER_RED}cc`
-        : color + "cc";
+  if (variant === "rainbow") {
+    return divIcon({
+      className: "",
+      html: mapPinMultiHtml(),
+      iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+      iconAnchor: [PIN_HALF, PIN_HALF],
+      popupAnchor: [0, -PIN_HALF - 2],
+    });
+  }
+  const pinColor = variant === "red" ? DANGER_RED : color;
+  // POIs: black core + color ring, inward only (no outer neon bloom)
+  const size = 15;
+  const half = size / 2;
   return divIcon({
     className: "",
-    html: `<div style="width:15px;height:15px;border-radius:50%;background:${ring};border:2px solid #050505;box-shadow:0 0 8px ${glow},0 2px 5px rgba(0,0,0,0.85);"></div>`,
-    iconSize: [15, 15],
-    iconAnchor: [7.5, 7.5],
-    popupAnchor: [0, -10],
+    html: `<div style="width:${size}px;height:${size}px;border-radius:999px;background:#000;border:2px solid ${pinColor};box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85);"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [half, half],
+    popupAnchor: [0, -half - 2],
   });
 }
 
@@ -77,8 +78,10 @@ function PoiPopup({ title, accent }: { title: string; accent: string }) {
   return (
     <div
       style={{
-        border: `2px solid ${accent}`,
-        boxShadow: `0 0 24px -14px ${accent}99`,
+        border: "1px solid #000",
+        boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+        outline: `1px solid ${accent}`,
+        outlineOffset: -2,
         background: "#050505",
         color: "#fff",
         padding: "11px 14px",
@@ -98,8 +101,10 @@ function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: stri
   return (
     <div
       style={{
-        border: `2px solid ${accent}`,
-        boxShadow: `0 0 24px -14px ${accent}99`,
+        border: "1px solid #000",
+        boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+        outline: `1px solid ${accent}`,
+        outlineOffset: -2,
         background: "#050505",
         color: "#fff",
         padding: "14px 16px",
@@ -182,7 +187,7 @@ export default function NudeBeachesMap({ tab, height }: Props) {
   return (
     <div className="directory-map-wrap nude-beaches-map">
       <div
-        className={`directory-map nude-beaches-map__canvas${fillParent ? " directory-map--fill" : ""}`}
+        className={`directory-map nude-beaches-map__canvas pdx-map-live pdx-map-surface${fillParent ? " directory-map--fill" : ""}`}
         style={{
           width: "100%",
           position: "relative",
@@ -191,22 +196,28 @@ export default function NudeBeachesMap({ tab, height }: Props) {
             : {}),
         }}
       >
+        <style>{`${POPUP_STYLES}${LIVE_MAP_CHROME_CSS}`}</style>
+        <div className="pdx-map-live__vignette" aria-hidden="true" />
+        <div className="pdx-map-live__shaft" aria-hidden="true" />
         <div className="nude-beaches-map__chip" aria-hidden="true">
+          {/* Black-core pin swatch — color ring only, no outer bloom */}
           <span
             className="nude-beaches-map__chip-dot"
-            style={{ background: location.pinColor, boxShadow: `0 0 10px ${location.pinColor}` }}
+            style={{
+              background: "#000",
+              borderColor: location.pinColor,
+            }}
           />
           <span>
             <span className="nude-beaches-map__chip-title">{location.label}</span>
             <span className="nude-beaches-map__chip-sub">{location.subtitle}</span>
           </span>
         </div>
-        <style>{POPUP_STYLES}</style>
         <MapContainer
           key={tab}
           center={[location.lat, location.lng]}
           zoom={location.zoom}
-          style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+          style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
           scrollWheelZoom={false}
           zoomControl
         >

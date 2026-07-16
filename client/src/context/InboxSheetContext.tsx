@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import FloatingInbox from "@/components/FloatingInbox";
 import InboxOverlay from "@/components/InboxOverlay";
+import { isLocalDemo } from "@/lib/localDemo";
 
 export type InboxSheetOpenOpts = {
   view?: "inbox" | "posts" | "stats";
@@ -55,7 +56,8 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
     [open, openOpts, openSheet, closeSheet, toggleSheet],
   );
 
-  const showOverlay = Boolean(user) && !isInboxRoute(location);
+  // Members always; localhost/Vite also mounts the sheet so glass chrome can demo.
+  const showOverlay = !isInboxRoute(location) && (Boolean(user) || isLocalDemo());
 
   return (
     <InboxSheetContext.Provider value={value}>

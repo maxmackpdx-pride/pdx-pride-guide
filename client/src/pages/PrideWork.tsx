@@ -25,6 +25,8 @@ import { timeAgo } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { GIG_BOARD_RULES_SUMMARY, validateGigPostContent } from "@shared/boardModeration";
 import type { Business } from "@/pages/Directory";
+import { BoardGlassMotif } from "@/components/board/GiftListingCard";
+import type { CSSProperties } from "react";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -95,9 +97,10 @@ const HOW_IT_WORKS = [
   { title: "Stamp it done", body: "Mark filled or found when the match wraps.", color: "#ff1fa0" },
 ];
 
+/** Deep-glass board accent for Gigs (SoT §2.4 #6E3DFF). Subtype motifs differ; rim is board purple. */
 const ACCENT = {
-  POSTING_GIG: "#b06bff",
-  LOOKING_FOR_WORK: "#19e3ff",
+  POSTING_GIG: "#6E3DFF",
+  LOOKING_FOR_WORK: "#6E3DFF",
 } as const;
 
 function ghostLetter(title: string) {
@@ -735,12 +738,24 @@ export function GigListingCard({
     || (isLooking ? "Available · message in inbox" : "Open · reply privately");
   const cta = isLooking ? "Say hi" : "Reply";
 
+  const glassVars = {
+    "--listing-accent": accent,
+    "--c": accent,
+    "--_c": accent,
+  } as CSSProperties;
+
   return (
     <article
       id={`board-post-${gig.id}`}
       data-testid={`card-gig-${gig.id}`}
-      className={`board-listing-card board-listing-card--makeover${expanded ? " is-expanded" : ""}`}
-      style={{ "--listing-accent": accent } as React.CSSProperties}
+      className={[
+        "board-listing-card board-listing-card--makeover board-listing-card--glass",
+        isLooking ? "is-looking is-dashed" : "is-offering",
+        expanded ? "is-expanded" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={glassVars}
       onClick={onToggle}
       role="button"
       tabIndex={0}
@@ -756,6 +771,7 @@ export function GigListingCard({
         }
       }}
     >
+      <BoardGlassMotif variant={isLooking ? "binoculars" : "dollar"} />
       <div className="board-listing-card__row">
         <div
           className="board-listing-card__thumb"

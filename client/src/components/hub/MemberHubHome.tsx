@@ -119,7 +119,11 @@ export default function MemberHubHome({
       </div>
 
       {isAdmin && (
-        <section className="hub-keys" aria-label="Admin access">
+        <section
+          className="hub-keys pdx-glass-rebind"
+          aria-label="Admin access"
+          style={{ ["--c" as string]: "var(--panel-magenta, #ff1fa0)" }}
+        >
           <div>
             <p className="hub-keys__kicker">You hold the keys</p>
             <p className="hub-keys__copy">

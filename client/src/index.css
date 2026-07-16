@@ -106,6 +106,8 @@ html {
   overflow-x: clip;
   /* both-edges keeps the page visually centered when a classic scrollbar shows */
   scrollbar-gutter: stable both-edges;
+  /* Prevent sideways rubber-band that leaves the page off-center after zoom */
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -116,6 +118,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
+  overscroll-behavior-x: none;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -135,9 +138,8 @@ body::before {
 }
 
 :root {
-  /* Matches .hub-mobile-bar: pad 9+10 + tab min-height 58 ≈ 77; pad to 80 so
-     overlays/drawers sit fully above the bar and never cover tab hits. */
-  --site-mobile-nav-height: 80px;
+  /* Floating dock: pad + dock (~72) + safe-area headroom */
+  --site-mobile-nav-height: 88px;
 }
 
 #root {
@@ -241,11 +243,12 @@ body::before {
   height: var(--site-rainbow-bar-height-thick);
 }
 
+/* Full-bleed without 100vw trick (100vw + scrollbar = sideways overflow / off-center) */
 .rainbow-bar--bleed {
   width: 100%;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 /* Solid black under the pre-footer rainbow so page grain never shows through */
@@ -1110,35 +1113,77 @@ h2.display,
   background-size: 18px 18px, 100% 100%;
 }
 
-/* Neon button */
+/* Neon button → deep-glass CTA (Card System §16). --c drives accent rim. */
 .btn-neon {
+  --c: var(--neon-yellow);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 10px 20px;
-  border: 2px solid var(--neon-yellow);
-  color: var(--neon-yellow);
-  background: rgba(0,0,0,0.62);
+  line-height: 1;
+  padding: 11px 20px;
+  border-radius: 9px;
+  border: 2px solid #000;
+  color: #fff;
+  background:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c) 15%, #0b0b0d), #060608) padding-box,
+    linear-gradient(#000, #000) border-box;
   cursor: pointer;
-  box-shadow: 4px 4px 0 rgba(255,0,204,0.36);
-  transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.55);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
-.btn-neon:not(.solid):hover {
-  background: var(--neon-yellow);
-  border-color: var(--neon-yellow);
-  color: #000;
-  transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0 rgba(255, 0, 204, 0.5);
+.btn-neon:not(.solid):not(:disabled):hover {
+  color: #fff;
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  background:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c) 24%, #0b0b0d), #060608) padding-box,
+    linear-gradient(#000, #000) border-box;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.55);
 }
-
-.btn-neon.solid:hover {
-  background: #fff;
-  transform: translateY(-2px);
+.btn-neon:not(.solid):not(:disabled):active {
+  transform: translateY(1px) scale(0.98);
+  filter: none;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+.btn-neon.solid {
+  color: #050506;
+  background: var(--c);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
+}
+.btn-neon.solid:hover:not(:disabled) {
+  color: #050506;
+  background: var(--c);
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
+}
+.btn-neon:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  color: #6a6870;
+  transform: none;
+  filter: none;
+  box-shadow: 0 0 0 1px #1c1c22, inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .home-hero-shade {
@@ -1443,7 +1488,7 @@ h2.display,
   gap: 8px;
   padding: 8px 14px;
   background: rgba(0, 0, 0, 0.88);
-  border: 1.5px solid var(--neon-yellow);
+  border: 1px solid #000;
   color: var(--neon-yellow);
   font-family: var(--font-display);
   font-size: 0.476rem;
@@ -1451,14 +1496,18 @@ h2.display,
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
-  box-shadow: 0 0 16px rgba(204, 255, 0, 0.25);
+  box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.75);
+  outline: 1px solid var(--neon-yellow);
+  outline-offset: -2px;
 }
 
 .home-map-all-events:hover {
   background: var(--neon-yellow);
   color: #000;
+  outline-color: #000;
 }
 
+/* YOU control — thin black + cyan edge, no outer neon bloom */
 .map-locate-btn {
   position: absolute;
   left: 12px;
@@ -1466,22 +1515,26 @@ h2.display,
   z-index: 1002;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1.5px solid var(--neon-cyan);
-  color: var(--neon-cyan);
+  gap: 7px;
+  padding: 8px 14px;
+  background: rgba(5, 5, 7, 0.88);
+  border: 1px solid #000;
+  color: var(--neon-cyan, #19e3ff);
   font-family: var(--font-display);
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.75);
+  outline: 1px solid var(--neon-cyan, #19e3ff);
+  outline-offset: -2px;
 }
 
 .map-locate-btn:hover {
-  background: var(--neon-cyan);
-  color: #000;
+  background: color-mix(in srgb, var(--neon-cyan, #19e3ff) 18%, rgba(5, 5, 7, 0.92));
+  color: #7af0ff;
 }
 
 .home-map-preview .map-locate-btn {
@@ -1496,46 +1549,59 @@ h2.display,
   font-size: 0.455rem;
 }
 
+/* Day legend — OLED glass panel (same chrome as directory map key); swatches unchanged */
 .map-legend {
   position: absolute;
   bottom: 28px;
   right: 12px;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.92);
-  padding: 10px 14px;
-  border: 1.5px solid var(--neon-yellow);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
+    radial-gradient(90% 80% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 60%),
+    #08080c;
+  padding: 12px 14px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px #000,
+    0 18px 40px -16px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -10px 28px -14px rgba(0, 0, 0, 0.75);
+  outline: none;
   pointer-events: none;
 }
 
 .map-legend-items {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
 }
 
 .map-legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 
 .map-legend-item--multi {
-  margin-top: 5px;
-  padding-top: 5px;
-  border-top: 1px solid #222;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .map-legend-swatch {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .map-legend-label {
   font-family: var(--font-display);
   font-size: 0.65rem;
-  color: #ccc;
+  font-weight: 700;
+  color: #c8c5bc;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -2151,7 +2217,12 @@ a.event-host-name.event-host-name--link:hover {
   }
 
   .site-hub-mobile-bar .hub-mobile-tab {
-    color: #8a8a8a;
+    color: #6e6e76;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab:not(.is-active):hover {
+    color: #a8a8b0;
+    background: rgba(255, 255, 255, 0.04);
   }
 
   /* Bar is portaled to <body>, so match from body instead of .app-shell */
@@ -2188,8 +2259,7 @@ a.event-host-name.event-host-name--link:hover {
     display: none;
   }
 
-  /* Center anchor: Hub — always shows a subtle cyan chip so it reads as the
-     home anchor even when the footer isn't on a hub route. */
+  /* Center anchor: Hub — quiet cyan chip when not the active route */
   .site-hub-mobile-bar .hub-mobile-tab--center svg {
     width: 28px;
     height: 28px;
@@ -2200,10 +2270,24 @@ a.event-host-name.event-host-name--link:hover {
     letter-spacing: 0.08em;
   }
 
+  /* Hub anchor keeps cyan fill/text; outline stays thin black like other tabs */
   .site-hub-mobile-bar .hub-mobile-tab--center:not(.is-active) {
-    color: var(--hub-cyan, #00ffff);
-    background: rgba(0, 255, 255, 0.12);
-    border-radius: 12px;
+    color: color-mix(in srgb, var(--hub-cyan, #19e3ff) 72%, #8a8a8a);
+    background: color-mix(in srgb, var(--hub-cyan, #19e3ff) 10%, transparent);
+    border-color: #000;
+  }
+
+  /* Hard-lock button outlines + dock rim to opaque black (no cyan edge bleed) */
+  .site-hub-mobile-bar .hub-mobile-bar__dock {
+    border-color: #000;
+    box-shadow:
+      0 0 0 1px #000,
+      0 -4px 28px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab {
+    border-color: #000;
   }
 }
 
@@ -2215,24 +2299,34 @@ a.event-host-name.event-host-name--link:hover {
   display: none;
 }
 
-.floating-inbox--orange {
-  --fab-neon: #FF6600;
-  --fab-neon-rgb: 255 102 0;
+/* Blue neon family (dark → bright) — matches deep-glass inbox drawer */
+.floating-inbox--blue-deep {
+  --fab-neon: #0a2a9c;
+  --fab-neon-rgb: 10 42 156;
 }
 
-.floating-inbox--cyan {
-  --fab-neon: #00FFFF;
-  --fab-neon-rgb: 0 255 255;
+.floating-inbox--blue {
+  --fab-neon: #1a4dff;
+  --fab-neon-rgb: 26 77 255;
 }
 
-.floating-inbox--magenta {
-  --fab-neon: #FF00CC;
-  --fab-neon-rgb: 255 0 204;
+.floating-inbox--blue-bright {
+  --fab-neon: #3d7cff;
+  --fab-neon-rgb: 61 124 255;
 }
 
+.floating-inbox--cyan-blue {
+  --fab-neon: #1966ff;
+  --fab-neon-rgb: 25 102 255;
+}
+
+/* Legacy class names → map into blue spectrum (avoid orange/magenta FAB) */
+.floating-inbox--orange,
+.floating-inbox--cyan,
+.floating-inbox--magenta,
 .floating-inbox--yellow {
-  --fab-neon: #CCFF00;
-  --fab-neon-rgb: 204 255 0;
+  --fab-neon: #1a4dff;
+  --fab-neon-rgb: 26 77 255;
 }
 
 @keyframes floating-inbox-halo-pulse {
@@ -2785,25 +2879,16 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 .btn-neon.cyan {
-  border-color: var(--neon-cyan);
-  color: var(--neon-cyan);
-}
-.btn-neon.cyan:hover {
-  background: var(--neon-cyan);
-  color: #000;
+  --c: var(--neon-cyan);
 }
 .btn-neon.magenta {
-  border-color: var(--neon-magenta);
-  color: var(--neon-magenta);
+  --c: var(--neon-magenta);
 }
-.btn-neon.magenta:hover {
-  background: var(--neon-magenta);
-  color: #000;
+.btn-neon.orange {
+  --c: var(--neon-orange);
 }
-.btn-neon.solid {
-  background: var(--neon-yellow);
-  color: #000;
-  box-shadow: 4px 4px 0 rgba(0,255,255,0.35);
+.btn-neon.green {
+  --c: var(--neon-green);
 }
 /* Section divider — torn paper effect */
 .torn-divider {
@@ -3108,31 +3193,42 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   color: #000;
 }
 
-/* Events map legend — 2× size (not home preview) */
+/* Events map legend — readable panel, not oversized (SoT: compact lime box) */
 .events-map-panel .map-legend {
-  padding: 20px 28px;
-  bottom: 36px;
-  right: 24px;
-  border-width: 3px;
+  padding: 12px 14px;
+  bottom: 16px;
+  right: 14px;
+  border-width: 2px;
+  box-shadow: 0 0 16px -4px var(--lime, #ccff00);
 }
 
 .events-map-panel .map-legend-items {
-  gap: 10px;
+  gap: 7px;
 }
 
 .events-map-panel .map-legend-swatch {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
 }
 
 .events-map-panel .map-legend-label {
-  font-size: 1.3rem;
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
 }
 
 .events-map-panel .map-legend-item--multi {
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+.events-map-panel .map-locate-btn {
+  left: 14px;
+  bottom: 14px;
+}
+
+.events-map-panel .pdx-map-live__expand {
+  top: 14px;
+  right: 14px;
 }
 
 /* Small screens: compact the events-map legend so it doesn't cover the map */
@@ -3207,12 +3303,11 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
     gap: 10px;
   }
 
-  /* Extra-compact event tags on mobile */
+  /* Extra-compact event tags on mobile (list/grid only — open modal keeps readable sizes) */
   .event-type-tag,
   .event-type-tag--sm,
   .event-type-tag--md,
   .events-page .event-type-tag--sm,
-  .event-modal__tags .event-type-tag--sm,
   .event-card-meta-tag,
   .event-card-day-tag {
     font-size: 0.58rem;
@@ -3223,7 +3318,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   }
 
   .event-type-tag-list,
-  .event-card-tags,
+  .event-card-tags:not(.event-modal__tags),
   .events-page .event-card-tags {
     gap: 4px;
   }
@@ -3318,7 +3413,6 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   transform: translateY(-2px) rotate(0deg);
 }
 
-.gifting-page,
 .about-page,
 .missed-page,
 .gigs-page {
@@ -3326,6 +3420,16 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   background:
     radial-gradient(circle at 20% 12%, rgba(0,255,255,0.14), transparent 24rem),
     radial-gradient(circle at 88% 18%, rgba(0,255,255,0.16), transparent 25rem),
+    #050505;
+  color: var(--board-text);
+}
+
+/* Gifting board wash is lime (#CCFF00), never cyan */
+.gifting-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(204, 255, 0, 0.12), transparent 24rem),
+    radial-gradient(circle at 88% 18%, rgba(204, 255, 0, 0.1), transparent 25rem),
     #050505;
   color: var(--board-text);
 }
@@ -4090,7 +4194,11 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   text-shadow: none;
 }
 
-.gifting-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num,
+.gifting-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num {
+  background: #ccff00;
+  color: #0a0a0a;
+}
+
 .gigs-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num,
 .missed-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num,
 .about-page .board-how--inline:not(.board-how--makeover) .board-step:nth-child(odd) .board-step__num {
@@ -4689,8 +4797,9 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 .gifting-actions .cyan {
-  border-color: #00ffff;
-  color: #00ffff;
+  /* legacy class — map to lime on gifting board */
+  border-color: #ccff00;
+  color: #ccff00;
 }
 
 .gifting-how-link {
@@ -4703,8 +4812,9 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .gifting-how {
   overflow: hidden;
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  /* Lime wash — gifting board accent is #CCFF00, not cyan */
   background:
-    linear-gradient(90deg, rgba(0,255,255,0.12), rgba(0,255,255,0.09)),
+    linear-gradient(90deg, rgba(204, 255, 0, 0.1), rgba(204, 255, 0, 0.06)),
     #080808;
 }
 
@@ -4752,6 +4862,10 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .board-step:nth-child(odd) .board-step__num {
   color: #19e3ff;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.22);
+}
+
+.gifting-page .board-step:nth-child(odd) .board-step__num {
+  color: #ccff00;
 }
 
 .board-step:nth-child(even) .board-step__num {
@@ -8325,7 +8439,8 @@ footer a:hover { color: #00FFFF !important; }
   text-shadow: 0 2px 0 #000, 0 0 18px rgba(204, 255, 0, 0.35);
 }
 
-/* Event modal — readable hierarchy */
+/* Event modal — single panel, one scroll, one sticky footer.
+   Overlay must NOT scroll (that stacked a second copy of the card mid-viewport). */
 .event-modal-overlay {
   position: fixed;
   inset: 0;
@@ -8333,56 +8448,81 @@ footer a:hover { color: #00FFFF !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow-y: auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 40px) 16px calc(env(safe-area-inset-bottom, 0px) + 88px);
-  background: rgba(0, 0, 0, 0.88);
+  overflow: hidden; /* only .event-modal__scroll moves */
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 12px
+    calc(env(safe-area-inset-bottom, 0px) + 16px);
+  background: rgba(0, 0, 0, 0.92);
 }
 
+/* Deep-glass open-event panel — day-accent neon edge + black ring + OLED fill.
+   Base sizes are mobile-first. Desktop bumps width + height below. */
 .event-modal {
+  --c: var(--event-accent, #19e3ff);
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 660px;
   max-height: min(92dvh, 920px);
-  margin: auto;
+  height: min(92dvh, 920px);
+  margin: 0;
   overflow: hidden;
-  background: #0d0d0d;
-  border: 2px solid var(--event-accent, #222);
   border-radius: 18px;
-  box-shadow: 0 0 60px -14px var(--event-accent, transparent);
+  background: #050506;
+  border: 1px solid color-mix(in srgb, var(--c) 62%, #101014);
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 48px -8px color-mix(in srgb, var(--c) 55%, transparent),
+    0 0 90px -16px color-mix(in srgb, var(--c) 35%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 50%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 40px -18px color-mix(in srgb, var(--c) 22%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  animation: pgDirCardIn 0.55s var(--ease-out, ease) both;
+  isolation: isolate;
 }
 
 .event-modal__scroll {
+  position: relative;
+  z-index: 1;
   flex: 1 1 auto;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: #050506;
 }
 
+/* One footer only — opaque, never mid-scroll ghost */
 .event-modal__sticky-cta {
+  position: relative;
+  z-index: 4;
   flex: 0 0 auto;
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-  padding: 12px 16px;
-  border-top: 1px solid #1f1f1f;
-  background: rgba(8, 8, 8, 0.97);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  flex-wrap: nowrap;
+  align-items: stretch;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid color-mix(in srgb, var(--c, var(--event-accent, #19e3ff)) 28%, #1f1f1f);
+  background: #050506;
+  box-shadow: 0 -12px 28px -16px rgba(0, 0, 0, 0.9);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .event-modal__sticky-cta-btn {
-  flex: 1 1 auto;
-  min-width: 140px;
+  flex: 1 1 0;
+  min-width: 0;
   justify-content: center;
   text-align: center;
 }
 
 /* Rainbow top seam — motion/color from .pdx-rainbow-rule (base.css); calm = static */
 .event-modal__bar {
+  position: relative;
+  z-index: 5;
   height: 3px;
   width: 100%;
   flex: none;
@@ -8391,15 +8531,27 @@ footer a:hover { color: #00FFFF !important; }
   border-radius: 0;
 }
 
+/* Corner sheen overlays — above body, below seam/close; pointer-events none */
+.event-modal__sheen {
+  z-index: 4;
+  border-radius: inherit;
+}
+
+/* Poster header → --poster-well (radial accent + 4px day floor + scanline) */
 .event-modal__poster {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background: #000;
-  border-bottom: 1px solid #1a1a1a;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--poster-well-bg);
+  border-bottom: var(--poster-well-floor);
 }
 
 .event-modal__poster-img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: min(48vh, 480px);
@@ -8407,21 +8559,58 @@ footer a:hover { color: #00FFFF !important; }
   object-position: top center;
 }
 
+/* Desktop: wider + 30% taller than mobile (mobile sizes above stay perfect).
+   Mobile height cap 920px → 1196px; poster 480px → 624px. */
+@media (min-width: 900px) {
+  .event-modal-overlay {
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 24px
+      calc(env(safe-area-inset-bottom, 0px) + 12px);
+  }
+
+  .event-modal {
+    max-width: min(920px, 92vw);
+    width: min(920px, 92vw);
+    max-height: min(98dvh, 1196px);
+    height: min(98dvh, 1196px);
+  }
+
+  .event-modal__poster-img {
+    height: min(62.4vh, 624px);
+  }
+
+  .event-modal__body {
+    padding: 28px 32px 32px;
+  }
+
+  .event-modal__title {
+    font-size: clamp(1.85rem, 2.4vw, 2.35rem);
+  }
+
+  .event-modal__sticky-cta {
+    padding: 14px 24px 16px;
+  }
+}
+
+.event-modal__poster .pdx-poster-well__scan {
+  z-index: 2;
+}
+
 .event-modal__close {
   position: absolute;
   top: 16px;
   right: 16px;
-  z-index: 2;
+  z-index: 6;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid #333;
+  border: 1px solid color-mix(in srgb, var(--c, #fff) 28%, #333);
   background: rgba(0, 0, 0, 0.75);
   color: var(--text-meta);
   font-size: 0.9rem;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .event-modal__body {
@@ -8498,12 +8687,100 @@ footer a:hover { color: #00FFFF !important; }
   color: var(--text-meta);
 }
 
-.event-modal__tags {
+/* Section kickers (FLAGS / TAGS / ABOUT) — mono uppercase SoT */
+.event-modal__kicker,
+.event-modal__block .event-modal__kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6e6b64;
+  margin: 0 0 10px;
+}
+
+.event-modal__block {
   margin-bottom: 20px;
 }
 
+/* Mid-page Tickets CTA — solid day-accent glass with sheen + soft bloom */
+.event-modal__tickets-mid {
+  display: flex !important;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 4px 0 22px;
+  padding: 16px 20px !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  border-radius: 12px !important;
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
+    var(--c, var(--event-accent, #39ff14)) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 28px -4px color-mix(in srgb, var(--c, #39ff14) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+  text-decoration: none !important;
+}
+
+.event-modal__tickets-mid:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  text-decoration: none !important;
+  color: #050506 !important;
+}
+
+/* Open-event tags — larger type, more padding, easier to scan */
+.event-modal__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.event-modal__tags .event-type-tag,
+.event-modal__tags .event-type-tag--sm,
+.event-modal__tags .event-type-tag--md,
+.event-modal__tags .event-card-day-tag,
+.event-modal__tags .event-card-meta-tag {
+  font-size: 0.78rem !important;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.25 !important;
+  padding: 5px 11px !important;
+  border-width: 2px;
+  border-radius: 3px;
+  box-shadow: 2px 2px 0 var(--tag-shadow, var(--neon-yellow));
+}
+
+.event-modal__tags .event-card-day-tag {
+  font-size: 0.8rem !important;
+  font-weight: 800;
+  color: #000;
+  background: #fff;
+}
+
+.event-modal__tags .event-card-meta-tag {
+  font-size: 0.76rem !important;
+  /* Keep filled solid look when --tag-accent is set (claim / type meta) */
+  color: #000;
+  background: var(--tag-accent, var(--neon-cyan, #19e3ff));
+  border-color: var(--neon-yellow, #ccff00);
+  box-shadow: 2px 2px 0 var(--neon-yellow, #ccff00);
+}
+
+.event-modal__tags .event-card-meta-tag--claim {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
 .event-modal__description {
-  margin: 0 0 20px;
+  margin: 0;
   font-size: 0.98rem;
   line-height: 1.7;
   color: #d4d0c7;
@@ -8516,6 +8793,21 @@ footer a:hover { color: #00FFFF !important; }
   border: 2px solid var(--section-accent, #1f1f1f);
 }
 
+/* Glass inner panels (hosts / host updates / lineup) */
+.event-modal__glass-panel.event-modal__section,
+.event-modal__section.event-modal__glass-panel {
+  border-radius: 14px;
+  background:
+    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #050508 100%),
+    radial-gradient(100% 80% at 0% 50%, color-mix(in srgb, var(--c, var(--section-accent)) 12%, transparent), transparent 55%);
+  border: 1px solid color-mix(in srgb, var(--c, var(--section-accent, #39ff14)) 45%, #1a1a14);
+  box-shadow:
+    0 0 0 1px #000,
+    0 16px 36px -16px rgba(0, 0, 0, 0.9),
+    0 0 28px -10px color-mix(in srgb, var(--c, var(--section-accent)) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
 .event-modal__section-label {
   margin-bottom: 12px;
   font-family: var(--font-display);
@@ -8523,16 +8815,41 @@ footer a:hover { color: #00FFFF !important; }
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--section-accent, var(--neon-yellow));
+  color: var(--section-accent, var(--c, var(--neon-yellow)));
 }
 
 .event-hosts-panel.event-modal__section {
   border-width: 1px;
-  border-color: #1f1f1f;
 }
 
 .event-hosts-panel .event-modal__section-label {
-  color: var(--section-accent, var(--neon-yellow));
+  color: var(--section-accent, var(--c, var(--neon-yellow)));
+}
+
+/* Sticky + mid CTAs: restore soft bloom only inside open-event (SoT) */
+.event-modal .event-modal__cta--primary.pdx-glass-btn--solid,
+.event-modal .event-modal__sticky-cta-btn.pdx-glass-btn--solid {
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
+    var(--c, #39ff14) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 24px -4px color-mix(in srgb, var(--c) 65%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+}
+
+.event-modal .event-modal__cta--secondary.pdx-glass-btn--outline,
+.event-modal .event-modal__sticky-cta-btn.pdx-glass-btn--outline {
+  color: var(--c) !important;
+  background: rgba(5, 5, 7, 0.88) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  outline: 1px solid color-mix(in srgb, var(--c) 65%, #000);
+  outline-offset: -2px;
 }
 
 .event-modal__cohost {
@@ -8595,6 +8912,22 @@ footer a:hover { color: #00FFFF !important; }
   padding-top: 20px;
 }
 
+/* Glass action chrome — §16 glass btn shape in event modal */
+.event-modal .pdx-glass-btn,
+.event-modal__action-btn.pdx-glass-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 11px 18px;
+  border-radius: 9px;
+  line-height: 1.2;
+}
+
 .event-modal__action-btn {
   font-size: 0.88rem !important;
   padding: 10px 18px !important;
@@ -8604,9 +8937,9 @@ footer a:hover { color: #00FFFF !important; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-color: var(--neon-cyan) !important;
-  color: var(--neon-cyan) !important;
 }
+
+/* Sticky Tickets primary stays day-accent glass; host row = outline (inherits --c) */
 
 .event-modal__edit-panel {
   margin: 16px 0 8px;
@@ -8791,11 +9124,13 @@ footer a:hover { color: #00FFFF !important; }
   align-items: center;
 }
 
+/* Secondary modal buttons → outlined glass (tokens: --glass-btn-outline-*) */
 .event-modal__btn-outline {
   padding: 8px 16px;
-  border: 1px solid rgba(204, 255, 0, 0.45);
-  background: transparent;
-  color: var(--neon-yellow);
+  border: var(--glass-btn-outline-border);
+  background: var(--glass-btn-outline-bg);
+  color: var(--c, var(--neon-yellow));
+  box-shadow: var(--glass-btn-outline-shadow);
   font-family: var(--font-display);
   font-size: 0.82rem;
   letter-spacing: 0.08em;
@@ -8804,19 +9139,25 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .event-modal__btn-outline--accent {
-  border-color: var(--neon-yellow);
+  --c: var(--neon-yellow, #ccff00);
+  border: var(--glass-btn-outline-border);
+  color: var(--c);
+  background: var(--glass-btn-outline-bg);
+  box-shadow: var(--glass-btn-outline-shadow);
 }
 
 .event-modal__btn-outline--mod {
-  border: 2px solid var(--mod-accent, #888);
-  color: var(--mod-accent, #888);
+  --c: var(--mod-accent, #888);
+  border: var(--glass-btn-outline-border);
+  color: var(--c);
+  background: var(--glass-btn-outline-bg);
+  box-shadow: var(--glass-btn-outline-shadow);
   font-size: 0.88rem;
   padding: 10px 20px;
 }
 
 .event-modal__btn-solid {
   padding: 10px 18px;
-  border: none;
   font-family: var(--font-display);
   font-size: 0.88rem;
   letter-spacing: 0.05em;
@@ -8825,13 +9166,80 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .event-modal__btn-solid--cyan {
-  background: var(--neon-cyan);
-  color: #000;
+  --c: var(--neon-cyan, #19e3ff);
+  color: #050506;
+  background: var(--glass-btn-bg);
+  border: var(--glass-btn-border);
+  box-shadow: var(--glass-btn-shadow);
 }
 
-.event-modal__btn-solid:disabled {
+.event-modal__btn-solid:disabled,
+.event-modal .pdx-glass-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  filter: none;
+}
+
+/* ── Going / RSVP pills inside open-event (outlined glass; motion preserved) ─ */
+.event-modal .attendance-going-pill {
+  color: var(--c, var(--neon-yellow, #ccff00));
+  background: var(--glass-btn-outline-bg);
+  border: var(--glass-btn-outline-border);
+  box-shadow: var(--glass-btn-outline-shadow);
+  /* keep solid-pill sizing; surface only */
+}
+
+.event-modal .attendance-going-pill__dot {
+  background: var(--c, var(--neon-yellow, #ccff00));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c, var(--neon-yellow, #ccff00)) 55%, transparent);
+}
+
+.event-modal .attendance-phrase-option {
+  background: var(--glass-btn-outline-bg);
+  border: 1px solid color-mix(in srgb, var(--phrase-color, var(--c, #ccff00)) 40%, #2a2a2a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.event-modal .attendance-phrase-option:hover {
+  border-color: color-mix(in srgb, var(--phrase-color, var(--c, #ccff00)) 55%, transparent);
+  background: linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--phrase-color, var(--c)) 14%, transparent),
+      color-mix(in srgb, var(--phrase-color, var(--c)) 2%, transparent) 46%
+    ),
+    rgba(255, 255, 255, 0.02);
+}
+
+.event-modal .attendance-phrase-option--active {
+  border-color: color-mix(in srgb, var(--phrase-color, #c8fa3c) 70%, transparent);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 16px -10px var(--phrase-color, #c8fa3c);
+}
+
+.event-modal .attendance-cluster-cta__btn {
+  color: #050506;
+  background: var(--glass-btn-bg);
+  border: var(--glass-btn-border);
+  box-shadow: var(--glass-btn-shadow);
+  /* --c from .event-modal day accent */
+}
+
+/* Calm: zero blur on modal slab (bloom already via --dir-gm:0) */
+html.calm-mode .event-modal,
+:root[data-calm="true"] .event-modal,
+html.calm-mode .event-modal__sticky-cta,
+:root[data-calm="true"] .event-modal__sticky-cta {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #050506 !important;
+}
+
+html.calm-mode .event-modal,
+:root[data-calm="true"] .event-modal {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .event-modal__btn-ghost {
@@ -8896,12 +9304,7 @@ footer a:hover { color: #00FFFF !important; }
   box-shadow: 2px 2px 0 var(--neon-yellow);
 }
 
-.event-modal__tags .event-type-tag--sm,
-.event-modal__tags .event-card-day-tag {
-  font-size: 0.62rem;
-  padding: 1px 8px;
-  line-height: 1.05;
-}
+/* Open-event tag sizes live under .event-modal__tags above (readable override). */
 
 .event-card-meta-tag {
   display: inline-block;
@@ -10579,6 +10982,7 @@ html.calm-mode .board-detail-backdrop {
   line-height: 1.4;
 }
 
+/* Base footer coffee CTA — solid lime glass (matches Pitch a sponsorship) */
 .site-footer__coffee-btn {
   position: relative;
   display: inline-flex;
@@ -10593,29 +10997,36 @@ html.calm-mode .board-detail-backdrop {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  color: #000;
-  background: var(--neon-yellow, #ccff00);
-  border: none;
-  border-radius: 6px;
-  box-shadow: 4px 4px 0 0 #6b1f7a;
+  color: #050506;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--lime, #ccff00);
+  border: 1px solid #000;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .site-footer__coffee-btn:hover {
   text-decoration: none;
-  color: #000;
+  color: #050506;
   filter: brightness(1.06);
-  transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0 0 #6b1f7a;
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
 }
 
 .site-footer__coffee-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 0 #6b1f7a;
+  transform: translateY(1px);
+  filter: brightness(0.98);
 }
 
 .site-footer__coffee-btn:focus-visible {
-  outline: 2px solid var(--neon-cyan, #00ffff);
+  outline: 2px solid var(--lime, #ccff00);
   outline-offset: 4px;
 }
 
@@ -10698,21 +11109,25 @@ html.calm-mode .board-detail-backdrop {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  color: #000;
-  background: var(--neon-yellow, #ccff00);
-  border: none;
-  border-radius: 6px;
-  box-shadow: 4px 4px 0 0 #6b1f7a;
+  color: #050506;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--lime, #ccff00);
+  border: 1px solid #000;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
 }
 
 html.calm-mode .site-footer__coffee-btn,
 html.calm-mode .footer-coffee__btn {
-  box-shadow: 3px 3px 0 0 #444;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 html.calm-mode .site-footer__coffee-btn:hover,
 html.calm-mode .footer-coffee__btn:hover {
-  box-shadow: 4px 4px 0 0 #444;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
   filter: none;
 }
 
@@ -11126,7 +11541,8 @@ html:not(.calm-mode) .calm-mode-toggle__label {
 /* ═══════════════════════════════════════════════════════════
    CALM MODE — high-contrast grayscale dark
    Toggled via html.calm-mode (ThemeContext).
-   Keeps color: avatars + rings, event flyers, active filter tags.
+   Everything greyscale (chrome, neons, rings, badges).
+   KEEP COLOR: photos only (flyers, portraits, map tiles, video).
    ═══════════════════════════════════════════════════════════ */
 
 html.calm-mode {
@@ -11139,9 +11555,10 @@ html.calm-mode {
   --calm-text: #ffffff;
   --calm-text-muted: #a3a3a3;
   --calm-text-subtle: #737373;
-  --calm-accent-active: #CCFF00;
+  /* Active UI stays high-contrast white/grey — no neon chroma */
+  --calm-accent-active: #e5e5e5;
 
-  /* Remap neon tokens → neutral gray (exceptions override below) */
+  /* Remap neon + hub/panel tokens → neutral gray */
   --neon-yellow: #d4d4d4;
   --neon-cyan: #a3a3a3;
   --neon-magenta: #a3a3a3;
@@ -11150,6 +11567,19 @@ html.calm-mode {
   --neon-green: #a3a3a3;
   --neon-red: #a3a3a3;
   --neon-blue: #a3a3a3;
+  --panel-cyan: #a3a3a3;
+  --panel-magenta: #a3a3a3;
+  --panel-lime: #c8c8c8;
+  --panel-orange: #a3a3a3;
+  --panel-purple: #8a8a8a;
+  --panel-pink: #a3a3a3;
+  --status-good: #b0b0b0;
+  --status-warn: #a3a3a3;
+  --status-bad: #888;
+  --hub-cyan: #a3a3a3;
+  --hub-pink: #a3a3a3;
+  --hub-lime: #c8c8c8;
+  --hub-green: #a3a3a3;
   --day-mon: #888;
   --day-tue: #888;
   --day-wed: #888;
@@ -11168,6 +11598,11 @@ html.calm-mode {
   --text-body-muted: #a3a3a3;
   --board-text: #f0f0f0;
   --board-muted: #a3a3a3;
+  /* Kill chroma on glass accent contract (inline --c still overridden below) */
+  --c: #a3a3a3;
+  --_c: #a3a3a3;
+  --dc: #a3a3a3;
+  --dir-gm: 0;
   --calm-hero-bg-opacity: 0.1;
   --calm-hero-scrim-alpha: 0.9;
   --calm-hero-scrim: linear-gradient(
@@ -11426,10 +11861,11 @@ html.calm-mode .btn-neon {
 }
 
 html.calm-mode .btn-neon:hover,
+html.calm-mode .btn-neon,
 html.calm-mode .btn-neon.solid {
-  background: #fff !important;
-  color: #000 !important;
-  border-color: #fff !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+  transform: none !important;
 }
 
 /* ── Filter tags: inactive gray, ACTIVE keeps neon yellow ── */
@@ -11452,17 +11888,17 @@ html.calm-mode .gigs-filterbar button.active,
 html.calm-mode .gifting-filterbar button.active,
 html.calm-mode .events-view-toggle__btn.active,
 html.calm-mode .schedule-toggle__btn.active {
-  border-color: var(--calm-accent-active) !important;
-  color: var(--calm-accent-active) !important;
-  background: rgba(204, 255, 0, 0.1) !important;
-  box-shadow: 0 0 12px rgba(204, 255, 0, 0.14) !important;
+  border-color: #e5e5e5 !important;
+  color: #e5e5e5 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
 }
 
 html.calm-mode .events-view-toggle__btn.active,
 html.calm-mode .schedule-toggle__btn.active,
 html.calm-mode .board-filter-chip.active {
   color: #000 !important;
-  background: var(--calm-accent-active) !important;
+  background: #e5e5e5 !important;
 }
 
 /* ── Other stickers/tags → grayscale ── */
@@ -11477,13 +11913,45 @@ html.calm-mode .event-type-tag {
   text-shadow: none !important;
 }
 
-/* ── KEEP COLOR: avatars + pride glow ──
-   Glow blur lives on ::before — do not strip filter there (calm only kills motion). */
-html.calm-mode .user-avatar,
-html.calm-mode .user-avatar__inner,
+/* ── KEEP COLOR: photos only (faces + flyers + video + map tiles) ── */
+html.calm-mode img,
+html.calm-mode video,
+html.calm-mode picture,
 html.calm-mode .user-avatar__photo,
-html.calm-mode .user-avatar__fallback {
+html.calm-mode .user-avatar__inner img,
+html.calm-mode .user-avatar img,
+html.calm-mode .pdxBoard__img,
+html.calm-mode .pdxRow__thumb img,
+html.calm-mode .poster-card img,
+html.calm-mode .event-modal__poster-img,
+html.calm-mode .event-board-card__poster img,
+html.calm-mode .pdxPlace__logo img,
+html.calm-mode .directory-card img,
+html.calm-mode .hp-card__poster,
+html.calm-mode .hub-feed-card__photo,
+html.calm-mode .feed-aff__slide,
+html.calm-mode .feed-aff__cover,
+html.calm-mode .feed-aff__logo,
+html.calm-mode .featured-event-ad__slide,
+html.calm-mode .leaflet-tile-pane img,
+html.calm-mode .leaflet-marker-pane img,
+html.calm-mode canvas.maplibregl-canvas,
+html.calm-mode .maplibregl-canvas {
   filter: none !important;
+}
+
+/* Avatar chrome greys; photo face stays color (img rule above) */
+html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before,
+html.calm-mode .user-avatar__shimmer {
+  filter: grayscale(1) !important;
+  opacity: 0.45 !important;
+  animation: none !important;
+}
+
+html.calm-mode .user-avatar__fallback {
+  filter: grayscale(1) !important;
+  background: #1a1a1a !important;
+  color: #c8c8c8 !important;
 }
 
 html.calm-mode .site-dashboard-link--avatar {
@@ -11492,11 +11960,96 @@ html.calm-mode .site-dashboard-link--avatar {
   background: #0a0a0a !important;
 }
 
-/* ── KEEP COLOR: event flyers / posters ── */
-html.calm-mode .poster-card img,
-html.calm-mode .event-modal__poster-img,
-html.calm-mode .event-board-card__poster img,
+/* Flyers/cards: solid grey chrome; image inside keeps color via img rule */
 html.calm-mode .schedule-event-card {
+  filter: none !important;
+}
+
+/* Force accent contract grey even when components set inline --c / --_day */
+html.calm-mode .pdxBoard,
+html.calm-mode .pdxRow,
+html.calm-mode .ds-listing-card,
+html.calm-mode .hub-feed-card,
+html.calm-mode .event-modal,
+html.calm-mode .hub-keys,
+html.calm-mode .hub-rail-card,
+html.calm-mode .hub-people-rail,
+html.calm-mode .feed-aff,
+html.calm-mode .featured-event-ad,
+html.calm-mode .pdx-glass-btn,
+html.calm-mode .pdxBtn,
+html.calm-mode .foll,
+html.calm-mode .hub-mobile-tab,
+html.calm-mode .board-listing-card,
+html.calm-mode .board-spotted-card,
+html.calm-mode .spotted-card,
+html.calm-mode .pdxPlace,
+html.calm-mode .pdxPlace__body {
+  --c: #a3a3a3 !important;
+  --_c: #a3a3a3 !important;
+  --_day: #a3a3a3 !important;
+  --_dayt: #c8c8c8 !important;
+  --dc: #a3a3a3 !important;
+  --hub-feed-accent: #a3a3a3 !important;
+  --listing-accent: #a3a3a3 !important;
+  --spotted-accent: #a3a3a3 !important;
+  --event-accent: #a3a3a3 !important;
+  --fea-accent: #a3a3a3 !important;
+  --feed-aff-primary: #a3a3a3 !important;
+  --card-day-color: #a3a3a3 !important;
+  --nb-accent: #a3a3a3 !important;
+  --nb-rim: #a3a3a3 !important;
+  --stats-bloom-c: #666 !important;
+  --stats-bloom: 0 !important;
+}
+
+/* Greyscale neon chrome only — never on parents that wrap photos (filter inherits) */
+html.calm-mode .hub-mobile-tab.is-active,
+html.calm-mode .hub-mobile-bar__pull,
+html.calm-mode .hub-v2-drawer__grip,
+html.calm-mode .foll,
+html.calm-mode .pdx-glass-btn,
+html.calm-mode .pdxBtn:not(.pdxBtn--ghost),
+html.calm-mode .btn-neon,
+html.calm-mode .hub-v2-pill,
+html.calm-mode .hub-feed-card__badge,
+html.calm-mode .hub-thread__badge,
+html.calm-mode .hub-people-row__foll,
+html.calm-mode .ld,
+html.calm-mode .sw.on,
+html.calm-mode .hub-rail-card__kick--cyan,
+html.calm-mode .hub-keys__kicker,
+html.calm-mode .hub-keys__n,
+html.calm-mode .navi.on svg,
+html.calm-mode .seg.on {
+  filter: grayscale(1) !important;
+}
+
+/* Day dots / status pills → flat grey */
+html.calm-mode .dot,
+html.calm-mode .d-mon,
+html.calm-mode .d-tue,
+html.calm-mode .d-wed,
+html.calm-mode .d-thu,
+html.calm-mode .d-fri,
+html.calm-mode .d-sat,
+html.calm-mode .d-sun {
+  background: #888 !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+/* Photos must win over greyscale chrome rules (higher specificity + later) */
+html.calm-mode img,
+html.calm-mode video,
+html.calm-mode picture,
+html.calm-mode .user-avatar__photo,
+html.calm-mode .user-avatar img,
+html.calm-mode .pdxBoard__img,
+html.calm-mode .event-modal__poster-img,
+html.calm-mode .poster-card img,
+html.calm-mode .hub-feed-card__photo,
+html.calm-mode .leaflet-tile-pane img {
   filter: none !important;
 }
 
@@ -12401,27 +12954,63 @@ html.calm-mode .schedule-now-line {
   height: 100%;
 }
 
-.directory-map-wrap {
-  width: 100%;
-  background: #000;
-  border-bottom: 1px solid #1a1a1a;
+.directory-map-wrap,
+.events-map-wrap,
+.events-map-panel,
+.home-map-panel-wrap,
+.home-map-panel,
+.home-main-stage #home-map,
+.nude-beaches-map,
+.nude-beaches-map__canvas,
+.pdx-map-live.pdx-map-surface,
+.pdx-map-live.pdx-map-surface--neutral {
+  background: var(--map-surface-bg, #06060a);
+  border: 1px solid #000;
+  border-radius: 16px;
+  /* Debossed map edge — inward hole-rim only */
+  box-shadow: var(
+    --map-frame-shadow,
+    0 0 0 1px #000,
+    inset 0 0 0 1px rgba(0, 0, 0, 0.85),
+    inset 0 2px 3px rgba(0, 0, 0, 0.9),
+    inset 0 0 28px -8px rgba(0, 0, 0, 0.95),
+    inset 0 0 52px 10px rgba(0, 0, 0, 0.42),
+    inset 0 4px 10px -2px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.045)
+  );
 }
 
-/* Pin color legend under the Directory map */
+.directory-map-wrap {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Pin color legend — OLED glass panel (ref: soft black well); keep ring-pin swatches */
 .directory-map-key {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 14px 20px 16px;
+  margin: 12px auto 16px;
+  padding: 18px 22px 20px;
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 52%),
+    radial-gradient(90% 80% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 58%),
+    #08080c;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 0 0 1px #000,
+    0 20px 44px -18px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -12px 32px -16px rgba(0, 0, 0, 0.75);
 }
 
 .directory-map-key__title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-meta, #8c8980);
-  margin-bottom: 10px;
+  color: #6e6b64;
+  margin-bottom: 14px;
 }
 
 .directory-map-key__list {
@@ -12430,22 +13019,24 @@ html.calm-mode .schedule-now-line {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 16px;
+  gap: 12px 26px;
   align-items: center;
 }
 
 .directory-map-key__item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .directory-map-key__swatch {
+  /* Shape kept: round pin core; ring color still set inline / --rainbow */
   width: 12px;
   height: 12px;
   border-radius: 50%;
   border: 2px solid #000;
   flex: none;
+  box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
 .directory-map-key__swatch--rainbow {
@@ -12460,7 +13051,7 @@ html.calm-mode .schedule-now-line {
     #ff00cc,
     #ff2400
   );
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
 .directory-map-key__label {
@@ -12501,11 +13092,11 @@ html.calm-mode .schedule-now-line {
 }
 
 .directory-page {
-  /* Quieter category glow so place glass stays charcoal (see Directory.css) */
-  --dir-gm: 28;
+  /* Little-card bloom strength (PlaceCard / Directory.css reassert 60) */
+  --dir-gm: 60;
   background:
-    radial-gradient(90% 60% at 12% -8%, rgba(255, 0, 204, 0.07), transparent 55%),
-    radial-gradient(78% 55% at 100% -2%, rgba(0, 255, 255, 0.06), transparent 55%),
+    radial-gradient(90% 60% at 12% -8%, rgba(255, 0, 204, 0.05), transparent 55%),
+    radial-gradient(78% 55% at 100% -2%, rgba(0, 255, 255, 0.04), transparent 55%),
     #0a0a0a;
 }
 
@@ -14548,22 +15139,45 @@ html.calm-mode .board-detail-modal {
   animation: none;
 }
 
-/* Stats band (3-col full bleed) */
+/*
+ * Stats band (full bleed) — columns = --board-stats-cols (default 3)
+ * Home-style grey outlines, no cyan bloom (all pages).
+ * Nude Beaches keeps its own padding/rules in NudeBeaches.css.
+ */
 .board-stats-band {
+  --board-stats-cols: 3;
+  --stats-bloom: 0;
+  --stats-bloom-c: transparent;
+  position: relative;
+  z-index: 1;
   background: #050505;
   border-top: 2px solid #1c1c22;
   border-bottom: 2px solid #1c1c22;
+  box-shadow: none;
+}
+
+.board-stats-band::before {
+  display: none;
+}
+
+html.calm-mode .board-stats-band,
+:root[data-calm="true"] .board-stats-band {
+  --stats-bloom: 0;
+  border-top-color: #1c1c22;
+  border-bottom-color: #1c1c22;
+  box-shadow: none;
 }
 
 .board-stats-band__inner {
   max-width: 1180px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--board-stats-cols, 3), minmax(0, 1fr));
 }
 
 .board-stats-band__item {
-  padding: clamp(20px, 3vw, 30px) clamp(16px, 3vw, 30px);
+  padding: clamp(18px, 2.5vw, 30px) clamp(12px, 2vw, 28px);
+  min-width: 0;
 }
 
 .board-stats-band__item--rule {
@@ -14574,7 +15188,7 @@ html.calm-mode .board-detail-modal {
   display: block;
   font-family: var(--font-board-display);
   font-weight: 900;
-  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-size: clamp(1.75rem, 3.2vw, 3.1rem);
   line-height: 0.82;
   font-variant-numeric: tabular-nums;
 }
@@ -14583,10 +15197,36 @@ html.calm-mode .board-detail-modal {
   display: block;
   margin-top: 11px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: clamp(9px, 1.1vw, 11px);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #8c8980;
+  line-height: 1.35;
+  /* Long About labels wrap instead of overflowing the cell */
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* 4-up bands (About): keep one row on tablet+, tighten type slightly */
+.board-stats-band[data-cols="4"] .board-stats-band__num {
+  font-size: clamp(1.65rem, 2.8vw, 2.75rem);
+}
+
+.board-stats-band[data-cols="4"] .board-stats-band__label {
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 900px) {
+  /* 4 stats → 2×2 so nothing is crushed; 3 stats stay a single row until phone */
+  .board-stats-band[data-cols="4"] .board-stats-band__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .board-stats-band[data-cols="4"] .board-stats-band__item:nth-child(2) {
+    border-right: none;
+  }
+  .board-stats-band[data-cols="4"] .board-stats-band__item:nth-child(-n + 2) {
+    border-bottom: 2px solid #1c1c22;
+  }
 }
 
 @media (max-width: 640px) {
@@ -14596,6 +15236,14 @@ html.calm-mode .board-detail-modal {
   .board-stats-band__item--rule {
     border-right: none;
     border-bottom: 2px solid #1c1c22;
+  }
+  .board-stats-band[data-cols="4"] .board-stats-band__item:nth-child(2),
+  .board-stats-band[data-cols="4"] .board-stats-band__item:nth-child(-n + 2) {
+    border-right: none;
+    border-bottom: 2px solid #1c1c22;
+  }
+  .board-stats-band[data-cols="4"] .board-stats-band__item:last-child {
+    border-bottom: none;
   }
 }
 
@@ -14774,18 +15422,16 @@ html.calm-mode .board-detail-modal {
 
 .board-listing-card--makeover {
   padding: 0;
-  border: 2px solid #1c1c22;
-  border-left: 4px solid var(--listing-accent, #ccff00);
-  border-radius: 7px;
+  /* Edge chrome comes from glass.css (neon rim + black ring / dashed ISO) */
+  border-radius: 14px;
   background: #0c0c0f;
   overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease, filter 0.15s ease;
 }
 
 .board-listing-card--makeover:hover,
 .board-listing-card--makeover.is-expanded {
-  border-color: var(--listing-accent, #ccff00);
-  box-shadow: 0 0 26px -8px var(--listing-accent, #ccff00);
+  filter: brightness(1.04);
   transform: translateY(-2px);
 }
 
@@ -15448,9 +16094,10 @@ html.calm-mode .category-constellation__orb {
 
 .directory-browse-layout__map-mobile .directory-map-wrap,
 .directory-browse-layout__map-desktop .directory-map-wrap {
-  border: 1px solid #1c1c22;
-  border-radius: 8px;
+  border: 1px solid #000;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: var(--map-frame-shadow);
 }
 
 .directory-map-toolbar {
@@ -15577,30 +16224,29 @@ html.calm-mode .category-constellation__orb {
   flex-direction: column;
   min-height: 210px;
   background: #0c0c0f;
-  border: 2px solid #1c1c22;
-  border-left: 4px solid #ff1fa0;
-  border-radius: 7px;
+  /* Neon edge from glass.css; left bar optional via glass rules */
+  border-radius: 14px;
   padding: 20px 20px 17px;
   cursor: pointer;
   overflow: hidden;
   transition:
-    border-color var(--dur-fast, 150ms) ease,
-    box-shadow var(--dur-fast, 150ms) ease,
+    filter var(--dur-fast, 150ms) ease,
     transform var(--dur-fast, 150ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
 }
 .board-spotted-card:hover {
-  border-color: #ff1fa0;
-  box-shadow: 0 0 26px -8px #ff1fa0;
+  filter: brightness(1.04);
   transform: translateY(-2px);
 }
+/* Legacy quote mark — prefer .board-glass-motif; keep as soft fallback */
 .board-spotted-card__quote {
   position: absolute;
   top: -22px;
   right: 6px;
+  z-index: 1;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 120px;
   line-height: 1;
-  color: rgba(255, 31, 160, 0.12);
+  color: color-mix(in srgb, var(--c, #ff1fa0) 18%, transparent);
   pointer-events: none;
 }
 .board-spotted-card__meta {
@@ -15698,23 +16344,91 @@ html.calm-mode .category-constellation__orb {
   position: relative;
   background: #0c0c0f;
   border: 2px solid var(--listing-accent, #ff1fa0);
-  border-radius: 10px;
+  border-radius: 14px;
   width: 100%;
-  max-width: 540px;
+  max-width: 600px;
   max-height: 90vh;
   overflow: auto;
   box-shadow: 0 0 50px -10px var(--listing-accent, #ff1fa0);
-  padding: 22px 22px 24px;
+  padding: 28px 28px 26px;
 }
 
-/* Gig/gift overlay: the wrapper is the single glowing panel (border + glow set
-   inline per-accent). Neutralize the reused board card's own chrome so the
-   accent border wraps the whole thing and the thumbnail clips to the corners. */
+.board-detail-modal__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.board-detail-modal__live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex: none;
+  background: var(--c, #ff00cc);
+  box-shadow: 0 0 10px var(--c, #ff00cc);
+}
+
+.board-detail-modal__meta-line {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.board-detail-modal__quote-title {
+  margin: 0;
+  font-size: clamp(1.55rem, 3.2vw, 2.1rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.board-detail-modal__body {
+  margin: 16px 0 0;
+  line-height: 1.62;
+  white-space: pre-line;
+  color: #c8c5bc;
+  font-size: 0.98rem;
+}
+
+.board-detail-modal__actions {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--c, #ff00cc) 22%, #1c1c22);
+}
+
+.board-detail-modal__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.board-spotted-card__ticks {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: 1;
+  color: color-mix(in srgb, var(--c, #ff00cc) 55%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Gig/gift overlay: the wrapper is the single glowing panel (deep-glass chrome
+   via glass.css). Neutralize the reused board card's own chrome so the
+   accent bloom wraps the whole thing and the thumbnail clips to the corners. */
 .board-post-overlay > .board-listing-card {
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
   margin: 0 !important;
+  background: transparent !important;
 }
 
 .board-detail-modal__quote {

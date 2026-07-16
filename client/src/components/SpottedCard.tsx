@@ -1,9 +1,13 @@
+import type { CSSProperties } from "react";
 import { MapPin, Share2 } from "lucide-react";
 import type { MissedConnectionPost } from "./MissedConnectionsPanel";
 import { shareMissedConnectionStory } from "@/lib/shareMissedConnection";
 import { useToast } from "@/hooks/use-toast";
+import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF00CC", "#39FF14", "#A855F7", "#FF6600"];
+/** Deep-glass board accent for Missed Connections (SoT §2.4). */
+const MC_GLASS = "#FF00CC";
 
 export function spottedAccent(id: number): string {
   return ACCENT_CYCLE[Math.abs(id) % ACCENT_CYCLE.length];
@@ -57,10 +61,16 @@ export default function SpottedCard({
   const displayTitle = post.title?.trim() || post.body.trim().split(/\n/)[0]?.slice(0, 80) || "Missed connection";
 
   if (makeover) {
+    const glassVars = {
+      "--spotted-accent": MC_GLASS,
+      "--listing-accent": MC_GLASS,
+      "--c": MC_GLASS,
+      "--_c": MC_GLASS,
+    } as CSSProperties;
     return (
       <article
-        className="board-spotted-card"
-        style={{ "--spotted-accent": kind.color } as React.CSSProperties}
+        className="board-spotted-card board-spotted-card--glass"
+        style={glassVars}
         onClick={onReply}
         onKeyDown={e => {
           if (e.key === "Enter" || e.key === " ") {
@@ -71,16 +81,18 @@ export default function SpottedCard({
         role="button"
         tabIndex={0}
       >
-        <span className="board-spotted-card__quote" aria-hidden="true">&rdquo;</span>
+        <BoardGlassMotif variant="quote" />
+        {/* Corner tick marks (design board cards) */}
+        <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
         <div className="board-spotted-card__meta">
-          <span className="board-spotted-card__kind" style={{ color: kind.color }}>{kind.label}</span>
+          <span className="board-spotted-card__kind" style={{ color: MC_GLASS }}>Missed Connections</span>
           <span className="board-spotted-card__time">{spottedTimeAgo(post.createdAt)}</span>
         </div>
         <h4 className="board-spotted-card__title">{displayTitle}</h4>
         <p className="board-spotted-card__body">{post.body}</p>
         <div className="board-spotted-card__foot">
           <span className="board-spotted-card__place">{spottedPlace(post)}</span>
-          {!post.isMine && !isClosed && <span className="board-spotted-card__cta">Reply →</span>}
+          {!post.isMine && !isClosed && <span className="board-spotted-card__cta" style={{ color: MC_GLASS }}>Reply →</span>}
         </div>
       </article>
     );
@@ -98,14 +110,20 @@ export default function SpottedCard({
     }
   };
 
+  const glassAccent = accentColor || MC_GLASS;
   return (
     <article
-      className="spotted-card"
-      style={{ "--spotted-accent": accentColor, animationDelay: `${animDelay}ms` } as React.CSSProperties}
+      className="spotted-card spotted-card--glass"
+      style={{
+        "--spotted-accent": glassAccent,
+        "--c": glassAccent,
+        "--_c": glassAccent,
+        animationDelay: `${animDelay}ms`,
+      } as CSSProperties}
     >
       {isClosed && <div className="spotted-card__found-stamp" aria-label="Found" />}
 
-      <span className="spotted-card__quote-mark" aria-hidden="true">❝</span>
+      <BoardGlassMotif variant="quote" />
 
       <p className="spotted-card__body">{post.body}</p>
 

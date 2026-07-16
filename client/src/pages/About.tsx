@@ -10,14 +10,14 @@ import type { Event } from "@shared/schema";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
 import EventModal from "@/components/EventModal";
 import ScrollReveal from "@/components/ScrollReveal";
-import TipSupport from "@/components/TipSupport";
+import BoardStatsBar from "@/components/BoardStatsBar";
+import { SupportPanel, AffiliatePartners, SponsorsPanel } from "@/components/support";
+import InfrastructureGrid from "@/components/home/InfrastructureGrid";
 import "./About.css";
 
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const PROFILE_URL = "/u/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
-const COCKBLOCK_URL = "https://cockblocktoys.com/tucker060";
-const MR_S_LEATHER_URL = "https://www.mr-s-leather.com/?acc=TUCKERMAX";
 
 /** Match Yes Coach / Stank by title — never hardcode event ids (they differ local vs prod). */
 function isYesCoachEvent(title: string): boolean {
@@ -32,12 +32,6 @@ const VALUES = [
   { title: "Your data is not for sale.", text: "Not now, not later, not for a nice offer." },
   { title: "We moderate the clearly over the line stuff.", text: "The rest of the community runs free." },
   { title: "One person builds this.", text: "Good people help. It is still not a committee." },
-] as const;
-
-const SPONSOR_CHECKS = [
-  "Queer owned or genuinely queer loving.",
-  "Treats its people right. Pays them right.",
-  "Does not need us to scrub anything clean first.",
 ] as const;
 
 const FAQ = [
@@ -101,16 +95,26 @@ export default function About() {
     }
   }, [yesCoachEvent]);
 
+  const heroStats = useMemo(
+    () => [
+      { num: eventCount, label: "Events, and counting", color: "#ccff00" },
+      { num: 7, label: "Days, one guide", color: "#19e3ff" },
+      { num: 0, label: "To browse. Always. ($0)", color: "#ff1fa0" },
+      { num: 1, label: "Guide — room for more", color: "#ffb020" },
+    ],
+    [eventCount],
+  );
+
   return (
-    <div className="about-v2">
-      {/* HERO — poster wall + big event counter title */}
-      <section className="about-v2-hero">
+    <div className="about-v2 board-page--makeover">
+      {/* Poster-wall hero (pride-posters-wall.jpg) — restored */}
+      <section className="about-v2-hero" aria-label="About">
         <div className="about-v2-hero__scrim" aria-hidden="true" />
         <div className="about-v2-hero__inner">
           <div>
             <div className="about-v2-hero__kicker">
               <span className="about-v2-hero__dot" aria-hidden="true" />
-              About · Portland Pride 2026
+              About · Portland Pride 2026 · July 13–19
             </div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">
@@ -134,41 +138,7 @@ export default function About() {
           </div>
         </div>
       </section>
-
-      {/* STAT BAND */}
-      <section className="about-v2-stats" aria-label="Guide stats">
-        <div className="about-v2-stats__grid">
-          <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--lime about-v2-stats__num--pop">
-              <CountUpValue
-                key={eventCount > 0 ? "stats-ready" : "stats-pending"}
-                value={eventCount}
-              />
-            </div>
-            <div className="about-v2-stats__label">Events, and counting</div>
-          </div>
-          <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--cyan about-v2-stats__num--pop">
-              <CountUpValue value={7} />
-            </div>
-            <div className="about-v2-stats__label">Days, one guide</div>
-          </div>
-          <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--pink about-v2-stats__num--pop">
-              $<CountUpValue value={0} />
-            </div>
-            <div className="about-v2-stats__label">To browse. Always.</div>
-          </div>
-          <div className="about-v2-stats__cell">
-            <div className="about-v2-stats__num about-v2-stats__num--amber about-v2-stats__num--pop">
-              <CountUpValue value={1} />
-            </div>
-            <div className="about-v2-stats__label">Guide with all our events, and room for more</div>
-          </div>
-        </div>
-      </section>
-
-      <hr className="pdx-rainbow-rule about-v2-seam" aria-hidden="true" />
+      <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
 
       {/* MANIFESTO */}
       <section className="about-v2-manifesto" aria-labelledby="about-manifesto-title">
@@ -330,8 +300,7 @@ export default function About() {
                 Open for{" "}
                 <span className="about-v2-work__headline-cyan">business</span>
                 {" "}and{" "}
-                <span className="about-v2-work__headline-lime">collaborative projects</span>
-                .
+                <span className="about-v2-work__headline-lime">collaborative projects.</span>
               </h3>
               <p className="about-v2-work__support">
                 Looking for partners who want to build with the community: brand work, events, platforms,
@@ -348,8 +317,8 @@ export default function About() {
                   Business inquiries, collabs, and a good handshake on request.
                 </span>
                 <div className="about-v2-work__ctas">
-                  <Link href="/resume">
-                    <Button as="span" variant="solid" accent="cyan" size="md" arrow>
+                  <Link href="/resume" className="about-v2-work__cta-link">
+                    <Button as="span" variant="solid" accent="cyan" size="md" arrow className="about-v2-work__btn">
                       View resume
                     </Button>
                   </Link>
@@ -358,6 +327,7 @@ export default function About() {
                     variant="neon"
                     accent="cyan"
                     size="md"
+                    className="about-v2-work__btn"
                     onClick={() => setContactModal("message")}
                   >
                     Pitch me
@@ -433,103 +403,9 @@ export default function About() {
       <section className="about-v2-support">
         <ScrollReveal>
           <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--lime">Keep it free</div>
-            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>
-              Help keep it free for <span className="hl">everyone else</span>
-            </h2>
-
-            <div className="about-v2-donate about-v2-donate--panel">
-              <div className="about-v2-donate__copy">
-                <h3 className="about-v2-donate__h3">Keep this guide alive</h3>
-                <p>
-                  Servers and domains cost money. Time costs the most. If this pointed you toward one good night,
-                  chip in and it stays free for the next person. Venmo is one tap. Card and Apple Pay use a secure
-                  Stripe checkout when it is turned on.
-                </p>
-              </div>
-              <div className="about-v2-donate__cta">
-                <TipSupport variant="about" />
-              </div>
-            </div>
-
-            <div className="about-v2-partners">
-              <p className="about-v2-partners__kicker">
-                <span className="about-v2-partners__star" aria-hidden="true">*</span>
-                {" "}Or shop through these links at these partner brands
-              </p>
-              <div className="about-v2-partners__tiles">
-                <a
-                  className="about-v2-partners__tile about-v2-partners__tile--cockblock"
-                  href={COCKBLOCK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="about-v2-partners__badge">10% OFF CODE: TUCKERMAX</span>
-                  <img
-                    src="/about/cockblock.png"
-                    alt="CockBlock Toys"
-                    className="about-v2-partners__logo about-v2-partners__logo--cockblock"
-                    width={276}
-                    height={77}
-                    decoding="async"
-                  />
-                </a>
-                <a
-                  className="about-v2-partners__tile about-v2-partners__tile--mrs"
-                  href={MR_S_LEATHER_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src="/about/mr-s-leather.png"
-                    alt="Mr. S Leather"
-                    className="about-v2-partners__logo about-v2-partners__logo--mrs"
-                    width={300}
-                    height={72}
-                    decoding="async"
-                  />
-                </a>
-              </div>
-              <p className="about-v2-partners__note">
-                Affiliate links. You pay the same, shop through this link, the guide gets a small cut.
-                CockBlock: 10% off with code{" "}
-                <span className="about-v2-partners__code">TUCKERMAX</span>.
-              </p>
-            </div>
-
-            <div className="about-v2-sponsors__grid">
-              <div className="about-v2-sponsors__copy">
-                <div className="about-v2__kicker about-v2__kicker--lime">Sponsors</div>
-                <p>
-                  Sponsors can buy featured posts in the scene feed and/or ads on the site. That is how this
-                  stays free to browse. The bar is simple: you need to be part of the community or already
-                  support what we are building. No scrubbing your brand first. No random corporate Pride
-                  cosplay.
-                </p>
-                <p>
-                  And it does not stop on July 19. After Pride week this becomes a{" "}
-                  <strong className="about-v2-sponsors__strong">year round resource</strong> for the scene, so your
-                  support keeps working long after the parade.
-                </p>
-                <Button
-                  type="button"
-                  variant="solid"
-                  accent="lime"
-                  size="md"
-                  onClick={() => setContactModal("sponsor")}
-                >
-                  Pitch a sponsorship
-                </Button>
-              </div>
-              <div className="about-v2-sponsors__checks">
-                {SPONSOR_CHECKS.map(item => (
-                  <div key={item} className="about-v2-sponsors__check">
-                    <span className="mark" aria-hidden="true">✓</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SupportPanel />
+            <AffiliatePartners />
+            <SponsorsPanel onPitch={() => setContactModal("sponsor")} />
           </div>
         </ScrollReveal>
       </section>
@@ -542,24 +418,7 @@ export default function About() {
             <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
               The whole city, <span className="hl">not the sanitized bits</span>
             </h2>
-            <div className="about-v2-infra__grid">
-              <Link href="/pride-work" className="about-v2-infra__card about-v2-infra__card--cyan">
-                <h3>Gigs</h3>
-                <p>Do you offer a trade, need work, or want to put your talents out there? Check gigs.</p>
-              </Link>
-              <Link href="/gifting" className="about-v2-infra__card about-v2-infra__card--amber">
-                <h3>Gifting</h3>
-                <p>Need something for Pride week or have old Pride gear collecting dust? Hit gifting.</p>
-              </Link>
-              <Link href="/spotted" className="about-v2-infra__card about-v2-infra__card--pink">
-                <h3>Missed connections</h3>
-                <p>Trying to find someone after a Pride event? That&apos;s why missed connections exists.</p>
-              </Link>
-              <Link href="/nude-beaches" className="about-v2-infra__card about-v2-infra__card--lime">
-                <h3>Nude beaches</h3>
-                <p>Want to make new friends at the river or catch a ride there or back? Check out the nude beach section.</p>
-              </Link>
-            </div>
+            <InfrastructureGrid />
           </div>
         </ScrollReveal>
       </section>

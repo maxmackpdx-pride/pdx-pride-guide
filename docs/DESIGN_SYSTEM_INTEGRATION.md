@@ -2,6 +2,14 @@
 
 **Rule:** Only replace surfaces that have a clear DS component spec. Everything else stays as-is until there is a rule.
 
+**Surface chrome (2026-07-16):** Deep-glass / OLED-neon is the **canonical card/map/button surface standard** and **overrides** the prior lite-glass + default brutal-CTA look. Package + tokens:
+
+- `docs/handoffs/deep-glass-2026-07-16/` (`Card System.html`, migration prompts, screenshots)
+- `client/src/components/ds/tokens/glass.css` — `--glass-card`, sheen, poster-well, glass-btn, map-surface, `--edge-deboss`
+- `client/src/components/ds/glass.ts` · `mapTheme.ts`
+
+Layout, spacing, fonts, and type scale are unchanged. Feature-level motion outside glass is preserved (`GROK_ANIMATION_MIGRATION.md` §6).
+
 **Claude Design / agents:** Prefer `design-system/` (tokens + previews + `EVENTS_GUIDE.md`) as the portable kit. Production React lives in `client/src/components/ds/`.
 
 ## Source of truth chain

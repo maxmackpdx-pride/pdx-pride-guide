@@ -1,0 +1,404 @@
+/* ============================================================
+   Promoter intake — deep-glass surfaces
+   SoT: deep-glass-2026-07-16 §2.10 · 11-promoter-intake.png
+        + user design (strong neon edge bloom, solid status chips)
+   Layout / type scale unchanged — surface only.
+   ============================================================ */
+
+.pi-intake {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ── Section head ─────────────────────────────────────────── */
+
+.pi-intake__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pi-intake__kicker {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pi-intake__kicker-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex: none;
+  background: var(--neon-yellow, #ccff00);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-yellow, #ccff00) 70%, transparent);
+}
+
+.pi-intake__kicker-label {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--neon-yellow, #ccff00);
+}
+
+.pi-intake__meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--text-faint, #666);
+  padding-top: 4px;
+}
+
+/* ── Verified banner — dark glass + soft lime rim (design image) ─ */
+
+.pi-verified {
+  --c: var(--neon-yellow, #ccff00);
+  --dir-gm: 42;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 14px;
+  padding: 16px 18px;
+  background:
+    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%),
+    radial-gradient(110% 60% at 50% -10%, color-mix(in srgb, var(--c) 12%, transparent), transparent 55%);
+  border: 1px solid color-mix(in srgb, var(--c) 48%, #1a1a14);
+  box-shadow:
+    0 0 0 1px #000,
+    0 20px 40px -20px rgba(0, 0, 0, 0.9),
+    0 0 22px -8px color-mix(in srgb, var(--c) 45%, transparent),
+    0 0 40px -14px color-mix(in srgb, var(--c) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 35%, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.pi-verified::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    133deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02) 16%,
+    transparent 40%
+  );
+}
+
+.pi-verified__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pi-verified__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex: none;
+  background: var(--neon-yellow, #ccff00);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-yellow, #ccff00) 75%, transparent);
+}
+
+.pi-verified__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--neon-yellow, #ccff00);
+  line-height: 1.15;
+}
+
+.pi-verified__body {
+  margin: 4px 0 0;
+  color: var(--text-mid, #e6e3da);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* ── Paths ────────────────────────────────────────────────── */
+
+.pi-paths {
+  margin-top: 2px;
+}
+
+.pi-paths__kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--panel-cyan, #19e3ff);
+  margin-bottom: 8px;
+}
+
+.pi-paths__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.55rem, 3.2vw, 2rem);
+  text-transform: uppercase;
+  color: var(--text-hi, #fff);
+  margin: 0 0 20px;
+  line-height: 1.05;
+}
+
+.pi-paths__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Action row — accent glass + strong neon rim (design) ── */
+
+.pi-action-row {
+  --c: var(--neon-yellow, #ccff00);
+  --badge-c: var(--c);
+  --dir-gm: 72;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 22px;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+  border-radius: 14px;
+  padding: 22px 24px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  isolation: isolate;
+  overflow: visible;
+  /* Explicit OLED glass so bloom always tracks local --c */
+  background:
+    radial-gradient(
+      90% 70% at 50% 46%,
+      #000 0%,
+      #000 34%,
+      #030304 70%,
+      color-mix(in srgb, var(--c) 6%, #050408) 100%
+    ),
+    radial-gradient(
+      120% 78% at 50% 122%,
+      color-mix(in srgb, var(--c) 18%, transparent),
+      transparent 56%
+    ) !important;
+  border: 1.5px solid color-mix(in srgb, var(--c) 62%, #101014) !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 28px 52px -22px rgba(0, 0, 0, 0.94),
+    0 0 28px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.35%), transparent),
+    0 0 48px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 0.85%), transparent),
+    0 0 14px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.1%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 32px -24px color-mix(in srgb, var(--c) 38%, transparent) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Corner sheen (override generic ::after so we own stacking) */
+.pi-action-row.pdx-glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(
+      133deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.03) 14%,
+      transparent 36%
+    ),
+    radial-gradient(
+      70% 55% at 108% 112%,
+      rgba(255, 255, 255, 0.08),
+      color-mix(in srgb, var(--c) 12%, transparent) 40%,
+      transparent 70%
+    );
+}
+
+.pi-action-row:hover,
+.pi-action-row:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  filter: brightness(1.06) saturate(1.06);
+  border-color: color-mix(in srgb, var(--c) 78%, #101014) !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 32px 56px -20px rgba(0, 0, 0, 0.95),
+    0 0 36px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.55%), transparent),
+    0 0 56px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.05%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 60%, rgba(255, 255, 255, 0.14)),
+    inset 0 0 32px -20px color-mix(in srgb, var(--c) 45%, transparent) !important;
+}
+
+.pi-action-row:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: 3px;
+}
+
+/* Content above sheen */
+.pi-action-row__num,
+.pi-action-row__text,
+.pi-action-row__arrow {
+  position: relative;
+  z-index: 3;
+}
+
+.pi-action-row .pdx-refract-seam {
+  z-index: 5;
+}
+
+.pi-action-row__num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.7rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--c);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.pi-action-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pi-action-row__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--text-hi, #fff);
+  line-height: 1;
+}
+
+.pi-action-row__desc {
+  font-size: 0.95rem;
+  color: var(--text-mid, #e6e3da);
+  line-height: 1.5;
+}
+
+.pi-action-row__desc strong {
+  color: var(--text-hi, #fff);
+  font-weight: 700;
+}
+
+/* Status badge — all chips share the same solid glass pill recipe */
+.pi-action-row__badge {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 6px 12px 5px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* Solid glass fill — --badge-c (lime for goes-live; row accent otherwise) */
+.pi-action-row__badge--solid,
+.pi-action-row__badge--outline {
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--badge-c, var(--c)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow:
+    0 0 14px -4px color-mix(in srgb, var(--badge-c, var(--c)) 65%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+}
+
+.pi-action-row__arrow {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  color: var(--text-faint, #666);
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.pi-action-row:hover .pi-action-row__arrow,
+.pi-action-row:focus-visible .pi-action-row__arrow {
+  color: var(--c);
+}
+
+@media (max-width: 560px) {
+  .pi-action-row {
+    gap: 14px;
+    padding: 18px 16px;
+  }
+
+  .pi-action-row__num {
+    font-size: 1.4rem;
+  }
+
+  .pi-action-row__arrow {
+    font-size: 1.4rem;
+  }
+}
+
+/* Calm */
+html.calm-mode .pi-action-row,
+:root[data-calm="true"] .pi-action-row {
+  --dir-gm: 0;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 18px 36px -18px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+html.calm-mode .pi-action-row:hover,
+html.calm-mode .pi-action-row:focus-visible,
+:root[data-calm="true"] .pi-action-row:hover,
+:root[data-calm="true"] .pi-action-row:focus-visible {
+  transform: none;
+  filter: none;
+}
+
+html.calm-mode .pi-verified,
+:root[data-calm="true"] .pi-verified {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    0 0 0 1px #000,
+    0 16px 32px -18px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pi-action-row .pdx-refract-seam {
+    animation: none;
+  }
+
+  .pi-action-row:hover,
+  .pi-action-row:focus-visible {
+    transform: none;
+  }
+}

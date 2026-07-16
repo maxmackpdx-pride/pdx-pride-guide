@@ -44,20 +44,45 @@
   flex: 1;
 }
 
+/* Dense event grid: skip offscreen paint work; cards are nearly opaque so
+   backdrop-filter only costs scroll FPS (no visible glass through the slab).
+   No contain:paint — that clips day bloom + hover lift. */
+.events-poster-grid > .ds-listing-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+}
+
+.events-poster-grid .pdxBoard {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Quiet top-seam scroll while the grid is dense (background-position thrash) */
+.events-poster-grid .pdxBoard::before {
+  animation: none !important;
+  background-size: auto;
+  background-position: 0 50%;
+}
+
 /* Grid thumbnails — fill the 2:3 poster frame (modal shows full flyer) */
 .events-poster-grid .pdxBoard__img {
   object-fit: cover;
   object-position: center top;
 }
 
+/* Hover lift — !important beats any residual animation fill on transform */
 .ds-listing-card:hover .pdxBoard {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--_day, var(--neon-cyan)) 40%, var(--border-default, #2b2b2b));
-  box-shadow: 0 0 28px color-mix(in srgb, var(--_day, var(--neon-cyan)) 40%, transparent);
+  transform: translateY(-4px) !important;
+  filter: brightness(1.06) saturate(1.08);
 }
 
 .ds-listing-card--list:hover .pdxRow {
-  transform: translateY(-1px);
-  background: var(--surface-card-hover, #141414);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--_day, var(--neon-cyan)) 24%, transparent);
+  transform: translateY(-2px) !important;
+  filter: brightness(1.06) saturate(1.08);
+}
+
+/* Stagger entrance delay when --i is set (grid index); fill-mode stays backwards */
+.ds-listing-card .pdxBoard,
+.ds-listing-card .pdxRow {
+  animation-delay: calc(var(--i, 0) * 40ms);
 }

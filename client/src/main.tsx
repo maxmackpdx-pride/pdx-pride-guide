@@ -4,7 +4,8 @@ import App from "./App";
 
 import {
   installScrollRecenterListeners,
-  resetPageScroll,
+  scheduleScrollReset,
+  ensurePageCentered,
 } from "./lib/resetPageScroll";
 import { captureInstallPrompt, registerServiceWorker } from "./lib/pwa";
 import { listenForPushSubscriptionChanges } from "./lib/pushNotifications";
@@ -38,11 +39,10 @@ if (typeof window !== "undefined") {
   }
 }
 
-resetPageScroll();
-requestAnimationFrame(resetPageScroll);
+// Pin once on boot; delayed top:0 spam was causing pages to jump upward while scrolling
+scheduleScrollReset();
 window.addEventListener("load", () => {
-  resetPageScroll();
-  requestAnimationFrame(resetPageScroll);
+  ensurePageCentered();
 }, { once: true });
 installScrollRecenterListeners();
 

@@ -49,9 +49,11 @@
 
 .events-page .events-map-wrap {
   width: 100%;
-  background: #000;
-  border-bottom: 1px solid #1a1a1a;
+  background: var(--map-surface-bg, #06060a);
+  border: 1px solid #000;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: var(--map-frame-shadow);
 }
 
 .events-page .events-map-row--solo .directory-map {
@@ -67,6 +69,18 @@
   .events-page .events-map-row--solo .events-map-panel {
     height: clamp(440px, 52vh, 600px);
   }
+}
+
+/* Past board view chip — sits with day categories */
+.events-page .events-filter-chip--past[aria-pressed="true"] {
+  background: #2a2a32;
+  border-color: #6e6b64;
+  color: #f0ede6;
+}
+
+.events-page .events-past-hint {
+  color: var(--text-meta, #8c8980);
+  font-weight: 600;
 }
 
 /* Board / Schedule tabs — right-aligned below map, 20% larger than board standard */

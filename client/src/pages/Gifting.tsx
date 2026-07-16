@@ -31,11 +31,11 @@ const PICKUP = ["Open Grab", "Porch pickup", "Public meetup", "Event handoff", "
 
 const HOW_IT_WORKS: Array<{ title: string; body: string; color: string }> = [
   { title: "Post it", body: "Gift it, or search for it.", color: "#ccff00" },
-  { title: "Add photos", body: "Up to two. The site makes them fit.", color: "#19e3ff" },
-  { title: "Three hands max", body: "Only three people can raise a hand on a gift.", color: "#ff1fa0" },
-  { title: "Poster picks", body: "They choose one and send a message.", color: "#ff8c00" },
+  { title: "Add photos", body: "Up to two. The site makes them fit.", color: "#ccff00" },
+  { title: "Three hands max", body: "Only three people can raise a hand on a gift.", color: "#ff8c00" },
+  { title: "Poster picks", body: "They choose one and send a message.", color: "#ccff00" },
   { title: "Hand it off", body: "Porch, public meetup, or event handoff.", color: "#ccff00" },
-  { title: "Stamp it done", body: "Gifted or Found, then it leaves the feed.", color: "#19e3ff" },
+  { title: "Stamp it done", body: "Gifted or Found, then it leaves the feed.", color: "#ccff00" },
 ];
 
 const blankForm = {
@@ -48,9 +48,10 @@ const blankForm = {
   acceptRules: false,
 };
 
+/** Gifting board accent is lime (#CCFF00) for gift + ISO; grab stays orange. */
 const ACCENT = {
   GIFT: "#ccff00",
-  ISO: "#19e3ff",
+  ISO: "#ccff00",
   GRAB: "#ff8c00",
 } as const;
 
@@ -209,7 +210,7 @@ export default function Gifting() {
   const chipDefs: Array<{ key: string; label: string; accent: string }> = [
     { key: "ALL", label: "All", accent: "lime" },
     { key: "GIFT", label: "Gift", accent: "lime" },
-    { key: "ISO", label: "In search of", accent: "cyan" },
+    { key: "ISO", label: "In search of", accent: "lime" },
     { key: "GRAB", label: "Open grab", accent: "orange" },
   ];
 
@@ -222,7 +223,7 @@ export default function Gifting() {
             <Button variant="solid" accent="lime" size="lg" arrow onClick={() => openForm("GIFT")}>
               Post a gift
             </Button>
-            <Button variant="neon" accent="cyan" size="lg" onClick={() => openForm("ISO")}>
+            <Button variant="neon" accent="lime" size="lg" onClick={() => openForm("ISO")}>
               Post an ISO
             </Button>
           </>
@@ -241,7 +242,7 @@ export default function Gifting() {
       <ScrollReveal>
         <BoardHowItWorks
           className="gifting-how"
-          kickerTone="cyan"
+          kickerTone="lime"
           title={<>How Gift with <span className="board-how__title-accent">Pride</span> works</>}
           lede="Give what you can. Ask for what you need. Keep it local, free, and kind. Posts go live right away; anything that breaks the rules gets pulled."
           steps={HOW_IT_WORKS}
@@ -383,13 +384,13 @@ export default function Gifting() {
         {isLoading ? (
           <BoardLoadingState label="Loading gifting posts" />
         ) : isError ? (
-          <div className="board-empty" style={{ borderColor: "#00FFFF" }}>
-            <Gift size={40} style={{ color: "#00FFFF", margin: "0 auto" }} />
+          <div className="board-empty" style={{ borderColor: "#ccff00" }}>
+            <Gift size={40} style={{ color: "#ccff00", margin: "0 auto" }} />
             <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
             <p className="board-copy-sm">
               {error instanceof Error ? error.message : "The gifting board API is unavailable right now."}
             </p>
-            <Button variant="neon" accent="cyan" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>
+            <Button variant="neon" accent="lime" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>
               Try again
             </Button>
           </div>
@@ -403,7 +404,7 @@ export default function Gifting() {
               <Button variant="solid" accent="lime" onClick={() => openForm("GIFT")}>
                 Post a gift
               </Button>
-              <Button variant="neon" accent="cyan" onClick={clearFilters}>
+              <Button variant="neon" accent="lime" onClick={clearFilters}>
                 Clear filters
               </Button>
             </div>

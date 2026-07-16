@@ -127,12 +127,10 @@ p { margin: 0; }
   overflow: hidden;
 }
 
+/* Rainbow top seam on event/schedule/hub cards — NOT on board quote cards (MC/gifts/gigs) */
 .pdxBoard::before,
 .pdxRow::before,
-.board-listing-card::before,
 .event-board-card::before,
-.board-spotted-card::before,
-.spotted-card::before,
 .schedule-event-card::before,
 .card.fitem.fitem--glow::before,
 .featured-event-ad::before {
@@ -157,6 +155,14 @@ p { margin: 0; }
   animation:
     pdxSeamFlow 3.4s linear infinite,
     pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite;
+}
+
+/* Board quote cards: no rainbow seam — accent neon frame only */
+.board-listing-card::before,
+.board-spotted-card::before,
+.spotted-card::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* Text stroked in rainbow (headline accent word) */

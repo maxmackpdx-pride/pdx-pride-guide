@@ -24,7 +24,7 @@ const CSS = `
 /* selected, outline look (like "ALL") */
 .pdxChip[aria-pressed="true"]{
   color:var(--_c,var(--lime)); border-color:var(--_c,var(--lime));
-  box-shadow:0 0 14px -4px var(--_c,var(--lime));
+  box-shadow:0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.08);
 }
 /* selected, fill look (opt-in) */
 .pdxChip--fill[aria-pressed="true"]{

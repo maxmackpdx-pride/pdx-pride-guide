@@ -194,6 +194,12 @@ export default function Directory() {
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
+  const [placeOriginRect, setPlaceOriginRect] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
   // Lazy init — function form so routePlaceId is actually evaluated (Boolean(fn) was a bug).
   const [showGrid, setShowGrid] = useState(() => directoryHasDeepLink() || Boolean(routePlaceId));
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
@@ -217,7 +223,18 @@ export default function Directory() {
   }, [activeType, searchQuery]);
 
   const openPlace = useCallback(
-    (biz: Business) => {
+    (biz: Business, originEl?: HTMLElement | null) => {
+      if (originEl) {
+        const r = originEl.getBoundingClientRect();
+        setPlaceOriginRect({
+          top: r.top,
+          left: r.left,
+          width: r.width,
+          height: r.height,
+        });
+      } else {
+        setPlaceOriginRect(null);
+      }
       setSelectedPlace(biz);
       setShowGrid(true);
       setLocation(`${placePath(biz.id, biz.name)}${directoryQuerySuffix()}`);
@@ -227,21 +244,25 @@ export default function Directory() {
 
   const closePlace = useCallback(() => {
     setSelectedPlace(null);
+    setPlaceOriginRect(null);
     setLocation(`/directory${directoryQuerySuffix()}`);
   }, [setLocation, directoryQuerySuffix]);
 
   // Deep link: /directory/:id/:slug or legacy ?place= — open when present, clear when gone (browser back).
+  // Origin rect is owned by openPlace (card click). Deep links leave it null for soft enter.
   useEffect(() => {
     if (!businesses.length) return;
     const queryPlaceId = Number(new URLSearchParams(window.location.search).get("place"));
     const placeId = routePlaceId || (Number.isFinite(queryPlaceId) && queryPlaceId > 0 ? queryPlaceId : null);
     if (!placeId) {
       setSelectedPlace(null);
+      setPlaceOriginRect(null);
       return;
     }
     const match = businesses.find(b => b.id === placeId);
     if (!match) {
       setSelectedPlace(null);
+      setPlaceOriginRect(null);
       return;
     }
     setSelectedPlace(match);
@@ -821,7 +842,7 @@ export default function Directory() {
                       <DirectoryCard
                         key={biz.id}
                         biz={biz}
-                        onClick={() => openPlace(biz)}
+                        onClick={(el) => openPlace(biz, el)}
                         onRequireAuth={() => setShowAuth(true)}
                       />
                     ))}
@@ -846,7 +867,13 @@ export default function Directory() {
       )}
 
       {selectedPlace && (
-        <PlaceModal place={selectedPlace} onClose={closePlace} onRequireAuth={() => setShowAuth(true)} />
+        <PlaceModal
+          key={selectedPlace.id}
+          place={selectedPlace}
+          originRect={placeOriginRect}
+          onClose={closePlace}
+          onRequireAuth={() => setShowAuth(true)}
+        />
       )}
 
       <BoardCloseSeam
@@ -895,7 +922,7 @@ function DirectoryCard({
   onRequireAuth,
 }: {
   biz: Business;
-  onClick?: () => void;
+  onClick?: (el: HTMLElement) => void;
   onRequireAuth?: () => void;
 }) {
   const upcomingEvents = biz.upcomingEvents ?? [];
@@ -908,7 +935,9 @@ function DirectoryCard({
   return (
     <PlaceCard
       name={biz.name}
-      onClick={onClick}
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        onClick?.(e.currentTarget);
+      }}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
       className="pdxPlace--clickable"
       isNonprofit={isNonprofit}

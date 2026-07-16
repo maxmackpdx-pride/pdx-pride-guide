@@ -1,7 +1,44 @@
-/* Inbox shell — hover states + composer primitives */
+/* Inbox shell — hover states + composer primitives
+   Agent 6 / deep-glass §2.6 — shell surface + FAB glossy chrome.
+   Overlay enter keyframes stay in index.css (inbox-overlay-in / fade). */
 
 .inbox-shell-root {
   --border-faint: var(--ink-border-faint);
+  /* Dark blue → bright blue (shared with floating drawer) */
+  --inbox-blue-deep: #061a66;
+  --inbox-blue-mid: #0a2a9c;
+  --inbox-blue: #1a4dff;
+  --inbox-blue-bright: #3d7cff;
+  --c: var(--inbox-blue);
+}
+
+/* Full-page /inbox shell: deep-glass fill + soft blue gradient wash */
+.inbox-shell-root--deep-glass {
+  background:
+    radial-gradient(
+      90% 70% at 50% 46%,
+      #000 0%,
+      #000 34%,
+      #030304 68%,
+      color-mix(in srgb, var(--inbox-blue-deep) 12%, #050408) 100%
+    ),
+    radial-gradient(
+      100% 80% at 0% 0%,
+      color-mix(in srgb, var(--inbox-blue-deep) 18%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      90% 70% at 100% 100%,
+      color-mix(in srgb, var(--inbox-blue) 12%, transparent),
+      transparent 52%
+    ) !important;
+  color: var(--text-body, #e6e3da);
+}
+
+html.calm-mode .inbox-shell-root--deep-glass,
+:root[data-calm="true"] .inbox-shell-root--deep-glass {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .pxRow:hover {
@@ -78,4 +115,87 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.78rem;
+}
+
+/* ============================================================
+   Desktop floating inbox FAB — deep-glass surface (Agent 6 / §2.6)
+   Layout, drag, halo pulse keyframes: unchanged (index.css).
+   Surface: glossy radial + top inset gloss + accent bloom.
+   ============================================================ */
+@media (min-width: 641px) {
+  .floating-inbox__fab {
+    /* Dark blue → bright blue neon (matches drawer gradient) */
+    --fab-neon: #1a4dff;
+    --fab-neon-deep: #061a66;
+    --fab-neon-bright: #3d7cff;
+    --fab-neon-rgb: 26 77 255;
+    color: #f2f0ff !important;
+    border: 1.5px solid transparent !important;
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 42%) padding-box,
+      radial-gradient(circle at 50% 38%, #0a1430 0%, #050506 72%) padding-box,
+      linear-gradient(145deg, #061a66 0%, #1a4dff 55%, #3d7cff 100%) border-box !important;
+    box-shadow:
+      0 0 0 2px #000,
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.3),
+      0 0 20px -6px #061a66,
+      0 0 16px -4px #1a4dff !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+  }
+
+  .floating-inbox--attention .floating-inbox__fab {
+    box-shadow:
+      0 0 0 2px #000,
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.3),
+      0 0 26px -4px #061a66,
+      0 0 18px -2px #1a4dff,
+      0 0 10px -1px #3d7cff !important;
+  }
+
+  .floating-inbox__fab:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow:
+      0 0 0 2px #000,
+      0 10px 26px rgba(0, 0, 0, 0.5),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.38),
+      0 0 28px -4px #061a66,
+      0 0 20px -3px #1a4dff !important;
+  }
+
+  .floating-inbox__fab--dragging,
+  .floating-inbox__fab--dragging:hover {
+    cursor: grabbing;
+    transform: none;
+    transition: none;
+  }
+
+  /* Open = dark glass close control + blue gradient rim */
+  .floating-inbox__fab--open {
+    color: #f2f0ff !important;
+    border: 1.5px solid transparent !important;
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 42%) padding-box,
+      radial-gradient(circle at 50% 38%, #0c1224 0%, #050506 78%) padding-box,
+      linear-gradient(145deg, #061a66 0%, #1a4dff 55%, #3d7cff 100%) border-box !important;
+    box-shadow:
+      0 0 0 2px #000,
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.22),
+      0 0 16px -6px #061a66,
+      0 0 12px -4px #1a4dff !important;
+  }
+
+  .floating-inbox__fab-badge {
+    border-color: #050506;
+  }
+}
+
+html.calm-mode .floating-inbox__fab,
+:root[data-calm="true"] .floating-inbox__fab {
+  box-shadow:
+    0 0 0 2px #000,
+    0 6px 16px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.22) !important;
 }

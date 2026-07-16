@@ -126,12 +126,11 @@ export default function HubFeedCard({ item }: Props) {
     }
   };
 
-  // Board posts glow in their category color: gigs purple, gifts acid-yellow,
-  // missed connections magenta.
+  // Board posts glow in SoT §2.4 deep-glass board accents.
   const BOARD_ACCENTS: Record<string, string> = {
-    gig: "var(--panel-purple)",
-    gifting: "var(--panel-lime)",
-    spotted: "var(--panel-magenta)",
+    gig: "#6E3DFF",
+    gifting: "#CCFF00",
+    spotted: "#FF00CC",
   };
   const glow = BOARD_ACCENTS[item.kind];
   const isSpotted = item.kind === "spotted";
@@ -173,11 +172,18 @@ export default function HubFeedCard({ item }: Props) {
   // not plain activity rows (RSVP, check-in, announcements).
   const isGlowCard = Boolean(glow) || isSpotted || isBoard;
 
-  const accentStyle = glow
-    ? ({ "--hub-feed-accent": glow } as CSSProperties)
-    : !glow && !isSpotted
-      ? ({ "--hub-feed-accent": badgeColor } as CSSProperties)
-      : undefined;
+  // Looking gigs always keep the full rainbow top bar (§2.13 hub items).
+  const isLooking = item.badge === "Looking" || (item.kind === "gig" && /looking/i.test(item.badge || ""));
+
+  const feedAccent = glow || (!isSpotted ? badgeColor : undefined);
+  const accentStyle = feedAccent
+    ? ({
+        "--hub-feed-accent": feedAccent,
+        "--c": feedAccent,
+        "--_c": feedAccent,
+        "--listing-accent": feedAccent,
+      } as CSSProperties)
+    : undefined;
 
   const cardClass = [
     "card",
@@ -186,7 +192,9 @@ export default function HubFeedCard({ item }: Props) {
     item.pinned ? "hub-feed-card--pin" : "",
     glow ? "hub-feed-card--accent" : "",
     (isSpotted || isBoard) ? "hub-feed-card--clickable" : "",
-    isGlowCard ? "fitem--glow" : "",
+    // Looking always gets the rainbow top seam (fitem--glow::before engine)
+    (isGlowCard || isLooking) ? "fitem--glow" : "",
+    isLooking ? "hub-feed-card--looking" : "",
   ].filter(Boolean).join(" ");
 
   const body = (
@@ -262,7 +270,10 @@ export default function HubFeedCard({ item }: Props) {
                 </div>
               )}
             </div>
-            <span className="kick hub-feed-card__badge" style={{ "--hub-feed-accent": badgeColor } as CSSProperties}>
+            <span
+              className="kick hub-feed-card__badge"
+              style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
+            >
               {item.badge}
             </span>
           </div>

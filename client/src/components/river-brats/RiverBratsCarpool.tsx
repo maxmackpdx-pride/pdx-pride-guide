@@ -342,7 +342,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
           <div className="rb-compose__actions">
             <Button
               variant="solid"
-              accent={accent === "cyan" ? "cyan" : "orange"}
+              accent={accent === "green" ? "green" : "orange"}
               size="sm"
               disabled={leaveHour == null || note.trim().length < 8 || createMutation.isPending}
               onClick={() => createMutation.mutate()}
@@ -406,7 +406,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
                     ) : (
                       <Button
                         variant="outline"
-                        accent="cyan"
+                        accent={accent === "green" ? "green" : "orange"}
                         size="sm"
                         onClick={() => {
                           if (!requireAuth()) return;
@@ -459,7 +459,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
                       <p className="rb-card__note">{req.note}</p>
                       <Button
                         variant="solid"
-                        accent={accent === "cyan" ? "cyan" : "orange"}
+                        accent={accent === "green" ? "green" : "orange"}
                         size="sm"
                         onClick={() => selectMutation.mutate({ postId: activePostId, requestId: req.id })}
                       >

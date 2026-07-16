@@ -1,14 +1,16 @@
 /* ============================================================
    PDX Pride Guide, EFFECTS: shadows, glows, motion
-   Canonical signatures from repo tokens:
-     --brutal-shadow : 4px 4px 0 rgba(255,0,204,0.36)  (magenta offset)
-     --glow          : 0 0 14px color-mix(cyan 18%)      (soft neon)
-     Motion          : 0.15s snappy hovers, ~4s ambient pulse
+   Deep-glass SoT (docs/handoffs/deep-glass-2026-07-16/) overrides
+   default CTA chrome: prefer --glass-btn over brutal offset.
+   --brutal-shadow remains for intentional "sticker" elements only
+   (e.g. Claim this event). Default interactive CTAs → glass buttons.
+   Motion: 0.15s snappy hovers, ~4s ambient pulse; card entrance
+   pgDirCardIn (22px/.55s/--ease-out) per §6 audit.
    ============================================================ */
 
 :root {
-  /* ---- BRUTALIST OFFSET (the signature) ------------------ */
-  /* Hard magenta drop, no blur. Grows on hover. */
+  /* ---- BRUTALIST OFFSET (sticker / legacy only) ----------- */
+  /* Not the default CTA shadow under deep-glass. */
   --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
   --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
   --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
@@ -51,7 +53,9 @@
   --card-glow-hot:  0 0 28px color-mix(in srgb, var(--dc, var(--neon-cyan)) 40%, transparent);
 }
 
-/* Ambient neon pulse, driven by a per-element --dc (day/accent color) */
+/* Ambient neon pulse, driven by a per-element --dc (day/accent color).
+   Deep-glass: resting bloom is baked into --glass-card / --dir-gm;
+   pdxPulse is hover/emphasis only on glass surfaces (not resting state). */
 @keyframes pdxPulse {
   0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--dc, var(--neon-cyan)) 18%, transparent); }
   50%      { box-shadow: 0 0 24px color-mix(in srgb, var(--dc, var(--neon-cyan)) 32%, transparent); }
@@ -62,7 +66,31 @@
   50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
 }
 
-/* Entrance reveal: fade + short rise (.sch-block / schIn) */
+/* Deep-glass card entrance — canonical values from PlaceCard / §6 audit:
+   22px rise, .55s, --ease-out. dirCardIn is an alias for reference HTML parity. */
+@keyframes pgDirCardIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes dirCardIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Thin edge-masked seam scroll (alias presentation of rainbow engine).
+   Prefer .pdx-rainbow-rule (3px shared) on cards; dirRefract is the 2px masked bar. */
+@keyframes dirRefract {
+  from { background-position: 200% 0; }
+  to   { background-position: 0 0; }
+}
+
+/* Mobile nav pull-handle breath */
+@keyframes pullHandle {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50%      { transform: translateY(-3px); opacity: 1; background: #4a4a55; }
+}
+
+/* Entrance reveal: fade + short rise (.sch-block / schIn) — non-card sections */
 @keyframes pdxReveal {
   from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: none; }
@@ -123,7 +151,7 @@ html.calm-mode .btn-neon,
 html.calm-mode .map-pin-rsvp-pulse {
   box-shadow: none !important;
   text-shadow: none !important;
-  filter: none !important;
+  /* Do NOT set filter:none — calm mode may greyscale chrome; photos opt out separately */
 }
 
 :root[data-calm="true"] .pdxBoard:hover,
@@ -187,6 +215,50 @@ html.calm-mode .pdxRow {
   }
 }
 
+/* Deep-glass motion calm: freeze refract seam + card entrance + pull handle + day pulse.
+   --dir-gm zeroed in glass.css under calm (resting bloom intensity, not deleted).
+   Seams stay visible but static; outer bloom drops; thin black ring + inset sheen remain. */
+:root[data-calm="true"] .dir-refract,
+:root[data-calm="true"] .pdx-refract-seam,
+:root[data-calm="true"] .pull-handle,
+:root[data-calm="true"] .pdxBoard,
+:root[data-calm="true"] .pdxRow,
+:root[data-calm="true"] .event-board-card,
+:root[data-calm="true"] .schedule-event-card,
+:root[data-calm="true"] .featured-event-ad,
+:root[data-calm="true"] .card.fitem.fitem--glow,
+html.calm-mode .dir-refract,
+html.calm-mode .pdx-refract-seam,
+html.calm-mode .pull-handle,
+html.calm-mode .pdxBoard,
+html.calm-mode .pdxRow,
+html.calm-mode .event-board-card,
+html.calm-mode .schedule-event-card,
+html.calm-mode .featured-event-ad,
+html.calm-mode .card.fitem.fitem--glow {
+  animation: none !important;
+}
+
+:root[data-calm="true"] .pdxBoard::before,
+:root[data-calm="true"] .pdxRow::before,
+:root[data-calm="true"] .event-board-card::before,
+:root[data-calm="true"] .schedule-event-card::before,
+:root[data-calm="true"] .featured-event-ad::before,
+:root[data-calm="true"] .card.fitem.fitem--glow::before,
+html.calm-mode .pdxBoard::before,
+html.calm-mode .pdxRow::before,
+html.calm-mode .event-board-card::before,
+html.calm-mode .schedule-event-card::before,
+html.calm-mode .featured-event-ad::before,
+html.calm-mode .card.fitem.fitem--glow::before {
+  animation: none !important;
+  filter: none !important;
+  opacity: 0.85;
+}
+
+/* Keep rainbow seam static under calm (already handled below) but ensure
+   day-pulse does not fight box-shadow:none rules on calm boards. */
+
 /* Calm mode: rainbow dividers stay visible but static (no flow, glint, glow) */
 :root[data-calm="true"] .pdx-seam,
 :root[data-calm="true"] .pdx-rainbow-rule,
@@ -194,12 +266,16 @@ html.calm-mode .pdxRow {
 :root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line,
 :root[data-calm="true"] .pdxMap__seam,
 :root[data-calm="true"] .rainbow-bar,
+:root[data-calm="true"] .dir-refract,
+:root[data-calm="true"] .pdx-refract-seam,
 html.calm-mode .pdx-seam,
 html.calm-mode .pdx-rainbow-rule,
 html.calm-mode .pdxSeam,
 html.calm-mode .pdxDivider--rainbow .pdxDivider__line,
 html.calm-mode .pdxMap__seam,
-html.calm-mode .rainbow-bar {
+html.calm-mode .rainbow-bar,
+html.calm-mode .dir-refract,
+html.calm-mode .pdx-refract-seam {
   background: var(--rainbow-bar);
   background-size: auto;
 }
@@ -258,6 +334,9 @@ html.calm-mode .featured-event-ad::before {
   background-size: auto;
   animation: none !important;
   box-shadow: none !important;
+  filter: none;
+  -webkit-mask: none;
+  mask: none;
 }
 
 /* Reduced-motion: same static rainbow (hide frozen glint mid-sweep) */

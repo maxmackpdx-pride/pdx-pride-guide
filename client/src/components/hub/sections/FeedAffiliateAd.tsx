@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import "@/components/AffiliatePosterCard.css";
 
 /** Exact affiliate destinations — do not alter path or query. */
 export const FEED_AFFILIATE_URLS = {
   cockblock: "https://cockblocktoys.com/tucker060",
   mrs: "https://www.mr-s-leather.com/?acc=TUCKERMAX",
 } as const;
+
+/** Brand accents: CockBlock red · Mr. S cyan */
+const ACCENT_CB = "#ff1f1f";
+const ACCENT_MRS = "#19e3ff";
 
 const CB_FRAMES = [
   { src: "/affiliate/feed/cb-social.png", pos: "center", ms: 4000 },
@@ -19,7 +24,8 @@ type Props = {
 };
 
 /**
- * Inline scene-feed affiliate card (not sticky). Matches Featured Ads.dc.html.
+ * Inline scene-feed affiliate card (not sticky).
+ * CockBlock = red glass · Mr. S = cyan glass. Data/rows unchanged.
  */
 export default function FeedAffiliateAd({ brand }: Props) {
   const [open, setOpen] = useState(true);
@@ -44,14 +50,24 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
 
   return (
     <div
-      className="featured-event-ad feed-aff feed-aff--cockblock"
+      className="feed-aff feed-aff--cockblock pdx-glass-rebind"
       data-testid="feed-affiliate-cockblock"
+      style={
+        {
+          ["--feed-aff-primary" as string]: ACCENT_CB,
+          ["--c" as string]: ACCENT_CB,
+        } as CSSProperties
+      }
     >
+      <span className="pdx-glass-sheen" aria-hidden="true" />
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+
       <button type="button" className="feed-aff__dismiss" aria-label="Dismiss" onClick={onDismiss}>
         ✕
       </button>
 
       <div className="feed-aff__media">
+        <span className="pdx-poster-well__scan" aria-hidden="true" />
         {CB_FRAMES.map((f, i) => (
           <img
             key={f.src}
@@ -96,14 +112,24 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
 function MrsLeatherFeedAd({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div
-      className="featured-event-ad feed-aff feed-aff--mrs"
+      className="feed-aff feed-aff--mrs pdx-glass-rebind"
       data-testid="feed-affiliate-mrs"
+      style={
+        {
+          ["--feed-aff-primary" as string]: ACCENT_MRS,
+          ["--c" as string]: ACCENT_MRS,
+        } as CSSProperties
+      }
     >
+      <span className="pdx-glass-sheen" aria-hidden="true" />
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+
       <button type="button" className="feed-aff__dismiss" aria-label="Dismiss" onClick={onDismiss}>
         ✕
       </button>
 
       <div className="feed-aff__media feed-aff__media--center">
+        <span className="pdx-poster-well__scan" aria-hidden="true" />
         <img
           src="/affiliate/feed/mrs-logo.webp"
           alt="Mr. S Leather"

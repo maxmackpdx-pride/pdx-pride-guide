@@ -427,7 +427,7 @@ export default function HubShell({
       {mode === "admin" && moreOpen && onMoreOpenChange && (
         <>
           <div className="hub-more-backdrop" onClick={() => onMoreOpenChange(false)} />
-          <div className="hub-more-sheet" role="dialog" aria-label="More admin sections">
+          <div className="hub-more-sheet pdx-edge-deboss" role="dialog" aria-label="More admin sections">
             <h3>More</h3>
             {moreNav.map(item => {
               const Icon = item.icon;
@@ -453,6 +453,7 @@ export default function HubShell({
           Admin mode keeps this hub bar; App hides the site bar on /admin. */}
       {mode === "admin" && (
         <nav className="hub-mobile-bar" aria-label="Hub mobile navigation">
+          <span className="pull-handle hub-mobile-bar__pull" aria-hidden="true" />
           <button
             type="button"
             className={`hub-mobile-tab${adminView === "overview" ? " is-active is-lime" : ""}`}

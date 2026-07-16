@@ -1,0 +1,171 @@
+/* Featured event ad (Yes Coach / Stank, etc.) — deep-glass shell.
+   Layout / 3 rows (countdown · tickets · RSVP) and row colors unchanged.
+   Edge: black ring + day-accent bloom (same language as feed affiliate cards). */
+
+.featured-event-ad {
+  --c: var(--fea-accent, #19e3ff);
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--glass-card-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 40px -8px color-mix(in srgb, var(--c) 55%, transparent),
+    0 0 80px -18px color-mix(in srgb, var(--c) 32%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent) !important;
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+}
+
+.featured-event-ad > .pdx-glass-sheen,
+.featured-event-ad > .pdx-glass-sheen--specular {
+  border-radius: inherit;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.featured-event-ad__dismiss {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.featured-event-ad__dismiss:hover {
+  background: rgba(0, 0, 0, 0.78);
+  border-color: color-mix(in srgb, var(--c) 65%, transparent);
+}
+
+/* Poster well — day-accent floor under slideshow */
+.featured-event-ad__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(
+    --poster-well-bg,
+    radial-gradient(
+      130% 130% at 50% 14%,
+      color-mix(in srgb, var(--c) 32%, #050506),
+      #050506 72%
+    )
+  );
+  border-bottom: 4px solid var(--c);
+}
+
+.featured-event-ad__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.featured-event-ad__slide.is-active {
+  opacity: 1;
+}
+
+.featured-event-ad__scan {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.28;
+  background: var(
+    --poster-well-scan,
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.16) 3px 4px)
+  );
+}
+
+/* Three content rows under media — same spacing/type as before */
+.featured-event-ad__row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 15px 18px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--c) 22%, #1c1c22);
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.featured-event-ad__row--countdown {
+  padding: 16px 18px 14px;
+  border-top: none;
+  user-select: none;
+}
+
+.featured-event-ad__row-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.featured-event-ad__row-label--lg {
+  font-size: 30px;
+}
+
+.featured-event-ad__row-copy {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--board-muted, #999);
+}
+
+/* Row accents — data colors stay intact */
+.featured-event-ad__row-label--cyan {
+  color: #19e3ff;
+  text-shadow: 0 0 16px #19e3ff80;
+}
+
+.featured-event-ad__row-label--green {
+  color: #5ce600;
+  text-shadow: 0 0 16px #5ce60080;
+}
+
+.featured-event-ad__row-label--orange {
+  color: #ff8c00;
+  text-shadow: 0 0 16px #ff8c0080;
+}
+
+.featured-event-ad__egg-zone {
+  position: relative;
+  z-index: 1;
+}
+
+.featured-event-ad__actions {
+  position: relative;
+  z-index: 2;
+}
+
+html.calm-mode .featured-event-ad,
+:root[data-calm="true"] .featured-event-ad {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

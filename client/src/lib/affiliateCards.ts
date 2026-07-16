@@ -18,7 +18,14 @@ export type EventsGridItem =
   | { kind: "event"; event: EventListing }
   | AffiliateSlot;
 
-export const AFFILIATE_ACCENT = "#FF0033";
+/** Brand glass accents for event-grid ads (match event-card chrome). */
+export const AFFILIATE_BRAND_ACCENT: Record<AffiliateBrand, string> = {
+  cockblock: "#FF1F1F", // red
+  mrs: "#19E3FF", // cyan
+};
+
+/** @deprecated use AFFILIATE_BRAND_ACCENT.cockblock */
+export const AFFILIATE_ACCENT = AFFILIATE_BRAND_ACCENT.cockblock;
 export const AFFILIATE_MAX_PER_BRAND = 5;
 
 export const AFFILIATE_LINKS = {
@@ -26,13 +33,21 @@ export const AFFILIATE_LINKS = {
   cockblock: "https://cockblocktoys.com/tucker060",
 } as const;
 
-function brandFromAd(ad: AdServePayload): AffiliateBrand {
+export function brandFromAd(ad: AdServePayload): AffiliateBrand {
   const key = (ad.templateKey || "").toLowerCase();
   if (key.includes("mrs")) return "mrs";
   if (key.includes("cockblock") || key.includes("cb")) return "cockblock";
+  const biz = (ad.business || ad.title || ad.logoText || "").toLowerCase();
+  if (biz.includes("mr") && biz.includes("leather")) return "mrs";
+  if (biz.includes("cockblock") || biz.includes("cock block")) return "cockblock";
   const url = (ad.destUrl || "").toLowerCase();
-  if (url.includes("mr-s-leather") || url.includes("mrs")) return "mrs";
+  if (url.includes("mr-s-leather") || url.includes("mrsleather") || url.includes("mr-s")) return "mrs";
+  if (url.includes("cockblock")) return "cockblock";
   return "cockblock";
+}
+
+export function accentForAffiliateBrand(brand: AffiliateBrand): string {
+  return AFFILIATE_BRAND_ACCENT[brand];
 }
 
 /**

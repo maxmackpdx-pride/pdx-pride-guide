@@ -1,0 +1,92 @@
+/**
+ * Infrastructure Grid — layout + type only.
+ * Surface (fill / edge / bloom / sheen / left bar) = glass.css tokens.
+ * SoT: deep-glass §2.11 · 12-infrastructure-grid.png
+ */
+
+.infra-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.infra-grid__card {
+  display: block;
+  padding: 26px;
+  border-radius: var(--glass-card-radius, 14px);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* Kill global a:hover underline / hub yellow bleed */
+a.infra-grid__card,
+a.infra-grid__card:link,
+a.infra-grid__card:visited,
+a.infra-grid__card:hover,
+a.infra-grid__card:focus,
+a.infra-grid__card:focus-visible,
+a.infra-grid__card:active {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.infra-grid__card:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.06) saturate(1.06);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Title: accent color, NO glow (SoT: no title text-shadow). z-index above sheen ::after */
+.infra-grid__title {
+  position: relative;
+  z-index: 3;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.4rem;
+  margin: 0 0 9px;
+  color: var(--c);
+  text-shadow: none;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.infra-grid__desc {
+  position: relative;
+  z-index: 3;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-mid, #c8c5bc);
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .infra-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infra-grid__card:hover {
+    transform: none;
+    filter: none;
+  }
+}
+
+html.calm-mode .infra-grid__card,
+:root[data-calm="true"] .infra-grid__card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.calm-mode .infra-grid__card:hover,
+:root[data-calm="true"] .infra-grid__card:hover {
+  transform: none;
+  filter: none;
+}

@@ -12,6 +12,13 @@ import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS, RSVP_COLOR } from "@shared/prideWeek";
+import {
+  MAP_PIN_SIZE,
+  MAP_SURFACE_BG,
+  LIVE_MAP_CHROME_CSS,
+  mapPinHtml,
+  mapPinMultiHtml,
+} from "@/components/ds/mapTheme";
 
 /** Pin color when an event has no recognizable day — neutral so it can't read as a day. */
 const UNKNOWN_DAY_COLOR = "#FFFFFF";
@@ -37,44 +44,33 @@ const MAP_VIEWS = {
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
+const PIN_HALF = MAP_PIN_SIZE / 2;
+
 function buildPinIcon(days: string[], rsvpPulse = false) {
   if (typeof divIcon !== "function") return null;
-  const SIZE = 22;
-  const R = SIZE / 2;
-  const pulseClass = rsvpPulse ? " map-pin-rsvp-pulse" : "";
-  const pulseGlow = rsvpPulse ? `,0 0 22px ${RSVP_COLOR},0 0 36px rgba(204,255,0,0.55)` : "";
+  const rsvpOpts = { rsvpPulse, rsvpColor: RSVP_COLOR };
 
-  if (days.length === 1) {
-    const color = DAY_COLORS[days[0] as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
+  // Single-day (or unknown): black core + day border + inward only (no outer bloom).
+  // Multi-day: conic rainbow + black rim. RSVP = scale pulse class only.
+  if (days.length <= 1) {
+    const color =
+      days.length === 1
+        ? DAY_COLORS[days[0] as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR
+        : UNKNOWN_DAY_COLOR;
     return divIcon({
-      html: `<div class="${pulseClass.trim()}" style="width:${SIZE}px;height:${SIZE}px;background:transparent;border:3px solid ${color};border-radius:50%;box-shadow:0 0 8px ${color},0 0 16px ${color}99,0 2px 6px rgba(0,0,0,0.8)${pulseGlow};"></div>`,
-      iconSize: [SIZE, SIZE],
-      iconAnchor: [R, R],
-      popupAnchor: [0, -R - 4],
+      html: mapPinHtml(color, rsvpOpts),
+      iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+      iconAnchor: [PIN_HALF, PIN_HALF],
+      popupAnchor: [0, -PIN_HALF - 4],
       className: "",
     });
   }
 
-  const n = days.length;
-  const sliceAngle = (2 * Math.PI) / n;
-  let paths = "";
-  days.forEach((day, i) => {
-    const color = DAY_COLORS[day as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
-    const a0 = i * sliceAngle - Math.PI / 2;
-    const a1 = a0 + sliceAngle;
-    const x1 = +(R + R * Math.cos(a0)).toFixed(2);
-    const y1 = +(R + R * Math.sin(a0)).toFixed(2);
-    const x2 = +(R + R * Math.cos(a1)).toFixed(2);
-    const y2 = +(R + R * Math.sin(a1)).toFixed(2);
-    const large = sliceAngle > Math.PI ? 1 : 0;
-    paths += `<path d="M${R},${R} L${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} Z" fill="${color}"/>`;
-  });
-
   return divIcon({
-    html: `<div class="${pulseClass.trim()}" style="width:${SIZE}px;height:${SIZE}px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8))${rsvpPulse ? " drop-shadow(0 0 10px rgba(204,255,0,0.75))" : ""};"><svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${paths}<circle cx="${R}" cy="${R}" r="${R - 1}" fill="none" stroke="#000" stroke-width="2"/></svg></div>`,
-    iconSize: [SIZE, SIZE],
-    iconAnchor: [R, R],
-    popupAnchor: [0, -R - 4],
+    html: mapPinMultiHtml(rsvpOpts),
+    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+    iconAnchor: [PIN_HALF, PIN_HALF],
+    popupAnchor: [0, -PIN_HALF - 4],
     className: "",
   });
 }
@@ -98,9 +94,9 @@ function groupEventsByVenue(events: Event[]) {
 function UserLocationMarker({ position }: { position: [number, number] | null }) {
   if (!position) return null;
   const icon = divIcon({
-    html: `<div style="width:14px;height:14px;background:#19E3FF;border:2.5px solid #fff;border-radius:50%;box-shadow:0 0 14px #19E3FF,0 0 24px rgba(25,227,255,0.55);"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    html: mapPinHtml("#19E3FF"),
+    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
+    iconAnchor: [PIN_HALF, PIN_HALF],
     className: "",
   });
   return <Marker position={position} icon={icon} />;
@@ -188,6 +184,28 @@ function MapFlyTo({ position }: { position: [number, number] | null }) {
   return null;
 }
 
+const EVENTS_MAP_EXTRA_CSS = `
+  .pdx-popup .leaflet-popup-content-wrapper { background:#0d0d0d !important; border:1.5px solid #333 !important; border-radius:0 !important; box-shadow:0 4px 24px rgba(0,0,0,0.9) !important; padding:0 !important; }
+  .pdx-popup .leaflet-popup-content { margin:0 !important; width:auto !important; }
+  .pdx-popup .leaflet-popup-tip-container { display:none; }
+  .leaflet-popup-close-button { color:#666 !important; top:6px !important; right:8px !important; }
+  .venue-hover-tooltip { background:#050505 !important; border:1px solid #000 !important; border-radius:0 !important; box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.8) !important; outline:1px solid #CCFF00; outline-offset:-2px; color:#fff !important; font-family:var(--font-display); font-size:0.7rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; padding:4px 8px !important; }
+  .venue-hover-tooltip::before { border-top-color:#000 !important; }
+  .pdx-map-live__expand{
+    position:absolute; top:10px; z-index:1001;
+    display:inline-flex; align-items:center; gap:5px;
+    padding:6px 10px; cursor:pointer;
+    font-family:var(--font-display); font-size:0.6rem; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--lime, #CCFF00);
+    background:rgba(5,5,7,.88);
+    border:1px solid #000;
+    box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.75);
+    outline:1px solid color-mix(in srgb, var(--lime, #CCFF00) 70%, #000);
+    outline-offset:-2px;
+  }
+`;
+
 export function MapView({
   events,
   expanded,
@@ -271,26 +289,20 @@ export function MapView({
         }}
       >
       <div
-        className={variant === "events" ? "events-map-panel directory-map" : "home-map-panel"}
+        className={
+          variant === "events"
+            ? "events-map-panel directory-map pdx-map-live pdx-map-surface"
+            : "home-map-panel pdx-map-live pdx-map-surface"
+        }
         style={{
           position: "relative",
           height: expanded ? "100%" : undefined,
           width: "100%",
         }}
       >
-        <style>{`
-          .pdx-popup .leaflet-popup-content-wrapper { background:#0d0d0d !important; border:1.5px solid #333 !important; border-radius:0 !important; box-shadow:0 4px 24px rgba(0,0,0,0.9) !important; padding:0 !important; }
-          .pdx-popup .leaflet-popup-content { margin:0 !important; width:auto !important; }
-          .pdx-popup .leaflet-popup-tip-container { display:none; }
-          .leaflet-popup-close-button { color:#666 !important; top:6px !important; right:8px !important; }
-          .leaflet-control-attribution { background:rgba(0,0,0,0.65) !important; color:var(--text-faint) !important; font-size:9px !important; }
-          .leaflet-control-attribution a { color:var(--text-meta) !important; }
-          .leaflet-control-zoom a { background:#111 !important; color:#CCFF00 !important; border-color:#333 !important; }
-          .leaflet-control-zoom a:hover { background:#222 !important; }
-          .venue-hover-tooltip { background:#050505 !important; border:1px solid #CCFF00 !important; border-radius:0 !important; box-shadow:0 0 14px rgba(204,255,0,0.42) !important; color:#fff !important; font-family:var(--font-display); font-size:0.7rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; padding:4px 8px !important; }
-          .venue-hover-tooltip::before { border-top-color:#CCFF00 !important; }
-          .venue-street-glow { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor); mix-blend-mode: screen; }
-        `}</style>
+        <style>{`${LIVE_MAP_CHROME_CSS}${EVENTS_MAP_EXTRA_CSS}`}</style>
+        <div className="pdx-map-live__vignette" aria-hidden="true" />
+        <div className="pdx-map-live__shaft" aria-hidden="true" />
 
         {expanded && (
           <button
@@ -312,7 +324,7 @@ export function MapView({
           <MapContainer
             center={MAP_VIEWS[variant].center}
             zoom={MAP_VIEWS[variant].zoom}
-            style={{ height: "100%", width: "100%", background: "#0a0a0a" }}
+            style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
             zoomControl={true}
             attributionControl={true}
           >
@@ -353,29 +365,15 @@ export function MapView({
 
         {variant !== "home" && (
           <button
+            type="button"
+            className="pdx-map-live__expand"
             onClick={event => {
               event.stopPropagation();
               expanded ? onCollapse() : onExpand();
             }}
             data-testid={expanded ? "button-collapse-map" : "button-expand-map"}
             title={expanded ? "Collapse map" : "Expand map"}
-            style={{
-              position: "absolute",
-              top: 10,
-              right: expanded ? 60 : 10,
-              zIndex: 1001,
-              background: "#000",
-              border: "1.5px solid #CCFF00",
-              color: "#CCFF00",
-              padding: "6px 10px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-              fontFamily: "var(--font-display)",
-              fontSize: "0.6rem",
-              letterSpacing: "0.08em",
-            }}
+            style={{ right: expanded ? 60 : 10 }}
           >
             {expanded ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
             {expanded ? "COLLAPSE" : "EXPAND"}
@@ -388,19 +386,27 @@ export function MapView({
               <div key={day} className="map-legend-item">
                 <span
                   className="map-legend-swatch"
-                  style={{ background: color, boxShadow: `0 0 8px ${color}, 2px 2px 0 rgba(0,0,0,0.7)` }}
+                  style={{
+                    background: "#000",
+                    border: `3px solid ${color}`,
+                    boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+                    boxSizing: "border-box",
+                  }}
                 />
                 <span className="map-legend-label">{day}</span>
               </div>
             ))}
             <div className="map-legend-item map-legend-item--multi">
-              <svg width="20" height="20" viewBox="0 0 10 10" aria-hidden="true">
-                <path d="M5,5 L5,0 A5,5 0 0,1 10,5 Z" fill={DAY_COLORS.MON} />
-                <path d="M5,5 L10,5 A5,5 0 0,1 5,10 Z" fill={DAY_COLORS.WED} />
-                <path d="M5,5 L5,10 A5,5 0 0,1 0,5 Z" fill={DAY_COLORS.FRI} />
-                <path d="M5,5 L0,5 A5,5 0 0,1 5,0 Z" fill={DAY_COLORS.SUN} />
-                <circle cx="5" cy="5" r="4.5" fill="none" stroke="#000" strokeWidth="1" />
-              </svg>
+              <span
+                className="map-legend-swatch"
+                style={{
+                  background:
+                    "conic-gradient(var(--purple,#8800FF),var(--blue,#1A4DFF),var(--cyan,#00FFFF),var(--green,#39FF14),var(--yellow,#FFEE00),var(--orange,#FF6600),var(--pink,#FF00CC),var(--purple,#8800FF))",
+                  border: "2px solid #000",
+                  boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+                }}
+                aria-hidden="true"
+              />
               <span className="map-legend-label">MULTI-DAY</span>
             </div>
           </div>

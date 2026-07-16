@@ -15,6 +15,8 @@ import type { AdServePayload } from "@/lib/adTypes";
 import HubFeedCard from "./HubFeedCard";
 import HubPost from "./HubPost";
 import { useAuth } from "@/context/AuthContext";
+import { isLocalDemo } from "@/lib/localDemo";
+import { getLocalDemoHubFeed } from "@/lib/localDemoHubFeed";
 
 // ── Featured event ads ──────────────────────────────────────────────────────
 // Add an entry to FEATURED (title matcher + slideshow) and the matching event
@@ -126,12 +128,25 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   const canPost = postOptionsQuery.data?.canPost ?? canPostToFeed;
 
   const feedQuery = useQuery<HubFeedResponse>({
-    queryKey: ["/api/hub/feed", filter],
+    queryKey: ["/api/hub/feed", filter, user?.id ?? "guest"],
     queryFn: async () => {
       const params = new URLSearchParams({ tab: filter, limit: "30" });
-      const r = await fetch(`/api/hub/feed?${params}`, { credentials: "include" });
-      if (!r.ok) throw new Error("Could not load feed");
-      return r.json();
+      try {
+        const r = await fetch(`/api/hub/feed?${params}`, { credentials: "include" });
+        // Local demo (no session): API is auth-gated — scene sample cards for look/feel.
+        if (!r.ok) {
+          if (isLocalDemo()) return getLocalDemoHubFeed(filter);
+          throw new Error("Could not load feed");
+        }
+        const data = (await r.json()) as HubFeedResponse;
+        if (isLocalDemo() && (!data.items || data.items.length === 0) && !user) {
+          return getLocalDemoHubFeed(filter);
+        }
+        return data;
+      } catch (err) {
+        if (isLocalDemo()) return getLocalDemoHubFeed(filter);
+        throw err;
+      }
     },
   });
 

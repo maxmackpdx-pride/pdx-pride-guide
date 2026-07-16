@@ -1,4 +1,3 @@
-import { Button } from "@/components/ds";
 import { useTipLinks } from "@/hooks/useTipLinks";
 import "./TipSupport.css";
 
@@ -12,6 +11,7 @@ type Props = {
 /**
  * Direct Venmo tip (pay composer) + optional Stripe (card / Apple Pay).
  * Venmo never needs Stripe or a special merchant setup.
+ * Buy me a coffee: solid lime glass — matches Pitch a sponsorship.
  */
 export default function TipSupport({ variant = "about", className = "" }: Props) {
   const { venmoUrl, venmoHandle, stripePaymentLink, applePayReady } = useTipLinks();
@@ -27,7 +27,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
             href={venmoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="site-footer__coffee-btn"
+            className="site-footer__coffee-btn tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass"
             data-testid="footer-buy-coffee-venmo"
             aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
           >
@@ -38,7 +38,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
               href={stripePaymentLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="site-footer__coffee-btn tip-support__btn--stripe-footer"
+              className="site-footer__coffee-btn tip-support__btn tip-support__btn--lime-glass tip-support__btn--stripe-footer"
               data-testid="footer-buy-coffee-stripe"
               aria-label="Tip with card or Apple Pay"
             >
@@ -61,17 +61,21 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
           href={venmoUrl}
           target="_blank"
           rel="noopener noreferrer"
+          className="tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass tip-support__btn--sm"
           aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
         >
-          <Button as="span" variant="solid" accent="lime" size="sm">
-            Coffee · Venmo
-          </Button>
+          Coffee · Venmo
         </a>
         {applePayReady && stripePaymentLink ? (
-          <a href={stripePaymentLink} target="_blank" rel="noopener noreferrer">
-            <Button as="span" variant="neon" accent="cyan" size="sm">
-              Apple Pay
-            </Button>
+          <a
+            href={stripePaymentLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tip-support__btn tip-support__btn--cyan-glass tip-support__btn--sm pdx-glass-btn"
+            style={{ ["--c" as string]: "var(--neon-cyan, #19e3ff)" }}
+            aria-label="Tip with card or Apple Pay"
+          >
+            Apple Pay
           </a>
         ) : null}
       </div>
@@ -85,23 +89,23 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
           href={venmoUrl}
           target="_blank"
           rel="noopener noreferrer"
+          className="tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass tip-support__btn--lg"
           data-testid="link-donate-venmo"
           aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
         >
-          <Button as="span" variant="solid" accent="lime" size="lg">
-            Buy me a coffee · Venmo
-          </Button>
+          Buy me a coffee · Venmo
         </a>
         {applePayReady && stripePaymentLink ? (
           <a
             href={stripePaymentLink}
             target="_blank"
             rel="noopener noreferrer"
+            className="tip-support__btn tip-support__btn--cyan-glass tip-support__btn--lg pdx-glass-btn"
+            style={{ ["--c" as string]: "var(--neon-cyan, #19e3ff)" }}
             data-testid="link-donate-stripe"
+            aria-label="Tip with card or Apple Pay"
           >
-            <Button as="span" variant="neon" accent="cyan" size="lg">
-              Card / Apple Pay
-            </Button>
+            Card / Apple Pay
           </a>
         ) : null}
       </div>

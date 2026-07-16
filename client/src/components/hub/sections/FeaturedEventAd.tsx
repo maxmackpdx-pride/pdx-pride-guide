@@ -1,16 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import { DAY_TEXT_COLORS } from "@shared/prideWeek";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import EventModal from "@/components/EventModal";
 import type { Event } from "@shared/schema";
+import "./FeaturedEventAd.css";
 
-const CYAN = "#19E3FF";
-const GREEN = "#5CE600";
-const ORANGE = "#FF8C00";
 /** Loops under the Stank secret story until the overlay closes. */
 const STANK_EGG_AUDIO = "/easter-eggs/stank-secret-story.m4a";
-const glow = (c: string): React.CSSProperties => ({ textShadow: `0 0 16px ${c}80` });
 
 function eventStartMs(dateStart: string): number {
   // Event date strings are Pacific-local and naive; Pride week is PDT (-07:00).
@@ -293,175 +297,103 @@ export default function FeaturedEventAd({
     if (easterEggUrl) setEggOpen(true);
   };
 
-  const rowLabel: React.CSSProperties = {
-    fontFamily: "var(--font-display)",
-    fontWeight: 800,
-    fontSize: 24,
-    letterSpacing: ".01em",
-    textTransform: "uppercase",
-    lineHeight: 1,
-  };
-  const rowCopy: React.CSSProperties = {
-    marginTop: 6,
-    fontFamily: "var(--font-mono)",
-    fontSize: 10.5,
-    letterSpacing: ".14em",
-    textTransform: "uppercase",
-    color: "var(--board-muted)",
-  };
-  const rowBase: React.CSSProperties = {
-    display: "block",
-    width: "100%",
-    textAlign: "left",
-    padding: "15px 18px",
-    background: "transparent",
-    border: "none",
-    borderTop: "1px solid var(--panel-border-2)",
-    cursor: "pointer",
-    textDecoration: "none",
+  const eggKeys = (e: ReactKeyboardEvent) => {
+    if (!easterEggUrl) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openEgg();
+    }
   };
 
   return (
     <div
-      className="featured-event-ad"
-      style={{
-        position: "relative",
-        borderRadius: 16,
-        overflow: "hidden",
-        border: `2px solid ${accent}`,
-        boxShadow: `0 0 40px -14px ${accent}`,
-        background: "#0d0d0d",
-      }}
+      className="featured-event-ad pdx-glass-rebind"
+      style={{ ["--fea-accent" as string]: accent, ["--c" as string]: accent } as CSSProperties}
     >
+      <span className="pdx-glass-sheen" aria-hidden="true" />
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+
       <button
         type="button"
+        className="featured-event-ad__dismiss"
         aria-label="Dismiss"
         onClick={(e) => {
           e.stopPropagation();
           onDismiss();
-        }}
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 10,
-          zIndex: 3,
-          width: 28,
-          height: 28,
-          borderRadius: 999,
-          border: "none",
-          background: "rgba(0,0,0,0.6)",
-          color: "#fff",
-          fontSize: 15,
-          lineHeight: 1,
-          cursor: "pointer",
         }}
       >
         ✕
       </button>
 
       {/* Easter egg hit zone = slideshow + countdown ONLY. Tickets/RSVP stay outside. */}
-      <div
-        className="featured-event-ad__egg-zone"
-        style={{ position: "relative", zIndex: 1 }}
-      >
+      <div className="featured-event-ad__egg-zone">
         {frames.length > 0 && (
-          // Full-width, top-anchored slideshow: never crop left/right; crop the bottom.
           <div
+            className="featured-event-ad__media"
             role={easterEggUrl ? "button" : undefined}
             tabIndex={easterEggUrl ? 0 : undefined}
             aria-label={easterEggUrl ? "Open secret story" : undefined}
             onClick={easterEggUrl ? openEgg : undefined}
-            onKeyDown={(e) => {
-              if (!easterEggUrl) return;
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                openEgg();
-              }
-            }}
-            style={{
-              position: "relative",
-              width: "100%",
-              aspectRatio: "1 / 1",
-              overflow: "hidden",
-              background: "#000",
-              cursor: easterEggUrl ? "pointer" : "default",
-            }}
+            onKeyDown={eggKeys}
+            style={{ cursor: easterEggUrl ? "pointer" : "default" }}
           >
+            <span className="featured-event-ad__scan" aria-hidden="true" />
             {frames.map((f, i) => (
               <img
                 key={f.src}
                 src={f.src}
                 alt={i === 0 ? event.title : ""}
                 draggable={false}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "top center",
-                  opacity: i === frame ? 1 : 0,
-                  transition: "opacity .6s ease",
-                  pointerEvents: "none",
-                }}
+                className={`featured-event-ad__slide${i === frame ? " is-active" : ""}`}
               />
             ))}
           </div>
         )}
 
-        {/* Countdown — easter egg hit target when secret URL is set */}
+        {/* Row 1 — countdown (cyan) */}
         <div
+          className="featured-event-ad__row featured-event-ad__row--countdown"
           role={easterEggUrl ? "button" : undefined}
           tabIndex={easterEggUrl ? 0 : undefined}
           aria-label={easterEggUrl ? "Open secret story" : undefined}
           onClick={easterEggUrl ? openEgg : undefined}
-          onKeyDown={(e) => {
-            if (!easterEggUrl) return;
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              openEgg();
-            }
-          }}
-          style={{
-            padding: "16px 18px 14px",
-            cursor: easterEggUrl ? "pointer" : "default",
-            userSelect: "none",
-          }}
+          onKeyDown={eggKeys}
+          style={{ cursor: easterEggUrl ? "pointer" : "default" }}
         >
-          <div style={{ ...rowLabel, color: CYAN, fontSize: 30, ...glow(CYAN) }}>
+          <div className="featured-event-ad__row-label featured-event-ad__row-label--lg featured-event-ad__row-label--cyan">
             {cd.done
               ? "Live now"
               : `${cd.days > 0 ? `${cd.days}d ` : ""}${pad(cd.hours)}:${pad(cd.minutes)}:${pad(cd.seconds)}`}
           </div>
-          <div style={rowCopy}>{cd.done ? "It's on" : "Kickoff in"}</div>
+          <div className="featured-event-ad__row-copy">{cd.done ? "It's on" : "Kickoff in"}</div>
         </div>
       </div>
 
-      {/* Ticket + RSVP sit outside the egg zone — always receive their own taps. */}
-      <div className="featured-event-ad__actions" style={{ position: "relative", zIndex: 2 }}>
+      {/* Rows 2–3 — tickets (green) + RSVP (orange); outside egg zone */}
+      <div className="featured-event-ad__actions">
         {event.ticketUrl && (
           <a
             href={event.ticketUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={rowBase}
+            className="featured-event-ad__row"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ ...rowLabel, color: GREEN, ...glow(GREEN) }}>Buy tickets</div>
-            <div style={rowCopy}>Available now</div>
+            <div className="featured-event-ad__row-label featured-event-ad__row-label--green">Buy tickets</div>
+            <div className="featured-event-ad__row-copy">Available now</div>
           </a>
         )}
 
         <button
           type="button"
+          className="featured-event-ad__row"
           onClick={(e) => {
             e.stopPropagation();
             setOpen(true);
           }}
-          style={rowBase}
         >
-          <div style={{ ...rowLabel, color: ORANGE, ...glow(ORANGE) }}>RSVP</div>
-          <div style={rowCopy}>Secure your spot</div>
+          <div className="featured-event-ad__row-label featured-event-ad__row-label--orange">RSVP</div>
+          <div className="featured-event-ad__row-copy">Secure your spot</div>
         </button>
       </div>
 

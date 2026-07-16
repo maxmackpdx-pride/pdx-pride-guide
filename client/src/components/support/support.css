@@ -1,0 +1,473 @@
+/* ============================================================
+   Support surfaces — deep-glass / OLED-neon (§2.12)
+   Keep-alive + Sponsors = neutral glass
+   Affiliate = cyan left accent + neutral glow
+   CTAs = lime glass buttons
+   Partner logos = #050506 wells
+   Layout/spacing preserved from About support block.
+   ============================================================ */
+
+/* ── Keep-this-guide-alive (neutral glass) ───────────────── */
+.support-keepalive,
+.about-v2-donate--panel.support-keepalive {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 36px;
+  border-radius: var(--glass-card-radius, 14px);
+  margin-bottom: 20px;
+  overflow: visible;
+  /* Neutral glass (override any accented glass cascade) */
+  --c: var(--glass-neutral-c2, #b8b8c2);
+  background: var(--glass-card-neutral-bg) !important;
+  border: var(--glass-card-neutral-border) !important;
+  box-shadow: var(--glass-card-neutral-shadow) !important;
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+  /* Kill prior lime left bar — neutral has no accent edge */
+  border-left: var(--glass-card-neutral-border) !important;
+}
+
+.support-keepalive > .pdx-glass-sheen {
+  border-radius: inherit;
+}
+
+.support-keepalive__copy,
+.support-keepalive .about-v2-donate__copy {
+  flex: 1 1 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.support-keepalive__title,
+.support-keepalive .about-v2-donate__h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.94;
+  color: #fff;
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  margin: 0 0 12px;
+}
+
+/* "Alive" matches pitch / sponsors lime accent */
+.support-keepalive__alive {
+  color: var(--lime, #ccff00);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--lime, #ccff00) 40%, transparent);
+}
+
+.support-keepalive__copy p,
+.support-keepalive .about-v2-donate__copy p {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--text-lo, #8c8980);
+  margin: 0;
+  max-width: 560px;
+}
+
+.support-keepalive__cta,
+.support-keepalive .about-v2-donate__cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.support-keepalive__cta .tip-support__btns {
+  max-width: 100%;
+}
+
+/* ── Affiliate partners (cyan left + neutral glow) ───────── */
+.support-affiliate,
+.about-v2-partners.support-affiliate {
+  position: relative;
+  padding: 28px 36px;
+  border-radius: var(--glass-card-radius, 14px);
+  margin-bottom: 40px;
+  overflow: visible;
+  /* Neutral fill/bloom, cyan left accent only */
+  --c: var(--glass-neutral-c2, #b8b8c2);
+  background: var(--glass-card-neutral-bg);
+  border: var(--glass-card-neutral-border);
+  border-left: 4px solid var(--neon-cyan, #19e3ff);
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 26px -12px rgba(255, 255, 255, 0.15),
+    0 0 13px -5px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 color-mix(in srgb, var(--glass-neutral-c2, #b8b8c2) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--glass-neutral-c1, #4a4a52) 45%, transparent);
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+}
+
+.support-affiliate > .pdx-glass-sheen {
+  border-radius: inherit;
+}
+
+.support-affiliate__kicker,
+.support-affiliate .about-v2-partners__kicker {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--neon-cyan, #19e3ff);
+  margin: 0 0 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.support-affiliate__star {
+  color: var(--lime, #ccff00);
+  font-weight: 900;
+}
+
+.support-affiliate__tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Partner logo wells — #050506 */
+.support-affiliate__tile {
+  position: relative;
+  flex: 1 1 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 118px;
+  padding: 26px 24px;
+  background: #050506;
+  border: 1px solid color-mix(in srgb, var(--glass-neutral-c2, #b8b8c2) 28%, #101014);
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: visible;
+}
+
+.support-affiliate__tile--mrs {
+  overflow: hidden;
+}
+
+.support-affiliate__tile:hover {
+  border-color: color-mix(in srgb, var(--neon-cyan, #19e3ff) 55%, #101014);
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 18px -8px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  color: inherit;
+}
+
+.support-affiliate__tile:focus-visible {
+  outline: 2px solid var(--neon-cyan, #19e3ff);
+  outline-offset: 2px;
+}
+
+.support-affiliate__logo {
+  width: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.support-affiliate__logo--cockblock {
+  max-width: 276px;
+  max-height: 77px;
+}
+
+.support-affiliate__logo--mrs {
+  max-width: 300px;
+  max-height: 72px;
+}
+
+.support-affiliate__badge {
+  position: absolute;
+  top: -13px;
+  left: 16px;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: #ff1f1f;
+  -webkit-text-stroke: 1.5px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000,
+     0    0   0 #000;
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  transform: rotate(-3deg);
+  white-space: nowrap;
+}
+
+.support-affiliate__note {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #666;
+  margin: 16px 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+.support-affiliate__code {
+  color: #ff1f1f;
+  font-weight: 800;
+  -webkit-text-stroke: 0.85px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    -0.5px -0.5px 0 #000,
+     0.5px -0.5px 0 #000,
+    -0.5px  0.5px 0 #000,
+     0.5px  0.5px 0 #000;
+}
+
+/* ── Sponsors panel (neutral shell + lime-left check rows) ─
+   SoT: design image — one outer OLED glass card, large lime title,
+   lime-left qualifier rows, solid lime pitch CTA (never cyan). */
+.support-sponsors {
+  position: relative;
+}
+
+.support-sponsors__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+}
+
+/* Outer neutral glass wrap (default on About + Sponsors) */
+.support-sponsors--card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(28px, 4vw, 40px);
+  border-radius: 16px;
+  --c: var(--glass-neutral-c2, #b8b8c2);
+  --dir-gm: 36;
+  background:
+    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 40%, #030304 78%, color-mix(in srgb, #4a4a52 8%, #050408) 100%),
+    radial-gradient(120% 70% at 50% 120%, rgba(184, 184, 194, 0.12), transparent 56%);
+  border: 1px solid color-mix(in srgb, #b8b8c2 38%, #101014);
+  box-shadow:
+    0 0 0 1px #000,
+    0 28px 56px -22px rgba(0, 0, 0, 0.92),
+    0 0 26px -12px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--glass-card-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
+}
+
+.support-sponsors--card > .pdx-glass-sheen {
+  border-radius: inherit;
+  z-index: 0;
+}
+
+.support-sponsors__copy {
+  position: relative;
+  z-index: 1;
+}
+
+/* Large display title (design: SPONSORS) — not a mono kicker */
+.support-sponsors__title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  font-size: clamp(1.75rem, 3.4vw, 2.35rem);
+  color: var(--lime, #ccff00);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--lime, #ccff00) 40%, transparent);
+  margin: 0 0 18px;
+}
+
+.support-sponsors__copy p {
+  font-size: 1rem;
+  line-height: 1.62;
+  color: var(--text-mid, #c8c5bc);
+  max-width: 520px;
+  margin: 0 0 18px;
+}
+
+.support-sponsors__strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.support-sponsors__checks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Qualifier rows — OLED glass, soft lime left edge only (no cyan) */
+.support-sponsors__check {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  --c: var(--lime, #ccff00);
+  background:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 40%, #050508 100%),
+    radial-gradient(100% 80% at 0% 50%, color-mix(in srgb, var(--c) 14%, transparent), transparent 55%);
+  border: 1px solid color-mix(in srgb, var(--c) 28%, #1a1a14);
+  border-left: 3px solid var(--c);
+  box-shadow:
+    0 0 0 1px #000,
+    0 16px 32px -18px rgba(0, 0, 0, 0.9),
+    0 0 18px -8px color-mix(in srgb, var(--c) 42%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #d8d4cb;
+}
+
+.support-sponsors__check .mark {
+  color: var(--lime, #ccff00);
+  font-weight: 900;
+  font-size: 18px;
+  flex-shrink: 0;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--lime, #ccff00) 55%, transparent);
+}
+
+/* Pitch CTA — solid lime glass, no outer bloom (never cyan) */
+.support-sponsors__pitch {
+  --c: var(--lime, #ccff00);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 14px 24px;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  color: #050506 !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--lime, #ccff00) !important;
+  border: 1px solid #000 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.support-sponsors__pitch:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: #050506 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+}
+
+.support-sponsors__pitch:active {
+  transform: translateY(1px);
+  filter: brightness(0.98);
+}
+
+.support-sponsors__pitch:focus-visible {
+  outline: 2px solid var(--lime, #ccff00);
+  outline-offset: 3px;
+}
+
+.support-sponsors__lede {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-lo, #8c8980);
+  max-width: 420px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .support-sponsors__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-keepalive,
+  .about-v2-donate--panel.support-keepalive {
+    padding: 28px 22px;
+    gap: 24px;
+  }
+
+  .support-affiliate,
+  .about-v2-partners.support-affiliate {
+    padding: 22px 20px;
+  }
+}
+
+/* ── Calm / reduced motion ───────────────────────────────── */
+html.calm-mode .support-keepalive,
+html.calm-mode .support-affiliate,
+html.calm-mode .support-sponsors--card,
+html.calm-mode .support-sponsors__check,
+:root[data-calm="true"] .support-keepalive,
+:root[data-calm="true"] .support-affiliate,
+:root[data-calm="true"] .support-sponsors--card,
+:root[data-calm="true"] .support-sponsors__check {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 12px 28px -16px rgba(0, 0, 0, 0.85) !important;
+}
+
+html.calm-mode .support-sponsors__check .mark,
+:root[data-calm="true"] .support-sponsors__check .mark {
+  text-shadow: none;
+}
+
+html.calm-mode .support-sponsors__pitch,
+:root[data-calm="true"] .support-sponsors__pitch {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+html.calm-mode .support-keepalive__alive,
+:root[data-calm="true"] .support-keepalive__alive {
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .support-affiliate__tile,
+  .support-sponsors__pitch {
+    transition: none;
+  }
+}

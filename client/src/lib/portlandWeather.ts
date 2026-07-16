@@ -5,12 +5,31 @@ import {
   PRIDE_WEEK_END_DATE,
 } from "@shared/prideWeek";
 
+/** Visual symbol for WMO weather codes (hub forecast strip). */
+export type WeatherIconKind =
+  | "clear"
+  | "mostly-clear"
+  | "partly-cloudy"
+  | "overcast"
+  | "fog"
+  | "drizzle"
+  | "rain"
+  | "showers"
+  | "snow"
+  | "thunder";
+
 export type PortlandForecastDay = {
   day: string;
   dateLabel: string;
   high: number;
   low: number;
   highlight: boolean;
+  /** WMO weather code for this day. */
+  code: number;
+  condition: string;
+  icon: WeatherIconKind;
+  /** ISO date YYYY-MM-DD (Pacific). */
+  iso: string;
 };
 
 export type PortlandWeather = {
@@ -29,6 +48,9 @@ export type PortlandWeather = {
   locationLabel: string;
   /** Short line under the temp, e.g. "Now in Portland" or "Sat forecast high". */
   tempContext: string;
+  /** Current / featured WMO code + icon for the hero symbol. */
+  currentCode: number;
+  currentIcon: WeatherIconKind;
 };
 
 export const PRIDE_WEEKEND_START = PRIDE_WEEK_START_DATE;
@@ -59,17 +81,35 @@ const WMO_LABELS: Record<number, string> = {
   63: "Rain",
   65: "Heavy rain",
   71: "Snow",
+  73: "Snow",
+  75: "Heavy snow",
   80: "Showers",
   81: "Showers",
   82: "Heavy showers",
   95: "Thunderstorm",
+  96: "Thunderstorm",
+  99: "Thunderstorm",
 };
 
-function wmoLabel(code: number) {
+export function wmoLabel(code: number) {
   return WMO_LABELS[code] ?? "Mixed skies";
 }
 
-function weatherStyle(code: number) {
+export function weatherIconForCode(code: number): WeatherIconKind {
+  if (code === 0) return "clear";
+  if (code === 1) return "mostly-clear";
+  if (code === 2) return "partly-cloudy";
+  if (code === 3) return "overcast";
+  if (code === 45 || code === 48) return "fog";
+  if (code >= 51 && code <= 57) return "drizzle";
+  if (code >= 61 && code <= 67) return "rain";
+  if (code >= 71 && code <= 77) return "snow";
+  if (code >= 80 && code <= 82) return "showers";
+  if (code >= 95) return "thunder";
+  return "partly-cloudy";
+}
+
+export function weatherStyle(code: number) {
   if (code === 0 || code === 1) {
     return {
       sunGradient: "radial-gradient(circle,#FFED00,#FF8C00)",
@@ -88,6 +128,12 @@ function weatherStyle(code: number) {
       sunGlow: "0 0 22px rgba(25,227,255,.45)",
     };
   }
+  if (code >= 95) {
+    return {
+      sunGradient: "radial-gradient(circle,#8800FF,#19E3FF)",
+      sunGlow: "0 0 22px rgba(136,0,255,.5)",
+    };
+  }
   return {
     sunGradient: "radial-gradient(circle,#C8FA3C,#19E3FF)",
     sunGlow: "0 0 20px rgba(200,250,60,.4)",
@@ -98,7 +144,7 @@ function weatherStyle(code: number) {
 function prideCaption(high: number, low: number, code: number, isEstimate: boolean) {
   const range = `Week H ${high}° · L ${low}°`;
   if (isEstimate) {
-    return `${range} · ${PORTLAND_LOCATION_LABEL} · Jul 13 to 19 · Live forecast when available`;
+    return `${range} · ${PORTLAND_LOCATION_LABEL} · Live forecast when available`;
   }
   if (code >= 51 && code <= 82) return `${range} · ${PORTLAND_CITY} · Pack a light layer`;
   if (high >= 90) return `${range} · Hot ${PORTLAND_CITY} week. Hydrate`;
@@ -109,6 +155,25 @@ function prideCaption(high: number, low: number, code: number, isEstimate: boole
 
 function pacificTodayIso() {
   return new Date().toLocaleDateString("en-CA", { timeZone: PORTLAND_TZ });
+}
+
+function addDaysIso(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + days));
+  return dt.toISOString().slice(0, 10);
+}
+
+function dayLabelFromIso(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  // noon UTC avoids DST edge when labeling
+  const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  return dt.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase().slice(0, 3);
+}
+
+function dateLabelFromIso(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
 export function isDuringPrideWeekend(now = new Date()) {
@@ -122,15 +187,80 @@ export function isAfterPrideWeekend(now = new Date()) {
   return now.getTime() > new Date(`${PRIDE_WEEKEND_END}T23:59:59-07:00`).getTime();
 }
 
-/** Mid-July Portland climate-style fallback when the live API is offline. */
-function prideFallback(): PortlandWeather {
-  const forecast: PortlandForecastDay[] = PRIDE_DAY_LABELS.map((day, i) => ({
+function forecastDayFrom(
+  day: string,
+  dateLabel: string,
+  high: number,
+  low: number,
+  code: number,
+  iso: string,
+  highlight: boolean,
+): PortlandForecastDay {
+  return {
     day,
-    dateLabel: PRIDE_DATE_LABELS[i],
-    high: [84, 86, 87, 85, 88, 90, 86][i],
-    low: [58, 59, 60, 59, 61, 62, 60][i],
-    highlight: day === "SAT",
-  }));
+    dateLabel,
+    high,
+    low,
+    highlight,
+    code,
+    condition: wmoLabel(code),
+    icon: weatherIconForCode(code),
+    iso,
+  };
+}
+
+/** Mid-July Portland climate-style fallback when the live API is offline. */
+function rollingFallback(): PortlandWeather {
+  const today = pacificTodayIso();
+  const codes = [1, 2, 1, 3, 2, 0, 1];
+  const highs = [78, 80, 82, 79, 81, 84, 80];
+  const lows = [56, 57, 58, 57, 58, 59, 57];
+  const forecast: PortlandForecastDay[] = Array.from({ length: 7 }, (_, i) => {
+    const iso = addDaysIso(today, i);
+    const code = codes[i];
+    return forecastDayFrom(
+      dayLabelFromIso(iso),
+      dateLabelFromIso(iso),
+      highs[i],
+      lows[i],
+      code,
+      iso,
+      i === 0,
+    );
+  });
+  const high = Math.max(...forecast.map(d => d.high));
+  const low = Math.min(...forecast.map(d => d.low));
+  const currentCode = forecast[0].code;
+  return {
+    currentTemp: forecast[0].high,
+    condition: wmoLabel(currentCode),
+    high,
+    low,
+    caption: prideCaption(high, low, currentCode, true),
+    forecast,
+    isEstimate: true,
+    city: PORTLAND_CITY,
+    locationLabel: PORTLAND_LOCATION_LABEL,
+    tempContext: `Estimate · ${PORTLAND_LOCATION_LABEL}`,
+    currentCode,
+    currentIcon: weatherIconForCode(currentCode),
+    ...weatherStyle(currentCode),
+  };
+}
+
+function prideFallback(): PortlandWeather {
+  const codes = [1, 1, 2, 1, 0, 0, 1];
+  const forecast: PortlandForecastDay[] = PRIDE_DAY_LABELS.map((day, i) =>
+    forecastDayFrom(
+      day,
+      PRIDE_DATE_LABELS[i],
+      [84, 86, 87, 85, 88, 90, 86][i],
+      [58, 59, 60, 59, 61, 62, 60][i],
+      codes[i],
+      PRIDE_DATES[i],
+      day === "SAT",
+    ),
+  );
   const high = Math.max(...forecast.map(d => d.high));
   const low = Math.min(...forecast.map(d => d.low));
   const code = 1;
@@ -145,6 +275,8 @@ function prideFallback(): PortlandWeather {
     city: PORTLAND_CITY,
     locationLabel: PORTLAND_LOCATION_LABEL,
     tempContext: "Pride Week estimate · Portland, OR",
+    currentCode: code,
+    currentIcon: weatherIconForCode(code),
     ...weatherStyle(code),
   };
 }
@@ -170,7 +302,6 @@ function isFahrenheitUnit(unit: string | undefined): boolean {
 function isCelsiusUnit(unit: string | undefined): boolean {
   if (!unit) return false;
   const u = unit.toLowerCase();
-  // Avoid matching "fahrenheit"
   return (u.includes("c") || u.includes("celsius")) && !u.includes("f");
 }
 
@@ -185,7 +316,6 @@ function openMeteoUrl(opts: {
   url.searchParams.set("longitude", PORTLAND_LNG);
   url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,weather_code");
   url.searchParams.set("timezone", PORTLAND_TZ);
-  // Critical: hub UI is °F for Portland, OR. Open-Meteo defaults to °C.
   url.searchParams.set("temperature_unit", "fahrenheit");
   url.searchParams.set("wind_speed_unit", "mph");
   url.searchParams.set("precipitation_unit", "inch");
@@ -209,6 +339,37 @@ async function fetchJson(url: URL): Promise<OpenMeteoPayload | null> {
   } catch {
     return null;
   }
+}
+
+function parseDailyRows(
+  data: OpenMeteoPayload,
+): Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }> | null {
+  if (isCelsiusUnit(data.daily_units?.temperature_2m_max)) return null;
+  const times = data.daily?.time ?? [];
+  const highs = data.daily?.temperature_2m_max ?? [];
+  const lows = data.daily?.temperature_2m_min ?? [];
+  const codes = data.daily?.weather_code ?? [];
+  if (times.length < 7) return null;
+
+  const rows = times.slice(0, 7).map((iso, idx) => {
+    const high = highs[idx];
+    const low = lows[idx];
+    if (high == null || low == null || !Number.isFinite(high) || !Number.isFinite(low)) return null;
+    return {
+      day: dayLabelFromIso(iso),
+      dateLabel: dateLabelFromIso(iso),
+      high: Math.round(high),
+      low: Math.round(low),
+      code: codes[idx] ?? 0,
+      iso,
+    };
+  });
+  if (rows.some(r => r === null)) return null;
+  const out = rows as Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }>;
+  const maxHigh = Math.max(...out.map(r => r.high));
+  if (maxHigh < 40 || maxHigh > 120) return null;
+  if (!isFahrenheitUnit(data.daily_units?.temperature_2m_max) && maxHigh < 50) return null;
+  return out;
 }
 
 function buildPrideForecast(
@@ -235,14 +396,9 @@ function buildPrideForecast(
 
   if (rows.some(r => r === null)) return null;
   const out = rows as Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }>;
-
-  // Sanity: Portland mid-July highs are almost never under ~50°F or over 120°F.
   const maxHigh = Math.max(...out.map(r => r.high));
   if (maxHigh < 50 || maxHigh > 120) return null;
-
-  // If unit metadata missing, still reject Celsius-looking peaks (~25–38).
   if (!isFahrenheitUnit(data.daily_units?.temperature_2m_max) && maxHigh < 50) return null;
-
   return out;
 }
 
@@ -250,12 +406,12 @@ function assemble(
   rows: Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }>,
   current: { temp?: number; code?: number } | null,
   isEstimate: boolean,
+  mode: "pride" | "rolling",
 ): PortlandWeather {
   const today = pacificTodayIso();
   const during = isDuringPrideWeekend();
-  const satRow = rows.find(r => r.day === "SAT") ?? rows[5] ?? rows[0];
   const todayRow = rows.find(r => r.iso === today);
-  const featured = todayRow ?? satRow;
+  const featured = todayRow ?? rows[0];
   const weekHigh = Math.max(...rows.map(r => r.high));
   const weekLow = Math.min(...rows.map(r => r.low));
 
@@ -265,20 +421,24 @@ function assemble(
 
   let tempContext: string;
   if (hasLiveNow) {
-    tempContext = during ? `Now · ${PORTLAND_LOCATION_LABEL}` : `Now in ${PORTLAND_LOCATION_LABEL}`;
+    tempContext = `Now · ${PORTLAND_LOCATION_LABEL}`;
   } else if (todayRow) {
     tempContext = `Today high · ${PORTLAND_LOCATION_LABEL}`;
   } else {
-    tempContext = `${featured.day} high · Pride Week · ${PORTLAND_LOCATION_LABEL}`;
+    tempContext = `${featured.day} high · ${PORTLAND_LOCATION_LABEL}`;
   }
 
-  const forecast: PortlandForecastDay[] = rows.map(row => ({
-    day: row.day,
-    dateLabel: row.dateLabel,
-    high: row.high,
-    low: row.low,
-    highlight: row.iso === today || (!during && !todayRow && row.day === "SAT"),
-  }));
+  const forecast: PortlandForecastDay[] = rows.map(row =>
+    forecastDayFrom(
+      row.day,
+      row.dateLabel,
+      row.high,
+      row.low,
+      row.code,
+      row.iso,
+      row.iso === today || (!todayRow && row === featured),
+    ),
+  );
 
   return {
     currentTemp,
@@ -290,61 +450,85 @@ function assemble(
     isEstimate,
     city: PORTLAND_CITY,
     locationLabel: PORTLAND_LOCATION_LABEL,
-    tempContext,
+    tempContext: `${tempContext}${mode === "pride" && during ? " · Pride Week" : ""}`,
+    currentCode,
+    currentIcon: weatherIconForCode(currentCode),
     ...weatherStyle(currentCode),
   };
 }
 
 export async function fetchPortlandWeather(): Promise<PortlandWeather> {
-  // Always ask for current conditions in Portland so the big number is real "now".
   const includeCurrent = true;
+  const duringPride = isDuringPrideWeekend();
 
-  // 1) Explicit Pride Week window Jul 13–19 for downtown Portland (°F).
-  const prideData = await fetchJson(
-    openMeteoUrl({
-      startDate: PRIDE_WEEKEND_START,
-      endDate: PRIDE_WEEKEND_END,
-      includeCurrent,
-    }),
-  );
-  if (prideData) {
-    const rows = buildPrideForecast(prideData);
-    if (rows) {
-      const cur =
-        prideData.current?.temperature_2m != null
-          ? {
-              temp: prideData.current.temperature_2m,
-              code: prideData.current.weather_code,
-            }
-          : null;
-      // If current came back in C somehow, drop it (keep daily F forecast).
-      if (cur && isCelsiusUnit(prideData.current_units?.temperature_2m)) {
-        return assemble(rows, null, false);
+  // During Pride Week prefer the Jul 13–19 window (7 fixed days with live codes).
+  if (duringPride) {
+    const prideData = await fetchJson(
+      openMeteoUrl({
+        startDate: PRIDE_WEEKEND_START,
+        endDate: PRIDE_WEEKEND_END,
+        includeCurrent,
+      }),
+    );
+    if (prideData) {
+      const rows = buildPrideForecast(prideData);
+      if (rows) {
+        const cur =
+          prideData.current?.temperature_2m != null
+            ? {
+                temp: prideData.current.temperature_2m,
+                code: prideData.current.weather_code,
+              }
+            : null;
+        if (cur && isCelsiusUnit(prideData.current_units?.temperature_2m)) {
+          return assemble(rows, null, false, "pride");
+        }
+        return assemble(rows, cur, false, "pride");
       }
-      return assemble(rows, cur, false);
     }
   }
 
-  // 2) Rolling 16-day forecast (still °F) may include Jul 13–19.
-  const extendedData = await fetchJson(
-    openMeteoUrl({ forecastDays: 16, includeCurrent }),
+  // Rolling 7-day forecast from today (always available, cycles forward each day).
+  const rollingData = await fetchJson(
+    openMeteoUrl({ forecastDays: 7, includeCurrent }),
   );
-  if (extendedData) {
-    const rows = buildPrideForecast(extendedData);
+  if (rollingData) {
+    const rows = parseDailyRows(rollingData);
     if (rows) {
       const cur =
-        extendedData.current?.temperature_2m != null
+        rollingData.current?.temperature_2m != null
           ? {
-              temp: extendedData.current.temperature_2m,
-              code: extendedData.current.weather_code,
+              temp: rollingData.current.temperature_2m,
+              code: rollingData.current.weather_code,
             }
           : null;
-      if (cur && isCelsiusUnit(extendedData.current_units?.temperature_2m)) {
-        return assemble(rows, null, false);
+      if (cur && isCelsiusUnit(rollingData.current_units?.temperature_2m)) {
+        return assemble(rows, null, false, "rolling");
       }
-      return assemble(rows, cur, false);
+      return assemble(rows, cur, false, "rolling");
     }
   }
 
-  return prideFallback();
+  // Extended window may still include Pride dates if rolling failed mid-pride.
+  if (duringPride) {
+    const extendedData = await fetchJson(
+      openMeteoUrl({ forecastDays: 16, includeCurrent }),
+    );
+    if (extendedData) {
+      const rows = buildPrideForecast(extendedData);
+      if (rows) {
+        const cur =
+          extendedData.current?.temperature_2m != null
+            ? {
+                temp: extendedData.current.temperature_2m,
+                code: extendedData.current.weather_code,
+              }
+            : null;
+        return assemble(rows, cur, false, "pride");
+      }
+    }
+    return prideFallback();
+  }
+
+  return rollingFallback();
 }

@@ -1,249 +1,953 @@
 /* ============================================================
-   PDX Pride Guide — lite sitewide dark glass
-   Surfaces only: background / edge / depth / blur.
-   Does NOT change wireframe (layout, padding, gaps, radii as
-   structural sizes) or fonts/type scales.
-   Neon borders, rainbow seams, solid CTAs stay.
+   PDX Pride Guide — DEEP GLASS / OLED-NEON (canonical)
+
+   Source of truth (overrides prior locked lite-glass + brutal CTA defaults):
+     docs/handoffs/deep-glass-2026-07-16/
+     Card System.html · GROK_MIGRATION_PROMPT.md §1
+     §6 animation audit: pgDirCardIn, --dir-gm, one rainbow seam engine
+
+   Surface only: fill / edge / bloom / sheen / button chrome / map frame.
+   Layout, spacing, structural radii, fonts, type scale: unchanged.
    ============================================================ */
 
 :root {
-  --pdx-glass-fill: color-mix(in srgb, #0c0c12 76%, transparent);
-  --pdx-glass-fill-hot: color-mix(in srgb, #14141c 82%, transparent);
-  --pdx-glass-fill-dense: color-mix(in srgb, #0a0a0e 86%, transparent);
-  --pdx-glass-edge: rgba(255, 255, 255, 0.10);
-  --pdx-glass-edge-hi: rgba(255, 255, 255, 0.14);
-  --pdx-glass-blur: 12px;
+  /* ── Accent contract: set --c (or --_c / --dc) per instance ─
+     Recipes below use var(--c). Because custom props compute on the
+     element where they are defined, any node that sets a local --c MUST
+     re-declare the --glass-card-* recipes (see .pdx-glass-rebind).
+     Otherwise every card inherits root cyan. */
+  --c: var(--neon-cyan, #19e3ff);
+  --dir-gm: 60; /* resting glow multiplier; calm zeros this */
+
+  /* ── 1.1 Master card (accented) ─────────────────────────── */
+  --glass-card-radius: 14px;
+  --glass-card-blur: 12px;
+  --glass-card-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 18%, transparent), transparent 56%);
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  --glass-card-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+
+  /* ── 1.1b Neutral card (no semantic accent) ─────────────── */
+  --glass-neutral-c1: #4a4a52;
+  --glass-neutral-c2: #b8b8c2;
+  --glass-card-neutral-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--glass-neutral-c1) 8%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--glass-neutral-c1) 20%, transparent), transparent 56%);
+  --glass-card-neutral-border: 1px solid color-mix(in srgb, var(--glass-neutral-c2) 50%, #101014);
+  --glass-card-neutral-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 26px -8px color-mix(in srgb, var(--glass-neutral-c2) calc(var(--dir-gm, 60) * 1.15%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--glass-neutral-c2) calc(var(--dir-gm, 60) * 1.15%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--glass-neutral-c2) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--glass-neutral-c1) 45%, transparent);
+
+  /* ── 1.2 Sheen overlays ─────────────────────────────────── */
+  --glass-sheen: linear-gradient(
+    133deg,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.03) 12%,
+    transparent 34%
+  );
+  --glass-sheen-specular: radial-gradient(
+    70% 55% at 108% 112%,
+    rgba(255, 255, 255, 0.1),
+    color-mix(in srgb, var(--c) 12%, transparent) 40%,
+    transparent 70%
+  );
+
+  /* ── 1.3 Refract seam (presentation; engine = pdx-rainbow-rule) ─ */
+  --refract-seam-height: 2px;
+  --refract-seam-gradient: linear-gradient(
+    90deg,
+    #ff2d5e,
+    #ff9500,
+    #ffee00,
+    #39ff14,
+    #00ffff,
+    #3a6bff,
+    #8800ff,
+    #ff00cc,
+    #ff2d5e
+  );
+
+  /* ── 1.4 Poster / logo well ─────────────────────────────── */
+  --poster-well-bg: radial-gradient(
+    130% 130% at 50% 14%,
+    color-mix(in srgb, var(--c) 32%, #050506),
+    #050506 72%
+  );
+  --poster-well-floor: 4px solid var(--c);
+  --poster-well-scan: repeating-linear-gradient(
+    0deg,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.16) 3px 4px
+  );
+
+  /* ── 1.5 Glass buttons (Card System §16 state sheet)
+     Default = near-black translucent fill + 2px black ring + accent hairline
+     + soft bloom + top sheen. Solid = filled accent CTA. Outline = secondary. */
+  --glass-btn-radius: 9px;
+  --glass-btn-bg:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      color-mix(in srgb, var(--c) 15%, #0b0b0d),
+      #060608
+    )
+    padding-box,
+    linear-gradient(#000, #000) border-box;
+  --glass-btn-border: 2px solid #000;
+  --glass-btn-color: #fff;
+  /* Buttons: thin black outline + inward sheen only — no outer neon bloom */
+  --glass-btn-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.55);
+  --glass-btn-hover-bg:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      color-mix(in srgb, var(--c) 24%, #0b0b0d),
+      #060608
+    )
+    padding-box,
+    linear-gradient(#000, #000) border-box;
+  --glass-btn-hover-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.55);
+  --glass-btn-active-bg:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      color-mix(in srgb, var(--c) 12%, #08080a),
+      #050506
+    )
+    padding-box,
+    linear-gradient(#000, #000) border-box;
+  --glass-btn-active-shadow:
+    0 0 0 1px #000,
+    inset 0 2px 5px rgba(0, 0, 0, 0.7);
+  /* Solid primary CTA (filled accent) */
+  --glass-btn-solid-bg: var(--c);
+  --glass-btn-solid-color: #050506;
+  --glass-btn-solid-border: 2px solid #000;
+  --glass-btn-solid-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
+  /* Outline secondary */
+  --glass-btn-outline-border: 1px solid #000;
+  --glass-btn-outline-bg: rgba(0, 0, 0, 0.5);
+  --glass-btn-outline-color: var(--c);
+  --glass-btn-outline-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* ── 1.6 Map surface ────────────────────────────────────── */
+  --map-surface-bg: #06060a;
+  /* Debossed map well — thin black rim + deep inward hole (no outer bloom) */
+  --map-frame-shadow:
+    0 0 0 1px #000,
+    inset 0 0 0 1px rgba(0, 0, 0, 0.85),
+    inset 0 2px 3px rgba(0, 0, 0, 0.9),
+    inset 0 0 28px -8px rgba(0, 0, 0, 0.95),
+    inset 0 0 52px 10px rgba(0, 0, 0, 0.42),
+    inset 0 4px 10px -2px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.045);
+  --map-grid-bg:
+    repeating-linear-gradient(0deg, transparent 0 38px, rgba(255, 255, 255, 0.022) 38px 39px),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255, 255, 255, 0.022) 46px 47px),
+    radial-gradient(120% 90% at 60% 40%, #101018 0%, #06060a 70%);
+  --map-vignette-bg: radial-gradient(
+    128% 128% at 50% 50%,
+    transparent 48%,
+    rgba(0, 0, 0, 0.18) 72%,
+    rgba(0, 0, 0, 0.48) 100%
+  );
+  --map-vignette-inset: inset 0 0 18px 2px rgba(0, 0, 0, 0.48), inset 0 0 56px 10px rgba(0, 0, 0, 0.4);
+  /* No outer bloom on maps — frame is black outline + inset deboss only */
+  --map-neutral-glow: none;
+
+  /* ── Nav deboss (Agent 8 / §2.8) ────────────────────────── */
+  --edge-deboss:
+    inset 0 0 34px -10px rgba(0, 0, 0, 0.95),
+    inset 0 2px 3px rgba(0, 0, 0, 0.6);
+
+  /* ── Legacy lite-glass aliases → deep (do not reintroduce lite) ─ */
+  --pdx-glass-fill: #050506;
+  --pdx-glass-fill-hot: #0a0a0e;
+  --pdx-glass-fill-dense: #030304;
+  --pdx-glass-edge: color-mix(in srgb, var(--c) 55%, #101014);
+  --pdx-glass-edge-hi: color-mix(in srgb, var(--c) 70%, #101014);
+  --pdx-glass-blur: var(--glass-card-blur);
   --pdx-glass-blur-sm: 10px;
   --pdx-glass-sat: 1.12;
-  --pdx-glass-specular: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.015) 30%,
-    transparent 55%
+  --pdx-glass-specular: var(--glass-sheen);
+  --pdx-glass-shadow: var(--glass-card-shadow);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Per-instance rebind: recompute recipes against local --c
+   (event day color, board accent, category, etc.)
+   ═══════════════════════════════════════════════════════════ */
+.pdx-glass-rebind,
+.pdx-glass-card,
+.pdx-glass,
+.pdxBoard,
+.pdxRow,
+.event-board-card,
+.board-listing-card,
+.board-listing-card--makeover,
+.board-spotted-card,
+.spotted-card,
+.board-detail-modal,
+.board-post-overlay,
+.event-modal,
+.pdxPlace,
+.pdxPlace__body,
+.affiliate-poster-card,
+.feed-aff,
+.featured-event-ad,
+.card.fitem.fitem--glow,
+.fitem--glow {
+  --glass-card-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 18%, transparent), transparent 56%);
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  --glass-card-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  --poster-well-bg: radial-gradient(
+    130% 130% at 50% 14%,
+    color-mix(in srgb, var(--c) 32%, #050506),
+    #050506 72%
   );
-  --pdx-glass-shadow:
-    0 8px 24px -12px rgba(0, 0, 0, 0.72),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --poster-well-floor: 4px solid var(--c);
+  --glass-btn-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
+    var(--c);
+  --glass-btn-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.35);
+  --glass-btn-outline-border: 1px solid #000;
+  --glass-btn-outline-bg: linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--c) 16%, transparent),
+      color-mix(in srgb, var(--c) 2%, transparent) 46%
+    ),
+    rgba(255, 255, 255, 0.015);
+  --glass-btn-outline-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.5);
+  --glass-sheen-specular: radial-gradient(
+    70% 55% at 108% 112%,
+    rgba(255, 255, 255, 0.1),
+    color-mix(in srgb, var(--c) 12%, transparent) 40%,
+    transparent 70%
+  );
+  --pdx-glass-edge: color-mix(in srgb, var(--c) 55%, #101014);
+  --pdx-glass-shadow: var(--glass-card-shadow);
 }
 
-/* Shared mixin-like utility (opt-in for one-offs) */
+/* ═══════════════════════════════════════════════════════════
+   Utility classes — point components here; set --c on the node
+   ═══════════════════════════════════════════════════════════ */
+
+.pdx-glass-card,
 .pdx-glass {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill);
-  border-color: var(--pdx-glass-edge);
-  box-shadow: var(--pdx-glass-shadow);
-  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
+  position: relative;
+  overflow: visible;
+  background: var(--glass-card-bg);
+  border: var(--glass-card-border);
+  box-shadow: var(--glass-card-shadow);
+  backdrop-filter: blur(var(--glass-card-blur));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur));
 }
 
-/* ── Large islands / form panels ─────────────────────────── */
+.pdx-glass-card--neutral {
+  --c: var(--glass-neutral-c2);
+  background: var(--glass-card-neutral-bg);
+  border: var(--glass-card-neutral-border);
+  box-shadow: var(--glass-card-neutral-shadow);
+  backdrop-filter: blur(var(--glass-card-blur));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+}
+
+/* Left-accent variant (infrastructure grid, sponsor rows) */
+.pdx-glass-card--left-accent {
+  border-left: 4px solid var(--c);
+}
+
+/* Corner sheen — mount as child or ::after */
+.pdx-glass-sheen,
+.pdx-glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--glass-sheen);
+}
+
+/* Prefer explicit child for dual-layer sheen */
+.pdx-glass-sheen--specular {
+  content: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--glass-sheen-specular);
+}
+
+/* Thin edge-masked refract bar (alias presentation; same palette as rainbow rule) */
+.pdx-refract-seam,
+.dir-refract {
+  position: absolute;
+  top: 0;
+  left: 7px;
+  right: 7px;
+  height: var(--refract-seam-height);
+  z-index: 5;
+  pointer-events: none;
+  background: var(--refract-seam-gradient);
+  background-size: 200% 100%;
+  opacity: 0.7;
+  filter: blur(0.2px);
+  animation: dirRefract 7s linear infinite;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+
+/* Prefer shared 3px site seam when mounting .pdx-rainbow-rule on cards */
+
+.pdx-poster-well {
+  position: relative;
+  border-radius: 13px 13px 0 0;
+  overflow: hidden;
+  background: var(--poster-well-bg);
+  border-bottom: var(--poster-well-floor);
+}
+
+.pdx-poster-well__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background: var(--poster-well-scan);
+}
+
+/* Default glass CTA — dark fill + accent rim (state sheet DEFAULT) */
+.pdx-glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 11px 20px;
+  font-size: 0.86rem;
+  border-radius: var(--glass-btn-radius, 9px);
+  color: var(--glass-btn-color, #fff);
+  border: var(--glass-btn-border);
+  background: var(--glass-btn-bg);
+  box-shadow: var(--glass-btn-shadow);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.pdx-glass-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  background: var(--glass-btn-hover-bg);
+  box-shadow: var(--glass-btn-hover-shadow);
+  text-decoration: none;
+  color: var(--glass-btn-color, #fff);
+}
+
+.pdx-glass-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  filter: none;
+  background: var(--glass-btn-active-bg);
+  box-shadow: var(--glass-btn-active-shadow);
+}
+
+.pdx-glass-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  color: #6a6870;
+  background: linear-gradient(#0b0b0d, #08080a) padding-box, linear-gradient(#000, #000) border-box;
+  box-shadow: 0 0 0 1px #1c1c22, inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transform: none;
+  filter: none;
+}
+
+/* Outline secondary */
+.pdx-glass-btn--outline {
+  color: var(--glass-btn-outline-color, var(--c));
+  background: var(--glass-btn-outline-bg);
+  border: var(--glass-btn-outline-border);
+  box-shadow: var(--glass-btn-outline-shadow);
+}
+
+.pdx-glass-btn--outline:hover:not(:disabled) {
+  color: var(--glass-btn-outline-color, var(--c));
+  filter: brightness(1.08);
+  background: color-mix(in srgb, var(--c) 10%, rgba(0, 0, 0, 0.55));
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Solid primary CTA */
+.pdx-glass-btn--solid {
+  color: var(--glass-btn-solid-color, #050506);
+  background: var(--glass-btn-solid-bg, var(--c));
+  border: var(--glass-btn-solid-border, 2px solid #000);
+  box-shadow: var(--glass-btn-solid-shadow);
+}
+
+.pdx-glass-btn--solid:hover:not(:disabled) {
+  color: var(--glass-btn-solid-color, #050506);
+  filter: brightness(1.06);
+  background: var(--glass-btn-solid-bg, var(--c));
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
+}
+
+/* Rainbow special (keep for rare moments) */
+.pdx-glass-btn--gradient {
+  color: #050506;
+  border: 1px solid #000;
+  background: linear-gradient(100deg, #ff2400, #ff9500, #ffee00, #39ff14, #00ffff, #8800ff, #ff00cc);
+  background-size: 180% 180%;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.3);
+}
+
+.pdx-glass-btn--gradient:hover:not(:disabled) {
+  color: #050506;
+  filter: brightness(1.05);
+  background-position: 100% 50%;
+}
+
+.pdx-map-surface,
+.pdx-map-surface--neutral {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--map-surface-bg);
+  border: 1px solid #000;
+  /* Debossed well edge — thin black rim + deep inward hole */
+  box-shadow: var(--map-frame-shadow);
+}
+
+/* Ensure live Leaflet map shells always pick up the same deboss edge */
+.pdx-map-live.pdx-map-surface,
+.pdx-map-live.pdx-map-surface--neutral {
+  box-shadow: var(--map-frame-shadow) !important;
+  border: 1px solid #000 !important;
+}
+
+.pdx-map-surface__plate {
+  position: relative;
+  overflow: hidden;
+  background: var(--map-grid-bg);
+}
+
+.pdx-map-surface__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: var(--map-vignette-bg);
+  box-shadow: var(--map-vignette-inset);
+}
+
+.pdx-map-surface__shaft {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 48%;
+  width: 70px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.015) 50%,
+    transparent
+  );
+  transform: rotate(14deg);
+  filter: blur(1px);
+  opacity: 0.85;
+}
+
+.pdx-edge-deboss {
+  box-shadow: var(--edge-deboss), 0 0 22px -10px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Supersede prior lite-glass surface selectors (same targets)
+   ═══════════════════════════════════════════════════════════ */
+
 .gifting-form-panel--makeover,
 .board-path-card,
 .board-empty,
 .board-empty--prototype,
 .gigs-page .board-how--makeover .board-step--makeover,
 .gifting-page .board-how--makeover .board-step--makeover,
-.missed-page .board-how--makeover .board-step--makeover {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  box-shadow:
-    var(--pdx-glass-shadow),
-    0 0 28px -16px color-mix(in srgb, currentColor 0%, transparent) !important;
-}
-
-/* Keep makeover form lime edge glow; glass fill only */
-.gifting-form-panel--makeover {
-  box-shadow:
-    var(--pdx-glass-shadow),
-    0 0 28px -14px #ccff00 !important;
-}
-
-/* Path cards: keep left accent; glass the fill */
-.board-path-card {
-  border-color: color-mix(in srgb, #1c1c22 70%, var(--pdx-glass-edge));
-}
-
-/* Empty states */
-.board-empty,
-.board-empty--prototype {
-  border-color: var(--pdx-glass-edge);
-}
-
-/* ── Board listing / spotted cards (lite) ────────────────── */
+.missed-page .board-how--makeover .board-step--makeover,
 .board-listing-card,
 .board-listing-card--makeover,
-.spotted-card {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  box-shadow: var(--pdx-glass-shadow);
-}
-
-.board-listing-card--makeover:hover,
-.board-listing-card--makeover.is-expanded,
-.board-listing-card:hover,
-.board-listing-card.is-expanded {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill-hot) !important;
-}
-
-.spotted-card:hover {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill-hot) !important;
-}
-
-/* ── Events poster + list rows (very lite — keep day glow) ─ */
-.pdxBoard {
-  background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.05), transparent 32%),
-    var(--pdx-glass-fill) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
-}
-
-.pdxRow {
-  background: var(--pdx-glass-fill) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(1.08);
-}
-
-a.pdxRow:hover,
-.ds-listing-card--list:hover .pdxRow {
-  background: var(--pdx-glass-fill-hot) !important;
-}
-
-/* ── Sticky filter chrome (events / boards / directory shell) */
-.zine-filter-bar {
-  background:
-    var(--pdx-glass-specular),
-    color-mix(in srgb, #050508 80%, transparent) !important;
-  border-bottom-color: var(--pdx-glass-edge) !important;
-  backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
-}
-
-/* ── Stats bands ─────────────────────────────────────────── */
+.board-spotted-card,
+.spotted-card,
+.board-detail-modal,
+.board-post-overlay,
+/* .event-modal — shell chrome lives in index.css (opaque; no backdrop-filter double) */
+.event-board-card,
+.pdxBoard,
+.pdxRow,
 .board-stats-bar,
-.board-stats-band {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill-dense) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-}
-
-/* ── Beaches live tiles + logistics ──────────────────────── */
+/* .board-stats-band — dedicated cyan strip bloom below (not full glass-card fill) */
 .nude-live-card,
 .nb-log-fee,
-.nb-log {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  border-color: color-mix(in srgb, #24242c 60%, var(--pdx-glass-edge)) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  box-shadow: var(--pdx-glass-shadow);
-}
-
-/* River Brats panels + cards */
+.nb-log,
 .rb-panel,
 .rb-compose,
 .rb-card,
 .rb-checkin__hero-card,
-.rb-checkin__pulse {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  border-color: var(--pdx-glass-edge) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  box-shadow: var(--pdx-glass-shadow);
-}
-
-/* ── Schedule / tools ────────────────────────────────────── */
+.rb-checkin__pulse,
 .schedule-page .sch-toolbar,
 .schedule-page .sch-pop,
 .sch-toolbar,
-.sch-pop {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill-dense) !important;
-  backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(14px) saturate(var(--pdx-glass-sat));
-  border-color: var(--pdx-glass-edge);
-}
-
-/* ── About dark panels (not white mission paper / photo panels) ─ */
-.about-v2-donate--panel {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  border-color: var(--pdx-glass-edge);
-  backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur)) saturate(var(--pdx-glass-sat));
-  box-shadow: var(--pdx-glass-shadow);
-}
-
-/* ── Submit success + empty utility ──────────────────────── */
-.submit-success {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  box-shadow: var(--pdx-glass-shadow);
-}
-
-/* ── Hub feed glowing board items (not plain rows) ───────── */
+.sch-pop,
+.submit-success,
 .card.fitem.fitem--glow,
 .fitem--glow {
-  background:
-    var(--pdx-glass-specular),
-    var(--pdx-glass-fill) !important;
-  backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
-  -webkit-backdrop-filter: blur(var(--pdx-glass-blur-sm)) saturate(var(--pdx-glass-sat));
+  background: var(--glass-card-bg) !important;
+  border-color: color-mix(in srgb, var(--c, var(--_c, var(--dc, #19e3ff))) 55%, #101014);
+  box-shadow: var(--glass-card-shadow);
+  backdrop-filter: blur(var(--glass-card-blur));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur));
 }
 
-/* ── Fallbacks: no blur / calm ───────────────────────────── */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .gifting-form-panel--makeover,
-  .board-path-card,
-  .board-empty,
-  .board-empty--prototype,
-  .board-listing-card,
-  .board-listing-card--makeover,
-  .spotted-card,
-  .pdxBoard,
-  .pdxRow,
-  .zine-filter-bar,
-  .board-stats-bar,
-  .board-stats-band,
-  .nude-live-card,
-  .nb-log,
-  .nb-log-fee,
-  .rb-panel,
-  .rb-compose,
-  .rb-card,
-  .rb-checkin__hero-card,
-  .rb-checkin__pulse,
-  .schedule-page .sch-toolbar,
-  .schedule-page .sch-pop,
-  .sch-toolbar,
-  .sch-pop,
-  .about-v2-donate--panel,
-  .submit-success,
-  .card.fitem.fitem--glow,
-  .fitem--glow {
-    background: #121218 !important;
+/* Keep-alive panel: neutral glass (Agent 12) — not accented */
+.about-v2-donate--panel.support-keepalive,
+.support-keepalive {
+  --c: var(--glass-neutral-c2);
+  background: var(--glass-card-neutral-bg) !important;
+  border: var(--glass-card-neutral-border) !important;
+  box-shadow: var(--glass-card-neutral-shadow) !important;
+  backdrop-filter: blur(var(--glass-card-blur));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+}
+
+/* Board cards: listing accent → --c (MC #FF00CC · Gifting #CCFF00 · Gigs #6E3DFF)
+   Solid posts: black ring + accent rim + left accent bar.
+   ISO / Looking: dashed full border (no solid left bar). */
+.board-listing-card,
+.board-listing-card--makeover {
+  --c: var(--listing-accent, var(--_c, #ccff00));
+  border-radius: 14px !important;
+  border: 1.5px solid color-mix(in srgb, var(--c) 70%, #101014) !important;
+  border-left: 4px solid var(--c) !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 36px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.4%), transparent),
+    0 0 18px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.25%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent) !important;
+}
+
+.board-listing-card.is-dashed,
+.board-listing-card.is-iso,
+.board-listing-card.is-looking,
+.board-listing-card--makeover.is-dashed,
+.board-listing-card--makeover.is-iso,
+.board-listing-card--makeover.is-looking {
+  border: 2px dashed color-mix(in srgb, var(--c) 75%, #101014) !important;
+  border-left: 2px dashed color-mix(in srgb, var(--c) 75%, #101014) !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 28px 56px -22px rgba(0, 0, 0, 0.92),
+    0 0 28px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.2%), transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.board-spotted-card,
+.spotted-card,
+.board-detail-modal--spotted {
+  --c: var(--spotted-accent, var(--listing-accent, #ff00cc));
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 36px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.4%), transparent),
+    0 0 18px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.25%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent) !important;
+}
+
+.board-detail-modal,
+.board-post-overlay {
+  --c: var(--listing-accent, var(--_c, #ff00cc));
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 50px -10px color-mix(in srgb, var(--c) 55%, transparent),
+    0 0 24px -6px color-mix(in srgb, var(--c) 40%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 40px -22px color-mix(in srgb, var(--c) 36%, transparent) !important;
+}
+
+.event-board-card {
+  --c: var(--card-day-color, var(--_day, #19e3ff));
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+}
+
+/*
+ * Stacking (bottom → top):
+ *   0  glass sheen (::after)
+ *   1  watermark motif (.board-glass-motif)
+ *   2  card content
+ * Motifs must sit above sheen or they vanish into the dark fill.
+ */
+.board-listing-card--makeover::after,
+.board-spotted-card::after,
+.spotted-card::after,
+.board-detail-modal::after,
+.board-post-overlay::after,
+.event-board-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(
+      133deg,
+      rgba(255, 255, 255, 0.16),
+      rgba(255, 255, 255, 0.04) 14%,
+      transparent 40%
+    ),
+    radial-gradient(
+      70% 55% at 108% 112%,
+      rgba(255, 255, 255, 0.08),
+      color-mix(in srgb, var(--c) 12%, transparent) 40%,
+      transparent 70%
+    );
+}
+
+/* Decorative board motifs — line SVGs, board accent, top-right watermark (§17) */
+.board-glass-motif {
+  position: absolute;
+  top: 10%;
+  right: -2%;
+  width: min(48%, 148px);
+  height: auto;
+  aspect-ratio: 1;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.2;
+  color: var(--c, var(--listing-accent, #ff00cc));
+  overflow: visible;
+}
+.board-glass-motif svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, currentColor 40%, transparent));
+}
+/* Quote wrap holds one or two typographic quotes without Fragment stacking bugs */
+.board-glass-motif--quote-wrap {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  aspect-ratio: auto;
+  opacity: 1;
+  z-index: 1;
+  pointer-events: none;
+  color: inherit;
+}
+/* MC quotes — oversized typographic watermark (top-right, design board cards) */
+.board-glass-motif--quote-wrap .board-glass-motif--quote {
+  position: absolute;
+  top: -12px;
+  right: 6%;
+  left: auto;
+  width: auto;
+  height: auto;
+  aspect-ratio: auto;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: clamp(5.5rem, 16vw, 9rem);
+  line-height: 1;
+  opacity: 0.18;
+  color: var(--c, var(--listing-accent, #ff00cc));
+  filter: none;
+  z-index: 1;
+}
+.board-glass-motif--quote-wrap .board-glass-motif--quote-end {
+  top: auto;
+  right: 4%;
+  bottom: -24px;
+  opacity: 0.14;
+}
+.board-glass-motif--dollar,
+.board-glass-motif--gift,
+.board-glass-motif--search,
+.board-glass-motif--binoculars {
+  opacity: 0.22;
+}
+
+/* Closed listing cards: keep motif in the text column (right of thumb) */
+.board-listing-card--makeover .board-glass-motif:not(.board-glass-motif--quote-wrap) {
+  top: 12%;
+  right: 4%;
+  width: min(38%, 120px);
+}
+
+/* Content above motif so type stays sharp; motif still reads in open areas */
+.board-listing-card--makeover > .board-listing-card__row,
+.board-listing-card--makeover > .board-listing-card__expand,
+.board-spotted-card > :not(.board-glass-motif):not(.board-glass-motif--quote-wrap):not(.board-spotted-card__ticks),
+.spotted-card > :not(.board-glass-motif):not(.board-glass-motif--quote-wrap):not(.spotted-card__found-stamp),
+.board-detail-modal > :not(.board-glass-motif):not(.board-glass-motif--quote-wrap),
+.event-board-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Ensure card is a positioning context for absolute motifs */
+.board-listing-card--makeover,
+.board-listing-card--glass,
+.board-spotted-card,
+.spotted-card {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Nested board card inside overlay: wrapper owns chrome; strip double slab */
+.board-post-overlay > .board-listing-card,
+.board-post-overlay > .board-listing-card:hover,
+.board-post-overlay > .board-listing-card.is-expanded {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+.board-post-overlay > .board-listing-card::after {
+  display: none;
+}
+
+/* Event cards: --c tracks day color (--_day from PosterCard / EventCard) */
+.pdxBoard,
+.pdxRow {
+  --c: var(--_day, var(--dc, var(--neon-cyan)));
+  --dc: var(--_day, var(--c)); /* pdxPulse / legacy glow hooks */
+}
+
+/* Day-colored ambient pulse (deep-glass slab, bloom breathes — keeps black ring) */
+@keyframes pdxGlassDayPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px #000,
+      0 34px 66px -24px rgba(0, 0, 0, 0.95),
+      0 0 22px -8px color-mix(in srgb, var(--c, var(--_day)) calc(var(--dir-gm, 60) * 1.1%), transparent),
+      0 0 12px -5px color-mix(in srgb, var(--c, var(--_day)) calc(var(--dir-gm, 60) * 1%), transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--c, var(--_day)) 55%, rgba(255, 255, 255, 0.12)),
+      inset 0 0 34px -26px color-mix(in srgb, var(--c, var(--_day)) 36%, transparent);
   }
+  50% {
+    box-shadow:
+      0 0 0 2px #000,
+      0 34px 66px -24px rgba(0, 0, 0, 0.95),
+      0 0 38px -6px color-mix(in srgb, var(--c, var(--_day)) calc(var(--dir-gm, 60) * 1.65%), transparent),
+      0 0 18px -4px color-mix(in srgb, var(--c, var(--_day)) calc(var(--dir-gm, 60) * 1.45%), transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--c, var(--_day)) 62%, rgba(255, 255, 255, 0.14)),
+      inset 0 0 34px -20px color-mix(in srgb, var(--c, var(--_day)) 52%, transparent);
+  }
+}
+
+.pdxBoard,
+.pdxRow {
+  /* IMPORTANT: entrance uses fill-mode `backwards` only — NOT `both`/`forwards`.
+     `both` keeps transform:none after the entrance and blocks hover lift.
+     No resting infinite box-shadow pulse — animating multi-layer shadows on
+     every grid card tanks scroll (L/R + U/D). Bloom is static; hover warms it. */
+  animation: pgDirCardIn 0.55s var(--ease-out, ease) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* New thin prismatic top seam (deep-glass) — overrides thick glowing base seam */
+.pdxBoard::before,
+.pdxRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 7px;
+  right: 7px;
+  height: 2px;
+  z-index: 6;
+  pointer-events: none;
+  background: var(
+    --refract-seam-gradient,
+    linear-gradient(
+      90deg,
+      #ff2d5e,
+      #ff9500,
+      #ffee00,
+      #39ff14,
+      #00ffff,
+      #3a6bff,
+      #8800ff,
+      #ff00cc,
+      #ff2d5e
+    )
+  );
+  background-size: 200% 100%;
+  opacity: 0.75;
+  filter: blur(0.2px);
+  box-shadow: none !important;
+  animation: dirRefract 7s linear infinite !important;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+
+/* Hover: card MOVES up (pre-glass feel) + hotter day bloom */
+.pdxBoard:hover,
+a.pdxBoard:hover,
+.ds-listing-card:hover .pdxBoard {
+  transform: translateY(-4px) !important;
+  filter: brightness(1.06) saturate(1.08);
+  border-color: color-mix(in srgb, var(--c, var(--_day)) 70%, #101014) !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 40px 70px -22px rgba(0, 0, 0, 0.92),
+    0 0 34px -4px color-mix(in srgb, var(--c, var(--_day)) 55%, transparent),
+    0 0 18px -3px color-mix(in srgb, var(--c, var(--_day)) 48%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c, var(--_day)) 65%, rgba(255, 255, 255, 0.14)),
+    inset 0 0 34px -20px color-mix(in srgb, var(--c, var(--_day)) 50%, transparent) !important;
+  /* Freeze entrance mid-flight if still running; transform free for the lift */
+  animation-play-state: paused;
+}
+
+.pdxRow:hover,
+a.pdxRow:hover,
+.ds-listing-card--list:hover .pdxRow {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.06) saturate(1.08);
+  border-color: color-mix(in srgb, var(--c, var(--_day)) 55%, #101014) !important;
+  border-left-color: var(--_day, var(--c)) !important;
+  box-shadow:
+    0 0 0 2px #000,
+    0 28px 50px -20px rgba(0, 0, 0, 0.9),
+    0 0 28px -4px color-mix(in srgb, var(--c, var(--_day)) 48%, transparent),
+    0 0 14px -3px color-mix(in srgb, var(--c, var(--_day)) 40%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c, var(--_day)) 60%, rgba(255, 255, 255, 0.14)),
+    inset 0 0 34px -22px color-mix(in srgb, var(--c, var(--_day)) 45%, transparent) !important;
+  animation-play-state: paused;
+}
+
+html.calm-mode .pdxBoard,
+html.calm-mode .pdxRow,
+:root[data-calm="true"] .pdxBoard,
+:root[data-calm="true"] .pdxRow {
+  animation: none !important;
+}
+
+html.calm-mode .pdxBoard::before,
+html.calm-mode .pdxRow::before,
+:root[data-calm="true"] .pdxBoard::before,
+:root[data-calm="true"] .pdxRow::before {
+  animation: none !important;
+  background: var(--rainbow-bar, linear-gradient(90deg, #19e3ff, #ffee00, #ff00cc, #ff6600, #19e3ff));
+  background-size: auto;
+  opacity: 0.85;
+  filter: none;
+  -webkit-mask: none;
+  mask: none;
+}
+
+.gifting-form-panel--makeover {
+  --c: #ccff00;
+  box-shadow: var(--glass-card-shadow) !important;
+}
+
+.zine-filter-bar {
+  background: var(--glass-card-neutral-bg) !important;
+  border-bottom-color: color-mix(in srgb, var(--glass-neutral-c2) 40%, #101014) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.8);
+}
+
+/* Hover: hot rim bloom (pdxPulse demoted — brighten existing bloom, not second engine) */
+.board-listing-card--makeover:hover,
+.board-listing-card--makeover.is-expanded,
+.board-listing-card:hover,
+.board-listing-card.is-expanded,
+.board-spotted-card:hover,
+.spotted-card:hover,
+.event-board-card:hover,
+a.pdxRow:hover,
+.ds-listing-card--list:hover .pdxRow {
+  filter: brightness(1.06) saturate(1.06);
+  /* Keep deep-glass slab; brighten bloom only (beats index.css soft glow override) */
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 34px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.55%), transparent),
+    0 0 16px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.55%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 60%, rgba(255, 255, 255, 0.14)),
+    inset 0 0 34px -22px color-mix(in srgb, var(--c) 48%, transparent) !important;
+  border-color: color-mix(in srgb, var(--c) 70%, #101014) !important;
+}
+
+/* ── Calm: zero bloom multiplier, solid fill, no blur ───── */
+html.calm-mode,
+:root[data-calm="true"] {
+  --dir-gm: 0;
 }
 
 html.calm-mode .gifting-form-panel--makeover,
@@ -252,12 +956,15 @@ html.calm-mode .board-empty,
 html.calm-mode .board-empty--prototype,
 html.calm-mode .board-listing-card,
 html.calm-mode .board-listing-card--makeover,
+html.calm-mode .board-spotted-card,
 html.calm-mode .spotted-card,
+html.calm-mode .board-detail-modal,
+html.calm-mode .board-post-overlay,
+html.calm-mode .event-board-card,
 html.calm-mode .pdxBoard,
 html.calm-mode .pdxRow,
 html.calm-mode .zine-filter-bar,
 html.calm-mode .board-stats-bar,
-html.calm-mode .board-stats-band,
 html.calm-mode .nude-live-card,
 html.calm-mode .nb-log,
 html.calm-mode .nb-log-fee,
@@ -268,22 +975,29 @@ html.calm-mode .rb-checkin__hero-card,
 html.calm-mode .rb-checkin__pulse,
 html.calm-mode .sch-toolbar,
 html.calm-mode .sch-pop,
-html.calm-mode .about-v2-donate--panel,
+html.calm-mode .support-keepalive,
+html.calm-mode .about-v2-donate--panel.support-keepalive,
 html.calm-mode .submit-success,
 html.calm-mode .card.fitem.fitem--glow,
 html.calm-mode .fitem--glow,
+html.calm-mode .pdx-glass-card,
+html.calm-mode .pdx-glass,
+html.calm-mode .pdx-glass-card--neutral,
 :root[data-calm="true"] .gifting-form-panel--makeover,
 :root[data-calm="true"] .board-path-card,
 :root[data-calm="true"] .board-empty,
 :root[data-calm="true"] .board-empty--prototype,
 :root[data-calm="true"] .board-listing-card,
 :root[data-calm="true"] .board-listing-card--makeover,
+:root[data-calm="true"] .board-spotted-card,
 :root[data-calm="true"] .spotted-card,
+:root[data-calm="true"] .board-detail-modal,
+:root[data-calm="true"] .board-post-overlay,
+:root[data-calm="true"] .event-board-card,
 :root[data-calm="true"] .pdxBoard,
 :root[data-calm="true"] .pdxRow,
 :root[data-calm="true"] .zine-filter-bar,
 :root[data-calm="true"] .board-stats-bar,
-:root[data-calm="true"] .board-stats-band,
 :root[data-calm="true"] .nude-live-card,
 :root[data-calm="true"] .nb-log,
 :root[data-calm="true"] .nb-log-fee,
@@ -294,21 +1008,38 @@ html.calm-mode .fitem--glow,
 :root[data-calm="true"] .rb-checkin__pulse,
 :root[data-calm="true"] .sch-toolbar,
 :root[data-calm="true"] .sch-pop,
-:root[data-calm="true"] .about-v2-donate--panel,
+:root[data-calm="true"] .support-keepalive,
+:root[data-calm="true"] .about-v2-donate--panel.support-keepalive,
 :root[data-calm="true"] .submit-success,
 :root[data-calm="true"] .card.fitem.fitem--glow,
-:root[data-calm="true"] .fitem--glow {
+:root[data-calm="true"] .fitem--glow,
+:root[data-calm="true"] .pdx-glass-card,
+:root[data-calm="true"] .pdx-glass,
+:root[data-calm="true"] .pdx-glass-card--neutral {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: #121218 !important;
 }
 
-/* Steps makeover calm: keep dark but solid */
-html.calm-mode .gigs-page .board-how--makeover .board-step--makeover,
-html.calm-mode .gifting-page .board-how--makeover .board-step--makeover,
-html.calm-mode .missed-page .board-how--makeover .board-step--makeover,
-:root[data-calm="true"] .gigs-page .board-how--makeover .board-step--makeover,
-:root[data-calm="true"] .gifting-page .board-how--makeover .board-step--makeover,
-:root[data-calm="true"] .missed-page .board-how--makeover .board-step--makeover {
-  background: #0c0c0f !important;
+/* No backdrop-filter support: solid OLED slab */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pdx-glass-card,
+  .pdx-glass,
+  .pdx-glass-card--neutral,
+  .gifting-form-panel--makeover,
+  .board-path-card,
+  .board-empty,
+  .board-listing-card,
+  .board-spotted-card,
+  .spotted-card,
+  .board-detail-modal,
+  .board-post-overlay,
+  .event-board-card,
+  .pdxBoard,
+  .pdxRow,
+  .nude-live-card,
+  .rb-panel,
+  .rb-card,
+  .fitem--glow {
+    background: #050506 !important;
+  }
 }

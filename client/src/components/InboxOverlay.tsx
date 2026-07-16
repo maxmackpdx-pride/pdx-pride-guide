@@ -18,8 +18,10 @@ import InboxGroupChat, { type InboxGroupChatTarget } from "@/components/inbox/In
 import { MessageBubbleWithReactions } from "@/components/inbox/MessageReactions";
 import { eventIdFromInboxContext } from "@/lib/inboxContext";
 import EventModal from "@/components/EventModal";
+import AuthModal from "@/components/AuthModal";
 import type { EventListing } from "@shared/multiDayEvents";
 import type { MessageReactionCode } from "@shared/messageReactions";
+import { isLocalDemo } from "@/lib/localDemo";
 import "@/components/inbox/inbox-experiment.css";
 import "@/components/inbox/message-reactions.css";
 
@@ -62,6 +64,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<InboxGroupChatTarget | null>(null);
   const [reply, setReply] = useState("");
+  const [showAuth, setShowAuth] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -199,7 +202,77 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     if (view !== "inbox") setActiveGroup(null);
   }, [view]);
 
-  if (!open || !user) return null;
+  if (!open) return null;
+
+  // Local guest demo: glass shell + login so the FAB/chrome can be shown without a session.
+  if (!user) {
+    if (!isLocalDemo()) return null;
+    return (
+      <>
+        <div
+          className="inbox-overlay inbox-overlay--experiment"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Inbox demo"
+          ref={panelRef}
+          data-testid="inbox-overlay-guest-demo"
+        >
+          <header className="inbox-exp-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 18px 10px", gap: 12 }}>
+            <div style={{ display: "flex", gap: 14, alignItems: "baseline" }}>
+              <span className="display" style={{ fontWeight: 900, letterSpacing: "0.06em", color: "#fff" }}>INBOX</span>
+              <span className="display" style={{ fontWeight: 800, letterSpacing: "0.06em", color: "#666" }}>POSTS</span>
+              <span className="display" style={{ fontWeight: 800, letterSpacing: "0.06em", color: "#666" }}>STATS</span>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close inbox"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                border: "1px solid #2a2a32",
+                background: "#0c0c0f",
+                color: "#ccc",
+                cursor: "pointer",
+              }}
+            >
+              <X size={16} />
+            </button>
+          </header>
+          <div style={{ padding: "28px 22px 32px", display: "flex", flexDirection: "column", gap: 16, alignItems: "flex-start" }}>
+            <p style={{ margin: 0, color: "#e6e3da", fontSize: "0.95rem", lineHeight: 1.5, maxWidth: 36 + "ch" }}>
+              Local demo — floating inbox glass shell. Sign in to load real threads, posts, and queues.
+            </p>
+            <p style={{ margin: 0, color: "#8a8a8a", fontSize: "0.8rem", lineHeight: 1.45 }}>
+              Smoke account if seeded: <code style={{ color: "#3d7cff" }}>tucker@test.com</code> /{" "}
+              <code style={{ color: "#3d7cff" }}>smoketest</code>
+            </p>
+            <button
+              type="button"
+              className="pdx-glass-btn"
+              data-testid="inbox-demo-login"
+              onClick={() => setShowAuth(true)}
+              style={{
+                ["--c" as string]: "#1a4dff",
+                marginTop: 4,
+                padding: "10px 18px",
+                borderRadius: 6,
+                fontFamily: "var(--font-display)",
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+              }}
+            >
+              Log in to demo
+            </button>
+          </div>
+        </div>
+        {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
+      </>
+    );
+  }
 
   const inboxActive = view === "inbox";
   const personalActive = inboxActive && account === "personal";

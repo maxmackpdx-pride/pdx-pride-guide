@@ -9,6 +9,9 @@ type EventTagsRowProps = {
   event: Event;
   size?: "sm" | "md";
   max?: number;
+  /** Policy chips: day, admission, age, house party, sex positive, nudity */
+  showFlags?: boolean;
+  /** JSON event-type tags (kink, dance, …) */
   showJsonTypes?: boolean;
   showClaim?: boolean;
   onClaimClick?: () => void;
@@ -28,38 +31,46 @@ export default function EventTagsRow({
   event,
   size = "sm",
   max,
+  showFlags = true,
   showJsonTypes = false,
   showClaim = true,
   onClaimClick,
   className = "",
   style,
 }: EventTagsRowProps) {
-  const typeTags = getEventTypeTagsForEvent(event);
+  const typeTags = showFlags ? getEventTypeTagsForEvent(event) : [];
   const dayAccent = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#fff";
   const hasPendingClaim = Boolean((event as Event & { hasPendingClaim?: boolean }).hasPendingClaim);
   const jsonTypes = showJsonTypes
     ? (JSON.parse(event.eventTypes || "[]") as string[])
     : [];
 
+  const hasFlags =
+    showFlags &&
+    (Boolean(event.dayOfWeek) || typeTags.length > 0 || (showClaim && (hasPendingClaim || (event.isClaimable && !event.claimedBy))));
+  const hasTags = jsonTypes.length > 0;
+
+  if (!hasFlags && !hasTags) return null;
+
   return (
     <div className={`event-card-tags${className ? ` ${className}` : ""}`} style={style}>
-      {event.dayOfWeek && (
+      {showFlags && event.dayOfWeek && (
         <span className="event-card-day-tag" style={dayTagStyle()}>
           {event.dayOfWeek}
         </span>
       )}
-      <EventTypeTagList labels={typeTags} size={size} max={max} />
+      {showFlags && typeTags.length > 0 && <EventTypeTagList labels={typeTags} size={size} max={max} />}
       {jsonTypes.map(t => (
         <span key={t} className="event-card-meta-tag" style={{ color: dayAccent, borderColor: `${dayAccent}88` }}>
           {t.replace(/-/g, " ")}
         </span>
       ))}
-      {showClaim && hasPendingClaim && (
+      {showFlags && showClaim && hasPendingClaim && (
         <span className="event-card-meta-tag event-card-meta-tag--claim" style={claimTagStyle("var(--neon-magenta)")}>
           CLAIM PENDING
         </span>
       )}
-      {showClaim && !hasPendingClaim && event.isClaimable && !event.claimedBy && (
+      {showFlags && showClaim && !hasPendingClaim && event.isClaimable && !event.claimedBy && (
         <span
           className={`event-card-meta-tag event-card-meta-tag--claim${onClaimClick ? " event-card-meta-tag--clickable" : ""}`}
           style={claimTagStyle("var(--neon-cyan)")}

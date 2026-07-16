@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -28,6 +28,14 @@ import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import "./PlaceModal.css";
+
+/** Source-card rect for little→big FLIP expand. */
+export type PlaceModalOriginRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
 
 type EditableFields = {
   description: string;
@@ -77,11 +85,20 @@ function toOwnerEditableFields(place: Business): OwnerEditableFields {
    links, upcoming Pride events / missed connections / gigs tabs). */
 
 const DAY_COLOR: Record<string, string> = {
-  THU: "var(--cyan)",
-  FRI: "var(--pink)",
-  SAT: "var(--green)",
-  SUN: "var(--orange)",
+  MON: "var(--day-mon, #ff2d5e)",
+  TUE: "var(--day-tue, #ff9500)",
+  WED: "var(--day-wed, #ffee00)",
+  THU: "var(--day-thu, var(--cyan, #19e3ff))",
+  FRI: "var(--day-fri, var(--pink, #ff00cc))",
+  SAT: "var(--day-sat, var(--green, #39ff14))",
+  SUN: "var(--day-sun, var(--orange, #ff6600))",
 };
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  if (document.documentElement.classList.contains("calm-mode")) return true;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 /** Nonprofit card border — full-spectrum rainbow instead of a single category color. */
 const NONPROFIT_RAINBOW_EDGE =
@@ -180,10 +197,13 @@ export default function PlaceModal({
   place,
   onClose,
   onRequireAuth,
+  originRect = null,
 }: {
   place: Business | null;
   onClose: () => void;
   onRequireAuth: () => void;
+  /** Bounding rect of the directory card that was clicked — drives little→big expand. */
+  originRect?: PlaceModalOriginRect | null;
 }) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -193,6 +213,10 @@ export default function PlaceModal({
   const [savedOverrides, setSavedOverrides] = useState<Partial<Business> | null>(null);
   const [tab, setTab] = useState<ModalTab>("events");
   const [sharing, setSharing] = useState(false);
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
+  const useFlip = Boolean(originRect && originRect.width > 0 && originRect.height > 0);
 
   // Fresh tab when opening a different place
   useEffect(() => {
@@ -200,6 +224,68 @@ export default function PlaceModal({
     setEditing(false);
     setSavedOverrides(null);
   }, [place?.id]);
+
+  // Little→big FLIP: map final panel onto source card, then animate to identity.
+  // Keep open=false until after the inverted transform is applied (same frame as paint).
+  useLayoutEffect(() => {
+    if (!place) return;
+    let cancelled = false;
+    setOpen(false);
+
+    const reduce = prefersReducedMotion();
+    const panel = panelRef.current;
+
+    const armOpen = () => {
+      if (cancelled) return;
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        requestAnimationFrame(() => {
+          if (!cancelled) setOpen(true);
+        });
+      });
+    };
+
+    if (!panel) {
+      setFlipVars(null);
+      armOpen();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (reduce || !useFlip || !originRect) {
+      setFlipVars(null);
+      armOpen();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // Measure final layout while still closed (enter/flip start state)
+    const last = panel.getBoundingClientRect();
+    if (last.width < 8 || last.height < 8) {
+      setFlipVars(null);
+      armOpen();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const sx = originRect.width / last.width;
+    const sy = originRect.height / last.height;
+    const tx = originRect.left - last.left;
+    const ty = originRect.top - last.top;
+    setFlipVars({
+      ["--pm-sx" as string]: String(sx),
+      ["--pm-sy" as string]: String(sy),
+      ["--pm-tx" as string]: `${tx}px`,
+      ["--pm-ty" as string]: `${ty}px`,
+    });
+    armOpen();
+    return () => {
+      cancelled = true;
+    };
+  }, [place?.id, useFlip, originRect]);
 
   const saveMutation = useMutation({
     mutationFn: (fields: EditableFields | OwnerEditableFields) => {
@@ -354,98 +440,45 @@ export default function PlaceModal({
     { key: "gigs", label: "Gigs", count: gigs.length },
   ];
 
+  const useSpecialEdge = isNonprofit || isHealthcare || isRealEstate;
+  const panelClass = [
+    "place-modal-panel",
+    "pdx-glass-rebind",
+    useSpecialEdge ? "place-modal-panel--edge" : "",
+    useFlip ? "place-modal-panel--flip" : "place-modal-panel--enter",
+    open ? "place-modal-panel--open" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   // Portal to body + overlay-scroll (same idiom as EventModal) so tall venues
   // like Camp never load clipped off-screen or trapped in a non-scrolling flex box.
   return createPortal(
     <div
       onClick={onClose}
       role="presentation"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 3000,
-        background: "rgba(0,0,0,.88)",
-        backdropFilter: "blur(2px)",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        overflowY: "auto",
-        WebkitOverflowScrolling: "touch",
-        padding: "calc(env(safe-area-inset-top, 0px) + 52px) 16px calc(env(safe-area-inset-bottom, 0px) + 76px)",
-        boxSizing: "border-box",
-      }}
+      className={`place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
     >
       <div
+        ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={place.name}
-        className="place-modal-panel"
+        className={panelClass}
         style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: 560,
-          margin: "0 auto",
-          flex: "none",
-          borderRadius: 12,
-          /* Dark glass island + light category tint (matches directory cards / home) */
-          background:
-            "linear-gradient(rgba(255,255,255,0.07), rgba(255,255,255,0.02) 28%, transparent 55%) padding-box, " +
-            `radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, ${accent} 10%, transparent), transparent 58%) padding-box, ` +
-            "linear-gradient(color-mix(in srgb, #0c0c12 74%, transparent), color-mix(in srgb, #0c0c12 74%, transparent)) padding-box, " +
-            edge +
-            " border-box",
-          border: "2px solid transparent",
-          boxShadow:
-            "0 30px 70px -18px rgba(0,0,0,.9), " +
-            "inset 0 1px 0 rgba(255,255,255,0.06), " +
-            `0 0 22px color-mix(in srgb, ${accent} 12%, transparent)`,
-          backdropFilter: "blur(14px) saturate(1.15)",
-          WebkitBackdropFilter: "blur(14px) saturate(1.15)",
-          overflow: "hidden",
+          ["--c" as string]: accent,
+          ["--_c" as string]: accent,
+          ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
+          ...(flipVars || {}),
         }}
       >
-        {/* Actions sit below the rainbow seam so they never ride the bloom */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          style={{
-            position: "absolute",
-            top: 18,
-            right: 12,
-            zIndex: 6,
-            width: 34,
-            height: 34,
-            borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.12)",
-            background: "rgba(6,6,10,0.82)",
-            backdropFilter: "blur(10px) saturate(1.02)",
-            WebkitBackdropFilter: "blur(10px) saturate(1.02)",
-            color: "var(--text-hi)",
-            fontSize: 16,
-            lineHeight: 1,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 4px 14px -6px rgba(0,0,0,.75)",
-          }}
-        >
-          ✕
-        </button>
+        <div className="place-modal-panel__glow" aria-hidden="true" />
+        <div className="place-modal-panel__sheen" aria-hidden="true" />
+        <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />
 
-        <div
-          style={{
-            position: "absolute",
-            top: 18,
-            right: 54,
-            zIndex: 6,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+        <div className="place-modal-panel__inner">
+        <div className="place-modal-panel__actions">
           <VenueFollowButton
             businessId={place.id}
             initialFollowing={Boolean(place.isFollowing)}
@@ -455,98 +488,46 @@ export default function PlaceModal({
           />
           <button
             type="button"
+            className="place-modal-panel__share"
             onClick={handleShare}
             disabled={sharing}
             aria-label="Share this venue"
-            style={{
-              height: 34,
-              padding: "0 12px",
-              borderRadius: 999,
-              border: `1px solid ${accent}`,
-              background: "rgba(6,6,10,0.82)",
-              backdropFilter: "blur(10px) saturate(1.02)",
-              WebkitBackdropFilter: "blur(10px) saturate(1.02)",
-              color: accent,
-              fontSize: 12,
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              letterSpacing: "0.04em",
-              cursor: sharing ? "default" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              opacity: sharing ? 0.6 : 1,
-              boxShadow: "0 4px 14px -6px rgba(0,0,0,.75)",
-            }}
           >
             <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
+          </button>
+          <button
+            type="button"
+            className="place-modal-panel__close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
           </button>
         </div>
 
         <div>
-          <div
-            style={{
-              position: "relative",
-              height: 172,
-              display: "grid",
-              placeItems: "center",
-              padding: "28px 22px 22px",
-              background: `radial-gradient(125% 130% at 50% 0%, color-mix(in srgb, ${accent} 11%, #08080c), #08080c 74%)`,
-              borderBottom: `1px solid color-mix(in srgb, ${accent} 22%, rgba(255,255,255,0.08))`,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px)",
-                opacity: 0.5,
-                pointerEvents: "none",
-              }}
-            />
-            <div
-              className="pdx-rainbow-rule"
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                top: 0,
-                height: 3,
-              }}
-            />
+          <div className="place-modal-panel__media">
+            <div className="place-modal-panel__media-glow" aria-hidden="true" />
+            <div className="place-modal-panel__media-scan" aria-hidden="true" />
             {logoUrl ? (
               <img
+                className="place-modal-panel__logo"
                 src={logoUrl}
                 alt={`${place.name} logo`}
                 loading="lazy"
-                style={{
-                  position: "relative",
-                  maxWidth: "78%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
-                  filter: `drop-shadow(0 0 14px color-mix(in srgb, ${accent} 50%, transparent))`,
-                }}
               />
             ) : (
               <img
+                className="place-modal-panel__logo place-modal-panel__logo--fallback"
                 src={fallbackLogoUrl}
                 alt={categoryLabel}
                 loading="lazy"
-                style={{
-                  position: "relative",
-                  maxWidth: "40%",
-                  maxHeight: "82%",
-                  objectFit: "contain",
-                  filter: `drop-shadow(0 0 16px color-mix(in srgb, ${accent} 55%, transparent))`,
-                }}
               />
             )}
           </div>
 
-          <div style={{ padding: "22px 24px 26px" }}>
+          <div className="place-modal-panel__body">
+
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
             {isGrandOpeningActive(place.grandOpeningDate) && (
               <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
@@ -1007,6 +988,7 @@ export default function PlaceModal({
           </div>
           </div>
         </div>
+        </div>{/* /.place-modal-panel__inner */}
       </div>
     </div>,
     document.body,
@@ -1028,6 +1010,6 @@ const linkStyle: React.CSSProperties = {
   fontFamily: "var(--font-body)",
   fontWeight: 700,
   fontSize: "0.9rem",
-  color: "var(--_c, var(--pink))",
+  color: "var(--c, var(--pink))",
   textDecoration: "none",
 };

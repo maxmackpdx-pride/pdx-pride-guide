@@ -1,5 +1,359 @@
-/* Place modal — past events horizontal rail (fixed card height, LTR scroll) */
+/*
+ * Place modal — open directory card
+ * Deep-glass OLED (matches PlaceCard / design) + little→big FLIP expand.
+ */
 
+/* ── Overlay ─────────────────────────────────────────────── */
+.place-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: calc(env(safe-area-inset-top, 0px) + 52px) 16px
+    calc(env(safe-area-inset-bottom, 0px) + 76px);
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  transition:
+    background 0.42s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    backdrop-filter 0.42s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.place-modal-overlay--open {
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ── Panel shell (deep glass) ─────────────────────────────── */
+.place-modal-panel {
+  --c: var(--pink, #ff00cc);
+  --dir-gm: 60;
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  flex: none;
+  border-radius: 14px;
+  overflow: hidden;
+  /* OLED glass fill — not translucent purple wash */
+  background:
+    radial-gradient(
+      90% 70% at 50% 46%,
+      #000 0%,
+      #000 34%,
+      #030304 70%,
+      color-mix(in srgb, var(--c) 6%, #050408) 100%
+    ),
+    radial-gradient(
+      120% 78% at 50% 122%,
+      color-mix(in srgb, var(--c) 18%, transparent),
+      transparent 56%
+    );
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transform-origin: top left;
+  will-change: transform;
+  z-index: 1;
+}
+
+/* Outer soft bloom frame (matches PlaceCard __glow) */
+.place-modal-panel__glow {
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow:
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 62px -14px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 0.85%), transparent);
+}
+
+/* Specialty edges (nonprofit / healthcare / realestate) */
+.place-modal-panel--edge {
+  background:
+    radial-gradient(
+      90% 70% at 50% 46%,
+      #000 0%,
+      #000 34%,
+      #030304 70%,
+      color-mix(in srgb, var(--c) 6%, #050408) 100%
+    )
+      padding-box,
+    radial-gradient(
+      120% 78% at 50% 122%,
+      color-mix(in srgb, var(--c) 18%, transparent),
+      transparent 56%
+    )
+      padding-box,
+    var(--_edge, linear-gradient(var(--c), var(--c))) border-box;
+  border: 2px solid transparent;
+}
+
+/* Dual sheen */
+.place-modal-panel__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(
+      133deg,
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.03) 12%,
+      transparent 34%
+    ),
+    radial-gradient(
+      70% 55% at 108% 112%,
+      rgba(255, 255, 255, 0.1),
+      color-mix(in srgb, var(--c) 12%, transparent) 30%,
+      transparent 62%
+    );
+}
+
+/* Thin refract seam (PlaceCard language — not thick header bar) */
+.place-modal-panel__seam {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  margin: 0;
+  z-index: 5;
+  border-radius: 0;
+  pointer-events: none;
+  overflow: visible;
+  background: linear-gradient(
+    90deg,
+    #ff2d5e,
+    #ff9500,
+    #ffee00,
+    #39ff14,
+    #00ffff,
+    #3a6bff,
+    #8800ff,
+    #ff00cc,
+    #ff2d5e
+  );
+  background-size: 200% 100%;
+  opacity: 0.75;
+  filter: blur(0.2px);
+  animation: dirRefract 7s linear infinite;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+}
+
+/* ── Little → big FLIP expand ─────────────────────────────── */
+.place-modal-panel--flip {
+  /* Start mapped onto source card; JS sets --pm-tx/ty/sx/sy */
+  transform: translate3d(var(--pm-tx, 0px), var(--pm-ty, 0px), 0)
+    scale(var(--pm-sx, 1), var(--pm-sy, 1));
+  transition: none;
+}
+
+.place-modal-panel--flip.place-modal-panel--open {
+  transform: none;
+  transition: transform 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Deep-link / no origin: soft scale-up entrance */
+.place-modal-panel--enter {
+  opacity: 0;
+  transform: translateY(18px) scale(0.94);
+  transition: none;
+}
+
+.place-modal-panel--enter.place-modal-panel--open {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.42s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    transform 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Content fades in slightly after the shell expands */
+.place-modal-panel__inner {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.28s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) 0.12s;
+}
+
+.place-modal-panel--open .place-modal-panel__inner {
+  opacity: 1;
+}
+
+/* ── Chrome: actions ──────────────────────────────────────── */
+.place-modal-panel__actions {
+  position: absolute;
+  top: 18px;
+  right: 12px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.place-modal-panel__close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(6, 6, 10, 0.82);
+  backdrop-filter: blur(10px) saturate(1.02);
+  -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  color: var(--text-hi, #fff);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.75);
+}
+
+.place-modal-panel__share {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--c);
+  background: rgba(6, 6, 10, 0.82);
+  backdrop-filter: blur(10px) saturate(1.02);
+  -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  color: var(--c);
+  font-size: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.75);
+}
+
+.place-modal-panel__share:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ── Logo media well (soft orb, matches PlaceCard) ────────── */
+.place-modal-panel__media {
+  position: relative;
+  height: 172px;
+  display: grid;
+  place-items: center;
+  padding: 28px 22px 22px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.place-modal-panel__media-glow {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 88%;
+  height: 96%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse closest-side,
+    color-mix(in srgb, var(--c) 42%, transparent),
+    color-mix(in srgb, var(--c) 14%, transparent) 45%,
+    transparent 70%
+  );
+  filter: blur(26px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.place-modal-panel__media-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.14;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.16) 3px 4px
+  );
+}
+
+.place-modal-panel__logo {
+  position: relative;
+  z-index: 3;
+  max-width: 78%;
+  max-height: 120px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: contrast(1.35) brightness(1.06)
+    drop-shadow(0 0 14px color-mix(in srgb, var(--c) 50%, transparent));
+}
+
+.place-modal-panel__logo--fallback {
+  max-width: 40%;
+  max-height: 100px;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--c) 55%, transparent));
+}
+
+/* ── Body content ─────────────────────────────────────────── */
+.place-modal-panel__body {
+  position: relative;
+  z-index: 1;
+  padding: 22px 24px 26px;
+}
+
+.place-modal-panel__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-lo, #9a968c);
+}
+
+.place-modal-panel__row svg {
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  flex: none;
+  stroke: var(--c);
+  opacity: 0.95;
+}
+
+.place-modal-panel__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--c);
+  text-decoration: none;
+}
+
+.place-modal-panel__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Past events rail (unchanged structure) */
 .place-modal-past {
   min-width: 0;
   max-width: 100%;
@@ -26,7 +380,6 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--ink-border, #2b2b2b) transparent;
-  /* Keep rail height fixed so the modal does not grow vertically with more events */
   max-height: 188px;
 }
 
@@ -47,8 +400,8 @@
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  background: var(--ink-800, #0d0d10);
-  border: 1px solid var(--ink-border-faint, #1c1c22);
+  background: #050506;
+  border: 1px solid #2a2a32;
   border-top: 3px solid var(--pm-day, var(--day-fri, #ff00cc));
   border-radius: 8px;
   overflow: hidden;
@@ -148,4 +501,46 @@
 
 .place-modal-past__host--muted {
   color: var(--text-lo, #888);
+}
+
+/* Calm / reduced motion: skip FLIP, instant open */
+html.calm-mode .place-modal-overlay,
+@media (prefers-reduced-motion: reduce) {
+  .place-modal-overlay {
+    transition: none !important;
+    background: rgba(0, 0, 0, 0.88) !important;
+    backdrop-filter: blur(2px) !important;
+  }
+
+  .place-modal-panel--flip,
+  .place-modal-panel--enter,
+  .place-modal-panel--flip.place-modal-panel--open,
+  .place-modal-panel--enter.place-modal-panel--open {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .place-modal-panel__inner {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .place-modal-panel__seam {
+    animation: none !important;
+  }
+}
+
+html.calm-mode .place-modal-panel {
+  --dir-gm: 0;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.calm-mode .place-modal-panel__glow {
+  box-shadow: none;
+}
+
+html.calm-mode .place-modal-panel__sheen {
+  opacity: 0.45;
 }

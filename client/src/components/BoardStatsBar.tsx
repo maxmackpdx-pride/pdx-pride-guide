@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import CountUpValue from "@/components/CountUpValue";
 
 type Stat = {
@@ -11,7 +12,7 @@ type BoardStatsBarProps = {
   liveLabel?: string;
   /** Hide the trailing live pill (design band uses a pure 3-col strip). */
   showLive?: boolean;
-  /** `band` = full-bleed 3-col bordered strip from the board makeover. */
+  /** `band` = full-bleed bordered strip; column count matches `stats.length`. */
   variant?: "inline" | "band";
 };
 
@@ -38,8 +39,14 @@ export default function BoardStatsBar({
   variant = "inline",
 }: BoardStatsBarProps) {
   if (variant === "band") {
+    const cols = Math.max(1, stats.length);
     return (
-      <section className="board-stats-band" aria-label="Board stats">
+      <section
+        className="board-stats-band"
+        aria-label="Board stats"
+        data-cols={cols}
+        style={{ ["--board-stats-cols" as string]: cols } as CSSProperties}
+      >
         <div className="board-stats-band__inner">
           {stats.map((stat, i) => (
             <div

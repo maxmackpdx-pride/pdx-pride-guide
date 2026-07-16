@@ -19,7 +19,7 @@ export default function EventBoardCard({
   revealDelay = 0,
   layout = "stack",
 }: EventBoardCardProps) {
-  const dayColor = DAY_COLORS[event.dayOfWeek as keyof typeof DAY_COLORS] || "#fff";
+  const dayColor = DAY_COLORS[event.dayOfWeek as keyof typeof DAY_COLORS] || "#19e3ff";
   const time = event.dateStart
     ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "";
@@ -29,12 +29,19 @@ export default function EventBoardCard({
   const soldOut = /\bsold\s*out\b/i.test(`${event.title} ${event.description || ""}`);
   const displayTitle = event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title;
 
+  const glassVars = {
+    "--card-day-color": dayColor,
+    "--c": dayColor,
+    "--_c": dayColor,
+    "--_day": dayColor,
+  } as React.CSSProperties;
+
   return (
     <ScrollReveal delay={revealDelay}>
       <article
-        className={`event-board-card event-board-card--${layout}${soldOut ? " event-board-card--sold-out" : ""}`}
+        className={`event-board-card event-board-card--glass event-board-card--${layout}${soldOut ? " event-board-card--sold-out" : ""}`}
         data-testid={`event-card-${event.id}`}
-        style={{ "--card-day-color": dayColor } as React.CSSProperties}
+        style={glassVars}
       >
         <header className="event-board-card__head">
           <button

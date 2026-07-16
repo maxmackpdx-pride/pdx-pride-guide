@@ -1,8 +1,12 @@
-/* Affiliate / sponsored poster cards — same .pdxBoard rhythm as event cards */
+/* Affiliate / sponsored ads — deep-glass chrome (Agent 14 / §2.14)
+   Grid slot: green glass · In-feed: red glass
+   Tokens: --glass-card, --glass-sheen, --poster-well, --glass-btn
+   Layout / placement algorithms: untouched. */
 
+/* ── Preserved component-scoped keyframes (animation audit §6.2) ─ */
 @keyframes pdxAffiliatePulse {
   50% {
-    box-shadow: 0 0 26px color-mix(in srgb, var(--ac, #ff0033) 42%, transparent);
+    filter: brightness(1.07) saturate(1.1);
   }
 }
 
@@ -12,60 +16,127 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   GRID SLOT — .pdxBoard--affiliate (events grid)
+   Same deep-glass chrome as event cards; brand drives --c:
+     CockBlock → red · Mr. S → cyan
+   ═══════════════════════════════════════════════════════════ */
+
 .pdxBoard--affiliate {
-  --ac: #ff0033;
-  --_day: var(--ac);
-  --_dayt: var(--ac);
+  --ac: var(--c, #ff1f1f);
+  --_day: var(--c, var(--ac));
+  --_dayt: var(--c, var(--ac));
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--ac) 18%, transparent);
-  animation: pdxAffiliatePulse 4s ease-in-out infinite;
+  /* Entrance only — infinite filter pulse forces per-frame repaints while scrolling */
+  animation: pgDirCardIn 0.55s var(--ease-out, ease) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.pdxBoard--affiliate-cb {
+  --c: #ff1f1f;
+  --ac: #ff1f1f;
+  --_day: #ff1f1f;
+}
+
+.pdxBoard--affiliate-mrs {
+  --c: #19e3ff;
+  --ac: #19e3ff;
+  --_day: #19e3ff;
 }
 
 .pdxBoard--affiliate:hover {
-  border-color: color-mix(in srgb, var(--ac) 40%, var(--border-default, #2b2b2b));
-  box-shadow: 0 0 28px color-mix(in srgb, var(--ac) 40%, transparent);
+  border-color: color-mix(in srgb, var(--c) 70%, #101014);
+  filter: brightness(1.06) saturate(1.06);
+  transform: translateY(-2px);
   text-decoration: none;
   color: inherit;
 }
 
+/* Poster well — radial accent + 4px floor (stripe becomes the floor) */
 .pdxBoard--affiliate .pdxBoard__poster {
-  background: #000;
+  position: relative;
+  background: var(--poster-well-bg);
+  border-bottom: var(--poster-well-floor);
+  overflow: hidden;
 }
 
+.pdxBoard--affiliate .pdxBoard__stripe {
+  /* floor is poster-well border-bottom */
+  display: none;
+}
+
+/* Brand-specific poster well tints */
 .pdxBoard--affiliate.pdxBoard--affiliate-cb .pdxBoard__poster {
-  background: linear-gradient(135deg, #1a0808, #260a0a);
+  background:
+    var(--poster-well-scan),
+    radial-gradient(130% 130% at 50% 14%, color-mix(in srgb, #ff1f1f 32%, #1a0808), #0a0505 72%);
 }
 
-/* Beat .events-poster-grid .pdxBoard__img { object-fit: cover } for logo cards */
+.pdxBoard--affiliate.pdxBoard--affiliate-mrs .pdxBoard__poster {
+  background:
+    var(--poster-well-scan),
+    radial-gradient(130% 130% at 50% 14%, color-mix(in srgb, #19e3ff 28%, #060c10), #05080a 72%);
+}
+
+/*
+ * Grid ads: media FILLS the 2:3 poster frame (same as event flyers).
+ * Was object-fit:contain → letterboxed/centered; user wants edge-to-edge cover.
+ */
 .pdxBoard--affiliate .pdxBoard__img,
-.events-poster-grid .pdxBoard--affiliate .pdxBoard__img {
-  object-fit: contain;
-  object-position: center;
+.events-poster-grid .pdxBoard--affiliate .pdxBoard__img,
+.pdxBoard--affiliate .pdxBoard__slides .pdxBoard__img,
+.events-poster-grid .pdxBoard--affiliate .pdxBoard__slides .pdxBoard__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  z-index: 0;
 }
 
-/* CockBlock product slides stay cover-fill */
-.pdxBoard--affiliate.pdxBoard--affiliate-cb .pdxBoard__slides .pdxBoard__img,
-.events-poster-grid .pdxBoard--affiliate-cb .pdxBoard__slides .pdxBoard__img {
-  object-fit: cover;
-  object-position: center;
+/* Slideshow stack fills the entire well */
+.pdxBoard--affiliate .pdxBoard__slides,
+.events-poster-grid .pdxBoard--affiliate .pdxBoard__slides {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .pdxBoard__slides {
   position: absolute;
   inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .pdxBoard__slide {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   transition: opacity 0.7s ease;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .pdxBoard__slide.is-active {
   opacity: 1;
+}
+
+.pdxBoard__slide .pdxBoard__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 
 .pdxBoard__slideDots {
@@ -93,29 +164,43 @@
   opacity: 1;
 }
 
+/* Chip + scan sit above filled media */
+.pdxBoard--affiliate .pdx-poster-well__scan,
+.pdxBoard--affiliate .pdxBoard__scan {
+  z-index: 2;
+}
+
+/* AFFILIATE chip — filled with brand accent (red / cyan) */
 .pdxBoard__affChip {
   position: absolute;
+  z-index: 3;
   top: 9px;
   left: 9px;
-  z-index: 3;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 4px 9px 3px;
-  background: var(--ac, #ff0033);
-  color: #000;
-  border: 1.5px solid var(--lime, #ccff00);
-  box-shadow: 2px 2px 0 0 var(--lime, #ccff00);
-  border-radius: 0;
+  background: var(--c, #ff1f1f);
+  color: #050506;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 0 14px -4px var(--c, #ff1f1f),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border-radius: 3px;
   line-height: 1;
 }
 
+/* Dark type on cyan; white type on red for contrast */
+.pdxBoard--affiliate-cb .pdxBoard__affChip {
+  color: #fff;
+}
+
 .pdxBoard__affTag--fill {
-  background: var(--ac, #ff0033);
-  color: #000;
-  border: none;
+  background: color-mix(in srgb, var(--c) 88%, #000);
+  color: #050506;
+  border: 1px solid rgba(255, 255, 255, 0.28);
 }
 
 .pdxBoard__affMeta {
@@ -126,7 +211,7 @@
 }
 
 .pdxBoard__affMeta--code {
-  color: var(--ac, #ff0033);
+  color: var(--c, #39ff14);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 600;
@@ -152,29 +237,308 @@
   animation: pdxAffiliateBlink 1.6s ease-in-out infinite;
 }
 
+/* SHOP NOW — brand-colored glass button (matches event CTA chrome) */
 .pdxBoard__affShop {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #000;
-  background: var(--ac, #ff0033);
-  border-radius: 2px;
+  color: #050506;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    var(--c, #ff1f1f);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 4px;
   padding: 6px 13px 5px;
-  box-shadow: 3px 3px 0 0 var(--lime, #ccff00);
+  box-shadow:
+    0 0 16px -5px color-mix(in srgb, var(--c) 65%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* Calm mode: no pulse / blink */
+.pdxBoard--affiliate-cb .pdxBoard__affShop {
+  color: #fff;
+}
+
+.pdxBoard--affiliate:hover .pdxBoard__affShop {
+  filter: brightness(1.06);
+}
+
+/* Corner sheen inside grid affiliate (explicit child) */
+.pdxBoard--affiliate > .pdx-glass-sheen,
+.pdxBoard--affiliate > .pdx-glass-sheen--specular {
+  border-radius: inherit;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   IN-FEED SLOT — .feed-aff (scene feed)
+   Deep-glass shell + black ring + brand neon edge bloom.
+   CockBlock red · Mr. S cyan. Layout / 3 rows preserved.
+   Overrides hub-v2.css surface only.
+   ═══════════════════════════════════════════════════════════ */
+
+.feed-aff {
+  --feed-aff-primary: #ff1f1f;
+  --c: var(--feed-aff-primary, #ff1f1f);
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--glass-card-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+  /* Hot rim like the affiliate mock: black ring + outer neon halo */
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 40px -8px color-mix(in srgb, var(--c) 55%, transparent),
+    0 0 80px -18px color-mix(in srgb, var(--c) 32%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent) !important;
+  backdrop-filter: blur(var(--glass-card-blur));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+}
+
+.feed-aff--cockblock {
+  --feed-aff-primary: #ff1f1f;
+  --c: #ff1f1f;
+}
+
+.feed-aff--mrs {
+  --feed-aff-primary: #19e3ff;
+  --c: #19e3ff;
+}
+
+.feed-aff > .pdx-glass-sheen,
+.feed-aff > .pdx-glass-sheen--specular {
+  border-radius: inherit;
+  z-index: 2;
+}
+
+/* Higher specificity than hub-v2.css so deep-glass surface wins */
+.feed-aff .feed-aff__dismiss {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.feed-aff .feed-aff__dismiss:hover {
+  background: rgba(0, 0, 0, 0.78);
+  border-color: color-mix(in srgb, var(--c) 65%, transparent);
+}
+
+/* Logo / media well */
+.feed-aff .feed-aff__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--poster-well-bg);
+  border-bottom: var(--poster-well-floor);
+}
+
+.feed-aff .feed-aff__media--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feed-aff .feed-aff__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 1;
+}
+
+.feed-aff .feed-aff__slide.is-active {
+  opacity: 1;
+}
+
+.feed-aff .feed-aff__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Transparent AFFILIATE + glowing red text */
+.feed-aff .feed-aff__pill {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c, #ff1f1f);
+  background: transparent;
+  padding: 5px 9px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow:
+    0 0 10px color-mix(in srgb, var(--c) 80%, transparent),
+    0 0 22px color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.feed-aff .feed-aff__pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  flex: none;
+  background: var(--c, #ff1f1f);
+  box-shadow:
+    0 0 8px var(--c, #ff1f1f),
+    0 0 14px color-mix(in srgb, var(--c) 55%, transparent);
+  animation: pdxAffiliateBlink 1.6s ease-in-out infinite;
+}
+
+.feed-aff .feed-aff__pill-dot--cb {
+  background: #ff1f1f;
+  box-shadow: 0 0 8px #ff1f1f, 0 0 14px color-mix(in srgb, #ff1f1f 55%, transparent);
+}
+
+.feed-aff .feed-aff__pill-dot--mrs {
+  background: #19e3ff;
+  box-shadow: 0 0 8px #19e3ff, 0 0 14px color-mix(in srgb, #19e3ff 55%, transparent);
+}
+
+.feed-aff .feed-aff__shade {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  height: 46%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.82), transparent);
+  pointer-events: none;
+}
+
+.feed-aff .feed-aff__logo {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 2;
+  width: 132px;
+  height: auto;
+}
+
+.feed-aff .feed-aff__body {
+  padding: 16px 18px 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.feed-aff .feed-aff__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--c, #ff1f1f);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+.feed-aff .feed-aff__title--cb {
+  color: #ff1f1f;
+  text-shadow: 0 0 16px #ff1f1f80;
+}
+
+.feed-aff .feed-aff__title--mrs {
+  color: #19e3ff;
+  text-shadow: 0 0 16px #19e3ff80;
+}
+
+.feed-aff--cockblock .feed-aff__title {
+  color: #ff1f1f;
+  text-shadow: 0 0 16px #ff1f1f80;
+}
+
+.feed-aff--mrs .feed-aff__title {
+  color: #19e3ff;
+  text-shadow: 0 0 16px #19e3ff80;
+}
+
+.feed-aff .feed-aff__copy {
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--board-muted, #999);
+  line-height: 1.5;
+}
+
+.feed-aff .feed-aff__cta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 15px 18px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--c) 28%, #1c1c22);
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.feed-aff .feed-aff__cta-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
+}
+
+.feed-aff .feed-aff__cta-copy {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--board-muted, #999);
+  line-height: 1.5;
+}
+
+/* ── Calm mode: no pulse / blink ─────────────────────────── */
 :root[data-calm="true"] .pdxBoard--affiliate,
 html.calm-mode .pdxBoard--affiliate {
   animation: none;
-  box-shadow: none;
+  filter: none;
 }
 
 :root[data-calm="true"] .pdxBoard__affAd .dot,
-html.calm-mode .pdxBoard__affAd .dot {
+html.calm-mode .pdxBoard__affAd .dot,
+:root[data-calm="true"] .feed-aff__pill-dot,
+html.calm-mode .feed-aff__pill-dot {
   animation: none;
+}
+
+:root[data-calm="true"] .feed-aff,
+html.calm-mode .feed-aff,
+:root[data-calm="true"] .pdxBoard--affiliate,
+html.calm-mode .pdxBoard--affiliate {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }

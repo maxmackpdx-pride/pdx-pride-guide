@@ -4,7 +4,7 @@ import { HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import type { MouseEvent } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { isOpenGrabPost, timeAgo } from "@/lib/boardFeed";
@@ -32,11 +32,76 @@ export type GiftingPost = {
   interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
 };
 
+/** Deep-glass board accents (SoT §2.4) — Gifting board is lime; grab keeps orange cue. */
 const ACCENT = {
-  GIFT: "#ccff00",
-  ISO: "#19e3ff",
+  GIFT: "#CCFF00",
+  ISO: "#CCFF00",
   GRAB: "#ff8c00",
 } as const;
+
+/**
+ * Decorative line motifs for deep-glass board cards (Card System §17).
+ * Stroke SVGs / quote marks — opacity + placement via .board-glass-motif CSS.
+ * Always a single root element (no Fragment) so stacking selectors match.
+ */
+export function BoardGlassMotif({
+  variant,
+}: {
+  variant: "gift" | "search" | "dollar" | "binoculars" | "quote" | "quote-pair";
+}) {
+  if (variant === "quote" || variant === "quote-pair") {
+    return (
+      <span className="board-glass-motif board-glass-motif--quote-wrap" aria-hidden="true">
+        <span className="board-glass-motif board-glass-motif--quote">“</span>
+        {variant === "quote-pair" ? (
+          <span className="board-glass-motif board-glass-motif--quote board-glass-motif--quote-end">
+            ”
+          </span>
+        ) : null}
+      </span>
+    );
+  }
+
+  // Line SVGs from Card System §17 (viewBox 0 0 48 48)
+  if (variant === "gift") {
+    return (
+      <span className="board-glass-motif board-glass-motif--gift" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M8 20h32v6H8zM11 26v14h26V26M24 20v20M24 20c-2-6-9-9-11-6s2 6 11 6M24 20c2-6 9-9 11-6s-2 6-11 6" />
+        </svg>
+      </span>
+    );
+  }
+  if (variant === "search") {
+    return (
+      <span className="board-glass-motif board-glass-motif--search" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="21" cy="21" r="12" />
+          <path d="M30 30l9 9" />
+        </svg>
+      </span>
+    );
+  }
+  if (variant === "dollar") {
+    return (
+      <span className="board-glass-motif board-glass-motif--dollar" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M24 8v32M31 15c0-3-3-5-7-5s-7 2-7 5 3 4 7 5 7 2 7 5-3 5-7 5-7-2-7-5" />
+        </svg>
+      </span>
+    );
+  }
+  // binoculars (gigs looking)
+  return (
+    <span className="board-glass-motif board-glass-motif--binoculars" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="16" cy="26" r="8" />
+        <circle cx="32" cy="26" r="8" />
+        <path d="M24 26c0-3 2-5 4-5M24 26c0-3-2-5-4-5M16 18c0-3 2-5 5-5M32 18c0-3-2-5-5-5" />
+      </svg>
+    </span>
+  );
+}
 
 export function ghostLetter(category: string) {
   return (category || "?").trim().charAt(0).toUpperCase();
@@ -50,13 +115,17 @@ export function kindLabel(post: GiftingPost) {
 
 export function thumbGradient(post: GiftingPost) {
   if (isOpenGrabPost(post)) return "linear-gradient(135deg,#ff8c00,#ccff00)";
-  if (post.postType === "ISO") return "linear-gradient(135deg,#19e3ff,#8a4bff)";
-  return "linear-gradient(135deg,#ccff00,#19e3ff)";
+  if (post.postType === "ISO") return "linear-gradient(135deg,#ccff00,#a8e600)";
+  return "linear-gradient(135deg,#ccff00,#9fd600)";
 }
 
 export function cardAccent(post: GiftingPost) {
   if (isOpenGrabPost(post)) return ACCENT.GRAB;
   return post.postType === "ISO" ? ACCENT.ISO : ACCENT.GIFT;
+}
+
+export function giftingMotifVariant(post: GiftingPost): "gift" | "search" {
+  return post.postType === "ISO" ? "search" : "gift";
 }
 
 function cardStatus(post: GiftingPost) {
@@ -143,11 +212,23 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
     setNote("");
   };
 
+  const glassVars = {
+    "--listing-accent": accent,
+    "--c": accent,
+    "--_c": accent,
+  } as CSSProperties;
+
   return (
     <article
       id={`board-post-${post.id}`}
-      className={`board-listing-card board-listing-card--makeover${expanded ? " is-expanded" : ""}`}
-      style={{ "--listing-accent": accent } as React.CSSProperties}
+      className={[
+        "board-listing-card board-listing-card--makeover board-listing-card--glass",
+        post.postType === "ISO" ? "is-iso is-dashed" : "is-giving",
+        expanded ? "is-expanded" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={glassVars}
       onClick={onToggle}
       role="button"
       tabIndex={0}
@@ -163,6 +244,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
         }
       }}
     >
+      <BoardGlassMotif variant={giftingMotifVariant(post)} />
       <div className="board-listing-card__row">
         <div
           className="board-listing-card__thumb"

@@ -5,6 +5,8 @@ import { useTheme } from "@/context/ThemeContext";
 import type { AuthUser } from "@/context/AuthContext";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { PeopleHubUser } from "@shared/peopleHub";
+import { isLocalDemo } from "@/lib/localDemo";
+import { getLocalDemoNextMoves, getLocalDemoWhoToFollow } from "@/lib/localDemoHubFeed";
 import HubPersonRow from "./sections/HubPersonRow";
 
 import PwaInstallBanner from "@/components/PwaInstallBanner";
@@ -76,13 +78,24 @@ function HubRightRail({
   onGoPeople: () => void;
 }) {
   const [pendingUsername, setPendingUsername] = useState<string | null>(null);
+  const demo = isLocalDemo();
 
   const { data: suggestions = [] } = useQuery<PeopleHubUser[]>({
-    queryKey: ["/api/users/me/people", "discover", "rail"],
+    queryKey: ["/api/users/me/people", "discover", "rail", demo ? "demo" : "live"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/users/me/people/discover");
-      const list = (await res.json()) as PeopleHubUser[];
-      return list.slice(0, 3);
+      try {
+        const res = await apiRequest("GET", "/api/users/me/people/discover");
+        if (!res.ok) {
+          if (demo) return getLocalDemoWhoToFollow();
+          return [];
+        }
+        const list = (await res.json()) as PeopleHubUser[];
+        if (demo && list.length === 0) return getLocalDemoWhoToFollow();
+        return list.slice(0, 3);
+      } catch {
+        if (demo) return getLocalDemoWhoToFollow();
+        return [];
+      }
     },
   });
 
@@ -99,41 +112,35 @@ function HubRightRail({
     },
   });
 
+  const moveRows = upcoming.length > 0 ? upcoming : demo ? getLocalDemoNextMoves() : [];
+
   return (
     <>
-      <div className="card" style={{ padding: 16 }}>
-        <div className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)", marginBottom: 14 }}>
-          Your next moves
-        </div>
-        {upcoming.length === 0 && (
-          <div className="kick" style={{ marginBottom: 13 }}>
+      <div className="card hub-rail-card hub-rail-card--moves">
+        <div className="kick hub-rail-card__kick hub-rail-card__kick--cyan">Your next moves</div>
+        {moveRows.length === 0 && (
+          <div className="kick hub-rail-card__empty">
             RSVP or check in to see upcoming nights here.
           </div>
         )}
-        {upcoming.map((e) => (
-          <div
-            key={e.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 11,
-              paddingBottom: 13,
-              marginBottom: 13,
-              borderBottom: "1px solid var(--panel-border)",
-            }}
-          >
-            <span className={`dot ${dayDotClass(e.dayOfWeek)}`} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "#fff", lineHeight: 1.1, textTransform: "uppercase" }}>
-                {e.title}
+        <div className="hub-rail-card__list">
+          {moveRows.map((e) => {
+            const hasDay = Boolean(e.dayOfWeek);
+            return (
+              <div
+                key={e.id}
+                className={`hub-rail-move${hasDay ? " hub-rail-move--day" : " hub-rail-move--featured"}`}
+              >
+                {hasDay ? <span className={`dot ${dayDotClass(e.dayOfWeek)}`} /> : null}
+                <div className="hub-rail-move__main">
+                  <div className="hub-rail-move__title">{e.title}</div>
+                  <div className="kick hub-rail-move__when">{e.when}</div>
+                </div>
               </div>
-              <div className="kick" style={{ letterSpacing: ".05em", marginTop: 4 }}>
-                {e.when}
-              </div>
-            </div>
-          </div>
-        ))}
-        <button type="button" className="ico" style={{ color: "var(--panel-cyan)" }} onClick={onGoEvents}>
+            );
+          })}
+        </div>
+        <button type="button" className="ico hub-rail-card__foot" onClick={onGoEvents}>
           All your events →
         </button>
       </div>
@@ -143,7 +150,7 @@ function HubRightRail({
             Who to follow
           </div>
           {suggestions.length === 0 && (
-            <p className="kick" style={{ lineHeight: 1.5, margin: 0 }}>
+            <p className="kick hub-people-rail__empty-copy">
               Hosts and scene-makers show up here as more profiles go live.
             </p>
           )}
@@ -152,6 +159,7 @@ function HubRightRail({
           <HubPersonRow
             key={person.id}
             person={person}
+            rail
             followPending={pendingUsername === person.username}
             onToggleFollow={() =>
               followMutation.mutate({ username: person.username, isFollowing: person.isFollowing })

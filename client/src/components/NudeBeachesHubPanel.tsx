@@ -137,7 +137,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
     <div className="nb-hub nb-hub--sauvie">
       <section
         className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}
-        style={{ borderTop: `3px solid ${swimColor}` }}
+        style={{ ["--nb-rim" as string]: swimColor }}
       >
         <div className="nb-hub__kicker">Water quality</div>
         <div className="nb-hub__swim-head">
