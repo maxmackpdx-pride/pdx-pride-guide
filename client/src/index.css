@@ -5771,6 +5771,157 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   background: rgba(255, 0, 204, 0.08);
 }
 
+/* ============================================================
+   Desktop nav redesign ("Avatar Menu" design import) — desktop only.
+   Scoped under min-width:1024px so the mobile top bar / hamburger
+   menu keep their existing styling untouched.
+   ============================================================ */
+@keyframes navSeamFlow { to { background-position: 200% 0; } }
+@keyframes navHubDot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--neon-cyan); }
+  50% { opacity: .35; box-shadow: 0 0 2px var(--neon-cyan); }
+}
+
+@media (min-width: 1024px) {
+  /* --- BOARDS: bordered pill trigger --- */
+  .site-nav-scroll .site-nav-dropdown__trigger {
+    gap: 7px;
+    padding: 7px 13px;
+    border-radius: 9px;
+    border: 1.5px solid transparent;
+    transition: color .13s ease, background .13s ease, border-color .13s ease;
+  }
+  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__trigger {
+    background: rgba(0, 255, 255, 0.06);
+    border-color: var(--neon-cyan);
+    color: var(--neon-yellow);
+  }
+  /* pill has no underline accent */
+  .site-nav-scroll .site-nav-dropdown__trigger.active::after { display: none; }
+
+  /* --- BOARDS: floating dark panel with rainbow seam + colored rails --- */
+  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__panel {
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 236px;
+    padding: 14px 8px 10px;
+    background: #0b0b0b;
+    border: 1px solid #24242c;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .7), 0 0 26px rgba(204, 255, 0, .12), 0 0 40px rgba(255, 0, 204, .08);
+    overflow: hidden;
+  }
+  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00ffff, #ffee00, #ff00cc, #ff6600, #00ffff);
+    background-size: 200% 100%;
+    animation: navSeamFlow 4s linear infinite;
+    opacity: .7;
+    -webkit-mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  }
+  .site-nav-scroll .site-nav-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: #e6e2d9;
+    font-size: 0.95rem;
+    letter-spacing: .06em;
+    transition: color .13s ease, background .13s ease, box-shadow .13s ease, transform .13s ease;
+  }
+  .site-nav-scroll .site-nav-dropdown__item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, .05);
+    transform: translateX(2px);
+  }
+  /* per-board hover rail: gig purple, gifting lime, missed pink */
+  .site-nav-scroll .site-nav-dropdown__item:nth-of-type(1):hover { box-shadow: inset 3px 0 0 #b06bff; }
+  .site-nav-scroll .site-nav-dropdown__item:nth-of-type(2):hover { box-shadow: inset 3px 0 0 #ccff00; }
+  .site-nav-scroll .site-nav-dropdown__item:nth-of-type(3):hover { box-shadow: inset 3px 0 0 #ff1fa0; }
+
+  /* --- HUB: pulsing cyan status dot (only when there is no unread dot) --- */
+  .site-auth--desktop .site-auth__hub .site-nav-link { position: relative; }
+  .site-auth--desktop .site-auth__hub .site-nav-link:not(.site-nav-link--notify)::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: -1px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    animation: navHubDot 1.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* --- Avatar cluster: lime-tinted chevron circle --- */
+  .site-auth--desktop .site-profile-menu__cluster { gap: 8px; }
+  .site-auth--desktop .site-profile-menu__caret {
+    width: 26px;
+    height: 26px;
+    background: rgba(204, 255, 0, .12);
+    border: 1px solid rgba(204, 255, 0, .35);
+    color: var(--neon-yellow);
+  }
+  .site-auth--desktop .site-profile-menu__caret:hover,
+  .site-auth--desktop .site-profile-menu__caret[aria-expanded="true"] {
+    background: rgba(204, 255, 0, .2);
+    color: var(--neon-yellow);
+  }
+
+  /* --- Avatar menu: dark rounded panel with rainbow seam + colored rails --- */
+  .site-auth--desktop .site-profile-menu__panel {
+    min-width: 312px;
+    padding: 0 0 8px;
+    background: #0b0b0b;
+    border: 1px solid #24242c;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .7), 0 0 26px rgba(204, 255, 0, .12), 0 0 40px rgba(255, 0, 204, .08);
+    overflow: hidden;
+  }
+  .site-auth--desktop .site-profile-menu__panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00ffff, #ffee00, #ff00cc, #ff6600, #00ffff);
+    background-size: 200% 100%;
+    animation: navSeamFlow 4s linear infinite;
+  }
+  .site-auth--desktop .site-profile-menu__identity {
+    padding: 18px 18px 16px;
+    border-bottom: 1px solid #1c1c22;
+    margin: 0;
+  }
+  .site-auth--desktop .site-profile-menu__identity--link:hover {
+    background: rgba(255, 255, 255, .04);
+  }
+  .site-auth--desktop .site-profile-menu__name { font-size: 1.3rem; }
+  .site-auth--desktop .site-profile-menu__item {
+    width: auto;
+    margin: 0 8px;
+    border-radius: 10px;
+    transition: color .13s ease, background .13s ease, box-shadow .13s ease, transform .13s ease;
+  }
+  .site-auth--desktop .site-profile-menu__item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, .05);
+    box-shadow: inset 3px 0 0 var(--neon-yellow);
+    transform: translateX(2px);
+  }
+  .site-auth--desktop .site-profile-menu__item--logout:hover {
+    color: var(--neon-magenta);
+    box-shadow: inset 3px 0 0 var(--neon-magenta);
+    background: rgba(255, 0, 204, .06);
+  }
+}
+
 .gifting-interest-row {
   display: flex;
   align-items: center;
