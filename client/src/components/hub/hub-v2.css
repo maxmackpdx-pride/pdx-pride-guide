@@ -22,9 +22,10 @@
 }
 
 *{box-sizing:border-box}
-    html,body{margin:0;background:var(--panel-ink)}
-    a{color:var(--link);text-decoration:none}
-    a:hover{color:var(--neon-yellow)}
+    /* Scope hub chrome — do NOT leak a:hover yellow/underline to the whole site */
+    .hub-root, .hub-root body{margin:0;background:var(--panel-ink)}
+    .hub-root a{color:var(--link);text-decoration:none}
+    .hub-root a:hover{color:var(--neon-yellow)}
     .hs::-webkit-scrollbar{width:8px;height:8px}
     .hs::-webkit-scrollbar-thumb{background:#1c1c24;border-radius:99px}
     .navi{display:flex;align-items:center;gap:13px;width:100%;padding:10px 12px;border:none;border-radius:9px;cursor:pointer;text-align:left;background:transparent;color:var(--board-text);font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.03em;text-transform:uppercase;transition:.13s}

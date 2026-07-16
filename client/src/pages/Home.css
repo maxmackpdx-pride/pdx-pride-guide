@@ -1621,18 +1621,59 @@ html.calm-mode .home-boards__card {
     box-shadow 0.18s ease;
 }
 
-/* Kill global a:hover underline on board islands */
-.home-boards__utility:hover,
-.home-boards__utility:focus,
-.home-boards__utility:focus-visible,
-.home-boards__utility:active {
-  text-decoration: none;
+/*
+ * Kill global a:hover underline + hub a:hover { color: neon-yellow }.
+ * Those rules leak sitewide; islands must stay accent-colored with no underline.
+ */
+a.home-boards__utility,
+a.home-boards__utility:link,
+a.home-boards__utility:visited,
+a.home-boards__utility:hover,
+a.home-boards__utility:focus,
+a.home-boards__utility:focus-visible,
+a.home-boards__utility:active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  color: inherit !important; /* block hub yellow on hover */
 }
 
-.home-boards__utility:hover *,
-.home-boards__utility:focus *,
-.home-boards__utility:focus-visible * {
-  text-decoration: none;
+a.home-boards__utility:hover *,
+a.home-boards__utility:focus *,
+a.home-boards__utility:focus-visible *,
+a.home-boards__utility:active * {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+/* Re-assert title colors so inherit doesn't wash them out */
+a.home-boards__utility:hover .home-boards__utility-name,
+a.home-boards__utility:focus .home-boards__utility-name {
+  color: var(--util-acc) !important;
+}
+
+a.home-boards__utility--magenta:hover .home-boards__utility-name,
+a.home-boards__utility--magenta:focus .home-boards__utility-name {
+  color: #ff1fa0 !important;
+}
+
+a.home-boards__utility--lime:hover .home-boards__utility-name,
+a.home-boards__utility--lime:focus .home-boards__utility-name {
+  color: #c8fa3c !important;
+}
+
+a.home-boards__utility--purple:hover .home-boards__utility-name,
+a.home-boards__utility--purple:focus .home-boards__utility-name {
+  color: #b06bff !important;
+}
+
+a.home-boards__utility:hover .home-boards__utility-desc,
+a.home-boards__utility:focus .home-boards__utility-desc {
+  color: #f4f1ea !important;
+}
+
+a.home-boards__utility:hover .home-boards__utility-mantra,
+a.home-boards__utility:focus .home-boards__utility-mantra {
+  color: var(--text-lo, #8a8a8a) !important;
 }
 
 .home-boards__utility:hover {
@@ -1646,7 +1687,7 @@ html.calm-mode .home-boards__card {
     0 12px 32px -14px rgba(0, 0, 0, 0.85),
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 0 28px color-mix(in srgb, var(--util-acc) 22%, transparent);
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .home-boards__utility--magenta {
