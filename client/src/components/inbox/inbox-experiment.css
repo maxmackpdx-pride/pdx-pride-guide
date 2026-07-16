@@ -26,23 +26,32 @@
   --panel-green: #39ff14;
   --board-text: #e6e3da;
   --board-muted: #999999;
-  /* OLED glass fill (new card recipe) tinted deep→bright blue */
+  /*
+   * Glass fill: 85%→95% opacity gradient so the site shows through a little.
+   * Top/center denser (~95%), edges/bottom more open (~85%), plus blue wash.
+   */
   --glass-card-bg:
     radial-gradient(
-      90% 70% at 50% 46%,
-      #000 0%,
-      #000 34%,
-      #030304 68%,
-      color-mix(in srgb, var(--inbox-blue-deep) 14%, #050408) 100%
+      95% 80% at 50% 40%,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.92) 38%,
+      rgba(3, 3, 4, 0.88) 72%,
+      rgba(5, 4, 8, 0.85) 100%
+    ),
+    linear-gradient(
+      165deg,
+      rgba(6, 10, 28, 0.95) 0%,
+      rgba(4, 6, 16, 0.90) 48%,
+      rgba(3, 4, 12, 0.85) 100%
     ),
     radial-gradient(
       120% 90% at 8% 0%,
-      color-mix(in srgb, var(--inbox-blue-deep) 22%, transparent),
+      color-mix(in srgb, var(--inbox-blue-deep) 28%, transparent),
       transparent 52%
     ),
     radial-gradient(
       110% 80% at 100% 100%,
-      color-mix(in srgb, var(--inbox-blue) 16%, transparent),
+      color-mix(in srgb, var(--inbox-blue) 18%, transparent),
       transparent 55%
     );
   /* Gradient rim: dark blue → mid → bright blue (border-image needs solid fallback) */
@@ -65,8 +74,9 @@
     0 0 10px -2px color-mix(in srgb, var(--inbox-blue-bright) 40%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--inbox-blue-bright) 35%, rgba(255, 255, 255, 0.1)),
     inset 0 0 34px -24px color-mix(in srgb, var(--inbox-blue-deep) 35%, transparent) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Stronger blur so 85–95% fill still reads as glass over the page */
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
   color: var(--board-text);
   font-family: var(--font-body), Inter, sans-serif;
   padding: 0;
