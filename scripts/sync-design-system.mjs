@@ -3,9 +3,13 @@
  * Sync design-system/ from live app sources.
  * Run before every Grok push that touches colors, tokens, or Pride week styling.
  *
- * Source of truth chain:
- *   shared/prideWeek.ts → client/src/index.css + client/src/components/ds/tokens
+ * Source of truth chain (live site wins for chrome — see docs/LIVE_DESIGN_STANDARD.md):
+ *   LIVE SITE + client/src/components/ds/tokens/glass.css
+ *   shared/prideWeek.ts → client/src/index.css + ds tokens
  *   → design-system/tokens/tokens.css + previews/colors.html + chips-effects.html
+ *
+ * This script syncs colors / Pride days / portable tokens only.
+ * It does NOT rewrite glass.css or reintroduce brutal default CTAs.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

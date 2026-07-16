@@ -1,13 +1,16 @@
 /* ============================================================
-   PDX Pride Guide — DEEP GLASS / OLED-NEON (canonical)
+   PDX Pride Guide — DEEP GLASS / OLED-NEON (canonical LIVE chrome)
 
-   Source of truth (overrides prior locked lite-glass + brutal CTA defaults):
-     docs/handoffs/deep-glass-2026-07-16/
-     Card System.html · GROK_MIGRATION_PROMPT.md §1
-     §6 animation audit: pgDirCardIn, --dir-gm, one rainbow seam engine
+   Source of truth: THIS FILE + production components on master / live site.
+   Rulebook: docs/LIVE_DESIGN_STANDARD.md
+   Migration archive (not open work): docs/handoffs/deep-glass-2026-07-16/
+
+   Overrides prior lite-glass + default brutal-CTA globals.
+   Default interactive CTAs → --glass-btn* (no outer neon bloom).
+   --brutal-shadow* stays in effects.css for intentional stickers only.
 
    Surface only: fill / edge / bloom / sheen / button chrome / map frame.
-   Layout, spacing, structural radii, fonts, type scale: unchanged.
+   Layout, spacing, structural radii, fonts, type scale: other token files.
    ============================================================ */
 
 :root {

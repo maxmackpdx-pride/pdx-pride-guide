@@ -97,12 +97,14 @@ the day tag.
 </article>
 ```
 
-Styling essentials:
+Styling essentials (**live chrome — see `docs/LIVE_DESIGN_STANDARD.md`**):
 - **Top rainbow seam** on every board/list card (shared site chrome — same
   animated bar as directory cards / hub feed; see `docs/BOARD_CARD_STANDARD.md`).
-- Card: `#0b0b0b` on `#0a0a0a` page, `2px solid #2b2b2b` border, 0–6px radius
-  (brutalist), glow `0 0 14px color-mix(in srgb, var(--card-day-color) 18%, transparent)`
-  with a slow ~4s pulse; hover lifts 2px and brightens the glow.
+- Card: **deep-glass** (`--glass-card*` / `.pdxBoard`) with day color as `--c`,
+  black ring + neon edge, sheen, poster-well — **not** flat brutalist slabs.
+- Primary CTAs (tickets / RSVP): **glass solid** buttons — not magenta offset.
+- Claim: pure cyan sticker + soft cyan offset (`Claim this event →`).
+- Grid: **no** dead “Event details →” row (card click opens modal).
 - Title: Barlow Condensed 900, uppercase, line-height ~1.05.
 - Venue `#888`, when-line `#999`, both Inter.
 
@@ -219,7 +221,7 @@ Portable samples: `previews/event-card.html`, `events-page-layout.html`,
 | Day / type filters | `FilterChip` | Active day fill = day base color; MON/TUE use light text on dark fill |
 | Search | `SearchInput` | Filter bar search |
 | Map legend | `MapLegend` | Day swatches + multi-day pie demo |
-| Primary CTAs | `Button` accent `lime` | RSVP / "I'll be there" — acid yellow only |
+| Primary CTAs | Glass `Button` / `.pdx-glass-btn--solid` | RSVP / tickets — solid glass; lime reserved where specified |
 | Directory venues | `PlaceCard` | Animated rainbow top seam (`.pdx-rainbow-rule`) + category neon edge (`--cat-*`), not day colors |
 
 ### Glow policy (cards)

@@ -1,20 +1,27 @@
 /* ============================================================
    PDX Pride Guide, EFFECTS: shadows, glows, motion
-   Deep-glass SoT (docs/handoffs/deep-glass-2026-07-16/) overrides
-   default CTA chrome: prefer --glass-btn over brutal offset.
-   --brutal-shadow remains for intentional "sticker" elements only
-   (e.g. Claim this event). Default interactive CTAs → glass buttons.
+   Live SoT: docs/LIVE_DESIGN_STANDARD.md + tokens/glass.css
+
+   Default interactive CTAs → --glass-btn (glass.css), NEVER these offsets.
+   --brutal-shadow* = intentional stickers / zine chrome only.
+   Claim sticker (live): pure #00FFFF + soft cyan 3px offset — not yellow rim,
+   not magenta brutal default. See .pdxBoard__claim-tag / meta-tag--claim.
+
    Motion: 0.15s snappy hovers, ~4s ambient pulse; card entrance
-   pgDirCardIn (22px/.55s/--ease-out) per §6 audit.
+   pgDirCardIn (22px/.55s/--ease-out).
    ============================================================ */
 
 :root {
-  /* ---- BRUTALIST OFFSET (sticker / legacy only) ----------- */
-  /* Not the default CTA shadow under deep-glass. */
+  /* ---- BRUTALIST OFFSET (sticker / legacy ONLY — not default CTA) ---- */
+  /* Do not re-wire buttons / tickets / Shop Now / RSVP to these. */
   --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
   --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
   --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
   --brutal-shadow-lime: 4px 4px 0 rgba(204,255,0,0.30);
+  /* Live claim sticker shadow (soft cyan; prefer this over --brutal-shadow) */
+  --claim-sticker-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35);
+  --claim-sticker-bg: #00ffff;
+  --claim-sticker-fg: #050506;
 
   /* Generic hard offsets (zine sticker) */
   --shadow-hard-sm: 3px 3px 0 var(--ink-1000);

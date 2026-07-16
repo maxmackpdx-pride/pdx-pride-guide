@@ -33,6 +33,24 @@ When the user asks to **push** / **deploy** / **ship** (or after any push to `ma
 Repo: `maxmackpdx-pride/pdx-pride-guide`  
 Railway: project `pdx-pride-guide`, production, https://www.prideguidepdx.com  
 
+## Design source of truth (hard rule)
+
+**The live site is truth.** Production code on `master` / https://www.prideguidepdx.com beats portable kits, previews, sandboxes, and old handoffs.
+
+| Priority | Location |
+|----------|----------|
+| 1 | Live React + CSS (`client/src/components/ds/**`, page/component CSS) |
+| 2 | Tokens: `client/src/components/ds/tokens/glass.css` (+ colors/type/layout/effects) |
+| 3 | Portable: `design-system/` (sync only — never invent chrome that fights live) |
+| Archive | `docs/handoffs/deep-glass-2026-07-16/` (migration package, not open work orders) |
+
+**Canonical rulebook:** [`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md)
+
+**Do not re-introduce** retired globals: default brutal magenta CTAs, map outer neon bloom, yellow-rim claim stickers, dead “Event details” on grid cards, Mr. S red ads, MC 7-day window as board “past.” Full trap list is in the live standard.
+
+When UI chrome changes, update `docs/LIVE_DESIGN_STANDARD.md` in the **same** ship.
+
 ## Nav source of truth
 
 Primary nav order lives in `client/src/lib/siteNav.ts` (`PRIMARY_NAV`).
+Do **not** restyle nav unless the user explicitly asks (black outlines; cyan active/handle only).

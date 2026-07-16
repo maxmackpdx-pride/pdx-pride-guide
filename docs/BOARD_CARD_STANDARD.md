@@ -6,11 +6,14 @@ behaves like the others: a colored card on its own board page, a matching card
 in the hub feed, and a tap-to-open overlay that shows the real, interactive
 card on top of the feed (close = back to your exact scroll spot).
 
-**Surface chrome (fill / edge / bloom / CTA):** superseded by the **deep-glass /
-OLED-neon** standard in `docs/handoffs/deep-glass-2026-07-16/` and
-`client/src/components/ds/tokens/glass.css`. This doc still owns structure
-(board triad, feed vs glowing cards, `?post=`, overlay behavior, accents as
-semantic colors). Pixel values for slabs/rings/sheen/buttons come from deep-glass.
+**Surface chrome (fill / edge / bloom / CTA):** owned by the **live design
+standard** — [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md) and
+`client/src/components/ds/tokens/glass.css`. The deep-glass handoff under
+`docs/handoffs/deep-glass-2026-07-16/` is **historical migration** only.
+
+This doc still owns structure (board triad, feed vs glowing cards, `?post=`,
+overlay behavior, accents as semantic colors). Pixel values for slabs / rings /
+sheen / buttons come from **live production CSS**, not old brutalist defaults.
 
 ## Feed posts vs. glowing cards (important distinction)
 

@@ -102,18 +102,20 @@ a.pdxBoard:hover{
   letter-spacing:.05em; text-transform:uppercase; color:var(--_dayt,var(--_day)); margin-top:2px;
   display:inline-flex; align-items:center; gap:5px; }
 
-/* Bottom claim CTA — Card System mock: pure cyan fill + soft cyan offset (no yellow rim) */
+/* Claim sticker — LIVE standard (not yellow-rim brutal, not default CTA glass).
+   docs/LIVE_DESIGN_STANDARD.md · tokens: --claim-sticker-* in effects.css */
 .pdxBoard__claim{ margin-top:auto; padding-top:10px; display:flex; }
 .pdxBoard__claim-tag{
   font-family:var(--font-display); font-weight:700; font-size:.62rem;
   letter-spacing:.07em; text-transform:uppercase; line-height:1.3;
-  padding:5px 10px 4px; color:#050506; border:0;
-  box-shadow:3px 3px 0 rgba(0,255,255,.35); background:#00FFFF;
+  padding:5px 10px 4px; color:var(--claim-sticker-fg,#050506); border:0;
+  box-shadow:var(--claim-sticker-shadow,3px 3px 0 rgba(0,255,255,.35));
+  background:var(--claim-sticker-bg,#00FFFF);
   border-radius:0; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
 }
 .pdxBoard__claim-tag:hover{ filter:brightness(1.06); }
 .pdxBoard__claim-tag--pending{
-  color:#050506; background:var(--neon-magenta,#FF00CC); cursor:default;
+  color:var(--claim-sticker-fg,#050506); background:var(--neon-magenta,#FF00CC); cursor:default;
   box-shadow:3px 3px 0 rgba(255,0,204,.35);
 }
 .pdxBoard__claim-tag--pending:hover{ filter:none; }

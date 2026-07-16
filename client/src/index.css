@@ -8774,14 +8774,14 @@ footer a:hover { color: #00FFFF !important; }
   box-shadow: 2px 2px 0 var(--neon-yellow, #ccff00);
 }
 
-/* Claim chip — Card System mock (pure cyan + soft cyan offset) */
+/* Claim chip — LIVE standard tokens */
 .event-modal__tags .event-card-meta-tag--claim {
   font-weight: 800;
   letter-spacing: 0.05em;
-  color: #050506 !important;
-  background: #00ffff !important;
+  color: var(--claim-sticker-fg, #050506) !important;
+  background: var(--claim-sticker-bg, #00ffff) !important;
   border: 0 !important;
-  box-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35) !important;
+  box-shadow: var(--claim-sticker-shadow, 3px 3px 0 rgba(0, 255, 255, 0.35)) !important;
 }
 
 .event-modal__tags .event-card-meta-tag--claim-pending {
@@ -9331,12 +9331,12 @@ html.calm-mode .event-modal,
   box-shadow: 2px 2px 0 var(--neon-yellow);
 }
 
-/* Claim chip matches Card System (not yellow-rim brutal sticker) */
+/* Claim chip — LIVE standard (docs/LIVE_DESIGN_STANDARD.md); not yellow-rim brutal */
 .event-card-meta-tag--claim {
-  color: #050506;
-  background: #00ffff;
+  color: var(--claim-sticker-fg, #050506);
+  background: var(--claim-sticker-bg, #00ffff);
   border: 0;
-  box-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35);
+  box-shadow: var(--claim-sticker-shadow, 3px 3px 0 rgba(0, 255, 255, 0.35));
   letter-spacing: 0.07em;
   padding: 4px 9px 3px;
 }

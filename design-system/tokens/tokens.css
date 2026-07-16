@@ -156,10 +156,14 @@
   --grad-electric: linear-gradient(120deg, var(--neon-cyan) 0%, var(--neon-violet) 100%);
   --grad-acid: linear-gradient(115deg, var(--neon-cyan) 0%, var(--neon-yellow) 100%);
 
+  /* Sticker / zine ONLY — not default CTAs (live: glass-btn). See docs/LIVE_DESIGN_STANDARD.md */
   --brutal-shadow: 4px 4px 0 rgba(255, 0, 204, 0.36);
   --brutal-shadow-lg: 6px 6px 0 rgba(255, 0, 204, 0.5);
   --brutal-shadow-cyan: 4px 4px 0 rgba(0, 255, 255, 0.32);
   --brutal-shadow-lime: 4px 4px 0 rgba(204, 255, 0, 0.3);
+  --claim-sticker-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35);
+  --claim-sticker-bg: #00ffff;
+  --claim-sticker-fg: #050506;
 
   --glow: 0 0 14px color-mix(in srgb, var(--neon-cyan) 18%, transparent);
   --glow-pink: 0 0 16px color-mix(in srgb, var(--neon-magenta) 26%, transparent);

@@ -103,17 +103,18 @@ a.pdxRow:hover{
 .pdxRow__save:hover{ color:var(--neon-magenta); }
 .pdxRow__save:active{ transform:scale(.85); }
 .pdxRow__save[aria-pressed="true"]{ color:var(--neon-magenta); }
-/* Claim sticker — Card System: pure cyan + soft cyan offset */
+/* Claim sticker — LIVE standard (docs/LIVE_DESIGN_STANDARD.md) */
 .pdxRow__claim{
   font-family:var(--font-display); font-weight:700; font-size:.58rem;
   letter-spacing:.07em; text-transform:uppercase; line-height:1.3;
-  padding:4px 9px 3px; color:#050506; border:0;
-  box-shadow:3px 3px 0 rgba(0,255,255,.35); background:#00FFFF;
+  padding:4px 9px 3px; color:var(--claim-sticker-fg,#050506); border:0;
+  box-shadow:var(--claim-sticker-shadow,3px 3px 0 rgba(0,255,255,.35));
+  background:var(--claim-sticker-bg,#00FFFF);
   cursor:pointer; white-space:nowrap;
 }
 .pdxRow__claim:hover{ filter:brightness(1.06); }
 .pdxRow__claim--pending{
-  color:#050506; background:var(--neon-magenta,#FF00CC); cursor:default;
+  color:var(--claim-sticker-fg,#050506); background:var(--neon-magenta,#FF00CC); cursor:default;
   box-shadow:3px 3px 0 rgba(255,0,204,.35);
 }
 .pdxRow__claim--pending:hover{ filter:none; }

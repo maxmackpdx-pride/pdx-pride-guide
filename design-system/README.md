@@ -1,9 +1,21 @@
-# PDX Pride Guide — Design System
+# PDX Pride Guide — Design System (portable kit)
 
 Sync-ready bundle for a claude.ai/design project.
 
-**Source of truth chain:** `shared/prideWeek.ts` → `client/src/index.css` →
-`design-system/tokens/tokens.css` + `previews/*.html`.
+> **Live product is truth.** Full chrome rules:
+> [`docs/LIVE_DESIGN_STANDARD.md`](../docs/LIVE_DESIGN_STANDARD.md)
+>
+> This folder is a **portable color/type/export kit**. It does **not**
+> override production deep-glass cards, glass CTAs, or map deboss recipes
+> in `client/src/components/ds/tokens/glass.css`.
+
+**Source of truth chain:**
+
+```
+LIVE SITE + client/src/components/ds/tokens/glass.css
+  ← shared/prideWeek.ts + client tokens
+  → design-system/tokens/tokens.css + previews (sync)
+```
 
 ## Grok / agent push checklist
 
@@ -17,45 +29,32 @@ git add design-system/
 Commit the synced folder in the **same PR/commit** as the app changes. If
 `sync:design-system` updates files, include those diffs — do not push drift.
 
+If you change a **global chrome rule**, update `docs/LIVE_DESIGN_STANDARD.md`
+in the same ship.
+
 ## Contents
-- `tokens/tokens.css` — canonical tokens (surfaces, neons, day colors, type,
-  spacing, effects, directory categories, schedule accents)
-- `EVENTS_GUIDE.md` — events/schedule system + DS component mapping
+- `tokens/tokens.css` — synced colors / days / type / spacing (not full glass chrome)
+- `EVENTS_GUIDE.md` — events/schedule system + DS mapping (chrome → live components)
 - `AVATARS_GUIDE.md` — avatar system (not in React DS)
-- `previews/*.html` — self-contained preview cards; first line carries the
-  `@dsCard group="…"` marker the Design System pane indexes on:
-  - `colors.html` (Colors)
-  - `typography.html` (Type)
-  - `buttons.html` (Buttons)
-  - `event-card.html` (Cards — PosterCard + EventCard)
-  - `place-card.html` (Cards — PlaceCard / directory; rainbow top seam + category edge)
-  - `chips-effects.html` (Effects — rainbow, day chips, glow, filters)
-  - `events-page-layout.html` / `schedule-grid.html` (Layout)
-  - `avatars.html` (Avatars)
+- `previews/*.html` — samples for Claude Design indexing
 
 Modular production tokens (richer, multi-file) live in
-`client/src/components/ds/tokens/`. Keep them aligned via
-`npm run sync:design-system`.
+`client/src/components/ds/tokens/` — **especially `glass.css`**.
 
-## Design rules
-- Background is always near-black `#0a0a0a`; content sits on `#0b0b0b` cards
-  with `2px solid #2b2b2b` borders. Radius is minimal (0–6px) — brutalist.
-- Display type: Barlow Condensed 700–900, uppercase, tight line-height (~0.95).
-  Body: Inter; body text `#e6e3da`, meta `#999`, faint `#666`.
-- One neon per element. Yellow `#CCFF00` = primary action; cyan `#00FFFF` =
-  accent pop; magenta `#FF00CC` mostly lives in offset shadows and glows.
-- Day colors are semantic Pride Week (Mon Jul 13 – Sun Jul 19): MON purple,
-  TUE blue, WED yellow, THU cyan, FRI magenta, SAT green, SUN orange.
-  MON/TUE have lighter text variants (`--day-mon-text` / `--day-tue-text`);
-  `#CCFF00` is reserved for RSVP/primary-action — never a day. Source of
-  truth: `shared/prideWeek.ts` + `npm run sync:design-system`. Full
-  event-system explainer with layout samples: `EVENTS_GUIDE.md` +
-  `previews/events-page-layout.html` + `previews/schedule-grid.html`.
-- Signature effects: rainbow bar divider; brutalist offset shadow
-  `4px 4px 0 rgba(255,0,204,0.36)`; soft neon glow
-  `0 0 14px color-mix(in srgb, <accent> 18%, transparent)` with a slow pulse.
-- Motion: 0.15s snappy for hovers, ~4s ease-in-out for ambient pulses.
-  Respect calm mode (glows off).
+## Design rules (aligned with live — not pre-migration brutal)
+
+- **Cards:** deep-glass OLED slabs (`--glass-card*`), black ring + neon edge,
+  sheen, poster-well — **not** flat `#0b0b0b` + only `#2b2b2b` as the default.
+- **CTAs:** glass buttons (`.pdx-glass-btn` / `.pdxBtn`); solid fill + dark type.
+  **Not** default magenta brutal offset.
+- **Claim sticker:** pure cyan `#00FFFF` + soft cyan offset (not yellow rim).
+- Display: Barlow Condensed 700–900 uppercase. Body: Inter `#e6e3da`.
+- One neon per element. Lime `#CCFF00` = reserved primary/RSVP where specified;
+  never a Pride day color.
+- Day colors: semantic Pride Week from `shared/prideWeek.ts`.
+- Rainbow top seam on clickable cards (`docs/BOARD_CARD_STANDARD.md`).
+- Motion: ~0.15s hover; calm / reduced-motion kills ambient pulse.
+- Full retired-rule trap list: `docs/LIVE_DESIGN_STANDARD.md`.
 
 ## How to sync to claude.ai/design
 This cloud session can't authorize Design sync (needs interactive login). Either:
