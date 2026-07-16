@@ -8767,16 +8767,26 @@ footer a:hover { color: #00FFFF !important; }
 
 .event-modal__tags .event-card-meta-tag {
   font-size: 0.76rem !important;
-  /* Keep filled solid look when --tag-accent is set (claim / type meta) */
+  /* Filled solid look when --tag-accent is set (type meta) */
   color: #000;
   background: var(--tag-accent, var(--neon-cyan, #19e3ff));
   border-color: var(--neon-yellow, #ccff00);
   box-shadow: 2px 2px 0 var(--neon-yellow, #ccff00);
 }
 
+/* Claim chip — Card System mock (pure cyan + soft cyan offset) */
 .event-modal__tags .event-card-meta-tag--claim {
   font-weight: 800;
   letter-spacing: 0.05em;
+  color: #050506 !important;
+  background: #00ffff !important;
+  border: 0 !important;
+  box-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35) !important;
+}
+
+.event-modal__tags .event-card-meta-tag--claim-pending {
+  background: var(--neon-magenta, #ff00cc) !important;
+  box-shadow: 3px 3px 0 rgba(255, 0, 204, 0.35) !important;
 }
 
 .event-modal__description {
@@ -9319,6 +9329,21 @@ html.calm-mode .event-modal,
   background: var(--tag-accent, var(--neon-cyan));
   border: 1.5px solid var(--neon-yellow);
   box-shadow: 2px 2px 0 var(--neon-yellow);
+}
+
+/* Claim chip matches Card System (not yellow-rim brutal sticker) */
+.event-card-meta-tag--claim {
+  color: #050506;
+  background: #00ffff;
+  border: 0;
+  box-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35);
+  letter-spacing: 0.07em;
+  padding: 4px 9px 3px;
+}
+
+.event-card-meta-tag--claim-pending {
+  background: var(--neon-magenta, #ff00cc);
+  box-shadow: 3px 3px 0 rgba(255, 0, 204, 0.35);
 }
 
 .event-card-meta-tag--clickable {

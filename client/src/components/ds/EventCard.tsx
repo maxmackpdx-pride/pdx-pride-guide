@@ -103,16 +103,19 @@ a.pdxRow:hover{
 .pdxRow__save:hover{ color:var(--neon-magenta); }
 .pdxRow__save:active{ transform:scale(.85); }
 .pdxRow__save[aria-pressed="true"]{ color:var(--neon-magenta); }
-/* Claim sticker — intentional brutal offset (keep) */
+/* Claim sticker — Card System: pure cyan + soft cyan offset */
 .pdxRow__claim{
   font-family:var(--font-display); font-weight:700; font-size:.58rem;
-  letter-spacing:.09em; text-transform:uppercase; line-height:1.3;
-  padding:4px 9px 3px; color:#000; border:2px solid var(--neon-yellow);
-  box-shadow:3px 3px 0 var(--neon-yellow); background:var(--neon-cyan,#19E3FF);
+  letter-spacing:.07em; text-transform:uppercase; line-height:1.3;
+  padding:4px 9px 3px; color:#050506; border:0;
+  box-shadow:3px 3px 0 rgba(0,255,255,.35); background:#00FFFF;
   cursor:pointer; white-space:nowrap;
 }
 .pdxRow__claim:hover{ filter:brightness(1.06); }
-.pdxRow__claim--pending{ background:var(--neon-magenta,#FF00CC); cursor:default; }
+.pdxRow__claim--pending{
+  color:#050506; background:var(--neon-magenta,#FF00CC); cursor:default;
+  box-shadow:3px 3px 0 rgba(255,0,204,.35);
+}
 .pdxRow__claim--pending:hover{ filter:none; }
 
 html.calm-mode .pdxRow,
@@ -207,7 +210,7 @@ export function EventCard({
         )}
         {showClaim && (
           claimPending ? (
-            <span className="pdxRow__claim pdxRow__claim--pending" data-testid="tag-claim-pending">CLAIM PENDING</span>
+            <span className="pdxRow__claim pdxRow__claim--pending" data-testid="tag-claim-pending">Claim pending</span>
           ) : (
             <button
               type="button"
@@ -215,7 +218,7 @@ export function EventCard({
               data-testid="tag-claim-event"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClaimClick?.(); }}
             >
-              CLAIM THIS EVENT →
+              Claim this event →
             </button>
           )
         )}

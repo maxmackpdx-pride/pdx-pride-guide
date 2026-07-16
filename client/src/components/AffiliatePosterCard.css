@@ -237,28 +237,46 @@
   animation: pdxAffiliateBlink 1.6s ease-in-out infinite;
 }
 
-/* SHOP NOW — brand-colored glass button (matches event CTA chrome) */
-.pdxBoard__affShop {
+/*
+ * SHOP NOW — solid glass primary CTA (brand fill).
+ * Bare .pdx-glass-btn was washing Mr. S into cyan-on-cyan (unreadable).
+ * Force solid fill + dark ink; CockBlock red keeps white type.
+ */
+.pdxBoard__affShop,
+.pdxBoard__affShop.pdx-glass-btn,
+.pdxBoard__affShop.pdx-glass-btn--solid {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #050506;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
     var(--c, #ff1f1f);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: 4px;
+  border: 2px solid #000;
+  border-radius: 9px;
   padding: 6px 13px 5px;
   box-shadow:
-    0 0 16px -5px color-mix(in srgb, var(--c) 65%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
   white-space: nowrap;
   flex-shrink: 0;
+  text-shadow: none;
 }
 
-.pdxBoard--affiliate-cb .pdxBoard__affShop {
+/* Red fill: white type for contrast on CockBlock */
+.pdxBoard--affiliate-cb .pdxBoard__affShop,
+.pdxBoard--affiliate-cb .pdxBoard__affShop.pdx-glass-btn,
+.pdxBoard--affiliate-cb .pdxBoard__affShop.pdx-glass-btn--solid {
   color: #fff;
+}
+
+/* Mr. S cyan: pin dark ink so glass tokens cannot re-tint the label */
+.pdxBoard--affiliate-mrs .pdxBoard__affShop,
+.pdxBoard--affiliate-mrs .pdxBoard__affShop.pdx-glass-btn,
+.pdxBoard--affiliate-mrs .pdxBoard__affShop.pdx-glass-btn--solid {
+  color: #050506;
 }
 
 .pdxBoard--affiliate:hover .pdxBoard__affShop {

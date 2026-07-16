@@ -146,7 +146,7 @@ export default function PosterAdCard({
             <span className="dot" aria-hidden="true" />
             Ad
           </span>
-          <span className="pdxBoard__affShop pdx-glass-btn">{ad.ctaCopy || "Shop Now →"}</span>
+          <span className="pdxBoard__affShop pdx-glass-btn pdx-glass-btn--solid">{ad.ctaCopy || "Shop Now →"}</span>
         </div>
       </div>
     </a>

@@ -74,7 +74,11 @@ a.pdxBoard:hover{
 .pdxTag--day{ background:#fff; color:#000; }
 .pdxTag--type{ border:1px solid var(--border-strong); color:var(--text-lo); }
 .pdxTag--meta{ border:1px solid var(--border-strong); color:var(--text-mid); }
-.pdxTag--claim{ border:1px solid var(--neon-yellow); color:var(--neon-yellow); }
+/* Inline claim chip (if used in tags row) — Card System cyan sticker */
+.pdxTag--claim{
+  color:#050506; background:#00FFFF; border:0;
+  box-shadow:3px 3px 0 rgba(0,255,255,.35);
+}
 
 .pdxBoard__title{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;
   font-size:var(--title-md); line-height:1.05; color:var(--text-hi); margin:2px 0 0; }
@@ -98,18 +102,19 @@ a.pdxBoard:hover{
   letter-spacing:.05em; text-transform:uppercase; color:var(--_dayt,var(--_day)); margin-top:2px;
   display:inline-flex; align-items:center; gap:5px; }
 
-/* Bottom claim CTA — sticker style (intentional brutal offset; keep) */
+/* Bottom claim CTA — Card System mock: pure cyan fill + soft cyan offset (no yellow rim) */
 .pdxBoard__claim{ margin-top:auto; padding-top:10px; display:flex; }
 .pdxBoard__claim-tag{
   font-family:var(--font-display); font-weight:700; font-size:.62rem;
-  letter-spacing:.09em; text-transform:uppercase; line-height:1.3;
-  padding:5px 10px 4px; color:#000; border:2px solid var(--neon-yellow);
-  box-shadow:3px 3px 0 var(--neon-yellow); background:var(--neon-cyan,#19E3FF);
+  letter-spacing:.07em; text-transform:uppercase; line-height:1.3;
+  padding:5px 10px 4px; color:#050506; border:0;
+  box-shadow:3px 3px 0 rgba(0,255,255,.35); background:#00FFFF;
   border-radius:0; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
 }
 .pdxBoard__claim-tag:hover{ filter:brightness(1.06); }
 .pdxBoard__claim-tag--pending{
-  background:var(--neon-magenta,#FF00CC); cursor:default; box-shadow:3px 3px 0 var(--neon-yellow);
+  color:#050506; background:var(--neon-magenta,#FF00CC); cursor:default;
+  box-shadow:3px 3px 0 rgba(255,0,204,.35);
 }
 .pdxBoard__claim-tag--pending:hover{ filter:none; }
 
@@ -229,7 +234,7 @@ export function PosterCard({
           <div className="pdxBoard__claim">
             {claimPending ? (
               <span className="pdxBoard__claim-tag pdxBoard__claim-tag--pending" data-testid="tag-claim-pending">
-                CLAIM PENDING
+                Claim pending
               </span>
             ) : (
               <button
@@ -242,7 +247,7 @@ export function PosterCard({
                   onClaimClick?.();
                 }}
               >
-                CLAIM THIS EVENT →
+                Claim this event →
               </button>
             )}
           </div>

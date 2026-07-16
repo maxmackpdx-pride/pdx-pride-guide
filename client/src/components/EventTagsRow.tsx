@@ -23,10 +23,6 @@ function dayTagStyle(): CSSProperties {
   return { "--day-tag-bg": "#ffffff" } as CSSProperties;
 }
 
-function claimTagStyle(accent: string): CSSProperties {
-  return { "--tag-accent": accent } as CSSProperties;
-}
-
 export default function EventTagsRow({
   event,
   size = "sm",
@@ -66,20 +62,19 @@ export default function EventTagsRow({
         </span>
       ))}
       {showFlags && showClaim && hasPendingClaim && (
-        <span className="event-card-meta-tag event-card-meta-tag--claim" style={claimTagStyle("var(--neon-magenta)")}>
-          CLAIM PENDING
+        <span className="event-card-meta-tag event-card-meta-tag--claim event-card-meta-tag--claim-pending">
+          Claim pending
         </span>
       )}
       {showFlags && showClaim && !hasPendingClaim && event.isClaimable && !event.claimedBy && (
         <span
           className={`event-card-meta-tag event-card-meta-tag--claim${onClaimClick ? " event-card-meta-tag--clickable" : ""}`}
-          style={claimTagStyle("var(--neon-cyan)")}
           onClick={onClaimClick}
           onKeyDown={onClaimClick ? e => e.key === "Enter" && onClaimClick() : undefined}
           role={onClaimClick ? "button" : undefined}
           tabIndex={onClaimClick ? 0 : undefined}
         >
-          {onClaimClick ? "CLAIM THIS EVENT →" : "CLAIM ME"}
+          {onClaimClick ? "Claim this event →" : "Claim me"}
         </span>
       )}
     </div>
