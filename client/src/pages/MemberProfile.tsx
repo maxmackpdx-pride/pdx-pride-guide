@@ -16,6 +16,7 @@ import {
 } from "@/components/profile/normalizePublicProfile";
 import ProfileHero from "@/components/profile/ProfileHero";
 import ProfileStatStrip from "@/components/profile/ProfileStatStrip";
+import MarqueeBand from "@/components/profile/MarqueeBand";
 import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
@@ -246,6 +247,13 @@ export default function MemberProfile() {
         />
 
         <ProfileStatStrip data={data} />
+
+        <MarqueeBand
+          marquee={data.marquee ?? { items: [], speed: 30, color: "rainbow" }}
+          isOwner={isOwner}
+          isPromoter={!!data.isPromoter}
+          onSave={(m) => patchMutation.mutate({ marquee: JSON.stringify(m) })}
+        />
 
         <HostingPanel
           upcoming={hosting.upcoming}
