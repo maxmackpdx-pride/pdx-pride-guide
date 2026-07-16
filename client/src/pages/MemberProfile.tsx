@@ -16,7 +16,7 @@ import {
 } from "@/components/profile/normalizePublicProfile";
 import ProfileHero from "@/components/profile/ProfileHero";
 import ProfileStatStrip from "@/components/profile/ProfileStatStrip";
-import MarqueeBand from "@/components/profile/MarqueeBand";
+import { Marquee } from "@/components/ds";
 import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
@@ -212,6 +212,15 @@ export default function MemberProfile() {
   for (const e of hosting.past) stashById.set(e.id, { ...e, stashRole: "MC" });
   const stashEvents = Array.from(stashById.values());
 
+  // Marquee = the parties they've actually been to (hosted or attended). Empty
+  // → a nudge to go out. Gradient follows the profile's theme accent.
+  const partyNames = Array.from(
+    new Set(stashEvents.map(e => e.title).filter((t): t is string => !!t)),
+  ).slice(0, 14);
+  const marqueeItems = partyNames.length
+    ? partyNames
+    : ["I need to go to a party still", "Where should I go?"];
+
   return (
     <div
       className="pp-page pp-page--reimagined profile-page"
@@ -248,12 +257,12 @@ export default function MemberProfile() {
 
         <ProfileStatStrip data={data} />
 
-        <MarqueeBand
-          marquee={data.marquee ?? { items: [], speed: 30, color: "rainbow" }}
-          isOwner={isOwner}
-          isPromoter={!!data.isPromoter}
-          onSave={(m) => patchMutation.mutate({ marquee: JSON.stringify(m) })}
-        />
+        <div
+          className="pp-marquee-wrap"
+          style={{ ["--pp-mq-accent" as string]: accent }}
+        >
+          <Marquee items={marqueeItems} speed={30} className="pp-marquee pp-marquee--accent" />
+        </div>
 
         <HostingPanel
           upcoming={hosting.upcoming}

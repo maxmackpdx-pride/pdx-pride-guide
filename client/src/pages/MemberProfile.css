@@ -1113,6 +1113,22 @@ a.pp-btn {
 .pp-marquee-wrap .pdxMarquee {
   border-block: 1px solid var(--border-faint, #1a1a1a);
 }
+
+/* Accent-themed ticker: gradient follows the profile's accent color. */
+.pp-marquee--accent.pdxMarquee {
+  background: linear-gradient(
+    100deg,
+    var(--pp-mq-accent, #ff00cc),
+    color-mix(in srgb, var(--pp-mq-accent, #ff00cc) 42%, #000)
+  );
+}
+.pp-marquee--accent .pdxMarquee__item {
+  color: #000;
+  font-weight: 900;
+}
+.pp-marquee--accent .pdxMarquee__star {
+  color: rgba(0, 0, 0, 0.6);
+}
 .pp-marquee-edit {
   position: absolute;
   right: 12px;
