@@ -44,14 +44,42 @@ export const AVATAR_RING_OPTIONS: AvatarRingOption[] = [
   { id: "chain", label: "Chain & Padlock" },
 ];
 
-export const AVATAR_EMOJI_OPTIONS = [
+export interface AvatarEmojiOption {
+  id: number;
+  /** Emoji glyph shown in the picker for the classic color avatars. */
+  emoji?: string;
+  /** Background color for the emoji/initial avatars. */
+  bg?: string;
+  /** Static image (served from /avatars/*.webp) for the illustrated avatars. */
+  img?: string;
+  label: string;
+}
+
+export const AVATAR_EMOJI_OPTIONS: AvatarEmojiOption[] = [
   { id: 1, emoji: "🐱", bg: "#00FFFF", label: "Cyan Cat" },
   { id: 2, emoji: "🦋", bg: "#FF00CC", label: "Magenta Butterfly" },
   { id: 3, emoji: "🐍", bg: "#CCFF00", label: "Neon Snake" },
   { id: 4, emoji: "🌙", bg: "#8800FF", label: "Violet Moon" },
   { id: 5, emoji: "🔥", bg: "#FF6600", label: "Orange Flame" },
   { id: 6, emoji: "⚡", bg: "#fff", label: "White Lightning" },
-] as const;
+  // Illustrated Portland / Pride avatars.
+  { id: 7, img: "/avatars/rose.webp", label: "Portland Rose" },
+  { id: 8, img: "/avatars/bridge.webp", label: "St. Johns Bridge" },
+  { id: 9, img: "/avatars/coffee.webp", label: "Coffee" },
+  { id: 10, img: "/avatars/beaver.webp", label: "Oregon Beaver" },
+  { id: 11, img: "/avatars/mthood.webp", label: "Mt. Hood" },
+  { id: 12, img: "/avatars/bigfoot.webp", label: "Pride Bigfoot" },
+  { id: 13, img: "/avatars/sasquatch.webp", label: "Sasquatch" },
+  { id: 14, img: "/avatars/yeti.webp", label: "Leather Yeti" },
+  { id: 15, img: "/avatars/biker.webp", label: "Biker Bigfoot" },
+  { id: 16, img: "/avatars/witch.webp", label: "Witch Hat" },
+  { id: 17, img: "/avatars/cat.webp", label: "Cat & Broom" },
+  { id: 18, img: "/avatars/pentacle.webp", label: "Pentacle" },
+  { id: 19, img: "/avatars/skate.webp", label: "Roller Skate" },
+  { id: 20, img: "/avatars/derby.webp", label: "Roller Derby" },
+  { id: 21, img: "/avatars/rugby.webp", label: "Rugby Player" },
+  { id: 22, img: "/avatars/rugbyball.webp", label: "Rugby Ball" },
+];
 
 export function normalizeAvatarRing(value?: string | null): AvatarRingId {
   const found = AVATAR_RING_OPTIONS.find(r => r.id === value);

@@ -134,10 +134,10 @@ export default function DashboardProfileEditor({
               type="button"
               onClick={() => setAvatarChoice(a.id)}
               title={a.label}
-              className={`hub-v2-profile-editor__avatar-btn${avatarChoice === a.id ? " is-selected" : ""}`}
-              style={{ background: a.bg }}
+              className={`hub-v2-profile-editor__avatar-btn${a.img ? " is-image" : ""}${avatarChoice === a.id ? " is-selected" : ""}`}
+              style={a.img ? undefined : { background: a.bg }}
             >
-              {a.emoji}
+              {a.img ? <img src={a.img} alt={a.label} /> : a.emoji}
             </button>
           ))}
         </div>

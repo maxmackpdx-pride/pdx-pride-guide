@@ -63,10 +63,12 @@ export default function UserAvatar({
       <div className="user-avatar__inner">
         {photoUrl ? (
           <img src={photoUrl} alt="" className="user-avatar__photo" />
+        ) : emoji.img ? (
+          <img src={emoji.img} alt="" className="user-avatar__photo" />
         ) : (
           <span
             className="user-avatar__fallback display"
-            style={{ background: emoji.bg, color: emoji.bg === "#fff" ? "#000" : "#000" }}
+            style={{ background: emoji.bg || "#00FFFF", color: "#000" }}
           >
             {initial}
           </span>
