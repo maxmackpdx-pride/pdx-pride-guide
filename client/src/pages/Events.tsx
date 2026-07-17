@@ -343,7 +343,7 @@ export default function Events() {
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
     return [
-      { num: liveEvents.length, label: "Total events", color: "#19e3ff" },
+      { num: liveEvents.length, label: "Events Remain", color: "#19e3ff" },
       { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
       { num: liveEvents.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
     ];

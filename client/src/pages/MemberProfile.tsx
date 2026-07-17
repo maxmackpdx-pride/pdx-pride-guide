@@ -7,9 +7,11 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import EventModal from "@/components/EventModal";
+import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
 import AuthModal from "@/components/AuthModal";
 import type { Event } from "@shared/schema";
-import type { MemberProfileData } from "./profile/types";
+import type { Business } from "@/pages/Directory";
+import type { MemberProfileData, ProfileTop8Entry } from "./profile/types";
 import {
   normalizePublicProfile,
   pickTheBigOne,
@@ -60,6 +62,8 @@ export default function MemberProfile() {
   const [top8Open, setTop8Open] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
+  const [placeOriginRect, setPlaceOriginRect] = useState<PlaceModalOriginRect | null>(null);
 
   const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
 
@@ -155,6 +159,55 @@ export default function MemberProfile() {
       toast({ title: parseApiError(err, "Could not open event"), variant: "destructive" });
     }
   }, [toast]);
+
+  /** Resolve a directory Business by id (reuse cached list when present). */
+  const loadDirectoryBusiness = useCallback(async (placeId: number): Promise<Business | null> => {
+    const cached = queryClient.getQueryData<Business[]>(["/api/directory"]);
+    if (Array.isArray(cached)) {
+      const hit = cached.find(b => b.id === placeId);
+      if (hit) return hit;
+    }
+    const res = await apiRequest("GET", "/api/directory");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const list = (await res.json()) as Business[];
+    queryClient.setQueryData(["/api/directory"], list);
+    return list.find(b => b.id === placeId) ?? null;
+  }, []);
+
+  /** Open PlaceModal on the profile — no route change so X keeps you here. */
+  const openPlaceFromTop8 = useCallback(
+    async (entry: Extract<ProfileTop8Entry, { kind: "place" }>, originEl: HTMLElement | null) => {
+      if (originEl) {
+        const r = originEl.getBoundingClientRect();
+        setPlaceOriginRect({
+          top: r.top,
+          left: r.left,
+          width: r.width,
+          height: r.height,
+        });
+      } else {
+        setPlaceOriginRect(null);
+      }
+      try {
+        const biz = await loadDirectoryBusiness(entry.id);
+        if (!biz) {
+          toast({ title: "Place not found in the directory", variant: "destructive" });
+          setPlaceOriginRect(null);
+          return;
+        }
+        setSelectedPlace(biz);
+      } catch (err) {
+        setPlaceOriginRect(null);
+        toast({ title: parseApiError(err, "Could not open place"), variant: "destructive" });
+      }
+    },
+    [loadDirectoryBusiness, toast],
+  );
+
+  const closePlace = useCallback(() => {
+    setSelectedPlace(null);
+    setPlaceOriginRect(null);
+  }, []);
 
   const profileUrl =
     typeof window !== "undefined"
@@ -281,6 +334,7 @@ export default function MemberProfile() {
               isOwner={isOwner}
               displayName={data.displayName || data.username}
               onEdit={() => setTop8Open(true)}
+              onPlaceClick={openPlaceFromTop8}
             />
             {bigOne && (
               <TheBigOne
@@ -336,6 +390,16 @@ export default function MemberProfile() {
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
           onEventUpdated={(updated) => setSelectedEvent(updated)}
+        />
+      )}
+
+      {selectedPlace && (
+        <PlaceModal
+          key={selectedPlace.id}
+          place={selectedPlace}
+          originRect={placeOriginRect}
+          onClose={closePlace}
+          onRequireAuth={() => setShowAuth(true)}
         />
       )}
 

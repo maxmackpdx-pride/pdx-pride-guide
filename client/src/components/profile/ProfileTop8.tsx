@@ -8,11 +8,13 @@ type Props = {
   isOwner: boolean;
   displayName: string;
   onEdit?: () => void;
+  /** Open directory PlaceModal in-place (stay on profile when closed). */
+  onPlaceClick?: (place: Extract<ProfileTop8Entry, { kind: "place" }>, originEl: HTMLElement | null) => void;
 };
 
-/** MySpace-style Top 8: ranked grid of favorite people + venues, each tile
- *  links into that profile or directory listing. */
-export default function ProfileTop8({ entries, isOwner, displayName, onEdit }: Props) {
+/** MySpace-style Top 8: ranked grid of favorite people + venues.
+ *  People navigate to profiles; venues open the directory card modal on this page. */
+export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onPlaceClick }: Props) {
   // Nothing to show and not the owner → hide the section entirely.
   if (entries.length === 0 && !isOwner) return null;
 
@@ -64,22 +66,41 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit }: P
                 </Link>
               );
             }
-            return (
-              <Link
-                key={`b-${e.id}`}
-                href={placePath(e.id, e.name)}
-                className="pp-top8__tile pp-top8__tile--place"
-              >
+            const placeInner = (
+              <>
                 <span className="pp-top8__rank display">{rank}</span>
                 <span className="pp-top8__avatar pp-top8__avatar--logo">
                   {e.logoUrl ? (
-                    <img src={e.logoUrl} alt={e.name} loading="lazy" />
+                    <img src={e.logoUrl} alt="" loading="lazy" />
                   ) : (
                     <span className="pp-top8__logo-fallback display">{e.name.slice(0, 1)}</span>
                   )}
                 </span>
                 <span className="pp-top8__name display">{e.name}</span>
                 <span className="pp-top8__meta">Venue</span>
+              </>
+            );
+            // Prefer in-page PlaceModal so closing stays on the profile.
+            if (onPlaceClick) {
+              return (
+                <button
+                  key={`b-${e.id}`}
+                  type="button"
+                  className="pp-top8__tile pp-top8__tile--place"
+                  aria-label={`Open ${e.name} directory card`}
+                  onClick={(ev) => onPlaceClick(e, ev.currentTarget)}
+                >
+                  {placeInner}
+                </button>
+              );
+            }
+            return (
+              <Link
+                key={`b-${e.id}`}
+                href={placePath(e.id, e.name)}
+                className="pp-top8__tile pp-top8__tile--place"
+              >
+                {placeInner}
               </Link>
             );
           })}

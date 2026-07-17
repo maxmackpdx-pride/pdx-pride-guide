@@ -107,8 +107,8 @@ export default function HomeHero({ eventCount }: Props) {
           <strong>take care of each other.</strong>
         </p>
 
-        <div className="home-hero__stat" aria-label={`${eventCount} total events`}>
-          <div className="home-hero__stat-label">Total events</div>
+        <div className="home-hero__stat" aria-label={`${eventCount} Events Remain`}>
+          <div className="home-hero__stat-label">Events Remain</div>
           <div className="home-hero__stat-row">
             <span className="home-hero__stat-num" data-testid="home-events-count">
               <CountUpValue value={eventCount} duration={1400} />
