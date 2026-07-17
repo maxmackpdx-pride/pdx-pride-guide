@@ -14,6 +14,7 @@ import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
 import AnalyticsTracker from "./components/AnalyticsTracker";
+import PrideGlowNudge from "./components/PrideGlowNudge";
 
 function RouteBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -132,6 +133,7 @@ export default function App() {
             <InboxSheetProvider>
               <ScrollToTop />
               <AnalyticsTracker />
+              <PrideGlowNudge />
               <AppLayout />
               <Toaster />
             </InboxSheetProvider>

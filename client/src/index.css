@@ -17177,3 +17177,123 @@ html.calm-mode .category-constellation__orb {
 }
 
 @keyframes ptr-spin { to { transform: rotate(360deg); } }
+
+/* ── Pride glow one-time nudge ─────────────────────────────────────────── */
+.glow-nudge__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 15000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: glowNudgeFade .18s ease both;
+}
+@keyframes glowNudgeFade { from { opacity: 0; } to { opacity: 1; } }
+.glow-nudge {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  padding: 30px 26px 24px;
+  text-align: center;
+  background: #0b0b0b;
+  border: 1px solid #24242c;
+  border-radius: 20px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, .75), 0 0 30px rgba(204, 255, 0, .12), 0 0 50px rgba(255, 0, 204, .08);
+  overflow: hidden;
+  animation: glowNudgePop .22s cubic-bezier(.2, .9, .3, 1.2) both;
+}
+@keyframes glowNudgePop { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+.glow-nudge::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00ffff, #ffee00, #ff00cc, #ff6600, #00ffff);
+  background-size: 200% 100%;
+  animation: navSeamFlow 4s linear infinite;
+}
+.glow-nudge__x {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .05);
+  color: #9a9aa2;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .13s ease, color .13s ease;
+}
+.glow-nudge__x:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.glow-nudge__preview {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 16px;
+}
+.glow-nudge__kicker {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--neon-yellow);
+}
+.glow-nudge__title {
+  margin: 6px 0 0;
+  font-weight: 900;
+  font-size: 1.7rem;
+  line-height: 1.05;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.glow-nudge__body {
+  margin: 10px auto 0;
+  max-width: 300px;
+  font-size: .95rem;
+  line-height: 1.45;
+  color: #c9c9d2;
+}
+.glow-nudge__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 22px;
+}
+.glow-nudge__cta {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  background: var(--neon-yellow);
+  color: #000;
+  font-weight: 800;
+  font-size: .82rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter .13s ease, transform .12s ease;
+}
+.glow-nudge__cta:hover { filter: brightness(1.06); }
+.glow-nudge__cta:active { transform: scale(.98); }
+.glow-nudge__later {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: none;
+  color: #8a8a92;
+  font-size: .82rem;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: color .13s ease;
+}
+.glow-nudge__later:hover { color: #cfcfd6; }
+@media (prefers-reduced-motion: reduce) {
+  .glow-nudge, .glow-nudge__backdrop, .glow-nudge::before { animation: none; }
+}
