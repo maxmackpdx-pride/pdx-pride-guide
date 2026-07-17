@@ -27,6 +27,16 @@ export function serveStatic(app: Express) {
     res.set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 
+  // Short vanity URLs → their canonical page. 302 (not 301) so the target can
+  // change later without browsers hard-caching the redirect. Express routing is
+  // case-insensitive, so /YCT, /yct, /Yct all match.
+  const VANITY_REDIRECTS: Record<string, string> = {
+    "/YCT": "/easter-eggs/stank-secret-story.html",
+  };
+  for (const [from, to] of Object.entries(VANITY_REDIRECTS)) {
+    app.get(from, (_req, res) => res.redirect(302, to));
+  }
+
   // Serve injected HTML for the homepage — express.static would bypass SEO injection.
   app.get("/", sendSeoIndex);
   app.get("/index.html", sendSeoIndex);
