@@ -23,6 +23,12 @@ import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
+import {
+  DIRECTORY_RECENT_MAX,
+  pushDirectoryRecent,
+  readDirectoryRecent,
+  type DirectoryRecentEntry,
+} from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import CategoryConstellation from "@/components/CategoryConstellation";
@@ -204,7 +210,20 @@ export default function Directory() {
   const [showGrid, setShowGrid] = useState(() => directoryHasDeepLink() || Boolean(routePlaceId));
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
   const [mobileMapOpen, setMobileMapOpen] = useState(false);
+  const [recentViewed, setRecentViewed] = useState<DirectoryRecentEntry[]>(() => readDirectoryRecent());
   const gridRef = useRef<HTMLDivElement>(null);
+
+  const recordRecentView = useCallback((biz: Business) => {
+    const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || null;
+    setRecentViewed(
+      pushDirectoryRecent({
+        id: biz.id,
+        name: biz.name,
+        type: biz.type,
+        logoUrl,
+      }),
+    );
+  }, []);
 
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
@@ -235,11 +254,12 @@ export default function Directory() {
       } else {
         setPlaceOriginRect(null);
       }
+      recordRecentView(biz);
       setSelectedPlace(biz);
       setShowGrid(true);
       setLocation(`${placePath(biz.id, biz.name)}${directoryQuerySuffix()}`);
     },
-    [setLocation, directoryQuerySuffix],
+    [setLocation, directoryQuerySuffix, recordRecentView],
   );
 
   const closePlace = useCallback(() => {
@@ -267,12 +287,13 @@ export default function Directory() {
     }
     setSelectedPlace(match);
     setShowGrid(true);
+    recordRecentView(match);
     // Canonicalize legacy ?place= to /directory/:id/:slug (keep type/q query).
     if (!routePlaceId) {
       const qs = window.location.search || "";
       setLocation(`${placePath(match.id, match.name)}${qs}`);
     }
-  }, [businesses, routePlaceId, setLocation]);
+  }, [businesses, routePlaceId, setLocation, recordRecentView]);
 
   const placeSeo = selectedPlace;
   usePageSeo(
@@ -758,6 +779,57 @@ export default function Directory() {
                 />
               </div>
             </div>
+
+            {recentViewed.length > 0 && (
+              <div
+                className="directory-recent"
+                data-testid="directory-recently-viewed"
+                aria-label="Recently viewed places"
+              >
+                <div className="directory-recent__label">Recently viewed</div>
+                <div className="directory-recent__rail" role="list">
+                  {recentViewed.slice(0, DIRECTORY_RECENT_MAX).map(entry => {
+                    const live = businesses.find(b => b.id === entry.id);
+                    const accent = TYPE_COLORS[entry.type] || TYPE_COLORS.venue;
+                    const logo =
+                      (live && resolveDirectoryLogo(live.name, live.imageUrl)) ||
+                      entry.logoUrl ||
+                      directoryFallbackLogo(entry.name);
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        role="listitem"
+                        className="directory-recent__chip"
+                        style={{ ["--c" as string]: accent }}
+                        data-testid={`directory-recent-${entry.id}`}
+                        title={entry.name}
+                        onClick={() => {
+                          if (live) {
+                            openPlace(live);
+                            return;
+                          }
+                          // Stale id still on disk — open by path so deep-link can resolve if still live.
+                          setShowGrid(true);
+                          setLocation(`${placePath(entry.id, entry.name)}${directoryQuerySuffix()}`);
+                        }}
+                      >
+                        <span className="directory-recent__logo" aria-hidden>
+                          {logo ? (
+                            <img src={logo} alt="" />
+                          ) : (
+                            <span className="directory-recent__logo-fallback">
+                              {entry.name.slice(0, 1).toUpperCase()}
+                            </span>
+                          )}
+                        </span>
+                        <span className="directory-recent__name">{entry.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
               {neighborhoodsInUse.map(n => {

@@ -9,6 +9,8 @@
   /* Deep-glass always-on bloom (overrides quieter index.css page value).
      Calm zeros explicitly so we do not fight glass.css root zeroing. */
   --dir-gm: 60;
+  /* Recently-viewed rail: 50% of default card bloom */
+  --dir-recent-gm: 30;
   --dir-glass-fill: color-mix(in srgb, #0c0c12 74%, transparent);
   --dir-glass-fill-hot: color-mix(in srgb, #14141c 80%, transparent);
   --dir-glass-edge: rgba(255, 255, 255, 0.10);
@@ -41,6 +43,135 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
   -webkit-backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
+}
+
+/* ── Recently viewed (top of search / filter strip) ─────────
+   Soft glass chips; bloom at 50% of place-card --dir-gm (30 vs 60). */
+.directory-recent {
+  --dir-gm: var(--dir-recent-gm, 30);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 4px 16px 10px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.directory-recent__label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6e6b64;
+}
+
+.directory-recent__rail {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.directory-recent__chip {
+  --c: var(--neon-cyan, #19e3ff);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 180px;
+  padding: 5px 11px 5px 5px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #f4f1ea;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-align: left;
+  border: 1px solid color-mix(in srgb, var(--c) 42%, #1c1c22);
+  background:
+    radial-gradient(
+      120% 100% at 20% 0%,
+      color-mix(in srgb, var(--c) 12%, transparent),
+      transparent 55%
+    ),
+    rgba(8, 8, 12, 0.88);
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 14px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 1.1%), transparent),
+    0 0 28px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 0.7%), transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+
+.directory-recent__chip:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--c) 65%, #1c1c22);
+  filter: brightness(1.06);
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 18px -3px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 1.35%), transparent),
+    0 0 32px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 0.85%), transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.directory-recent__logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: none;
+  background: #0a0a0e;
+  border: 1px solid color-mix(in srgb, var(--c) 40%, #222);
+  display: grid;
+  place-items: center;
+}
+
+.directory-recent__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.directory-recent__logo-fallback {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--c);
+}
+
+.directory-recent__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+html.calm-mode .directory-recent__chip,
+:root[data-calm="true"] .directory-recent__chip {
+  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  filter: none;
+}
+
+@media (max-width: 560px) {
+  .directory-recent {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .directory-recent__chip {
+    max-width: 150px;
+    font-size: 0.68rem;
+  }
 }
 
 /*
