@@ -3,15 +3,21 @@ import { join } from "node:path";
 
 const assetsDir = "dist/public/assets";
 const assets = readdirSync(assetsDir);
-const jsFile = assets.find((f) => f.startsWith("index-") && f.endsWith(".js"));
+// Vite can emit more than one `index-*.js` chunk (the main entry plus small
+// lazy chunks from dynamically-imported `index.*` modules). Concatenate every
+// index chunk so positive checks pass when the string is in ANY chunk and
+// negative checks only pass when it is in NONE — picking a single "first" file
+// is order-dependent and silently checks the wrong chunk.
+const jsFiles = assets.filter((f) => f.startsWith("index-") && f.endsWith(".js"));
 const cssFile = assets.find((f) => f.startsWith("index-") && f.endsWith(".css"));
 
-if (!jsFile || !cssFile) {
+if (jsFiles.length === 0 || !cssFile) {
   console.error("Missing built index assets in dist/public/assets");
   process.exit(1);
 }
 
-const js = readFileSync(join(assetsDir, jsFile), "utf8");
+const jsFile = jsFiles.join(", ");
+const js = jsFiles.map((f) => readFileSync(join(assetsDir, f), "utf8")).join("\n");
 const css = readFileSync(join(assetsDir, cssFile), "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
 const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css", "utf8");
