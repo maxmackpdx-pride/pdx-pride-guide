@@ -5927,6 +5927,60 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   }
 }
 
+/* Avatar dropdown on mobile matches the desktop redesign (the .site-hub-mtop bar
+   only renders on mobile, so no media query needed). This is the AVATAR menu only —
+   it does not touch the nav-bar board folders. */
+.site-hub-mtop .site-profile-menu__panel {
+  min-width: 300px;
+  padding: 0 0 8px;
+  background: #0b0b0b;
+  border: 1px solid #24242c;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .7), 0 0 26px rgba(204, 255, 0, .12), 0 0 40px rgba(255, 0, 204, .08);
+  overflow: hidden;
+}
+.site-hub-mtop .site-profile-menu__panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00ffff, #ffee00, #ff00cc, #ff6600, #00ffff);
+  background-size: 200% 100%;
+  animation: navSeamFlow 4s linear infinite;
+}
+.site-hub-mtop .site-profile-menu__identity {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid #1c1c22;
+  margin: 0;
+}
+.site-hub-mtop .site-profile-menu__identity--link:hover {
+  background: rgba(255, 255, 255, .04);
+}
+.site-hub-mtop .site-profile-menu__name { font-size: 1.25rem; }
+.site-hub-mtop .site-profile-menu__item {
+  width: auto;
+  margin: 0 8px;
+  border-radius: 10px;
+  transition: color .13s ease, background .13s ease, box-shadow .13s ease, transform .13s ease;
+}
+.site-hub-mtop .site-profile-menu__item:hover,
+.site-hub-mtop .site-profile-menu__item:active {
+  color: #fff;
+  background: rgba(255, 255, 255, .05);
+  box-shadow: inset 3px 0 0 var(--neon-yellow);
+}
+.site-hub-mtop .site-profile-menu__item--logout:hover,
+.site-hub-mtop .site-profile-menu__item--logout:active {
+  color: var(--neon-magenta);
+  box-shadow: inset 3px 0 0 var(--neon-magenta);
+  background: rgba(255, 0, 204, .06);
+}
+.site-hub-mtop .site-profile-menu__caret {
+  background: rgba(204, 255, 0, .12);
+  border: 1px solid rgba(204, 255, 0, .35);
+  color: var(--neon-yellow);
+}
+
 .gifting-interest-row {
   display: flex;
   align-items: center;
