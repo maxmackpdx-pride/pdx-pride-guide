@@ -327,6 +327,17 @@ export default function Events() {
     return scatterAffiliateCards(filtered, posterServeQuery.data?.ads ?? []);
   }, [filtered, posterServeReady, posterServeQuery.data?.ads]);
 
+  // Upcoming events that fall inside Pride Week (Jul 13–19) — excludes any
+  // "and beyond" listings so the headline + stat stay Pride-Week-specific.
+  const prideWeekLeft = useMemo(
+    () =>
+      liveEvents.filter(e => {
+        const day = pacificCalendarDate(e.dateStart);
+        return day != null && day >= PRIDE_WEEK_START_DATE && day <= PRIDE_WEEK_END_DATE;
+      }).length,
+    [liveEvents],
+  );
+
   const heroStats = useMemo(() => {
     const parseTags = (raw: string) => {
       try {
@@ -342,18 +353,12 @@ export default function Events() {
     const unclaimedIds = new Set(
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
-    // Upcoming events that fall inside Pride Week (Jul 13–19) — excludes any
-    // "and beyond" listings so the headline count is Pride-Week-specific.
-    const prideWeekLeft = liveEvents.filter(e => {
-      const day = pacificCalendarDate(e.dateStart);
-      return day != null && day >= PRIDE_WEEK_START_DATE && day <= PRIDE_WEEK_END_DATE;
-    }).length;
     return [
       { num: prideWeekLeft, label: "Pride events left", color: "#19e3ff" },
       { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
       { num: liveEvents.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
     ];
-  }, [liveEvents]);
+  }, [liveEvents, prideWeekLeft]);
 
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
@@ -363,7 +368,7 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <EventsHero eventCount={liveEvents.length} stats={heroStats} />
+      <EventsHero eventCount={prideWeekLeft} stats={heroStats} />
 
       <div className="events-map-toolbar">
         <button
