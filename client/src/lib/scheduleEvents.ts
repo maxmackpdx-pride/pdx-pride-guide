@@ -1,5 +1,5 @@
 import { resolveBeachPosterUrl, resolveEventPosterUrl } from "@shared/eventPoster";
-import { parsePacificDateTime } from "@shared/missedConnections";
+import { parsePacificDateTime, pacificCalendarDate } from "@shared/missedConnections";
 import type { EventListing } from "@shared/multiDayEvents";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import {
@@ -264,6 +264,7 @@ export function eventListingToScheduleEvent(
     posterUrl: resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek),
     startMs,
     endMs,
+    calendarDate: pacificCalendarDate(event.dateStart) ?? undefined,
   };
 }
 

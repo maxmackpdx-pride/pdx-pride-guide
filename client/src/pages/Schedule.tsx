@@ -27,6 +27,7 @@ import {
 } from "@shared/prideWeek";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
+import { pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import {
   DEFAULT_ATTENDANCE_PHRASE_KEY,
   attendancePhraseLabel,
@@ -51,6 +52,56 @@ import { Button } from "@/components/ds";
 import { Download } from "lucide-react";
 import "./Schedule.css";
 import "./ScheduleToolbar.css";
+
+// ---- Year-round week model (the grid navigates by real week, not a fixed Jul 13–19) ----
+const SCHED_PACIFIC = "America/Los_Angeles";
+const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+/** YYYY-MM-DD → epoch-ms at Pacific noon (offset-safe for date math). */
+function ymdMs(ymd: string): number {
+  return parsePacificDateTime(`${ymd}T12:00:00`) ?? Date.parse(`${ymd}T12:00:00-07:00`);
+}
+/** epoch-ms → Pacific YYYY-MM-DD. */
+function msYmd(ms: number): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: SCHED_PACIFIC, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
+}
+/** Pacific weekday code (MON…SUN) for a YYYY-MM-DD. */
+function ymdWeekday(ymd: string): string {
+  const s = new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, weekday: "short" }).format(new Date(ymdMs(ymd)));
+  return WEEKDAY_CODES[["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(s)] ?? "MON";
+}
+/** Monday (YYYY-MM-DD) of the week containing `ymd`. */
+function mondayOf(ymd: string): string {
+  const dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(
+    new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, weekday: "short" }).format(new Date(ymdMs(ymd))),
+  );
+  const backToMon = (dow + 6) % 7; // days since Monday (Mon=0 … Sun=6)
+  return msYmd(ymdMs(ymd) - backToMon * 86400000);
+}
+/** "JUL 20" style label for a YYYY-MM-DD. */
+function ymdDayLabel(ymd: string): string {
+  return new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short", day: "numeric" }).format(new Date(ymdMs(ymd))).toUpperCase();
+}
+type WeekColumn = { key: string; short: string; date: string; ymd: string; color: string; text: string };
+/** The 7 columns (Mon→Sun) for the week starting `weekStartYmd`, colored by weekday. */
+function buildWeekColumns(weekStartYmd: string): WeekColumn[] {
+  return Array.from({ length: 7 }, (_, i) => {
+    const ymd = msYmd(ymdMs(weekStartYmd) + i * 86400000);
+    const code = ymdWeekday(ymd);
+    const def = DAYS.find(d => d.key === code);
+    return { key: code, short: code, date: ymdDayLabel(ymd), ymd, color: def?.color ?? "#19e3ff", text: def?.text ?? "#19e3ff" };
+  });
+}
+/** "Jul 20 – 26" range label for the week header. */
+function weekRangeLabel(weekStartYmd: string): string {
+  const endYmd = msYmd(ymdMs(weekStartYmd) + 6 * 86400000);
+  const startMs = ymdMs(weekStartYmd);
+  const endMs = ymdMs(endYmd);
+  const monthFmt = new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short", day: "numeric" });
+  const dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, day: "numeric" });
+  const sameMonth = new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short" }).format(new Date(startMs)) ===
+    new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short" }).format(new Date(endMs));
+  return `${monthFmt.format(new Date(startMs))} – ${(sameMonth ? dayFmt : monthFmt).format(new Date(endMs))}`;
+}
 
 /** Legacy prop — event blocks always use full-bleed flyer backgrounds. */
 export type PosterStyle = 'Color blocks' | 'Poster chip' | 'Poster peek';
@@ -105,6 +156,8 @@ export default function Schedule({
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState('');
   const [showAuth, setShowAuth] = useState(false);
+  // Selected week (Monday YYYY-MM-DD); null = follow the auto default (week of next event).
+  const [weekStart, setWeekStart] = useState<string | null>(null);
 
   const scrollElRef = useRef<HTMLDivElement | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -158,6 +211,22 @@ export default function Schedule({
   const scheduleEvents = useMemo(
     () => buildScheduleEvents(listings, attendanceSummaries, user ? myBeachCheckIns : []),
     [listings, attendanceSummaries, myBeachCheckIns, user],
+  );
+
+  // Week the grid opens on: the week of the next upcoming event, else the current week.
+  const defaultWeekStart = useMemo(() => {
+    const nowMs = Date.now();
+    const upcoming = scheduleEvents
+      .filter(e => e.endMs >= nowMs && e.calendarDate)
+      .sort((a, b) => a.startMs - b.startMs)[0];
+    const anchor = upcoming?.calendarDate ?? pacificTodayDate(nowMs);
+    return mondayOf(anchor);
+  }, [scheduleEvents]);
+  const activeWeekStart = weekStart ?? defaultWeekStart;
+  const weekColumns = useMemo(() => buildWeekColumns(activeWeekStart), [activeWeekStart]);
+  const shiftWeek = useCallback(
+    (deltaWeeks: number) => setWeekStart(msYmd(ymdMs(activeWeekStart) + deltaWeeks * 7 * 86400000)),
+    [activeWeekStart],
   );
 
   const rsvpMutation = useMutation({
@@ -496,10 +565,11 @@ export default function Schedule({
   };
 
   const days: DayVM[] = useMemo(() => {
-    return DAYS.map((d) => {
+    return weekColumns.map((d) => {
       const dc = calm ? '#7d7d82' : d.color;
       const dt = calm ? '#c8c8cc' : d.text;
-      const list = scheduleEvents.filter((e) => e.day === d.key && pass(e));
+      // Bucket by real calendar date within the selected week (not just weekday code).
+      const list = scheduleEvents.filter((e) => e.calendarDate === d.ymd && pass(e));
       const { res, maxCols } = layoutDay(list);
       const dayW = Math.max(BASE_DAY, maxCols * MIN_LANE);
       const blocks: BlockVM[] = list.map((e) => {
@@ -708,6 +778,7 @@ export default function Schedule({
     compact,
     embed,
     scheduleEvents,
+    weekColumns,
     myEventIds,
     now,
     view,
@@ -1354,6 +1425,22 @@ export default function Schedule({
           <div className="schedule-empty-banner__inner board-empty board-empty--prototype" style={{ marginTop: 0 }}>
             {emptyBanner}
           </div>
+        </div>
+      )}
+
+      {/* ---- Week navigator ---- */}
+      {!embed && (
+        <div className="sch-weeknav" role="group" aria-label="Week">
+          <button type="button" className="sch-weeknav__arrow" onClick={() => shiftWeek(-1)} aria-label="Previous week">‹</button>
+          <div className="sch-weeknav__label">
+            <span className="sch-weeknav__range">{weekRangeLabel(activeWeekStart)}</span>
+            {activeWeekStart !== mondayOf(pacificTodayDate(Date.now())) && (
+              <button type="button" className="sch-weeknav__today" onClick={() => setWeekStart(mondayOf(pacificTodayDate(Date.now())))}>
+                This week
+              </button>
+            )}
+          </div>
+          <button type="button" className="sch-weeknav__arrow" onClick={() => shiftWeek(1)} aria-label="Next week">›</button>
         </div>
       )}
 

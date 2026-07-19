@@ -51,3 +51,54 @@
 @media (prefers-reduced-motion: reduce) {
   .sch-block, .sch-export, .sch-pop, .sch-livedot { animation: none !important; }
 }
+
+/* ---- Year-round week navigator ---- */
+.sch-weeknav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 6px auto 14px;
+  padding: 0 12px;
+}
+.sch-weeknav__arrow {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #2a2a32;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .03);
+  color: #cfcfd6;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color .13s ease, color .13s ease, background .13s ease;
+}
+.sch-weeknav__arrow:hover { border-color: var(--neon-cyan, #19e3ff); color: #fff; background: rgba(25, 227, 255, .08); }
+.sch-weeknav__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 150px;
+}
+.sch-weeknav__range {
+  font-family: var(--font-display, sans-serif);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.sch-weeknav__today {
+  border: none;
+  background: none;
+  color: var(--neon-cyan, #19e3ff);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.sch-weeknav__today:hover { text-decoration: underline; }
