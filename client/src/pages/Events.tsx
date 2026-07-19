@@ -32,17 +32,80 @@ import { lazyWithReload } from "@/lib/lazyWithReload";
 import { MapViewFallback } from "@/components/EventsMapFallback";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
-import { dayAccentToken } from "@/lib/dsColors";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
-import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
-import { isEventSchedulePast } from "@shared/missedConnections";
+import { DAY_SORT_ORDER } from "@shared/prideWeek";
+import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import "./Events.css";
 
-const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
-/** MON/TUE fills are too dark for black pill text — flip to white. */
-const DARK_FILL_DAYS = new Set(["MON", "TUE"]);
+const PACIFIC = "America/Los_Angeles";
+
+/** Pacific YYYY-MM-DD for an epoch-ms. */
+function pacDate(ms: number): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: PACIFIC, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
+}
+/** Pacific weekday index 0=Sun … 6=Sat for an epoch-ms. */
+function pacWeekday(ms: number): number {
+  const s = new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC, weekday: "short" }).format(new Date(ms));
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(s);
+}
+/** The Fri/Sat/Sun (YYYY-MM-DD) of the weekend that contains or next follows `now`. */
+function weekendDates(nowMs: number): Set<string> {
+  const today = pacificTodayDate(nowMs);
+  const noonMs = parsePacificDateTime(`${today}T12:00:00`) ?? nowMs;
+  const dow = pacWeekday(noonMs);
+  // Days back to this weekend's Friday; Mon–Thu → negative = forward to the coming Friday.
+  const backToFri = dow === 5 ? 0 : dow === 6 ? 1 : dow === 0 ? 2 : -(5 - dow);
+  const friMs = noonMs - backToFri * 86400000;
+  return new Set([0, 1, 2].map(i => pacDate(friMs + i * 86400000)));
+}
+/** "AUG" (or "AUG '27" when not the current Pacific year) for a YYYY-MM key. */
+function monthChipLabel(monthKey: string, nowMs: number): string {
+  const ms = parsePacificDateTime(`${monthKey}-01T12:00:00`);
+  if (ms == null) return monthKey;
+  const mon = new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC, month: "short" }).format(new Date(ms)).toUpperCase();
+  const curYear = pacificTodayDate(nowMs).slice(0, 4);
+  const year = monthKey.slice(0, 4);
+  return year === curYear ? mon : `${mon} '${year.slice(2)}`;
+}
+
+const EMPTY_WEEKEND = new Set<string>();
+
+type DayChip = { key: string; label: string };
+
+/** Date-window filter chips derived from the events in view (year-round). */
+function buildDayChips(pool: EventListing[], pastView: boolean, nowMs: number): DayChip[] {
+  const chips: DayChip[] = [{ key: "ALL", label: "All" }];
+  const weekend = weekendDates(nowMs);
+  if (!pastView && pool.some(e => { const d = pacificCalendarDate(e.dateStart); return d != null && weekend.has(d); })) {
+    chips.push({ key: "WEEKEND", label: "This weekend" });
+  }
+  const months = new Set<string>();
+  for (const e of pool) { const d = pacificCalendarDate(e.dateStart); if (d) months.add(d.slice(0, 7)); }
+  const sorted = Array.from(months).sort();
+  if (pastView) sorted.reverse();
+  for (const m of sorted) chips.push({ key: m, label: monthChipLabel(m, nowMs) });
+  return chips;
+}
+
+const WINDOW_PALETTE = [
+  "var(--neon-yellow)", "var(--neon-cyan)", "var(--neon-magenta)",
+  "var(--neon-orange)", "var(--neon-green)", "var(--neon-violet)",
+];
+function windowAccent(key: string, i: number): string {
+  if (key === "ALL") return "var(--neon-cyan)";
+  if (key === "WEEKEND") return "var(--neon-magenta)";
+  return WINDOW_PALETTE[i % WINDOW_PALETTE.length];
+}
+/** True when event `e` falls inside the selected date window (ALL/WEEKEND/YYYY-MM). */
+function eventInWindow(e: EventListing, window: string, weekend: Set<string>): boolean {
+  if (window === "ALL") return true;
+  const d = pacificCalendarDate(e.dateStart);
+  if (!d) return false;
+  if (window === "WEEKEND") return weekend.has(d);
+  return d.startsWith(window); // month key YYYY-MM
+}
 
 /** Board PAST = scheduled end has passed (not the 7-day MC post window). */
 function isPastListing(e: EventListing): boolean {
@@ -103,13 +166,15 @@ function filterBoardEvents(
   activeFilters: string[],
   searchQuery: string,
   pastView: boolean,
+  nowMs: number,
 ) {
+  const weekend = activeDay === "WEEKEND" ? weekendDates(nowMs) : EMPTY_WEEKEND;
   return events
     .filter(e => {
       // Live board = upcoming + happening now. Past board = ended only.
       const past = isPastListing(e);
       if (pastView ? !past : past) return false;
-      if (activeDay !== "ALL" && e.dayOfWeek !== activeDay) return false;
+      if (!eventInWindow(e, activeDay, weekend)) return false;
       if (activeFilters.length > 0) {
         const admissionFilters = activeFilters
           .map(admissionFromFilterTag)
@@ -302,8 +367,16 @@ export default function Events() {
   const pastEvents = useMemo(() => events.filter(isPastListing), [events]);
   const poolEvents = pastView ? pastEvents : liveEvents;
 
+  // Date-window filter chips (All / This weekend / by month), derived from the events in view.
+  const dayChips = useMemo(() => buildDayChips(poolEvents, pastView, Date.now()), [poolEvents, pastView]);
+  const activeChipLabel = dayChips.find(c => c.key === activeDay)?.label ?? null;
+  // If the selected window no longer exists in the pool (e.g. after toggling Past), fall back to All.
+  useEffect(() => {
+    if (activeDay !== "ALL" && !dayChips.some(c => c.key === activeDay)) setActiveDay("ALL");
+  }, [dayChips, activeDay]);
+
   const filtered = useMemo(
-    () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView), sortMode),
+    () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView, Date.now()), sortMode),
     [events, activeDay, activeFilters, searchQuery, sortMode, pastView],
   );
 
@@ -441,7 +514,7 @@ export default function Events() {
                         {pastView ? " past" : ""}
                       </>
                     )}
-                    {activeDay !== "ALL" ? ` · ${activeDay}` : ""}
+                    {activeChipLabel && activeDay !== "ALL" ? ` · ${activeChipLabel}` : ""}
                     {pastEvents.length > 0 && !pastView ? (
                       <span className="events-past-hint"> · {pastEvents.length} past</span>
                     ) : null}
@@ -450,19 +523,18 @@ export default function Events() {
               </div>
               <div className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
-                  {DAYS.map(d => {
-                    const selected = activeDay === d;
+                  {dayChips.map((chip, i) => {
+                    const selected = activeDay === chip.key;
                     return (
                       <FilterChip
-                        key={d}
+                        key={chip.key}
                         selected={selected}
                         fill={selected}
-                        accent={dayAccentToken(d)}
-                        onToggle={() => setActiveDay(d)}
-                        data-testid={`filter-day-${d}`}
-                        style={selected && DARK_FILL_DAYS.has(d) ? { color: "var(--text-hi)" } : undefined}
+                        accent={windowAccent(chip.key, i)}
+                        onToggle={() => setActiveDay(chip.key)}
+                        data-testid={`filter-day-${chip.key}`}
                       >
-                        {d}
+                        {chip.label}
                       </FilterChip>
                     );
                   })}
