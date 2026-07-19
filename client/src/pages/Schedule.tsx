@@ -110,8 +110,8 @@ export default function Schedule({
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   usePageSeo(
-    "Schedule | Portland Pride 2026 | PDX Pride Guide",
-    "Your full Pride Week schedule, July 13–19, side by side.",
+    "Schedule | PDX Pride Guide",
+    "Portland's queer events, laid out side by side. Build your week.",
     { skip: embed },
   );
 

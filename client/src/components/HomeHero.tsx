@@ -93,7 +93,7 @@ export default function HomeHero({ eventCount }: Props) {
       <div className="home-hero__inner">
         <div className="home-hero__kicker">
           <span className="home-hero__dot" aria-hidden />
-          Portland Pride Week 2026 · July 13 to 19
+          Portland's queer events · all year
         </div>
 
         <h1 className="home-hero__title">
@@ -103,12 +103,12 @@ export default function HomeHero({ eventCount }: Props) {
         </h1>
 
         <p className="home-hero__tagline">
-          Your welcoming map to Pride Week: discover events, find your people, back the queer venues that host it, and{" "}
+          Your welcoming map to queer Portland: discover events, find your people, back the venues that host us, and{" "}
           <strong>take care of each other.</strong>
         </p>
 
-        <div className="home-hero__stat" aria-label={`${eventCount} Events Remain`}>
-          <div className="home-hero__stat-label">Events Remain</div>
+        <div className="home-hero__stat" aria-label={`${eventCount} upcoming events`}>
+          <div className="home-hero__stat-label">Upcoming events</div>
           <div className="home-hero__stat-row">
             <span className="home-hero__stat-num" data-testid="home-events-count">
               <CountUpValue value={eventCount} duration={1400} />
@@ -116,7 +116,7 @@ export default function HomeHero({ eventCount }: Props) {
             <span className="home-hero__stat-meta">
               and counting
               <br />
-              across 7 days · Jul 13 to 19
+              all across Portland
             </span>
           </div>
         </div>

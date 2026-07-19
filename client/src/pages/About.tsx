@@ -36,15 +36,15 @@ const VALUES = [
 
 const FAQ = [
   {
-    q: "When is Portland Pride 2026?",
-    a: "July 13 to 19, Monday to Sunday. Festivals, parties, marches, and the quiet stuff too. All seven days are in here.",
+    q: "Is this just for Pride Week?",
+    a: "Not anymore. It started as the Pride Week guide and now runs all year — parties, drag, marches, community nights, and the quiet stuff too. Pride is every day here.",
   },
   {
     q: "Where do I find events?",
     a: "The Events page. Every live listing on a map and a board. Filter by day, type, or neighborhood, then open anything for times, venue, and tickets.",
   },
   {
-    q: "How is this different from other Pride apps?",
+    q: "How is this different from other queer event apps?",
     a: "It is free, run by a person, and built for this city. No corporate feed. No paying to rank higher. Promoters post their events and the community shows up.",
   },
   {
@@ -114,7 +114,7 @@ export default function About() {
           <div>
             <div className="about-v2-hero__kicker">
               <span className="about-v2-hero__dot" aria-hidden="true" />
-              About · Portland Pride 2026 · July 13–19
+              About · Portland's queer events guide · all year
             </div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">

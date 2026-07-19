@@ -36,8 +36,8 @@ import { dayAccentToken } from "@/lib/dsColors";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
-import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS, PRIDE_WEEK_START_DATE, PRIDE_WEEK_END_DATE } from "@shared/prideWeek";
-import { isEventSchedulePast, pacificCalendarDate } from "@shared/missedConnections";
+import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { isEventSchedulePast } from "@shared/missedConnections";
 import "./Events.css";
 
 const DAYS = ["ALL", ...PRIDE_WEEK_DAYS];
@@ -327,16 +327,8 @@ export default function Events() {
     return scatterAffiliateCards(filtered, posterServeQuery.data?.ads ?? []);
   }, [filtered, posterServeReady, posterServeQuery.data?.ads]);
 
-  // Upcoming events that fall inside Pride Week (Jul 13–19) — excludes any
-  // "and beyond" listings so the headline + stat stay Pride-Week-specific.
-  const prideWeekLeft = useMemo(
-    () =>
-      liveEvents.filter(e => {
-        const day = pacificCalendarDate(e.dateStart);
-        return day != null && day >= PRIDE_WEEK_START_DATE && day <= PRIDE_WEEK_END_DATE;
-      }).length,
-    [liveEvents],
-  );
+  // All upcoming (not-yet-ended) live events — the site is year-round now.
+  const upcomingCount = liveEvents.length;
 
   const heroStats = useMemo(() => {
     const parseTags = (raw: string) => {
@@ -354,11 +346,11 @@ export default function Events() {
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
     return [
-      { num: prideWeekLeft, label: "Pride events left", color: "#19e3ff" },
+      { num: upcomingCount, label: "Upcoming events", color: "#19e3ff" },
       { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
       { num: liveEvents.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
     ];
-  }, [liveEvents, prideWeekLeft]);
+  }, [liveEvents, upcomingCount]);
 
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
@@ -368,7 +360,7 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <EventsHero eventCount={prideWeekLeft} stats={heroStats} />
+      <EventsHero eventCount={upcomingCount} stats={heroStats} />
 
       <div className="events-map-toolbar">
         <button

@@ -14,13 +14,13 @@ export default function ScheduleHero({ stats }: Props) {
     <>
       <BoardHero
         accent="cyan"
-        kicker="Portland Pride Week 2026 · July 13–19"
+        kicker="Portland's queer calendar · all year"
         title={
           <>
             My <span className="board-hero__title-accent">schedule</span>
           </>
         }
-        lede="The whole week, laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other."
+        lede="The week laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other."
         actions={
           <Link href="/events">
             <Button as="span" variant="neon" accent="cyan" size="lg">

@@ -43,9 +43,15 @@ export function postPrideEventsOpenAtMs(): number {
   return new Date(POST_PRIDE_EVENTS_OPEN_AT).getTime();
 }
 
-/** True while the calendar is still locked to Pride Week only. */
-export function isPostPrideListingCapActive(nowMs: number = Date.now()): boolean {
-  return nowMs < postPrideEventsOpenAtMs();
+/**
+ * Pride Week 2026 has ended and the guide is year-round now, so the post-Pride
+ * cap that hid (and boot-pruned) events dated after Jul 19 is permanently off.
+ * Kept as a function so the historical call sites still resolve; it just never
+ * suppresses anything anymore. Flipping this back to a date check would re-lock
+ * the whole calendar to Pride Week.
+ */
+export function isPostPrideListingCapActive(_nowMs: number = Date.now()): boolean {
+  return false;
 }
 
 /** Calendar day (YYYY-MM-DD) is after Pride Sunday. */
