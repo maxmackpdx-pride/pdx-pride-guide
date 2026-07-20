@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTipLinks } from "@/hooks/useTipLinks";
 import "./HomeConstructionNudge.css";
-
-/**
- * Owner's tip jar. Paste the real full link here (Venmo / Ko-fi / PayPal.me / etc.).
- * While this stays the REPLACE_ME placeholder the tip button is hidden so a dead
- * link never ships to production.
- */
-const SUPPORT_URL = "https://venmo.com/u/REPLACE_ME";
 
 const DISMISS_KEY = "pgpdx:construction-nudge:v1";
 
@@ -28,8 +22,6 @@ function alreadyDismissed(): boolean {
   }
 }
 
-const hasSupportLink = !/REPLACE_ME/i.test(SUPPORT_URL) && /^https?:\/\//i.test(SUPPORT_URL);
-
 /**
  * Friendly "under construction" pop-up for the home screen. Tells visitors the
  * Pride guide is growing into a year-round Portland LGBTQ+ events home, thanks
@@ -37,6 +29,7 @@ const hasSupportLink = !/REPLACE_ME/i.test(SUPPORT_URL) && /^https?:\/\//i.test(
  * dismisses it (localStorage), then stays hidden.
  */
 export default function HomeConstructionNudge() {
+  const { venmoUrl } = useTipLinks();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -102,19 +95,18 @@ export default function HomeConstructionNudge() {
         </div>
 
         <div className="pgc-actions">
-          {hasSupportLink && (
-            <a
-              className="pgc-btn pgc-btn--primary"
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={dismiss}
-            >
-              ☕ Buy me a coffee
-            </a>
-          )}
+          <a
+            className="pgc-btn pgc-btn--primary"
+            href={venmoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="construction-buy-coffee-venmo"
+            onClick={dismiss}
+          >
+            ☕ Buy me a coffee
+          </a>
           <button type="button" className="pgc-btn pgc-btn--ghost" onClick={dismiss}>
-            {hasSupportLink ? "Maybe later" : "Got it"}
+            Maybe later
           </button>
         </div>
 
