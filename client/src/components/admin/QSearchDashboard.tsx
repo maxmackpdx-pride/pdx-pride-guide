@@ -926,6 +926,38 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     }
   }
 
+  async function clearLastScan(scope: "last" | "all" = "last") {
+    const msg =
+      scope === "all"
+        ? "Clear the entire Review queue? All pending scan candidates will be discarded (not committed)."
+        : "Clear pending candidates from the last scan? Useful after a noisy run (bar crawls, wrong EB dumps).";
+    if (!window.confirm(msg)) return;
+    setBusy(true);
+    try {
+      const res = await apiRequest("POST", "/api/admin/qsearch/queue/clear", { scope, hard: false });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Clear failed");
+      setSelected({});
+      setJob(null);
+      setJobId(null);
+      toast({
+        title: scope === "all" ? "Review queue cleared" : "Last scan cleared",
+        description: `${data.cleared ?? 0} candidate${data.cleared === 1 ? "" : "s"} removed from queue`,
+      });
+      void refetch();
+      void refetchQueue();
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
+    } catch (err) {
+      toast({
+        title: "Clear failed",
+        description: parseApiError(err, "Could not clear scan"),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function saveRecipe(sourceId: string) {
     const recipeUrl = recipeEdits[sourceId]?.trim() || null;
     try {
@@ -1542,6 +1574,26 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="qsearch__scan-btn is-ghost"
+            disabled={busy || scanning}
+            title="Drop pending review rows from the most recent scan (bar-crawl noise, etc.)"
+            onClick={() => void clearLastScan("last")}
+            data-testid="qsearch-clear-last-scan"
+          >
+            Clear last scan
+          </button>
+          <button
+            type="button"
+            className="qsearch__scan-btn is-ghost"
+            disabled={busy || scanning}
+            title="Empty the entire Review queue"
+            onClick={() => void clearLastScan("all")}
+            data-testid="qsearch-clear-queue"
+          >
+            Clear review queue
+          </button>
           <label
             style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
             title="If a calendar page has no structured events, try reading flyer images on that page (needs AI key)."
@@ -2097,6 +2149,22 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 </button>
                 <button type="button" onClick={() => selectAll(false)}>
                   Deselect all
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || scanning}
+                  onClick={() => void clearLastScan("last")}
+                  title="Discard pending candidates from the last scan"
+                >
+                  Clear last scan
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || scanning}
+                  onClick={() => void clearLastScan("all")}
+                  title="Empty the entire review queue"
+                >
+                  Clear queue
                 </button>
                 <button
                   type="button"

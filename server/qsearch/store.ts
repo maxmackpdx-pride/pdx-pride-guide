@@ -762,6 +762,63 @@ export function markCandidatesSkipped(ids: string[]) {
   tx();
 }
 
+/**
+ * Clear review queue candidates.
+ * - scope "last": pending rows from the most recent finished scan job
+ * - scope "all": every pending candidate (full queue wipe)
+ * Soft-skips by default; hard=true deletes rows.
+ */
+export function clearScanQueue(opts?: {
+  scope?: "last" | "all";
+  hard?: boolean;
+}): { ok: true; cleared: number; scope: "last" | "all"; jobId: string | null; hard: boolean } {
+  ensureTables();
+  const scope = opts?.scope === "all" ? "all" : "last";
+  const hard = Boolean(opts?.hard);
+
+  let jobId: string | null = null;
+  let cleared = 0;
+
+  if (scope === "last") {
+    const job = sqlite
+      .prepare(
+        `SELECT id FROM qsearch_scan_jobs WHERE status IN ('done','cancelled','failed') ORDER BY started_at DESC LIMIT 1`,
+      )
+      .get() as { id: string } | undefined;
+    // Fall back to absolute latest job if nothing finished yet
+    const fallback = sqlite
+      .prepare(`SELECT id FROM qsearch_scan_jobs ORDER BY started_at DESC LIMIT 1`)
+      .get() as { id: string } | undefined;
+    jobId = job?.id || fallback?.id || null;
+    if (!jobId) {
+      return { ok: true, cleared: 0, scope, jobId: null, hard };
+    }
+    if (hard) {
+      const r = sqlite
+        .prepare(`DELETE FROM qsearch_candidates WHERE job_id = ? AND status = 'pending'`)
+        .run(jobId);
+      cleared = Number(r.changes || 0);
+    } else {
+      const r = sqlite
+        .prepare(`UPDATE qsearch_candidates SET status = 'skipped' WHERE job_id = ? AND status = 'pending'`)
+        .run(jobId);
+      cleared = Number(r.changes || 0);
+    }
+  } else {
+    if (hard) {
+      const r = sqlite.prepare(`DELETE FROM qsearch_candidates WHERE status = 'pending'`).run();
+      cleared = Number(r.changes || 0);
+    } else {
+      const r = sqlite
+        .prepare(`UPDATE qsearch_candidates SET status = 'skipped' WHERE status = 'pending'`)
+        .run();
+      cleared = Number(r.changes || 0);
+    }
+  }
+
+  return { ok: true, cleared, scope, jobId, hard };
+}
+
 export function reviewQueueSummary() {
   ensureTables();
   const pending = sqlite

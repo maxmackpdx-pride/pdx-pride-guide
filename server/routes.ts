@@ -64,6 +64,7 @@ import {
 } from "./qsearch/scanJob";
 import {
   addCustomSource,
+  clearScanQueue,
   deleteSource,
   enableSource,
   listCandidates,
@@ -4821,6 +4822,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     // Always re-match directory brands so logo pack + fuzzy match apply to old rows
     const enriched = attachDirectoryBrandsToCandidates(candidates as any[]);
     res.json({ candidates: enriched });
+  });
+
+  /** Clear review queue: last scan only (default) or all pending. */
+  app.post("/api/admin/qsearch/queue/clear", requireAdmin, (req, res) => {
+    const scope = req.body?.scope === "all" ? "all" : "last";
+    const hard = Boolean(req.body?.hard);
+    const result = clearScanQueue({ scope, hard });
+    auditAdmin(req, "qsearch_queue_clear", {
+      type: "qsearch",
+      detail: { scope: result.scope, cleared: result.cleared, hard: result.hard, jobId: result.jobId },
+    });
+    res.json(result);
   });
 
   app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {

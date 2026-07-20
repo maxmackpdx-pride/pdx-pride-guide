@@ -232,6 +232,15 @@ export function isRelevantScanDraft(
     return { keep: true };
   }
 
+  // Commercial bar-crawl spam often bleeds into venue-named EB city searches
+  const title = String(draft.title || "");
+  if (
+    /\b(bar\s*crawl|santacon|pub\s*crawl|crawl\s*202\d)\b/i.test(title) &&
+    !hasQueerSignal(draft)
+  ) {
+    return { keep: false, reason: "bar_crawl_noise" };
+  }
+
   if (mode === "venue") {
     const tokens = venueScopeTokens(ctx);
     if (tokens.length && !matchesVenueScope(draft, tokens)) {
