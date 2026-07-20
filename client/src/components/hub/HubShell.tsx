@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   MoreHorizontal,
+  Search,
   Shield,
   Store,
   Users,
@@ -26,6 +27,7 @@ export type HubMode = "member" | "admin";
 export type MemberView = "home" | "inbox" | "posts";
 export type AdminViewKey =
   | "overview"
+  | "qsearch"
   | "events"
   | "users"
   | "gigs"
@@ -43,6 +45,12 @@ export const ADMIN_VIEW_META: Record<
     kicker: "Control room",
     kickerColor: "var(--lime, #ccff00)",
     lede: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
+  },
+  qsearch: {
+    title: "QSearch",
+    kicker: "Ingest",
+    kickerColor: "var(--orange, #ff6600)",
+    lede: "Pull events from venue sites and directory websites. Preview first, commit as HIDDEN, then go LIVE from All Events.",
   },
   events: {
     title: "All events",
@@ -144,6 +152,7 @@ const ADMIN_MORE_NAV: Array<{
   usersOnly?: boolean;
   catalogOnly?: boolean;
 }> = [
+  { key: "qsearch", label: "QSearch", icon: Search, catalogOnly: true },
   { key: "events", label: "All events", icon: CalendarDays, catalogOnly: true },
   { key: "users", label: "All users", icon: UserCircle, usersOnly: true },
   { key: "gigs", label: "Pride Werk", icon: Briefcase, catalogOnly: true },
@@ -152,7 +161,7 @@ const ADMIN_MORE_NAV: Array<{
   { key: "team", label: "My team", icon: Users, teamOnly: true },
 ];
 
-const MORE_VIEWS: AdminViewKey[] = ["events", "users", "gigs", "promoters", "venue-claims", "team"];
+const MORE_VIEWS: AdminViewKey[] = ["qsearch", "events", "users", "gigs", "promoters", "venue-claims", "team"];
 
 const MOBILE_ICON = 26;
 
@@ -203,7 +212,7 @@ export default function HubShell({
   const moreViews = MORE_VIEWS.filter(v => {
     if (v === "team") return canManageTeam;
     if (v === "users") return canViewUsers;
-    if (v === "events" || v === "gigs") return canManageCatalog;
+    if (v === "qsearch" || v === "events" || v === "gigs") return canManageCatalog;
     return true;
   });
   const moreNav = ADMIN_MORE_NAV.filter(item => {

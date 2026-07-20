@@ -112,7 +112,7 @@ sqlite.exec(`
     is_sex_positive INTEGER NOT NULL DEFAULT 0,
     nudity_ok INTEGER NOT NULL DEFAULT 0,
     poster_image_url TEXT,
-    status TEXT NOT NULL DEFAULT 'LIVE',
+    status TEXT NOT NULL DEFAULT 'HIDDEN',
     source TEXT NOT NULL DEFAULT 'admin_seeded',
     is_claimable INTEGER NOT NULL DEFAULT 0,
     claimed_by TEXT,
@@ -3320,7 +3320,6 @@ function runBootMigrationsOnce() {
     // Add new businesses
     const newEntries = [
       { name: "Peacock PDX", type: "bar", description: "Inclusive queer bar with karaoke, trivia, drag shows, and astrology-themed comedy nights.", address: "1400 SE Morrison St", neighborhood: "SE Portland", website: "https://peacockpdx.com", instagram: "@peacock.pdx", queerOwned: true, queerFriendly: true },
-      { name: "Back 2 Earth", type: "bar", description: "Queer bar on MLK with karaoke, trivia, comedy, and themed dance nights. From the team behind Eagle Portland.", address: "3536 NE Martin Luther King Jr Blvd", neighborhood: "NE Portland", website: "https://back2earthpdx.com", instagram: "@back2earthpdx", queerOwned: true, queerFriendly: true },
       { name: "Scandals East", type: "bar", description: "Portland's iconic gay bar, open since 1978, reopened in NE Alberta in March 2026. All-ages, dinner service, drag.", address: "827 NE Alberta St", neighborhood: "NE Alberta", website: "https://scandalspdx.com", instagram: "@scandals_pdx", queerOwned: true, queerFriendly: true },
       { name: "Honeyed Words", type: "shop", description: "Queer bookstore inside Sonny's House focused on trans joy and LGBTQ+ literature. Events include cozy reading hours and story fests.", address: "2504 NE Sandy Blvd", neighborhood: "NE Portland", website: null, instagram: "@honeyedwordspdx", queerOwned: true, queerFriendly: true },
     ];
@@ -3381,7 +3380,6 @@ function runBootMigrationsOnce() {
       { name: "The Nest Lounge",      lat: 45.5165, lng: -122.6432, hours: "Mon–Sun 3pm–2:30am", phone: "(503) 764-9023" },
       { name: "Living Room Wines",    lat: 45.5805, lng: -122.6857, hours: "Mon–Thu 3–9pm, Fri–Sat 3–10pm, Sun 3–8pm" },
       { name: "Peacock PDX",          lat: 45.5169, lng: -122.6490, hours: "Mon–Thu 3pm–12am, Fri–Sat 3pm–2am, Sun 3pm–12am", phone: "(503) 946-8929" },
-      { name: "Back 2 Earth",         lat: 45.5529, lng: -122.6597 },
       { name: "Stem Wine Bar",        lat: 45.5638, lng: -122.6785, hours: "Tue–Thu 5–9pm, Fri 3–10pm, Sat 1–10pm, Sun 1–9pm", phone: "(971) 427-8085" },
       { name: "Kann",                 lat: 45.5218, lng: -122.6569, hours: "Wed 4–7pm, Thu–Sat 4–9:30pm, Sun 4–7pm" },
       { name: "The Sports Bra",       lat: 45.5374, lng: -122.6354, hours: "Daily 11am–12am" },
@@ -5245,6 +5243,93 @@ function runBootMigrationsOnce() {
       .run();
     recordBootMigration("either_or_not_queer_owned_v1");
   }
+
+  // Sanctuary Club: ensure website so QSearch host-match + publish link work (ICS often TBA LOCATION).
+  if (!hasBootMigration("sanctuary_club_website_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET website = COALESCE(NULLIF(TRIM(website), ''), 'https://www.pdxsanctuary.com/'),
+             address = COALESCE(NULLIF(TRIM(address), ''), '33 NW 9th Ave')
+         WHERE name = 'Sanctuary Club' OR name LIKE 'Sanctuary%'`,
+      )
+      .run();
+    recordBootMigration("sanctuary_club_website_v1");
+  }
+
+  // Bearracuda: nightlife brand / promoter as directory group (events at partner venues).
+  if (!hasBootMigration("seed_bearracuda_group_v1")) {
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = 'Bearracuda' LIMIT 1`)
+      .get() as { id?: number } | undefined;
+    if (!exists?.id) {
+      db.insert(businesses)
+        .values({
+          name: "Bearracuda",
+          type: "group",
+          description:
+            "Portland bear dance party / nightlife brand. Events at Nova PDX, Crystal Ballroom, and partner venues — follow brand calendar + IG for flyers.",
+          address: null,
+          neighborhood: "Portland",
+          website: "https://bearracuda.com",
+          instagram: "@bearracudapdx",
+          queerOwned: true,
+          queerFriendly: true,
+          active: true,
+          isNew: false,
+          createdAt: new Date().toISOString(),
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_bearracuda_group_v1");
+  }
+
+  // Remove Back 2 Earth from directory (venue no longer listed).
+  if (!hasBootMigration("remove_back_2_earth_v1")) {
+    const row = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = 'Back 2 Earth' OR website LIKE '%back2earth%' LIMIT 1`)
+      .get() as { id?: number } | undefined;
+    const bizId = row?.id;
+    if (bizId != null) {
+      try {
+        sqlite.prepare(`DELETE FROM business_claims WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* table may not exist in all envs */
+      }
+      try {
+        sqlite.prepare(`DELETE FROM business_submissions WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* ignore */
+      }
+      try {
+        sqlite.prepare(`DELETE FROM business_blocks WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* ignore */
+      }
+      try {
+        sqlite.prepare(`DELETE FROM business_logo_requests WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* ignore */
+      }
+      sqlite.prepare(`DELETE FROM businesses WHERE id = ?`).run(bizId);
+    } else {
+      sqlite
+        .prepare(
+          `DELETE FROM businesses WHERE name = 'Back 2 Earth' OR website LIKE '%back2earth%' OR instagram LIKE '%back2earth%'`,
+        )
+        .run();
+    }
+    try {
+      sqlite
+        .prepare(
+          `DELETE FROM qsearch_source_health WHERE source_id LIKE '%back2earth%' OR label LIKE '%Back 2 Earth%' OR url LIKE '%back2earth%'`,
+        )
+        .run();
+    } catch {
+      /* qsearch tables may not exist yet */
+    }
+    recordBootMigration("remove_back_2_earth_v1");
+  }
 }
 
 function parseEnvAdminLists() {
@@ -7005,7 +7090,17 @@ export const storage: IStorage = {
     `).all().map((row: any) => Number(row.eventId));
   },
   createEvent(data) {
-    return db.insert(events).values({ ...data, createdAt: new Date().toISOString() }).returning().get();
+    // Footgun guard: never inherit a silent LIVE default. Callers that want public
+    // must pass status: "LIVE" explicitly (admin seed, approve flows, etc.).
+    return db
+      .insert(events)
+      .values({
+        ...data,
+        status: data.status ?? "HIDDEN",
+        createdAt: new Date().toISOString(),
+      })
+      .returning()
+      .get();
   },
   updateEventStatus(id, status) {
     db.update(events).set({ status }).where(eq(events.id, id)).run();

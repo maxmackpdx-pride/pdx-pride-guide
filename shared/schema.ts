@@ -25,7 +25,8 @@ export const events = sqliteTable("events", {
   isSexPositive: integer("is_sex_positive", { mode: "boolean" }).notNull().default(false),
   nudityOk: integer("nudity_ok", { mode: "boolean" }).notNull().default(false),
   posterImageUrl: text("poster_image_url"),
-  status: text("status").notNull().default("LIVE"),
+  /** Default HIDDEN so a forgotten status never silently publishes (ingest/admin set LIVE explicitly). */
+  status: text("status").notNull().default("HIDDEN"),
   source: text("source").notNull().default("admin_seeded"),
   isClaimable: integer("is_claimable", { mode: "boolean" }).notNull().default(false),
   claimedBy: text("claimed_by"),
