@@ -1,5 +1,17 @@
 # Agent rules — PDX Pride Guide
 
+## Prod fixes: ready-to-ship + confirm before push (hard rule)
+
+When the user reports a **live-site bug** or asks to **fix** something on the product (reload glitch, broken UI, wrong data, etc.):
+
+1. **Destination is production**, not a local-only patch. Implement the fix on `master` (or a clean commit that will land on `master`) with **only the fix** — leave unrelated feature WIP unstaged.
+2. **Never imply the site is fixed** while the change is still local/unpushed. Say clearly: *“Fixed locally — ready to push”* (or equivalent).
+3. **Always confirm before `git push`** (and before any Railway deploy). Show short summary: commit subject, files, that prod will update. Wait for an explicit yes (e.g. “push,” “ship,” “do it,” “go”).
+4. **After they confirm:** `git push origin master` → poll Railway until **SUCCESS** → live probe when useful. Same bar as “ship.”
+5. **Local / preview testing only when they explicitly ask.** Don’t default to “test this first” and leave it there.
+
+Default bias: **fix for prod, ask once, then ship.** Not “fixed” until they approved the push and deploy succeeded.
+
 ## What “deploy / fix the website / ship” means (hard rule)
 
 When the user says **deploy**, **ship**, **push**, **go live**, **fix the site**, or similar, they mean **the real product**:

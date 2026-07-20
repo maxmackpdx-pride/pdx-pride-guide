@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
@@ -48,6 +48,35 @@ import {
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
+import { commitIngest, previewIngest } from "./ingest";
+import {
+  INGEST_SOURCES,
+  buildDirectoryIngestSources,
+  expandWebsiteScrapeCandidates,
+  mergeIngestSources,
+} from "@shared/ingestSources";
+import {
+  attachDirectoryBrandsToCandidates,
+  cancelScan,
+  dashboardSnapshot,
+  getScanJobView,
+  startScan,
+} from "./qsearch/scanJob";
+import {
+  listCandidates,
+  markAllNewSeen,
+  markCandidatesCommitted,
+  markCandidatesSkipped,
+  setDragpdxOptIn,
+  setInstagramHandle,
+  setRecipeUrl,
+} from "./qsearch/store";
+import { startQSearchNightly, triggerNightlyPriorityScan } from "./qsearch/nightly";
+import { visionFlyerToDrafts } from "./qsearch/vision";
+import { igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
+import { buildScanCandidates } from "./qsearch/analyze";
+import { saveCandidates } from "./qsearch/store";
+import { randomUUID } from "node:crypto";
 import {
   COMMUNITY_STANDARDS_VERSION,
   COMMUNITY_STANDARDS_DECLINE_URL,
@@ -1131,11 +1160,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
-  // Serve uploaded files statically
-  app.use("/uploads", (req: any, res: any, next: any) => {
-    const express = require("express");
-    express.static(UPLOADS_DIR)(req, res, next);
-  });
+  // Serve uploaded files statically (ESM-safe — do not use require())
+  app.use("/uploads", express.static(UPLOADS_DIR));
 
   // ─── ANALYTICS ──────────────────────────────────────────────────────────
   app.post("/api/analytics/pageview", (req, res) => {
@@ -4722,6 +4748,448 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(result);
   });
 
+  /**
+   * Live ingest source list: curated registry + every directory website.
+   * New Places with a website appear here automatically.
+   */
+  app.get("/api/admin/events/ingest/sources", requireAdmin, (_req, res) => {
+    const businesses = storage.getBusinesses({});
+    const directory = buildDirectoryIngestSources(
+      businesses.map((b: any) => ({
+        id: b.id,
+        name: b.name,
+        website: b.website,
+        type: b.type,
+        active: b.active,
+      })),
+    );
+    const sources = mergeIngestSources(INGEST_SOURCES, directory);
+    res.json({
+      sources,
+      curatedCount: INGEST_SOURCES.length,
+      directoryCount: directory.length,
+      total: sources.length,
+    });
+  });
+
+  // ─── QSearch dashboard (multi-source scan + health) ─────────────────────
+  app.get("/api/admin/qsearch/dashboard", requireAdmin, (_req, res) => {
+    const businesses = storage.getBusinesses({}).map((b: any) => ({
+      id: b.id,
+      name: b.name,
+      website: b.website,
+      type: b.type,
+      active: b.active,
+    }));
+    res.json(dashboardSnapshot(businesses));
+  });
+
+  app.get("/api/admin/qsearch/queue", requireAdmin, (req, res) => {
+    const status = req.query.status != null ? String(req.query.status) : "pending";
+    const limit = Math.min(500, Number(req.query.limit) || 200);
+    const candidates = listCandidates({ status, limit });
+    // Always re-match directory brands so logo pack + fuzzy match apply to old rows
+    const enriched = attachDirectoryBrandsToCandidates(candidates as any[]);
+    res.json({ candidates: enriched });
+  });
+
+  app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {
+    markAllNewSeen();
+    res.json({ ok: true });
+  });
+
+  app.post("/api/admin/qsearch/sources/:sourceId/recipe", requireAdmin, (req, res) => {
+    const sourceId = String(req.params.sourceId);
+    const recipeUrl =
+      req.body?.recipeUrl === null || req.body?.recipeUrl === ""
+        ? null
+        : String(req.body?.recipeUrl || "").trim() || null;
+    setRecipeUrl(sourceId, recipeUrl);
+    auditAdmin(req, "qsearch_recipe", { type: "qsearch_source", id: sourceId, detail: { recipeUrl } });
+    res.json({ ok: true, sourceId, recipeUrl });
+  });
+
+  app.post("/api/admin/qsearch/sources/:sourceId/instagram", requireAdmin, (req, res) => {
+    const sourceId = String(req.params.sourceId);
+    const handle = parseInstagramHandle(req.body?.handle ?? req.body?.instagramHandle ?? null);
+    setInstagramHandle(sourceId, handle);
+    res.json({ ok: true, sourceId, handle });
+  });
+
+  app.post("/api/admin/qsearch/dragpdx-opt-in", requireAdmin, (req, res) => {
+    const optIn = Boolean(req.body?.optIn);
+    setDragpdxOptIn(optIn);
+    auditAdmin(req, "qsearch_dragpdx_opt_in", { type: "qsearch", detail: { optIn } });
+    res.json({ ok: true, optIn });
+  });
+
+  app.post("/api/admin/qsearch/scan", requireAdmin, (req, res) => {
+    const businesses = storage.getBusinesses({}).map((b: any) => ({
+      id: b.id,
+      name: b.name,
+      website: b.website,
+      type: b.type,
+      active: b.active,
+    }));
+    const result = startScan({
+      tiers: Array.isArray(req.body?.tiers) ? req.body.tiers.map(String) : undefined,
+      onlyFailing: Boolean(req.body?.onlyFailing),
+      onlyDirectory: Boolean(req.body?.onlyDirectory),
+      onlyNew: Boolean(req.body?.onlyNew),
+      sourceIds: Array.isArray(req.body?.sourceIds) ? req.body.sourceIds.map(String) : undefined,
+      kind: req.body?.kind === "nightly" ? "nightly" : "manual",
+      // Default on; pass tryVision: false to skip flyer vision sampling
+      tryVision: req.body?.tryVision !== false,
+      // Default off — only upcoming/current listings unless explicitly included
+      includePastEvents: req.body?.includePastEvents === true,
+      businesses,
+      existingEvents: storage.getEvents({}),
+    });
+    if ("error" in result) return res.status(400).json(result);
+    auditAdmin(req, "qsearch_scan_start", {
+      type: "qsearch",
+      id: result.jobId,
+      label: `Scan ${result.total} sources`,
+      detail: { total: result.total },
+    });
+    res.json(result);
+  });
+
+  app.post("/api/admin/qsearch/scan/nightly-now", requireAdmin, (req, res) => {
+    const result = triggerNightlyPriorityScan();
+    if ("error" in result) return res.status(400).json(result);
+    auditAdmin(req, "qsearch_nightly_manual", { type: "qsearch", id: result.jobId });
+    res.json(result);
+  });
+
+  app.get("/api/admin/qsearch/scan/:jobId", requireAdmin, (req, res) => {
+    const job = getScanJobView(String(req.params.jobId));
+    if (!job) return res.status(404).json({ error: "Scan job not found" });
+    res.json(job);
+  });
+
+  app.post("/api/admin/qsearch/scan/:jobId/cancel", requireAdmin, (req, res) => {
+    const ok = cancelScan(String(req.params.jobId));
+    if (!ok) return res.status(400).json({ error: "Cannot cancel" });
+    res.json({ ok: true });
+  });
+
+  /**
+   * Approve QSearch candidates → HIDDEN by default.
+   * Body: { confirm: true, status?: HIDDEN|LIVE, items: [{ id?, draft, skip?, conflictAction?, conflictEventIds? }] }
+   */
+  app.post("/api/admin/qsearch/approve", requireAdmin, async (req, res) => {
+    if (!req.body?.confirm) {
+      return res.status(400).json({ error: "confirm: true required" });
+    }
+    // LIVE only if explicitly requested — still never automatic
+    const status = req.body?.status === "LIVE" ? "LIVE" : "HIDDEN";
+    const rawItems = Array.isArray(req.body?.items) ? req.body.items : [];
+    if (!rawItems.length) return res.status(400).json({ error: "No items" });
+
+    const overrides: number[] = [];
+    const skippedIds: string[] = [];
+    const items = rawItems.map((row: any) => {
+      const action = String(row?.conflictAction || "keep_both");
+      if (action === "deny" || row?.skip) {
+        if (row?.id) skippedIds.push(String(row.id));
+        return { draft: row?.draft, skip: true };
+      }
+      if (action === "override" && Array.isArray(row?.conflictEventIds)) {
+        for (const id of row.conflictEventIds.map(Number)) {
+          if (Number.isFinite(id)) overrides.push(id);
+        }
+      }
+      return { draft: row?.draft, skip: false };
+    });
+
+    for (const id of Array.from(new Set(overrides))) {
+      try {
+        storage.updateEventStatus(id, "HIDDEN");
+      } catch {
+        /* ignore */
+      }
+    }
+
+    const existingEvents = storage.getEvents({});
+    const result = await commitIngest({
+      items,
+      status,
+      skipDuplicates: req.body?.skipDuplicates !== false,
+      existingEvents,
+      createEvent: (data) => storage.createEvent(data),
+    });
+    if (!result.ok) return res.status(400).json({ error: result.error });
+
+    const committedIds = rawItems
+      .filter((row: any) => row?.id && !row?.skip && row?.conflictAction !== "deny")
+      .map((row: any) => String(row.id));
+    if (committedIds.length && result.created.length) {
+      markCandidatesCommitted(
+        committedIds.slice(0, result.created.length),
+        result.created.map(c => c.id),
+      );
+    }
+    if (skippedIds.length) markCandidatesSkipped(skippedIds);
+
+    auditAdmin(req, "qsearch_approve", {
+      type: "qsearch",
+      label: result.impact,
+      detail: {
+        createdIds: result.created.map(c => c.id),
+        overridden: overrides,
+        status,
+      },
+    });
+    res.json({ ...result, overridden: overrides });
+  });
+
+  /** Vision flyer → queue candidates (HIDDEN path via approve). */
+  app.post("/api/admin/qsearch/vision", requireAdmin, async (req, res) => {
+    try {
+      const imageUrl = String(req.body?.imageUrl || "").trim();
+      if (!imageUrl) return res.status(400).json({ error: "imageUrl required" });
+      const venueHint = req.body?.venueHint != null ? String(req.body.venueHint) : null;
+      const sourceUrl = req.body?.sourceUrl != null ? String(req.body.sourceUrl) : imageUrl;
+      const vis = await visionFlyerToDrafts({ imageUrl, sourceUrl, venueHint });
+      if (vis.error && !vis.drafts.length) {
+        return res.status(400).json({ error: vis.error, model: vis.model });
+      }
+      const catalog = storage.getEvents({});
+      const businesses = storage.getBusinesses({});
+      const candidates = buildScanCandidates(
+        vis.drafts.map(draft => ({
+          draft,
+          sourceId: "vision-manual",
+          sourceLabel: "Vision flyer",
+          sourceUrl,
+        })),
+        catalog,
+        businesses,
+      );
+      for (const c of candidates) {
+        if (c.draft.confidence != null && c.draft.confidence < 0.55) c.selected = false;
+      }
+      const jobId = `vision-${randomUUID()}`;
+      // Lightweight job row for queue grouping
+      const { insertScanJob } = await import("./qsearch/store");
+      insertScanJob({
+        id: jobId,
+        status: "done",
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        total: 1,
+        completed: 1,
+        currentSourceId: null,
+        currentLabel: "Vision flyer",
+        etaSeconds: 0,
+        error: null,
+        avgMs: 0,
+        filterJson: JSON.stringify({ kind: "vision" }),
+        perSourceJson: "[]",
+        kind: "manual",
+      });
+      saveCandidates(
+        jobId,
+        candidates.map(c => ({
+          id: c.id,
+          sourceId: c.sourceId,
+          sourceLabel: c.sourceLabel,
+          sourceUrl: c.sourceUrl,
+          draft: c.draft,
+          selected: c.selected,
+          recurring: c.recurring,
+          recurringCount: c.recurringCount,
+          condensed: c.condensed,
+          conflicts: c.conflicts,
+          duplicates: c.duplicates,
+          strongDuplicate: c.strongDuplicate,
+          directoryBrands: c.directoryBrands,
+        })),
+      );
+      auditAdmin(req, "qsearch_vision", { type: "qsearch", id: jobId, detail: { count: candidates.length } });
+      res.json({ ok: true, jobId, model: vis.model, candidates, error: vis.error || null });
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || "Vision failed" });
+    }
+  });
+
+  /** Instagram assist — paste caption/image or Graph Business Discovery if creds exist. */
+  app.post("/api/admin/qsearch/instagram", requireAdmin, async (req, res) => {
+    try {
+      const mode = String(req.body?.mode || "paste");
+      let result;
+      if (mode === "graph") {
+        result = await igGraphPull({
+          handle: String(req.body?.handle || ""),
+          limit: Number(req.body?.limit) || 5,
+        });
+      } else {
+        result = await igPasteAssist({
+          handle: req.body?.handle,
+          caption: req.body?.caption,
+          imageUrl: req.body?.imageUrl,
+          postUrl: req.body?.postUrl,
+          venueHint: req.body?.venueHint,
+        });
+      }
+      if (!result.ok && !result.drafts.length) {
+        return res.status(400).json(result);
+      }
+      const catalog = storage.getEvents({});
+      const businesses = storage.getBusinesses({});
+      const candidates = buildScanCandidates(
+        result.drafts.map(draft => ({
+          draft,
+          sourceId: `ig-${result.handle || "paste"}`,
+          sourceLabel: result.handle ? `IG @${result.handle}` : "IG paste",
+          sourceUrl: req.body?.postUrl || req.body?.imageUrl || null,
+        })),
+        catalog,
+        businesses,
+      );
+      for (const c of candidates) {
+        if (c.draft.confidence != null && c.draft.confidence < 0.55) c.selected = false;
+      }
+      const jobId = `ig-${randomUUID()}`;
+      const { insertScanJob } = await import("./qsearch/store");
+      insertScanJob({
+        id: jobId,
+        status: "done",
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        total: 1,
+        completed: 1,
+        currentSourceId: null,
+        currentLabel: "Instagram assist",
+        etaSeconds: 0,
+        error: null,
+        avgMs: 0,
+        filterJson: JSON.stringify({ kind: "instagram", mode: result.mode }),
+        perSourceJson: "[]",
+        kind: "manual",
+      });
+      saveCandidates(
+        jobId,
+        candidates.map(c => ({
+          id: c.id,
+          sourceId: c.sourceId,
+          sourceLabel: c.sourceLabel,
+          sourceUrl: c.sourceUrl,
+          draft: c.draft,
+          selected: c.selected,
+          recurring: c.recurring,
+          recurringCount: c.recurringCount,
+          condensed: c.condensed,
+          conflicts: c.conflicts,
+          duplicates: c.duplicates,
+          strongDuplicate: c.strongDuplicate,
+          directoryBrands: c.directoryBrands,
+        })),
+      );
+      res.json({
+        ok: true,
+        jobId,
+        mode: result.mode,
+        handle: result.handle,
+        note: result.note,
+        error: result.error || null,
+        candidates,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || "IG assist failed" });
+    }
+  });
+
+  /**
+   * Phase 4 ingest — preview only (no DB writes).
+   * Body: { url?: string, html?: string, ics?: string, expandPaths?: boolean }
+   * expandPaths (default true): if homepage is empty, try /events, format=json, Tribe REST, etc.
+   */
+  app.post("/api/admin/events/ingest/preview", requireAdmin, async (req, res) => {
+    try {
+      const url = req.body?.url != null ? String(req.body.url) : null;
+      const html = req.body?.html != null ? String(req.body.html) : null;
+      const ics = req.body?.ics != null ? String(req.body.ics) : null;
+      const expandPaths = req.body?.expandPaths !== false;
+      const existingEvents = storage.getEvents({});
+
+      let result = await previewIngest({ url, html, ics, existingEvents });
+      if (!result.ok) return res.status(400).json({ error: result.error });
+
+      if (expandPaths && url && !html && !ics && result.events.length === 0) {
+        const candidates = expandWebsiteScrapeCandidates(url).slice(1);
+        const warnings = [
+          ...result.warnings,
+          `No events on primary URL — tried ${candidates.length} event-path candidates`,
+        ];
+        for (const candidate of candidates.slice(0, 6)) {
+          const next = await previewIngest({ url: candidate, existingEvents });
+          if (next.ok && next.events.length > 0) {
+            result = {
+              ...next,
+              warnings: [...warnings, ...next.warnings, `Used expanded path: ${candidate}`],
+              impact: `${next.impact} · via expanded path`,
+            };
+            break;
+          }
+          if (next.ok) warnings.push(...next.warnings);
+        }
+        if (result.events.length === 0) {
+          result = { ...result, warnings: Array.from(new Set(warnings)) };
+        }
+      }
+
+      res.json(result);
+    } catch (err: any) {
+      console.error("ingest preview failed:", err);
+      res.status(500).json({ error: err?.message || "Ingest preview failed" });
+    }
+  });
+
+  /**
+   * Phase 4 ingest — commit after preview.
+   * Body: {
+   *   confirm: true,
+   *   status?: "HIDDEN" | "LIVE" (default HIDDEN),
+   *   skipDuplicates?: boolean (default true),
+   *   events: Array<{ draft, skip?: boolean }>
+   * }
+   * Safety: defaults to HIDDEN; max batch; strong duplicates skipped by default.
+   */
+  app.post("/api/admin/events/ingest/commit", requireAdmin, async (req, res) => {
+    if (!req.body?.confirm) {
+      return res.status(400).json({ error: "confirm: true required — use preview first" });
+    }
+    const status = req.body?.status === "LIVE" ? "LIVE" : "HIDDEN";
+    const skipDuplicates = req.body?.skipDuplicates !== false;
+    const rawEvents = Array.isArray(req.body?.events) ? req.body.events : [];
+    const items = rawEvents.map((row: any) => ({
+      draft: row?.draft ?? row,
+      skip: Boolean(row?.skip),
+    }));
+    const existingEvents = storage.getEvents({});
+    const result = await commitIngest({
+      items,
+      status,
+      skipDuplicates,
+      existingEvents,
+      createEvent: (data) => storage.createEvent(data),
+    });
+    if (!result.ok) return res.status(400).json({ error: result.error });
+
+    auditAdmin(req, "events_ingest_commit", {
+      type: "events",
+      label: result.impact,
+      detail: {
+        status,
+        createdIds: result.created.map(c => c.id),
+        skipped: result.skipped.length,
+      },
+    });
+    res.json(result);
+  });
+
   /** Public URLs for admin "view as public" (no admin session required on the target). */
   app.get("/api/admin/preview-links", requireAdmin, (req, res) => {
     const eventId = req.query.eventId != null ? Number(req.query.eventId) : null;
@@ -5264,4 +5732,5 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   scheduleMapCoordinateBackfill();
   startPromptScheduler();
+  startQSearchNightly();
 }

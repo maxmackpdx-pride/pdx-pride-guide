@@ -44,6 +44,7 @@ const MEMBER_NAV: NavItem[] = [
 
 const ADMIN_ICONS: Partial<Record<HubSection, ReactNode>> = {
   admin: <HubIconAdmin size={18} />,
+  "tbl-qsearch": <HubIconEvents size={18} />,
   "tbl-events": <HubIconEvents size={18} />,
   "tbl-users": <HubIconProfile size={18} />,
   "tbl-werk": <HubIconWerk size={18} />,

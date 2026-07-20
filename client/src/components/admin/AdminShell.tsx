@@ -7,6 +7,7 @@ import {
   LogOut,
   MoreHorizontal,
   RefreshCw,
+  Search,
   Store,
   Users,
   UserCircle,
@@ -17,6 +18,7 @@ import "./admin-panel.css";
 
 export type AdminView =
   | "overview"
+  | "qsearch"
   | "events"
   | "users"
   | "gigs"
@@ -40,6 +42,7 @@ type PushStatus = {
 
 const VIEW_TITLES: Record<AdminView, string> = {
   overview: "Admin overview",
+  qsearch: "QSearch",
   events: "All events",
   users: "All users",
   gigs: "Pride Werk",
@@ -51,6 +54,7 @@ const VIEW_TITLES: Record<AdminView, string> = {
 
 const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
   overview: { label: "Control room", color: "var(--lime, #ccff00)" },
+  qsearch: { label: "Ingest", color: "var(--orange, #ff6600)" },
   events: { label: "The program", color: "var(--orange, #ff6600)" },
   users: { label: "The community", color: "var(--cyan, #00ffff)" },
   gigs: { label: "The gig board", color: "var(--amber, #ffb020)" },
@@ -62,6 +66,7 @@ const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
 
 const VIEW_LEDES: Record<AdminView, string> = {
   overview: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
+  qsearch: "Pull events from venue sites and directory websites. Preview, then commit as HIDDEN.",
   events: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",
   users: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",
   gigs: "Live Pride Werk posts. Take down spam, keep the board useful for workers and hosts.",
@@ -79,6 +84,7 @@ function makeIcons(size: number): Record<AdminView | "more", ReactNode> {
   const p = { size, strokeWidth: size >= 32 ? 2 : 2.2, "aria-hidden": true as const };
   return {
     overview: <LayoutDashboard {...p} />,
+    qsearch: <Search {...p} />,
     events: <CalendarDays {...p} />,
     users: <UserCircle {...p} />,
     gigs: <Briefcase {...p} />,
@@ -130,8 +136,9 @@ export default function AdminShell({
 }: Props) {
   const navItems: AdminNavItem[] = [
     { key: "overview", label: "Overview" },
-    { key: "team", label: "My team", count: navCounts.team },
+    { key: "qsearch", label: "QSearch" },
     { key: "events", label: "All events", count: navCounts.events },
+    { key: "team", label: "My team", count: navCounts.team },
     { key: "users", label: "All users", count: navCounts.users },
     { key: "gigs", label: "Pride Werk", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
@@ -140,11 +147,13 @@ export default function AdminShell({
 
   const mobilePrimary: Array<{ key: AdminView | "more"; label: string; alert?: number }> = [
     { key: "overview", label: "Home" },
+    { key: "qsearch", label: "QSearch" },
     { key: "events", label: "Events" },
     { key: "more", label: "More" },
   ];
 
   const moreItems: AdminNavItem[] = [
+    { key: "qsearch", label: "QSearch" },
     { key: "users", label: "All users", count: navCounts.users },
     { key: "gigs", label: "Pride Werk", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
@@ -152,7 +161,7 @@ export default function AdminShell({
     { key: "team", label: "My team", count: navCounts.team },
   ];
 
-  const moreViews: AdminView[] = ["users", "gigs", "promoters", "venue-claims", "team"];
+  const moreViews: AdminView[] = ["qsearch", "users", "gigs", "promoters", "venue-claims", "team"];
   const kicker = VIEW_KICKERS[view];
   const pushOk = !!pushStatus?.configured;
 

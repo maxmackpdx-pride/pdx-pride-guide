@@ -1,0 +1,607 @@
+/**
+ * Admin ingest presets — machine-readable twin of docs/VENUE_SCRAPE_EXACT_URLS.md.
+ * Keep curated URLs in lockstep with that doc.
+ *
+ * Directory websites are merged live via `buildDirectoryIngestSources` /
+ * `GET /api/admin/events/ingest/sources` so new Places auto-appear in the tool.
+ */
+import { normalizeVenueKey, VENUE_WEBSITE_FALLBACKS } from "./venueLinks";
+
+export type IngestSourceTier =
+  | "1"
+  | "2"
+  | "3"
+  | "agg"
+  | "partiful"
+  | "eventbrite"
+  | "directory";
+
+export type IngestSource = {
+  id: string;
+  label: string;
+  /** Primary URL the server will fetch */
+  url: string;
+  tier: IngestSourceTier;
+  /** Parser hint for UI + server logs */
+  format:
+    | "ics"
+    | "jsonld"
+    | "squarespace"
+    | "tribe"
+    | "wix"
+    | "html"
+    | "eventbrite"
+    | "partiful"
+    | "unknown";
+  notes?: string;
+  /** Star sources from the registry */
+  priority?: boolean;
+  /** Do not auto-trust without human check */
+  caution?: boolean;
+  /** Directory business id when auto-sourced from Places */
+  businessId?: number;
+  businessType?: string | null;
+};
+
+export const INGEST_SOURCES: IngestSource[] = [
+  // ── Tier 1 ──────────────────────────────────────────────────────────────
+  {
+    id: "sanctuary-calendar",
+    label: "Sanctuary calendar",
+    url: "https://pdxsanctuary.com/calendar/",
+    tier: "1",
+    format: "html",
+    notes: "Follow Export .ics / Subscribe on page for full feed",
+    priority: true,
+  },
+  {
+    id: "darcelle-tribe",
+    label: "Darcelle (Tribe JSON)",
+    url: "https://darcellexv.com/wp-json/tribe/events/v1/events",
+    tier: "1",
+    format: "tribe",
+    priority: true,
+  },
+  {
+    id: "darcelle-ics",
+    label: "Darcelle (ICS)",
+    url: "https://darcellexv.com/events/?ical=1",
+    tier: "1",
+    format: "ics",
+  },
+  {
+    id: "steam-events",
+    label: "Steam Portland",
+    url: "https://www.steampdx.com/events",
+    tier: "1",
+    format: "wix",
+    notes: "warmupData; flyers if empty",
+    priority: true,
+  },
+  {
+    id: "hawks-json",
+    label: "Hawks PDX",
+    url: "https://www.hawkspdx.com/hawks-events?format=json",
+    tier: "1",
+    format: "squarespace",
+  },
+  {
+    id: "stag-json",
+    label: "Stag PDX",
+    url: "https://www.stagportland.com/events?format=json",
+    tier: "1",
+    format: "squarespace",
+  },
+  {
+    id: "scandals-json",
+    label: "Scandals",
+    url: "https://www.scandalspdx.com/events?format=json",
+    tier: "1",
+    format: "squarespace",
+    caution: true,
+    notes: "Often stale — verify IG",
+  },
+  {
+    id: "badlands-worker",
+    label: "Badlands calendar",
+    url: "https://badlands-events.badlandsportland.workers.dev/calendar",
+    tier: "1",
+    format: "unknown",
+    notes: "Needs browser UA (server sets one)",
+    priority: true,
+  },
+  {
+    id: "cc-slaughters",
+    label: "CC Slaughters",
+    url: "https://www.ccslaughterspdx.com/",
+    tier: "1",
+    format: "html",
+    notes: "Weekly lineup HTML",
+  },
+  {
+    id: "eagle-events",
+    label: "Eagle Portland",
+    url: "https://www.eagleportland.com/events",
+    tier: "1",
+    format: "wix",
+  },
+  {
+    id: "automatic-events",
+    label: "Automatic Bar",
+    url: "https://www.theautomaticbarpdx.com/events",
+    tier: "1",
+    format: "wix",
+  },
+  {
+    id: "montavilla",
+    label: "Montavilla Station",
+    url: "https://montavillastation.com/",
+    tier: "1",
+    format: "html",
+  },
+  {
+    id: "silverado",
+    label: "Silverado (homepage)",
+    url: "https://www.silveradopdx.com/",
+    tier: "1",
+    format: "html",
+    notes: "Flyer vision — low parse yield",
+    caution: true,
+  },
+
+  // ── Tier 2 ──────────────────────────────────────────────────────────────
+  {
+    id: "star-bit",
+    label: "Star Theater (BIT)",
+    url: "https://www.bandsintown.com/v/10001223-star-theater",
+    tier: "2",
+    format: "jsonld",
+  },
+  {
+    id: "starlight-bit",
+    label: "Starlight Patio (BIT)",
+    url: "https://www.bandsintown.com/v/10243136-starlight-patio-and-lounge-at-the-star-theater",
+    tier: "2",
+    format: "jsonld",
+  },
+  {
+    id: "holocene-bit",
+    label: "Holocene (BIT)",
+    url: "https://www.bandsintown.com/v/10001836-holocene",
+    tier: "2",
+    format: "jsonld",
+  },
+  {
+    id: "getdown-tixr",
+    label: "The Get Down (Tixr)",
+    url: "https://www.tixr.com/groups/thegetdownpdx",
+    tier: "2",
+    format: "jsonld",
+  },
+  {
+    id: "nova-tixr",
+    label: "Nova PDX (Tixr)",
+    url: "https://www.tixr.com/groups/novapdx",
+    tier: "2",
+    format: "jsonld",
+  },
+  {
+    id: "alberta-rose",
+    label: "Alberta Rose calendar",
+    url: "https://albertarosetheatre.com/calendar/",
+    tier: "2",
+    format: "html",
+  },
+  {
+    id: "white-owl-ra",
+    label: "White Owl (RA)",
+    url: "https://ra.co/clubs/93930",
+    tier: "2",
+    format: "jsonld",
+  },
+
+  // ── Tier 3 ──────────────────────────────────────────────────────────────
+  {
+    id: "portland-pride-2026",
+    label: "Portland Pride 2026",
+    url: "https://www.portlandpride.org/2026-portland-pride-official-events?format=json",
+    tier: "3",
+    format: "squarespace",
+    notes: "Slug rolls yearly",
+  },
+  {
+    id: "q-center-tribe",
+    label: "Q Center (Tribe)",
+    url: "https://www.pdxqcenter.org/wp-json/tribe/events/v1/events",
+    tier: "3",
+    format: "tribe",
+  },
+  {
+    id: "osl-calendar",
+    label: "OSL Contest calendar",
+    url: "https://www.oslcontest.org/calendar",
+    tier: "3",
+    format: "html",
+    notes: "Extract Google Calendar ICS id",
+  },
+  {
+    id: "escape-eb",
+    label: "Escape (Eventbrite)",
+    url: "https://www.eventbrite.com/d/or--portland/escape-bar-and-grill/",
+    tier: "3",
+    format: "eventbrite",
+  },
+  {
+    id: "bar-cala-eb",
+    label: "Bar Cala (Eventbrite)",
+    url: "https://www.eventbrite.com/d/or--portland/bar-cala/",
+    tier: "3",
+    format: "eventbrite",
+  },
+  {
+    id: "sports-bra-eb",
+    label: "Sports Bra (Eventbrite)",
+    url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
+    tier: "3",
+    format: "eventbrite",
+  },
+
+  // ── Eventbrite city catch-alls ───────────────────────────────────────────
+  {
+    id: "eb-gay",
+    label: "EB gay-event (city)",
+    url: "https://www.eventbrite.com/d/or--portland/gay-event/",
+    tier: "eventbrite",
+    format: "eventbrite",
+    priority: true,
+    notes: "Nightly catch-all",
+  },
+  {
+    id: "eb-drag",
+    label: "EB drag",
+    url: "https://www.eventbrite.com/d/or--portland/drag/",
+    tier: "eventbrite",
+    format: "eventbrite",
+  },
+  {
+    id: "eb-lgbtq",
+    label: "EB lgbtq",
+    url: "https://www.eventbrite.com/d/or--portland/lgbtq/",
+    tier: "eventbrite",
+    format: "eventbrite",
+  },
+  {
+    id: "eb-queer",
+    label: "EB queer",
+    url: "https://www.eventbrite.com/d/or--portland/queer/",
+    tier: "eventbrite",
+    format: "eventbrite",
+  },
+
+  // ── Partiful ────────────────────────────────────────────────────────────
+  {
+    id: "partiful-pride-ride",
+    label: "Partiful: Pride Ride",
+    url: "https://partiful.com/e/RNgh9o2xBSbtN5ZzLHW0",
+    tier: "partiful",
+    format: "partiful",
+  },
+  {
+    id: "partiful-wake-bake",
+    label: "Partiful: Wake Bake Walk",
+    url: "https://partiful.com/e/dbI1343XEB6XxzxSQciD",
+    tier: "partiful",
+    format: "partiful",
+  },
+
+  // ── Aggregators ─────────────────────────────────────────────────────────
+  {
+    id: "dragpdx-tribe",
+    label: "dragpdx (ask first)",
+    url: "https://dragpdx.com/wp-json/tribe/events/v1/events",
+    tier: "agg",
+    format: "tribe",
+    caution: true,
+    notes: "Partnership ask before automated pull",
+  },
+  {
+    id: "qsc-json",
+    label: "Queer Social Club",
+    url: "https://www.queersocialclub.com/events-portland?format=json",
+    tier: "agg",
+    format: "squarespace",
+  },
+  {
+    id: "everout-drag",
+    label: "EverOut drag",
+    url: "https://everout.com/portland/events/?category=performance-drag",
+    tier: "agg",
+    format: "html",
+  },
+  {
+    id: "pdx-events",
+    label: "pdx-events.com",
+    url: "https://www.pdx-events.com/",
+    tier: "agg",
+    format: "html",
+  },
+  {
+    id: "ra-process",
+    label: "RA Process",
+    url: "https://ra.co/promoters/141994",
+    tier: "agg",
+    format: "jsonld",
+  },
+  {
+    id: "bit-electronic",
+    label: "BIT electronic PDX",
+    url: "https://www.bandsintown.com/c/portland-or/all-dates/genre/electronic",
+    tier: "agg",
+    format: "jsonld",
+  },
+];
+
+export const INGEST_TIER_LABELS: Record<IngestSourceTier, string> = {
+  "1": "Tier 1 · Queer venues",
+  "2": "Tier 2 · Music rooms",
+  "3": "Tier 3 · Community",
+  eventbrite: "Eventbrite",
+  partiful: "Partiful",
+  agg: "Aggregators",
+  directory: "Directory · auto",
+};
+
+export function sourcesByTier(tier: IngestSourceTier, sources: IngestSource[] = INGEST_SOURCES): IngestSource[] {
+  return sources.filter(s => s.tier === tier);
+}
+
+/** Host key for dedupe (strips www, lowercases). */
+export function ingestHostKey(url: string): string | null {
+  try {
+    const u = new URL(url.includes("://") ? url : `https://${url}`);
+    return u.hostname.replace(/^www\./i, "").toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+export function normalizeIngestWebsite(raw: string | null | undefined): string | null {
+  const s = String(raw || "").trim();
+  if (!s) return null;
+  // Skip pure social handles / non-http schemes
+  if (s.startsWith("@") || s.startsWith("mailto:") || s.startsWith("tel:")) return null;
+  try {
+    const withProto = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+    const u = new URL(withProto);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    // Drop fragments; keep path (some listings are /events already)
+    u.hash = "";
+    return u.toString().replace(/\/$/, "") === `${u.protocol}//${u.host}`
+      ? `${u.protocol}//${u.host}/`
+      : u.toString();
+  } catch {
+    return null;
+  }
+}
+
+const WEAK_SCRAPE_HOSTS = [
+  "instagram.com",
+  "facebook.com",
+  "fb.com",
+  "fb.me",
+  "linktr.ee",
+  "linktree.com",
+  "twitter.com",
+  "x.com",
+  "tiktok.com",
+  "venmo.com",
+  "onlyfans.com",
+  "fetlife.com",
+  "youtube.com",
+  "youtu.be",
+  "maps.google.com",
+  "goo.gl",
+];
+
+export function isWeakScrapeHost(url: string): boolean {
+  const host = ingestHostKey(url);
+  if (!host) return true;
+  return WEAK_SCRAPE_HOSTS.some(h => host === h || host.endsWith(`.${h}`));
+}
+
+export type DirectoryBusinessForIngest = {
+  id: number;
+  name: string;
+  website?: string | null;
+  type?: string | null;
+  active?: boolean | null;
+};
+
+export type DirectoryWebsiteResolution = {
+  url: string | null;
+  /** Where the URL came from */
+  source: "field" | "fallback" | "none";
+};
+
+/**
+ * Resolve a scrape URL for a directory place:
+ * 1) listing.website field
+ * 2) shared/venueLinks VENUE_WEBSITE_FALLBACKS (hand-maintained known homes)
+ */
+export function resolveDirectoryWebsite(
+  biz: DirectoryBusinessForIngest,
+  fallbacks?: Record<string, string>,
+): DirectoryWebsiteResolution {
+  const fromField = normalizeIngestWebsite(biz.website);
+  if (fromField) return { url: fromField, source: "field" };
+
+  // Lazy import avoided — caller can pass map; default loaded below in helper
+  const map = fallbacks || VENUE_WEBSITE_FALLBACKS;
+  const key = normalizeVenueKey(biz.name);
+  if (!key) return { url: null, source: "none" };
+
+  const direct = map[key];
+  if (direct) {
+    const url = normalizeIngestWebsite(direct);
+    return url ? { url, source: "fallback" } : { url: null, source: "none" };
+  }
+
+  // Soft match: fallback key contained in name or vice versa
+  for (const [fk, furl] of Object.entries(map)) {
+    if (!fk) continue;
+    if (key.includes(fk) || fk.includes(key)) {
+      const url = normalizeIngestWebsite(furl);
+      if (url) return { url, source: "fallback" };
+    }
+  }
+  return { url: null, source: "none" };
+}
+
+export type DirectoryCoverageRow = {
+  businessId: number;
+  name: string;
+  type: string | null;
+  websiteField: string | null;
+  resolvedUrl: string | null;
+  resolution: "field" | "fallback" | "none";
+  inScrapeList: boolean;
+  absorbedByCurated: boolean;
+};
+
+/** Full directory coverage report — all active places, not only those with a website field. */
+export function buildDirectoryCoverage(
+  businesses: DirectoryBusinessForIngest[],
+  curated: IngestSource[] = INGEST_SOURCES,
+): DirectoryCoverageRow[] {
+  const curatedHosts = new Set(
+    curated.map(s => ingestHostKey(s.url)).filter(Boolean) as string[],
+  );
+  const sorted = [...businesses]
+    .filter(b => b && b.active !== false)
+    .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
+
+  return sorted.map(biz => {
+    const res = resolveDirectoryWebsite(biz);
+    const host = res.url ? ingestHostKey(res.url) : null;
+    const absorbed = !!(host && curatedHosts.has(host));
+    return {
+      businessId: biz.id,
+      name: biz.name,
+      type: biz.type ?? null,
+      websiteField: biz.website ? String(biz.website) : null,
+      resolvedUrl: res.url,
+      resolution: res.source,
+      inScrapeList: !!res.url,
+      absorbedByCurated: absorbed,
+    };
+  });
+}
+
+/**
+ * One ingest source per directory listing with a resolvable website
+ * (field or venueLinks fallback). New Places appear on the next sources fetch.
+ */
+export function buildDirectoryIngestSources(
+  businesses: DirectoryBusinessForIngest[],
+): IngestSource[] {
+  const out: IngestSource[] = [];
+  const seenHosts = new Set<string>();
+
+  const sorted = [...businesses]
+    .filter(b => b && b.active !== false)
+    .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
+
+  for (const biz of sorted) {
+    const resolved = resolveDirectoryWebsite(biz);
+    const url = resolved.url;
+    if (!url) continue;
+    const host = ingestHostKey(url);
+    if (!host) continue;
+    // One chip per host (multiple listings sharing a parent site → first name wins)
+    if (seenHosts.has(host)) continue;
+    seenHosts.add(host);
+
+    const weak = isWeakScrapeHost(url);
+    const notes =
+      resolved.source === "fallback"
+        ? "Website filled from venue link map (missing on directory card)"
+        : weak
+          ? "Social / link-in-bio URL — low structured-data yield"
+          : "Auto from directory website";
+
+    out.push({
+      id: `directory-${biz.id}`,
+      label: biz.name || host,
+      url,
+      tier: "directory",
+      format: weak ? "unknown" : "html",
+      businessId: biz.id,
+      businessType: biz.type ?? null,
+      caution: weak || resolved.source === "fallback",
+      notes,
+    });
+  }
+
+  return out;
+}
+
+/**
+ * Curated registry + live directory websites.
+ * Directory entries whose host already exists in curated stay as curated only
+ * (keeps specialized Tribe/Squarespace URLs preferred).
+ */
+export function mergeIngestSources(
+  curated: IngestSource[] = INGEST_SOURCES,
+  directory: IngestSource[] = [],
+): IngestSource[] {
+  const curatedHosts = new Set<string>();
+  for (const s of curated) {
+    const h = ingestHostKey(s.url);
+    if (h) curatedHosts.add(h);
+  }
+
+  const dirOnly = directory.filter(s => {
+    const h = ingestHostKey(s.url);
+    return h && !curatedHosts.has(h);
+  });
+
+  return [...curated, ...dirOnly];
+}
+
+/**
+ * Candidate event-page URLs derived from a homepage (used by server preview expand).
+ * Homepage is always first.
+ */
+export function expandWebsiteScrapeCandidates(website: string): string[] {
+  const base = normalizeIngestWebsite(website);
+  if (!base) return [];
+  if (isWeakScrapeHost(base)) return [base];
+
+  let origin: string;
+  try {
+    origin = new URL(base).origin;
+  } catch {
+    return [base];
+  }
+
+  const candidates = [
+    base,
+    `${origin}/events`,
+    `${origin}/events/`,
+    `${origin}/events?format=json`,
+    `${origin}/calendar`,
+    `${origin}/calendar/`,
+    `${origin}/upcoming-events`,
+    `${origin}/wp-json/tribe/events/v1/events`,
+  ];
+
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const c of candidates) {
+    const key = c.replace(/\/$/, "").toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(c);
+  }
+  return out;
+}
