@@ -355,14 +355,25 @@ export function scoreSubmissionAgainstEvent(
     score = Math.max(score, 74);
   }
 
-  // Exact title + same venue is almost always a twin (even if times messy)
-  if (titleS >= 0.99 && sameVenue) {
+  // Exact title + same venue is a twin when same/adjacent day or times unknown —
+  // NOT across weeks (weekly series nights must not block each other).
+  if (
+    titleS >= 0.99 &&
+    sameVenue &&
+    (dayDist === 0 || dayDist === 1 || dayDist == null)
+  ) {
     score = Math.max(score, 80);
   }
 
-  // Ticket URL + some title signal is strong
+  // Ticket URL + some title signal is strong (per-occurrence URLs usually differ by date)
   if (tA && tB && tA === tB && titleS >= 0.35) {
     score = Math.max(score, 78);
+  }
+
+  // Same series title at same venue on a different week = sibling night, not a duplicate listing.
+  // Cap below "high" so re-scans can still add new dates for recurring shows.
+  if (dayDist != null && dayDist >= 3 && !(tA && tB && tA === tB)) {
+    score = Math.min(score, 68);
   }
 
   score = Math.max(0, Math.min(100, Math.round(score)));

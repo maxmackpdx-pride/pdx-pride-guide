@@ -71,6 +71,7 @@ import {
   markAllNewSeen,
   markCandidatesCommitted,
   markCandidatesSkipped,
+  prunePendingAgainstCatalog,
   setDragpdxOptIn,
   setInstagramHandle,
   setRecipeUrl,
@@ -5100,19 +5101,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!rawItems.length) return res.status(400).json({ error: "No items" });
 
     const overrides: number[] = [];
-    const skippedIds: string[] = [];
+    const denySkipIds: string[] = [];
     const items = rawItems.map((row: any) => {
       const action = String(row?.conflictAction || "keep_both");
+      const candidateId = row?.id != null ? String(row.id) : undefined;
       if (action === "deny" || row?.skip) {
-        if (row?.id) skippedIds.push(String(row.id));
-        return { draft: row?.draft, skip: true };
+        if (candidateId) denySkipIds.push(candidateId);
+        return { draft: row?.draft, skip: true, candidateId };
       }
       if (action === "override" && Array.isArray(row?.conflictEventIds)) {
         for (const id of row.conflictEventIds.map(Number)) {
           if (Number.isFinite(id)) overrides.push(id);
         }
       }
-      return { draft: row?.draft, skip: false };
+      return { draft: row?.draft, skip: false, candidateId };
     });
 
     for (const id of Array.from(new Set(overrides))) {
@@ -5127,28 +5129,60 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const result = await commitIngest({
       items,
       status,
+      // Always on for admin approve — never re-create main-board twins
       skipDuplicates: req.body?.skipDuplicates !== false,
       existingEvents,
       createEvent: (data) => storage.createEvent(data),
     });
     if (!result.ok) return res.status(400).json({ error: result.error });
 
-    const committedIds = rawItems
-      .filter((row: any) => row?.id && !row?.skip && row?.conflictAction !== "deny")
-      .map((row: any) => String(row.id));
-    if (committedIds.length && result.created.length) {
-      markCandidatesCommitted(
-        committedIds.slice(0, result.created.length),
-        result.created.map(c => c.id),
-      );
+    // Resolve Review cards: created → committed; already-on-board / invalid → skipped (leave queue)
+    type CandOutcome = { eventIds: number[]; boardSkip: boolean; deny: boolean };
+    const byCand = new Map<string, CandOutcome>();
+    const touch = (id: string | undefined): CandOutcome | null => {
+      if (!id) return null;
+      let o = byCand.get(id);
+      if (!o) {
+        o = { eventIds: [], boardSkip: false, deny: false };
+        byCand.set(id, o);
+      }
+      return o;
+    };
+    for (const id of denySkipIds) {
+      const o = touch(id);
+      if (o) o.deny = true;
     }
-    if (skippedIds.length) markCandidatesSkipped(skippedIds);
+    for (const c of result.created) {
+      const o = touch(c.candidateId);
+      if (o) o.eventIds.push(c.id);
+    }
+    for (const s of result.skipped) {
+      const o = touch(s.candidateId);
+      if (!o) continue;
+      if (/Already on main board|Strong duplicate|Invalid draft/i.test(s.reason)) {
+        o.boardSkip = true;
+      }
+    }
+    const committedIds: string[] = [];
+    const committedEventIds: number[] = [];
+    const autoSkipIds: string[] = [];
+    Array.from(byCand.entries()).forEach(([id, o]) => {
+      if (o.eventIds.length) {
+        committedIds.push(id);
+        committedEventIds.push(o.eventIds[0]);
+      } else if (o.boardSkip || o.deny) {
+        autoSkipIds.push(id);
+      }
+    });
+    if (committedIds.length) markCandidatesCommitted(committedIds, committedEventIds);
+    if (autoSkipIds.length) markCandidatesSkipped(Array.from(new Set(autoSkipIds)));
 
     auditAdmin(req, "qsearch_approve", {
       type: "qsearch",
       label: result.impact,
       detail: {
         createdIds: result.created.map(c => c.id),
+        skipped: result.skipped,
         overridden: overrides,
         status,
       },

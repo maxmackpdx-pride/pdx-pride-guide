@@ -771,6 +771,105 @@ export function markCandidatesSkipped(ids: string[]) {
 }
 
 /**
+ * Re-check pending Review cards against the main board.
+ * Fully covered one-offs / series → status skipped (disappear).
+ * Partial series → rewrite member drafts to only new dates.
+ */
+export function prunePendingAgainstCatalog(catalog: import("@shared/schema").Event[]): {
+  pruned: number;
+  updated: number;
+} {
+  ensureTables();
+  // Lazy import avoids circular init with analyze
+  const { applyCatalogCoverage } = require("./analyze") as typeof import("./analyze");
+  const pending = listCandidates({ status: "pending", limit: 500 });
+  let pruned = 0;
+  let updated = 0;
+
+  const skipStmt = sqlite.prepare(
+    `UPDATE qsearch_candidates SET status = 'skipped' WHERE id = ? AND status = 'pending'`,
+  );
+  const updateStmt = sqlite.prepare(`
+    UPDATE qsearch_candidates SET
+      draft_json = ?,
+      selected = ?,
+      recurring = ?,
+      recurring_count = ?,
+      condensed = ?,
+      conflicts_json = ?,
+      duplicates_json = ?,
+      strong_dup_json = ?,
+      brands_json = ?,
+      bundle_json = ?
+    WHERE id = ? AND status = 'pending'
+  `);
+
+  const tx = sqlite.transaction(() => {
+    for (const row of pending) {
+      const draft = row.draft as import("../ingest/types").IngestEventDraft;
+      if (!draft?.title) continue;
+      const asCand = {
+        id: String(row.id),
+        draft,
+        sourceId: String(row.sourceId || ""),
+        sourceLabel: String(row.sourceLabel || ""),
+        sourceUrl: String(row.sourceUrl || ""),
+        selected: Boolean(row.selected),
+        recurring: (row.recurring as any) || null,
+        recurringGroupId: null,
+        recurringCount: Number(row.recurringCount || 1),
+        condensed: Boolean(row.condensed),
+        conflicts: (row.conflicts as any) || [],
+        duplicates: (row.duplicates as any) || [],
+        strongDuplicate: (row.strongDuplicate as any) || null,
+        recurringDupAction: null,
+        directoryBrands: (row.directoryBrands as any) || [],
+        sourceBundle: (row.sourceBundle as any) || [],
+        fieldConflicts: (row.fieldConflicts as any) || [],
+        memberDrafts: (row.memberDrafts as any) || [],
+      };
+      const kept = applyCatalogCoverage(asCand, catalog);
+      if (!kept) {
+        skipStmt.run(String(row.id));
+        pruned += 1;
+        continue;
+      }
+      const beforeDates = JSON.stringify(
+        ((row.memberDrafts as any[]) || []).map((m: any) => m?.dateStart).concat([(draft as any).dateStart]),
+      );
+      const afterDates = JSON.stringify(
+        (kept.memberDrafts || []).map(m => m.dateStart).concat([kept.draft.dateStart]),
+      );
+      const changed =
+        beforeDates !== afterDates ||
+        Boolean(row.strongDuplicate) !== Boolean(kept.strongDuplicate) ||
+        Number(row.recurringCount || 1) !== kept.recurringCount;
+      if (!changed) continue;
+      updateStmt.run(
+        JSON.stringify(kept.draft),
+        kept.selected ? 1 : 0,
+        kept.recurring,
+        kept.recurringCount,
+        kept.condensed ? 1 : 0,
+        JSON.stringify(kept.conflicts || []),
+        JSON.stringify(kept.duplicates || []),
+        kept.strongDuplicate ? JSON.stringify(kept.strongDuplicate) : null,
+        JSON.stringify(kept.directoryBrands || []),
+        JSON.stringify({
+          sourceBundle: kept.sourceBundle || [],
+          fieldConflicts: kept.fieldConflicts || [],
+          memberDrafts: kept.memberDrafts || [],
+        }),
+        String(row.id),
+      );
+      updated += 1;
+    }
+  });
+  tx();
+  return { pruned, updated };
+}
+
+/**
  * Clear review queue candidates.
  * - scope "last": pending rows from the most recent finished scan job
  * - scope "all": every pending candidate (full queue wipe)

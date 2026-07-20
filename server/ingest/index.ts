@@ -437,7 +437,7 @@ export function draftToInsertEvent(
 }
 
 export async function commitIngest(input: {
-  items: Array<{ draft: IngestEventDraft; skip?: boolean }>;
+  items: Array<{ draft: IngestEventDraft; skip?: boolean; candidateId?: string }>;
   status?: "HIDDEN" | "LIVE";
   skipDuplicates?: boolean;
   existingEvents: Event[];
@@ -453,17 +453,23 @@ export async function commitIngest(input: {
   const created: IngestCommitResult["created"] = [];
   const skipped: IngestCommitResult["skipped"] = [];
   // Mutate a local catalog so within-batch duplicates also get caught.
-  let catalog = [...input.existingEvents];
+  let catalog = [...input.existingEvents].filter(e => e.status !== "REMOVED");
 
   for (let index = 0; index < input.items.length; index++) {
     const item = input.items[index];
+    const candidateId = item.candidateId ? String(item.candidateId) : undefined;
     let draft = item.draft;
     if (!draft?.title || !draft?.dateStart) {
-      skipped.push({ index, title: draft?.title || "(missing)", reason: "Invalid draft" });
+      skipped.push({
+        index,
+        title: draft?.title || "(missing)",
+        reason: "Invalid draft",
+        candidateId,
+      });
       continue;
     }
     if (item.skip) {
-      skipped.push({ index, title: draft.title, reason: "Deselected" });
+      skipped.push({ index, title: draft.title, reason: "Deselected", candidateId });
       continue;
     }
     if (skipDup) {
@@ -493,7 +499,8 @@ export async function commitIngest(input: {
         skipped.push({
           index,
           title: draft.title,
-          reason: `Strong duplicate of #${strong.eventId} (${strong.title})`,
+          reason: `Already on main board as #${strong.eventId} (${strong.title})`,
+          candidateId,
         });
         continue;
       }
@@ -509,14 +516,23 @@ export async function commitIngest(input: {
     }
 
     const row = input.createEvent(draftToInsertEvent(draft, { status }));
-    created.push({ id: row.id, title: row.title, status: row.status });
+    created.push({ id: row.id, title: row.title, status: row.status, candidateId });
     catalog = [...catalog, row];
   }
 
+  const dupSkips = skipped.filter(s => /Already on main board|Strong duplicate/i.test(s.reason)).length;
+  const impactParts = [`Created ${created.length} as ${status}`];
+  if (skipped.length) {
+    impactParts.push(
+      dupSkips === skipped.length
+        ? `skipped ${skipped.length} already on board`
+        : `skipped ${skipped.length}`,
+    );
+  }
   return {
     ok: true,
     created,
     skipped,
-    impact: `Created ${created.length} as ${status}; skipped ${skipped.length}`,
+    impact: impactParts.join("; "),
   };
 }

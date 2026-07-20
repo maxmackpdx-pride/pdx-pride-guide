@@ -1258,6 +1258,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         });
       }
     }
+    // (candidate id is always sent so server can clear Review after create or board-skip)
 
     const n = items.length;
     const liveMsg =
@@ -1271,6 +1272,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       let createdTotal = 0;
       let skippedTotal = 0;
       let impactParts: string[] = [];
+      const skipReasons: string[] = [];
       for (let i = 0; i < items.length; i += 40) {
         const chunk = items.slice(i, i + 40);
         const res = await apiRequest("POST", "/api/admin/qsearch/approve", {
@@ -1284,12 +1286,24 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         createdTotal += Array.isArray(data.created) ? data.created.length : 0;
         skippedTotal += Array.isArray(data.skipped) ? data.skipped.length : 0;
         if (data.impact) impactParts.push(data.impact);
+        if (Array.isArray(data.skipped)) {
+          for (const s of data.skipped) {
+            if (s?.reason && skipReasons.length < 4) {
+              skipReasons.push(`${s.title || "Event"}: ${s.reason}`);
+            }
+          }
+        }
       }
+      const reasonTail =
+        skipReasons.length > 0
+          ? ` · ${skipReasons.join(" · ")}${skippedTotal > skipReasons.length ? "…" : ""}`
+          : "";
       toast({
         title: status === "LIVE" ? "Published LIVE" : "Staged as HIDDEN",
         description:
-          impactParts[0] ||
-          `${createdTotal} created${skippedTotal ? ` · ${skippedTotal} skipped` : ""}${seriesExpanded ? ` · series expanded` : ""}`,
+          (impactParts[0] ||
+            `${createdTotal} created${skippedTotal ? ` · ${skippedTotal} skipped` : ""}${seriesExpanded ? ` · series expanded` : ""}`) +
+          reasonTail,
       });
       setSelected({});
       setSeriesMode({});

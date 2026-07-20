@@ -67,8 +67,8 @@ export type IngestPreviewResult = {
 
 export type IngestCommitResult = {
   ok: true;
-  created: Array<{ id: number; title: string; status: string }>;
-  skipped: Array<{ index: number; title: string; reason: string }>;
+  created: Array<{ id: number; title: string; status: string; candidateId?: string }>;
+  skipped: Array<{ index: number; title: string; reason: string; candidateId?: string }>;
   impact: string;
 };
 

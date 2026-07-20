@@ -257,14 +257,20 @@ function queueDraftsForReview(
   );
 
   const skipped: Array<{ title: string; reason: string }> = [];
-  // Pre-select all; strong dups still show in Review for human decision
+  // buildScanCandidates already drops events fully covered by the main board.
+  // Any residual strong-dup (edge cases) stays unselected and is reported.
   for (const c of candidates) {
     if (c.strongDuplicate) {
-      // Keep visible but unselected so approve won't double-publish by default
       c.selected = false;
       skipped.push({
         title: c.draft.title,
         reason: `Possible duplicate of #${c.strongDuplicate.eventId} (unselected)`,
+      });
+    }
+    if (c.alreadyOnBoard?.length) {
+      skipped.push({
+        title: c.draft.title,
+        reason: `${c.alreadyOnBoard.length} date(s) already on main board — only new nights queued`,
       });
     }
   }

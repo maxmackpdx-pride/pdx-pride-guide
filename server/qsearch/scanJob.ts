@@ -40,6 +40,7 @@ import {
   listCustomIngestSources,
   listDisabledSourceIds,
   listSourceHealth,
+  prunePendingAgainstCatalog,
   recordScanResult,
   reviewQueueSummary,
   saveCandidates,
@@ -818,6 +819,12 @@ export function dashboardSnapshot(businesses: StartScanOpts["businesses"]) {
   const sources = buildLiveSources(businesses);
   const summary = syncAndSummarize(sources, businesses);
   const fullBiz = storage.getBusinesses({});
+  // Drop Review cards already on the main board (and trim series to new dates only)
+  try {
+    prunePendingAgainstCatalog(storage.getEvents({}));
+  } catch {
+    /* non-fatal */
+  }
   return {
     ...summary,
     latestJob: getLatestScanJob(),

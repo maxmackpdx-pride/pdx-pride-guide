@@ -1,7 +1,12 @@
 import type { Business, Event } from "@shared/schema";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { isEventPlaceholderUrl } from "@shared/eventPoster";
-import { normalizeTitleKey, findSubmissionMatches } from "@shared/submissionMatch";
+import {
+  normalizeTitleKey,
+  findSubmissionMatches,
+  submissionHasStrongDuplicate,
+  type SubmissionMatchCandidate,
+} from "@shared/submissionMatch";
 import { normalizeVenueKey } from "@shared/venueLinks";
 import type { IngestEventDraft } from "../ingest/types";
 import { isPastEventListing } from "../ingest/dates";
@@ -159,7 +164,174 @@ export type ScanCandidate = {
   fieldConflicts: FieldConflict[];
   /** Every occurrence in a condensed weekly/monthly series (for expand-on-approve). */
   memberDrafts: IngestEventDraft[];
+  /**
+   * Dates already on the main board (LIVE/HIDDEN) that were stripped from this card.
+   * Empty when nothing was pruned.
+   */
+  alreadyOnBoard?: Array<{ date: string; eventId: number; title: string }>;
 };
+
+/** Catalog shape used for strong-dup checks (LIVE + HIDDEN count as “on board”). */
+function catalogMatchRows(catalog: Event[]) {
+  return catalog
+    .filter(e => e.status !== "REMOVED")
+    .map(e => ({
+      id: e.id,
+      title: e.title,
+      venueName: e.venueName,
+      address: e.address,
+      dateStart: e.dateStart,
+      dateEnd: e.dateEnd,
+      status: e.status,
+      ticketUrl: e.ticketUrl,
+    }));
+}
+
+/** High-confidence match against main-board catalog, or null. */
+export function strongCatalogDuplicate(
+  draft: Pick<IngestEventDraft, "title" | "venueName" | "address" | "dateStart" | "dateEnd" | "ticketUrl">,
+  catalog: Event[],
+): SubmissionMatchCandidate | null {
+  if (!draft?.title || !draft?.dateStart) return null;
+  const matches = findSubmissionMatches(
+    {
+      title: draft.title,
+      venueName: draft.venueName,
+      address: draft.address,
+      dateStart: draft.dateStart,
+      dateEnd: draft.dateEnd,
+      ticketUrl: draft.ticketUrl,
+    },
+    catalogMatchRows(catalog),
+    { limit: 1, minScore: 32 },
+  );
+  return submissionHasStrongDuplicate(matches) ?? null;
+}
+
+function sortDraftsByDate(drafts: IngestEventDraft[]): IngestEventDraft[] {
+  return [...drafts].sort((a, b) =>
+    String(a.dateStart || "").localeCompare(String(b.dateStart || "")),
+  );
+}
+
+/**
+ * Strip occurrence dates already on the main board.
+ * - One-off already listed → null (do not put in Review)
+ * - Series with only known dates → null
+ * - Series with some new nights → keep only new dates (re-score card)
+ *
+ * Prevents re-approve / re-scan spam of events already published or staged.
+ */
+export function applyCatalogCoverage(
+  candidate: ScanCandidate,
+  catalog: Event[],
+): ScanCandidate | null {
+  const membersRaw =
+    Array.isArray(candidate.memberDrafts) && candidate.memberDrafts.length > 0
+      ? candidate.memberDrafts
+      : [candidate.draft];
+  const members = sortDraftsByDate(membersRaw.filter(m => m?.title && m?.dateStart));
+  if (!members.length) return null;
+
+  const newMembers: IngestEventDraft[] = [];
+  const alreadyOnBoard: Array<{ date: string; eventId: number; title: string }> = [];
+
+  for (const md of members) {
+    const strong = strongCatalogDuplicate(md, catalog);
+    if (strong) {
+      alreadyOnBoard.push({
+        date: String(md.dateStart || "").slice(0, 10),
+        eventId: strong.eventId,
+        title: strong.title,
+      });
+    } else {
+      newMembers.push(md);
+    }
+  }
+
+  // Fully covered by main board — disappear from Review / never queue
+  if (!newMembers.length) return null;
+
+  const allNew = alreadyOnBoard.length === 0 && newMembers.length === members.length;
+  if (allNew) {
+    // Still drop pure strong-dup one-offs when memberDrafts was empty/single
+    // and representative alone is a strong match (belt + suspenders)
+    if (
+      newMembers.length === 1 &&
+      candidate.strongDuplicate?.confidence === "high" &&
+      !(candidate.recurring === "weekly" || candidate.recurring === "monthly")
+    ) {
+      return null;
+    }
+    return { ...candidate, alreadyOnBoard: [] };
+  }
+
+  // Partial series: only new nights remain
+  const draft = newMembers[0];
+  const isSeries =
+    newMembers.length >= 2 &&
+    (candidate.recurring === "weekly" || candidate.recurring === "monthly");
+  const warnings = Array.from(
+    new Set([
+      ...(draft.warnings || []),
+      ...(candidate.draft.warnings || []),
+      `Skipped ${alreadyOnBoard.length} date${alreadyOnBoard.length === 1 ? "" : "s"} already on the main board` +
+        (alreadyOnBoard[0]
+          ? ` (e.g. #${alreadyOnBoard[0].eventId} ${alreadyOnBoard[0].title})`
+          : ""),
+    ]),
+  );
+
+  // Re-match representative against catalog (should be clean)
+  const matches = findSubmissionMatches(
+    {
+      title: draft.title,
+      venueName: draft.venueName,
+      address: draft.address,
+      dateStart: draft.dateStart,
+      dateEnd: draft.dateEnd,
+      ticketUrl: draft.ticketUrl,
+    },
+    catalogMatchRows(catalog),
+    { limit: 3, minScore: 32 },
+  );
+  const duplicates: DuplicateInfo[] = matches.map(m => {
+    const prev = candidate.duplicates?.find(d => d.eventId === m.eventId);
+    if (prev) return prev;
+    return {
+      eventId: m.eventId,
+      title: m.title,
+      score: m.score,
+      confidence: m.confidence,
+      dateStart: m.dateStart,
+      dayOfWeek: null,
+      catalogRecurring: null,
+      catalogRecurringStatus: "unknown",
+      note: m.reasons?.join("; ") || "",
+    };
+  });
+  const strong = duplicates.find(d => d.confidence === "high") || null;
+
+  return {
+    ...candidate,
+    draft: { ...draft, warnings },
+    memberDrafts: isSeries ? newMembers : newMembers.length > 1 ? newMembers : [draft],
+    recurring: isSeries ? candidate.recurring : null,
+    recurringCount: isSeries ? newMembers.length : 1,
+    condensed: isSeries || candidate.condensed,
+    strongDuplicate: strong,
+    duplicates,
+    selected:
+      !strong &&
+      !(candidate.conflicts?.length > 0) &&
+      !(draft.confidence != null && draft.confidence < 0.55) &&
+      !(candidate.fieldConflicts?.length > 0),
+    alreadyOnBoard,
+    recurringDupAction: alreadyOnBoard.length
+      ? `Only new dates queued — ${alreadyOnBoard.length} already on main board`
+      : candidate.recurringDupAction,
+  };
+}
 
 function wallParts(dateStart: string): { dayKey: string; minutes: number } | null {
   const m = dateStart.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
@@ -1037,5 +1209,8 @@ export function buildScanCandidates(
       sourceBundle,
       fieldConflicts,
     };
-  });
+  })
+    // Main-board de-dupe: drop fully-covered one-offs / series; keep only new series nights
+    .map(c => applyCatalogCoverage(c, catalog))
+    .filter((c): c is ScanCandidate => c != null);
 }
