@@ -55,6 +55,63 @@
   border: 1px solid var(--qs-line);
   background: rgba(0, 0, 0, 0.35);
   padding: 0.65rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.1s ease;
+}
+
+button.qsearch__stat:hover {
+  border-color: rgba(25, 227, 255, 0.45);
+  background: rgba(25, 227, 255, 0.08);
+}
+
+button.qsearch__stat:focus-visible {
+  outline: 2px solid var(--qs-cyan);
+  outline-offset: 2px;
+}
+
+button.qsearch__stat.is-active {
+  border-color: rgba(200, 250, 60, 0.55);
+  background: rgba(200, 250, 60, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(200, 250, 60, 0.2);
+}
+
+.qsearch__focus-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(25, 227, 255, 0.35);
+  background: rgba(25, 227, 255, 0.08);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.qsearch__focus-clear {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--qs-line);
+  background: transparent;
+  color: var(--qs-cyan);
+  cursor: pointer;
+}
+
+.qsearch__focus-clear:hover {
+  border-color: var(--qs-cyan);
+  color: #fff;
+}
+
+.qsearch__panel.is-focused {
+  border-color: rgba(25, 227, 255, 0.4);
+  box-shadow: 0 0 0 1px rgba(25, 227, 255, 0.15);
 }
 
 .qsearch__stat-val {

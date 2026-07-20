@@ -72,8 +72,8 @@ import {
   setRecipeUrl,
 } from "./qsearch/store";
 import { startQSearchNightly, triggerNightlyPriorityScan } from "./qsearch/nightly";
-import { visionFlyerToDrafts } from "./qsearch/vision";
-import { igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
+import { localUploadToDataUrl, visionFlyerToDrafts } from "./qsearch/vision";
+import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
 import { buildScanCandidates } from "./qsearch/analyze";
 import { saveCandidates } from "./qsearch/store";
 import { randomUUID } from "node:crypto";
@@ -4971,69 +4971,99 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ...result, overridden: overrides });
   });
 
-  /** Vision flyer → queue candidates (HIDDEN path via approve). */
+  /** Persist vision/IG drafts into the review queue (HIDDEN path via approve). */
+  async function queueManualQSearchDrafts(opts: {
+    drafts: import("./ingest/types").IngestEventDraft[];
+    sourceId: string;
+    sourceLabel: string;
+    sourceUrl: string;
+    kind: string;
+  }) {
+    const catalog = storage.getEvents({});
+    const businesses = storage.getBusinesses({});
+    const candidates = buildScanCandidates(
+      opts.drafts.map(draft => ({
+        draft,
+        sourceId: opts.sourceId,
+        sourceLabel: opts.sourceLabel,
+        sourceUrl: opts.sourceUrl,
+      })),
+      catalog,
+      businesses,
+    );
+    for (const c of candidates) {
+      if (c.draft.confidence != null && c.draft.confidence < 0.55) c.selected = false;
+    }
+    const jobId = `${opts.kind}-${randomUUID()}`;
+    const { insertScanJob } = await import("./qsearch/store");
+    insertScanJob({
+      id: jobId,
+      status: "done",
+      startedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
+      total: 1,
+      completed: 1,
+      currentSourceId: null,
+      currentLabel: opts.sourceLabel,
+      etaSeconds: 0,
+      error: null,
+      avgMs: 0,
+      filterJson: JSON.stringify({ kind: opts.kind }),
+      perSourceJson: "[]",
+      kind: "manual",
+    });
+    saveCandidates(
+      jobId,
+      candidates.map(c => ({
+        id: c.id,
+        sourceId: c.sourceId,
+        sourceLabel: c.sourceLabel,
+        sourceUrl: c.sourceUrl,
+        draft: c.draft,
+        selected: c.selected,
+        recurring: c.recurring,
+        recurringCount: c.recurringCount,
+        condensed: c.condensed,
+        conflicts: c.conflicts,
+        duplicates: c.duplicates,
+        strongDuplicate: c.strongDuplicate,
+        directoryBrands: c.directoryBrands,
+      })),
+    );
+    return { jobId, candidates };
+  }
+
+  /** Vision flyer URL → queue candidates (HIDDEN path via approve). */
   app.post("/api/admin/qsearch/vision", requireAdmin, async (req, res) => {
     try {
-      const imageUrl = String(req.body?.imageUrl || "").trim();
+      let imageUrl = String(req.body?.imageUrl || "").trim();
       if (!imageUrl) return res.status(400).json({ error: "imageUrl required" });
       const venueHint = req.body?.venueHint != null ? String(req.body.venueHint) : null;
       const sourceUrl = req.body?.sourceUrl != null ? String(req.body.sourceUrl) : imageUrl;
-      const vis = await visionFlyerToDrafts({ imageUrl, sourceUrl, venueHint });
+      let posterStoreUrl: string | null = imageUrl.startsWith("data:") ? null : imageUrl;
+      // Local upload path → data URL for cloud vision API
+      if (imageUrl.startsWith("/uploads/")) {
+        const dataUrl = localUploadToDataUrl(imageUrl);
+        if (!dataUrl) return res.status(400).json({ error: "Upload file not found" });
+        posterStoreUrl = imageUrl;
+        imageUrl = dataUrl;
+      }
+      const vis = await visionFlyerToDrafts({
+        imageUrl,
+        sourceUrl,
+        venueHint,
+        posterStoreUrl,
+      });
       if (vis.error && !vis.drafts.length) {
         return res.status(400).json({ error: vis.error, model: vis.model });
       }
-      const catalog = storage.getEvents({});
-      const businesses = storage.getBusinesses({});
-      const candidates = buildScanCandidates(
-        vis.drafts.map(draft => ({
-          draft,
-          sourceId: "vision-manual",
-          sourceLabel: "Vision flyer",
-          sourceUrl,
-        })),
-        catalog,
-        businesses,
-      );
-      for (const c of candidates) {
-        if (c.draft.confidence != null && c.draft.confidence < 0.55) c.selected = false;
-      }
-      const jobId = `vision-${randomUUID()}`;
-      // Lightweight job row for queue grouping
-      const { insertScanJob } = await import("./qsearch/store");
-      insertScanJob({
-        id: jobId,
-        status: "done",
-        startedAt: new Date().toISOString(),
-        finishedAt: new Date().toISOString(),
-        total: 1,
-        completed: 1,
-        currentSourceId: null,
-        currentLabel: "Vision flyer",
-        etaSeconds: 0,
-        error: null,
-        avgMs: 0,
-        filterJson: JSON.stringify({ kind: "vision" }),
-        perSourceJson: "[]",
-        kind: "manual",
+      const { jobId, candidates } = await queueManualQSearchDrafts({
+        drafts: vis.drafts,
+        sourceId: "vision-manual",
+        sourceLabel: "Vision flyer",
+        sourceUrl,
+        kind: "vision",
       });
-      saveCandidates(
-        jobId,
-        candidates.map(c => ({
-          id: c.id,
-          sourceId: c.sourceId,
-          sourceLabel: c.sourceLabel,
-          sourceUrl: c.sourceUrl,
-          draft: c.draft,
-          selected: c.selected,
-          recurring: c.recurring,
-          recurringCount: c.recurringCount,
-          condensed: c.condensed,
-          conflicts: c.conflicts,
-          duplicates: c.duplicates,
-          strongDuplicate: c.strongDuplicate,
-          directoryBrands: c.directoryBrands,
-        })),
-      );
       auditAdmin(req, "qsearch_vision", { type: "qsearch", id: jobId, detail: { count: candidates.length } });
       res.json({ ok: true, jobId, model: vis.model, candidates, error: vis.error || null });
     } catch (err: any) {
@@ -5041,15 +5071,89 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
-  /** Instagram assist — paste caption/image or Graph Business Discovery if creds exist. */
+  /** Batch flyer upload → vision each file → review queue. */
+  app.post(
+    "/api/admin/qsearch/vision/upload",
+    requireAdmin,
+    upload.array("flyers", 12),
+    async (req: any, res) => {
+      try {
+        const files = Array.isArray(req.files) ? req.files : [];
+        if (!files.length) {
+          return res.status(400).json({ error: "Upload 1–12 flyer images (jpg/png/webp/gif)" });
+        }
+        const venueHint = req.body?.venueHint != null ? String(req.body.venueHint) : null;
+        const allDrafts: import("./ingest/types").IngestEventDraft[] = [];
+        const errors: string[] = [];
+        let model: string | null = null;
+        for (const file of files) {
+          const storeUrl = `/uploads/${file.filename}`;
+          const dataUrl = localUploadToDataUrl(storeUrl);
+          if (!dataUrl) {
+            errors.push(`${file.originalname}: could not read upload`);
+            continue;
+          }
+          const vis = await visionFlyerToDrafts({
+            imageUrl: dataUrl,
+            sourceUrl: storeUrl,
+            venueHint,
+            posterStoreUrl: storeUrl,
+          });
+          model = vis.model;
+          if (vis.error && !vis.drafts.length) {
+            errors.push(`${file.originalname}: ${vis.error}`);
+            continue;
+          }
+          allDrafts.push(...vis.drafts);
+        }
+        if (!allDrafts.length) {
+          return res.status(400).json({
+            error: errors[0] || "No events extracted from uploads",
+            errors,
+            model,
+          });
+        }
+        const { jobId, candidates } = await queueManualQSearchDrafts({
+          drafts: allDrafts,
+          sourceId: "vision-upload",
+          sourceLabel: "Vision upload",
+          sourceUrl: "upload",
+          kind: "vision-upload",
+        });
+        auditAdmin(req, "qsearch_vision_upload", {
+          type: "qsearch",
+          id: jobId,
+          detail: { files: files.length, drafts: allDrafts.length, errors },
+        });
+        res.json({
+          ok: true,
+          jobId,
+          model,
+          candidates,
+          fileCount: files.length,
+          draftCount: allDrafts.length,
+          errors: errors.length ? errors : null,
+        });
+      } catch (err: any) {
+        res.status(500).json({ error: err?.message || "Vision upload failed" });
+      }
+    },
+  );
+
+  /** Instagram assist — single URL preferred; Graph Business Discovery if creds exist. */
   app.post("/api/admin/qsearch/instagram", requireAdmin, async (req, res) => {
     try {
-      const mode = String(req.body?.mode || "paste");
+      const mode = String(req.body?.mode || "url");
       let result;
       if (mode === "graph") {
         result = await igGraphPull({
           handle: String(req.body?.handle || ""),
           limit: Number(req.body?.limit) || 5,
+        });
+      } else if (mode === "url" || req.body?.url) {
+        result = await igFromUrl({
+          url: String(req.body?.url || req.body?.postUrl || req.body?.imageUrl || ""),
+          venueHint: req.body?.venueHint != null ? String(req.body.venueHint) : null,
         });
       } else {
         result = await igPasteAssist({
@@ -5063,57 +5167,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!result.ok && !result.drafts.length) {
         return res.status(400).json(result);
       }
-      const catalog = storage.getEvents({});
-      const businesses = storage.getBusinesses({});
-      const candidates = buildScanCandidates(
-        result.drafts.map(draft => ({
-          draft,
-          sourceId: `ig-${result.handle || "paste"}`,
-          sourceLabel: result.handle ? `IG @${result.handle}` : "IG paste",
-          sourceUrl: req.body?.postUrl || req.body?.imageUrl || null,
-        })),
-        catalog,
-        businesses,
+      const sourceUrl = String(
+        req.body?.url || req.body?.postUrl || req.body?.imageUrl || "instagram",
       );
-      for (const c of candidates) {
-        if (c.draft.confidence != null && c.draft.confidence < 0.55) c.selected = false;
-      }
-      const jobId = `ig-${randomUUID()}`;
-      const { insertScanJob } = await import("./qsearch/store");
-      insertScanJob({
-        id: jobId,
-        status: "done",
-        startedAt: new Date().toISOString(),
-        finishedAt: new Date().toISOString(),
-        total: 1,
-        completed: 1,
-        currentSourceId: null,
-        currentLabel: "Instagram assist",
-        etaSeconds: 0,
-        error: null,
-        avgMs: 0,
-        filterJson: JSON.stringify({ kind: "instagram", mode: result.mode }),
-        perSourceJson: "[]",
-        kind: "manual",
+      const { jobId, candidates } = await queueManualQSearchDrafts({
+        drafts: result.drafts,
+        sourceId: `ig-${result.handle || "url"}`,
+        sourceLabel: result.handle ? `IG @${result.handle}` : "Instagram",
+        sourceUrl,
+        kind: "instagram",
       });
-      saveCandidates(
-        jobId,
-        candidates.map(c => ({
-          id: c.id,
-          sourceId: c.sourceId,
-          sourceLabel: c.sourceLabel,
-          sourceUrl: c.sourceUrl,
-          draft: c.draft,
-          selected: c.selected,
-          recurring: c.recurring,
-          recurringCount: c.recurringCount,
-          condensed: c.condensed,
-          conflicts: c.conflicts,
-          duplicates: c.duplicates,
-          strongDuplicate: c.strongDuplicate,
-          directoryBrands: c.directoryBrands,
-        })),
-      );
       res.json({
         ok: true,
         jobId,

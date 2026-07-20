@@ -1,3 +1,5 @@
+import { readFileSync, existsSync } from "node:fs";
+import path from "node:path";
 import type { IngestEventDraft } from "../ingest/types";
 import { dayOfWeekFromStart, defaultEndFromStart, toPacificWallClock } from "../ingest/dates";
 
@@ -75,13 +77,19 @@ function draftFromPartial(
 }
 
 /**
- * Flyer image URL → event draft(s) via vision API when configured.
- * Without API keys, returns error (UI can still queue paste path after human entry).
+ * Flyer image → event draft(s) via cloud vision API (xAI Grok Vision or OpenAI).
+ * There is no on-device / custom mini-model — without XAI_API_KEY or OPENAI_API_KEY this cannot OCR flyers.
+ *
+ * `imageUrl` may be https://… or data:image/…;base64,… (uploads use data URLs so the
+ * remote vision API can read local files). `posterStoreUrl` is what we save on the draft
+ * (e.g. /uploads/…) so the Review queue shows a local flyer, not a huge data URL.
  */
 export async function visionFlyerToDrafts(opts: {
   imageUrl: string;
   sourceUrl?: string | null;
   venueHint?: string | null;
+  /** Permanent poster path for the site (defaults to imageUrl when not a data: URL) */
+  posterStoreUrl?: string | null;
 }): Promise<VisionResult> {
   const cfg = visionConfigured();
   if (!cfg) {
@@ -89,9 +97,20 @@ export async function visionFlyerToDrafts(opts: {
       drafts: [],
       model: null,
       error:
-        "Vision not configured. Set XAI_API_KEY or OPENAI_API_KEY (optional QSEARCH_VISION_MODEL).",
+        "Vision not configured. Set XAI_API_KEY or OPENAI_API_KEY (optional QSEARCH_VISION_MODEL). Flyer reading uses a cloud vision model — not a custom local model.",
     };
   }
+
+  const apiImage = String(opts.imageUrl || "").trim();
+  if (!apiImage) {
+    return { drafts: [], model: cfg.model, error: "imageUrl required" };
+  }
+
+  const posterForDraft =
+    opts.posterStoreUrl ||
+    (apiImage.startsWith("data:") ? null : apiImage) ||
+    opts.sourceUrl ||
+    null;
 
   const prompt = `You extract Portland LGBTQ+ / nightlife event details from a flyer image.
 Return ONLY valid JSON: {"confidence":0-1,"events":[{"title","dateStart","dateEnd","venueName","address","admission","ticketUrl","description","ageRequirement"}]}
@@ -117,7 +136,7 @@ Rules:
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: opts.imageUrl } },
+              { type: "image_url", image_url: { url: apiImage } },
             ],
           },
         ],
@@ -137,12 +156,50 @@ Rules:
     const events = Array.isArray(parsed.events) ? parsed.events : [];
     const drafts: IngestEventDraft[] = [];
     for (const e of events) {
-      const d = draftFromPartial(e, opts.sourceUrl || opts.imageUrl, opts.imageUrl, confidence);
+      const d = draftFromPartial(
+        e,
+        opts.sourceUrl || posterForDraft || apiImage.slice(0, 80),
+        posterForDraft,
+        confidence,
+      );
       if (d) drafts.push(d);
+    }
+    if (!drafts.length) {
+      return {
+        drafts: [],
+        model: cfg.model,
+        error: "Vision returned no usable events (missing title/date on flyer?)",
+      };
     }
     return { drafts, model: cfg.model };
   } catch (err: any) {
     return { drafts: [], model: cfg.model, error: err?.message || "Vision failed" };
+  }
+}
+
+/** Read a local /uploads file into a data URL for the vision API. */
+export function localUploadToDataUrl(filenameOrPath: string): string | null {
+  try {
+    const UPLOADS =
+      process.env.UPLOADS_DIR?.trim() || path.join(process.cwd(), "uploads");
+    let name = filenameOrPath;
+    if (name.startsWith("/uploads/")) name = name.slice("/uploads/".length);
+    name = path.basename(name);
+    const full = path.join(UPLOADS, name);
+    if (!existsSync(full)) return null;
+    const buf = readFileSync(full);
+    const ext = path.extname(name).toLowerCase();
+    const mime =
+      ext === ".png"
+        ? "image/png"
+        : ext === ".webp"
+          ? "image/webp"
+          : ext === ".gif"
+            ? "image/gif"
+            : "image/jpeg";
+    return `data:${mime};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
   }
 }
 

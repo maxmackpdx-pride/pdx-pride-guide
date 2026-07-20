@@ -239,6 +239,8 @@ type ScanJobView = {
 };
 
 type Tab = "overview" | "venues" | "queue" | "assist";
+/** Which slice of data a hero-stat click should show in the tab below */
+type StatFocus = "scan-urls" | "directory" | "works" | "trouble" | "queue" | "new-links" | null;
 type ConflictAction = "keep_both" | "deny" | "override";
 
 function fmtEta(sec: number | null | undefined): string {
@@ -297,6 +299,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("overview");
+  const [statFocus, setStatFocus] = useState<StatFocus>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<ScanJobView | null>(null);
   const [busy, setBusy] = useState(false);
@@ -312,9 +315,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   // Assist forms
   const [visionUrl, setVisionUrl] = useState("");
   const [visionVenue, setVisionVenue] = useState("");
+  const [igUrl, setIgUrl] = useState("");
   const [igHandle, setIgHandle] = useState("");
-  const [igCaption, setIgCaption] = useState("");
-  const [igImage, setIgImage] = useState("");
 
   // Add-to-directory modal (unknown venue from scan)
   const [dirForm, setDirForm] = useState<DirectoryFormState | null>(null);
@@ -492,6 +494,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   }
 
   async function runVision() {
+    if (!visionUrl.trim()) return;
     setBusy(true);
     try {
       const res = await apiRequest("POST", "/api/admin/qsearch/vision", {
@@ -505,7 +508,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         title: n ? "Flyer added to Review" : "No event found on flyer",
         description: n
           ? `${n} draft${n === 1 ? "" : "s"} — check Review, then approve as HIDDEN.`
-          : data.error || "Try a clearer image URL or add a venue name.",
+          : data.error || "Try a clearer image or add a venue name.",
       });
       if (n) {
         void refetchQueue();
@@ -514,7 +517,47 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     } catch (err) {
       toast({
         title: "Could not read flyer",
-        description: parseApiError(err, "Needs a public image URL and AI key (XAI_API_KEY or OPENAI_API_KEY)"),
+        description: parseApiError(
+          err,
+          "Needs cloud vision (XAI_API_KEY or OPENAI_API_KEY) — not a local model",
+        ),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runVisionUpload(files: FileList | File[]) {
+    const list = Array.from(files).slice(0, 12);
+    if (!list.length) return;
+    setBusy(true);
+    try {
+      const body = new FormData();
+      for (const f of list) body.append("flyers", f);
+      if (visionVenue.trim()) body.append("venueHint", visionVenue.trim());
+      const res = await fetch("/api/admin/qsearch/vision/upload", {
+        method: "POST",
+        body,
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload vision failed");
+      const n = data.candidates?.length || data.draftCount || 0;
+      toast({
+        title: n ? `Read ${list.length} flyer${list.length === 1 ? "" : "s"}` : "No events from uploads",
+        description: n
+          ? `${n} draft${n === 1 ? "" : "s"} in Review${data.errors?.length ? ` · ${data.errors.length} failed` : ""}`
+          : data.error || "Check API key and image quality",
+      });
+      if (n) {
+        void refetchQueue();
+        setTab("queue");
+      }
+    } catch (err) {
+      toast({
+        title: "Flyer upload failed",
+        description: parseApiError(err, "Needs XAI_API_KEY or OPENAI_API_KEY"),
         variant: "destructive",
       });
     } finally {
@@ -604,23 +647,22 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     }
   }
 
-  async function runIg(mode: "paste" | "graph") {
+  async function runIg(mode: "url" | "graph" = "url") {
     setBusy(true);
     try {
       const res = await apiRequest("POST", "/api/admin/qsearch/instagram", {
         mode,
+        url: igUrl.trim() || null,
         handle: igHandle.trim() || null,
-        caption: igCaption.trim() || null,
-        imageUrl: igImage.trim() || null,
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not build draft from Instagram");
+      if (!res.ok) throw new Error(data.error || data.note || "Could not use Instagram URL");
       const n = data.candidates?.length || 0;
       toast({
-        title: n ? "Instagram post added to Review" : "No event found",
+        title: n ? "Instagram → Review" : "No event found",
         description: n
           ? `${n} draft${n === 1 ? "" : "s"} — check Review, then approve as HIDDEN.`
-          : data.error || data.note || "Paste the caption text and/or a flyer image URL.",
+          : data.error || data.note || "Try a direct image URL or upload the flyer.",
       });
       if (n) {
         void refetchQueue();
@@ -628,12 +670,12 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       }
     } catch (err) {
       toast({
-        title: mode === "graph" ? "Instagram pull failed" : "Could not use paste",
+        title: mode === "graph" ? "Instagram pull failed" : "Could not use Instagram URL",
         description: parseApiError(
           err,
           mode === "graph"
-            ? "Needs Meta Business API tokens, or just paste the caption below instead."
-            : "Paste caption text and/or an image URL from the post.",
+            ? "Needs Meta Business API tokens."
+            : "Paste a post or image URL. If IG blocks the post, upload the flyer instead.",
         ),
         variant: "destructive",
       });
@@ -719,10 +761,28 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     return m;
   }, [dash?.health]);
 
+  const isTroubleHealth = useCallback((h: SourceHealth) => {
+    return (
+      h.lastOk === false ||
+      h.consecutiveFails >= 2 ||
+      ["dead", "zero_yield", "discovery_needed", "needs_recipe"].includes(h.yieldStatus)
+    );
+  }, []);
+
+  const isWorksHealth = useCallback((h: SourceHealth) => {
+    return h.yieldStatus === "works" || h.lastOk === true;
+  }, []);
+
   const venues = useMemo(() => {
     const q = venueFilter.trim().toLowerCase();
     // Prefer health list (full scrape sources) merged with coverage
-    const health = dash?.health || [];
+    let health = dash?.health || [];
+    if (statFocus === "directory") health = health.filter(h => h.isDirectory);
+    else if (statFocus === "works") health = health.filter(isWorksHealth);
+    else if (statFocus === "trouble") health = health.filter(isTroubleHealth);
+    else if (statFocus === "new-links") health = health.filter(h => h.isDirectory && h.isNew);
+    // scan-urls / null → all sources
+
     return health
       .filter(h => {
         if (!q) return true;
@@ -735,12 +795,55 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         );
       })
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [dash?.health, venueFilter]);
+  }, [dash?.health, venueFilter, statFocus, isWorksHealth, isTroubleHealth]);
 
   const coverageMissing = useMemo(
     () => (dash?.coverage || []).filter(c => c.resolution === "none"),
     [dash?.coverage],
   );
+
+  /** Hero stat → open the tab that lists that data (and filter Sources when relevant). */
+  function openStat(focus: StatFocus) {
+    setStatFocus(focus);
+    if (focus === "queue") {
+      setTab("queue");
+      setTimeout(() => {
+        document.getElementById("qsearch-panel-queue")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+      return;
+    }
+    if (focus === "trouble" || focus === "new-links") {
+      // Overview panels list these; also open Sources filtered for the same slice
+      setTab("overview");
+      setTimeout(() => {
+        const id =
+          focus === "trouble" ? "qsearch-panel-trouble" : "qsearch-panel-new-links";
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+      return;
+    }
+    // scan-urls | directory | works → Sources table
+    setTab("venues");
+    setVenueFilter("");
+    setTimeout(() => {
+      document.getElementById("qsearch-panel-sources")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }
+
+  const statFocusLabel =
+    statFocus === "scan-urls"
+      ? "All scan URLs"
+      : statFocus === "directory"
+        ? "Directory places (auto-linked sources)"
+        : statFocus === "works"
+          ? "Yield works"
+          : statFocus === "trouble"
+            ? "Trouble / failing sources"
+            : statFocus === "new-links"
+              ? "New directory auto-links"
+              : statFocus === "queue"
+                ? "Review queue"
+                : null;
 
   return (
     <div className="qsearch" data-testid="qsearch-dashboard">
@@ -753,37 +856,73 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           missed. Everything stages as <strong>HIDDEN</strong> — never auto-LIVE.
         </p>
 
-        <div className="qsearch__stats">
-          <div className="qsearch__stat">
+        <div className="qsearch__stats" role="navigation" aria-label="QSearch stats shortcuts">
+          <button
+            type="button"
+            className={`qsearch__stat${statFocus === "scan-urls" ? " is-active" : ""}`}
+            onClick={() => openStat("scan-urls")}
+            title="Open Sources — all scan URLs"
+            data-testid="qsearch-stat-urls"
+          >
             <div className="qsearch__stat-val is-cyan">{stats?.urlCount ?? "—"}</div>
             <div className="qsearch__stat-label">Scan URLs</div>
-          </div>
-          <div className="qsearch__stat">
+          </button>
+          <button
+            type="button"
+            className={`qsearch__stat${statFocus === "directory" ? " is-active" : ""}`}
+            onClick={() => openStat("directory")}
+            title="Open Sources — directory places with websites"
+            data-testid="qsearch-stat-directory"
+          >
             <div className="qsearch__stat-val">{stats?.directoryPlaces ?? "—"}</div>
             <div className="qsearch__stat-label">Directory places</div>
-          </div>
-          <div className="qsearch__stat">
+          </button>
+          <button
+            type="button"
+            className={`qsearch__stat${statFocus === "works" ? " is-active" : ""}`}
+            onClick={() => openStat("works")}
+            title="Open Sources — yield works"
+            data-testid="qsearch-stat-works"
+          >
             <div className="qsearch__stat-val">{stats?.healthyCount ?? "—"}</div>
             <div className="qsearch__stat-label">Yield works</div>
-          </div>
-          <div className="qsearch__stat">
+          </button>
+          <button
+            type="button"
+            className={`qsearch__stat${statFocus === "trouble" ? " is-active" : ""}`}
+            onClick={() => openStat("trouble")}
+            title="Open Health — sources having trouble"
+            data-testid="qsearch-stat-trouble"
+          >
             <div className={`qsearch__stat-val ${(stats?.failingCount || 0) > 0 ? "is-warn" : ""}`}>
               {stats?.failingCount ?? "—"}
             </div>
             <div className="qsearch__stat-label">Trouble</div>
-          </div>
-          <div className="qsearch__stat">
+          </button>
+          <button
+            type="button"
+            className={`qsearch__stat${statFocus === "queue" ? " is-active" : ""}`}
+            onClick={() => openStat("queue")}
+            title="Open Review queue"
+            data-testid="qsearch-stat-queue"
+          >
             <div className={`qsearch__stat-val ${(stats?.pendingReview || 0) > 0 ? "is-warn" : "is-cyan"}`}>
               {stats?.pendingReview ?? queueCandidates.length}
             </div>
             <div className="qsearch__stat-label">Review queue</div>
-          </div>
-          <div className="qsearch__stat">
+          </button>
+          <button
+            type="button"
+            className={`qsearch__stat${statFocus === "new-links" ? " is-active" : ""}`}
+            onClick={() => openStat("new-links")}
+            title="Open Health — new directory auto-links"
+            data-testid="qsearch-stat-new"
+          >
             <div className={`qsearch__stat-val ${(stats?.newDirectoryCount || 0) > 0 ? "is-warn" : ""}`}>
               {stats?.newDirectoryCount ?? "—"}
             </div>
             <div className="qsearch__stat-label">New auto-links</div>
-          </div>
+          </button>
         </div>
 
         <div className="qsearch__scan-row">
@@ -898,7 +1037,18 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             type="button"
             role="tab"
             className={`qsearch__tab${tab === id ? " is-active" : ""}`}
-            onClick={() => setTab(id)}
+            onClick={() => {
+              setTab(id);
+              // Manual tab pick clears stat filter except queue/sources still useful with focus
+              if (id === "assist") setStatFocus(null);
+              if (id === "overview" && statFocus !== "trouble" && statFocus !== "new-links") {
+                setStatFocus(null);
+              }
+              if (id === "venues" && (statFocus === "queue" || statFocus === "trouble" || statFocus === "new-links")) {
+                setStatFocus("scan-urls");
+              }
+              if (id === "queue") setStatFocus("queue");
+            }}
           >
             {label}
           </button>
@@ -907,55 +1057,102 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
 
       {tab === "overview" && (
         <div>
-          {(dash?.failing?.length || 0) > 0 && (
-            <div className="qsearch__panel">
-              <h2 className="qsearch__panel-title">Venues having trouble</h2>
-              <ul className="qsearch__fail-list">
-                {dash!.failing.slice(0, 25).map(h => (
-                  <li key={h.sourceId}>
-                    <span className={`qsearch__badge ${yieldBadge(h.yieldStatus)}`}>{h.yieldStatus}</span>
-                    <strong>{h.label}</strong> — {h.lastError || "No data"}
-                    {h.zeroYieldStreak > 0 ? ` · zero×${h.zeroYieldStreak}` : ""}
-                    <br />
-                    <a href={h.resolvedUrl || h.url} target="_blank" rel="noreferrer">
-                      {h.resolvedUrl || h.url}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+          {statFocus === "trouble" && (
+            <div className="qsearch__focus-banner">
+              Showing <strong>Trouble</strong> sources
+              <button type="button" className="qsearch__focus-clear" onClick={() => setStatFocus(null)}>
+                Clear
+              </button>
+              <button
+                type="button"
+                className="qsearch__focus-clear"
+                onClick={() => {
+                  setStatFocus("trouble");
+                  setTab("venues");
+                }}
+              >
+                Open in Sources →
+              </button>
+            </div>
+          )}
+          {statFocus === "new-links" && (
+            <div className="qsearch__focus-banner">
+              Showing <strong>New auto-links</strong>
+              <button type="button" className="qsearch__focus-clear" onClick={() => setStatFocus(null)}>
+                Clear
+              </button>
             </div>
           )}
 
-          {(dash?.newFromDirectory?.length || 0) > 0 && (
-            <div className="qsearch__panel">
-              <h2 className="qsearch__panel-title">New directory auto-links</h2>
-              <ul className="qsearch__fail-list" style={{ color: "rgba(255,180,120,0.95)" }}>
-                {dash!.newFromDirectory.map(h => (
-                  <li key={h.sourceId}>
-                    <span className="qsearch__badge is-new">New</span>
-                    {h.label}{" "}
-                    <a href={h.url} target="_blank" rel="noreferrer">
-                      {h.url}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <div className="qsearch__toolbar" style={{ marginTop: 8 }}>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await apiRequest("POST", "/api/admin/qsearch/sources/ack-new", {});
-                    void refetch();
-                  }}
-                >
-                  Mark new as seen
-                </button>
-              </div>
+          {(dash?.failing?.length || 0) > 0 || statFocus === "trouble" ? (
+            <div
+              className={`qsearch__panel${statFocus === "trouble" ? " is-focused" : ""}`}
+              id="qsearch-panel-trouble"
+            >
+              <h2 className="qsearch__panel-title">
+                Venues having trouble ({dash?.failing?.length ?? 0})
+              </h2>
+              {(dash?.failing?.length || 0) === 0 ? (
+                <p style={{ fontSize: 13, color: "var(--qs-muted)", margin: 0 }}>No troubled sources right now.</p>
+              ) : (
+                <ul className="qsearch__fail-list">
+                  {dash!.failing.slice(0, 50).map(h => (
+                    <li key={h.sourceId}>
+                      <span className={`qsearch__badge ${yieldBadge(h.yieldStatus)}`}>{h.yieldStatus}</span>
+                      <strong>{h.label}</strong> — {h.lastError || "No data"}
+                      {h.zeroYieldStreak > 0 ? ` · zero×${h.zeroYieldStreak}` : ""}
+                      <br />
+                      <a href={h.resolvedUrl || h.url} target="_blank" rel="noreferrer">
+                        {h.resolvedUrl || h.url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          )}
+          ) : null}
+
+          {(dash?.newFromDirectory?.length || 0) > 0 || statFocus === "new-links" ? (
+            <div
+              className={`qsearch__panel${statFocus === "new-links" ? " is-focused" : ""}`}
+              id="qsearch-panel-new-links"
+            >
+              <h2 className="qsearch__panel-title">
+                New directory auto-links ({dash?.newFromDirectory?.length ?? 0})
+              </h2>
+              {(dash?.newFromDirectory?.length || 0) === 0 ? (
+                <p style={{ fontSize: 13, color: "var(--qs-muted)", margin: 0 }}>No new auto-links.</p>
+              ) : (
+                <>
+                  <ul className="qsearch__fail-list" style={{ color: "rgba(255,180,120,0.95)" }}>
+                    {dash!.newFromDirectory.map(h => (
+                      <li key={h.sourceId}>
+                        <span className="qsearch__badge is-new">New</span>
+                        {h.label}{" "}
+                        <a href={h.url} target="_blank" rel="noreferrer">
+                          {h.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="qsearch__toolbar" style={{ marginTop: 8 }}>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await apiRequest("POST", "/api/admin/qsearch/sources/ack-new", {});
+                        void refetch();
+                      }}
+                    >
+                      Mark new as seen
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : null}
 
           {coverageMissing.length > 0 && (
-            <div className="qsearch__panel">
+            <div className="qsearch__panel" id="qsearch-panel-directory-missing">
               <h2 className="qsearch__panel-title">Directory places with no URL ({coverageMissing.length})</h2>
               <p style={{ fontSize: 12, color: "var(--qs-muted)" }}>
                 {coverageMissing.map(c => c.name).join(" · ")}
@@ -991,14 +1188,38 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       )}
 
       {tab === "venues" && (
-        <div>
+        <div id="qsearch-panel-sources">
+          {statFocusLabel &&
+            (statFocus === "scan-urls" ||
+              statFocus === "directory" ||
+              statFocus === "works" ||
+              statFocus === "trouble" ||
+              statFocus === "new-links") && (
+              <div className="qsearch__focus-banner">
+                Showing <strong>{statFocusLabel}</strong> · {venues.length} source
+                {venues.length === 1 ? "" : "s"}
+                <button
+                  type="button"
+                  className="qsearch__focus-clear"
+                  onClick={() => {
+                    setStatFocus(null);
+                    setVenueFilter("");
+                  }}
+                >
+                  Show all
+                </button>
+              </div>
+            )}
           <div className="qsearch__toolbar">
             <input
               className="qsearch__filter"
               type="search"
               placeholder="Filter sources…"
               value={venueFilter}
-              onChange={e => setVenueFilter(e.target.value)}
+              onChange={e => {
+                setVenueFilter(e.target.value);
+                if (e.target.value) setStatFocus(null);
+              }}
             />
             <button
               type="button"
@@ -1088,6 +1309,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       )}
 
       {tab === "queue" && (
+        <div id="qsearch-panel-queue">
         <div>
           {!filteredCandidates.length && (
             <p className="qsearch__empty">
@@ -1414,6 +1636,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             </>
           )}
         </div>
+        </div>
       )}
 
       <Dialog open={!!dirForm} onOpenChange={open => !open && setDirForm(null)}>
@@ -1610,49 +1833,42 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <h2 className="qsearch__panel-title">When to use this tab</h2>
             <ol className="qsearch__assist-steps">
               <li>
-                <strong>Scan now</strong> (top of page) — normal path. Pulls venue calendars into
-                Review.
+                <strong>Scan now</strong> — calendars into Review.
               </li>
               <li>
-                <strong>Read a flyer</strong> — you have one poster image URL (host shared art, email
-                flyer) and Scan didn’t pick it up.
+                <strong>Read a flyer</strong> — paste image URL <em>or upload</em> one/many posters.
+                Cloud vision (Grok/OpenAI) reads title/date/venue — not a local mini-model.
               </li>
               <li>
-                <strong>From Instagram</strong> — you copy the post caption (and optionally the image
-                URL). We do <em>not</em> log into Instagram or scrape profiles.
+                <strong>Instagram</strong> — paste the post URL (or direct image URL) only.
               </li>
             </ol>
             <p className="qsearch__assist-note">
-              Both tools only create drafts in <strong>Review</strong>. You still approve → HIDDEN.
-              Nothing goes LIVE from here.
+              Drafts land in <strong>Review</strong> as HIDDEN only. Needs{" "}
+              <code>XAI_API_KEY</code> or <code>OPENAI_API_KEY</code> on the server to read flyers.
             </p>
           </div>
 
           <div className="qsearch__panel">
-            <h2 className="qsearch__panel-title">1 · Read a flyer image</h2>
+            <h2 className="qsearch__panel-title">1 · Read a flyer</h2>
             <p className="qsearch__assist-blurb">
-              Paste a <strong>direct link to the image</strong> (ends in .jpg / .png, or a CDN image
-              URL). AI reads the text for title, date, and venue, then drops a draft in Review with
-              that image as the flyer.
-            </p>
-            <p className="qsearch__assist-note">
-              Needs an AI key on the server (<code>XAI_API_KEY</code> or <code>OPENAI_API_KEY</code>).
-              Unclear flyers stay unchecked so you can fix them before approve.
+              Cloud vision reads the poster (title, date, venue). Without an API key this step cannot
+              OCR flyers — there is no custom on-device model.
             </p>
             <div className="qsearch__assist-fields">
-              <label className="qsearch__field">
-                <span>Flyer image URL</span>
+              <label className="qsearch__field qsearch__field--wide">
+                <span>Flyer image URL (optional if uploading)</span>
                 <input
                   className="qsearch__filter"
                   type="url"
-                  placeholder="https://example.com/path/to/flyer.jpg"
+                  placeholder="https://…/flyer.jpg"
                   value={visionUrl}
                   onChange={e => setVisionUrl(e.target.value)}
                   data-testid="qsearch-flyer-url"
                 />
               </label>
               <label className="qsearch__field">
-                <span>Venue name (optional but helps)</span>
+                <span>Venue hint (optional)</span>
                 <input
                   className="qsearch__filter"
                   placeholder="e.g. Darcelle XV Showplace"
@@ -1661,59 +1877,50 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   data-testid="qsearch-flyer-venue"
                 />
               </label>
+              <label className="qsearch__field qsearch__field--wide">
+                <span>Upload flyer(s) — single or batch (max 12)</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  multiple
+                  data-testid="qsearch-flyer-upload"
+                  onChange={e => {
+                    if (e.target.files?.length) void runVisionUpload(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
             </div>
             <div className="qsearch__toolbar">
               <button
                 type="button"
                 className="is-primary"
                 disabled={busy || !visionUrl.trim()}
-                onClick={runVision}
+                onClick={() => void runVision()}
                 data-testid="qsearch-read-flyer"
               >
-                {busy ? "Reading…" : "Read flyer → Review"}
+                {busy ? "Reading…" : "Read URL → Review"}
               </button>
             </div>
           </div>
 
           <div className="qsearch__panel">
-            <h2 className="qsearch__panel-title">2 · From an Instagram post</h2>
+            <h2 className="qsearch__panel-title">2 · Instagram URL</h2>
             <p className="qsearch__assist-blurb">
-              Open the post → copy the <strong>caption</strong>. Optionally copy the{" "}
-              <strong>image address</strong> (right‑click image → copy image address) so Review gets
-              a flyer. We never open Instagram for you.
+              Paste the <strong>post link</strong> or a <strong>direct image address</strong>. We try
+              to pull the flyer image and run vision — we do <em>not</em> log into Instagram. If the
+              post is blocked, right‑click the image → copy address, or upload under Read a flyer.
             </p>
             <div className="qsearch__assist-fields">
               <label className="qsearch__field qsearch__field--wide">
-                <span>Caption text (required unless you only have an image URL)</span>
-                <textarea
-                  className="qsearch__filter qsearch__textarea"
-                  placeholder={
-                    "Paste the full caption here…\n\nExample:\nFriday Night Show · July 25 · Doors 8pm @ Darcelle"
-                  }
-                  value={igCaption}
-                  onChange={e => setIgCaption(e.target.value)}
-                  data-testid="qsearch-ig-caption"
-                />
-              </label>
-              <label className="qsearch__field">
-                <span>Flyer image URL (optional)</span>
+                <span>Instagram post or image URL</span>
                 <input
                   className="qsearch__filter"
                   type="url"
-                  placeholder="https://… (copy image address from the post)"
-                  value={igImage}
-                  onChange={e => setIgImage(e.target.value)}
-                  data-testid="qsearch-ig-image"
-                />
-              </label>
-              <label className="qsearch__field">
-                <span>@handle (optional, for notes only)</span>
-                <input
-                  className="qsearch__filter"
-                  placeholder="@venuehandle"
-                  value={igHandle}
-                  onChange={e => setIgHandle(e.target.value)}
-                  data-testid="qsearch-ig-handle"
+                  placeholder="https://www.instagram.com/p/…  or  https://…cdninstagram…/flyer.jpg"
+                  value={igUrl}
+                  onChange={e => setIgUrl(e.target.value)}
+                  data-testid="qsearch-ig-url"
                 />
               </label>
             </div>
@@ -1721,25 +1928,35 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               <button
                 type="button"
                 className="is-primary"
-                disabled={busy || (!igCaption.trim() && !igImage.trim())}
-                onClick={() => runIg("paste")}
-                data-testid="qsearch-ig-paste"
+                disabled={busy || !igUrl.trim()}
+                onClick={() => void runIg("url")}
+                data-testid="qsearch-ig-url-btn"
               >
-                {busy ? "Working…" : "Add post → Review"}
+                {busy ? "Working…" : "Add from URL → Review"}
               </button>
             </div>
 
             <details className="qsearch__assist-advanced">
-              <summary>Advanced: pull recent posts via Meta API</summary>
+              <summary>Advanced: Meta Business Graph pull by @handle</summary>
               <p className="qsearch__assist-note">
-                Only if the server has Meta Business tokens configured. Needs a handle. Most people
-                should ignore this and paste the caption instead.
+                Only with server Meta tokens. Most people should use the URL field above.
               </p>
+              <div className="qsearch__assist-fields">
+                <label className="qsearch__field">
+                  <span>@handle</span>
+                  <input
+                    className="qsearch__filter"
+                    placeholder="@venuehandle"
+                    value={igHandle}
+                    onChange={e => setIgHandle(e.target.value)}
+                  />
+                </label>
+              </div>
               <div className="qsearch__toolbar">
                 <button
                   type="button"
                   disabled={busy || !igHandle.trim()}
-                  onClick={() => runIg("graph")}
+                  onClick={() => void runIg("graph")}
                   data-testid="qsearch-ig-graph"
                 >
                   Pull recent posts for @{igHandle.trim().replace(/^@/, "") || "handle"}

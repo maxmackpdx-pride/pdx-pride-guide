@@ -84,19 +84,28 @@ When a scrape is weekly/monthly **or** matches catalog:
 | Single one-off listing | **Needs recurring update** — update that event, don’t stack a second host |
 | Scrape weekly + catalog one-off | Candidate unselected + action note for human |
 
-## Vision
+## Vision (how flyer reading works)
 
-- `POST /api/admin/qsearch/vision` with `{ imageUrl, venueHint?, sourceUrl? }`
-- Needs `XAI_API_KEY` or `OPENAI_API_KEY` (optional `QSEARCH_VISION_MODEL`)
-- `parseSource: vision`; low confidence (&lt;0.55) unselected by default
-- Poster = image URL (also captured full-quality when possible)
-- **Scan default:** sample flyers if structured parse empty (`tryVision` default on)
+There is **no custom/local mini-model**. Flyer OCR uses a **cloud vision API**:
+
+| Env | Model default |
+|-----|----------------|
+| `XAI_API_KEY` | `grok-2-vision-latest` (or `QSEARCH_VISION_MODEL`) |
+| `OPENAI_API_KEY` | `gpt-4o-mini` |
+
+- `POST /api/admin/qsearch/vision` — `{ imageUrl, venueHint? }` (https or `/uploads/…`)
+- `POST /api/admin/qsearch/vision/upload` — multipart `flyers` (1–12 images) + optional `venueHint`
+- Low confidence (&lt;0.55) unselected by default
+- **Scan:** optional `tryVision` samples page images when structured parse is empty
+
+Without those keys, calendar **HTML/JSON/ICS** still work; flyer-from-image does not.
 
 ## Instagram assist
 
-- **Paste:** caption and/or image URL → caption parse and/or vision  
-- **Graph:** `META_PAGE_ACCESS_TOKEN` + `INSTAGRAM_BUSINESS_ACCOUNT_ID` → Business Discovery  
-- **Never** scrapes `instagram.com` unauthenticated  
+- **URL only:** `POST /api/admin/qsearch/instagram` `{ mode: "url", url }` — post link or direct image CDN  
+- Tries public OG image (often blocked) then vision on the image  
+- **Graph:** Meta Business Discovery when tokens set  
+- **Never** full unauth Instagram scrape  
 
 ## Admin API surface
 

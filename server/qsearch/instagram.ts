@@ -124,9 +124,141 @@ function captionToDraft(
   };
 }
 
+function looksLikeImageUrl(url: string): boolean {
+  const u = url.toLowerCase();
+  if (u.startsWith("data:image/")) return true;
+  if (/\.(jpe?g|png|webp|gif)(\?|$)/i.test(u)) return true;
+  if (/cdninstagram|fbcdn\.net|scontent\.|ig_cache|evbuc\.com|static\.tixr/i.test(u)) return true;
+  return false;
+}
+
+function isInstagramPostUrl(url: string): boolean {
+  return /instagram\.com\/(p|reel|tv)\//i.test(url);
+}
+
 /**
- * Manual IG assist: paste caption and/or image URL (or post URL as image if vision can load).
- * Never scrapes instagram.com unauthenticated.
+ * Best-effort OG tags from a public page (often blocked for instagram.com).
+ * Never claims full IG scrape.
+ */
+async function tryFetchOpenGraph(pageUrl: string): Promise<{ image: string | null; description: string | null }> {
+  try {
+    const { assertSafePublicUrl } = await import("../ingest/ssrf");
+    await assertSafePublicUrl(pageUrl);
+    const res = await fetch(pageUrl, {
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml",
+      },
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!res.ok) return { image: null, description: null };
+    const html = (await res.text()).slice(0, 400_000);
+    const image =
+      html.match(/property=["']og:image["'][^>]+content=["']([^"']+)["']/i)?.[1] ||
+      html.match(/content=["']([^"']+)["'][^>]+property=["']og:image["']/i)?.[1] ||
+      null;
+    const description =
+      html.match(/property=["']og:description["'][^>]+content=["']([^"']+)["']/i)?.[1] ||
+      html.match(/content=["']([^"']+)["'][^>]+property=["']og:description["']/i)?.[1] ||
+      html.match(/name=["']description["'][^>]+content=["']([^"']+)["']/i)?.[1] ||
+      null;
+    return {
+      image: image ? image.replace(/&amp;/g, "&") : null,
+      description: description ? description.replace(/&amp;/g, "&") : null,
+    };
+  } catch {
+    return { image: null, description: null };
+  }
+}
+
+/**
+ * Single-URL Instagram assist: post URL or direct image CDN URL.
+ * - Image URL → vision OCR (needs API key)
+ * - Post URL → try OG image (often blocked) then vision; no full unauth scrape
+ */
+export async function igFromUrl(opts: {
+  url: string;
+  venueHint?: string | null;
+}): Promise<IgAssistResult> {
+  const raw = String(opts.url || "").trim();
+  if (!raw) {
+    return { ok: false, handle: null, drafts: [], mode: "none", error: "URL required" };
+  }
+
+  let imageUrl: string | null = null;
+  let caption: string | null = null;
+  let postUrl: string | null = null;
+  const handle = parseInstagramHandle(raw);
+
+  if (looksLikeImageUrl(raw) && !isInstagramPostUrl(raw)) {
+    imageUrl = raw;
+    postUrl = raw;
+  } else if (isInstagramPostUrl(raw) || /instagram\.com\//i.test(raw)) {
+    postUrl = raw;
+    const og = await tryFetchOpenGraph(raw);
+    imageUrl = og.image;
+    caption = og.description;
+    if (!imageUrl) {
+      return {
+        ok: false,
+        handle,
+        drafts: [],
+        mode: "paste",
+        error:
+          "Could not load this Instagram post (login wall / blocked). Paste the direct image address (right‑click flyer → Copy image address) or upload the flyer under Read a flyer.",
+        note: "We do not scrape Instagram logged-out. Meta Graph works only with Business tokens.",
+      };
+    }
+  } else {
+    // Unknown URL — try as image for vision
+    imageUrl = raw;
+    postUrl = raw;
+  }
+
+  const drafts: IngestEventDraft[] = [];
+  let lastError: string | undefined;
+
+  if (imageUrl) {
+    const vis = await visionFlyerToDrafts({
+      imageUrl,
+      sourceUrl: postUrl || imageUrl,
+      venueHint: opts.venueHint || handle,
+      posterStoreUrl: imageUrl.startsWith("data:") ? null : imageUrl,
+    });
+    drafts.push(...vis.drafts);
+    if (vis.error) lastError = vis.error;
+  }
+
+  if (caption?.trim() && !drafts.length) {
+    const d = captionToDraft(caption.trim(), imageUrl, postUrl);
+    if (d) drafts.push(d);
+  }
+
+  if (!drafts.length) {
+    return {
+      ok: false,
+      handle,
+      drafts: [],
+      mode: "paste",
+      error: lastError || "Could not extract an event from that URL.",
+      note: "Need a public image URL or XAI_API_KEY / OPENAI_API_KEY for flyer vision.",
+    };
+  }
+
+  return {
+    ok: true,
+    handle,
+    drafts,
+    mode: "paste",
+    note: caption && !lastError ? "Used post preview text + image when available" : undefined,
+  };
+}
+
+/**
+ * Manual IG assist: caption and/or image URL, or prefer igFromUrl for a single link.
+ * Never scrapes instagram.com unauthenticated beyond public OG (often empty).
  */
 export async function igPasteAssist(opts: {
   handle?: string | null;
@@ -135,6 +267,12 @@ export async function igPasteAssist(opts: {
   postUrl?: string | null;
   venueHint?: string | null;
 }): Promise<IgAssistResult> {
+  // Single URL path preferred
+  const single = String(opts.postUrl || opts.imageUrl || "").trim();
+  if (single && !opts.caption?.trim()) {
+    return igFromUrl({ url: single, venueHint: opts.venueHint || opts.handle });
+  }
+
   const handle = parseInstagramHandle(opts.handle || null);
   const drafts: IngestEventDraft[] = [];
 
@@ -171,9 +309,9 @@ export async function igPasteAssist(opts: {
       handle,
       drafts: [],
       mode: "paste",
-      error: "Provide caption text and/or flyer image URL (no unauth IG scrape).",
+      error: "Paste an Instagram post URL or image URL (caption optional).",
       note: metaConfigured()
-        ? "Meta credentials present — use graphPull for Business Discovery."
+        ? "Meta credentials present — advanced Graph pull still available."
         : "Meta Business Discovery not configured.",
     };
   }
