@@ -11,12 +11,15 @@ Admin event intelligence for Pride Guide PDX. **Discover + draft only.** Default
 |------|--------|
 | Location | Own admin tab only (not under All Events) |
 | Publish | Human select + `confirm: true` → `commitIngest` / approve |
-| Default status | `HIDDEN` |
+| Default status | `HIDDEN` (schema + `createEvent` footgun guard; LIVE only when explicit) |
+| Candidates | `qsearch_*` tables only — never touch `events` until human commit |
 | Directory auto | Registers sources + scan targets; no silent publish |
 | Curated feeds | Prefer specialized URLs for known hosts over plain homepages |
 | dragpdx | Opt-in only (`POST /api/admin/qsearch/dragpdx-opt-in`) |
-| Instagram | No unauth scrape; paste assist + optional Meta Business Discovery |
+| Instagram | No unauth scrape; paste assist + optional Meta Business Discovery (Bearer token) |
 | FB Events API | Out of scope |
+| SSRF | `server/ingest/ssrf.ts` on all fetch paths (http/https, DNS private-IP block, redirect re-check) |
+| **Groups** | **Portland-metro events only** — multi-city brands (e.g. Bearracuda) drop SF/Seattle/etc. (`portlandOnly` / `businessType: group`) |
 
 ## Architecture
 

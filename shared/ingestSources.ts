@@ -41,6 +41,11 @@ export type IngestSource = {
   /** Directory business id when auto-sourced from Places */
   businessId?: number;
   businessType?: string | null;
+  /**
+   * When true (or businessType is group), scan drops non-Portland listings.
+   * Use for multi-city brands like Bearracuda.
+   */
+  portlandOnly?: boolean;
 };
 
 export const INGEST_SOURCES: IngestSource[] = [
@@ -147,6 +152,30 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "html",
     notes: "Flyer vision — low parse yield",
     caution: true,
+  },
+  // ── Groups (Portland events only) ───────────────────────────────────────
+  {
+    id: "bearracuda",
+    label: "Bearracuda (Portland only)",
+    url: "https://bearracuda.com/",
+    tier: "1",
+    format: "html",
+    priority: true,
+    portlandOnly: true,
+    businessType: "group",
+    notes:
+      "Multi-city brand — keep Portland/OR only. Prefer PDX city section / tickets; flyers on event pages. Never SF/Seattle/etc.",
+  },
+  {
+    id: "rose-court",
+    label: "Rose Court (ISRC)",
+    url: "https://rosecourt.org/",
+    tier: "1",
+    format: "html",
+    priority: true,
+    portlandOnly: true,
+    businessType: "group",
+    notes: "Imperial Sovereign Rose Court — Portland org; coronation / pageants / community events only.",
   },
 
   // ── Tier 2 ──────────────────────────────────────────────────────────────
@@ -522,12 +551,17 @@ export function buildDirectoryIngestSources(
     seenHosts.add(host);
 
     const weak = isWeakScrapeHost(url);
-    const notes =
+    const isGroup = String(biz.type || "").toLowerCase() === "group";
+    const notes = [
       resolved.source === "fallback"
         ? "Website filled from venue link map (missing on directory card)"
         : weak
           ? "Social / link-in-bio URL — low structured-data yield"
-          : "Auto from directory website";
+          : "Auto from directory website",
+      isGroup ? "GROUP: Portland-metro events only (drop other cities)" : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
     out.push({
       id: `directory-${biz.id}`,
@@ -538,6 +572,7 @@ export function buildDirectoryIngestSources(
       businessId: biz.id,
       businessType: biz.type ?? null,
       caution: weak || resolved.source === "fallback",
+      portlandOnly: isGroup || undefined,
       notes,
     });
   }

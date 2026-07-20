@@ -7,7 +7,22 @@ import type { IngestEventDraft } from "../ingest/types";
 import { isPastEventListing } from "../ingest/dates";
 import { matchDirectoryBrands, type DirectoryBrand } from "./directoryBrands";
 
-/** Prefer a real flyer from a catalog match / same-series sibling when scrape has none. */
+/** True when two titles are the same series (e.g. "BI Night" / "BI Night — July"). */
+export function titlesSameSeries(a: string, b: string): boolean {
+  const na = normalizeTitleKey(a || "");
+  const nb = normalizeTitleKey(b || "");
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  // Containment only for meaningful keys (avoid "night" matching everything)
+  if (na.length >= 6 && nb.length >= 6 && (na.includes(nb) || nb.includes(na))) return true;
+  return false;
+}
+
+/**
+ * Reuse a prior flyer ONLY for the same series — never "any event at this venue".
+ * Example: BI Night scrape has a new time but no image → use catalog BI Night flyer.
+ * Does not pull Friday Night Show art onto Saturday Night Show.
+ */
 export function priorFlyerFromCatalog(
   draft: IngestEventDraft,
   catalog: Event[],
@@ -18,24 +33,40 @@ export function priorFlyerFromCatalog(
     return { url: e.posterImageUrl, eventId: e.id };
   };
 
+  const draftTitle = draft.title || "";
+  const vKey = normalizeVenueKey(draft.venueName || "");
+
+  // 1) High-confidence matches first — still require same series title
   for (const id of matchEventIds) {
-    const hit = tryPoster(catalog.find(e => e.id === id));
+    const e = catalog.find(ev => ev.id === id);
+    if (!e || !titlesSameSeries(draftTitle, e.title || "")) continue;
+    if (vKey && e.venueName && normalizeVenueKey(e.venueName) && normalizeVenueKey(e.venueName) !== vKey) {
+      // same title at a different venue is not the series we want
+      continue;
+    }
+    const hit = tryPoster(e);
     if (hit) return hit;
   }
 
-  // Series siblings: same title + venue, any date
-  const tKey = normalizeTitleKey(draft.title || "");
-  const vKey = normalizeVenueKey(draft.venueName || "");
-  if (!tKey) return null;
+  // 2) Same series siblings: same title key + same venue (any date)
+  const tKey = normalizeTitleKey(draftTitle);
+  if (!tKey || tKey.length < 4) return null;
+  let best: { url: string; eventId: number; dateStart: string } | null = null;
   for (const e of catalog) {
     if (!e.posterImageUrl || isEventPlaceholderUrl(e.posterImageUrl)) continue;
-    if (normalizeTitleKey(e.title || "") !== tKey) continue;
-    if (vKey && normalizeVenueKey(e.venueName || "") && normalizeVenueKey(e.venueName || "") !== vKey) {
-      continue;
+    if (!titlesSameSeries(draftTitle, e.title || "")) continue;
+    if (vKey && e.venueName) {
+      const ev = normalizeVenueKey(e.venueName);
+      if (ev && ev !== vKey) continue;
     }
-    return { url: e.posterImageUrl, eventId: e.id };
+    const hit = tryPoster(e);
+    if (!hit) continue;
+    // Prefer most recent catalog instance with art
+    if (!best || String(e.dateStart || "") > best.dateStart) {
+      best = { ...hit, dateStart: String(e.dateStart || "") };
+    }
   }
-  return null;
+  return best ? { url: best.url, eventId: best.eventId } : null;
 }
 
 export type RecurringKind = "weekly" | "monthly" | "series" | null;
@@ -506,23 +537,20 @@ export function buildScanCandidates(
     // Deselect strong dups; also deselect when weekly scrape matches one-off (needs human update path)
     const selected = !strong && !hasConflict && !lowConf && !needsRecurringUpdate;
 
-    // Weekly/monthly (or strong catalog match): reuse prior flyer when scrape has no new art
+    // Same-series prior flyer only (e.g. BI Night update, no new art → old BI Night flyer).
+    // Never borrow another night's art from the same venue.
     let draft: IngestEventDraft = row.draft;
     const warnings = [...(draft.warnings || [])];
     if (action) warnings.push(action);
 
     const scrapeMissingFlyer =
       !draft.posterImageUrl || isEventPlaceholderUrl(draft.posterImageUrl);
-    const seriesOrMatched =
-      row.recurring === "weekly" ||
-      row.recurring === "monthly" ||
-      Boolean(strong) ||
-      duplicates.some(d => d.confidence === "high" || d.confidence === "medium");
 
-    if (scrapeMissingFlyer && seriesOrMatched) {
+    if (scrapeMissingFlyer) {
+      // Prefer high-confidence title matches only
       const matchIds = [
-        ...(strong ? [strong.eventId] : []),
-        ...duplicates.map(d => d.eventId),
+        ...(strong && strong.confidence === "high" ? [strong.eventId] : []),
+        ...duplicates.filter(d => d.confidence === "high").map(d => d.eventId),
       ];
       const prior = priorFlyerFromCatalog(draft, catalog, matchIds);
       if (prior) {
@@ -530,7 +558,9 @@ export function buildScanCandidates(
           ...draft,
           posterImageUrl: prior.url,
         };
-        warnings.push(`Flyer reused from prior catalog event #${prior.eventId}`);
+        warnings.push(
+          `Flyer reused from prior same-series catalog event #${prior.eventId}`,
+        );
       }
     }
 

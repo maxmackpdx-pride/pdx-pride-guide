@@ -315,10 +315,13 @@ export async function enrichDraftPoster<T extends { posterImageUrl: string | nul
   draft: T,
   extraCandidates: string[] = [],
 ): Promise<T> {
-  const candidates = [
-    draft.posterImageUrl,
-    ...extraCandidates,
-  ].filter(Boolean) as string[];
+  // If the draft already has a per-event poster, only upgrade THAT url — never
+  // fall through to shared list-page candidates (wrong flyer for sibling nights).
+  const candidates = draft.posterImageUrl
+    ? ([preferFullQualityImageUrl(draft.posterImageUrl) || draft.posterImageUrl].filter(
+        Boolean,
+      ) as string[])
+    : ([...extraCandidates].filter(Boolean) as string[]);
 
   if (!candidates.length) return draft;
 
@@ -327,7 +330,7 @@ export async function enrichDraftPoster<T extends { posterImageUrl: string | nul
   let captured = false;
 
   // Try candidates until one downloads as a real image
-  for (const cand of candidates.slice(0, 5)) {
+  for (const cand of candidates.slice(0, draft.posterImageUrl ? 2 : 5)) {
     const result = await captureFullQualityPoster(cand, {
       referer: draft.sourceUrl,
     });

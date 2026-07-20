@@ -8,6 +8,7 @@ import {
   type IngestSource,
 } from "@shared/ingestSources";
 import type { IngestEventDraft } from "../ingest/types";
+import { isPortlandEventListing } from "../ingest";
 import {
   enrichDraftPoster,
   extractFlyerCandidatesFromHtml,
@@ -16,7 +17,6 @@ import { storage } from "../storage";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
 import { matchDirectoryBrands } from "./directoryBrands";
 import { isEventPlaceholderUrl } from "@shared/eventPoster";
-import type { IngestEventDraft } from "../ingest/types";
 import { discoverAndParse } from "./discover";
 import { fetchIngestSource } from "../ingest/fetchSource";
 import { extractFlyerImageUrls, visionFlyerToDrafts } from "./vision";
@@ -392,23 +392,37 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         parsers: hit.parsers,
       });
 
-      // Extra flyer candidates from the winning calendar/list page (ICS has no images)
+      // List-page flyer pool is only safe when this source returned ONE event.
+      // Applying a calendar hero to every night is what made wrong flyers spread.
       let pageFlyerPool: string[] = [];
-      try {
-        const listPage = await fetchIngestSource(hit.url || primary);
-        if (listPage.body && /<html|<img|og:image/i.test(listPage.body)) {
-          pageFlyerPool = extractFlyerCandidatesFromHtml(
-            listPage.body,
-            listPage.url || hit.url || primary,
-          );
+      const singleEventYield = hit.drafts.length === 1;
+      if (singleEventYield) {
+        try {
+          const listPage = await fetchIngestSource(hit.url || primary);
+          if (listPage.body && /<html|<img|og:image/i.test(listPage.body)) {
+            pageFlyerPool = extractFlyerCandidatesFromHtml(
+              listPage.body,
+              listPage.url || hit.url || primary,
+            );
+          }
+        } catch {
+          /* optional */
         }
-      } catch {
-        /* optional */
       }
 
+      // Groups / multi-city brands: Portland-metro only (e.g. Bearracuda national calendar)
+      const portlandOnly =
+        source.portlandOnly === true ||
+        String(source.businessType || "").toLowerCase() === "group";
+
+      let kept = 0;
       for (const draft of hit.drafts) {
-        const extra: string[] = [...pageFlyerPool];
-        // Per-event page (Tribe event URL, ticket page) often has the real flyer
+        if (portlandOnly && !isPortlandEventListing(draft)) {
+          continue;
+        }
+        kept++;
+        const extra: string[] = [];
+        // Per-event page only (Tribe event URL / ticket page) — never sibling nights
         const eventPage =
           (draft.sourceUrl && draft.sourceUrl !== hit.url && draft.sourceUrl !== primary
             ? draft.sourceUrl
@@ -418,21 +432,47 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
           try {
             const ep = await fetchIngestSource(eventPage);
             if (ep.body) {
-              extra.unshift(
-                ...extractFlyerCandidatesFromHtml(ep.body, ep.url || eventPage),
-              );
+              extra.push(...extractFlyerCandidatesFromHtml(ep.body, ep.url || eventPage));
             }
           } catch {
             /* optional */
           }
         }
+        if (!draft.posterImageUrl && singleEventYield && pageFlyerPool.length) {
+          extra.push(...pageFlyerPool);
+        }
         // Capture full-quality flyer into /uploads when remote
-        const withPoster = await enrichDraftPoster(draft, extra);
+        // Only pass extras when draft has no image — never let a list hero replace a per-event poster
+        const withPoster = await enrichDraftPoster(
+          draft,
+          draft.posterImageUrl ? [] : extra,
+        );
         raw.push({
           draft: withPoster,
           sourceId: source.id,
           sourceLabel: source.label,
           sourceUrl: hit.sourceUrl || hit.url,
+        });
+      }
+
+      // Reflect Portland filter in health counts when we dropped out-of-market rows
+      if (portlandOnly && kept !== hit.eventCount) {
+        const last = handle.perSource[handle.perSource.length - 1];
+        if (last && last.sourceId === source.id) {
+          last.eventCount = kept;
+          last.error =
+            kept === 0
+              ? hit.eventCount > 0
+                ? `Zero Portland yield (${hit.eventCount} out-of-market dropped)`
+                : "Zero yield"
+              : last.error;
+        }
+        recordScanResult(source.id, {
+          ok: true,
+          eventCount: kept,
+          resolvedUrl: kept > 0 ? hit.url : null,
+          winningParser: hit.parsers[0] || null,
+          yieldStatus: kept > 0 ? "works" : "zero_yield",
         });
       }
 
@@ -539,17 +579,20 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
         sourceLabel: String(c.sourceLabel || ""),
       });
 
+      // Same-series prior flyer only — never "any poster from this venue"
       const missingFlyer = !draft.posterImageUrl || isEventPlaceholderUrl(draft.posterImageUrl);
-      const recurring = c.recurring as string | null | undefined;
-      const strong = c.strongDuplicate as { eventId?: number } | null | undefined;
-      const dups = (c.duplicates as Array<{ eventId?: number }> | undefined) || [];
-      if (
-        missingFlyer &&
-        (recurring === "weekly" || recurring === "monthly" || strong?.eventId || dups.length)
-      ) {
+      const strong = c.strongDuplicate as { eventId?: number; confidence?: string } | null | undefined;
+      const dups =
+        (c.duplicates as Array<{ eventId?: number; confidence?: string }> | undefined) || [];
+      if (missingFlyer) {
         const matchIds = [
-          ...(strong?.eventId != null ? [strong.eventId] : []),
-          ...dups.map(d => d.eventId).filter((id): id is number => id != null),
+          ...(strong?.eventId != null && (strong.confidence === "high" || !strong.confidence)
+            ? [strong.eventId]
+            : []),
+          ...dups
+            .filter(d => d.confidence === "high" || d.confidence == null)
+            .map(d => d.eventId)
+            .filter((id): id is number => id != null),
         ];
         const prior = priorFlyerFromCatalog(draft, catalog, matchIds);
         if (prior) {
@@ -557,7 +600,10 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
             ...draft,
             posterImageUrl: prior.url,
             warnings: Array.from(
-              new Set([...(draft.warnings || []), `Flyer reused from prior catalog event #${prior.eventId}`]),
+              new Set([
+                ...(draft.warnings || []),
+                `Flyer reused from prior same-series catalog event #${prior.eventId}`,
+              ]),
             ),
           };
         }

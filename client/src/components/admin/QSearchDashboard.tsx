@@ -2,7 +2,79 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import "./qsearch.css";
+
+const DIRECTORY_TYPES = [
+  "bar",
+  "venue",
+  "restaurant",
+  "cafe",
+  "shop",
+  "service",
+  "hotel",
+  "nonprofit",
+  "healthcare",
+  "realestate",
+  "group",
+] as const;
+
+type DirectoryFormState = {
+  name: string;
+  type: (typeof DIRECTORY_TYPES)[number];
+  description: string;
+  address: string;
+  neighborhood: string;
+  website: string;
+  instagram: string;
+  phone: string;
+  hours: string;
+  imageUrl: string;
+  queerOwned: boolean;
+  queerFriendly: boolean;
+  lat: number | null;
+  lng: number | null;
+  fromCandidateId: string;
+};
+
+/** Venue names that should not prompt "Add to directory". */
+function isWeakVenueName(name: string | null | undefined): boolean {
+  const v = String(name || "").trim();
+  if (!v || v.length < 2) return true;
+  return /^(tba|tbd|n\/?a|unknown|various|online|virtual|see listing|multiple|portland)$/i.test(v);
+}
+
+/** Prefer a real venue site as website — skip Eventbrite/Facebook list noise. */
+function guessWebsiteFromCandidate(c: {
+  sourceUrl?: string;
+  draft: { sourceUrl?: string | null; ticketUrl?: string | null };
+}): string {
+  const urls = [c.draft.sourceUrl, c.sourceUrl, c.draft.ticketUrl].filter(Boolean) as string[];
+  for (const raw of urls) {
+    try {
+      const u = new URL(raw);
+      const host = u.hostname.replace(/^www\./, "").toLowerCase();
+      if (
+        /eventbrite|facebook|fb\.com|instagram|ticketmaster|etix|dice\.fm|ra\.co|bandsintown/i.test(
+          host,
+        )
+      ) {
+        continue;
+      }
+      return `${u.protocol}//${u.hostname}`;
+    } catch {
+      /* next */
+    }
+  }
+  return "";
+}
 
 type SourceHealth = {
   sourceId: string;
@@ -93,6 +165,31 @@ type Candidate = {
   }>;
   status?: string;
 };
+
+function buildDirectoryFormFromCandidate(c: Candidate): DirectoryFormState {
+  const name = String(c.draft.venueName || "").trim();
+  const desc =
+    (c.draft.description || "").trim().slice(0, 500) ||
+    `${name} — found via QSearch (${c.sourceLabel || "scan"}). Edit this blurb before publishing.`;
+  return {
+    name,
+    type: "venue",
+    description: desc.length >= 10 ? desc : `${desc} Portland LGBTQ+ / nightlife place.`.slice(0, 500),
+    address: String(c.draft.address || "").trim(),
+    neighborhood: "",
+    website: guessWebsiteFromCandidate(c),
+    instagram: "",
+    phone: "",
+    hours: "",
+    // Flyer can seed logo preview until a proper neon logo is uploaded
+    imageUrl: c.draft.posterImageUrl || "",
+    queerOwned: false,
+    queerFriendly: true,
+    lat: null,
+    lng: null,
+    fromCandidateId: c.id,
+  };
+}
 
 type Dashboard = {
   sources: Array<{ id: string; label: string; url: string; tier: string; notes?: string; caution?: boolean }>;
@@ -218,6 +315,11 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   const [igHandle, setIgHandle] = useState("");
   const [igCaption, setIgCaption] = useState("");
   const [igImage, setIgImage] = useState("");
+
+  // Add-to-directory modal (unknown venue from scan)
+  const [dirForm, setDirForm] = useState<DirectoryFormState | null>(null);
+  const [dirSaving, setDirSaving] = useState(false);
+  const [dirAddedNames, setDirAddedNames] = useState<Record<string, true>>({});
 
   const { data: dash, isLoading, refetch } = useQuery<Dashboard>({
     queryKey: ["/api/admin/qsearch/dashboard"],
@@ -417,6 +519,88 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function saveDirectoryPlace() {
+    if (!dirForm) return;
+    if (!dirForm.name.trim() || dirForm.name.trim().length < 2) {
+      toast({ title: "Name required", description: "Enter the place name.", variant: "destructive" });
+      return;
+    }
+    if (!dirForm.description.trim() || dirForm.description.trim().length < 10) {
+      toast({
+        title: "Description required",
+        description: "Add at least a short blurb (10+ characters) for the directory card.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setDirSaving(true);
+    try {
+      const res = await apiRequest("POST", "/api/admin/directory", {
+        name: dirForm.name.trim(),
+        type: dirForm.type,
+        description: dirForm.description.trim(),
+        address: dirForm.address.trim() || null,
+        neighborhood: dirForm.neighborhood.trim() || null,
+        website: dirForm.website.trim() || null,
+        instagram: dirForm.instagram.trim() || null,
+        phone: dirForm.phone.trim() || null,
+        hours: dirForm.hours.trim() || null,
+        imageUrl: dirForm.imageUrl.trim() || null,
+        queerOwned: dirForm.queerOwned,
+        queerFriendly: dirForm.queerFriendly,
+        active: true,
+        isNew: true,
+        lat: dirForm.lat,
+        lng: dirForm.lng,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not add place");
+      const key = dirForm.name.trim().toLowerCase();
+      setDirAddedNames(prev => ({ ...prev, [key]: true }));
+      setDirForm(null);
+      toast({
+        title: "Added to directory",
+        description: `${data.name || dirForm.name} is live as ${data.type || dirForm.type}. Re-scan or refresh Review to match logos.`,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
+      void refetch();
+      void refetchQueue();
+    } catch (err) {
+      toast({
+        title: "Directory add failed",
+        description: parseApiError(err, "Could not create place"),
+        variant: "destructive",
+      });
+    } finally {
+      setDirSaving(false);
+    }
+  }
+
+  async function uploadDirectoryLogo(file: File) {
+    const body = new FormData();
+    body.append("logo", file);
+    try {
+      const res = await fetch("/api/upload/business-logo", {
+        method: "POST",
+        body,
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      if (data.url) {
+        setDirForm(prev => (prev ? { ...prev, imageUrl: data.url } : prev));
+        toast({ title: "Logo uploaded", description: "Preview updated — save to attach to the place." });
+      }
+    } catch (err) {
+      toast({
+        title: "Logo upload failed",
+        description: parseApiError(err, "jpg/png/webp, max 8MB"),
+        variant: "destructive",
+      });
     }
   }
 
@@ -951,6 +1135,13 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 const groupBrand = brands.find(b => b.role === "group");
                 const venueBrand =
                   brands.find(b => b.role === "venue") || brands.find(b => b.role === "place");
+                const venueNameKey = String(c.draft.venueName || "")
+                  .trim()
+                  .toLowerCase();
+                const canAddToDirectory =
+                  !venueBrand &&
+                  !isWeakVenueName(c.draft.venueName) &&
+                  !dirAddedNames[venueNameKey];
                 const orderedBrands = [groupBrand, venueBrand].filter(Boolean) as NonNullable<
                   typeof brands
                 >;
@@ -1042,6 +1233,26 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         {venueBrand && (
                           <span className="qsearch__cand-slot-name" style={{ color: venueBrand.color }}>
                             {venueBrand.name}
+                          </span>
+                        )}
+                        {canAddToDirectory && (
+                          <button
+                            type="button"
+                            className="qsearch__add-dir-btn"
+                            data-testid="qsearch-add-directory"
+                            title="This venue is not in the directory yet"
+                            onClick={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setDirForm(buildDirectoryFormFromCandidate(c));
+                            }}
+                          >
+                            Add to directory
+                          </button>
+                        )}
+                        {dirAddedNames[venueNameKey] && !venueBrand && (
+                          <span className="qsearch__cand-slot-name" style={{ color: "var(--qs-lime)" }}>
+                            Added ✓
                           </span>
                         )}
                       </div>
@@ -1204,6 +1415,194 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           )}
         </div>
       )}
+
+      <Dialog open={!!dirForm} onOpenChange={open => !open && setDirForm(null)}>
+        <DialogContent className="qsearch__dir-dialog max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add place to directory</DialogTitle>
+            <DialogDescription>
+              Venue from this scan is not in the directory yet. Review the fields (and logo), then
+              save. Goes live immediately as an admin listing.
+            </DialogDescription>
+          </DialogHeader>
+          {dirForm && (
+            <div className="qsearch__dir-form">
+              <div className="qsearch__dir-logo-row">
+                <div className="qsearch__dir-logo-preview">
+                  {dirForm.imageUrl ? (
+                    <img src={dirForm.imageUrl} alt="" />
+                  ) : (
+                    <span>No logo</span>
+                  )}
+                </div>
+                <div className="qsearch__dir-logo-fields">
+                  <label className="qsearch__field">
+                    <span>Logo / image URL</span>
+                    <input
+                      className="qsearch__filter"
+                      value={dirForm.imageUrl}
+                      onChange={e => setDirForm({ ...dirForm, imageUrl: e.target.value })}
+                      placeholder="https://… or /uploads/…"
+                    />
+                  </label>
+                  <label className="qsearch__field">
+                    <span>Upload logo file</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (f) void uploadDirectoryLogo(f);
+                      }}
+                    />
+                  </label>
+                  <p className="qsearch__assist-note" style={{ margin: 0 }}>
+                    Flyer is prefilled when present — replace with a square neon logo when you have
+                    one.
+                  </p>
+                </div>
+              </div>
+
+              <label className="qsearch__field qsearch__field--wide">
+                <span>Name *</span>
+                <input
+                  className="qsearch__filter"
+                  value={dirForm.name}
+                  onChange={e => setDirForm({ ...dirForm, name: e.target.value })}
+                  required
+                />
+              </label>
+
+              <div className="qsearch__assist-fields">
+                <label className="qsearch__field">
+                  <span>Type *</span>
+                  <select
+                    className="qsearch__filter"
+                    value={dirForm.type}
+                    onChange={e =>
+                      setDirForm({
+                        ...dirForm,
+                        type: e.target.value as DirectoryFormState["type"],
+                      })
+                    }
+                  >
+                    {DIRECTORY_TYPES.map(t => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="qsearch__field">
+                  <span>Neighborhood</span>
+                  <input
+                    className="qsearch__filter"
+                    value={dirForm.neighborhood}
+                    onChange={e => setDirForm({ ...dirForm, neighborhood: e.target.value })}
+                    placeholder="e.g. Old Town"
+                  />
+                </label>
+              </div>
+
+              <label className="qsearch__field qsearch__field--wide">
+                <span>Description * (directory card blurb)</span>
+                <textarea
+                  className="qsearch__filter qsearch__textarea"
+                  value={dirForm.description}
+                  onChange={e => setDirForm({ ...dirForm, description: e.target.value })}
+                  rows={4}
+                />
+              </label>
+
+              <label className="qsearch__field qsearch__field--wide">
+                <span>Address</span>
+                <input
+                  className="qsearch__filter"
+                  value={dirForm.address}
+                  onChange={e => setDirForm({ ...dirForm, address: e.target.value })}
+                />
+              </label>
+
+              <div className="qsearch__assist-fields">
+                <label className="qsearch__field">
+                  <span>Website</span>
+                  <input
+                    className="qsearch__filter"
+                    value={dirForm.website}
+                    onChange={e => setDirForm({ ...dirForm, website: e.target.value })}
+                    placeholder="https://"
+                  />
+                </label>
+                <label className="qsearch__field">
+                  <span>Instagram</span>
+                  <input
+                    className="qsearch__filter"
+                    value={dirForm.instagram}
+                    onChange={e => setDirForm({ ...dirForm, instagram: e.target.value })}
+                    placeholder="@handle"
+                  />
+                </label>
+                <label className="qsearch__field">
+                  <span>Phone</span>
+                  <input
+                    className="qsearch__filter"
+                    value={dirForm.phone}
+                    onChange={e => setDirForm({ ...dirForm, phone: e.target.value })}
+                  />
+                </label>
+                <label className="qsearch__field">
+                  <span>Hours</span>
+                  <input
+                    className="qsearch__filter"
+                    value={dirForm.hours}
+                    onChange={e => setDirForm({ ...dirForm, hours: e.target.value })}
+                    placeholder="e.g. Daily 4pm–2am"
+                  />
+                </label>
+              </div>
+
+              <div className="qsearch__dir-checks">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={dirForm.queerFriendly}
+                    onChange={e => setDirForm({ ...dirForm, queerFriendly: e.target.checked })}
+                  />{" "}
+                  Queer-friendly
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={dirForm.queerOwned}
+                    onChange={e => setDirForm({ ...dirForm, queerOwned: e.target.checked })}
+                  />{" "}
+                  Queer-owned
+                </label>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <button
+              type="button"
+              className="qsearch__scan-btn is-ghost"
+              onClick={() => setDirForm(null)}
+              disabled={dirSaving}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="qsearch__scan-btn"
+              style={{ borderColor: "var(--qs-lime)", color: "var(--qs-lime)" }}
+              disabled={dirSaving}
+              onClick={() => void saveDirectoryPlace()}
+              data-testid="qsearch-dir-save"
+            >
+              {dirSaving ? "Saving…" : "Save to directory"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {tab === "assist" && (
         <div className="qsearch__assist">

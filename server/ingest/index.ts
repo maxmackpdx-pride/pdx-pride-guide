@@ -68,6 +68,51 @@ export function isNonEventListing(draft: Pick<IngestEventDraft, "title" | "descr
   return false;
 }
 
+/**
+ * Multi-city brands (Bearracuda, touring groups) often list SF/Seattle/etc.
+ * Pride Guide only wants Portland metro listings for group sources.
+ */
+export function isPortlandEventListing(
+  draft: Pick<IngestEventDraft, "title" | "description" | "venueName" | "address" | "neighborhood" | "sourceUrl">,
+): boolean {
+  const blob = [
+    draft.venueName,
+    draft.address,
+    draft.neighborhood,
+    draft.title,
+    draft.description?.slice(0, 400),
+    draft.sourceUrl,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  // Explicit non-PDX cities (common multi-city brand calendars)
+  if (
+    /\b(san francisco|sf bay|oakland|seattle|los angeles|\bla\b|chicago|denver|atlanta|new orleans|austin|dallas|houston|phoenix|vegas|miami|nyc|new york|boston|dc|washington)\b/i.test(
+      blob,
+    ) &&
+    !/\b(portland|pdx|oregon|\bor\b)\b/i.test(blob)
+  ) {
+    return false;
+  }
+  // Strong Portland signals
+  if (/\b(portland|pdx|beaverton|gresham|milwaukie|oregon city|tualatin|hillsboro|lake oswego)\b/i.test(blob)) {
+    return true;
+  }
+  if (/\b(or|oregon)\s*\d{5}\b/i.test(blob) || /,\s*or\b/i.test(blob)) return true;
+  // Known local venues without "Portland" in the string
+  if (
+    /\b(darcelle|stag|badlands|eagle|silverado|cc slaughters|slaughters|nova|holocene|sanctuary|hawks|camp bar|scandals|crystal ballroom|star theater|get down|alberta rose|meet rack)\b/i.test(
+      blob,
+    )
+  ) {
+    return true;
+  }
+  // No clear city → drop for group filters (prefer precision over noise)
+  return false;
+}
+
 export { isPastEventListing } from "./dates";
 
 function mergeDrafts(parts: IngestEventDraft[][]): IngestEventDraft[] {
@@ -271,7 +316,9 @@ export async function previewIngest(input: {
     description: decodeEntities(d.description),
   }));
 
-  // Harvest flyer candidates from all HTML bodies (og:image, srcset, large imgs)
+  // Harvest page-level flyer candidates (og:image, etc.) — ONLY safe to assign when
+  // this fetch produced a single event. Multi-event calendars must not share one
+  // list-page hero across every night (that stamped the same flyer on all venues).
   const pageFlyerPool: string[] = [];
   for (const b of bodies) {
     if (b.body && /<html|<img|og:image/i.test(b.body)) {
@@ -280,6 +327,7 @@ export async function previewIngest(input: {
       );
     }
   }
+  const singleEventPage = drafts.length === 1;
 
   drafts = drafts.map(d => {
     if (d.posterImageUrl) {
@@ -288,7 +336,8 @@ export async function previewIngest(input: {
         posterImageUrl: preferFullQualityImageUrl(d.posterImageUrl) || d.posterImageUrl,
       };
     }
-    if (pageFlyerPool[0]) {
+    // One listing on the page → og:image is usually that event's flyer
+    if (singleEventPage && pageFlyerPool[0]) {
       return {
         ...d,
         posterImageUrl: pageFlyerPool[0],
@@ -298,10 +347,12 @@ export async function previewIngest(input: {
     return d;
   });
 
-  // Capture flyers to local /uploads when possible (full quality)
+  // Capture flyers to local /uploads when possible (full quality).
+  // Never pass shared pageFlyerPool into multi-event drafts (would steal one flyer for all).
   const enriched: IngestEventDraft[] = [];
   for (const d of drafts) {
-    enriched.push(await enrichDraftPoster(d, pageFlyerPool));
+    const extra = d.posterImageUrl ? [] : singleEventPage ? pageFlyerPool : [];
+    enriched.push(await enrichDraftPoster(d, extra));
   }
 
   const events = attachDuplicates(enriched, input.existingEvents);

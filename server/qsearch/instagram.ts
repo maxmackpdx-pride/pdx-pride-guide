@@ -214,8 +214,14 @@ export async function igGraphPull(opts: {
         String(opts.limit || 5) +
         "){caption,media_url,permalink,timestamp,media_type}}",
     );
-    const url = `https://graph.facebook.com/v19.0/${meta.businessId}?fields=${fields}&access_token=${encodeURIComponent(meta.token)}`;
-    const res = await fetch(url);
+    // Prefer Authorization header so access tokens are not query-string logged by proxies
+    const url = `https://graph.facebook.com/v19.0/${meta.businessId}?fields=${fields}`;
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${meta.token}`,
+        Accept: "application/json",
+      },
+    });
     if (!res.ok) {
       const t = await res.text();
       return {

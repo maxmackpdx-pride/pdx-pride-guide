@@ -1932,13 +1932,40 @@ export function registerRoutes(httpServer: Server, app: Express) {
       lng: data.lng,
     });
     const biz = storage.createBusiness({
-      ...data,
-      lat: withCoords.lat ?? data.lat,
-      lng: withCoords.lng ?? data.lng,
+      name: String(data.name).trim(),
+      type: String(data.type).trim(),
+      description: String(data.description).trim(),
+      address: data.address != null && String(data.address).trim() ? String(data.address).trim() : null,
+      neighborhood:
+        data.neighborhood != null && String(data.neighborhood).trim()
+          ? String(data.neighborhood).trim()
+          : null,
+      website: data.website != null && String(data.website).trim() ? String(data.website).trim() : null,
+      instagram:
+        data.instagram != null && String(data.instagram).trim() ? String(data.instagram).trim() : null,
+      phone: data.phone != null && String(data.phone).trim() ? String(data.phone).trim() : null,
+      hours: data.hours != null && String(data.hours).trim() ? String(data.hours).trim() : null,
+      imageUrl:
+        data.imageUrl != null && String(data.imageUrl).trim() ? String(data.imageUrl).trim() : null,
+      donateUrl: data.donateUrl != null && String(data.donateUrl).trim() ? String(data.donateUrl).trim() : null,
+      lat: withCoords.lat ?? data.lat ?? null,
+      lng: withCoords.lng ?? data.lng ?? null,
       active: data.active !== false,
       queerOwned: !!data.queerOwned,
       queerFriendly: data.queerFriendly !== false,
+      isNew: data.isNew === true,
+      grandOpeningDate: data.grandOpeningDate || null,
     });
+    try {
+      auditAdmin(req, "directory_create", {
+        type: "business",
+        id: String(biz.id),
+        label: biz.name,
+        detail: { type: biz.type, from: "qsearch_or_admin" },
+      });
+    } catch {
+      /* audit optional */
+    }
     res.json(biz);
   });
 

@@ -112,7 +112,7 @@ sqlite.exec(`
     is_sex_positive INTEGER NOT NULL DEFAULT 0,
     nudity_ok INTEGER NOT NULL DEFAULT 0,
     poster_image_url TEXT,
-    status TEXT NOT NULL DEFAULT 'LIVE',
+    status TEXT NOT NULL DEFAULT 'HIDDEN',
     source TEXT NOT NULL DEFAULT 'admin_seeded',
     is_claimable INTEGER NOT NULL DEFAULT 0,
     claimed_by TEXT,
@@ -5244,6 +5244,33 @@ function runBootMigrationsOnce() {
     recordBootMigration("either_or_not_queer_owned_v1");
   }
 
+  // Bearracuda: nightlife brand / promoter as directory group (events at partner venues).
+  if (!hasBootMigration("seed_bearracuda_group_v1")) {
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = 'Bearracuda' LIMIT 1`)
+      .get() as { id?: number } | undefined;
+    if (!exists?.id) {
+      db.insert(businesses)
+        .values({
+          name: "Bearracuda",
+          type: "group",
+          description:
+            "Portland bear dance party / nightlife brand. Events at Nova PDX, Crystal Ballroom, and partner venues — follow brand calendar + IG for flyers.",
+          address: null,
+          neighborhood: "Portland",
+          website: "https://bearracuda.com",
+          instagram: "@bearracudapdx",
+          queerOwned: true,
+          queerFriendly: true,
+          active: true,
+          isNew: false,
+          createdAt: new Date().toISOString(),
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_bearracuda_group_v1");
+  }
+
   // Remove Back 2 Earth from directory (venue no longer listed).
   if (!hasBootMigration("remove_back_2_earth_v1")) {
     const row = sqlite
@@ -7050,7 +7077,17 @@ export const storage: IStorage = {
     `).all().map((row: any) => Number(row.eventId));
   },
   createEvent(data) {
-    return db.insert(events).values({ ...data, createdAt: new Date().toISOString() }).returning().get();
+    // Footgun guard: never inherit a silent LIVE default. Callers that want public
+    // must pass status: "LIVE" explicitly (admin seed, approve flows, etc.).
+    return db
+      .insert(events)
+      .values({
+        ...data,
+        status: data.status ?? "HIDDEN",
+        createdAt: new Date().toISOString(),
+      })
+      .returning()
+      .get();
   },
   updateEventStatus(id, status) {
     db.update(events).set({ status }).where(eq(events.id, id)).run();
