@@ -257,6 +257,196 @@ button.qsearch__stat.is-active {
   margin: 0 0 0.65rem;
 }
 
+.qsearch__section-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.qsearch__toolbar .qsearch__section-chip,
+.qsearch__section-chip {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--qs-line);
+  background: transparent;
+  color: var(--qs-muted);
+  cursor: pointer;
+}
+
+.qsearch__toolbar .qsearch__section-chip:hover,
+.qsearch__section-chip:hover {
+  border-color: rgba(25, 227, 255, 0.45);
+  color: #fff;
+}
+
+.qsearch__toolbar .qsearch__section-chip.is-active,
+.qsearch__section-chip.is-active {
+  border-color: rgba(25, 227, 255, 0.65);
+  color: var(--qs-cyan);
+  background: rgba(25, 227, 255, 0.08);
+}
+
+.qsearch__sources-lede {
+  font-size: 0.82rem;
+  color: var(--qs-muted);
+  line-height: 1.45;
+  margin: 0 0 0.85rem;
+  max-width: 48rem;
+}
+
+.qsearch__sources-section .qsearch__panel-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+}
+
+.qsearch__panel-count {
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-weight: 400;
+  color: var(--qs-muted);
+}
+
+.qsearch__section-hint {
+  font-size: 0.78rem;
+  color: var(--qs-muted);
+  margin: -0.25rem 0 0.75rem;
+  line-height: 1.4;
+}
+
+.qsearch__listing-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.qsearch__listing {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.qsearch__listing-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.75rem;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.qsearch__listing-summary::-webkit-details-marker {
+  display: none;
+}
+
+.qsearch__listing-summary::before {
+  content: "▸";
+  color: var(--qs-cyan);
+  margin-right: 0.35rem;
+  font-size: 0.7rem;
+}
+
+.qsearch__listing[open] > .qsearch__listing-summary::before {
+  content: "▾";
+}
+
+.qsearch__listing-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.qsearch__listing-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.qsearch__listing-count {
+  font-size: 0.7rem;
+  color: var(--qs-muted);
+  margin-left: 0.25rem;
+}
+
+.qsearch__listing-body {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.35rem 0.4rem 0.5rem;
+}
+
+.qsearch__add-source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.65rem 0.75rem;
+  align-items: end;
+}
+
+.qsearch__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--qs-muted);
+}
+
+.qsearch__field--wide {
+  grid-column: 1 / -1;
+}
+
+.qsearch__field .qsearch__filter,
+.qsearch__field select.qsearch__filter {
+  max-width: none;
+  width: 100%;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.qsearch__add-source-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.qsearch__source-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.qsearch__btn-delete {
+  border-color: rgba(255, 0, 204, 0.4) !important;
+  color: var(--qs-pink) !important;
+  font-size: 0.65rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.qsearch__btn-delete:hover:not(:disabled) {
+  background: rgba(255, 0, 204, 0.1);
+}
+
+.qsearch__btn-restore {
+  border-color: rgba(200, 250, 60, 0.45) !important;
+  color: var(--qs-lime) !important;
+  font-size: 0.65rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.qsearch__venue-table tr.is-disabled-source {
+  opacity: 0.72;
+}
+
 .qsearch__venue-table {
   width: 100%;
   border-collapse: collapse;
@@ -500,6 +690,29 @@ button.qsearch__stat.is-active {
 
 .qsearch__cand-meta a:hover {
   color: var(--qs-lime);
+}
+
+.qsearch__cand-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0;
+}
+
+.qsearch__link-event {
+  font-weight: 700;
+  color: var(--qs-lime) !important;
+  text-decoration: underline;
+}
+
+.qsearch__link-feed {
+  opacity: 0.85;
+  font-size: 0.72rem;
+}
+
+.qsearch__link-missing {
+  color: var(--qs-muted);
+  font-style: italic;
 }
 
 .qsearch__cand-actions {

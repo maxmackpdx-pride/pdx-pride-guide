@@ -72,24 +72,36 @@ export async function clearPwaCaches(): Promise<void> {
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!("serviceWorker" in navigator)) return null;
   try {
+    // Snapshot before register(): clientsClaim() on first install (and any
+    // first control of this document) fires controllerchange even when the
+    // page already has the latest shell. Reloading in that case makes every
+    // cold open of / flash a full second load.
+    const hadController = navigator.serviceWorker.controller != null;
+
     const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
 
     registration.addEventListener("updatefound", () => {
       const worker = registration.installing;
       if (!worker) return;
       worker.addEventListener("statechange", () => {
+        // Activate immediately only when replacing an already-controlling SW
+        // (post-deploy update). First install activates on its own.
         if (worker.state === "installed" && navigator.serviceWorker.controller) {
           worker.postMessage({ type: "SKIP_WAITING" });
         }
       });
     });
 
-    let reloaded = false;
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (reloaded) return;
-      reloaded = true;
-      window.location.reload();
-    });
+    // Only auto-reload when an *updated* worker takes over a page that was
+    // already controlled. First-time claim must not force a reload.
+    if (hadController) {
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (reloaded) return;
+        reloaded = true;
+        window.location.reload();
+      });
+    }
 
     return registration;
   } catch (error) {

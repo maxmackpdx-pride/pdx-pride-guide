@@ -137,11 +137,12 @@ function nodeToDraft(node: Record<string, any>, sourceUrl: string | null): Inges
   let description = String(node.description || node.about || node.summary || "").replace(/<[^>]+>/g, " ").trim();
   if (!description) description = `${title} at ${venueName}.`;
 
-  const ticketUrl = node.eventPageUrl || node.url || node.slug
-    ? (String(node.eventPageUrl || node.url || "").startsWith("http")
-        ? String(node.eventPageUrl || node.url)
-        : sourceUrl)
-    : sourceUrl;
+  const rawPage = String(node.eventPageUrl || node.url || "").trim();
+  const eventPageUrl =
+    rawPage.startsWith("http") && !/format=json|wp-json|\.ics/i.test(rawPage)
+      ? rawPage.slice(0, 500)
+      : null;
+  const ticketUrl = eventPageUrl || sourceUrl;
 
   return {
     title: title.slice(0, 200),
@@ -158,6 +159,7 @@ function nodeToDraft(node: Record<string, any>, sourceUrl: string | null): Inges
     eventTypes: "[]",
     admission: "FREE",
     ticketUrl: ticketUrl ? String(ticketUrl).slice(0, 500) : null,
+    eventPageUrl,
     isPublic: true,
     isPrivate: false,
     isHouseParty: false,

@@ -5244,6 +5244,19 @@ function runBootMigrationsOnce() {
     recordBootMigration("either_or_not_queer_owned_v1");
   }
 
+  // Sanctuary Club: ensure website so QSearch host-match + publish link work (ICS often TBA LOCATION).
+  if (!hasBootMigration("sanctuary_club_website_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET website = COALESCE(NULLIF(TRIM(website), ''), 'https://www.pdxsanctuary.com/'),
+             address = COALESCE(NULLIF(TRIM(address), ''), '33 NW 9th Ave')
+         WHERE name = 'Sanctuary Club' OR name LIKE 'Sanctuary%'`,
+      )
+      .run();
+    recordBootMigration("sanctuary_club_website_v1");
+  }
+
   // Bearracuda: nightlife brand / promoter as directory group (events at partner venues).
   if (!hasBootMigration("seed_bearracuda_group_v1")) {
     const exists = sqlite

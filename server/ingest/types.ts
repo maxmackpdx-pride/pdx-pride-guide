@@ -33,7 +33,12 @@ export type IngestEventDraft = {
   isSexPositive: boolean;
   nudityOk: boolean;
   posterImageUrl: string | null;
-  /** Provenance for admin notes / source field. */
+  /**
+   * Public human-facing event page (venue site event URL, Tixr event, etc.).
+   * Prefer this over feed/API URLs for "open listing" links in Review.
+   */
+  eventPageUrl?: string | null;
+  /** Provenance for admin notes / source field (often the feed/list URL). */
   sourceUrl: string | null;
   parseSource: IngestParseSource;
   warnings: string[];

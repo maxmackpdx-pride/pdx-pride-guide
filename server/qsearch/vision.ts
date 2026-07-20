@@ -1,7 +1,13 @@
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import type { IngestEventDraft } from "../ingest/types";
-import { dayOfWeekFromStart, defaultEndFromStart, toPacificWallClock } from "../ingest/dates";
+import {
+  dayOfWeekFromStart,
+  defaultEndFromStart,
+  pacificCalendarYear,
+  toPacificWallClock,
+  yearFromDateString,
+} from "../ingest/dates";
 
 export type VisionResult = {
   drafts: IngestEventDraft[];
@@ -33,16 +39,33 @@ function draftFromPartial(
 ): IngestEventDraft | null {
   const title = String(p.title || p.name || "").trim();
   if (!title) return null;
+  // Year is mandatory — reject or repair partial dates that drop the year
   let dateStart = toPacificWallClock(p.dateStart || p.start || p.date || p.when);
   if (!dateStart && p.date && p.time) {
-    dateStart = toPacificWallClock(`${p.date}T${String(p.time).padStart(5, "0")}`);
+    const datePart = String(p.date);
+    const withYear =
+      yearFromDateString(datePart) != null
+        ? datePart
+        : `${pacificCalendarYear()}-${datePart.replace(/^(\d{1,2})[\/\-](\d{1,2})/, (_, a, b) => `${String(a).padStart(2, "0")}-${String(b).padStart(2, "0")}`)}`;
+    dateStart = toPacificWallClock(`${withYear}T${String(p.time).padStart(5, "0")}`);
   }
-  if (!dateStart) {
-    // low confidence stub with far future placeholder rejected
+  if (!dateStart || yearFromDateString(dateStart) == null) {
+    // Do not invent a year-less or hard-coded placeholder listing
     return null;
   }
   let dateEnd = toPacificWallClock(p.dateEnd || p.end);
+  if (dateEnd && yearFromDateString(dateEnd) == null) dateEnd = null;
+  // If end year missing but start has year, don't invent wrong year end
+  if (dateEnd && yearFromDateString(dateStart) != null && yearFromDateString(dateEnd) != null) {
+    // ok
+  }
   if (!dateEnd) dateEnd = defaultEndFromStart(dateStart);
+  // Guard: end must not jump to a different year unless multi-day NYE-style (start Dec 31)
+  const ys = yearFromDateString(dateStart)!;
+  const ye = yearFromDateString(dateEnd);
+  if (ye != null && ye !== ys && !dateStart.includes("-12-31")) {
+    dateEnd = defaultEndFromStart(dateStart);
+  }
   const venueName = String(p.venueName || p.venue || p.location || "TBA").slice(0, 200);
   const description = String(p.description || p.details || `${title} at ${venueName}.`).slice(0, 8000);
   const warnings = [`Vision extract confidence ${confidence.toFixed(2)}`];
@@ -112,13 +135,16 @@ export async function visionFlyerToDrafts(opts: {
     opts.sourceUrl ||
     null;
 
+  const yearNow = pacificCalendarYear();
   const prompt = `You extract Portland LGBTQ+ / nightlife event details from a flyer image.
 Return ONLY valid JSON: {"confidence":0-1,"events":[{"title","dateStart","dateEnd","venueName","address","admission","ticketUrl","description","ageRequirement"}]}
 Rules:
-- dateStart/dateEnd as ISO-like local Pacific wall times YYYY-MM-DDTHH:mm:ss when possible
-- If year missing assume 2026
+- dateStart/dateEnd MUST include the full year as Pacific wall times: YYYY-MM-DDTHH:mm:ss
+- YEAR IS CRITICAL: use the year printed on the flyer. Never drop or invent a wrong year.
+- If the flyer shows only month/day with no year: use ${yearNow} if that date is still upcoming in ${yearNow}, otherwise ${yearNow + 1}
+- Do not map a 2025 event to 2026 or vice versa when the flyer shows the year
 - venueHint: ${opts.venueHint || "unknown"}
-- If multiple nights, multiple events
+- If multiple nights, multiple events (each with its own full date including year)
 - No markdown`;
 
   try {

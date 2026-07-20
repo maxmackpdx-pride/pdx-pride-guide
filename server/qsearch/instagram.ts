@@ -1,5 +1,11 @@
 import type { IngestEventDraft } from "../ingest/types";
-import { dayOfWeekFromStart, defaultEndFromStart, toPacificWallClock } from "../ingest/dates";
+import {
+  dayOfWeekFromStart,
+  defaultEndFromStart,
+  pacificCalendarYear,
+  toPacificWallClock,
+  yearFromDateString,
+} from "../ingest/dates";
 import { visionFlyerToDrafts } from "./vision";
 
 export type IgAssistResult = {
@@ -59,15 +65,19 @@ function captionToDraft(
   let dateStart: string | null = null;
   if (dateHit) {
     const raw = dateHit[1];
-    if (/^\d{4}-/.test(raw)) {
-      dateStart = toPacificWallClock(`${raw}T${timeHit ? "20:00:00" : "20:00:00"}`);
+    if (/^\d{4}-/.test(raw) || yearFromDateString(raw) != null) {
+      dateStart = toPacificWallClock(`${raw.includes("T") ? raw : `${raw}T20:00:00`}`);
     } else {
-      const year = raw.match(/\d{4}/)?.[0] || "2026";
-      const d = new Date(`${raw} ${year} 20:00:00 GMT-0700`);
+      // Month + day only — use Pacific calendar year (and +1 if that date already passed)
+      const y = pacificCalendarYear();
+      let d = new Date(`${raw} ${y} 20:00:00 GMT-0700`);
+      if (Number.isFinite(d.getTime()) && d.getTime() < Date.now() - 12 * 3600_000) {
+        d = new Date(`${raw} ${y + 1} 20:00:00 GMT-0700`);
+      }
       if (Number.isFinite(d.getTime())) dateStart = toPacificWallClock(d);
     }
   }
-  if (!dateStart) {
+  if (!dateStart || yearFromDateString(dateStart) == null) {
     return {
       title,
       description: caption.slice(0, 8000),
@@ -76,8 +86,9 @@ function captionToDraft(
       neighborhood: null,
       lat: null,
       lng: null,
-      dateStart: "2026-12-31T20:00:00",
-      dateEnd: "2026-12-31T23:00:00",
+      // Far placeholder still includes an explicit year so nothing is year-less
+      dateStart: `${pacificCalendarYear() + 1}-12-31T20:00:00`,
+      dateEnd: `${pacificCalendarYear() + 1}-12-31T23:00:00`,
       dayOfWeek: null,
       ageRequirement: "ALL_AGES",
       eventTypes: "[]",
@@ -91,7 +102,7 @@ function captionToDraft(
       posterImageUrl: mediaUrl,
       sourceUrl,
       parseSource: "instagram",
-      warnings: ["IG caption missing clear date — placeholder date; unselected"],
+      warnings: ["IG caption missing clear date/year — placeholder; unselected"],
       confidence: 0.25,
     };
   }

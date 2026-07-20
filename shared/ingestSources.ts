@@ -48,6 +48,107 @@ export type IngestSource = {
   portlandOnly?: boolean;
 };
 
+/**
+ * Portland Eventbrite identity keyword searches.
+ * One source per term so Scan health shows which query actually yields.
+ * Pattern: https://www.eventbrite.com/d/or--portland/{query}/
+ * Never use /d/local/events/ or bare /events (city dumps).
+ */
+export const PORTLAND_EVENTBRITE_KEYWORDS: Array<{
+  id: string;
+  query: string;
+  label: string;
+  priority?: boolean;
+  notes?: string;
+}> = [
+  { id: "eb-lgbtq", query: "lgbtq", label: "EB · LGBTQ (Portland)", priority: true },
+  { id: "eb-gay", query: "gay", label: "EB · Gay (Portland)", priority: true },
+  { id: "eb-lesbian", query: "lesbian", label: "EB · Lesbian (Portland)", priority: true },
+  { id: "eb-queer", query: "queer", label: "EB · Queer (Portland)", priority: true },
+  { id: "eb-trans", query: "trans", label: "EB · Trans (Portland)", priority: true },
+  { id: "eb-transgender", query: "transgender", label: "EB · Transgender (Portland)" },
+  { id: "eb-drag", query: "drag", label: "EB · Drag (Portland)", priority: true },
+  { id: "eb-pride", query: "pride", label: "EB · Pride (Portland)", priority: true },
+  { id: "eb-sapphic", query: "sapphic", label: "EB · Sapphic (Portland)" },
+  { id: "eb-bisexual", query: "bisexual", label: "EB · Bisexual (Portland)" },
+  { id: "eb-nonbinary", query: "nonbinary", label: "EB · Nonbinary (Portland)" },
+  { id: "eb-ballroom", query: "ballroom", label: "EB · Ballroom (Portland)", notes: "House/ball culture" },
+  { id: "eb-leather", query: "leather", label: "EB · Leather (Portland)" },
+];
+
+function buildPortlandEventbriteKeywordSources(): IngestSource[] {
+  return PORTLAND_EVENTBRITE_KEYWORDS.map(k => ({
+    id: k.id,
+    label: k.label,
+    url: `https://www.eventbrite.com/d/or--portland/${encodeURIComponent(k.query)}/`,
+    tier: "eventbrite" as const,
+    format: "eventbrite" as const,
+    priority: k.priority,
+    notes:
+      k.notes ||
+      "Portland-only Eventbrite keyword search. Never expand to /d/local/events/.",
+  }));
+}
+
+/** EverOut Portland category/tag searches — parallel to EB keywords. */
+export const PORTLAND_EVEROUT_CATEGORIES: Array<{
+  id: string;
+  label: string;
+  url: string;
+  priority?: boolean;
+  notes?: string;
+}> = [
+  {
+    id: "everout-drag",
+    label: "EverOut · Drag (Portland)",
+    url: "https://everout.com/portland/events/?category=performance-drag",
+    priority: true,
+  },
+  {
+    id: "everout-lgbtq",
+    label: "EverOut · LGBTQ (Portland)",
+    url: "https://everout.com/portland/events/?tag=lgbtq",
+    priority: true,
+  },
+  {
+    id: "everout-pride",
+    label: "EverOut · Pride (Portland)",
+    url: "https://everout.com/portland/events/?tag=pride",
+  },
+  {
+    id: "everout-queer",
+    label: "EverOut · Queer (Portland)",
+    url: "https://everout.com/portland/events/?q=queer",
+  },
+  {
+    id: "everout-gay",
+    label: "EverOut · Gay (Portland)",
+    url: "https://everout.com/portland/events/?q=gay",
+  },
+  {
+    id: "everout-lesbian",
+    label: "EverOut · Lesbian (Portland)",
+    url: "https://everout.com/portland/events/?q=lesbian",
+  },
+  {
+    id: "everout-trans",
+    label: "EverOut · Trans (Portland)",
+    url: "https://everout.com/portland/events/?q=trans",
+  },
+];
+
+function buildPortlandEveroutCategorySources(): IngestSource[] {
+  return PORTLAND_EVEROUT_CATEGORIES.map(k => ({
+    id: k.id,
+    label: k.label,
+    url: k.url,
+    tier: "agg" as const,
+    format: "html" as const,
+    priority: k.priority,
+    notes: k.notes || "Portland EverOut identity/category search — not city-wide unfiltered.",
+  }));
+}
+
 export const INGEST_SOURCES: IngestSource[] = [
   // ── Tier 1 ──────────────────────────────────────────────────────────────
   // Recipe research: docs/BAR_VENUE_SCAN_RECIPES.md (32 bars/venues/groups)
@@ -344,59 +445,37 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "html",
     notes: "Extract Google Calendar ICS id",
   },
+  // Venue-scoped Eventbrite (not city dumps — require venue match in scan filter)
   {
     id: "escape-eb",
-    label: "Escape (Eventbrite)",
+    label: "Escape (Eventbrite venue)",
     url: "https://www.eventbrite.com/d/or--portland/escape-bar-and-grill/",
     tier: "3",
     format: "eventbrite",
+    notes: "Venue-scoped only — not city-wide. Filter requires Escape in venue/title.",
   },
   {
     id: "bar-cala-eb",
-    label: "Bar Cala (Eventbrite)",
+    label: "Bar Cala (Eventbrite venue)",
     url: "https://www.eventbrite.com/d/or--portland/bar-cala/",
     tier: "3",
     format: "eventbrite",
+    notes: "Venue-scoped drag brunches etc.",
   },
   {
     id: "sports-bra-eb",
-    label: "Sports Bra (Eventbrite)",
+    label: "Sports Bra (Eventbrite venue)",
     url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
     tier: "3",
     format: "eventbrite",
+    notes: "Venue-scoped — not generic sports events.",
   },
 
-  // ── Eventbrite city catch-alls ───────────────────────────────────────────
-  {
-    id: "eb-gay",
-    label: "EB gay-event (city)",
-    url: "https://www.eventbrite.com/d/or--portland/gay-event/",
-    tier: "eventbrite",
-    format: "eventbrite",
-    priority: true,
-    notes: "Nightly catch-all",
-  },
-  {
-    id: "eb-drag",
-    label: "EB drag",
-    url: "https://www.eventbrite.com/d/or--portland/drag/",
-    tier: "eventbrite",
-    format: "eventbrite",
-  },
-  {
-    id: "eb-lgbtq",
-    label: "EB lgbtq",
-    url: "https://www.eventbrite.com/d/or--portland/lgbtq/",
-    tier: "eventbrite",
-    format: "eventbrite",
-  },
-  {
-    id: "eb-queer",
-    label: "EB queer",
-    url: "https://www.eventbrite.com/d/or--portland/queer/",
-    tier: "eventbrite",
-    format: "eventbrite",
-  },
+  // ── Eventbrite · Portland-only identity keyword searches ─────────────────
+  // Pattern: https://www.eventbrite.com/d/or--portland/{query}/
+  // Keep these separate — never use /d/local/events/ or bare /events.
+  // Each search is independent so yield/debug stays readable per term.
+  ...buildPortlandEventbriteKeywordSources(),
 
   // ── Partiful ────────────────────────────────────────────────────────────
   {
@@ -414,7 +493,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "partiful",
   },
 
-  // ── Aggregators ─────────────────────────────────────────────────────────
+  // ── Aggregators (queer-scoped feeds only — no city-wide dumps) ───────────
   {
     id: "dragpdx-tribe",
     label: "dragpdx (ask first)",
@@ -430,34 +509,17 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://www.queersocialclub.com/events-portland?format=json",
     tier: "agg",
     format: "squarespace",
+    notes: "Portland queer events feed",
   },
-  {
-    id: "everout-drag",
-    label: "EverOut drag",
-    url: "https://everout.com/portland/events/?category=performance-drag",
-    tier: "agg",
-    format: "html",
-  },
-  {
-    id: "pdx-events",
-    label: "pdx-events.com",
-    url: "https://www.pdx-events.com/",
-    tier: "agg",
-    format: "html",
-  },
+  // EverOut Portland — separate category searches (same idea as EB keywords)
+  ...buildPortlandEveroutCategorySources(),
   {
     id: "ra-process",
     label: "RA Process",
     url: "https://ra.co/promoters/141994",
     tier: "agg",
     format: "jsonld",
-  },
-  {
-    id: "bit-electronic",
-    label: "BIT electronic PDX",
-    url: "https://www.bandsintown.com/c/portland-or/all-dates/genre/electronic",
-    tier: "agg",
-    format: "jsonld",
+    notes: "Process promoter page — not full RA city dump",
   },
 ];
 
@@ -698,10 +760,35 @@ export function mergeIngestSources(
  * Candidate event-page URLs derived from a homepage (used by server preview expand).
  * Homepage is always first.
  */
+/** Platforms where /events expansion is a city-wide dump, not this listing's calendar. */
+const NO_PATH_EXPAND_HOSTS = [
+  "eventbrite.com",
+  "eventbrite.de",
+  "eventbrite.co.uk",
+  "eventbrite.ca",
+  "eventbrite.com.au",
+  "tixr.com",
+  "partiful.com",
+  "bandsintown.com",
+  "ra.co",
+  "dice.fm",
+  "ticketmaster.com",
+  "etix.com",
+];
+
+function isNoPathExpandHost(url: string): boolean {
+  const host = ingestHostKey(url);
+  if (!host) return true;
+  return NO_PATH_EXPAND_HOSTS.some(h => host === h || host.endsWith(`.${h}`));
+}
+
 export function expandWebsiteScrapeCandidates(website: string): string[] {
   const base = normalizeIngestWebsite(website);
   if (!base) return [];
   if (isWeakScrapeHost(base)) return [base];
+  // Eventbrite/Tixr/etc.: never expand to /events — that becomes a local dump
+  // and discovery used to "win" on event count (Stag → /d/local/events/).
+  if (isNoPathExpandHost(base)) return [base];
 
   let origin: string;
   try {

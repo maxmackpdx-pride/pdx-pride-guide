@@ -9,13 +9,21 @@ import {
 } from "@shared/ingestSources";
 import type { IngestEventDraft } from "../ingest/types";
 import { isPortlandEventListing } from "../ingest";
+import { isPastEventListing } from "../ingest/dates";
+import {
+  isGenericEventbriteDumpUrl,
+  isRelevantScanDraft,
+  type SourceRelevanceContext,
+} from "../ingest/relevance";
+import { enrichEventPageUrl } from "../ingest/eventPageUrl";
+import { enrichDraftsFromEventPages } from "../ingest/enrichEventPage";
 import {
   enrichDraftPoster,
   extractFlyerCandidatesFromHtml,
 } from "../ingest/posterQuality";
 import { storage } from "../storage";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
-import { matchDirectoryBrands } from "./directoryBrands";
+import { enrichDraftVenueFromSource, matchDirectoryBrands } from "./directoryBrands";
 import { isEventPlaceholderUrl } from "@shared/eventPoster";
 import { discoverAndParse } from "./discover";
 import { fetchIngestSource } from "../ingest/fetchSource";
@@ -27,6 +35,8 @@ import {
   getSourceHealth,
   insertScanJob,
   listCandidates,
+  listCustomIngestSources,
+  listDisabledSourceIds,
   listSourceHealth,
   recordScanResult,
   reviewQueueSummary,
@@ -72,6 +82,44 @@ export function buildLiveSources(businesses: Array<{
 }>): IngestSource[] {
   const directory = buildDirectoryIngestSources(businesses);
   let sources = mergeIngestSources(INGEST_SOURCES, directory);
+
+  // Admin-added custom scrape URLs
+  const custom = listCustomIngestSources();
+  if (custom.length) {
+    const seen = new Set(sources.map(s => s.id));
+    const tierOk = new Set(["1", "2", "3", "agg", "partiful", "eventbrite", "directory"]);
+    const formatOk = new Set([
+      "ics",
+      "jsonld",
+      "squarespace",
+      "tribe",
+      "wix",
+      "html",
+      "eventbrite",
+      "partiful",
+      "unknown",
+    ]);
+    for (const c of custom) {
+      if (seen.has(c.id)) continue;
+      seen.add(c.id);
+      sources.push({
+        id: c.id,
+        url: c.url,
+        label: c.label,
+        tier: (tierOk.has(c.tier) ? c.tier : "1") as IngestSource["tier"],
+        format: (formatOk.has(c.format) ? c.format : "html") as IngestSource["format"],
+        businessId: c.businessId,
+        notes: "Admin-added custom source",
+      });
+    }
+  }
+
+  // Soft-deleted sources stay out of scans (and stay disabled across registry sync)
+  const disabled = listDisabledSourceIds();
+  if (disabled.size) {
+    sources = sources.filter(s => !disabled.has(s.id));
+  }
+
   // dragpdx: only include if opt-in
   const health = listSourceHealth();
   const dragOpt = health.some(h => h.dragpdxOptIn && /dragpdx/i.test(h.sourceId + h.url));
@@ -83,8 +131,13 @@ export function buildLiveSources(businesses: Array<{
 
 export function effectiveScanUrl(source: IngestSource): string {
   const h = getSourceHealth(source.id);
-  if (h?.recipeUrl) return h.recipeUrl;
-  if (h?.resolvedUrl && h.yieldStatus === "works" && h.zeroYieldStreak < 2) {
+  if (h?.recipeUrl && !isGenericEventbriteDumpUrl(h.recipeUrl)) return h.recipeUrl;
+  if (
+    h?.resolvedUrl &&
+    h.yieldStatus === "works" &&
+    h.zeroYieldStreak < 2 &&
+    !isGenericEventbriteDumpUrl(h.resolvedUrl)
+  ) {
     return h.resolvedUrl;
   }
   return source.url;
@@ -415,34 +468,41 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         source.portlandOnly === true ||
         String(source.businessType || "").toLowerCase() === "group";
 
+      const relevanceCtx: SourceRelevanceContext = {
+        sourceId: source.id,
+        label: source.label,
+        url: source.url,
+        tier: source.tier,
+      };
+
+      // Drop past listings BEFORE page enrich (Sanctuary ICS is ~400 VEVENTs, mostly history)
+      // Also drop Eventbrite dumps / non-queer city noise / venue-mismatched org scrapes
+      const includePast = opts.includePastEvents === true;
+      const upcomingDrafts = hit.drafts.filter(d => {
+        if (portlandOnly && !isPortlandEventListing(d)) return false;
+        if (!includePast && isPastEventListing(d)) return false;
+        const rel = isRelevantScanDraft(d, relevanceCtx);
+        if (!rel.keep) return false;
+        return true;
+      });
+
+      // Attach human event page URL, then pull flyer + full description from that page
+      const withPages = upcomingDrafts.map(d => enrichEventPageUrl(d));
+      const enrichedPages = await enrichDraftsFromEventPages(withPages, {
+        concurrency: 3,
+        maxPages: 50,
+      });
+
       let kept = 0;
-      for (const draft of hit.drafts) {
-        if (portlandOnly && !isPortlandEventListing(draft)) {
-          continue;
-        }
+      for (const draft of enrichedPages) {
+        // Re-check past after page may have corrected dates
+        if (!includePast && isPastEventListing(draft)) continue;
         kept++;
         const extra: string[] = [];
-        // Per-event page only (Tribe event URL / ticket page) — never sibling nights
-        const eventPage =
-          (draft.sourceUrl && draft.sourceUrl !== hit.url && draft.sourceUrl !== primary
-            ? draft.sourceUrl
-            : null) ||
-          (draft.ticketUrl && /^https?:/i.test(draft.ticketUrl) ? draft.ticketUrl : null);
-        if (!draft.posterImageUrl && eventPage) {
-          try {
-            const ep = await fetchIngestSource(eventPage);
-            if (ep.body) {
-              extra.push(...extractFlyerCandidatesFromHtml(ep.body, ep.url || eventPage));
-            }
-          } catch {
-            /* optional */
-          }
-        }
         if (!draft.posterImageUrl && singleEventYield && pageFlyerPool.length) {
           extra.push(...pageFlyerPool);
         }
         // Capture full-quality flyer into /uploads when remote
-        // Only pass extras when draft has no image — never let a list hero replace a per-event poster
         const withPoster = await enrichDraftPoster(
           draft,
           draft.posterImageUrl ? [] : extra,
@@ -539,6 +599,8 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
       duplicates: c.duplicates,
       strongDuplicate: c.strongDuplicate,
       directoryBrands: c.directoryBrands,
+      sourceBundle: c.sourceBundle,
+      fieldConflicts: c.fieldConflicts,
     })),
   );
 
@@ -575,8 +637,14 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
     try {
       let draft = c.draft as IngestEventDraft | undefined;
       if (!draft) return c;
+      draft = enrichDraftVenueFromSource(draft, businesses, {
+        sourceLabel: String(c.sourceLabel || ""),
+        sourceId: String(c.sourceId || ""),
+      });
+      draft = enrichEventPageUrl(draft);
       const directoryBrands = matchDirectoryBrands(draft, businesses, {
         sourceLabel: String(c.sourceLabel || ""),
+        sourceId: String(c.sourceId || ""),
       });
 
       // Same-series prior flyer only — never "any poster from this venue"

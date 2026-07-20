@@ -85,17 +85,16 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
     }
 
     const path = item.fullUrl || item.url || item.websiteUrl || "";
-    let ticketUrl: string | null = null;
-    if (typeof path === "string" && path.startsWith("http")) ticketUrl = path;
+    let eventPageUrl: string | null = null;
+    if (typeof path === "string" && path.startsWith("http")) eventPageUrl = path;
     else if (typeof path === "string" && path.startsWith("/") && sourceUrl) {
       try {
-        ticketUrl = new URL(path, sourceUrl).toString();
+        eventPageUrl = new URL(path, sourceUrl).toString();
       } catch {
-        ticketUrl = sourceUrl;
+        eventPageUrl = null;
       }
-    } else {
-      ticketUrl = sourceUrl;
     }
+    const ticketUrl = eventPageUrl || sourceUrl;
 
     // Prefer original/full asset over thumbnail — flyers must be full quality
     const poster =
@@ -123,6 +122,7 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
       eventTypes: "[]",
       admission: "FREE",
       ticketUrl: ticketUrl ? ticketUrl.slice(0, 500) : null,
+      eventPageUrl: eventPageUrl ? eventPageUrl.slice(0, 500) : null,
       isPublic: true,
       isPrivate: false,
       isHouseParty: false,

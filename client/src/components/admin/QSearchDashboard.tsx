@@ -87,6 +87,7 @@ type SourceHealth = {
   consecutiveFails: number;
   isDirectory: boolean;
   isNew: boolean;
+  businessId: number | null;
   tier: string;
   format: string;
   resolvedUrl: string | null;
@@ -96,7 +97,130 @@ type SourceHealth = {
   zeroYieldStreak: number;
   instagramHandle: string | null;
   dragpdxOptIn: boolean;
+  disabled?: boolean;
+  isCustom?: boolean;
 };
+
+/** City catch-alls / aggregators — not one directory listing. */
+const GENERAL_SCRAPE_TIERS = new Set(["eventbrite", "partiful", "agg"]);
+
+/** Strip recipe suffixes so "Holocene events" and "Holocene (BIT)" group under Holocene. */
+function listingNameFromLabel(label: string): string {
+  return label
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .replace(
+      /\s+(calendar|events?|ICS|Tribe JSON|JSON|API|homepage|Weebly weeklies|Eventbrite|BIT|Tixr|RA|site|flyer page|Portland only).*$/i,
+      "",
+    )
+    .replace(/\s+/g, " ")
+    .trim() || label;
+}
+
+function hostKey(url: string | null | undefined): string {
+  if (!url) return "";
+  try {
+    return new URL(url.includes("://") ? url : `https://${url}`).hostname
+      .replace(/^www\./i, "")
+      .toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function isGeneralScrapeSource(h: SourceHealth): boolean {
+  if (h.isDirectory || h.businessId != null) return false;
+  if (GENERAL_SCRAPE_TIERS.has(h.tier)) return true;
+  // Portland identity keyword searches (EB + EverOut) — not a single directory listing
+  if (/^eb-/i.test(h.sourceId)) return true;
+  if (/^everout-/i.test(h.sourceId)) return true;
+  if (
+    /^(partiful-|dragpdx|qsc-|pdx-events|bit-electronic|ra-process)/i.test(h.sourceId)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+type SourceListingGroup = {
+  key: string;
+  name: string;
+  businessId: number | null;
+  /** True when this group includes a directory-auto source */
+  hasDirectorySource: boolean;
+  sources: SourceHealth[];
+};
+
+function buildDirectoryListingGroups(sources: SourceHealth[]): SourceListingGroup[] {
+  const groups = new Map<string, SourceListingGroup>();
+  const hostToKey = new Map<string, string>();
+  const nameToKey = new Map<string, string>();
+
+  const ensure = (key: string, name: string, businessId: number | null, hasDir: boolean) => {
+    let g = groups.get(key);
+    if (!g) {
+      g = { key, name, businessId, hasDirectorySource: hasDir, sources: [] };
+      groups.set(key, g);
+    } else {
+      if (hasDir) g.hasDirectorySource = true;
+      if (businessId != null && g.businessId == null) g.businessId = businessId;
+      // Prefer cleaner directory place name over recipe label
+      if (hasDir && name) g.name = name;
+    }
+    return g;
+  };
+
+  // Pass 1: directory auto-sources define listing groups
+  for (const h of sources) {
+    if (!h.isDirectory && h.businessId == null) continue;
+    const key = h.businessId != null ? `biz:${h.businessId}` : `dir:${h.sourceId}`;
+    const g = ensure(key, h.label, h.businessId, h.isDirectory);
+    g.sources.push(h);
+    const hk = hostKey(h.resolvedUrl || h.url);
+    if (hk) hostToKey.set(hk, key);
+    nameToKey.set(listingNameFromLabel(h.label).toLowerCase(), key);
+  }
+
+  // Pass 2: curated venue/group recipes attach to listing or form their own
+  for (const h of sources) {
+    if (h.isDirectory || h.businessId != null) continue;
+    const hk = hostKey(h.resolvedUrl || h.recipeUrl || h.url);
+    let key = hk ? hostToKey.get(hk) : undefined;
+    if (!key) {
+      const n = listingNameFromLabel(h.label).toLowerCase();
+      key = nameToKey.get(n);
+      if (!key) {
+        // Soft: directory name contained in recipe name or vice versa
+        Array.from(nameToKey.entries()).some(([dn, dk]) => {
+          if (n.includes(dn) || dn.includes(n)) {
+            key = dk;
+            return true;
+          }
+          return false;
+        });
+      }
+    }
+    if (!key) {
+      const name = listingNameFromLabel(h.label);
+      key = `curated:${name.toLowerCase()}`;
+      ensure(key, name, null, false);
+      nameToKey.set(name.toLowerCase(), key);
+      if (hk) hostToKey.set(hk, key);
+    }
+    const g = groups.get(key)!;
+    // Avoid double-adding if already in from pass 1
+    if (!g.sources.some(s => s.sourceId === h.sourceId)) g.sources.push(h);
+  }
+
+  Array.from(groups.values()).forEach(g => {
+    g.sources.sort((a: SourceHealth, b: SourceHealth) => {
+      // Directory auto first, then by label
+      if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+      return a.label.localeCompare(b.label);
+    });
+  });
+
+  return Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
 
 type CoverageRow = {
   businessId: number;
@@ -106,6 +230,28 @@ type CoverageRow = {
   resolvedUrl: string | null;
   resolution: "field" | "fallback" | "none";
   absorbedByCurated: boolean;
+};
+
+type SourceBundleMember = {
+  sourceId: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  title?: string;
+  venueName?: string;
+  dateStart?: string;
+  dateEnd?: string;
+  ticketUrl?: string | null;
+  eventPageUrl?: string | null;
+  address?: string | null;
+  posterImageUrl?: string | null;
+  ageRequirement?: string | null;
+  admission?: string | null;
+};
+
+type FieldConflict = {
+  field: string;
+  label: string;
+  values: Array<{ sourceLabel: string; sourceId: string; value: string }>;
 };
 
 type Candidate = {
@@ -119,6 +265,7 @@ type Candidate = {
     dateEnd: string;
     dayOfWeek: string | null;
     ticketUrl: string | null;
+    eventPageUrl?: string | null;
     ageRequirement?: string | null;
     admission?: string | null;
     warnings: string[];
@@ -163,8 +310,155 @@ type Candidate = {
     color: string;
     role: "venue" | "group" | "place";
   }>;
+  /** Multi-source scrape of the same party */
+  sourceBundle?: SourceBundleMember[];
+  fieldConflicts?: FieldConflict[];
   status?: string;
 };
+
+/** Display-time bundle for older queue rows that weren't merged on scan. */
+type QueueBundle = {
+  key: string;
+  primary: Candidate;
+  members: Candidate[];
+  sourceBundle: SourceBundleMember[];
+  fieldConflicts: FieldConflict[];
+};
+
+function clientNormTitle(t: string): string {
+  return String(t || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function clientNormVenue(v: string): string {
+  return String(v || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function clientEventKey(c: Candidate): string {
+  // Prefer ticket/page URL identity
+  const urls = [c.draft.ticketUrl, c.draft.eventPageUrl, c.draft.sourceUrl, c.sourceUrl].filter(
+    Boolean,
+  ) as string[];
+  for (const raw of urls) {
+    try {
+      const u = new URL(raw);
+      if (/format=json|wp-json|tribe\/events|ical|\.ics/i.test(u.href)) continue;
+      return `url:${u.hostname.replace(/^www\./, "")}${u.pathname.replace(/\/$/, "").toLowerCase()}`;
+    } catch {
+      /* next */
+    }
+  }
+  const day = String(c.draft.dateStart || "").slice(0, 10);
+  const title = clientNormTitle(c.draft.title).slice(0, 48);
+  const venue = clientNormVenue(c.draft.venueName || "tba").slice(0, 32);
+  const time = String(c.draft.dateStart || "").slice(11, 16);
+  return `slot:${day}|${title}|${venue}|${time}`;
+}
+
+function clientFieldConflicts(members: Candidate[]): FieldConflict[] {
+  const fields: Array<{ field: string; label: string; get: (c: Candidate) => string }> = [
+    { field: "title", label: "Title", get: c => c.draft.title || "" },
+    { field: "venueName", label: "Venue", get: c => c.draft.venueName || "" },
+    { field: "address", label: "Address", get: c => c.draft.address || "" },
+    {
+      field: "dateStart",
+      label: "Start",
+      get: c => String(c.draft.dateStart || "").slice(0, 16).replace("T", " "),
+    },
+    {
+      field: "dateEnd",
+      label: "End",
+      get: c => String(c.draft.dateEnd || "").slice(0, 16).replace("T", " "),
+    },
+    { field: "ticketUrl", label: "Tickets", get: c => c.draft.ticketUrl || "" },
+    { field: "ageRequirement", label: "Age", get: c => c.draft.ageRequirement || "" },
+    { field: "admission", label: "Admission", get: c => c.draft.admission || "" },
+  ];
+  const out: FieldConflict[] = [];
+  for (const f of fields) {
+    const byVal = new Map<string, { sourceLabel: string; sourceId: string; value: string }>();
+    for (const m of members) {
+      const v = f.get(m).trim();
+      if (!v) continue;
+      const key = v.toLowerCase();
+      if (!byVal.has(key)) {
+        byVal.set(key, {
+          sourceLabel: m.sourceLabel,
+          sourceId: m.sourceId,
+          value: v.length > 80 ? v.slice(0, 77) + "…" : v,
+        });
+      }
+    }
+    if (byVal.size > 1) {
+      out.push({ field: f.field, label: f.label, values: Array.from(byVal.values()) });
+    }
+  }
+  return out;
+}
+
+function bundleQueueCandidates(list: Candidate[]): QueueBundle[] {
+  const map = new Map<string, Candidate[]>();
+  for (const c of list) {
+    // Server-bundled already? keep as its own group key by id so we don't re-merge
+    if (c.sourceBundle && c.sourceBundle.length > 1) {
+      map.set(`server:${c.id}`, [c]);
+      continue;
+    }
+    const key = clientEventKey(c);
+    const arr = map.get(key) || [];
+    arr.push(c);
+    map.set(key, arr);
+  }
+  const bundles: QueueBundle[] = [];
+  Array.from(map.entries()).forEach(([key, members]) => {
+    // Prefer member with flyer / longer description as primary
+    const ranked = [...members].sort((a, b) => {
+      const score = (c: Candidate) =>
+        (c.draft.posterImageUrl ? 40 : 0) +
+        (c.draft.description?.length || 0) / 20 +
+        (c.draft.ticketUrl ? 10 : 0);
+      return score(b) - score(a);
+    });
+    const primary = ranked[0];
+    const serverBundle = primary.sourceBundle?.length
+      ? primary.sourceBundle
+      : members.map(m => ({
+          sourceId: m.sourceId,
+          sourceLabel: m.sourceLabel,
+          sourceUrl: m.sourceUrl,
+          title: m.draft.title,
+          venueName: m.draft.venueName,
+          dateStart: m.draft.dateStart,
+          dateEnd: m.draft.dateEnd,
+          ticketUrl: m.draft.ticketUrl,
+          eventPageUrl: m.draft.eventPageUrl,
+          address: m.draft.address,
+          posterImageUrl: m.draft.posterImageUrl,
+          ageRequirement: m.draft.ageRequirement,
+          admission: m.draft.admission,
+        }));
+    // unique by sourceId
+    const seen = new Set<string>();
+    const sourceBundle = serverBundle.filter(s => {
+      if (seen.has(s.sourceId)) return false;
+      seen.add(s.sourceId);
+      return true;
+    });
+    const fieldConflicts =
+      primary.fieldConflicts && primary.fieldConflicts.length
+        ? primary.fieldConflicts
+        : members.length > 1
+          ? clientFieldConflicts(members)
+          : [];
+    bundles.push({ key, primary, members, sourceBundle, fieldConflicts });
+  });
+  return bundles;
+}
 
 function buildDirectoryFormFromCandidate(c: Candidate): DirectoryFormState {
   const name = String(c.draft.venueName || "").trim();
@@ -241,6 +535,8 @@ type ScanJobView = {
 type Tab = "overview" | "venues" | "queue" | "assist";
 /** Which slice of data a hero-stat click should show in the tab below */
 type StatFocus = "scan-urls" | "directory" | "works" | "trouble" | "queue" | "new-links" | null;
+/** Sources tab: all, directory listings only, or general scrape only */
+type SourceSection = "all" | "directory" | "general";
 type ConflictAction = "keep_both" | "deny" | "override";
 
 function fmtEta(sec: number | null | undefined): string {
@@ -258,27 +554,28 @@ function fmtWhen(iso: string | null): string {
   }
 }
 
-/** Human-readable party window from Pacific wall-clock ISO strings. */
+/** Human-readable party window — always includes year (critical for multi-year ICS). */
 function formatPartyWhen(dateStart?: string | null, dateEnd?: string | null): string {
   if (!dateStart) return "";
   const parse = (s: string) => {
     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
     if (!m) return s.slice(0, 16);
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const year = m[1];
     const mon = months[Number(m[2]) - 1] || m[2];
     const day = Number(m[3]);
     let h = Number(m[4]);
     const min = m[5];
     const ap = h >= 12 ? "pm" : "am";
     h = h % 12 || 12;
-    return { date: `${mon} ${day}`, time: `${h}:${min}${ap}` };
+    return { date: `${mon} ${day}, ${year}`, dayKey: `${year}-${m[2]}-${m[3]}`, time: `${h}:${min}${ap}` };
   };
   const a = parse(dateStart);
   if (typeof a === "string") return a;
   if (!dateEnd) return `${a.date} · ${a.time}`;
   const b = parse(dateEnd);
   if (typeof b === "string") return `${a.date} · ${a.time}`;
-  if (a.date === b.date) return `${a.date} · ${a.time}–${b.time}`;
+  if (a.dayKey === b.dayKey) return `${a.date} · ${a.time}–${b.time}`;
   return `${a.date} ${a.time} → ${b.date} ${b.time}`;
 }
 
@@ -295,6 +592,148 @@ function yieldBadge(status: string) {
   return map[status] || "";
 }
 
+/** Prefer human event page over feed/API URLs (ICS feed, Tribe REST, etc.). */
+function isFeedOrApiUrl(url: string): boolean {
+  return /format=json|wp-json|\/tribe\/events\/v1|\.ics(\?|$)|\/ics\/?(\?|$)|\/api\/calendar|ical=1|\/calendar\/.*ics/i.test(
+    url,
+  );
+}
+
+function isTicketVendorUrl(url: string): boolean {
+  return /ticketmaster|etix\.com|eventbrite\.com\/checkout|dice\.fm\/checkout/i.test(url);
+}
+
+/** Public page for this listing — not the scrape feed. */
+function humanEventPageUrl(c: Candidate): string | null {
+  const d = c.draft;
+  const candidates = [d.eventPageUrl, d.ticketUrl, d.sourceUrl, c.sourceUrl].filter(
+    Boolean,
+  ) as string[];
+  for (const u of candidates) {
+    if (!/^https?:\/\//i.test(u)) continue;
+    if (isFeedOrApiUrl(u)) continue;
+    return u;
+  }
+  // Fallback: ticket vendor page is still human-openable
+  for (const u of candidates) {
+    if (/^https?:\/\//i.test(u) && !isFeedOrApiUrl(u)) return u;
+  }
+  return null;
+}
+
+function ticketLinkUrl(c: Candidate, eventPage: string | null): string | null {
+  const t = c.draft.ticketUrl;
+  if (!t || !/^https?:\/\//i.test(t)) return null;
+  if (eventPage && t === eventPage) return null;
+  if (isFeedOrApiUrl(t)) return null;
+  // Show separate Tickets when it's a vendor or different from event page
+  if (isTicketVendorUrl(t) || (eventPage && t !== eventPage)) return t;
+  return null;
+}
+
+function SourceRow({
+  h,
+  recipeEdits,
+  setRecipeEdits,
+  saveRecipe,
+  onClearRecipe,
+  onDelete,
+  onRestore,
+  busy,
+}: {
+  h: SourceHealth;
+  recipeEdits: Record<string, string>;
+  setRecipeEdits: (fn: (prev: Record<string, string>) => Record<string, string>) => void;
+  saveRecipe: (sourceId: string) => void;
+  onClearRecipe: () => void;
+  onDelete: (h: SourceHealth) => void;
+  onRestore?: (h: SourceHealth) => void;
+  busy?: boolean;
+}) {
+  const link = h.resolvedUrl || h.url;
+  const isDisabled = Boolean(h.disabled);
+  return (
+    <tr className={isDisabled ? "is-disabled-source" : undefined}>
+      <td>
+        {h.label}
+        <div style={{ color: "var(--qs-muted)", fontSize: 11 }}>
+          {h.tier}
+          {h.isNew ? " · new" : ""}
+          {h.isDirectory ? " · directory auto" : ""}
+          {h.isCustom ? " · custom" : ""}
+          {!h.isDirectory && !h.isCustom && !isGeneralScrapeSource(h) ? " · recipe" : ""}
+          {isGeneralScrapeSource(h) ? " · general" : ""}
+          {isDisabled ? " · removed" : ""}
+        </div>
+      </td>
+      <td>
+        {isDisabled ? (
+          <span className="qsearch__badge is-fail">removed</span>
+        ) : (
+          <>
+            <span className={`qsearch__badge ${yieldBadge(h.yieldStatus)}`}>{h.yieldStatus}</span>
+            {h.zeroYieldStreak > 0 && (
+              <span className="qsearch__badge is-fail">0×{h.zeroYieldStreak}</span>
+            )}
+            {h.lastEventCount > 0 && (
+              <div style={{ fontSize: 11, color: "var(--qs-muted)" }}>
+                last {h.lastEventCount} events
+              </div>
+            )}
+          </>
+        )}
+      </td>
+      <td style={{ minWidth: 220 }}>
+        <a href={link} target="_blank" rel="noreferrer">
+          {link.slice(0, 64)}
+          {link.length > 64 ? "…" : ""}
+        </a>
+        {!isDisabled && (
+          <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <input
+              className="qsearch__filter"
+              style={{ maxWidth: 260 }}
+              placeholder="Recipe URL override"
+              value={recipeEdits[h.sourceId] ?? h.recipeUrl ?? ""}
+              onChange={e => setRecipeEdits(prev => ({ ...prev, [h.sourceId]: e.target.value }))}
+            />
+            <button type="button" onClick={() => saveRecipe(h.sourceId)} disabled={busy}>
+              Save recipe
+            </button>
+            {h.recipeUrl && (
+              <button type="button" onClick={onClearRecipe} disabled={busy}>
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+      </td>
+      <td>
+        <div className="qsearch__source-actions">
+          {isDisabled && onRestore ? (
+            <button type="button" className="qsearch__btn-restore" onClick={() => onRestore(h)} disabled={busy}>
+              Restore
+            </button>
+          ) : (
+            <>
+              <span style={{ color: "var(--qs-muted)", fontSize: 12 }}>{h.winningParser || "—"}</span>
+              <button
+                type="button"
+                className="qsearch__btn-delete"
+                onClick={() => onDelete(h)}
+                disabled={busy}
+                title={h.isCustom ? "Permanently delete custom source" : "Remove from scrape list (can restore)"}
+              >
+                {h.isCustom ? "Delete" : "Remove"}
+              </button>
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -306,6 +745,13 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [conflictAction, setConflictAction] = useState<Record<string, ConflictAction>>({});
   const [venueFilter, setVenueFilter] = useState("");
+  const [sourceSection, setSourceSection] = useState<SourceSection>("all");
+  const [showAddSource, setShowAddSource] = useState(false);
+  const [addLabel, setAddLabel] = useState("");
+  const [addUrl, setAddUrl] = useState("");
+  const [addTier, setAddTier] = useState("custom");
+  const [addFormat, setAddFormat] = useState("html");
+  const [showRemoved, setShowRemoved] = useState(false);
   const [resultFilter, setResultFilter] = useState("");
   const [tryVision, setTryVision] = useState(true);
   /** Default off: only upcoming/current listings in results */
@@ -773,29 +1219,140 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     return h.yieldStatus === "works" || h.lastOk === true;
   }, []);
 
+  const matchVenueFilter = useCallback(
+    (h: SourceHealth) => {
+      const q = venueFilter.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        h.label.toLowerCase().includes(q) ||
+        h.url.toLowerCase().includes(q) ||
+        (h.resolvedUrl || "").toLowerCase().includes(q) ||
+        (h.recipeUrl || "").toLowerCase().includes(q) ||
+        h.yieldStatus.includes(q) ||
+        listingNameFromLabel(h.label).toLowerCase().includes(q) ||
+        h.sourceId.toLowerCase().includes(q)
+      );
+    },
+    [venueFilter],
+  );
+
   const venues = useMemo(() => {
-    const q = venueFilter.trim().toLowerCase();
     // Prefer health list (full scrape sources) merged with coverage
-    let health = dash?.health || [];
-    if (statFocus === "directory") health = health.filter(h => h.isDirectory);
+    let health = (dash?.health || []).filter(h => !h.disabled);
+    if (statFocus === "directory") health = health.filter(h => h.isDirectory || h.businessId != null);
     else if (statFocus === "works") health = health.filter(isWorksHealth);
     else if (statFocus === "trouble") health = health.filter(isTroubleHealth);
     else if (statFocus === "new-links") health = health.filter(h => h.isDirectory && h.isNew);
-    // scan-urls / null → all sources
+    // scan-urls / null → all active sources
 
-    return health
-      .filter(h => {
-        if (!q) return true;
-        return (
-          h.label.toLowerCase().includes(q) ||
-          h.url.toLowerCase().includes(q) ||
-          (h.resolvedUrl || "").toLowerCase().includes(q) ||
-          (h.recipeUrl || "").toLowerCase().includes(q) ||
-          h.yieldStatus.includes(q)
-        );
-      })
+    return health.filter(matchVenueFilter).sort((a, b) => a.label.localeCompare(b.label));
+  }, [dash?.health, matchVenueFilter, statFocus, isWorksHealth, isTroubleHealth]);
+
+  const removedSources = useMemo(() => {
+    return (dash?.health || [])
+      .filter(h => h.disabled)
+      .filter(matchVenueFilter)
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [dash?.health, venueFilter, statFocus, isWorksHealth, isTroubleHealth]);
+  }, [dash?.health, matchVenueFilter]);
+
+  const sourcesByArea = useMemo(() => {
+    const directoryLinked = venues.filter(h => !isGeneralScrapeSource(h));
+    const general = venues.filter(isGeneralScrapeSource).sort((a, b) => a.label.localeCompare(b.label));
+    const directoryGroups = buildDirectoryListingGroups(directoryLinked);
+    return { directoryGroups, general, directoryCount: directoryLinked.length, generalCount: general.length };
+  }, [venues]);
+
+  async function addSource() {
+    if (!addLabel.trim() || !addUrl.trim()) {
+      toast({ title: "Label and URL required", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await apiRequest("POST", "/api/admin/qsearch/sources", {
+        label: addLabel.trim(),
+        url: addUrl.trim(),
+        tier: addTier,
+        format: addFormat,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not add source");
+      toast({ title: "Source added", description: data.source?.label || addLabel.trim() });
+      setAddLabel("");
+      setAddUrl("");
+      setShowAddSource(false);
+      void refetch();
+    } catch (err) {
+      toast({
+        title: "Add failed",
+        description: parseApiError(err, "Could not add source"),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeSource(h: SourceHealth) {
+    const hard = Boolean(h.isCustom);
+    const ok = window.confirm(
+      hard
+        ? `Permanently delete custom source “${h.label}”?`
+        : `Remove “${h.label}” from the scrape list?\n\nIt will stop scanning. You can restore it later from Removed sources.`,
+    );
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const res = await apiRequest(
+        "DELETE",
+        `/api/admin/qsearch/sources/${encodeURIComponent(h.sourceId)}`,
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not remove source");
+      toast({
+        title: hard ? "Source deleted" : "Source removed",
+        description: hard ? h.label : `${h.label} — restore anytime from Removed`,
+      });
+      if (!hard) setShowRemoved(true);
+      void refetch();
+    } catch (err) {
+      toast({
+        title: "Remove failed",
+        description: parseApiError(err, "Could not remove source"),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function restoreSource(h: SourceHealth) {
+    setBusy(true);
+    try {
+      const res = await apiRequest(
+        "POST",
+        `/api/admin/qsearch/sources/${encodeURIComponent(h.sourceId)}/enable`,
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not restore source");
+      toast({ title: "Source restored", description: h.label });
+      void refetch();
+    } catch (err) {
+      toast({
+        title: "Restore failed",
+        description: parseApiError(err, "Could not restore source"),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Hero "directory" focus → Directory listings section; other focuses keep All
+  useEffect(() => {
+    if (statFocus === "directory" || statFocus === "new-links") setSourceSection("directory");
+    else if (statFocus === "scan-urls") setSourceSection("all");
+  }, [statFocus]);
 
   const coverageMissing = useMemo(
     () => (dash?.coverage || []).filter(c => c.resolution === "none"),
@@ -825,8 +1382,12 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     // scan-urls | directory | works → Sources table
     setTab("venues");
     setVenueFilter("");
+    if (focus === "directory") setSourceSection("directory");
+    else if (focus === "scan-urls") setSourceSection("all");
     setTimeout(() => {
-      document.getElementById("qsearch-panel-sources")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const id =
+        focus === "directory" ? "qsearch-sources-directory" : "qsearch-panel-sources";
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   }
 
@@ -1204,6 +1765,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   onClick={() => {
                     setStatFocus(null);
                     setVenueFilter("");
+                    setSourceSection("all");
                   }}
                 >
                   Show all
@@ -1221,6 +1783,36 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 if (e.target.value) setStatFocus(null);
               }}
             />
+            <div className="qsearch__section-chips" role="group" aria-label="Source area">
+              {(
+                [
+                  ["all", `All (${venues.length})`],
+                  ["directory", `Directory (${sourcesByArea.directoryCount})`],
+                  ["general", `General scrape (${sourcesByArea.generalCount})`],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`qsearch__section-chip${sourceSection === id ? " is-active" : ""}`}
+                  onClick={() => setSourceSection(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="is-primary"
+              onClick={() => setShowAddSource(v => !v)}
+            >
+              {showAddSource ? "Cancel add" : "Add source"}
+            </button>
+            {removedSources.length > 0 && (
+              <button type="button" onClick={() => setShowRemoved(v => !v)}>
+                {showRemoved ? "Hide removed" : `Removed (${removedSources.length})`}
+              </button>
+            )}
             <button
               type="button"
               onClick={async () => {
@@ -1232,79 +1824,252 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               Opt-in dragpdx
             </button>
           </div>
-          <div className="qsearch__panel" style={{ overflowX: "auto" }}>
-            <table className="qsearch__venue-table">
-              <thead>
-                <tr>
-                  <th>Source</th>
-                  <th>Yield</th>
-                  <th>URL / recipe</th>
-                  <th>Parser</th>
-                </tr>
-              </thead>
-              <tbody>
-                {venues.map(h => (
-                  <tr key={h.sourceId}>
-                    <td>
-                      {h.label}
-                      <div style={{ color: "var(--qs-muted)", fontSize: 11 }}>
-                        {h.tier}
-                        {h.isNew ? " · new" : ""}
-                        {h.isDirectory ? " · directory" : ""}
+
+          {showAddSource && (
+            <div className="qsearch__panel qsearch__add-source">
+              <h2 className="qsearch__panel-title">Add scrape source</h2>
+              <p className="qsearch__section-hint">
+                Paste any calendar / events URL. Custom sources persist and are included in Scan now.
+                Use Directory area for venue-specific recipes; General for city-wide catch-alls.
+              </p>
+              <div className="qsearch__add-source-grid">
+                <label className="qsearch__field">
+                  <span>Label</span>
+                  <input
+                    className="qsearch__filter"
+                    value={addLabel}
+                    onChange={e => setAddLabel(e.target.value)}
+                    placeholder="e.g. New venue calendar"
+                  />
+                </label>
+                <label className="qsearch__field qsearch__field--wide">
+                  <span>URL</span>
+                  <input
+                    className="qsearch__filter"
+                    style={{ maxWidth: "100%" }}
+                    value={addUrl}
+                    onChange={e => setAddUrl(e.target.value)}
+                    placeholder="https://…"
+                  />
+                </label>
+                <label className="qsearch__field">
+                  <span>Tier</span>
+                  <select
+                    className="qsearch__filter"
+                    value={addTier}
+                    onChange={e => setAddTier(e.target.value)}
+                  >
+                    <option value="custom">Custom</option>
+                    <option value="1">Tier 1 · venue</option>
+                    <option value="2">Tier 2 · music</option>
+                    <option value="3">Tier 3 · community</option>
+                    <option value="eventbrite">Eventbrite</option>
+                    <option value="partiful">Partiful</option>
+                    <option value="agg">Aggregator</option>
+                  </select>
+                </label>
+                <label className="qsearch__field">
+                  <span>Parser hint</span>
+                  <select
+                    className="qsearch__filter"
+                    value={addFormat}
+                    onChange={e => setAddFormat(e.target.value)}
+                  >
+                    <option value="html">HTML</option>
+                    <option value="ics">ICS</option>
+                    <option value="jsonld">JSON-LD</option>
+                    <option value="tribe">Tribe</option>
+                    <option value="squarespace">Squarespace</option>
+                    <option value="wix">Wix</option>
+                    <option value="eventbrite">Eventbrite</option>
+                    <option value="partiful">Partiful</option>
+                    <option value="unknown">Unknown</option>
+                  </select>
+                </label>
+                <div className="qsearch__add-source-actions">
+                  <button type="button" className="is-primary" disabled={busy} onClick={() => void addSource()}>
+                    {busy ? "Saving…" : "Save source"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p className="qsearch__sources-lede">
+            <strong>Directory listings</strong> group every scrape URL under a place or group in the
+            directory (auto website + curated recipes).{" "}
+            <strong>General scrape</strong> is city-wide catch-alls and aggregators not tied to one
+            listing (Eventbrite city, Partiful, dragpdx, EverOut, etc.). Use <strong>Add source</strong>{" "}
+            for a new URL; <strong>Remove</strong> drops it from scans (custom = permanent delete).
+          </p>
+
+          {(sourceSection === "all" || sourceSection === "directory") && (
+            <div className="qsearch__panel qsearch__sources-section" id="qsearch-sources-directory">
+              <h2 className="qsearch__panel-title">
+                Directory listings
+                <span className="qsearch__panel-count">
+                  {sourcesByArea.directoryGroups.length} listing
+                  {sourcesByArea.directoryGroups.length === 1 ? "" : "s"} ·{" "}
+                  {sourcesByArea.directoryCount} source
+                  {sourcesByArea.directoryCount === 1 ? "" : "s"}
+                </span>
+              </h2>
+              {!sourcesByArea.directoryGroups.length ? (
+                <p className="qsearch__empty">No directory-linked sources match this filter.</p>
+              ) : (
+                <div className="qsearch__listing-groups">
+                  {sourcesByArea.directoryGroups.map(group => (
+                    <details key={group.key} className="qsearch__listing" open={group.sources.length <= 3 || !!venueFilter}>
+                      <summary className="qsearch__listing-summary">
+                        <span className="qsearch__listing-name">{group.name}</span>
+                        <span className="qsearch__listing-meta">
+                          {group.hasDirectorySource ? (
+                            <span className="qsearch__badge is-ok">directory</span>
+                          ) : (
+                            <span className="qsearch__badge is-month">curated only</span>
+                          )}
+                          {group.businessId != null && (
+                            <span className="qsearch__badge">#{group.businessId}</span>
+                          )}
+                          <span className="qsearch__listing-count">
+                            {group.sources.length} source{group.sources.length === 1 ? "" : "s"}
+                          </span>
+                        </span>
+                      </summary>
+                      <div className="qsearch__listing-body" style={{ overflowX: "auto" }}>
+                        <table className="qsearch__venue-table">
+                          <thead>
+                            <tr>
+                              <th>Source</th>
+                              <th>Yield</th>
+                              <th>URL / recipe</th>
+                              <th>Parser</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {group.sources.map(h => (
+                              <SourceRow
+                                key={h.sourceId}
+                                h={h}
+                                recipeEdits={recipeEdits}
+                                setRecipeEdits={setRecipeEdits}
+                                saveRecipe={saveRecipe}
+                                busy={busy}
+                                onDelete={removeSource}
+                                onClearRecipe={() => {
+                                  setRecipeEdits(prev => ({ ...prev, [h.sourceId]: "" }));
+                                  void apiRequest(
+                                    "POST",
+                                    `/api/admin/qsearch/sources/${encodeURIComponent(h.sourceId)}/recipe`,
+                                    { recipeUrl: null },
+                                  ).then(() => refetch());
+                                }}
+                              />
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    </td>
-                    <td>
-                      <span className={`qsearch__badge ${yieldBadge(h.yieldStatus)}`}>{h.yieldStatus}</span>
-                      {h.zeroYieldStreak > 0 && (
-                        <span className="qsearch__badge is-fail">0×{h.zeroYieldStreak}</span>
-                      )}
-                      {h.lastEventCount > 0 && (
-                        <div style={{ fontSize: 11, color: "var(--qs-muted)" }}>
-                          last {h.lastEventCount} events
-                        </div>
-                      )}
-                    </td>
-                    <td style={{ minWidth: 220 }}>
-                      <a href={h.resolvedUrl || h.url} target="_blank" rel="noreferrer">
-                        {(h.resolvedUrl || h.url).slice(0, 64)}
-                        {(h.resolvedUrl || h.url).length > 64 ? "…" : ""}
-                      </a>
-                      <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                        <input
-                          className="qsearch__filter"
-                          style={{ maxWidth: 260 }}
-                          placeholder="Recipe URL override"
-                          value={recipeEdits[h.sourceId] ?? h.recipeUrl ?? ""}
-                          onChange={e =>
-                            setRecipeEdits(prev => ({ ...prev, [h.sourceId]: e.target.value }))
-                          }
+                    </details>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {(sourceSection === "all" || sourceSection === "general") && (
+            <div className="qsearch__panel qsearch__sources-section" id="qsearch-sources-general">
+              <h2 className="qsearch__panel-title">
+                General scrape
+                <span className="qsearch__panel-count">
+                  {sourcesByArea.generalCount} source
+                  {sourcesByArea.generalCount === 1 ? "" : "s"} · not tied to a directory listing
+                </span>
+              </h2>
+              <p className="qsearch__section-hint">
+                Eventbrite city searches, Partiful drops, and aggregators. High noise — review carefully
+                before commit.
+              </p>
+              {!sourcesByArea.general.length ? (
+                <p className="qsearch__empty">No general-scrape sources match this filter.</p>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table className="qsearch__venue-table">
+                    <thead>
+                      <tr>
+                        <th>Source</th>
+                        <th>Yield</th>
+                        <th>URL / recipe</th>
+                        <th>Parser</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sourcesByArea.general.map(h => (
+                        <SourceRow
+                          key={h.sourceId}
+                          h={h}
+                          recipeEdits={recipeEdits}
+                          setRecipeEdits={setRecipeEdits}
+                          saveRecipe={saveRecipe}
+                          busy={busy}
+                          onDelete={removeSource}
+                          onClearRecipe={() => {
+                            setRecipeEdits(prev => ({ ...prev, [h.sourceId]: "" }));
+                            void apiRequest(
+                              "POST",
+                              `/api/admin/qsearch/sources/${encodeURIComponent(h.sourceId)}/recipe`,
+                              { recipeUrl: null },
+                            ).then(() => refetch());
+                          }}
                         />
-                        <button type="button" onClick={() => saveRecipe(h.sourceId)}>
-                          Save recipe
-                        </button>
-                        {h.recipeUrl && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRecipeEdits(prev => ({ ...prev, [h.sourceId]: "" }));
-                              void apiRequest(
-                                "POST",
-                                `/api/admin/qsearch/sources/${encodeURIComponent(h.sourceId)}/recipe`,
-                                { recipeUrl: null },
-                              ).then(() => refetch());
-                            }}
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                    <td>{h.winningParser || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {showRemoved && removedSources.length > 0 && (
+            <div className="qsearch__panel qsearch__sources-section" id="qsearch-sources-removed">
+              <h2 className="qsearch__panel-title">
+                Removed sources
+                <span className="qsearch__panel-count">
+                  {removedSources.length} · not scanned until restored
+                </span>
+              </h2>
+              <p className="qsearch__section-hint">
+                Registry and directory sources soft-removed so they do not reappear on sync. Custom
+                sources you deleted are gone permanently.
+              </p>
+              <div style={{ overflowX: "auto" }}>
+                <table className="qsearch__venue-table">
+                  <thead>
+                    <tr>
+                      <th>Source</th>
+                      <th>Status</th>
+                      <th>URL</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {removedSources.map(h => (
+                      <SourceRow
+                        key={h.sourceId}
+                        h={h}
+                        recipeEdits={recipeEdits}
+                        setRecipeEdits={setRecipeEdits}
+                        saveRecipe={saveRecipe}
+                        busy={busy}
+                        onDelete={removeSource}
+                        onRestore={restoreSource}
+                        onClearRecipe={() => undefined}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1535,40 +2300,71 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           </span>
                         )}
                       </p>
-                      <p className="qsearch__cand-meta">
-                        {(c.sourceUrl || c.draft.sourceUrl) ? (
-                          <>
-                            Found at{" "}
-                            <a
-                              href={c.sourceUrl || c.draft.sourceUrl || "#"}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={e => e.stopPropagation()}
-                            >
-                              {c.sourceLabel || "source"}
-                            </a>
-                          </>
-                        ) : (
-                          c.sourceLabel
-                        )}
-                        {c.draft.parseSource ? ` · ${c.draft.parseSource}` : ""}
-                        {c.draft.confidence != null
-                          ? ` · conf ${(c.draft.confidence * 100).toFixed(0)}%`
-                          : ""}
-                        {c.draft.ticketUrl ? (
-                          <>
+                      {(() => {
+                        const eventPage = humanEventPageUrl(c);
+                        const tickets = ticketLinkUrl(c, eventPage);
+                        const feed =
+                          c.sourceUrl && isFeedOrApiUrl(c.sourceUrl)
+                            ? c.sourceUrl
+                            : c.draft.sourceUrl && isFeedOrApiUrl(c.draft.sourceUrl)
+                              ? c.draft.sourceUrl
+                              : null;
+                        return (
+                          <p className="qsearch__cand-meta qsearch__cand-links">
+                            {eventPage ? (
+                              <a
+                                className="qsearch__link-event"
+                                href={eventPage}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                title={eventPage}
+                              >
+                                Open event page
+                              </a>
+                            ) : (
+                              <span className="qsearch__link-missing" title="Feed had no per-event URL">
+                                No event page URL
+                              </span>
+                            )}
+                            {tickets ? (
+                              <>
+                                {" · "}
+                                <a
+                                  href={tickets}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  Tickets
+                                </a>
+                              </>
+                            ) : null}
                             {" · "}
-                            <a
-                              href={c.draft.ticketUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={e => e.stopPropagation()}
-                            >
-                              Tickets
-                            </a>
-                          </>
-                        ) : null}
-                      </p>
+                            <span title={feed || c.sourceUrl || undefined}>
+                              via {c.sourceLabel || "source"}
+                            </span>
+                            {feed ? (
+                              <>
+                                {" · "}
+                                <a
+                                  href={feed}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  className="qsearch__link-feed"
+                                >
+                                  Feed
+                                </a>
+                              </>
+                            ) : null}
+                            {c.draft.parseSource ? ` · ${c.draft.parseSource}` : ""}
+                            {c.draft.confidence != null
+                              ? ` · conf ${(c.draft.confidence * 100).toFixed(0)}%`
+                              : ""}
+                          </p>
+                        );
+                      })()}
                       <div>
                         {c.condensed && c.recurring === "weekly" && (
                           <span className="qsearch__badge is-week">Weekly · {c.recurringCount}</span>

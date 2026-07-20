@@ -5,7 +5,12 @@ import { normalizeTitleKey, findSubmissionMatches } from "@shared/submissionMatc
 import { normalizeVenueKey } from "@shared/venueLinks";
 import type { IngestEventDraft } from "../ingest/types";
 import { isPastEventListing } from "../ingest/dates";
-import { matchDirectoryBrands, type DirectoryBrand } from "./directoryBrands";
+import { enrichEventPageUrl } from "../ingest/eventPageUrl";
+import {
+  enrichDraftVenueFromSource,
+  matchDirectoryBrands,
+  type DirectoryBrand,
+} from "./directoryBrands";
 
 /** True when two titles are the same series (e.g. "BI Night" / "BI Night — July"). */
 export function titlesSameSeries(a: string, b: string): boolean {
@@ -102,6 +107,31 @@ export type DuplicateInfo = {
   note: string;
 };
 
+/** One scrape source that produced this listing (cross-source bundle). */
+export type SourceBundleMember = {
+  sourceId: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  /** Snapshot of key fields from that source (for conflict UI) */
+  title?: string;
+  venueName?: string;
+  dateStart?: string;
+  dateEnd?: string;
+  ticketUrl?: string | null;
+  eventPageUrl?: string | null;
+  address?: string | null;
+  posterImageUrl?: string | null;
+  ageRequirement?: string | null;
+  admission?: string | null;
+};
+
+/** Same event, different sources disagreeing on a field. */
+export type FieldConflict = {
+  field: string;
+  label: string;
+  values: Array<{ sourceLabel: string; sourceId: string; value: string }>;
+};
+
 export type ScanCandidate = {
   id: string;
   draft: IngestEventDraft;
@@ -120,6 +150,13 @@ export type ScanCandidate = {
   recurringDupAction: string | null;
   /** Directory venue + group logos/colors when matched */
   directoryBrands: DirectoryBrand[];
+  /**
+   * When the same party was found on multiple calendars (venue site + EB + …),
+   * all sources are listed here. Primary sourceId/sourceLabel stay the “best” row.
+   */
+  sourceBundle: SourceBundleMember[];
+  /** Conflicting fields across sources in the bundle (time, venue, title, tickets, …). */
+  fieldConflicts: FieldConflict[];
 };
 
 function wallParts(dateStart: string): { dayKey: string; minutes: number } | null {
@@ -441,6 +478,364 @@ function recurringDupAction(
   return null;
 }
 
+type CondensedRow = {
+  draft: IngestEventDraft;
+  sourceId: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  recurring: RecurringKind;
+  recurringGroupId: string | null;
+  recurringCount: number;
+  condensed: boolean;
+  memberDrafts: IngestEventDraft[];
+  sourceBundle?: SourceBundleMember[];
+  fieldConflicts?: FieldConflict[];
+};
+
+function normalizeComparableUrl(raw: string | null | undefined): string | null {
+  if (!raw || !/^https?:\/\//i.test(raw)) return null;
+  try {
+    const u = new URL(raw);
+    // Drop tracking noise; keep path identity
+    u.hash = "";
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"].forEach(
+      k => u.searchParams.delete(k),
+    );
+    const host = u.hostname.replace(/^www\./i, "").toLowerCase();
+    // Feed/API URLs are not event identity
+    if (
+      /format=json|wp-json|\/tribe\/events\/v1|\.ics(\?|$)|\/ics\/?(\?|$)|ical=1/i.test(
+        u.pathname + u.search,
+      )
+    ) {
+      return null;
+    }
+    return `${host}${u.pathname.replace(/\/$/, "").toLowerCase()}${u.search}`;
+  } catch {
+    return null;
+  }
+}
+
+function draftDayKey(d: IngestEventDraft): string {
+  return String(d.dateStart || "").slice(0, 10);
+}
+
+function isWeakVenueNameLocal(name: string | null | undefined): boolean {
+  const v = String(name || "").trim();
+  if (!v || v.length < 2) return true;
+  return /^(tba|tbd|n\/?a|unknown|various|online|virtual|see listing|multiple|portland)$/i.test(v);
+}
+
+/** Completeness score — prefer richer scrape as primary when bundling. */
+function draftRichness(d: IngestEventDraft): number {
+  let s = 0;
+  if (d.posterImageUrl && !isEventPlaceholderUrl(d.posterImageUrl)) s += 40;
+  if (d.description && d.description.length > 80) s += 15;
+  if (d.description && d.description.length > 300) s += 10;
+  if (!isWeakVenueNameLocal(d.venueName)) s += 20;
+  if (d.ticketUrl) s += 12;
+  if (d.eventPageUrl) s += 10;
+  if (d.address) s += 8;
+  if (d.ageRequirement) s += 4;
+  if (d.admission) s += 4;
+  if (d.confidence != null) s += Math.round(d.confidence * 10);
+  return s;
+}
+
+function sameEventCrossSource(a: CondensedRow, b: CondensedRow): boolean {
+  // Never merge two different weekly/monthly series groups
+  if (
+    a.recurringGroupId &&
+    b.recurringGroupId &&
+    a.recurringGroupId !== b.recurringGroupId
+  ) {
+    return false;
+  }
+
+  const urlsA = [
+    normalizeComparableUrl(a.draft.ticketUrl),
+    normalizeComparableUrl(a.draft.eventPageUrl),
+    normalizeComparableUrl(a.draft.sourceUrl),
+  ].filter(Boolean) as string[];
+  const urlsB = [
+    normalizeComparableUrl(b.draft.ticketUrl),
+    normalizeComparableUrl(b.draft.eventPageUrl),
+    normalizeComparableUrl(b.draft.sourceUrl),
+  ].filter(Boolean) as string[];
+  if (urlsA.some(u => urlsB.includes(u))) return true;
+
+  const dayA = draftDayKey(a.draft);
+  const dayB = draftDayKey(b.draft);
+  if (!dayA || !dayB || dayA !== dayB) return false;
+
+  if (!titlesSameSeries(a.draft.title, b.draft.title)) return false;
+
+  const venueOk =
+    sameVenue(a.draft.venueName, b.draft.venueName) ||
+    isWeakVenueNameLocal(a.draft.venueName) ||
+    isWeakVenueNameLocal(b.draft.venueName);
+  if (!venueOk) return false;
+
+  const ta = timeBucket(a.draft.dateStart);
+  const tb = timeBucket(b.draft.dateStart);
+  if (ta != null && tb != null && Math.abs(ta - tb) > 90) return false;
+
+  return true;
+}
+
+function normFieldValue(field: string, raw: string): string {
+  const s = String(raw || "").trim().toLowerCase().replace(/\s+/g, " ");
+  if (field === "dateStart" || field === "dateEnd") {
+    // Compare to minute precision
+    return s.slice(0, 16);
+  }
+  if (field === "ticketUrl" || field === "eventPageUrl") {
+    return normalizeComparableUrl(raw) || s;
+  }
+  if (field === "venueName") return normalizeVenueKey(raw) || s;
+  if (field === "title") return normalizeTitleKey(raw) || s;
+  return s;
+}
+
+const BUNDLE_FIELDS: Array<{ field: keyof IngestEventDraft; label: string }> = [
+  { field: "title", label: "Title" },
+  { field: "venueName", label: "Venue" },
+  { field: "address", label: "Address" },
+  { field: "dateStart", label: "Start" },
+  { field: "dateEnd", label: "End" },
+  { field: "ticketUrl", label: "Tickets" },
+  { field: "eventPageUrl", label: "Event page" },
+  { field: "ageRequirement", label: "Age" },
+  { field: "admission", label: "Admission" },
+  { field: "posterImageUrl", label: "Flyer" },
+];
+
+function buildFieldConflicts(members: CondensedRow[]): FieldConflict[] {
+  const out: FieldConflict[] = [];
+  for (const { field, label } of BUNDLE_FIELDS) {
+    const byNorm = new Map<string, Array<{ sourceLabel: string; sourceId: string; value: string }>>();
+    for (const m of members) {
+      const raw = String((m.draft as any)[field] ?? "").trim();
+      if (!raw) continue;
+      if (field === "posterImageUrl" && isEventPlaceholderUrl(raw)) continue;
+      const key = normFieldValue(field, raw);
+      if (!key) continue;
+      const list = byNorm.get(key) || [];
+      list.push({
+        sourceLabel: m.sourceLabel,
+        sourceId: m.sourceId,
+        value: field === "dateStart" || field === "dateEnd" ? raw.slice(0, 16).replace("T", " ") : raw.length > 80 ? raw.slice(0, 77) + "…" : raw,
+      });
+      byNorm.set(key, list);
+    }
+    if (byNorm.size <= 1) continue;
+    const values: FieldConflict["values"] = [];
+    for (const list of byNorm.values()) {
+      // One representative per distinct value
+      values.push(list[0]);
+    }
+    if (values.length > 1) {
+      out.push({ field, label, values });
+    }
+  }
+  return out;
+}
+
+function mergeDraftsFromBundle(members: CondensedRow[]): IngestEventDraft {
+  const ranked = [...members].sort((a, b) => draftRichness(b.draft) - draftRichness(a.draft));
+  const primary = ranked[0].draft;
+  let out: IngestEventDraft = { ...primary };
+
+  const fill = <K extends keyof IngestEventDraft>(key: K, prefer?: (v: unknown) => boolean) => {
+    if (out[key] != null && String(out[key]).trim() !== "") {
+      if (key === "posterImageUrl" && isEventPlaceholderUrl(String(out[key]))) {
+        /* fall through to replace */
+      } else if (key === "venueName" && isWeakVenueNameLocal(String(out[key]))) {
+        /* fall through */
+      } else {
+        return;
+      }
+    }
+    for (const m of ranked) {
+      const v = m.draft[key];
+      if (v == null || String(v).trim() === "") continue;
+      if (prefer && !prefer(v)) continue;
+      if (key === "posterImageUrl" && isEventPlaceholderUrl(String(v))) continue;
+      if (key === "venueName" && isWeakVenueNameLocal(String(v))) continue;
+      (out as any)[key] = v;
+      return;
+    }
+  };
+
+  fill("venueName");
+  fill("address");
+  fill("ticketUrl");
+  fill("eventPageUrl");
+  fill("posterImageUrl");
+  fill("ageRequirement");
+  fill("admission");
+  // Prefer longest description
+  for (const m of ranked) {
+    if ((m.draft.description || "").length > (out.description || "").length) {
+      out = { ...out, description: m.draft.description };
+    }
+  }
+
+  const sourceNames = Array.from(new Set(members.map(m => m.sourceLabel)));
+  const warnings = [
+    ...(out.warnings || []),
+    sourceNames.length > 1
+      ? `Same event on ${sourceNames.length} sources: ${sourceNames.join(" · ")}`
+      : "",
+  ].filter(Boolean);
+  return { ...out, warnings: Array.from(new Set(warnings)) };
+}
+
+/**
+ * Bundle the same party found on multiple calendars (venue site + Eventbrite + …)
+ * into one review card, and record any field-level conflicts.
+ */
+export function bundleCrossSourceEvents(rows: CondensedRow[]): CondensedRow[] {
+  if (rows.length < 2) {
+    return rows.map(r => ({
+      ...r,
+      sourceBundle: [
+        {
+          sourceId: r.sourceId,
+          sourceLabel: r.sourceLabel,
+          sourceUrl: r.sourceUrl,
+          title: r.draft.title,
+          venueName: r.draft.venueName,
+          dateStart: r.draft.dateStart,
+          dateEnd: r.draft.dateEnd,
+          ticketUrl: r.draft.ticketUrl,
+          eventPageUrl: r.draft.eventPageUrl,
+          address: r.draft.address,
+          posterImageUrl: r.draft.posterImageUrl,
+          ageRequirement: r.draft.ageRequirement,
+          admission: r.draft.admission,
+        },
+      ],
+      fieldConflicts: [],
+    }));
+  }
+
+  // Union-find
+  const parent = rows.map((_, i) => i);
+  const find = (i: number): number => {
+    while (parent[i] !== i) {
+      parent[i] = parent[parent[i]];
+      i = parent[i];
+    }
+    return i;
+  };
+  const unite = (a: number, b: number) => {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent[rb] = ra;
+  };
+
+  for (let i = 0; i < rows.length; i++) {
+    for (let j = i + 1; j < rows.length; j++) {
+      if (sameEventCrossSource(rows[i], rows[j])) unite(i, j);
+    }
+  }
+
+  const clusters = new Map<number, number[]>();
+  for (let i = 0; i < rows.length; i++) {
+    const r = find(i);
+    const list = clusters.get(r) || [];
+    list.push(i);
+    clusters.set(r, list);
+  }
+
+  const out: CondensedRow[] = [];
+  for (const idxs of clusters.values()) {
+    const members = idxs.map(i => rows[i]);
+    if (members.length === 1) {
+      const r = members[0];
+      out.push({
+        ...r,
+        sourceBundle: [
+          {
+            sourceId: r.sourceId,
+            sourceLabel: r.sourceLabel,
+            sourceUrl: r.sourceUrl,
+            title: r.draft.title,
+            venueName: r.draft.venueName,
+            dateStart: r.draft.dateStart,
+            dateEnd: r.draft.dateEnd,
+            ticketUrl: r.draft.ticketUrl,
+            eventPageUrl: r.draft.eventPageUrl,
+            address: r.draft.address,
+            posterImageUrl: r.draft.posterImageUrl,
+            ageRequirement: r.draft.ageRequirement,
+            admission: r.draft.admission,
+          },
+        ],
+        fieldConflicts: [],
+      });
+      continue;
+    }
+
+    // Prefer richest draft as primary; keep recurring from any condensed member
+    members.sort((a, b) => draftRichness(b.draft) - draftRichness(a.draft));
+    const primary = members[0];
+    const fieldConflicts = buildFieldConflicts(members);
+    const draft = mergeDraftsFromBundle(members);
+    if (fieldConflicts.length) {
+      draft.warnings = [
+        ...(draft.warnings || []),
+        `Conflicting info across sources: ${fieldConflicts.map(f => f.label).join(", ")}`,
+      ];
+    }
+
+    const sourceBundle: SourceBundleMember[] = members.map(m => ({
+      sourceId: m.sourceId,
+      sourceLabel: m.sourceLabel,
+      sourceUrl: m.sourceUrl,
+      title: m.draft.title,
+      venueName: m.draft.venueName,
+      dateStart: m.draft.dateStart,
+      dateEnd: m.draft.dateEnd,
+      ticketUrl: m.draft.ticketUrl,
+      eventPageUrl: m.draft.eventPageUrl,
+      address: m.draft.address,
+      posterImageUrl: m.draft.posterImageUrl,
+      ageRequirement: m.draft.ageRequirement,
+      admission: m.draft.admission,
+    }));
+
+    // De-dupe sources by sourceId
+    const seenSrc = new Set<string>();
+    const uniqueBundle = sourceBundle.filter(s => {
+      if (seenSrc.has(s.sourceId)) return false;
+      seenSrc.add(s.sourceId);
+      return true;
+    });
+
+    const recurringMember = members.find(m => m.recurring) || primary;
+    out.push({
+      draft,
+      sourceId: primary.sourceId,
+      sourceLabel:
+        uniqueBundle.length > 1
+          ? `${primary.sourceLabel} +${uniqueBundle.length - 1} more`
+          : primary.sourceLabel,
+      sourceUrl: primary.sourceUrl,
+      recurring: recurringMember.recurring,
+      recurringGroupId: recurringMember.recurringGroupId,
+      recurringCount: Math.max(...members.map(m => m.recurringCount || 1)),
+      condensed: true,
+      memberDrafts: members.flatMap(m => m.memberDrafts),
+      sourceBundle: uniqueBundle,
+      fieldConflicts,
+    });
+  }
+
+  return out;
+}
+
 export function buildScanCandidates(
   raw: Array<{ draft: IngestEventDraft; sourceId: string; sourceLabel: string; sourceUrl: string }>,
   catalog: Event[],
@@ -457,16 +852,30 @@ export function buildScanCandidates(
     // Representative should still be upcoming; drop fully-past series
     return !isPastEventListing(row.draft);
   });
-  return condensed.map((row, index) => {
+  // Same party on multiple sites → one review card + field conflicts
+  const bundled = bundleCrossSourceEvents(condensed);
+  return bundled.map((row, index) => {
+    // Resolve TBA / street-only LOCATION → directory venue (e.g. Sanctuary ICS)
+    // + human event page URL when feed omitted it
+    let resolvedDraft = businesses.length
+      ? enrichDraftVenueFromSource(row.draft, businesses, {
+          sourceLabel: row.sourceLabel,
+          sourceId: row.sourceId,
+        })
+      : row.draft;
+    resolvedDraft = enrichEventPageUrl(resolvedDraft);
     const directoryBrands = businesses.length
-      ? matchDirectoryBrands(row.draft, businesses, { sourceLabel: row.sourceLabel })
+      ? matchDirectoryBrands(resolvedDraft, businesses, {
+          sourceLabel: row.sourceLabel,
+          sourceId: row.sourceId,
+        })
       : [];
     const matches = findSubmissionMatches(
       {
-        title: row.draft.title,
-        venueName: row.draft.venueName,
-        address: row.draft.address,
-        dateStart: row.draft.dateStart,
+        title: resolvedDraft.title,
+        venueName: resolvedDraft.venueName,
+        address: resolvedDraft.address,
+        dateStart: resolvedDraft.dateStart,
         dateEnd: row.draft.dateEnd,
         ticketUrl: row.draft.ticketUrl,
       },
@@ -539,7 +948,7 @@ export function buildScanCandidates(
 
     // Same-series prior flyer only (e.g. BI Night update, no new art → old BI Night flyer).
     // Never borrow another night's art from the same venue.
-    let draft: IngestEventDraft = row.draft;
+    let draft: IngestEventDraft = resolvedDraft;
     const warnings = [...(draft.warnings || [])];
     if (action) warnings.push(action);
 
@@ -568,22 +977,40 @@ export function buildScanCandidates(
       ? { ...draft, warnings: Array.from(new Set(warnings)) }
       : draft;
 
+    const sourceBundle: SourceBundleMember[] =
+      row.sourceBundle && row.sourceBundle.length
+        ? row.sourceBundle
+        : [
+            {
+              sourceId: row.sourceId,
+              sourceLabel: row.sourceLabel,
+              sourceUrl: row.sourceUrl,
+            },
+          ];
+    const fieldConflicts: FieldConflict[] = row.fieldConflicts || [];
+    if (fieldConflicts.length) {
+      // Multi-source disagreement needs a human look — don't auto-select
+      // (selected already computed; force off)
+    }
+
     return {
       id: `cand-${index}-${row.sourceId}`,
       draft,
       sourceId: row.sourceId,
       sourceLabel: row.sourceLabel,
       sourceUrl: row.sourceUrl,
-      selected,
+      selected: selected && fieldConflicts.length === 0,
       recurring: row.recurring,
       recurringGroupId: row.recurringGroupId,
       recurringCount: row.recurringCount,
-      condensed: row.condensed,
+      condensed: row.condensed || sourceBundle.length > 1,
       conflicts,
       duplicates,
       strongDuplicate: strong,
       recurringDupAction: action,
       directoryBrands,
+      sourceBundle,
+      fieldConflicts,
     };
   });
 }

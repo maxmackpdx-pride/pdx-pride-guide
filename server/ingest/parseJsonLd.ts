@@ -215,7 +215,17 @@ function nodeToDraft(node: Record<string, unknown>, sourceUrl: string | null): I
   }
 
   const poster = imageUrl(node);
-  const ticketUrl = offersUrl(node) || sourceUrl;
+  const eventPage =
+    textOf(node.url) ||
+    textOf(node.mainEntityOfPage) ||
+    (typeof node["@id"] === "string" && /^https?:/i.test(node["@id"]) ? node["@id"] : null);
+  const offers = offersUrl(node);
+  const ticketUrl = offers || eventPage || sourceUrl;
+  // Prefer event page over feed/list URL for human "open listing"
+  const eventPageUrl =
+    eventPage && /^https?:/i.test(eventPage) && !/format=json|wp-json|\.ics/i.test(eventPage)
+      ? eventPage.slice(0, 500)
+      : null;
 
   return {
     title: title.slice(0, 200),
@@ -232,6 +242,7 @@ function nodeToDraft(node: Record<string, unknown>, sourceUrl: string | null): I
     eventTypes: "[]",
     admission: admissionFrom(node),
     ticketUrl: ticketUrl ? ticketUrl.slice(0, 500) : null,
+    eventPageUrl,
     isPublic: true,
     isPrivate: false,
     isHouseParty: false,

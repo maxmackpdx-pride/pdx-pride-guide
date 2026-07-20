@@ -114,7 +114,140 @@ function nameLooselyMatch(a: string, b: string): boolean {
 export type MatchDirectoryBrandsOpts = {
   /** QSearch source label e.g. "Darcelle XV" — used when venue is TBA/empty */
   sourceLabel?: string | null;
+  /** Curated source id e.g. sanctuary-ics — used for host/label hints */
+  sourceId?: string | null;
 };
+
+/** Strip parser noise from labels: "Sanctuary (ICS)" → "Sanctuary" */
+export function cleanSourceLabel(label: string | null | undefined): string {
+  return stripHtml(label || "")
+    .replace(
+      /\s*[\(\[]\s*(ics|json|tribe|html|wix|squarespace|eventbrite|tixr|bit|bandsintown|vision|upload|api|calendar|jsonld)\s*[\)\]]\s*/gi,
+      " ",
+    )
+    .replace(/\s*[-–—|]\s*(ics|tribe|json|eventbrite|tixr|calendar)\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Feed put the street in LOCATION with no venue name (common on Sanctuary ICS). */
+export function isAddressLikeVenueName(name: string | null | undefined): boolean {
+  const n = stripHtml(name || "").trim();
+  if (!n) return false;
+  if (/^\d{1,6}\s+\S+/.test(n)) return true; // "33 NW 9th Ave"
+  if (/^(nw|ne|sw|se)\s+\d/i.test(n)) return true;
+  return false;
+}
+
+export function isWeakVenueName(name: string | null | undefined): boolean {
+  const v = stripHtml(name || "").trim();
+  if (!v || v.length < 2) return true;
+  if (/^(tba|tbd|n\/?a|unknown|various|online|virtual|see listing|multiple)$/i.test(v)) return true;
+  if (isAddressLikeVenueName(v)) return true;
+  return false;
+}
+
+function hostsMatch(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (!a || !b) return false;
+  try {
+    const ha = new URL(a.startsWith("http") ? a : `https://${a}`).hostname.replace(/^www\./, "");
+    const hb = new URL(b.startsWith("http") ? b : `https://${b}`).hostname.replace(/^www\./, "");
+    if (!ha || !hb) return false;
+    return ha === hb || ha.endsWith(`.${hb}`) || hb.endsWith(`.${ha}`);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * When ICS/HTML only has TBA or a street address, resolve the real directory venue
+ * from source label / source URL host so Review logos + publish matching work.
+ */
+export function enrichDraftVenueFromSource(
+  draft: IngestEventDraft,
+  businesses: Business[],
+  opts?: MatchDirectoryBrandsOpts,
+): IngestEventDraft {
+  const active = businesses.filter(b => b.active !== false);
+  const rawVenue = stripHtml(draft.venueName || "");
+  const weak = isWeakVenueName(rawVenue);
+  let address = draft.address || null;
+
+  // Street-only LOCATION → keep as address, clear fake venue name
+  if (isAddressLikeVenueName(rawVenue)) {
+    if (!address) address = rawVenue.slice(0, 300);
+  }
+
+  if (!weak && !isAddressLikeVenueName(rawVenue)) {
+    return address !== draft.address ? { ...draft, address } : draft;
+  }
+
+  const label = cleanSourceLabel(opts?.sourceLabel);
+  const sourceId = String(opts?.sourceId || "").toLowerCase();
+
+  // Prefer website host (pdxsanctuary.com ICS → Sanctuary Club once website is set)
+  let hit =
+    active.find(
+      b =>
+        b.type !== "group" &&
+        b.type !== "nonprofit" &&
+        hostsMatch(draft.sourceUrl, b.website || undefined),
+    ) || null;
+
+  // Source id / label contains venue key
+  if (!hit && (label || sourceId)) {
+    hit =
+      active.find(b => {
+        if (b.type === "group" || b.type === "nonprofit") return false;
+        const bn = normalizeVenueKey(b.name);
+        const core = bn.split(" ")[0] || bn;
+        if (core.length < 4) return false;
+        if (label && (nameLooselyMatch(label, b.name) || normalizeVenueKey(label).includes(core))) {
+          return true;
+        }
+        if (sourceId && sourceId.includes(core.replace(/\s+/g, ""))) return true;
+        return false;
+      }) || null;
+  }
+
+  // Address match alone
+  if (!hit && address) {
+    hit =
+      active.find(
+        b =>
+          b.type !== "group" &&
+          b.type !== "nonprofit" &&
+          addressesLooselyMatch(address, b.address),
+      ) || null;
+  }
+
+  if (!hit) {
+    // At least prefer cleaned label over TBA for display
+    if (label && (isWeakVenueName(rawVenue) || isAddressLikeVenueName(rawVenue))) {
+      return {
+        ...draft,
+        venueName: label.slice(0, 200),
+        address,
+        warnings: Array.from(
+          new Set([...(draft.warnings || []), `Venue filled from source label (${label})`]),
+        ),
+      };
+    }
+    return address !== draft.address ? { ...draft, address } : draft;
+  }
+
+  return {
+    ...draft,
+    venueName: hit.name,
+    address: address || hit.address || draft.address,
+    warnings: Array.from(
+      new Set([
+        ...(draft.warnings || []),
+        `Venue resolved to directory: ${hit.name}`,
+      ]),
+    ),
+  };
+}
 
 /**
  * Match an ingest draft to directory places:
@@ -135,12 +268,10 @@ export function matchDirectoryBrands(
   const title = stripHtml(draft.title || "");
   const description = stripHtml(draft.description || "");
   const address = draft.address || "";
-  const sourceLabel = stripHtml(opts?.sourceLabel || "");
-  const venueWeak =
-    !venueName ||
-    /^(tba|tbd|n\/?a|unknown|various|online|virtual)$/i.test(venueName.trim());
-  // Fallback name for venue matching when feed says TBA
-  const venueProbe = venueWeak ? sourceLabel : venueName;
+  const sourceLabel = cleanSourceLabel(opts?.sourceLabel || "");
+  const venueWeak = isWeakVenueName(venueName);
+  // Fallback name for venue matching when feed says TBA / street-only
+  const venueProbe = venueWeak ? sourceLabel || venueName : venueName;
 
   // Score every business
   type Scored = { biz: Business; score: number; reasons: string[]; role: DirectoryBrand["role"] };
@@ -151,11 +282,11 @@ export function matchDirectoryBrands(
     let score = 0;
     const reasons: string[] = [];
 
-    if (venueName && nameLooselyMatch(venueName, biz.name)) {
+    if (venueName && !isAddressLikeVenueName(venueName) && nameLooselyMatch(venueName, biz.name)) {
       score += 55;
       reasons.push("Venue name match");
     } else if (venueProbe && nameLooselyMatch(venueProbe, biz.name)) {
-      score += venueWeak ? 48 : 55;
+      score += venueWeak ? 50 : 55;
       reasons.push(venueWeak ? "Source label venue match" : "Venue name match");
     } else if (venueProbe) {
       // token overlap
@@ -166,7 +297,8 @@ export function matchDirectoryBrands(
         score += 30;
         reasons.push("Partial venue name");
       } else if (shared === 1 && bt.some(t => t.length >= 5 && vt.has(t))) {
-        score += 28;
+        // "Sanctuary" → Sanctuary Club when feed venue is TBA
+        score += venueWeak ? 45 : 28;
         reasons.push("Venue token match");
       }
     }
@@ -175,21 +307,23 @@ export function matchDirectoryBrands(
       score += 50;
       reasons.push("Address match");
     }
+    // Street-only venueName is also an address signal
+    if (isAddressLikeVenueName(venueName) && addressesLooselyMatch(venueName, biz.address)) {
+      score += 50;
+      reasons.push("Street LOCATION = directory address");
+    }
 
-    // Website host overlap (darcelle-tribe source → darcellexv.com)
-    if (draft.sourceUrl && biz.website) {
-      try {
-        const host = new URL(draft.sourceUrl).hostname.replace(/^www\./, "");
-        const bHost = new URL(
-          biz.website.startsWith("http") ? biz.website : `https://${biz.website}`,
-        ).hostname.replace(/^www\./, "");
-        if (host && bHost && (host === bHost || host.endsWith(`.${bHost}`) || bHost.endsWith(`.${host}`))) {
-          score += 35;
-          reasons.push("Website host match");
-        }
-      } catch {
-        /* ignore bad urls */
-      }
+    // Website host overlap (pdxsanctuary.com ICS → Sanctuary Club)
+    if (hostsMatch(draft.sourceUrl, biz.website || undefined)) {
+      score += 45;
+      reasons.push("Website host match");
+    }
+    // Source id hint: sanctuary-ics
+    const sid = String(opts?.sourceId || "").toLowerCase();
+    const bKey = normalizeVenueKey(biz.name).replace(/\s+/g, "");
+    if (sid && bKey.length >= 5 && sid.includes(bKey.slice(0, Math.min(8, bKey.length)))) {
+      score += 40;
+      reasons.push("Source id venue hint");
     }
 
     if (score < 40) continue;

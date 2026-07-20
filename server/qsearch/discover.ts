@@ -1,5 +1,6 @@
 import { fetchIngestSource } from "../ingest/fetchSource";
 import { previewIngest } from "../ingest";
+import { isAllowedDiscoveryUrl, isGenericEventbriteDumpUrl } from "../ingest/relevance";
 import type { IngestEventDraft } from "../ingest/types";
 import type { Event } from "@shared/schema";
 import { expandWebsiteScrapeCandidates } from "@shared/ingestSources";
@@ -82,12 +83,20 @@ export async function discoverAndParse(opts: {
     queue.push(u);
   };
 
+  // Never re-use a poisoned "local events" dump as resolved recipe
+  const safeResolved =
+    opts.resolvedUrl && !isGenericEventbriteDumpUrl(opts.resolvedUrl) && isAllowedDiscoveryUrl(opts.primaryUrl, opts.resolvedUrl)
+      ? opts.resolvedUrl
+      : null;
+
   pushQ(opts.recipeUrl);
-  pushQ(opts.resolvedUrl);
+  pushQ(safeResolved);
   pushQ(opts.primaryUrl);
 
   if (opts.allowExpand !== false) {
-    for (const c of expandWebsiteScrapeCandidates(opts.primaryUrl)) pushQ(c);
+    for (const c of expandWebsiteScrapeCandidates(opts.primaryUrl)) {
+      if (isAllowedDiscoveryUrl(opts.primaryUrl, c)) pushQ(c);
+    }
   }
 
   let best: DiscoverHit = {
@@ -98,14 +107,34 @@ export async function discoverAndParse(opts: {
     sourceUrl: null,
   };
 
+  /** Prefer primary-path hits over generic high-count dumps. */
+  function scoreHit(url: string, count: number): number {
+    let s = count;
+    try {
+      const primary = new URL(opts.primaryUrl.includes("://") ? opts.primaryUrl : `https://${opts.primaryUrl}`);
+      const u = new URL(url.includes("://") ? url : `https://${url}`);
+      if (u.pathname === primary.pathname) s += 1000; // exact primary wins
+      else if (primary.pathname.length > 1 && u.pathname.startsWith(primary.pathname.replace(/\/$/, ""))) s += 200;
+      if (isGenericEventbriteDumpUrl(url)) s -= 10_000;
+    } catch {
+      /* keep count */
+    }
+    return s;
+  }
+
+  let bestScore = -Infinity;
+
   // First pass: known URLs
   for (const url of queue.slice(0, 8)) {
+    if (!isAllowedDiscoveryUrl(opts.primaryUrl, url)) continue;
     tried.push(url);
     try {
       const result = await previewIngest({ url, existingEvents: opts.existingEvents });
       if (!result.ok) continue;
       const drafts = result.events.map(e => e.draft);
-      if (drafts.length > best.eventCount) {
+      const sc = scoreHit(url, drafts.length);
+      if (sc > bestScore) {
+        bestScore = sc;
         best = {
           url,
           eventCount: drafts.length,
@@ -120,14 +149,16 @@ export async function discoverAndParse(opts: {
           const fetched = await fetchIngestSource(url);
           if (fetched.body && /<html|<link|href=/i.test(fetched.body)) {
             for (const d of extractDiscoveryUrls(fetched.body, fetched.url || url)) {
-              pushQ(d);
+              if (isAllowedDiscoveryUrl(opts.primaryUrl, d)) pushQ(d);
             }
           }
         } catch {
           /* ignore discover fetch errors */
         }
       }
-      if (best.eventCount >= 3) break; // good enough early exit
+      // Good enough on the exact primary path — don't chase bigger dumps
+      if (drafts.length >= 1 && scoreHit(url, drafts.length) >= 1000) break;
+      if (best.eventCount >= 3 && bestScore >= 1000) break;
     } catch {
       /* try next */
     }
@@ -136,13 +167,16 @@ export async function discoverAndParse(opts: {
   // Second pass: newly discovered links not yet tried
   for (const url of queue) {
     if (tried.includes(url)) continue;
+    if (!isAllowedDiscoveryUrl(opts.primaryUrl, url)) continue;
     if (tried.length >= 14) break;
     tried.push(url);
     try {
       const result = await previewIngest({ url, existingEvents: opts.existingEvents });
       if (!result.ok) continue;
       const drafts = result.events.map(e => e.draft);
-      if (drafts.length > best.eventCount) {
+      const sc = scoreHit(url, drafts.length);
+      if (sc > bestScore) {
+        bestScore = sc;
         best = {
           url,
           eventCount: drafts.length,
@@ -151,7 +185,7 @@ export async function discoverAndParse(opts: {
           sourceUrl: result.sourceUrl,
         };
       }
-      if (best.eventCount >= 5) break;
+      if (best.eventCount >= 5 && bestScore >= 1000) break;
     } catch {
       /* next */
     }

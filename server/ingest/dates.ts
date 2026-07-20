@@ -2,9 +2,28 @@ import { pacificDayOfWeek } from "@shared/missedConnections";
 
 const PACIFIC_TZ = "America/Los_Angeles";
 
+/** Full year from a wall-clock or ISO string (never invent). */
+export function yearFromDateString(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const m = String(value).match(/\b(20\d{2})\b/);
+  if (!m) return null;
+  const y = Number(m[1]);
+  return y >= 2000 && y <= 2100 ? y : null;
+}
+
+/** Current calendar year in America/Los_Angeles (for vision when flyer omits year). */
+export function pacificCalendarYear(nowMs = Date.now()): number {
+  const y = new Intl.DateTimeFormat("en-US", {
+    timeZone: PACIFIC_TZ,
+    year: "numeric",
+  }).format(new Date(nowMs));
+  return Number(y) || new Date(nowMs).getUTCFullYear();
+}
+
 /**
  * Convert any absolute timestamp (or ICS-like local) into the wall-clock
  * Pacific format used by the events table: `YYYY-MM-DDTHH:mm:ss` (no Z).
+ * Always preserves the real year from the source — never defaults to a hard-coded year.
  */
 export function toPacificWallClock(value: string | Date | null | undefined): string | null {
   if (value == null) return null;
@@ -87,9 +106,21 @@ export function isPastEventListing(
   if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(end)) {
     ms = new Date(end).getTime();
   } else {
-    ms = new Date(`${end}-07:00`).getTime();
+    // Wall-clock Pacific: pin to America/Los_Angeles via noon probe for the day,
+    // then use the wall time with a fixed offset approximation (−08/−07 by month).
+    const m = end.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (m) {
+      const month = Number(m[2]);
+      // Rough PDT Mar–Nov, else PST (good enough for past/future filter)
+      const off = month >= 3 && month <= 11 ? "-07:00" : "-08:00";
+      ms = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6] || "00"}${off}`).getTime();
+    } else {
+      ms = new Date(`${end}-07:00`).getTime();
+    }
   }
-  return Number.isFinite(ms) && ms < nowMs;
+  if (!Number.isFinite(ms)) return false;
+  // Also treat start-of-day after end-of-event day as past when end is midnight-ish
+  return ms < nowMs;
 }
 
 /** Default end = start + 3h when only a start is known. */

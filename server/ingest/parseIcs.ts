@@ -37,12 +37,22 @@ function parseProps(block: string[]): Map<string, string> {
 function icsDateValue(rawLine: string | undefined, plain: string | undefined): string | null {
   if (rawLine) {
     // DTSTART;TZID=America/Los_Angeles:20260718T210000
+    // DTSTART;TZID=UTC:20250628T010000  (UTC without Z — treat as Z)
     const m = rawLine.match(/^DT(?:START|END)([^:]*):(.*)$/i);
     if (m) {
       const params = m[1];
-      const val = m[2].trim();
+      let val = m[2].trim();
       if (/VALUE=DATE/i.test(params) && /^\d{8}$/.test(val)) {
         return toPacificWallClock(`${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`);
+      }
+      // TZID=UTC / GMT without trailing Z → absolute UTC
+      if (/TZID=(UTC|GMT)/i.test(params) && /^\d{8}T\d{6}$/i.test(val) && !/Z$/i.test(val)) {
+        val = `${val}Z`;
+      }
+      // Floating local with America/Los_Angeles — keep as Pacific wall-clock (no Z)
+      if (/TZID=America\/Los_Angeles/i.test(params) && /^\d{8}T\d{6}$/i.test(val)) {
+        const c = val.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/);
+        if (c) return `${c[1]}-${c[2]}-${c[3]}T${c[4]}:${c[5]}:${c[6]}`;
       }
       return toPacificWallClock(val);
     }
@@ -109,7 +119,11 @@ export function parseIcs(text: string, sourceUrl: string | null = null): IngestE
       `${title}${location ? ` at ${location}` : ""}.`;
     if (!props.get("DESCRIPTION")) warnings.push("No DESCRIPTION — generated stub");
 
-    const url = unescapeIcs(props.get("URL") || "") || sourceUrl;
+    const icsUrl = unescapeIcs(props.get("URL") || "");
+    const eventPageUrl =
+      icsUrl && /^https?:\/\//i.test(icsUrl) && !/\.ics(\?|$)/i.test(icsUrl)
+        ? icsUrl.slice(0, 500)
+        : null;
     const venueName = (location.split(",")[0] || "TBA").slice(0, 200);
 
     const draft: IngestEventDraft = {
@@ -126,7 +140,8 @@ export function parseIcs(text: string, sourceUrl: string | null = null): IngestE
       ageRequirement: "ALL_AGES",
       eventTypes: "[]",
       admission: "FREE",
-      ticketUrl: url && url.startsWith("http") ? url.slice(0, 500) : sourceUrl,
+      ticketUrl: eventPageUrl || (sourceUrl && sourceUrl.startsWith("http") ? sourceUrl.slice(0, 500) : null),
+      eventPageUrl,
       isPublic: true,
       isPrivate: false,
       isHouseParty: false,

@@ -14,6 +14,8 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   "star theater and starlight lounge": "https://www.startheaterportland.com/",
   holocene: "https://www.holocene.org/",
   sanctuary: "https://www.pdxsanctuary.com/",
+  "sanctuary club": "https://www.pdxsanctuary.com/",
+  "pdx sanctuary": "https://www.pdxsanctuary.com/",
   "crystal ballroom": "https://www.mcmenamins.com/crystal-ballroom",
   "mcmenamins crystal ballroom": "https://www.mcmenamins.com/crystal-ballroom",
   "mcmenamins crystal ballroom hotel": "https://www.mcmenamins.com/crystal-ballroom",

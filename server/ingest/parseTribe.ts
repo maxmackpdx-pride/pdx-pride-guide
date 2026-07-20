@@ -61,7 +61,15 @@ export function parseTribeEventsJson(raw: string, sourceUrl: string | null = nul
       warnings.push("No description — stub");
     }
 
-    const ticketUrl = evt.url || evt.website || sourceUrl || null;
+    // Tribe evt.url is the human event page (not the REST feed)
+    const eventPageUrl = evt.url ? String(evt.url).slice(0, 500) : null;
+    const ticketUrl =
+      evt.website ||
+      evt.ticket_url ||
+      evt.ticketUrl ||
+      eventPageUrl ||
+      sourceUrl ||
+      null;
     // Prefer full/original over medium/thumbnail sizes
     const poster =
       pickBestImageFromUnknown(evt.image) ||
@@ -85,6 +93,7 @@ export function parseTribeEventsJson(raw: string, sourceUrl: string | null = nul
       eventTypes: "[]",
       admission: "FREE",
       ticketUrl: ticketUrl ? String(ticketUrl).slice(0, 500) : null,
+      eventPageUrl,
       isPublic: true,
       isPrivate: false,
       isHouseParty: false,

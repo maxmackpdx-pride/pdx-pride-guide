@@ -36,7 +36,10 @@ export function preferFullQualityImageUrl(raw: string | null | undefined): strin
     }
 
     // WordPress sized: image-300x200.jpg → image.jpg
-    u.pathname = u.pathname.replace(/-\d{2,4}x\d{2,4}(\.[a-z]+)$/i, "$1");
+    // Sanctuary also uses AlienOrgy-980x980-1.avif — strip -WxH and trailing -N before ext
+    u.pathname = u.pathname
+      .replace(/-\d{2,4}x\d{2,4}(-\d+)?(\.[a-z0-9]+)$/i, "$2")
+      .replace(/-\d{2,4}x\d{2,4}(\.[a-z0-9]+)$/i, "$1");
 
     // Cloudinary / imgix style w_ / h_ transforms — hard to reverse; keep as-is
     // Tribe / Eventbrite often put size in query
@@ -174,6 +177,7 @@ export async function captureFullQualityPoster(
 
     let ext = ".jpg";
     if (ct.includes("png") || upgraded.toLowerCase().includes(".png")) ext = ".png";
+    else if (ct.includes("avif") || upgraded.toLowerCase().includes(".avif")) ext = ".avif";
     else if (ct.includes("webp") || upgraded.toLowerCase().includes(".webp")) ext = ".webp";
     else if (ct.includes("gif")) ext = ".gif";
     else if (ct.includes("jpeg") || ct.includes("jpg")) ext = ".jpg";
@@ -197,10 +201,84 @@ export async function captureFullQualityPoster(
 }
 
 /**
+ * Sanctuary Club pattern (verified):
+ *   https://pdxsanctuary.com/wp-content/uploads/YYYY/MM/Name.avif
+ *   https://pdxsanctuary.com/wp-content/uploads/YYYY/MM/AlienOrgy-980x980-1.avif
+ *   https://pdxsanctuary.com/wp-content/uploads/YYYY/MM/JKPride.avif
+ * Prefer og:image + /uploads/YYYY/MM/* image files; never site LOGO/cropped favicons.
+ */
+export function extractSanctuaryFlyerUrls(html: string, pageUrl = "https://pdxsanctuary.com/"): string[] {
+  type Ranked = { url: string; score: number };
+  const ranked: Ranked[] = [];
+  const seen = new Set<string>();
+
+  const scoreUrl = (raw: string, boost: number) => {
+    let u = raw.trim().replace(/&amp;/g, "&");
+    if (!u || u.startsWith("data:")) return;
+    try {
+      u = new URL(u.startsWith("//") ? `https:${u}` : u, pageUrl).toString();
+    } catch {
+      return;
+    }
+    // Must be WP media image
+    if (!/\/wp-content\/uploads\//i.test(u)) return;
+    if (!/\.(avif|jpe?g|png|webp|gif)(\?|$)/i.test(u)) return;
+    // Reject chrome / brand marks
+    if (
+      /logo|cropped-|favicon|apple-touch|elementor|\.css|\.ttf|\.woff|trans_color_square|t_color_full/i.test(
+        u,
+      )
+    ) {
+      return;
+    }
+    const full = preferFullQualityImageUrl(u) || u;
+    if (seen.has(full)) return;
+    seen.add(full);
+    let score = boost;
+    if (/\/wp-content\/uploads\/\d{4}\/\d{2}\//i.test(full)) score += 30;
+    if (/\.avif(\?|$)/i.test(full)) score += 12;
+    // Event-ish filenames (JKPride, AlienOrgy, Kinkoween, Summerween…)
+    if (/jiffy|jkpride|kink|orgy|ween|pride|karaoke|bang|party|flyer|poster/i.test(full)) {
+      score += 20;
+    }
+    // Prefer non-tiny derivatives still on CDN
+    if (/-\d{2,3}x\d{2,3}/i.test(u) && !/980x980|1200x|1500x|1920x/i.test(u)) score -= 15;
+    ranked.push({ url: full, score });
+  };
+
+  // 1) og/twitter image (primary SoT on Sanctuary)
+  const metaRe =
+    /<meta[^>]+(?:property|name)=["'](?:og:image(?::url|:secure_url)?|twitter:image(?::src)?)["'][^>]+content=["']([^"']+)["']/gi;
+  let m: RegExpExecArray | null;
+  while ((m = metaRe.exec(html)) != null) scoreUrl(m[1], 50);
+  const metaRe2 =
+    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image(?::url|:secure_url)?|twitter:image)["']/gi;
+  while ((m = metaRe2.exec(html)) != null) scoreUrl(m[1], 50);
+
+  // 2) Every uploads/YYYY/MM/* image in the HTML (covers Elementor/img tags)
+  const uploadRe =
+    /https?:\/\/(?:www\.)?pdxsanctuary\.com\/wp-content\/uploads\/\d{4}\/\d{2}\/[^"'\\\s>]+\.(?:avif|jpe?g|png|webp|gif)/gi;
+  while ((m = uploadRe.exec(html)) != null) scoreUrl(m[0], 25);
+
+  // Relative paths
+  const relRe =
+    /\/wp-content\/uploads\/\d{4}\/\d{2}\/[^"'\\\s>]+\.(?:avif|jpe?g|png|webp|gif)/gi;
+  while ((m = relRe.exec(html)) != null) scoreUrl(m[0], 25);
+
+  ranked.sort((a, b) => b.score - a.score);
+  return ranked.slice(0, 8).map(r => r.url);
+}
+
+/**
  * Pull candidate flyer URLs from page HTML — og:image, twitter:image, large <img>, srcset.
  * Prefers wider images and skips logos/icons.
  */
 export function extractFlyerCandidatesFromHtml(html: string, pageUrl: string): string[] {
+  // Sanctuary-specific path first (avif flyers under /uploads/YYYY/MM/)
+  if (/pdxsanctuary\.com/i.test(pageUrl) || /pdxsanctuary\.com/i.test(html.slice(0, 2000))) {
+    const sanc = extractSanctuaryFlyerUrls(html, pageUrl);
+    if (sanc.length) return sanc;
+  }
   type Ranked = { url: string; score: number };
   const ranked: Ranked[] = [];
   const seen = new Set<string>();
@@ -226,7 +304,10 @@ export function extractFlyerCandidatesFromHtml(html: string, pageUrl: string): s
     let score = boost;
     if (/flyer|poster|event|featured|hero|promo|bill|attachment/i.test(full)) score += 20;
     if (/uploads|media|cdn|wp-content|squarespace|tribe|events/i.test(full)) score += 8;
-    if (/\.(jpe?g|png|webp)(\?|$)/i.test(full)) score += 3;
+    if (/\.(jpe?g|png|webp|avif)(\?|$)/i.test(full)) score += 3;
+    // Sanctuary / WP full flyers: /wp-content/uploads/YYYY/MM/Name.avif (or -980x980 variants)
+    if (/\/wp-content\/uploads\/\d{4}\/\d{2}\//i.test(full)) score += 15;
+    if (/\.avif(\?|$)/i.test(full)) score += 8;
     // Squarespace size hints in path
     const wHint = full.match(/\/(\d{3,4})w\//);
     if (wHint) score += Math.min(Number(wHint[1]) / 50, 30);
@@ -253,7 +334,7 @@ export function extractFlyerCandidatesFromHtml(html: string, pageUrl: string): s
   const dataImgRe =
     /(?:data-image|data-src|data-bg|data-original|data-lazy-src|data-full-url)\s*=\s*["']([^"']+)["']/gi;
   while ((m = dataImgRe.exec(html)) != null) {
-    if (/\.(jpe?g|png|webp|gif)/i.test(m[1]) || /images\.squarespace|wp-content|cdn/i.test(m[1])) {
+    if (/\.(jpe?g|png|webp|gif|avif)/i.test(m[1]) || /images\.squarespace|wp-content|cdn/i.test(m[1])) {
       push(m[1], 18);
     }
   }
@@ -261,7 +342,7 @@ export function extractFlyerCandidatesFromHtml(html: string, pageUrl: string): s
   // CSS background-image: url(...)
   const bgRe = /background(?:-image)?\s*:\s*url\(\s*['"]?([^'")\s]+)['"]?\s*\)/gi;
   while ((m = bgRe.exec(html)) != null) {
-    if (/\.(jpe?g|png|webp)/i.test(m[1])) push(m[1], 10);
+    if (/\.(jpe?g|png|webp|avif)/i.test(m[1])) push(m[1], 10);
   }
 
   // srcset: pick largest width
@@ -297,9 +378,9 @@ export function extractFlyerCandidatesFromHtml(html: string, pageUrl: string): s
     }
   }
 
-  // JSON blobs often embed image URLs (Squarespace collection, Tribe)
+  // JSON blobs often embed image URLs (Squarespace collection, Tribe, WP)
   const jsonUrlRe =
-    /https?:\/\/[^"'\\\s]+(?:uploads|media|images)[^"'\\\s]+\.(?:jpe?g|png|webp)(?:\?[^"'\\\s]*)?/gi;
+    /https?:\/\/[^"'\\\s]+(?:uploads|media|images)[^"'\\\s]+\.(?:jpe?g|png|webp|avif|gif)(?:\?[^"'\\\s]*)?/gi;
   let jm: RegExpExecArray | null;
   const jsonSlice = html.length > 400_000 ? html.slice(0, 400_000) : html;
   while ((jm = jsonUrlRe.exec(jsonSlice)) != null) {

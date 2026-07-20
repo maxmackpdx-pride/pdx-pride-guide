@@ -63,6 +63,9 @@ import {
   startScan,
 } from "./qsearch/scanJob";
 import {
+  addCustomSource,
+  deleteSource,
+  enableSource,
   listCandidates,
   markAllNewSeen,
   markCandidatesCommitted,
@@ -4823,6 +4826,58 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {
     markAllNewSeen();
     res.json({ ok: true });
+  });
+
+  /** Add a custom scrape source (any http(s) URL). */
+  app.post("/api/admin/qsearch/sources", requireAdmin, (req, res) => {
+    const result = addCustomSource({
+      label: String(req.body?.label || "").trim(),
+      url: String(req.body?.url || "").trim(),
+      tier: req.body?.tier != null ? String(req.body.tier) : undefined,
+      format: req.body?.format != null ? String(req.body.format) : undefined,
+      businessId:
+        req.body?.businessId != null && req.body.businessId !== ""
+          ? Number(req.body.businessId)
+          : null,
+    });
+    if (!result.ok) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    auditAdmin(req, "qsearch_source_add", {
+      type: "qsearch_source",
+      id: result.source.sourceId,
+      detail: { label: result.source.label, url: result.source.url, tier: result.source.tier },
+    });
+    res.json({ ok: true, source: result.source });
+  });
+
+  /** Soft-disable registry/directory sources; hard-delete custom ones. */
+  app.delete("/api/admin/qsearch/sources/:sourceId", requireAdmin, (req, res) => {
+    const sourceId = decodeURIComponent(String(req.params.sourceId));
+    const result = deleteSource(sourceId);
+    if (!result.ok) {
+      res.status(404).json({ error: result.error });
+      return;
+    }
+    auditAdmin(req, "qsearch_source_delete", {
+      type: "qsearch_source",
+      id: sourceId,
+      detail: { hard: result.hard },
+    });
+    res.json({ ok: true, sourceId, hard: result.hard });
+  });
+
+  /** Re-enable a soft-disabled source. */
+  app.post("/api/admin/qsearch/sources/:sourceId/enable", requireAdmin, (req, res) => {
+    const sourceId = decodeURIComponent(String(req.params.sourceId));
+    const result = enableSource(sourceId);
+    if (!result.ok) {
+      res.status(404).json({ error: result.error });
+      return;
+    }
+    auditAdmin(req, "qsearch_source_enable", { type: "qsearch_source", id: sourceId });
+    res.json({ ok: true, source: result.source });
   });
 
   app.post("/api/admin/qsearch/sources/:sourceId/recipe", requireAdmin, (req, res) => {

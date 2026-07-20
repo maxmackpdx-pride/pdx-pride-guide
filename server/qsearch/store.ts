@@ -23,6 +23,10 @@ export type QSearchSourceHealth = {
   zeroYieldStreak: number;
   instagramHandle: string | null;
   dragpdxOptIn: boolean;
+  /** Soft-removed — excluded from scans until re-enabled */
+  disabled: boolean;
+  /** Admin-added source (not from curated registry or directory auto) */
+  isCustom: boolean;
 };
 
 export type PersistedScanJob = {
@@ -129,12 +133,17 @@ function ensureTables() {
   add("zero_yield_streak", "INTEGER NOT NULL DEFAULT 0");
   add("instagram_handle", "TEXT");
   add("dragpdx_opt_in", "INTEGER NOT NULL DEFAULT 0");
+  add("disabled", "INTEGER NOT NULL DEFAULT 0");
+  add("is_custom", "INTEGER NOT NULL DEFAULT 0");
 
-  // candidates brands column for older DBs
+  // candidates brands + multi-source bundle for older DBs
   try {
     const ccols = sqlite.prepare(`PRAGMA table_info(qsearch_candidates)`).all() as Array<{ name: string }>;
     if (!ccols.some(c => c.name === "brands_json")) {
       sqlite.exec(`ALTER TABLE qsearch_candidates ADD COLUMN brands_json TEXT NOT NULL DEFAULT '[]'`);
+    }
+    if (!ccols.some(c => c.name === "bundle_json")) {
+      sqlite.exec(`ALTER TABLE qsearch_candidates ADD COLUMN bundle_json TEXT NOT NULL DEFAULT '{}'`);
     }
   } catch {
     /* ignore */
@@ -166,6 +175,8 @@ function rowToHealth(row: any): QSearchSourceHealth {
     zeroYieldStreak: Number(row.zero_yield_streak || 0),
     instagramHandle: row.instagram_handle || null,
     dragpdxOptIn: Boolean(row.dragpdx_opt_in),
+    disabled: Boolean(row.disabled),
+    isCustom: Boolean(row.is_custom),
   };
 }
 
@@ -200,15 +211,15 @@ export function syncKnownSources(
     INSERT INTO qsearch_source_health (
       source_id, url, label, last_scan_at, last_ok, last_error, last_event_count,
       consecutive_fails, is_directory, first_seen_at, is_new, business_id, tier, format,
-      yield_status, zero_yield_streak, dragpdx_opt_in
-    ) VALUES (?, ?, ?, NULL, NULL, NULL, 0, 0, ?, ?, 1, ?, ?, ?, 'unscanned', 0, 0)
+      yield_status, zero_yield_streak, dragpdx_opt_in, disabled, is_custom
+    ) VALUES (?, ?, ?, NULL, NULL, NULL, 0, 0, ?, ?, 1, ?, ?, ?, 'unscanned', 0, 0, 0, 0)
     ON CONFLICT(source_id) DO UPDATE SET
-      url = excluded.url,
-      label = excluded.label,
+      url = CASE WHEN qsearch_source_health.is_custom = 1 THEN qsearch_source_health.url ELSE excluded.url END,
+      label = CASE WHEN qsearch_source_health.is_custom = 1 THEN qsearch_source_health.label ELSE excluded.label END,
       is_directory = excluded.is_directory,
-      business_id = excluded.business_id,
-      tier = excluded.tier,
-      format = excluded.format
+      business_id = COALESCE(excluded.business_id, qsearch_source_health.business_id),
+      tier = CASE WHEN qsearch_source_health.is_custom = 1 THEN qsearch_source_health.tier ELSE excluded.tier END,
+      format = CASE WHEN qsearch_source_health.is_custom = 1 THEN qsearch_source_health.format ELSE excluded.format END
   `);
 
   let newlyRegistered = 0;
@@ -275,6 +286,188 @@ export function setInstagramHandle(sourceId: string, handle: string | null) {
   ensureTables();
   const clean = handle ? handle.replace(/^@/, "").trim() : null;
   sqlite.prepare(`UPDATE qsearch_source_health SET instagram_handle = ? WHERE source_id = ?`).run(clean, sourceId);
+}
+
+const ALLOWED_SOURCE_TIERS = new Set([
+  "1",
+  "2",
+  "3",
+  "agg",
+  "partiful",
+  "eventbrite",
+  "directory",
+  "custom",
+]);
+
+const ALLOWED_SOURCE_FORMATS = new Set([
+  "ics",
+  "jsonld",
+  "squarespace",
+  "tribe",
+  "wix",
+  "html",
+  "eventbrite",
+  "partiful",
+  "unknown",
+]);
+
+function slugSourceId(label: string, url: string): string {
+  const base = String(label || "source")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 40) || "source";
+  let host = "x";
+  try {
+    host = new URL(url.includes("://") ? url : `https://${url}`).hostname
+      .replace(/^www\./i, "")
+      .replace(/[^a-z0-9]+/gi, "-")
+      .slice(0, 24);
+  } catch {
+    /* keep x */
+  }
+  const tail = Math.random().toString(36).slice(2, 7);
+  return `custom-${base}-${host}-${tail}`.replace(/-+/g, "-");
+}
+
+function normalizeSourceUrl(raw: string): string | null {
+  const s = String(raw || "").trim();
+  if (!s) return null;
+  try {
+    const withProto = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+    const u = new URL(withProto);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    u.hash = "";
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+export type AddCustomSourceInput = {
+  label: string;
+  url: string;
+  tier?: string;
+  format?: string;
+  businessId?: number | null;
+};
+
+/** Admin-added scrape URL. Survives registry sync; included in live scans. */
+export function addCustomSource(input: AddCustomSourceInput): { ok: true; source: QSearchSourceHealth } | { ok: false; error: string } {
+  ensureTables();
+  const label = String(input.label || "").trim();
+  if (!label || label.length < 2) return { ok: false, error: "Label is required (min 2 characters)" };
+  const url = normalizeSourceUrl(input.url);
+  if (!url) return { ok: false, error: "Valid http(s) URL is required" };
+
+  // Dedupe by URL against active sources
+  const existingSameUrl = sqlite
+    .prepare(
+      `SELECT * FROM qsearch_source_health WHERE lower(url) = lower(?) OR lower(COALESCE(recipe_url,'')) = lower(?) OR lower(COALESCE(resolved_url,'')) = lower(?) LIMIT 1`,
+    )
+    .get(url, url, url) as any;
+  if (existingSameUrl) {
+    const h = rowToHealth(existingSameUrl);
+    if (h.disabled) {
+      sqlite.prepare(`UPDATE qsearch_source_health SET disabled = 0, label = ?, is_new = 1 WHERE source_id = ?`).run(label, h.sourceId);
+      const restored = getSourceHealth(h.sourceId);
+      if (restored) return { ok: true, source: restored };
+    }
+    return { ok: false, error: `URL already registered as “${h.label}” (${h.sourceId})` };
+  }
+
+  const tier = ALLOWED_SOURCE_TIERS.has(String(input.tier || "")) ? String(input.tier) : "custom";
+  const format = ALLOWED_SOURCE_FORMATS.has(String(input.format || "")) ? String(input.format) : "html";
+  const businessId =
+    input.businessId != null && Number.isFinite(Number(input.businessId))
+      ? Number(input.businessId)
+      : null;
+  const sourceId = slugSourceId(label, url);
+  const now = new Date().toISOString();
+
+  sqlite
+    .prepare(
+      `INSERT INTO qsearch_source_health (
+        source_id, url, label, last_scan_at, last_ok, last_error, last_event_count,
+        consecutive_fails, is_directory, first_seen_at, is_new, business_id, tier, format,
+        yield_status, zero_yield_streak, dragpdx_opt_in, disabled, is_custom
+      ) VALUES (?, ?, ?, NULL, NULL, NULL, 0, 0, 0, ?, 1, ?, ?, ?, 'unscanned', 0, 0, 0, 1)`,
+    )
+    .run(sourceId, url, label, now, businessId, tier, format);
+
+  const source = getSourceHealth(sourceId);
+  if (!source) return { ok: false, error: "Failed to create source" };
+  return { ok: true, source };
+}
+
+/**
+ * Remove a source from the active scrape list.
+ * - Custom sources: hard delete
+ * - Registry / directory: soft-disable (so nightly sync does not re-activate)
+ */
+export function deleteSource(
+  sourceId: string,
+): { ok: true; hard: boolean; sourceId: string } | { ok: false; error: string } {
+  ensureTables();
+  const existing = getSourceHealth(sourceId);
+  if (!existing) return { ok: false, error: "Source not found" };
+
+  if (existing.isCustom) {
+    sqlite.prepare(`DELETE FROM qsearch_source_health WHERE source_id = ?`).run(sourceId);
+    return { ok: true, hard: true, sourceId };
+  }
+
+  sqlite.prepare(`UPDATE qsearch_source_health SET disabled = 1, is_new = 0 WHERE source_id = ?`).run(sourceId);
+  return { ok: true, hard: false, sourceId };
+}
+
+/** Re-enable a soft-disabled registry/directory source. */
+export function enableSource(
+  sourceId: string,
+): { ok: true; source: QSearchSourceHealth } | { ok: false; error: string } {
+  ensureTables();
+  const existing = getSourceHealth(sourceId);
+  if (!existing) return { ok: false, error: "Source not found" };
+  sqlite.prepare(`UPDATE qsearch_source_health SET disabled = 0 WHERE source_id = ?`).run(sourceId);
+  const source = getSourceHealth(sourceId);
+  if (!source) return { ok: false, error: "Source not found after enable" };
+  return { ok: true, source };
+}
+
+export function listDisabledSourceIds(): Set<string> {
+  ensureTables();
+  const rows = sqlite
+    .prepare(`SELECT source_id FROM qsearch_source_health WHERE disabled = 1`)
+    .all() as Array<{ source_id: string }>;
+  return new Set(rows.map(r => String(r.source_id)));
+}
+
+/** Custom sources as ingest recipes for live scan merge. */
+export function listCustomIngestSources(): Array<{
+  id: string;
+  url: string;
+  label: string;
+  tier: string;
+  format: string;
+  businessId?: number;
+}> {
+  ensureTables();
+  const rows = sqlite
+    .prepare(
+      `SELECT * FROM qsearch_source_health WHERE is_custom = 1 AND disabled = 0 ORDER BY label COLLATE NOCASE`,
+    )
+    .all();
+  return rows.map((row: any) => {
+    const h = rowToHealth(row);
+    return {
+      id: h.sourceId,
+      url: h.recipeUrl || h.url,
+      label: h.label,
+      tier: h.tier || "custom",
+      format: h.format || "html",
+      businessId: h.businessId ?? undefined,
+    };
+  });
 }
 
 export function recordScanResult(
@@ -452,6 +645,8 @@ export function saveCandidates(
     duplicates: unknown;
     strongDuplicate: unknown;
     directoryBrands?: unknown;
+    sourceBundle?: unknown;
+    fieldConflicts?: unknown;
   }>,
 ) {
   ensureTables();
@@ -460,8 +655,8 @@ export function saveCandidates(
     INSERT OR REPLACE INTO qsearch_candidates (
       id, job_id, source_id, source_label, source_url, draft_json, selected,
       recurring, recurring_count, condensed, conflicts_json, duplicates_json, strong_dup_json,
-      brands_json, status, created_at, committed_event_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL)
+      brands_json, bundle_json, status, created_at, committed_event_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL)
   `);
   const tx = sqlite.transaction(() => {
     for (const c of candidates) {
@@ -480,6 +675,10 @@ export function saveCandidates(
         JSON.stringify(c.duplicates || []),
         c.strongDuplicate ? JSON.stringify(c.strongDuplicate) : null,
         JSON.stringify(c.directoryBrands || []),
+        JSON.stringify({
+          sourceBundle: c.sourceBundle || [],
+          fieldConflicts: c.fieldConflicts || [],
+        }),
         now,
       );
     }
@@ -510,25 +709,35 @@ export function listCandidates(opts?: {
     sql += ` LIMIT ?`;
     params.push(opts.limit);
   }
-  return sqlite.prepare(sql).all(...params).map((row: any) => ({
-    id: row.id,
-    jobId: row.job_id,
-    sourceId: row.source_id,
-    sourceLabel: row.source_label,
-    sourceUrl: row.source_url,
-    draft: JSON.parse(row.draft_json),
-    selected: Boolean(row.selected),
-    recurring: row.recurring,
-    recurringCount: row.recurring_count,
-    condensed: Boolean(row.condensed),
-    conflicts: JSON.parse(row.conflicts_json || "[]"),
-    duplicates: JSON.parse(row.duplicates_json || "[]"),
-    strongDuplicate: row.strong_dup_json ? JSON.parse(row.strong_dup_json) : null,
-    directoryBrands: JSON.parse(row.brands_json || "[]"),
-    status: row.status,
-    createdAt: row.created_at,
-    committedEventId: row.committed_event_id,
-  }));
+  return sqlite.prepare(sql).all(...params).map((row: any) => {
+    let bundle: { sourceBundle?: unknown[]; fieldConflicts?: unknown[] } = {};
+    try {
+      bundle = JSON.parse(row.bundle_json || "{}") || {};
+    } catch {
+      bundle = {};
+    }
+    return {
+      id: row.id,
+      jobId: row.job_id,
+      sourceId: row.source_id,
+      sourceLabel: row.source_label,
+      sourceUrl: row.source_url,
+      draft: JSON.parse(row.draft_json),
+      selected: Boolean(row.selected),
+      recurring: row.recurring,
+      recurringCount: row.recurring_count,
+      condensed: Boolean(row.condensed),
+      conflicts: JSON.parse(row.conflicts_json || "[]"),
+      duplicates: JSON.parse(row.duplicates_json || "[]"),
+      strongDuplicate: row.strong_dup_json ? JSON.parse(row.strong_dup_json) : null,
+      directoryBrands: JSON.parse(row.brands_json || "[]"),
+      sourceBundle: Array.isArray(bundle.sourceBundle) ? bundle.sourceBundle : [],
+      fieldConflicts: Array.isArray(bundle.fieldConflicts) ? bundle.fieldConflicts : [],
+      status: row.status,
+      createdAt: row.created_at,
+      committedEventId: row.committed_event_id,
+    };
+  });
 }
 
 export function markCandidatesCommitted(ids: string[], eventIds: number[]) {
