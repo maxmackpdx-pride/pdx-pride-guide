@@ -11,11 +11,14 @@ function pad(n: number) {
 }
 
 function diffMs(target: string) {
-  return Math.max(0, new Date(target).getTime() - Date.now());
+  const t = new Date(target).getTime();
+  if (!Number.isFinite(t)) return 0;
+  return Math.max(0, t - Date.now());
 }
 
-/** Three-column stat band: kickoff countdown, directory places, RSVPs going. */
+/** Three-column stat band: next-event countdown, directory places, RSVPs going. */
 export default function HomeStatStrip({ placesCount, goingCount, countdownTarget }: Props) {
+  const hasTarget = !!countdownTarget && Number.isFinite(new Date(countdownTarget).getTime());
   const [left, setLeft] = useState(() => diffMs(countdownTarget));
 
   useEffect(() => {
@@ -38,8 +41,10 @@ export default function HomeStatStrip({ placesCount, goingCount, countdownTarget
     <div className="home-stat-strip" aria-label="Live site stats">
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--countdown" aria-live="polite">
-          {live ? (
-            <span>Live</span>
+          {!hasTarget ? (
+            <span>—</span>
+          ) : live ? (
+            <span>Now</span>
           ) : (
             <>
               <span>{days}</span>
@@ -53,7 +58,7 @@ export default function HomeStatStrip({ placesCount, goingCount, countdownTarget
             </>
           )}
         </div>
-        <div className="home-stat-strip__label">{live ? "Pride Week" : "Kickoff in"}</div>
+        <div className="home-stat-strip__label">{live ? "Happening now" : "Next event in"}</div>
       </div>
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--lime">{placesCount}</div>

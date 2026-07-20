@@ -17,7 +17,7 @@ import {
 } from "@/components/ds";
 import {
   HOME_MARQUEE_FALLBACK,
-  earliestPrideWeekStartTarget,
+  nextEventStartTarget,
   eventsUpNext,
   pickMarqueeItems,
 } from "@/lib/homeEvents";
@@ -74,7 +74,7 @@ export default function Home() {
   }, [events]);
 
   const upNext = useMemo(() => eventsUpNext(events, 4), [events]);
-  const countdownTarget = useMemo(() => earliestPrideWeekStartTarget(events), [events]);
+  const countdownTarget = useMemo(() => nextEventStartTarget(events) ?? "", [events]);
   // Same source as /events hero: expanded listings from GET /api/events
   // (multi-day festivals count once per day they appear on the board).
   const eventCount = events.length;

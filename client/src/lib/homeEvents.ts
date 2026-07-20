@@ -42,6 +42,27 @@ export function earliestPrideWeekStartTarget(
   return HOME_COUNTDOWN_TARGET;
 }
 
+/**
+ * Countdown target = start of the next event that hasn't begun yet (year-round).
+ * Returns null when nothing upcoming is loaded.
+ */
+export function nextEventStartTarget(
+  events: Array<Pick<EventListing, "dateStart">>,
+  nowMs: number = Date.now(),
+): string | null {
+  let bestMs: number | null = null;
+  let bestRaw: string | null = null;
+  for (const event of events) {
+    const ms = parsePacificDateTime(event.dateStart);
+    if (ms == null || ms <= nowMs) continue;
+    if (bestMs == null || ms < bestMs) {
+      bestMs = ms;
+      bestRaw = event.dateStart;
+    }
+  }
+  return bestRaw ? toCountdownTarget(bestRaw) : null;
+}
+
 export const HOME_DAY_ORDER = ["THU", "FRI", "SAT", "SUN"] as const;
 export type HomeDayKey = (typeof HOME_DAY_ORDER)[number];
 
@@ -57,7 +78,7 @@ export const HOME_DAY_META: Record<
 
 export const HOME_MARQUEE_FALLBACK = [
   "Rainbow Rave 2026",
-  "July 16 to 19",
+  "Every Day Is Pride",
   "Keep Portland Weird",
   "Gay All Day",
   "Made by the Scene",
