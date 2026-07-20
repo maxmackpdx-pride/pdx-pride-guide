@@ -161,7 +161,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
         <div className={`card hub-post__card${embedded ? " hub-post__card--compact" : ""}`}>
           <div className="kick hub-post__kick">Post to the feed</div>
           <p className="hub-post__copy">
-            Coming soon for members. Admins, event hosts, and directory venue owners can post now.
+            Sign in to share with the scene. Posts are public to members by default.
           </p>
         </div>
       </div>
@@ -302,7 +302,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
                 setEventId("");
               }}
             >
-              Everyone
+              Public
             </button>
             <button
               type="button"
@@ -314,6 +314,11 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
               My RSVPs
             </button>
           </div>
+          {audience === "ALL" && (
+            <p className="hub-post__copy--hint">
+              Public posts show in the scene feed for signed-in members.
+            </p>
+          )}
           {audience === "RSVPS" && hostedEvents.length === 0 && (
             <p className="hub-post__copy--hint">
               RSVP-only posts need at least one live event you host.

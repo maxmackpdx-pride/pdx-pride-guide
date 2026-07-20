@@ -120,7 +120,7 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
       dayOfWeek: dayOfWeekFromStart(dateStart),
       ageRequirement: "ALL_AGES",
       eventTypes: "[]",
-      admission: "FREE",
+      admission: "UNKNOWN",
       ticketUrl: ticketUrl ? ticketUrl.slice(0, 500) : null,
       eventPageUrl: eventPageUrl ? eventPageUrl.slice(0, 500) : null,
       isPublic: true,

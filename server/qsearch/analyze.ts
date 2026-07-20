@@ -157,6 +157,8 @@ export type ScanCandidate = {
   sourceBundle: SourceBundleMember[];
   /** Conflicting fields across sources in the bundle (time, venue, title, tickets, …). */
   fieldConflicts: FieldConflict[];
+  /** Every occurrence in a condensed weekly/monthly series (for expand-on-approve). */
+  memberDrafts: IngestEventDraft[];
 };
 
 function wallParts(dateStart: string): { dayKey: string; minutes: number } | null {
@@ -1025,6 +1027,8 @@ export function buildScanCandidates(
       recurringGroupId: row.recurringGroupId,
       recurringCount: row.recurringCount,
       condensed: row.condensed || sourceBundle.length > 1,
+      /** All series dates (for “create full series” approve). Empty if one-off. */
+      memberDrafts: row.memberDrafts || [],
       conflicts,
       duplicates,
       strongDuplicate: strong,

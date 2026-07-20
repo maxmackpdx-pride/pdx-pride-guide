@@ -562,6 +562,16 @@ try { sqlite.exec(`
   )
 `); } catch(e) {}
 try { sqlite.exec(`CREATE INDEX IF NOT EXISTS follows_following_idx ON follows(following_user_id)`); } catch(e) {}
+// Soft-launch: default everyone-follows-everyone; rows here mean "I unfollowed them".
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS follow_blocks (
+    blocker_user_id INTEGER NOT NULL,
+    blocked_user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (blocker_user_id, blocked_user_id)
+  )
+`); } catch(e) {}
+try { sqlite.exec(`CREATE INDEX IF NOT EXISTS follow_blocks_blocked_idx ON follow_blocks(blocked_user_id)`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS business_follows (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -5693,12 +5703,14 @@ function hubFeedPostToItem(
   row: any,
   goingCounts: Record<number, { count: number }>,
   businesses: Business[] = [],
+  viewerUserId?: number,
 ): HubFeedItem {
   const postType = row.postType ?? row.post_type;
   const audience = row.audience ?? "ALL";
   const eventId = row.eventId ?? row.event_id ?? null;
   const postAs = row.postAs ?? row.post_as ?? "self";
   const businessId = row.businessId ?? row.business_id ?? null;
+  const authorUserId = Number(row.userId ?? row.user_id ?? 0) || null;
 
   let eventEmbed: HubFeedEventEmbed | null = null;
   if (eventId != null) {
@@ -5739,6 +5751,10 @@ function hubFeedPostToItem(
   const action = audience === "RSVPS"
     ? (eventEmbed ? `Shared with RSVPs for ${eventEmbed.title}` : "Shared with their RSVPs")
     : "Shared with the scene";
+  const viewerFollowsAuthor =
+    viewerUserId != null && authorUserId != null && viewerUserId !== authorUserId
+      ? storage.isFollowing(viewerUserId, authorUserId)
+      : null;
   return {
     id: `feed_post-${row.id}`,
     kind: postType === "photo" ? "feed_photo" : "feed_text",
@@ -5751,6 +5767,7 @@ function hubFeedPostToItem(
     postedBy,
     event: eventEmbed,
     link: null,
+    viewerFollowsAuthor,
   };
 }
 
@@ -7133,24 +7150,99 @@ export const storage: IStorage = {
     return db.select().from(users).all().filter((u) => !storage.isSystemGuideAccount(u));
   },
   // ─── Member profiles + follows ─────────────────────────────────────────────
+  /**
+   * Soft-launch graph: every active member follows every other active member
+   * unless they explicitly unfollowed (row in follow_blocks).
+   * Set FOLLOW_ALL_DEFAULT=0 to revert to explicit follows-only.
+   */
+  isFollowAllDefault() {
+    const v = String(process.env.FOLLOW_ALL_DEFAULT ?? "1").trim().toLowerCase();
+    return !(v === "0" || v === "false" || v === "off" || v === "no");
+  },
+  isFollowBlocked(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return false;
+    return !!sqlite.prepare(
+      `SELECT 1 FROM follow_blocks WHERE blocker_user_id = ? AND blocked_user_id = ?`,
+    ).get(followerUserId, followingUserId);
+  },
   followUser(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return;
+    // Re-follow: clear soft-launch unfollow block
+    sqlite.prepare(
+      `DELETE FROM follow_blocks WHERE blocker_user_id = ? AND blocked_user_id = ?`,
+    ).run(followerUserId, followingUserId);
     sqlite.prepare(`
       INSERT OR IGNORE INTO follows (follower_user_id, following_user_id, created_at)
       VALUES (?, ?, ?)
     `).run(followerUserId, followingUserId, new Date().toISOString());
   },
   unfollowUser(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return;
     sqlite.prepare(`DELETE FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).run(followerUserId, followingUserId);
+    if (storage.isFollowAllDefault()) {
+      sqlite.prepare(`
+        INSERT OR IGNORE INTO follow_blocks (blocker_user_id, blocked_user_id, created_at)
+        VALUES (?, ?, ?)
+      `).run(followerUserId, followingUserId, new Date().toISOString());
+    }
   },
   getFollowerCount(userId) {
+    if (storage.isFollowAllDefault()) {
+      // Everyone active except self and those who unfollowed this user
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      // Subtract system guide accounts (not listed as people)
+      const guide = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active' AND u.id != ?
+          AND lower(u.username) IN ('prideguidepdx', 'pdxprideguide')
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      return Math.max(0, (row?.count ?? 0) - (guide?.count ?? 0));
+    }
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE following_user_id = ?`).get(userId) as { count: number } | undefined;
     return row?.count ?? 0;
   },
   getFollowingCount(userId) {
+    if (storage.isFollowAllDefault()) {
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      const guide = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active' AND u.id != ?
+          AND lower(u.username) IN ('prideguidepdx', 'pdxprideguide')
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      return Math.max(0, (row?.count ?? 0) - (guide?.count ?? 0));
+    }
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE follower_user_id = ?`).get(userId) as { count: number } | undefined;
     return row?.count ?? 0;
   },
   isFollowing(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return false;
+    if (storage.isFollowAllDefault()) {
+      return !storage.isFollowBlocked(followerUserId, followingUserId);
+    }
     return !!sqlite.prepare(`SELECT 1 FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).get(followerUserId, followingUserId);
   },
   followBusiness(followerUserId, businessId) {
@@ -7196,6 +7288,25 @@ export const storage: IStorage = {
     }));
   },
   getFollowingList(userId, viewerUserId) {
+    if (storage.isFollowAllDefault()) {
+      // Soft-launch: everyone you're not unfollowed
+      const rows = sqlite.prepare(`
+        SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+               u.location, u.promoter_status AS promoterStatus
+        FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+        ORDER BY u.display_name COLLATE NOCASE, u.username COLLATE NOCASE
+      `).all(userId, userId) as any[];
+      return rows
+        .filter((row) => !isGuideSystemUsername(row.username))
+        .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+    }
     const rows = sqlite.prepare(`
       SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
@@ -7210,6 +7321,24 @@ export const storage: IStorage = {
       .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
   },
   getFollowersList(userId, viewerUserId) {
+    if (storage.isFollowAllDefault()) {
+      const rows = sqlite.prepare(`
+        SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+               u.location, u.promoter_status AS promoterStatus
+        FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
+          )
+        ORDER BY u.display_name COLLATE NOCASE, u.username COLLATE NOCASE
+      `).all(userId, userId) as any[];
+      return rows
+        .filter((row) => !isGuideSystemUsername(row.username))
+        .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+    }
     const rows = sqlite.prepare(`
       SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
@@ -7224,6 +7353,26 @@ export const storage: IStorage = {
       .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
   },
   discoverPeople(viewerUserId, limit = 24) {
+    // Soft-launch: who-to-follow = people you unfollowed (easy re-follow) + new hosts not yet "seen"
+    if (storage.isFollowAllDefault()) {
+      const rows = sqlite.prepare(`
+        SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+               u.location, u.promoter_status AS promoterStatus
+        FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+        ORDER BY u.created_at DESC
+        LIMIT ?
+      `).all(viewerUserId, viewerUserId, limit) as any[];
+      return rows
+        .filter((row) => !isGuideSystemUsername(row.username))
+        .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+    }
     const rows = sqlite.prepare(`
       SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
@@ -11743,12 +11892,10 @@ export const storage: IStorage = {
   canUserPostToHubFeed(userId, isAdmin = false) {
     if (isAdmin) return true;
     const user = storage.getUserById(userId);
+    // Soft-launch: every active member can post (public by default).
     if (!user) return false;
-    // Approved promoters, live event hosts, and directory venue owners.
-    if (user.promoterStatus === "approved") return true;
-    if (storage.getHostedLiveEventIds(userId).length > 0) return true;
-    if (storage.getUserOwnedBusinesses(userId).length > 0) return true;
-    return false;
+    if (user.status && user.status !== "active") return false;
+    return true;
   },
   getHostedLiveEventIds(userId) {
     return storage.getEvents({})
@@ -12075,7 +12222,7 @@ export const storage: IStorage = {
         hostedCache.set(row.userId, hosted);
       }
       if (!canViewerSeeHubFeedPost(row, viewerUserId, viewerRsvpEventIds, viewerIsAdmin, hosted)) continue;
-      items.push(hubFeedPostToItem(row, goingCounts, businesses));
+      items.push(hubFeedPostToItem(row, goingCounts, businesses, viewerUserId));
     }
 
     const sorted = items

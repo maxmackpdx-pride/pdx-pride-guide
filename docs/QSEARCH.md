@@ -1,6 +1,6 @@
 # QSearch
 
-Admin event intelligence for Pride Guide PDX. **Discover + draft only.** Default commit status is **HIDDEN**. Never auto-LIVE.
+Admin event intelligence for Pride Guide PDX. **Discover + draft only.** Review supports **Approve LIVE** or **Stage HIDDEN**. Never auto-LIVE without human approve.
 
 **Route:** `/admin?tab=qsearch`  
 **Branch work:** `feature/phase4-ingest`
@@ -11,7 +11,7 @@ Admin event intelligence for Pride Guide PDX. **Discover + draft only.** Default
 |------|--------|
 | Location | Own admin tab only (not under All Events) |
 | Publish | Human select + `confirm: true` → `commitIngest` / approve |
-| Default status | `HIDDEN` (schema + `createEvent` footgun guard; LIVE only when explicit) |
+| Approve status | Human chooses `LIVE` or `HIDDEN` on approve (API: `status` body; never auto) |
 | Candidates | `qsearch_*` tables only — never touch `events` until human commit |
 | Directory auto | Registers sources + scan targets; no silent publish |
 | Curated feeds | Prefer specialized URLs for known hosts over plain homepages |
@@ -146,7 +146,7 @@ PORT=5050 npm run dev
 
 # login then:
 # open http://localhost:5050/admin?tab=qsearch
-# Scan now → watch progress → Review queue → Approve as HIDDEN
+# Scan now → watch progress → Review queue → Approve LIVE or Stage HIDDEN
 ```
 
 Login (local smoke DB): `tucker_pdmax` / `smoketest`

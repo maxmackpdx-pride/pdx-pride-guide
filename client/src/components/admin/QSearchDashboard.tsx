@@ -314,8 +314,13 @@ type Candidate = {
   /** Multi-source scrape of the same party */
   sourceBundle?: SourceBundleMember[];
   fieldConflicts?: FieldConflict[];
+  /** All dates in a condensed weekly/monthly series */
+  memberDrafts?: Array<Candidate["draft"]>;
   status?: string;
 };
+
+/** How to commit a condensed series candidate */
+type SeriesMode = "one" | "series";
 
 /** Display-time bundle for older queue rows that weren't merged on scan. */
 type QueueBundle = {
@@ -768,7 +773,11 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   // Add-to-directory modal (unknown venue from scan)
   const [dirForm, setDirForm] = useState<DirectoryFormState | null>(null);
   const [dirSaving, setDirSaving] = useState(false);
+  const [dirLookingUp, setDirLookingUp] = useState(false);
+  const [dirLookupNote, setDirLookupNote] = useState<string | null>(null);
   const [dirAddedNames, setDirAddedNames] = useState<Record<string, true>>({});
+  /** condensed series: create one night vs all N occurrences */
+  const [seriesMode, setSeriesMode] = useState<Record<string, SeriesMode>>({});
 
   const { data: dash, isLoading, refetch } = useQuery<Dashboard>({
     queryKey: ["/api/admin/qsearch/dashboard"],
@@ -986,7 +995,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       toast({
         title: n ? "Flyer added to Review" : "No event found on flyer",
         description: n
-          ? `${n} draft${n === 1 ? "" : "s"} — check Review, then approve as HIDDEN.`
+          ? `${n} draft${n === 1 ? "" : "s"} — check Review, then Approve LIVE or Stage HIDDEN.`
           : data.error || "Try a clearer image or add a venue name.",
       });
       if (n) {
@@ -1140,7 +1149,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       toast({
         title: n ? "Instagram → Review" : "No event found",
         description: n
-          ? `${n} draft${n === 1 ? "" : "s"} — check Review, then approve as HIDDEN.`
+          ? `${n} draft${n === 1 ? "" : "s"} — check Review, then Approve LIVE or Stage HIDDEN.`
           : data.error || data.note || "Try a direct image URL or upload the flyer.",
       });
       if (n) {
@@ -1189,35 +1198,101 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     setSelected(next);
   }
 
-  async function approveSelected() {
-    const items = queueCandidates
-      .filter(c => selected[c.id])
-      .map(c => {
-        const action = conflictAction[c.id] || "keep_both";
-        return {
+  async function approveSelected(status: "LIVE" | "HIDDEN") {
+    const picked = queueCandidates.filter(c => selected[c.id]);
+    if (!picked.length) {
+      toast({ title: "Nothing selected", variant: "destructive" });
+      return;
+    }
+
+    // Expand condensed series when user chose “full series”
+    type ApproveItem = {
+      id: string;
+      draft: Candidate["draft"];
+      skip: boolean;
+      conflictAction: string;
+      conflictEventIds: number[];
+    };
+    const items: ApproveItem[] = [];
+    let seriesExpanded = 0;
+    for (const c of picked) {
+      const action = conflictAction[c.id] || "keep_both";
+      const mode = seriesMode[c.id] || "one";
+      const members = Array.isArray(c.memberDrafts) ? c.memberDrafts : [];
+      const wantSeries =
+        mode === "series" &&
+        c.condensed &&
+        (c.recurring === "weekly" || c.recurring === "monthly") &&
+        members.length >= 2;
+
+      if (wantSeries) {
+        seriesExpanded += members.length;
+        for (const md of members) {
+          items.push({
+            id: c.id,
+            draft: {
+              ...md,
+              // Carry flyer / venue fixes from the representative card
+              posterImageUrl: md.posterImageUrl || c.draft.posterImageUrl,
+              venueName: md.venueName || c.draft.venueName,
+              address: md.address || c.draft.address,
+              ageRequirement: md.ageRequirement || c.draft.ageRequirement,
+              admission: md.admission || c.draft.admission,
+              warnings: [
+                ...(md.warnings || []),
+                `Series expand: ${c.recurring} × ${members.length}`,
+              ],
+            },
+            skip: false,
+            conflictAction: action,
+            conflictEventIds: action === "override" ? c.conflicts.map(x => x.eventId) : [],
+          });
+        }
+      } else {
+        items.push({
           id: c.id,
           draft: c.draft,
           skip: false,
           conflictAction: action,
           conflictEventIds: action === "override" ? c.conflicts.map(x => x.eventId) : [],
-        };
-      });
-    if (!items.length) {
-      toast({ title: "Nothing selected", variant: "destructive" });
-      return;
+        });
+      }
     }
+
+    const n = items.length;
+    const liveMsg =
+      status === "LIVE"
+        ? `Publish ${n} event${n === 1 ? "" : "s"} LIVE on the public board${seriesExpanded ? ` (includes full series: ${seriesExpanded} nights)` : ""}?`
+        : `Stage ${n} event${n === 1 ? "" : "s"} as HIDDEN${seriesExpanded ? ` (includes full series: ${seriesExpanded} nights)` : ""}?`;
+    if (!window.confirm(liveMsg)) return;
     setBusy(true);
     try {
-      const res = await apiRequest("POST", "/api/admin/qsearch/approve", {
-        confirm: true,
-        status: "HIDDEN",
-        skipDuplicates: true,
-        items,
+      // Commit in chunks of 40 (server max)
+      let createdTotal = 0;
+      let skippedTotal = 0;
+      let impactParts: string[] = [];
+      for (let i = 0; i < items.length; i += 40) {
+        const chunk = items.slice(i, i + 40);
+        const res = await apiRequest("POST", "/api/admin/qsearch/approve", {
+          confirm: true,
+          status,
+          skipDuplicates: true,
+          items: chunk,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Approve failed");
+        createdTotal += Array.isArray(data.created) ? data.created.length : 0;
+        skippedTotal += Array.isArray(data.skipped) ? data.skipped.length : 0;
+        if (data.impact) impactParts.push(data.impact);
+      }
+      toast({
+        title: status === "LIVE" ? "Published LIVE" : "Staged as HIDDEN",
+        description:
+          impactParts[0] ||
+          `${createdTotal} created${skippedTotal ? ` · ${skippedTotal} skipped` : ""}${seriesExpanded ? ` · series expanded` : ""}`,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Approve failed");
-      toast({ title: "Staged as HIDDEN", description: data.impact });
       setSelected({});
+      setSeriesMode({});
       onCommitted?.();
       void refetch();
       void refetchQueue();
@@ -1229,6 +1304,56 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function openDirectoryFromCandidate(c: Candidate) {
+    const base = buildDirectoryFormFromCandidate(c);
+    setDirForm(base);
+    setDirLookupNote(null);
+    setDirLookingUp(true);
+    try {
+      const res = await apiRequest("POST", "/api/admin/qsearch/directory-lookup", {
+        name: base.name,
+        address: base.address || null,
+        website: base.website || null,
+        description: base.description || null,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Lookup failed");
+      setDirForm(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          name: data.name || prev.name,
+          type: (data.type as DirectoryFormState["type"]) || prev.type,
+          description:
+            data.description && String(data.description).length >= 10
+              ? String(data.description).slice(0, 800)
+              : prev.description,
+          address: data.address || prev.address,
+          neighborhood: data.neighborhood || prev.neighborhood,
+          website: data.website || prev.website,
+          instagram: data.instagram || prev.instagram,
+          phone: data.phone || prev.phone,
+          hours: data.hours || prev.hours,
+          // Prefer real logo/og:image over flyer when lookup found one
+          imageUrl: data.imageUrl || prev.imageUrl,
+          lat: data.lat != null ? Number(data.lat) : prev.lat,
+          lng: data.lng != null ? Number(data.lng) : prev.lng,
+        };
+      });
+      const src = Array.isArray(data.sources) ? data.sources.join(" · ") : "";
+      const warn = Array.isArray(data.warnings) && data.warnings.length
+        ? data.warnings.slice(0, 2).join(" · ")
+        : "";
+      setDirLookupNote(
+        [src ? `Looked up via ${src}` : "Lookup finished", warn].filter(Boolean).join(" — "),
+      );
+    } catch (err) {
+      setDirLookupNote(parseApiError(err, "Lookup incomplete — fill fields manually"));
+    } finally {
+      setDirLookingUp(false);
     }
   }
 
@@ -1447,7 +1572,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         <p className="qsearch__lede">
           <strong>Scan now</strong> pulls calendars into the Review queue. Use{" "}
           <strong>Add by hand</strong> only for a single flyer image or Instagram post that Scan
-          missed. Review stages as <strong>HIDDEN</strong>.{" "}
+          missed. In Review, <strong>Approve LIVE</strong> or <strong>Stage HIDDEN</strong>.{" "}
           <strong>Trusted</strong> Sync also lands in Review first.
         </p>
 
@@ -1806,7 +1931,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <p style={{ fontSize: 13, color: "var(--qs-muted)", margin: 0 }}>
               ~3:00am America/Los_Angeles when <code>QSEARCH_NIGHTLY</code> is on (default in production).
               See <code>docs/QSEARCH.md</code>. Priority: never-scanned → failing → Tier1/EB → rest.
-              Candidates land here for human approve → HIDDEN.
+              Candidates land here — Approve LIVE or Stage HIDDEN.
             </p>
           </div>
         </div>
@@ -2182,10 +2307,20 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   type="button"
                   className="is-primary"
                   disabled={busy || selectedCount === 0}
-                  onClick={approveSelected}
-                  data-testid="qsearch-approve"
+                  onClick={() => void approveSelected("LIVE")}
+                  data-testid="qsearch-approve-live"
+                  title="Create events and show them on the public board"
                 >
-                  Approve {selectedCount} as HIDDEN
+                  Approve {selectedCount || ""} LIVE
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || selectedCount === 0}
+                  onClick={() => void approveSelected("HIDDEN")}
+                  data-testid="qsearch-approve-hidden"
+                  title="Create events staged off the public board"
+                >
+                  Stage {selectedCount || ""} HIDDEN
                 </button>
               </div>
               {filteredCandidates.map(c => {
@@ -2311,7 +2446,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             onClick={e => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setDirForm(buildDirectoryFormFromCandidate(c));
+                              void openDirectoryFromCandidate(c);
                             }}
                           >
                             Add to directory
@@ -2484,6 +2619,63 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           {c.recurringDupAction || c.strongDuplicate?.note}
                         </p>
                       )}
+                      {/* Recurring series — more than a badge: choose one night vs full series */}
+                      {c.condensed &&
+                        (c.recurring === "weekly" || c.recurring === "monthly") &&
+                        (c.recurringCount || 0) >= 2 && (
+                          <div
+                            className="qsearch__series-box"
+                            data-testid={`qsearch-series-${c.id}`}
+                            onClick={e => e.preventDefault()}
+                          >
+                            <div className="qsearch__series-title">
+                              Recurring {c.recurring} series — {c.recurringCount} dates found
+                            </div>
+                            <p className="qsearch__series-lede">
+                              Choose how many nights to create when you approve. Series uses every
+                              date QSearch found (not invented).
+                            </p>
+                            <div className="qsearch__series-options" role="radiogroup" aria-label="Series expand">
+                              <label className="qsearch__series-opt">
+                                <input
+                                  type="radio"
+                                  name={`series-${c.id}`}
+                                  checked={(seriesMode[c.id] || "one") === "one"}
+                                  onChange={() =>
+                                    setSeriesMode(prev => ({ ...prev, [c.id]: "one" }))
+                                  }
+                                />
+                                <span>
+                                  One occurrence only
+                                  <em> — next/representative date only</em>
+                                </span>
+                              </label>
+                              <label className="qsearch__series-opt">
+                                <input
+                                  type="radio"
+                                  name={`series-${c.id}`}
+                                  checked={seriesMode[c.id] === "series"}
+                                  onChange={() =>
+                                    setSeriesMode(prev => ({ ...prev, [c.id]: "series" }))
+                                  }
+                                />
+                                <span>
+                                  Full series — create all {c.recurringCount} nights
+                                  <em>
+                                    {" "}
+                                    —{" "}
+                                    {(c.memberDrafts || [])
+                                      .map(d => (d.dateStart || "").slice(0, 10))
+                                      .filter(Boolean)
+                                      .slice(0, 6)
+                                      .join(", ")}
+                                    {(c.memberDrafts || []).length > 6 ? "…" : ""}
+                                  </em>
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        )}
                       {!!c.conflicts?.length && (
                         <div className="qsearch__cand-actions">
                           <span style={{ fontSize: 12, color: "var(--qs-muted)" }}>
@@ -2520,10 +2712,21 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           <DialogHeader>
             <DialogTitle>Add place to directory</DialogTitle>
             <DialogDescription>
-              Venue from this scan is not in the directory yet. Review the fields (and logo), then
-              save. Goes live immediately as an admin listing.
+              Venue from this scan is not in the directory yet. We look up address coordinates and
+              the website (when known) to prefill fields — review, then save. Goes live as an admin
+              listing.
             </DialogDescription>
           </DialogHeader>
+          {dirLookingUp && (
+            <p className="qsearch__assist-note" data-testid="qsearch-dir-lookup-loading">
+              Looking up business info (geocode + website)…
+            </p>
+          )}
+          {dirLookupNote && !dirLookingUp && (
+            <p className="qsearch__assist-note" data-testid="qsearch-dir-lookup-note">
+              {dirLookupNote}
+            </p>
+          )}
           {dirForm && (
             <div className="qsearch__dir-form">
               <div className="qsearch__dir-logo-row">
@@ -2720,7 +2923,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               </li>
             </ol>
             <p className="qsearch__assist-note">
-              Drafts land in <strong>Review</strong> as HIDDEN only. Needs{" "}
+              Drafts land in <strong>Review</strong> — Approve LIVE or Stage HIDDEN. Needs{" "}
               <code>XAI_API_KEY</code> or <code>OPENAI_API_KEY</code> on the server to read flyers.
             </p>
           </div>

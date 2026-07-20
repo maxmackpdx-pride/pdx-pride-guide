@@ -179,13 +179,15 @@ function admissionFrom(node: Record<string, unknown>): string {
       return "FREE";
     }
     if (price != null && String(price).trim() !== "") {
-      const cur = textOf(o.priceCurrency) || "USD";
-      return `${cur === "USD" ? "$" : cur + " "}${price}`;
+      // Explicit non-zero price → ticketed (don't invent FREE)
+      return "TICKETED";
     }
   }
   const isAccessible = node.isAccessibleForFree;
   if (isAccessible === true || isAccessible === "true") return "FREE";
-  return "FREE";
+  if (isAccessible === false || isAccessible === "false") return "TICKETED";
+  // No offer / free signal → unknown (never assume free)
+  return "UNKNOWN";
 }
 
 function nodeToDraft(node: Record<string, unknown>, sourceUrl: string | null): IngestEventDraft | null {

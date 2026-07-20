@@ -647,6 +647,8 @@ export function saveCandidates(
     directoryBrands?: unknown;
     sourceBundle?: unknown;
     fieldConflicts?: unknown;
+    /** Series occurrence drafts for expand-on-approve */
+    memberDrafts?: unknown;
   }>,
 ) {
   ensureTables();
@@ -678,6 +680,7 @@ export function saveCandidates(
         JSON.stringify({
           sourceBundle: c.sourceBundle || [],
           fieldConflicts: c.fieldConflicts || [],
+          memberDrafts: Array.isArray(c.memberDrafts) ? c.memberDrafts : [],
         }),
         now,
       );
@@ -710,7 +713,11 @@ export function listCandidates(opts?: {
     params.push(opts.limit);
   }
   return sqlite.prepare(sql).all(...params).map((row: any) => {
-    let bundle: { sourceBundle?: unknown[]; fieldConflicts?: unknown[] } = {};
+    let bundle: {
+      sourceBundle?: unknown[];
+      fieldConflicts?: unknown[];
+      memberDrafts?: unknown[];
+    } = {};
     try {
       bundle = JSON.parse(row.bundle_json || "{}") || {};
     } catch {
@@ -733,6 +740,7 @@ export function listCandidates(opts?: {
       directoryBrands: JSON.parse(row.brands_json || "[]"),
       sourceBundle: Array.isArray(bundle.sourceBundle) ? bundle.sourceBundle : [],
       fieldConflicts: Array.isArray(bundle.fieldConflicts) ? bundle.fieldConflicts : [],
+      memberDrafts: Array.isArray(bundle.memberDrafts) ? bundle.memberDrafts : [],
       status: row.status,
       createdAt: row.created_at,
       committedEventId: row.committed_event_id,

@@ -1,10 +1,13 @@
 import type { IngestEventDraft } from "./types";
 import { dayOfWeekFromStart, defaultEndFromStart, toPacificWallClock } from "./dates";
+import { inferAdmissionFromText } from "./admissionInfer";
 
 const PACIFIC_TZ = "America/Los_Angeles";
 const DEFAULT_VENUE = "Badlands";
 const DEFAULT_ADDRESS = "110 NW Broadway, Portland, OR";
 const DEFAULT_NEIGHBORHOOD = "Old Town";
+/** Badlands is a 21+ bar — never all-ages. */
+const BADLANDS_AGE = "21_PLUS" as const;
 
 /**
  * Badlands calendar worker:
@@ -133,6 +136,10 @@ export function parseBadlandsJson(raw: string, sourceUrl: string | null = null):
 
     const poster = evt.photoUrl ? String(evt.photoUrl).trim() : "";
 
+    // Never invent FREE — only FREE when text clearly says so
+    const adm = inferAdmissionFromText(title, description);
+    if (adm.reason) warnings.push(adm.reason);
+
     const draft: IngestEventDraft = {
       title: title.slice(0, 200),
       description: description.slice(0, 8000),
@@ -144,9 +151,9 @@ export function parseBadlandsJson(raw: string, sourceUrl: string | null = null):
       dateStart,
       dateEnd,
       dayOfWeek: dayOfWeekFromStart(dateStart),
-      ageRequirement: "ALL_AGES",
+      ageRequirement: BADLANDS_AGE,
       eventTypes: "[]",
-      admission: "FREE",
+      admission: adm.admission,
       ticketUrl: ticketUrl ? String(ticketUrl).slice(0, 500) : null,
       eventPageUrl,
       isPublic: true,

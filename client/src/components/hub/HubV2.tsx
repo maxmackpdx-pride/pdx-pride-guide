@@ -151,7 +151,8 @@ function HubRightRail({
           </div>
           {suggestions.length === 0 && (
             <p className="kick hub-people-rail__empty-copy">
-              Hosts and scene-makers show up here as more profiles go live.
+              You&apos;re following the scene by default. Unfollow anyone on their
+              profile or from their posts — they&apos;ll show up here to re-follow.
             </p>
           )}
         </div>

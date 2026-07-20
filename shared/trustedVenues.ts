@@ -16,7 +16,7 @@ export type TrustedVenueDef = {
   address: string;
   neighborhood?: string;
   /** How we pull events */
-  fetchMode: "badlands_api" | "sanctuary_ics" | "generic";
+  fetchMode: "badlands_api" | "sanctuary_ics" | "eagle_wix" | "generic";
   /** Primary feed URL (may need date expansion at runtime) */
   feedUrl: string;
   /** Human calendar page for admins */
@@ -53,6 +53,19 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 6,
     notes: "ICS for structure; flyers from per-event pages + series reuse.",
+  },
+  {
+    sourceId: "eagle-events",
+    venueName: "Eagle Portland",
+    address: "835 N Lombard St, Portland, OR 97217",
+    neighborhood: "North Portland",
+    fetchMode: "eagle_wix",
+    feedUrl: "https://www.eagleportland.com/what-s-happening",
+    calendarPageUrl: "https://www.eagleportland.com/what-s-happening",
+    publishStatus: "LIVE",
+    pollHours: 6,
+    notes:
+      "Wix Events via appsWarmupData. 21+ bar — never ALL_AGES; cover UNKNOWN unless listing says free.",
   },
 ];
 

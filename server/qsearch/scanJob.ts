@@ -691,6 +691,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
       directoryBrands: c.directoryBrands,
       sourceBundle: c.sourceBundle,
       fieldConflicts: c.fieldConflicts,
+      memberDrafts: c.memberDrafts || [],
     })),
   );
 

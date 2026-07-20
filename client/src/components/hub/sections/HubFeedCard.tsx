@@ -1,13 +1,16 @@
 import { useState, type CSSProperties, type MouseEvent } from "react";
 import { Link } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import EventModal from "@/components/EventModal";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { avatarHrefFor } from "@/lib/avatarLinks";
 import { timeAgo } from "@/lib/boardFeed";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";
 import type { Event } from "@shared/schema";
@@ -97,14 +100,68 @@ function EventFeedRow({
 }
 
 export default function HubFeedCard({ item }: Props) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [spottedOpen, setSpottedOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
   const [modalEvent, setModalEvent] = useState<Event | null>(null);
   const [openingEventId, setOpeningEventId] = useState<number | null>(null);
+  // Soft-launch: everyone follows everyone — Unfollow unless they already dropped them.
+  const [followOverride, setFollowOverride] = useState<boolean | null>(null);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
   const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
+
+  // Person to follow/unfollow: real author or "posted by" host behind venue/event identity
+  const followTarget =
+    item.postedBy?.username && !item.postedBy.anonymous
+      ? item.postedBy
+      : item.author?.username && !item.author.anonymous && !item.author.venueLogo
+        ? item.author
+        : null;
+  const followUsername = followTarget?.username?.replace(/^@/, "") || "";
+  const isSelf =
+    !!user &&
+    !!followUsername &&
+    user.username?.toLowerCase() === followUsername.toLowerCase();
+  const showFollowShortcut = Boolean(user && followUsername && !isSelf);
+  // Prefer server field; soft-launch default is following
+  const isFollowing =
+    followOverride !== null
+      ? followOverride
+      : item.viewerFollowsAuthor != null
+        ? item.viewerFollowsAuthor
+        : true;
+
+  const followMutation = useMutation({
+    mutationFn: async (nextFollowing: boolean) => {
+      const method = nextFollowing ? "POST" : "DELETE";
+      const res = await apiRequest(method, `/api/users/${encodeURIComponent(followUsername)}/follow`);
+      return res.json() as Promise<{ isFollowing?: boolean }>;
+    },
+    onSuccess: (data) => {
+      setFollowOverride(data?.isFollowing ?? !isFollowing);
+      toast({
+        title: data?.isFollowing ? "Following" : "Unfollowed",
+        description: data?.isFollowing
+          ? `You’re following @${followUsername} again`
+          : `You won’t see @${followUsername} as a follow`,
+        duration: 2200,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["/api/users/me/follow-stats"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/users/me/people"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+    },
+    onError: (err) => {
+      toast({
+        title: "Could not update follow",
+        description: parseApiError(err, "Try again"),
+        variant: "destructive",
+      });
+    },
+  });
 
   /** Open the real event modal in place — stay on the feed (no navigation). */
   const openEventInPlace = async (eventId: number) => {
@@ -270,12 +327,29 @@ export default function HubFeedCard({ item }: Props) {
                 </div>
               )}
             </div>
-            <span
-              className="kick hub-feed-card__badge"
-              style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
-            >
-              {item.badge}
-            </span>
+            <div className="hub-feed-card__head-actions">
+              {showFollowShortcut && (
+                <button
+                  type="button"
+                  className={`foll hub-feed-card__foll${isFollowing ? " on" : ""}`}
+                  disabled={followMutation.isPending}
+                  data-testid="feed-follow-shortcut"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    followMutation.mutate(!isFollowing);
+                  }}
+                >
+                  {isFollowing ? "Unfollow" : "Follow"}
+                </button>
+              )}
+              <span
+                className="kick hub-feed-card__badge"
+                style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
+              >
+                {item.badge}
+              </span>
+            </div>
           </div>
           {showSubject && (
             <h4 className="hub-feed-card__subject">{item.title}</h4>

@@ -248,7 +248,9 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://www.eagleportland.com/what-s-happening",
     tier: "1",
     format: "wix",
-    notes: "Wix Upcoming Events; per-event /event-details/{slug}. Strip wix fill transforms for full flyer.",
+    priority: true,
+    notes:
+      "Wix Events appsWarmupData; /event-details/{slug}. Trusted source. 21+ bar; cover UNKNOWN unless free in text.",
   },
   {
     id: "automatic-events",

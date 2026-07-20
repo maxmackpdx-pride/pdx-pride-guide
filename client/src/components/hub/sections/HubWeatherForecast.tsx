@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchPortlandWeather,
-  isDuringPrideWeekend,
   weatherStyle,
   type PortlandForecastDay,
 } from "@/lib/portlandWeather";
@@ -13,11 +12,10 @@ const ROTATE_MS = 2800;
 /**
  * 7-day Portland forecast for the hub feed.
  * - Live Open-Meteo data with WMO weather symbols
- * - Rolling 7 days from today (Pride Week window when during Jul 13–19)
+ * - Always today + the following 6 days (Pacific)
  * - Auto-rotates highlight across the 7 days
  */
 export default function HubWeatherForecast() {
-  const duringPride = isDuringPrideWeekend();
   const [rotateIdx, setRotateIdx] = useState(0);
 
   const {
@@ -26,7 +24,7 @@ export default function HubWeatherForecast() {
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["portland-weather", "hub-feed", "rolling-7", "icons"],
+    queryKey: ["portland-weather", "hub-feed", "today-plus-6"],
     queryFn: fetchPortlandWeather,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 60,
@@ -78,9 +76,7 @@ export default function HubWeatherForecast() {
         <div className="hub-v2-weather__titles">
           <div className="kick hub-v2-weather__kick">7-day forecast</div>
           <h2 className="hub-v2-weather__city">Portland, OR</h2>
-          <p className="hub-v2-weather__sub">
-            {duringPride ? "Pride Week · Jul 13 to 19" : "Next 7 days · Rolling"}
-          </p>
+          <p className="hub-v2-weather__sub">Today + next 6 days</p>
         </div>
         <span
           className="hub-v2-weather__hero-icon"

@@ -73,6 +73,11 @@ export type HubFeedItem = {
   /** Opens the site feedback modal when set to "feedback". */
   ctaAction?: "feedback" | null;
   ctaLabel?: string | null;
+  /**
+   * Whether the viewer currently follows the post’s person (soft-launch: true
+   * unless they unfollowed). Used for Unfollow / Follow on feed cards.
+   */
+  viewerFollowsAuthor?: boolean | null;
 };
 
 export type HubFeedResponse = {

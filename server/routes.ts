@@ -2798,7 +2798,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const user = storage.getUserById(userId);
     const isAdmin = sessionIsAdmin(req);
     if (!user || !storage.canUserPostToHubFeed(userId, isAdmin)) {
-      return res.status(403).json({ error: "Only admins, event hosts, venue owners, and approved promoters can post to the scene feed" });
+      return res.status(403).json({ error: "Sign in with an active account to post to the scene feed" });
     }
 
     const postType = String(req.body.postType || "").trim().toLowerCase();
@@ -4823,6 +4823,28 @@ export function registerRoutes(httpServer: Server, app: Express) {
    */
   app.get("/api/admin/qsearch/trusted", requireAdmin, (_req, res) => {
     res.json(getTrustedDashboard());
+  });
+
+  /**
+   * Prefill "Add to directory" from venue name + optional website/address.
+   * Geocode (Nominatim) + light website scrape for blurb / IG / phone / og:image.
+   */
+  app.post("/api/admin/qsearch/directory-lookup", requireAdmin, async (req, res) => {
+    try {
+      const { lookupDirectoryPlace } = await import("./qsearch/directoryLookup");
+      const result = await lookupDirectoryPlace({
+        name: String(req.body?.name || "").trim(),
+        address: req.body?.address != null ? String(req.body.address) : null,
+        website: req.body?.website != null ? String(req.body.website) : null,
+        description: req.body?.description != null ? String(req.body.description) : null,
+      });
+      if (!result.name || result.name.length < 2) {
+        return res.status(400).json({ error: "name required" });
+      }
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || "Directory lookup failed" });
+    }
   });
 
   async function runTrustedSyncHandler(

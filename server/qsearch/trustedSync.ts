@@ -28,6 +28,8 @@ import {
   fetchSanctuaryDrafts,
   SANCTUARY_AGE_REQUIREMENT,
 } from "../ingest/adapters/sanctuary";
+import { applyEaglePolicy, fetchEagleDrafts } from "../ingest/adapters/eagle";
+import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import type { IngestEventDraft } from "../ingest/types";
 import { storage } from "../storage";
 import { buildScanCandidates } from "./analyze";
@@ -109,6 +111,34 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
     next = applySanctuaryPolicy(next);
   }
 
+  if (venue.sourceId === "eagle-events" || venue.fetchMode === "eagle_wix") {
+    next = applyEaglePolicy(next);
+  }
+
+  // Badlands is a 21+ bar — never ALL_AGES; never invent FREE cover
+  if (venue.sourceId === "badlands-api" || venue.fetchMode === "badlands_api") {
+    const adm = inferAdmissionFromText(next.title, next.description);
+    // Only keep FREE if re-infer still says free; otherwise UNKNOWN/DOOR/TICKETED
+    const admission =
+      next.admission === "FREE" && adm.admission === "FREE"
+        ? "FREE"
+        : next.admission && next.admission !== "FREE" && next.admission !== "ALL_AGES"
+          ? next.admission
+          : adm.admission;
+    next = {
+      ...next,
+      ageRequirement: "21_PLUS",
+      admission,
+      warnings: Array.from(
+        new Set([
+          ...(next.warnings || []),
+          "Age set to 21_PLUS (Badlands is a bar)",
+          ...(adm.reason ? [adm.reason] : []),
+        ]),
+      ),
+    };
+  }
+
   return next;
 }
 
@@ -144,6 +174,13 @@ async function fetchSanctuaryDraftsForVenue(venue: TrustedVenueDef): Promise<Ing
   });
 }
 
+async function fetchEagleDraftsForVenue(venue: TrustedVenueDef): Promise<IngestEventDraft[]> {
+  return fetchEagleDrafts({
+    feedUrl: venue.feedUrl,
+    includePast: false,
+  });
+}
+
 async function fetchGenericDrafts(
   venue: TrustedVenueDef,
   existingEvents: Event[],
@@ -166,6 +203,8 @@ async function fetchDraftsForVenue(
       return fetchBadlandsDrafts(venue);
     case "sanctuary_ics":
       return fetchSanctuaryDraftsForVenue(venue);
+    case "eagle_wix":
+      return fetchEagleDraftsForVenue(venue);
     case "generic":
     default:
       return fetchGenericDrafts(venue, existingEvents);
@@ -276,6 +315,7 @@ function queueDraftsForReview(
       directoryBrands: c.directoryBrands,
       sourceBundle: c.sourceBundle,
       fieldConflicts: c.fieldConflicts,
+      memberDrafts: c.memberDrafts || [],
     })),
   );
 

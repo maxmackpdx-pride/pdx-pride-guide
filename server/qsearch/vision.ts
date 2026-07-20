@@ -84,7 +84,7 @@ function draftFromPartial(
     dayOfWeek: dayOfWeekFromStart(dateStart),
     ageRequirement: String(p.ageRequirement || "ALL_AGES"),
     eventTypes: "[]",
-    admission: String(p.admission || "FREE"),
+    admission: String(p.admission || "UNKNOWN"),
     ticketUrl: p.ticketUrl ? String(p.ticketUrl).slice(0, 500) : sourceUrl,
     isPublic: true,
     isPrivate: false,

@@ -44,10 +44,10 @@
       padding:7px 15px;border-radius:99px;transition:filter .15s,box-shadow .15s,background .15s,border-color .15s,color .15s,transform .12s;
       border:var(--glass-btn-border,1px solid rgba(255,255,255,.35));
       background:var(--glass-btn-bg,linear-gradient(150deg,rgba(255,255,255,.55),rgba(255,255,255,0) 42%),var(--c));
-      color:#050506;font-weight:600;
+      color:#fff;font-weight:600;
       box-shadow:var(--glass-btn-shadow,0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.7),inset 0 -6px 12px -6px rgba(0,0,0,.35));
     }
-    .foll:hover{filter:brightness(1.08)}
+    .foll:hover{filter:brightness(1.08);color:#fff}
     .foll.on{
       color:var(--c);font-weight:400;
       background:var(--glass-btn-outline-bg,linear-gradient(150deg,color-mix(in srgb,var(--c) 16%,transparent),color-mix(in srgb,var(--c) 2%,transparent) 46%),rgba(255,255,255,.015));
@@ -452,17 +452,22 @@
       border-radius:99px;
       font-weight:700;
       letter-spacing:.08em;
+      color:#fff;
       box-shadow:
         0 0 0 1px rgba(0,0,0,.4),
         0 0 18px -4px color-mix(in srgb,var(--panel-cyan,#19e3ff) 75%,transparent),
         inset 0 1px 0 rgba(255,255,255,.55);
     }
     .hub-people-row__foll.foll:not(.on):hover{
+      color:#fff;
       filter:brightness(1.08);
       box-shadow:
         0 0 0 1px rgba(0,0,0,.4),
         0 0 26px -2px color-mix(in srgb,var(--panel-cyan,#19e3ff) 85%,transparent),
         inset 0 1px 0 rgba(255,255,255,.65);
+    }
+    .hub-people-row__foll.foll.on{
+      color:var(--panel-cyan,#19e3ff);
     }
 
     /* ── Scene feed (Experiment 101 register) ───────────────── */
@@ -710,6 +715,11 @@
     .hub-feed-card__row{display:flex;align-items:flex-start;gap:12px}
     .hub-feed-card__main{flex:1;min-width:0}
     .hub-feed-card__head{display:flex;align-items:flex-start;gap:10px}
+    .hub-feed-card__head-actions{display:flex;align-items:center;gap:8px;flex:none;margin-left:auto}
+    .hub-feed-card__foll.foll{
+      flex:none;padding:5px 11px;font-size:10px;letter-spacing:.08em;color:#fff;font-weight:700;
+    }
+    .hub-feed-card__foll.foll.on{color:var(--panel-cyan,#19e3ff);font-weight:500}
     .hub-feed-card__author{font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;text-transform:uppercase;line-height:1.1}
     .hub-feed-card__meta{font-size:10.5px;letter-spacing:.06em;margin-top:5px}
     .hub-feed-card__postedby{display:flex;align-items:center;gap:6px;margin-top:7px}

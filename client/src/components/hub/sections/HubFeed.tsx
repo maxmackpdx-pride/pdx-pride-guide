@@ -116,7 +116,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   // Only fetch events if at least one featured ad could still show today.
   const anyFeaturedPossible = FEATURED.some((f) => !isDismissedToday(f.key));
 
-  // Server is source of truth: admins, event hosts, venue owners, approved promoters.
+  // Server is source of truth (all active members can post during soft-launch).
   const postOptionsQuery = useQuery<PostOptions>({
     queryKey: ["/api/hub/feed/post-options"],
     queryFn: async () => {

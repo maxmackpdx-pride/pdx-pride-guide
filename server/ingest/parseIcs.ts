@@ -139,7 +139,7 @@ export function parseIcs(text: string, sourceUrl: string | null = null): IngestE
       dayOfWeek: dayOfWeekFromStart(dateStart),
       ageRequirement: "ALL_AGES",
       eventTypes: "[]",
-      admission: "FREE",
+      admission: "UNKNOWN",
       ticketUrl: eventPageUrl || (sourceUrl && sourceUrl.startsWith("http") ? sourceUrl.slice(0, 500) : null),
       eventPageUrl,
       isPublic: true,

@@ -341,6 +341,10 @@ async function fetchJson(url: URL): Promise<OpenMeteoPayload | null> {
   }
 }
 
+/**
+ * Build today + following 6 days (Pacific calendar).
+ * Skips any past days Open-Meteo may still return at the head of the series.
+ */
 function parseDailyRows(
   data: OpenMeteoPayload,
 ): Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }> | null {
@@ -349,27 +353,37 @@ function parseDailyRows(
   const highs = data.daily?.temperature_2m_max ?? [];
   const lows = data.daily?.temperature_2m_min ?? [];
   const codes = data.daily?.weather_code ?? [];
-  if (times.length < 7) return null;
+  if (times.length < 1) return null;
 
-  const rows = times.slice(0, 7).map((iso, idx) => {
-    const high = highs[idx];
-    const low = lows[idx];
-    if (high == null || low == null || !Number.isFinite(high) || !Number.isFinite(low)) return null;
-    return {
+  const today = pacificTodayIso();
+  let startIdx = times.indexOf(today);
+  if (startIdx < 0) {
+    // First day on/after today (API timezone edge)
+    startIdx = times.findIndex(t => t >= today);
+    if (startIdx < 0) startIdx = 0;
+  }
+
+  const rows: Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }> = [];
+  for (let i = startIdx; i < times.length && rows.length < 7; i++) {
+    const iso = times[i];
+    const high = highs[i];
+    const low = lows[i];
+    if (high == null || low == null || !Number.isFinite(high) || !Number.isFinite(low)) continue;
+    rows.push({
       day: dayLabelFromIso(iso),
       dateLabel: dateLabelFromIso(iso),
       high: Math.round(high),
       low: Math.round(low),
-      code: codes[idx] ?? 0,
+      code: codes[i] ?? 0,
       iso,
-    };
-  });
-  if (rows.some(r => r === null)) return null;
-  const out = rows as Array<{ day: string; dateLabel: string; high: number; low: number; code: number; iso: string }>;
-  const maxHigh = Math.max(...out.map(r => r.high));
+    });
+  }
+
+  if (rows.length < 7) return null;
+  const maxHigh = Math.max(...rows.map(r => r.high));
   if (maxHigh < 40 || maxHigh > 120) return null;
   if (!isFahrenheitUnit(data.daily_units?.temperature_2m_max) && maxHigh < 50) return null;
-  return out;
+  return rows;
 }
 
 function buildPrideForecast(
@@ -457,40 +471,17 @@ function assemble(
   };
 }
 
+/**
+ * Hub 7-day strip: always **today + following 6 days** (Pacific).
+ * Pride Week no longer pins the strip to Jul 13–19 Mon→Sun.
+ */
 export async function fetchPortlandWeather(): Promise<PortlandWeather> {
   const includeCurrent = true;
-  const duringPride = isDuringPrideWeekend();
 
-  // During Pride Week prefer the Jul 13–19 window (7 fixed days with live codes).
-  if (duringPride) {
-    const prideData = await fetchJson(
-      openMeteoUrl({
-        startDate: PRIDE_WEEKEND_START,
-        endDate: PRIDE_WEEKEND_END,
-        includeCurrent,
-      }),
-    );
-    if (prideData) {
-      const rows = buildPrideForecast(prideData);
-      if (rows) {
-        const cur =
-          prideData.current?.temperature_2m != null
-            ? {
-                temp: prideData.current.temperature_2m,
-                code: prideData.current.weather_code,
-              }
-            : null;
-        if (cur && isCelsiusUnit(prideData.current_units?.temperature_2m)) {
-          return assemble(rows, null, false, "pride");
-        }
-        return assemble(rows, cur, false, "pride");
-      }
-    }
-  }
-
-  // Rolling 7-day forecast from today (always available, cycles forward each day).
+  // Ask for a few extra days so we can still slice a full 7 if the series
+  // includes a past day or timezone lag at the head.
   const rollingData = await fetchJson(
-    openMeteoUrl({ forecastDays: 7, includeCurrent }),
+    openMeteoUrl({ forecastDays: 10, includeCurrent }),
   );
   if (rollingData) {
     const rows = parseDailyRows(rollingData);
@@ -509,26 +500,6 @@ export async function fetchPortlandWeather(): Promise<PortlandWeather> {
     }
   }
 
-  // Extended window may still include Pride dates if rolling failed mid-pride.
-  if (duringPride) {
-    const extendedData = await fetchJson(
-      openMeteoUrl({ forecastDays: 16, includeCurrent }),
-    );
-    if (extendedData) {
-      const rows = buildPrideForecast(extendedData);
-      if (rows) {
-        const cur =
-          extendedData.current?.temperature_2m != null
-            ? {
-                temp: extendedData.current.temperature_2m,
-                code: extendedData.current.weather_code,
-              }
-            : null;
-        return assemble(rows, cur, false, "pride");
-      }
-    }
-    return prideFallback();
-  }
-
+  // Last resort: still today-centric climate fallback (not fixed Pride week).
   return rollingFallback();
 }

@@ -418,7 +418,8 @@ export function draftToInsertEvent(
     dayOfWeek: draft.dayOfWeek,
     ageRequirement: draft.ageRequirement || "ALL_AGES",
     eventTypes: draft.eventTypes || "[]",
-    admission: draft.admission || "FREE",
+    // Never invent FREE when the draft left admission empty
+    admission: draft.admission || "UNKNOWN",
     ticketUrl: draft.ticketUrl,
     isPublic: draft.isPublic !== false,
     isPrivate: !!draft.isPrivate,

@@ -207,7 +207,8 @@ export default function Dashboard() {
   });
 
   const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
-  const canPostToFeed = Boolean(isAdmin || user?.promoterStatus === "approved");
+  // Soft-launch: every signed-in member can post (server still enforces active status).
+  const canPostToFeed = Boolean(user);
   const isSuperAdmin = Boolean(user?.isSuperAdmin || adminSession?.isSuperAdmin);
   // Owner + owner peers only (do NOT grant via isSuperAdmin alone).
   const canManageTeam = Boolean(user?.canManageTeam || adminSession?.canManageTeam);

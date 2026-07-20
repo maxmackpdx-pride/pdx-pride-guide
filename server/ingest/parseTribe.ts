@@ -91,7 +91,7 @@ export function parseTribeEventsJson(raw: string, sourceUrl: string | null = nul
       dayOfWeek: dayOfWeekFromStart(dateStart),
       ageRequirement: "ALL_AGES",
       eventTypes: "[]",
-      admission: "FREE",
+      admission: "UNKNOWN",
       ticketUrl: ticketUrl ? String(ticketUrl).slice(0, 500) : null,
       eventPageUrl,
       isPublic: true,
