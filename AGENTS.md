@@ -1,5 +1,16 @@
 # Agent rules — PDX Pride Guide
 
+## Ship prod fixes by default (hard rule)
+
+When the user reports a **live-site bug** or asks to **fix** something on the product (reload glitch, broken UI, wrong data, etc.):
+
+1. **Fix it, commit to `master`, push, and wait for Railway SUCCESS** — same bar as “ship.”
+2. **Do not stop at local verification** or ask them to “test locally first.”
+3. **Local testing only when they explicitly ask** (e.g. “test this local,” “preview before ship,” “don’t deploy yet”).
+4. Ship **only the fix** — leave unrelated feature WIP on other branches unstaged; never drag phase/feature work onto `master`.
+
+Default bias: **production is the destination.** Previews and local smokes are opt-in.
+
 ## What “deploy / fix the website / ship” means (hard rule)
 
 When the user says **deploy**, **ship**, **push**, **go live**, **fix the site**, or similar, they mean **the real product**:
