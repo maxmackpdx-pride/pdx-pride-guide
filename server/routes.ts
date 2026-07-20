@@ -76,6 +76,7 @@ import {
   setRecipeUrl,
 } from "./qsearch/store";
 import { startQSearchNightly, triggerNightlyPriorityScan } from "./qsearch/nightly";
+import { getTrustedDashboard } from "./qsearch/trustedHealth";
 import { localUploadToDataUrl, visionFlyerToDrafts } from "./qsearch/vision";
 import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
 import { buildScanCandidates } from "./qsearch/analyze";
@@ -4813,6 +4814,82 @@ export function registerRoutes(httpServer: Server, app: Express) {
       active: b.active,
     }));
     res.json(dashboardSnapshot(businesses));
+  });
+
+  /**
+   * Trusted venues health board (auto-publish path).
+   * GET  → registry + qsearch_trusted_health + derived green/yellow/red
+   * POST → run one or all trusted syncs (Agent C: trustedSync.ts)
+   */
+  app.get("/api/admin/qsearch/trusted", requireAdmin, (_req, res) => {
+    res.json(getTrustedDashboard());
+  });
+
+  async function runTrustedSyncHandler(
+    req: any,
+    res: any,
+    sourceId: string | undefined,
+  ) {
+    try {
+      const mod = await import("./qsearch/trustedSync");
+      const syncOne = mod.syncTrustedVenue as
+        | ((id: string) => Promise<unknown>)
+        | undefined;
+      const syncAll = mod.syncAllTrustedVenues as
+        | (() => Promise<unknown>)
+        | undefined;
+
+      if (sourceId) {
+        if (typeof syncOne !== "function") {
+          return res.status(503).json({ error: "Trusted sync is unavailable" });
+        }
+        const result = await syncOne(sourceId);
+        auditAdmin(req, "qsearch_trusted_sync", {
+          type: "qsearch_trusted",
+          id: sourceId,
+          detail: { scope: "one", result },
+        });
+        return res.json({ ok: true, sourceId, result });
+      }
+
+      if (typeof syncAll !== "function") {
+        return res.status(503).json({ error: "Trusted sync is unavailable" });
+      }
+      const result = await syncAll();
+      auditAdmin(req, "qsearch_trusted_sync", {
+        type: "qsearch_trusted",
+        detail: { scope: "all", result },
+      });
+      return res.json({ ok: true, scope: "all", result });
+    } catch (err: any) {
+      const msg = String(err?.message || err || "trusted sync failed");
+      if (
+        msg.includes("Cannot find module") ||
+        msg.includes("Cannot find package") ||
+        err?.code === "ERR_MODULE_NOT_FOUND" ||
+        err?.code === "MODULE_NOT_FOUND"
+      ) {
+        return res.status(503).json({ error: "Trusted sync module missing", detail: msg });
+      }
+      console.error("[qsearch-trusted] sync failed:", err);
+      return res.status(500).json({ error: msg });
+    }
+  }
+
+  app.post("/api/admin/qsearch/trusted/sync", requireAdmin, async (req, res) => {
+    const sourceId =
+      req.body?.sourceId != null && String(req.body.sourceId).trim()
+        ? String(req.body.sourceId).trim()
+        : undefined;
+    await runTrustedSyncHandler(req, res, sourceId);
+  });
+
+  app.post("/api/admin/qsearch/trusted/sync/:sourceId", requireAdmin, async (req, res) => {
+    const sourceId = decodeURIComponent(String(req.params.sourceId || "")).trim();
+    if (!sourceId) {
+      return res.status(400).json({ error: "sourceId required" });
+    }
+    await runTrustedSyncHandler(req, res, sourceId);
   });
 
   app.get("/api/admin/qsearch/queue", requireAdmin, (req, res) => {

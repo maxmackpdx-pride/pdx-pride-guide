@@ -21,12 +21,14 @@ import {
   enrichDraftPoster,
   extractFlyerCandidatesFromHtml,
 } from "../ingest/posterQuality";
+import { fetchSanctuaryDrafts } from "../ingest/adapters/sanctuary";
 import { storage } from "../storage";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
 import { enrichDraftVenueFromSource, matchDirectoryBrands } from "./directoryBrands";
 import { isEventPlaceholderUrl } from "@shared/eventPoster";
 import { discoverAndParse } from "./discover";
 import { fetchIngestSource } from "../ingest/fetchSource";
+import { expandBadlandsCalendarUrl } from "../ingest/parseBadlands";
 import { extractFlyerImageUrls, visionFlyerToDrafts } from "./vision";
 import {
   getActiveScanJobRow,
@@ -131,16 +133,25 @@ export function buildLiveSources(businesses: Array<{
 
 export function effectiveScanUrl(source: IngestSource): string {
   const h = getSourceHealth(source.id);
-  if (h?.recipeUrl && !isGenericEventbriteDumpUrl(h.recipeUrl)) return h.recipeUrl;
-  if (
+  let url = source.url;
+  if (h?.recipeUrl && !isGenericEventbriteDumpUrl(h.recipeUrl)) {
+    url = h.recipeUrl;
+  } else if (
     h?.resolvedUrl &&
     h.yieldStatus === "works" &&
     h.zeroYieldStreak < 2 &&
     !isGenericEventbriteDumpUrl(h.resolvedUrl)
   ) {
-    return h.resolvedUrl;
+    url = h.resolvedUrl;
   }
-  return source.url;
+  // Badlands worker requires ?from=&to= Pacific date window
+  if (
+    source.id === "badlands-api" ||
+    /badlandsportland\.workers\.dev|badlands-events/i.test(url)
+  ) {
+    url = expandBadlandsCalendarUrl(url);
+  }
+  return url;
 }
 
 export function syncAndSummarize(
@@ -388,6 +399,85 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
     const health = getSourceHealth(source.id);
 
     try {
+      const isSanctuarySource =
+        source.id === "sanctuary-ics" ||
+        source.id === "sanctuary-calendar" ||
+        /^sanctuary[-_]/i.test(source.id);
+
+      // ── Dedicated Sanctuary path (ICS + page flyers + series reuse) ──
+      if (isSanctuarySource) {
+        const sanctuaryDrafts = await fetchSanctuaryDrafts({
+          // Always prefer the ICS feed; calendar HTML is month-grid noise
+          feedUrl:
+            /ics/i.test(source.id) || /\.ics|\/ics\/?/i.test(primary)
+              ? primary
+              : undefined,
+          maxPages: 80,
+          concurrency: 4,
+          includePast: opts.includePastEvents === true,
+        });
+
+        const ms = Date.now() - t0;
+        times.push(ms);
+        const avgMs = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+        const remaining = sources.length - times.length;
+        const etaSeconds = Math.max(0, Math.round((remaining * avgMs) / 1000));
+
+        const portlandOnly =
+          source.portlandOnly === true ||
+          String(source.businessType || "").toLowerCase() === "group";
+        const relevanceCtx: SourceRelevanceContext = {
+          sourceId: source.id,
+          label: source.label,
+          url: source.url,
+          tier: source.tier,
+        };
+        const includePast = opts.includePastEvents === true;
+
+        let kept = 0;
+        for (const draft of sanctuaryDrafts) {
+          if (portlandOnly && !isPortlandEventListing(draft)) continue;
+          if (!includePast && isPastEventListing(draft)) continue;
+          const rel = isRelevantScanDraft(draft, relevanceCtx);
+          if (!rel.keep) continue;
+          kept++;
+          const withPoster = await enrichDraftPoster(draft, []);
+          raw.push({
+            draft: withPoster,
+            sourceId: source.id,
+            sourceLabel: source.label,
+            sourceUrl: source.url,
+          });
+        }
+
+        recordScanResult(source.id, {
+          ok: true,
+          eventCount: kept,
+          resolvedUrl: kept > 0 ? source.url : null,
+          winningParser: "ics",
+          yieldStatus: kept > 0 ? "works" : "zero_yield",
+        });
+        handle.perSource.push({
+          sourceId: source.id,
+          label: source.label,
+          url: primary,
+          ok: true,
+          eventCount: kept,
+          error: kept === 0 ? "Zero yield" : null,
+          ms,
+          resolvedUrl: source.url,
+          parsers: ["ics", "sanctuary"],
+        });
+        updateScanJob({
+          id: jobId,
+          completed: times.length,
+          avgMs,
+          etaSeconds,
+          perSourceJson: JSON.stringify(handle.perSource),
+        });
+        continue;
+      }
+
       const hit = await discoverAndParse({
         primaryUrl: primary,
         recipeUrl: health?.recipeUrl,

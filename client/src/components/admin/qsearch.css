@@ -963,3 +963,260 @@ button.qsearch__stat.is-active {
 .qsearch__fail-list li {
   margin-bottom: 0.35rem;
 }
+
+/* ── Trusted venues health board ───────────────────────────────── */
+
+.qsearch__trusted {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.qsearch__trusted-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.qsearch__trusted-lede {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--qs-muted);
+  line-height: 1.45;
+  max-width: 36rem;
+}
+
+.qsearch__trusted-lede strong {
+  color: var(--qs-lime);
+  font-weight: 600;
+}
+
+.qsearch__trusted-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.qsearch__trusted-actions .qsearch__scan-btn {
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  box-shadow: 3px 3px 0 rgba(255, 102, 0, 0.45);
+}
+
+.qsearch__trusted-actions .qsearch__scan-btn.is-ghost {
+  box-shadow: none;
+}
+
+.qsearch__trusted-banner {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--qs-orange);
+  margin: 0.25rem 0 0;
+}
+
+.qsearch__trusted-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.qsearch__trusted-card {
+  border: 1px solid var(--qs-line);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.85rem 0.95rem;
+}
+
+.qsearch__trusted-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem 0.85rem;
+  margin-bottom: 0.7rem;
+}
+
+.qsearch__trusted-name-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.qsearch__trusted-name {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.qsearch__trusted-sync-one {
+  font-size: 0.72rem !important;
+  padding: 0.4rem 0.75rem !important;
+  box-shadow: none !important;
+}
+
+/* Health pills */
+.qsearch__health {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--qs-line);
+  color: var(--qs-muted);
+  white-space: nowrap;
+}
+
+.qsearch__health-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
+}
+
+.qsearch__health--green {
+  border-color: rgba(200, 250, 60, 0.5);
+  color: var(--qs-lime);
+  background: rgba(200, 250, 60, 0.08);
+}
+
+.qsearch__health--yellow {
+  border-color: rgba(255, 102, 0, 0.55);
+  color: var(--qs-orange);
+  background: rgba(255, 102, 0, 0.1);
+}
+
+.qsearch__health--red {
+  border-color: rgba(255, 0, 204, 0.5);
+  color: var(--qs-pink);
+  background: rgba(255, 0, 204, 0.08);
+}
+
+.qsearch__health--unknown {
+  border-color: rgba(25, 227, 255, 0.35);
+  color: var(--qs-cyan);
+  background: rgba(25, 227, 255, 0.06);
+}
+
+.qsearch__trusted-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.45rem 0.85rem;
+  margin: 0 0 0.65rem;
+}
+
+.qsearch__trusted-meta--wide {
+  grid-column: 1 / -1;
+}
+
+.qsearch__trusted-meta dt {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--qs-muted);
+  margin: 0 0 0.12rem;
+}
+
+.qsearch__trusted-meta dd {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.3;
+}
+
+.qsearch__trusted-mode {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  color: var(--qs-cyan);
+  background: rgba(25, 227, 255, 0.08);
+  border: 1px solid rgba(25, 227, 255, 0.2);
+  padding: 0.1rem 0.35rem;
+}
+
+.qsearch__trusted-ok {
+  color: var(--qs-lime);
+  font-size: 0.75rem;
+}
+
+.qsearch__trusted-fail {
+  color: var(--qs-pink);
+  font-size: 0.75rem;
+}
+
+.qsearch__trusted-err {
+  color: rgba(255, 160, 210, 0.95) !important;
+  font-size: 0.78rem !important;
+  word-break: break-word;
+}
+
+.qsearch__trusted-pub-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.qsearch__trusted-pub-when {
+  color: var(--qs-muted);
+  font-size: 0.78rem;
+}
+
+.qsearch__trusted-muted {
+  color: var(--qs-muted);
+}
+
+.qsearch__trusted-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.85rem;
+  font-size: 0.78rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.55rem;
+}
+
+.qsearch__trusted-link {
+  color: var(--qs-cyan);
+  text-decoration: none;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.qsearch__trusted-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.qsearch__trusted-link--muted {
+  color: var(--qs-muted);
+}
+
+.qsearch__trusted-notes {
+  color: var(--qs-muted);
+  font-size: 0.72rem;
+  max-width: 28rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qsearch__trusted-empty .qsearch__panel-title {
+  margin-bottom: 0.5rem;
+}

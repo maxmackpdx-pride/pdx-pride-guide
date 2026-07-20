@@ -4,6 +4,11 @@
  */
 import { parseJsonLdFromHtml } from "../server/ingest/parseJsonLd";
 import { parseIcs } from "../server/ingest/parseIcs";
+import {
+  expandBadlandsCalendarUrl,
+  looksLikeBadlandsJson,
+  parseBadlandsJson,
+} from "../server/ingest/parseBadlands";
 import { dayOfWeekFromStart, isPastEventListing, toPacificWallClock } from "../server/ingest/dates";
 import { commitIngest, isNonEventListing } from "../server/ingest";
 import { assessCatalogRecurring, buildScanCandidates } from "../server/qsearch/analyze";
@@ -74,6 +79,49 @@ assert(dayOfWeekFromStart(icsDrafts[0]!.dateStart) != null, "dayOfWeek derived")
 
 const wall = toPacificWallClock("2026-07-18T21:00:00Z");
 assert(!!wall && wall.includes("2026-07-1"), `UTC converts to Pacific: ${wall}`);
+
+const badlandsRaw = JSON.stringify({
+  events: [
+    {
+      id: "fp-1",
+      title: "Fresh Paint",
+      start: "2026-08-04T21:00:00-07:00",
+      end: "2026-08-05T02:00:00-07:00",
+      blurb: "Monday drag showcase.",
+      photoUrl: "https://example.com/fresh-paint.jpg",
+      link: "https://www.badlandsportland.com/calendar",
+      location: "Badlands",
+    },
+    {
+      title: "No Start Skip",
+      // missing start — should skip
+      blurb: "ignored",
+    },
+  ],
+});
+assert(looksLikeBadlandsJson(badlandsRaw), "looksLikeBadlandsJson true");
+const blDrafts = parseBadlandsJson(
+  badlandsRaw,
+  "https://badlands-events.badlandsportland.workers.dev/api/calendar",
+);
+assert(blDrafts.length === 1, "Badlands yields 1 (skips no-start)");
+assert(blDrafts[0]?.title === "Fresh Paint", "Badlands title");
+assert(blDrafts[0]?.venueName === "Badlands", "Badlands venue");
+assert(blDrafts[0]?.address === "110 NW Broadway, Portland, OR", "Badlands address");
+assert(blDrafts[0]?.neighborhood === "Old Town", "Badlands neighborhood");
+assert(blDrafts[0]?.posterImageUrl === "https://example.com/fresh-paint.jpg", "Badlands photoUrl");
+assert(blDrafts[0]?.parseSource === "badlands", "parseSource badlands");
+assert(blDrafts[0]?.dateStart.startsWith("2026-08-04T21:"), `Badlands start wall: ${blDrafts[0]?.dateStart}`);
+assert(dayOfWeekFromStart(blDrafts[0]!.dateStart) != null, "Badlands dayOfWeek");
+const expanded = expandBadlandsCalendarUrl(
+  "https://badlands-events.badlandsportland.workers.dev/api/calendar",
+);
+assert(/[?&]from=\d{4}-\d{2}-\d{2}/.test(expanded), `expand from: ${expanded}`);
+assert(/[?&]to=\d{4}-\d{2}-\d{2}/.test(expanded), `expand to: ${expanded}`);
+const already = expandBadlandsCalendarUrl(
+  "https://badlands-events.badlandsportland.workers.dev/api/calendar?from=2026-07-01&to=2026-07-31",
+);
+assert(already.includes("from=2026-07-01") && already.includes("to=2026-07-31"), "expand leaves existing window");
 
 let nextId = 9000;
 const created: Event[] = [];

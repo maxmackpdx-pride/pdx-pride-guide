@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import "./qsearch.css";
+import QSearchTrusted from "./QSearchTrusted";
 
 const DIRECTORY_TYPES = [
   "bar",
@@ -532,7 +533,7 @@ type ScanJobView = {
   kind?: string;
 };
 
-type Tab = "overview" | "venues" | "queue" | "assist";
+type Tab = "overview" | "trusted" | "venues" | "queue" | "assist";
 /** Which slice of data a hero-stat click should show in the tab below */
 type StatFocus = "scan-urls" | "directory" | "works" | "trouble" | "queue" | "new-links" | null;
 /** Sources tab: all, directory listings only, or general scrape only */
@@ -1446,7 +1447,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         <p className="qsearch__lede">
           <strong>Scan now</strong> pulls calendars into the Review queue. Use{" "}
           <strong>Add by hand</strong> only for a single flyer image or Instagram post that Scan
-          missed. Everything stages as <strong>HIDDEN</strong> — never auto-LIVE.
+          missed. Review stages as <strong>HIDDEN</strong>.{" "}
+          <strong>Trusted</strong> venues auto-publish without Review.
         </p>
 
         <div className="qsearch__stats" role="navigation" aria-label="QSearch stats shortcuts">
@@ -1640,6 +1642,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         {(
           [
             ["overview", "Health"],
+            ["trusted", "Trusted"],
             ["venues", `Sources (${venues.length})`],
             ["queue", `Review (${queueCandidates.length})`],
             ["assist", "Add by hand"],
@@ -1653,7 +1656,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             onClick={() => {
               setTab(id);
               // Manual tab pick clears stat filter except queue/sources still useful with focus
-              if (id === "assist") setStatFocus(null);
+              if (id === "assist" || id === "trusted") setStatFocus(null);
               if (id === "overview" && statFocus !== "trouble" && statFocus !== "new-links") {
                 setStatFocus(null);
               }
@@ -1667,6 +1670,15 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           </button>
         ))}
       </div>
+
+      {tab === "trusted" && (
+        <QSearchTrusted
+          onSynced={() => {
+            void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
+            onCommitted?.();
+          }}
+        />
+      )}
 
       {tab === "overview" && (
         <div>

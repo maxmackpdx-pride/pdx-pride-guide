@@ -8,6 +8,7 @@ import { parseIcs, looksLikeIcs } from "./parseIcs";
 import { parseJsonLdDocument, parseJsonLdFromHtml } from "./parseJsonLd";
 import { looksLikeSquarespaceJson, parseSquarespaceJson } from "./parseSquarespace";
 import { looksLikeTribeJson, parseTribeEventsJson } from "./parseTribe";
+import { looksLikeBadlandsJson, parseBadlandsJson } from "./parseBadlands";
 import { parseWarmupDataFromHtml } from "./parseWarmupData";
 import {
   enrichDraftPoster,
@@ -30,7 +31,16 @@ export type {
 
 export const INGEST_MAX_COMMIT = 40;
 
-type ParseSourceTag = "jsonld" | "ics" | "squarespace" | "tribe" | "wix" | "vision" | "caption" | "instagram";
+type ParseSourceTag =
+  | "jsonld"
+  | "ics"
+  | "squarespace"
+  | "tribe"
+  | "wix"
+  | "badlands"
+  | "vision"
+  | "caption"
+  | "instagram";
 
 /**
  * Venue status blurbs that calendars often publish as "events" but are not
@@ -166,6 +176,18 @@ function parseBody(
   }
 
   if (isJson && !isIcs) {
+    // Badlands worker JSON before Tribe/Squarespace — Tribe also keys on `.events[]`.
+    const badlandsUrl =
+      urlHint.includes("badlandsportland.workers.dev") ||
+      urlHint.includes("badlands-api") ||
+      urlHint.includes("badlands-events");
+    if (looksLikeBadlandsJson(trimmed) || badlandsUrl) {
+      const bl = parseBadlandsJson(trimmed, sourceUrl);
+      if (bl.length) {
+        parts.push(bl);
+        parseSources.push("badlands");
+      }
+    }
     if (looksLikeTribeJson(trimmed) || urlHint.includes("/tribe/events/v1/")) {
       const tribe = parseTribeEventsJson(trimmed, sourceUrl);
       if (tribe.length) {
@@ -211,7 +233,7 @@ function parseBody(
   const drafts = mergeDrafts(parts);
   if (!drafts.length) {
     warnings.push(
-      "No events found. Need JSON-LD Event, ICS, Squarespace ?format=json, Tribe REST, or Wix warmupData.",
+      "No events found. Need JSON-LD Event, ICS, Squarespace ?format=json, Tribe REST, Badlands calendar API, or Wix warmupData.",
     );
   }
   return { drafts, parseSources, warnings };

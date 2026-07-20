@@ -168,7 +168,8 @@ export const INGEST_SOURCES: IngestSource[] = [
     tier: "1",
     format: "ics",
     priority: true,
-    notes: "Best structured Sanctuary feed; sparse flyers",
+    notes:
+      "Dedicated adapter: ICS structure + per-event page flyers (budget 80) + series flyer reuse; venue forced to Sanctuary Club / Pearl",
   },
   {
     id: "darcelle-tribe",
@@ -229,7 +230,8 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://badlands-events.badlandsportland.workers.dev/api/calendar",
     tier: "1",
     format: "unknown",
-    notes: "GET ?from=YYYY-MM-DD&to=YYYY-MM-DD → events[{title,start,end,photoUrl,blurb}]. photoUrl is full flyer. Browser UA.",
+    notes:
+      "Worker JSON parseSource=badlands. photoUrl→flyer. Scan auto-expands ?from=today&to=+60d Pacific when missing. Browser UA.",
     priority: true,
   },
   {

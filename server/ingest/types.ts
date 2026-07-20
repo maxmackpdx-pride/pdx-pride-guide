@@ -7,6 +7,7 @@ export type IngestParseSource =
   | "squarespace"
   | "tribe"
   | "wix"
+  | "badlands"
   | "vision"
   | "caption"
   | "instagram";

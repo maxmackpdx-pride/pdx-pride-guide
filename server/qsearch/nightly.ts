@@ -2,6 +2,9 @@
  * Nightly QSearch scan — ~3am America/Los_Angeles.
  * Lands candidates in review queue (pending), never LIVE.
  *
+ * Trusted venue auto-publish sync also runs once per day at 3am Pacific
+ * (fire-and-forget after scan start; requires Agent C trustedSync.ts).
+ *
  * Enable: QSEARCH_NIGHTLY=1 (or production default on)
  * Disable: QSEARCH_NIGHTLY=0
  *
@@ -15,6 +18,8 @@ import { recoverOrphanScans } from "./scanJob";
 const CHECK_MS = 60_000;
 let started = false;
 let lastNightlyKey: string | null = null;
+/** YYYY-MM-DD Pacific day we last fired trusted auto-sync */
+let lastTrustedSyncKey: string | null = null;
 
 function pacificNowParts(d = new Date()) {
   const fmt = new Intl.DateTimeFormat("en-US", {
@@ -57,11 +62,50 @@ export function startQSearchNightly() {
   );
 }
 
+/** Fire-and-forget trusted venue auto-publish (once per Pacific day). */
+function fireTrustedSync(dayKey: string) {
+  if (lastTrustedSyncKey === dayKey) return;
+  lastTrustedSyncKey = dayKey;
+  console.log(`[qsearch-nightly] starting trusted venue sync for ${dayKey}`);
+  void import("./trustedSync")
+    .then(mod => {
+      const fn = mod.syncAllTrustedVenues as (() => Promise<unknown>) | undefined;
+      if (typeof fn !== "function") {
+        console.warn(
+          "[qsearch-nightly] trustedSync.syncAllTrustedVenues missing — skip until Agent C ships",
+        );
+        return;
+      }
+      return fn().then(
+        result => console.log("[qsearch-nightly] trusted sync done:", result),
+        err => console.error("[qsearch-nightly] trusted sync failed:", err),
+      );
+    })
+    .catch(err => {
+      const msg = String(err?.message || err);
+      if (
+        msg.includes("Cannot find module") ||
+        err?.code === "ERR_MODULE_NOT_FOUND" ||
+        err?.code === "MODULE_NOT_FOUND"
+      ) {
+        console.warn(
+          "[qsearch-nightly] trustedSync.ts not present yet (Agent C) — health store still works",
+        );
+        return;
+      }
+      console.error("[qsearch-nightly] trusted sync import failed:", err);
+    });
+}
+
 async function tick() {
   if (!nightlyEnabled()) return;
   const { key, hour } = pacificNowParts();
   // Run once in the 3am hour Pacific
   if (hour !== 3) return;
+
+  // Trusted auto-publish: same 3am window, independent of scan success
+  fireTrustedSync(key);
+
   if (lastNightlyKey === key) return;
 
   // Avoid double-run if last job was nightly today
