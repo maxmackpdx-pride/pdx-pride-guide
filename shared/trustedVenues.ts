@@ -1,8 +1,7 @@
 /**
- * Trusted venue calendars — auto-publish path + QSearch "Trusted" health board.
+ * Trusted venue calendars — QSearch "Trusted" health board + dedicated adapters.
  *
- * These sources are first-party venue feeds we trust enough to publish without
- * human review (still dedupe + never overwrite hand-edited events lightly).
+ * Manual Sync now / Sync all → Review queue (admin approves LIVE or HIDDEN).
  * Keep this list small and intentional.
  */
 
@@ -22,7 +21,7 @@ export type TrustedVenueDef = {
   feedUrl: string;
   /** Human calendar page for admins */
   calendarPageUrl: string;
-  /** Auto-publish as LIVE (vs HIDDEN) */
+  /** Preferred status when approving from Review (or rare publish-mode automation) */
   publishStatus: "LIVE" | "HIDDEN";
   /** Hours between trusted sync runs */
   pollHours: number;

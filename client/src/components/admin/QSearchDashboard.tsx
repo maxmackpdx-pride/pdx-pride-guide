@@ -1448,7 +1448,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           <strong>Scan now</strong> pulls calendars into the Review queue. Use{" "}
           <strong>Add by hand</strong> only for a single flyer image or Instagram post that Scan
           missed. Review stages as <strong>HIDDEN</strong>.{" "}
-          <strong>Trusted</strong> venues auto-publish without Review.
+          <strong>Trusted</strong> Sync also lands in Review first.
         </p>
 
         <div className="qsearch__stats" role="navigation" aria-label="QSearch stats shortcuts">

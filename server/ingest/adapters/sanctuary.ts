@@ -20,6 +20,14 @@ const SANCTUARY_VENUE = "Sanctuary Club";
 const SANCTUARY_ADDRESS = "33 NW 9th Ave, Portland, OR 97209";
 const SANCTUARY_NEIGHBORHOOD = "Pearl District";
 
+/**
+ * Schema ageRequirement enum is ALL_AGES | 18_PLUS | 21_PLUS (underscore form).
+ * Sanctuary is a 21+ sex club — never 18+ / ALL_AGES.
+ */
+export const SANCTUARY_AGE_REQUIREMENT = "21_PLUS" as const;
+/** JSON tags stored in eventTypes (see shared/eventTypeTags SEX_POSITIVE / NUDITY_OK). */
+const SANCTUARY_EVENT_TYPE_TAGS = ["SEX_POSITIVE", "NUDITY_OK", "KINK"] as const;
+
 const DEFAULT_FEED =
   getTrustedVenue("sanctuary-ics")?.feedUrl ||
   "https://pdxsanctuary.com/events/calendar/sanctuary/ics/";
@@ -92,6 +100,45 @@ export function applySanctuaryVenue(draft: IngestEventDraft): IngestEventDraft {
     venueName,
     address,
     neighborhood,
+    warnings: Array.from(new Set(warnings)),
+  };
+}
+
+function parseEventTypesJson(raw: string | null | undefined): string[] {
+  try {
+    const parsed = JSON.parse(raw || "[]");
+    return Array.isArray(parsed) ? parsed.map(t => String(t)).filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Stamp every Sanctuary draft as 21+ sex-positive (sex club policy).
+ * ageRequirement must be schema enum "21_PLUS" — not "21+" or "18+".
+ */
+export function applySanctuaryPolicy(draft: IngestEventDraft): IngestEventDraft {
+  const tags = parseEventTypesJson(draft.eventTypes);
+  const upper = new Set(tags.map(t => t.trim().toUpperCase().replace(/[\s-]+/g, "_")));
+  for (const t of SANCTUARY_EVENT_TYPE_TAGS) {
+    if (!upper.has(t)) {
+      tags.push(t);
+      upper.add(t);
+    }
+  }
+  const warnings = [...(draft.warnings || [])];
+  if (draft.ageRequirement !== SANCTUARY_AGE_REQUIREMENT) {
+    warnings.push("Age set to 21_PLUS (Sanctuary is 21+ only)");
+  }
+  if (!draft.isSexPositive || !draft.nudityOk) {
+    warnings.push("Sex-positive + nudity flags set for Sanctuary sex club");
+  }
+  return {
+    ...draft,
+    ageRequirement: SANCTUARY_AGE_REQUIREMENT,
+    isSexPositive: true,
+    nudityOk: true,
+    eventTypes: JSON.stringify(tags),
     warnings: Array.from(new Set(warnings)),
   };
 }
@@ -196,6 +243,8 @@ export async function fetchSanctuaryDrafts(
   // Series reuse fills null/logo gaps from sibling occurrences with real art
   enriched = applySeriesFlyerReuse(enriched);
   enriched = enriched.map(applySanctuaryVenue);
+  // 21+ sex club policy — always, before auto-LIVE or review queue
+  enriched = enriched.map(applySanctuaryPolicy);
 
   // Re-check past after page may have refined dates
   if (!opts?.includePast) {

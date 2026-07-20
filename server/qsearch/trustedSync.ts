@@ -1,14 +1,11 @@
 /**
- * Trusted venue auto-publish pipeline (no QSearch review queue).
+ * Trusted venue sync pipeline.
  *
- * Agent C surface — import registry + parsers + commitIngest only.
- * Agent D health: dynamic import of `./trustedHealth.recordTrustedSyncResult`.
- *
- * Call sites (Agent D routes / nightly):
- *   await syncTrustedVenue("badlands-api")
- *   await syncAllTrustedVenues()
+ * Manual Sync (admin Trusted tab) → QSearch Review queue (no auto-LIVE).
+ * Optional mode "publish" → commit LIVE (nightly / future automation only).
  */
 
+import { randomUUID } from "node:crypto";
 import {
   TRUSTED_VENUES,
   getTrustedVenue,
@@ -26,20 +23,70 @@ import {
   expandBadlandsCalendarUrl,
   parseBadlandsJson,
 } from "../ingest/parseBadlands";
-import { fetchSanctuaryDrafts } from "../ingest/adapters/sanctuary";
+import {
+  applySanctuaryPolicy,
+  fetchSanctuaryDrafts,
+  SANCTUARY_AGE_REQUIREMENT,
+} from "../ingest/adapters/sanctuary";
 import type { IngestEventDraft } from "../ingest/types";
 import { storage } from "../storage";
+import { buildScanCandidates } from "./analyze";
 import { discoverAndParse } from "./discover";
+import { insertScanJob, saveCandidates } from "./store";
+
+/** Belt-and-suspenders: Sanctuary createEvent must never land as ALL_AGES / 18+. */
+function enforceSanctuaryCreateFields(data: InsertEvent): InsertEvent {
+  let eventTypes = data.eventTypes || "[]";
+  try {
+    const tags = Array.isArray(JSON.parse(eventTypes))
+      ? (JSON.parse(eventTypes) as unknown[]).map(t => String(t))
+      : [];
+    const upper = new Set(tags.map(t => t.trim().toUpperCase().replace(/[\s-]+/g, "_")));
+    for (const t of ["SEX_POSITIVE", "NUDITY_OK", "KINK"] as const) {
+      if (!upper.has(t)) {
+        tags.push(t);
+        upper.add(t);
+      }
+    }
+    eventTypes = JSON.stringify(tags);
+  } catch {
+    eventTypes = JSON.stringify(["SEX_POSITIVE", "NUDITY_OK", "KINK"]);
+  }
+  return {
+    ...data,
+    ageRequirement: SANCTUARY_AGE_REQUIREMENT,
+    isSexPositive: true,
+    nudityOk: true,
+    eventTypes,
+  };
+}
+
+export type TrustedSyncMode = "review" | "publish";
 
 export type TrustedSyncResult = {
   sourceId: string;
   venueName: string;
   ok: boolean;
   error?: string;
+  /** How this run finished events */
+  mode: TrustedSyncMode;
   fetched: number;
+  /** LIVE events created (publish mode only) */
   created: Array<{ id: number; title: string }>;
+  /** Review-queue candidate count (review mode) */
+  queued: number;
+  /** Scan job id when mode=review */
+  jobId: string | null;
   skipped: Array<{ title: string; reason: string }>;
   lastPublishedAt: string | null;
+};
+
+export type TrustedSyncOpts = {
+  /**
+   * review (default) — land drafts in QSearch Review for admin approve.
+   * publish — commit LIVE without review (nightly automation only).
+   */
+  mode?: TrustedSyncMode;
 };
 
 function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): IngestEventDraft {
@@ -47,10 +94,9 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
     !draft.venueName ||
     draft.venueName === "TBA" ||
     /^(unknown|tbd|n\/a)$/i.test(draft.venueName.trim()) ||
-    // ICS often puts street address in LOCATION → first segment looks like address
     /^\d+\s/.test(draft.venueName.trim());
 
-  return {
+  let next: IngestEventDraft = {
     ...draft,
     venueName: weakVenue ? venue.venueName : draft.venueName,
     address: draft.address?.trim() ? draft.address : venue.address,
@@ -58,11 +104,14 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
       ? draft.neighborhood
       : venue.neighborhood ?? null,
   };
+
+  if (venue.sourceId === "sanctuary-ics" || venue.fetchMode === "sanctuary_ics") {
+    next = applySanctuaryPolicy(next);
+  }
+
+  return next;
 }
 
-/**
- * Drop past / non-events / empty rows; fill venue defaults; de-dupe within batch.
- */
 function prepareDrafts(raw: IngestEventDraft[], venue: TrustedVenueDef): IngestEventDraft[] {
   const out: IngestEventDraft[] = [];
   const seen = new Set<string>();
@@ -123,13 +172,6 @@ async function fetchDraftsForVenue(
   }
 }
 
-/**
- * Hook Agent D health store. Uses dynamic import so this module still loads if
- * trustedHealth is briefly absent; prefers static-compatible call shape.
- *
- * recordTrustedSyncResult input (Agent D):
- *   { sourceId, ok, error?, eventCount, created?, lastPublishedAt? }
- */
 async function recordHealth(input: {
   sourceId: string;
   ok: boolean;
@@ -151,20 +193,157 @@ async function recordHealth(input: {
       });
     }
   } catch {
-    // Agent D not ready — no-op
+    /* health store optional */
   }
 }
 
 /**
- * Sync one trusted venue: fetch → filter past → dedupe → commit as LIVE (or registry status).
- *
- * Dedupe rules (via commitIngest skipDuplicates:true):
- * - findSubmissionMatches against full catalog (title + day + venue / ticket URL, etc.)
- * - strong (high-confidence) matches are skipped (LIVE or HIDDEN)
- * - within-batch duplicates caught by refreshing catalog after each create chunk
- * - never creates past events (pre-filtered)
+ * Queue drafts into QSearch Review (pending). Admin approves → HIDDEN or LIVE.
  */
-export async function syncTrustedVenue(sourceId: string): Promise<TrustedSyncResult> {
+function queueDraftsForReview(
+  venue: TrustedVenueDef,
+  drafts: IngestEventDraft[],
+  existingEvents: Event[],
+): { jobId: string; queued: number; skipped: Array<{ title: string; reason: string }> } {
+  const businesses = storage.getBusinesses({});
+  const candidates = buildScanCandidates(
+    drafts.map(draft => ({
+      draft,
+      sourceId: venue.sourceId,
+      sourceLabel: `Trusted · ${venue.venueName}`,
+      sourceUrl: venue.feedUrl || venue.calendarPageUrl,
+    })),
+    existingEvents,
+    businesses,
+  );
+
+  const skipped: Array<{ title: string; reason: string }> = [];
+  // Pre-select all; strong dups still show in Review for human decision
+  for (const c of candidates) {
+    if (c.strongDuplicate) {
+      // Keep visible but unselected so approve won't double-publish by default
+      c.selected = false;
+      skipped.push({
+        title: c.draft.title,
+        reason: `Possible duplicate of #${c.strongDuplicate.eventId} (unselected)`,
+      });
+    }
+  }
+
+  const jobId = `trusted-review-${venue.sourceId}-${randomUUID().slice(0, 8)}`;
+  insertScanJob({
+    id: jobId,
+    status: "done",
+    startedAt: new Date().toISOString(),
+    finishedAt: new Date().toISOString(),
+    total: 1,
+    completed: 1,
+    currentSourceId: venue.sourceId,
+    currentLabel: `Trusted · ${venue.venueName}`,
+    etaSeconds: 0,
+    error: null,
+    avgMs: 0,
+    filterJson: JSON.stringify({ kind: "trusted_review", sourceId: venue.sourceId }),
+    perSourceJson: JSON.stringify([
+      {
+        sourceId: venue.sourceId,
+        label: venue.venueName,
+        url: venue.feedUrl,
+        ok: true,
+        eventCount: candidates.length,
+        error: null,
+        ms: 0,
+      },
+    ]),
+    kind: "trusted_manual",
+  });
+
+  saveCandidates(
+    jobId,
+    candidates.map(c => ({
+      id: c.id,
+      sourceId: c.sourceId,
+      sourceLabel: c.sourceLabel,
+      sourceUrl: c.sourceUrl,
+      draft: c.draft,
+      selected: c.selected,
+      recurring: c.recurring,
+      recurringCount: c.recurringCount,
+      condensed: c.condensed,
+      conflicts: c.conflicts,
+      duplicates: c.duplicates,
+      strongDuplicate: c.strongDuplicate,
+      directoryBrands: c.directoryBrands,
+      sourceBundle: c.sourceBundle,
+      fieldConflicts: c.fieldConflicts,
+    })),
+  );
+
+  return { jobId, queued: candidates.length, skipped };
+}
+
+async function publishDraftsLive(
+  venue: TrustedVenueDef,
+  drafts: IngestEventDraft[],
+  existingEvents: Event[],
+): Promise<{
+  created: Array<{ id: number; title: string }>;
+  skipped: Array<{ title: string; reason: string }>;
+  error?: string;
+}> {
+  const status = venue.publishStatus === "LIVE" ? "LIVE" : "HIDDEN";
+  let catalog = existingEvents;
+  const created: Array<{ id: number; title: string }> = [];
+  const skipped: Array<{ title: string; reason: string }> = [];
+
+  for (let i = 0; i < drafts.length; i += INGEST_MAX_COMMIT) {
+    const chunk = drafts.slice(i, i + INGEST_MAX_COMMIT);
+    const result = await commitIngest({
+      items: chunk.map(draft => ({ draft })),
+      status,
+      skipDuplicates: true,
+      existingEvents: catalog,
+      createEvent: (data: InsertEvent) => {
+        const isSanctuary =
+          venue.sourceId === "sanctuary-ics" || venue.fetchMode === "sanctuary_ics";
+        const stamped = isSanctuary ? enforceSanctuaryCreateFields(data) : data;
+        return storage.createEvent({
+          ...stamped,
+          status,
+          source: `trusted:${venue.sourceId}`,
+          adminNotes: [
+            stamped.adminNotes,
+            `Trusted auto-publish · ${venue.venueName} · ${venue.sourceId}`,
+            isSanctuary ? "Policy: 21_PLUS · sex-positive · nudity OK" : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+            .slice(0, 1000),
+        });
+      },
+    });
+
+    if (!result.ok) {
+      return { created, skipped, error: result.error };
+    }
+    for (const c of result.created) created.push({ id: c.id, title: c.title });
+    for (const s of result.skipped) skipped.push({ title: s.title, reason: s.reason });
+    if (result.created.length) catalog = storage.getEvents({});
+  }
+
+  return { created, skipped };
+}
+
+/**
+ * Sync one trusted venue.
+ * Default mode **review** — queues for QSearch Review (manual Sync now).
+ * Pass mode **publish** only for automated LIVE commit (nightly).
+ */
+export async function syncTrustedVenue(
+  sourceId: string,
+  opts?: TrustedSyncOpts,
+): Promise<TrustedSyncResult> {
+  const mode: TrustedSyncMode = opts?.mode === "publish" ? "publish" : "review";
   const venue = getTrustedVenue(sourceId);
   if (!venue) {
     return {
@@ -172,8 +351,11 @@ export async function syncTrustedVenue(sourceId: string): Promise<TrustedSyncRes
       venueName: sourceId,
       ok: false,
       error: `Unknown trusted sourceId: ${sourceId}`,
+      mode,
       fetched: 0,
       created: [],
+      queued: 0,
+      jobId: null,
       skipped: [],
       lastPublishedAt: null,
     };
@@ -183,8 +365,11 @@ export async function syncTrustedVenue(sourceId: string): Promise<TrustedSyncRes
     sourceId: venue.sourceId,
     venueName: venue.venueName,
     ok: false,
+    mode,
     fetched: 0,
     created: [],
+    queued: 0,
+    jobId: null,
     skipped: [],
     lastPublishedAt: null,
   };
@@ -208,76 +393,54 @@ export async function syncTrustedVenue(sourceId: string): Promise<TrustedSyncRes
       return base;
     }
 
-    const status = venue.publishStatus === "LIVE" ? "LIVE" : "HIDDEN";
-    let catalog = existingEvents;
-    const created: TrustedSyncResult["created"] = [];
-    const skipped: TrustedSyncResult["skipped"] = [];
-
-    for (let i = 0; i < drafts.length; i += INGEST_MAX_COMMIT) {
-      const chunk = drafts.slice(i, i + INGEST_MAX_COMMIT);
-      const result = await commitIngest({
-        items: chunk.map(draft => ({ draft })),
-        status,
-        skipDuplicates: true,
-        existingEvents: catalog,
-        createEvent: (data: InsertEvent) =>
-          storage.createEvent({
-            ...data,
-            status,
-            source: `trusted:${venue.sourceId}`,
-            adminNotes: [
-              data.adminNotes,
-              `Trusted auto-publish · ${venue.venueName} · ${venue.sourceId}`,
-            ]
-              .filter(Boolean)
-              .join(" · ")
-              .slice(0, 1000),
-          }),
+    if (mode === "review") {
+      const { jobId, queued, skipped } = queueDraftsForReview(venue, drafts, existingEvents);
+      base.ok = true;
+      base.jobId = jobId;
+      base.queued = queued;
+      base.skipped = skipped;
+      // Health: feed worked; no LIVE publish on review path
+      await recordHealth({
+        sourceId: venue.sourceId,
+        ok: true,
+        error: null,
+        eventCount: drafts.length,
+        created: [],
+        lastPublishedAt: null,
       });
-
-      if (!result.ok) {
-        base.error = result.error;
-        base.created = created;
-        base.skipped = skipped;
-        await recordHealth({
-          sourceId: venue.sourceId,
-          ok: false,
-          error: result.error,
-          eventCount: base.fetched,
-          created,
-          lastPublishedAt: null,
-        });
-        return base;
-      }
-
-      for (const c of result.created) {
-        created.push({ id: c.id, title: c.title });
-      }
-      for (const s of result.skipped) {
-        skipped.push({ title: s.title, reason: s.reason });
-      }
-
-      // Refresh catalog so next chunk / within-run dups see new rows
-      if (result.created.length) {
-        catalog = storage.getEvents({});
-      }
+      return base;
     }
 
-    const publishedAt = created.length ? new Date().toISOString() : null;
-    base.ok = true;
-    base.created = created;
-    base.skipped = skipped;
-    base.lastPublishedAt = publishedAt;
+    // ── publish mode (nightly / explicit) ──
+    const pub = await publishDraftsLive(venue, drafts, existingEvents);
+    if (pub.error) {
+      base.error = pub.error;
+      base.created = pub.created;
+      base.skipped = pub.skipped;
+      await recordHealth({
+        sourceId: venue.sourceId,
+        ok: false,
+        error: pub.error,
+        eventCount: base.fetched,
+        created: pub.created,
+        lastPublishedAt: null,
+      });
+      return base;
+    }
 
+    const publishedAt = pub.created.length ? new Date().toISOString() : null;
+    base.ok = true;
+    base.created = pub.created;
+    base.skipped = pub.skipped;
+    base.lastPublishedAt = publishedAt;
     await recordHealth({
       sourceId: venue.sourceId,
       ok: true,
       error: null,
       eventCount: base.fetched,
-      created,
+      created: pub.created,
       lastPublishedAt: publishedAt,
     });
-
     return base;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -295,11 +458,13 @@ export async function syncTrustedVenue(sourceId: string): Promise<TrustedSyncRes
   }
 }
 
-/** Sync every entry in TRUSTED_VENUES (sequential — polite to venue hosts). */
-export async function syncAllTrustedVenues(): Promise<TrustedSyncResult[]> {
+/** Sync every trusted venue (sequential). Defaults to review mode. */
+export async function syncAllTrustedVenues(
+  opts?: TrustedSyncOpts,
+): Promise<TrustedSyncResult[]> {
   const results: TrustedSyncResult[] = [];
   for (const v of TRUSTED_VENUES) {
-    results.push(await syncTrustedVenue(v.sourceId));
+    results.push(await syncTrustedVenue(v.sourceId, opts));
   }
   return results;
 }

@@ -62,37 +62,26 @@ export function startQSearchNightly() {
   );
 }
 
-/** Fire-and-forget trusted venue auto-publish (once per Pacific day). */
+/**
+ * Fire-and-forget trusted venue pull (once per Pacific day).
+ * Queues into Review (same as manual) — never auto-LIVE at night.
+ */
 function fireTrustedSync(dayKey: string) {
   if (lastTrustedSyncKey === dayKey) return;
   lastTrustedSyncKey = dayKey;
-  console.log(`[qsearch-nightly] starting trusted venue sync for ${dayKey}`);
+  console.log(`[qsearch-nightly] starting trusted venue review-sync for ${dayKey}`);
   void import("./trustedSync")
     .then(mod => {
-      const fn = mod.syncAllTrustedVenues as (() => Promise<unknown>) | undefined;
-      if (typeof fn !== "function") {
-        console.warn(
-          "[qsearch-nightly] trustedSync.syncAllTrustedVenues missing — skip until Agent C ships",
-        );
+      if (typeof mod.syncAllTrustedVenues !== "function") {
+        console.warn("[qsearch-nightly] trustedSync.syncAllTrustedVenues missing — skip");
         return;
       }
-      return fn().then(
-        result => console.log("[qsearch-nightly] trusted sync done:", result),
+      return mod.syncAllTrustedVenues({ mode: "review" }).then(
+        result => console.log("[qsearch-nightly] trusted review-sync done:", result),
         err => console.error("[qsearch-nightly] trusted sync failed:", err),
       );
     })
     .catch(err => {
-      const msg = String(err?.message || err);
-      if (
-        msg.includes("Cannot find module") ||
-        err?.code === "ERR_MODULE_NOT_FOUND" ||
-        err?.code === "MODULE_NOT_FOUND"
-      ) {
-        console.warn(
-          "[qsearch-nightly] trustedSync.ts not present yet (Agent C) — health store still works",
-        );
-        return;
-      }
       console.error("[qsearch-nightly] trusted sync import failed:", err);
     });
 }

@@ -60,6 +60,30 @@ function weekendDates(nowMs: number): Set<string> {
   const friMs = noonMs - backToFri * 86400000;
   return new Set([0, 1, 2].map(i => pacDate(friMs + i * 86400000)));
 }
+
+/**
+ * Pacific Mon–Sun calendar week as YYYY-MM-DD set.
+ * weekOffset 0 = week containing today, 1 = next week, -1 = previous, …
+ */
+function weekDates(nowMs: number, weekOffset = 0): Set<string> {
+  const today = pacificTodayDate(nowMs);
+  const noonMs = parsePacificDateTime(`${today}T12:00:00`) ?? nowMs;
+  const dow = pacWeekday(noonMs); // 0=Sun … 6=Sat
+  // Days since Monday (Mon=0 … Sun=6)
+  const daysSinceMon = dow === 0 ? 6 : dow - 1;
+  const thisMonMs = noonMs - daysSinceMon * 86400000;
+  const monMs = thisMonMs + weekOffset * 7 * 86400000;
+  return new Set([0, 1, 2, 3, 4, 5, 6].map(i => pacDate(monMs + i * 86400000)));
+}
+
+/** True if any pool event falls on a date in `dates`. */
+function poolHitsDates(pool: EventListing[], dates: Set<string>): boolean {
+  return pool.some(e => {
+    const d = pacificCalendarDate(e.dateStart);
+    return d != null && dates.has(d);
+  });
+}
+
 /** "AUG" (or "AUG '27" when not the current Pacific year) for a YYYY-MM key. */
 function monthChipLabel(monthKey: string, nowMs: number): string {
   const ms = parsePacificDateTime(`${monthKey}-01T12:00:00`);
@@ -70,19 +94,45 @@ function monthChipLabel(monthKey: string, nowMs: number): string {
   return year === curYear ? mon : `${mon} '${year.slice(2)}`;
 }
 
-const EMPTY_WEEKEND = new Set<string>();
+const EMPTY_DATES = new Set<string>();
 
 type DayChip = { key: string; label: string };
+
+type DateWindows = {
+  weekend: Set<string>;
+  thisWeek: Set<string>;
+  nextWeek: Set<string>;
+};
+
+function buildDateWindows(nowMs: number): DateWindows {
+  return {
+    weekend: weekendDates(nowMs),
+    thisWeek: weekDates(nowMs, 0),
+    nextWeek: weekDates(nowMs, 1),
+  };
+}
 
 /** Date-window filter chips derived from the events in view (year-round). */
 function buildDayChips(pool: EventListing[], pastView: boolean, nowMs: number): DayChip[] {
   const chips: DayChip[] = [{ key: "ALL", label: "All" }];
-  const weekend = weekendDates(nowMs);
-  if (!pastView && pool.some(e => { const d = pacificCalendarDate(e.dateStart); return d != null && weekend.has(d); })) {
+  const { weekend, thisWeek, nextWeek } = buildDateWindows(nowMs);
+
+  // Week windows first — quick “what’s on now / coming up”
+  if (poolHitsDates(pool, thisWeek)) {
+    chips.push({ key: "THIS_WEEK", label: "This week" });
+  }
+  if (poolHitsDates(pool, nextWeek)) {
+    chips.push({ key: "NEXT_WEEK", label: "Next week" });
+  }
+  if (!pastView && poolHitsDates(pool, weekend)) {
     chips.push({ key: "WEEKEND", label: "This weekend" });
   }
+
   const months = new Set<string>();
-  for (const e of pool) { const d = pacificCalendarDate(e.dateStart); if (d) months.add(d.slice(0, 7)); }
+  for (const e of pool) {
+    const d = pacificCalendarDate(e.dateStart);
+    if (d) months.add(d.slice(0, 7));
+  }
   const sorted = Array.from(months).sort();
   if (pastView) sorted.reverse();
   for (const m of sorted) chips.push({ key: m, label: monthChipLabel(m, nowMs) });
@@ -95,15 +145,20 @@ const WINDOW_PALETTE = [
 ];
 function windowAccent(key: string, i: number): string {
   if (key === "ALL") return "var(--neon-cyan)";
+  if (key === "THIS_WEEK") return "var(--neon-green)";
+  if (key === "NEXT_WEEK") return "var(--neon-cyan)";
   if (key === "WEEKEND") return "var(--neon-magenta)";
   return WINDOW_PALETTE[i % WINDOW_PALETTE.length];
 }
-/** True when event `e` falls inside the selected date window (ALL/WEEKEND/YYYY-MM). */
-function eventInWindow(e: EventListing, window: string, weekend: Set<string>): boolean {
+
+/** True when event `e` falls inside the selected date window. */
+function eventInWindow(e: EventListing, window: string, windows: DateWindows): boolean {
   if (window === "ALL") return true;
   const d = pacificCalendarDate(e.dateStart);
   if (!d) return false;
-  if (window === "WEEKEND") return weekend.has(d);
+  if (window === "THIS_WEEK") return windows.thisWeek.has(d);
+  if (window === "NEXT_WEEK") return windows.nextWeek.has(d);
+  if (window === "WEEKEND") return windows.weekend.has(d);
   return d.startsWith(window); // month key YYYY-MM
 }
 
@@ -168,13 +223,16 @@ function filterBoardEvents(
   pastView: boolean,
   nowMs: number,
 ) {
-  const weekend = activeDay === "WEEKEND" ? weekendDates(nowMs) : EMPTY_WEEKEND;
+  const windows =
+    activeDay === "WEEKEND" || activeDay === "THIS_WEEK" || activeDay === "NEXT_WEEK"
+      ? buildDateWindows(nowMs)
+      : { weekend: EMPTY_DATES, thisWeek: EMPTY_DATES, nextWeek: EMPTY_DATES };
   return events
     .filter(e => {
       // Live board = upcoming + happening now. Past board = ended only.
       const past = isPastListing(e);
       if (pastView ? !past : past) return false;
-      if (!eventInWindow(e, activeDay, weekend)) return false;
+      if (!eventInWindow(e, activeDay, windows)) return false;
       if (activeFilters.length > 0) {
         const admissionFilters = activeFilters
           .map(admissionFromFilterTag)
@@ -367,7 +425,7 @@ export default function Events() {
   const pastEvents = useMemo(() => events.filter(isPastListing), [events]);
   const poolEvents = pastView ? pastEvents : liveEvents;
 
-  // Date-window filter chips (All / This weekend / by month), derived from the events in view.
+  // Date-window chips: All / This week / Next week / This weekend / months
   const dayChips = useMemo(() => buildDayChips(poolEvents, pastView, Date.now()), [poolEvents, pastView]);
   const activeChipLabel = dayChips.find(c => c.key === activeDay)?.label ?? null;
   // If the selected window no longer exists in the pool (e.g. after toggling Past), fall back to All.

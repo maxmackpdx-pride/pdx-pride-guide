@@ -4817,9 +4817,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   /**
-   * Trusted venues health board (auto-publish path).
-   * GET  → registry + qsearch_trusted_health + derived green/yellow/red
-   * POST → run one or all trusted syncs (Agent C: trustedSync.ts)
+   * Trusted venues health board.
+   * GET  → registry + health
+   * POST → manual sync defaults to Review queue (mode=review). Never LIVE from admin button.
    */
   app.get("/api/admin/qsearch/trusted", requireAdmin, (_req, res) => {
     res.json(getTrustedDashboard());
@@ -4832,35 +4832,53 @@ export function registerRoutes(httpServer: Server, app: Express) {
   ) {
     try {
       const mod = await import("./qsearch/trustedSync");
-      const syncOne = mod.syncTrustedVenue as
-        | ((id: string) => Promise<unknown>)
-        | undefined;
-      const syncAll = mod.syncAllTrustedVenues as
-        | (() => Promise<unknown>)
-        | undefined;
+      // Admin manual sync always goes to Review — ignore body.mode=publish
+      const syncOpts = { mode: "review" as const };
 
       if (sourceId) {
-        if (typeof syncOne !== "function") {
+        if (typeof mod.syncTrustedVenue !== "function") {
           return res.status(503).json({ error: "Trusted sync is unavailable" });
         }
-        const result = await syncOne(sourceId);
+        const result = await mod.syncTrustedVenue(sourceId, syncOpts);
         auditAdmin(req, "qsearch_trusted_sync", {
           type: "qsearch_trusted",
           id: sourceId,
-          detail: { scope: "one", result },
+          detail: { scope: "one", mode: "review", result },
         });
-        return res.json({ ok: true, sourceId, result });
+        const queued = Number((result as any)?.queued || 0);
+        return res.json({
+          ok: true,
+          sourceId,
+          mode: "review",
+          queued,
+          result,
+          message:
+            queued > 0
+              ? `${queued} candidate${queued === 1 ? "" : "s"} sent to Review — approve to publish`
+              : "Sync finished — nothing new for Review",
+        });
       }
 
-      if (typeof syncAll !== "function") {
+      if (typeof mod.syncAllTrustedVenues !== "function") {
         return res.status(503).json({ error: "Trusted sync is unavailable" });
       }
-      const result = await syncAll();
+      const results = await mod.syncAllTrustedVenues(syncOpts);
+      const queued = results.reduce((n, r) => n + (Number(r.queued) || 0), 0);
       auditAdmin(req, "qsearch_trusted_sync", {
         type: "qsearch_trusted",
-        detail: { scope: "all", result },
+        detail: { scope: "all", mode: "review", results },
       });
-      return res.json({ ok: true, scope: "all", result });
+      return res.json({
+        ok: true,
+        scope: "all",
+        mode: "review",
+        queued,
+        result: results,
+        message:
+          queued > 0
+            ? `${queued} candidate${queued === 1 ? "" : "s"} sent to Review — approve to publish`
+            : "Sync finished — nothing new for Review",
+      });
     } catch (err: any) {
       const msg = String(err?.message || err || "trusted sync failed");
       if (

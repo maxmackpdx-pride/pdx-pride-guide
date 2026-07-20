@@ -104,7 +104,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
   async function syncOne(sourceId: string, venueName: string) {
     if (
       !window.confirm(
-        `Sync trusted venue “${venueName}” now?\n\nNew events publish LIVE (no Review queue). Duplicates are skipped.`,
+        `Sync trusted venue “${venueName}” now?\n\nNew events go to the Review queue — you approve before anything goes live.`,
       )
     ) {
       return;
@@ -114,20 +114,21 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
       const res = await apiRequest("POST", `/api/admin/qsearch/trusted/sync/${encodeURIComponent(sourceId)}`, {});
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
-        published?: number;
-        skipped?: number;
-        error?: string;
+        queued?: number;
         message?: string;
+        error?: string;
       };
       toast({
         title: `Synced ${venueName}`,
         description:
           body.message ||
-          (body.published != null
-            ? `Published ${body.published}${body.skipped != null ? ` · skipped ${body.skipped}` : ""}`
-            : "Trusted sync finished"),
+          (body.queued != null
+            ? `${body.queued} candidate${body.queued === 1 ? "" : "s"} in Review`
+            : "Trusted sync finished — check Review"),
       });
       await invalidate();
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
       void refetch();
     } catch (err) {
       if (isNotWiredError(err)) {
@@ -152,7 +153,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
   async function syncAll() {
     if (
       !window.confirm(
-        `Sync all trusted venues now?\n\nNew events publish LIVE (no Review queue). Duplicates are skipped.`,
+        `Sync all trusted venues now?\n\nNew events go to the Review queue — you approve before anything goes live.`,
       )
     ) {
       return;
@@ -162,8 +163,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
       const res = await apiRequest("POST", "/api/admin/qsearch/trusted/sync", {});
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
-        published?: number;
-        results?: unknown[];
+        queued?: number;
         message?: string;
         error?: string;
       };
@@ -171,11 +171,13 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
         title: "Synced all trusted",
         description:
           body.message ||
-          (body.published != null
-            ? `Published ${body.published} total`
-            : `Finished ${venues.length} venue${venues.length === 1 ? "" : "s"}`),
+          (body.queued != null
+            ? `${body.queued} candidates in Review`
+            : `Finished ${venues.length} venue${venues.length === 1 ? "" : "s"} — check Review`),
       });
       await invalidate();
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
       void refetch();
     } catch (err) {
       if (isNotWiredError(err)) {
@@ -216,7 +218,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
             Trusted API not wired yet
           </p>
           <p className="qsearch__empty" style={{ marginTop: "0.5rem" }}>
-            Health board and auto-publish sync will show here once server routes are live.
+            Health board and trusted Sync → Review will show here once server routes are live.
             Other QSearch tabs keep working.
           </p>
         </div>
@@ -255,8 +257,9 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
               <span className="qsearch__panel-count">{venues.length}</span>
             </h2>
             <p className="qsearch__trusted-lede">
-              First-party feeds that <strong>auto-publish LIVE</strong> without the Review queue.
-              Health reflects last sync + publish lag (poll window ×2 / ×3).
+              First-party feeds (Badlands, Sanctuary, …). <strong>Sync now</strong> pulls into the{" "}
+              <strong>Review</strong> queue — approve there before anything goes live.
+              Health shows last successful feed pull.
             </p>
           </div>
           <div className="qsearch__trusted-actions">

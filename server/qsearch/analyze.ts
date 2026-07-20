@@ -5,7 +5,7 @@ import { normalizeTitleKey, findSubmissionMatches } from "@shared/submissionMatc
 import { normalizeVenueKey } from "@shared/venueLinks";
 import type { IngestEventDraft } from "../ingest/types";
 import { isPastEventListing } from "../ingest/dates";
-import { enrichEventPageUrl } from "../ingest/eventPageUrl";
+import { enrichEventPageUrl, isIngestFeedUrl } from "../ingest/eventPageUrl";
 import {
   enrichDraftVenueFromSource,
   matchDirectoryBrands,
@@ -542,6 +542,32 @@ function draftRichness(d: IngestEventDraft): number {
   return s;
 }
 
+/**
+ * URLs that identify a *specific* event listing — not a shared feed/calendar
+ * all nights inherit (Badlands worker API, ICS feed, venue /calendar home).
+ * Never use draft.sourceUrl here: it's almost always the list feed for the whole scan.
+ */
+function uniqueEventIdentityUrls(d: IngestEventDraft): string[] {
+  const out: string[] = [];
+  for (const raw of [d.ticketUrl, d.eventPageUrl]) {
+    if (!raw || !/^https?:\/\//i.test(raw)) continue;
+    if (isIngestFeedUrl(raw)) continue;
+    if (/\/api\/calendar|workers\.dev\/api\/|format=json|ical=1|\.ics(\?|$)/i.test(raw)) {
+      continue;
+    }
+    // Bare venue calendar index (no /event(s)/ slug)
+    try {
+      const path = new URL(raw).pathname.replace(/\/+$/, "") || "/";
+      if (/\/calendar$/i.test(path) && !/\/events?\//i.test(path)) continue;
+    } catch {
+      continue;
+    }
+    const n = normalizeComparableUrl(raw);
+    if (n && !out.includes(n)) out.push(n);
+  }
+  return out;
+}
+
 function sameEventCrossSource(a: CondensedRow, b: CondensedRow): boolean {
   // Never merge two different weekly/monthly series groups
   if (
@@ -552,17 +578,12 @@ function sameEventCrossSource(a: CondensedRow, b: CondensedRow): boolean {
     return false;
   }
 
-  const urlsA = [
-    normalizeComparableUrl(a.draft.ticketUrl),
-    normalizeComparableUrl(a.draft.eventPageUrl),
-    normalizeComparableUrl(a.draft.sourceUrl),
-  ].filter(Boolean) as string[];
-  const urlsB = [
-    normalizeComparableUrl(b.draft.ticketUrl),
-    normalizeComparableUrl(b.draft.eventPageUrl),
-    normalizeComparableUrl(b.draft.sourceUrl),
-  ].filter(Boolean) as string[];
-  if (urlsA.some(u => urlsB.includes(u))) return true;
+  // Shared feed URLs must NOT force a merge (was collapsing all Badlands nights into one card)
+  const urlsA = uniqueEventIdentityUrls(a.draft);
+  const urlsB = uniqueEventIdentityUrls(b.draft);
+  if (urlsA.length && urlsB.length && urlsA.some(u => urlsB.includes(u))) {
+    return true;
+  }
 
   const dayA = draftDayKey(a.draft);
   const dayB = draftDayKey(b.draft);
