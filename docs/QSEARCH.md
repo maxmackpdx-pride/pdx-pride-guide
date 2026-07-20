@@ -26,6 +26,7 @@ Admin event intelligence for Pride Guide PDX. **Discover + draft only.** Default
 | Layer | Path |
 |-------|------|
 | Source registry | `shared/ingestSources.ts` |
+| Bar/venue recipes (32) | `docs/BAR_VENUE_SCAN_RECIPES.md` |
 | Parsers | `server/ingest/*` |
 | Yield discovery | `server/qsearch/discover.ts` |
 | Scan + persist | `server/qsearch/scanJob.ts`, `store.ts` |
