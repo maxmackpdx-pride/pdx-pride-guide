@@ -2355,7 +2355,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                       ? `linear-gradient(135deg, ${brandColors[0]}35 0%, rgba(0,0,0,0.5) 65%)`
                       : undefined;
                 return (
-                  <label
+                  <div
                     key={c.id}
                     className={`qsearch__cand${on ? " is-selected" : " is-dim"}`}
                     style={{
@@ -2369,11 +2369,13 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             : undefined,
                     }}
                   >
-                    <input
-                      type="checkbox"
-                      checked={on}
-                      onChange={e => setSelected(prev => ({ ...prev, [c.id]: e.target.checked }))}
-                    />
+                    <label className="qsearch__cand-check" title="Select for approve">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={e => setSelected(prev => ({ ...prev, [c.id]: e.target.checked }))}
+                      />
+                    </label>
                     {/* Group → Venue → Flyer (directory brand marks, not avatars) */}
                     <div className="qsearch__cand-row" aria-label="Group, venue, flyer">
                       <div className="qsearch__cand-slot">
@@ -2626,7 +2628,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           <div
                             className="qsearch__series-box"
                             data-testid={`qsearch-series-${c.id}`}
-                            onClick={e => e.preventDefault()}
+                            onClick={e => e.stopPropagation()}
+                            onMouseDown={e => e.stopPropagation()}
                           >
                             <div className="qsearch__series-title">
                               Recurring {c.recurring} series — {c.recurringCount} dates found
@@ -2635,30 +2638,46 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                               Choose how many nights to create when you approve. Series uses every
                               date QSearch found (not invented).
                             </p>
-                            <div className="qsearch__series-options" role="radiogroup" aria-label="Series expand">
-                              <label className="qsearch__series-opt">
-                                <input
-                                  type="radio"
-                                  name={`series-${c.id}`}
-                                  checked={(seriesMode[c.id] || "one") === "one"}
-                                  onChange={() =>
-                                    setSeriesMode(prev => ({ ...prev, [c.id]: "one" }))
-                                  }
-                                />
+                            <div
+                              className="qsearch__series-options"
+                              role="radiogroup"
+                              aria-label="Series expand"
+                            >
+                              <button
+                                type="button"
+                                className={`qsearch__series-opt${
+                                  (seriesMode[c.id] || "one") === "one" ? " is-on" : ""
+                                }`}
+                                data-testid={`qsearch-series-one-${c.id}`}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setSeriesMode(prev => ({ ...prev, [c.id]: "one" }));
+                                }}
+                              >
+                                <span className="qsearch__series-radio" aria-hidden>
+                                  {(seriesMode[c.id] || "one") === "one" ? "●" : "○"}
+                                </span>
                                 <span>
                                   One occurrence only
                                   <em> — next/representative date only</em>
                                 </span>
-                              </label>
-                              <label className="qsearch__series-opt">
-                                <input
-                                  type="radio"
-                                  name={`series-${c.id}`}
-                                  checked={seriesMode[c.id] === "series"}
-                                  onChange={() =>
-                                    setSeriesMode(prev => ({ ...prev, [c.id]: "series" }))
-                                  }
-                                />
+                              </button>
+                              <button
+                                type="button"
+                                className={`qsearch__series-opt${
+                                  seriesMode[c.id] === "series" ? " is-on" : ""
+                                }`}
+                                data-testid={`qsearch-series-full-${c.id}`}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setSeriesMode(prev => ({ ...prev, [c.id]: "series" }));
+                                }}
+                              >
+                                <span className="qsearch__series-radio" aria-hidden>
+                                  {seriesMode[c.id] === "series" ? "●" : "○"}
+                                </span>
                                 <span>
                                   Full series — create all {c.recurringCount} nights
                                   <em>
@@ -2672,7 +2691,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                     {(c.memberDrafts || []).length > 6 ? "…" : ""}
                                   </em>
                                 </span>
-                              </label>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -2689,7 +2708,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 [c.id]: e.target.value as ConflictAction,
                               }))
                             }
-                            onClick={e => e.preventDefault()}
+                            onClick={e => e.stopPropagation()}
                           >
                             <option value="keep_both">Keep both</option>
                             <option value="override">Override (hide existing)</option>
@@ -2698,7 +2717,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         </div>
                       )}
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </>
