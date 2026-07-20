@@ -9,6 +9,7 @@ import HomeHero from "@/components/HomeHero";
 import HomeStatStrip from "@/components/HomeStatStrip";
 import HomeUpNext from "@/components/HomeUpNext";
 import HomeBeachWidget from "@/components/HomeBeachWidget";
+import HomeConstructionNudge from "@/components/HomeConstructionNudge";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import {
   Button,
@@ -86,6 +87,7 @@ export default function Home() {
 
   return (
     <div className="home-main-stage">
+      <HomeConstructionNudge />
       <HomeHero eventCount={eventCount} />
       <HomeStatStrip
         placesCount={placesCount}
