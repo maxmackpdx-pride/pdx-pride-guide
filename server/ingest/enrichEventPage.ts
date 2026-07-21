@@ -10,7 +10,9 @@ import { toPacificWallClock, yearFromDateString } from "./dates";
 
 function looksLikeSiteLogo(url: string | null | undefined): boolean {
   if (!url) return true;
-  return /logo|cropped-|favicon|trans_color|t_color_full|apple-touch|elementor/i.test(url);
+  // NB: no bare `elementor` — Sanctuary (WordPress/Elementor) serves some real
+  // flyers through Elementor's image optimizer, and that token was nuking them.
+  return /logo|cropped-|favicon|trans_color|t_color_full|apple-touch/i.test(url);
 }
 
 function metaContent(html: string, prop: string): string | null {
@@ -100,6 +102,7 @@ export async function enrichDraftFromEventPage(
         const og =
           metaContent(html, "og:image") ||
           metaContent(html, "og:image:url") ||
+          metaContent(html, "og:image:secure_url") ||
           metaContent(html, "twitter:image");
         const fromOg = og ? preferFullQualityImageUrl(decodeEntities(og)) : null;
         if (fromOg && !looksLikeSiteLogo(fromOg)) {

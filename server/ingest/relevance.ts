@@ -94,6 +94,10 @@ export function tokensFromQuery(raw: string): string[] {
  * Venue/org-scoped Eventbrite sources: require the listing to actually
  * mention the venue (or land on a known queer venue for that source).
  */
+/** Words too generic to identify a venue on their own (defeats "sports"→every sports event). */
+const GENERIC_SCOPE_TOKEN =
+  /^(sports?|dance|music|night|nights|bar|bars|club|clubs|party|parties|event|events|live|social|drag|show|shows|pride)$/i;
+
 export function matchesVenueScope(
   draft: Pick<IngestEventDraft, "title" | "description" | "venueName" | "address" | "sourceUrl" | "ticketUrl">,
   scopeTokens: string[],
@@ -125,8 +129,10 @@ export function matchesVenueScope(
     // concatenated form e.g. "sportbra" rare — also allow full phrase
     const phrase = scopeTokens.join("\\s+");
     if (new RegExp(`\\b${phrase}\\b`, "i").test(blob)) return true;
-    // single distinctive token if longer (e.g. "escape", "cala")
-    const distinctive = scopeTokens.filter(t => t.length >= 5);
+    // A single distinctive token can stand in for the venue (e.g. "escape",
+    // "sanctuary") — but NOT a generic word like "sports"/"dance"/"night", or
+    // every sports/dance/night event city-wide would pass.
+    const distinctive = scopeTokens.filter(t => t.length >= 5 && !GENERIC_SCOPE_TOKEN.test(t));
     if (distinctive.some(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(blob))) return true;
     return false;
   }

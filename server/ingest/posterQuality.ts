@@ -244,7 +244,7 @@ export function extractSanctuaryFlyerUrls(html: string, pageUrl = "https://pdxsa
     if (!/\.(avif|jpe?g|png|webp|gif)(\?|$)/i.test(u)) return;
     // Reject chrome / brand marks
     if (
-      /logo|cropped-|favicon|apple-touch|elementor|\.css|\.ttf|\.woff|trans_color_square|t_color_full/i.test(
+      /logo|cropped-|favicon|apple-touch|\.css|\.ttf|\.woff|trans_color_square|t_color_full/i.test(
         u,
       )
     ) {
