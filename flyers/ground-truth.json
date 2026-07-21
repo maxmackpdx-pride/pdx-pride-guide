@@ -1,0 +1,82 @@
+{
+  "flyers/gaylabration-radiance.png": {
+    "title": "Gaylabration: Radiance",
+    "start_date": "2026-07-18",
+    "end_date": "2026-07-19",
+    "time": "21:00",
+    "venue": "Crystal Ballroom",
+    "address": null,
+    "url": null,
+    "_notes": "Sat July 18, 9P-3A. Matt Suave, Poundstar w/ Mircat Dragonfae, Bro Hoe, Sappho. Sponsored by QCare+; benefits CAP + Pride Northwest."
+  },
+  "flyers/spellman-spectacle.png": {
+    "title": "A Spellman Spectacle",
+    "start_date": "2026-07-16",
+    "end_date": null,
+    "time": null,
+    "venue": "The Get Down",
+    "address": "680 SE 6th Ave, Portland OR 97214",
+    "url": null,
+    "_notes": "Euphoria presents; Sabrina 30th anniversary; Nate Richert & Curtis Andersen; $20 advance/$25 tier 2. No time printed on flyer."
+  },
+  "flyers/sports-bra-pride-block-party.png": {
+    "title": "The Sports Bra Pride 5th Annual Block Party",
+    "start_date": null,
+    "end_date": null,
+    "time": null,
+    "venue": "The Sports Bra",
+    "address": null,
+    "url": null,
+    "_notes": "Banner art only — no date/time printed. Good hard-case: parser should return nulls, not hallucinate."
+  },
+  "flyers/stank-yes-coach.png": {
+    "title": "Stank: Yes Coach — PDX Pride",
+    "start_date": "2026-07-18",
+    "end_date": "2026-07-19",
+    "time": "20:00",
+    "venue": "Sanctuary",
+    "address": "33 NW 9th Ave",
+    "url": null,
+    "_notes": "Sat July 18, 8PM-4AM. JUMPR (SF), Bro Hoe, Lake Everett, Spencer Adam, Tucker Max. Has QR code (qr_info should be non-null if model reports it)."
+  },
+  "flyers/stfu-femdom-play-party.png": {
+    "title": "Mistress Viola's Femdom Play Party",
+    "start_date": "2026-07-16",
+    "end_date": null,
+    "time": null,
+    "venue": "The Den",
+    "address": null,
+    "url": null,
+    "_notes": "STFU branding; Pride Week, July 16th @ The Den."
+  },
+  "flyers/treasure-trail-bearracuda.png": {
+    "title": "Treasure Trail",
+    "start_date": "2026-07-17",
+    "end_date": null,
+    "time": "20:00",
+    "venue": null,
+    "address": "33 NW 9th, Portland, OR",
+    "url": "https://www.bearracuda.com",
+    "_notes": "Matt Bearracuda & JP Hardy present; Pride Friday July 17, 8PM-late; Tigerbeatz; 21+. Address is Sanctuary's but venue name not printed."
+  },
+  "flyers/yes-sir-pride-closer.png": {
+    "title": "Yes Sir: Portland Pride Closer",
+    "start_date": "2026-07-19",
+    "end_date": "2026-07-20",
+    "time": "21:00",
+    "venue": "Realm PDX",
+    "address": null,
+    "url": null,
+    "_notes": "Sunday July 19, 9P-2A."
+  },
+  "flyers/sasha-colby-live.png": {
+    "title": "Sasha Colby Live",
+    "start_date": null,
+    "end_date": null,
+    "time": null,
+    "venue": null,
+    "address": null,
+    "url": "https://flipphoneevents.com/portland",
+    "_notes": "Cropped banner — name partially cut off, no date/venue visible. Hard-case: partial-text handling."
+  }
+}
