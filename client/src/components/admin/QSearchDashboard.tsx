@@ -568,6 +568,22 @@ function dupTargetId(c: {
   return c.conflicts?.[0]?.eventId ?? c.strongDuplicate?.eventId ?? undefined;
 }
 
+/**
+ * A condensed recurring candidate defaults to FULL SERIES (create every night
+ * QSearch found); anything else is a single occurrence.
+ */
+function defaultSeriesMode(c: {
+  condensed?: boolean;
+  recurring?: string | null;
+  memberDrafts?: unknown[];
+}): SeriesMode {
+  return c.condensed &&
+    (c.recurring === "weekly" || c.recurring === "monthly") &&
+    (c.memberDrafts?.length || 0) >= 2
+    ? "series"
+    : "one";
+}
+
 function fmtEta(sec: number | null | undefined): string {
   if (sec == null || !Number.isFinite(sec)) return "—";
   if (sec < 60) return `~${sec}s`;
@@ -1262,7 +1278,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               ? [dupId]
               : []
             : [];
-      const mode = seriesMode[c.id] || "one";
+      const mode = seriesMode[c.id] || defaultSeriesMode(c);
       const members = Array.isArray(c.memberDrafts) ? c.memberDrafts : [];
       const wantSeries =
         action !== "merge" &&
@@ -2721,7 +2737,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                               <button
                                 type="button"
                                 className={`qsearch__series-opt${
-                                  (seriesMode[c.id] || "one") === "one" ? " is-on" : ""
+                                  (seriesMode[c.id] || defaultSeriesMode(c)) === "one" ? " is-on" : ""
                                 }`}
                                 data-testid={`qsearch-series-one-${c.id}`}
                                 onClick={e => {
@@ -2731,7 +2747,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 }}
                               >
                                 <span className="qsearch__series-radio" aria-hidden>
-                                  {(seriesMode[c.id] || "one") === "one" ? "●" : "○"}
+                                  {(seriesMode[c.id] || defaultSeriesMode(c)) === "one" ? "●" : "○"}
                                 </span>
                                 <span>
                                   One occurrence only
@@ -2741,7 +2757,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                               <button
                                 type="button"
                                 className={`qsearch__series-opt${
-                                  seriesMode[c.id] === "series" ? " is-on" : ""
+                                  (seriesMode[c.id] || defaultSeriesMode(c)) === "series" ? " is-on" : ""
                                 }`}
                                 data-testid={`qsearch-series-full-${c.id}`}
                                 onClick={e => {
@@ -2751,7 +2767,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 }}
                               >
                                 <span className="qsearch__series-radio" aria-hidden>
-                                  {seriesMode[c.id] === "series" ? "●" : "○"}
+                                  {(seriesMode[c.id] || defaultSeriesMode(c)) === "series" ? "●" : "○"}
                                 </span>
                                 <span>
                                   Full series — create all {c.recurringCount} nights
