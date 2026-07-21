@@ -8,6 +8,14 @@
 import sharp from "sharp";
 import { safeFlyerRelPath } from "../server/flyerReader/github";
 import { preprocessFlyer } from "../server/flyerReader/ocr";
+import {
+  coerceFlyerJson,
+  heuristicDate,
+  heuristicTime,
+  heuristicFlyerParse,
+  flyerParseToDraft,
+  structureFlyerText,
+} from "../server/flyerReader/parse";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) {
@@ -46,6 +54,54 @@ async function main() {
     pre.buffer.length > 4 && pre.buffer[0] === 0x89 && pre.buffer[1] === 0x50,
     "preprocess outputs valid PNG",
   );
+
+  /* ── Phase 2: structured parsing (offline paths) ── */
+  const NOW = new Date("2026-07-21T12:00:00");
+  assert(
+    coerceFlyerJson('Sure! ```json\n{"title":"Alien Orgy","confidence":88}\n``` hope that helps')?.title === "Alien Orgy",
+    "coerceFlyerJson unwraps fenced LLM output",
+  );
+  assert(coerceFlyerJson("no json here") === null, "coerceFlyerJson null on garbage");
+  assert(heuristicDate("SAT AUG 8 - 9PM", NOW) === "2026-08-08", "heuristic date parses 'AUG 8' → next occurrence");
+  assert(heuristicDate("MAR 3 DOORS 8PM", NOW) === "2027-03-03", "past month rolls to next year");
+  assert(heuristicTime("DOORS 8PM SHOW 9:30PM") === "20:00", "heuristic time parses first time");
+  const OCR_TEXT = "ALIEN ORGY\nSAT AUG 8 - 9PM\nSANCTUARY CLUB\n33 NW 9TH AVE PORTLAND\npdxsanctuary.com/events/alien-orgy";
+  const hp = heuristicFlyerParse(OCR_TEXT, NOW);
+  assert(hp.title === "ALIEN ORGY", "heuristic title = prominent top line");
+  assert(hp.start_date === "2026-08-08" && hp.time === "21:00", "heuristic date+time extracted");
+  assert(hp.address != null && /33 NW 9TH/i.test(hp.address), "heuristic address extracted");
+  assert(hp.warnings.some(w => /LLM not configured/.test(w)), "no-LLM warning present");
+
+  // structureFlyerText with mocked LLM fetch (no network)
+  const mockFetch = (async () =>
+    new Response(
+      JSON.stringify({
+        choices: [
+          {
+            message: {
+              content:
+                '{"title":"Alien Orgy","start_date":"2026-08-08","end_date":null,"time":"21:00","venue":"Sanctuary Club","address":"33 NW 9th Ave, Portland, OR","description":"Sci-fi themed play party at Sanctuary Club.","url":"https://pdxsanctuary.com/events/alien-orgy","qr_info":null,"confidence":90}',
+            },
+          },
+        ],
+      }),
+      { status: 200 },
+    )) as unknown as typeof fetch;
+  process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || "smoke-test-key";
+  const structured = await structureFlyerText(OCR_TEXT, {
+    ocrConfidence: 80,
+    now: NOW,
+    fetchImpl: mockFetch,
+  });
+  assert(structured.title === "Alien Orgy" && structured.venue === "Sanctuary Club", "LLM JSON mapped to schema");
+  assert(structured.confidence === 81, `confidence blends LLM(90) with OCR(80) (got ${structured.confidence})`);
+  assert(structured.model != null, "model recorded");
+
+  const draftOut = flyerParseToDraft(structured, { sourcePath: "flyers/alien-orgy.png" });
+  assert(draftOut != null && draftOut.dateStart === "2026-08-08T21:00:00", "draft dateStart from date+time");
+  assert(draftOut!.parseSource === "flyer-reader", "draft parseSource = flyer-reader");
+  assert(draftOut!.sourceUrl === "github:flyers/alien-orgy.png", "draft carries GitHub source path");
+  assert(draftOut!.admission !== "FREE", "draft never invents FREE");
 
   /* ── real OCR (opt-in: needs network for traineddata) ── */
   if (process.env.SMOKE_OCR === "1") {

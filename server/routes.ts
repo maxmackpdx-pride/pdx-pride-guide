@@ -4866,6 +4866,59 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  // ── Flyer Reader (Phase 2): OCR → LLM → structured event JSON + draft ──
+  app.post("/api/admin/qsearch/flyer-reader/parse", requireAdmin, async (req, res) => {
+    try {
+      const { loadFlyer } = await import("./flyerReader/github");
+      const { ocrFlyer } = await import("./flyerReader/ocr");
+      const { structureFlyerText, flyerParseToDraft } = await import("./flyerReader/parse");
+
+      const githubPath = req.body?.githubPath != null ? String(req.body.githubPath) : "";
+      const imageBase64 = req.body?.imageBase64 != null ? String(req.body.imageBase64) : "";
+      const rawTextIn = req.body?.rawText != null ? String(req.body.rawText) : "";
+
+      let flyerPath: string | null = null;
+      let source = "upload";
+      let ocr: Awaited<ReturnType<typeof ocrFlyer>> | null = null;
+      let rawText = rawTextIn;
+
+      if (!rawText) {
+        let buffer: Buffer;
+        if (githubPath) {
+          const flyer = await loadFlyer(githubPath);
+          buffer = flyer.buffer;
+          source = flyer.source;
+          flyerPath = flyer.path;
+        } else if (imageBase64) {
+          buffer = Buffer.from(imageBase64.replace(/^data:[^,]+,/, ""), "base64");
+        } else {
+          return res
+            .status(400)
+            .json({ ok: false, error: "Provide githubPath, imageBase64, or rawText" });
+        }
+        if (!buffer?.length) return res.status(400).json({ ok: false, error: "Empty flyer" });
+        ocr = await ocrFlyer(buffer);
+        rawText = ocr.text;
+      }
+
+      const parse = await structureFlyerText(rawText, { ocrConfidence: ocr?.confidence });
+      const draft = flyerParseToDraft(parse, { sourcePath: flyerPath });
+      res.json({
+        ok: true,
+        source,
+        path: flyerPath,
+        ocr: ocr
+          ? { confidence: ocr.confidence, preprocessMs: ocr.preprocessMs, ocrMs: ocr.ocrMs }
+          : null,
+        parse,
+        draft,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ ok: false, error: message });
+    }
+  });
+
   app.post("/api/admin/qsearch/directory-lookup", requireAdmin, async (req, res) => {
     try {
       const { lookupDirectoryPlace } = await import("./qsearch/directoryLookup");

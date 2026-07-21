@@ -216,11 +216,24 @@ deploy). `server/flyerReader/`:
   `TESSERACT_CACHE_DIR`, default /tmp/tesseract).
 - **Endpoint**: `POST /api/admin/qsearch/flyer-reader/ocr` (admin) —
   `{githubPath}` or small `{imageBase64}` → `{text, confidence, preprocessMs, ocrMs}`.
-- **Roadmap**: Phase 2 structured parsing reuses `qsearch/vision.ts` (LLM
-  already configured via XAI/OpenAI envs); Phase 3 QSearch Scans hooks;
-  Phase 4 validation harness scores parses against `flyers/ground-truth.json`
-  (see `flyers/README.md` + example) using `exports/` event data; Phase 5
-  persistence + docs.
+- **Phase 2 (shipped)**: `POST /api/admin/qsearch/flyer-reader/parse` —
+  `{githubPath | imageBase64 | rawText}` → OCR (skipped when rawText given)
+  → LLM structuring → brief schema JSON (title, start_date, end_date, time,
+  venue, address, description, url, qr_info, confidence, raw_text) + an
+  `IngestEventDraft` (parseSource `flyer-reader`) ready for the Review queue.
+  LLM order: `GROQ_API_KEY` (preferred, `FLYER_LLM_MODEL` default
+  llama-3.3-70b-versatile) → XAI/OpenAI envs → deterministic heuristic
+  fallback (low confidence + warning; never breaks). Confidence blends LLM
+  self-report with OCR quality. Never-invent-FREE applies to drafts.
+- **Phase 4 harness (shipped, needs your flyers)**: `npx tsx
+  script/validate-flyers.ts [--limit N] [--json report.json]` — runs the
+  full pipeline over every entry in `flyers/ground-truth.json`, scores
+  fields (fuzzy title/venue, exact day, ±30min time, street-number address,
+  hostname url), prints per-field + overall accuracy, exits non-zero under
+  70%. This is the ongoing test suite for parser changes.
+- **Remaining**: Phase 3 QSearch Scans hooks (wire /parse into the existing
+  batch flyer upload → review queue flow); Phase 5 persistence + rate
+  limits + frontend samples.
 
 ```bash
 npx tsx script/smoke-flyer-reader.ts        # offline: paths + preprocessing

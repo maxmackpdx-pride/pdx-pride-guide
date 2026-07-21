@@ -10,7 +10,8 @@ export type IngestParseSource =
   | "badlands"
   | "vision"
   | "caption"
-  | "instagram";
+  | "instagram"
+  | "flyer-reader";
 
 /** Normalized draft event ready for createEvent (Pacific wall-clock strings). */
 export type IngestEventDraft = {
