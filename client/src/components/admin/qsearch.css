@@ -1305,3 +1305,93 @@ button.qsearch__stat.is-active {
   color: var(--qs-muted);
   margin-top: 0.1rem;
 }
+
+/* ── Mobile: keep the Review queue usable on a phone (~390px) ───────────────
+   The card is a flex row (the earlier @media 720 targets grid and is inert),
+   so stack it explicitly and make controls wrap into tappable rows. */
+@media (max-width: 640px) {
+  /* Card: stack the checkbox+brand strip and the text body vertically */
+  .qsearch__cand {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.65rem;
+    padding: 0.75rem;
+  }
+  .qsearch__cand-row {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.6rem;
+  }
+  .qsearch__cand-body {
+    flex: 1 1 100%;
+  }
+
+  /* Brand slots share the row and shrink instead of overflowing */
+  .qsearch__cand-slot,
+  .qsearch__cand-slot--flyer {
+    flex: 1 1 88px;
+    width: auto;
+    min-width: 0;
+    max-width: 33%;
+  }
+  .qsearch__cand-slot-name {
+    max-width: 100%;
+  }
+
+  /* Keep the flyer thumbnail contained */
+  .qsearch__cand-flyer,
+  .qsearch__cand-flyer--empty {
+    width: 100%;
+    max-width: 110px;
+    height: auto;
+    aspect-ratio: 110 / 148;
+  }
+
+  /* Controls bar: full-width filter, buttons wrap into tappable rows */
+  .qsearch__toolbar {
+    gap: 0.5rem;
+  }
+  .qsearch__toolbar .qsearch__filter,
+  .qsearch__filter {
+    flex: 1 1 100%;
+    max-width: none;
+    min-height: 44px;
+    font-size: 16px; /* prevents iOS zoom-on-focus */
+  }
+  .qsearch__toolbar button {
+    flex: 1 1 45%;
+    min-height: 44px;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.78rem;
+  }
+  /* Primary actions (Approve / Stage) span the full width */
+  .qsearch__toolbar button.is-primary,
+  .qsearch__toolbar button[data-testid="qsearch-approve-hidden"] {
+    flex: 1 1 100%;
+  }
+
+  /* Conflict resolver select: full-width, tappable, no iOS zoom */
+  .qsearch__cand-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .qsearch__cand-actions select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+    padding: 0.5rem 0.6rem;
+  }
+
+  /* Series picker options already stack — just enlarge tap area */
+  .qsearch__series-opt {
+    min-height: 44px;
+    padding: 0.65rem 0.7rem;
+  }
+
+  /* "Add to directory" pill: easier to tap */
+  .qsearch__add-dir-btn {
+    max-width: none;
+    min-height: 36px;
+    padding: 0.4rem 0.55rem;
+  }
+}
