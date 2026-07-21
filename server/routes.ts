@@ -4830,6 +4830,42 @@ export function registerRoutes(httpServer: Server, app: Express) {
    * Prefill "Add to directory" from venue name + optional website/address.
    * Geocode (Nominatim) + light website scrape for blurb / IG / phone / og:image.
    */
+  // ── Flyer Reader (Phase 1): GitHub-sourced flyer → sharp preprocess →
+  // Tesseract OCR → raw text + confidence. Structured parsing lands in
+  // Phase 2 (reuses qsearch/vision.ts); validation harness in Phase 4.
+  app.post("/api/admin/qsearch/flyer-reader/ocr", requireAdmin, async (req, res) => {
+    try {
+      const { loadFlyer } = await import("./flyerReader/github");
+      const { ocrFlyer } = await import("./flyerReader/ocr");
+
+      const githubPath = req.body?.githubPath != null ? String(req.body.githubPath) : "";
+      const imageBase64 = req.body?.imageBase64 != null ? String(req.body.imageBase64) : "";
+
+      let buffer: Buffer;
+      let source = "upload";
+      let flyerPath: string | null = null;
+      if (githubPath) {
+        const flyer = await loadFlyer(githubPath);
+        buffer = flyer.buffer;
+        source = flyer.source;
+        flyerPath = flyer.path;
+      } else if (imageBase64) {
+        buffer = Buffer.from(imageBase64.replace(/^data:[^,]+,/, ""), "base64");
+      } else {
+        return res.status(400).json({ ok: false, error: "Provide githubPath or imageBase64" });
+      }
+      if (!buffer?.length) {
+        return res.status(400).json({ ok: false, error: "Empty flyer" });
+      }
+
+      const result = await ocrFlyer(buffer);
+      res.json({ ok: true, source, path: flyerPath, bytes: buffer.length, ...result });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ ok: false, error: message });
+    }
+  });
+
   app.post("/api/admin/qsearch/directory-lookup", requireAdmin, async (req, res) => {
     try {
       const { lookupDirectoryPlace } = await import("./qsearch/directoryLookup");

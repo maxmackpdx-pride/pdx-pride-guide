@@ -203,6 +203,30 @@ Without those keys, calendar **HTML/JSON/ICS** still work; flyer-from-image does
 - UI checkbox **Include past events** on QSearch hero passes `includePastEvents: true`.
 - Weekly/monthly series still form; the representative date is the **next upcoming** occurrence when past is excluded.
 
+## Flyer Reader (GitHub-sourced OCR — Phase 1 shipped 2026-07-21)
+
+Server-side flyer parsing inside this app (no separate service — one Railway
+deploy). `server/flyerReader/`:
+
+- **Source**: flyers live in the repo `flyers/` folder — loaded disk-first
+  (ships with the deploy), GitHub API fallback (`GITHUB_FLYERS_REPO`,
+  optional `GITHUB_TOKEN`). Paths strictly confined to `flyers/`.
+- **OCR**: sharp preprocess (rotate/grayscale/normalize/upscale-to-1200px)
+  → tesseract.js (pure WASM, lazy worker, traineddata cached in
+  `TESSERACT_CACHE_DIR`, default /tmp/tesseract).
+- **Endpoint**: `POST /api/admin/qsearch/flyer-reader/ocr` (admin) —
+  `{githubPath}` or small `{imageBase64}` → `{text, confidence, preprocessMs, ocrMs}`.
+- **Roadmap**: Phase 2 structured parsing reuses `qsearch/vision.ts` (LLM
+  already configured via XAI/OpenAI envs); Phase 3 QSearch Scans hooks;
+  Phase 4 validation harness scores parses against `flyers/ground-truth.json`
+  (see `flyers/README.md` + example) using `exports/` event data; Phase 5
+  persistence + docs.
+
+```bash
+npx tsx script/smoke-flyer-reader.ts        # offline: paths + preprocessing
+SMOKE_OCR=1 npx tsx script/smoke-flyer-reader.ts  # + real Tesseract (network)
+```
+
 ## Smoke
 
 ```bash
