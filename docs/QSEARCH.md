@@ -73,6 +73,14 @@ Flyers are first-class. On parse + commit QSearch:
 4. **Downloads** remote flyers into `/uploads/qsearch-flyer-*.{jpg,png,webp}` when possible
 5. Review queue shows poster thumb; “Missing flyer” / “Flyer saved” badges
 6. Commit always re-enriches poster before write
+7. Wix media normalized: `wix:image://` URIs and `/v1/fill/w_63…` thumbnails → original `static.wixstatic.com/media/{id}` (Eagle)
+
+### Trusted flyer hardening (2026-07)
+
+- **Sanctuary real-URL harvest** — slugs are never guessed first: the `/events/` index (plus pagination, ≤5 pages) is fetched and real hrefs (WP collision suffixes + `/YYYY-MM-DD/` occurrence paths) are matched to ICS drafts by title tokens + day (`matchSanctuaryIndexUrl`). Slug inference remains fallback only. Wrong-day occurrence URLs are rejected (wrong night → wrong flyer).
+- **Cross-run series flyer memory** — when a draft has no art, series art is reused from this batch first, then from existing board events (`seriesPosterHints` from trustedSync). Logos never qualify.
+- **No silent failures** — event-page enrich failures and enrich-budget drops now leave warning breadcrumbs on the draft; enrich budget spends soonest-first.
+- **Flyer coverage in health** — trusted sync records `flyerCount`; dashboard derives `flyerCoverage`, and green degrades to yellow when coverage < 0.5 on ≥3 drafts (`deriveTrustedHealth`). A venue must hold green *including coverage* before its scrape sources are pruned.
 
 ## Recurring ↔ duplicate checks
 
@@ -137,6 +145,9 @@ Without those keys, calendar **HTML/JSON/ICS** still work; flyer-from-image does
 ```bash
 # parsers + non-event + past filter + recurring dups
 npx tsx script/smoke-ingest.ts
+
+# trusted flyer hardening (offline fixtures: index harvest, URL match, wix, reuse, health)
+npx tsx script/smoke-trusted-flyers.ts
 
 # QSearch offline + live API (server must be on :5050)
 npx tsx script/smoke-qsearch.ts

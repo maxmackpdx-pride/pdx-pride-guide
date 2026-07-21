@@ -62,6 +62,153 @@ export function seriesTitleKey(title: string): string {
     .trim();
 }
 
+/* ── Events-index URL harvest ─────────────────────────────────────────────
+ * Sanctuary's real event URLs carry WP collision suffixes and per-occurrence
+ * dates ("/events/game-bang-blanket-forts-3-2/2026-07-22/") that title-slug
+ * inference can never predict — guessed slugs 404 and the flyer enrich step
+ * gets no page to pull from. So: fetch the public /events/ index, harvest the
+ * REAL hrefs, and match them to ICS drafts by title tokens + occurrence day.
+ * Slug inference (enrichEventPageUrl) stays as fallback for unmatched drafts.
+ */
+
+export type SanctuaryIndexEntry = {
+  /** Absolute event page URL (with occurrence date path when present) */
+  url: string;
+  /** Raw slug segment, e.g. "game-bang-blanket-forts-3-2" */
+  slug: string;
+  /** Occurrence day from the URL path (YYYY-MM-DD) or null */
+  day: string | null;
+};
+
+/** Non-event /events/* paths (views, feeds, archives) — never event pages. */
+const SANCTUARY_INDEX_EXCLUDE =
+  /^(calendar|category|categories|list|month|week|day|today|tag|page|feed|photo|map|ical|search)$/i;
+
+export function extractSanctuaryEventIndex(
+  html: string,
+  baseUrl = "https://pdxsanctuary.com/",
+): SanctuaryIndexEntry[] {
+  const out: SanctuaryIndexEntry[] = [];
+  const seen = new Set<string>();
+  const re =
+    /href=["']((?:https?:\/\/(?:www\.)?pdxsanctuary\.com)?\/events\/([a-z0-9][a-z0-9-]*)\/(?:(\d{4}-\d{2}-\d{2})\/)?)(?:["'#?])/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) != null) {
+    const slug = m[2];
+    if (SANCTUARY_INDEX_EXCLUDE.test(slug)) continue;
+    let url: string;
+    try {
+      url = new URL(m[1], baseUrl).toString();
+    } catch {
+      continue;
+    }
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push({ url, slug, day: m[3] || null });
+  }
+  return out;
+}
+
+/** Next-page URLs from the index (rel=next or common WP pagination shapes). */
+export function extractSanctuaryIndexNextUrls(html: string, baseUrl: string): string[] {
+  const urls = new Set<string>();
+  const push = (raw: string) => {
+    try {
+      const u = new URL(raw.replace(/&amp;/g, "&"), baseUrl).toString();
+      if (/pdxsanctuary\.com/i.test(u)) urls.add(u);
+    } catch {
+      /* ignore */
+    }
+  };
+  let m: RegExpExecArray | null;
+  const relNext = /<a[^>]+rel=["']next["'][^>]+href=["']([^"']+)["']|<a[^>]+href=["']([^"']+)["'][^>]+rel=["']next["']/gi;
+  while ((m = relNext.exec(html)) != null) push(m[1] || m[2]);
+  const pagey =
+    /href=["']([^"']*\/events\/(?:page\/\d+\/?|[^"']*(?:\?|&|&amp;)(?:paged|pno|mec_paged|eventDisplay)=[^"']+))["']/gi;
+  while ((m = pagey.exec(html)) != null) push(m[1]);
+  return Array.from(urls);
+}
+
+/**
+ * Fetch the events index (following pagination a few pages, SSRF-guarded via
+ * fetchIngestSource). Failures return what we have — callers warn + fall back.
+ */
+export async function fetchSanctuaryEventIndex(
+  feedUrl: string,
+  maxIndexPages = 5,
+): Promise<SanctuaryIndexEntry[]> {
+  let origin = "https://pdxsanctuary.com";
+  try {
+    origin = new URL(feedUrl).origin;
+  } catch {
+    /* keep default */
+  }
+  const entries: SanctuaryIndexEntry[] = [];
+  const seenUrls = new Set<string>();
+  const seenPages = new Set<string>();
+  const queue = [`${origin}/events/`];
+
+  while (queue.length && seenPages.size < maxIndexPages) {
+    const pageUrl = queue.shift()!;
+    if (seenPages.has(pageUrl)) continue;
+    seenPages.add(pageUrl);
+    try {
+      const fetched = await fetchIngestSource(pageUrl);
+      if (!fetched.body) continue;
+      for (const e of extractSanctuaryEventIndex(fetched.body, fetched.url || pageUrl)) {
+        if (seenUrls.has(e.url)) continue;
+        seenUrls.add(e.url);
+        entries.push(e);
+      }
+      for (const next of extractSanctuaryIndexNextUrls(fetched.body, fetched.url || pageUrl)) {
+        if (!seenPages.has(next)) queue.push(next);
+      }
+    } catch {
+      /* single page failure is fine — keep whatever we harvested */
+    }
+  }
+  return entries;
+}
+
+/** Slug → comparable token key ("game-bang-blanket-forts-3-2" → "game bang blanket forts"). */
+export function sanctuarySlugKey(slug: string): string {
+  return seriesTitleKey(String(slug || "").replace(/-/g, " "));
+}
+
+/**
+ * Best real event URL for a draft: title-token overlap with the slug, and the
+ * occurrence day must match when the URL carries one (wrong-night pages have
+ * the wrong flyer). Returns null when nothing clears the bar.
+ */
+export function matchSanctuaryIndexUrl(
+  draft: Pick<IngestEventDraft, "title" | "dateStart">,
+  entries: SanctuaryIndexEntry[],
+): string | null {
+  const day = String(draft.dateStart || "").slice(0, 10);
+  const titleKey = seriesTitleKey(draft.title);
+  if (!titleKey) return null;
+  const tTokens = new Set(titleKey.split(" ").filter(Boolean));
+  if (!tTokens.size) return null;
+
+  let best: { url: string; score: number } | null = null;
+  for (const e of entries) {
+    if (e.day && day && e.day !== day) continue;
+    const sTokens = new Set(sanctuarySlugKey(e.slug).split(" ").filter(Boolean));
+    if (!sTokens.size) continue;
+    let inter = 0;
+    tTokens.forEach(t => {
+      if (sTokens.has(t)) inter++;
+    });
+    if (!inter) continue;
+    const overlap = inter / Math.min(tTokens.size, sTokens.size);
+    if (overlap < 0.6) continue;
+    let score = overlap * 100 + inter;
+    if (e.day && e.day === day) score += 50; // exact occurrence beats series root
+    if (!best || score > best.score) best = { url: e.url, score };
+  }
+  return best?.url ?? null;
+}
+
 function isTbaOrEmpty(value: string | null | undefined): boolean {
   const v = String(value || "").trim();
   return !v || /^tba$/i.test(v) || /^tbd$/i.test(v) || /^n\/?a$/i.test(v);
@@ -143,11 +290,32 @@ export function applySanctuaryPolicy(draft: IngestEventDraft): IngestEventDraft 
   };
 }
 
+/** Existing board event art offered to the current sync as series memory. */
+export type SeriesPosterHint = { title: string; posterImageUrl: string | null };
+
+/** Build seriesKey → poster map from existing board events (skips logos/empties). */
+export function buildSeriesPosterHintMap(hints: SeriesPosterHint[] | undefined): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const h of hints || []) {
+    if (!h?.posterImageUrl || isSanctuaryLogoPoster(h.posterImageUrl)) continue;
+    const key = seriesTitleKey(h.title);
+    if (!key || key.length < 3) continue;
+    if (!map.has(key)) map.set(key, h.posterImageUrl);
+  }
+  return map;
+}
+
 /**
  * When a draft lacks a real flyer (missing or site logo), copy poster from
- * another draft in the same series that already has good art.
+ * another draft in the same series that already has good art — first from
+ * this batch, then from existing board events (cross-run memory: last month's
+ * Game Bang already carries the series flyer even when this run's page fetch
+ * came up empty).
  */
-export function applySeriesFlyerReuse(drafts: IngestEventDraft[]): IngestEventDraft[] {
+export function applySeriesFlyerReuse(
+  drafts: IngestEventDraft[],
+  boardHints?: Map<string, string>,
+): IngestEventDraft[] {
   // Prefer earliest occurrence with a good flyer as the series canonical art
   const byDate = [...drafts].sort((a, b) =>
     String(a.dateStart || "").localeCompare(String(b.dateStart || "")),
@@ -165,12 +333,19 @@ export function applySeriesFlyerReuse(drafts: IngestEventDraft[]): IngestEventDr
     if (!isSanctuaryLogoPoster(d.posterImageUrl)) return d;
     const key = seriesTitleKey(d.title);
     if (!key || key.length < 3) return d;
-    const flyer = goodBySeries.get(key);
+    const batchFlyer = goodBySeries.get(key);
+    const boardFlyer = boardHints?.get(key);
+    const flyer = batchFlyer || boardFlyer;
     if (!flyer) return d;
     return {
       ...d,
       posterImageUrl: flyer,
-      warnings: Array.from(new Set([...(d.warnings || []), "Series flyer reused"])),
+      warnings: Array.from(
+        new Set([
+          ...(d.warnings || []),
+          batchFlyer ? "Series flyer reused" : "Series flyer reused from existing board event",
+        ]),
+      ),
     };
   });
 }
@@ -181,10 +356,15 @@ export type FetchSanctuaryDraftsOpts = {
   concurrency?: number;
   /** When true, keep past VEVENTs (default false — adapter drops them). */
   includePast?: boolean;
+  /** Existing board events' titles+posters for cross-run series flyer reuse. */
+  seriesPosterHints?: SeriesPosterHint[];
+  /** Skip the /events/ index harvest (tests / offline). Default false. */
+  skipIndexHarvest?: boolean;
 };
 
 /**
- * Full Sanctuary path: ICS → upcoming → page enrich → series flyer reuse → venue fix.
+ * Full Sanctuary path: ICS → upcoming → real-URL harvest from /events/ index
+ * → page enrich → series flyer reuse (batch + board memory) → venue fix.
  */
 export async function fetchSanctuaryDrafts(
   opts?: FetchSanctuaryDraftsOpts,
@@ -220,8 +400,43 @@ export async function fetchSanctuaryDrafts(
     drafts = drafts.filter(d => !isPastEventListing(d));
   }
 
+  // Real event URLs from the /events/ index — guessed slugs 404 on Sanctuary's
+  // suffixed permalinks, so match harvested hrefs by title tokens + day first.
+  let indexWarning: string | null = null;
+  if (!opts?.skipIndexHarvest) {
+    let indexEntries: SanctuaryIndexEntry[] = [];
+    try {
+      indexEntries = await fetchSanctuaryEventIndex(feedUrl);
+    } catch {
+      /* harvested nothing — warn below */
+    }
+    if (indexEntries.length) {
+      drafts = drafts.map(d => {
+        const url = matchSanctuaryIndexUrl(d, indexEntries);
+        if (!url) return d;
+        return {
+          ...d,
+          eventPageUrl: url.slice(0, 500),
+          warnings: Array.from(
+            new Set([...(d.warnings || []), "Event page matched from Sanctuary events index"]),
+          ),
+        };
+      });
+    } else {
+      indexWarning = "Sanctuary events index unavailable — slug inference fallback";
+    }
+  }
+
   // Page URL + flyer/description enrich (higher budget than generic scan)
-  const withPages = drafts.map(d => enrichEventPageUrl(d));
+  const withPages = drafts.map(d => {
+    const next = enrichEventPageUrl(d);
+    return indexWarning
+      ? {
+          ...next,
+          warnings: Array.from(new Set([...(next.warnings || []), indexWarning])),
+        }
+      : next;
+  });
   // Clear logo URLs so enrich treats them as missing (batch needs-check is null-only)
   const prepped = withPages.map(d =>
     d.posterImageUrl && isSanctuaryLogoPoster(d.posterImageUrl)
@@ -240,8 +455,9 @@ export async function fetchSanctuaryDrafts(
       : d,
   );
 
-  // Series reuse fills null/logo gaps from sibling occurrences with real art
-  enriched = applySeriesFlyerReuse(enriched);
+  // Series reuse fills null/logo gaps — sibling occurrences first, then
+  // existing board events (cross-run memory)
+  enriched = applySeriesFlyerReuse(enriched, buildSeriesPosterHintMap(opts?.seriesPosterHints));
   enriched = enriched.map(applySanctuaryVenue);
   // 21+ sex club policy — always, before auto-LIVE or review queue
   enriched = enriched.map(applySanctuaryPolicy);

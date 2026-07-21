@@ -91,6 +91,15 @@ export function trustedSourceIds(): string[] {
  * Catalog “last LIVE event” fallbacks must NOT force yellow — only real trusted
  * publish timestamps (`fromTrustedPublish`) may.
  */
+/**
+ * Flyer coverage below this (with a meaningful event count) degrades green →
+ * yellow: a sync can "succeed" while art quietly fails, and the board must say
+ * so before a venue is trusted enough to prune its scrape sources.
+ */
+export const TRUSTED_FLYER_COVERAGE_YELLOW = 0.5;
+/** Require at least this many drafts before coverage can flag (avoid flapping). */
+export const TRUSTED_FLYER_COVERAGE_MIN_EVENTS = 3;
+
 export function deriveTrustedHealth(input: {
   lastSyncAt: string | null;
   lastSyncOk: boolean | null;
@@ -99,6 +108,10 @@ export function deriveTrustedHealth(input: {
   /** True when lastPublishedAt came from trusted auto-publish, not catalog fallback */
   fromTrustedPublish?: boolean;
   pollHours: number;
+  /** Feed yield last sync (gates flyer-coverage flagging) */
+  lastEventCount?: number;
+  /** lastFlyerCount / lastEventCount (0..1); null/undefined = not measured */
+  flyerCoverage?: number | null;
   now?: Date;
 }): TrustedHealthStatus {
   const now = input.now ?? new Date();
@@ -114,6 +127,16 @@ export function deriveTrustedHealth(input: {
   if (input.fromTrustedPublish && input.lastPublishedAt) {
     const pubAge = now.getTime() - Date.parse(input.lastPublishedAt);
     if (Number.isFinite(pubAge) && pubAge > pollMs * 28) return "yellow"; // ~1 week at 6h poll
+  }
+
+  // Low flyer yield never blocks sync health harder than yellow, and only
+  // flags when measured on a meaningful batch (null = older run, no signal).
+  if (
+    input.flyerCoverage != null &&
+    (input.lastEventCount ?? 0) >= TRUSTED_FLYER_COVERAGE_MIN_EVENTS &&
+    input.flyerCoverage < TRUSTED_FLYER_COVERAGE_YELLOW
+  ) {
+    return "yellow";
   }
 
   if (input.lastSyncOk === true) return "green";

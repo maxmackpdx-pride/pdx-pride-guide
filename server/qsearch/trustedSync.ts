@@ -28,6 +28,7 @@ import {
 import {
   applySanctuaryPolicy,
   fetchSanctuaryDrafts,
+  isSanctuaryLogoPoster,
   SANCTUARY_AGE_REQUIREMENT,
 } from "../ingest/adapters/sanctuary";
 import { applyEaglePolicy, fetchEagleDrafts } from "../ingest/adapters/eagle";
@@ -233,12 +234,28 @@ async function fetchBadlandsDrafts(venue: TrustedVenueDef): Promise<IngestEventD
   return parseBadlandsJson(fetched.body, fetched.url);
 }
 
-async function fetchSanctuaryDraftsForVenue(venue: TrustedVenueDef): Promise<IngestEventDraft[]> {
+async function fetchSanctuaryDraftsForVenue(
+  venue: TrustedVenueDef,
+  existingEvents: Event[],
+): Promise<IngestEventDraft[]> {
+  // Cross-run series flyer memory: recurring Sanctuary events already on the
+  // board carry the series art even when this run's page fetch comes up empty.
+  const seriesPosterHints = existingEvents
+    .filter(e => e.status !== "REMOVED")
+    .filter(
+      e =>
+        /sanctuary/i.test(String(e.venueName || "")) ||
+        /sanctuary/i.test(String((e as { source?: string | null }).source || "")),
+    )
+    .filter(e => e.posterImageUrl && !isSanctuaryLogoPoster(e.posterImageUrl))
+    .map(e => ({ title: e.title, posterImageUrl: e.posterImageUrl ?? null }));
+
   return fetchSanctuaryDrafts({
     feedUrl: venue.feedUrl,
     maxPages: 80,
     concurrency: 4,
     includePast: false,
+    seriesPosterHints,
   });
 }
 
@@ -270,7 +287,7 @@ async function fetchDraftsForVenue(
     case "badlands_api":
       return fetchBadlandsDrafts(venue);
     case "sanctuary_ics":
-      return fetchSanctuaryDraftsForVenue(venue);
+      return fetchSanctuaryDraftsForVenue(venue, existingEvents);
     case "eagle_wix":
       return fetchEagleDraftsForVenue(venue);
     case "generic":
@@ -284,6 +301,8 @@ async function recordHealth(input: {
   ok: boolean;
   error?: string | null;
   eventCount: number;
+  /** Drafts that arrived with real flyer art (null = not measured this run) */
+  flyerCount?: number | null;
   created: Array<{ id: number; title: string }>;
   lastPublishedAt: string | null;
 }): Promise<void> {
@@ -295,6 +314,7 @@ async function recordHealth(input: {
         ok: input.ok,
         error: input.error ?? null,
         eventCount: input.eventCount,
+        flyerCount: input.flyerCount ?? null,
         created: input.created,
         lastPublishedAt: input.lastPublishedAt,
       });
@@ -495,6 +515,11 @@ export async function syncTrustedVenue(
     const raw = await fetchDraftsForVenue(venue, existingEvents);
     const drafts = prepareDrafts(raw, venue);
     base.fetched = drafts.length;
+    // Flyer yield this run — sync can be "ok" while art quietly fails; health
+    // needs to see coverage, not just fetch success.
+    const flyerCount = drafts.filter(
+      d => d.posterImageUrl && !d.posterImageUrl.startsWith("data:"),
+    ).length;
 
     if (!drafts.length) {
       base.ok = true;
@@ -503,6 +528,7 @@ export async function syncTrustedVenue(
         ok: true,
         error: null,
         eventCount: 0,
+        flyerCount: null,
         created: [],
         lastPublishedAt: null,
       });
@@ -529,6 +555,7 @@ export async function syncTrustedVenue(
         ok: true,
         error: null,
         eventCount: drafts.length,
+        flyerCount,
         created: [],
         lastPublishedAt: null,
       });
@@ -546,6 +573,7 @@ export async function syncTrustedVenue(
         ok: false,
         error: pub.error,
         eventCount: base.fetched,
+        flyerCount,
         created: pub.created,
         lastPublishedAt: null,
       });

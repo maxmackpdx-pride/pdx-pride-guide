@@ -17,6 +17,8 @@ export type TrustedHealthRow = {
   lastSyncOk: boolean | null;
   lastSyncError: string | null;
   lastEventCount: number;
+  /** Drafts with real flyer art last sync (null = not measured) */
+  lastFlyerCount: number | null;
   consecutiveFails: number;
   lastPublishedAt: string | null;
   lastPublishedTitle: string | null;
@@ -35,6 +37,9 @@ export type TrustedVenueDashboardRow = {
   lastSyncOk: boolean | null;
   lastSyncError: string | null;
   lastEventCount: number;
+  lastFlyerCount: number | null;
+  /** lastFlyerCount / lastEventCount (0..1), null when not measured */
+  flyerCoverage: number | null;
   lastPublishedAt: string | null;
   lastPublishedTitle: string | null;
   lastPublishedEventId: number | null;
@@ -61,6 +66,12 @@ function ensureTrustedHealthTable() {
       updated_at TEXT
     );
   `);
+  // Migration: flyer yield column (added for flyer-coverage health)
+  try {
+    sqlite.exec(`ALTER TABLE qsearch_trusted_health ADD COLUMN last_flyer_count INTEGER`);
+  } catch {
+    /* column exists */
+  }
 }
 
 ensureTrustedHealthTable();
@@ -72,6 +83,7 @@ function rowToHealth(row: any): TrustedHealthRow {
     lastSyncOk: row.last_sync_ok == null ? null : Boolean(row.last_sync_ok),
     lastSyncError: row.last_sync_error || null,
     lastEventCount: Number(row.last_event_count || 0),
+    lastFlyerCount: row.last_flyer_count == null ? null : Number(row.last_flyer_count),
     consecutiveFails: Number(row.consecutive_fails || 0),
     lastPublishedAt: row.last_published_at || null,
     lastPublishedTitle: row.last_published_title || null,
@@ -115,6 +127,8 @@ export function recordTrustedSyncResult(input: {
   eventCount?: number;
   /** Agent C alias for eventCount */
   fetched?: number;
+  /** Drafts with real flyer art this sync (null/omitted = not measured) */
+  flyerCount?: number | null;
   created?: Array<{ id: number; title: string }>;
   createdCount?: number;
   lastPublishedAt?: string | null;
@@ -140,6 +154,9 @@ export function recordTrustedSyncResult(input: {
           : 0,
     ) || 0,
   );
+
+  const flyerCount =
+    input.flyerCount == null ? null : Math.max(0, Number(input.flyerCount) || 0);
 
   let lastPublishedAt = prev?.lastPublishedAt ?? null;
   let lastPublishedTitle = prev?.lastPublishedTitle ?? null;
@@ -173,15 +190,16 @@ export function recordTrustedSyncResult(input: {
     .prepare(
       `INSERT INTO qsearch_trusted_health (
         source_id, last_sync_at, last_sync_ok, last_sync_error,
-        last_event_count, consecutive_fails,
+        last_event_count, last_flyer_count, consecutive_fails,
         last_published_at, last_published_title, last_published_event_id,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(source_id) DO UPDATE SET
         last_sync_at = excluded.last_sync_at,
         last_sync_ok = excluded.last_sync_ok,
         last_sync_error = excluded.last_sync_error,
         last_event_count = excluded.last_event_count,
+        last_flyer_count = excluded.last_flyer_count,
         consecutive_fails = excluded.consecutive_fails,
         last_published_at = COALESCE(excluded.last_published_at, qsearch_trusted_health.last_published_at),
         last_published_title = COALESCE(excluded.last_published_title, qsearch_trusted_health.last_published_title),
@@ -194,6 +212,7 @@ export function recordTrustedSyncResult(input: {
       input.ok ? 1 : 0,
       input.ok ? null : String(input.error || "sync failed").slice(0, 2000),
       eventCount,
+      flyerCount,
       consecutiveFails,
       lastPublishedAt,
       lastPublishedTitle,
@@ -281,6 +300,12 @@ export function getTrustedDashboard(): { venues: TrustedVenueDashboardRow[] } {
       }
     }
 
+    const lastFlyerCount = h?.lastFlyerCount ?? null;
+    const flyerCoverage =
+      lastFlyerCount != null && (h?.lastEventCount ?? 0) > 0
+        ? lastFlyerCount / (h!.lastEventCount)
+        : null;
+
     const health = deriveTrustedHealth({
       lastSyncAt: h?.lastSyncAt ?? null,
       lastSyncOk: h?.lastSyncOk ?? null,
@@ -288,6 +313,8 @@ export function getTrustedDashboard(): { venues: TrustedVenueDashboardRow[] } {
       lastPublishedAt,
       fromTrustedPublish,
       pollHours: def.pollHours,
+      lastEventCount: h?.lastEventCount ?? 0,
+      flyerCoverage,
     });
 
     return {
@@ -301,6 +328,8 @@ export function getTrustedDashboard(): { venues: TrustedVenueDashboardRow[] } {
       lastSyncOk: h?.lastSyncOk ?? null,
       lastSyncError: h?.lastSyncError ?? null,
       lastEventCount: h?.lastEventCount ?? 0,
+      lastFlyerCount,
+      flyerCoverage,
       lastPublishedAt,
       lastPublishedTitle,
       lastPublishedEventId,

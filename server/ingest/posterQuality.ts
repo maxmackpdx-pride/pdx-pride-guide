@@ -22,8 +22,27 @@ export function preferFullQualityImageUrl(raw: string | null | undefined): strin
   // Protocol-relative
   if (url.startsWith("//")) url = `https:${url}`;
 
+  // Wix media URI (Eagle mainImage etc.): wix:image://v1/{mediaId}/{name}#originWidth=…
+  // → https://static.wixstatic.com/media/{mediaId}
+  const wixUri = url.match(/^wix:image:\/\/v1\/([^/#?]+)/i);
+  if (wixUri) {
+    url = `https://static.wixstatic.com/media/${wixUri[1]}`;
+  }
+
   try {
     const u = new URL(url);
+
+    // Wixstatic transform paths serve resized derivatives:
+    //   /media/{id}~mv2.jpg/v1/fill/w_63,h_63,…/name.jpg  → tiny thumbnail
+    // Strip the /v1/{fill|fit|crop}/… suffix to get the original upload.
+    if (/(?:^|\.)wixstatic\.com$/i.test(u.hostname)) {
+      const wm = u.pathname.match(/^(\/media\/[^/]+)\/v[12]\/(?:fill|fit|crop)\//i);
+      if (wm) {
+        u.pathname = wm[1];
+        u.search = "";
+      }
+      return u.toString();
+    }
 
     // Squarespace CDN: drop format/size shrink params when possible; keep original path
     if (/squarespace-cdn\.com|sqsp\.net|static1\.squarespace/i.test(u.hostname)) {

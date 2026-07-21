@@ -189,8 +189,19 @@ export async function enrichDraftFromEventPage(
       dateEnd,
       warnings: Array.from(new Set(warnings)),
     };
-  } catch {
-    return draft;
+  } catch (err: unknown) {
+    // Never fail the sync — but leave a breadcrumb so Review shows WHY the
+    // flyer/description is missing (404 slug, timeout, SSRF reject, …).
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      ...draft,
+      warnings: Array.from(
+        new Set([
+          ...(draft.warnings || []),
+          `Event page enrich failed (${String(msg).slice(0, 120)})`,
+        ]),
+      ),
+    };
   }
 }
 
@@ -212,7 +223,24 @@ export async function enrichDraftsFromEventPages(
     const page = d.eventPageUrl || d.ticketUrl;
     if (needs && page && !isIngestFeedUrl(page)) jobs.push(i);
   }
+  // Soonest-first: when the budget can't cover every draft, spend it on the
+  // events users will see next, not ICS feed order.
+  jobs.sort((a, b) =>
+    String(out[a].dateStart || "").localeCompare(String(out[b].dateStart || "")),
+  );
   const limited = jobs.slice(0, maxPages);
+  // No silent caps: mark drafts the budget dropped so Review can tell.
+  for (const i of jobs.slice(maxPages)) {
+    out[i] = {
+      ...out[i],
+      warnings: Array.from(
+        new Set([
+          ...(out[i].warnings || []),
+          `Enrich budget (${maxPages}) reached — event page not visited`,
+        ]),
+      ),
+    };
+  }
   let cursor = 0;
   async function worker() {
     while (cursor < limited.length) {
