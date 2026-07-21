@@ -4869,16 +4869,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
           detail: { scope: "one", mode: "review", result },
         });
         const queued = Number((result as any)?.queued || 0);
+        const updated = Number((result as any)?.updated?.length || 0);
         return res.json({
           ok: true,
           sourceId,
           mode: "review",
           queued,
+          updated,
           result,
           message:
-            queued > 0
-              ? `${queued} candidate${queued === 1 ? "" : "s"} sent to Review — approve to publish`
-              : "Sync finished — nothing new for Review",
+            [
+              queued > 0 ? `${queued} new for Review` : null,
+              updated > 0 ? `${updated} existing event${updated === 1 ? "" : "s"} refreshed` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ") || "Sync finished — nothing new",
         });
       }
 
@@ -4887,6 +4892,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
       const results = await mod.syncAllTrustedVenues(syncOpts);
       const queued = results.reduce((n, r) => n + (Number(r.queued) || 0), 0);
+      const updated = results.reduce((n, r) => n + (Number((r as any)?.updated?.length) || 0), 0);
       auditAdmin(req, "qsearch_trusted_sync", {
         type: "qsearch_trusted",
         detail: { scope: "all", mode: "review", results },
@@ -4896,11 +4902,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
         scope: "all",
         mode: "review",
         queued,
+        updated,
         result: results,
         message:
-          queued > 0
-            ? `${queued} candidate${queued === 1 ? "" : "s"} sent to Review — approve to publish`
-            : "Sync finished — nothing new for Review",
+          [
+            queued > 0 ? `${queued} new for Review` : null,
+            updated > 0 ? `${updated} existing event${updated === 1 ? "" : "s"} refreshed` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || "Sync finished — nothing new",
       });
     } catch (err: any) {
       const msg = String(err?.message || err || "trusted sync failed");

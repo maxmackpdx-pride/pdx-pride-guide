@@ -15,8 +15,10 @@ import type { Event, InsertEvent } from "@shared/schema";
 import {
   commitIngest,
   isNonEventListing,
+  mergeDraftIntoEvent,
   INGEST_MAX_COMMIT,
 } from "../ingest";
+import { findSubmissionMatches, submissionHasStrongDuplicate } from "@shared/submissionMatch";
 import { isPastEventListing } from "../ingest/dates";
 import { fetchIngestSource } from "../ingest/fetchSource";
 import {
@@ -75,6 +77,8 @@ export type TrustedSyncResult = {
   fetched: number;
   /** LIVE events created (publish mode only) */
   created: Array<{ id: number; title: string }>;
+  /** Existing events refreshed in place (kept id → kept RSVPs) */
+  updated: Array<{ id: number; title: string }>;
   /** Review-queue candidate count (review mode) */
   queued: number;
   /** Scan job id when mode=review */
@@ -157,6 +161,70 @@ function prepareDrafts(raw: IngestEventDraft[], venue: TrustedVenueDef): IngestE
     out.push(draft);
   }
   return out;
+}
+
+/**
+ * Refresh existing events in place instead of re-queuing / re-skipping them.
+ *
+ * For each freshly-synced draft that strongly matches an event already on the
+ * board, merge it into that event (same id → RSVPs & chat preserved; date/time
+ * refreshed to the newest sync; missing fields backfilled; never erased, never
+ * duplicated). Only drafts with no existing match are returned as `fresh` for
+ * the Review queue / LIVE publish. This is what keeps a recurring trusted feed
+ * from surfacing the same events every sync.
+ */
+function autoMergeExistingEvents(
+  drafts: IngestEventDraft[],
+  existingEvents: Event[],
+): { fresh: IngestEventDraft[]; updated: Array<{ id: number; title: string }> } {
+  const updated: Array<{ id: number; title: string }> = [];
+  const fresh: IngestEventDraft[] = [];
+  const byId = new Map(existingEvents.map(e => [e.id, e] as const));
+  const usedIds = new Set<number>();
+  const toRow = (e: Event) => ({
+    id: e.id,
+    title: e.title,
+    venueName: e.venueName,
+    address: e.address,
+    dateStart: e.dateStart,
+    dateEnd: e.dateEnd,
+    status: e.status,
+    ticketUrl: e.ticketUrl,
+  });
+
+  for (const draft of drafts) {
+    // Match against the live catalog minus anything we already merged this run.
+    const catalog = existingEvents
+      .filter(e => e.status !== "REMOVED" && !usedIds.has(e.id))
+      .map(toRow);
+    const matches = findSubmissionMatches(
+      {
+        title: draft.title,
+        venueName: draft.venueName,
+        address: draft.address,
+        dateStart: draft.dateStart,
+        dateEnd: draft.dateEnd,
+        ticketUrl: draft.ticketUrl,
+      },
+      catalog,
+      { limit: 1, minScore: 32 },
+    );
+    const strong = submissionHasStrongDuplicate(matches);
+    const existing = strong ? byId.get(strong.eventId) : undefined;
+    if (strong && existing && !usedIds.has(existing.id)) {
+      try {
+        storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft));
+        usedIds.add(existing.id);
+        updated.push({ id: existing.id, title: existing.title });
+        continue;
+      } catch {
+        /* fall through and treat as fresh if the update failed */
+      }
+    }
+    fresh.push(draft);
+  }
+
+  return { fresh, updated };
 }
 
 async function fetchBadlandsDrafts(venue: TrustedVenueDef): Promise<IngestEventDraft[]> {
@@ -400,6 +468,7 @@ export async function syncTrustedVenue(
       mode,
       fetched: 0,
       created: [],
+      updated: [],
       queued: 0,
       jobId: null,
       skipped: [],
@@ -414,6 +483,7 @@ export async function syncTrustedVenue(
     mode,
     fetched: 0,
     created: [],
+    updated: [],
     queued: 0,
     jobId: null,
     skipped: [],
@@ -439,12 +509,20 @@ export async function syncTrustedVenue(
       return base;
     }
 
+    // Refresh existing board events in place (no duplicate, no erase); only
+    // genuinely-new drafts continue to Review / LIVE publish.
+    const { fresh, updated } = autoMergeExistingEvents(drafts, existingEvents);
+    base.updated = updated;
+    const catalog = updated.length ? storage.getEvents({}) : existingEvents;
+
     if (mode === "review") {
-      const { jobId, queued, skipped } = queueDraftsForReview(venue, drafts, existingEvents);
+      if (fresh.length) {
+        const { jobId, queued, skipped } = queueDraftsForReview(venue, fresh, catalog);
+        base.jobId = jobId;
+        base.queued = queued;
+        base.skipped = skipped;
+      }
       base.ok = true;
-      base.jobId = jobId;
-      base.queued = queued;
-      base.skipped = skipped;
       // Health: feed worked; no LIVE publish on review path
       await recordHealth({
         sourceId: venue.sourceId,
@@ -458,7 +536,7 @@ export async function syncTrustedVenue(
     }
 
     // ── publish mode (nightly / explicit) ──
-    const pub = await publishDraftsLive(venue, drafts, existingEvents);
+    const pub = await publishDraftsLive(venue, fresh, catalog);
     if (pub.error) {
       base.error = pub.error;
       base.created = pub.created;
