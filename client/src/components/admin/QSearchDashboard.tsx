@@ -1306,11 +1306,23 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     }
     // (candidate id is always sent so server can clear Review after create or board-skip)
 
-    const n = items.length;
-    const liveMsg =
-      status === "LIVE"
-        ? `Publish ${n} event${n === 1 ? "" : "s"} LIVE on the public board${seriesExpanded ? ` (includes full series: ${seriesExpanded} nights)` : ""}?`
-        : `Stage ${n} event${n === 1 ? "" : "s"} as HIDDEN${seriesExpanded ? ` (includes full series: ${seriesExpanded} nights)` : ""}?`;
+    const mergeCount = items.filter(it => it.conflictAction === "merge").length;
+    const createCount = items.length - mergeCount;
+    if (!createCount && !mergeCount) {
+      toast({ title: "Nothing to approve", variant: "destructive" });
+      return;
+    }
+    const parts: string[] = [];
+    if (createCount)
+      parts.push(
+        status === "LIVE"
+          ? `publish ${createCount} new event${createCount === 1 ? "" : "s"} LIVE`
+          : `stage ${createCount} new event${createCount === 1 ? "" : "s"} as HIDDEN`,
+      );
+    if (mergeCount)
+      parts.push(`merge ${mergeCount} into existing event${mergeCount === 1 ? "" : "s"} (keeps RSVPs)`);
+    if (seriesExpanded) parts.push(`full series: ${seriesExpanded} nights`);
+    const liveMsg = `${parts.join(" · ")}?`;
     if (!window.confirm(liveMsg)) return;
     setBusy(true);
     try {

@@ -5153,14 +5153,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
 
     const existingEvents = storage.getEvents({});
-    const result = await commitIngest({
-      items,
-      status,
-      // Always on for admin approve — never re-create main-board twins
-      skipDuplicates: req.body?.skipDuplicates !== false,
-      existingEvents,
-      createEvent: (data) => storage.createEvent(data),
-    });
+    // When every picked candidate was a MERGE (or there is simply nothing to
+    // create), skip commitIngest — an empty item list is a no-op, not an error.
+    const result = items.length
+      ? await commitIngest({
+          items,
+          status,
+          // Always on for admin approve — never re-create main-board twins
+          skipDuplicates: req.body?.skipDuplicates !== false,
+          existingEvents,
+          createEvent: (data) => storage.createEvent(data),
+        })
+      : {
+          ok: true as const,
+          created: [] as Array<{ id: number; title: string; status: string; candidateId?: string }>,
+          skipped: [] as Array<{ index: number; title: string; reason: string; candidateId?: string }>,
+          impact: mergedCand.length ? `Merged ${mergedCand.length}` : "Nothing to do",
+        };
     if (!result.ok) return res.status(400).json({ error: result.error });
 
     // Resolve Review cards: created → committed; already-on-board / invalid → skipped (leave queue)
