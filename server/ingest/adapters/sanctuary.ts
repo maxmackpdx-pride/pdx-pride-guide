@@ -90,8 +90,10 @@ export function extractSanctuaryEventIndex(
 ): SanctuaryIndexEntry[] {
   const out: SanctuaryIndexEntry[] = [];
   const seen = new Set<string>();
+  // Sugar Calendar publishes event pages under BOTH /events/{slug}/ and
+  // /calendar/{slug}/ (Horse Market's current page is /calendar/horse-market-2/)
   const re =
-    /href=["']((?:https?:\/\/(?:www\.)?pdxsanctuary\.com)?\/events\/([a-z0-9][a-z0-9-]*)\/(?:(\d{4}-\d{2}-\d{2})\/)?)(?:["'#?])/gi;
+    /href=["']((?:https?:\/\/(?:www\.)?pdxsanctuary\.com)?\/(?:events|calendar)\/([a-z0-9][a-z0-9-]*)\/(?:(\d{4}-\d{2}-\d{2})\/)?)(?:["'#?])/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) != null) {
     const slug = m[2];
@@ -148,7 +150,7 @@ export function sitemapLocsToIndexEntries(locs: string[]): SanctuaryIndexEntry[]
   const out: SanctuaryIndexEntry[] = [];
   const seen = new Set<string>();
   for (const loc of locs) {
-    const m = loc.match(/\/events\/([a-z0-9][a-z0-9-]*)\/?$/i);
+    const m = loc.match(/\/(?:events|calendar)\/([a-z0-9][a-z0-9-]*)\/?$/i);
     if (!m) continue;
     if (SANCTUARY_INDEX_EXCLUDE.test(m[1])) continue;
     const url = loc.endsWith("/") ? loc : `${loc}/`;
@@ -200,8 +202,8 @@ export async function fetchSanctuarySitemapEntries(
       try {
         const idx = await fetchIngestSource(idxUrl);
         const subs = extractSitemapLocs(idx.body)
-          .filter(u => /event/i.test(u) && /\.xml(\?|$)/i.test(u))
-          .slice(0, 3);
+          .filter(u => /event|calendar/i.test(u) && /\.xml(\?|$)/i.test(u))
+          .slice(0, 4);
         for (const sub of subs) {
           try {
             const fetched = await fetchIngestSource(sub);
@@ -266,10 +268,36 @@ export function sanctuarySlugKey(slug: string): string {
   return seriesTitleKey(String(slug || "").replace(/-/g, " "));
 }
 
+/** Bounded Levenshtein for short keys (spelling drift: polyitopia/polytopia). */
+export function boundedEditDistance(a: string, b: string, max = 2): number {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  const prev = new Array(b.length + 1).fill(0).map((_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let diag = prev[0];
+    prev[0] = i;
+    let rowMin = prev[0];
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j];
+      prev[j] = Math.min(
+        prev[j] + 1,
+        prev[j - 1] + 1,
+        diag + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+      diag = tmp;
+      if (prev[j] < rowMin) rowMin = prev[j];
+    }
+    if (rowMin > max) return max + 1;
+  }
+  return prev[b.length];
+}
+
 /**
  * Best real event URL for a draft: title-token overlap with the slug, and the
  * occurrence day must match when the URL carries one (wrong-night pages have
- * the wrong flyer). Returns null when nothing clears the bar.
+ * the wrong flyer). Token overlap is primary; a squashed-form comparison
+ * (spaces/hyphens removed) catches word-boundary drift ("EbonyFest" vs
+ * "ebony-fest") and small spelling drift ("Polyitopia" vs "polytopia").
+ * Returns null when nothing clears the bar.
  */
 export function matchSanctuaryIndexUrl(
   draft: Pick<IngestEventDraft, "title" | "dateStart">,
@@ -281,19 +309,36 @@ export function matchSanctuaryIndexUrl(
   const tTokens = new Set(titleKey.split(" ").filter(Boolean));
   if (!tTokens.size) return null;
 
+  const tSquash = titleKey.replace(/\s+/g, "");
+
   let best: { url: string; score: number } | null = null;
   for (const e of entries) {
     if (e.day && day && e.day !== day) continue;
-    const sTokens = new Set(sanctuarySlugKey(e.slug).split(" ").filter(Boolean));
+    const slugKey = sanctuarySlugKey(e.slug);
+    const sTokens = new Set(slugKey.split(" ").filter(Boolean));
     if (!sTokens.size) continue;
     let inter = 0;
     tTokens.forEach(t => {
       if (sTokens.has(t)) inter++;
     });
-    if (!inter) continue;
-    const overlap = inter / Math.min(tTokens.size, sTokens.size);
-    if (overlap < 0.6) continue;
-    let score = overlap * 100 + inter;
+    const overlap = inter ? inter / Math.min(tTokens.size, sTokens.size) : 0;
+
+    let score: number;
+    if (inter && overlap >= 0.6) {
+      score = overlap * 100 + inter;
+    } else {
+      // Squashed fallback: word-boundary drift + small spelling drift
+      const sSquash = slugKey.replace(/\s+/g, "");
+      if (!tSquash || tSquash.length < 5 || !sSquash) continue;
+      const contains =
+        tSquash === sSquash ||
+        (sSquash.length >= 6 && tSquash.includes(sSquash)) ||
+        (tSquash.length >= 6 && sSquash.includes(tSquash));
+      const maxEd = Math.min(tSquash.length, sSquash.length) >= 8 ? 2 : 1;
+      const fuzzy = !contains && boundedEditDistance(tSquash, sSquash, maxEd) <= maxEd;
+      if (!contains && !fuzzy) continue;
+      score = contains ? 85 : 75;
+    }
     if (e.day && e.day === day) score += 50; // exact occurrence beats series root
     // Tie-break same-series duplicates ("game-bang-2" vs "game-bang-3-2")
     // toward the highest WP collision suffix — the newest page carries the
@@ -306,6 +351,30 @@ export function matchSanctuaryIndexUrl(
     if (!best || score > best.score) best = { url: e.url, score };
   }
   return best?.url ?? null;
+}
+
+/**
+ * Third-party events at Sanctuary (Polyitopia via SP Portland, EbonyFest…)
+ * often have no pdxsanctuary.com page — but the ICS DESCRIPTION carries the
+ * organizer's URL, whose page has the flyer (og:image). Extract it as an
+ * eventPageUrl fallback for the standard enrich path (SSRF-guarded there).
+ */
+export function extractUrlFromDescription(text: string | null | undefined): string | null {
+  const m = String(text || "").match(/https?:\/\/[^\s"'<>\\)\]]+/i);
+  if (!m) return null;
+  const url = m[0].replace(/[.,;:!?]+$/, "");
+  if (
+    /\.ics(\?|$)|\/ics\/?(\?|$)|\/feed\/|format=json|ical=1|instagram\.com|facebook\.com\/(?:sharer|login)/i.test(
+      url,
+    )
+  ) {
+    return null;
+  }
+  try {
+    return new URL(url).toString().slice(0, 500);
+  } catch {
+    return null;
+  }
 }
 
 function isTbaOrEmpty(value: string | null | undefined): boolean {
@@ -536,6 +605,21 @@ export async function fetchSanctuaryDrafts(
       indexWarning = "Sanctuary events index unavailable — slug inference fallback";
     }
   }
+
+  // Third-party fallback: organizer URL from the ICS description when no
+  // Sanctuary page matched (SP Portland, guest promoters…)
+  drafts = drafts.map(d => {
+    if (d.eventPageUrl) return d;
+    const fromDesc = extractUrlFromDescription(d.description);
+    if (!fromDesc) return d;
+    return {
+      ...d,
+      eventPageUrl: fromDesc,
+      warnings: Array.from(
+        new Set([...(d.warnings || []), "Event page from ICS description (third-party organizer)"]),
+      ),
+    };
+  });
 
   // Page URL + flyer/description enrich (higher budget than generic scan)
   const withPages = drafts.map(d => {

@@ -40,6 +40,7 @@ import {
 } from "../ingest/adapters/hawks";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
+import { isRelevantScanDraft } from "../ingest/relevance";
 import type { IngestEventDraft } from "../ingest/types";
 import { storage } from "../storage";
 import { buildScanCandidates } from "./analyze";
@@ -322,7 +323,17 @@ async function fetchGenericDrafts(
     existingEvents,
     allowExpand: true,
   });
-  return hit.drafts;
+  // Venue-scope relevance — the scan lane applies this per source, and
+  // trusted generic mode must too: an Eventbrite venue-scoped search page
+  // (e.g. Sports Bra /d/ URL) returns city-wide noise without it. For own-
+  // site feeds the mode resolves to "open" and everything passes.
+  const relevanceCtx = {
+    sourceId: venue.sourceId,
+    label: venue.venueName,
+    url: venue.feedUrl || venue.calendarPageUrl,
+    tier: "1",
+  };
+  return hit.drafts.filter(d => isRelevantScanDraft(d, relevanceCtx).keep);
 }
 
 async function fetchDraftsForVenue(

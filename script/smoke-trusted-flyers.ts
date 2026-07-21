@@ -15,12 +15,15 @@ import {
   extractSanctuaryIndexNextUrls,
   extractSitemapLocs,
   sitemapLocsToIndexEntries,
+  extractUrlFromDescription,
+  boundedEditDistance,
   matchSanctuaryIndexUrl,
   sanctuarySlugKey,
   applySeriesFlyerReuse,
   buildSeriesPosterHintMap,
   isSanctuaryLogoPoster,
 } from "../server/ingest/adapters/sanctuary";
+import { isRelevantScanDraft } from "../server/ingest/relevance";
 import { countFreshFlyerDrafts, isFreshFlyerDraft } from "../server/ingest/venuePolicy";
 import { preferFullQualityImageUrl } from "../server/ingest/posterQuality";
 import { deriveTrustedHealth } from "../shared/trustedVenues";
@@ -188,6 +191,81 @@ assert(
   "cross-run reuse warning breadcrumb present",
 );
 assert(!hints.has("some logo event") && !Array.from(hints.values()).includes(LOGO), "logo posters never enter hint map");
+
+/* ── 4a2. the four reported misses: calendar-base, squashed, fuzzy, 3rd-party ── */
+const missEntries = sitemapLocsToIndexEntries([
+  "https://pdxsanctuary.com/events/alien-orgy/",
+  "https://pdxsanctuary.com/events/vampire-orgy-2/",
+  "https://pdxsanctuary.com/calendar/horse-market-2/", // /calendar/ base (live-verified)
+  "https://pdxsanctuary.com/events/horse-market/",
+  "https://pdxsanctuary.com/events/ebony-fest-2/",
+  "https://pdxsanctuary.com/events/polytopia-3/",
+]);
+assert(
+  missEntries.some(e => e.url === "https://pdxsanctuary.com/calendar/horse-market-2/"),
+  "sitemap harvest accepts /calendar/{slug}/ pages",
+);
+assert(
+  matchSanctuaryIndexUrl({ title: "Alien Orgy", dateStart: "2026-08-08T21:00:00" }, missEntries) ===
+    "https://pdxsanctuary.com/events/alien-orgy/",
+  "Alien Orgy matches its own page, not Vampire Orgy",
+);
+assert(
+  matchSanctuaryIndexUrl({ title: "Horse Market", dateStart: "2026-08-15T21:00:00" }, missEntries) ===
+    "https://pdxsanctuary.com/calendar/horse-market-2/",
+  "Horse Market resolves to newest page (calendar base, -2 suffix)",
+);
+assert(
+  matchSanctuaryIndexUrl({ title: "EbonyFest", dateStart: "2026-08-21T21:00:00" }, missEntries) ===
+    "https://pdxsanctuary.com/events/ebony-fest-2/",
+  "EbonyFest matches ebony-fest via squashed comparison (word-boundary drift)",
+);
+assert(
+  matchSanctuaryIndexUrl({ title: "Polyitopia", dateStart: "2026-08-28T21:00:00" }, missEntries) ===
+    "https://pdxsanctuary.com/events/polytopia-3/",
+  "Polyitopia matches polytopia via fuzzy squashed comparison (spelling drift)",
+);
+assert(boundedEditDistance("polyitopia", "polytopia", 2) === 1, "edit distance sane");
+assert(
+  matchSanctuaryIndexUrl({ title: "Leather Social", dateStart: "2026-08-28T21:00:00" }, missEntries) === null,
+  "fuzzy fallback does not create false matches",
+);
+
+// Third-party organizer URL from ICS description (Polyitopia via SP Portland)
+assert(
+  extractUrlFromDescription(
+    "Hosted with SP Portland! Details & tickets: https://www.sexpositiveportland.org/polytopia-2026. 21+.",
+  ) === "https://www.sexpositiveportland.org/polytopia-2026",
+  "organizer URL extracted from ICS description (trailing punctuation stripped)",
+);
+assert(
+  extractUrlFromDescription("See our calendar https://pdxsanctuary.com/events/calendar/sanctuary/ics/") === null,
+  "feed URLs never used as event pages",
+);
+
+/* ── 4a3. Sports Bra scope: trusted generic mode filters EB noise ── */
+const braCtx = {
+  sourceId: "sports-bra-eb",
+  label: "The Sports Bra",
+  url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
+  tier: "1",
+};
+const noiseDraft = draft({
+  title: "Portland Timbers Trivia Night",
+  dateStart: "2026-08-05T19:00:00",
+  venueName: "Some Other Bar",
+  address: "123 SE Main St, Portland, OR",
+  description: "Soccer trivia downtown!",
+});
+const braEventDraft = draft({
+  title: "Thorns Watch Party at The Sports Bra",
+  dateStart: "2026-08-06T19:00:00",
+  venueName: "The Sports Bra",
+  address: "2512 NE Broadway, Portland, OR",
+  description: "Watch the Thorns with us at the Sports Bra!",
+});
+assert(!isRelevantScanDraft(noiseDraft, braCtx).keep, "unrelated Portland event dropped by venue scope");
+assert(isRelevantScanDraft(braEventDraft, braCtx).keep, "actual Sports Bra event kept by venue scope");
 
 /* ── 4b. sitemap harvest (Sugar Calendar JS pagination workaround) ── */
 const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
