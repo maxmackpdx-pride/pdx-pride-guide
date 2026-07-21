@@ -32,6 +32,20 @@ export type TrustedVenueDef = {
   /** Hours between trusted sync runs */
   pollHours: number;
   notes?: string;
+  /**
+   * Declarative per-venue rules applied to every draft (after any dedicated
+   * adapter policy). New venues get correct policy without new code.
+   */
+  venuePolicy?: {
+    /** Force schema enum age (restrictive default; Review can adjust) */
+    ageRequirement?: "ALL_AGES" | "18_PLUS" | "21_PLUS";
+    /** Warning breadcrumb explaining the age default for Review */
+    ageNote?: string;
+    /** Sex-club stamps: isSexPositive + nudityOk + SEX_POSITIVE/NUDITY_OK/KINK tags */
+    sexPositive?: boolean;
+    /** Re-infer admission from text — never invent FREE (default true) */
+    reinferAdmission?: boolean;
+  };
 };
 
 /** Ordered for QSearch Trusted tab. */
@@ -98,6 +112,90 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     pollHours: 6,
     notes:
       "Squarespace ?format=json, assetUrl posters, paginated (pagination.nextPageUrl). Sex club — sex-positive + nudity flags always on; age defaults 21_PLUS, verify 18+ nights in Review.",
+  },
+  {
+    sourceId: "stag-eb",
+    venueName: "Stag PDX",
+    address: "317 NW Broadway, Portland, OR",
+    neighborhood: "Old Town",
+    fetchMode: "generic",
+    feedUrl: "https://www.eventbrite.com/o/stag-pdx-73608204703",
+    calendarPageUrl: "https://www.eventbrite.com/o/stag-pdx-73608204703",
+    publishStatus: "LIVE",
+    pollHours: 12,
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (Stag is a 21+ bar)",
+    },
+    notes:
+      "Eventbrite organizer via generic discover (relevance guards handle Stags' Leap false-positives). Brunch/specials only — nightly dancers are not discrete rows.",
+  },
+  {
+    sourceId: "sports-bra-eb",
+    venueName: "The Sports Bra",
+    address: "2512 NE Broadway, Portland, OR",
+    neighborhood: "NE Portland",
+    fetchMode: "generic",
+    feedUrl: "https://www.eventbrite.com/d/or--portland/sports-bra/",
+    calendarPageUrl: "https://thesportsbraofficial.com/",
+    publishStatus: "LIVE",
+    pollHours: 12,
+    venuePolicy: {
+      ageNote: "Verify age — Sports Bra is a bar-restaurant; watch parties often all-ages, late events may be 21+",
+    },
+    notes:
+      "Eventbrite venue-scoped search via generic discover (sports+bra token scope). Women's sports bar — do not force 21+.",
+  },
+  {
+    sourceId: "living-room-eb",
+    venueName: "Living Room Wines",
+    address: "4818 N Lombard St, Portland, OR",
+    neighborhood: "N Portland",
+    fetchMode: "generic",
+    feedUrl: "https://www.eventbrite.com/o/104468106391",
+    calendarPageUrl: "https://livingroomwinespdx.com",
+    publishStatus: "LIVE",
+    pollHours: 12,
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (wine bar — ticketed tastings/classes)",
+    },
+    notes:
+      "Eventbrite organizer via generic discover. Ticketed classes only; free nights are IG-only (stay in scan lane).",
+  },
+  {
+    sourceId: "camp-bar",
+    venueName: "Camp Bar PDX",
+    address: "1125 SW Harvey Milk St, Portland, OR",
+    neighborhood: "Downtown",
+    fetchMode: "generic",
+    feedUrl: "https://campbarpdx.com",
+    calendarPageUrl: "https://campbarpdx.com",
+    publishStatus: "LIVE",
+    pollHours: 12,
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (Camp Bar is a 21+ bar)",
+    },
+    notes:
+      "Static #events weeklies via generic discover; flyers limited (IG specials). Watch flyer coverage on the board before pruning scan sources.",
+  },
+  {
+    sourceId: "cc-slaughters",
+    venueName: "CC Slaughters",
+    address: "219 NW Davis St, Portland, OR",
+    neighborhood: "Old Town",
+    fetchMode: "generic",
+    feedUrl: "https://www.ccslaughterspdx.com/",
+    calendarPageUrl: "https://www.ccslaughterspdx.com/",
+    publishStatus: "LIVE",
+    pollHours: 12,
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (CC Slaughters is a 21+ bar)",
+    },
+    notes:
+      "HTML weeklies + WP vertical posters (*_ADVERTICAL_*) via generic discover. Watch flyer coverage before pruning scan sources.",
   },
 ];
 

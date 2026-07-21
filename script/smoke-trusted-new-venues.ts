@@ -19,6 +19,7 @@ import {
   expandHawksJsonUrl,
 } from "../server/ingest/adapters/hawks";
 import { getTrustedVenue, TRUSTED_VENUES } from "../shared/trustedVenues";
+import { applyDeclaredVenuePolicy } from "../server/ingest/venuePolicy";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) {
@@ -29,7 +30,10 @@ function assert(cond: unknown, msg: string) {
 }
 
 /* ── registry wiring ── */
-assert(TRUSTED_VENUES.length === 5, `5 trusted venues registered (got ${TRUSTED_VENUES.length})`);
+assert(TRUSTED_VENUES.length === 10, `10 trusted venues registered (got ${TRUSTED_VENUES.length})`);
+for (const sid of ["stag-eb", "sports-bra-eb", "living-room-eb", "camp-bar", "cc-slaughters"]) {
+  assert(getTrustedVenue(sid)?.fetchMode === "generic", `${sid} registered as generic mode`);
+}
 assert(getTrustedVenue("darcelle-tribe")?.fetchMode === "darcelle_tribe", "darcelle-tribe registered with fetchMode darcelle_tribe");
 assert(getTrustedVenue("hawks-json")?.fetchMode === "hawks_squarespace", "hawks-json registered with fetchMode hawks_squarespace");
 
@@ -157,5 +161,28 @@ assert(
 );
 assert(uw.venueName === "Hawks PDX", "venue name normalized");
 assert(uw.admission !== "FREE", "no free text → admission not invented as FREE");
+
+/* ── declarative venuePolicy (the scaling path) ── */
+const stag = getTrustedVenue("stag-eb")!;
+const stagDraft = applyDeclaredVenuePolicy(
+  { ...uw, ageRequirement: "ALL_AGES", isSexPositive: false, nudityOk: false, eventTypes: "[]", admission: "UNKNOWN", warnings: [], title: "Drag Brunch at Stag", description: "Sunday drag brunch. Tickets $25." },
+  stag,
+);
+assert(stagDraft.ageRequirement === "21_PLUS", "declared policy forces Stag to 21_PLUS");
+assert(stagDraft.warnings.some(w => /21\+ bar/i.test(w)), "declared age note breadcrumb present");
+assert(stagDraft.isSexPositive === false, "no sex-positive stamp unless declared");
+assert(stagDraft.admission !== "FREE", "ticketed text does not become FREE");
+
+const bra = getTrustedVenue("sports-bra-eb")!;
+const braDraft = applyDeclaredVenuePolicy(
+  { ...uw, ageRequirement: "ALL_AGES", isSexPositive: false, nudityOk: false, eventTypes: "[]", admission: "UNKNOWN", warnings: [], title: "Thorns Watch Party", description: "Free entry, all welcome!" },
+  bra,
+);
+assert(braDraft.ageRequirement === "ALL_AGES", "Sports Bra: age NOT forced (note-only policy)");
+assert(braDraft.warnings.some(w => /verify age/i.test(w)), "Sports Bra verify-age note present");
+assert(braDraft.admission === "FREE", "explicit free text keeps FREE via declared re-infer");
+
+const hawksDef = getTrustedVenue("hawks-json")!;
+assert(hawksDef.venuePolicy == null, "dedicated-adapter venues do not double-stamp via declarative policy");
 
 console.log("\nAll new-venue trusted connector smoke checks passed.");

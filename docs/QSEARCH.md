@@ -104,6 +104,28 @@ Wines, Stem, Coffee Beer…) excluded as not LGBTQ-exclusive nightlife venues.
 `darcelle-ics` / `hawks-json` stay in INGEST_SOURCES until both venues hold
 green (incl. flyer coverage) on the live Trusted board.
 
+### Trusted wave 3 — generic-mode promotions + declarative venuePolicy (2026-07-21)
+
+`TrustedVenueDef.venuePolicy` (applied by `server/ingest/venuePolicy.ts`, runs
+after any dedicated adapter policy): declarative age / sex-positive /
+never-invent-FREE rules — **new venues scale via data, not code**.
+
+Promoted via fetchMode `generic` (existing discover pipeline; relevance guards
+already venue-scope Eventbrite — incl. Stag ≠ Stags' Leap and sports+bra
+token rules):
+
+| Venue | sourceId | Source | Policy |
+|-------|----------|--------|--------|
+| Stag PDX | `stag-eb` | Eventbrite organizer | 21_PLUS |
+| The Sports Bra | `sports-bra-eb` | Eventbrite venue-scoped | age NOT forced (note-only: verify per event) |
+| Living Room Wines | `living-room-eb` | Eventbrite organizer | 21_PLUS |
+| Camp Bar PDX | `camp-bar` | Static #events HTML | 21_PLUS |
+| CC Slaughters | `cc-slaughters` | HTML + WP posters | 21_PLUS |
+
+These five are **scrape-grade sources on the trusted board** — the flyer
+coverage + yield health is the probation gate. 12h poll (vs 6h for feed-grade).
+Scan-lane entries stay until each holds green.
+
 ## Recurring ↔ duplicate checks
 
 When a scrape is weekly/monthly **or** matches catalog:
@@ -171,7 +193,7 @@ npx tsx script/smoke-ingest.ts
 # trusted flyer hardening (offline fixtures: index harvest, URL match, wix, reuse, health)
 npx tsx script/smoke-trusted-flyers.ts
 
-# Darcelle + Hawks trusted connectors (offline fixtures: parse, policy, pagination URLs)
+# Darcelle + Hawks + wave-3 venues (offline fixtures: parse, policy, declarative venuePolicy)
 npx tsx script/smoke-trusted-new-venues.ts
 
 # QSearch offline + live API (server must be on :5050)

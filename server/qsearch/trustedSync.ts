@@ -39,6 +39,7 @@ import {
   HAWKS_AGE_REQUIREMENT,
 } from "../ingest/adapters/hawks";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
+import { applyDeclaredVenuePolicy } from "../ingest/venuePolicy";
 import type { IngestEventDraft } from "../ingest/types";
 import { storage } from "../storage";
 import { buildScanCandidates } from "./analyze";
@@ -185,6 +186,9 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
       ),
     };
   }
+
+  // Declarative rules last — new venues scale via data, not code
+  next = applyDeclaredVenuePolicy(next, venue);
 
   return next;
 }
