@@ -48,7 +48,7 @@ import {
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
-import { commitIngest, previewIngest } from "./ingest";
+import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
 import {
   INGEST_SOURCES,
   buildDirectoryIngestSources,
@@ -5102,26 +5102,53 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
     const overrides: number[] = [];
     const denySkipIds: string[] = [];
-    const items = rawItems.map((row: any) => {
+    const mergeOps: Array<{ candidateId?: string; draft: any; eventId: number }> = [];
+    const items: Array<{ draft: any; skip: boolean; candidateId?: string; allowDuplicate?: boolean }> = [];
+    for (const row of rawItems) {
       const action = String(row?.conflictAction || "keep_both");
       const candidateId = row?.id != null ? String(row.id) : undefined;
+      const targetIds = Array.isArray(row?.conflictEventIds)
+        ? row.conflictEventIds.map(Number).filter((n: number) => Number.isFinite(n))
+        : [];
+
       if (action === "deny" || row?.skip) {
         if (candidateId) denySkipIds.push(candidateId);
-        return { draft: row?.draft, skip: true, candidateId };
+        items.push({ draft: row?.draft, skip: true, candidateId });
+        continue;
       }
-      if (action === "override" && Array.isArray(row?.conflictEventIds)) {
-        for (const id of row.conflictEventIds.map(Number)) {
-          if (Number.isFinite(id)) overrides.push(id);
-        }
+      // Merge: update the existing event in place (keep its id → keep RSVPs).
+      // Handled below; NOT sent to commitIngest so no duplicate row is created.
+      if (action === "merge" && targetIds.length) {
+        mergeOps.push({ candidateId, draft: row?.draft, eventId: targetIds[0] });
+        continue;
       }
-      return { draft: row?.draft, skip: false, candidateId };
-    });
+      if (action === "override") {
+        for (const id of targetIds) overrides.push(id);
+      }
+      // The admin explicitly resolved the conflict (keep both / override), so let
+      // this draft through the duplicate filter instead of silently skipping it.
+      const allowDuplicate = action === "keep_both" || action === "override";
+      items.push({ draft: row?.draft, skip: false, candidateId, allowDuplicate });
+    }
 
     for (const id of Array.from(new Set(overrides))) {
       try {
         storage.updateEventStatus(id, "HIDDEN");
       } catch {
         /* ignore */
+      }
+    }
+
+    // Apply merges: patch each existing row from the newest sync, preserving id/RSVPs.
+    const mergedCand: Array<{ candidateId?: string; eventId: number }> = [];
+    for (const op of mergeOps) {
+      try {
+        const existing = storage.getEvent(op.eventId);
+        if (!existing || !op.draft?.title || !op.draft?.dateStart) continue;
+        storage.updateEvent(op.eventId, mergeDraftIntoEvent(existing, op.draft));
+        mergedCand.push({ candidateId: op.candidateId, eventId: op.eventId });
+      } catch {
+        /* ignore a single bad merge */
       }
     }
 
@@ -5174,6 +5201,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
         autoSkipIds.push(id);
       }
     });
+    // Merged candidates resolve like committed ones (clear the Review card).
+    for (const m of mergedCand) {
+      if (!m.candidateId) continue;
+      committedIds.push(m.candidateId);
+      committedEventIds.push(m.eventId);
+    }
     if (committedIds.length) markCandidatesCommitted(committedIds, committedEventIds);
     if (autoSkipIds.length) markCandidatesSkipped(Array.from(new Set(autoSkipIds)));
 
@@ -5184,10 +5217,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
         createdIds: result.created.map(c => c.id),
         skipped: result.skipped,
         overridden: overrides,
+        merged: mergedCand.map(m => m.eventId),
         status,
       },
     });
-    res.json({ ...result, overridden: overrides });
+    res.json({
+      ...result,
+      overridden: overrides,
+      merged: mergedCand.map(m => m.eventId),
+    });
   });
 
   /** Persist vision/IG drafts into the review queue (HIDDEN path via approve). */

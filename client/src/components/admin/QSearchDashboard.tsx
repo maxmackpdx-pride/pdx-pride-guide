@@ -287,6 +287,9 @@ type Candidate = {
     title: string;
     note: string;
     kind: string;
+    dateStart?: string;
+    dateEnd?: string;
+    status?: string;
   }>;
   strongDuplicate: {
     eventId: number;
@@ -543,7 +546,27 @@ type Tab = "overview" | "trusted" | "venues" | "queue" | "assist";
 type StatFocus = "scan-urls" | "directory" | "works" | "trouble" | "queue" | "new-links" | null;
 /** Sources tab: all, directory listings only, or general scrape only */
 type SourceSection = "all" | "directory" | "general";
-type ConflictAction = "keep_both" | "deny" | "override";
+type ConflictAction = "keep_both" | "merge" | "deny" | "override";
+
+/**
+ * A duplicate-flagged candidate defaults to MERGE (update the existing event in
+ * place → keep its RSVPs), which is the safe resolution; a clean candidate just
+ * gets created. The admin can still switch to Keep both / Override / Deny.
+ */
+function defaultConflictAction(c: {
+  conflicts?: Array<{ eventId: number }>;
+  strongDuplicate?: { eventId: number } | null;
+}): ConflictAction {
+  return c.conflicts?.length || c.strongDuplicate ? "merge" : "keep_both";
+}
+
+/** Existing event id a candidate would merge/override into, if any. */
+function dupTargetId(c: {
+  conflicts?: Array<{ eventId: number }>;
+  strongDuplicate?: { eventId: number } | null;
+}): number | undefined {
+  return c.conflicts?.[0]?.eventId ?? c.strongDuplicate?.eventId ?? undefined;
+}
 
 function fmtEta(sec: number | null | undefined): string {
   if (sec == null || !Number.isFinite(sec)) return "—";
@@ -800,7 +823,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         const conf: Record<string, ConflictAction> = {};
         for (const c of data.candidates) {
           init[c.id] = c.selected !== false;
-          conf[c.id] = "keep_both";
+          conf[c.id] = defaultConflictAction(c);
         }
         setSelected(init);
         setConflictAction(conf);
@@ -864,8 +887,16 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     setSelected(prev => {
       if (Object.keys(prev).length) return prev;
       const init: Record<string, boolean> = {};
-      for (const c of list) init[c.id] = c.selected !== false && !c.strongDuplicate;
+      // Select duplicate-flagged candidates too — they default to Merge, so the
+      // Approve button is usable instead of silently disabled on a dup-only queue.
+      for (const c of list) init[c.id] = c.selected !== false;
       return init;
+    });
+    setConflictAction(prev => {
+      if (Object.keys(prev).length) return prev;
+      const conf: Record<string, ConflictAction> = {};
+      for (const c of list) conf[c.id] = defaultConflictAction(c);
+      return conf;
     });
   }, [queueData, dash?.pendingCandidates]);
 
@@ -1217,9 +1248,24 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     let seriesExpanded = 0;
     for (const c of picked) {
       const action = conflictAction[c.id] || "keep_both";
+      const dupId = dupTargetId(c);
+      // Both override and merge target an existing event id; merge into one, override hides all.
+      const conflictEventIds =
+        action === "override"
+          ? c.conflicts?.length
+            ? c.conflicts.map(x => x.eventId)
+            : dupId != null
+              ? [dupId]
+              : []
+          : action === "merge"
+            ? dupId != null
+              ? [dupId]
+              : []
+            : [];
       const mode = seriesMode[c.id] || "one";
       const members = Array.isArray(c.memberDrafts) ? c.memberDrafts : [];
       const wantSeries =
+        action !== "merge" &&
         mode === "series" &&
         c.condensed &&
         (c.recurring === "weekly" || c.recurring === "monthly") &&
@@ -1245,7 +1291,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             },
             skip: false,
             conflictAction: action,
-            conflictEventIds: action === "override" ? c.conflicts.map(x => x.eventId) : [],
+            conflictEventIds,
           });
         }
       } else {
@@ -1254,7 +1300,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           draft: c.draft,
           skip: false,
           conflictAction: action,
-          conflictEventIds: action === "override" ? c.conflicts.map(x => x.eventId) : [],
+          conflictEventIds,
         });
       }
     }
@@ -1271,6 +1317,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       // Commit in chunks of 40 (server max)
       let createdTotal = 0;
       let skippedTotal = 0;
+      let mergedTotal = 0;
       let impactParts: string[] = [];
       const skipReasons: string[] = [];
       for (let i = 0; i < items.length; i += 40) {
@@ -1285,6 +1332,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         if (!res.ok) throw new Error(data.error || "Approve failed");
         createdTotal += Array.isArray(data.created) ? data.created.length : 0;
         skippedTotal += Array.isArray(data.skipped) ? data.skipped.length : 0;
+        mergedTotal += Array.isArray(data.merged) ? data.merged.length : 0;
         if (data.impact) impactParts.push(data.impact);
         if (Array.isArray(data.skipped)) {
           for (const s of data.skipped) {
@@ -1302,7 +1350,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         title: status === "LIVE" ? "Published LIVE" : "Staged as HIDDEN",
         description:
           (impactParts[0] ||
-            `${createdTotal} created${skippedTotal ? ` · ${skippedTotal} skipped` : ""}${seriesExpanded ? ` · series expanded` : ""}`) +
+            `${createdTotal} created${mergedTotal ? ` · ${mergedTotal} merged` : ""}${skippedTotal ? ` · ${skippedTotal} skipped` : ""}${seriesExpanded ? ` · series expanded` : ""}`) +
+          (mergedTotal && impactParts[0] ? ` · ${mergedTotal} merged` : "") +
           reasonTail,
       });
       setSelected({});
@@ -2709,27 +2758,51 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             </div>
                           </div>
                         )}
-                      {!!c.conflicts?.length && (
-                        <div className="qsearch__cand-actions">
-                          <span style={{ fontSize: 12, color: "var(--qs-muted)" }}>
-                            {c.conflicts[0]?.note}
-                          </span>
-                          <select
-                            value={conflictAction[c.id] || "keep_both"}
-                            onChange={e =>
-                              setConflictAction(prev => ({
-                                ...prev,
-                                [c.id]: e.target.value as ConflictAction,
-                              }))
-                            }
-                            onClick={e => e.stopPropagation()}
-                          >
-                            <option value="keep_both">Keep both</option>
-                            <option value="override">Override (hide existing)</option>
-                            <option value="deny">Deny this candidate</option>
-                          </select>
-                        </div>
-                      )}
+                      {(() => {
+                        const dup = c.conflicts?.[0];
+                        const dupId = dup?.eventId ?? c.strongDuplicate?.eventId;
+                        if (dupId == null) return null;
+                        const dupTitle =
+                          dup?.title || c.strongDuplicate?.title || "existing event";
+                        const dupDate = (dup?.dateStart || "")
+                          .slice(0, 16)
+                          .replace("T", " · ");
+                        const dupStatus = dup?.status;
+                        const moreCount =
+                          (c.conflicts?.length || 0) > 1 ? (c.conflicts!.length - 1) : 0;
+                        return (
+                          <div className="qsearch__cand-actions">
+                            <div
+                              style={{ fontSize: 12, color: "var(--qs-muted)", lineHeight: 1.4 }}
+                            >
+                              <div>Looks like a duplicate of:</div>
+                              <div style={{ color: "#dcdce4" }}>
+                                <strong>#{dupId}</strong> {dupTitle}
+                                {dupDate ? ` · ${dupDate}` : ""}
+                                {dupStatus ? ` · ${dupStatus}` : ""}
+                                {moreCount
+                                  ? ` (+${moreCount} more overlap${moreCount > 1 ? "s" : ""})`
+                                  : ""}
+                              </div>
+                            </div>
+                            <select
+                              value={conflictAction[c.id] || "keep_both"}
+                              onChange={e =>
+                                setConflictAction(prev => ({
+                                  ...prev,
+                                  [c.id]: e.target.value as ConflictAction,
+                                }))
+                              }
+                              onClick={e => e.stopPropagation()}
+                            >
+                              <option value="merge">Merge → update #{dupId} (keep RSVPs)</option>
+                              <option value="keep_both">Keep both (add anyway)</option>
+                              <option value="override">Override (hide #{dupId})</option>
+                              <option value="deny">Deny this candidate</option>
+                            </select>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 );

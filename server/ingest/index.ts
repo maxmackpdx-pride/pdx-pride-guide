@@ -436,8 +436,61 @@ export function draftToInsertEvent(
   };
 }
 
+/** Non-empty, non-placeholder value check for merge backfill. */
+function hasValue(v: unknown): boolean {
+  if (v == null) return false;
+  if (typeof v === "string") return v.trim() !== "";
+  return true;
+}
+
+/**
+ * Merge a freshly-synced draft INTO an existing event row (same id → RSVPs/chat
+ * are preserved). Returns a partial patch for storage.updateEvent().
+ *
+ * Rule: the newest sync wins on any field it actually carries a value for; the
+ * existing row fills gaps the sync lacks (never overwritten with empty). Date/
+ * time is ALWAYS taken from the newest sync — that is the point of a merge —
+ * and dayOfWeek is set explicitly because updateEvent() writes columns raw and
+ * does not recompute it. Safety flags (sex-positive / nudity / house-party) are
+ * OR-ed so a venue never silently loses a marking on update. Identity, status/
+ * visibility, source, claim/ownership, and createdAt are left untouched.
+ */
+export function mergeDraftIntoEvent(existing: Event, draft: IngestEventDraft): Partial<InsertEvent> {
+  const inc = draftToInsertEvent(draft, { status: existing.status as "HIDDEN" | "LIVE" });
+  const patch: Partial<InsertEvent> = {};
+
+  const newWins: Array<keyof InsertEvent> = [
+    "title", "description", "venueName", "address", "neighborhood",
+    "lat", "lng", "ticketUrl", "posterImageUrl",
+  ];
+  for (const k of newWins) {
+    if (hasValue((inc as Record<string, unknown>)[k])) {
+      (patch as Record<string, unknown>)[k] = (inc as Record<string, unknown>)[k];
+    }
+  }
+  // Placeholder-aware: only take the sync value when it is a real (non-default) value.
+  if (inc.eventTypes && inc.eventTypes !== "[]") patch.eventTypes = inc.eventTypes;
+  if (inc.admission && inc.admission !== "UNKNOWN") patch.admission = inc.admission;
+  if (inc.ageRequirement && inc.ageRequirement !== "ALL_AGES") patch.ageRequirement = inc.ageRequirement;
+
+  // OR the safety flags so a marking is never lost on update.
+  patch.isSexPositive = !!existing.isSexPositive || !!inc.isSexPositive;
+  patch.nudityOk = !!existing.nudityOk || !!inc.nudityOk;
+  patch.isHouseParty = !!existing.isHouseParty || !!inc.isHouseParty;
+
+  // Date/time always refreshed to the newest sync.
+  patch.dateStart = inc.dateStart;
+  patch.dateEnd = inc.dateEnd;
+  patch.dayOfWeek = inc.dayOfWeek;
+
+  const note = `Merged from sync${draft.sourceUrl ? ` (${draft.sourceUrl})` : ""}`;
+  patch.adminNotes = [existing.adminNotes?.trim(), note].filter(Boolean).join(" · ").slice(0, 1000);
+
+  return patch;
+}
+
 export async function commitIngest(input: {
-  items: Array<{ draft: IngestEventDraft; skip?: boolean; candidateId?: string }>;
+  items: Array<{ draft: IngestEventDraft; skip?: boolean; candidateId?: string; allowDuplicate?: boolean }>;
   status?: "HIDDEN" | "LIVE";
   skipDuplicates?: boolean;
   existingEvents: Event[];
@@ -472,7 +525,7 @@ export async function commitIngest(input: {
       skipped.push({ index, title: draft.title, reason: "Deselected", candidateId });
       continue;
     }
-    if (skipDup) {
+    if (skipDup && !item.allowDuplicate) {
       const matches = findSubmissionMatches(
         {
           title: draft.title,
