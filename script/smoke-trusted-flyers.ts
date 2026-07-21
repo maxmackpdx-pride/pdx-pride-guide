@@ -13,12 +13,15 @@
 import {
   extractSanctuaryEventIndex,
   extractSanctuaryIndexNextUrls,
+  extractSitemapLocs,
+  sitemapLocsToIndexEntries,
   matchSanctuaryIndexUrl,
   sanctuarySlugKey,
   applySeriesFlyerReuse,
   buildSeriesPosterHintMap,
   isSanctuaryLogoPoster,
 } from "../server/ingest/adapters/sanctuary";
+import { countFreshFlyerDrafts, isFreshFlyerDraft } from "../server/ingest/venuePolicy";
 import { preferFullQualityImageUrl } from "../server/ingest/posterQuality";
 import { deriveTrustedHealth } from "../shared/trustedVenues";
 import type { IngestEventDraft } from "../server/ingest/types";
@@ -185,6 +188,46 @@ assert(
   "cross-run reuse warning breadcrumb present",
 );
 assert(!hints.has("some logo event") && !Array.from(hints.values()).includes(LOGO), "logo posters never enter hint map");
+
+/* ── 4b. sitemap harvest (Sugar Calendar JS pagination workaround) ── */
+const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>https://pdxsanctuary.com/events/game-bang-blanket-forts-3-2/</loc></url>
+<url><loc>https://pdxsanctuary.com/events/game-bang-2/</loc></url>
+<url><loc>https://pdxsanctuary.com/events/kinkoween-4-5/</loc></url>
+<url><loc>https://pdxsanctuary.com/events/calendar/</loc></url>
+<url><loc>https://pdxsanctuary.com/about/</loc></url>
+</urlset>`;
+const locs = extractSitemapLocs(SITEMAP_XML);
+assert(locs.length === 5, "sitemap locs extracted");
+const smEntries = sitemapLocsToIndexEntries(locs);
+assert(smEntries.length === 3, `sitemap yields 3 event entries (got ${smEntries.length}; views/pages excluded)`);
+assert(smEntries.every(e => e.day === null), "sitemap entries are undated series roots");
+
+// Duplicate-series tie-break: highest WP collision suffix (newest page) wins
+const kinkFar = matchSanctuaryIndexUrl(
+  { title: "Kinkoween", dateStart: "2026-10-30T21:00:00" },
+  smEntries,
+);
+assert(kinkFar === "https://pdxsanctuary.com/events/kinkoween-4-5/", "sitemap covers events months out (beyond index page window)");
+const gbDup = matchSanctuaryIndexUrl(
+  { title: "Game Bang!", dateStart: "2026-09-23T19:00:00" },
+  smEntries,
+);
+assert(
+  gbDup === "https://pdxsanctuary.com/events/game-bang-blanket-forts-3-2/",
+  "duplicate series slugs tie-break toward newest collision suffix",
+);
+
+/* ── 4c. fresh-vs-reused flyer coverage ── */
+const freshDraft = { posterImageUrl: "https://pdxsanctuary.com/wp-content/uploads/2026/07/X.avif", warnings: ["Flyer from event page og:image"] };
+const reusedDraft = { posterImageUrl: "https://pdxsanctuary.com/wp-content/uploads/2026/06/Y.avif", warnings: ["Series flyer reused"] };
+const boardReusedDraft = { posterImageUrl: "https://pdxsanctuary.com/wp-content/uploads/2026/06/Z.avif", warnings: ["Series flyer reused from existing board event"] };
+const bareDraft = { posterImageUrl: null, warnings: [] };
+assert(isFreshFlyerDraft(freshDraft), "page-enriched flyer counts as fresh");
+assert(!isFreshFlyerDraft(reusedDraft), "batch-reused flyer does NOT count toward coverage");
+assert(!isFreshFlyerDraft(boardReusedDraft), "board-reused flyer does NOT count toward coverage");
+assert(countFreshFlyerDrafts([freshDraft, reusedDraft, boardReusedDraft, bareDraft]) === 1, "coverage counts only fresh acquisitions");
 
 /* ── 5. flyer-coverage health gating ── */
 const nowIso = new Date().toISOString();

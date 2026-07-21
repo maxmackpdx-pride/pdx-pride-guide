@@ -104,6 +104,25 @@ Wines, Stem, Coffee Beer…) excluded as not LGBTQ-exclusive nightlife venues.
 `darcelle-ics` / `hawks-json` stay in INGEST_SOURCES until both venues hold
 green (incl. flyer coverage) on the live Trusted board.
 
+### Sanctuary flyer fix v2 — sitemap slug map + honest coverage (2026-07-21)
+
+Live finding: Sanctuary runs **Sugar Calendar**, whose /events/ list paginates
+via JS (no hrefs) — the index harvest could only ever see ~1 week (~9 events)
+while the ICS holds months, so everything past week one leaned on series-flyer
+reuse. Fixes:
+
+- **WP sitemap harvest is now the primary slug map** — `wp-sitemap-posts-sc_event-N.xml`
+  (index-file discovery fallback) lists EVERY event page URL server-side, no
+  pagination. Index page still contributes dated occurrence URLs; slug
+  inference remains last-resort.
+- **Duplicate-series tie-break** — same series key ("game-bang-2" vs
+  "game-bang-blanket-forts-3-2") resolves toward the highest WP collision
+  suffix (newest page = current flyer); tiny bonus, never outweighs
+  title-overlap or day match.
+- **Coverage counts FRESH flyers only** (`countFreshFlyerDrafts`) — series-reuse
+  backfill still displays but no longer counts toward flyer coverage, so the
+  health board exposes the real acquisition rate instead of reuse masking it.
+
 ### Trusted wave 3 — generic-mode promotions + declarative venuePolicy (2026-07-21)
 
 `TrustedVenueDef.venuePolicy` (applied by `server/ingest/venuePolicy.ts`, runs

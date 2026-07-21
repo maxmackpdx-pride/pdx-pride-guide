@@ -8,6 +8,24 @@ import type { TrustedVenueDef } from "@shared/trustedVenues";
 import type { IngestEventDraft } from "./types";
 import { inferAdmissionFromText } from "./admissionInfer";
 
+/**
+ * Fresh-flyer predicate for health coverage: a draft counts toward flyer
+ * coverage only when its art was actually ACQUIRED this sync (feed field or
+ * event-page enrich) — NOT backfilled by series reuse. Reused art still
+ * displays (good UX), but coverage must expose the real acquisition rate or
+ * reuse quietly masks a broken flyer path.
+ */
+export function isFreshFlyerDraft(draft: Pick<IngestEventDraft, "posterImageUrl" | "warnings">): boolean {
+  if (!draft.posterImageUrl || draft.posterImageUrl.startsWith("data:")) return false;
+  return !(draft.warnings || []).some(w => /^Series flyer reused/i.test(w));
+}
+
+export function countFreshFlyerDrafts(
+  drafts: Array<Pick<IngestEventDraft, "posterImageUrl" | "warnings">>,
+): number {
+  return drafts.filter(isFreshFlyerDraft).length;
+}
+
 export function applyDeclaredVenuePolicy(
   draft: IngestEventDraft,
   venue: Pick<TrustedVenueDef, "venuePolicy">,

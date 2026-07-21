@@ -39,7 +39,7 @@ import {
   HAWKS_AGE_REQUIREMENT,
 } from "../ingest/adapters/hawks";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
-import { applyDeclaredVenuePolicy } from "../ingest/venuePolicy";
+import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
 import type { IngestEventDraft } from "../ingest/types";
 import { storage } from "../storage";
 import { buildScanCandidates } from "./analyze";
@@ -571,11 +571,10 @@ export async function syncTrustedVenue(
     const raw = await fetchDraftsForVenue(venue, existingEvents);
     const drafts = prepareDrafts(raw, venue);
     base.fetched = drafts.length;
-    // Flyer yield this run — sync can be "ok" while art quietly fails; health
-    // needs to see coverage, not just fetch success.
-    const flyerCount = drafts.filter(
-      d => d.posterImageUrl && !d.posterImageUrl.startsWith("data:"),
-    ).length;
+    // Flyer yield this run — FRESH acquisitions only (series-reuse backfill
+    // excluded): sync can be "ok" and every card can show art while the
+    // actual flyer path is broken. Coverage must measure acquisition.
+    const flyerCount = countFreshFlyerDrafts(drafts);
 
     if (!drafts.length) {
       base.ok = true;

@@ -130,6 +130,97 @@ export function extractSanctuaryIndexNextUrls(html: string, baseUrl: string): st
 }
 
 /**
+ * WordPress sitemap harvest — the FULL slug map. Sanctuary runs Sugar
+ * Calendar, whose /events/ list paginates via JS (no hrefs), so the index
+ * page can only ever show ~1 week. WP sitemaps list every sc_event page URL
+ * server-side: wp-sitemap.xml → wp-sitemap-posts-sc_event-N.xml. This is the
+ * primary source; the index page still contributes dated occurrence URLs.
+ */
+export function extractSitemapLocs(xml: string): string[] {
+  const out: string[] = [];
+  const re = /<loc>\s*(https?:\/\/[^<\s]+)\s*<\/loc>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(xml)) != null) out.push(m[1]);
+  return out;
+}
+
+export function sitemapLocsToIndexEntries(locs: string[]): SanctuaryIndexEntry[] {
+  const out: SanctuaryIndexEntry[] = [];
+  const seen = new Set<string>();
+  for (const loc of locs) {
+    const m = loc.match(/\/events\/([a-z0-9][a-z0-9-]*)\/?$/i);
+    if (!m) continue;
+    if (SANCTUARY_INDEX_EXCLUDE.test(m[1])) continue;
+    const url = loc.endsWith("/") ? loc : `${loc}/`;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push({ url, slug: m[1], day: null });
+  }
+  return out;
+}
+
+export async function fetchSanctuarySitemapEntries(
+  feedUrl: string,
+): Promise<SanctuaryIndexEntry[]> {
+  let origin = "https://pdxsanctuary.com";
+  try {
+    origin = new URL(feedUrl).origin;
+  } catch {
+    /* keep default */
+  }
+
+  // Direct sc_event sitemaps first; index files as discovery fallback.
+  const direct = [
+    `${origin}/wp-sitemap-posts-sc_event-1.xml`,
+    `${origin}/wp-sitemap-posts-sc_event-2.xml`,
+  ];
+  const indexes = [`${origin}/wp-sitemap.xml`, `${origin}/sitemap_index.xml`];
+
+  const entries: SanctuaryIndexEntry[] = [];
+  const seen = new Set<string>();
+  const absorb = (list: SanctuaryIndexEntry[]) => {
+    for (const e of list) {
+      if (seen.has(e.url)) continue;
+      seen.add(e.url);
+      entries.push(e);
+    }
+  };
+
+  for (const url of direct) {
+    try {
+      const fetched = await fetchIngestSource(url);
+      absorb(sitemapLocsToIndexEntries(extractSitemapLocs(fetched.body)));
+    } catch {
+      /* missing page number / plugin rename — try discovery below */
+    }
+  }
+
+  if (!entries.length) {
+    for (const idxUrl of indexes) {
+      try {
+        const idx = await fetchIngestSource(idxUrl);
+        const subs = extractSitemapLocs(idx.body)
+          .filter(u => /event/i.test(u) && /\.xml(\?|$)/i.test(u))
+          .slice(0, 3);
+        for (const sub of subs) {
+          try {
+            const fetched = await fetchIngestSource(sub);
+            absorb(sitemapLocsToIndexEntries(extractSitemapLocs(fetched.body)));
+          } catch {
+            /* skip bad sub-sitemap */
+          }
+        }
+        if (entries.length) break;
+      } catch {
+        /* try next index */
+      }
+    }
+  }
+
+  return entries;
+}
+
+/**
  * Fetch the events index (following pagination a few pages, SSRF-guarded via
  * fetchIngestSource). Failures return what we have — callers warn + fall back.
  */
@@ -204,6 +295,14 @@ export function matchSanctuaryIndexUrl(
     if (overlap < 0.6) continue;
     let score = overlap * 100 + inter;
     if (e.day && e.day === day) score += 50; // exact occurrence beats series root
+    // Tie-break same-series duplicates ("game-bang-2" vs "game-bang-3-2")
+    // toward the highest WP collision suffix — the newest page carries the
+    // current flyer. Tiny bonus: never outweighs overlap or day match.
+    const suffixNums = e.slug.match(/-(\d+)/g) || [];
+    score += Math.min(
+      suffixNums.reduce((a, n) => a + Number(n.slice(1)), 0),
+      40,
+    ) * 0.01;
     if (!best || score > best.score) best = { url: e.url, score };
   }
   return best?.url ?? null;
@@ -406,7 +505,18 @@ export async function fetchSanctuaryDrafts(
   if (!opts?.skipIndexHarvest) {
     let indexEntries: SanctuaryIndexEntry[] = [];
     try {
-      indexEntries = await fetchSanctuaryEventIndex(feedUrl);
+      // Sitemap = full slug map (Sugar Calendar's JS pagination hides all but
+      // ~1 week from the index page); index page adds dated occurrence URLs.
+      const [sitemap, index] = await Promise.all([
+        fetchSanctuarySitemapEntries(feedUrl).catch(() => [] as SanctuaryIndexEntry[]),
+        fetchSanctuaryEventIndex(feedUrl).catch(() => [] as SanctuaryIndexEntry[]),
+      ]);
+      const seenUrl = new Set<string>();
+      for (const e of [...index, ...sitemap]) {
+        if (seenUrl.has(e.url)) continue;
+        seenUrl.add(e.url);
+        indexEntries.push(e);
+      }
     } catch {
       /* harvested nothing — warn below */
     }
