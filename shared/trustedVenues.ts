@@ -16,7 +16,13 @@ export type TrustedVenueDef = {
   address: string;
   neighborhood?: string;
   /** How we pull events */
-  fetchMode: "badlands_api" | "sanctuary_ics" | "eagle_wix" | "generic";
+  fetchMode:
+    | "badlands_api"
+    | "sanctuary_ics"
+    | "eagle_wix"
+    | "darcelle_tribe"
+    | "hawks_squarespace"
+    | "generic";
   /** Primary feed URL (may need date expansion at runtime) */
   feedUrl: string;
   /** Human calendar page for admins */
@@ -66,6 +72,32 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     pollHours: 6,
     notes:
       "Wix Events via appsWarmupData. 21+ bar — never ALL_AGES; cover UNKNOWN unless listing says free.",
+  },
+  {
+    sourceId: "darcelle-tribe",
+    venueName: "Darcelle XV Showplace",
+    address: "208 NW 3rd Ave, Portland, OR",
+    neighborhood: "Old Town",
+    fetchMode: "darcelle_tribe",
+    feedUrl: "https://darcellexv.com/wp-json/tribe/events/v1/events",
+    calendarPageUrl: "https://darcellexv.com/events/",
+    publishStatus: "LIVE",
+    pollHours: 6,
+    notes:
+      "Tribe REST JSON, image.url flyers, paginated (next_rest_url); ICS ?ical=1 fallback (ATTACH flyers). Age defaults 21_PLUS — verify all-ages/brunch shows in Review.",
+  },
+  {
+    sourceId: "hawks-json",
+    venueName: "Hawks PDX",
+    address: "335 SE 99th Ave, Portland, OR 97216",
+    neighborhood: "SE Portland",
+    fetchMode: "hawks_squarespace",
+    feedUrl: "https://www.hawkspdx.com/hawks-events?format=json",
+    calendarPageUrl: "https://www.hawkspdx.com/hawks-events",
+    publishStatus: "LIVE",
+    pollHours: 6,
+    notes:
+      "Squarespace ?format=json, assetUrl posters, paginated (pagination.nextPageUrl). Sex club — sex-positive + nudity flags always on; age defaults 21_PLUS, verify 18+ nights in Review.",
   },
 ];
 

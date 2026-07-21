@@ -82,6 +82,28 @@ Flyers are first-class. On parse + commit QSearch:
 - **No silent failures** — event-page enrich failures and enrich-budget drops now leave warning breadcrumbs on the draft; enrich budget spends soonest-first.
 - **Flyer coverage in health** — trusted sync records `flyerCount`; dashboard derives `flyerCoverage`, and green degrades to yellow when coverage < 0.5 on ≥3 drafts (`deriveTrustedHealth`). A venue must hold green *including coverage* before its scrape sources are pruned.
 
+### Trusted wave 2 — directory audit (2026-07-21)
+
+Directory audit: every `queer_owned` bar/venue was assessed for trusted promotion.
+Promoted (structured feed + flyers, dedicated adapters):
+
+| Venue | sourceId | Mode | Feed | Policy |
+|-------|----------|------|------|--------|
+| Darcelle XV Showplace | `darcelle-tribe` | `darcelle_tribe` | Tribe REST (paginated, `image.url` flyers) + ICS `?ical=1` fallback | 21_PLUS default + verify breadcrumb (all-ages/brunch) |
+| Hawks PDX | `hawks-json` | `hawks_squarespace` | Squarespace `?format=json` (paginated, `assetUrl` posters) | 21_PLUS default + verify breadcrumb (18+ nights); sex-positive/nudity/KINK always stamped (Sanctuary-style, enforced again at publish) |
+
+Not promotable yet (no structured event source — stays in scan lane):
+CC Slaughters (HTML+WP posters), Scandals East (Zyrosite gallery, needs OCR),
+Silverado (SQS archive stale; live = IG/FB), Camp Bar (static weeklies),
+Peacock (html/JS cards + IG), Back 2 Earth (no events feed), The Nest Lounge
+(IG-only), Stag PDX (Eventbrite organizer — third-party; candidate for a
+future `eventbrite` fetchMode). Queer-owned wine bars/cafes (Living Room
+Wines, Stem, Coffee Beer…) excluded as not LGBTQ-exclusive nightlife venues.
+
+**Scrape sources NOT pruned yet** — per migration rule, `darcelle-tribe` /
+`darcelle-ics` / `hawks-json` stay in INGEST_SOURCES until both venues hold
+green (incl. flyer coverage) on the live Trusted board.
+
 ## Recurring ↔ duplicate checks
 
 When a scrape is weekly/monthly **or** matches catalog:
@@ -148,6 +170,9 @@ npx tsx script/smoke-ingest.ts
 
 # trusted flyer hardening (offline fixtures: index harvest, URL match, wix, reuse, health)
 npx tsx script/smoke-trusted-flyers.ts
+
+# Darcelle + Hawks trusted connectors (offline fixtures: parse, policy, pagination URLs)
+npx tsx script/smoke-trusted-new-venues.ts
 
 # QSearch offline + live API (server must be on :5050)
 npx tsx script/smoke-qsearch.ts

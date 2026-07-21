@@ -32,6 +32,12 @@ import {
   SANCTUARY_AGE_REQUIREMENT,
 } from "../ingest/adapters/sanctuary";
 import { applyEaglePolicy, fetchEagleDrafts } from "../ingest/adapters/eagle";
+import { applyDarcellePolicy, fetchDarcelleDrafts } from "../ingest/adapters/darcelle";
+import {
+  applyHawksPolicy,
+  fetchHawksDrafts,
+  HAWKS_AGE_REQUIREMENT,
+} from "../ingest/adapters/hawks";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import type { IngestEventDraft } from "../ingest/types";
 import { storage } from "../storage";
@@ -60,6 +66,33 @@ function enforceSanctuaryCreateFields(data: InsertEvent): InsertEvent {
   return {
     ...data,
     ageRequirement: SANCTUARY_AGE_REQUIREMENT,
+    isSexPositive: true,
+    nudityOk: true,
+    eventTypes,
+  };
+}
+
+/** Belt-and-suspenders: Hawks createEvent must never land as ALL_AGES / 18+. */
+function enforceHawksCreateFields(data: InsertEvent): InsertEvent {
+  let eventTypes = data.eventTypes || "[]";
+  try {
+    const tags = Array.isArray(JSON.parse(eventTypes))
+      ? (JSON.parse(eventTypes) as unknown[]).map(t => String(t))
+      : [];
+    const upper = new Set(tags.map(t => t.trim().toUpperCase().replace(/[\s-]+/g, "_")));
+    for (const t of ["SEX_POSITIVE", "NUDITY_OK", "KINK"] as const) {
+      if (!upper.has(t)) {
+        tags.push(t);
+        upper.add(t);
+      }
+    }
+    eventTypes = JSON.stringify(tags);
+  } catch {
+    eventTypes = JSON.stringify(["SEX_POSITIVE", "NUDITY_OK", "KINK"]);
+  }
+  return {
+    ...data,
+    ageRequirement: HAWKS_AGE_REQUIREMENT,
     isSexPositive: true,
     nudityOk: true,
     eventTypes,
@@ -118,6 +151,15 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
 
   if (venue.sourceId === "eagle-events" || venue.fetchMode === "eagle_wix") {
     next = applyEaglePolicy(next);
+  }
+
+  if (venue.sourceId === "darcelle-tribe" || venue.fetchMode === "darcelle_tribe") {
+    next = applyDarcellePolicy(next);
+  }
+
+  // Hawks is a sex club — Sanctuary-style stamps, never ALL_AGES
+  if (venue.sourceId === "hawks-json" || venue.fetchMode === "hawks_squarespace") {
+    next = applyHawksPolicy(next);
   }
 
   // Badlands is a 21+ bar — never ALL_AGES; never invent FREE cover
@@ -290,6 +332,10 @@ async function fetchDraftsForVenue(
       return fetchSanctuaryDraftsForVenue(venue, existingEvents);
     case "eagle_wix":
       return fetchEagleDraftsForVenue(venue);
+    case "darcelle_tribe":
+      return fetchDarcelleDrafts({ feedUrl: venue.feedUrl, includePast: false });
+    case "hawks_squarespace":
+      return fetchHawksDrafts({ feedUrl: venue.feedUrl, includePast: false });
     case "generic":
     default:
       return fetchGenericDrafts(venue, existingEvents);
@@ -440,7 +486,13 @@ async function publishDraftsLive(
       createEvent: (data: InsertEvent) => {
         const isSanctuary =
           venue.sourceId === "sanctuary-ics" || venue.fetchMode === "sanctuary_ics";
-        const stamped = isSanctuary ? enforceSanctuaryCreateFields(data) : data;
+        const isHawks =
+          venue.sourceId === "hawks-json" || venue.fetchMode === "hawks_squarespace";
+        const stamped = isSanctuary
+          ? enforceSanctuaryCreateFields(data)
+          : isHawks
+            ? enforceHawksCreateFields(data)
+            : data;
         return storage.createEvent({
           ...stamped,
           status,
@@ -448,7 +500,7 @@ async function publishDraftsLive(
           adminNotes: [
             stamped.adminNotes,
             `Trusted auto-publish · ${venue.venueName} · ${venue.sourceId}`,
-            isSanctuary ? "Policy: 21_PLUS · sex-positive · nudity OK" : null,
+            isSanctuary || isHawks ? "Policy: 21_PLUS · sex-positive · nudity OK" : null,
           ]
             .filter(Boolean)
             .join(" · ")
