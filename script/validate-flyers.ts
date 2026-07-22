@@ -19,7 +19,7 @@ import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { loadFlyer } from "../server/flyerReader/github";
 import { ocrFlyer } from "../server/flyerReader/ocr";
-import { structureFlyerText, type FlyerParse } from "../server/flyerReader/parse";
+import { structureFlyer, type FlyerParse } from "../server/flyerReader/parse";
 
 type GroundTruth = Record<string, Record<string, string | null>>;
 
@@ -125,7 +125,9 @@ async function main() {
     try {
       const flyer = await loadFlyer(flyerPath);
       const ocr = await ocrFlyer(flyer.buffer);
-      const parse: FlyerParse = await structureFlyerText(ocr.text, {
+      const parse: FlyerParse = await structureFlyer({
+        imageBuffer: flyer.buffer,
+        rawText: ocr.text,
         ocrConfidence: ocr.confidence,
       });
 

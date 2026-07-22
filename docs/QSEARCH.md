@@ -225,6 +225,13 @@ deploy). `server/flyerReader/`:
   llama-3.3-70b-versatile) → XAI/OpenAI envs → deterministic heuristic
   fallback (low confidence + warning; never breaks). Confidence blends LLM
   self-report with OCR quality. Never-invent-FREE applies to drafts.
+- **Vision hybrid (title lever, r2)**: when the flyer image is available and
+  a vision model is configured, `structureFlyer` sends the IMAGE (downscaled
+  1024px JPEG) to the vision model with OCR text as a hint — stylized display
+  type never survives Tesseract ("Gaylabration" → "Reorder"). Providers:
+  Groq `FLYER_VISION_MODEL` (default llama-4-scout-17b-16e-instruct) → XAI
+  grok-2-vision → OpenAI. Any failure falls back to the text path with a
+  breadcrumb. /parse endpoint + validator are vision-first automatically.
 - **Phase 4 harness (shipped, needs your flyers)**: `npx tsx
   script/validate-flyers.ts [--limit N] [--json report.json]` — runs the
   full pipeline over every entry in `flyers/ground-truth.json`, scores

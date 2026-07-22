@@ -15,6 +15,7 @@ import {
   heuristicFlyerParse,
   flyerParseToDraft,
   structureFlyerText,
+  structureFlyer,
 } from "../server/flyerReader/parse";
 
 function assert(cond: unknown, msg: string) {
@@ -114,6 +115,49 @@ async function main() {
   assert(draftOut!.parseSource === "flyer-reader", "draft parseSource = flyer-reader");
   assert(draftOut!.sourceUrl === "github:flyers/alien-orgy.png", "draft carries GitHub source path");
   assert(draftOut!.admission !== "FREE", "draft never invents FREE");
+
+  /* ── vision hybrid (mocked) ── */
+  let visionSawImage = false;
+  const mockVisionFetch = (async (_url: any, init: any) => {
+    const body = JSON.parse(String(init?.body || "{}"));
+    const userContent = body?.messages?.[1]?.content;
+    visionSawImage =
+      Array.isArray(userContent) &&
+      userContent.some((c: any) => c?.type === "image_url" && String(c?.image_url?.url || "").startsWith("data:image/jpeg;base64,"));
+    return new Response(
+      JSON.stringify({
+        choices: [{ message: { content: '{"title":"Gaylabration: Radiance","start_date":"2026-07-18","end_date":"2026-07-19","time":"21:00","venue":"Crystal Ballroom","address":null,"description":"Pride dance party at the Crystal Ballroom.","url":null,"qr_info":null,"confidence":92}' } }],
+      }),
+      { status: 200 },
+    );
+  }) as unknown as typeof fetch;
+
+  const tinyFlyer = await sharp(Buffer.from(svg)).png().toBuffer();
+  const visionResult = await structureFlyer({
+    imageBuffer: tinyFlyer,
+    rawText: "REORDER GAYLABRATON SOUP", // deliberately bad OCR
+    ocrConfidence: 30,
+    now: NOW,
+    fetchImpl: mockVisionFetch,
+  });
+  assert(visionSawImage, "vision request carries downscaled JPEG data URL");
+  assert(visionResult.title === "Gaylabration: Radiance", "vision reads the stylized title OCR could not");
+  assert(visionResult.model?.startsWith("groq-vision:") || visionResult.model?.includes("vision"), `vision model recorded (${visionResult.model})`);
+
+  // Vision failure → text fallback with breadcrumb
+  const failFetch = (async () => new Response("upstream error", { status: 500 })) as unknown as typeof fetch;
+  const fellBack = await structureFlyer({
+    imageBuffer: tinyFlyer,
+    rawText: OCR_TEXT,
+    now: NOW,
+    fetchImpl: failFetch,
+  });
+  assert(fellBack.warnings.some(w => /Vision parse failed/.test(w)), "vision failure leaves breadcrumb and falls back");
+  assert(fellBack.start_date === "2026-08-08", "text/heuristic fallback still extracts date");
+
+  // No image → straight to text path (no vision attempt)
+  const textOnly = await structureFlyer({ rawText: OCR_TEXT, now: NOW, fetchImpl: mockFetch });
+  assert(textOnly.title === "Alien Orgy", "no image → text path unchanged");
 
   /* ── real OCR (opt-in: needs network for traineddata) ── */
   if (process.env.SMOKE_OCR === "1") {

@@ -4871,7 +4871,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const { loadFlyer } = await import("./flyerReader/github");
       const { ocrFlyer } = await import("./flyerReader/ocr");
-      const { structureFlyerText, flyerParseToDraft } = await import("./flyerReader/parse");
+      const { structureFlyer, flyerParseToDraft } = await import("./flyerReader/parse");
 
       const githubPath = req.body?.githubPath != null ? String(req.body.githubPath) : "";
       const imageBase64 = req.body?.imageBase64 != null ? String(req.body.imageBase64) : "";
@@ -4881,27 +4881,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
       let source = "upload";
       let ocr: Awaited<ReturnType<typeof ocrFlyer>> | null = null;
       let rawText = rawTextIn;
+      let imageBuffer: Buffer | null = null;
 
       if (!rawText) {
-        let buffer: Buffer;
         if (githubPath) {
           const flyer = await loadFlyer(githubPath);
-          buffer = flyer.buffer;
+          imageBuffer = flyer.buffer;
           source = flyer.source;
           flyerPath = flyer.path;
         } else if (imageBase64) {
-          buffer = Buffer.from(imageBase64.replace(/^data:[^,]+,/, ""), "base64");
+          imageBuffer = Buffer.from(imageBase64.replace(/^data:[^,]+,/, ""), "base64");
         } else {
           return res
             .status(400)
             .json({ ok: false, error: "Provide githubPath, imageBase64, or rawText" });
         }
-        if (!buffer?.length) return res.status(400).json({ ok: false, error: "Empty flyer" });
-        ocr = await ocrFlyer(buffer);
+        if (!imageBuffer?.length) return res.status(400).json({ ok: false, error: "Empty flyer" });
+        ocr = await ocrFlyer(imageBuffer);
         rawText = ocr.text;
       }
 
-      const parse = await structureFlyerText(rawText, { ocrConfidence: ocr?.confidence });
+      const parse = await structureFlyer({ imageBuffer, rawText, ocrConfidence: ocr?.confidence });
       const draft = flyerParseToDraft(parse, { sourcePath: flyerPath });
       res.json({
         ok: true,

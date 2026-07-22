@@ -55,6 +55,34 @@ export function flyerLlmConfigured(): LlmConfig | null {
   return { base: base.replace(/\/$/, ""), key, model, label: "vision-env" };
 }
 
+/**
+ * Vision-capable model config — the title-accuracy lever. Stylized flyer
+ * lettering OCRs to soup; a vision model reads the art directly. Same
+ * provider order as text: Groq → XAI → OpenAI.
+ */
+export function flyerVisionConfigured(): LlmConfig | null {
+  const groq = process.env.GROQ_API_KEY?.trim();
+  if (groq) {
+    return {
+      base: "https://api.groq.com/openai/v1",
+      key: groq,
+      model:
+        process.env.FLYER_VISION_MODEL?.trim() ||
+        "meta-llama/llama-4-scout-17b-16e-instruct",
+      label: "groq-vision",
+    };
+  }
+  const key = process.env.XAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim() || "";
+  if (!key) return null;
+  const base =
+    process.env.XAI_API_BASE?.trim() ||
+    (process.env.XAI_API_KEY ? "https://api.x.ai/v1" : "https://api.openai.com/v1");
+  const model =
+    process.env.FLYER_VISION_MODEL?.trim() ||
+    (process.env.XAI_API_KEY ? "grok-2-vision-latest" : "gpt-4o-mini");
+  return { base: base.replace(/\/$/, ""), key, model, label: "vision" };
+}
+
 /** Pull the first JSON object out of an LLM reply (tolerates fences/prose). */
 export function coerceFlyerJson(text: string): Record<string, unknown> | null {
   const raw = String(text || "");
@@ -275,6 +303,110 @@ export async function structureFlyerText(
     return fallback;
   } finally {
     clearTimeout(timer);
+  }
+}
+
+export type StructureFlyerOpts = {
+  /** Original flyer image — enables the vision pass (title authority). */
+  imageBuffer?: Buffer | null;
+  rawText: string;
+  ocrConfidence?: number;
+  now?: Date;
+  fetchImpl?: typeof fetch;
+};
+
+/**
+ * Vision-first structuring: when the flyer image is available and a vision
+ * model is configured, the model reads the IMAGE directly (stylized display
+ * type never survives OCR) with the OCR text attached as a hint. Falls back
+ * to the text-only path (then heuristics) on any failure.
+ */
+export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerParse> {
+  const cfg = opts.imageBuffer ? flyerVisionConfigured() : null;
+  if (!cfg || !opts.imageBuffer) {
+    return structureFlyerText(opts.rawText, opts);
+  }
+
+  const now = opts.now ?? new Date();
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  try {
+    // Downscale for token cost — 1024px wide JPEG is plenty for flyer type
+    const sharp = (await import("sharp")).default;
+    const jpeg = await sharp(opts.imageBuffer, { failOn: "none" })
+      .rotate()
+      .resize({ width: 1024, withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+    const dataUrl = `data:image/jpeg;base64,${jpeg.toString("base64")}`;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60_000);
+    try {
+      const res = await fetchImpl(`${cfg.base}/chat/completions`, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cfg.key}`,
+        },
+        body: JSON.stringify({
+          model: cfg.model,
+          temperature: 0,
+          messages: [
+            { role: "system", content: PARSE_PROMPT },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `Today is ${now.toISOString().slice(0, 10)}.\n\nRead the flyer IMAGE directly — it is authoritative, especially for the stylized title text. Noisy OCR text as a secondary hint:\n${String(opts.rawText || "").slice(0, 6000)}`,
+                },
+                { type: "image_url", image_url: { url: dataUrl } },
+              ],
+            },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`Vision LLM HTTP ${res.status}`);
+      const data: any = await res.json();
+      const content = String(data?.choices?.[0]?.message?.content || "");
+      const json = coerceFlyerJson(content);
+      if (!json) throw new Error("Vision LLM returned no parseable JSON");
+
+      const str = (k: string) => {
+        const v = json[k];
+        return v == null || v === "" ? null : String(v).trim().slice(0, 500) || null;
+      };
+      let url = str("url");
+      if (url && !/^https?:\/\//i.test(url)) {
+        url = /^[a-z0-9.-]+\.[a-z]{2,}([\/?#]|$)/i.test(url) ? `https://${url.toLowerCase()}` : url;
+      }
+      return {
+        title: str("title"),
+        start_date: str("start_date"),
+        end_date: str("end_date"),
+        time: str("time"),
+        venue: str("venue"),
+        address: str("address"),
+        description:
+          json.description == null ? null : String(json.description).trim().slice(0, 4000) || null,
+        url,
+        qr_info: str("qr_info"),
+        confidence: Math.max(0, Math.min(100, Math.round(Number(json.confidence) || 0))),
+        raw_text: opts.rawText,
+        model: `${cfg.label}:${cfg.model}`,
+        warnings: [],
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    const fallback = await structureFlyerText(opts.rawText, opts);
+    fallback.warnings = Array.from(
+      new Set([`Vision parse failed (${message.slice(0, 120)}) — text fallback`, ...fallback.warnings]),
+    );
+    return fallback;
   }
 }
 
