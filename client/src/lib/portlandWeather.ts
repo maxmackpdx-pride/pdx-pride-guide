@@ -109,6 +109,31 @@ export function weatherIconForCode(code: number): WeatherIconKind {
   return "partly-cloudy";
 }
 
+/**
+ * Map NWS shortForecast / period text → hub WeatherIcon glyph.
+ * Beach widgets get hourly NWS text, not WMO codes.
+ */
+export function weatherIconFromForecastText(
+  text: string | null | undefined,
+): WeatherIconKind {
+  const t = String(text || "").toLowerCase();
+  if (!t) return "partly-cloudy";
+  if (/thunder|t-?storm|lightning/.test(t)) return "thunder";
+  if (/snow|flurries|blizzard|sleet|ice\s*pellet/.test(t)) return "snow";
+  if (/heavy\s*rain|rain\s*shower|showers?/.test(t)) return "showers";
+  if (/\brain\b|precip/.test(t)) return "rain";
+  if (/drizzle|sprinkle|light\s*rain/.test(t)) return "drizzle";
+  if (/fog|haze|smoke|mist/.test(t)) return "fog";
+  if (/overcast|cloudy/.test(t) && !/partly|mostly\s*sunny|mostly\s*clear/.test(t)) {
+    return "overcast";
+  }
+  if (/partly\s*(cloudy|sunny)|mixed/.test(t)) return "partly-cloudy";
+  if (/mostly\s*(sunny|clear)/.test(t)) return "mostly-clear";
+  if (/sunny|clear|fair|hot/.test(t)) return "clear";
+  if (/cloud/.test(t)) return "overcast";
+  return "partly-cloudy";
+}
+
 export function weatherStyle(code: number) {
   if (code === 0 || code === 1) {
     return {

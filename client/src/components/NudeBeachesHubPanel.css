@@ -156,6 +156,33 @@
   color: #8a8a8a;
 }
 
+/* Match hub 7-day: kicker left, forecast glyph top-right for this time of day. */
+.nb-hub__weather-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.nb-hub__weather-head .nb-hub__kicker {
+  margin-bottom: 0;
+}
+
+.nb-hub__weather-hero-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -2px;
+  color: #ffc14a;
+  transition: color 0.25s ease, filter 0.25s ease;
+}
+
+.nb-hub__weather-hero-icon .hub-weather-icon {
+  display: block;
+}
+
 .nb-hub__weather-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr;

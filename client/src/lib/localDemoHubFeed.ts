@@ -81,13 +81,16 @@ export function getLocalDemoHubFeed(tab: HubFeedTab = "all"): HubFeedResponse {
  * First row: full when-line (no day dot). Second: day chip + short venue line.
  */
 export function getLocalDemoNextMoves(): HubEventRow[] {
+  // Far-future demo dates so the rail never paints Pride Week as “next” after it ends.
   return [
     {
       id: "demo-stank-featured",
       title: "Stank x Yes Coach: Pride Weekend",
-      when: "Sanctuary · 7/18/2026, 8:00:00 PM",
+      when: "Sanctuary · 7/18/2027, 8:00:00 PM",
       // no dayOfWeek → no day-dot (featured line)
       neighborhood: "Pearl",
+      dateStart: "2027-07-18T20:00:00",
+      dateEnd: "2027-07-19T04:00:00",
     },
     {
       id: STANK_EVENT_ID,
@@ -96,6 +99,8 @@ export function getLocalDemoNextMoves(): HubEventRow[] {
       dayOfWeek: "SAT",
       neighborhood: "Pearl",
       going: 3,
+      dateStart: "2027-07-18T20:00:00",
+      dateEnd: "2027-07-19T04:00:00",
     },
   ];
 }

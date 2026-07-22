@@ -10,6 +10,9 @@ export type HubEventRow = {
   going?: number | string;
   dayOfWeek?: string;
   chip?: string;
+  /** ISO / Pacific event start — used to keep “next moves” free of past nights. */
+  dateStart?: string | null;
+  dateEnd?: string | null;
 };
 
 type EventsTab = "going" | "hosting";

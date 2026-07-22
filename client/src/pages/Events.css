@@ -2,10 +2,35 @@
 
 .events-map-toolbar {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   max-width: 1180px;
   margin: 0 auto;
   padding: 12px clamp(20px, 4vw, 44px) 0;
+}
+
+.events-map-toolbar__count {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-meta, #8c8980);
+  min-width: 0;
+}
+
+/* Board-embedded map: sit under sticky filters, full width of feed. */
+.board-active-feed .events-map-toolbar {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 8px;
+}
+
+.board-active-feed .events-map-row {
+  margin-top: 8px;
+  margin-bottom: 16px;
 }
 
 .events-map-toggle {

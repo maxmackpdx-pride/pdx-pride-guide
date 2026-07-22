@@ -24,11 +24,13 @@ import "@/components/dashboard/dashboard.css";
 
 function mapCheckInRow(check: any): HubEventRow {
   return {
-    id: check.id,
+    id: check.eventId ?? check.id,
     title: check.eventTitle,
     when: `${check.venueName} · ${new Date(check.dateStart).toLocaleString()}`,
     dayOfWeek: check.dayOfWeek,
     chip: "Checked in",
+    dateStart: check.dateStart ?? null,
+    dateEnd: check.dateEnd ?? null,
   };
 }
 
@@ -41,6 +43,8 @@ function mapEventRow(evt: any, chip?: string): HubEventRow {
     admission: evt.admission ?? undefined,
     dayOfWeek: evt.dayOfWeek ?? undefined,
     chip,
+    dateStart: evt.dateStart ?? evt.date_start ?? null,
+    dateEnd: evt.dateEnd ?? evt.date_end ?? null,
   };
 }
 

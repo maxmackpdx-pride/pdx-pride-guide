@@ -43,6 +43,8 @@ function eventHref(item: HubFeedItem): string | null {
 }
 
 function eventRowsForItem(item: HubFeedItem): HubFeedEventEmbed[] {
+  // Recurring bulk series: one card, one row (badge "Recurring") — never expand N nights.
+  if (item.badge === "Recurring" && item.event) return [item.event];
   if (item.events?.length) return item.events;
   if (item.event) return [item.event];
   return [];

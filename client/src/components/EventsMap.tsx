@@ -102,6 +102,15 @@ function UserLocationMarker({ position }: { position: [number, number] | null })
   return <Marker position={position} icon={icon} />;
 }
 
+/** Stable signature so Leaflet remounts pins when the filtered set changes. */
+function selectionPinKey(events: Event[]): string {
+  if (events.length === 0) return "empty";
+  return events
+    .map(e => `${e.id}:${e.dateStart ?? ""}`)
+    .sort()
+    .join("|");
+}
+
 function MarkersLayer({
   events,
   onSelect,
@@ -123,8 +132,11 @@ function MarkersLayer({
         const icon = buildPinIcon(days, hasRsvp);
         if (!icon) return null;
         const primaryColor = DAY_COLORS[days[0] as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
+        // Include listing ids in the key so react-leaflet rebuilds the pin when
+        // the board filter adds/removes nights at the same venue (icon + popup).
+        const markerKey = `${key}:${evts.map(e => listingKey(e)).sort().join(",")}`;
         return (
-          <Marker key={key} position={[lat, lng]} icon={icon}>
+          <Marker key={markerKey} position={[lat, lng]} icon={icon}>
             <Tooltip direction="top" offset={[0, -16]} opacity={1} className="venue-hover-tooltip">
               {evts[0].venueName}
             </Tooltip>
@@ -172,6 +184,37 @@ function MapResizer({ expanded }: { expanded: boolean }) {
       clearTimeout(t2);
     };
   }, [expanded]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
+/**
+ * When board filters change, refit the map to the pins that remain so the
+ * viewport matches the selection (not a stale city-wide zoom full of ghosts).
+ */
+function MapFitToSelection({
+  events,
+  selectionKey,
+  defaultCenter,
+  defaultZoom,
+}: {
+  events: Event[];
+  selectionKey: string;
+  defaultCenter: [number, number];
+  defaultZoom: number;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    const points = events.filter(hasMapPin).map(e => [e.lat as number, e.lng as number] as [number, number]);
+    if (points.length === 0) {
+      map.setView(defaultCenter, defaultZoom, { animate: true });
+      return;
+    }
+    if (points.length === 1) {
+      map.flyTo(points[0], Math.max(map.getZoom(), 14), { duration: 0.55 });
+      return;
+    }
+    map.fitBounds(points, { padding: [48, 48], maxZoom: 15, animate: true });
+  }, [selectionKey, map, defaultCenter, defaultZoom]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
 }
 
@@ -237,6 +280,15 @@ export function MapView({
     () => new Set(checkIns.map(row => row.eventId ?? row.event_id).filter((id): id is number => typeof id === "number")),
     [checkIns],
   );
+
+  // Board filters pass the already-filtered list; remount pins + refit when it changes.
+  const selectionKey = useMemo(() => selectionPinKey(events), [events]);
+  const legendDays = useMemo(() => {
+    const present = new Set(
+      events.map(e => e.dayOfWeek).filter((d): d is string => Boolean(d)),
+    );
+    return sortByPrideDay(Array.from(present));
+  }, [events]);
 
   const locateMe = useCallback(() => {
     if (!navigator.geolocation) {
@@ -334,9 +386,20 @@ export function MapView({
               maxZoom={19}
               subdomains="abcd"
             />
-            <MarkersLayer events={events} onSelect={onSelect} rsvpEventIds={rsvpEventIds} />
+            <MarkersLayer
+              key={selectionKey}
+              events={events}
+              onSelect={onSelect}
+              rsvpEventIds={rsvpEventIds}
+            />
             <UserLocationMarker position={userPosition} />
             <MapFlyTo position={userPosition} />
+            <MapFitToSelection
+              events={events}
+              selectionKey={selectionKey}
+              defaultCenter={MAP_VIEWS[variant].center}
+              defaultZoom={MAP_VIEWS[variant].zoom}
+            />
             <MapResizer expanded={expanded} />
           </MapContainer>
         )}
@@ -382,20 +445,23 @@ export function MapView({
 
         <div className={`map-legend${variant === "home" ? " map-legend--home" : ""}`} aria-label="Map key">
           <div className="map-legend-items">
-            {PRIDE_WEEK_DAYS.map((day) => [day, DAY_COLORS[day]] as const).map(([day, color]) => (
-              <div key={day} className="map-legend-item">
-                <span
-                  className="map-legend-swatch"
-                  style={{
-                    background: "#000",
-                    border: `3px solid ${color}`,
-                    boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
-                    boxSizing: "border-box",
-                  }}
-                />
-                <span className="map-legend-label">{day}</span>
-              </div>
-            ))}
+            {(legendDays.length > 0 ? legendDays : PRIDE_WEEK_DAYS).map((day) => {
+              const color = DAY_COLORS[day as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
+              return (
+                <div key={day} className="map-legend-item">
+                  <span
+                    className="map-legend-swatch"
+                    style={{
+                      background: "#000",
+                      border: `3px solid ${color}`,
+                      boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <span className="map-legend-label">{day}</span>
+                </div>
+              );
+            })}
             <div className="map-legend-item map-legend-item--multi">
               <span
                 className="map-legend-swatch"

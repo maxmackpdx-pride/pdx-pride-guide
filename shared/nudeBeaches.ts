@@ -201,7 +201,8 @@ export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
     {
       lat: 45.54978,
       lng: -122.20488,
-      title: "Worth the hike. The distance is the whole point — it keeps this end for those in the know.",
+      // Soft location note only — no IYKYK / cruising copy (rangers read maps too).
+      title: "Far end of the sand. Quieter, more cover, longer walk back — bring water.",
     },
     {
       lat: 45.55445,

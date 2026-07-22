@@ -25,6 +25,22 @@ import {
   hubSectionToAdminTab,
   type HubSection,
 } from "./types";
+import { isEventSchedulePast, parsePacificDateTime } from "@shared/missedConnections";
+
+/** Upcoming nights only for the right-rail “Your next moves” list. */
+function isHubNextMoveLive(row: HubEventRow, nowMs = Date.now()): boolean {
+  if (row.dateStart || row.dateEnd) {
+    return !isEventSchedulePast(row.dateStart, row.dateEnd, nowMs);
+  }
+  // No schedule → don't invent a “next” night (avoid stale demo / partial rows).
+  return false;
+}
+
+function sortHubNextMoves(a: HubEventRow, b: HubEventRow): number {
+  const aMs = parsePacificDateTime(a.dateStart) ?? Number.POSITIVE_INFINITY;
+  const bMs = parsePacificDateTime(b.dateStart) ?? Number.POSITIVE_INFINITY;
+  return aMs - bMs;
+}
 
 export type HubV2Props = {
   user: AuthUser;
@@ -247,10 +263,19 @@ export default function HubV2({
     onSectionChange(next);
   };
 
-  const upcoming = useMemo(
-    () => [...goingEvents, ...hostingEvents].slice(0, 3),
-    [goingEvents, hostingEvents],
-  );
+  const upcoming = useMemo(() => {
+    const now = Date.now();
+    const seen = new Set<string>();
+    const rows: HubEventRow[] = [];
+    for (const row of [...goingEvents, ...hostingEvents]) {
+      if (!isHubNextMoveLive(row, now)) continue;
+      const key = String(row.id);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push(row);
+    }
+    return rows.sort(sortHubNextMoves).slice(0, 3);
+  }, [goingEvents, hostingEvents]);
 
   const stats =
     profileStats ??

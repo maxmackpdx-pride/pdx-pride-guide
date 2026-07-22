@@ -493,42 +493,6 @@ export default function Events() {
     <div className="zine-page events-page board-page board-page--makeover">
       <EventsHero eventCount={upcomingCount} stats={heroStats} />
 
-      <div className="events-map-toolbar">
-        <button
-          type="button"
-          className="events-map-toggle"
-          data-testid="button-toggle-events-map"
-          aria-expanded={mapVisible}
-          aria-controls="events-map-panel"
-          onClick={() => {
-            setMapVisible(v => {
-              if (v) setMapExpanded(false);
-              return !v;
-            });
-          }}
-        >
-          {mapVisible ? "Hide map" : "Show map"}
-        </button>
-      </div>
-
-      {mapVisible && (
-        <ScrollReveal>
-          <div id="events-map-panel" className="events-map-row events-map-row--solo">
-            <div className="events-map-row__map">
-              <Suspense fallback={<MapViewFallback variant="events" />}>
-                <MapView
-                  events={filtered}
-                  expanded={mapExpanded}
-                  onExpand={() => setMapExpanded(true)}
-                  onCollapse={() => setMapExpanded(false)}
-                  onSelect={openEvent}
-                />
-              </Suspense>
-            </div>
-          </div>
-        </ScrollReveal>
-      )}
-
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
 
       {activeTab === "schedule" ? (
@@ -668,7 +632,7 @@ export default function Events() {
                     </button>
                   </div>
                 </div>
-                {(activeFilters.length > 0 || searchQuery.trim() || pastView) && (
+                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== "ALL") && (
                   <button
                     type="button"
                     className="events-clear-filters"
@@ -685,6 +649,51 @@ export default function Events() {
               </div>
             </div>
           </ScrollReveal>
+
+          {/* Map under filter chips so pins track the same selection as the board. */}
+          <div className="events-map-toolbar">
+            <button
+              type="button"
+              className="events-map-toggle"
+              data-testid="button-toggle-events-map"
+              aria-expanded={mapVisible}
+              aria-controls="events-map-panel"
+              onClick={() => {
+                setMapVisible(v => {
+                  if (v) setMapExpanded(false);
+                  return !v;
+                });
+              }}
+            >
+              {mapVisible ? "Hide map" : "Show map"}
+            </button>
+            {mapVisible && !isLoading && (
+              <span className="events-map-toolbar__count" data-testid="events-map-filter-count">
+                Map · {filtered.length} event{filtered.length === 1 ? "" : "s"}
+                {activeChipLabel && activeDay !== "ALL" ? ` · ${activeChipLabel}` : ""}
+                {activeFilters.length > 0 ? ` · ${activeFilters.join(" · ")}` : ""}
+                {pastView ? " · past" : ""}
+              </span>
+            )}
+          </div>
+
+          {mapVisible && (
+            <ScrollReveal>
+              <div id="events-map-panel" className="events-map-row events-map-row--solo">
+                <div className="events-map-row__map">
+                  <Suspense fallback={<MapViewFallback variant="events" />}>
+                    <MapView
+                      events={filtered}
+                      expanded={mapExpanded}
+                      onExpand={() => setMapExpanded(true)}
+                      onCollapse={() => setMapExpanded(false)}
+                      onSelect={openEvent}
+                    />
+                  </Suspense>
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
 
           <div className="board-active-feed__body">
         {isLoading ? (

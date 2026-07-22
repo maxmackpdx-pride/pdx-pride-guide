@@ -5,6 +5,12 @@ import {
   SAUVIE_ISLAND_PARKING_URL,
   SAUVIE_ISLAND_SWIM_GUIDE_URL,
 } from "@shared/nudeBeaches";
+import WeatherIcon from "@/components/hub/WeatherIcon";
+import {
+  weatherIconFromForecastText,
+  weatherStyle,
+} from "@/lib/portlandWeather";
+import "./NudeBeachesHubPanel.css";
 
 /** Swim-status color ramp used for the big water-quality value + card border. */
 function swimStatusColor(status?: string | null) {
@@ -13,7 +19,6 @@ function swimStatusColor(status?: string | null) {
   if (status === "warning") return "#FFB347";
   return "#19E3FF";
 }
-import "./NudeBeachesHubPanel.css";
 
 function formatShortTime(iso?: string | null) {
   if (!iso) return null;
@@ -31,6 +36,45 @@ function trendLabel(trend?: string | null) {
   return null;
 }
 
+/** Current-period NWS line → hub-style forecast glyph (same icons as 7-day hub strip). */
+function weatherIconForLive(summary?: string | null, forecastDays?: { shortForecast?: string | null }[]) {
+  const text = summary || forecastDays?.[0]?.shortForecast || null;
+  return weatherIconFromForecastText(text);
+}
+
+function WeatherSectionHead({
+  summary,
+  forecastDays,
+}: {
+  summary?: string | null;
+  forecastDays?: { shortForecast?: string | null }[];
+}) {
+  const kind = weatherIconForLive(summary, forecastDays);
+  // Match hub hero tint: clear/sunny warm gold; rain/storm cooler cyan; else soft gold.
+  const style =
+    kind === "clear" || kind === "mostly-clear"
+      ? weatherStyle(0)
+      : kind === "rain" || kind === "showers" || kind === "drizzle"
+        ? weatherStyle(61)
+        : kind === "thunder"
+          ? weatherStyle(95)
+          : weatherStyle(2);
+
+  return (
+    <div className="nb-hub__weather-head">
+      <div className="nb-hub__kicker">Weather</div>
+      <span
+        className="nb-hub__weather-hero-icon"
+        style={{ color: "#ffc14a", filter: `drop-shadow(${style.sunGlow})` }}
+        title={summary || undefined}
+        aria-hidden
+      >
+        <WeatherIcon kind={kind} size={30} />
+      </span>
+    </div>
+  );
+}
+
 function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   const trend = trendLabel(live.levelTrend);
   const lowTime = formatShortTime(live.todayLowAt);
@@ -40,7 +84,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   return (
     <div className="nb-hub nb-hub--rooster">
       <section className="nb-hub__section nb-hub__section--pulse">
-        <div className="nb-hub__kicker">Weather</div>
+        <WeatherSectionHead summary={live.weatherSummary} forecastDays={live.forecastDays} />
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
             <span className="nb-hub__weather-value">
@@ -135,6 +179,37 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
 
   return (
     <div className="nb-hub nb-hub--sauvie">
+      <section className="nb-hub__section nb-hub__section--pulse">
+        <WeatherSectionHead summary={live.weatherSummary} forecastDays={live.forecastDays} />
+        <div className="nb-hub__weather-grid">
+          <div className="nb-hub__weather-main">
+            <span className="nb-hub__weather-value">
+              {live.airTempF != null ? `${live.airTempF}°F` : "—"}
+            </span>
+            <span className="nb-hub__weather-label">Air temp</span>
+          </div>
+          <div className="nb-hub__weather-stat">
+            <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
+            <span className="nb-hub__weather-stat-label">Wind</span>
+          </div>
+          <div className="nb-hub__weather-stat">
+            <span className="nb-hub__weather-stat-value">
+              {live.forecastDays?.[0]?.highF != null ? `${live.forecastDays[0].highF}°F` : "—"}
+            </span>
+            <span className="nb-hub__weather-stat-label">
+              {live.forecastDays?.[0]?.name ? `${live.forecastDays[0].name} high` : "Day high"}
+            </span>
+          </div>
+          <div className="nb-hub__weather-stat">
+            <span className="nb-hub__weather-stat-value">
+              {live.parkingStatusLabel || "—"}
+            </span>
+            <span className="nb-hub__weather-stat-label">Parking</span>
+          </div>
+        </div>
+        <p className="nb-hub__summary">{live.weatherSummary || "NWS forecast unavailable."}</p>
+      </section>
+
       <section
         className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}
         style={{ ["--nb-rim" as string]: swimColor }}
