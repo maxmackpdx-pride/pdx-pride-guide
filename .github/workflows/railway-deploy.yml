@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - "reports/**"
 
 # Queue deploys — cancel-in-progress caused overlapping Railway deploys that
 # showed up as CRASHED/REMOVED in the dashboard and failed GitHub Actions runs.

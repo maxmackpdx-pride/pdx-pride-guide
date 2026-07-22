@@ -1,0 +1,98 @@
+name: Flyer Reader validation
+
+# Runs the full OCR → vision/LLM validation suite automatically whenever the
+# parser, the flyers, or the harness change — and writes the report BACK INTO
+# THE REPO (reports/), so every collaborator (human or AI) reads results by
+# pulling master. No more relaying numbers between chats.
+#
+# One-time setup: add repo secret GROQ_API_KEY
+# (GitHub → Settings → Secrets and variables → Actions → New repository secret)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "flyers/**"
+      - "server/flyerReader/**"
+      - "script/validate-flyers.ts"
+      - ".github/workflows/flyer-validate.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: flyer-validate
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci --ignore-scripts
+
+      - name: Run offline smokes (no secrets needed)
+        run: |
+          npx tsx script/smoke-flyer-reader.ts
+          npx tsx script/smoke-trusted-flyers.ts
+          npx tsx script/smoke-trusted-new-venues.ts
+
+      - name: Run flyer validation suite
+        id: validate
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ] && [ -z "$XAI_API_KEY" ]; then
+            echo "::warning::No GROQ_API_KEY / XAI_API_KEY secret set — validation will run heuristic-only (low scores expected). Add the secret in repo Settings → Secrets → Actions."
+          fi
+          mkdir -p reports
+          set +e
+          npx tsx script/validate-flyers.ts --json reports/flyer-validation-latest.json | tee reports/flyer-validation-latest.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo '## Flyer Reader validation' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -25 reports/flyer-validation-latest.txt >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit report back to repo
+        if: always()
+        run: |
+          git config user.name "flyer-validate-bot"
+          git config user.email "actions@github.com"
+          git add reports/
+          if git diff --cached --quiet; then
+            echo "No report changes."
+            exit 0
+          fi
+          OVERALL=$(node -e "try{console.log(require('./reports/flyer-validation-latest.json').overall+'%')}catch{console.log('n/a')}")
+          git commit -m "Flyer validation report: ${OVERALL} overall (auto)"
+          git pull --rebase origin master
+          git push origin master
+      # NOTE: reports/ is intentionally NOT in this workflow's `paths` trigger,
+      # so the report commit cannot re-trigger this workflow (no loop). The
+      # Railway deploy workflow will run on the report commit — harmless
+      # (idempotent redeploy) but if it bothers, add `paths-ignore: reports/**`
+      # to railway-deploy.yml.
+
+      - name: Fail job if accuracy below threshold
+        if: steps.validate.outputs.exit_code != '0'
+        run: |
+          echo "Validation below 70% threshold (or errored)."
+          exit 1
