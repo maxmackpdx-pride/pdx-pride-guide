@@ -1,12 +1,12 @@
 {
-  "flyers/example-flyer.png": {
+  "flyers/alien-orgy-aug.png": {
     "title": "Alien Orgy",
-    "start_date": "2026-08-08",
-    "end_date": null,
-    "time": "21:00",
-    "venue": "Sanctuary Club",
+    "dateStart": "2026-08-08T21:00:00",
+    "dateEnd": "2026-08-09T02:00:00",
+    "venueName": "Sanctuary Club",
     "address": "33 NW 9th Ave, Portland, OR 97209",
-    "url": "https://pdxsanctuary.com/events/alien-orgy/",
-    "_notes": "Keys match script/validate-flyers.ts scoring: title/venue fuzzy, dates exact-day, time ±30min, address street-number+name, url hostname. null = field not printed on flyer (skipped in scoring). _notes is ignored."
+    "admission": "TICKETED",
+    "ageRequirement": "21_PLUS",
+    "url": "https://pdxsanctuary.com/events/alien-orgy/"
   }
 }
