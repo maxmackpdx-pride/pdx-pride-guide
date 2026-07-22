@@ -91,7 +91,13 @@ export function scoreField(field: ScoredField, expected: string | null, actual: 
 async function main() {
   const args = process.argv.slice(2);
   const limitIdx = args.indexOf("--limit");
-  const limit = limitIdx >= 0 ? Number(args[limitIdx + 1]) || Infinity : Infinity;
+  // Spend ceiling: never more than FLYER_VALIDATE_MAX vision calls per run
+  // (default 25) regardless of ground-truth size; --limit can only lower it.
+  const hardCap = Math.max(1, Number(process.env.FLYER_VALIDATE_MAX) || 25);
+  const limit = Math.min(
+    limitIdx >= 0 ? Number(args[limitIdx + 1]) || hardCap : hardCap,
+    hardCap,
+  );
   const jsonIdx = args.indexOf("--json");
   const jsonOut = jsonIdx >= 0 ? args[jsonIdx + 1] : null;
 

@@ -34,7 +34,13 @@ export type FlyerParse = {
 
 type LlmConfig = { base: string; key: string; model: string; label: string };
 
+/** Hard kill switch: FLYER_LLM_DISABLED=1 stops ALL paid LLM/vision calls. */
+function llmKilled(): boolean {
+  return process.env.FLYER_LLM_DISABLED === "1";
+}
+
 export function flyerLlmConfigured(): LlmConfig | null {
+  if (llmKilled()) return null;
   const groq = process.env.GROQ_API_KEY?.trim();
   if (groq) {
     return {
@@ -61,6 +67,7 @@ export function flyerLlmConfigured(): LlmConfig | null {
  * provider order as text: Groq → XAI → OpenAI.
  */
 export function flyerVisionConfigured(): LlmConfig | null {
+  if (llmKilled()) return null;
   const groq = process.env.GROQ_API_KEY?.trim();
   if (groq) {
     return {
