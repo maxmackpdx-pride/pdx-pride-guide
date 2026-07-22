@@ -73,11 +73,17 @@ export function scoreField(field: ScoredField, expected: string | null, actual: 
       return Boolean(numE && numE === numA && tokenOverlap(expected, actual) >= 0.5);
     }
     case "url": {
-      try {
-        return new URL(String(expected)).hostname === new URL(String(actual)).hostname;
-      } catch {
-        return norm(expected) === norm(actual);
-      }
+      const host = (raw: string): string | null => {
+        const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+        try {
+          return new URL(withScheme).hostname.toLowerCase().replace(/^www\./, "");
+        } catch {
+          return null;
+        }
+      };
+      const he = host(String(expected));
+      const ha = host(String(actual));
+      return Boolean(he && ha && he === ha);
     }
   }
 }

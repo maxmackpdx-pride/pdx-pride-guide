@@ -63,7 +63,8 @@ async function main() {
   );
   assert(coerceFlyerJson("no json here") === null, "coerceFlyerJson null on garbage");
   assert(heuristicDate("SAT AUG 8 - 9PM", NOW) === "2026-08-08", "heuristic date parses 'AUG 8' → next occurrence");
-  assert(heuristicDate("MAR 3 DOORS 8PM", NOW) === "2027-03-03", "past month rolls to next year");
+  assert(heuristicDate("MAR 3 DOORS 8PM", NOW) === "2027-03-03", "months-old date rolls to next year");
+  assert(heuristicDate("SAT JUL 18 9PM", new Date("2026-07-22T12:00:00")) === "2026-07-18", "recent-past date stays this year (no year bias)");
   assert(heuristicTime("DOORS 8PM SHOW 9:30PM") === "20:00", "heuristic time parses first time");
   const OCR_TEXT = "ALIEN ORGY\nSAT AUG 8 - 9PM\nSANCTUARY CLUB\n33 NW 9TH AVE PORTLAND\npdxsanctuary.com/events/alien-orgy";
   const hp = heuristicFlyerParse(OCR_TEXT, NOW);
@@ -96,6 +97,17 @@ async function main() {
   assert(structured.title === "Alien Orgy" && structured.venue === "Sanctuary Club", "LLM JSON mapped to schema");
   assert(structured.confidence === 81, `confidence blends LLM(90) with OCR(80) (got ${structured.confidence})`);
   assert(structured.model != null, "model recorded");
+
+  // Scheme-less URL normalization (validator failure pattern from live run)
+  const mockFetchUrl = (async () =>
+    new Response(
+      JSON.stringify({
+        choices: [{ message: { content: '{"title":"Treasure Trail","start_date":"2026-07-17","end_date":null,"time":"20:00","venue":null,"address":null,"description":null,"url":"WWW.BEARRACUDA.COM","qr_info":null,"confidence":80}' } }],
+      }),
+      { status: 200 },
+    )) as unknown as typeof fetch;
+  const urlNorm = await structureFlyerText("TREASURE TRAIL", { now: NOW, fetchImpl: mockFetchUrl });
+  assert(urlNorm.url === "https://www.bearracuda.com", `scheme-less URL normalized (got ${urlNorm.url})`);
 
   const draftOut = flyerParseToDraft(structured, { sourcePath: "flyers/alien-orgy.png" });
   assert(draftOut != null && draftOut.dateStart === "2026-08-08T21:00:00", "draft dateStart from date+time");

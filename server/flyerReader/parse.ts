@@ -112,12 +112,15 @@ export function heuristicDate(text: string, now = new Date()): string | null {
   }
   if (month < 1 || month > 12 || day < 1 || day > 31) return null;
 
-  // Flyers omit the year — pick this year, roll forward if it already passed
+  // Flyers omit the year — pick the CLOSEST occurrence: flyers are usually
+  // scanned near their event date, so a date up to ~45 days past stays in
+  // the current year (a Pride flyer scanned the week after must not roll a
+  // year forward); older than that rolls to next year.
   const explicitYear = t.match(/\b(20\d{2})\b/);
   let year = explicitYear ? Number(explicitYear[1]) : now.getFullYear();
   if (!explicitYear) {
     const candidate = new Date(year, month - 1, day, 23, 59);
-    if (candidate.getTime() < now.getTime() - 24 * 3600_000) year += 1;
+    if (candidate.getTime() < now.getTime() - 45 * 24 * 3600_000) year += 1;
   }
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
@@ -180,7 +183,10 @@ Return ONLY a JSON object with exactly these keys:
 
 Rules:
 - Unknown → null. NEVER guess an address or venue not present in the text.
-- Flyers usually omit the year: pick the NEXT occurrence relative to today (given below).
+- "title" is the EVENT NAME — usually the visually dominant words. It is NOT a DJ/performer/host name, not the venue, not a date, not a sponsor, not ticket text. Prefer a short distinctive name ("Treasure Trail", "Gaylabration: Radiance") over lineup words.
+- Flyers usually omit the year: choose the year that puts the date CLOSEST to today (given below). A date within the last ~6 weeks is this year's PAST event — do NOT roll it a year forward. Only pick next year when the date would otherwise be months in the past.
+- Overnight events: if the end time is after midnight (e.g. "9PM-3AM"), "end_date" is the NEXT calendar day after start_date.
+- "url": include the scheme — if the flyer prints "WWW.EXAMPLE.COM", return "https://www.example.com".
 - "description" = one clean sentence summarizing the event from the text, not a transcript.
 - "qr_info" = text near any QR mention (e.g. "scan for tickets"), else null.
 - "confidence" = your honest overall extraction confidence.`;
@@ -234,6 +240,12 @@ export async function structureFlyerText(
       const v = json[k];
       return v == null || v === "" ? null : String(v).trim().slice(0, 500) || null;
     };
+    // Normalize scheme-less URLs ("WWW.BEARRACUDA.COM" → https://www.bearracuda.com)
+    let url = str("url");
+    if (url && !/^https?:\/\//i.test(url)) {
+      url = /^[a-z0-9.-]+\.[a-z]{2,}([\/?#]|$)/i.test(url) ? `https://${url.toLowerCase()}` : url;
+    }
+
     const llmConf = Math.max(0, Math.min(100, Number(json.confidence) || 0));
     // Blend: LLM confidence dampened by OCR quality (garbage in, garbage out)
     const ocrConf = opts?.ocrConfidence;
@@ -249,7 +261,7 @@ export async function structureFlyerText(
       venue: str("venue"),
       address: str("address"),
       description: json.description == null ? null : String(json.description).trim().slice(0, 4000) || null,
-      url: str("url"),
+      url,
       qr_info: str("qr_info"),
       confidence,
       raw_text: rawText,
