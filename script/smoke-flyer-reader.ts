@@ -159,6 +159,43 @@ async function main() {
   const textOnly = await structureFlyer({ rawText: OCR_TEXT, now: NOW, fetchImpl: mockFetch });
   assert(textOnly.title === "Alien Orgy", "no image → text path unchanged");
 
+  // Self-healing: 404 model → /models discovery → retry with found model
+  let discoveryCalls = 0;
+  const heal404Fetch = (async (url: any, init: any) => {
+    const u = String(url);
+    if (u.endsWith("/models")) {
+      discoveryCalls++;
+      return new Response(
+        JSON.stringify({ data: [{ id: "llama-3.3-70b-versatile" }, { id: "meta-llama/llama-4-maverick-17b-128e-instruct" }, { id: "llava-v1.5-7b" }] }),
+        { status: 200 },
+      );
+    }
+    const body = JSON.parse(String(init?.body || "{}"));
+    if (body.model === "meta-llama/llama-4-scout-17b-16e-instruct") {
+      return new Response("model not found", { status: 404 });
+    }
+    return new Response(
+      JSON.stringify({ choices: [{ message: { content: '{"title":"Gaylabration: Radiance","start_date":"2026-07-18","end_date":null,"time":"21:00","venue":"Crystal Ballroom","address":null,"description":null,"url":null,"qr_info":null,"confidence":90}' } }] }),
+      { status: 200 },
+    );
+  }) as unknown as typeof fetch;
+  const healed = await structureFlyer({
+    imageBuffer: tinyFlyer,
+    rawText: "SOUP",
+    now: NOW,
+    fetchImpl: heal404Fetch,
+  });
+  assert(discoveryCalls === 1, "404 triggers exactly one /models discovery");
+  assert(healed.title === "Gaylabration: Radiance", "retry with discovered model succeeds");
+  assert(
+    healed.model != null && /maverick/.test(healed.model),
+    `discovered maverick model recorded (${healed.model})`,
+  );
+  assert(
+    healed.warnings.some(w => /auto-discovered/.test(w)),
+    "auto-discovery breadcrumb present",
+  );
+
   /* ── real OCR (opt-in: needs network for traineddata) ── */
   if (process.env.SMOKE_OCR === "1") {
     const { ocrFlyer } = await import("../server/flyerReader/ocr");

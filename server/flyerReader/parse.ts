@@ -313,6 +313,36 @@ export async function structureFlyerText(
   }
 }
 
+/** Runtime-discovered vision model (survives per-process; reset on deploy). */
+let discoveredVisionModel: string | null = null;
+
+/**
+ * Ask the provider which vision-capable models exist and pick the best.
+ * Self-healing against model deprecations: a 404 becomes a discovery pass +
+ * warning, never a silent text-path regression.
+ */
+export async function discoverVisionModel(
+  cfg: { base: string; key: string },
+  fetchImpl: typeof fetch = fetch,
+): Promise<{ id: string | null; candidates: string[] }> {
+  try {
+    const res = await fetchImpl(`${cfg.base}/models`, {
+      headers: { Authorization: `Bearer ${cfg.key}` },
+    });
+    if (!res.ok) return { id: null, candidates: [] };
+    const data: any = await res.json();
+    const ids: string[] = (Array.isArray(data?.data) ? data.data : [])
+      .map((m: any) => String(m?.id || ""))
+      .filter(Boolean);
+    const rank = (id: string) =>
+      /scout/i.test(id) ? 3 : /maverick/i.test(id) ? 2 : /vision|llava/i.test(id) ? 1 : 0;
+    const candidates = ids.filter(id => rank(id) > 0).sort((a, b) => rank(b) - rank(a));
+    return { id: candidates[0] || null, candidates };
+  } catch {
+    return { id: null, candidates: [] };
+  }
+}
+
 export type StructureFlyerOpts = {
   /** Original flyer image — enables the vision pass (title authority). */
   imageBuffer?: Buffer | null;
@@ -347,34 +377,54 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
     const dataUrl = `data:image/jpeg;base64,${jpeg.toString("base64")}`;
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 60_000);
+    const timer = setTimeout(() => controller.abort(), 90_000);
     try {
-      const res = await fetchImpl(`${cfg.base}/chat/completions`, {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${cfg.key}`,
-        },
-        body: JSON.stringify({
-          model: cfg.model,
-          temperature: 0,
-          messages: [
-            { role: "system", content: PARSE_PROMPT },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: `Today is ${now.toISOString().slice(0, 10)}.\n\nRead the flyer IMAGE directly — it is authoritative, especially for the stylized title text. Noisy OCR text as a secondary hint:\n${String(opts.rawText || "").slice(0, 6000)}`,
-                },
-                { type: "image_url", image_url: { url: dataUrl } },
-              ],
-            },
-          ],
-        }),
-      });
-      if (!res.ok) throw new Error(`Vision LLM HTTP ${res.status}`);
+      const callVision = (model: string) =>
+        fetchImpl(`${cfg.base}/chat/completions`, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${cfg.key}`,
+          },
+          body: JSON.stringify({
+            model,
+            temperature: 0,
+            messages: [
+              { role: "system", content: PARSE_PROMPT },
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: `Today is ${now.toISOString().slice(0, 10)}.\n\nRead the flyer IMAGE directly — it is authoritative, especially for the stylized title text. Noisy OCR text as a secondary hint:\n${String(opts.rawText || "").slice(0, 6000)}`,
+                  },
+                  { type: "image_url", image_url: { url: dataUrl } },
+                ],
+              },
+            ],
+          }),
+        });
+
+      const visionWarnings: string[] = [];
+      let modelUsed = discoveredVisionModel || cfg.model;
+      let res = await callVision(modelUsed);
+
+      // Self-healing: unknown model → ask the provider what vision models
+      // exist, retry once with the best candidate, remember it per-process.
+      if ((res.status === 404 || res.status === 400) && !discoveredVisionModel) {
+        const found = await discoverVisionModel(cfg, fetchImpl);
+        if (found.id) {
+          visionWarnings.push(
+            `Vision model ${cfg.model} unavailable (HTTP ${res.status}) — auto-discovered ${found.id}`,
+          );
+          discoveredVisionModel = found.id;
+          modelUsed = found.id;
+          res = await callVision(modelUsed);
+        }
+      }
+
+      if (!res.ok) throw new Error(`Vision LLM HTTP ${res.status} (model ${modelUsed})`);
       const data: any = await res.json();
       const content = String(data?.choices?.[0]?.message?.content || "");
       const json = coerceFlyerJson(content);
@@ -401,8 +451,8 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
         qr_info: str("qr_info"),
         confidence: Math.max(0, Math.min(100, Math.round(Number(json.confidence) || 0))),
         raw_text: opts.rawText,
-        model: `${cfg.label}:${cfg.model}`,
-        warnings: [],
+        model: `${cfg.label}:${modelUsed}`,
+        warnings: visionWarnings,
       };
     } finally {
       clearTimeout(timer);
