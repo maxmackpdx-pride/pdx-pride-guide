@@ -1,16 +1,16 @@
 {
-  "overall": 65,
+  "overall": 97,
   "perField": {
     "title": {
-      "hit": 1,
+      "hit": 7,
       "scored": 8
     },
     "start_date": {
-      "hit": 5,
+      "hit": 6,
       "scored": 6
     },
     "end_date": {
-      "hit": 2,
+      "hit": 3,
       "scored": 3
     },
     "time": {
@@ -18,7 +18,7 @@
       "scored": 4
     },
     "venue": {
-      "hit": 4,
+      "hit": 6,
       "scored": 6
     },
     "address": {
@@ -35,28 +35,27 @@
       "path": "flyers/gaylabration-radiance.jpg",
       "ok": true,
       "ocrConfidence": 47,
-      "parseConfidence": 44,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 90,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, openai/gpt-oss-safeguard-20b, groq/compound-mini, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, canopylabs/orpheus-arabic-saudi, llama-3.1-8b-instant,)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, whisper-large-v3, openai/gpt-oss-20b, canopylabs/orpheus-v1-english, groq/compound-mini, llama-3.3-70b-versatile, groq/compound, canopylabs/orpheus-arabic-saudi, ll)",
+        "Vision model gemini-2.0-flash unavailable (HTTP 404/429) — auto-discovered gemini-flash-lite-latest"
       ],
       "fields": {
         "title": {
           "expected": "Gaylabration: Radiance",
-          "actual": "REORDER TR",
-          "hit": false
+          "actual": "Gaylabration: Radiance",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-18",
-          "actual": "2024-07-18",
-          "hit": false
+          "actual": "2026-07-18",
+          "hit": true
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": "2024-07-19",
-          "hit": false
+          "actual": "2026-07-19",
+          "hit": true
         },
         "time": {
           "expected": "21:00",
@@ -65,7 +64,7 @@
         },
         "venue": {
           "expected": "Crystal Ballroom",
-          "actual": "CRYSTAL BALLROOM",
+          "actual": "Crystal Ballroom",
           "hit": true
         },
         "address": {
@@ -84,18 +83,16 @@
       "path": "flyers/spellman-spectacle.webp",
       "ok": true,
       "ocrConfidence": 63,
-      "parseConfidence": 65,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 95,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, llama-3.1-8b-instant, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, groq/compound-mini, openai/gpt-oss-safeguard-20b, canopylabs/)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, allam-2-7b, openai/gpt-oss-20b, whisper-large-v3-turbo, llama-3.3-70b-versatile, openai/gpt-oss-120b, openai/gpt-oss-safeguard-20b, whisper-large-v3, groq/compound-mini, )"
       ],
       "fields": {
         "title": {
           "expected": "A Spellman Spectacle",
-          "actual": "EUPHORIA PRESENTS A 30% Anniversary",
-          "hit": false
+          "actual": "A Spellman Spectacle: A 30th Anniversary Special",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-16",
@@ -104,7 +101,7 @@
         },
         "end_date": {
           "expected": null,
-          "actual": null,
+          "actual": "2026-07-16",
           "hit": null
         },
         "time": {
@@ -114,12 +111,12 @@
         },
         "venue": {
           "expected": "The Get Down",
-          "actual": null,
-          "hit": false
+          "actual": "The Get Down",
+          "hit": true
         },
         "address": {
           "expected": "680 SE 6th Ave, Portland OR 97214",
-          "actual": "680 SE 6TH AVE, PORTLAND OR 97214",
+          "actual": "680 SE 6th Ave, Portland, OR 97214",
           "hit": true
         },
         "url": {
@@ -133,18 +130,16 @@
       "path": "flyers/sports-bra-pride-block-party.jpg",
       "ok": true,
       "ocrConfidence": 0,
-      "parseConfidence": 0,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 60,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, llama-3.1-8b-instant, openai/gpt-oss-safeguard-20b, whisper-large-v3-turbo, llama-3)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[llama-3.1-8b-instant, qwen/qwen3.6-27b, groq/compound-mini, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, openai/gpt-oss-120b, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, canopyla)"
       ],
       "fields": {
         "title": {
           "expected": "The Sports Bra Pride 5th Annual Block Party",
-          "actual": null,
-          "hit": false
+          "actual": "Sports Bra Pride 5th Annual Block Party",
+          "hit": true
         },
         "start_date": {
           "expected": null,
@@ -163,8 +158,8 @@
         },
         "venue": {
           "expected": "The Sports Bra",
-          "actual": null,
-          "hit": false
+          "actual": "The Sports Bra",
+          "hit": true
         },
         "address": {
           "expected": null,
@@ -182,18 +177,16 @@
       "path": "flyers/stank-yes-coach.jpg",
       "ok": true,
       "ocrConfidence": 41,
-      "parseConfidence": 56,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 95,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, openai/gpt-oss-120b, llama-3.3-70b-versatile, groq/compound, qwen/qwen3.6-27b, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, meta-llama/llama-prompt-gua)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, canopylabs/orpheus-v1-english, groq/compound-mini, openai/gpt-oss-20b, qwen/qwen3.6-27b, op)"
       ],
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
-          "actual": "JUMPR",
-          "hit": false
+          "actual": "Stank Yes Coach",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-18",
@@ -217,7 +210,7 @@
         },
         "address": {
           "expected": "33 NW 9th Ave",
-          "actual": "33 NW 6th Ave",
+          "actual": "33 NW 9th Ave",
           "hit": true
         },
         "url": {
@@ -231,17 +224,15 @@
       "path": "flyers/stfu-femdom-play-party.jpg",
       "ok": true,
       "ocrConfidence": 33,
-      "parseConfidence": 53,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 90,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, qwen/qwen3.6-27b, whisper-large-v3, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-v1-english, meta-llama/llama-prompt-guard-2)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, openai/gpt-oss-safeguard-20b, whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versatile, groq/compound, openai/gpt-oss-20b, canopylabs/orpheus-arabic-saudi,)"
       ],
       "fields": {
         "title": {
           "expected": "Mistress Viola's Femdom Play Party",
-          "actual": "Mistress Viola's Femdom Party",
+          "actual": "Mistress Viola's Femdom Play Party",
           "hit": true
         },
         "start_date": {
@@ -251,7 +242,7 @@
         },
         "end_date": {
           "expected": null,
-          "actual": null,
+          "actual": "2026-07-16",
           "hit": null
         },
         "time": {
@@ -280,18 +271,16 @@
       "path": "flyers/treasure-trail-bearracuda.jpg",
       "ok": true,
       "ocrConfidence": 32,
-      "parseConfidence": 53,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 95,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[llama-3.1-8b-instant, qwen/qwen3.6-27b, groq/compound, openai/gpt-oss-safeguard-20b, whisper-large-v3, canopylabs/orpheus-arabic-saudi, whisper-large-v3-turbo, meta-llama/llama-)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-120b, whisper-large-v3-turbo, llama-3.1-8b-instant, openai/gpt-oss-safeguard-20b, allam-2-7b, whisper-large-v3, groq/compound, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-ara)"
       ],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
-          "actual": "Tigerbeat Pride",
-          "hit": false
+          "actual": "Treasure Trail",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-17",
@@ -329,18 +318,16 @@
       "path": "flyers/yes-sir-pride-closer.jpg",
       "ok": true,
       "ocrConfidence": 46,
-      "parseConfidence": 66,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 95,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, whisper-large-v3, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, openai/gpt-oss-20b, groq/compound, canopylabs/orpheus-arabic-saudi, qwen/qwen3.6)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[llama-3.1-8b-instant, groq/compound, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-arabic-saudi, groq/compound-mini, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versa)"
       ],
       "fields": {
         "title": {
           "expected": "Yes Sir: Portland Pride Closer",
-          "actual": "BAD",
-          "hit": false
+          "actual": "Yes Sir Portland Pride Closer",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-19",
@@ -359,7 +346,7 @@
         },
         "venue": {
           "expected": "Realm PDX",
-          "actual": "REALM PDX",
+          "actual": "Realm PDX",
           "hit": true
         },
         "address": {
@@ -369,7 +356,7 @@
         },
         "url": {
           "expected": null,
-          "actual": null,
+          "actual": "https://shotgun.live",
           "hit": null
         }
       }
@@ -378,17 +365,15 @@
       "path": "flyers/sasha-colby-live.jpg",
       "ok": true,
       "ocrConfidence": 58,
-      "parseConfidence": 0,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 60,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-22m, llama-3.1-8b-instant, openai/gpt-oss-120b, allam-2-7b, qwen/qwen3.6-27b, groq/compoun)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
-        "All vision providers failed — text fallback"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-20b, groq/compound, llama-3.1-8b-instant, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, openai/gpt-oss-safeguard-20b, groq/compound-mini, whisper-large-v3, met)"
       ],
       "fields": {
         "title": {
           "expected": "Sasha Colby Live",
-          "actual": null,
+          "actual": "Katya Colada Live",
           "hit": false
         },
         "start_date": {
@@ -418,7 +403,7 @@
         },
         "url": {
           "expected": null,
-          "actual": null,
+          "actual": "https://flipphoneevents.com/portland",
           "hit": null
         }
       }
