@@ -324,22 +324,32 @@ let discoveredVisionModel: string | null = null;
 export async function discoverVisionModel(
   cfg: { base: string; key: string },
   fetchImpl: typeof fetch = fetch,
-): Promise<{ id: string | null; candidates: string[] }> {
+): Promise<{ id: string | null; candidates: string[]; debug: string }> {
   try {
     const res = await fetchImpl(`${cfg.base}/models`, {
       headers: { Authorization: `Bearer ${cfg.key}` },
     });
-    if (!res.ok) return { id: null, candidates: [] };
+    if (!res.ok) return { id: null, candidates: [], debug: `/models HTTP ${res.status}` };
     const data: any = await res.json();
     const ids: string[] = (Array.isArray(data?.data) ? data.data : [])
       .map((m: any) => String(m?.id || ""))
       .filter(Boolean);
     const rank = (id: string) =>
-      /scout/i.test(id) ? 3 : /maverick/i.test(id) ? 2 : /vision|llava/i.test(id) ? 1 : 0;
+      /scout/i.test(id)
+        ? 5
+        : /maverick/i.test(id)
+          ? 4
+          : /vision|llava|pixtral|\bvl\b|-vl-|4o/i.test(id)
+            ? 3
+            : /llama-4/i.test(id)
+              ? 2
+              : 0;
     const candidates = ids.filter(id => rank(id) > 0).sort((a, b) => rank(b) - rank(a));
-    return { id: candidates[0] || null, candidates };
-  } catch {
-    return { id: null, candidates: [] };
+    const debug = `/models ok: ${ids.length} models, sample=[${ids.slice(0, 10).join(", ")}]`;
+    return { id: candidates[0] || null, candidates, debug };
+  } catch (err: unknown) {
+    const m = err instanceof Error ? err.message : String(err);
+    return { id: null, candidates: [], debug: `/models fetch failed: ${m.slice(0, 80)}` };
   }
 }
 
@@ -421,6 +431,12 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
           discoveredVisionModel = found.id;
           modelUsed = found.id;
           res = await callVision(modelUsed);
+        } else {
+          // No candidate — surface exactly what the provider offered so the
+          // report explains itself (key access tier, renamed models, …).
+          throw new Error(
+            `Vision model ${cfg.model} HTTP ${res.status}; no vision candidate found. ${found.debug}`,
+          );
         }
       }
 
