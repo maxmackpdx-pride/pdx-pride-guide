@@ -38,7 +38,7 @@
       "parseConfidence": 44,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
@@ -85,7 +85,7 @@
       "parseConfidence": 65,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
@@ -132,7 +132,7 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
@@ -179,7 +179,7 @@
       "parseConfidence": 56,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
@@ -226,7 +226,7 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
@@ -273,12 +273,12 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
-          "actual": "TIGERBEAT1 PRIDE",
+          "actual": "Tigerbeat Pride",
           "hit": false
         },
         "start_date": {
@@ -317,10 +317,10 @@
       "path": "flyers/yes-sir-pride-closer.jpg",
       "ok": true,
       "ocrConfidence": 46,
-      "parseConfidence": 58,
+      "parseConfidence": 66,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
@@ -367,7 +367,7 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
       ],
       "fields": {
         "title": {
