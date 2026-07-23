@@ -123,6 +123,8 @@ async function main() {
     error?: string;
     ocrConfidence?: number;
     parseConfidence?: number;
+    model?: string | null;
+    warnings?: string[];
     fields?: Record<string, { expected: string | null; actual: string | null; hit: boolean | null }>;
   }> = [];
 
@@ -153,11 +155,17 @@ async function main() {
           );
         }
       }
+      // Which engine actually answered + why fallbacks happened — without
+      // this, a dead vision model silently grades as a text-path regression.
+      if (parse.model) process.stdout.write(`  model: ${parse.model}\n`);
+      for (const w of parse.warnings || []) process.stdout.write(`  ! ${w}\n`);
       results.push({
         path: flyerPath,
         ok: true,
         ocrConfidence: ocr.confidence,
         parseConfidence: parse.confidence,
+        model: parse.model,
+        warnings: parse.warnings,
         fields,
       });
     } catch (err: unknown) {
