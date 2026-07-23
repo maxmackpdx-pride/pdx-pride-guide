@@ -4903,6 +4903,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
       const parse = await structureFlyer({ imageBuffer, rawText, ocrConfidence: ocr?.confidence });
       const draft = flyerParseToDraft(parse, { sourcePath: flyerPath });
+
+      // Phase 3: queue=true lands the draft in the QSearch Review queue
+      // (same human-approve path as every other source — never auto-LIVE).
+      let queuedJobId: string | null = null;
+      if (req.body?.queue === true && draft) {
+        if (flyerPath) {
+          // Show the actual flyer art on the Review card
+          draft.posterImageUrl = `https://raw.githubusercontent.com/${
+            process.env.GITHUB_FLYERS_REPO?.trim() || "maxmackpdx-pride/pdx-pride-guide"
+          }/${process.env.GITHUB_FLYERS_BRANCH?.trim() || "master"}/${flyerPath}`;
+        }
+        const { jobId } = await queueManualQSearchDrafts({
+          drafts: [draft],
+          sourceId: "flyer-reader",
+          sourceLabel: "Flyer Reader",
+          sourceUrl: flyerPath ? `github:${flyerPath}` : "flyer-upload",
+          kind: "flyer_reader",
+        });
+        queuedJobId = jobId;
+      }
+
       res.json({
         ok: true,
         source,
@@ -4912,6 +4933,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
           : null,
         parse,
         draft,
+        queuedJobId,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
