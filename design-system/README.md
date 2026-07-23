@@ -36,6 +36,7 @@ in the same ship.
 - `tokens/tokens.css` — synced colors / days / type / spacing (not full glass chrome)
 - `EVENTS_GUIDE.md` — events/schedule system + DS mapping (chrome → live components)
 - `AVATARS_GUIDE.md` — avatar system (not in React DS)
+- `ZAYLIST_LOGO_GUIDE.md` — **NEW (Jul 2026)**: ZAYLIST wordmark guidelines with Swiss design tweaks (30% scale for cleaner/timeless application), Neue Haas Grotesk Bold typography, vibrant rainbow color palette, centered balanced layout, generous negative space, simplicity (removed unnecessary effects), and cross-platform consistency.
 - `previews/*.html` — samples for Claude Design indexing
 
 Modular production tokens (richer, multi-file) live in
