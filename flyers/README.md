@@ -33,3 +33,5 @@ source for correct values.
 
 ---
 CI armed 2026-07-23: GROQ_API_KEY secret set — every change to the parser, flyers, or harness now grades itself into reports/.
+
+CI trigger: GEMINI_API_KEY armed — first true vision run.
