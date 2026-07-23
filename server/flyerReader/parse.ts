@@ -372,17 +372,23 @@ export async function discoverVisionModel(
     const ids: string[] = (Array.isArray(data?.data) ? data.data : [])
       .map((m: any) => String(m?.id || ""))
       .filter(Boolean);
-    const rank = (id: string) =>
-      /scout/i.test(id)
-        ? 5
-        : /maverick/i.test(id)
-          ? 4
-          : /vision|llava|pixtral|\bvl\b|-vl-|4o/i.test(id)
-            ? 3
-            : /llama-4/i.test(id)
-              ? 2
-              : 0;
-    const candidates = ids.filter(id => rank(id) > 0).sort((a, b) => rank(b) - rank(a));
+    const clean = (id: string) => id.replace(/^models\//, "");
+    const junk = /embed|tts|audio|live|veo|imagen|whisper|guard|safeguard|orpheus/i;
+    const rank = (raw: string) => {
+      const id = clean(raw);
+      if (junk.test(id)) return 0;
+      if (/scout/i.test(id)) return 6;
+      if (/maverick/i.test(id)) return 5;
+      if (/gemini[.-\d]*.*flash/i.test(id)) return 4; // all Gemini models are multimodal; flash = free-tier friendly
+      if (/vision|llava|pixtral|\bvl\b|-vl-|4o/i.test(id)) return 3;
+      if (/gemini/i.test(id)) return 2;
+      if (/llama-4/i.test(id)) return 1;
+      return 0;
+    };
+    const candidates = ids
+      .filter(id => rank(id) > 0)
+      .map(clean)
+      .sort((a, b) => rank(b) - rank(a) || b.localeCompare(a)); // newer versions first on ties
     const debug = `/models ok: ${ids.length} models, sample=[${ids.slice(0, 10).join(", ")}]`;
     return { id: candidates[0] || null, candidates, debug };
   } catch (err: unknown) {
@@ -407,8 +413,13 @@ export type StructureFlyerOpts = {
  * to the text-only path (then heuristics) on any failure.
  */
 export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerParse> {
-  const cfg = opts.imageBuffer ? flyerVisionConfigured() : null;
-  if (!cfg || !opts.imageBuffer) {
+  // Provider chain up front: primary (Groq/XAI/OpenAI) AND/OR the free
+  // fallback (Gemini). Vision runs if ANY provider is configured — a
+  // Gemini-only setup must not silently skip vision.
+  const primary = opts.imageBuffer ? flyerVisionConfigured() : null;
+  const fallbackCfg = opts.imageBuffer ? fallbackVisionConfigured(primary) : null;
+  const providers = [primary, fallbackCfg].filter((c): c is LlmConfig => Boolean(c));
+  if (!opts.imageBuffer || providers.length === 0) {
     return structureFlyerText(opts.rawText, opts);
   }
 
@@ -434,12 +445,8 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
     return fallback;
   }
 
-  // Provider chain: primary (Groq when keyed — but Groq currently serves no
-  // multimodal models) → secondary (xAI grok-2-vision / OpenAI). Each failure
-  // leaves a breadcrumb; only when every provider fails do we drop to text.
-  const providers = [cfg, fallbackVisionConfigured(cfg)].filter(
-    (c): c is LlmConfig => Boolean(c),
-  );
+  // Each provider failure leaves a breadcrumb; only when every provider
+  // fails do we drop to text.
   const chainWarnings: string[] = [];
 
   for (const provider of providers) {
@@ -499,11 +506,16 @@ async function attemptVisionProvider(
     let modelUsed = discoveredVisionModels.get(cfg.base) || cfg.model;
     let res = await callVision(modelUsed);
 
-    // Self-healing: unknown model → ask the provider what vision models
-    // exist, retry once with the best candidate, remember it per-process.
-    if ((res.status === 404 || res.status === 400) && !discoveredVisionModels.has(cfg.base)) {
+    // Self-healing: unknown/inaccessible model → ask the provider what vision
+    // models exist, retry once with the best candidate, remember it
+    // per-process. 429 included: on a first call it usually means "model not
+    // in your tier / zero quota" (Gemini), not real rate pressure.
+    if (
+      (res.status === 404 || res.status === 400 || res.status === 429) &&
+      !discoveredVisionModels.has(cfg.base)
+    ) {
       const found = await discoverVisionModel(cfg, fetchImpl);
-      if (found.id) {
+      if (found.id && found.id !== modelUsed) {
         visionWarnings.push(
           `Vision model ${cfg.model} unavailable (HTTP ${res.status}) — auto-discovered ${found.id}`,
         );

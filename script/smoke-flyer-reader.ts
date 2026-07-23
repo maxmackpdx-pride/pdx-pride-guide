@@ -204,6 +204,39 @@ async function main() {
   assert(fb!.base.includes("generativelanguage.googleapis.com"), "Gemini OpenAI-compat base URL");
   delete process.env.GEMINI_API_KEY;
 
+  // Gemini path: 429 (zero-quota tier signal) → discovery → retry with a
+  // gemini flash model (models/ prefix stripped, junk filtered)
+  delete process.env.GROQ_API_KEY;
+  process.env.GEMINI_API_KEY = "smoke-gemini-key";
+  let geminiCalls = 0;
+  const gemini429Fetch = (async (url: any, init: any) => {
+    const u = String(url);
+    if (u.endsWith("/models")) {
+      return new Response(
+        JSON.stringify({ data: [
+          { id: "models/gemini-2.0-flash" },
+          { id: "models/gemini-2.5-flash" },
+          { id: "models/gemini-embedding-001" },
+          { id: "models/gemini-2.5-flash-preview-tts" },
+        ] }),
+        { status: 200 },
+      );
+    }
+    const body = JSON.parse(String(init?.body || "{}"));
+    geminiCalls++;
+    if (body.model === "gemini-2.0-flash") return new Response("quota", { status: 429 });
+    return new Response(
+      JSON.stringify({ choices: [{ message: { content: '{"title":"Treasure Trail","start_date":"2026-07-17","end_date":null,"time":"20:00","venue":null,"address":null,"description":null,"url":null,"qr_info":null,"confidence":88}' } }] }),
+      { status: 200 },
+    );
+  }) as unknown as typeof fetch;
+  const gem = await structureFlyer({ imageBuffer: tinyFlyer, rawText: "SOUP", now: NOW, fetchImpl: gemini429Fetch });
+  assert(gem.title === "Treasure Trail", "429 → discovery → retry succeeds on Gemini");
+  assert(gem.model != null && /gemini-2\.5-flash/.test(gem.model), `newest flash discovered, models/ prefix stripped (${gem.model})`);
+  assert(gem.warnings.some(w => /auto-discovered gemini-2\.5-flash/.test(w)), "gemini discovery breadcrumb present");
+  delete process.env.GEMINI_API_KEY;
+  process.env.GROQ_API_KEY = "smoke-test-key";
+
   /* ── real OCR (opt-in: needs network for traineddata) ── */
   if (process.env.SMOKE_OCR === "1") {
     const { ocrFlyer } = await import("../server/flyerReader/ocr");
