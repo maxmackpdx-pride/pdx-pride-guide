@@ -249,6 +249,17 @@ async function main() {
     console.log("(real OCR skipped — set SMOKE_OCR=1 to run Tesseract with network)");
   }
 
+  // Scan-pipeline vision (qsearch/vision.ts) now recognizes the Gemini key
+  const { visionConfigured } = await import("../server/qsearch/vision");
+  process.env.GEMINI_API_KEY = "smoke-gemini-key";
+  const scanVis = visionConfigured();
+  assert(scanVis != null && scanVis.url.includes("generativelanguage.googleapis.com"), "scan vision uses Gemini when keyed");
+  assert(scanVis!.model === "gemini-flash-lite-latest", "scan vision default model = proven live model");
+  process.env.FLYER_LLM_DISABLED = "1";
+  assert(visionConfigured() === null, "kill switch stops scan vision too");
+  delete process.env.FLYER_LLM_DISABLED;
+  delete process.env.GEMINI_API_KEY;
+
   console.log("\nAll flyer-reader smoke checks passed.");
 }
 

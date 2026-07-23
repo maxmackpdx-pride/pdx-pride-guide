@@ -15,7 +15,21 @@ export type VisionResult = {
   error?: string;
 };
 
-function visionConfigured(): { url: string; key: string; model: string } | null {
+export function visionConfigured(): { url: string; key: string; model: string } | null {
+  // Same kill switch as the Flyer Reader — one env stops all paid vision.
+  if (process.env.FLYER_LLM_DISABLED === "1") return null;
+
+  // Gemini first: free tier, OpenAI-compatible, and the model proven live by
+  // the flyer-reader validation suite (reports/flyer-validation-latest.json).
+  const gemini = process.env.GEMINI_API_KEY?.trim();
+  if (gemini) {
+    return {
+      url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+      key: gemini,
+      model: process.env.QSEARCH_VISION_MODEL?.trim() || "gemini-flash-lite-latest",
+    };
+  }
+
   const key =
     process.env.XAI_API_KEY?.trim() ||
     process.env.OPENAI_API_KEY?.trim() ||

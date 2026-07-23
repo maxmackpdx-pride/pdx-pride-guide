@@ -14,6 +14,12 @@ must stay at baseline (37), offline smokes must pass before push.
 - CI: flyer-validate.yml grades every parser/flyer change into reports/.
 
 ## Done recently
+- Scan-pipeline vision UNLOCKED: qsearch/vision.ts now recognizes
+  GEMINI_API_KEY (free tier, model proven by validation suite) + honors the
+  FLYER_LLM_DISABLED kill switch. Zero-yield scan sources with flyer-only
+  pages (Scandals-class) now get vision-read drafts — capped at 2 images per
+  source, first success stops. Nightly vision stays gated behind
+  QSEARCH_NIGHTLY_VISION=1.
 - Phase 5 docs: docs/FLYER_READER.md (API, frontend sample, env table).
 - TUCKER confirmed 2026-07-23: Railway bill paid; GEMINI_API_KEY added to
   Railway Variables → live-site vision active. Flyer Reader brief COMPLETE.
