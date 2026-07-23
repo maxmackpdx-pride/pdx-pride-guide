@@ -1,16 +1,16 @@
 {
-  "overall": 65,
+  "overall": 71,
   "perField": {
     "title": {
       "hit": 1,
       "scored": 8
     },
     "start_date": {
-      "hit": 5,
+      "hit": 6,
       "scored": 6
     },
     "end_date": {
-      "hit": 2,
+      "hit": 3,
       "scored": 3
     },
     "time": {
@@ -35,26 +35,27 @@
       "path": "flyers/gaylabration-radiance.jpg",
       "ok": true,
       "ocrConfidence": 47,
-      "parseConfidence": 44,
+      "parseConfidence": 59,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-22m, whisper-large-v3, groq/compound, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, groq/compound-mini, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-120b, openai/gpt-oss-20b]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, whisper-large-v3-turbo, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-120b, canopylabs/orp)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
           "expected": "Gaylabration: Radiance",
-          "actual": "REORDER TR",
+          "actual": "REORDER",
           "hit": false
         },
         "start_date": {
           "expected": "2026-07-18",
-          "actual": "2024-07-18",
-          "hit": false
+          "actual": "2026-07-18",
+          "hit": true
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": "2024-07-19",
-          "hit": false
+          "actual": "2026-07-19",
+          "hit": true
         },
         "time": {
           "expected": "21:00",
@@ -85,7 +86,8 @@
       "parseConfidence": 65,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, whisper-large-v3, canopylabs/orpheus-arabic-saudi, qwen/qwen3.6-27b, openai/gpt-oss-safeguard-20b, openai/gpt-oss-120b, groq/compound, meta-llama/llama-prompt-guard-2-22m, groq/compound-mini, canopylabs/orpheus-v1-english]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, qwen/qwen3.6-27b, allam-2-7b, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-safeguard-20b, whisper-large-v3, whisper-l)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
@@ -132,7 +134,8 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, openai/gpt-oss-120b, qwen/qwen3.6-27b, llama-3.1-8b-instant, openai/gpt-oss-20b, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-arabic-saudi, allam-2-7b]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b, whisper-large-v3, llama-3.3-70b-versatile, canopylabs/orpheus-v1-eng)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
@@ -179,7 +182,8 @@
       "parseConfidence": 56,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3, groq/compound-mini, groq/compound, llama-3.1-8b-instant, openai/gpt-oss-120b, whisper-large-v3-turbo, canopylabs/orpheus-v1-english, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-20b]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-22m, whisper-large-v3, allam-2-7b, openai/gpt-oss-120b, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-86m, canopylabs)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
@@ -226,7 +230,8 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[llama-3.1-8b-instant, canopylabs/orpheus-v1-english, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, groq/compound-mini, groq/compound, openai/gpt-oss-120b, canopylabs/orpheus-arabic-saudi]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-120b, whisper-large-v3, canopylabs/orpheus-v1-english, whisper-large-v3-turbo, allam-2-7b, openai/gpt-oss-20b, groq/compound-mini, meta-llama/llama-prompt-guard-2)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
@@ -273,12 +278,13 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-120b, groq/compound, allam-2-7b, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, qwen/qwen3.6-27b, canopylabs/orpheus-arabic-saudi, llama-3.1-8b-instant]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-86m, llama-3.3-70b-versatile, qwen/qwen3.6-27b, openai/gpt-oss-safeguard-20b, groq/compound, openai/gpt-oss-120b, meta-ll)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
-          "actual": "Tigerbeat Pride",
+          "actual": "TIGERBEAT1 PRIDE",
           "hit": false
         },
         "start_date": {
@@ -303,7 +309,7 @@
         },
         "address": {
           "expected": "33 NW 9th, Portland, OR",
-          "actual": "33 NW 9th, Portland, OR",
+          "actual": "33 NW 9TH, PORTLAND, OR",
           "hit": true
         },
         "url": {
@@ -320,7 +326,8 @@
       "parseConfidence": 58,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-22m, whisper-large-v3-turbo, allam-2-7b, openai/gpt-oss-120b, groq/compound, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b, llama-3.3-70b-versatile, llama-3.1-8b-instant]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[groq/compound, canopylabs/orpheus-arabic-saudi, whisper-large-v3, allam-2-7b, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-safeguard-20b, llama-3.3-70b-)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
@@ -367,7 +374,8 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, allam-2-7b, openai/gpt-oss-120b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, groq/compound-mini, openai/gpt-oss-20b, llama-3.3-70b-versatile, canopylabs/orpheus-v1-english, canopylabs/orpheus-arabic-saudi]) — text fallback"
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-120b, whisper-large-v3, whisper-large-v3-turbo, qwen/qwen3.6-27b, canopylabs/orpheus-v1-engl)",
+        "All vision providers failed — text fallback"
       ],
       "fields": {
         "title": {
