@@ -6,21 +6,21 @@
   ✓ time: expected "21:00" got "21:00"
   ✓ venue: expected "Crystal Ballroom" got "CRYSTAL BALLROOM"
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-22m, whisper-large-v3, groq/compound, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, groq/compound-mini, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-120b, openai/gpt-oss-20b]) — text fallback
 
 ▸ flyers/spellman-spectacle.webp
-  ✗ title: expected "A Spellman Spectacle" got "EUPHORIA PRESENTS 30% Anniversary"
+  ✗ title: expected "A Spellman Spectacle" got "EUPHORIA 30% Anniversary"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
   ✗ venue: expected "The Get Down" got null
   ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6TH AVE, PORTLAND OR 97214"
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, whisper-large-v3, canopylabs/orpheus-arabic-saudi, qwen/qwen3.6-27b, openai/gpt-oss-safeguard-20b, openai/gpt-oss-120b, groq/compound, meta-llama/llama-prompt-guard-2-22m, groq/compound-mini, canopylabs/orpheus-v1-english]) — text fallback
 
 ▸ flyers/sports-bra-pride-block-party.jpg
   ✗ title: expected "The Sports Bra Pride 5th Annual Block Party" got null
   ✗ venue: expected "The Sports Bra" got null
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, openai/gpt-oss-120b, qwen/qwen3.6-27b, llama-3.1-8b-instant, openai/gpt-oss-20b, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-arabic-saudi, allam-2-7b]) — text fallback
 
 ▸ flyers/stank-yes-coach.jpg
   ✗ title: expected "Stank: Yes Coach — PDX Pride" got "JUMPR"
@@ -30,23 +30,23 @@
   ✓ venue: expected "Sanctuary" got "Sanctuary"
   ✓ address: expected "33 NW 9th Ave" got "33 NW 6th Ave"
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3, groq/compound-mini, groq/compound, llama-3.1-8b-instant, openai/gpt-oss-120b, whisper-large-v3-turbo, canopylabs/orpheus-v1-english, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-20b]) — text fallback
 
 ▸ flyers/stfu-femdom-play-party.jpg
   ✓ title: expected "Mistress Viola's Femdom Play Party" got "Mistress Viola's Femdom Party"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
   ✓ venue: expected "The Den" got "The Den"
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[llama-3.1-8b-instant, canopylabs/orpheus-v1-english, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, groq/compound-mini, groq/compound, openai/gpt-oss-120b, canopylabs/orpheus-arabic-saudi]) — text fallback
 
 ▸ flyers/treasure-trail-bearracuda.jpg
-  ✗ title: expected "Treasure Trail" got "TIGERBEAT1 PRIDE"
+  ✗ title: expected "Treasure Trail" got "Tigerbeat Pride"
   ✓ start_date: expected "2026-07-17" got "2026-07-17"
   ✓ time: expected "20:00" got "20:00"
-  ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9TH, PORTLAND, OR"
+  ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9th, Portland, OR"
   ✓ url: expected "https://www.bearracuda.com" got "https://www.bearracuda.com"
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-120b, groq/compound, allam-2-7b, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, qwen/qwen3.6-27b, canopylabs/orpheus-arabic-saudi, llama-3.1-8b-instant]) — text fallback
 
 ▸ flyers/yes-sir-pride-closer.jpg
   ✗ title: expected "Yes Sir: Portland Pride Closer" got "BAD"
@@ -55,12 +55,12 @@
   ✓ time: expected "21:00" got "21:00"
   ✓ venue: expected "Realm PDX" got "REALM PDX"
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-22m, whisper-large-v3-turbo, allam-2-7b, openai/gpt-oss-120b, groq/compound, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b, llama-3.3-70b-versatile, llama-3.1-8b-instant]) — text fallback
 
 ▸ flyers/sasha-colby-live.jpg
   ✗ title: expected "Sasha Colby Live" got null
   model: groq:llama-3.3-70b-versatile
-  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback
+  ! Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, allam-2-7b, openai/gpt-oss-120b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, groq/compound-mini, openai/gpt-oss-20b, llama-3.3-70b-versatile, canopylabs/orpheus-v1-english, canopylabs/orpheus-arabic-saudi]) — text fallback
 
 ══ Field accuracy ══
   title       1/8  (13%)
