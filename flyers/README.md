@@ -30,3 +30,6 @@ source for correct values.
 - `GITHUB_FLYERS_BRANCH` (default `master`)
 - `GITHUB_TOKEN` — only needed for private-repo GitHub fallback
 - `TESSERACT_CACHE_DIR` (default `/tmp/tesseract`)
+
+---
+CI armed 2026-07-23: GROQ_API_KEY secret set — every change to the parser, flyers, or harness now grades itself into reports/.
