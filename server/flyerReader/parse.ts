@@ -385,10 +385,13 @@ export async function discoverVisionModel(
       if (/llama-4/i.test(id)) return 1;
       return 0;
     };
+    const isPreview = (id: string) => (/preview|exp|latest-unstable/i.test(id) ? 1 : 0);
     const candidates = ids
       .filter(id => rank(id) > 0)
       .map(clean)
-      .sort((a, b) => rank(b) - rank(a) || b.localeCompare(a)); // newer versions first on ties
+      // rank desc → stable before preview/exp (previews often have zero free
+      // quota) → newest version on remaining ties
+      .sort((a, b) => rank(b) - rank(a) || isPreview(a) - isPreview(b) || b.localeCompare(a));
     const debug = `/models ok: ${ids.length} models, sample=[${ids.slice(0, 10).join(", ")}]`;
     return { id: candidates[0] || null, candidates, debug };
   } catch (err: unknown) {
@@ -515,18 +518,26 @@ async function attemptVisionProvider(
       !discoveredVisionModels.has(cfg.base)
     ) {
       const found = await discoverVisionModel(cfg, fetchImpl);
-      if (found.id && found.id !== modelUsed) {
-        visionWarnings.push(
-          `Vision model ${cfg.model} unavailable (HTTP ${res.status}) — auto-discovered ${found.id}`,
-        );
-        discoveredVisionModels.set(cfg.base, found.id);
-        modelUsed = found.id;
-        res = await callVision(modelUsed);
-      } else {
-        // No candidate — surface exactly what the provider offered so the
-        // report explains itself (key access tier, renamed models, …).
+      const tried: string[] = [modelUsed];
+      for (const cand of found.candidates.slice(0, 4)) {
+        if (tried.includes(cand)) continue;
+        tried.push(cand);
+        res = await callVision(cand);
+        if (res.ok) {
+          visionWarnings.push(
+            `Vision model ${cfg.model} unavailable (HTTP ${tried.length === 2 ? "404/429" : "…"}) — auto-discovered ${cand}`,
+          );
+          discoveredVisionModels.set(cfg.base, cand);
+          modelUsed = cand;
+          break;
+        }
+        if (![400, 404, 429].includes(res.status)) break; // real error — stop burning candidates
+      }
+      if (!res.ok) {
+        // Surface exactly what was tried + offered so the report explains
+        // itself (key access tier, renamed models, previews without quota…).
         throw new Error(
-          `Vision model ${cfg.model} HTTP ${res.status}; no vision candidate found. ${found.debug}`,
+          `Vision HTTP ${res.status}; tried [${tried.join(", ")}]. ${found.debug}`,
         );
       }
     }
