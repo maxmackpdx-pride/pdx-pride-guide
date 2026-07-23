@@ -38,8 +38,8 @@
       "parseConfidence": 44,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-v1-english, groq/compound-mini, openai/gpt-oss-20b, qwen/qwen3.6-27b, openai/gpt-oss-safeguard-20b, whisper-l)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, openai/gpt-oss-safeguard-20b, groq/compound-mini, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, canopylabs/orpheus-arabic-saudi, llama-3.1-8b-instant,)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -87,8 +87,8 @@
       "parseConfidence": 65,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, canopylabs/orpheus-v1-english, allam-2-7b, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, groq/compound, qwen/qwen3.6-27b, llama-3.3-7)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, llama-3.1-8b-instant, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, groq/compound-mini, openai/gpt-oss-safeguard-20b, canopylabs/)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -136,8 +136,8 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-v1-english, qwen/qwen3.6-27b, groq/compound-mini, llama-3.3-70b-versatile, allam-2-7b, openai/gpt-oss-1)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, llama-3.1-8b-instant, openai/gpt-oss-safeguard-20b, whisper-large-v3-turbo, llama-3)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -185,8 +185,8 @@
       "parseConfidence": 56,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-86m, openai/gpt-oss-safeguard-20b, whisper-large-v3, openai/gpt-oss-20b, openai/gpt-oss-120b, groq/compound, canopylabs/orpheus-v1-english, llama)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, openai/gpt-oss-120b, llama-3.3-70b-versatile, groq/compound, qwen/qwen3.6-27b, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, meta-llama/llama-prompt-gua)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -234,8 +234,8 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[groq/compound-mini, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, llama-3.3-70b-versatile, whisper-large-v3, openai/gpt-oss-120b, qwen/qwen3.6-27b, groq)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, qwen/qwen3.6-27b, whisper-large-v3, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-v1-english, meta-llama/llama-prompt-guard-2)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -283,8 +283,8 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-arabic-saudi, canopylabs/orpheus-v1-english, llama-3.1)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[llama-3.1-8b-instant, qwen/qwen3.6-27b, groq/compound, openai/gpt-oss-safeguard-20b, whisper-large-v3, canopylabs/orpheus-arabic-saudi, whisper-large-v3-turbo, meta-llama/llama-)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -329,11 +329,11 @@
       "path": "flyers/yes-sir-pride-closer.jpg",
       "ok": true,
       "ocrConfidence": 46,
-      "parseConfidence": 58,
+      "parseConfidence": 66,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3, allam-2-7b, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, openai/gpt-oss-120b, openai/gpt-oss-20b, groq/compound, ca)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, whisper-large-v3, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, openai/gpt-oss-20b, groq/compound, canopylabs/orpheus-arabic-saudi, qwen/qwen3.6)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
@@ -381,8 +381,8 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, groq/compound, whisper-large-v3, groq/compound-mini, llama-3.1-8b-instant, openai/gpt-oss-120b, llama-3.3-70b-versatile, whisper-large-v3-turbo, me)",
-        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))",
+        "Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-22m, llama-3.1-8b-instant, openai/gpt-oss-120b, allam-2-7b, qwen/qwen3.6-27b, groq/compoun)",
+        "Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-omni-flash-preview))",
         "All vision providers failed — text fallback"
       ],
       "fields": {
