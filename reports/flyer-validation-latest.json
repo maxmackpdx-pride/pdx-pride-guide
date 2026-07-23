@@ -38,7 +38,7 @@
       "parseConfidence": 44,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
@@ -85,12 +85,12 @@
       "parseConfidence": 65,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
           "expected": "A Spellman Spectacle",
-          "actual": "EUPHORIA PRESENTS A 30% Anniversary",
+          "actual": "EUPHORIA PRESENTS 30% Anniversary",
           "hit": false
         },
         "start_date": {
@@ -132,7 +132,7 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
@@ -179,7 +179,7 @@
       "parseConfidence": 56,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
@@ -226,7 +226,7 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
@@ -273,12 +273,12 @@
       "parseConfidence": 53,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
-          "actual": "Tigerbeat Pride",
+          "actual": "TIGERBEAT1 PRIDE",
           "hit": false
         },
         "start_date": {
@@ -303,7 +303,7 @@
         },
         "address": {
           "expected": "33 NW 9th, Portland, OR",
-          "actual": "33 NW 9th, Portland, OR",
+          "actual": "33 NW 9TH, PORTLAND, OR",
           "hit": true
         },
         "url": {
@@ -320,7 +320,7 @@
       "parseConfidence": 66,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
@@ -367,7 +367,7 @@
       "parseConfidence": 0,
       "model": "groq:llama-3.3-70b-versatile",
       "warnings": [
-        "Vision parse failed (Vision LLM HTTP 404 (model meta-llama/llama-4-scout-17b-16e-instruct)) — text fallback"
+        "Vision parse failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sampl) — text fallback"
       ],
       "fields": {
         "title": {
