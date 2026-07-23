@@ -48,6 +48,18 @@ jobs:
           npx tsx script/smoke-trusted-flyers.ts
           npx tsx script/smoke-trusted-new-venues.ts
 
+      - name: Dump provider model list (diagnosis: which models can this key see)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          mkdir -p reports
+          if [ -n "$GROQ_API_KEY" ]; then
+            curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer $GROQ_API_KEY" \
+              | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{const j=JSON.parse(d);console.log(JSON.stringify((j.data||[]).map(m=>m.id).sort(),null,1))}catch(e){console.log(JSON.stringify({error:String(e),raw:d.slice(0,500)}))}})" \
+              > reports/groq-models.json
+            echo "Model list:"; cat reports/groq-models.json
+          fi
+
       - name: Run flyer validation suite
         id: validate
         env:

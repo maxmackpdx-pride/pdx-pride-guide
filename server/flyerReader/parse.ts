@@ -477,7 +477,7 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
     const message = err instanceof Error ? err.message : String(err);
     const fallback = await structureFlyerText(opts.rawText, opts);
     fallback.warnings = Array.from(
-      new Set([`Vision parse failed (${message.slice(0, 120)}) — text fallback`, ...fallback.warnings]),
+      new Set([`Vision parse failed (${message.slice(0, 500)}) — text fallback`, ...fallback.warnings]),
     );
     return fallback;
   }
