@@ -36,6 +36,10 @@
       "ok": true,
       "ocrConfidence": 47,
       "parseConfidence": 44,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Gaylabration: Radiance",
@@ -79,10 +83,14 @@
       "ok": true,
       "ocrConfidence": 63,
       "parseConfidence": 65,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "A Spellman Spectacle",
-          "actual": "EUPHORIA 30% Anniversary",
+          "actual": "EUPHORIA PRESENTS A 30% Anniversary",
           "hit": false
         },
         "start_date": {
@@ -122,6 +130,10 @@
       "ok": true,
       "ocrConfidence": 0,
       "parseConfidence": 0,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "The Sports Bra Pride 5th Annual Block Party",
@@ -165,6 +177,10 @@
       "ok": true,
       "ocrConfidence": 41,
       "parseConfidence": 56,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
@@ -208,6 +224,10 @@
       "ok": true,
       "ocrConfidence": 33,
       "parseConfidence": 53,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Mistress Viola's Femdom Play Party",
@@ -251,6 +271,10 @@
       "ok": true,
       "ocrConfidence": 32,
       "parseConfidence": 53,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
@@ -294,6 +318,10 @@
       "ok": true,
       "ocrConfidence": 46,
       "parseConfidence": 58,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Yes Sir: Portland Pride Closer",
@@ -337,6 +365,10 @@
       "ok": true,
       "ocrConfidence": 58,
       "parseConfidence": 0,
+      "model": "groq:llama-3.3-70b-versatile",
+      "warnings": [
+        "Vision parse failed (Vision LLM HTTP 404) — text fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Sasha Colby Live",
