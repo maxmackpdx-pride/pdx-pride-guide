@@ -152,7 +152,7 @@ async function main() {
     now: NOW,
     fetchImpl: failFetch,
   });
-  assert(fellBack.warnings.some(w => /Vision parse failed/.test(w)), "vision failure leaves breadcrumb and falls back");
+  assert(fellBack.warnings.some(w => /Vision via .+ failed|All vision providers failed/.test(w)), "vision failure leaves breadcrumb and falls back");
   assert(fellBack.start_date === "2026-08-08", "text/heuristic fallback still extracts date");
 
   // No image → straight to text path (no vision attempt)
