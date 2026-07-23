@@ -1,60 +1,60 @@
 
 ▸ flyers/gaylabration-radiance.jpg
   ✗ title: expected "Gaylabration: Radiance" got "REORDER TR"
-  ✗ start_date: expected "2026-07-18" got null
-  ✗ end_date: expected "2026-07-19" got null
-  ✗ time: expected "21:00" got null
-  ✗ venue: expected "Crystal Ballroom" got null
+  ✗ start_date: expected "2026-07-18" got "2024-07-18"
+  ✗ end_date: expected "2026-07-19" got "2024-07-19"
+  ✓ time: expected "21:00" got "21:00"
+  ✓ venue: expected "Crystal Ballroom" got "CRYSTAL BALLROOM"
 
 ▸ flyers/spellman-spectacle.webp
-  ✗ title: expected "A Spellman Spectacle" got "! = © Raa Rad A"
+  ✗ title: expected "A Spellman Spectacle" got "EUPHORIA 30% Anniversary"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
   ✗ venue: expected "The Get Down" got null
-  ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6TH AVE"
+  ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6TH AVE, PORTLAND OR 97214"
 
 ▸ flyers/sports-bra-pride-block-party.jpg
   ✗ title: expected "The Sports Bra Pride 5th Annual Block Party" got null
   ✗ venue: expected "The Sports Bra" got null
 
 ▸ flyers/stank-yes-coach.jpg
-  ✗ title: expected "Stank: Yes Coach — PDX Pride" got "JUMPR (SF) - BRO HOE - LAKE EVERETT ay"
+  ✗ title: expected "Stank: Yes Coach — PDX Pride" got "JUMPR"
   ✓ start_date: expected "2026-07-18" got "2026-07-18"
-  ✗ end_date: expected "2026-07-19" got null
+  ✓ end_date: expected "2026-07-19" got "2026-07-19"
   ✓ time: expected "20:00" got "20:00"
-  ✗ venue: expected "Sanctuary" got null
-  ✓ address: expected "33 NW 9th Ave" got "33 NW ITHAVE"
+  ✓ venue: expected "Sanctuary" got "Sanctuary"
+  ✓ address: expected "33 NW 9th Ave" got "33 NW 6th Ave"
 
 ▸ flyers/stfu-femdom-play-party.jpg
-  ✗ title: expected "Mistress Viola's Femdom Play Party" got "VI 4+ J-3 0 ~ . . ."
+  ✓ title: expected "Mistress Viola's Femdom Play Party" got "Mistress Viola's Femdom Party"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
-  ✗ venue: expected "The Den" got null
+  ✓ venue: expected "The Den" got "The Den"
 
 ▸ flyers/treasure-trail-bearracuda.jpg
-  ✗ title: expected "Treasure Trail" got "MATT BEARRACUDA & JP HARDY PRESENT"
+  ✗ title: expected "Treasure Trail" got "TIGERBEAT1 PRIDE"
   ✓ start_date: expected "2026-07-17" got "2026-07-17"
   ✓ time: expected "20:00" got "20:00"
-  ✗ address: expected "33 NW 9th, Portland, OR" got null
-  ✓ url: expected "https://www.bearracuda.com" got "WWW.BEARRACUDA.COM"
+  ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9th, Portland, OR"
+  ✓ url: expected "https://www.bearracuda.com" got "https://www.bearracuda.com"
 
 ▸ flyers/yes-sir-pride-closer.jpg
-  ✗ title: expected "Yes Sir: Portland Pride Closer" got "oN VESyp"
+  ✗ title: expected "Yes Sir: Portland Pride Closer" got "BAD"
   ✓ start_date: expected "2026-07-19" got "2026-07-19"
-  ✗ end_date: expected "2026-07-20" got null
-  ✗ time: expected "21:00" got null
-  ✗ venue: expected "Realm PDX" got null
+  ✓ end_date: expected "2026-07-20" got "2026-07-20"
+  ✓ time: expected "21:00" got "21:00"
+  ✓ venue: expected "Realm PDX" got "REALM PDX"
 
 ▸ flyers/sasha-colby-live.jpg
-  ✗ title: expected "Sasha Colby Live" got "\\ |"
+  ✗ title: expected "Sasha Colby Live" got null
 
 ══ Field accuracy ══
-  title       0/8  (0%)
+  title       1/8  (13%)
   start_date  5/6  (83%)
-  end_date    0/3  (0%)
-  time        2/4  (50%)
-  venue       0/6  (0%)
-  address     2/3  (67%)
+  end_date    2/3  (67%)
+  time        4/4  (100%)
+  venue       4/6  (67%)
+  address     3/3  (100%)
   url         1/1  (100%)
 
-  OVERALL     10/31  (32%)
+  OVERALL     20/31  (65%)
   Flyers: 8/8 processed
   Report written: reports/flyer-validation-latest.json

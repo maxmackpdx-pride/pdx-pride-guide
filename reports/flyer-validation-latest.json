@@ -1,8 +1,8 @@
 {
-  "overall": 32,
+  "overall": 65,
   "perField": {
     "title": {
-      "hit": 0,
+      "hit": 1,
       "scored": 8
     },
     "start_date": {
@@ -10,19 +10,19 @@
       "scored": 6
     },
     "end_date": {
-      "hit": 0,
+      "hit": 2,
       "scored": 3
     },
     "time": {
-      "hit": 2,
+      "hit": 4,
       "scored": 4
     },
     "venue": {
-      "hit": 0,
+      "hit": 4,
       "scored": 6
     },
     "address": {
-      "hit": 2,
+      "hit": 3,
       "scored": 3
     },
     "url": {
@@ -35,7 +35,7 @@
       "path": "flyers/gaylabration-radiance.jpg",
       "ok": true,
       "ocrConfidence": 47,
-      "parseConfidence": 25,
+      "parseConfidence": 44,
       "fields": {
         "title": {
           "expected": "Gaylabration: Radiance",
@@ -44,23 +44,23 @@
         },
         "start_date": {
           "expected": "2026-07-18",
-          "actual": null,
+          "actual": "2024-07-18",
           "hit": false
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": null,
+          "actual": "2024-07-19",
           "hit": false
         },
         "time": {
           "expected": "21:00",
-          "actual": null,
-          "hit": false
+          "actual": "21:00",
+          "hit": true
         },
         "venue": {
           "expected": "Crystal Ballroom",
-          "actual": null,
-          "hit": false
+          "actual": "CRYSTAL BALLROOM",
+          "hit": true
         },
         "address": {
           "expected": null,
@@ -78,11 +78,11 @@
       "path": "flyers/spellman-spectacle.webp",
       "ok": true,
       "ocrConfidence": 63,
-      "parseConfidence": 25,
+      "parseConfidence": 65,
       "fields": {
         "title": {
           "expected": "A Spellman Spectacle",
-          "actual": "! = © Raa Rad A",
+          "actual": "EUPHORIA 30% Anniversary",
           "hit": false
         },
         "start_date": {
@@ -107,7 +107,7 @@
         },
         "address": {
           "expected": "680 SE 6th Ave, Portland OR 97214",
-          "actual": "680 SE 6TH AVE",
+          "actual": "680 SE 6TH AVE, PORTLAND OR 97214",
           "hit": true
         },
         "url": {
@@ -164,11 +164,11 @@
       "path": "flyers/stank-yes-coach.jpg",
       "ok": true,
       "ocrConfidence": 41,
-      "parseConfidence": 25,
+      "parseConfidence": 56,
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
-          "actual": "JUMPR (SF) - BRO HOE - LAKE EVERETT ay",
+          "actual": "JUMPR",
           "hit": false
         },
         "start_date": {
@@ -178,8 +178,8 @@
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": null,
-          "hit": false
+          "actual": "2026-07-19",
+          "hit": true
         },
         "time": {
           "expected": "20:00",
@@ -188,12 +188,12 @@
         },
         "venue": {
           "expected": "Sanctuary",
-          "actual": null,
-          "hit": false
+          "actual": "Sanctuary",
+          "hit": true
         },
         "address": {
           "expected": "33 NW 9th Ave",
-          "actual": "33 NW ITHAVE",
+          "actual": "33 NW 6th Ave",
           "hit": true
         },
         "url": {
@@ -207,12 +207,12 @@
       "path": "flyers/stfu-femdom-play-party.jpg",
       "ok": true,
       "ocrConfidence": 33,
-      "parseConfidence": 25,
+      "parseConfidence": 53,
       "fields": {
         "title": {
           "expected": "Mistress Viola's Femdom Play Party",
-          "actual": "VI 4+ J-3 0 ~ . . .",
-          "hit": false
+          "actual": "Mistress Viola's Femdom Party",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-16",
@@ -231,8 +231,8 @@
         },
         "venue": {
           "expected": "The Den",
-          "actual": null,
-          "hit": false
+          "actual": "The Den",
+          "hit": true
         },
         "address": {
           "expected": null,
@@ -250,11 +250,11 @@
       "path": "flyers/treasure-trail-bearracuda.jpg",
       "ok": true,
       "ocrConfidence": 32,
-      "parseConfidence": 25,
+      "parseConfidence": 53,
       "fields": {
         "title": {
           "expected": "Treasure Trail",
-          "actual": "MATT BEARRACUDA & JP HARDY PRESENT",
+          "actual": "TIGERBEAT1 PRIDE",
           "hit": false
         },
         "start_date": {
@@ -264,7 +264,7 @@
         },
         "end_date": {
           "expected": null,
-          "actual": null,
+          "actual": "2026-07-18",
           "hit": null
         },
         "time": {
@@ -279,12 +279,12 @@
         },
         "address": {
           "expected": "33 NW 9th, Portland, OR",
-          "actual": null,
-          "hit": false
+          "actual": "33 NW 9th, Portland, OR",
+          "hit": true
         },
         "url": {
           "expected": "https://www.bearracuda.com",
-          "actual": "WWW.BEARRACUDA.COM",
+          "actual": "https://www.bearracuda.com",
           "hit": true
         }
       }
@@ -293,11 +293,11 @@
       "path": "flyers/yes-sir-pride-closer.jpg",
       "ok": true,
       "ocrConfidence": 46,
-      "parseConfidence": 25,
+      "parseConfidence": 58,
       "fields": {
         "title": {
           "expected": "Yes Sir: Portland Pride Closer",
-          "actual": "oN VESyp",
+          "actual": "BAD",
           "hit": false
         },
         "start_date": {
@@ -307,18 +307,18 @@
         },
         "end_date": {
           "expected": "2026-07-20",
-          "actual": null,
-          "hit": false
+          "actual": "2026-07-20",
+          "hit": true
         },
         "time": {
           "expected": "21:00",
-          "actual": null,
-          "hit": false
+          "actual": "21:00",
+          "hit": true
         },
         "venue": {
           "expected": "Realm PDX",
-          "actual": null,
-          "hit": false
+          "actual": "REALM PDX",
+          "hit": true
         },
         "address": {
           "expected": null,
@@ -336,11 +336,11 @@
       "path": "flyers/sasha-colby-live.jpg",
       "ok": true,
       "ocrConfidence": 58,
-      "parseConfidence": 25,
+      "parseConfidence": 0,
       "fields": {
         "title": {
           "expected": "Sasha Colby Live",
-          "actual": "\\ |",
+          "actual": null,
           "hit": false
         },
         "start_date": {
