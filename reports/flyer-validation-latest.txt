@@ -1,28 +1,31 @@
 
 ▸ flyers/gaylabration-radiance.jpg
-  ✗ title: expected "Gaylabration: Radiance" got "REORDER"
-  ✓ start_date: expected "2026-07-18" got "2026-07-18"
-  ✓ end_date: expected "2026-07-19" got "2026-07-19"
+  ✗ title: expected "Gaylabration: Radiance" got "REORDER TR"
+  ✗ start_date: expected "2026-07-18" got "2024-07-18"
+  ✗ end_date: expected "2026-07-19" got "2024-07-19"
   ✓ time: expected "21:00" got "21:00"
   ✓ venue: expected "Crystal Ballroom" got "CRYSTAL BALLROOM"
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, whisper-large-v3-turbo, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-120b, canopylabs/orp)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[allam-2-7b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-v1-english, groq/compound-mini, openai/gpt-oss-20b, qwen/qwen3.6-27b, openai/gpt-oss-safeguard-20b, whisper-l)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/spellman-spectacle.webp
-  ✗ title: expected "A Spellman Spectacle" got "EUPHORIA 30% Anniversary"
+  ✗ title: expected "A Spellman Spectacle" got "EUPHORIA PRESENTS A 30% Anniversary"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
   ✗ venue: expected "The Get Down" got null
   ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6TH AVE, PORTLAND OR 97214"
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, qwen/qwen3.6-27b, allam-2-7b, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-safeguard-20b, whisper-large-v3, whisper-l)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, canopylabs/orpheus-v1-english, allam-2-7b, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, groq/compound, qwen/qwen3.6-27b, llama-3.3-7)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/sports-bra-pride-block-party.jpg
   ✗ title: expected "The Sports Bra Pride 5th Annual Block Party" got null
   ✗ venue: expected "The Sports Bra" got null
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b, whisper-large-v3, llama-3.3-70b-versatile, canopylabs/orpheus-v1-eng)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-v1-english, qwen/qwen3.6-27b, groq/compound-mini, llama-3.3-70b-versatile, allam-2-7b, openai/gpt-oss-1)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/stank-yes-coach.jpg
@@ -33,7 +36,8 @@
   ✓ venue: expected "Sanctuary" got "Sanctuary"
   ✓ address: expected "33 NW 9th Ave" got "33 NW 6th Ave"
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-22m, whisper-large-v3, allam-2-7b, openai/gpt-oss-120b, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-86m, canopylabs)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-86m, openai/gpt-oss-safeguard-20b, whisper-large-v3, openai/gpt-oss-20b, openai/gpt-oss-120b, groq/compound, canopylabs/orpheus-v1-english, llama)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/stfu-femdom-play-party.jpg
@@ -41,17 +45,19 @@
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
   ✓ venue: expected "The Den" got "The Den"
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-120b, whisper-large-v3, canopylabs/orpheus-v1-english, whisper-large-v3-turbo, allam-2-7b, openai/gpt-oss-20b, groq/compound-mini, meta-llama/llama-prompt-guard-2)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[groq/compound-mini, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, llama-3.3-70b-versatile, whisper-large-v3, openai/gpt-oss-120b, qwen/qwen3.6-27b, groq)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/treasure-trail-bearracuda.jpg
-  ✗ title: expected "Treasure Trail" got "TIGERBEAT1 PRIDE"
+  ✗ title: expected "Treasure Trail" got "Tigerbeat Pride"
   ✓ start_date: expected "2026-07-17" got "2026-07-17"
   ✓ time: expected "20:00" got "20:00"
-  ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9TH, PORTLAND, OR"
+  ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9th, Portland, OR"
   ✓ url: expected "https://www.bearracuda.com" got "https://www.bearracuda.com"
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-86m, llama-3.3-70b-versatile, qwen/qwen3.6-27b, openai/gpt-oss-safeguard-20b, groq/compound, openai/gpt-oss-120b, meta-ll)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-arabic-saudi, canopylabs/orpheus-v1-english, llama-3.1)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/yes-sir-pride-closer.jpg
@@ -61,24 +67,26 @@
   ✓ time: expected "21:00" got "21:00"
   ✓ venue: expected "Realm PDX" got "REALM PDX"
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[groq/compound, canopylabs/orpheus-arabic-saudi, whisper-large-v3, allam-2-7b, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-safeguard-20b, llama-3.3-70b-)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[whisper-large-v3, allam-2-7b, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, openai/gpt-oss-120b, openai/gpt-oss-20b, groq/compound, ca)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ▸ flyers/sasha-colby-live.jpg
   ✗ title: expected "Sasha Colby Live" got null
   model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-120b, whisper-large-v3, whisper-large-v3-turbo, qwen/qwen3.6-27b, canopylabs/orpheus-v1-engl)
+  ! Vision via groq-vision failed (Vision model meta-llama/llama-4-scout-17b-16e-instruct HTTP 404; no vision candidate found. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, groq/compound, whisper-large-v3, groq/compound-mini, llama-3.1-8b-instant, openai/gpt-oss-120b, llama-3.3-70b-versatile, whisper-large-v3-turbo, me)
+  ! Vision via gemini-vision failed (Vision LLM HTTP 429 (model gemini-2.0-flash))
   ! All vision providers failed — text fallback
 
 ══ Field accuracy ══
   title       1/8  (13%)
-  start_date  6/6  (100%)
-  end_date    3/3  (100%)
+  start_date  5/6  (83%)
+  end_date    2/3  (67%)
   time        4/4  (100%)
   venue       4/6  (67%)
   address     3/3  (100%)
   url         1/1  (100%)
 
-  OVERALL     22/31  (71%)
+  OVERALL     20/31  (65%)
   Flyers: 8/8 processed
   Report written: reports/flyer-validation-latest.json
