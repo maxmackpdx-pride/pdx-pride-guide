@@ -196,6 +196,14 @@ async function main() {
     "auto-discovery breadcrumb present",
   );
 
+  // Free-tier Gemini fallback config resolves when GEMINI_API_KEY present
+  const { fallbackVisionConfigured, flyerVisionConfigured } = await import("../server/flyerReader/parse");
+  process.env.GEMINI_API_KEY = "smoke-gemini-key";
+  const fb = fallbackVisionConfigured(flyerVisionConfigured());
+  assert(fb != null && fb.label === "gemini-vision", "Gemini selected as free vision fallback");
+  assert(fb!.base.includes("generativelanguage.googleapis.com"), "Gemini OpenAI-compat base URL");
+  delete process.env.GEMINI_API_KEY;
+
   /* ── real OCR (opt-in: needs network for traineddata) ── */
   if (process.env.SMOKE_OCR === "1") {
     const { ocrFlyer } = await import("../server/flyerReader/ocr");

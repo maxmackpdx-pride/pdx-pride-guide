@@ -324,6 +324,23 @@ const discoveredVisionModels = new Map<string, string>();
  */
 export function fallbackVisionConfigured(primary: LlmConfig | null): LlmConfig | null {
   if (llmKilled()) return null;
+
+  // Free first: Google Gemini's OpenAI-compatible endpoint reads images on
+  // the free tier — the right price for a community project. Key from
+  // aistudio.google.com/apikey → secret/env GEMINI_API_KEY.
+  const gemini = process.env.GEMINI_API_KEY?.trim();
+  if (gemini) {
+    const base = "https://generativelanguage.googleapis.com/v1beta/openai";
+    if (!primary || primary.base !== base) {
+      return {
+        base,
+        key: gemini,
+        model: process.env.FLYER_VISION_MODEL_FALLBACK?.trim() || "gemini-2.0-flash",
+        label: "gemini-vision",
+      };
+    }
+  }
+
   const key = process.env.XAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim() || "";
   if (!key) return null;
   const base = (
