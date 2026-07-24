@@ -181,20 +181,21 @@ export default function HomeHero() {
           <span className="home-hero__dot" aria-hidden />
           Portland nights · all year
         </div>
+      </div>
 
-        <div className="home-hero__cta">
-          <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
-            View all events →
+      {/* Center-bottom glass CTAs */}
+      <div className="home-hero__cta">
+        <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
+          View all events →
+        </Link>
+        <Link href="/nude-beaches" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
+          Headed to the river? →
+        </Link>
+        {user && (
+          <Link href="/dashboard" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-account">
+            Your Hub →
           </Link>
-          <Link href="/nude-beaches" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
-            Headed to the river? →
-          </Link>
-          {user && (
-            <Link href="/dashboard" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-account">
-              Your Hub →
-            </Link>
-          )}
-        </div>
+        )}
       </div>
     </section>
   );

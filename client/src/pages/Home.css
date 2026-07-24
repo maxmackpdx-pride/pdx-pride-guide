@@ -315,68 +315,93 @@
   border: none;
 }
 
+/* Center-bottom CTA row on the hero panel */
 .home-hero__cta {
+  position: absolute;
+  left: 50%;
+  bottom: max(28px, env(safe-area-inset-bottom, 0px) + 20px);
+  z-index: 4;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 0;
+  justify-content: center;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  transform: translate3d(
+    calc(-50% + var(--px) * -6px),
+    calc(var(--py) * -4px),
+    0
+  );
+  will-change: transform;
 }
 
+/* Glass round black pills */
 .home-hero__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-weight: 800;
-  font-size: 18px;
-  letter-spacing: 0.04em;
+  font-size: 16px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
-  border-radius: 3px;
-  padding: 14px 22px;
+  border-radius: 999px;
+  padding: 14px 26px;
   line-height: 1;
-  transition: transform 0.12s ease, filter 0.12s ease;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .home-hero__btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
+/* VIEW ALL EVENTS - acid yellow text on black glass */
 .home-hero__btn--primary {
-  color: #000;
-  background: #ccff00;
-  border: none;
-  box-shadow: 4px 4px 0 rgba(255, 0, 204, 0.36);
+  color: #ccff00;
+  background: rgba(0, 0, 0, 0.72);
 }
 
 .home-hero__btn--primary:hover {
-  color: #000;
-  filter: brightness(1.05);
+  color: #d8ff33;
+  filter: none;
 }
 
+/* HEADED TO THE RIVER? - orange text on black glass */
+.home-hero__btn--river {
+  color: #ff6600;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.home-hero__btn--river:hover {
+  color: #ff8533;
+  filter: none;
+}
+
+/* Your Hub - cyan text on same black glass */
 .home-hero__btn--secondary {
   color: #00ffff;
-  background: transparent;
-  border: 2px solid #00ffff;
-  box-shadow: 0 0 16px rgba(0, 255, 255, 0.26);
+  background: rgba(0, 0, 0, 0.72);
 }
 
 .home-hero__btn--secondary:hover {
   color: #7dfbff;
-  border-color: #7dfbff;
-}
-
-.home-hero__btn--river {
-  color: #000;
-  background: var(--neon-orange, #ff6600);
-  border: none;
-  box-shadow: 4px 4px 0 rgba(255, 102, 0, 0.38), 0 0 18px rgba(255, 102, 0, 0.35);
-}
-
-.home-hero__btn--river:hover {
-  color: #000;
-  filter: brightness(1.06);
-  box-shadow: 4px 4px 0 rgba(255, 102, 0, 0.45), 0 0 22px rgba(255, 102, 0, 0.42);
+  border-color: rgba(0, 255, 255, 0.35);
 }
 
 @keyframes homeHeroBlink {
@@ -396,6 +421,10 @@ html.calm-mode .home-hero--parallax .home-hero__inner {
   --px: 0 !important;
   --py: 0 !important;
   transform: none !important;
+}
+
+html.calm-mode .home-hero--parallax .home-hero__cta {
+  transform: translateX(-50%) !important;
 }
 
 html.calm-mode .home-hero__bg {
@@ -441,6 +470,10 @@ html.calm-mode .home-hero__orb {
   .home-hero--parallax .home-hero__grain,
   .home-hero--parallax .home-hero__inner {
     transform: none !important;
+  }
+
+  .home-hero--parallax .home-hero__cta {
+    transform: translateX(-50%) !important;
   }
 
   .home-hero__orb,
