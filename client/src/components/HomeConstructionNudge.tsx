@@ -24,7 +24,7 @@ function alreadyDismissed(): boolean {
 
 /**
  * Friendly "under construction" pop-up for the home screen. Tells visitors the
- * Zaylist is growing into a year-round Portland nightlife home, thanks
+ * Zaylist is growing into a year-round Portland LGBTQ+ events home, thanks
  * them, and invites an optional tip. Shows on every visit until the visitor
  * dismisses it (localStorage), then stays hidden.
  */
@@ -85,8 +85,8 @@ export default function HomeConstructionNudge() {
             people and your parties. 🌈
           </p>
           <p>
-            We're rebuilding it into a <strong>year-round</strong> home for Portland nights —
-            all 365 days, not just Pride Week. Pardon our dust while we make it better.
+            We're rebuilding it into a <strong>year-round</strong> home for Portland's LGBTQ+
+            community — all 365 days, not just Pride Week. Pardon our dust while we make it better.
           </p>
           <p className="pgc-tip">
             Keeping the lights on isn't free. If this was useful, you're welcome to toss a couple

@@ -170,7 +170,7 @@ export default function About() {
                 Stop pretending our nights only matter once they&apos;ve been scrubbed clean.
               </p>
               <p>
-                This app is after dark. This app really is{" "}
+                This app is really gay. This app really is{" "}
                 <span className="about-v2-manifesto__glitch">ours.</span>
               </p>
             </div>
