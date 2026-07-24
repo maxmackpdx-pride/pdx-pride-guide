@@ -115,6 +115,15 @@ export function matchesVenueScope(
     .join(" ")
     .toLowerCase();
 
+  // Where the event actually IS — venue name, address, and the event's own
+  // Eventbrite slug — as opposed to what its title/description happen to say.
+  // A generic word like "Sports" in a *title* must never scope-match The
+  // Sports Bra; only a location field (or the event's own EB slug) counts.
+  const locBlob = [draft.venueName, draft.address, draft.sourceUrl, draft.ticketUrl]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
   const primary = scopeTokens[0];
   // "Stags' Leap" wine dinners are NOT Stag PDX
   if (primary === "stag" || scopeTokens.includes("stag")) {
@@ -122,13 +131,16 @@ export function matchesVenueScope(
     return /\bstag(?:\s*pdx)?\b/i.test(blob) || /\bbroadway'?s\s+finest\b/i.test(blob);
   }
 
-  // Multi-token venue (sports + bra): need the distinctive pair, not "sports" alone
+  // Multi-token venue (sports + bra): need the distinctive pair to appear in the
+  // LOCATION fields, not merely in a title. "Kellogg Creek Ward Sports Night"
+  // (title has "sports", venue is a church) and "StrongFirst Barbell Cert"
+  // (at Hardstyle Strength) must both fail — they are not AT The Sports Bra.
   if (scopeTokens.length >= 2) {
-    const hits = scopeTokens.filter(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(blob));
+    const hits = scopeTokens.filter(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(locBlob));
     if (hits.length >= 2) return true;
-    // concatenated form e.g. "sportbra" rare — also allow full phrase
+    // concatenated form e.g. "sportbra" rare — also allow full phrase (location fields)
     const phrase = scopeTokens.join("\\s+");
-    if (new RegExp(`\\b${phrase}\\b`, "i").test(blob)) return true;
+    if (new RegExp(`\\b${phrase}\\b`, "i").test(locBlob)) return true;
     // A single distinctive token can stand in for the venue (e.g. "escape",
     // "sanctuary") — but NOT a generic word like "sports"/"dance"/"night", or
     // every sports/dance/night event city-wide would pass.

@@ -20,6 +20,7 @@ import {
 } from "../server/ingest/adapters/hawks";
 import { getTrustedVenue, TRUSTED_VENUES } from "../shared/trustedVenues";
 import { applyDeclaredVenuePolicy } from "../server/ingest/venuePolicy";
+import { isRelevantScanDraft } from "../server/ingest/relevance";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) {
@@ -184,5 +185,45 @@ assert(braDraft.admission === "FREE", "explicit free text keeps FREE via declare
 
 const hawksDef = getTrustedVenue("hawks-json")!;
 assert(hawksDef.venuePolicy == null, "dedicated-adapter venues do not double-stamp via declarative policy");
+
+/* ── Sports Bra venue-scope leak: generic title words must NOT scope-match ── */
+const braCtx = {
+  sourceId: "sports-bra-eb",
+  label: "The Sports Bra",
+  url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
+  tier: "1",
+};
+// Real Sports Bra event — venue field names the bar → kept.
+assert(
+  isRelevantScanDraft(
+    { title: "Thorns Watch Party", venueName: "The Sports Bra", address: "2512 NE Broadway, Portland, OR", description: "Come watch!", sourceUrl: null, ticketUrl: null } as any,
+    braCtx,
+  ).keep,
+  "Sports Bra: genuine event AT the bar is kept",
+);
+// Junk 1: church pickleball whose TITLE contains "Sports" → dropped.
+assert(
+  !isRelevantScanDraft(
+    { title: "Kellogg Creek Ward Sports Night", venueName: "The Church of Jesus Christ of Latter-day Saints", address: "13520 SE Ruscliffe Lane, Milwaukie, OR 97222", description: "Please come join us playing pickleball.", sourceUrl: null, ticketUrl: null } as any,
+    braCtx,
+  ).keep,
+  "Sports Bra: church 'Sports Night' (wrong venue) is dropped",
+);
+// Junk 2: barbell cert at a different gym → dropped.
+assert(
+  !isRelevantScanDraft(
+    { title: "SFL StrongFirst Barbell Instructor Certification—Portland, OR, USA", venueName: "Hardstyle Strength", address: "2505 SE 36th Ave, Portland, OR 97202", description: "Dive deep into the powerlifts.", sourceUrl: null, ticketUrl: null } as any,
+    braCtx,
+  ).keep,
+  "Sports Bra: barbell cert at Hardstyle Strength is dropped",
+);
+// Slug fallback: EB event slug carries the venue → kept even if venueName empty.
+assert(
+  isRelevantScanDraft(
+    { title: "Drag Brunch", venueName: null, address: null, description: null, sourceUrl: "https://www.eventbrite.com/e/the-sports-bra-drag-brunch-tickets-123456", ticketUrl: null } as any,
+    braCtx,
+  ).keep,
+  "Sports Bra: event whose own EB slug names the bar is kept",
+);
 
 console.log("\nAll new-venue trusted connector smoke checks passed.");
