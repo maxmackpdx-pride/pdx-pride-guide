@@ -225,10 +225,10 @@
   top: 0;
   left: 0;
   z-index: 1;
-  transform: translateY(calc(var(--py, 0) * 16px)) scale(1.04);
   transform-origin: center center;
   will-change: opacity, filter, transform;
-  animation: homeGlowPulse 5.5s ease-in-out infinite;
+  /* Drift + scale breathe make the bloom float behind the crisp core = depth */
+  animation: homeGlowPulse 6s ease-in-out infinite;
 }
 
 @keyframes homeWordmarkFloat {
@@ -237,20 +237,22 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-24px);
+    transform: translateY(-16px);
   }
 }
 
-/* Slow neon breathe — opacity + brightness only (no transform: keeps parallax) */
+/* Slow neon breathe + drift/scale so the glow floats behind the text (3D depth) */
 @keyframes homeGlowPulse {
   0%,
   100% {
-    opacity: 0.5;
-    filter: saturate(1.05) brightness(0.95);
+    opacity: 0.45;
+    filter: saturate(1.05) brightness(0.9);
+    transform: translate(-7px, 7px) scale(1.06);
   }
   50% {
     opacity: 1;
-    filter: saturate(1.3) brightness(1.3);
+    filter: saturate(1.35) brightness(1.35);
+    transform: translate(7px, -3px) scale(1.11);
   }
 }
 
