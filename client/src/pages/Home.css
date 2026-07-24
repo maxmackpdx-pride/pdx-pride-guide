@@ -608,8 +608,9 @@ html.calm-mode .home-hero__orb {
 
   .home-hero__wordmark-wrap {
     top: 40%;
-    width: min(100vw, 936px);
-    max-height: 62%;
+    /* 30% larger on mobile — transparent PNG margins absorb the overflow */
+    width: min(130vw, 936px);
+    max-height: 80%;
   }
 
   .home-hero__title {

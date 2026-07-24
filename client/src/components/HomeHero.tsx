@@ -186,11 +186,6 @@ export default function HomeHero() {
         <Link href="/nude-beaches" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
           Headed to the river? →
         </Link>
-        {user && (
-          <Link href="/dashboard" className="home-hero__btn home-hero__btn--secondary" data-testid="hero-cta-account">
-            Your Hub →
-          </Link>
-        )}
       </div>
     </section>
   );
