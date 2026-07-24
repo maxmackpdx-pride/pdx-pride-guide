@@ -170,17 +170,9 @@
   z-index: 2;
 }
 
-/* Dark left-weighted + bottom fade (wallpaper shows through on the right) */
+/* Light 2% wash so the ZAYLIST wallpaper stays dominant */
 .home-hero__scrim--title {
-  background:
-    linear-gradient(
-      100deg,
-      rgba(6, 6, 8, 0.94) 0%,
-      rgba(6, 6, 8, 0.8) 40%,
-      rgba(6, 6, 8, 0.34) 68%,
-      rgba(6, 6, 8, 0.06) 100%
-    ),
-    linear-gradient(to top, rgba(6, 6, 8, 0.7), transparent 50%);
+  background: rgba(6, 6, 8, 0.02);
 }
 
 /* Bottom scrim folded into --title to match HTML; keep empty for markup */
