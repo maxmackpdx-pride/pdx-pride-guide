@@ -1835,6 +1835,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             Last scan: {fmtWhen(stats?.lastScanAt ?? null)}
           </span>
         </div>
+        <div className="qsearch__seam" aria-hidden />
       </header>
 
       {scanning && job && (

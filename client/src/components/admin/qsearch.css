@@ -1,82 +1,134 @@
 .qsearch {
   --qs-orange: #ff6600;
   --qs-lime: #c8fa3c;
+  --qs-yellow: #ccff00; /* neon "go" — filled primary actions */
   --qs-cyan: #19e3ff;
   --qs-pink: #ff00cc;
+  --qs-violet: #6e3dff;
   --qs-muted: rgba(255, 255, 255, 0.45);
+  --qs-faint: rgba(255, 255, 255, 0.34);
   --qs-line: rgba(255, 255, 255, 0.12);
+  --qs-line-2: rgba(255, 255, 255, 0.18);
+  --qs-ink: #0b0b0b;
+  --qs-ink-2: #050505;
+  --qs-card: rgba(18, 18, 22, 0.55);
+  --qs-card-2: rgba(10, 10, 14, 0.7);
+  --qs-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: #fff;
 }
 
 .qsearch__hero {
+  position: relative;
   border: 1px solid var(--qs-line);
+  border-radius: 12px;
   background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255, 102, 0, 0.18), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(25, 227, 255, 0.1), transparent 50%),
-    rgba(0, 0, 0, 0.45);
-  padding: 1.25rem 1.35rem 1.4rem;
+    radial-gradient(ellipse 80% 60% at 8% -10%, rgba(255, 102, 0, 0.16), transparent 55%),
+    radial-gradient(ellipse 55% 50% at 96% 0%, rgba(25, 227, 255, 0.1), transparent 55%),
+    var(--qs-ink-2);
+  padding: 1.35rem 1.5rem 0;
   margin-bottom: 1rem;
+  overflow: hidden;
 }
 
 .qsearch__kicker {
-  font-family: var(--font-display, "Barlow Condensed", sans-serif);
-  letter-spacing: 0.12em;
-  font-size: 0.7rem;
+  font-family: var(--qs-mono);
+  letter-spacing: 0.16em;
+  font-size: 0.66rem;
   color: var(--qs-orange);
   text-transform: uppercase;
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.4rem;
 }
 
 .qsearch__title {
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
-  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
   font-weight: 800;
-  line-height: 1;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
   margin: 0 0 0.5rem;
   text-transform: uppercase;
+  color: #f7f5ee;
+  -webkit-text-stroke: 1px #000;
+  text-shadow: 2px 2px 0 #000;
 }
 
 .qsearch__lede {
-  color: var(--qs-muted);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.88rem;
-  max-width: 42rem;
+  max-width: 44rem;
   margin: 0 0 1.1rem;
-  line-height: 1.45;
+  line-height: 1.5;
+}
+
+.qsearch__lede strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Signature rainbow seam — flowing spine along the hero's bottom edge */
+.qsearch__seam {
+  height: 2px;
+  margin: 0 -1.5rem;
+  background: linear-gradient(
+    90deg,
+    var(--qs-cyan),
+    var(--qs-yellow),
+    var(--qs-pink),
+    var(--qs-orange),
+    var(--qs-cyan)
+  );
+  background-size: 300% 100%;
+  animation: qsSeamFlow 6s linear infinite, qsSeamGlow 4s ease-in-out infinite;
+}
+
+@keyframes qsSeamFlow {
+  from { background-position: 200% 0; }
+  to { background-position: 0% 0; }
+}
+
+@keyframes qsSeamGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(25, 227, 255, 0.28); }
+  50% { box-shadow: 0 0 18px rgba(255, 0, 204, 0.5); }
 }
 
 .qsearch__stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.6rem;
-  margin-bottom: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0 -1.5rem 1.1rem;
+  border-top: 1px solid var(--qs-line);
+  border-bottom: 1px solid var(--qs-line);
 }
 
 .qsearch__stat {
-  border: 1px solid var(--qs-line);
-  background: rgba(0, 0, 0, 0.35);
-  padding: 0.65rem 0.75rem;
+  flex: 1 1 140px;
+  border: 0;
+  border-right: 1px solid var(--qs-line);
+  background: transparent;
+  padding: 1rem 1.1rem;
   text-align: left;
   cursor: pointer;
   color: inherit;
   font: inherit;
-  width: 100%;
-  transition: border-color 0.12s ease, background 0.12s ease, transform 0.1s ease;
+  transition: background 0.12s ease;
+}
+
+.qsearch__stat:last-child {
+  border-right: 0;
 }
 
 button.qsearch__stat:hover {
-  border-color: rgba(25, 227, 255, 0.45);
-  background: rgba(25, 227, 255, 0.08);
+  background: rgba(25, 227, 255, 0.06);
 }
 
 button.qsearch__stat:focus-visible {
   outline: 2px solid var(--qs-cyan);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 button.qsearch__stat.is-active {
-  border-color: rgba(200, 250, 60, 0.55);
   background: rgba(200, 250, 60, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(200, 250, 60, 0.2);
+  box-shadow: inset 0 2px 0 var(--qs-yellow);
 }
 
 .qsearch__focus-banner {
@@ -116,9 +168,10 @@ button.qsearch__stat.is-active {
 
 .qsearch__stat-val {
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
-  font-size: 1.55rem;
-  font-weight: 800;
-  line-height: 1;
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
   color: var(--qs-lime);
 }
 
@@ -131,78 +184,94 @@ button.qsearch__stat.is-active {
 }
 
 .qsearch__stat-label {
-  font-size: 0.65rem;
+  font-family: var(--qs-mono);
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--qs-muted);
-  margin-top: 0.25rem;
+  letter-spacing: 0.14em;
+  color: var(--qs-faint);
+  margin-top: 0.4rem;
 }
 
 .qsearch__scan-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  padding-bottom: 1.35rem;
 }
 
 .qsearch__scan-btn {
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
-  font-size: 1.05rem;
+  font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0.85rem 1.6rem;
-  border: 2px solid var(--qs-lime);
-  background: var(--qs-lime);
-  color: #0a0a0a;
+  padding: 0.6rem 1.1rem;
+  border: 1.5px solid var(--qs-yellow);
+  border-radius: 7px;
+  background: var(--qs-yellow);
+  color: #000;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  box-shadow: 4px 4px 0 rgba(255, 102, 0, 0.55);
+  white-space: nowrap;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  box-shadow: 0 0 18px -6px rgba(204, 255, 0, 0.6);
 }
 
 .qsearch__scan-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 rgba(255, 102, 0, 0.65);
+  transform: translateY(-1px);
+  filter: brightness(1.06);
 }
 
 .qsearch__scan-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: not-allowed;
   box-shadow: none;
 }
 
 .qsearch__scan-btn.is-ghost {
-  background: transparent;
-  color: var(--qs-cyan);
-  border-color: var(--qs-cyan);
+  background: var(--qs-card-2);
+  color: rgba(255, 255, 255, 0.82);
+  border-color: var(--qs-line-2);
   box-shadow: none;
+}
+
+.qsearch__scan-btn.is-ghost:hover:not(:disabled) {
+  border-color: rgba(25, 227, 255, 0.55);
+  color: #fff;
 }
 
 .qsearch__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
+  gap: 1.4rem;
+  margin-bottom: 1.25rem;
   border-bottom: 1px solid var(--qs-line);
-  padding-bottom: 0.5rem;
 }
 
 .qsearch__tab {
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid transparent;
+  padding: 0.6rem 0.15rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
   background: transparent;
   color: var(--qs-muted);
   cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.qsearch__tab:hover {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .qsearch__tab.is-active {
-  color: var(--qs-orange);
-  border-color: rgba(255, 102, 0, 0.45);
-  background: rgba(255, 102, 0, 0.1);
+  color: #fff;
+  border-bottom-color: var(--qs-yellow);
+  background: transparent;
 }
 
 .qsearch__progress {
@@ -243,8 +312,9 @@ button.qsearch__stat.is-active {
 
 .qsearch__panel {
   border: 1px solid var(--qs-line);
-  background: rgba(0, 0, 0, 0.28);
-  padding: 0.9rem;
+  border-radius: 10px;
+  background: var(--qs-card);
+  padding: 1rem 1.1rem;
   margin-bottom: 0.75rem;
 }
 
@@ -520,10 +590,28 @@ button.qsearch__stat.is-active {
   grid-template-columns: auto minmax(280px, 320px) 1fr;
   gap: 0.95rem;
   border: 1px solid var(--qs-line);
-  padding: 0.9rem;
-  margin-bottom: 0.55rem;
-  background: rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 0.65rem;
+  background:
+    radial-gradient(120% 80% at 50% 120%, rgba(110, 61, 255, 0.06), transparent 58%),
+    var(--qs-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.9);
   align-items: start;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease,
+    opacity 0.15s ease;
+  animation: qsReveal 0.42s ease both;
+}
+
+@keyframes qsReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+
+.qsearch__cand:hover {
+  transform: translateY(-2px);
 }
 
 /* Group → Venue → Flyer brand strip (full directory marks, not avatar circles) */
@@ -572,8 +660,11 @@ button.qsearch__stat.is-active {
   width: 88px;
   height: 88px;
   border-radius: 10px;
-  border: 2px solid var(--qs-line);
-  background: #050505;
+  border: 2px solid var(--qs-line-2);
+  background: rgba(10, 10, 14, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px -10px rgba(0, 0, 0, 0.8);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -603,9 +694,10 @@ button.qsearch__stat.is-active {
   height: 148px;
   object-fit: cover;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--qs-line-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px -10px rgba(0, 0, 0, 0.8);
   display: block;
-  background: #000;
+  background: rgba(10, 10, 14, 0.45);
 }
 
 .qsearch__cand-flyer--empty {
@@ -1393,5 +1485,61 @@ button.qsearch__stat.is-active {
     max-width: none;
     min-height: 36px;
     padding: 0.4rem 0.55rem;
+  }
+
+  /* Stat band wraps 2-per-row on a phone (no sideways scroll) */
+  .qsearch__stat {
+    flex: 1 1 42%;
+  }
+  .qsearch__stat:nth-child(2n) {
+    border-right: 0;
+  }
+  .qsearch__stat-val {
+    font-size: 2rem;
+  }
+  .qsearch__tabs {
+    gap: 1rem;
+  }
+  .qsearch__tab {
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Health panels: colored left-accent spine per severity ─────────── */
+#qsearch-panel-trouble {
+  border-left: 4px solid var(--qs-pink);
+}
+#qsearch-panel-new-links,
+#qsearch-panel-directory-missing {
+  border-left: 4px solid var(--qs-orange);
+}
+
+/* Progress card: rounded to match the surface language */
+.qsearch__progress {
+  border-radius: 10px;
+}
+.qsearch__progress-bar {
+  border-radius: 4px;
+}
+
+/* Primary queue action (Approve / Read flyer) — filled neon-yellow pill */
+.qsearch__toolbar button.is-primary {
+  border-color: var(--qs-yellow);
+  background: var(--qs-yellow);
+  color: #000;
+  box-shadow: 0 0 16px -6px rgba(204, 255, 0, 0.55);
+}
+.qsearch__toolbar button.is-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+/* Respect reduced-motion: still legible, just still */
+@media (prefers-reduced-motion: reduce) {
+  .qsearch__seam,
+  .qsearch__cand {
+    animation: none !important;
+  }
+  .qsearch__cand:hover {
+    transform: none;
   }
 }
