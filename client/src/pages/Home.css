@@ -245,13 +245,13 @@
 @keyframes homeGlowPulse {
   0%,
   100% {
-    opacity: 0.45;
-    filter: saturate(1.05) brightness(0.9);
+    opacity: 0.25;
+    filter: saturate(1.05) brightness(0.95);
     transform: translate(-7px, 7px) scale(1.06);
   }
   50% {
-    opacity: 1;
-    filter: saturate(1.35) brightness(1.35);
+    opacity: 0.7;
+    filter: saturate(1.2) brightness(1.12);
     transform: translate(7px, -3px) scale(1.11);
   }
 }
