@@ -1,17 +1,94 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
 
 /**
- * Full-bleed home hero (above the ticker): skyline wallpaper, aurora orbs,
- * left-weighted scrim, film grain, kicker + CTAs.
- * Event count lives in HomeStatStrip, not the hero.
+ * Letter orbs under Z-A-Y-L-I-S-T on the spectrum wordmark.
+ * Colors sample the Zaylist gradient at each letter’s place in the tape.
+ */
+const LETTER_ORBS = [
+  { letter: "Z", color: "#FF19D6", left: "16%", top: "38%" },
+  { letter: "A", color: "#FF196C", left: "28%", top: "42%" },
+  { letter: "Y", color: "#FFD119", left: "40%", top: "36%" },
+  { letter: "L", color: "#9CFF19", left: "50%", top: "44%" },
+  { letter: "I", color: "#19F7FF", left: "60%", top: "38%" },
+  { letter: "S", color: "#1956FF", left: "70%", top: "42%" },
+  { letter: "T", color: "#E419FF", left: "82%", top: "36%" },
+] as const;
+
+/**
+ * Full-bleed home hero: ZAYLIST wallpaper, letter-matched spectrum orbs,
+ * grain, kicker + CTAs. Parallax on pointer + scroll (respects reduced-motion).
  */
 export default function HomeHero() {
   const { user } = useAuth();
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
+  const panelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (document.documentElement.classList.contains("calm-mode")) return;
+
+    let raf = 0;
+    let running = true;
+    const target = { x: 0, y: 0 };
+    const current = { x: 0, y: 0 };
+
+    const readScroll = () => {
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      // -1 when panel is above, +1 below; 0 when centered
+      return Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / (vh * 0.55)));
+    };
+
+    const onPointer = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      target.x = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      target.y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    };
+
+    const onLeave = () => {
+      target.x = 0;
+      // keep scroll bias
+      target.y = readScroll() * 0.65;
+    };
+
+    const onScroll = () => {
+      const s = readScroll();
+      // blend scroll into y when pointer is idle-ish
+      target.y = target.y * 0.35 + s * 0.65;
+    };
+
+    const tick = () => {
+      if (!running) return;
+      current.x += (target.x - current.x) * 0.07;
+      current.y += (target.y - current.y) * 0.07;
+      el.style.setProperty("--px", current.x.toFixed(4));
+      el.style.setProperty("--py", current.y.toFixed(4));
+      raf = requestAnimationFrame(tick);
+    };
+
+    target.y = readScroll() * 0.65;
+    el.addEventListener("pointermove", onPointer, { passive: true });
+    el.addEventListener("pointerleave", onLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      el.removeEventListener("pointermove", onPointer);
+      el.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("scroll", onScroll);
+      el.style.removeProperty("--px");
+      el.style.removeProperty("--py");
+    };
+  }, []);
 
   const shareSite = async () => {
     const who = (user?.displayName || user?.username || "").trim();
@@ -29,7 +106,11 @@ export default function HomeHero() {
   };
 
   return (
-    <section className="home-hero" aria-label="Portland Zaylist hero">
+    <section
+      ref={panelRef}
+      className="home-hero home-hero--parallax"
+      aria-label="Portland Zaylist hero"
+    >
       <img
         className="home-hero__bg"
         src={heroWallpaper}
@@ -37,18 +118,25 @@ export default function HomeHero() {
         decoding="async"
       />
 
-      {/* Aurora orbs - signature glow; silenced on reduced-motion / calm */}
+      {/* Letter-matched spectrum orbs under Z-A-Y-L-I-S-T */}
       <div className="home-hero__aurora" aria-hidden>
-        <span className="home-hero__orb home-hero__orb--magenta" />
-        <span className="home-hero__orb home-hero__orb--cyan" />
-        <span className="home-hero__orb home-hero__orb--violet" />
+        {LETTER_ORBS.map((orb, i) => (
+          <span
+            key={orb.letter}
+            className={`home-hero__orb home-hero__orb--letter home-hero__orb--${orb.letter.toLowerCase()}`}
+            style={{
+              background: orb.color,
+              left: orb.left,
+              top: orb.top,
+              // slight stagger in float phase via animation-delay
+              animationDelay: `${i * -1.4}s`,
+            }}
+            data-letter={orb.letter}
+          />
+        ))}
       </div>
 
-      {/* Legibility scrims: left-weighted + bottom fade */}
-      <div className="home-hero__scrim home-hero__scrim--title" aria-hidden />
-      <div className="home-hero__scrim home-hero__scrim--bottom" aria-hidden />
-
-      {/* Film grain (SVG fractal noise tile) */}
+      {/* Film grain */}
       <div className="home-hero__grain" aria-hidden />
 
       {/* Mobile-only site share - top right of first panel */}

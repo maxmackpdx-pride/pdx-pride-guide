@@ -93,117 +93,109 @@
   }
 }
 
+/* Parallax vars set by HomeHero (pointer + scroll). Default 0. */
+.home-hero--parallax {
+  --px: 0;
+  --py: 0;
+}
+
 /* z-0 wallpaper - ZAYLIST neon wordmark (full mark, not skyline crop) */
 .home-hero__bg {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
   object-fit: contain;
   object-position: center center;
   display: block;
   z-index: 0;
   background: #000;
   filter: saturate(1.12) contrast(1.05);
+  will-change: transform;
+  transform: translate3d(
+    calc(var(--px) * 14px),
+    calc(var(--py) * 12px),
+    0
+  ) scale(1.04);
 }
 
-/* z-1 aurora orbs - match PDX Hero Wallpaper (animated).html */
+/* z-1 letter orbs under Z-A-Y-L-I-S-T (spectrum colors) */
 .home-hero__aurora {
   position: absolute;
-  inset: 0;
+  inset: -6%;
   z-index: 1;
   pointer-events: none;
   overflow: hidden;
+  will-change: transform;
+  transform: translate3d(
+    calc(var(--px) * 30px),
+    calc(var(--py) * 24px),
+    0
+  );
 }
 
 .home-hero__orb {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.5;
+  opacity: 0.295;
   mix-blend-mode: screen;
-  filter: blur(70px);
+  filter: blur(80px);
   pointer-events: none;
   will-change: transform;
+  width: 22vw;
+  height: 22vw;
+  max-width: 360px;
+  max-height: 360px;
+  /* Center on left/top so letter positions are true centers */
+  transform: translate(-50%, -50%);
+  animation: homeLetterOrb 16s ease-in-out infinite;
 }
 
-/* a1 magenta - top-left */
-.home-hero__orb--magenta {
-  width: 33vw;
-  height: 33vw;
-  max-width: 520px;
-  max-height: 520px;
-  top: -8%;
-  left: 8%;
-  background: #ff00cc;
-  animation: homeAurora1 14s ease-in-out infinite;
+/* Soft float - transform base is centered; keyframes add offset via translate */
+@keyframes homeLetterOrb {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(-50%, -50%) translate(10px, -14px) scale(1.06);
+  }
+  70% {
+    transform: translate(-50%, -50%) translate(-8px, 10px) scale(0.97);
+  }
 }
 
-/* a2 cyan - lower-mid */
-.home-hero__orb--cyan {
-  width: 30vw;
-  height: 30vw;
-  max-width: 480px;
-  max-height: 480px;
-  bottom: -14%;
-  left: 34%;
-  background: #00ffff;
-  animation: homeAurora2 18s ease-in-out infinite;
-}
-
-/* a3 violet - mid-right */
-.home-hero__orb--violet {
-  width: 27vw;
-  height: 27vw;
-  max-width: 440px;
-  max-height: 440px;
-  top: 20%;
-  left: 56%;
-  background: #8800ff;
-  animation: homeAurora3 16s ease-in-out infinite;
-}
-
-/* z-2 scrims - single stack matching animated HTML */
-.home-hero__scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Light 2% wash so the ZAYLIST wallpaper stays dominant */
-.home-hero__scrim--title {
-  background: rgba(6, 6, 8, 0.02);
-}
-
-/* Bottom scrim folded into --title to match HTML; keep empty for markup */
-.home-hero__scrim--bottom {
-  display: none;
-}
-
-.home-hero__scrim--angle,
-.home-hero__scrim--top {
-  background: none;
-}
-
-/* z-3 film grain - SVG fractal noise (animated HTML: baseFrequency 0.8, 2 octaves) */
+/* z-2 film grain (scrim removed) */
 .home-hero__grain {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
   pointer-events: none;
   opacity: 0.12;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
+  will-change: transform;
+  transform: translate3d(
+    calc(var(--px) * 8px),
+    calc(var(--py) * 6px),
+    0
+  );
 }
 
-/* z-4 content */
+/* z-3 content - slight counter-parallax */
 .home-hero__inner {
   position: relative;
-  z-index: 4;
+  z-index: 3;
   max-width: 940px;
   margin: 0;
   padding: 52px 64px;
   text-align: left;
+  will-change: transform;
+  transform: translate3d(
+    calc(var(--px) * -10px),
+    calc(var(--py) * -8px),
+    0
+  );
 }
 
 .home-hero__kicker {
@@ -391,12 +383,29 @@ html.calm-mode .home-hero__orb {
   animation: none !important;
 }
 
+html.calm-mode .home-hero--parallax,
+html.calm-mode .home-hero--parallax .home-hero__bg,
+html.calm-mode .home-hero--parallax .home-hero__aurora,
+html.calm-mode .home-hero--parallax .home-hero__grain,
+html.calm-mode .home-hero--parallax .home-hero__inner {
+  --px: 0 !important;
+  --py: 0 !important;
+  transform: none !important;
+}
+
 html.calm-mode .home-hero__bg {
   filter: grayscale(0.85) brightness(0.72);
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 html.calm-mode .home-hero__grain {
   opacity: 0;
+}
+
+html.calm-mode .home-hero__orb {
+  opacity: 0.12;
 }
 
 @media (max-width: 900px) {
@@ -419,6 +428,18 @@ html.calm-mode .home-hero__grain {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-hero--parallax {
+    --px: 0 !important;
+    --py: 0 !important;
+  }
+
+  .home-hero--parallax .home-hero__bg,
+  .home-hero--parallax .home-hero__aurora,
+  .home-hero--parallax .home-hero__grain,
+  .home-hero--parallax .home-hero__inner {
+    transform: none !important;
+  }
+
   .home-hero__orb,
   .home-hero__dot,
   .home-hero__word--pride {
