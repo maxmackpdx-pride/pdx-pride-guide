@@ -319,7 +319,8 @@
 .home-hero__cta {
   position: absolute;
   left: 50%;
-  bottom: max(28px, env(safe-area-inset-bottom, 0px) + 20px);
+  /* Raised ~20% up the panel from the bottom edge */
+  bottom: max(20%, env(safe-area-inset-bottom, 0px) + 18%);
   z-index: 4;
   display: flex;
   gap: 12px;
@@ -1325,11 +1326,6 @@ html.calm-mode .home-boards__card {
   font-variant-numeric: tabular-nums;
 }
 
-.home-stat-strip__value--countdown {
-  color: #02ffff;
-  text-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
-}
-
 .home-stat-strip__unit {
   font-size: 45px;
 }
@@ -1338,30 +1334,11 @@ html.calm-mode .home-boards__card {
   font-size: 26px;
 }
 
-.home-stat-strip__min {
-  color: #0effc9;
-}
-
-.home-stat-strip__sec {
-  color: #16feab;
-}
-
-.home-stat-strip__value--lime {
-  color: #9cff05;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-}
-
-.home-stat-strip__value--orange {
-  color: var(--neon-orange, #ff6600);
-  text-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
-}
-
 .home-stat-strip__label {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-lo);
   margin-top: 8px;
 }
 
@@ -1370,6 +1347,42 @@ html.calm-mode .home-boards__card {
   flex-direction: column;
   gap: 2px;
   line-height: 1.25;
+}
+
+/* L→R text gradients on number + label */
+.home-stat-strip__grad {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* next 7 days: pink → orange */
+.home-stat-strip__grad--events {
+  background-image: linear-gradient(90deg, #ff19d6 0%, #ff6600 100%);
+}
+
+/* places: yellow → neon green */
+.home-stat-strip__grad--places {
+  background-image: linear-gradient(90deg, #ffee00 0%, #39ff14 100%);
+}
+
+/* going: cyan → neon navy */
+.home-stat-strip__grad--going {
+  background-image: linear-gradient(90deg, #00ffff 0%, #0033aa 100%);
+}
+
+/* CountUp inherits the gradient fill */
+.home-stat-strip__grad .pdxCountUp,
+.home-stat-strip__grad .pdxCountUp__num {
+  background-image: inherit;
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 /* Marquee band */
