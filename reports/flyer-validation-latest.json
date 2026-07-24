@@ -1,8 +1,8 @@
 {
-  "overall": 97,
+  "overall": 100,
   "perField": {
     "title": {
-      "hit": 7,
+      "hit": 8,
       "scored": 8
     },
     "start_date": {
@@ -35,10 +35,10 @@
       "path": "flyers/gaylabration-radiance.jpg",
       "ok": true,
       "ocrConfidence": 47,
-      "parseConfidence": 90,
+      "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, whisper-large-v3, openai/gpt-oss-20b, canopylabs/orpheus-v1-english, groq/compound-mini, llama-3.3-70b-versatile, groq/compound, canopylabs/orpheus-arabic-saudi, ll)",
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-120b, allam-2-7b, openai/gpt-oss-20b, llama-3.1-8b-instant, whisper-large-v3-turbo, canopylabs/orpheus-arabic-saudi, groq/compound-mini, llama-3.3-70b-versatile, whisper-large-v3, openai)",
         "Vision model gemini-2.0-flash unavailable (HTTP 404/429) — auto-discovered gemini-flash-lite-latest"
       ],
       "fields": {
@@ -86,7 +86,7 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, allam-2-7b, openai/gpt-oss-20b, whisper-large-v3-turbo, llama-3.3-70b-versatile, openai/gpt-oss-120b, openai/gpt-oss-safeguard-20b, whisper-large-v3, groq/compound-mini, )"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[groq/compound-mini, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, whisper-large-v3, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, canopylabs/orpheus-arabic-saudi, meta-ll)"
       ],
       "fields": {
         "title": {
@@ -133,7 +133,7 @@
       "parseConfidence": 60,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[llama-3.1-8b-instant, qwen/qwen3.6-27b, groq/compound-mini, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, openai/gpt-oss-120b, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, canopyla)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, llama-3.3-70b-versatile, qwen/qwen3.6-27b, allam-2-7b, canopylabs/orpheus-v1-english, groq/compound-mini, whisper-large-v3-turbo, groq/compound,)"
       ],
       "fields": {
         "title": {
@@ -180,12 +180,12 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, canopylabs/orpheus-v1-english, groq/compound-mini, openai/gpt-oss-20b, qwen/qwen3.6-27b, op)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, groq/compound-mini, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-guard-)"
       ],
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
-          "actual": "Stank Yes Coach",
+          "actual": "Stank Yes Coach: PDX Pride",
           "hit": true
         },
         "start_date": {
@@ -227,7 +227,7 @@
       "parseConfidence": 90,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, openai/gpt-oss-safeguard-20b, whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versatile, groq/compound, openai/gpt-oss-20b, canopylabs/orpheus-arabic-saudi,)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, openai/gpt-oss-120b, canopylabs/orpheus-v1-english, whisper-large-v3-turbo, allam-2-7b, openai/gpt-oss-20b, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-86m, qwen/qwen3.6-)"
       ],
       "fields": {
         "title": {
@@ -274,7 +274,7 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-120b, whisper-large-v3-turbo, llama-3.1-8b-instant, openai/gpt-oss-safeguard-20b, allam-2-7b, whisper-large-v3, groq/compound, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-ara)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, whisper-large-v3-turbo, llama-3.1-8b-instant, openai/gpt-oss-safeguard-20b, openai/gpt-oss-120b, allam-2-7b, qwen/qwen3.6-27b, groq/compound-mini, whisper-large-v3, gro)"
       ],
       "fields": {
         "title": {
@@ -289,7 +289,7 @@
         },
         "end_date": {
           "expected": null,
-          "actual": "2026-07-18",
+          "actual": "2026-07-17",
           "hit": null
         },
         "time": {
@@ -321,12 +321,12 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[llama-3.1-8b-instant, groq/compound, meta-llama/llama-prompt-guard-2-86m, canopylabs/orpheus-arabic-saudi, groq/compound-mini, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versa)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[allam-2-7b, whisper-large-v3-turbo, whisper-large-v3, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, qwen/qwen3.6-27b, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-safeguard-20b, groq/co)"
       ],
       "fields": {
         "title": {
           "expected": "Yes Sir: Portland Pride Closer",
-          "actual": "Yes Sir Portland Pride Closer",
+          "actual": "Portland Pride Closer",
           "hit": true
         },
         "start_date": {
@@ -365,16 +365,16 @@
       "path": "flyers/sasha-colby-live.jpg",
       "ok": true,
       "ocrConfidence": 58,
-      "parseConfidence": 60,
+      "parseConfidence": 75,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-20b, groq/compound, llama-3.1-8b-instant, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, openai/gpt-oss-safeguard-20b, groq/compound-mini, whisper-large-v3, met)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, whisper-large-v3-turbo, groq/compound-mini, meta-llama/llama-prompt-guard-2-86m, whisper)"
       ],
       "fields": {
         "title": {
           "expected": "Sasha Colby Live",
-          "actual": "Katya Colada Live",
-          "hit": false
+          "actual": "Sasha Colby Live",
+          "hit": true
         },
         "start_date": {
           "expected": null,
@@ -403,7 +403,7 @@
         },
         "url": {
           "expected": null,
-          "actual": "https://flipphoneevents.com/portland",
+          "actual": "https://www.flipphoneevents.com/portland",
           "hit": null
         }
       }
