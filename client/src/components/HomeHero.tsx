@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroBg from "@/assets/home/hero-bg.jpg";
-import heroWordmark from "@/assets/home/hero-wordmark.webp";
+import heroWordmarkGlow from "@/assets/home/hero-wordmark-glow.webp";
+import heroWordmarkCore from "@/assets/home/hero-wordmark-core.webp";
 
 /**
  * Letter orbs under Z-A-Y-L-I-S-T (mid-layer glow between bg + wordmark).
@@ -125,14 +126,22 @@ export default function HomeHero() {
         ))}
       </div>
 
-      {/* z3 — ZAYLIST cutout (parallax wrap + idle float); above grain/orbs */}
+      {/* z3 — ZAYLIST: glow layer (slow pulse + deeper parallax) under crisp core */}
       <div className="home-hero__wordmark-wrap" aria-hidden>
-        <img
-          className="home-hero__wordmark"
-          src={heroWordmark}
-          alt=""
-          decoding="async"
-        />
+        <div className="home-hero__wordmark-sign">
+          <img
+            className="home-hero__wordmark home-hero__wordmark--glow"
+            src={heroWordmarkGlow}
+            alt=""
+            decoding="async"
+          />
+          <img
+            className="home-hero__wordmark home-hero__wordmark--core"
+            src={heroWordmarkCore}
+            alt=""
+            decoding="async"
+          />
+        </div>
       </div>
 
       {/* Mobile-only site share */}
