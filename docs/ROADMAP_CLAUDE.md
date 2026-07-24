@@ -44,6 +44,20 @@ must stay at baseline (37), offline smokes must pass before push.
    (Eagle monthly schedule class); Sanctuary flyer-coverage recheck on live
    board; UI surface for flyer-reader in QSearchDashboard.
 
+## Ideas parked (Tucker's — not started, discuss before building)
+- NEWSLETTER MAILROOM (Tucker, 2026-07-24): a dedicated email address subscribes
+  to every directory venue's newsletter; each scan cycle, new emails are parsed
+  for events (HTML/JSON-LD links + embedded flyer images through the existing
+  Flyer Reader + vision) → Review queue, attributed to the venue. NOT the app's
+  "Inbox" (that's user DMs) — name it distinctly (Mailroom/Feed). Reuses:
+  ingest pipeline, flyer reader, dedup, review-queue lock, cost caps + kill
+  switch. New pieces needed: (1) how mail gets IN — inbound-email provider
+  webhook (Mailgun/Postmark/CloudMailin) or IMAP polling of one mailbox;
+  (2) one-time signup effort per venue (many use double opt-in confirm clicks);
+  (3) relevance/noise filter (merch/promo emails aren't events); (4) hard vision
+  caps per email (newsletters are image-heavy → cost). Decision to make first:
+  inbound-webhook vs IMAP. Start small: one mailbox, 2–3 venues, prove it.
+
 ## How to resume in a fresh session
 Token is in the project instructions. Clone, read this file + reports/
 flyer-validation-latest.json + git log -10, then do the next unblocked item.
