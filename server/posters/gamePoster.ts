@@ -7,17 +7,16 @@
  * Deterministic everywhere: the SVG embeds Archivo (woff2, base64) and is
  * rasterized to PNG with sharp — no system fonts required on Railway.
  */
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
+import { ARCHIVO_500, ARCHIVO_700, ARCHIVO_900 } from "./fontData";
 
-const FONT_DIR = path.join(import.meta.dirname ?? __dirname, "fonts");
-function fontFace(weight: number): string {
-  const b64 = readFileSync(path.join(FONT_DIR, `archivo-${weight}.woff2`)).toString("base64");
+function fontFace(weight: number, b64: string): string {
   return `@font-face{font-family:AR;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format('woff2');}`;
 }
-// Read + embed the three weights once at module load.
-const FONTS = [500, 700, 900].map(fontFace).join("");
+// Fonts are inlined (base64) so there is no file to read at runtime — this
+// survives the production bundle where the server is a single dist/index.cjs.
+const FONTS =
+  fontFace(500, ARCHIVO_500) + fontFace(700, ARCHIVO_700) + fontFace(900, ARCHIVO_900);
 
 const PINK = "#E63E82";
 const INK = "#171310";
