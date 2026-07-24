@@ -648,8 +648,8 @@ html.calm-mode .home-hero__orb {
 
   .home-hero__wordmark-wrap {
     top: 40%;
-    /* 30% larger on mobile — transparent PNG margins absorb the overflow */
-    width: min(130vw, 936px);
+    /* Art fills ~95-100% of the canvas, so keep a margin or it clips the edges */
+    width: min(94vw, 936px);
     max-height: 80%;
   }
 
