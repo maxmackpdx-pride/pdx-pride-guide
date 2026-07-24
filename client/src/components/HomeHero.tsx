@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroBg from "@/assets/home/hero-bg.jpg";
-import heroWordmark from "@/assets/home/hero-wordmark.png";
+import heroWordmark from "@/assets/home/hero-wordmark.webp";
 
 /**
  * Letter orbs under Z-A-Y-L-I-S-T (mid-layer glow between bg + wordmark).
