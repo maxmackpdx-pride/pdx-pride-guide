@@ -60,7 +60,7 @@ const FAQ = [
 export default function About() {
   usePageSeo(
     "About Zaylist | Portland Pride 2026",
-    "Built by one person in Portland. Free Pride week directory with zero interest in being a sanitized corporate pamphlet.",
+    "Built by one person in Portland. A year-round guide to queer nightlife and events, with zero interest in being a sanitized corporate pamphlet.",
   );
 
   const { data: events = [] } = useQuery<EventListing[]>({

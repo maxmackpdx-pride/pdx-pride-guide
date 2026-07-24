@@ -20,7 +20,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
     return (
       <div className={`tip-support tip-support--footer${className ? ` ${className}` : ""}`}>
         <p className="site-footer__coffee-note tip-support__lede">
-          Free forever, but not free to run.
+          Free to use, but not free to run.
         </p>
         <div className="tip-support__btns tip-support__btns--footer">
           <a
